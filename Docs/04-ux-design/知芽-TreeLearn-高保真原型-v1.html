@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>知芽（TreeLearn） · 高保真交互原型 v1</title>
+
+<!-- React + Babel pinned（huashu-design 规范） -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+/* ============ 设计系统 · 知芽「生长绿」 ============ */
+:root{
+  --bg:#F7F6F0;          /* 米白纸感底 */
+  --surface:#FFFFFF;
+  --ink:#1E2B23;         /* 深绿墨 */
+  --ink2:#5A6B60;        /* 次级灰绿 */
+  --ink3:#8A938E;        /* 弱化 */
+  --line:#E6E3D6;
+  --green:#2E7D4F;       /* 生长绿主色 */
+  --green-deep:#1F5C38;
+  --green-soft:#E3F0E7;
+  --green-faint:#F0F7F1;
+  --blue:#2F6BFF;        /* 未读蓝点（BASE-13 指定实心蓝点） */
+  --amber:#B7791F;
+  --amber-soft:#FBF3E2;
+  --red:#C0392B;
+  --red-soft:#FBEAE7;
+  --serif:'Noto Serif SC','Songti SC','STSong',serif;
+  --sans:'Noto Sans SC',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  font-family:var(--sans);color:var(--ink);background:#ECEAE0;
+  background-image:radial-gradient(#d8d5c6 1px,transparent 1px);
+  background-size:22px 22px;
+}
+#root{min-height:100vh;}
+button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit;}
+input,textarea{font-family:inherit;color:inherit;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:#C9C6B6;border-radius:4px;}
+
+/* ============ 舞台（手机外） ============ */
+.stage{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:56px;padding:40px 24px;flex-wrap:wrap;}
+.guide{width:300px;flex-shrink:0;}
+.guide-brand{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.guide-brand .logo{width:34px;height:34px;color:var(--green);}
+.guide-name{font-family:var(--serif);font-size:26px;font-weight:700;color:var(--ink);}
+.guide-sub{font-size:12px;color:var(--ink2);margin-bottom:22px;letter-spacing:.04em;}
+.guide h3{font-size:12px;color:var(--green-deep);letter-spacing:.18em;margin:18px 0 10px;font-weight:700;}
+.guide-steps{counter-reset:step;list-style:none;}
+.guide-steps li{counter-increment:step;font-size:12.5px;color:var(--ink2);line-height:1.65;padding:7px 0 7px 30px;position:relative;border-bottom:1px dashed var(--line);}
+.guide-steps li::before{content:counter(step);position:absolute;left:0;top:8px;width:20px;height:20px;border-radius:50%;background:var(--green-soft);color:var(--green-deep);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.guide-steps li b{color:var(--ink);font-weight:500;}
+.legend{font-size:12px;color:var(--ink2);line-height:2;}
+.legend .k{display:inline-flex;align-items:center;gap:6px;margin-right:14px;}
+.legend .dot{width:8px;height:8px;border-radius:50%;background:var(--blue);display:inline-block;}
+.legend .anchor-sample{border-bottom:1.5px dashed var(--green);color:var(--green-deep);}
+.legend .fork-sample{color:var(--green);font-weight:700;}
+
+/* ============ 手机内通用 ============ */
+.screen{height:100%;display:flex;flex-direction:column;background:var(--bg);position:relative;animation:screenIn .28s cubic-bezier(.2,.8,.2,1);}
+@keyframes screenIn{from{opacity:0;transform:translateX(14px);}to{opacity:1;transform:none;}}
+.appbar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);background:rgba(247,246,240,.92);backdrop-filter:blur(6px);z-index:5;min-height:54px;}
+.appbar .icon-btn{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--ink2);position:relative;transition:background .15s;}
+.appbar .icon-btn:hover{background:var(--green-soft);color:var(--green-deep);}
+.appbar .icon-btn .mini-dot{position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:50%;background:var(--blue);border:1.5px solid var(--bg);}
+.appbar-title{flex:1;min-width:0;}
+.appbar-title .t1{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.appbar-title .t2{font-size:11px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.body-scroll{flex:1;overflow-y:auto;overscroll-behavior:contain;}
+.serif{font-family:var(--serif);}
+.udot{width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(47,107,255,.35);}50%{box-shadow:0 0 0 4px rgba(47,107,255,0);}}
+.chip-type{font-size:10px;padding:2px 7px;border-radius:99px;background:var(--green-soft);color:var(--green-deep);font-weight:500;}
+.chip-arch{font-size:10px;padding:2px 7px;border-radius:99px;background:#EDEBE2;color:var(--ink3);font-weight:500;}
+.btn-primary{background:var(--green);color:#fff;border-radius:12px;padding:11px 18px;font-size:14px;font-weight:500;transition:background .15s,transform .1s;}
+.btn-primary:hover{background:var(--green-deep);}
+.btn-primary:active{transform:scale(.97);}
+.btn-ghost{border:1px solid var(--line);border-radius:12px;padding:10px 16px;font-size:13px;color:var(--ink2);background:var(--surface);}
+.btn-ghost:hover{border-color:var(--green);color:var(--green-deep);}
+.btn-danger{color:var(--red);border:1px solid #EAD0CB;border-radius:12px;padding:10px 16px;font-size:13px;background:var(--surface);}
+
+/* ============ 空状态 ============ */
+.empty-wrap{flex:1;display:flex;flex-direction:column;align-items:center;padding:44px 26px 26px;overflow-y:auto;}
+.empty-logo{width:64px;height:64px;color:var(--green);animation:grow 1.2s cubic-bezier(.2,.8,.2,1);}
+@keyframes grow{from{transform:scale(.6) translateY(10px);opacity:0;}to{transform:none;opacity:1;}}
+.empty-name{font-family:var(--serif);font-size:32px;font-weight:700;margin-top:12px;}
+.empty-tag{font-size:13px;color:var(--ink2);margin-top:8px;text-align:center;line-height:1.8;}
+.empty-illu{margin:26px 0 8px;opacity:.9;}
+.root-input-card{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:0 2px 14px rgba(30,43,35,.05);}
+.root-input-card textarea{width:100%;border:none;outline:none;resize:none;font-size:15px;line-height:1.7;min-height:72px;background:transparent;}
+.root-input-card .foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
+.key-hint{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--amber);background:var(--amber-soft);padding:5px 10px;border-radius:99px;cursor:pointer;}
+.send-fab{width:40px;height:40px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;transition:transform .12s,background .15s;}
+.send-fab:hover{background:var(--green-deep);}
+.send-fab:active{transform:scale(.92);}
+.send-fab:disabled{background:#C9CFC9;cursor:not-allowed;}
+.demo-link{margin-top:16px;font-size:12px;color:var(--ink3);text-decoration:underline;text-underline-offset:3px;}
+.demo-link:hover{color:var(--green-deep);}
+
+/* ============ 主题列表 ============ */
+.topic-list{padding:14px 14px 90px;}
+.topic-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px;cursor:pointer;transition:transform .15s,box-shadow .15s;position:relative;animation:cardIn .35s cubic-bezier(.2,.8,.2,1) backwards;}
+@keyframes cardIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+.topic-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(30,43,35,.08);}
+.topic-card .tc-top{display:flex;align-items:flex-start;gap:8px;}
+.topic-card .tc-title{font-family:var(--serif);font-size:16.5px;font-weight:600;line-height:1.5;flex:1;}
+.topic-card .tc-sum{font-size:12.5px;color:var(--ink2);line-height:1.7;margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.topic-card .tc-meta{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:11px;color:var(--ink3);}
+.fab-new{position:absolute;right:18px;bottom:34px;height:44px;padding:0 18px;border-radius:99px;background:var(--green);color:#fff;font-size:13.5px;font-weight:500;display:flex;align-items:center;gap:6px;box-shadow:0 6px 18px rgba(46,125,79,.35);z-index:6;transition:transform .12s;}
+.fab-new:active{transform:scale(.95);}
+
+/* ============ 对话阅读页 ============ */
+.source-banner{margin:10px 14px 0;background:var(--green-faint);border:1px solid var(--green-soft);border-radius:12px;padding:9px 12px;font-size:12px;color:var(--green-deep);display:flex;align-items:center;gap:8px;cursor:pointer;animation:cardIn .3s backwards;}
+.source-banner:hover{background:var(--green-soft);}
+.source-banner .q{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.arch-banner{margin:10px 14px 0;background:#EDEBE2;border-radius:12px;padding:9px 12px;font-size:12px;color:var(--ink2);display:flex;gap:8px;align-items:center;}
+.msg-flow{padding:16px 14px 20px;display:flex;flex-direction:column;gap:14px;}
+.msg-user{align-self:flex-end;max-width:82%;background:var(--green);color:#fff;border-radius:16px 16px 4px 16px;padding:11px 14px;font-size:14.5px;line-height:1.7;animation:msgIn .3s cubic-bezier(.2,.8,.2,1);}
+.msg-ai{align-self:stretch;background:var(--surface);border:1px solid var(--line);border-radius:4px 16px 16px 16px;padding:13px 14px;font-size:14.5px;line-height:1.85;animation:msgIn .3s cubic-bezier(.2,.8,.2,1);}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+.msg-ai .ai-tag{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--green-deep);font-weight:500;margin-bottom:6px;letter-spacing:.06em;}
+.anchor-span{color:var(--green-deep);border-bottom:1.5px dashed var(--green);cursor:pointer;padding-bottom:1px;transition:background .15s;}
+.anchor-span:hover{background:var(--green-soft);}
+.anchor-span.flash, .flash-target{animation:flashBg 1.8s ease-out;}
+@keyframes flashBg{0%{background:#F5D98C;}60%{background:#F5E9C4;}100%{background:transparent;}}
+.typing-cursor{display:inline-block;width:2px;height:1em;background:var(--green);vertical-align:-2px;margin-left:2px;animation:blink .8s infinite;}
+@keyframes blink{50%{opacity:0;}}
+.gen-note{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:11.5px;color:var(--ink3);}
+.gen-dots i{display:inline-block;width:4px;height:4px;border-radius:50%;background:var(--green);margin-right:3px;animation:genDot 1.2s infinite;}
+.gen-dots i:nth-child(2){animation-delay:.15s;}.gen-dots i:nth-child(3){animation-delay:.3s;}
+@keyframes genDot{0%,60%,100%{transform:translateY(0);opacity:.4;}30%{transform:translateY(-4px);opacity:1;}}
+.fail-bar{margin-top:10px;background:var(--amber-soft);border:1px solid #EDDFBE;border-radius:10px;padding:9px 11px;font-size:12px;color:var(--amber);line-height:1.6;}
+.fail-bar .row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;}
+.retry-btn{font-size:12px;color:var(--green-deep);font-weight:600;padding:5px 12px;border:1px solid var(--green);border-radius:99px;background:var(--surface);}
+.retry-btn:hover{background:var(--green-soft);}
+.msg-actions{display:flex;align-items:center;gap:8px;margin-top:11px;padding-top:10px;border-top:1px dashed var(--line);}
+.fork-btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--green-deep);font-weight:500;padding:6px 11px;border-radius:99px;background:var(--green-faint);border:1px solid var(--green-soft);transition:background .15s;}
+.fork-btn:hover{background:var(--green-soft);}
+.sugg-block{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);}
+.sugg-label{font-size:10.5px;color:var(--ink3);letter-spacing:.08em;margin-bottom:7px;display:flex;align-items:center;gap:4px;}
+.sugg-chip{display:flex;align-items:center;gap:6px;width:100%;text-align:left;background:var(--green-faint);border:1px solid var(--green-soft);border-radius:12px;padding:9px 11px;font-size:13px;color:var(--ink);margin-bottom:7px;transition:background .15s,transform .1s;animation:cardIn .35s backwards;}
+.sugg-chip:hover{background:var(--green-soft);}
+.sugg-chip:active{transform:scale(.99);}
+.sugg-chip .txt{flex:1;line-height:1.5;}
+.sugg-chip .fork-ic{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--green);flex-shrink:0;border-left:1px solid var(--green-soft);padding-left:6px;}
+.sugg-chip .fork-ic:hover{color:var(--green-deep);transform:scale(1.15);}
+.composer{border-top:1px solid var(--line);background:var(--surface);padding:10px 12px 12px;}
+.composer .inner{display:flex;align-items:flex-end;gap:8px;background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:8px 8px 8px 14px;}
+.composer textarea{flex:1;border:none;outline:none;resize:none;background:transparent;font-size:14px;line-height:1.6;max-height:96px;}
+.pending-fork-card{margin-bottom:9px;background:var(--green-faint);border:1px solid var(--green-soft);border-left:3px solid var(--green);border-radius:10px;padding:9px 11px;font-size:12px;color:var(--green-deep);animation:cardIn .25s backwards;}
+.pending-fork-card .pf-top{display:flex;align-items:center;justify-content:space-between;font-weight:600;margin-bottom:3px;}
+.pending-fork-card .pf-q{color:var(--ink2);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.newmsg-pill{position:absolute;left:50%;transform:translateX(-50%);bottom:96px;background:var(--blue);color:#fff;font-size:12px;padding:7px 14px;border-radius:99px;box-shadow:0 4px 14px rgba(47,107,255,.4);z-index:7;animation:cardIn .25s;cursor:pointer;}
+
+/* ============ 逐层导航 ============ */
+.nav-section{padding:14px 16px 4px;font-size:11px;letter-spacing:.14em;color:var(--ink3);font-weight:700;}
+.crumbs{display:flex;flex-wrap:wrap;gap:6px;padding:8px 16px 2px;}
+.crumb{font-size:12px;color:var(--green-deep);background:var(--green-faint);border:1px solid var(--green-soft);padding:5px 10px;border-radius:99px;cursor:pointer;}
+.crumb:hover{background:var(--green-soft);}
+.crumb-sep{color:var(--ink3);font-size:12px;align-self:center;}
+.nav-current{margin:10px 14px;background:var(--surface);border:1px solid var(--green);border-radius:16px;padding:14px;box-shadow:0 2px 12px rgba(46,125,79,.08);}
+.nav-current .nc-title{font-family:var(--serif);font-size:17px;font-weight:600;display:flex;align-items:flex-start;gap:8px;}
+.nav-current .nc-sum{font-size:12.5px;color:var(--ink2);line-height:1.7;margin-top:6px;}
+.nav-current .nc-meta{display:flex;gap:10px;margin-top:10px;font-size:11px;color:var(--ink3);align-items:center;}
+.branch-row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 13px;margin:0 14px 9px;cursor:pointer;transition:border-color .15s,transform .1s;animation:cardIn .3s backwards;}
+.branch-row:hover{border-color:var(--green);}
+.branch-row .br-main{flex:1;min-width:0;}
+.branch-row .br-title{font-size:14px;font-weight:500;display:flex;align-items:center;gap:7px;}
+.branch-row .br-sum{font-size:11.5px;color:var(--ink3);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.branch-row .br-meta{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink3);flex-shrink:0;}
+.more-row{margin:0 14px 9px;padding:11px;border:1px dashed var(--line);border-radius:14px;text-align:center;font-size:12.5px;color:var(--ink2);cursor:pointer;background:transparent;}
+.more-row:hover{border-color:var(--green);color:var(--green-deep);}
+.nav-footer-link{display:flex;align-items:center;justify-content:center;gap:6px;padding:16px;font-size:12.5px;color:var(--ink2);cursor:pointer;}
+.nav-footer-link:hover{color:var(--green-deep);}
+
+/* ============ 总览画布 ============ */
+.canvas-wrap{flex:1;position:relative;overflow:hidden;background:var(--bg);background-image:radial-gradient(#DDD9C8 1px,transparent 1px);background-size:18px 18px;}
+.canvas-tools{position:absolute;right:12px;top:12px;display:flex;flex-direction:column;gap:8px;z-index:5;}
+.canvas-tools button{width:36px;height:36px;border-radius:12px;background:var(--surface);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink2);box-shadow:0 2px 8px rgba(30,43,35,.08);font-size:16px;}
+.canvas-tools button:hover{color:var(--green-deep);border-color:var(--green);}
+.cv-node{width:100%;height:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:8px 10px;cursor:pointer;overflow:hidden;transition:border-color .15s,box-shadow .15s;display:flex;flex-direction:column;}
+.cv-node:hover{border-color:var(--green);}
+.cv-node.current{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft);}
+.cv-node .cv-title{font-size:12px;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.cv-node .cv-sum{font-size:10px;color:var(--ink2);line-height:1.5;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.cv-node .cv-meta{margin-top:auto;display:flex;align-items:center;gap:6px;font-size:9.5px;color:var(--ink3);}
+.cv-node.lowzoom .cv-sum,.cv-node.lowzoom .cv-meta{display:none;}
+.cv-node.lowzoom{justify-content:center;}
+.fold-btn{position:absolute;left:50%;transform:translateX(-50%);bottom:-13px;width:24px;height:24px;border-radius:50%;background:var(--surface);border:1.5px solid var(--green);color:var(--green-deep);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3;}
+.fold-btn:hover{background:var(--green-soft);}
+
+/* ============ 搜索 / 归档 / 设置 ============ */
+.search-bar{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin:12px 14px 4px;}
+.search-bar input{flex:1;border:none;outline:none;font-size:14px;background:transparent;}
+.search-scope{padding:8px 18px 0;font-size:11px;color:var(--ink3);}
+.result-card{margin:10px 14px 0;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 13px;cursor:pointer;animation:cardIn .3s backwards;}
+.result-card:hover{border-color:var(--green);}
+.result-card .r-path{font-size:10.5px;color:var(--ink3);margin-bottom:5px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+.result-card .r-title{font-size:14px;font-weight:500;display:flex;align-items:center;gap:7px;}
+.result-card .r-snip{font-size:12px;color:var(--ink2);line-height:1.7;margin-top:5px;}
+.result-card mark{background:#F5E9C4;color:inherit;border-radius:3px;padding:0 1px;}
+.arch-row{margin:10px 14px 0;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px;animation:cardIn .3s backwards;}
+.arch-row .a-title{font-size:14px;font-weight:500;display:flex;align-items:center;gap:7px;}
+.arch-row .a-meta{font-size:11px;color:var(--ink3);margin-top:4px;}
+.arch-row .a-actions{display:flex;gap:8px;margin-top:10px;}
+.arch-row .a-actions button{flex:1;font-size:12.5px;padding:8px;border-radius:10px;}
+.set-section{margin:16px 14px 0;}
+.set-label{font-size:11px;letter-spacing:.14em;color:var(--ink3);font-weight:700;margin-bottom:8px;}
+.set-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:15px;}
+.set-row{display:flex;align-items:center;gap:10px;padding:6px 0;}
+.set-row .sr-main{flex:1;min-width:0;}
+.set-row .sr-title{font-size:14px;font-weight:500;}
+.set-row .sr-sub{font-size:11.5px;color:var(--ink3);margin-top:2px;line-height:1.6;}
+.key-ok{color:var(--green-deep);font-size:11px;background:var(--green-soft);padding:2px 8px;border-radius:99px;font-weight:600;}
+.key-bad{color:var(--red);font-size:11px;background:var(--red-soft);padding:2px 8px;border-radius:99px;font-weight:600;}
+.key-none{color:var(--amber);font-size:11px;background:var(--amber-soft);padding:2px 8px;border-radius:99px;font-weight:600;}
+.key-input-row{display:flex;gap:8px;margin-top:10px;}
+.key-input-row input{flex:1;border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:13px;outline:none;background:var(--bg);}
+.key-input-row input:focus{border-color:var(--green);}
+.set-note{font-size:11.5px;color:var(--ink2);line-height:1.8;background:var(--green-faint);border-radius:12px;padding:11px 13px;}
+.set-note b{color:var(--green-deep);}
+
+/* ============ 浮层：底部弹层 / 确认框 / 气泡菜单 / Toast ============ */
+.overlay-mask{position:absolute;inset:0;background:rgba(30,43,35,.32);z-index:40;display:flex;align-items:flex-end;animation:fadeIn .2s;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.sheet{width:100%;background:var(--surface);border-radius:22px 22px 0 0;padding:10px 18px 22px;animation:sheetUp .3s cubic-bezier(.2,.8,.2,1);max-height:82%;overflow-y:auto;}
+@keyframes sheetUp{from{transform:translateY(60px);opacity:0;}to{transform:none;opacity:1;}}
+.sheet .handle{width:38px;height:4px;border-radius:99px;background:var(--line);margin:2px auto 14px;}
+.sheet h3{font-family:var(--serif);font-size:17px;font-weight:600;margin-bottom:4px;}
+.sheet .sh-sub{font-size:12px;color:var(--ink2);line-height:1.7;margin-bottom:12px;}
+.sheet-actions{display:flex;gap:10px;margin-top:16px;}
+.sheet-actions button{flex:1;}
+.center-mask{position:absolute;inset:0;background:rgba(30,43,35,.36);z-index:50;display:flex;align-items:center;justify-content:center;padding:30px;animation:fadeIn .2s;}
+.confirm-box{width:100%;background:var(--surface);border-radius:20px;padding:20px 18px;animation:sheetUp .28s cubic-bezier(.2,.8,.2,1);}
+.confirm-box h3{font-family:var(--serif);font-size:16.5px;font-weight:600;margin-bottom:8px;}
+.confirm-box p{font-size:13px;color:var(--ink2);line-height:1.8;}
+.confirm-box .cb-actions{display:flex;gap:10px;margin-top:18px;}
+.confirm-box .cb-actions button{flex:1;padding:10px;border-radius:12px;font-size:13.5px;}
+.bubble-menu{position:absolute;z-index:45;background:var(--ink);color:#F5F4EE;border-radius:12px;padding:5px;box-shadow:0 8px 24px rgba(30,43,35,.3);animation:cardIn .18s;display:flex;flex-direction:column;min-width:170px;}
+.bubble-menu button{display:flex;align-items:center;gap:8px;padding:9px 11px;font-size:12.5px;border-radius:8px;color:#F5F4EE;text-align:left;}
+.bubble-menu button:hover{background:rgba(255,255,255,.12);}
+.bubble-menu .bm-note{padding:8px 11px;font-size:11px;color:#B9C2BA;line-height:1.6;}
+.toast{position:absolute;left:50%;transform:translateX(-50%);bottom:104px;background:var(--ink);color:#F5F4EE;font-size:12.5px;padding:10px 18px;border-radius:99px;z-index:60;animation:toastIn .25s cubic-bezier(.2,.8,.2,1);max-width:82%;text-align:center;line-height:1.6;box-shadow:0 8px 24px rgba(30,43,35,.3);}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px);}to{opacity:1;transform:translateX(-50%);}}
+.ctx-menu{position:absolute;z-index:44;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(30,43,35,.16);padding:5px;min-width:158px;animation:cardIn .18s;}
+.ctx-menu button{display:flex;align-items:center;gap:9px;width:100%;padding:10px 12px;font-size:13px;border-radius:9px;text-align:left;color:var(--ink);}
+.ctx-menu button:hover{background:var(--green-faint);}
+.ctx-menu button.danger{color:var(--red);}
+.ctx-menu button.danger:hover{background:var(--red-soft);}
+.rename-input{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 13px;font-size:14px;outline:none;background:var(--bg);margin-top:10px;}
+.rename-input:focus{border-color:var(--green);}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useMemo } = React;
+
+/* ================= 图标集（线性 SVG，stroke 风格统一） ================= */
+const Ic = ({children, size=20}) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{children}</svg>
+);
+const IBack   = p => <Ic {...p}><path d="M15 5l-7 7 7 7"/></Ic>;
+const ISearch = p => <Ic {...p}><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></Ic>;
+const ITree   = p => <Ic {...p}><circle cx="5" cy="12" r="2.1"/><circle cx="17.5" cy="6" r="2.1"/><circle cx="17.5" cy="18" r="2.1"/><path d="M7 11.2 15.5 6.8M7 12.8l8.5 4.4"/></Ic>;
+const IMap    = p => <Ic {...p}><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></Ic>;
+const IGear   = p => <Ic {...p}><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2.1 2.1M16.9 16.9 19 19M19 5l-2.1 2.1M7.1 16.9 5 19"/></Ic>;
+const IBox    = p => <Ic {...p}><rect x="3" y="4" width="18" height="5" rx="1.2"/><path d="M5 9v10a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 19V9M10 13h4"/></Ic>;
+const ISend   = p => <Ic {...p}><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></Ic>;
+const IFork   = p => <Ic {...p}><circle cx="6" cy="6" r="2.1"/><circle cx="6" cy="18" r="2.1"/><circle cx="18" cy="8" r="2.1"/><path d="M6 8.1v7.8M6 13c0-2.4 2.6-3.4 5.4-3.4h4.4"/></Ic>;
+const IPlus   = p => <Ic {...p}><path d="M12 5v14M5 12h14"/></Ic>;
+const IClose  = p => <Ic {...p}><path d="M6 6l12 12M18 6 6 18"/></Ic>;
+const IMore   = p => <Ic {...p}><circle cx="5" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/></Ic>;
+const ILocate = p => <Ic {...p}><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2"/></Ic>;
+const IPencil = p => <Ic {...p}><path d="M4 20l1-4.2L16.6 4.2a2.05 2.05 0 0 1 2.9 2.9L7.9 18.7z"/></Ic>;
+const IRefresh= p => <Ic {...p}><path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 3.5V8h-4.5"/></Ic>;
+const ITrash  = p => <Ic {...p}><path d="M4 7h16M9.5 7V5.2A1.2 1.2 0 0 1 10.7 4h2.6a1.2 1.2 0 0 1 1.2 1.2V7M6.5 7l.9 12.2a1.5 1.5 0 0 0 1.5 1.4h6.2a1.5 1.5 0 0 0 1.5-1.4L17.5 7"/></Ic>;
+const ISpark  = p => <Ic {...p} size={14}><path d="M12 3.5 13.8 9 19.5 10.8 13.8 12.6 12 18.5 10.2 12.6 4.5 10.8 10.2 9z"/></Ic>;
+const IKey    = p => <Ic {...p}><circle cx="8" cy="14.5" r="4"/><path d="M11.2 11.3 20 2.5M15.5 6.5l3 3"/></Ic>;
+const ISprout = p => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" width={p&&p.size?p.size:24} height={p&&p.size?p.size:24}>
+    <path d="M12 21.5v-8.5"/>
+    <path d="M12 13C12 9.2 9.2 6.5 4.8 6.5c0 3.8 2.8 6.5 7.2 6.5z" fill="currentColor" fillOpacity=".18"/>
+    <path d="M12 11c0-4.2 3-7 7.5-7 0 4.2-3 7-7.5 7z" fill="currentColor" fillOpacity=".3"/>
+  </svg>
+);
+const IChevR  = p => <Ic {...p} size={16}><path d="M9 6l6 6-6 6"/></Ic>;
+
+/* ================= Android 设备框（huashu-design android_frame.jsx 内联） ================= */
+const androidFrameStyles = {
+  wrapper:{display:'inline-block',padding:10,background:'#1a1a1a',borderRadius:44,boxShadow:'0 0 0 2px #2a2a2a,0 24px 70px rgba(20,28,22,.38)',position:'relative'},
+  screen:{position:'relative',borderRadius:36,overflow:'hidden',background:'#fff'},
+  statusBar:{position:'absolute',top:0,left:0,right:0,height:32,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 24px',fontSize:14,fontWeight:500,zIndex:20,pointerEvents:'none'},
+  punchHole:{position:'absolute',top:10,left:'50%',transform:'translateX(-50%)',width:14,height:14,background:'#000',borderRadius:'50%',zIndex:30},
+  statusIcons:{display:'flex',alignItems:'center',gap:6},
+  content:{position:'absolute',top:32,left:0,right:0,bottom:24,overflow:'hidden'},
+  navBar:{position:'absolute',bottom:0,left:0,right:0,height:24,display:'flex',alignItems:'center',justifyContent:'center',zIndex:10},
+};
+function AndroidFrame({children, width=412, height=872, time='9:41', battery=86}) {
+  return (
+    <div style={androidFrameStyles.wrapper}>
+      <div style={{...androidFrameStyles.screen, width, height, background:'#F7F6F0'}}>
+        <div style={{...androidFrameStyles.statusBar, color:'#1a1a1a'}}>
+          <span>{time}</span>
+          <div style={androidFrameStyles.statusIcons}>
+            <svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor"><rect x="0" y="6" width="2" height="4" rx="0.5"/><rect x="4" y="4" width="2" height="6" rx="0.5"/><rect x="8" y="2" width="2" height="8" rx="0.5"/><rect x="12" y="0" width="2" height="10" rx="0.5"/></svg>
+            <div style={{width:22,height:10,border:'1.5px solid currentColor',borderRadius:2,padding:1}}>
+              <div style={{width:battery+'%',height:'100%',background:'currentColor',borderRadius:1}}/>
+            </div>
+            <span style={{fontSize:11,fontWeight:600}}>{battery}%</span>
+          </div>
+        </div>
+        <div style={androidFrameStyles.punchHole}/>
+        <div style={androidFrameStyles.content}>{children}</div>
+        <div style={androidFrameStyles.navBar}>
+          <div style={{width:100,height:4,background:'rgba(0,0,0,.32)',borderRadius:99}}/>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ================= 模拟数据 ================= */
+let __mid = 100;
+const nid = () => 'm' + (++__mid);
+
+const SUGG_POOL = ['能举个具体例子吗？','这和工程落地有什么关系？','有哪些常见误区？','能再深入一层吗？'];
+
+function fakeAnswer(q){
+  const s = q.length > 18 ? q.slice(0,18) + '…' : q;
+  const pool = [
+    `关于「${s}」：这是当前分支里的一个好问题。先抓住主干机制，再沿你关心的方向深入即可。注意，本分支的回答只会基于这里的对话和创建时的来源快照，不会混入其他分支的内容。`,
+    `「${s}」可以分三层看：概念层的定义与边界、机制层为什么这样设计、实践层的常见取舍。建议先确认最关心哪一层——临时疑问直接追问即可；若想系统展开，值得开一条独立分支。`,
+    `接着「${s}」往下走一步：先建立最小可用心智模型，再用一个反例检验它。读的过程中如果某一段勾起新问题，选中那段文字单独分叉，主线不会被带偏。`,
+  ];
+  return pool[q.length % pool.length];
+}
+function fakeTitle(q){
+  let t = q.replace(/^(帮我|请问|我想知道|我想了解|我想|能|能否|可不可以|讲一下|说说|介绍(下|一下)?)/,'').replace(/[吗呢？?。！!，,.\s]+$/,'').trim();
+  if (t.length > 15) t = t.slice(0,15);
+  return t || q.slice(0,12);
+}
+
+function buildDemo(){
+  return {
+    topicOrder:['t1','t2'],
+    topics:{
+      t1:{id:'t1', rootId:'r1', lastBranchId:'r1', time:'今天 08:52'},
+      t2:{id:'t2', rootId:'r2', lastBranchId:'r2', time:'昨天 21:14'},
+    },
+    branches:{
+      r1:{id:'r1', topicId:'t1', parentId:null, title:'大语言模型的注意力机制', isTempTitle:false,
+        summary:'主干学习：QKV 原理、缩放点积、多头机制与位置编码的整体框架。',
+        children:['b1','b2','b3','b4','b5','b6'], archived:false, unread:false, collapsed:false, source:null,
+        messages:[
+          {id:'m1', role:'user', text:'我在工作中需要理解 Transformer 的注意力机制，能系统讲一下吗？'},
+          {id:'m2', role:'ai', status:'stable',
+            text:'注意力机制的核心，是让模型在处理每个词时，动态决定应该关注序列中的哪些其他词。它通过查询（Q）、键（K）、值（V）三个向量完成：用 Q 与所有 K 计算相似度，再对 V 加权求和。最关键的工程细节是缩放点积（Scaled Dot-Product Attention）——相似度要除以 √d 来防止数值过大。在此之上，多头注意力（Multi-Head Attention）把表示拆成多份并行计算，让模型同时从不同子空间捕捉关系。由于注意力本身不含顺序信息，还需要位置编码告诉模型每个词的位置。',
+            anchors:['缩放点积（Scaled Dot-Product Attention）','多头注意力（Multi-Head Attention）','位置编码'],
+            suggestions:['为什么相似度要除以 √d？','多头注意力的头数怎么选？','RoPE 和绝对位置编码差在哪？']},
+        ]},
+      b1:{id:'b1', topicId:'t1', parentId:'r1', title:'为什么 Q·K 要除以 √d', isTempTitle:false,
+        summary:'点积方差随维度增长，√d 缩放把 Softmax 维持在梯度充足区间。',
+        children:['b11'], archived:false, unread:true, collapsed:false,
+        source:{branchId:'r1', msgId:'m2', anchorText:'缩放点积（Scaled Dot-Product Attention）'},
+        messages:[
+          {id:'m3', role:'user', text:'为什么 Q 和 K 的点积要除以 √d？不除会怎样？'},
+          {id:'m4', role:'ai', status:'stable',
+            text:'假设 Q 和 K 的各分量是均值为 0、方差为 1 的独立随机变量，那么 Q·K 的方差会随维度 d 线性增长——d=512 时，点积的标准差约为 22.6。过大的点积会把 Softmax 推进饱和区：输出接近 one-hot，梯度趋近于 0，训练随之停滞。除以 √d 相当于把方差归一化回 1，让 Softmax 工作在梯度充足的区间。这也是为什么模型维度越大，这个缩放越不能省。',
+            anchors:['Softmax 推进饱和区'],
+            suggestions:['能给出梯度消失的数学推导吗？','有没有不做缩放的变体？']},
+        ]},
+      b11:{id:'b11', topicId:'t1', parentId:'b1', title:'Softmax 饱和区的梯度推导', isTempTitle:false,
+        summary:'p(1−p) 在饱和区趋近于 0，反向信号逐层衰减至耗尽。',
+        children:[], archived:false, unread:false, collapsed:false,
+        source:{branchId:'b1', msgId:'m4', anchorText:'Softmax 推进饱和区'},
+        messages:[
+          {id:'m5', role:'user', text:'能给出梯度消失的数学推导吗？'},
+          {id:'m6', role:'ai', status:'stable',
+            text:'设 z = Q·K，Softmax 输出 p_i = e^{z_i} / Σe^{z_j}。对 z_i 求导得 ∂p_i/∂z_i = p_i(1−p_i)。当 |z| 很大时，p_i 趋近 0 或 1，乘积 p_i(1−p_i) 趋近于 0——这就是梯度消失。反向传播时上游梯度逐层乘以这个小量，几层之后信号就耗尽了。除以 √d 让 z 保持在 |z|≈1 的活跃区，p(1−p) 维持在 0.25 附近的最大梯度带。',
+            suggestions:['实际训练里怎么监控这种饱和？']},
+        ]},
+      b2:{id:'b2', topicId:'t1', parentId:'r1', title:'多头相比单头的收益', isTempTitle:false,
+        summary:'多组 QKV 投影并行，让不同头分化出语法、语义、位置等不同视角。',
+        children:[], archived:false, unread:false, collapsed:false,
+        source:{branchId:'r1', msgId:'m2', anchorText:'多头注意力（Multi-Head Attention）'},
+        messages:[
+          {id:'m7', role:'user', text:'多头注意力相比单头到底好在哪里？'},
+          {id:'m8', role:'ai', status:'failed',
+            text:'单头注意力只能用一组 QKV 投影，意味着每个位置只能从一种「视角」衡量相关性。多头把维度切成 h 份并行计算，相当于让模型同时从语法、语义、位置等不同子空间……',
+            retryText:'单头注意力只能用一组 QKV 投影，意味着每个位置只能从一种「视角」衡量相关性。多头把维度切成 h 份并行计算，相当于让模型同时从语法、语义、位置等不同子空间捕捉依赖。实验上，不同的头确实分化出了不同功能：有的关注相邻词，有的追踪长距离指代。头数太少视角单一，太多则每个头维度过小、表示能力不足——实践中 8~16 头是常见区间。',
+            retryAnchors:['语法、语义、位置等不同子空间'],
+            suggestions:['头数 8 和 16 在实际效果上差多少？','什么叫头的功能分化？']},
+        ]},
+      b3:{id:'b3', topicId:'t1', parentId:'r1', title:'位置编码：从绝对位置到 RoPE', isTempTitle:false,
+        summary:'正弦绝对编码 → 可学习编码 → RoPE 旋转相对编码的演进脉络。',
+        children:[], archived:false, unread:false, collapsed:false,
+        source:{branchId:'r1', msgId:'m2', anchorText:'位置编码'},
+        messages:[
+          {id:'m9', role:'user', text:'位置编码都有哪些方案？演进逻辑是什么？'},
+          {id:'m10', role:'ai', status:'stable',
+            text:'最早的 Transformer 用正弦/余弦函数生成绝对位置编码，优点是可外推到更长序列；后来 BERT 改用可学习编码，表达更灵活但长度受限。当前主流是 RoPE（旋转位置编码）：把位置信息做成对 Q、K 的旋转操作，让点积天然携带相对位置信息，长序列外推性更好，LLaMA 等模型都在用。',
+            anchors:['RoPE（旋转位置编码）'],
+            suggestions:['RoPE 为什么外推性更好？']},
+        ]},
+      b4:{id:'b4', topicId:'t1', parentId:'r1', title:'注意力与卷积的取舍', isTempTitle:false,
+        summary:'全局依赖建模 vs 局部归纳偏置，混合架构是折中方向。',
+        children:[], archived:false, unread:false, collapsed:false,
+        source:{branchId:'r1', msgId:'m2', anchorText:null},
+        messages:[
+          {id:'m11', role:'user', text:'注意力机制和卷积相比，各自适合什么场景？'},
+          {id:'m12', role:'ai', status:'stable', text:'卷积自带局部性和权重共享的归纳偏置，样本效率高，适合图像等局部结构强的数据；注意力不做局部假设，能直接建模任意距离依赖，但需要更多数据「喂」出来。视觉里的混合架构（先卷积提局部特征、再用注意力做全局建模）正是两者的折中。', suggestions:['为什么注意力需要更多数据？']},
+        ]},
+      b5:{id:'b5', topicId:'t1', parentId:'r1', title:'FlashAttention 的工程优化', isTempTitle:false,
+        summary:'以分块计算替代完整注意力矩阵显存占用，训练推理提速。',
+        children:[], archived:false, unread:false, collapsed:false,
+        source:{branchId:'r1', msgId:'m2', anchorText:null},
+        messages:[
+          {id:'m13', role:'user', text:'FlashAttention 是怎么加速注意力的？'},
+          {id:'m14', role:'ai', status:'stable', text:'标准实现会把 N×N 的注意力矩阵完整写进显存，读写开销远大于计算本身。FlashAttention 的思路是分块（tiling）：在 SRAM 里按块计算并滚动更新 softmax 归一化项，从不物化完整矩阵。显存占用从 O(N²) 降到 O(N)，速度提升 2~4 倍，且数值结果完全一致。', suggestions:['分块 softmax 怎么保证结果一致？']},
+        ]},
+      b6:{id:'b6', topicId:'t1', parentId:'r1', title:'KV Cache 与推理显存', isTempTitle:false,
+        summary:'缓存历史 K/V 避免重复计算，显存随序列长度线性增长。',
+        children:[], archived:false, unread:false, collapsed:false,
+        source:{branchId:'r1', msgId:'m2', anchorText:null},
+        messages:[
+          {id:'m15', role:'user', text:'推理时的 KV Cache 是什么？为什么会爆显存？'},
+          {id:'m16', role:'ai', status:'stable', text:'自回归生成时，每个新 token 都要与全部历史 token 做注意力。KV Cache 把历史 token 的 K、V 缓存下来，每步只算新 token 的 Q，避免 O(N²) 重复计算。代价是显存随序列长度、层数、头数线性膨胀——长上下文场景下，KV Cache 往往比模型权重更占显存，于是有了 GQA、MLA 等压缩方案。', suggestions:['GQA 是怎么压缩 KV Cache 的？']},
+        ]},
+      r2:{id:'r2', topicId:'t2', parentId:null, title:'冷链物流的断链风险点', isTempTitle:false,
+        summary:'梳理装卸月台、干支交接、零售冷柜三大高发断链环节。',
+        children:['c1'], archived:false, unread:true, collapsed:false, source:null,
+        messages:[
+          {id:'m17', role:'user', text:'帮我梳理冷链物流中最容易断链的环节。'},
+          {id:'m18', role:'ai', status:'stable',
+            text:'冷链断链最高发的环节依次是：装卸货月台（开门作业导致温度暴露）、干线向末端配送的交接、以及零售冷柜的夜间化霜期。其中装卸货月台贡献了约 45% 的断链时长——作业门常开、缓冲间缺失、人员为效率牺牲规范是主因。治理优先级也建议按这个顺序排。',
+            anchors:['装卸货月台'],
+            suggestions:['月台缓冲间该怎么设计？','化霜期温度波动怎么控制？']},
+        ]},
+      c1:{id:'c1', topicId:'t2', parentId:'r2', title:'预冷环节的关键控制点', isTempTitle:false,
+        summary:'预冷不足会让全程冷链事倍功半；差压预冷与冷库预冷的适用边界。',
+        children:[], archived:true, unread:false, collapsed:false,
+        source:{branchId:'r2', msgId:'m18', anchorText:'装卸货月台'},
+        messages:[
+          {id:'m19', role:'user', text:'预冷环节有哪些关键控制点？'},
+          {id:'m20', role:'ai', status:'stable', text:'预冷的核心指标是「从采摘到目标温度的耗时」。差压预冷效率高、适合包装箱堆叠场景；冷库预冷成本低但耗时长 4~6 倍。最常见错误是把冷库当预冷设备用——货物带着田间热直接进库，降温太慢，后续全程冷链做得再好也补不回来。', suggestions:['差压预冷设备投入大概多少？']},
+        ]},
+    },
+  };
+}
+
+/* ================= 主状态机 ================= */
+function AppPhone(){
+  const empty = {topicOrder:[], topics:{}, branches:{}};
+  const [screen, setScreen] = useState('empty'); // empty | topics | chat | nav | canvas | archived | settings | newTopic
+  const [data, setData] = useState(empty);       // {topicOrder, topics, branches}
+  const [keyStatus, setKeyStatus] = useState('none'); // none | ok | invalid
+  const [currentBranchId, setCurrentBranchId] = useState(null);
+  const [sheet, setSheet] = useState(null);      // {type, payload}
+  const [ctxMenu, setCtxMenu] = useState(null);  // {x,y,items}
+  const [confirmBox, setConfirmBox] = useState(null); // {title, body, danger, onOk}
+  const [bubble, setBubble] = useState(null);    // {x,y,msgId,branchId,anchorText,enabled,reason}
+  const [toastMsg, setToastMsg] = useState(null);
+  const [pendingFork, setPendingFork] = useState(null); // {parentId, msgId, anchorText}
+  const [searchQ, setSearchQ] = useState('');
+  const [composerDraft, setComposerDraft] = useState('');
+  const [rootDraft, setRootDraft] = useState('');
+
+  const branches = data.branches;
+  const genTimers = useRef({});
+  const scrollPos = useRef({});
+  const viewRef = useRef({screen:'empty', branchId:null, atBottom:true});
+  const flashRef = useRef(null);
+  const visitCounter = useRef(0);
+  const lastVisit = useRef({});
+  const toastTimer = useRef(null);
+
+  const toast = (msg) => {
+    setToastMsg(msg);
+    clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(()=>setToastMsg(null), 2400);
+  };
+
+  const setBranches = (fn) => setData(prev => ({...prev, branches: fn(prev.branches)}));
+  const upBranch = (id, fn) => setBranches(prev => ({...prev, [id]: fn(prev[id])}));
+
+  /* ---------- 派生帮助函数 ---------- */
+  const topicOf = (bid) => branches[bid] ? data.topics[branches[bid].topicId] : null;
+  const descendants = (id) => {
+    const out = [];
+    const walk = (x) => (branches[x] ? branches[x].children : []).forEach(c => { out.push(c); walk(c); });
+    walk(id);
+    return out;
+  };
+  const visibleChildren = (b) => b.children.filter(c => branches[c] && !branches[c].archived);
+  const subtreeHasUnread = (id) => {
+    let found = false;
+    const walk = (x) => { const b = branches[x]; if(!b) return; if(b.unread) found = true; b.children.forEach(walk); };
+    walk(id);
+    return found;
+  };
+  const hiddenUnreadCount = (id) => { // 折叠后代中的未读数
+    let n = 0;
+    const walk = (x) => { const b = branches[x]; if(!b) return; if(!b.archived){ if(b.unread) n++; b.children.forEach(walk);} };
+    (branches[id]?branches[id].children:[]).forEach(walk);
+    return n;
+  };
+  const hiddenDescCount = (id) => descendants(id).filter(x => !branches[x].archived).length;
+  const ancestorsOf = (bid) => {
+    const out = [];
+    let cur = branches[bid];
+    while (cur && cur.parentId){ const p = branches[cur.parentId]; if(!p) break; out.unshift(p); cur = p; }
+    return out;
+  };
+  const anyUnreadInTopic = (tid) => Object.values(branches).some(b => b.topicId===tid && !b.archived && b.unread);
+
+  /* ---------- 生成模拟（流式打字机） ---------- */
+  const runGeneration = (branchId, msgId, fullText, opts={}) => {
+    let i = 0;
+    genTimers.current[msgId] = setInterval(() => {
+      i += 3;
+      const done = i >= fullText.length;
+      upBranch(branchId, b => ({
+        ...b,
+        messages: b.messages.map(m => m.id===msgId
+          ? {...m, text: fullText.slice(0, i), status: done ? 'stable' : 'generating',
+             ...(done ? {suggestions: opts.suggestions || SUGG_POOL.slice(0,3), anchors: opts.anchors} : {})}
+          : m),
+      }));
+      if (done){
+        clearInterval(genTimers.current[msgId]);
+        delete genTimers.current[msgId];
+        const v = viewRef.current;
+        const watching = v.screen==='chat' && v.branchId===branchId && v.atBottom;
+        if (!watching) upBranch(branchId, b => ({...b, unread:true}));
+        // AI 命名：临时标题 → 正式标题（仅一次，依据首问/根问题）
+        setTimeout(() => {
+          setBranches(prev => {
+            const b = prev[branchId];
+            if (!b || !b.isTempTitle) return prev;
+            const firstQ = (b.messages.find(m => m.role==='user') || {text:''}).text;
+            return {...prev, [branchId]: {...b, title: fakeTitle(firstQ), isTempTitle:false}};
+          });
+        }, 900);
+        if (opts.onDone) opts.onDone();
+      }
+    }, 42);
+  };
+
+  /* ---------- 导航动作 ---------- */
+  const go = (s) => { setScreen(s); };
+  const openBranch = (bid, opts={}) => {
+    if (!branches[bid]) return;
+    visitCounter.current += 1;
+    lastVisit.current[bid] = visitCounter.current;
+    setData(prev => {
+      const t = prev.topics[prev.branches[bid].topicId];
+      return {...prev, topics: {...prev.topics, [t.id]: {...t, lastBranchId: bid}}};
+    });
+    if (opts.flash) flashRef.current = opts.flash; else flashRef.current = null;
+    setCurrentBranchId(bid);
+    setPendingFork(null);
+    setBubble(null);
+    setScreen('chat');
+  };
+  const openTopic = (tid) => {
+    const t = data.topics[tid];
+    openBranch(t.lastBranchId && branches[t.lastBranchId] && !branches[t.lastBranchId].archived ? t.lastBranchId : t.rootId);
+  };
+
+  /* ---------- Key 守卫（BASE-05 / BASE-18） ---------- */
+  const guardKey = (contextLabel) => {
+    if (keyStatus === 'ok') return true;
+    setSheet({type:'key', payload:{context: contextLabel, status: keyStatus}});
+    return false; // 输入保留在原位，不产生任何树节点
+  };
+
+  /* ---------- 发送：根问题 ---------- */
+  const sendRoot = () => {
+    const q = rootDraft.trim();
+    if (!q) return;
+    if (!guardKey('root')) return;
+    const tid = 't' + Date.now();
+    const bid = 'r' + Date.now();
+    const aiId = nid();
+    const fullText = `收到，我们开始系统学习「${fakeTitle(q)}」。我会先给出主干框架；阅读中你可以对任何一段划词分叉，把临时疑问隔离进独立分支，探索完随时回到这里。\n\n（演示提示：这条回答稳定后，底部会出现推荐问题与「作为来源新建分支」入口。）`;
+    setData(prev => ({
+      topicOrder: [...prev.topicOrder, tid],
+      topics: {...prev.topics, [tid]: {id: tid, rootId: bid, lastBranchId: bid, time: '刚刚'}},
+      branches: {...prev.branches, [bid]: {
+        id: bid, topicId: tid, parentId: null, title: q.length>16 ? q.slice(0,16)+'…' : q, isTempTitle: true,
+        summary: '（摘要将随本分支对话自动更新）', children: [], archived:false, unread:false, collapsed:false, source:null,
+        messages: [
+          {id: nid(), role:'user', text: q},
+          {id: aiId, role:'ai', status:'generating', text:''},
+        ],
+      }},
+    }));
+    setRootDraft('');
+    setCurrentBranchId(bid);
+    setScreen('chat');
+    runGeneration(bid, aiId, fullText, {suggestions: SUGG_POOL.slice(0,3)});
+    toast('主题与根分支已形成');
+  };
+
+  /* ---------- 发送：当前分支追问 / 新分支首问 ---------- */
+  const sendChat = () => {
+    const q = composerDraft.trim();
+    if (!q) return;
+    if (pendingFork){
+      if (!guardKey('fork')) return;
+      const pf = pendingFork;
+      const bid = 'b' + Date.now();
+      const aiId = nid();
+      const fullText = fakeAnswer(q);
+      setBranches(prev => ({
+        ...prev,
+        [pf.parentId]: {...prev[pf.parentId], children: [...prev[pf.parentId].children, bid]},
+        [bid]: {
+          id: bid, topicId: prev[pf.parentId].topicId, parentId: pf.parentId,
+          title: q.length>16 ? q.slice(0,16)+'…' : q, isTempTitle: true,
+          summary: '（摘要将随本分支对话自动更新）', children: [], archived:false, unread:false, collapsed:false,
+          source: {branchId: pf.parentId, msgId: pf.msgId, anchorText: pf.anchorText},
+          messages: [
+            {id: nid(), role:'user', text: q},
+            {id: aiId, role:'ai', status:'generating', text:''},
+          ],
+        },
+      }));
+      setComposerDraft('');
+      setPendingFork(null);
+      toast('已创建子分支，来源快照已固定');
+      openBranch(bid);
+      runGeneration(bid, aiId, fullText);
+      return;
+    }
+    if (!currentBranchId) return;
+    if (!guardKey('follow')) return;
+    const bid = currentBranchId;
+    const aiId = nid();
+    const fullText = fakeAnswer(q);
+    upBranch(bid, b => ({...b, messages: [...b.messages,
+      {id: nid(), role:'user', text: q},
+      {id: aiId, role:'ai', status:'generating', text:''},
+    ]}));
+    setComposerDraft('');
+    setTimeout(() => {
+      const el = document.getElementById('chat-scroll');
+      if (el) el.scrollTop = el.scrollHeight;
+    }, 60);
+    runGeneration(bid, aiId, fullText);
+  };
+
+  /* ---------- 分叉入口 ---------- */
+  const startFork = (msgId, anchorText, prefill='') => {
+    setPendingFork({parentId: currentBranchId, msgId, anchorText});
+    setComposerDraft(prefill);
+    setBubble(null);
+  };
+  const anchorClick = (e, msg, branchId) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const host = document.getElementById('phone-content').getBoundingClientRect();
+    const enabled = msg.status === 'stable';
+    setBubble({
+      x: Math.min(Math.max(rect.left - host.left - 20, 12), 200),
+      y: rect.bottom - host.top + 6,
+      msgId: msg.id, branchId, anchorText: e.currentTarget.textContent,
+      enabled,
+      reason: msg.status === 'generating' ? '回答还在生成中，完成后才能从这里分叉。' : '这条回答生成中断，仅保留的部分内容可供阅读；原位重试成功、形成稳定回答后才能分叉。',
+    });
+  };
+
+  /* ---------- 重试（BASE-15：原位、不重复消息/分支） ---------- */
+  const retryMsg = (branchId, msg) => {
+    if (!guardKey('retry')) return;
+    upBranch(branchId, b => ({...b, messages: b.messages.map(m => m.id===msg.id ? {...m, status:'generating', text:''} : m)}));
+    runGeneration(branchId, msg.id, msg.retryText, {anchors: msg.retryAnchors, suggestions: msg.suggestions});
+    toast('正在原位置重试，不会新增消息或分支');
+  };
+
+  /* ---------- 整理：归档 / 恢复 / 删除（BASE-14） ---------- */
+  const setSubtreeArchived = (id, flag) => {
+    const ids = [id, ...descendants(id)];
+    setBranches(prev => {
+      const next = {...prev};
+      ids.forEach(x => { next[x] = {...next[x], archived: flag}; });
+      return next;
+    });
+  };
+  const archiveBranch = (id) => {
+    const n = descendants(id).length;
+    setConfirmBox({
+      title: '归档这棵子树？',
+      body: `「${branches[id].title」及其 ${n} 个后代将从日常导航和默认画布中隐藏，可随时从「已归档」整体恢复，父子关系保持不变。`,
+      danger: false, okText: '归档',
+      onOk: () => {
+        setSubtreeArchived(id, true);
+        toast(`已归档「${branches[id].title}」（含 ${n} 个后代）`);
+        if (currentBranchId === id || descendants(id).includes(currentBranchId)){
+          openBranch(branches[id].parentId);
+        }
+      },
+    });
+  };
+  const restoreSubtree = (id) => {
+    const n = descendants(id).length;
+    setSubtreeArchived(id, false);
+    setSheet(null);
+    toast(`已恢复整棵子树（${n + 1} 个分支）`);
+  };
+  const deleteSubtree = (id) => {
+    const n = descendants(id).length;
+    setConfirmBox({
+      title: '永久删除这棵子树？',
+      body: `将永久删除「${branches[id].title」及全部 ${n} 个后代分支，删除后不可恢复。取消不会改变任何内容。`,
+      danger: true, okText: '永久删除',
+      onOk: () => {
+        const ids = [id, ...descendants(id)];
+        setData(prev => {
+          const next = {...prev.branches};
+          const parent = next[prev.branches[id].parentId];
+          if (parent) next[parent.id] = {...parent, children: parent.children.filter(c => c !== id)};
+          ids.forEach(x => delete next[x]);
+          return {...prev, branches: next};
+        });
+        toast('已删除整棵子树');
+        setSheet(null);
+      },
+    });
+  };
+  const deleteTopic = (tid) => {
+    const t = data.topics[tid];
+    const root = branches[t.rootId];
+    const n = descendants(t.rootId).length;
+    setConfirmBox({
+      title: '永久删除整个主题？',
+      body: `「${root ? root.title : ''」包含 ${n + 1} 个分支的全部内容仅保存在本机，删除后不可恢复，不存在云端备份。取消不会改变任何内容。`,
+      danger: true, okText: '永久删除',
+      onOk: () => {
+        setData(prev => {
+          const ids = [t.rootId, ...descendants(t.rootId)];
+          const next = {...prev.branches};
+          ids.forEach(x => delete next[x]);
+          const topics = {...prev.topics};
+          delete topics[tid];
+          const order = prev.topicOrder.filter(x => x !== tid);
+          return {topicOrder: order, topics, branches: next};
+        });
+        toast('主题已永久删除');
+        setScreen(Object.keys(data.topics).length > 1 ? 'topics' : 'empty');
+      },
+    });
+  };
+
+  /* ---------- 标题（BASE-06 / BASE-12 / BASE-19） ---------- */
+  const renameBranch = (id, name) => {
+    if (!name.trim()) return;
+    const isRoot = branches[id].parentId === null;
+    upBranch(id, b => ({...b, title: name.trim(), isTempTitle:false}));
+    setSheet(null);
+    toast(isRoot ? '根标题已更新，主题列表同步显示' : '分支标题已更新');
+  };
+  const refreshTitle = (id) => {
+    const b = branches[id];
+    const firstQ = (b.messages.find(m => m.role==='user') || {text:''}).text;
+    setSheet(null);
+    toast('正在依据' + (b.parentId ? '来源锚点与首问' : '根问题') + '重新生成标题…');
+    setTimeout(() => {
+      upBranch(id, x => ({...x, title: fakeTitle(firstQ), isTempTitle:false}));
+      toast(b.parentId === null ? '根标题已刷新，主题列表同步显示' : '分支标题已刷新');
+    }, 900);
+  };
+
+  /* ---------- 搜索（BASE-12） ---------- */
+  const searchAll = (q) => {
+    if (!q.trim()) return [];
+    const results = [];
+    const hl = (text) => {
+      const i = text.indexOf(q);
+      const s = Math.max(0, i - 14), e = Math.min(text.length, i + q.length + 22);
+      return (s > 0 ? '…' : '') + text.slice(s, e) + (e < text.length ? '…' : '');
+    };
+    Object.values(branches).forEach(b => {
+      const path = [...ancestorsOf(b.id).map(x => x.title)];
+      if (b.title.includes(q)) results.push({bid: b.id, type: '分支标题', snip: b.title, path, archived: b.archived});
+      b.messages.forEach(m => {
+        if (m.text && m.text.includes(q)) results.push({bid: b.id, type: m.role==='user' ? '用户问题' : (m.status==='stable' ? 'AI 回答' : '部分回答'), snip: hl(m.text), path, archived: b.archived});
+      });
+      if (b.source && b.source.anchorText && b.source.anchorText.includes(q))
+        results.push({bid: b.id, type: '锚定原文', snip: b.source.anchorText, path, archived: b.archived});
+    });
+    return results.slice(0, 30);
+  };
+
+  /* ================= 通用浮层组件 ================= */
+  const renderToast = () => toastMsg && <div className="toast">{toastMsg}</div>;
+  const renderConfirm = () => confirmBox && (
+    <div className="center-mask" onClick={() => setConfirmBox(null)}>
+      <div className="confirm-box" onClick={e => e.stopPropagation()}>
+        <h3>{confirmBox.title}</h3>
+        <p>{confirmBox.body}</p>
+        <div className="cb-actions">
+          <button className="btn-ghost" onClick={() => { setConfirmBox(null); toast('已取消，内容保持不变'); }}>取消</button>
+          <button className="btn-primary" style={confirmBox.danger ? {background:'var(--red)'} : {}}
+            onClick={() => { setConfirmBox(null); confirmBox.onOk(); }}>{confirmBox.okText || '确认'}</button>
+        </div>
+      </div>
+    </div>
+  );
+  const renderCtxMenu = () => ctxMenu && (
+    <React.Fragment>
+      <div style={{position:'absolute', inset:0, zIndex:43}} onClick={() => setCtxMenu(null)}/>
+      <div className="ctx-menu" style={{left: ctxMenu.x, top: ctxMenu.y}}>
+        {ctxMenu.items.map((it, i) => (
+          <button key={i} className={it.danger ? 'danger' : ''} onClick={() => { setCtxMenu(null); it.onClick(); }}>
+            {it.icon}{it.label}
+          </button>
+        ))}
+      </div>
+    </React.Fragment>
+  );
+  const renderBubble = () => bubble && (
+    <React.Fragment>
+      <div style={{position:'absolute', inset:0, zIndex:44}} onClick={() => setBubble(null)}/>
+      <div className="bubble-menu" style={{left: bubble.x, top: bubble.y}}>
+        {bubble.enabled ? (
+          <button onClick={() => startFork(bubble.msgId, bubble.anchorText)}>
+            <IFork size={15}/> 以选中文字为来源新建分支
+          </button>
+        ) : (
+          <div className="bm-note">{bubble.reason}</div>
+        )}
+      </div>
+    </React.Fragment>
+  );
+  const renderSheet = () => {
+    if (!sheet) return null;
+    const close = () => setSheet(null);
+    let body = null;
+    if (sheet.type === 'key'){
+      const st = sheet.payload.status;
+      body = (
+        <React.Fragment>
+          <div className="handle"/><h3>需要先配置 DeepSeek Key</h3>
+          <div className="sh-sub">
+            {st === 'none' ? '尚未配置 API Key，发送已被阻止。' : '当前 Key 无效或额度不足，发送已被阻止。'}
+            你输入的内容已保留在原位置，不会形成主题或分支；配置可用 Key 后回来即可继续发送。
+          </div>
+          <div className="sheet-actions">
+            <button className="btn-ghost" onClick={close}>继续编辑</button>
+            <button className="btn-primary" onClick={() => { setSheet(null); setScreen('settings'); }}>去配置 Key</button>
+          </div>
+        </React.Fragment>
+      );
+    } else if (sheet.type === 'rename'){
+      const b = branches[sheet.payload.id];
+      body = (
+        <React.Fragment>
+          <div className="handle"/><h3>修改标题</h3>
+          <div className="sh-sub">{b.parentId === null ? '根标题即主题显示身份，修改后主题列表同步更新。' : '标题不随对话自动变化，可随时手动修改。'}</div>
+          <input className="rename-input" id="rename-input" defaultValue={b.title}/>
+          <div className="sheet-actions">
+            <button className="btn-ghost" onClick={close}>取消</button>
+            <button className="btn-primary" onClick={() => renameBranch(b.id, document.getElementById('rename-input').value)}>保存</button>
+          </div>
+        </React.Fragment>
+      );
+    } else if (sheet.type === 'archDetail'){
+      const b = branches[sheet.payload.id];
+      const n = descendants(b.id).length;
+      body = (
+        <React.Fragment>
+          <div className="handle"/><h3>{b.title}</h3>
+          <div className="sh-sub">已归档子树 · 含 {n} 个后代分支。查看详情不会改变归档状态；恢复将以整棵子树为单位回到日常导航与画布。</div>
+          <div style={{background:'var(--bg)',borderRadius:12,padding:'11px 13px',fontSize:12.5,color:'var(--ink2)',lineHeight:1.8}}>
+            {b.summary}<br/>来源：{b.source && branches[b.source.branchId] ? branches[b.source.branchId].title : '—'}{b.source && b.source.anchorText ? ` · 「${b.source.anchorText}」` : ''}
+          </div>
+          <div className="sheet-actions">
+            <button className="btn-ghost" onClick={() => { setSheet(null); openBranch(b.id); toast('正在查看已归档分支，恢复前仍可阅读'); }}>仅查看内容</button>
+            <button className="btn-primary" onClick={() => restoreSubtree(b.id)}>恢复整棵子树</button>
+          </div>
+        </React.Fragment>
+      );
+    } else if (sheet.type === 'archSearchHit'){
+      const b = branches[sheet.payload.id];
+      body = (
+        <React.Fragment>
+          <div className="handle"/><h3>{b.title}</h3>
+          <div className="sh-sub">该分支位于已归档子树中。「查看」与「恢复」是两个不同动作——查看不会改变归档状态。</div>
+          <div className="sheet-actions">
+            <button className="btn-ghost" onClick={() => { setSheet(null); openBranch(b.id); }}>仅查看</button>
+            <button className="btn-primary" onClick={() => restoreSubtree(b.id)}>恢复整棵子树</button>
+          </div>
+        </React.Fragment>
+      );
+    } else if (sheet.type === 'nodeDetail'){
+      const b = branches[sheet.payload.id];
+      const n = visibleChildren(b).length;
+      body = (
+        <React.Fragment>
+          <div className="handle"/>
+          <div style={{display:'flex',alignItems:'flex-start',gap:8}}>
+            {b.unread && <span className="udot" style={{marginTop:7}}/>}
+            <h3 style={{flex:1}}>{b.title}</h3>
+          </div>
+          <div className="sh-sub" style={{marginTop:6}}>{b.summary}</div>
+          {b.source && (
+            <div style={{background:'var(--green-faint)',border:'1px solid var(--green-soft)',borderRadius:10,padding:'9px 11px',fontSize:12,color:'var(--green-deep)',lineHeight:1.7}}>
+              来源：{branches[b.source.branchId] ? branches[b.source.branchId].title : '—'}{b.source.anchorText ? <React.Fragment> · 「{b.source.anchorText}」</React.Fragment> : ' · 整条回答'}
+            </div>
+          )}
+          <div className="sheet-actions">
+            <button className="btn-ghost" onClick={() => {
+              upBranch(b.id, x => ({...x, collapsed: !x.collapsed}));
+              setSheet(null);
+            }}>{b.collapsed ? `展开子树（${hiddenDescCount(b.id)}）` : `折叠子树（${n}）`}</button>
+            <button className="btn-primary" onClick={() => { setSheet(null); openBranch(b.id); }}>进入对话</button>
+          </div>
+        </React.Fragment>
+      );
+    }
+    return (
+      <div className="overlay-mask" onClick={close}>
+        <div className="sheet" onClick={e => e.stopPropagation()}>{body}</div>
+      </div>
+    );
+  };
+
+  /* ================= 页面：空状态 / 新主题 ================= */
+  const renderEmpty = (isNewTopic) => (
+    <div className="screen" key={isNewTopic ? 'new' : 'empty'}>
+      {isNewTopic && (
+        <div className="appbar">
+          <button className="icon-btn" onClick={() => setScreen('topics')}><IBack/></button>
+          <div className="appbar-title"><div className="t1">新主题</div></div>
+        </div>
+      )}
+      <div className="empty-wrap">
+        <ISprout size={64}/>
+        <div className="empty-name serif">知芽</div>
+        <div className="empty-tag">让每一次追问，都长成自己的枝干。<br/>从一个问题开始，种下一棵学习树。</div>
+        <svg className="empty-illu" width="220" height="74" viewBox="0 0 220 74" fill="none" stroke="var(--green)" strokeWidth="1.4" strokeLinecap="round" opacity=".55">
+          <path d="M110 66V38"/>
+          <path d="M110 46C110 34 100 30 88 30c0 12 10 16 22 16z" fill="var(--green-soft)"/>
+          <path d="M110 40c0-14 10-20 24-20 0 14-10 20-24 20z" fill="var(--green-soft)"/>
+          <circle cx="52" cy="20" r="7" stroke-dasharray="2 3"/>
+          <circle cx="178" cy="14" r="9" stroke-dasharray="2 3"/>
+          <path d="M59 22c14 2 26 8 34 16M169 18c-14 4-26 10-36 20" stroke-dasharray="2 4"/>
+        </svg>
+        <div className="root-input-card">
+          <textarea placeholder="输入你的根问题，例如：帮我系统理解Transformer的注意力机制"
+            value={rootDraft} onChange={e => setRootDraft(e.target.value)}/>
+          <div className="foot">
+            {keyStatus !== 'ok' ? (
+              <div className="key-hint" onClick={() => setScreen('settings')}>
+                <IKey size={13}/>{keyStatus === 'none' ? '未配置 Key' : 'Key 无效'}
+              </div>
+            ) : <span style={{fontSize:11,color:'var(--ink3)'}}>DeepSeek 已就绪</span>}
+            <button className="send-fab" disabled={!rootDraft.trim()} onClick={sendRoot}><ISend size={18}/></button>
+          </div>
+        </div>
+        {!isNewTopic && (
+          <button className="demo-link" onClick={() => { setData(buildDemo()); setScreen('topics'); toast('已载入示例主题'); }}>
+            先逛逛示例主题 →
+          </button>
+        )}
+      </div>
+    </div>
+  );
+
+  /* ================= 页面：主题列表 ================= */
+  const renderTopics = () => {
+    const archivedCount = Object.values(branches).filter(b => b.archived && !branches[b.parentId]?.archived).length;
+    return (
+      <div className="screen" key="topics">
+        <div className="appbar" style={{borderBottom:'none',paddingTop:14}}>
+          <div style={{display:'flex',alignItems:'center',gap:8,flex:1}}>
+            <ISprout size={26}/>
+            <span className="serif" style={{fontSize:21,fontWeight:700}}>知芽</span>
+          </div>
+          <button className="icon-btn" onClick={() => { setSearchQ(''); setScreen('search'); }}><ISearch/></button>
+          <button className="icon-btn" onClick={() => setScreen('archived')}>
+            <IBox/>
+            {archivedCount > 0 && <span style={{position:'absolute',top:2,right:2,fontSize:9,background:'var(--ink3)',color:'#fff',borderRadius:99,padding:'1px 4px'}}>{archivedCount}</span>}
+          </button>
+          <button className="icon-btn" onClick={() => setScreen('settings')}><IGear/></button>
+        </div>
+        <div className="body-scroll">
+          <div style={{padding:'2px 18px 12px',fontSize:12,color:'var(--ink3)'}}>主题以根分支标题命名 · 全部数据仅保存在本机</div>
+          <div className="topic-list">
+            {data.topicOrder.map((tid, i) => {
+              const t = data.topics[tid];
+              const root = branches[t.rootId];
+              if (!root) return null;
+              const n = descendants(t.rootId).length;
+              const unread = anyUnreadInTopic(tid);
+              return (
+                <div className="topic-card" key={tid} style={{animationDelay:(i*0.06)+'s'}} onClick={() => openTopic(tid)}>
+                  <div className="tc-top">
+                    {unread && <span className="udot" style={{marginTop:7}}/>}
+                    <div className="tc-title serif">{root.title}</div>
+                    <button className="icon-btn" style={{width:30,height:30,flexShrink:0}} onClick={(e) => {
+                      e.stopPropagation();
+                      const r = e.currentTarget.getBoundingClientRect();
+                      const host = document.getElementById('phone-content').getBoundingClientRect();
+                      setCtxMenu({x: r.left - host.left - 130, y: r.bottom - host.top + 4, items:[
+                        {icon:<IPencil size={15}/>, label:'修改根标题', onClick: () => setSheet({type:'rename', payload:{id: root.id}})},
+                        {icon:<IRefresh size={15}/>, label:'AI 刷新根标题', onClick: () => refreshTitle(root.id)},
+                        {icon:<ITrash size={15}/>, label:'永久删除主题', danger:true, onClick: () => deleteTopic(tid)},
+                      ]});
+                    }}><IMore/></button>
+                  </div>
+                  <div className="tc-sum">{root.summary}</div>
+                  <div className="tc-meta">
+                    <span style={{display:'inline-flex',alignItems:'center',gap:4}}><ITree size={12}/>{n + 1} 个分支</span>
+                    <span>{t.time}</span>
+                    {root.isTempTitle && <span className="chip-type">临时标题</span>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <button className="fab-new" onClick={() => { setRootDraft(''); setScreen('newTopic'); }}><IPlus size={16}/>新主题</button>
+      </div>
+    );
+  };
+
+  /* ================= 页面：对话阅读（核心） ================= */
+  const ChatScreen = () => {
+    const b = branches[currentBranchId];
+    const scrollRef = useRef(null);
+
+    useEffect(() => {
+      viewRef.current = {screen:'chat', branchId: currentBranchId, atBottom: viewRef.current.atBottom};
+      const el = scrollRef.current;
+      if (el){
+        requestAnimationFrame(() => {
+          const flash = flashRef.current;
+          if (flash){
+            const msgEl = document.getElementById('m-' + flash.msgId);
+            if (msgEl){
+              let target = msgEl;
+              if (flash.anchorText){
+                const sp = msgEl.querySelector('[data-anchor]');
+                if (sp) target = sp;
+              }
+              el.scrollTop = Math.max(0, target.offsetTop - 140);
+              target.classList && target.classList.add(flash.anchorText ? 'flash' : 'flash-target');
+              setTimeout(() => target.classList && target.classList.remove('flash','flash-target'), 1900);
+            }
+            flashRef.current = null;
+          } else {
+            const saved = scrollPos.current[currentBranchId];
+            el.scrollTop = saved != null ? saved : el.scrollHeight;
+          }
+          // 短内容直接在底部 → 即满足「最新回答进入可视区域」
+          const atB = el.scrollTop + el.clientHeight >= el.scrollHeight - 60;
+          viewRef.current.atBottom = atB;
+          if (atB && b && b.unread) upBranch(b.id, x => ({...x, unread:false}));
+        });
+      }
+      return () => {
+        if (el) scrollPos.current[currentBranchId] = el.scrollTop;
+      };
+    }, [currentBranchId]);
+
+    if (!b) return null;
+    const topic = topicOf(b.id);
+    const root = branches[topic.rootId];
+    const isRoot = b.parentId === null;
+    const topicUnread = anyUnreadInTopic(topic.id);
+
+    const onScroll = (e) => {
+      const el = e.currentTarget;
+      const atB = el.scrollTop + el.clientHeight >= el.scrollHeight - 60;
+      viewRef.current.atBottom = atB;
+      if (atB && b.unread) upBranch(b.id, x => ({...x, unread:false}));
+    };
+
+    const renderMsgText = (m) => {
+      const anchors = m.anchors || [];
+      if (!anchors.length || m.status !== 'stable') return <span>{m.text}</span>;
+      // 按锚点拆分渲染可划词片段
+      let parts = [{text: m.text, isAnchor: false}];
+      anchors.forEach(a => {
+        const next = [];
+        parts.forEach(p => {
+          if (p.isAnchor || !p.text.includes(a)){ next.push(p); return; }
+          const idx = p.text.indexOf(a);
+          if (idx > 0) next.push({text: p.text.slice(0, idx), isAnchor:false});
+          next.push({text: a, isAnchor:true});
+          if (idx + a.length < p.text.length) next.push({text: p.text.slice(idx + a.length), isAnchor:false});
+        });
+        parts = next;
+      });
+      return parts.map((p, i) => p.isAnchor
+        ? <span key={i} className="anchor-span" data-anchor={p.text} onClick={(e) => anchorClick(e, m, b.id)}>{p.text}</span>
+        : <span key={i}>{p.text}</span>);
+    };
+
+    return (
+      <div className="screen" key={b.id}>
+        <div className="appbar">
+          <button className="icon-btn" onClick={() => { setPendingFork(null); isRoot ? setScreen('topics') : openBranch(b.parentId); }}><IBack/></button>
+          <div className="appbar-title">
+            {!isRoot && <div className="t2">{root.title} /</div>}
+            <div className="t1" style={{display:'flex',alignItems:'center',gap:6}}>
+              {b.unread && <span className="udot"/>}{b.title}
+              {b.isTempTitle && <span className="chip-type">临时标题</span>}
+            </div>
+          </div>
+          <button className="icon-btn" onClick={() => setScreen('nav')}>
+            <ITree/>{topicUnread && <span className="mini-dot"/>}
+          </button>
+          <button className="icon-btn" onClick={() => setScreen('canvas')}><IMap/></button>
+        </div>
+
+        {b.source && (
+          <div className="source-banner" onClick={() => {
+            const src = b.source;
+            if (branches[src.branchId]) openBranch(src.branchId, {flash:{msgId: src.msgId, anchorText: src.anchorText}});
+          }}>
+            <IBack size={14}/>
+            <span style={{fontWeight:600,flexShrink:0}}>来源</span>
+            <span className="q">{branches[b.source.branchId] ? branches[b.source.branchId].title : ''}{b.source.anchorText ? ` · 「${b.source.anchorText}」` : ' · 整条回答'}</span>
+          </div>
+        )}
+        {b.archived && (
+          <div className="arch-banner"><IBox size={14}/>该分支位于已归档子树中，可正常阅读；恢复请前往「已归档」。</div>
+        )}
+
+        <div className="body-scroll" id="chat-scroll" ref={scrollRef} onScroll={onScroll}>
+          <div className="msg-flow">
+            {b.messages.map(m => m.role === 'user' ? (
+              <div key={m.id} className="msg-user">{m.text}</div>
+            ) : (
+              <div key={m.id} className="msg-ai" id={'m-' + m.id}>
+                <div className="ai-tag"><ISpark/>知芽 · DeepSeek</div>
+                <div>
+                  {m.anchors && m.status === 'stable' ? renderMsgText(m) : (
+                    <span>
+                      {m.text}
+                      {m.status === 'generating' && <span className="typing-cursor"/>}
+                    </span>
+                  )}
+                  {/* 部分回答上的锚点同样可点，但会解释为何不可分叉（评审点①） */}
+                  {m.status !== 'stable' && m.anchors == null && null}
+                </div>
+                {m.status === 'generating' && (
+                  <div className="gen-note">
+                    <span className="gen-dots"><i/><i/><i/></span>正在生成 · 完成后才能从这条回答分叉
+                  </div>
+                )}
+                {m.status === 'failed' && (
+                  <div className="fail-bar">
+                    生成中断，以上为部分回答——可以阅读，但不能作为新分支的来源。
+                    <div className="row">
+                      <span style={{color:'var(--ink3)',fontSize:11}}>重试不会重复创建消息或分支</span>
+                      <button className="retry-btn" onClick={() => retryMsg(b.id, m)}>原位重试</button>
+                    </div>
+                  </div>
+                )}
+                {m.status === 'stable' && (
+                  <React.Fragment>
+                    <div className="msg-actions">
+                      <button className="fork-btn" onClick={() => startFork(m.id, null)}>
+                        <IFork size={14}/>作为来源新建分支
+                      </button>
+                      <span style={{fontSize:10.5,color:'var(--ink3)'}}>选中带下划线的文字也可分叉</span>
+                    </div>
+                    {m.suggestions && m.suggestions.length > 0 && (
+                      <div className="sugg-block">
+                        <div className="sugg-label"><ISpark size={11}/>结合本主题树轮廓推荐 · 不污染当前回答上下文</div>
+                        {m.suggestions.map((s, i) => (
+                          <div key={i} className="sugg-chip" style={{animationDelay:(i*0.05)+'s'}}>
+                            <span className="txt" onClick={() => { setComposerDraft(s); setPendingFork(null); }}>{s}</span>
+                            <span className="fork-ic" title="以此推荐新建分支" onClick={(e) => { e.stopPropagation(); startFork(m.id, null, s); }}><IFork size={14}/></span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </React.Fragment>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {b.unread && <div className="newmsg-pill" onClick={() => {
+          const el = document.getElementById('chat-scroll');
+          if (el) el.scrollTop = el.scrollHeight;
+        }}>↓ 有未读回答，点击查看</div>}
+
+        <div className="composer">
+          {pendingFork && (
+            <div className="pending-fork-card">
+              <div className="pf-top">
+                <span style={{display:'flex',alignItems:'center',gap:5}}><IFork size={13}/>新分支 · 来源已固定</span>
+                <button onClick={() => { setPendingFork(null); setComposerDraft(''); }} style={{color:'var(--ink3)'}}><IClose size={14}/></button>
+              </div>
+              <div className="pf-q">{pendingFork.anchorText ? `「${pendingFork.anchorText}」` : '整条回答'} · {branches[pendingFork.parentId] ? branches[pendingFork.parentId].title : ''}</div>
+            </div>
+          )}
+          <div className="inner">
+            <textarea rows={1} placeholder={pendingFork ? '就来源内容提出本分支的第一个问题…' : '在当前分支继续追问…'}
+              value={composerDraft}
+              onChange={e => { setComposerDraft(e.target.value); e.target.style.height='auto'; e.target.style.height=Math.min(e.target.scrollHeight,96)+'px'; }}
+              onKeyDown={e => { if (e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendChat(); } }}/>
+            <button className="send-fab" disabled={!composerDraft.trim()} onClick={sendChat}><ISend size={18}/></button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  /* ================= 页面：逐层导航 ================= */
+  const renderNav = () => {
+    const b = branches[currentBranchId];
+    if (!b) return null;
+    const ancestors = ancestorsOf(b.id);
+    const kids = visibleChildren(b)
+      .map(id => branches[id])
+      .sort((x, y) => (lastVisit.current[y.id] || 0) - (lastVisit.current[x.id] || 0));
+    const recent = kids.slice(0, 3);
+    const more = kids.slice(3);
+    const isRoot = b.parentId === null;
+    const archivedHere = kids.length !== b.children.length ? b.children.filter(c => branches[c] && branches[c].archived) : [];
+    const [showMore, setShowMore] = [navMoreOpen, setNavMoreOpen];
+    const row = (k, i) => (
+      <div className="branch-row" key={k.id} style={{animationDelay:(i*0.04)+'s'}} onClick={() => openBranch(k.id)}>
+        {k.unread && <span className="udot"/>}
+        <div className="br-main">
+          <div className="br-title">{k.title}{k.isTempTitle && <span className="chip-type">临时</span>}</div>
+          <div className="br-sum">{k.summary}</div>
+        </div>
+        <div className="br-meta">
+          {visibleChildren(k).length > 0 && <span>{visibleChildren(k).length} 子分支</span>}
+          <button className="icon-btn" style={{width:28,height:28}} onClick={(e) => {
+            e.stopPropagation();
+            const r = e.currentTarget.getBoundingClientRect();
+            const host = document.getElementById('phone-content').getBoundingClientRect();
+            setCtxMenu({x: r.left - host.left - 140, y: r.bottom - host.top + 4, items:[
+              {icon:<IPencil size={15}/>, label:'修改标题', onClick: () => setSheet({type:'rename', payload:{id:k.id}})},
+              {icon:<IRefresh size={15}/>, label:'AI 刷新标题', onClick: () => refreshTitle(k.id)},
+              {icon:<IBox size={15}/>, label:'归档此子树', onClick: () => archiveBranch(k.id)},
+              {icon:<ITrash size={15}/>, label:'永久删除子树', danger:true, onClick: () => deleteSubtree(k.id)},
+            ]});
+          }}><IMore size={16}/></button>
+          <IChevR/>
+        </div>
+      </div>
+    );
+    return (
+      <div className="screen" key="nav">
+        <div className="appbar">
+          <button className="icon-btn" onClick={() => setScreen('chat')}><IBack/></button>
+          <div className="appbar-title"><div className="t1">分支导航</div><div className="t2">逐层定位 · 深层不靠缩进</div></div>
+          <button className="icon-btn" onClick={() => { setSearchQ(''); setScreen('search'); }}><ISearch/></button>
+          <button className="icon-btn" onClick={() => setScreen('canvas')}><IMap/></button>
+        </div>
+        <div className="body-scroll">
+          <div className="nav-section">祖先路径</div>
+          <div className="crumbs">
+            {ancestors.length === 0 && <span style={{fontSize:12,color:'var(--ink3)'}}>当前位于根分支，即主题本身</span>}
+            {ancestors.map((a, i) => (
+              <React.Fragment key={a.id}>
+                {i > 0 && <span className="crumb-sep">›</span>}
+                <span className="crumb" onClick={() => openBranch(a.id)}>{a.parentId === null ? '根 · ' : ''}{a.title}</span>
+              </React.Fragment>
+            ))}
+          </div>
+          <div className="nav-section">当前分支</div>
+          <div className="nav-current">
+            <div className="nc-title">
+              {b.unread && <span className="udot" style={{marginTop:7}}/>}
+              <span style={{flex:1}}>{b.title}</span>
+              <button className="icon-btn" style={{width:30,height:30,flexShrink:0}} onClick={(e) => {
+                const r = e.currentTarget.getBoundingClientRect();
+                const host = document.getElementById('phone-content').getBoundingClientRect();
+                const items = [
+                  {icon:<IPencil size={15}/>, label:'修改标题', onClick: () => setSheet({type:'rename', payload:{id:b.id}})},
+                  {icon:<IRefresh size={15}/>, label:'AI 刷新标题', onClick: () => refreshTitle(b.id)},
+                ];
+                if (!isRoot){
+                  items.push({icon:<IBox size={15}/>, label:'归档此子树', onClick: () => archiveBranch(b.id)});
+                  items.push({icon:<ITrash size={15}/>, label:'永久删除子树', danger:true, onClick: () => deleteSubtree(b.id)});
+                }
+                // BASE-14：根分支不提供任何归档能力
+                setCtxMenu({x: r.left - host.left - 140, y: r.bottom - host.top + 4, items});
+              }}><IMore/></button>
+            </div>
+            <div className="nc-sum">{b.summary}</div>
+            <div className="nc-meta">
+              {isRoot && <span className="chip-type">根分支 · 不可归档</span>}
+              <span>{kids.length} 个直接子分支</span>
+              {b.isTempTitle && <span className="chip-type">临时标题</span>}
+            </div>
+          </div>
+          <div className="nav-section">直接子分支 · {kids.length}</div>
+          {kids.length === 0 && <div style={{padding:'6px 18px',fontSize:12.5,color:'var(--ink3)'}}>还没有子分支。回到对话，从稳定回答划词或整条分叉。</div>}
+          {recent.map((k, i) => row(k, i))}
+          {more.length > 0 && !showMore && (
+            <div className="more-row" onClick={() => setNavMoreOpen(true)}>更多分支（{more.length}）· 按最近使用排序</div>
+          )}
+          {showMore && more.map((k, i) => row(k, i + 3))}
+          {kids.length > 3 && (
+            <div className="more-row" onClick={() => { setSearchQ(''); setScreen('search'); }} style={{borderStyle:'solid'}}>
+              <ISearch size={13}/> 在全部分支中搜索
+            </div>
+          )}
+          <div className="nav-footer-link" onClick={() => setScreen('archived')}>
+            <IBox size={14}/>查看已归档子树{archivedHere.length > 0 ? `（本主题 ${archivedHere.length} 棵）` : ''}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  /* ================= 页面：总览画布 ================= */
+  const [cvZoom, setCvZoom] = useState(1);
+  const [cvPan, setCvPan] = useState({x: 30, y: 30});
+  const [navMoreOpen, setNavMoreOpen] = useState(false);
+  const dragRef = useRef(null);
+
+  const renderCanvas = () => {
+    const b = branches[currentBranchId];
+    if (!b) return null;
+    const topic = topicOf(b.id);
+    const rootId = topic.rootId;
+    // 自动树布局（BASE-11：节点不可自由摆放）
+    const NW = 176, NH = 86, GX = 40, GY = 60;
+    const pos = {}; let leafX = 0;
+    const dfs = (id, depth) => {
+      const br = branches[id];
+      const kids = br.collapsed ? [] : visibleChildren(br);
+      if (!kids.length){ pos[id] = {x: leafX * (NW + GX), y: depth * (NH + GY)}; leafX++; }
+      else {
+        kids.forEach(k => dfs(k, depth + 1));
+        const xs = kids.map(k => pos[k].x);
+        pos[id] = {x: (Math.min(...xs) + Math.max(...xs)) / 2, y: depth * (NH + GY)};
+      }
+      pos[id].kids = kids;
+    };
+    dfs(rootId, 0);
+    const edges = [];
+    Object.keys(pos).forEach(id => pos[id].kids.forEach(k => {
+      const x1 = pos[id].x + NW / 2, y1 = pos[id].y + NH;
+      const x2 = pos[k].x + NW / 2, y2 = pos[k].y;
+      edges.push(<path key={id+'-'+k} d={`M${x1},${y1} C${x1},${y1+26} ${x2},${y2-26} ${x2},${y2}`} stroke="var(--green)" strokeOpacity=".45" strokeWidth="1.6" fill="none"/>);
+    }));
+    const onWheel = (e) => {
+      const k = e.deltaY < 0 ? 1.12 : 0.9;
+      setCvZoom(z => Math.min(1.6, Math.max(0.35, z * k)));
+    };
+    const onPointerDown = (e) => { dragRef.current = {sx: e.clientX, sy: e.clientY, ox: cvPan.x, oy: cvPan.y}; };
+    const onPointerMove = (e) => {
+      if (!dragRef.current) return;
+      setCvPan({x: dragRef.current.ox + e.clientX - dragRef.current.sx, y: dragRef.current.oy + e.clientY - dragRef.current.sy});
+    };
+    const onPointerUp = () => { dragRef.current = null; };
+    const centerOn = (id) => {
+      if (!pos[id]) return;
+      const host = document.getElementById('canvas-host');
+      const w = host ? host.clientWidth : 380, h = host ? host.clientHeight : 600;
+      setCvPan({x: w / 2 - (pos[id].x + NW / 2) * cvZoom, y: h / 2 - (pos[id].y + NH / 2) * cvZoom - 40});
+    };
+    const lowzoom = cvZoom < 0.72; // 缩小时只显示标题（BASE-11）
+    return (
+      <div className="screen" key="canvas">
+        <div className="appbar">
+          <button className="icon-btn" onClick={() => setScreen('chat')}><IBack/></button>
+          <div className="appbar-title"><div className="t1">总览画布</div><div className="t2">{branches[rootId].title}</div></div>
+          <button className="icon-btn" onClick={() => { setSearchQ(''); setScreen('search'); }}><ISearch/></button>
+        </div>
+        <div className="canvas-wrap" id="canvas-host" onWheel={onWheel}
+          onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerLeave={onPointerUp}
+          style={{cursor: dragRef.current ? 'grabbing' : 'grab'}}>
+          <div className="canvas-tools">
+            <button onClick={() => setCvZoom(z => Math.min(1.6, z * 1.18))}>+</button>
+            <button onClick={() => setCvZoom(z => Math.max(0.35, z * 0.85))}>−</button>
+            <button onClick={() => centerOn(currentBranchId)}><ILocate size={17}/></button>
+          </div>
+          <svg width="100%" height="100%" style={{display:'block', touchAction:'none'}}>
+            <g transform={`translate(${cvPan.x},${cvPan.y}) scale(${cvZoom})`}>
+              {edges}
+              {Object.keys(pos).map(id => {
+                const br = branches[id];
+                const kidsAll = visibleChildren(br).length;
+                const hiddenN = br.collapsed ? hiddenDescCount(id) : 0;
+                const aggUnread = br.collapsed ? hiddenUnreadCount(id) : 0;
+                return (
+                  <foreignObject key={id} x={pos[id].x} y={pos[id].y} width={NW} height={NH + 30} style={{overflow:'visible'}}>
+                    <div style={{position:'relative', width:NW, height:NH}}>
+                      <div className={'cv-node' + (id === currentBranchId ? ' current' : '') + (lowzoom ? ' lowzoom' : '')}
+                        onClick={(e) => { e.stopPropagation(); setSheet({type:'nodeDetail', payload:{id}}); }}>
+                        <div className="cv-title" style={{display:'flex',gap:4}}>
+                          {br.unread && <span className="udot" style={{marginTop:3}}/>}
+                          <span style={{flex:1}}>{br.title}</span>
+                        </div>
+                        <div className="cv-sum">{br.summary}</div>
+                        <div className="cv-meta">
+                          {br.parentId === null && <span className="chip-type" style={{fontSize:9,padding:'1px 5px'}}>根</span>}
+                          {kidsAll > 0 && !br.collapsed && <span>{kidsAll} 子分支</span>}
+                          {br.isTempTitle && <span>临时标题</span>}
+                        </div>
+                      </div>
+                      {(kidsAll > 0) && (
+                        <button className="fold-btn" onClick={(e) => { e.stopPropagation(); upBranch(id, x => ({...x, collapsed: !x.collapsed})); }}>
+                          {br.collapsed ? '+' + hiddenN : '−'}
+                        </button>
+                      )}
+                      {br.collapsed && aggUnread > 0 && (
+                        <span className="udot" style={{position:'absolute', top:-4, right:-4, width:10, height:10}}/>
+                      )}
+                    </div>
+                  </foreignObject>
+                );
+              })}
+            </g>
+          </svg>
+          <div style={{position:'absolute',left:12,bottom:12,fontSize:10.5,color:'var(--ink3)',background:'rgba(247,246,240,.85)',padding:'5px 10px',borderRadius:99,border:'1px solid var(--line)'}}>
+            拖动平移 · 滚轮缩放 · 已归档子树默认隐藏
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  /* ================= 页面：搜索 ================= */
+  const renderSearch = () => {
+    const results = searchAll(searchQ);
+    return (
+      <div className="screen" key="search">
+        <div className="appbar">
+          <button className="icon-btn" onClick={() => setScreen(data.topicOrder.length ? 'topics' : 'empty')}><IBack/></button>
+          <div className="appbar-title"><div className="t1">搜索</div></div>
+        </div>
+        <div className="search-bar">
+          <ISearch size={16}/>
+          <input autoFocus placeholder="标题、问题、回答、锚定原文…" value={searchQ} onChange={e => setSearchQ(e.target.value)}/>
+          {searchQ && <button onClick={() => setSearchQ('')} style={{color:'var(--ink3)'}}><IClose size={15}/></button>}
+        </div>
+        <div className="search-scope">覆盖全部分支与已归档子树 · 结果显示祖先路径与归档状态</div>
+        <div className="body-scroll" style={{paddingBottom:30}}>
+          {searchQ && results.length === 0 && <div style={{padding:'30px 18px',fontSize:13,color:'var(--ink3)',textAlign:'center'}}>没有找到「{searchQ}」</div>}
+          {!searchQ && <div style={{padding:'30px 18px',fontSize:13,color:'var(--ink3)',textAlign:'center'}}>输入关键词开始搜索</div>}
+          {results.map((r, i) => {
+            const br = branches[r.bid];
+            return (
+              <div className="result-card" key={i} style={{animationDelay:(i*0.03)+'s'}} onClick={() => {
+                if (br.archived) setSheet({type:'archSearchHit', payload:{id: r.bid}});
+                else openBranch(r.bid);
+              }}>
+                <div className="r-path">
+                  {r.path.map((p, j) => <span key={j}>{j > 0 ? ' › ' : ''}{p}</span>)}
+                  {r.archived && <span className="chip-arch">已归档</span>}
+                  <span className="chip-type">{r.type}</span>
+                </div>
+                <div className="r-title">{br.unread && <span className="udot"/>}{br.title}</div>
+                <div className="r-snip">{r.snip}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  /* ================= 页面：已归档 ================= */
+  const renderArchived = () => {
+    const roots = Object.values(branches).filter(b => b.archived && !(b.parentId && branches[b.parentId] && branches[b.parentId].archived));
+    return (
+      <div className="screen" key="archived">
+        <div className="appbar">
+          <button className="icon-btn" onClick={() => setScreen(data.topicOrder.length ? 'topics' : 'empty')}><IBack/></button>
+          <div className="appbar-title"><div className="t1">已归档</div><div className="t2">仅非根子树可归档 · 整体恢复，不重接后代</div></div>
+        </div>
+        <div className="body-scroll" style={{paddingBottom:30}}>
+          {roots.length === 0 && (
+            <div style={{padding:'50px 24px',textAlign:'center',color:'var(--ink3)',fontSize:13,lineHeight:2}}>
+              <IBox size={30}/><br/>暂无已归档子树<br/>
+              <span style={{fontSize:11.5}}>在分支导航中对非根分支选择「归档此子树」试试</span>
+            </div>
+          )}
+          {roots.map((b, i) => {
+            const n = descendants(b.id).length;
+            const parent = b.parentId && branches[b.parentId];
+            return (
+              <div className="arch-row" key={b.id} style={{animationDelay:(i*0.05)+'s'}}>
+                <div className="a-title"><IBox size={15}/>{b.title}</div>
+                <div className="a-meta">含 {n} 个后代 · 来源：{parent ? parent.title : '—'}</div>
+                <div className="a-actions">
+                  <button className="btn-ghost" onClick={() => setSheet({type:'archDetail', payload:{id: b.id}})}>查看详情</button>
+                  <button className="btn-primary" style={{padding:'8px',fontSize:12.5}} onClick={() => restoreSubtree(b.id)}>恢复整棵子树</button>
+                  <button className="btn-danger" style={{flex:'0 0 44px',padding:'8px 0'}} onClick={() => deleteSubtree(b.id)}><ITrash size={15}/></button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  /* ================= 页面：设置 / Key ================= */
+  const renderSettings = () => {
+    const masked = {ok:'sk-••••••••••3f2a', invalid:'sk-••••••••••0x9e'};
+    return (
+      <div className="screen" key="settings">
+        <div className="appbar">
+          <button className="icon-btn" onClick={() => setScreen(data.topicOrder.length ? 'topics' : 'empty')}><IBack/></button>
+          <div className="appbar-title"><div className="t1">设置</div></div>
+        </div>
+        <div className="body-scroll" style={{paddingBottom:30}}>
+          <div className="set-section">
+            <div className="set-label">DEEPSEEK API KEY</div>
+            <div className="set-card">
+              <div className="set-row">
+                <div className="sr-main">
+                  <div className="sr-title" style={{display:'flex',alignItems:'center',gap:8}}>
+                    <IKey size={15}/>
+                    {keyStatus === 'ok' && <React.Fragment><span>{masked.ok}</span><span className="key-ok">可用</span></React.Fragment>}
+                    {keyStatus === 'invalid' && <React.Fragment><span>{masked.invalid}</span><span className="key-bad">无效 / 额度不足</span></React.Fragment>}
+                    {keyStatus === 'none' && <React.Fragment><span style={{color:'var(--ink3)'}}>未配置</span><span className="key-none">发送将被阻止</span></React.Fragment>}
+                  </div>
+                  <div className="sr-sub">Key 仅保存在本机，掩码展示，可随时替换或删除。</div>
+                </div>
+              </div>
+              <div className="key-input-row">
+                <input id="key-input" placeholder="粘贴新的 DeepSeek API Key"/>
+                <button className="btn-primary" style={{padding:'9px 14px',fontSize:12.5}} onClick={() => {
+                  const v = document.getElementById('key-input').value.trim();
+                  if (!v){ toast('请先输入 Key'); return; }
+                  setKeyStatus('ok');
+                  toast('Key 已配置，可返回继续发送');
+                }}>保存</button>
+              </div>
+              <div style={{display:'flex',gap:8,marginTop:10,flexWrap:'wrap'}}>
+                <button className="btn-ghost" style={{padding:'7px 12px',fontSize:12}} onClick={() => { setKeyStatus('ok'); toast('已填入演示 Key（可用状态）'); }}>使用演示 Key</button>
+                <button className="btn-ghost" style={{padding:'7px 12px',fontSize:12}} onClick={() => { setKeyStatus('invalid'); toast('已切换为无效 Key（演示拦截）'); }}>模拟无效 Key</button>
+                {keyStatus !== 'none' && <button className="btn-danger" style={{padding:'7px 12px',fontSize:12}} onClick={() => { setKeyStatus('none'); toast('Key 已删除'); }}>删除 Key</button>}
+              </div>
+            </div>
+          </div>
+          <div className="set-section">
+            <div className="set-label">数据边界</div>
+            <div className="set-note">
+              全部主题、分支、消息、快照、标题、摘要、未读与阅读位置<b>仅保存在本机</b>；无登录、云同步、共享或备份。卸载或清除应用数据后不可恢复。<br/><br/>
+              调用 DeepSeek 完成生成时，完成该次生成所需的内容会交由外部 AI 服务处理——本产品不宣称全程离线。<span style={{color:'var(--ink3)'}}>（具体数据处理告知将于发布前依据官方条款核定 · TBD-01）</span>
+            </div>
+          </div>
+          <div className="set-section">
+            <div className="set-label">演示数据</div>
+            <div className="set-card" style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+              <button className="btn-ghost" onClick={() => { setData(buildDemo()); setScreen('topics'); toast('已载入示例主题'); }}>载入示例主题</button>
+              <button className="btn-ghost" onClick={() => { setData({topicOrder:[], topics:{}, branches:{}}); setScreen('empty'); toast('已重置为空白状态'); }}>重置为空白</button>
+            </div>
+          </div>
+          <div style={{padding:'26px 18px',textAlign:'center',fontSize:11,color:'var(--ink3)',lineHeight:1.9}}>
+            知芽（TreeLearn） · 高保真交互原型 v1<br/>依据 V3.0 冻结需求基准 · BASE-05 ~ BASE-19
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  /* ================= 路由 ================= */
+  let current = null;
+  if (screen === 'empty') current = renderEmpty(false);
+  else if (screen === 'newTopic') current = renderEmpty(true);
+  else if (screen === 'topics') current = renderTopics();
+  else if (screen === 'chat') current = <ChatScreen/>;
+  else if (screen === 'nav') current = renderNav();
+  else if (screen === 'canvas') current = renderCanvas();
+  else if (screen === 'search') current = renderSearch();
+  else if (screen === 'archived') current = renderArchived();
+  else if (screen === 'settings') current = renderSettings();
+
+  return (
+    <div id="phone-content" style={{position:'absolute', inset:0, overflow:'hidden'}}
+      onClick={() => { if (bubble) setBubble(null); }}>
+      {current}
+      {renderBubble()}
+      {renderCtxMenu()}
+      {renderSheet()}
+      {renderConfirm()}
+      {renderToast()}
+    </div>
+  );
+}
+
+/* ================= 舞台与引导 ================= */
+function App(){
+  return (
+    <div className="stage">
+      <div className="guide">
+        <div className="guide-brand"><ISprout size={34}/><span className="guide-name">知芽</span></div>
+        <div className="guide-sub">TreeLearn · 树状分支学习 · 高保真交互原型 v1</div>
+        <h3>验收走查路径</h3>
+        <ol className="guide-steps">
+          <li><b>空状态发送根问题</b> → 未配置 Key 被阻止，输入保留；去配置后回来继续（BASE-05/18）</li>
+          <li><b>发送成功</b> → 主题与根分支同时形成，临时标题 → AI 正式命名一次（BASE-06）</li>
+          <li>阅读页点击<b>虚线下划线文字</b> → 划词分叉；底部「作为来源新建分支」整条分叉（BASE-07）</li>
+          <li>推荐问题：点文字=当前分支追问，点右侧 <b>⑂</b>=新建分支（BASE-16）</li>
+          <li>「多头相比单头的收益」分支：<b>部分回答</b>不可分叉 + 原位重试（BASE-15）</li>
+          <li>逐层导航：祖先路径 / 最近使用 / 更多 / 搜索；对非根分支<b>归档整树</b>（BASE-10/14）</li>
+          <li>总览画布：平移缩放、折叠子树、节点详情、回到当前（BASE-11）</li>
+          <li>已归档：<b>查看详情</b> 与 <b>恢复整树</b> 是两个动作（评审要求）</li>
+          <li>未读蓝点：离开生成中的分支 → 完成后出现蓝点；进入并看到最新回答后清除（BASE-13）</li>
+        </ol>
+        <h3>图例</h3>
+        <div className="legend">
+          <span className="k"><span className="dot"/>未读回答</span>
+          <span className="k"><span className="anchor-sample">虚线下划线</span>可划词分叉</span>
+          <span className="k"><span className="fork-sample">⑂</span>分叉入口</span>
+        </div>
+      </div>
+      <AndroidFrame>
+        <AppPhone/>
+      </AndroidFrame>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App/>);
+</script>
+</body>
+</html>

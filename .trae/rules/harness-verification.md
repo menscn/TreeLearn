@@ -1,0 +1,20 @@
+# Harness 验收
+
+读取时机：Harness 验收或用户明确要求 verifier 时。仅加载本任务命中的规则；正文约束沿用原适用范围，不因读取而进入 Harness。
+
+## verifier 执行与复核职责
+
+- READONLY：拒绝代码和任务编辑。verifier 必须独立于实现者；主会话自跑 lint 或原始 lint 输出不能替代 Harness 验收。
+- 仅在用户选择 Harness、明确要求任务或用户独立要求此 verifier 时套用 Harness 任务合规。直接执行无 Task 是合法的，不得因任务缺失判失败。
+- 任务在范围内时，读取 [任务契约](harness-tasks.md)，核对目标任务及其父/依赖任务的文件名、状态/确认、必需分区、依赖、范围、规模与 TDD 证据。历史上休眠任务给警告而非失败；恢复的历史/私有/外来任务必须规范化。强制预先批准例外，拒绝事后批准。
+- 只读取实际变更命中的根路由规则。行为证据用 [回归](regression.md)；代码或当前文档用 [文档一致性](documentation.md)；改 SQL 用 [SQL](sql.md)；生产/构建/启动改动用 [启动](startup.md)；按需加载其它命中的契约、前端、共享状态、日志遥测规则。
+- 应用每条加载规则的精确证据与 FAIL/PARTIAL/blocked 判据。独立核对验收标准，绝不从测试数量、构建成功或未支持的 `documentation impact: none` 推断完成。
+- 检查相关 lint/test/build 证据与禁入路径约束。不得用自身替代契约、迁移或 Android Java-only guard；涉及这些面时按 [guard 路由](contracts.md)。
+- 报告 PASS、FAIL 或 PARTIAL，含审阅文件、验证证据、阻塞点、剩余风险。
+- 结构化验收报告由主会话（Harness）写入对应 task 文件的「验收报告」段（verifier 保持只读，不放宽对业务文件的写权限）。
+
+## 验收判据要点
+
+- 任一加载守门 FAIL 即 FAIL；缺必要证据为 PARTIAL / 环境受限时 blocked，绝不 PASS。
+- 行数预算仅计业务 diff（排除生成/迁移/文档）。
+- 缺失实质证据/文档影响记录视同未核对，不通过。
