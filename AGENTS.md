@@ -51,7 +51,8 @@
 | Harness 验收，或用户明确要求 verifier | [验收](.trae/rules/harness-verification.md) | 验收前，叠加本次变更命中的专项规则 |
 
 ## 工具与参考
-- 项目技能：`.trae/skills/*/SKILL.md`。仅加载实际使用的技能。
+- 项目 agent（派 subagent 时的角色提示词）：`.trae/agents/*.md`；项目技能：`.trae/skills/*/SKILL.md`。仅加载实际使用的角色或技能。
+- 任务文件机械校验：`.trae/scripts/validate_tasks.py`（Task v2 契约校验，verifier 与提交前可跑）。
 - [排除说明](.trae/rules/EXCLUDED.md)：列出从 knowledge_space 迁移时明确排除的规则（HClaw、CSPfix 归档等）及理由。
 
 ## 失败案例库（不要再犯）
