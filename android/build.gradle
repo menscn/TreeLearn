@@ -1,0 +1,121 @@
+// Treelearn Android root build script.
+//
+// Toolchain: Gradle 8.14.3 + AGP 8.13.2 + Java 17 bytecode.
+// Java-only contract: no Kotlin plugin may be declared or applied anywhere.
+// AGP 9.x is intentionally NOT used because it bundles built-in Kotlin support,
+// which conflicts with the Java-only guard for this project.
+
+plugins {
+    id 'com.android.application' version '8.13.2' apply false
+    id 'com.android.library' version '8.13.2' apply false
+}
+
+// Java-only dependency verification (coordinate + bytecode level).
+// See gradle/verify-no-kotlin.gradle for why a clean POM is not proof.
+apply from: 'gradle/verify-no-kotlin.gradle'
+
+// ---------------------------------------------------------------------------
+// Module dependency direction (water flows downward).
+//
+//   :app          -> :core :data :ai :tree-layout
+//   :data  :ai    -> :core
+//   :core         -> (nothing; pure JVM, no Android at all)
+//   :tree-layout  -> (nothing; pure JVM, no Android at all)
+// ---------------------------------------------------------------------------
+def moduleDependencyRules = [
+        ':core'       : [],
+        ':tree-layout': [],
+        ':data'       : [':core'],
+        ':ai'         : [':core'],
+        ':app'        : [':core', ':data', ':ai', ':tree-layout'],
+]
+
+// Modules that must stay free of the Android platform.
+def pureJvmModules = [':core', ':tree-layout']
+
+// Every configuration that can carry a project dependency. Checking only
+// implementation/api misses `compileOnly project(':app')`, which is just as much
+// an upward dependency.
+def dependencyBearingConfigurations = [
+        'implementation', 'api', 'compileOnly', 'compileOnlyApi', 'runtimeOnly',
+        'annotationProcessor', 'testImplementation', 'testCompileOnly', 'testRuntimeOnly',
+        'androidTestImplementation', 'androidTestCompileOnly', 'androidTestRuntimeOnly',
+]
+
+// android.* package names, so that a fully-qualified use is caught even when the
+// file has no `import android.…` line.
+def androidPackageRe = /\bandroid\.(util|content|app|os|view|graphics|widget|database|text|net|media|prefs|provider|webkit|hardware|opengl|animation|gesture|security|location|telephony|accessibility|accounts|bluetooth|nfc|speech)\./
+
+tasks.register('verifyDependencyDirection') {
+    group = 'verification'
+    description = 'Fails when a module depends upward in the Treelearn dependency chain, ' +
+            'or when a pure-JVM module touches the Android platform.'
+
+    doLast {
+        def problems = []
+        def purityVacuousModules = []
+
+        moduleDependencyRules.each { String modulePath, List<String> allowed ->
+            def moduleProject = project(modulePath)
+            if (moduleProject == null) {
+                problems.add("declared module ${modulePath} does not exist")
+                return
+            }
+            moduleProject.configurations
+                    .findAll { dependencyBearingConfigurations.contains(it.name) }
+                    .each { cfg ->
+                        cfg.dependencies.withType(org.gradle.api.artifacts.ProjectDependency).each { dep ->
+                            if (!allowed.contains(dep.path)) {
+                                problems.add("${modulePath} (${cfg.name}) -> ${dep.path} ; allowed = ${allowed}")
+                            }
+                        }
+                    }
+        }
+
+        pureJvmModules.each { String modulePath ->
+            def moduleProject = project(modulePath)
+            if (moduleProject == null) {
+                return
+            }
+            def javaTree = moduleProject.fileTree('src/main/java') { include '**/*.java' }
+            if (javaTree.isEmpty()) {
+                // T-002 ships an empty skeleton; T-003 (:core) and T-016
+                // (:tree-layout) fill these modules. Surfaced loudly instead of
+                // silently reporting PASS on a vacuous check.
+                println "verifyDependencyDirection: WARNING ${modulePath} has no src/main/java sources yet, " +
+                        "so its purity contract is vacuous until T-003 / T-016 land code"
+                purityVacuousModules.add(modulePath)
+                return
+            }
+            javaTree.each { f ->
+                f.readLines().eachWithIndex { line, idx ->
+                    def trimmed = line.trim()
+                    if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*')) {
+                        return
+                    }
+                    if (trimmed.contains('import android.') || trimmed.contains('import androidx.')) {
+                        problems.add("${modulePath} purity: ${f.name}:${idx + 1} imports the Android platform: ${trimmed}")
+                    }
+                    else if (trimmed ==~ /.*androidx\..*/ || trimmed ==~ /.*${androidPackageRe}.*/) {
+                        problems.add("${modulePath} purity: ${f.name}:${idx + 1} references the Android platform: ${trimmed}")
+                    }
+                }
+            }
+        }
+
+        if (!problems.isEmpty()) {
+            throw new GradleException('Dependency direction / purity violation:\n  ' + problems.join('\n  '))
+        }
+        def vacuousNote = purityVacuousModules.isEmpty() ? '' :
+                " ; purity NOT yet enforced for ${purityVacuousModules} (no sources)"
+        println "verifyDependencyDirection: PASS (downward-only module graph + pure-JVM module purity)${vacuousNote}"
+    }
+}
+
+// Every module's `check` lifecycle runs the architecture guard as well, so a
+// plain `./gradlew check` can never skip the dependency-direction contract.
+subprojects { subproject ->
+    subproject.tasks.matching { it.name == 'check' }.configureEach {
+        dependsOn rootProject.tasks.named('verifyDependencyDirection')
+    }
+}

@@ -23,7 +23,7 @@
 
 ## 并行规则
 - 同一 task 内不并行 implementer；不同 task 可同时派，但 verifier **串行**。
-- 触共享代码区（接口契约 / Flyway 迁移 / docker-compose / .env.example）的 task **必须独立**，不与其它 task 并行。
+- 触共享代码区（接口契约 / 数据库 schema 或 migration / docker-compose / .env.example）的 task **必须独立**，不与其它 task 并行。
 
 ## 上下文管理（context anxiety 对抗）
 - 上下文用量 ≥ 40% → 建议用户调 `context-handoff`：把进度写入 task 文件「交接备忘」区，开新会话从干净 context 续上。

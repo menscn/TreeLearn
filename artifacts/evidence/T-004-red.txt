@@ -1,0 +1,46 @@
+# T-004 RED — first failing run of the schema acceptance suite
+
+- Date: 2026-09-21
+- Device: emulator-5554 (Medium_Phone_API_36.1, API 36, x86_64)
+- Working directory: D:/Project/Android/Treelearn/android
+- Command (character-identical to the GREEN run recorded in T-004-green.txt):
+  `./gradlew :app:connectedDebugAndroidTest --console=plain`
+- Exit code: 1
+- Failing task: `:app:compileDebugAndroidTestJavaWithJavac FAILED`
+
+## What kind of RED this is
+
+**Compile-level, not behavioural.** The production types under construction did not exist yet, so
+the acceptance suite could not be loaded at all. This proves the capability was absent; it does not
+prove that a specific wrong behaviour was observed and then fixed. It is recorded as such instead of
+being dressed up as a behavioural RED.
+
+## Compiler-reported error count
+
+```
+21 errors
+```
+
+Counting raw `error:` occurrences over the whole log yields 42, because Gradle prints every error
+once inline and once in its own summary. The compiler's own count is 21. Stated explicitly so nobody
+later re-derives a different number from the same log and concludes the evidence is stale.
+
+## Distinct missing symbols
+
+```
+package com.treelearn.data.db does not exist
+symbol:   class DatabaseTransactionRunner
+symbol:   class TreeLearnDatabaseHelper
+symbol:   variable TreeLearnDatabaseHelper
+symbol:   variable TreeLearnSchema
+```
+
+Every compile error traces to one of these three production types, so the failure is caused by the
+missing behaviour and nothing else.
+
+## Build result
+
+```
+BUILD FAILED in 4s
+Execution failed for task ':app:compileDebugAndroidTestJavaWithJavac'.
+```

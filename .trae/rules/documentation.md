@@ -23,7 +23,7 @@
 | 服务边界、鉴权/凭据归属、队列/worker/并发、存储、权威表/数据流 | 对应架构文档与适用的治理文档 |
 | 构建/启动命令、端口、代理、环境变量、依赖安装、健康/就绪行为 | 根与模块 README、文档入口，以及启动规则要求的 Docker/Compose/`.env.example` 检查 |
 | Android SDK/来源、Manifest intent、Activity 生命周期、原生插件、系统 UI、仅限 Java/i18n 行为 | `android/README.md` 与相关的业务流程文档 |
-| Flyway/schema/表变更 | 迁移权威来源加表清单、数据治理、架构及受影响的 API/业务文档 |
+| Flyway、SQLiteOpenHelper/schema/表变更 | 对应引擎的迁移权威来源加表清单、数据治理、架构及受影响的 API/业务文档 |
 
 ### 文档影响记录
 

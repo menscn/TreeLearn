@@ -1,0 +1,38 @@
+﻿TreeLearn T-003 Java-only guard evidence
+Generated: 2026-09-21 10:45:52 +08:00
+Command: powershell -File android\scripts\no-kotlin-check.ps1
+Guard script: android\scripts\no-kotlin-check.ps1
+Guard script SHA-256: BDBCC52DBA13022921F44C15E05DBFF198E33F9CB7FD85FB7D234264F38AD779
+Guard script lines: 439
+Exit codes: 0 = PASS, 1 = FAIL, 2 = PARTIAL (dependency/APK stage skipped; never a pass).
+==============================================================================
+Treelearn Java-only guard
+Android root: D:\Project\Android\Treelearn\android
+
+== Kotlin source files ==
+OK   no .kt / .kts / .gradle.kts source files
+
+== Gradle scripts and version catalogs ==
+OK   scanned 11 Gradle script/catalog file(s), comments excluded
+OK   raw-text dependency scan completed (lexer-independent)
+OK   lexer trust check completed (fail-closed on desync)
+
+== Resolved dependency report ==
+OK   debugRuntimeClasspath contains no Kotlin coordinates (group or -ktx)
+OK   releaseRuntimeClasspath contains no Kotlin coordinates (group or -ktx)
+OK   debugAndroidTestRuntimeClasspath contains no Kotlin coordinates (group or -ktx)
+
+== Built APK dex tables ==
+OK   verifyNoKotlinDex: app debug APK (shipped artifact) [app/build/outputs/apk/debug/app-debug.apk] = 39586 bytes, 3 dex file(s) [classes.dex, classes2.dex, classes3.dex]
+OK   verifyNoKotlinDex: app androidTest APK (test process) [app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk] = 749885 bytes, 3 dex file(s) [classes.dex, classes2.dex, classes3.dex]
+OK   verifyNoKotlinDex: app release APK (shipped artifact) [app/build/outputs/apk/release/app-release-unsigned.apk] = 31580 bytes, 1 dex file(s) [classes.dex]
+OK   verifyNoKotlinDex: NOTICE (accepted) app androidTest APK (test process) [app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk] contains Kotlin-compiled annotation classes without runtime linkage ([classes.dex -> Lkotlin/Metadata;]); no Kotlin runtime library is required on device
+OK   verifyNoKotlinDex: PASS (3 APK(s) inspected, no Kotlin runtime bytecode)
+OK   no built APK contains Kotlin runtime bytecode
+
+== Result ==
+NOTICE verifyNoKotlinDex: NOTICE (accepted) app androidTest APK (test process) [app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk] contains Kotlin-compiled annotation classes without runtime linkage ([classes.dex -> Lkotlin/Metadata;]); no Kotlin runtime library is required on device
+VERDICT: PASS
+
+==============================================================================
+GUARD EXITCODE=0

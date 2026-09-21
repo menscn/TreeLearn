@@ -2,6 +2,15 @@
 
 读取时机：新增或改造处理流程、用户功能或遥测改动前。仅加载本任务命中的规则；正文约束沿用原适用范围，不因读取而进入 Harness。
 
+## 适用性判定（先读这一段）
+
+- 「服务端 RequestId 通用接入」整节针对后端服务与跨实例消息链路。Treelearn V1 是 **Android 单机本地优先应用**：无服务端、无后端统一日志基础设施、无跨实例消息与持久异步 worker，因此**该整节不适用**。不得据此要求 Android 本地任务接入 `requestId`/`spanId`、复用后端 trace 语义，或运行服务端 trace 覆盖门禁脚本。
+- 本机日志的追踪标识采用**业务自身的稳定 ID**：`operationId` / `topicId` / `branchId`（均为应用生成 UUID），不新增与服务端同义的 `traceId` 别名。
+- 仍然适用的部分：
+  1. 「可排障日志」段：每个生成操作与派生 AI 任务记录脱敏的 `start / accepted / streaming / stable / failed / interrupted / canceled` 与 `start / applied / stale_discarded / failed`，含 operation/branch ID、模型档位、思考开关、字符计数、耗时、错误分类、input digest 前 8 位；禁止记录问题正文、回答正文、推理内容、prompt、quote、快照 JSON、响应原文与 API Key（技术方案 §14、§15）。
+  2. Cross-cutting telemetry guard 的**决策记录**义务：技术方案 §14 规定 release 不发送远程行为遥测、`TelemetrySink` 为 no-op，因此每个新的面向用户功能仍须在任务或 PR 中明确记录「不发射遥测」或 debug 本地事件的范围与理由；release 默认降低日志级别并禁止正文输出。
+- 若将来引入后端服务或远程遥测管道，本规则全文重新启用，并在同一任务内补齐统一 trace 接入、边界测试与门禁。
+
 ## 可排障日志
 
 - 新增或改造处理流程时必须补充可排障日志：至少记录 start / success / fallback / failure，包含关键 ID、计数、耗时、模式、fallback reason；不得记录密钥、完整原文、完整 prompt、长 quote 或 sourceRefs 细节。

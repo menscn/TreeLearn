@@ -1,0 +1,40 @@
+// :data — SQLite schema/DAO/transactions, search, reading state, Keystore secrets.
+// Never decides business flow and never calls DeepSeek.
+plugins {
+    id 'com.android.library'
+}
+
+android {
+    namespace 'com.treelearn.data'
+    compileSdk 36
+
+    defaultConfig {
+        minSdk 28
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    lint {
+        abortOnError true
+        checkDependencies true
+        warningsAsErrors false
+    }
+}
+
+configurations.configureEach {
+    resolutionStrategy {
+        force 'androidx.test:monitor:1.6.0'
+    }
+}
+
+// Convention: every instrumentation test lives in :app's androidTest source set,
+// so no other module declares androidTest dependencies. That keeps a single test
+// APK, a single testing stack, and one place for the Java-only guard to cover.
+dependencies {
+    implementation project(':core')
+
+    testImplementation 'junit:junit:4.13.2'
+}

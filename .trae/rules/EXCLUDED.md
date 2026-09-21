@@ -7,9 +7,9 @@
 - `hclaw.md`：绑定特定 AI 服务（HClaw）。Treelearn 不依赖该服务，规则预案不适用，故整体排除。若项目后续确有该服务相关约定，应作为项目私有契约重新定义，而非照搬。
 - `cspfix-sync.md`：绑定源工程 CSPfix 分支的归档/同步流程。该流程与 Treelearn 的分支与发布策略无关，整体排除。
 
-## 二、源工程已有但 Treelearn 无对应技术而排除或并入
+## 二、源工程已有但 Treelearn 曾无对应技术而排除、后续恢复或并入
 
-- `sql.md`、`contracts.md`：源工程以独立文件承载数据库表级读写所有权与契约。Treelearn 无对应的一级文档，未单独复制规则文件；其关键约束（SQL/契约变更前的配合读取提示、producer/consumer 要求）已精简并入 `backend.md`。若后续 Treelearn 沉淀出正式的 SQL/契约规范文档，可拆回独立规则。
+- `sql.md`、`contracts.md`：迁移初期曾因 Treelearn 无对应一级规范而排除；现已按 Treelearn 的后端 MySQL/Flyway、Android SQLite/SQLiteOpenHelper 和跨端契约边界恢复为独立规则。当前权威正文分别为 [`sql.md`](sql.md) 与 [`contracts.md`](contracts.md)，本文件仅保留历史迁移说明。
 - 源工程 `java.md` 中「Java/Core 数据库表级读写所有权」「Python Core 层所有权」相关条目：Treelearn 无 `core-py` 处理层，无此表级所有权分区模型，故剥离（相应职责收敛回 backend 自身）。
 - 源工程 `java.md` 中「Elasticsearch 向量索引由 Python 独写」条目：Treelearn 无 Python 服务、未启用 Es 向量索引，故剥离。
 

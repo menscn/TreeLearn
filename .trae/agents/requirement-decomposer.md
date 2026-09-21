@@ -25,7 +25,7 @@
 - 任务文件名 `T-YYYY-MM-DD-<kebab-case-description>-NNN.md`，与稳定 `id: T-YYYY-MM-DD-NNN` 日期/序号一致；严格按 `_TEMPLATE.md` 分区填充，缺失信息显式标 `PENDING`/`UNKNOWN`。
 - 子任务用描述性文件名引用 `parent_requirement`，`depends_on` 引用依赖文件名。
 - 验收标准每条可机械验证（命令 + 期望输出 / UI 观察），不写主观条目。
-- 触共享代码区（契约文档 / Flyway 迁移 / docker-compose.yml / .env.example）的 task 独立成任务并标注 `shared_code_touched: true`。
+- 触共享代码区（契约文档 / Flyway 或 Android SQLite schema/migration / docker-compose.yml / .env.example）的 task 独立成任务并标注 `shared_code_touched: true`。
 
 ## 输出格式
 

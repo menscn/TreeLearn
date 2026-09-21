@@ -1,0 +1,219 @@
+// ---------------------------------------------------------------------------
+// Java-only verification at the FINAL ARTIFACT level for TreeLearn.
+//
+// Why this exists: verifying a dependency's coordinate (or even its POM) is not
+// proof of a Kotlin-free build. androidx.test:monitor:1.6.1 publishes no
+// kotlin-stdlib in its POM, yet ships Kotlin bytecode and the androidTest APK
+// dies on device with
+//     ClassNotFoundException: kotlin.jvm.internal.Lambda
+// A coordinate-only guard reports PASS while the device crashes.
+//
+// So this task inspects the dex string tables of the APKs that actually get
+// installed. Dex stores type descriptors verbatim in its string table, so a
+// Kotlin runtime link shows up as the literal `kotlin/jvm/internal`, and any
+// Kotlin-compiled class carries `Lkotlin/Metadata;`.
+//
+// THIS TASK IS THE AUTHORITATIVE Java-only proof, together with the resolved
+// dependency report. Static text scanning in scripts/no-kotlin-check.ps1 is
+// only a fast pre-filter: an independent audit demonstrated that legal Groovy
+// (`\uXXXX` escapes, GString interpolation, string concatenation, coordinates
+// split across statements) can construct a Kotlin coordinate that no line-based
+// text scan can see. Because the APK is produced by the real Gradle build, this
+// dex scan cannot be evaded that way.
+//
+// AUDIT FINDING (round 4, fixed here): this task used to hardcode
+// `app-release.apk` and mark the release APK `optional`. An unsigned release
+// build actually emits `app-release-unsigned.apk`, so the release artifact was
+// never scanned and the miss was reported as a benign `SKIP`. Artifacts are now
+// discovered by directory glob and every group is mandatory.
+//
+// AUDIT FINDING (round 5, fixed here): the glob was then applied to three
+// HARDCODED directories, so an APK produced anywhere else (a new build type, a
+// product flavour, or any renamed output directory) was silently never scanned;
+// an independent audit dropped a real Kotlin-linking APK into
+// app/build/outputs/apk/staging/ and this task still printed
+// `PASS (3 APK(s) inspected)`. Discovery is now a recursive walk of the whole
+// `app/build/outputs` tree, and the three known groups became ASSERTIONS
+// (each must still yield at least one APK) instead of the scan's boundary.
+//
+// Strictness policy:
+//   * shipped APKs (debug / release): BOTH needles are violations. The app must
+//     contain no Kotlin at all.
+//   * androidTest APK: `kotlin/jvm/internal` is a violation (it would crash the
+//     test process). `Lkotlin/Metadata;` alone is REPORTED as a narrow,
+//     auditable exception: androidx.annotation:annotation-experimental ships
+//     Kotlin-compiled annotation classes that need no kotlin-stdlib at runtime.
+// ---------------------------------------------------------------------------
+
+// Every APK under these roots is inspected, at any depth.
+def apkScanRoots = ['app/build/outputs/apk']
+
+// Build tasks that must run so the artifacts exist at all.
+def apkAssembleTasks = [
+        ':app:assembleDebug',
+        ':app:assembleDebugAndroidTest',
+        ':app:assembleRelease',
+]
+
+// Coverage assertions: each of these must still yield >= 1 APK. They describe the
+// expected artifacts; they no longer limit what gets scanned.
+def apkExpectedGroups = [
+        [
+                dir          : 'app/build/outputs/apk/debug',
+                label        : 'app debug APK (shipped artifact)',
+        ],
+        [
+                dir          : 'app/build/outputs/apk/androidTest/debug',
+                label        : 'app androidTest APK (test process)',
+        ],
+        [
+                dir          : 'app/build/outputs/apk/release',
+                label        : 'app release APK (shipped artifact)',
+        ],
+]
+
+// Literal byte sequences that mean "Kotlin runtime linkage" in a dex string table.
+def kotlinRuntimeNeedle = 'kotlin/jvm/internal'
+// Literal byte sequence that means "this class was compiled from Kotlin".
+def kotlinMetadataNeedle = 'Lkotlin/Metadata;'
+
+// AUDIT FINDING (round 6, fixed here): the androidTest exception used to be
+// reported as a single literal descriptor, which is not the whole boundary. An
+// auditor could not tell from the NOTICE whether any other Kotlin class was
+// referenced, so they had to re-scan the APK to discover the exception's real
+// extent. The NOTICE now lists every Kotlin type descriptor present in the APK,
+// which makes the extent auditable from the log alone.
+//
+// Written as a compiled Pattern rather than a Groovy slashy literal on purpose:
+// scripts/no-kotlin-check.ps1 decides slashy-versus-division from a
+// character-class test, and a semicolon immediately followed by a slash reads as
+// a slashy-string start to it (an earlier round desynchronised that scanner in
+// exactly this way). A quoted pattern inside a single-quoted Groovy string is
+// consumed wholesale by its lexer and carries no such ambiguity.
+def kotlinDescriptorPattern = java.util.regex.Pattern.compile('Lkotlin/[A-Za-z0-9_/]+;')
+
+ext.apkScanRoots = apkScanRoots
+ext.apkExpectedGroups = apkExpectedGroups
+
+// The instrumentation test APK is the only artifact allowed to carry
+// Kotlin-compiled annotations, so strictness is decided per path, not per group.
+def isTestProcessApk = { File apk ->
+    apk.path.replace('\\', '/').toLowerCase().contains('/androidtest/')
+}
+
+tasks.register('verifyNoKotlinDex') {
+    group = 'verification'
+    description = 'Fails when a built TreeLearn APK contains Kotlin bytecode.'
+
+    dependsOn apkAssembleTasks
+
+    doLast {
+        def violations = []
+        def notices = []
+        def inspected = 0
+
+        // ---- discover: recursive walk, so no output directory can hide ----
+        def found = []
+        apkScanRoots.each { rootPath ->
+            def root = rootProject.file(rootPath)
+            if (!root.exists()) {
+                violations.add("APK scan root ${rootPath} does not exist (nothing to verify)")
+                return
+            }
+            root.eachFileRecurse { f ->
+                if (f.isFile() && f.name.endsWith('.apk')) { found.add(f) }
+            }
+        }
+        found = found.unique().sort { it.path }
+
+        if (found.isEmpty()) {
+            violations.add("no APK found under ${apkScanRoots.join(', ')} (build produced nothing to verify)")
+        }
+
+        // ---- coverage assertions: the known artifacts must all be present ----
+        apkExpectedGroups.each { group ->
+            def dir = rootProject.file(group.dir)
+            def present = dir.exists()
+                    ? (dir.listFiles() ?: new File[0]).findAll { it.isFile() && it.name.endsWith('.apk') }
+                    : []
+            if (present.isEmpty()) {
+                violations.add("${group.label}: no APK found under ${group.dir} (expected artifact missing)")
+            }
+        }
+
+        // ---- inspect every discovered APK ----
+        found.each { apk ->
+            def rel = rootProject.projectDir.toPath().relativize(apk.toPath()).toString().replace('\\', '/')
+            def runtimeStrict = !isTestProcessApk(apk)
+            def label = isTestProcessApk(apk)
+                    ? 'APK in an androidTest output path (test process)'
+                    : 'shipped APK'
+
+            def dexNames = []
+            def runtimeHits = []
+            def metadataHits = []
+            def dexDescriptors = new java.util.TreeSet<String>()
+            def zip = new java.util.zip.ZipFile(apk)
+            try {
+                zip.entries().each { entry ->
+                    if (entry.name.endsWith('.dex')) {
+                        dexNames.add(entry.name)
+                        def stream = zip.getInputStream(entry)
+                        def text
+                        try {
+                            text = new String(stream.bytes, java.nio.charset.StandardCharsets.ISO_8859_1)
+                        } finally {
+                            stream.close()
+                        }
+                        if (text.contains(kotlinRuntimeNeedle)) {
+                            runtimeHits.add("${entry.name} -> ${kotlinRuntimeNeedle}")
+                        }
+                        if (text.contains(kotlinMetadataNeedle)) {
+                            metadataHits.add("${entry.name} -> ${kotlinMetadataNeedle}")
+                        }
+                        def descriptorMatcher = kotlinDescriptorPattern.matcher(text)
+                        while (descriptorMatcher.find()) {
+                            dexDescriptors.add(descriptorMatcher.group())
+                        }
+                    }
+                }
+            } finally {
+                zip.close()
+            }
+
+            inspected++
+            println "verifyNoKotlinDex: [${rel}] ${label} = ${apk.length()} bytes, ${dexNames.size()} dex file(s) ${dexNames}"
+
+            if (!runtimeHits.isEmpty()) {
+                violations.add("[${rel}] links the Kotlin runtime: ${runtimeHits}")
+            }
+            if (!metadataHits.isEmpty()) {
+                if (runtimeStrict) {
+                    violations.add("[${rel}] contains Kotlin-compiled classes: ${metadataHits}")
+                } else {
+                    // The whole descriptor set, not just the needle that triggered this
+                    // notice: an exception whose extent is not printed is not auditable,
+                    // and the reader would have to re-scan the APK to find its boundary.
+                    notices.add("[${rel}] contains Kotlin-compiled annotation classes without " +
+                            "runtime linkage (${metadataHits}); no Kotlin runtime library is " +
+                            "required on device. Kotlin type descriptors in this APK " +
+                            "(${dexDescriptors.size()}): ${dexDescriptors}")
+                }
+            }
+        }
+
+        notices.each { println "verifyNoKotlinDex: NOTICE (accepted) ${it}" }
+
+        if (!violations.isEmpty()) {
+            throw new GradleException('Java-only violation:\n  ' + violations.join('\n  '))
+        }
+        println "verifyNoKotlinDex: PASS (${inspected} APK(s) inspected across " +
+                "${apkScanRoots.join(', ')}, no Kotlin runtime bytecode)"
+    }
+}
+
+subprojects { subproject ->
+    subproject.tasks.matching { it.name == 'check' }.configureEach {
+        dependsOn rootProject.tasks.named('verifyNoKotlinDex')
+    }
+}

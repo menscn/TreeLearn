@@ -60,9 +60,10 @@ description: Harness 触发词入口的完整执行手册：澄清 → 拆 task 
 | :--- | :--- | :--- |
 | `frontend/**` | `frontend-dev` | API 契约/接口客户端变化 → `contract-guardian` |
 | `backend/**` | `backend-dev` | API 变更 → `contract-guardian`；Flyway 迁移 → `db-migration-reviewer` |
-| `android/**` | `android-dev` | 完成前 → `android-no-kotlin-guard` |
+| `android/**` | `android-dev` | 完成前 → `android-no-kotlin-guard`；SQLite schema/migration → `db-migration-reviewer` |
 | API 契约文档 | 当前 task owner | **强制** `contract-guardian` |
 | `backend/**/db/migration/V*__*.sql` | `backend-dev` | **强制** `db-migration-reviewer` |
+| `android/**` 中 SQLiteOpenHelper/schema/migration | `android-dev` | **强制** `db-migration-reviewer` + `android-no-kotlin-guard` |
 | `docker-compose.yml` / `.env.example` | **不自动派** | leader 协调 + 人工复核 |
 
 - implementer 角色提示词：[`.trae/agents/frontend-dev.md`](../../agents/frontend-dev.md)、[`.trae/agents/backend-dev.md`](../../agents/backend-dev.md)、[`.trae/agents/android-dev.md`](../../agents/android-dev.md)。
@@ -89,7 +90,7 @@ description: Harness 触发词入口的完整执行手册：澄清 → 拆 task 
 ## 并行与共享区
 
 - 同一 task 内不并行多个 implementer；不同 task 可同时派，verifier **串行**。
-- 触共享代码区（契约文档 / Flyway 迁移 / docker-compose.yml / .env.example）的 task 必须独立，不与其它 task 并行。
+- 触共享代码区（契约文档 / 数据库 schema 或 migration / docker-compose.yml / .env.example）的 task 必须独立，不与其它 task 并行。
 
 ## 关键禁忌（与 AGENTS.md 失败案例库一致）
 

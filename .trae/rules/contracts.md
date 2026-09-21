@@ -8,10 +8,11 @@
 |---|---|---|
 | `frontend/**` | `frontend-dev` | API 契约或接口客户端变化时 `contract-guardian` |
 | `backend/**` | `backend-dev` | API 变更时 `contract-guardian`；Flyway 迁移时 `db-migration-reviewer` |
-| `android/**` | `android-dev` | 完成前 `android-no-kotlin-guard` |
+| `android/**` | `android-dev` | 完成前 `android-no-kotlin-guard`；SQLite schema/migration 变化时另走 `db-migration-reviewer` |
 | API 契约文档 | 当前任务 owner | `contract-guardian` |
 | 前端到 Android 桥生产者/消费者契约、资源集/数量或共享错误语义 | 分配的栈 owner | `contract-guardian`；Android 变更还需 `android-no-kotlin-guard` |
 | `backend/**/db/migration/V*__*.sql` | `backend-dev` | `db-migration-reviewer` |
+| `android/**` 中 SQLiteOpenHelper/schema/migration | `android-dev` | `db-migration-reviewer` + `android-no-kotlin-guard` |
 | `docker-compose.yml` / `.env.example` | leader 协调 | 手动协调与复核 |
 
 > 注：Treelearn 暂未启用 Python 服务；如日后启用，其路径与契约 guard 按源工程规格补充。
@@ -20,7 +21,7 @@
 
 共享代码区在完成前需要明确的 guard/复核；隔离任务仅需在 Harness 内进行（直接执行不需要任务文件）：
 - API 契约文档、接口与原生桥接的生产者/消费者契约、共享错误语义 -> `contract-guardian`。应用防回归与行为证据 [guard](regression.md)。
-- Flyway 迁移 SQL -> `db-migration-reviewer`。
+- Flyway 迁移 SQL 或 Android SQLite schema/migration -> `db-migration-reviewer`；执行证据必须来自对应真实数据库引擎。
 - `docker-compose.yml` 与 `.env.example` -> leader 协调加手动复核。
 - Android 变更 -> 完成前 `android-no-kotlin-guard`。
 

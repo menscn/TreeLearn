@@ -1,0 +1,9 @@
+Command: grep -rn "CREATE TABLE|ALTER TABLE|CREATE INDEX" android --include=*.java
+--- matches ---
+android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:356:            "CREATE INDEX " + INDEX_BRANCHES_TOPIC_PARENT + " ON " + Branches.TABLE + "("
+android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:358:            "CREATE INDEX " + INDEX_BRANCHES_SOURCE_REVISION + " ON " + Branches.TABLE + "("
+android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:360:            "CREATE INDEX " + INDEX_BRANCHES_ARCHIVED + " ON " + Branches.TABLE + "("
+android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:372:            "CREATE INDEX " + INDEX_ARTIFACTS_KIND_SCOPE + " ON " + AiArtifacts.TABLE + "("
+android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:429:    /** The seven {@code CREATE TABLE} statements, in creation order. */
+android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:520:        StringBuilder sql = new StringBuilder("CREATE TABLE ").append(table).append(" (");
+EXIT=0

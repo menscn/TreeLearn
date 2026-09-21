@@ -1,0 +1,17 @@
+# Shell 脚本必须始终以 LF 检出：Windows 的 CRLF 会让 Unix/Mac 报
+# "bad interpreter: /bin/sh^M"，导致 gradlew 在任何非 Windows 机器上直接不可用。
+*.sh text eol=lf
+android/gradlew text eol=lf
+android/gradlew.bat text eol=crlf
+
+# Windows 脚本保留 CRLF（PowerShell 5.1 对脚本最稳的形态）
+*.ps1 text eol=crlf
+
+# 二进制资源不做任何行尾转换
+*.png binary
+*.jpg binary
+*.jks binary
+*.keystore binary
+
+# 其余文本文件由 Git 按 text=auto 处理
+* text=auto

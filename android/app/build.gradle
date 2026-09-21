@@ -1,0 +1,101 @@
+// :app — Activities, XML views, navigation, screen controllers, AppContainer.
+// Must never contain raw SQL or DeepSeek JSON assembly.
+plugins {
+    id 'com.android.application'
+}
+
+// ---------------------------------------------------------------------------
+// Release signing for personal sideloading.
+//
+// The keystore lives OUTSIDE the repository. Credentials are read from the
+// process environment (preferred) or from android/keystore.properties, which is
+// gitignored. Secrets are never written into the repo, the APK or any report.
+// When no credentials are present, `assembleRelease` produces an unsigned APK.
+// ---------------------------------------------------------------------------
+def signingSecrets = new Properties()
+def signingSecretsFile = rootProject.file('keystore.properties')
+if (signingSecretsFile.exists()) {
+    signingSecretsFile.withInputStream { signingSecrets.load(it) }
+}
+
+def releaseStorePath = System.getenv('TREELEARN_KEYSTORE_PATH') ?: signingSecrets.getProperty('storeFile')
+def releaseStorePassword = System.getenv('TREELEARN_KEYSTORE_PASSWORD') ?: signingSecrets.getProperty('storePassword')
+def releaseKeyAlias = System.getenv('TREELEARN_KEY_ALIAS') ?: signingSecrets.getProperty('keyAlias')
+def releaseKeyPassword = System.getenv('TREELEARN_KEY_PASSWORD') ?: signingSecrets.getProperty('keyPassword')
+def hasReleaseSigning = releaseStorePath && releaseStorePassword && releaseKeyAlias && releaseKeyPassword &&
+        file(releaseStorePath).exists()
+
+android {
+    namespace 'com.treelearn.app'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'com.treelearn'
+        minSdk 28
+        targetSdk 36
+        versionCode 1
+        versionName '1.0'
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+        }
+        release {
+            minifyEnabled false
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+
+    lint {
+        abortOnError true
+        checkDependencies true
+        warningsAsErrors false
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+
+    signingConfigs {
+        release {
+            if (hasReleaseSigning) {
+                storeFile file(releaseStorePath)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
+    }
+}
+
+configurations.configureEach {
+    resolutionStrategy {
+        // androidx.test:monitor 1.6.1+ is compiled from Kotlin (OutputDirCalculator)
+        // without declaring kotlin-stdlib, which crashes at runtime with
+        // ClassNotFoundException: kotlin.jvm.internal.Lambda.
+        // 1.6.0 is the last bytecode-verified Kotlin-free release, so pin it and
+        // use runner 1.5.1 (whose monitor requirement is exactly [1.6.0]).
+        force 'androidx.test:monitor:1.6.0'
+    }
+}
+
+dependencies {
+    implementation project(':core')
+    implementation project(':data')
+    implementation project(':ai')
+    implementation project(':tree-layout')
+
+    testImplementation 'junit:junit:4.13.2'
+
+    androidTestImplementation 'androidx.test:runner:1.5.1'
+    androidTestImplementation 'junit:junit:4.13.2'
+}

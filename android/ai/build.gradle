@@ -1,0 +1,39 @@
+// :ai — DeepSeek HTTPS/SSE gateway, context encoding, versioned prompt registry.
+// Never touches views or the database directly. No user-supplied system templates.
+plugins {
+    id 'com.android.library'
+}
+
+android {
+    namespace 'com.treelearn.ai'
+    compileSdk 36
+
+    defaultConfig {
+        minSdk 28
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    lint {
+        abortOnError true
+        checkDependencies true
+        warningsAsErrors false
+    }
+}
+
+configurations.configureEach {
+    resolutionStrategy {
+        force 'androidx.test:monitor:1.6.0'
+    }
+}
+
+// Convention: every instrumentation test lives in :app's androidTest source set,
+// so no other module declares androidTest dependencies.
+dependencies {
+    implementation project(':core')
+
+    testImplementation 'junit:junit:4.13.2'
+}
