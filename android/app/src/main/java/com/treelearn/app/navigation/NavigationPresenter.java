@@ -119,7 +119,7 @@ public final class NavigationPresenter implements NavigationActions {
 
     @Override
     public void onDeleteRequested(String branchId, DeleteScope scope) {
-        NavigationData.Plan plan = plan(state.topicId, lastSnapshot, branchId,
+        NavigationData.Plan plan = NavigationData.plan(state.topicId, lastSnapshot, branchId,
                 scope == DeleteScope.TOPIC);
         if (plan == null) {
             render(state.withNotice(NavigationViewState.Notice.SCOPE_UNRESOLVABLE));
@@ -264,41 +264,6 @@ public final class NavigationPresenter implements NavigationActions {
             }
         }
         return null;
-    }
-
-    /**
-     * @return the exact set a confirmation would cover, or null when it cannot be counted - the
-     *         target is not in the last tree, no tree has been read, or a node names a parent the
-     *         tree does not hold. The last case is the reason this fails closed: a tree that does
-     *         not describe itself cannot answer "how many branches will this remove", and a wrong
-     *         number under a permanent-delete button is worse than no button.
-     */
-    private static NavigationData.Plan plan(String topicId, NavigationData.Snapshot tree,
-            String target, boolean wholeTopic) {
-        if (topicId == null || tree == null || target == null || tree.node(target) == null) {
-            return null;
-        }
-        for (NavigationData.Node node : tree.nodes) {
-            if (node.parentBranchId != null && tree.node(node.parentBranchId) == null) {
-                return null;
-            }
-        }
-        List<String> ids = new ArrayList<String>();
-        if (wholeTopic) {
-            for (NavigationData.Node node : tree.nodes) {
-                ids.add(node.branchId);
-            }
-            return new NavigationData.Plan(topicId, target, ids, true);
-        }
-        ids.add(target);
-        for (int i = 0; i < ids.size(); i++) {
-            for (NavigationData.Node node : tree.nodes) {
-                if (ids.get(i).equals(node.parentBranchId) && !ids.contains(node.branchId)) {
-                    ids.add(node.branchId);
-                }
-            }
-        }
-        return new NavigationData.Plan(topicId, target, ids, false);
     }
 
     /**

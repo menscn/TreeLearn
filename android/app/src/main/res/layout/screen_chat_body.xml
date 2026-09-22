@@ -26,15 +26,15 @@
         android:paddingEnd="@dimen/page_gutter"
         android:paddingTop="@dimen/space_s2">
 
-        <Button
+        <ImageView
             android:id="@+id/chat_back"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/touch_min"
             android:layout_height="@dimen/touch_min"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:minWidth="@dimen/touch_min"
-            android:text="@string/chat_back"
-            android:textColor="@color/tl_green_deep"
-            android:textSize="@dimen/text_sm" />
+            android:contentDescription="@string/cd_chat_back"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_nav_back"
+            android:tint="@color/tl_green_deep" />
 
         <TextView
             android:id="@+id/chat_title"
@@ -48,35 +48,35 @@
             android:textSize="@dimen/text_h2"
             android:textStyle="bold" />
 
-        <Button
+        <ImageView
             android:id="@+id/chat_nav"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/touch_min"
             android:layout_height="@dimen/touch_min"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:minWidth="@dimen/touch_min"
-            android:text="@string/chat_nav"
-            android:textColor="@color/tl_green_deep"
-            android:textSize="@dimen/text_sm" />
+            android:contentDescription="@string/cd_chat_nav"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_nav_tree"
+            android:tint="@color/tl_green_deep" />
 
-        <Button
+        <ImageView
             android:id="@+id/chat_overview"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/touch_min"
             android:layout_height="@dimen/touch_min"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:minWidth="@dimen/touch_min"
-            android:text="@string/chat_overview"
-            android:textColor="@color/tl_green_deep"
-            android:textSize="@dimen/text_sm" />
+            android:contentDescription="@string/cd_chat_overview"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_chat_overview"
+            android:tint="@color/tl_green_deep" />
 
-        <Button
+        <ImageView
             android:id="@+id/chat_settings"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/touch_min"
             android:layout_height="@dimen/touch_min"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:minWidth="@dimen/touch_min"
-            android:text="@string/action_settings"
-            android:textColor="@color/tl_green_deep"
-            android:textSize="@dimen/text_sm" />
+            android:contentDescription="@string/cd_chat_settings"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_chat_gear"
+            android:tint="@color/tl_green_deep" />
     </LinearLayout>
 
     <!-- The reading-state notice: a write the store refused, hidden until something fails. -->
@@ -161,15 +161,15 @@
             android:textColor="@color/tl_green_deep"
             android:textSize="@dimen/text_cap" />
 
-        <Button
+        <ImageView
             android:id="@+id/chat_quote_clear"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/touch_min"
             android:layout_height="@dimen/touch_min"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:minWidth="@dimen/touch_min"
-            android:text="@string/chat_quote_clear"
-            android:textColor="@color/tl_ink2"
-            android:textSize="@dimen/text_cap" />
+            android:contentDescription="@string/cd_chat_quote_clear"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_chat_close"
+            android:tint="@color/tl_ink2" />
     </LinearLayout>
 
     <!-- Composer: the draft, the model/thinking chip and send (PRD 6.2.18 point 2). -->
@@ -211,8 +211,14 @@
             android:layout_height="@dimen/touch_min"
             android:layout_marginStart="@dimen/space_s2"
             android:background="@drawable/bg_button_primary"
+            android:contentDescription="@string/cd_chat_send"
+            android:drawableStart="@drawable/ic_chat_send"
+            android:drawableTint="@color/tl_surface"
+            android:drawablePadding="0dp"
             android:minWidth="@dimen/touch_min"
-            android:text="@string/chat_send"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:text=""
             android:textColor="@color/tl_surface"
             android:textSize="@dimen/text_sm" />
     </LinearLayout>

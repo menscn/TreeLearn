@@ -57,6 +57,8 @@ App 主代码**零 AndroidX 依赖**。原因：`androidx.appcompat:1.7.0`、`an
 因此：
 
 - 主代码使用平台 API：`android.app.Activity`、平台控件、`android:Theme.Material.Light.NoActionBar`、矢量/自适应图标。
+  键盘行为（T-2026-09-22-063）：`MainActivity` 设 `android:windowSoftInputMode="adjustResize"`，`Theme.TreeLearn` 设
+  `android:windowOptOutEdgeToEdgeEnforcement=true`（API 35+ opt-out edge-to-edge 强制，低版本自动忽略），键盘拉起时窗口收缩、输入框保持可见。
   实测 `app-debug.apk` **零第三方依赖、零 Kotlin 字节码**。字节数与 dex 个数每次构建都会变，因此**不在此处复制具体数字**
   （此前这里手写的「约 71 KB、4 个 dex」已经过期：随 `:data` 入库变成 5 个 dex，而没有人会记得改这一行）。
   权威值以 `artifacts/evidence/T-004-guard.txt` 的 `verifyNoKotlinDex:` 行为准——那里是守门从实际产物解包实测的
@@ -240,6 +242,7 @@ androidTest APK 的 `classes.dex` 含 Kotlin 描述符（无 `kotlin/jvm/interna
 | `GenerationStabilizer` | `answer_revisions` + `generation_operations`（跨表） | **跨表用例之一，自己持有事务边界**：它写的那对（revision 行 + 尝试置 `STABLE`）只有在一起才有意义，把边界留给调用方等于把中间态变成调用方的 bug。**拒绝必须抛异常**（`DatabaseTransactionRunner` 会提交工作体返回的任何东西，从工作体返回=提交），且两次写**顺序为 state 先、revision 后**——顺序的选择是为了让「万一退回从工作体返回」这个缺陷**可观测**，该配对由 `stabilizeRollsBackBothWritesWhenTheRevisionNumberIsAlreadyTaken` 钉住 |
 | `ContextSnapshotDao` | `context_snapshots` | 只搬「行 + 不透明载荷」：`payload` 原样写入、原样读回，**本层不解析、不截取、不重建 JSON**（载荷 schema 属 `:core` 的 `ContextSnapshotCodec`，见上表）。`uq_context_snapshots_branch` 保证每个分支至多一行；唯一冲突与 NOT NULL 都由库层拒绝且**不给领域码**——`:core` 没有「该分支已有出生快照」这类业务码，硬造一个就是无生产者的码，诊断成因是调用方的事。快照不可改写、不可单独删除（触发器），只随所属分支级联消失 |
 | `AiArtifactDao` | `ai_artifacts` | 派生结果的**基线 CAS**：写回是单条 `UPDATE … WHERE kind=? AND scope_id=? AND based_on_revision_id IS NOT NULL AND based_on_revision_id=? AND input_digest=?`；受影响行数 1 → `APPLIED`、0 → `DISCARDED_STALE`（**正常路径，不是失败**）、>1 → 抛错。**禁止「先 SELECT 再 UPDATE」**——那会把基线复核移到真正改写数据的语句之外。`insert` 自带 `WHERE NOT EXISTS`，因此「每个 (kind, scope) 只有一行」是事实而非注释。被 `ON DELETE SET NULL` 清空基线的行**永远判 stale**并保留旧 payload（取舍见 T-024 交接备忘）。`scope_id` 是多态键、**没有外键**：删除 scope 不会自动清理 artifact，`deleteByScope` 是调用方义务 || `ConstraintFailures` | — | 约束冲突 → 领域错误的**唯一**共享翻译点；**刻意不建「扩展码 → 错误码」总表**，因为同一个扩展码（2067 UNIQUE）在两张表上含义不同，只能按「扩展码 + 冲突列清单」一起判 |
+| `ConstraintExtendedCode` | — | `:data` 里**唯一的取码判定点**：扩展结果码只能从平台异常文案里读出（平台没有取码访问器），而这份文案的前缀随 Android 版本变化（API 36 = `(code N`，Android 13 真机 = `(Sqlite code N`），因此只匹配稳定片段 `code <digits>`、**不枚举前缀**。生产侧唯一调用者是 `ConstraintFailures.extendedCode`；androidTest 的 `assertCause` 也经它取码，而**期望的码值仍由各测试独立给出**，不共用 |
 | `FirstTopicCreation` | `topics` + 根 `branches` + 两条 `messages` + `generation_operations`（跨表） | **首题的五类行在一个事务里全成或全败**：复用 `DatabaseTransactionRunner`，不新造事务机制；留下「有 topic 没有根分支」或「有分支没有 attempt」都会让 T-008 的恢复推导出不可重试的空树。**首题不写快照**——根分支没有父分支来源，`context_snapshot_id`/`source_*` 必须是 `NULL`，不要为了「看起来完整」补一行快照（分叉的两步写属 `BranchCreation`）。**跨主题 source 判定是全仓唯一一处**（`sourceRefusal` → 纯判定点 `decideSourceRefusal`）：`source_*` 是 `ON DELETE CASCADE`，跨表规则写不出 CHECK，所以必须在**同一事务内**判定，`BranchCreation` 复用同一入口而不是再写一份。重复 topic id 按**实测扩展码 1555 + SQLite 自己的小写约束文本**判定（纯判定点 `classifyStorageRefusal`），既不只看码（同码还有 `messages.id` 等主键）也不只看措辞（首版写成大写，编译正常却永不匹配，重复创建全被降级成 STORAGE_REFUSED）。失败一律以分类 `Refusal` 返回，不抛裸异常穿透调用方 |
 | `SearchDao` | `branches` + `messages` + `answer_revisions` + `generation_operations`（七臂 `UNION ALL` 跨表） | 本仓唯一读多表的 SQL（技术方案 §6.3）。七个字段各一臂：标题、用户问题、分叉锚点引文、当前展示 revision 的回答与思考、失败尝试的部分正文。**通配符不内联**——七处全是 `LIKE ? ESCAPE '\'` 加参数绑定；回答/思考臂经 `messages.active_revision_id` 连接，所以「没有位置在展示的过期 revision」在结构上不可达，仍被引用的那条只能经**分叉自己的锚点臂**（`b.source_revision_id`）找到；七臂一律 `b.archived_at IS NULL`。union 列名取自第一臂而三张表都有 `id`，因此 branch/message/revision 键必须别名，否则 `Rows.string(cursor, "id")` 会静默取错键 |
 | `ReadingPositionDao` | `branches` 的四个 `reading_*` 列 | 阅读位置是**语义锚点**（message + revision + 两个相对偏移），不是滚动像素；四列同生同灭，`reading_anchor_message_id` 为 `NULL` 即「没有位置」（正是 `ON DELETE SET NULL` 之后的形态）；消息在而偏移缺 = 半截行，**大声失败**而不是当成「从顶部开始」 |
@@ -420,14 +423,19 @@ runner **阻止不了**，只能在事后检测到并抛 `IllegalStateException`
 ## 应用层入口索引（:app）—— 首页与设置（T-012）
 
 首屏是**一个页面**（PRD 6.2.16 取消了「空态页 + 新建主题页」的拆分），因此 `MainActivity` 是唯一
-Activity、唯一宿主，首页与设置页是同一个 Activity 的两个状态，靠替换宿主子视图切换；对话页
-（T-013）、树画布（T-038）与导航页（T-039）都用同一种方式接上（各见对应小节）；搜索页的入口仍由搜索 lane
+Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话页（T-013）、树画布（T-038）与导航页（T-039）
+都用同一种方式接上（各见对应小节）；搜索页的入口仍由搜索 lane
 继续加进来（T-040，已于 2026-09-22 落地，见「搜索页与首页搜索入口（T-040）」）。
+
+**但一级目的地自 T-052 起多了一件外壳：常驻底部标签栏。** PRD V3.2 6.2.16 把 主页 / 学习库 / 设置
+并列为三个对等入口，`activity_main.xml` 因此从「一个 `shell_host`」变成「`shell_host` + 常驻
+`screen_tab_bar`」：标签栏由外壳拥有、任何屏幕都不自己画一份，显隐只在 `MainActivity.swap()` 一处判定，
+二级屏返回落回发起它的那个标签。细节见「底部标签栏与学习库（T-052）」一节。
 
 | 类型 | 职责 | 关键不变量 |
 | :--- | :--- | :--- |
 | `AppContainer` | 依赖装配：真实 `SettingsRepository` + `KeystoreSecretStore`、单后台线程、主 Looper 的 `UiThread` | 只持 application context，不持 Activity；所有 store 调用串行在一条线程上 |
-| `MainActivity` | 应用外壳：在 `R.id.shell_host` 里换屏，实现 `HomeSink` + `SettingsSink` + `ChatSink` + `TreeCanvasSink` + `NavigationSink` + `SearchPresenter.Sink` | 自己不持草稿、不持状态、不做决策；每个屏幕的系统返回由它统一接管（见「系统返回」） |
+| `MainActivity` | 应用外壳：在 `R.id.shell_host` 里换屏 + 常驻 `R.id.tab_bar` 的显隐与高亮，实现 `HomeSink` + `SettingsSink` + `ChatSink` + `TreeCanvasSink` + `NavigationSink` + `SearchPresenter.Sink` + `LibrarySink` | 自己不持草稿、不持状态、不做决策；每个屏幕的系统返回由它统一接管（见「系统返回」）；一级 / 二级的分别只由 `swap()` 与 `showTab()` 两处判定（T-052） |
 | `ui.HomePresenter` | 首页的全部决策 | 草稿只在 accepted 分支清空；推荐点击先写入草稿再走同一条 `onSubmit()`；缺 Key 时只提示并跳设置，**不写任何行** |
 | `ui.HomeViewState` | 首页可绘制的全部状态（相位/草稿/Key/模型/思考/列表/推荐/提交中/提示） | 四相位 LOADING/EMPTY/ERROR/READY；`Notice` 是分类不是句子；两个列表不可变 |
 | `ui.SettingsPresenter` | 设置页决策：读 Key 状态、保存/替换、删除 | Key 文本从不进入任何 ViewState；缓冲区归它所有并 `finally` 擦除，成功失败都擦 |
@@ -457,7 +465,10 @@ Activity、唯一宿主，首页与设置页是同一个 Activity 的两个状�
 **资源与尺寸事实：**
 
 - `res/values/dimens.xml` 是这一层的令牌表（间距 4/8/12/16/24/32、`page_gutter` 20dp、
-  `touch_min` 44dp、字阶 `text_display`…`text_cap`）。布局只引用名字，不内联 dp。
+  `touch_min` 44dp、圆角 `radius_sm`/`radius_md`/`radius_lg`/`radius_full` = 8/14/18/99dp、
+  字阶 `text_display`/`text_h1`/`text_h2`/`text_body`/`text_sm`/`text_cap` = 26/20/16/15/13/11sp）。
+  布局只引用名字，不内联 dp。本轮（T-050）把圆角与字阶对齐 Figma 新稿档位，**条目名一个都没动**；
+  `space_*` 四档与 `page_gutter` 新稿与原值相同，故未变。
 - 手机与平板**共用同一份列**：`layout/screen_home_body.xml`、`layout/screen_settings_body.xml`；
   `layout/screen_*.xml` 是整宽单列，`layout-sw600dp/screen_*.xml` 把同一个列 include 成
   `@dimen/content_measure`（640dp）并水平居中，两种配置因此不可能漂移。
@@ -469,8 +480,11 @@ Activity、唯一宿主，首页与设置页是同一个 Activity 的两个状�
 **系统返回（不要在 `MainActivity` 里重写 `onBackPressed`）：**
 
 - API 33+ 走框架的 `getOnBackInvokedDispatcher().registerOnBackInvokedCallback(...)`；API 28–32 走
-  `dispatchKeyEvent(KEYCODE_BACK)` 回落；两条路都收敛到同一个 `onBackRequested()`（设置页 → 导航页 → 画布 →
-  对话页 → 退出应用，见「导航页与归档 / 恢复 / 永久删除（T-039）」）。
+  `dispatchKeyEvent(KEYCODE_BACK)` 回落；两条路都收敛到同一个 `onBackRequested()`（设置页 → 搜索页 →
+  导航页 → 画布 → 对话页 → 学习库 → 退出应用，见「导航页与归档 / 恢复 / 永久删除（T-039）」与
+  「底部标签栏与学习库（T-052）」）。
+- **二级屏的返回落点是发起它的那个标签，不是首页**（T-052）：对话页与搜索页的返回走 `showTab(currentTab)`，
+  因此从学习库进对话再返回落回学习库；`currentTab` 只被标签点击与一级屏自身改写。
 - **不能用 AndroidX 的 `getOnBackPressedDispatcher()`**：lint 的 `GestureBackNavigation` 会这么建议，但
   `:app` 主代码的编译类路径解析出来是**零 AndroidX 坐标**（只有四个 project 依赖，见
   `artifacts/evidence/T-012-lint.txt` 的 `:app:dependencies` 输出），而 `androidx.activity` 会连同
@@ -642,7 +656,7 @@ View 自己不持内容。
 | `screen.ChildBranchPopup` | 子分支列表弹层（`PopupWindow` + `showAsDropDown`） | 行是**传进来**的，弹层不读库；只有点行才导航，点外面或按返回只关列表 |
 | `wiring.BranchChildren` | 「这条回答的直接子分支」与「每个位置各有几个子分支」的唯一判定点 | 子 = 非根、带 source message、未归档；chips 与弹层两处读同一份，因此不会出现「数量说有、列表却拿不出」 |
 | `wiring.ChatWiring` | 对话的**真实**数据路径（T-032）：读回 + 五条命令，实现 `ChatData` 与 `ChatCommands` | 读回走 `MessageDao.findByBranch` / `AnswerRevisionDao` / `GenerationOperationDao`；`send`/`retry`/`reset` 装配请求后交协调器、`selectRevision` 直接落库、`fork` 走 `BranchCreation`；每条拒绝都以可见 `Notice` 返回 |
-| `wiring.ChatStore` / `wiring.SqliteChatStore` | 对话的端口与它的 SQLite 实现 | 端口**委托** T-010 的 `AnswerVersions`/`PositionCommands`，不复制它们的判定；`history()` 用编码器自己的 `ContextPlan.Entry` 词汇表达「问题之前的行」，历史因此就是存储的行 |
+| `wiring.ChatStore` / `wiring.SqliteChatStore` | 对话的端口与它的 SQLite 实现 | 端口**委托** T-010 的 `AnswerVersions`/`PositionCommands`，不复制它们的判定；`history()` 用编码器自己的 `ContextPlan.Entry` 词汇表达「问题之前的行」——非根分支先经 `ContextSnapshot.fromStored` 读回出生快照、由 `SnapshotHistoryMerger`（T-064，纯 JVM 类型）按 sources 顺序展开成前置 entry，再接本分支行；快照行缺失（根分支）时就是存储的行。快照不可解码或引用的行已不在时经 `ChatStore.SnapshotUnreadable` 拒绝本次请求（STORAGE 提示），不静默丢上游背景 |
 | `wiring.PromptLimits` | 请求预算的两个数字，全应用唯一取值点 | `AppContainer` 用 `PromptLimits.budget()` 构造那一个 `PromptBudget`；数字与理由见 `:app` 首页一节的「请求预算（T-032 的一次决定）」 |
 | `wiring.LogcatTelemetry` | 协调器的遥测出口 | 只记状态与计数，**不记** Key、system prompt、问题、回答或 reasoning 正文 |
 
@@ -712,11 +726,17 @@ View 自己不持内容。
   不该有两种说法，所以没有第二份映射；但这个名字已经比它的第一个用户大了，行为无关的重命名
   （`HomeViewState.Notice` → `FailureNotice`）记在这里作为后续工作。**`Notice.NOT_WIRED` 已随 T-032 一并
   删除**：生产装配里不再有任何一条路径会返回它，枚举里留着它就等于留一条永远不可达的分支。
-- **对比度已按 token 修好（2026-09-21）**：展开正文用的次级灰 `tl_ink2` 在 `tl_surface` 上是 **5.67:1**、
-  在 `tl_bg` 上是 **5.23:1**；最浅一档 `tl_ink3` 原本只有 **3.16:1 / 2.92:1**，低于 4.5:1 的可读底线，
-  已改**调色板 token**（`#8A938E` → `#636F66`，现为 **5.26:1 / 4.85:1**），不是它的 27 个调用点中的任何一个；
-  三档灰（`tl_ink` > `tl_ink2` > `tl_ink3`）的层次不变。四个数字与测量命令见
-  `artifacts/evidence/T-013-static-ui-checks.txt` 的 CHECK 3 及其复跑块。
+- **对比度已按 token 修好（2026-09-22 随新稿基座复算，取代 2026-09-21 的 T-013 记录）**：设计基座同步到
+  Figma 新稿配色后，展开正文用的次级灰 `tl_ink2` 在 `tl_surface` 上是 **7.80:1**、在 `tl_bg` 上是 **7.16:1**。
+  新稿自带两处回退，本轮用修正值落地：`tl_ink3` 用 `#627067`（新稿的 `#75867B` 实测只有 **3.42:1 / 3.72:1**，
+  低于 4.5:1 的可读底线），现为 **4.62:1 / 5.03:1**，在 `tl_amber_soft` 上 **4.72:1**；`tl_amber` 用 `#B05108`
+  （新稿的 `#B45309` 在 `tl_bg` 上只有 **4.45:1**，旧值 `#B7791F` 更是只有 3.36:1），现为
+  **4.63:1 / 5.04:1**，在 `tl_amber_soft` 上 **4.72:1**。改的都是**调色板 token**（`res/values/colors.xml`），
+  不是它们在各布局里的调用点；三档灰（`tl_ink` > `tl_ink2` > `tl_ink3`）的层次不变。
+  历史：2026-09-21 的 T-013 曾把 `tl_ink3` 由 `#8A938E`（3.16:1 / 2.92:1）调到 `#636F66`（5.26:1 / 4.85:1），
+  该值已随本轮新稿同步被 `#627067` 取代；T-013 的原始数字与测量命令见
+  `artifacts/evidence/T-013-static-ui-checks.txt` 的 CHECK 3。本轮全部数字、矩阵与测量命令见
+  `artifacts/evidence/T-050-design-token-sync.txt`。
 - **本轮不使用模拟器**（用户指令 2026-09-21）：`:app:assembleDebugAndroidTest` 只做**编译验证**，
   `app/build/outputs/androidTest-results/connected/debug` 保持为空。必须上设备才能证明的验收项一律记为
   `deferred — emulator not used this round (user instruction 2026-09-21)`：真机上的流式刷新节奏、展开态在
@@ -807,6 +827,86 @@ View 自己不持内容。
 - **规模超硬上限**：本切片 **646 非空非注释生产行**（新增 531 + 改动 115，`artifacts/evidence/T-039-sizing-final.txt`），
   超 200 行软上限、也超 500 行硬上限；**没有用户批准的规模例外**，属待裁定偏差，不得当成已批准例外引用。
 
+## 应用层入口索引（`:app`）—— 底部标签栏与学习库（T-052）
+
+V3.2 PRD 6.2.16 把 主页 / 学习库 / 设置 并列为一级入口，并给出一个常驻底部标签栏。此前 `MainActivity`
+只有「一个 Activity、一个宿主」，一级目的地由页面自身充当；本节记录这一层外壳、学习库屏，以及它们各自
+**唯一的那处判定**。
+
+| 类型 | 职责 | 关键不变量 |
+| :--- | :--- | :--- |
+| `res/layout/activity_main.xml` | 应用外壳的盒子：`LinearLayout(main_root)` 里是 `shell_host`（`0dp` + `weight=1`）与 `<include layout="@layout/screen_tab_bar"/>` | 标签栏是**外壳的一部分**，不是任何屏幕画的；`R.id.main_root` 与 `R.id.home_draft` 都仍在（`AppLaunchInstrumentedTest` 依赖） |
+| `res/layout/screen_tab_bar.xml` + `layout-sw600dp/` 镜像 | 三个标签项 `tab_home` / `tab_library` / `tab_settings`，每项 `minHeight=touch_min`，带 24dp 图标与标签 | 三项在同一个布局里**各自命名 id**（`tab_home_icon` 等）：三个 `tab_icon` 是重复 id，lint 在 `abortOnError` 下会当场让 `check` 失败；图标与文案仍留在声明式布局里，没有搬到代码 |
+| `MainActivity.swap(View)` | 换屏，并且是**唯一**判定标签栏显隐的地方 | 判定读的是外壳自己刚换上去的那块屏幕（`screen == homeScreen \|\| screen == libraryScreen \|\| (screen == settingsScreen && settingsIsAFrontRoom())`），所以栏与屏不可能互相不一致；让每个屏自己定位一次标签栏，就是在第一次有人忘记时开始漂移 |
+| `MainActivity.showTab(Tab)` / `selectTab(Tab)` / `markTab(...)` | 一级目的地按名称进入；`currentTab` 是「一级现在站在哪」的唯一记录 | `showTab` 是**除点标签之外唯一移动一级的方式**，二级屏只读它、不写它；`markTab` 同时给 label 上色与给 icon 上 tint（`tl_green_deep` / `tl_ink3`），只改一个就是半选中 |
+| `MainActivity.settingsIsAFrontRoom()` | 「设置是不是一级目的地」这一条规则的唯一实现 | 两个读者（`showSettings()` 与 `swap()`）共用它；从对话里进设置是**旁路**，一级仍停在对话，所以返回回到那段对话 |
+| `library.LibraryData` / `LibrarySink` / `LibraryViewState` / `LibraryPresenter` | 学习库的读端口、出口、可绘制状态与全部判定 | 屏幕**不做任何判定**：能否列出、在哪个相位、每行说什么，全部来自一个不可变 `LibraryViewState`；相位 LOADING / READY / EMPTY / ERROR，空表是 EMPTY 而不是错误 |
+| `wiring.SqliteLibraryStore` | 学习库的真实数据路径：把连接交给 `TopicDao.listOverviews` | **只读**：本切片不加表、不加列、不加 migration、没有写方法可误用，所以它连事务执行器都不需要——那样的构造只可能为了一次裸写 |
+| `wiring.LibraryWiring` | `TopicDao.Overview` → `LibraryViewState.Row` 的映射 | 树名只由 `BranchHeading.of(存下来的标题, 首个用户问题)` 给出，与首页卡片、对话标题**同一个实现**，所以一个主题不可能在库里叫另一个名字 |
+| `screen.LibraryScreen` + `res/layout/screen_library*.xml` / `screen_library_body.xml` / `item_library_topic.xml` | 学习库视图：标题、搜索框位、两个分段位、行列表与状态句 | 行 = 强调条 + 标题 + 「分支数 · 最近使用（· 未读数）」；未读点没读就 `gone`；屏幕里没有 SQL、没有 DAO、没有排序 |
+| `AppContainer.libraryData()` | 组合根暴露的端口 | 装配只发生一次，学习库与首页读的是同一条连接、同一条语句 |
+| `android/app/src/androidTest/java/com/treelearn/app/BottomTabShellInstrumentedTest.java` | 本片验收：标签可达与高亮、两条返回落点、学习库真实行、空表空态 | 每个动作都走产品真的画出来的控件（标签项、库行、对话的返回与导航按钮、导航页的返回），不调私有方法、不模拟系统返回手势 |
+
+**这一层的交互事实：**
+
+- **标签栏显隐只有一条规则**：一级目的地（主页 / 学习库 / 作为一级的设置）显示，二级屏（对话、画布、导航页、
+  搜索页、作为旁路的设置）隐藏；判定集中在 `swap()`，屏幕不参与。
+- **二级屏返回落回发起它的标签**：对话页与搜索页的返回走 `showTab(currentTab)`，画布与导航页各自回到打开它的
+  那段对话。从主页进对话返回落主页、从学习库进对话（再到导航页）逐层返回落学习库，两条路都各有真机用例。
+- **学习库的行点击复用同一条开门路径**：行 → `LibraryPresenter.onTopicTapped` → `ChatSink.openBranch(resumeBranchId)`
+  → `MainActivity.showChat(branchId)`，与首页列表项点开的是同一个方法，不是第二份「怎么打开一段对话」。
+- **每次进学习库都是新读一次**：屏幕与 presenter 按访问构造、离开即丢，所以在对话里新建的主题下一次看就在
+  列表里，而不是下次启动才在。
+- **`TopicDao.listOverviews` 是首页与学习库共用的那一条只读语句**（`ORDER BY t.updated_at DESC, t.id ASC`）；
+  未读数是 `latest_stable_sequence - last_seen_stable_sequence` 的求和，与首页卡片同源。
+- **晚到的对话状态被丢弃而不是画进已离开的屏**：`showChat` 被二级屏接管时会置空 `chatScreen`，而对话的读
+  （以及生成中的轮询）仍可能在飞，因此 `render(ChatViewState)` 与 `renderPosition(...)` 现在与导航页同样有
+  空守卫。这是本片**新验收路径第一次走出来的既有崩溃**（修复前进程直接 NPE 退出），不是新增行为。
+- **跨分支的晚到状态同样被丢弃（T-064）**：`render(ChatViewState)` 比对 `state.branchId` 与当前屏分支、
+  `renderPosition(branchId, ...)` 比对随调用交出的分支（`ReadingPosition` 自身不带身份），不一致一律丢弃——
+  fork 打开新对话后，旧 presenter 的收尾 read 不再把旧分支内容闪进新屏。
+
+**已知缺口与记录的偏差（不要读成已解决）：**
+
+- **两处占位不是控制**：`library_search_input`（054 接管）与 `library_segment_done`（053 接管）只有位置和 id，
+  `focusable="false"` 且没有监听器，点它们什么都不发生。
+- **「已完成」分段与已归档主题不在本片**：本片只画「进行中」一个分段并列出全部主题；`archived_at` 分段与非根
+  子树删除由 053 在本片产物上补。
+- **`strings.xml` 只追加了 `tab_*` 与 `library_*` 前缀键**，没有重排、没有改动其他切片的键。
+- **规模超硬上限、已获用户批准的例外**：判定值 **575** 非空非注释生产行（新增文件 439 + 既有文件净增 136，
+  口径为仓库脚本 `count_production_lines.py` 对改动前后整文件剥注释后相减；逐文件明细见
+  `artifacts/evidence/T-052-tab-shell-library.txt` 第 8 节），超 200 行软上限、也**超 500 行硬上限 15%**。
+  用户于 2026-09-22 明确批准继续复核；批准发生在实现完成之后，属**事后追认**，不得写成事先批准。超出估算（340）
+  的部分主要来自两套平台分支的标签栏（101 行）与学习库页壳（27 行）这类结构性重复——去掉平板那一份本不会超线。
+  剩余风险：单片 575 行，出问题时的二分定位粒度比小片粗；本例外按任务逐项记录，**不自动适用于 053–058**。
+  （另有两个非判定口径的数字曾出现过：实现者手搓过滤的 592 与逐行剥注释的 676；三者同向、均超 500，判定值取 575。）
+- **`layout-sw600dp/` 只由构建与 id 可达性证明**：本轮没有像素或观感证据（沿用 2026-09-21 的既有决定）。
+
+## 图标资产约定（T-056 / T-057 建立）
+
+来源为 Figma 新稿 `src/icons.tsx`（25 枚线性图标）。工程按领地分片登记：
+
+- **052**：`ic_tab_home / ic_tab_library / ic_tab_settings`（底部标签栏）。
+- **056（导航、列表与设置）**：`ic_nav_back / ic_nav_chat / ic_nav_tree / ic_nav_more / ic_nav_restore`，
+  用于 `screen_navigation_body`、`item_navigation_row`、`screen_settings_body`。
+- **057（对话与动作）**：`ic_action_quote / ic_action_copy / ic_action_fork`、
+  `ic_chat_send / ic_chat_close / ic_chat_gear / ic_chat_overview`，用于 `screen_chat_body`、`view_answer_actions`。
+- **058（画布控制条）**：待建。
+- **055（首页）**：首页顶栏「搜索 / 归档 / 设置」随首页瘦身整块删除，不建图标。
+
+绘图约定（两组资产逐项一致，由 `IconAssetsTest` 把守）：
+
+1. 24dp 网格：`width/height=24dp`、`viewportWidth/Height=24`。
+2. 描边 1.8、`strokeLineCap=round`、`strokeLineJoin=round`；纯实心图形（如 more 圆点）无描边，不受此条约束。
+3. 资产内只写中性源色（`#FF212121`），**不引用业务色 token**（`@color/tl_*` 零命中）——同一图标要在
+   深绿（主动作）与次要灰（次要动作）两种语义下复用，实际着色一律由使用处 `android:tint` 或
+   `android:drawableTint` 决定。`check_design_tokens.py` 不扫描 `res/drawable/`，此约定靠 `IconAssetsTest`。
+4. 图形相同的图标**复用同一文件**、不重复建（如 `ic_nav_restore` 与 `act_reset` 同为原型 IRefresh）；
+   命名前缀只标领地，不构成互斥所有权。
+5. 图标动作位必须有非空 `contentDescription`（`cd_*` 键）；原文字字符串键保留不删（其他位置可能仍引用）。
+6. Java 按 `findViewById` 持有的控件类型不可变：声明为 `Button` 的动作位保留 Button、用
+   `drawableStart + text=""` 的复合 drawable 方案；无类型声明的才可改 ImageView。改 id 会在运行时崩溃且编译期无错。
+
 ## 常用命令
 
 ```bash
@@ -844,6 +944,21 @@ python scripts/dev/lint_summary.py
 # 设备测试（需已连接设备/模拟器）
 # 约定：所有 instrumentation 测试都放在 :app 的 androidTest 源集，
 # 这样只需一份 test APK 与一个测试栈，避免多模块重复引入测试依赖。
+#
+# **全量 connectedDebugAndroidTest 必须在真机与模拟器上各跑一次**：平台异常文案的前缀随 Android
+# 版本变化（API 36 = `(code N`、Android 13 真机 = `(Sqlite code N`），只在一个环境上跑无法证明
+# 取码判定对两种文案都成立。理由与实测文案见上文「约束错误码与跑测环境」。
+# 只跑一台设备时用 ANDROID_SERIAL 定向（`connectDebugAndroidTest` 会跑所有已连接设备）：
+#   ANDROID_SERIAL=AWSS013807000356 ./gradlew :app:connectedDebugAndroidTest
+#
+# 2026-09-22 T-060 起，真机 `ALP-AN00` 与模拟器 `Medium_Phone_API_36.1` 两个环境都是
+# 178 tests / 0 failures。T-052 当时记下的 26 个失败已按其**真实成因**分四类修掉
+# （21 处测试写死文案前缀 / 2 处生产取码读不到扩展码 / 2 处测试在成功结果上急切求值 `.error()` /
+# 1 处夹具缺分支标题），原始失败日志保留在 artifacts/evidence/.t052-full-androidtest.log。
+#
+# 另外：设备**熄屏**时没有合成帧，也就没有 layout 遍历，任何读视图几何的断言都会超时失败
+# （表现为 getHeight() 恒为 0）。跑之前先唤醒并解锁：
+#   adb shell input keyevent KEYCODE_WAKEUP && adb shell wm dismiss-keyguard
 ./gradlew :app:connectedDebugAndroidTest
 
 # 全部检查（含依赖方向与 dex 级 Java-only 守门）
@@ -858,6 +973,43 @@ python scripts/dev/lint_summary.py
 - **SDK 决策（用户 2026-09-21 确认）**：统一以 API 36 / 36.1 为开发与验收目标，
   不再建设 API 28 环境。`minSdk 28` 仍作为声明的最低兼容版本，
   由 `compileSdk 36 + minSdk 28` 的 lint `NewApi` 检查覆盖。
+
+## 约束错误码与跑测环境
+
+SQLite 的扩展结果码（UNIQUE `2067`、NOT NULL `1299`、CHECK `275`、FOREIGN KEY `787`、
+TRIGGER `1811`）**只能从平台异常（`SQLiteConstraintException`）的文案里读出来**——
+`android.database.sqlite` 没有暴露取码的访问器（已核对 `android-36/android.jar`：该类只有三个
+构造器）。而这份文案由 Android 版本构造，**前缀与尾缀会随版本变化**：
+
+| 环境 | 同一次 UNIQUE 冲突的实际文案 |
+| :--- | :--- |
+| API 36（模拟器 `Medium_Phone_API_36.1`） | `UNIQUE constraint failed: generation_operations.branch_id (code 2067 SQLITE_CONSTRAINT_UNIQUE)` |
+| Android 13（真机 `ALP-AN00`） | `UNIQUE constraint failed: generation_operations.branch_id (Sqlite code 2067 SQLITE_CONSTRAINT_UNIQUE), (OS error - 2:No such file or directory)` |
+
+因此**取码判定不依赖前缀，且全仓只有一处**：`data` 模块的
+`com.treelearn.data.db.ConstraintExtendedCode`（只匹配稳定片段 `code <digits>`）。生产侧由
+`ConstraintFailures.extendedCode` 委托它，androidTest 的 `assertCause` 也经它取码。
+分工是**取码共用、码值独立**：共用取码点是为了不让同一条规则写成五份而漂移；期望的**码值**
+仍由各测试自己写成字面量，否则测试会退化成实现的镜像、一起错也一起绿。放宽前缀的代价由既有
+的**双重判据**兜住——`ConstraintFailures.isUniqueOn` 仍同时要求「码值相同」**且**「文案含
+`UNIQUE constraint failed: <列名列表>`」，二者缺一会把 NOT NULL / CHECK 报成唯一冲突。
+
+同一次 **CHECK** 拒绝还会以另一种方式漂移，而且这次两环境**无共同片段**：API 36 报失败的
+**表达式**（`CHECK constraint failed: role IN ('USER','AI')`），Android 13 只报**表名**
+（`CHECK constraint failed: messages`）。所以 `SqliteSchemaInstrumentedTest` 不再断言这段文案，
+改用**三角证明**：运行时断言「码 = 275 **且**拒绝发生在本场景对该表的写语句上」，静态断言该表的
+DDL（`sqlite_master` 里的建表原文）**声明了**该约束的期望片段，同一测试内再加**正控**（合法行必须
+被接受）。代价如实登记：运行时文案不再能证明「是该表上的**哪一条** CHECK 拒绝的」（`branches` 有
+6 条 CHECK、`messages` 有 3 条），这一段由上述三段合起来承担。要彻底恢复「精确到该约束」，需要给
+CHECK 起名（`CONSTRAINT ck_... CHECK (...)`）——那会改 `CREATE TABLE` 且既有库需重建表，属 schema
+与 migration 变更，记为独立片候选，不在本片范围内。
+
+**跑测约定：全量仪器测试必须在真机与模拟器上各跑一次。** 这条来自一次实测教训
+（T-2026-09-22-060）：过去的仪器测试证据全部产自 API 36 模拟器，而当时的取码规则只认
+`(code ` 前缀，于是 Android 13 真机上的唯一约束冲突被读成「没有码」，重复主题 id 在真机上
+报的是 `STORAGE_REFUSED` 而不是 PRD 规定的 `TOPIC_ID_ALREADY_EXISTS`。**这个生产缺陷一直错着，
+却从未被任何一次以模拟器为环境的验收照到**——所以「只在一个环境上跑」的结论不能当作
+「两种文案都认」的证据。两处的原始输出见 `artifacts/evidence/T-059-constraint-codes.txt`。
 
 ## Release 签名
 

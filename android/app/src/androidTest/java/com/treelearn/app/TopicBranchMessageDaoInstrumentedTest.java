@@ -22,6 +22,7 @@ import com.treelearn.core.domain.GenerationState;
 import com.treelearn.core.domain.Message;
 import com.treelearn.core.domain.MessageRole;
 import com.treelearn.core.domain.Topic;
+import com.treelearn.data.db.ConstraintExtendedCode;
 import com.treelearn.data.db.DatabaseTransactionRunner;
 import com.treelearn.data.db.TreeLearnDatabaseHelper;
 import com.treelearn.data.db.TreeLearnSchema;
@@ -43,7 +44,9 @@ import java.util.List;
  * <p>Rejections are asserted <em>by cause</em> using the SQLite extended result code, for the same
  * reason T-004 moved to them: a message substring can be satisfied by the wording of the constraint
  * rather than by its class. Codes measured in
- * {@code artifacts/evidence/T-004-constraint-code-probe.txt}.
+ * {@code artifacts/evidence/T-004-constraint-code-probe.txt} (API 36) and
+ * {@code artifacts/evidence/T-059-constraint-codes.txt} (Android 13), and read through the shared
+ * {@link ConstraintExtendedCode} point rather than through a hand-written prefix.
  *
  * <p>Holds no real user content and no API key: every literal is synthetic (rules/sql.md).
  */
@@ -63,9 +66,15 @@ public final class TopicBranchMessageDaoInstrumentedTest {
     /** Synthetic policy version; the body of that policy never appears here. */
     private static final String POLICY_VERSION = "tl-learning-answer/1.0.0";
 
-    private static final String CODE_UNIQUE = "(code 2067";
-    private static final String CODE_CHECK = "(code 275";
-    private static final String CODE_NOT_NULL = "(code 1299";
+    /**
+     * Declared here independently; the reading of the code out of the refusal text is shared with
+     * production through {@link ConstraintExtendedCode}. The reader matches the stable
+     * {@code code <digits>} fragment rather than a prefix, because Android spells the same refusal as
+     * {@code (code 2067 ...)} on API 36 and as {@code (Sqlite code 2067 ...)} on Android 13.
+     */
+    private static final int CODE_UNIQUE = 2067;
+    private static final int CODE_CHECK = 275;
+    private static final int CODE_NOT_NULL = 1299;
 
     private TreeLearnDatabaseHelper helper;
     private DatabaseTransactionRunner runner;
@@ -655,10 +664,12 @@ public final class TopicBranchMessageDaoInstrumentedTest {
                 actual.activeOperationId());
     }
 
-    private static void assertCause(String scenario, String message, String expectedCode,
+    private static void assertCause(String scenario, String message, int expectedCode,
                                     String requiredText) {
-        assertTrue(scenario + ": expected " + expectedCode + " but got " + message,
-                message.contains(expectedCode));
+        int actualCode = ConstraintExtendedCode.of(message);
+        assertTrue(scenario + ": expected code " + expectedCode + " but got code " + actualCode
+                        + " in: " + message,
+                actualCode == expectedCode);
         if (requiredText != null) {
             assertTrue(scenario + ": the failure must name " + requiredText + " but was " + message,
                     message.contains(requiredText));

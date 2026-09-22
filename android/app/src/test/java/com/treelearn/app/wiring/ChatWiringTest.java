@@ -278,6 +278,9 @@ public class ChatWiringTest {
 
     @Test
     public void forkOpensTheChildBranchWithoutStartingAnAttempt() {
+        // T-064 gave fork the same key guard send and replace already had, so a fork that runs
+        // must be one a configured vault allowed through (PRD §6.2.3 exception 2).
+        key.configured = true;
         AnswerRevision stable = revision(WiringDoubles.ANSWER_ID, "the reasoning", "the answer");
         Message source = Message.restore(WiringDoubles.ANSWER_ID, WiringDoubles.BRANCH_ID,
                 com.treelearn.core.domain.MessageRole.AI, 1, null, "", WiringDoubles.NOW, stable.id,
@@ -304,6 +307,9 @@ public class ChatWiringTest {
 
     @Test
     public void forkRefusesAPositionThatDisplaysNoStableVersion() {
+        // The vault is configured so the refusal that reaches this position is the storage one the
+        // test names, not the key guard that now runs before it (T-064).
+        key.configured = true;
         store.positions.put(WiringDoubles.ANSWER_ID, Message.restore(WiringDoubles.ANSWER_ID,
                 WiringDoubles.BRANCH_ID, com.treelearn.core.domain.MessageRole.AI, 1, null, "", WiringDoubles.NOW, null, null));
         store.branch = Branch.root(WiringDoubles.TOPIC_ID, WiringDoubles.NOW);
@@ -329,8 +335,57 @@ public class ChatWiringTest {
         assertEquals(0, store.createBranchCalls);
     }
 
+    /**
+     * T-064: fork joins send and replace behind the same key guard (PRD §6.2.3 exception 2). The
+     * refusal has to land before any row is chosen, so an unconfigured vault can never spend the
+     * store writes a fork needs - and never open a branch it could not have asked a question in.
+     */
+    @Test
+    public void forkWithoutKeyIsRefusedBeforeCreation() {
+        // A position that is forkable in every other respect; only the vault is empty.
+        AnswerRevision stable = revision(WiringDoubles.ANSWER_ID, "the reasoning", "the answer");
+        Message source = Message.restore(WiringDoubles.ANSWER_ID, WiringDoubles.BRANCH_ID,
+                com.treelearn.core.domain.MessageRole.AI, 1, null, "", WiringDoubles.NOW, stable.id,
+                null);
+        store.positions.put(WiringDoubles.ANSWER_ID, source);
+        store.branch = Branch.root(WiringDoubles.TOPIC_ID, WiringDoubles.NOW);
+        store.conversation = new ChatStore.Conversation("", Arrays.asList(
+                user(0, WiringDoubles.FIRST_QUESTION), answer(1, WiringDoubles.ANSWER_ID, stable)));
+        key.configured = false;
+
+        ChatCommandResult result = wiring().fork(WiringDoubles.ANSWER_ID, "");
+
+        assertFalse(result.isAccepted());
+        assertEquals(HomeViewState.Notice.KEY_MISSING, result.notice());
+        assertEquals(0, store.createBranchCalls);
+        assertEquals(0, generation.submitCalls);
+    }
+
+    /**
+     * T-064's failure channel: a birth snapshot that cannot be proven intact stops the request
+     * instead of sending a silently shortened history (PRD §6.2.4 exception 2). The store raises,
+     * the wiring turns it into the STORAGE notice the presenter draws.
+     */
+    @Test
+    public void sendRefusesWhenTheBirthSnapshotCannotBeTrusted() {
+        key.configured = true;
+        store.nextOrdinal = 0;
+        store.historyFailure = new ChatStore.SnapshotUnreadable(
+                "the stored snapshot payload does not hash to its stored digest");
+
+        ChatCommandResult result = wiring().send(WiringDoubles.BRANCH_ID, "a follow-up", "",
+                WiringDoubles.MODEL, false);
+
+        assertFalse(result.isAccepted());
+        assertEquals(HomeViewState.Notice.STORAGE, result.notice());
+        assertEquals(0, generation.submitCalls);
+    }
+
     @Test
     public void forkSurfacesARefusedCreationAsStorage() {
+        // The vault is configured so the refusal that reaches the store is the creation one the
+        // test names, not the key guard that now runs before it (T-064).
+        key.configured = true;
         AnswerRevision stable = revision(WiringDoubles.ANSWER_ID, "", "the answer");
         Message source = Message.restore(WiringDoubles.ANSWER_ID, WiringDoubles.BRANCH_ID,
                 com.treelearn.core.domain.MessageRole.AI, 1, null, "", WiringDoubles.NOW, stable.id,

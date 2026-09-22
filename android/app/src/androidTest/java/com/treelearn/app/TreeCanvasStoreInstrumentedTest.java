@@ -258,7 +258,8 @@ public final class TreeCanvasStoreInstrumentedTest {
 
         DomainResult<Void> folded = canvas.setCollapsed(writes.branch.id, true, T0 + 20);
 
-        assertTrue("storing the fold must be accepted: " + folded.error(), folded.isOk());
+        assertTrue("storing the fold must be accepted: " + (folded.isOk() ? "" : folded.error()),
+                folded.isOk());
         assertEquals("the column carries the new flag, not merely the object", Integer.valueOf(1),
                 collapsedColumnOf(writes.branch.id));
         assertTrue("and the row reads back folded through the domain",
@@ -270,7 +271,8 @@ public final class TreeCanvasStoreInstrumentedTest {
 
         DomainResult<Void> unfolded = canvas.setCollapsed(writes.branch.id, false, T0 + 30);
 
-        assertTrue("unfolding is the same write: " + unfolded.error(), unfolded.isOk());
+        assertTrue("unfolding is the same write: " + (unfolded.isOk() ? "" : unfolded.error()),
+                unfolded.isOk());
         assertEquals("the column goes back to 0", Integer.valueOf(0),
                 collapsedColumnOf(writes.branch.id));
         assertFalse("and the row reads back unfolded",
@@ -305,7 +307,8 @@ public final class TreeCanvasStoreInstrumentedTest {
 
         // Pinned as the store behaves, not as a screen would want it: the canvas never draws an
         // archived branch, so this path is unreachable from the UI, but the store does not refuse it.
-        assertTrue("archive is not a guard on the fold: " + folded.error(), folded.isOk());
+        assertTrue("archive is not a guard on the fold: " + (folded.isOk() ? "" : folded.error()),
+                folded.isOk());
         assertEquals("the column carries the fold anyway", Integer.valueOf(1),
                 collapsedColumnOf(writes.branch.id));
         assertTrue("and archiving is untouched by the fold",

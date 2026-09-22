@@ -4,17 +4,24 @@ import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
+import android.content.res.ColorStateList;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.window.OnBackInvokedDispatcher;
 
+import com.treelearn.app.library.LibraryPresenter;
+import com.treelearn.app.library.LibrarySink;
+import com.treelearn.app.library.LibraryViewState;
 import com.treelearn.app.screen.ChatScreen;
 import com.treelearn.app.screen.HomeScreen;
+import com.treelearn.app.screen.LibraryScreen;
 import com.treelearn.app.screen.NavigationScreen;
 import com.treelearn.app.screen.SearchScreen;
 import com.treelearn.app.screen.SettingsScreen;
@@ -48,24 +55,49 @@ import com.treelearn.treelayout.ViewportConstraints;
 import java.util.List;
 
 /**
- * The app shell: one Activity, one host, screens swapped into it.
+ * The app shell: one Activity, one content host, and the persistent bottom tab bar that carries the
+ * first-level destinations.
  *
- * <p>The single entry page is a product decision, not a layout convenience - PRD 6.2.16 removed the
- * old "separate empty page and separate new-topic page" split, so the home page and the settings page
- * are two states of one Activity rather than two launcher targets. The conversation arrived in T-013
- * the same way, the tree canvas in T-038, and the archive list in T-039: further children of the same
- * host, not second Activities. Search arrived in T-040 the same way.
+ * <p><strong>The first level is a bar, not a page.</strong> PRD 6.2.16 as of V3.2 makes 主页 / 学习库 /
+ * 设置 three peers reachable from a bar the shell owns, so this Activity keeps two things apart: the
+ * content host, whose single child is swapped as before, and the bar, which is included once in
+ * {@code activity_main.xml} and never drawn by a screen. {@link #swap(View)} is the only place that
+ * decides whether the bar is on screen, and {@link #showTab} is the only place that decides which tab
+ * a first-level destination belongs to - so a second-level screen can never leave the bar behind, and
+ * a return can never land on the wrong tab.
+ *
+ * <p>The conversation arrived in T-013 the same way, the tree canvas in T-038, the archive list in
+ * T-039 and search in T-040: further children of the same host, not second Activities. The library is
+ * the fifth, and the only one that is a first-level destination rather than a screen opened from one.
  *
  * <p>The shell is the only place that knows about every screen; it holds no view state, no draft and no
- * decision of its own beyond one: which screen is on top, because that is what back acts on. A
- * conversation, a canvas and the navigation page are created per branch and dropped when they are left,
- * so nothing keeps a read screen or its presenter alive.
+ * decision of its own beyond two: which screen is on top - because that is what back acts on - and
+ * which tab the first level is standing on, because that is what back returns to. A conversation, a
+ * canvas, the navigation page and the library are created per visit and dropped when they are left, so
+ * nothing keeps a read screen or its presenter alive.
  */
 public final class MainActivity extends Activity
         implements HomeSink, SettingsSink, ChatSink, TreeCanvasSink, NavigationSink,
-        SearchPresenter.Sink {
+        SearchPresenter.Sink, LibrarySink {
+
+    /** The three first-level destinations the bottom bar carries. */
+    private enum Tab {
+        HOME,
+        LIBRARY,
+        SETTINGS
+    }
 
     private FrameLayout host;
+    private View tabBar;
+    private View tabHome;
+    private View tabLibrary;
+    private View tabSettings;
+    /**
+     * The tab the first level is standing on. Only a tab tap or a first-level screen changes it: a
+     * second-level screen leaves it alone, which is what makes a return land where it came from.
+     */
+    private Tab currentTab = Tab.HOME;
+
     private HomeScreen homeScreen;
     private SettingsScreen settingsScreen;
     private HomePresenter homePresenter;
@@ -93,6 +125,10 @@ public final class MainActivity extends Activity
     private SearchScreen searchScreen;
     private SearchPresenter searchPresenter;
 
+    /** The library page and its decisions; null while the page is not on screen. */
+    private LibraryScreen libraryScreen;
+    private LibraryPresenter libraryPresenter;
+
     private boolean showingSettings;
     private boolean homeStarted;
 
@@ -101,6 +137,10 @@ public final class MainActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         host = findViewById(R.id.shell_host);
+        tabBar = findViewById(R.id.tab_bar);
+        tabHome = findViewById(R.id.tab_home);
+        tabLibrary = findViewById(R.id.tab_library);
+        tabSettings = findViewById(R.id.tab_settings);
         registerSystemBack();
 
         container = AppContainer.get(this);
@@ -115,6 +155,10 @@ public final class MainActivity extends Activity
         homeScreen.setActions(homePresenter);
         settingsScreen.setActions(settingsPresenter);
         settingsScreen.setOnBackPressed(this::onBackRequested);
+
+        tabHome.setOnClickListener(view -> showHome());
+        tabLibrary.setOnClickListener(view -> showLibrary());
+        tabSettings.setOnClickListener(view -> showSettings());
 
         showHome();
     }
@@ -139,6 +183,10 @@ public final class MainActivity extends Activity
         }
         if (searchScreen != null) {
             searchPresenter.onResumed();
+            return;
+        }
+        if (libraryScreen != null) {
+            libraryPresenter.onResumed();
             return;
         }
         if (homeStarted) {
@@ -181,11 +229,13 @@ public final class MainActivity extends Activity
     /**
      * The one back decision: settings step back to whatever opened them, the navigation page steps back
      * to the conversation it was opened from, the canvas steps back to the conversation it was opened
-     * from - the same move the prototype's canvas appbar makes. The search page steps back to the home
-     * page, a conversation steps back to the home page, and the home page leaves the app.
+     * from - the same move the prototype's canvas appbar makes. The library steps back to the home tab,
+     * a conversation steps back to the tab it was opened from, the search page steps back to the tab
+     * that opened it, and the home page leaves the app.
      *
      * <p>Both platforms land here, so there is a single place that decides what back means and no
-     * second copy of the rule to drift.
+     * second copy of the rule to drift. A second-level screen returns through {@link #showTab} rather
+     * than to the home page: the tab the learner left from is the tab they come back to.
      */
     private void onBackRequested() {
         if (showingSettings) {
@@ -197,7 +247,7 @@ public final class MainActivity extends Activity
             return;
         }
         if (searchScreen != null) {
-            showHome();
+            showTab(currentTab);
             return;
         }
         if (navigationBranchId != null) {
@@ -209,6 +259,10 @@ public final class MainActivity extends Activity
             return;
         }
         if (chatBranchId != null) {
+            showTab(currentTab);
+            return;
+        }
+        if (libraryScreen != null) {
             showHome();
             return;
         }
@@ -240,15 +294,39 @@ public final class MainActivity extends Activity
         settingsScreen.render(state);
     }
 
+    /**
+     * The conversation's state. Guarded for the same reason the navigation page's is, and it was this
+     * slice's own acceptance walk that found the crash: a conversation's read - and, while an answer is
+     * being written, its poll - can still be in flight when a second-level screen takes over, and
+     * {@link #showChat(String)} drops the screen the moment it does. A state that lands after that is
+     * dropped rather than drawn into a screen that is gone.
+     *
+     * <p>T-064 adds the branch half of the guard: a fork opens a second conversation while the first
+     * presenter's finishing read is still in flight, and a state of the old branch drawn into the new
+     * screen is exactly the cross-branch flash a learner sees as the answer changing under them. A
+     * state is drawn only when it belongs to the branch this screen was opened for.
+     */
     @Override
     public void render(ChatViewState state) {
-        chatScreen.render(state);
+        if (chatScreen != null && isTheBranchOnScreen(state.branchId)) {
+            chatScreen.render(state);
+        }
     }
 
     /** Where the conversation stands: the presenter resolved it, the screen only scrolls there. */
     @Override
-    public void renderPosition(ReadingPosition position) {
-        chatScreen.renderPosition(position);
+    public void renderPosition(String branchId, ReadingPosition position) {
+        // The same branch guard the state above carries: a position resolved for a branch the
+        // learner has already left must not scroll the conversation that replaced it. The branch
+        // rides with the call because a ReadingPosition carries no identity of its own.
+        if (chatScreen != null && isTheBranchOnScreen(branchId)) {
+            chatScreen.renderPosition(position);
+        }
+    }
+
+    /** Whether {@code branchId} is the branch the current conversation screen was opened for. */
+    private boolean isTheBranchOnScreen(String branchId) {
+        return chatBranchId != null && chatBranchId.equals(branchId);
     }
 
     @Override
@@ -257,9 +335,9 @@ public final class MainActivity extends Activity
     }
 
     /**
-     * The navigation page's state. Guarded where the other three are not: its presenter is the only one
-     * that posts a state from a screen the learner has already left (a tree read that finishes after
-     * back was pressed), and a page that is gone must not be drawn into.
+     * The navigation page's state. Guarded the way the conversation's now is: its presenter posts from
+     * a screen the learner has already left (a tree read that finishes after back was pressed), and a
+     * page that is gone must not be drawn into.
      */
     @Override
     public void render(NavigationViewState state) {
@@ -394,9 +472,10 @@ public final class MainActivity extends Activity
         chatScreen.showVersions(messageId, versions);
     }
 
+    /** A conversation is left for the first level it was opened from, not for the home page. */
     @Override
     public void close() {
-        showHome();
+        showTab(currentTab);
     }
 
     private void showHome() {
@@ -412,6 +491,9 @@ public final class MainActivity extends Activity
         showingSettings = false;
         searchScreen = null;
         searchPresenter = null;
+        libraryScreen = null;
+        libraryPresenter = null;
+        selectTab(Tab.HOME);
         swap(homeScreen);
         if (homeStarted) {
             homePresenter.onResumed();
@@ -419,9 +501,46 @@ public final class MainActivity extends Activity
     }
 
     private void showSettings() {
+        // Settings is a first-level destination when it is reached as one. Reached from a conversation
+        // it is a detour inside that conversation, and the level underneath stays where it was, which is
+        // what makes leaving it return to the conversation rather than to the settings tab.
+        if (settingsIsAFrontRoom()) {
+            selectTab(Tab.SETTINGS);
+        }
         showingSettings = true;
+        libraryScreen = null;
+        libraryPresenter = null;
         swap(settingsScreen);
         settingsPresenter.start();
+    }
+
+    /**
+     * Opens the library: the topics the learner has, with the one entry into each of them.
+     *
+     * <p>Built here and dropped when the tab is left, like every other screen, so the list is read
+     * fresh on each visit - a topic created in a conversation is on the next look rather than on the
+     * next launch.
+     */
+    private void showLibrary() {
+        navigationBranchId = null;
+        navigationScreen = null;
+        navigationPresenter = null;
+        chatBranchId = null;
+        chatScreen = null;
+        chatPresenter = null;
+        treeBranchId = null;
+        treeCanvasScreen = null;
+        treeCanvasPresenter = null;
+        showingSettings = false;
+        searchScreen = null;
+        searchPresenter = null;
+        libraryScreen = new LibraryScreen(this);
+        libraryPresenter = new LibraryPresenter(this, container.uiThread(), container.background(),
+                container.libraryData());
+        libraryScreen.setActions(libraryPresenter);
+        selectTab(Tab.LIBRARY);
+        swap(libraryScreen);
+        libraryPresenter.start();
     }
 
     /**
@@ -456,6 +575,8 @@ public final class MainActivity extends Activity
         showingSettings = false;
         searchScreen = null;
         searchPresenter = null;
+        libraryScreen = null;
+        libraryPresenter = null;
         ReadingStore reading = container.readingStore();
         chatScreen = new ChatScreen(this);
         chatPresenter = new ChatPresenter(this, container.uiThread(), container.background(),
@@ -494,6 +615,8 @@ public final class MainActivity extends Activity
         showingSettings = false;
         searchScreen = null;
         searchPresenter = null;
+        libraryScreen = null;
+        libraryPresenter = null;
         treeCanvasScreen = new TreeCanvasScreen(this);
         treeCanvasPresenter = new TreeCanvasPresenter(this, container.uiThread(),
                 container.background(), container.treeCanvasData(), container.treeCanvasCommands(),
@@ -542,6 +665,8 @@ public final class MainActivity extends Activity
         showingSettings = false;
         searchScreen = null;
         searchPresenter = null;
+        libraryScreen = null;
+        libraryPresenter = null;
         navigationBranchId = branchId;
         navigationScreen = new NavigationScreen(this);
         navigationPresenter = new NavigationPresenter(this, container.uiThread(),
@@ -583,6 +708,8 @@ public final class MainActivity extends Activity
         chatScreen = null;
         chatPresenter = null;
         showingSettings = false;
+        libraryScreen = null;
+        libraryPresenter = null;
         searchScreen = new SearchScreen(this);
         searchPresenter = new SearchPresenter(this, container.uiThread(), container.background(),
                 container.searchRepository());
@@ -599,9 +726,79 @@ public final class MainActivity extends Activity
         }
     }
 
+    /**
+     * The library's state. Guarded the way the navigation page's is: the list is read on the background
+     * thread, so a read that lands after the learner has left the tab must be dropped rather than drawn
+     * into a screen that is gone.
+     */
+    @Override
+    public void render(LibraryViewState state) {
+        if (libraryScreen != null) {
+            libraryScreen.render(state);
+        }
+    }
+
+    /**
+     * The one place that decides whether the tab bar is on screen.
+     *
+     * <p>A first-level destination shows it and a second-level screen hides it, and that judgement is
+     * made here rather than by each screen for itself: a bar every screen positioned on its own is a bar
+     * whose visibility drifts the first time a screen forgets. The predicate reads the shell's own
+     * knowledge of what it is showing, so it cannot disagree with the screen that was just swapped in.
+     */
     private void swap(View screen) {
         host.removeAllViews();
         host.addView(screen, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        tabBar.setVisibility(screen == homeScreen || screen == libraryScreen
+                || (screen == settingsScreen && settingsIsAFrontRoom())
+                        ? View.VISIBLE : View.GONE);
+    }
+
+    /**
+     * True when settings stands as a first-level destination rather than as a detour from a conversation.
+     * One rule with two readers - {@link #showSettings()} and {@link #swap(View)} - so the bar and the
+     * highlight cannot disagree about what the page is.
+     */
+    private boolean settingsIsAFrontRoom() {
+        return chatBranchId == null;
+    }
+
+    /** A first-level destination, by tab. The only way the level moves besides the tab tap itself. */
+    private void showTab(Tab tab) {
+        switch (tab) {
+            case LIBRARY:
+                showLibrary();
+                break;
+            case SETTINGS:
+                showSettings();
+                break;
+            default:
+                showHome();
+                break;
+        }
+    }
+
+    /** Marks where the first level stands; the bar is a readout of that fact and decides nothing. */
+    private void selectTab(Tab tab) {
+        currentTab = tab;
+        markTab(tabHome, R.id.tab_home_icon, R.id.tab_home_label, tab == Tab.HOME);
+        markTab(tabLibrary, R.id.tab_library_icon, R.id.tab_library_label, tab == Tab.LIBRARY);
+        markTab(tabSettings, R.id.tab_settings_icon, R.id.tab_settings_label, tab == Tab.SETTINGS);
+    }
+
+    /**
+     * Paints one tab item for the state it is in. Both the label and the icon carry the state - a bar
+     * that moved only one of them would read as half-selected, and it is the pair the learner sees.
+     *
+     * <p>The item's two children are named by the caller rather than looked up by a shared id: three
+     * items in one layout cannot all answer to one id, so each tab names its own and the caller is the
+     * one that knows which pair it handed over.
+     */
+    private void markTab(View item, int iconId, int labelId, boolean selected) {
+        int color = getColor(selected ? R.color.tl_green_deep : R.color.tl_ink3);
+        item.setSelected(selected);
+        ((TextView) item.findViewById(labelId)).setTextColor(color);
+        ((ImageView) item.findViewById(iconId)).setImageTintList(ColorStateList.valueOf(color));
     }
 }

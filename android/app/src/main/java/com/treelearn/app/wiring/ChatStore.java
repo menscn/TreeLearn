@@ -55,10 +55,33 @@ public interface ChatStore {
             boolean thinkingEnabled, long now);
 
     /**
-     * The plan entries before {@code questionOrdinal}: every learner message and every displayed
-     * stable answer earlier in the branch, in order.
+     * The plan entries before {@code questionOrdinal}: the branch's birth snapshot's sources (when
+     * it has one) followed by every learner message and displayed stable answer of the branch
+     * itself, in order (PRD 6.2.4 point 2). The snapshot's prepended entries are unaffected by
+     * {@code questionOrdinal}, which truncates the branch's own rows only.
+     *
+     * @throws SnapshotUnreadable when the branch's birth snapshot cannot be decoded or resolved row
+     *         by row - a context that cannot be proven intact stops the request rather than being
+     *         silently shortened (PRD 6.2.4 exception 2)
      */
     List<ContextPlan.Entry> history(String branchId, int questionOrdinal);
+
+    /**
+     * The store's failure channel for a birth snapshot that cannot be trusted: a payload that fails
+     * its digest check, a schema this build cannot read, or a pinned row that is gone. Unchecked,
+     * because the port's other failures are values and this one means "the history itself is not
+     * readable"; the wiring catches it and shows the STORAGE notice.
+     */
+    final class SnapshotUnreadable extends RuntimeException {
+
+        public SnapshotUnreadable(String message) {
+            super(message);
+        }
+
+        public SnapshotUnreadable(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
 
     /** The next free ordinal of a branch: one above the highest stored, or 0. */
     int nextOrdinal(String branchId);

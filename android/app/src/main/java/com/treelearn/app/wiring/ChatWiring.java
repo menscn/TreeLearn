@@ -202,6 +202,13 @@ public final class ChatWiring implements ChatData, ChatCommands {
     @Override
     public ChatCommandResult fork(String messageId, String question) {
         Guard.id(messageId, "messageId");
+        // The same guard send and replace answer to (PRD 6.2.3 exception 2): a fork spends store
+        // writes and opens a branch the learner could not ask a question in without a key, so the
+        // refusal lands before any row is chosen or written.
+        HomeViewState.Notice missing = missingKey();
+        if (missing != null) {
+            return ChatCommandResult.refused(missing);
+        }
         Message source = store.position(messageId);
         if (source == null || source.isUser()) {
             // A fork hangs off an answer; a question has no version to fork from.
@@ -305,8 +312,15 @@ public final class ChatWiring implements ChatData, ChatCommands {
     private ChatCommandResult submit(GenerationCommand command, int questionOrdinal,
             final String input, final String quote) {
         final String branchId = command.branchId;
-        final ContextPlan requestHistory = historyForRequest(branchId, questionOrdinal,
-                command.model);
+        final ContextPlan requestHistory;
+        try {
+            requestHistory = historyForRequest(branchId, questionOrdinal, command.model);
+        } catch (ChatStore.SnapshotUnreadable broken) {
+            // A birth context that cannot be proven intact stops the request rather than being
+            // partially believed (PRD 6.2.4 exception 2): the refusal is visible, never a silently
+            // shortened history.
+            return ChatCommandResult.refused(HomeViewState.Notice.STORAGE);
+        }
         GenerationCoordinator.Assembler assembler = forCommand -> DeepSeekRequestAssembler.assemble(
                 forCommand.purpose, forCommand.thinkingEnabled,
                 DeepSeekContextEncoder.encode(requestHistory),

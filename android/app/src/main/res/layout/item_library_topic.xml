@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  One library row (T-052, PRD 6.2.16 point 4): the left accent bar, the topic's identity, its branch
+  count and last use, and the unread dot. The whole row is one tap target - tapping it resumes the
+  topic, the same move the home list makes - and the dot is a hidden-until-earned view rather than a
+  count, because "there is something new" is the only thing the row has to say about unread.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/library_topic" android:layout_width="match_parent"
+    android:layout_height="wrap_content" android:background="?android:attr/selectableItemBackground"
+    android:clickable="true" android:focusable="true" android:gravity="center_vertical"
+    android:minHeight="@dimen/touch_min" android:orientation="horizontal">
+
+    <View android:id="@+id/library_topic_accent" android:layout_width="3dp"
+        android:layout_height="match_parent"
+        android:background="@color/tl_green" android:importantForAccessibility="no" />
+
+    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+        android:layout_weight="1" android:orientation="vertical"
+        android:paddingStart="@dimen/space_s4" android:paddingTop="@dimen/space_s2"
+        android:paddingEnd="@dimen/space_s2" android:paddingBottom="@dimen/space_s2">
+
+        <TextView android:id="@+id/library_topic_title" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:ellipsize="end" android:maxLines="1"
+            android:textColor="@color/tl_ink" android:textSize="@dimen/text_h2" />
+
+        <TextView android:id="@+id/library_topic_meta" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_s1"
+            android:ellipsize="end" android:maxLines="1" android:textColor="@color/tl_ink3"
+            android:textSize="@dimen/text_cap" />
+    </LinearLayout>
+
+    <View android:id="@+id/library_topic_unread" android:layout_width="8dp"
+        android:layout_height="8dp" android:layout_marginEnd="@dimen/space_s4"
+        android:background="@drawable/bg_pill" android:backgroundTint="@color/tl_green"
+        android:importantForAccessibility="no" android:visibility="gone" />
+</LinearLayout>

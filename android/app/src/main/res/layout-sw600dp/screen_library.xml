@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Tablet library: the same column, capped at a comfortable reading measure and centred, so a landscape
+  tablet shows one readable list instead of rows stretched across the full width.
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/library_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <include
+            layout="@layout/screen_library_body"
+            android:layout_width="@dimen/content_measure"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal" />
+    </FrameLayout>
+</ScrollView>

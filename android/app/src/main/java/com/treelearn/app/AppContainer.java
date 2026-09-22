@@ -10,6 +10,7 @@ import com.treelearn.app.generation.AiGatewayStreams;
 import com.treelearn.app.generation.GenerationCoordinator;
 import com.treelearn.app.generation.GenerationGateway;
 import com.treelearn.app.artifact.DerivedService;
+import com.treelearn.app.library.LibraryData;
 import com.treelearn.app.navigation.NavigationData;
 import com.treelearn.app.navigation.SqliteNavigationStore;
 import com.treelearn.app.reading.ReadingStore;
@@ -32,11 +33,13 @@ import com.treelearn.app.wiring.ChatStore;
 import com.treelearn.app.wiring.CoordinatorGenerationPort;
 import com.treelearn.app.wiring.GenerationPort;
 import com.treelearn.app.wiring.HomeWiring;
+import com.treelearn.app.wiring.LibraryWiring;
 import com.treelearn.app.wiring.LogcatTelemetry;
 import com.treelearn.app.wiring.NavigationWiring;
 import com.treelearn.app.wiring.PromptLimits;
 import com.treelearn.app.wiring.SqliteChatStore;
 import com.treelearn.app.wiring.SqliteHomeStore;
+import com.treelearn.app.wiring.SqliteLibraryStore;
 import com.treelearn.app.wiring.SqliteSearchStore;
 import com.treelearn.app.wiring.SqliteTreeCanvasStore;
 import com.treelearn.app.wiring.TreeCanvasWiring;
@@ -94,6 +97,9 @@ public final class AppContainer {
 
     private final NavigationWiring navigationWiring;
 
+    /** The library's topic list: a read-only store, built once like every other store. */
+    private final LibraryWiring libraryWiring;
+
     private final ReadingStore readingStore;
 
     /** The search port: the statement runner, with its connection opened on first use. */
@@ -132,6 +138,10 @@ public final class AppContainer {
                 new SqliteTreeCanvasStore(helper, transactions));
         this.navigationWiring = new NavigationWiring(
                 new SqliteNavigationStore(helper, transactions, coordinator));
+        // The completed segment restores and deletes archived branches, and both are the navigation
+        // store's own acts: handing the library that port is what keeps one subtree-deletion
+        // implementation rather than a second one that could answer with a different set.
+        this.libraryWiring = new LibraryWiring(new SqliteLibraryStore(helper), navigationWiring);
         this.readingStore = new SqliteReadingStore(helper);
         this.searchRepository = new SqliteSearchStore(helper);
     }
@@ -192,6 +202,18 @@ public final class AppContainer {
      */
     public NavigationData navigationData() {
         return navigationWiring;
+    }
+
+    /**
+     * The library's two lists: the topics still being worked on, and the archived branches.
+     *
+     * <p>The completed segment's two writes are not the library's own. Restore is the navigation
+     * port's {@code setArchived} and delete takes a {@link NavigationData.Plan} counted by
+     * {@link NavigationData#plan} - the same implementation the navigation page uses - so the library
+     * cannot offer a deletion that removes a different set for the same branch.
+     */
+    public LibraryData libraryData() {
+        return libraryWiring;
     }
 
     /**

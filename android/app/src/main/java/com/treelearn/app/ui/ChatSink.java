@@ -67,6 +67,11 @@ public interface ChatSink {
      * <p>The presenter decided where the learner was; the screen only has to put that row there. The
      * position is resolved against the rows that exist now, so a stored spot whose answer has been
      * deleted arrives as the live end rather than as a row the screen would have to guess about.
+     *
+     * <p>The branch travels with the position (T-064) because a {@code ReadingPosition} carries no
+     * identity of its own: the host compares it against the branch the conversation shows now and
+     * drops a position that was resolved for a branch the learner has already left, instead of
+     * scrolling a screen it does not belong to.
      */
-    void renderPosition(ReadingPosition position);
+    void renderPosition(String branchId, ReadingPosition position);
 }

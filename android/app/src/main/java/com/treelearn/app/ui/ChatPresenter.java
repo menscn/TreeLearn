@@ -398,7 +398,7 @@ public final class ChatPresenter implements ChatActions {
         background.execute(() -> {
             final ReadingPosition position = session.open(branch, rows, itemHeightPx);
             final boolean advanced = seen(branch, rows, visible);
-            ui.post(() -> sink.renderPosition(position));
+            ui.post(() -> sink.renderPosition(branchId, position));
             if (advanced) {
                 background.execute(this::read);
             }

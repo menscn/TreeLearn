@@ -151,6 +151,8 @@ final class WiringDoubles {
         DomainResult<GenerationCommand> resetResult;
         List<ContextPlan.Entry> history = new ArrayList<ContextPlan.Entry>();
         int historyOrdinal = -1;
+        /** When set, the history read raises - the store-side "birth snapshot untrustworthy" channel. */
+        RuntimeException historyFailure;
         int nextOrdinal;
         int appendCalls;
         Message appendedUser;
@@ -199,6 +201,9 @@ final class WiringDoubles {
         @Override
         public List<ContextPlan.Entry> history(String branchId, int questionOrdinal) {
             historyOrdinal = questionOrdinal;
+            if (historyFailure != null) {
+                throw historyFailure;
+            }
             return history;
         }
 

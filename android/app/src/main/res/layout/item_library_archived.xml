@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  One archived branch, as the 「已完成」 segment draws it (T-053, PRD 6.2.16 point 4). The shape is the
+  navigation branch row's - one selectable row, the title on the left, the controls on the right - so an
+  archived branch looks like the branch it was rather than like a different kind of thing.
+
+  Three lines, and one of them is optional: the title, the branch's own summary, and the row's own
+  facts (the archived mark and where the branch came from). The summary is `gone` until the derived
+  service has written one, and the row then draws one line fewer - never a sentence standing in for it
+  (PRD item 7 forbids "摘要将随本分支对话自动更新" on exactly this kind of surface).
+
+  The confirmation is inline rather than a dialog: the row asks, the row names the exact number of
+  branches the deletion removes, and nothing is written until 「永久删除」 is tapped. That number comes
+  from the presenter, which counted it from the branch's own tree; this layout only holds the place.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/library_done_row" android:layout_width="match_parent"
+    android:layout_height="wrap_content" android:orientation="vertical">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:gravity="center_vertical" android:minHeight="@dimen/touch_min"
+        android:orientation="horizontal">
+
+        <View android:id="@+id/library_done_accent" android:layout_width="3dp"
+            android:layout_height="match_parent" android:background="@color/tl_amber"
+            android:importantForAccessibility="no" />
+
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:orientation="vertical"
+            android:paddingStart="@dimen/space_s4" android:paddingTop="@dimen/space_s2"
+            android:paddingEnd="@dimen/space_s2" android:paddingBottom="@dimen/space_s2">
+
+            <TextView android:id="@+id/library_done_title" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:ellipsize="end" android:maxLines="1"
+                android:textColor="@color/tl_ink" android:textSize="@dimen/text_h2" />
+
+            <TextView android:id="@+id/library_done_summary" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_s1"
+                android:ellipsize="end" android:maxLines="2" android:textColor="@color/tl_ink2"
+                android:textSize="@dimen/text_cap" android:visibility="gone" />
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_s1" android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView android:id="@+id/library_done_mark" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:background="@drawable/bg_pill"
+                    android:backgroundTint="@color/tl_amber_soft" android:paddingStart="@dimen/space_s2"
+                    android:paddingEnd="@dimen/space_s2" android:textColor="@color/tl_amber"
+                    android:textSize="@dimen/text_cap" />
+
+                <TextView android:id="@+id/library_done_meta" android:layout_width="0dp"
+                    android:layout_height="wrap_content" android:layout_marginStart="@dimen/space_s2"
+                    android:layout_weight="1" android:ellipsize="end" android:maxLines="1"
+                    android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <Button android:id="@+id/library_done_restore" android:layout_width="wrap_content"
+            android:layout_height="@dimen/touch_min"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:minWidth="@dimen/touch_min" android:text="@string/done_restore"
+            android:textColor="@color/tl_green_deep" android:textSize="@dimen/text_sm" />
+
+        <Button android:id="@+id/library_done_delete" android:layout_width="wrap_content"
+            android:layout_height="@dimen/touch_min"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:minWidth="@dimen/touch_min" android:paddingEnd="@dimen/space_s4"
+            android:text="@string/done_delete" android:textColor="@color/tl_red"
+            android:textSize="@dimen/text_sm" />
+    </LinearLayout>
+
+    <TextView android:id="@+id/library_done_prompt" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:paddingStart="@dimen/space_s6"
+        android:paddingEnd="@dimen/space_s4" android:paddingBottom="@dimen/space_s2"
+        android:textColor="@color/tl_ink2" android:textSize="@dimen/text_cap"
+        android:visibility="gone" />
+
+    <LinearLayout android:id="@+id/library_done_actions" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:gravity="end" android:orientation="horizontal"
+        android:paddingStart="@dimen/space_s4" android:paddingEnd="@dimen/space_s4"
+        android:paddingBottom="@dimen/space_s2" android:visibility="gone">
+
+        <Button android:id="@+id/library_done_cancel" android:layout_width="wrap_content"
+            android:layout_height="@dimen/touch_min"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:minWidth="@dimen/touch_min" android:text="@string/done_delete_cancel"
+            android:textColor="@color/tl_ink3" android:textSize="@dimen/text_sm" />
+
+        <Button android:id="@+id/library_done_confirm" android:layout_width="wrap_content"
+            android:layout_height="@dimen/touch_min"
+            android:layout_marginStart="@dimen/space_s2"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:minWidth="@dimen/touch_min" android:text="@string/done_delete_confirm"
+            android:textColor="@color/tl_red" android:textSize="@dimen/text_sm" />
+    </LinearLayout>
+</LinearLayout>

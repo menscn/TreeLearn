@@ -28,15 +28,15 @@
         android:paddingTop="@dimen/space_s2"
         android:paddingEnd="@dimen/page_gutter">
 
-        <Button
+        <ImageView
             android:id="@+id/navigation_back"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/touch_min"
             android:layout_height="@dimen/touch_min"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:minWidth="@dimen/touch_min"
-            android:text="@string/navigation_back"
-            android:textColor="@color/tl_green_deep"
-            android:textSize="@dimen/text_sm" />
+            android:contentDescription="@string/cd_navigation_back"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_nav_back"
+            android:tint="@color/tl_green_deep" />
 
         <TextView
             android:id="@+id/navigation_title"
@@ -56,8 +56,14 @@
             android:layout_width="wrap_content"
             android:layout_height="@dimen/touch_min"
             android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/cd_navigation_enter"
+            android:drawableStart="@drawable/ic_nav_chat"
+            android:drawableTint="@color/tl_green_deep"
+            android:drawablePadding="0dp"
             android:minWidth="@dimen/touch_min"
-            android:text="@string/navigation_enter"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:text=""
             android:textColor="@color/tl_green_deep"
             android:textSize="@dimen/text_sm" />
 
@@ -66,8 +72,14 @@
             android:layout_width="wrap_content"
             android:layout_height="@dimen/touch_min"
             android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/cd_navigation_canvas"
+            android:drawableStart="@drawable/ic_nav_tree"
+            android:drawableTint="@color/tl_green_deep"
+            android:drawablePadding="0dp"
             android:minWidth="@dimen/touch_min"
-            android:text="@string/navigation_canvas"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:text=""
             android:textColor="@color/tl_green_deep"
             android:textSize="@dimen/text_sm" />
     </LinearLayout>

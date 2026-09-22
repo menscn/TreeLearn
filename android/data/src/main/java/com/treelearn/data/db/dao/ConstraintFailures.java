@@ -4,10 +4,8 @@ import android.database.sqlite.SQLiteConstraintException;
 
 import com.treelearn.core.domain.DomainError;
 import com.treelearn.core.domain.DomainErrorCode;
+import com.treelearn.data.db.ConstraintExtendedCode;
 import com.treelearn.data.db.TreeLearnSchema;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * The one place a store refusal becomes the domain error a caller has to branch on.
@@ -18,16 +16,23 @@ import java.util.regex.Pattern;
  * {@code generation_operations}. A lookup keyed on the code alone would therefore answer at least one
  * of them wrongly, which is the same defect as writing one rule twice — the second copy drifts. So
  * the translation happens per call site, through one shared implementation, and this class owns the
- * two things every such translation needs: how to read the code out of the failure, and how to
- * recognise which constraint spoke.
+ * second half of every such translation — recognising which constraint spoke — while the first half,
+ * reading the code, is delegated to {@link ConstraintExtendedCode} so that reading it once is the
+ * only way to read it.
  *
  * <p><strong>How the code is read.</strong> Android's {@link SQLiteConstraintException} exposes no
  * accessor for the extended result code — verified against {@code android-36/android.jar}, whose
- * class declares three constructors and nothing else — so the code is read out of the message text,
- * which is SQLite's own stable format. The codes were measured on device rather than assumed; the
- * raw probe is {@code artifacts/evidence/T-004-constraint-code-probe.txt}.
+ * class declares three constructors and nothing else — so the code has to be read out of the message
+ * text Android built for the failure. That text is <em>not</em> a stable format across releases, which
+ * this class originally assumed it was: API 36 writes {@code (code 2067 ...)} where Android 13 writes
+ * {@code (Sqlite code 2067 ...)} for the same refusal, so reading a fixed prefix answered "no code"
+ * on the device and the given classification silently degraded to "storage refused". The reading rule
+ * therefore lives in one shared, prefix-free place, {@link ConstraintExtendedCode}, and this class
+ * only delegates to it. The codes themselves were measured on device rather than assumed: the API 36
+ * probe is {@code artifacts/evidence/T-004-constraint-code-probe.txt}, and the Android 13 spelling is
+ * recorded in {@code artifacts/evidence/T-059-constraint-codes.txt}.
  *
- * <p>Only the code this package has to name is declared here. The probe file records the rest
+ * <p>Only the code this package has to name is declared here. Those probe files record the rest
  * (CHECK {@code 275}, NOT NULL {@code 1299}, foreign key {@code 787}, trigger {@code 1811}), and they
  * are deliberately <em>not</em> copied in yet: a constant with no reader is the same dead surface as a
  * {@link DomainErrorCode} with no producer, and the first caller that needs to name one should add it
@@ -53,8 +58,6 @@ final class ConstraintFailures {
 
     private static final String UNIQUE_PREFIX = "UNIQUE constraint failed: ";
 
-    private static final Pattern EXTENDED_CODE = Pattern.compile("\\(code ([0-9]+)");
-
     private ConstraintFailures() {
     }
 
@@ -63,8 +66,7 @@ final class ConstraintFailures {
      *         Zero is not a SQLite result code, so it reads as "no code", never as a valid one.
      */
     static int extendedCode(SQLiteConstraintException failure) {
-        Matcher matcher = EXTENDED_CODE.matcher(message(failure));
-        return matcher.find() ? Integer.parseInt(matcher.group(1)) : 0;
+        return ConstraintExtendedCode.of(message(failure));
     }
 
     /**

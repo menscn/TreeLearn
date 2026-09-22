@@ -136,4 +136,47 @@ public interface NavigationData {
 
     /** Removes the plan's branches and everything hanging off them, in one transaction. */
     void delete(Plan plan);
+
+    /**
+     * Counts the exact set one confirmation would cover out of one tree.
+     *
+     * <p><strong>One implementation, two callers.</strong> The navigation page and the library's
+     * completed segment both ask "which branches would this remove", and both must be handed the same
+     * answer. A second walk would be a second opinion about what a subtree is, and the two disagreeing
+     * is an irreversible deletion of the wrong set - which is why this lives on the port both screens
+     * already share rather than in either presenter.
+     *
+     * <p>It fails closed: a target the tree does not hold, no tree at all, or a node naming a parent
+     * the tree does not hold all answer null. A tree that does not describe itself cannot say how many
+     * branches a deletion removes, and a wrong number under a permanent-delete button is worse than no
+     * button.
+     *
+     * @return the plan, or null when the scope cannot be counted
+     */
+    static Plan plan(String topicId, Snapshot tree, String target, boolean wholeTopic) {
+        if (topicId == null || tree == null || target == null || tree.node(target) == null) {
+            return null;
+        }
+        for (Node node : tree.nodes) {
+            if (node.parentBranchId != null && tree.node(node.parentBranchId) == null) {
+                return null;
+            }
+        }
+        List<String> ids = new ArrayList<String>();
+        if (wholeTopic) {
+            for (Node node : tree.nodes) {
+                ids.add(node.branchId);
+            }
+            return new Plan(topicId, target, ids, true);
+        }
+        ids.add(target);
+        for (int i = 0; i < ids.size(); i++) {
+            for (Node node : tree.nodes) {
+                if (ids.get(i).equals(node.parentBranchId) && !ids.contains(node.branchId)) {
+                    ids.add(node.branchId);
+                }
+            }
+        }
+        return new Plan(topicId, target, ids, false);
+    }
 }

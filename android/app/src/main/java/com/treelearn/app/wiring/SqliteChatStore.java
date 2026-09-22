@@ -7,6 +7,7 @@ import com.treelearn.app.ui.ChildBranch;
 import com.treelearn.core.domain.AnswerRevision;
 import com.treelearn.core.domain.Branch;
 import com.treelearn.core.domain.ContextPlan;
+import com.treelearn.core.domain.ContextSnapshot;
 import com.treelearn.core.domain.DomainResult;
 import com.treelearn.core.domain.GenerationCommand;
 import com.treelearn.core.domain.GenerationModel;
@@ -134,6 +135,8 @@ public final class SqliteChatStore implements ChatStore {
         Guard.id(branchId, "branchId");
         SQLiteDatabase database = database();
         List<ContextPlan.Entry> entries = new ArrayList<ContextPlan.Entry>();
+        // The branch's own rows first in the builder, but ordinal truncation applies to these alone:
+        // the snapshot's prepended segment below is never cut by the question's ordinal (T-064).
         for (Message row : MessageDao.findByBranch(database, branchId)) {
             if (row.ordinal >= questionOrdinal) {
                 break;
@@ -152,7 +155,41 @@ public final class SqliteChatStore implements ChatStore {
                         revision.answerContent));
             }
         }
-        return entries;
+        // The birth snapshot is the branch's upstream context (PRD 6.2.4 point 2). fromStored is the
+        // one reader of the payload; the merge resolves its references row by row and refuses the
+        // whole plan when one is gone, which the wiring shows as the STORAGE notice.
+        ContextSnapshotDao.Row stored = ContextSnapshotDao.findByBranchId(database, branchId);
+        if (stored == null) {
+            return entries;
+        }
+        DomainResult<ContextSnapshot> decoded = ContextSnapshot.fromStored(stored.id, stored.branchId,
+                stored.schemaVersion, stored.digest, stored.payload, stored.createdAt);
+        if (decoded.isFailure()) {
+            throw new ChatStore.SnapshotUnreadable("the birth snapshot of branch " + branchId
+                    + " cannot be trusted: " + decoded.error());
+        }
+        DomainResult<List<ContextPlan.Entry>> merged = SnapshotHistoryMerger.merge(decoded.value(),
+                entries, snapshotRows(database));
+        if (merged.isFailure()) {
+            throw new ChatStore.SnapshotUnreadable("the birth snapshot of branch " + branchId
+                    + " cannot be resolved: " + merged.error());
+        }
+        return merged.value();
+    }
+
+    /** The rows a snapshot's references resolve against, read through the same DAOs the screen reads. */
+    private static SnapshotHistoryMerger.Rows snapshotRows(SQLiteDatabase database) {
+        return new SnapshotHistoryMerger.Rows() {
+            @Override
+            public Message message(String messageId) {
+                return MessageDao.findById(database, messageId);
+            }
+
+            @Override
+            public AnswerRevision revision(String revisionId) {
+                return AnswerRevisionDao.findById(database, revisionId);
+            }
+        };
     }
 
     @Override

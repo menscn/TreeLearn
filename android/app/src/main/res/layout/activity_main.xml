@@ -1,20 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The app shell: one Activity, one host, screens swapped into it (PRD 6.2.16 keeps a single entry
-  page; the conversation, canvas and search screens arrive in later tasks and are added by swapping
-  the host's child, not by adding Activities).
+  The app shell: one Activity, one content host, and the bottom tab bar that carries the first-level
+  destinations (PRD 6.2.16 as of V3.2 - the home page is no longer the only entry page, so the shell
+  is now "content + persistent bar" rather than a single host). The conversation, canvas, navigation
+  and search screens still arrive by swapping the host's child, not by adding Activities.
+
+  The bar is included here once and shown or hidden by MainActivity's swap(): first-level tab screens
+  show it, second-level screens hide it. No screen draws a copy of its own.
 
   `main_root` is kept from the T-002 skeleton because the launch test finds it by that id.
 -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/main_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/tl_bg">
+    android:background="@color/tl_bg"
+    android:orientation="vertical">
 
     <FrameLayout
         android:id="@+id/shell_host"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
-</FrameLayout>
+    <include layout="@layout/screen_tab_bar" />
+
+</LinearLayout>

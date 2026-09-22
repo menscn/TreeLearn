@@ -77,6 +77,14 @@ public final class NavigationStoreInstrumentedTest {
     private static final String SUMMARY_VERSION = "tl-branch-summary/1.0.0";
 
     private static final String TITLE_PAYLOAD = "{\"title\":\"SYNTHETIC-TITLE\"}";
+
+    /**
+     * The branch title the fixture persists. A root branch is born without one and receives it from
+     * the root-title artifact, so navigation reads a row whose title is null until that write
+     * happens; {@code NavigationData.Node} refuses a null title, which is the production rule, so the
+     * fixture has to make the same write the product makes rather than the rule being relaxed.
+     */
+    private static final String TITLE_TEXT = "SYNTHETIC-TITLE";
     private static final String SUMMARY_PAYLOAD =
             "{\"summary\":\"SYNTHETIC-SUMMARY\",\"key_points\":[\"SYNTHETIC-KEY-POINT-1\",\"SYNTHETIC-KEY-POINT-2\"]}";
 
@@ -192,6 +200,11 @@ public final class NavigationStoreInstrumentedTest {
         TopicDao.insert(database, new Topic(TOPIC, null, T0, T0));
         Branch root = Branch.root(TOPIC, T0);
         BranchDao.insert(database, root);
+        // The title arrives after creation, through the same mutable-field write the product uses
+        // (SqliteHomeStore.renameTopic): the root-title artifact is generated for an existing branch,
+        // so a freshly inserted root really does carry no title until this write.
+        root.setTitle(TITLE_TEXT, T0 + 1L);
+        BranchDao.update(database, root);
         rootBranchId = root.id;
         MessageDao.insert(database, Message.user(root.id, 1, "SYNTHETIC-USER-TURN", T0 + 1_000L));
         Message ai = Message.ai(root.id, 2, T0 + 2_000L);

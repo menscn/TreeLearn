@@ -215,7 +215,7 @@ final class ChatTestDoubles {
         }
 
         @Override
-        public void renderPosition(ReadingPosition position) {
+        public void renderPosition(String branchId, ReadingPosition position) {
             restored.add(position);
         }
 

@@ -17,6 +17,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.treelearn.core.domain.Branch;
 import com.treelearn.core.domain.Topic;
+import com.treelearn.data.db.ConstraintExtendedCode;
 import com.treelearn.data.db.DatabaseTransactionRunner;
 import com.treelearn.data.db.TreeLearnDatabaseHelper;
 import com.treelearn.data.db.TreeLearnSchema;
@@ -42,7 +43,9 @@ import java.util.List;
  * <p>Rejections are asserted <em>by cause</em> using the SQLite extended result code, for the same
  * reason T-004 moved to them: a message substring can be satisfied by the wording of a constraint
  * rather than by its class. Codes measured in
- * {@code artifacts/evidence/T-004-constraint-code-probe.txt}.
+ * {@code artifacts/evidence/T-004-constraint-code-probe.txt} (API 36) and
+ * {@code artifacts/evidence/T-059-constraint-codes.txt} (Android 13), and read through the shared
+ * {@link ConstraintExtendedCode} point rather than through a hand-written prefix.
  *
  * <p>Every literal is synthetic; the file holds no real user content and no API key (rules/sql.md).
  */
@@ -66,9 +69,15 @@ public final class ContextSnapshotAiArtifactDaoInstrumentedTest {
     /** Synthetic body marker: proves nothing outside a payload column can carry such text. */
     private static final String BODY_SENTINEL = "SENTINEL-DO-NOT-STORE-OUTSIDE-PAYLOAD";
 
-    private static final String CODE_UNIQUE = "(code 2067";
-    private static final String CODE_NOT_NULL = "(code 1299";
-    private static final String CODE_TRIGGER = "(code 1811";
+    /**
+     * Declared here independently; the reading of the code out of the refusal text is shared with
+     * production through {@link ConstraintExtendedCode}. The reader matches the stable
+     * {@code code <digits>} fragment rather than a prefix, because Android spells the same refusal as
+     * {@code (code 2067 ...)} on API 36 and as {@code (Sqlite code 2067 ...)} on Android 13.
+     */
+    private static final int CODE_UNIQUE = 2067;
+    private static final int CODE_NOT_NULL = 1299;
+    private static final int CODE_TRIGGER = 1811;
 
     private TreeLearnDatabaseHelper helper;
 
@@ -468,11 +477,13 @@ public final class ContextSnapshotAiArtifactDaoInstrumentedTest {
         return holding;
     }
 
-    private static void assertCause(String label, String message, String expectedCode,
+    private static void assertCause(String label, String message, int expectedCode,
                                     String expectedColumns) {
         assertNotNull(label + ": the store must report a cause", message);
-        assertTrue(label + ": expected " + expectedCode + " in: " + message,
-                message.contains(expectedCode));
+        int actualCode = ConstraintExtendedCode.of(message);
+        assertTrue(label + ": expected code " + expectedCode + " but got code " + actualCode
+                        + " in: " + message,
+                actualCode == expectedCode);
         if (expectedColumns != null) {
             assertTrue(label + ": expected column list " + expectedColumns + " in: " + message,
                     message.contains(expectedColumns));

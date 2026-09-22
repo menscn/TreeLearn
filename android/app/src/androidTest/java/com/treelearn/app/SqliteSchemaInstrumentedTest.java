@@ -16,6 +16,7 @@ import android.database.sqlite.SQLiteDatabase;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.treelearn.data.db.ConstraintExtendedCode;
 import com.treelearn.data.db.DatabaseTransactionRunner;
 import com.treelearn.data.db.TreeLearnDatabaseHelper;
 import com.treelearn.data.db.TreeLearnSchema;
@@ -57,8 +58,9 @@ import java.util.TreeSet;
  * witness: the assertion passes, the invariant is never exercised, and the suite looks greener than
  * the system is. For the same reason no assertion may pass only because a table is empty.
  *
- * <p>The cause is judged by the SQLite <em>extended result code</em> of the failure, measured on
- * this device and recorded in {@code artifacts/evidence/T-004-constraint-code-probe.txt}. Message
+ * <p>The cause is judged by the SQLite <em>extended result code</em> of the failure, measured on the
+ * devices this suite runs on and recorded in {@code artifacts/evidence/T-004-constraint-code-probe.txt}
+ * (API 36) and {@code artifacts/evidence/T-059-constraint-codes.txt} (Android 13). Message
  * substrings are not sufficient, and this suite has the scar to prove it: it once asserted "mentions
  * CHECK and not NOT NULL", which the role CHECK satisfies in the wrong direction because that
  * constraint's own text contains {@code user_content IS NOT NULL}. A code belongs to the failure
@@ -131,8 +133,16 @@ public final class SqliteSchemaInstrumentedTest {
     private static final Set<String> EXPECTED_TRIGGERS = expectedTriggers();
 
     /**
-     * SQLite extended result codes, measured on this device rather than assumed
+     * SQLite extended result codes, measured on device rather than assumed
      * (see {@code artifacts/evidence/T-004-constraint-code-probe.txt}).
+     *
+     * <p>The code is read out of the refusal text by {@link ConstraintExtendedCode}, the same reading
+     * point production uses, and the values below are still written here independently: sharing the
+     * reading is what keeps the two from drifting, while sharing the <em>value</em> would make these
+     * assertions agree with the implementation even when both are wrong. Reading must survive the
+     * fact that Android spells the same refusal differently across releases — API 36 writes
+     * {@code (code 2067 ...)}, Android 13 writes {@code (Sqlite code 2067 ...)} — which is why the
+     * text is matched on the stable {@code code <digits>} fragment and not on a prefix.
      *
      * <p>Every rejection below is asserted against one of these codes. The previous version of this
      * suite used message substrings instead, and that was already defeated once: it claimed "the
@@ -142,11 +152,23 @@ public final class SqliteSchemaInstrumentedTest {
      * same way. A single failure carries exactly one code, so asserting the right one also rules
      * out every other cause without a brittle negated-substring clause.
      */
-    private static final String CODE_NOT_NULL = "(code 1299";
-    private static final String CODE_CHECK = "(code 275";
-    private static final String CODE_UNIQUE = "(code 2067";
-    private static final String CODE_FOREIGN_KEY = "(code 787";
-    private static final String CODE_TRIGGER = "(code 1811";
+    private static final int CODE_NOT_NULL = 1299;
+    private static final int CODE_CHECK = 275;
+    private static final int CODE_UNIQUE = 2067;
+    private static final int CODE_FOREIGN_KEY = 787;
+    private static final int CODE_TRIGGER = 1811;
+
+    /**
+     * The only fragment the two measured CHECK spellings share.
+     *
+     * <p>For one and the same refusal API 36 writes
+     * {@code CHECK constraint failed: role IN ('USER','AI')} — the failing <em>expression</em> — and
+     * Android 13 writes {@code CHECK constraint failed: messages} — the <em>table</em>. Nothing else
+     * is common, so this lead-in is the whole of what a CHECK text assertion can carry, and
+     * {@link #assertCheckRefusedOn} pairs it with the table's DDL instead of trying to read the
+     * constraint identity out of the wording.
+     */
+    private static final String CHECK_MARKER = "CHECK constraint failed: ";
 
     /** Root branch id for a topic id, mirroring the fixture below. */
     private static String rootBranchOf(String topicId) {
@@ -392,14 +414,14 @@ public final class SqliteSchemaInstrumentedTest {
         String orderingFailure = constraintFailure("last seen beyond latest", () -> db.execSQL(
                 "UPDATE branches SET last_seen_stable_sequence=5 WHERE id=?",
                 new Object[]{rootBranchOf("t-unread")})).getMessage();
-        assertCause("seen must never run ahead of latest", orderingFailure, CODE_CHECK,
-                "last_seen_stable_sequence");
+        assertCheckRefusedOn(db, "branches", "last_seen_stable_sequence <= latest_stable_sequence",
+                "seen must never run ahead of latest", orderingFailure);
 
         String negativeFailure = constraintFailure("negative sequence", () -> db.execSQL(
                 "UPDATE branches SET latest_stable_sequence=-1 WHERE id=?",
                 new Object[]{rootBranchOf("t-unread")})).getMessage();
-        assertCause("sequences are counts, not offsets", negativeFailure, CODE_CHECK,
-                "latest_stable_sequence");
+        assertCheckRefusedOn(db, "branches", "latest_stable_sequence >= 0",
+                "sequences are counts, not offsets", negativeFailure);
 
         db.execSQL("UPDATE branches SET latest_stable_sequence=3, last_seen_stable_sequence=3"
                 + " WHERE id=?", new Object[]{rootBranchOf("t-unread")});
@@ -603,16 +625,30 @@ public final class SqliteSchemaInstrumentedTest {
                         T0})).getMessage();
         // The code is the load-bearing part here: this CHECK's own text contains "IS NOT NULL", so
         // the old "mentions CHECK and not NOT NULL" test could not tell the two classes apart.
-        assertCause("a USER row is content and must carry it", userFailure, CODE_CHECK,
-                "role = 'AI'");
+        assertCheckRefusedOn(db, "messages", "role = 'AI' OR (user_content IS NOT NULL",
+                "a USER row is content and must carry it", userFailure);
 
         String aiFailure = constraintFailure("an AI message carrying content", () -> db.execSQL(
                 "INSERT INTO messages(id, branch_id, ordinal, role, user_content, created_at)"
                         + " VALUES(?,?,?,?,?,?)",
                 new Object[]{"m-ai-content", rootBranchOf("t-role"), 1, "AI", "text",
                         T0})).getMessage();
-        assertCause("an AI row is a logical position and must not carry content", aiFailure,
-                CODE_CHECK, "role = 'USER'");
+        assertCheckRefusedOn(db, "messages", "role = 'USER' OR user_content IS NULL",
+                "an AI row is a logical position and must not carry content", aiFailure);
+
+        // Positive control: both shapes §5.1 allows must be writable. Without it a CHECK that
+        // refused every message would satisfy both refusals above, and neither refused row may have
+        // landed on the way.
+        db.execSQL("INSERT INTO messages(id, branch_id, ordinal, role, user_content, created_at)"
+                        + " VALUES(?,?,?,?,?,?)",
+                new Object[]{"m-legal-user", rootBranchOf("t-role"), 2, "USER", "synthetic text",
+                        T0});
+        db.execSQL("INSERT INTO messages(id, branch_id, ordinal, role, user_content, created_at)"
+                        + " VALUES(?,?,?,?,?,?)",
+                new Object[]{"m-legal-ai", rootBranchOf("t-role"), 3, "AI", null, T0});
+        assertEquals("both §5.1 shapes must be writable", 2, rowCount(db, "messages"));
+        assertEquals("no refused message may have landed", 0, rowCountWhere(db, "messages",
+                "id IN ('m-empty-user','m-ai-content')"));
     }
 
     // ------------------------------------------------------------------
@@ -637,10 +673,11 @@ public final class SqliteSchemaInstrumentedTest {
                 "INSERT INTO messages(id, branch_id, ordinal, role, user_content, created_at)"
                         + " VALUES(?,?,?,?,?,?)",
                 new Object[]{"m-badrole", rootBranchOf("t-fk"), 0, "ROBOT", "x", T0})).getMessage();
-        // The branch exists by now, so the only constraint that can fire is the role CHECK. The
-        // code assertion is what makes that claim checkable instead of merely intended.
-        assertCause("the role CHECK must be what rejects an unknown role", roleFailure, CODE_CHECK,
-                "role");
+        // The branch exists by now, so no foreign key can fire and some CHECK on messages must be
+        // what refused the row. That it is the role CHECK is carried by the DDL declaring
+        // role IN ('USER','AI') plus the positive control at the end, not by the wording.
+        assertCheckRefusedOn(db, "messages", "role IN ('USER','AI')",
+                "the role CHECK must be what rejects an unknown role", roleFailure);
 
         // A non-root branch without its source version must be refused (技术方案 §5.2).
         //
@@ -654,9 +691,10 @@ public final class SqliteSchemaInstrumentedTest {
                 new Object[]{"b-no-source", "t-fk", rootBranchOf("t-fk"), "", T0, T0, 0}))
                 .getMessage();
         // Both branch provenance CHECKs are written on parent_id, so naming that column alone
-        // cannot tell them apart; the mutually exclusive continuation does.
-        assertCause("a non-root branch must carry its source version", sourceFailure, CODE_CHECK,
-                "source_message_id IS NOT NULL");
+        // cannot tell them apart; the DDL fragment each one carries does, and the code plus the
+        // positive control say the table really enforces one of them.
+        assertCheckRefusedOn(db, "branches", "source_message_id IS NOT NULL",
+                "a non-root branch must carry its source version", sourceFailure);
 
         // A root branch must not carry fork provenance. This uses a topic with no root branch yet,
         // so the only constraint that can fire is the CHECK itself — pointing it at t-fk would let
@@ -676,8 +714,23 @@ public final class SqliteSchemaInstrumentedTest {
                                 + " VALUES(?,?,?,?,?,?,?,?)",
                         new Object[]{"b-root-dirty", "t-dirty", null, "", T0, T0, 0,
                                 "m-foreign-src"})).getMessage();
-        assertCause("a root branch must not carry provenance", rootProvenanceFailure, CODE_CHECK,
-                "source_message_id IS NULL");
+        assertCheckRefusedOn(db, "branches", "parent_id IS NOT NULL",
+                "a root branch must not carry provenance", rootProvenanceFailure);
+
+        // Positive controls: the same two tables must accept the legal shapes these CHECKs
+        // describe — a known role, an AI position, a root branch with no provenance, and a non-root
+        // branch carrying its source version. Without them a CHECK that refused everything would
+        // satisfy every refusal above.
+        seedTopicWithRoot(db, "t-legal");
+        seedMessage(db, "m-legal-user", rootBranchOf("t-legal"), 0, "USER");
+        seedMessage(db, "m-legal-ai", rootBranchOf("t-legal"), 1, "AI");
+        seedRevision(db, "r-legal", "m-legal-ai", 1);
+        insertChildBranch(db, "b-legal-child", "t-legal", rootBranchOf("t-legal"), "m-legal-ai",
+                "r-legal");
+        assertEquals("the legal branch shapes these CHECKs describe must be writable", 2,
+                rowCountWhere(db, "branches", "topic_id = 't-legal'"));
+        assertEquals("the legal message shapes these CHECKs describe must be writable", 2,
+                rowCountWhere(db, "messages", "id IN ('m-legal-user','m-legal-ai')"));
     }
 
     /**
@@ -741,8 +794,8 @@ public final class SqliteSchemaInstrumentedTest {
                         "m-anchor-src", "r-anchor-src", start, end, quote, hash})).getMessage();
         // No context_snapshot_id is passed, deliberately: no snapshot row exists, so supplying one
         // would trip the foreign key and the failure would stop being about the anchor CHECK.
-        assertCause(scenario + " must be refused by the anchor CHECK", failure, CODE_CHECK,
-                "anchor_start_inclusive");
+        assertCheckRefusedOn(db, "branches", "anchor_start_inclusive IS NOT NULL",
+                scenario + " must be refused by the anchor CHECK", failure);
     }
 
     @Test
@@ -1274,20 +1327,69 @@ public final class SqliteSchemaInstrumentedTest {
 
     /**
      * Asserts that a rejection was produced by one specific constraint class, and — when
-     * {@code requiredText} is given — by the specific constraint this scenario is about.
+     * {@code requiredText} is given — that the failure text names it.
      *
-     * <p>The code proves the class; the text proves which constraint fired. Both are needed: a
-     * CHECK violation on an unrelated column would satisfy the code alone, and the text alone can
-     * be matched by the wording of a different constraint.
+     * <p>The code proves the class; the text, where given, proves the failure is about the named
+     * thing. Both are needed: a violation on an unrelated column would satisfy the code alone, and
+     * the text alone can be matched by the wording of a different constraint.
+     *
+     * <p>{@code requiredText} is usable only where the platform's wording is stable. The UNIQUE
+     * column list and the NOT NULL column are, measured identically on API 36 and Android 13. The
+     * CHECK identifier is not — see {@link #assertCheckRefusedOn}, where the two spellings share no
+     * fragment to assert at all.
+     *
+     * <p>The code is read through the shared production point rather than by comparing a hand-written
+     * prefix: the assertion names the value it expects, the reader names none.
      */
-    private static void assertCause(String scenario, String message, String expectedCode,
+    private static void assertCause(String scenario, String message, int expectedCode,
                                     String requiredText) {
-        assertTrue(scenario + ": expected " + expectedCode + " but the store reported " + message,
-                message.contains(expectedCode));
+        int actualCode = ConstraintExtendedCode.of(message);
+        assertTrue(scenario + ": expected code " + expectedCode + " but the store reported "
+                        + actualCode + " in: " + message,
+                actualCode == expectedCode);
         if (requiredText != null) {
             assertTrue(scenario + ": the failure must name " + requiredText + " but was " + message,
                     message.contains(requiredText));
         }
+    }
+
+    /**
+     * Asserts that a CHECK refused the write this scenario aimed at {@code table}, and that
+     * {@code table} declares {@code declaredCheck}.
+     *
+     * <p><strong>Why the failure text cannot carry this assertion.</strong> The extended code
+     * ({@code 275}) proves the refusal came from a CHECK, but not from which table's CHECK, and the
+     * wording cannot fill that gap: the two spellings share nothing but {@link #CHECK_MARKER}. An
+     * assertion that accepted either spelling would write the version difference into this suite and
+     * drift again on the next Android release.
+     *
+     * <p><strong>What is asserted instead.</strong> Two sides here, plus a third the caller owes:
+     * <ol>
+     *   <li>the refusal is a CHECK — code {@code 275} and the {@code CHECK constraint failed: }
+     *       lead-in — raised by the write this scenario issued against {@code table};</li>
+     *   <li>{@code table}'s own DDL, read from {@code sqlite_master}, declares {@code declaredCheck}.
+     *       This half is version-independent: the stored schema definition does not depend on how a
+     *       release words a failure;</li>
+     *   <li>a positive control the caller must keep in the same test: {@code table} must accept a
+     *       legal row, otherwise a CHECK that refused everything would satisfy every side above.</li>
+     * </ol>
+     *
+     * <p><strong>Residual loss, stated rather than papered over.</strong> On {@code branches} (six
+     * CHECKs) and {@code messages} (three) the runtime text no longer proves <em>which</em> of that
+     * table's CHECKs refused. That is carried by the three sides together — the constraint is
+     * declared, the table does refuse, the table does accept — and not by the wording of the
+     * failure, which no assertion here may be read as doing.
+     */
+    private static void assertCheckRefusedOn(SQLiteDatabase db, String table, String declaredCheck,
+                                             String scenario, String message) {
+        assertCause(scenario, message, CODE_CHECK, null);
+        assertTrue(scenario + ": a CHECK refusal must carry the \"" + CHECK_MARKER + "\" lead-in: "
+                        + message,
+                message.contains(CHECK_MARKER));
+        String ddl = tableDdl(db, table);
+        assertTrue(scenario + ": the " + table + " DDL must declare CHECK (" + declaredCheck
+                        + ") but was: " + ddl,
+                ddl.contains(declaredCheck));
     }
 
     // ------------------------------------------------------------------
