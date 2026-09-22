@@ -43,6 +43,23 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
 
+    // NOTE (leader fix 2026-09-21): signingConfigs must be declared BEFORE buildTypes.
+    // buildTypes.release reads signingConfigs.release and the android {} closure is evaluated
+    // top-to-bottom. With a real keystore configured, the previous order threw "Could not get
+    // unknown property release for SigningConfig container" at configuration time for EVERY
+    // task, including `gradlew help`.
+    // Reproduce/proof: artifacts/evidence/build-signing-config-order-2026-09-21.txt
+    signingConfigs {
+        release {
+            if (hasReleaseSigning) {
+                storeFile file(releaseStorePath)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         debug {
             minifyEnabled false
@@ -65,16 +82,6 @@ android {
         unitTests.returnDefaultValues = true
     }
 
-    signingConfigs {
-        release {
-            if (hasReleaseSigning) {
-                storeFile file(releaseStorePath)
-                storePassword releaseStorePassword
-                keyAlias releaseKeyAlias
-                keyPassword releaseKeyPassword
-            }
-        }
-    }
 }
 
 configurations.configureEach {
@@ -93,6 +100,7 @@ dependencies {
     implementation project(':data')
     implementation project(':ai')
     implementation project(':tree-layout')
+    implementation 'org.commonmark:commonmark:0.22.0'
 
     testImplementation 'junit:junit:4.13.2'
 

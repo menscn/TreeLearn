@@ -1,0 +1,10 @@
+# Markdown rendering evidence
+# implementation: org.commonmark:commonmark:0.22.0 parses answer/reasoning text into native Android
+# Spannable spans. ChatScreen answers and ReasoningDisclosure bodies use MarkdownRenderer; links use
+# URLSpan and remain selectable.
+# device command:
+#   adb shell am instrument -w -e class com.treelearn.app.MarkdownRendererInstrumentedTest com.treelearn.test/androidx.test.runner.AndroidJUnitRunner
+# result: 2 tests, 0 failures on AWSS013807000356 / API 36
+# build: gradlew check BUILD SUCCESSFUL; Java-only guard PASS
+# release APK installed after debug instrumentation; MainActivity pid observed.
+# EXITCODE=0
