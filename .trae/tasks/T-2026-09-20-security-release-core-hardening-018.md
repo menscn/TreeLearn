@@ -13,7 +13,7 @@ owner_lane: android
 stack: android
 estimated_production_lines: 180
 shared_code_touched: true
-depends_on: [T-2026-09-20-home-settings-ui-012.md, T-2026-09-20-chat-reasoning-answer-actions-013.md, T-2026-09-20-navigation-archive-delete-014.md, T-2026-09-20-search-unread-reading-position-015.md, T-2026-09-20-tree-canvas-tablet-ui-017.md]
+depends_on: [T-2026-09-20-home-settings-ui-012.md, T-2026-09-20-chat-reasoning-answer-actions-013.md, T-2026-09-20-navigation-archive-delete-014.md, T-2026-09-20-search-unread-reading-position-015.md, T-2026-09-20-tree-canvas-tablet-ui-017.md, T-2026-09-21-real-data-path-wiring-032.md]
 tdd_mode: required
 
 ## Requirement collaboration brief
@@ -108,6 +108,8 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Implementation notes
 
+- 组合根所有权：`AppContainer.java` 与 `MainActivity.java` 由 T-2026-09-21-032（真实数据路径接线）独占。本任务只做安全/release/守门/端到端测试，不并行编辑这两个文件；确需改动时先经 leader 交接。
+
 - 未提供正式证书时，生成 Treelearn 专用个人侧载 keystore 并保存在仓库外；口令只进入环境变量或未跟踪的本地配置，绝不打印或提交。记录 keystore 路径、证书 SHA-256 和 APK SHA-256，不记录口令。
 - 正式商店签名材料、个人侧载 keystore、测试 Key 和 local.properties 均不入库。
 - 进程死亡测试必须用系统终止方式，不以 Activity recreate 冒充。
@@ -130,3 +132,10 @@ Follow [code-document alignment](../rules/documentation.md).
 - Unblock condition: 在执行进程可见的环境变量中提供测试 Key；密钥不得写任务文件或日志。
 - Next steps: 派独立 verifier 执行最终任务。
 - Watch-outs: 未覆盖真实分支不得声称 release ready。
+- [leader 2026-09-21] 本轮由主会话完成了本任务中**不依赖设备**的部分：
+  - 新增 `android/app/src/main/res/xml/network_security_config.xml`（base-config 禁明文、只信任系统锚点、无 debug 放宽），并在 `AndroidManifest.xml` 声明 `android:networkSecurityConfig="@xml/network_security_config"`；同时改写了 manifest 里「网络配置尚无、属于 T-018」的旧注释，避免留下文档漂移。
+  - `android/app/build.gradle` 的 `signingConfigs` 顺序缺陷已修（原写法使**每个** Gradle 任务在配置期失败）；`apksigner verify --print-certs` 退出码 0，证书 SHA-256 `d8670c863d692a90e21b7a895cf0f717bc8a1cc4ba82a48ff771f09a8780c561`。
+  - 产出 `android/app/build/outputs/apk/release/app-release.apk`（429964 字节，SHA-256 `05CDD77999DAC8388400DC84902425A52B8CA3E8609F5E450306CA67B9FB892B`），证据 `artifacts/evidence/T-018-release-apk-2026-09-21.txt`。
+  - 构建期守门：`\gradlew.bat check` 退出码 0；Java-only guard `VERDICT: PASS (13 OK line(s))`；lint 0 error。
+- [leader 2026-09-21] **未完成**（不得读作通过）：release `TelemetrySink` no-op 的落位与验证、端到端测试的**执行**（`androidTest-results/connected/debug` 为 0 文件）、secret/content log scan 的正式报告、安装启动与手机/平板实机验收、真实 DeepSeek 冒烟（无 Key）。设备相关一律 `deferred — emulator not used this round (user instruction 2026-09-21)`。
+- [leader 2026-09-21] 注意：release APK 虽然签名有效，但**应用仍装配 `PendingHomeWiring`/`PendingChatWiring`**，首页与对话数据路径未接线（见 T-032），装到设备上核心流程走不通。

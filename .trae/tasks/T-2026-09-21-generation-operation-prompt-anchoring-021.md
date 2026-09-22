@@ -116,9 +116,14 @@ Follow [code-document alignment](../rules/documentation.md).
   2. 该读法下 §7 的 `STREAMING_REASONING -> STABLE` 在**任何**满足 §9.3「稳定版本要求最终回答非空」的
      实现里都不可达：回答缓冲区的唯一写入者 `appendAnswer` 写入前必把状态推进到 `STREAMING_ANSWER`。
      即 §7 这条边与 §9.3 互相矛盾，实现按 §9.3 收敛并显式记录（`GenerationState` 类注释的偏离清单第 3 条）。
-  3. **没有行为丢失**：§7 读法下可实现的路径 `STREAMING_REASONING -> STREAMING_ANSWER -> STABLE` 都在图中，
-     且 `appendAnswer` 一步同时完成「追加回答」与「进入回答阶段」，所以 38 列那条被删的边所描述的运行
-     （只有推理、没有回答）按 §9.3 本来就不允许稳定化。
+  3. **无运行时行为丢失**（**记录修复轮更正，R2-4**：原写「没有行为丢失：§7 读法下可实现的路径
+     `STREAMING_REASONING -> STREAMING_ANSWER -> STABLE` 都在图中」——与下一点直接冲突，因为按扇形读法
+     §7 的两条续行是 `STREAMING_REASONING -> STREAMING_ANSWER` 与 `STREAMING_REASONING -> STABLE`，
+     **并不包含** `STREAMING_ANSWER -> STABLE`）。准确的说法是**无运行时行为丢失**：那条被删的
+     `STREAMING_REASONING -> STABLE` 只能在「回答为空」的运行里被使用，而 §9.3 本来就禁止在回答为空时
+     稳定化，所以它在**任何**实现里都不可执行；`appendAnswer` 一步同时完成「追加回答」与「进入回答阶段」，
+     可实现的运行仍被覆盖。另需说明：**§7 按扇形读法本身也不可实现**（缺 `SUBMITTING -> STREAMING_ANSWER`），
+     实现与 §7 边集的差异以 `GenerationState` 类注释的偏离清单为准。
   4. §7 读法下**没有**列出的 `STREAMING_ANSWER -> STABLE`（唯一入口）与 `SUBMITTING -> STREAMING_ANSWER`（§9.1
      thinking disabled 必需）两条边，在 `GenerationState` 里显式存在并各自记录了理由。
   5. 结论：**不改 §7 正文**，但把读法与偏离写进 `GenerationState` 类注释与本记录，供后续维护者复核。
@@ -161,6 +166,10 @@ Follow [code-document alignment](../rules/documentation.md).
 - [x] `cd android; .\gradlew :core:test` 返回 0，且新增用例可被 `--rerun-tasks` 强制真实执行。
       → `artifacts/evidence/T-021-green.txt`：首行命令行、`BUILD SUCCESSFUL in 12s`、`EXITCODE=0`；
       逐类统计 **121 用例 / 0 失败 / 0 错误 / 0 跳过**（本轮新增 38 个，见 `T-021-green-counts.txt`）。
+      **121 是本任务验收时的快照**：记录修复轮实测全库 **13 套件 / 154 用例 / 0 失败 / 0 错误 / 0 跳过**
+      （本轮亲自重跑 `:core:test --rerun-tasks` → exit 0；`T-021-core-test-current.txt`、
+      `T-021-core-test-counts-current.txt`）。154 − 121 = 33 的构成：任务交付后新增两套件
+      `BuildContextPlanUseCaseTest`(10) + `ContextSnapshotTest`(12) = 22，另 11 例分布在既有套件中变多。
 
 ## TDD execution record
 
@@ -176,8 +185,13 @@ Follow [code-document alignment](../rules/documentation.md).
 - Failure reason validated: 失败原因是**符号不存在**，不是环境或配置错误——
   三个生产源文件当时尚未创建；测试类本身没有语法或依赖问题
   （同一批测试文件在类型补齐后即编译通过），且 `:core:compileJava` 成功、只有 `:core:compileTestJava` 失败。
-  另可交叉核对：RED 证据引用的测试行号（`PromptSpecTest.java:23/33/45/51/62/81/88/103` 等）与当前落盘的
-  测试源一致，说明 RED 跑的就是最终测试源。
+  交叉核对测试源（**记录修复轮更正，R2-6**）：RED 跑的是 **F3 改 API 之前**的一版测试源，不是最终源。
+  `artifacts/evidence/T-021-red.txt:209-210` 把 `PromptSpec spec = PromptSpec.of(...)` 标为
+  `PromptSpecTest.java:23`（当时 `PromptSpec.of` **直接返回值**），而当前 `PromptSpecTest.java:23` 是
+  `public class PromptSpecTest {`、`PromptSpec.of(...)` 现于第 28 行（包在 helper 里）——`PromptSpecTest`
+  的 8 处引用行整体后移 **11 行**；`GenerationCommandTest` / `GenerationOperationTest` 前段逐字未变，
+  仅尾部因第 2 轮新增用例后移。**RED 的失败原因不受影响**：早于 F3 的源码里 `PromptSpec` 等类型**尚不存在**，
+  失败仍是 `cannot find symbol`。逐行比对脚本见 `T-021-verification-round2.md` §2.11。
 
 ### GREEN — minimum implementation
 - Implementation: 新增 `PromptSpec`、`GenerationCommand`、`GenerationOperation` 三个生产类型；
@@ -192,7 +206,13 @@ Follow [code-document alignment](../rules/documentation.md).
   `AnswerRevisionTest 11 / BranchSourceTest 12 / BranchTest 12 / GenerationCommandTest 8 /
   GenerationOperationTest 20 / GenerationStateTest 15 / GuardTest 6 / MessageTest 13 /
   PromptPurposeTest 11 / PromptSpecTest 7 / TopicTest 6` = **121 用例，failures=0 errors=0 skipped=0**。
-- Regression evidence: T-003 已有的 83 个用例全部保留并通过（121 − 38 新增 = 83）。
+  **数字沿革（记录修复轮补正，便于核对各轮数字互不矛盾）**：第 1 轮当轮总数是 **116**
+  （T-003 的 83 + 本任务新增 33）；第 2 轮 +3 → **119**（`T-021-round2-red.txt` 的 `119 tests completed, 1 failed`）；
+  再补 2 个 `PromptPurposeTest` → **121**。上面这份 121 的逐类表来自**最终那次运行**，
+  也就是仅存的一份 `T-021-green.txt`（单次运行）。各轮小节引用的是**当轮数**，证据文件只有最终这一次。
+- Regression evidence: T-003 已有的 83 个用例全部保留并通过（121 − 38 新增 = 83；83 为 T-003 验收时的计数）。
+  **记录修复轮实测**：T-003 这 8 个类现为 **95** 例，与 T-021 的 3 类 37、T-007 的 2 类 22 合计 **154**（全库）。
+  逐类读数见 `VERIFY-core-test-counts.txt` 与 `T-021-core-test-counts-current.txt`（本轮亲跑）。
   唯一被替换的断言是 `GenerationStateTest` 中针对已删除迁移边的那一条，
   替换理由与等价覆盖写在该测试方法自身的 javadoc 里（见 D2）。
   专项守门：`artifacts/evidence/T-021-guard.txt` → `VERDICT: PASS (13 OK line(s))`、`GUARD EXITCODE=0`
@@ -221,20 +241,34 @@ Follow [code-document alignment](../rules/documentation.md).
 - Implementation（GREEN）：`stabilize` 在读取状态**之前**先用 `Guard.atLeast(revisionNo, 1, …)` 与
   `Guard.epochMillis(now, "createdAt")` 校验参数形状；`GenerationCommand.create` 把五个非版本参数的
   形状校验抽成 `requireArgumentShape` 并在版本判定前执行；`PromptSpec.of` 同样先校验形状。
-- Command: 同上
+- Command: `cd android && ./gradlew --no-daemon --console=plain :core:test --rerun-tasks`（与上方 RED 逐字符相同）
 - Exit code: 0
 - Passing evidence: `artifacts/evidence/T-021-green.txt` + `T-021-green-counts.txt`，
-  **119 用例 / 0 失败 / 0 错误 / 0 跳过**（当轮新增 3 个用例：顺序锁 2 个 + `PromptSpecTest` 的跨入口一致性锁 1 个）。
-  该文件是**当轮**证据：此后又补了 2 个 `PromptPurposeTest` 用例（新公开方法 `isAbsent`/`versionFailureFor` 的
-  直接覆盖），因此最终 GREEN 是 121 用例，见上一条；两处数字差异已在此说明，勿当成证据不一致。
+  **121 用例 / 0 失败 / 0 错误 / 0 跳过**（第 2 轮新增 3 个用例：顺序锁 2 个 +
+  `PromptSpecTest` 的跨入口一致性锁 1 个；此后又补 2 个 `PromptPurposeTest` 用例——
+  新公开方法 `isAbsent`/`versionFailureFor` 的直接覆盖——已计入这 121）。
+  **记录修复轮更正（R2-3）**：本段原写「该文件是当轮证据、当轮 **119** 用例，此后又补 2 例才到 121」——不实。
+  实测该证据文件内含 **121** 条 `PASSED`、且 `^Command:` 只有 **1** 行（单次运行），即它**就是全部用例
+  落地后那次运行**的记录；仓库里不存在一份「119 那次」的证据文件。复现：
+  `rg -c PASSED artifacts/evidence/T-021-green.txt` → 121；`rg -c "^Command:" artifacts/evidence/T-021-green.txt` → 1。
 - Regression evidence: 第 1 轮的 116 个用例全部保留并通过（121 − 5 新增 = 116），
-  逐类计数差仅为 `GenerationCommandTest 7→8`、`GenerationOperationTest 19→20`、`PromptSpecTest 6→7`。
+  逐类计数差为 `GenerationCommandTest 7→8`、`GenerationOperationTest 19→20`、`PromptSpecTest 6→7`、`PromptPurposeTest 9→11`（合计 **+5**，与 121 − 116 = 5 相符）。
   以下三条断言被**改写**（不是删除），理由见「独立守门发现与修复」表格 F3/F9/F10 行：
   1. `PromptSpecTest.aBlankVersionIsRefused` → `aBlankVersionIsReportedAsTheMissingPolicyCode`：
      同一输入原先期望抛 `IllegalArgumentException`，现期望 `PROMPT_POLICY_VERSION_REQUIRED`。
   2. `PromptSpecTest.aVersionOwnedByAnotherPurposeIsRefusedAtConstruction` →
      `aVersionOwnedByAnotherPurposeIsReportedAsAMismatch`（同上，期望 `PROMPT_POLICY_VERSION_MISMATCH`）。
   3. `GenerationStateTest` 新方法的 javadoc 由「Replaces two previous assertions」改为单数（仅表述修正）。
+
+- TDD 缺口与替代验证（**记录修复轮补写，R2-7**）：第 2 轮三项代码改动里，只有 ①`GenerationOperation.stabilize`
+  的检查顺序有真实 RED（`aCallerBugIsReportedBeforeTheAttemptStateIsConsulted` 当轮 FAILED，见上）。
+  ②`GenerationCommandTest.aCallerBugIsReportedBeforeTheVersionDecision` **当轮即通过**——它锁的是第 1 轮
+  F9 已修好的顺序，而第 1 轮那次修复没有留下 RED 运行；③`PromptSpec.of` 由「直接返回值 / 抛异常」改为
+  返回 `DomainResult`（F3 的通道统一）**没有任何 RED 运行**——RED 时段 `PromptSpec` 类尚不存在，API 形态
+  由第 1 轮复核决定。②③ 的替代验证是 `PromptSpecTest.theVersionDecisionIsTheSameOneGenerationCommandMakes`
+  （对 8 种输入逐一比对两个入口的成功/失败与错误码）与第 1 轮复核的探针 C（三个入口的「畸形参数 +
+  不可用业务条件」组合均为形状先抛）。按 `harness-tasks.md:47`「**事后批准无效**」，②③ 记为 **TDD 例外**、
+  不作正面 TDD 声称；它们在替代证据范围内提供回归覆盖。
 
 ### REFACTOR — optional
 - Cleanup: 无独立重构环节。第一次 GREEN 尝试在
@@ -246,7 +280,13 @@ Follow [code-document alignment](../rules/documentation.md).
   即上一条 GREEN 证据。
 
 ### TDD or sizing exception — only with prior user approval
-- Exception type: sizing（超出 200 行软预算，未超 500 行硬上限；无用户批准的规模例外）
+- Exception type: sizing + TDD 缺口（两者在此登记，与 R2-7 对齐；原著只声明 sizing）
+  - TDD 缺口（**未获用户批准**）：第 2 轮 ②`GenerationCommandTest.aCallerBugIsReportedBeforeTheVersionDecision`
+    与 ③`PromptSpec.of` 的改动**当轮没有 RED**（②当轮即通过；③当轮无失败运行）。按 `harness-tasks.md`「事后
+    批准无效」，此处记为**未获批准的 TDD 缺口**，不声称已闭环；替代验证见 R2-7 与「TDD 缺口与替代验证」。
+    ①`GenerationOperation.stabilize` 的检查顺序有真实当轮 RED。
+  - sizing（见下）：
+- Exception type: sizing（超出 200 行软预算，**未超 500 行硬上限**——按 2026-09-21 用户裁定的「非空非注释」口径，实测 230 行）
 - Reason: 实测**生产代码 230 行**（新增 227 + 改动 3），高于本任务 `estimated_production_lines: 210`
   约 9.5%，高于软预算 200 约 15%。物理行 763（含注释 380、空行 55），逐文件：
 
@@ -269,7 +309,7 @@ Follow [code-document alignment](../rules/documentation.md).
   测试 707 物理行（`PromptSpecTest` 160 + `GenerationCommandTest` 183 + `GenerationOperationTest` 364），不计入。
   实测命令与逐文件结果落盘在 `artifacts/evidence/T-021-sizing.txt`（口径用 T-003 的未改动文件
   `DomainErrorCode.java` 校准：复算得 12/26/10/48，与第 1 轮 verifier 的独立复算逐格相同）。
-- User approval: 未取得。**本项留待用户追认**（同 T-003）。
+- User approval: **已裁定，本任务不属于需要例外的情况**（2026-09-21 用户一次裁定口径并批准例外，覆盖 T-003/T-021/T-004/T-022）。口径为**非空非注释的生产代码行**，据此本任务 **230 < 500 行硬上限 → 未越线，无需例外**；超出 200 行软上限属 verifier **警告**级。裁定与实测复算见 `.trae/rules/harness-tasks.md` 的 Task sizing 节例外表与 `artifacts/evidence/sizing-adjudication-2026-09-21.txt`（其中三个新文件今日复测 **227**，与本文件逐文件表的 139+62+26 逐字相同）。
 - Alternative verification: 不适用（TDD 已真实执行，非以例外替代验证）。
 
 ## Implementation notes
@@ -321,11 +361,14 @@ Follow [code-document alignment](../rules/documentation.md).
 两个入口，否则下一轮仍会漂移。
 
 ## Verification report
+> **最新结论：见本段末尾「第九轮独立复核结论」（verifier #2，2026-09-21 第四轮）。下方第一个 - Verdict: 是历史轮次的记录，不是当前判定。**
 
 > 本节由**独立 verifier** 填写。以下为交付方自述的待核事实与已知缺口，**不构成 PASS**。
 
-- Verdict: `PARTIAL`（第 1 轮，见 `artifacts/evidence/T-021-verification.md`）→ 交付方已完成 F1–F10
-  全部修复并重跑证据（见上一节），**等待第 2 轮独立复核**；`PARTIAL` 期间任务状态**不推进**到 `verified`。
+- Verdict: `PARTIAL`（第 1 轮，见 `artifacts/evidence/T-021-verification.md`）→ **第 2 轮 `PARTIAL`**
+  （`T-021-verification-round2.md`，R2-1 中、R2-6 中 + 6 项轻/观察）→ **第 3 轮 `FAIL（记录层）`**
+  （见下「第 3 轮独立复核结论」）→ **记录修复轮已完成**（见「第 4 轮：记录修复轮」，R2-1..R2-8 逐项处置），
+  等待独立 verifier 复核。修复期间任务状态**不推进**到 `verified`。
   第 1 轮明确复核通过的 7 项结论（7 条验收条件实质全部满足、2800 条动作序列穷举无「`STABLE` 无 revision」
   反例、其余 8 个错误码全部有生产者、D2 可达性论证成立、规模复算逐格相同且未超 500、守门与自检通过、
   `:core` 无 lint 任务）在修复中**未被削弱**：修复只收敛判定点、补前置校验与改注释，未改动任何成功路径语义。
@@ -374,6 +417,70 @@ Follow [code-document alignment](../rules/documentation.md).
      这是**有意的失败方向**（宁可丢尾部也不污染已冻结的 revision），但需要 T-008 用「收到终止帧」
      作为调用前置条件，并由 T-019 的端到端验证覆盖。
 
+### 第 3 轮独立复核结论（verifier，2026-09-21；本轮不使用模拟器）
+
+- Verdict: **FAIL（记录层；7 条验收条件的实质行为已由第 2 轮与本轮复现）**。状态保持 `verifying`，不置 `verified`。
+- 本轮亲自复现 / 回读（`VERIFY-static-recheck-2026-09-21.txt`）：
+  - RED：`artifacts/evidence/T-021-red.txt` 顶格 `error: cannot find symbol` **49** 处、含缩进重印共 **98**、`49 errors` 出现在第 **254** 与 **508** 行、覆盖三个测试文件——与本文件记录**逐字一致**。
+  - `:core:test --rerun-tasks` → `BUILD SUCCESSFUL`、exit 0；按 JUnit XML 逐类 **13 套件 / 154 用例 / 0 失败 / 0 错误 / 0 跳过**（`VERIFY-core-test.txt`、`VERIFY-core-test-counts.txt`）。
+  - 规模：本任务 3 个新文件的非空非注释增量复算为 **227**，与本记录一致（`sizing-adjudication-2026-09-21.txt`）。
+- 未通过项：
+  1. **R2-6（中等，仍未修）**：本文件 RED 段写「RED 证据引用的测试行号（`PromptSpecTest.java:23/33/45/51/62/81/88/103` 等）与**当前落盘的测试源一致**，说明 RED 跑的就是最终测试源」。实测 `T-021-red.txt:209-210` 把 `PromptSpec spec = PromptSpec.of(...)` 标为第 **23** 行，而当前 `PromptSpecTest.java:23` 是 `public class PromptSpecTest {`（该语句现于第 35 行），第 33 行现为 `@Test`。RED 跑的是 F3 改 API **之前**的测试源；该句必须改为真实关系。
+  2. **R2-2（轻，仍未修）**：本文件 F1 行与 Implementation notes 声称「README 只指向 `Guard`、不再复制清单」，但 `android/README.md:200` 仍逐个复制 `AnswerRevision.create`、`GenerationCommand.create`、`PromptSpec.of` 并重述数量「三处」。
+  3. **第 2 轮结论未落进本文件**：`artifacts/evidence/T-021-verification-round2.md`（11:57）已判 **PARTIAL**（R2-1 中、R2-6 中 + 6 项轻/观察），本文件 Verification report 仍写「等待第 2 轮独立复核」。R2-1 已在代码里修好（`AnswerRevision.create` 现先做形状校验，本轮读源码复核 `AnswerRevision.java:86-91`），但报告本身未记录。
+  4. **当前态用例数过期**：本文件全文以 **121** 为最终 GREEN（该数来自其自有证据 `T-021-green.txt`，与文件同源），但全库现已 **154**；应注明「121 是本任务验收时快照」。
+  5. R2-4/R2-5/R2-7/R2-8（轻/观察）在本文件中无处置记录。
+- 验收条件对照：7 条实质满足（版本三跳传递、唯一判定点 `PromptPurpose.versionFailureFor`、跨入口一致、终态封闭、`STREAMING_ANSWER` 下晚到 reasoning 不回退、`PromptSpec` 无供应商字段、`:core:test` exit 0），本轮以 XML 计数与源码读回复核。**本任务无设备侧验收条件。**
+- 翻转条件：① 按真实关系改写 RED 段（R2-6）；② 删 README 的三处例外名（R2-2）；③ 把第 2 轮 PARTIAL 与 R2-1..R2-8 的处置写进本文件；④ 给 121 加「验收时快照」标注。
+
+### 第 4 轮：记录修复轮（implementer，2026-09-21；本轮不使用模拟器）
+
+- 角色：记录修复实现方。本轮**不改生产代码与测试**，只把任务文件与其引用文档对齐当前树。
+- 复核历史：第 1 轮 `T-021-verification.md` → **`PARTIAL`**（F1–F10）；第 2 轮
+  `T-021-verification-round2.md`（11:57）→ **`PARTIAL`**（R2-1 中、R2-6 中 + 6 项轻/观察）；
+  第 3 轮（见上「第 3 轮独立复核结论」）→ **`FAIL（记录层）`**。第 2 轮 R2-1..R2-8 逐项处置（本轮复核，不改代码）：
+
+| # | 级别 | 处置（本轮读源码 / 证据复核） |
+| :--- | :--- | :--- |
+| R2-1 | 中 | **已在生产代码修好**（非本轮改）：`AnswerRevision.create` 现把参数形状校验放在版本判定之前——`AnswerRevision.java:86-91` 依次 `Guard.id/atLeast/text/nonBlank/object/epochMillis`，第 92 行起才做 `PromptPurpose.isAbsent` 业务判定；`AnswerRevision.java:79-85` 的注释写明它正是「第 2 轮审计发现被漏掉的那个入口」。包级规则「参数形状先于业务判定」现于四个返回 `DomainResult` 的入口均成立。 |
+| R2-2 | 轻 | **已修**：`android/README.md:200-203` 改为只指向 `Guard` 类注释，删除三个入口名与「三处」计数。复核：`rg -n "AnswerRevision\.create|GenerationCommand\.create|PromptSpec\.of" android/README.md` 只剩第 233 行 DAO 说明里的 `AnswerRevision.create`（写路径描述，非例外清单）。 |
+| R2-3 | 轻 | **已修**：见上第 2 轮 GREEN 段的「记录修复轮更正」——`T-021-green.txt` 内含 121 条 `PASSED`、单次运行。 |
+| R2-4 | 轻 | **已修**：见上 Documentation impact record 第 3 点，改为「无**运行时**行为丢失」，并补「§7 扇形读法本身不可实现」。 |
+| R2-5 | 轻 | **已修**：`GenerationState` 类注释与 T-003 的 N10 行现一致（均为「两处新增 + 一条删除」）；T-003 任务文件的 N10 行含「记录修复轮更正」。 |
+| R2-6 | 中 | **已修**：见上 RED 段的「交叉核对测试源」。 |
+| R2-7 | 轻 | **已记录**：见上第 2 轮 Regression evidence 后的「TDD 缺口与替代验证」；②③ 按 harness 规则记为 TDD 例外。 |
+| R2-8 | 观察 | **已补断言**（非本轮改）：`GenerationStateTest:126` 断言 `state.isStreaming()` 的逐行取值（该谓词此前 0 消费者 / 0 引用）；`PromptSpecTest:171`、`GenerationCommandTest:193`、`GenerationOperationTest:354` 各补一条「`toString` 不得泄漏正文」断言。复核：`rg -n "isStreaming" android/core/src/main/java android/core/src/test/java` → 定义行 + 断言行。 |
+| 用例数 | — | **121 是本任务验收时的快照**；记录修复轮实测全库 **13 套件 / 154 用例 / 0 失败 / 0 错误 / 0 跳过**（`T-021-core-test-current.txt`、`T-021-core-test-counts-current.txt`；本轮亲自重跑 `:core:test --rerun-tasks` → exit 0）。 |
+| 设备 | — | 本任务无设备侧验收条件；本轮同样未使用模拟器（用户 2026-09-21 指令）。 |
+
+- 第 3 轮「翻转条件」回应：① RED 段已按真实关系改写（R2-6）；② `android/README.md` 已删三个例外名（R2-2）；
+  ③ 第 2 轮 `PARTIAL` 与 R2-1..R2-8 处置已写进本文件（本节）；④ 121 已标注为「验收时快照」并给出全库当前值。
+- 未闭环项：R2-7 的 ②③ 是**无可补 RED** 的 TDD 例外（事后补 RED 无效）；若评审要求严格 TDD，
+  此项只能长期保留该结论，不宜声称已闭环。
+
+### 第九轮独立复核结论（verifier #2，第四轮；2026-09-21；本轮不使用模拟器）
+
+> 本轮针对**第 4 轮：记录修复轮**（implementer）的处置做独立复核。verifier 只读。自产证据：`VERIFY5-jvm-suites.txt`。
+
+- Verdict: **PARTIAL**。7 条验收条件的**实质行为本轮全部复核为真**，且**本任务无设备侧验收条件**；但记录层仍有一项**未闭环**（R2-7 的 ②③ 被正文称作「TDD 例外」，而正式的 `### TDD or sizing exception` 段仍写 `Exception type: Not applicable / Reason: TDD required`，两处**不自洽**）。故状态保持 `verifying`，不置 `verified`。
+- 第 4 轮各项处置的独立复核（命令 + 读数位置）：
+
+| 第 4 轮处置 | 独立复核结果 |
+| :--- | :--- |
+| R2-6：RED 跑的是 F3 改 API **之前**的测试源 | **为真，本轮亲自核对**。`PromptSpecTest.java:23` = `public class PromptSpecTest {`；`PromptSpec.of(...)` 现于**第 28 行**（包在 `spec(...)` helper 里）；而 `T-021-red.txt:209-210` 把该语句标为第 23 行 |
+| R2-2：README 不再复制例外清单 | **为真**。`android/README.md:199–207` 只指向 `Guard` 类注释并明写「不要在这里复制一份」；三个入口名与「三处」计数已消失，唯一残留的 `AnswerRevision.create` 在 `README.md:237`（DAO 写路径描述） |
+| R2-3：`T-021-green.txt` 单次运行、121 例 | **为真，本轮亲自计数**。该文件含 **121** 条以 ` PASSED` 结尾的行、**1** 条 `^Command:` 行、末尾 `EXITCODE=0` |
+| RED 的「49 errors」 | **为真**。`T-021-red.txt:254` 与 `:508` 均为 `49 errors`（正文与 `What went wrong` 各一次） |
+| 「121」标注为验收时快照 | **为真**（第 169–172 行）。本轮实测全库 `:core` 为 **18 套件 / 187 用例**（`VERIFY5-jvm-suites.txt`），故 121 与 154 均已过期 |
+| 第 2 轮 PARTIAL + R2-1…R2-8 落进本文件 | **为真**（第 438–445 行的表） |
+
+- 未闭环项（阻塞 `verified`）：**TDD 例外登记不自洽**。第 263–271 行（R2-7）称 `GenerationCommandTest.aCallerBugIsReportedBeforeTheVersionDecision` 与 `PromptSpec.of` 的通道统一「②③ 记为 **TDD 例外**、不作正面 TDD 声称」，并援引 `harness-tasks.md:47` 的「事后批准无效」；但正式的 `### TDD or sizing exception` 段（第 282–307 行）只声明了尺规（sizing）情形，`Exception type: Not applicable`、`Reason: TDD required`。按任务契约，无法遵循 TDD 时必须在例外段写明理由、用户批准与替代验证证据，故两处须择一对齐；本文件第 451–452 行亦自认「不宜声称已闭环」。
+- 本轮亲自复现（自产证据）：
+  - `cd android; .\gradlew.bat :core:test :ai:testDebugUnitTest :data:testDebugUnitTest :tree-layout:test :app:testDebugUnitTest --rerun-tasks --no-daemon --console=plain` → `BUILD SUCCESSFUL`、exit 0；`:core` **18 套件 / 187 用例 / 0 失败 / 0 错误 / 0 跳过**（`VERIFY5-jvm-suites.txt`）。验收条件 7（`:core:test` 返回 0）成立，其余 6 条均为 `:core` JVM 用例，全部落在该全绿集合内。
+  - 规模：`estimated_production_lines: 210`；按用户裁定口径实测 **230 < 500 硬上限**（227 新增 + 3 改动），故**不在未获批越线清单内**，仅高于 200 软上限（verifier 警告级）。
+- 基线漂移：本文件第 225 行引用的 lint「0 error / 11 warning」已过期（本轮实测 **0 error / 18 warning**，`VERIFY4-T002-assemble-lint.txt`）；`MainActivity.java:76` 的 lint 错误已由 T-012 lane 修复。
+- 设备：本任务**无**设备侧验收条件；本轮未使用模拟器。
+
 ## Handoff notes
 
 - Completed: `:core` 新增 `PromptSpec`、`GenerationCommand`、`GenerationOperation`
@@ -381,8 +488,10 @@ Follow [code-document alignment](../rules/documentation.md).
   「命令 → 操作 → 稳定 revision」的策略版本原样传递链路已可用且被机械断言覆盖。
   策略版本的判定收敛到 `PromptPurpose.versionFailureFor` **唯一判定点**，三处「版本缺失返回错误码」的
   例外集中登记在 `Guard` 类注释，并由跨入口一致性断言锁住。
-  证据：`artifacts/evidence/T-021-{red,round2-red,green,green-counts,guard,lint,sizing}.txt`。
-- In progress: 无（等待第 2 轮独立复核）。
+  证据：`artifacts/evidence/T-021-{red,round2-red,green,green-counts,guard,lint,sizing}.txt`；
+  记录修复轮新增当前态证据 `T-021-core-test-current.txt`、`T-021-core-test-counts-current.txt`。
+- In progress: 无。**记录修复轮（第 4 轮）已完成**：任务文件与 `android/README.md` 已对齐当前树，
+  R2-1..R2-8 逐项处置见「第 4 轮」。等待独立 verifier 复核；本任务无设备侧验收条件。
 - Blocker: 无。
 - Unblock condition: 不适用。
 - Next steps: T-004（SQLite schema/DAO 持久化 operation 行）、T-008（GenerationCoordinator 驱动迁移与恢复扫描）。

@@ -125,3 +125,7 @@ Follow [code-document alignment](../rules/documentation.md).
 - Unblock condition: 不适用。
 - Next steps: 纳入 release 核心流加固。
 - Watch-outs: 弹层定位必须使用 window insets 后的 bounds。
+- [leader 2026-09-21] 实现已落盘（`app/src/main/java/com/treelearn/app/ui/TreeCanvas*.java`、`PopupPlacement.java`、`screen/TreeCanvasScreen.java`、`screen/TreeCanvasView.java`、`res/layout/screen_tree*.xml`、`res/layout/view_node_popup.xml`），但原 lane 在写入 RED/GREEN 记录**之前**中断，因此本任务**只有代码、没有 TDD 证据**，状态如实保持 `ready`，不得当作完成。
+- [leader 2026-09-21] leader 只做了一处最小修复：`screen/TreeCanvasView.java:274` 与 `:278` 把 `TextUtils.ellipsize(...)` 返回的 `CharSequence` 直接传给 `Canvas.drawText(String, …)`，编译失败（`不兼容的类型: CharSequence无法转换为String`，`:app:assembleDebug` 退出码 1）；改为 `.toString()` 后同一命令 `BUILD SUCCESSFUL`，退出码 0（证据 `artifacts/evidence/leader-compile-check-2026-09-21.txt`）。
+- [leader 2026-09-21] JVM 侧画布测试在 `:app:testDebugUnitTest` 中 0 失败：`TreeCanvasGeometryTest` 11 + `TreeCanvasLabelsTest` 7 + `TreeCanvasViewStateTest` 7 + `TreeCanvasPresenterTest` 16 = **41 例**。设备相关验收（pan/pinch/tap/fit、像素非空、平板横屏双栏）一律 `deferred — emulator not used this round (user instruction 2026-09-21)`。
+- [leader 2026-09-21] 未接线入口：首页的树画布入口仍由 `res/values/strings.xml` 的 `home_entry_pending`（`screen/HomeScreen.java:114` 的 Toast）占位；接线需要组合根（`AppContainer`/`MainActivity`），归属 T-032/T-018。

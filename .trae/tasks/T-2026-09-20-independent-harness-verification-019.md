@@ -13,7 +13,7 @@ owner_lane: verification
 stack: android
 estimated_production_lines: 0
 shared_code_touched: false
-depends_on: [T-2026-09-20-security-release-core-hardening-018.md]
+depends_on: [T-2026-09-20-security-release-core-hardening-018.md, T-2026-09-21-real-data-path-wiring-032.md, T-2026-09-21-delivery-report-033.md]
 tdd_mode: not-applicable
 
 ## Requirement collaboration brief
@@ -109,6 +109,7 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Implementation notes
 
+- **本轮验收环境限制（用户 2026-09-21 指令）**：本轮**不使用 emulator/adb/connectedDebugAndroidTest**，且未提供 DeepSeek Key。因此验收标准第 2、3、5、6、8 条中依赖设备或真实服务的部分**本轮不可能闭合**，必须逐条写成 deferred — emulator not used this round (user instruction 2026-09-21) 或 locked — 缺少设备/Key。本轮允许给出的最强结论是 PARTIAL，**不得授予最终 PASS**，也不得把「构建成功 + JVM 测试通过」写成「已安装可用」。可闭合的部分（alidate_tasks.py、lint、unit、release assemble、依赖方向、Java-only guard、secret/content log scan、pksigner verify --print-certs、报告与证据同源性）仍须逐条给出可复现证据。ndroid/app/build/outputs/androidTest-results/connected/debug 必须为 0 文件。
 - 执行前读取 `.trae/rules/harness-verification.md` 及本次所有专项规则。
 - verifier 不编辑代码；发现失败回派原任务并要求最小修复及新增回归测试。
 - 不得展示或写入真实 Key、system prompt、用户问题、reasoning、answer、派生输入、quote 或 snapshot 正文；只报告用途/版本和结构性断言。

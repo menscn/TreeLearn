@@ -35,7 +35,20 @@
 .trae/
 ├── README.md              # 本文件
 ├── HARNESS.md             # 用户选择 Harness 后的编排入口
+├── ROADMAP.md             # Stage 2–6 遗留事项（可粘贴执行的条目）
+├── context/               # Plan 阶段背景包（project-brief.md / domain-glossary.md）
+├── templates/             # 产物模板（INTENT.md）
 ├── rules/                 # 专项规则正文（唯一权威）
+├── agents/                # 派 subagent 时的角色提示词
 ├── tasks/                 # Task 状态文件（Task v2）+ _TEMPLATE
 └── skills/                # 项目技能（机械化守门/原子动作）
 ```
+
+目录职责快查：
+
+- `.trae/context/` —— Plan 阶段背景包：产品一句话、当前阶段与技术栈、关键约束、权威文档索引、事实源声明。
+- `.trae/templates/` —— 产物模板，当前含 `INTENT.md`。
+- `.trae/ROADMAP.md` —— Stage 2–6 遗留事项的可执行清单，每条都能整段粘给新会话。
+- `.trae/tasks/` —— Task v2 状态文件，新会话从这里续上进度。
+- `.trae/agents/` —— 角色提示词（intent-capturer / requirement-decomposer / verifier 等）。
+- `Docs/intent/` —— 变更意图文件（`INTENT-*.md`）的唯一存放处。

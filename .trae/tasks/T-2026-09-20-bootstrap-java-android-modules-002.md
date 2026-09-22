@@ -81,7 +81,7 @@ Follow [code-document alignment](../rules/documentation.md).
 
 - [x] `cd android; ./gradlew :app:assembleDebug :app:lintDebug` 返回 0。
 - [x] `powershell -NoProfile -File android\scripts\no-kotlin-check.ps1` 返回 0，依赖报告无 `org.jetbrains.kotlin`/`-ktx`。
-- [x] 启动初始 Activity，首屏正常渲染且无启动崩溃。（环境由 API 28 模拟器改为 API 36 模拟器，见上文执行期需求变更）
+- [x] 启动初始 Activity，首屏正常渲染且无启动崩溃。（环境由 API 28 模拟器改为 API 36 模拟器，见上文执行期需求变更）**deferred — emulator not used this round (user instruction 2026-09-21)**：记录修复轮不使用模拟器，该条在本轮**既不判 PASS 也不判 FAIL**；勾选只表示 T-002 阶段成立，见下条证据范围注记。
   - **证据范围注记（不得读作当前产物已通过设备验证）**：该项证据对应 T-002 阶段的 **15 KB / 2 dex 骨架 APK** 与 `artifacts/evidence/T-002-device-evidence.txt`（截图 `T-002-phone-first-screen.png`）。其后 `:core` 等模块已填入代码（`find android/core/src -type f -newermt "2026-09-21 01:01" | wc -l` → 28），当前产物为 **70 966 B / 3 dex**，**未做**设备验证——用户 2026-09-21 决定暂停模拟/设备侧验证并自行安装实测。勾选仅表示 T-002 阶段成立。
 - [x] 机械化依赖检查证明 `:core` 不反向依赖 app/data/ai/tree-layout。
 
@@ -124,7 +124,7 @@ VERDICT: FAIL (2 problem(s))
 | 测试依赖面 | `:app:dependencies --configuration debugAndroidTestRuntimeClasspath` | `androidx.test:runner:1.5.1 → monitor:1.6.0 / storage:1.4.2 / annotation:1.0.1` + `junit:4.13.2`；`org.jetbrains.kotlin` / `-ktx` 命中数 **0** |
 | dex 级 Java-only | `./gradlew verifyNoKotlinDex` | `app-debug.apk` 15 140 B / 2 dex → 零 Kotlin；`app-debug-androidTest.apk` 754 229 B / 3 dex → 仅 `Lkotlin/Metadata;`（已登记例外），无 `kotlin/jvm/internal` |
 | 设备冒烟（T-002 阶段） | `adb shell am start -W` + `:app:connectedDebugAndroidTest` | `emulator-5554`（API 36 / x86_64）；`com.treelearn` versionCode 1 / versionName 1.0 / minSdk 28 / targetSdk 36；冷启动 `LaunchState: COLD`、`TotalTime: 827ms`、`topResumedActivity` 为本应用、`FATAL EXCEPTION` 计数 0；connectedDebugAndroidTest → 1 test / 0 failure。证据：`artifacts/evidence/T-002-device-evidence.txt`、截图 `artifacts/evidence/T-002-phone-first-screen.png`。注：`emulator-5554` 序列号出自技术方案文档，**不在**证据文件内——该文件只记录 `sdk=36 abi=x86_64 model=sdk_gphone64_x86_64` |
-| 守门双向自检（第六轮加固后，**完整模式**） | `powershell -NoProfile -ExecutionPolicy Bypass -File android\scripts\dev\guard-selftest.ps1`（不加 `-Fast`） | **40 例全 PASS** / `SELFTEST EXITCODE=0`，含两个需要真实 Gradle 的用例（CASE 7 GString `compileOnly`、CASE 8 `staging/` 下含 Kotlin APK）与新增的 CASE 11 自解析闸门；证据：`artifacts/evidence/T-002-guard-selftest.txt` |
+| 守门双向自检（第六轮加固后，**完整模式**） | `powershell -NoProfile -ExecutionPolicy Bypass -File android\scripts\dev\guard-selftest.ps1`（不加 `-Fast`） | **40 例全 PASS** / `SELFTEST EXITCODE=0`，含两个需要真实 Gradle 的用例（CASE 7 GString `compileOnly`、CASE 8 `staging/` 下含 Kotlin APK）与新增的 CASE 11 自解析闸门；**记录修复轮注**：该 40/40 只在**无并发构建**的窗口可复现（本文件「第八轮」重录，`T-002-guard-selftest.txt` 第 158 行 `OVERALL = SELFTEST PASS (40 case(s))`）；若其它 lane 正在写 `build/`，CASE 0 会因副本继承撕裂产物而红（39/40，见 `VERIFY-T002-guard-selftest*.txt`）。证据：`artifacts/evidence/T-002-guard-selftest.txt` |
 
 ### REFACTOR — optional
 - Cleanup: 把「所有 instrumentation 测试统一放在 `:app` 的 androidTest」定为约定，避免每模块重复测试 runner 与 test APK；`mipmap-anydpi-v26` 并入 `mipmap-anydpi`（minSdk 28 下 v26 限定符冗余）。
@@ -198,7 +198,7 @@ VERDICT: FAIL (2 problem(s))
 | 22 | **高** | 依赖段只查 `debugRuntimeClasspath`/`releaseRuntimeClasspath`/`debugAndroidTestRuntimeClasspath` **三个手写配置**。verifier 用 GString 形态 `compileOnly "org.jetbrains.${'kotlin'}:kotlin-stdlib:2.0.0"`（静态层原理上看不见）注入后，**完整守门仍 PASS** | 改为**按模式识别而非手写清单**：单次调用取 `:app`/`:core`/`:data`/`:ai`/`:tree-layout` 的完整依赖报告，按配置名模式 `(Compile|Runtime|AnnotationProcessor)Classpath$` 选**全部变体 classpath**，按 `^(_internal|detachedConfiguration|classpath$)` 排除 AGP/Gradle 自身的构建工具配置，并**断言匹配集非空**（模式过期就响亮失败，而不是「什么都没验证却通过」） | 自检新增 CASE 7（GString + `compileOnly` 必须被 stage 3 拦下）。实测输出：`no Kotlin coordinates on 53 variant classpath configuration(s) across :app, :core, :data, :ai, :tree-layout (build tooling configurations excluded, 4201 report lines)` / `excluded 36 build-tooling configuration(s)` |
 | 23 | 中 | APK 段只 glob **三个硬编码目录**（`app/build/outputs/apk/{debug,androidTest/debug,release}`）。verifier 把含 Kotlin 的真实 APK 放到 `app/build/outputs/apk/staging/`，守门仍打印 `PASS (3 APK(s) inspected)`——staged 产物永不被扫 | 改为**递归遍历 `app/build/outputs/apk` 全树**，三个期望产物降级为**覆盖断言**（每组必须仍有产物，否则 FAIL）而非扫描边界；严格度按**路径**判定（`androidTest` 路径允许 `Lkotlin/Metadata;`，其余 shipped APK 两个 needle 任一命中即 FAIL） | 自检新增 CASE 8：把 androidTest APK 复制到 `staging/staged.apk` 后必须 FAIL |
 | 24 | 中（证据） | ① `artifacts/evidence/T-002-guard-selftest.txt` 仍是第三轮的值（`7c6a34fb…` / 371 行），已被后续两轮改动作废；② 更根本：第 20 项声称「自检探针新增该用例」，但**该探针从未落盘**——它只是被内联跑过一次，verifier 在仓库里找不到任何可复现它的东西 | 把自检**落盘为可复现脚本** `android/scripts/dev/guard-selftest.ps1`（在工作树**之外**的临时副本上运行，从不修改工作树；`-Fast` 模式 23 例不需要真实 Gradle，完整模式 25 例含 2 个 Gradle 用例）；证据文件改为**流式写出 + UTF-8**：原先用 `>>` 重定向原生命令输出，PowerShell 5.1 写的是 **UTF-16LE**，证据文件在评审工具里显示为二进制；同时把「捕获到变量再一次性写出」改为逐行流式写，被超时中断时也能保留已打印内容（上一轮就因此得到一个空的证据文件） | `artifacts/evidence/T-002-guard-selftest.txt`（完整模式 25 例全 PASS / `SELFTEST EXITCODE=0`）；`artifacts/evidence/T-002-no-kotlin-guard.txt`（`VERDICT: PASS` / `GUARD EXITCODE=0`） |
-| 25 | 轻（自述不实） | Handoff 里「Gradle 构建配置 **529 行**」不可复现 | 更正为实测值，并**不再把它当作冻结数字**（守门的 Gradle helper `verify-no-kotlin.gradle` 本身也被本轮重写，数字还会动）。当前实测（第六轮再测）：`find . -name '*.gradle' -not -path '*/build/*' -type f \| xargs wc -l` → **599 行**；`find . -name '*.gradle' -not -path '*/build/*' -type f \| wc -l` → **8 个文件**（旧的「10 个」把 `wc -l` 的 `total` 行与 `./.gradle` 目录条目一起数了进去，见第六轮 F4） | 上述两条命令输出；`local.properties` 不计入（gitignored、含机器路径） |
+| 25 | 轻（自述不实） | Handoff 里「Gradle 构建配置 **529 行**」不可复现 | 更正为实测值，并**不再把它当作冻结数字**（守门的 Gradle helper `verify-no-kotlin.gradle` 本身也被本轮重写，数字还会动）。当前实测（**记录修复轮再测**）：逐文件回读 **606 行 / 8 文件**（`artifacts/evidence/T-002-gradle-size-2026-09-21-repair.txt`，39+108+121+27+40+219+25+27=606）。第六轮当时为 **599**；此后 leader 于 21:36 调整 `android/app/build.gradle` 的 `signingConfigs` 顺序（+17/−10 = +7 行），**文件数 `8` 不变**。原句：`find . -name '*.gradle' -not -path '*/build/*' -type f \| xargs wc -l` → **599 total**；`find . -name '*.gradle' -not -path '*/build/*' -type f \| wc -l` → **8 个文件**（旧的「10 个」把 `wc -l` 的 `total` 行与 `./.gradle` 目录条目一起数了进去，见第六轮 F4） | 上述两条命令输出；`local.properties` 不计入（gitignored、含机器路径） |
 | 26 | 轻（自述不实） | 「`:core` / `:tree-layout` 纯净性扫描空跑」「debug APK 15 KB / 2 dex」已半失效：T-003 已给 `:core` 填 14 个类型（T-021 后为 17 个），纯 Java-only 扫描对它**已是真实强制**；debug APK 也已不是 15 KB / 2 dex | 同步 `android/README.md`：纯净性缺口只剩 `:tree-layout`（待 T-016）；APK 尺寸改为「约 70 KB / 3 dex」并注明字节数随构建变化、精确值以证据文件为准 | `android/README.md` 对应小节；本任务 Handoff 同步 |
 
 - 第 21–23 项合起来的教训，比第四轮第 19 项更进一步：**「不再手写清单」本身必须被机械保证**。三轮里我两次因为手写枚举而留盲区（手写 3 个 runtime classpath、手写 3 个 APK 目录），两次都是 verifier 往枚举之外放东西就打穿。现在的做法是**按模式识别 + 断言匹配集非空**：模式过期时守门**响亮失败**，而不是退化成「什么都没检查却打印 PASS」。这条已写进脚本头的 `SCOPE HONESTY`。
@@ -207,7 +207,7 @@ VERDICT: FAIL (2 problem(s))
   - `android/scripts/no-kotlin-check.ps1` — SHA-256 `5F3FDB52F9EF8E6F0B20D016065A06F4A925F18353B5DE1AFC28D6277C7A3C32`，**692 行**
     （历史值：`B9D342E8…` / 577 行为第五轮，`BDBCC52D…` / 439 行为第四轮，均已过期）
   - `android/scripts/lib/evidence-integrity.ps1` — SHA-256 `DD2E4A55A6641D949C735AFDDBCE1A6D8654BD158F07119E59099786CA65B426`，169 行
-  - `android/scripts/dev/guard-selftest.ps1` — SHA-256 `78464A8830A5A16C849073A01C8D1084176AC393D2CE61C7B8E56A5196B5D91F`，467 行
+  - `android/scripts/dev/guard-selftest.ps1` — SHA-256 `9D680E26CCF291D8CAB5B818B6851A9B6B21EDDB21C7826F1E5806388FA98828`，**570 行**（记录修复轮实测回读；mtime 2026-09-21 12:38:05）
 
 ### 第六轮独立复核发现与修复（VERIFY 阶段，第 3 轮）
 
@@ -218,8 +218,8 @@ VERDICT: FAIL (2 problem(s))
 | F1 | **中（阻塞）** | 任务与 `android/README.md` 把 `artifacts/evidence/T-002-guard-selftest.txt` 当作「**完整模式 25 例**、含 CASE 7/8」的证据，而该文件**自身**写的是 `-Fast` / `CASE 7-8 skipped` / `23 case(s)`——被引用的恰好是它跳过的两个用例 | 以**完整模式**重跑并落盘到同一路径（见下方「本轮证据刷新」）；任务与 README 只引用完整模式那份，且运行模式写进文件头，引用方必须核对该模式 | 见下方证据行 |
 | F2 | 中 | 同一文件缺 AGENTS 要求的头部：无 `Generated:`、无被核脚本 `SHA-256` 与行数，无法判定出自哪个版本 | `guard-selftest.ps1` 输出头增加 `Generated:` / `Command:`（含是否 `-Fast`）/ `Guard` 与 `Library` 的 `SHA-256` 与行数；捕获封装再补 `ExitCode` / `Seconds` / `CapturedAt` / `Mode` | 该文件头 6 行 |
 | F3 | 中 | 守门 stage 3b 只看 `gradlew verifyNoKotlinDex` 的**退出码**，不断言判据行存在：零输出时仍可打印 `OK no built APK contains Kotlin runtime bytecode` 并 `VERDICT: PASS` | 新增共享库 `Get-ApkDexStageEvidence`：要求 ≥1 条 `^verifyNoKotlinDex:` 判据行、出现最终 `PASS (N APK(s)`、且 N 可解析且 ≥1；任一不满足即 FAIL。守门与自检**导入同一文件**，不再各写一份 | 自检 CASE 10 的 11 条方向性断言；本轮守门输出 `5 judgement line(s)` |
-| F4 | 轻 | 「Gradle 构建配置 574 行 / **10 个文件**」实测 **8**（`wc -l` 的 `total` 行与 `./.gradle` 目录条目被当成文件） | 见下方变更规模：599 行 / 8 个 `*.gradle` 文件，并给出可复算的两条命令 | `find … -type f \| wc -l` → 8 |
-| F5 | 轻 | 「自检探针 261 行」实测 317 行（写任务时数字已过期） | 见下方变更规模：467 行（第六轮继续修改后）。**不再凭记忆写行数**，一律改完后回读 | 该行给出的实测命令 |
+| F4 | 轻 | 「Gradle 构建配置 574 行 / **10 个文件**」实测 **8**（`wc -l` 的 `total` 行与 `./.gradle` 目录条目被当成文件） | 见下方变更规模：**606 行 / 8 个 `*.gradle` 文件**（记录修复轮再测；第六轮为 599），并给出可复算的两条命令 | `find … -type f \| wc -l` → 8 |
+| F5 | 轻 | 「自检探针 261 行」实测 317 行（写任务时数字已过期） | 见下方变更规模：**570 行**（记录修复轮实测回读。第六轮当时是 467 行，此后脚本又被改过，因此 467 已过期）。**不再凭记忆写行数**，一律改完后回读 | 该行给出的实测命令 |
 | F6 | 轻 | 回归表写 lint「0 error（**13 条**全为 warning）」，与「不再固化 warning 条数」的决定及实测 **11** 自相矛盾 | 改为「0 error（warning 条数随 AGP/lint 版本漂移，不固化；本轮实测 11）」 | 本轮实测 11 |
 | F7 | 轻 | 「RED 原始输出见该文件的早期版本历史」指向**不存在物**：`android/` 与 `artifacts/` 均未被 git 跟踪 | 直说 RED 原始输出无留存，并给出可复现的等价取证方式（移除 `android/` 后重跑同一条命令） | `git ls-files android \| wc -l` → 0 |
 | F8 | 轻 | 写 `assets/evidence/T-002-phone-first-screen.png`，实际在 `artifacts/evidence/`；设备行未引用真正的证据文件 | 路径改为 `artifacts/evidence/…`，并在设备冒烟行补上 `T-002-device-evidence.txt` | 两文件均存在 |
@@ -280,14 +280,15 @@ VERDICT: FAIL (2 problem(s))
 - 若任一候选库传递引入 Kotlin，改用平台 Java API或合规版本。
 
 ## Verification report
+> **最新结论：见本段末尾「第九轮独立复核结论」（verifier #2，2026-09-21 第四轮）。下方第一个 - Verdict: 是历史轮次的记录，不是当前判定。**
 
 > 本节由**独立 verifier** 填写。以下为交付方自述的待核事实与已知缺口，**不构成 PASS**。
 
-- Verdict: PENDING（第六轮 verifier 判 **FAIL**——判词对工程实体是肯定的：字节码级 Java-only、五模块、构建/lint/测试 exit 0、守门 PASS、自检全 PASS 均被独立复现且未发现回归；判 FAIL 只因**证据引用与当前态数字失真**（F1 阻塞）与守门一条**静默退化路径**（F3）。F1–F13 已全部修复并刷新证据，见「第六轮独立复核发现与修复」；等待第七轮独立复核。**不得把自述读作验收结论。**）
+- Verdict: 第 6 轮 **FAIL（记录层）**、第 7 轮 **FAIL（记录层；工程实体层未发现回归）**（见下方「第七轮独立复核结论」，2026-09-21）。两轮判词对工程实体都是肯定的：字节码级 Java-only、五模块、构建/lint/测试 exit 0、守门 PASS、自检全 PASS 均被独立复现且未发现回归；判 FAIL 只因**证据引用与当前态数字失真**（第六轮 F1 阻塞）与守门一条**静默退化路径**（第六轮 F3）以及**自检证据无法绑定到当前脚本**（第七轮①②）。F1–F13 与第七轮两条未通过项已全部修复并刷新证据，见「第八轮：记录修复轮」；**等待下一轮独立复核**。**不得把自述读作验收结论。**
 - Evidence:
   - `artifacts/evidence/T-002-no-kotlin-guard.txt` — 真实仓库完整守门，`VERDICT: PASS` / `GUARD EXITCODE=0`，
     含 stage 1（源码）、stage 2（Gradle 脚本预筛）、stage 3（53 个变体 classpath）、stage 3b（递归发现的 3 个 APK）。
-  - `artifacts/evidence/T-002-guard-selftest.txt` — 双向自检，**完整模式 40 例全 PASS** / `SELFTEST EXITCODE=0`
+  - `artifacts/evidence/T-002-guard-selftest.txt` — 双向自检，**完整模式 40 例全 PASS** / `SELFTEST EXITCODE=0`（**第八轮记录修复轮再次重录**：文件头现含自检脚本**自身**的 SHA-256/行数/mtime 与运行环境说明，并同时保留一次 harness 中止（RUN A exit 3）；40/40 只在无并发构建的窗口可复现）
     （第六轮以完整模式重录，文件头含 `Generated:` / `Command:`（无 `-Fast`）/ `Guard` 与 `Library` 的 `SHA-256` 与行数；
     此前该文件是一次 `-Fast` 运行，被引用为「完整模式 25 例」的证据，而它恰恰跳过了 CASE 7/8 —— 见第六轮 F1），
     含两个需要真实 Gradle 的用例（CASE 7 GString `compileOnly`、CASE 8 非标准目录下的含 Kotlin APK）。
@@ -307,12 +308,67 @@ VERDICT: FAIL (2 problem(s))
     `artifacts/evidence/T-002-phone-first-screen.png`（截图）与 `artifacts/evidence/T-002-device-evidence.txt`（冒烟输出）为 T-002 阶段的设备证据，其后代码已变化；当前 70 966 B / 3 dex 产物**未做**设备验证。
 - Risks: 依赖树漂移（任何一次依赖升级都可能引入 Kotlin，必须重跑守门与 APK dex 扫描）。
 
+
+### 第七轮独立复核结论（verifier，2026-09-21；本轮不使用模拟器）
+
+- Verdict: **FAIL（记录层；工程实体层未发现回归）**。状态保持 `verifying`，不置 `verified`。
+- 本轮亲自复现（证据文件均在 `artifacts/evidence/`）：
+  - `powershell -NoProfile -ExecutionPolicy Bypass -File android\scripts\no-kotlin-check.ps1`（仓库根执行）→ `VERDICT: PASS (13 OK line(s))`、exit 0（`VERIFY-T002-guard.txt`）。
+  - 守门身份：692 行 / SHA-256 `5F3FDB52F9EF8E6F0B20D016065A06F4A925F18353B5DE1AFC28D6277C7A3C32`，与本文件记录逐字一致（`VERIFY-T002-verify-readback.txt`）。
+  - `cd android; .\gradlew.bat :app:assembleDebug :app:lintDebug` → `BUILD SUCCESSFUL`、exit 0；lint 0 error / 12 warning（`VERIFY-T002-assemble-lint.txt`）。
+  - Gradle 构建配置逐文件回读相加 = **599 行 / 8 个 `*.gradle`**，与本文件一致（`VERIFY-T002-gradle-size.txt`）。
+- 未通过项（两条，均无涉生产代码）：
+  1. `android/scripts/dev/guard-selftest.ps1` 现为 **570 行**（mtime 12:38:05），本文件 Handoff 写 **467 行**；被引用的 `artifacts/evidence/T-002-guard-selftest.txt` 捕获于 **12:20:25**，早于脚本最后一次修改，且该文件头只记录 Guard/Library 的 SHA-256、**不记录自检脚本自身**，故无法把这份证据绑定到当前脚本。修法：改完脚本后重录该证据，并把 467 改为实测行数。
+  2. 完整模式自检独立重跑 **2 次**均为 `OVERALL = SELFTEST FAIL (1 mismatch(es))`，唯一红点是 CASE 0（`untouched copy => PASS`，实测 1）；其余 **39/40** 条断言通过。根因已定位并实测：`New-GuardCopy` 刻意继承 `build/`，在实现方并发写 `:data`/`:app` 产物时副本继承到撕裂的中间产物（`D8: Class BranchCreation$Refusal requires its nest host BranchCreation`），副本自身的 Gradle 构建因此失败；同一脚本在**安静时刻新建的副本**上 `verifyNoKotlinDex: PASS`、exit 0。属并发窗口效应，不是检测分支失效，但"完整模式 40 例全 PASS"目前**无法复现**。证据：`VERIFY-T002-guard-selftest.txt`、`VERIFY-T002-guard-selftest-run2.txt`、`VERIFY-scratch-copy-build.txt`、`VERIFY-scratch-copy-run3.txt`。
+- 验收条件 3（启动初始 Activity、首屏正常渲染且无启动崩溃）：**deferred — emulator not used this round (user instruction 2026-09-21)**。本轮不使用模拟器，该条既不判 PASS 也不判 FAIL，**仍未决**（先前 `T-002-device-evidence.txt` 对应的是已变化的 15 KB 骨架 APK，不能代表当前产物）。
+- 翻转条件：① 重录自检证据（文件头含自检脚本自身 SHA-256 与行数）并把 467 改为实测值；② 在无并发构建的窗口重跑自检取得全 PASS；③ 验收条件 3 留待后续设备轮次。
+### 第八轮：记录修复轮（record repair，2026-09-21 下；本轮不使用模拟器）
+
+> 本节由**记录修复 lane**（与实现同方，**不是**独立 verifier）填写：只修记录、引用与证据重录，不改生产代码、不改守门脚本与自检脚本。
+> 上方「第七轮独立复核结论」原样保留，本节是回应而不是覆盖。
+
+第七轮列出的两条未通过项与一条验收事项，逐条处置：
+
+| 第七轮发现 | 处置 | 修复后实测（命令 + 读数位置） |
+| :--- | :--- | :--- |
+| ① `guard-selftest.ps1` 现为 570 行而本文件写 467 行；被引证据捕获于 12:20:25、早于脚本最后一次修改，且该文件头不记录自检脚本自身 | 把 467 一律改为实测 **570**（并更正 SHA-256）；**以完整模式重录** `artifacts/evidence/T-002-guard-selftest.txt`，文件头新增「自检脚本自身的 SHA-256 + 行数 + mtime」 | `(Get-Content android\scripts\dev\guard-selftest.ps1).Count` → **570**；`(Get-FileHash -Algorithm SHA256 android\scripts\dev\guard-selftest.ps1).Hash` → `9D680E26CCF291D8CAB5B818B6851A9B6B21EDDB21C7826F1E5806388FA98828`；证据文件第 14–15 行 |
+| ② 完整模式自检此前两次独立重跑都是 `39/40`（唯一红点 CASE 0：副本继承 `build/` 后被并发构建撕成不一致） | 在**无并发构建**的窗口重跑：第一次因本 lane 的环境问题（本会话的 PowerShell 7 把 `PSModulePath` 泄漏进子进程 PS 5.1，遮蔽 `Microsoft.PowerShell.Utility`，`Get-FileHash` 不可用）沿自检**自身的 `INCONCLUSIVE` 通道**退出 3，属 harness 中止而非用例不匹配；修正模块路径后**第二次取得完整模式 40/40 PASS** | `artifacts/evidence/T-002-guard-selftest.txt` 第 158 行 `OVERALL = SELFTEST PASS (40 case(s))`、第 159 行 `#### RUN B EXITCODE=0` |
+| ③ 验收条件 3（首屏渲染无崩溃）需要 deferred 标注 | 在该验收条件行内直接写入 `deferred — emulator not used this round (user instruction 2026-09-21)`，既不判 PASS 也不判 FAIL | 本文件 Acceptance criteria 第 3 条 |
+| ④（本节自查）Gradle 构建配置本文件写 **599 行**，记录修复轮再测为 **606 行** | 把 Handoff 与相关表格更新为 606，并说明差值来源（不把它当冻结数字） | `artifacts/evidence/T-002-gradle-size-2026-09-21-repair.txt` 末行 `files=8 total=606`；`android/app/build.gradle` mtime 21:36:33（leader 的 signingConfigs 顺序修复，+17/−10） |
+
+- **CASE 0 的并发敏感性没有被消除，只是被绕开**：本节的重跑取自一个没有其它 lane 写 `build/` 的窗口。`guard-selftest.ps1` 的 `New-GuardCopy` **刻意保留 `build/`** 以便 Gradle 增量；并发构建时副本可能继承到撕裂的中间产物（第七轮实测 `D8: Class BranchCreation$Refusal requires its nest host BranchCreation`），CASE 0 因此会红。这是**自检脚手架在并发下的已知脆弱点**（`AGENTS.md` 失败案例库有同类条目），本任务只记录、**不改脚本**——改自检脚本超出记录修复的范围。
+- 本轮**未**执行任何设备命令（无 `connectedDebugAndroidTest`、无 `adb`、无模拟器）。
+### 第九轮独立复核结论（verifier #2，第四轮；2026-09-21；本轮不使用模拟器）
+
+> 本轮只针对**第八轮：记录修复轮**的四项处置做独立复核。verifier 只读：未改动任何生产代码、守门脚本、自检脚本或他人证据。
+> 自产证据：`VERIFY4-T002-guard.txt`、`VERIFY4-T002-assemble-lint.txt`、`VERIFY5-jvm-suites.txt`、`VERIFY5-androidtest-javadoc-depdirection.txt`。
+
+- Verdict: **PARTIAL**（记录层四项处置已逐条复核为真；工程实体层本轮未发现回归；**验收条件 3 是设备判据，按用户 2026-09-21 指令 deferred，故本任务不得闭合**）。
+- 第八轮四项处置的独立复核（命令 + 读数位置）：
+
+| 第八轮处置 | 独立复核结果（verifier 亲自读回） |
+| :--- | :--- |
+| ① `guard-selftest.ps1` = 570 行 / 新 SHA-256；证据头新增自检脚本自身指纹 | **为真**。`(Get-Content android\scripts\dev\guard-selftest.ps1).Count` → **570**；`(Get-FileHash -Algorithm SHA256 …).Hash` → `9D680E26CCF291D8CAB5B818B6851A9B6B21EDDB21C7826F1E5806388FA98828`，与 `T-002-guard-selftest.txt` 第 14–17 行逐字一致 |
+| ② 完整模式 40/40 | **为真**。`T-002-guard-selftest.txt:158` = `OVERALL = SELFTEST PASS (40 case(s))`、`:159` = `#### RUN B EXITCODE=0`；RUN A（INCONCLUSIVE，exit 3，PSModulePath 环境中止）原样保留，未被冒充为用例不匹配 |
+| ③ 验收条件 3 加 deferred 标注 | **为真**。本文件第 84 行含 `deferred — emulator not used this round (user instruction 2026-09-21)`，并附「15 KB / 2 dex 骨架 APK」的证据范围注记 |
+| ④ Gradle 配置 599 → 606 | **为真**。verifier 逐文件回读 39+108+121+27+40+219+25+27 = **606**（8 个 `*.gradle`），与 `T-002-gradle-size-2026-09-21-repair.txt` 末行 `files=8 total=606` 及本文件 Handoff 一致 |
+
+- 本轮亲自复现（自产证据）：
+  - `powershell -NoProfile -ExecutionPolicy Bypass -File android\scripts\no-kotlin-check.ps1`（仓库根）→ `VERDICT: PASS (13 OK line(s))`、exit 0；`vacuous` 命中 **0**（`VERIFY4-T002-guard.txt`）。
+  - `cd android; .\gradlew.bat :app:assembleDebug :app:lintDebug` → `BUILD SUCCESSFUL`、exit 0；lint 报告回读 **0 error / 18 warning**（`VERIFY4-T002-assemble-lint.txt`）。
+  - `verifyDependencyDirection` → `PASS (downward-only module graph + pure-JVM module purity)`，**不再打印任何 `vacuous` WARNING**（`VERIFY5-androidtest-javadoc-depdirection.txt:404`）。
+- **基线漂移（引用方须注意，非本任务新缺陷）**：本文件第 122 行「本轮实测 11（warning）」与 T-003/T-021 引用的「lint 0 error / 11 warning」基线**均已过期**。原因是 `MainActivity.java:76` 的 `GestureBackNavigation` lint 错误已被 T-012 lane 修好（该文件现只在第 110 行 javadoc 里提到 `onBackPressed`），此后 warning 数为 18。
+- **未决（阻塞闭合）**：验收条件 3「启动初始 Activity、首屏正常渲染且无启动崩溃」= `deferred — emulator not used this round (user instruction 2026-09-21)`。既不判 PASS 也不判 FAIL。**要让本任务闭合，用户须显式豁免该条，或另开一次设备轮次。**
+- 规模：`estimated_production_lines: 160`。记录中的 **606 行是 Gradle 构建配置（开发脚手架，非生产代码）**，不计入行数预算，故本任务**不在规模越线清单内**。
+- RED/GREEN 键卫生：RED `Exit code: 1`、GREEN `Exit code: 0`，两条 `Command` 逐字节相同（`powershell -NoProfile -ExecutionPolicy Bypass -File android\scripts\no-kotlin-check.ps1`），符合契约。
+- 残留（不阻塞，如实记录）：① 第 125 行与 `T-002-runtime-classpath*.txt` 的产物字节数（15 140 B / 2 dex）对应 T-002 阶段旧骨架产物，当前产物更大（本文件第 85 行自述为 70 966 B / 3 dex），引用时不得当作当前值；② 第 318 行（第七轮小节）仍写 599，属历史记录，第 336/344 行已更正为 606。
+
 ## Handoff notes
 
-- Completed: `android/` 五模块骨架、Gradle wrapper、Java-only 守门脚本（**第六轮后：692 行 / SHA-256 `5F3FDB52F9EF8E6F0B20D016065A06F4A925F18353B5DE1AFC28D6277C7A3C32`**）、依赖方向守门任务、dex 级 Java-only 守门任务、守门双向自检探针（`scripts/dev/guard-selftest.ps1`，467 行）、共享证据完整性库（`scripts/lib/evidence-integrity.ps1`，169 行）、`android/README.md`。
+- Completed: `android/` 五模块骨架、Gradle wrapper、Java-only 守门脚本（**第六轮后：692 行 / SHA-256 `5F3FDB52F9EF8E6F0B20D016065A06F4A925F18353B5DE1AFC28D6277C7A3C32`**）、依赖方向守门任务、dex 级 Java-only 守门任务、守门双向自检探针（`scripts/dev/guard-selftest.ps1`，**570 行**）、共享证据完整性库（`scripts/lib/evidence-integrity.ps1`，169 行）、`android/README.md`。
 - 变更规模（第六轮守门修复后重新点过，全部为实测回读值）：**生产代码 175 行**（Java 24 + res XML 123 + Manifest 28）；测试 52 行；
-  Gradle 构建配置 **599 行 / 8 个 `*.gradle` 文件**（`find . -name '*.gradle' -not -path '*/build/*' -type f | xargs wc -l` → `599 total`；同一条 `find` 接 `| wc -l` → `8`。旧值 `574 行 / 10 个文件` 的文件数已由第六轮 F4 证伪）；
-  守门脚本 692 行（SHA-256 `5F3FDB52…`）；共享证据库 `scripts/lib/evidence-integrity.ps1` 169 行；自检探针 467 行（三者均属开发脚手架，不计入生产代码）。
+  Gradle 构建配置 **606 行 / 8 个 `*.gradle` 文件**（**记录修复轮再测**：逐文件回读 39+108+121+27+40+219+25+27 = 606，`artifacts/evidence/T-002-gradle-size-2026-09-21-repair.txt`；第六轮 verifier 于 21:21 读数为 `599 total`，此后 leader 于 21:36 调整 `android/app/build.gradle` 的 `signingConfigs` 顺序（+17/−10）使总数 599→606。**文件数 `8` 不变**。旧值 `574 行 / 10 个文件` 的文件数已由第六轮 F4 证伪）；
+  守门脚本 692 行（SHA-256 `5F3FDB52…`）；共享证据库 `scripts/lib/evidence-integrity.ps1` 169 行；自检探针 **570 行**（三者均属开发脚手架，不计入生产代码）。
 - In progress: 无。第五轮 6 项（#21 注释降级可伪造、#22 依赖段漏 `compileOnly`、#23 APK 段漏扫、#24 证据过期且探针未落盘、#25/#26 自述不实）已全部修复并刷新证据，等待第六轮独立 verifier + `android-no-kotlin-guard` 判定。
 - Blocker: 无。
 - Unblock condition: 不适用。

@@ -27,6 +27,24 @@ scoop install gitleaks
 
 > 不强制装完才能 commit；但 gitleaks 缺失时必须 **退化为下方「模式 B：Grep 兜底」**，不能直接跳过扫描或假装 PASS（密钥可能入库）。
 
+### A0. 正控自检（每次会话第一次扫描前跑一次）
+
+先用一个**形状合法**的样本确认扫描器真的会命中——否则你无法区分「没有密钥」与「扫描器根本没在工作」：
+
+```powershell
+$probe = Join-Path $env:TEMP ("tl-secretctl-" + (Get-Date -Format 'HHmmssfff'))
+New-Item -ItemType Directory -Path $probe | Out-Null
+@('-----BEGIN RSA PRIVATE KEY-----',
+  'MIIEowIBAAKCAQEAx7Vn0ZmXq1cQq5m3kQeY2Jm7pC4m8vT1s6rL0hN2bYq9wZ3dKfAqLmA0rPq1cQq8yF5nQe2vJ7uG3sT6xY9zB4cD1eF8gH5iJ2kL9mN6oP3qR0sT7uV4wX1yZ8aB5cD2eF3gH6iJ9kL0mN7oP4qR1sT8uV5wX2yZ9aB6cD3eF4gH7iJ0kL1mN8oP5qR2sT9uV6wX3yZ0aB7cD4eF5gH8iJ1kL2mN9oP6qR3sT0uV7wX4yZ1aB8cD5eF6gH9iJ2kL3mN0oP7qR4sT1uV8wX5yZ2aB9cD6eF7gH0iJ3kL4mN1oP8qR5sT2uV9wX6yZ3aB0cD7eF8gH1iJ4kL5mN2oP9qR6sT3uV0wX7yZ4aB1c',
+  '-----END RSA PRIVATE KEY-----') | Set-Content -LiteralPath (Join-Path $probe 'control.pem') -Encoding ascii
+gitleaks dir $probe --redact --no-banner
+```
+
+- exit **非 0**（`leaks found: 1`）→ 扫描器工作正常，继续模式 A。
+- exit **0**（`no leaks found`）→ 扫描器在本机不工作，**必须退化为模式 B**，**不得**据此判 PASS。
+
+**样本形状必须是完整 PEM 块**（头 + base64 body + END 行）。只写一行 `-----BEGIN RSA PRIVATE KEY-----` 是**无效正控**：规则本就不该命中它（实测 `no leaks found`、exit 0），你只会得到「工具坏了」的假结论——2026-09-22 真实发生过，见 `AGENTS.md` 失败案例库里「探针测的形状不是生产路径的形状」条目下的镜像形态。
+
 ## 模式 A：gitleaks（优先）
 
 ### A1. staged（commit 前 / 默认）

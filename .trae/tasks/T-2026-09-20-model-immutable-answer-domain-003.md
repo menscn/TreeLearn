@@ -4,7 +4,7 @@ id: T-2026-09-20-003
 title: 建立不可变回答领域模型
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -159,7 +159,9 @@ java.lang.IllegalArgumentException: messageId must be a UUID string but was: m-1
   - 相对 500 行硬上限：741 / 500 ≈ **148%（超出 48%）**；若按物理行计则 1301 / 500 ≈ **260%（超出 160%）**。**无论采用哪种定义都已越线**。
   - **更正记录**：本任务此前两次写下的「680 行，超上限约 36%」是按一套未写明的私有口径估的；第 3 轮的 742 / 1249 同样已被本轮作废。此处以 **741 / 1301** 为**唯一权威值**。
 - 拆分已做但仍超线：原任务声明「技术方案 §5 全部实体 + §7 状态机 + §9.2 提示词契约」配 `estimated_production_lines: 190`，二者自相矛盾。已按内聚性拆出 T-021（生成操作/命令/`PromptSpec`）、T-007（上下文快照）、T-011（派生 AI 产物）；742 行是**拆分后**残余。未继续拆分的原因：剩余 14 个类型互相引用（`BranchSource`→`GenerationState`、`Branch`→`BranchSource`、`Message`→revision、`AnswerRevision`→提示词版本命名空间），进一步切分会让两个任务同时编辑同一批文件与同一套测试夹具，产生跨任务不一致风险。单文件最大 `Branch.java` 136 代码行，仍可逐文件复核。
-- User approval: **待用户确认**。本任务未取得事前批准即执行，属流程缺陷，已在 T-019 交付报告中列为需用户追认项，并在本任务的 `Verification report → Risks` 与 Handoff 中重复标注。依据是用户「持续执行到 APK 与最终验收报告完成、不要只给计划、不要在完成单个 Task 后停止」的直接指令，据此继续推进而未阻塞等待。
+- User approval: **已获用户明确批准（2026-09-21 一次裁定口径并批准例外，覆盖 T-003/T-021/T-004/T-022）**。口径裁定为**非空非注释**，据此本任务 **741 行超 500 行硬上限 48% → 需例外，已获批准**。批准人 / 日期 / 任务 ID / 判定口径实测值与超出比例均已写入 `.trae/rules/harness-tasks.md` 的 Task sizing 节例外表；实测复算见 `artifacts/evidence/sizing-adjudication-2026-09-21.txt`。
+  - **流程缺陷照实记录，不隐藏**：本任务**实施时未取得事前批准**，批准发生在实现完成之后，属**事后追认**。按规则这不算「事先批准」，因此本节不写成「已事前批准」——例外成立的依据是用户 2026-09-21 的明确批准，而不是记录补得齐。
+  - **741 不可按目录复算**：本任务认领的 `core/domain` 目录后来被 T-021（新增 3 个文件）与 T-022（改 `Branch`/`Message`）继续编辑，直接测目录得到的是并集（今测 17 文件 / 1029 行），不是本任务的残余。引用本任务规模时数只能取第 4 轮实测值。
 - Alternative verification: 无替代方案；已用「单文件 ≤ 140 代码行 + 每类独立测试类 + 8 类 83 用例全绿」控制复核成本。
 
 ## Implementation notes
@@ -169,12 +171,17 @@ java.lang.IllegalArgumentException: messageId must be a UUID string but was: m-1
 - 轮数由已提交用户消息派生，重试/重置不得增加。
 
 ## Verification report
+> **最新结论：见本段末尾「第九轮独立复核结论」（verifier #2，2026-09-21 第四轮）。下方第一个 - Verdict: 是历史轮次的记录，不是当前判定。**
 
 > 本节由**独立 verifier** 填写。以下为交付方自述的待核事实与已知缺口，**不构成 PASS**。
 
-- Verdict: PENDING（第 1、2、3 轮 verifier 均判 `PARTIAL`，第 4 轮判 `PARTIAL`；
-  四轮共 3 + 8 + 7 + 3 = **21 项**发现已全部修复，其中 N8/N9 为本轮修复、N10 为实现期发现并回记，
-  等待第 5 轮独立复核判定。**已知唯一硬阻塞是尺寸例外待用户追认，见下方 Risks。**）
+- Verdict: **FAIL（记录层）** ——第 5 轮判 **FAIL**（V1–V8，报告 `artifacts/evidence/T-003-verification-round5.md`，11:59），
+  第 6 轮判 **FAIL（记录层；领域行为层经独立复现为真）**（见下方「第六轮独立复核结论」），
+  记录修复轮（2026-09-21 下，见「第七轮：记录修复轮」）逐条处置后**等待下一轮独立复核**。
+  历史：第 1–4 轮均判 `PARTIAL`，四轮共 3 + 8 + 7 + 3 = **21 项**发现已全部修复
+  （N8/N9 为第 4 轮修复，N10 为实现期发现并回记）。
+  状态保持 `verifying`——`verified` 只能由独立 verifier 写。**尺寸例外已由用户 2026-09-21 明确批准（属事后追认）**，
+  不再是阻塞。本任务**无设备侧验收条件**，因此**没有 deferred 项**。
 - Evidence: `artifacts/evidence/T-003-red.txt`、`T-003-green.txt`（**83 用例 / 0 失败 / 0 错误 / 0 跳过**，
   `--rerun-tasks` 强制真实执行，用例数直接取自 `core/build/test-results/test/*.xml`）、
   `T-003-checks.txt`、`T-003-guard.txt`。
@@ -211,9 +218,9 @@ java.lang.IllegalArgumentException: messageId must be a UUID string but was: m-1
 
 | # | 级别 | 发现 | 处置 | 复核证据 |
 | :-- | :--- | :--- | :--- | :--- |
-| N8 | 中 | **「错误通道规则已全库统一」并不成立**：`Guard` 类注释当时只写了两条通道，而实际存在 **3 处反例**——① `GenerationState.transitionTo(null)` 返回 `ILLEGAL_STATE_TRANSITION` 业务码；② `Branch.child(topicId, null, now)` 返回 `BRANCH_SOURCE_INVALID` 业务码（与 ① 同类输入、走不同通道）；③ `GenerationState.recoveryTarget()` 对终态抛 `IllegalStateException`，**这条通道当时根本没被规则文本覆盖** | 把规则文本从两条改为**三条**（缺参数/格式非法 → `IllegalArgumentException`；参数合法但接收者状态不对 → `IllegalStateException`；参数合法、状态有效而业务拒绝 → `DomainResult` 失败），并明确 `DomainResult` 是**第三通道**、返回它的方法在前两种情况下仍须抛异常。①② 改为抛 `IllegalArgumentException`；`BRANCH_SOURCE_INVALID` 因此**再无生产者，一并删除**；`AnswerRevision.create` 的缺失策略版本改为在 javadoc 里**显式声明为有意例外**并写明理由 | `GenerationStateTest.aNullTransitionTargetIsACallerBugNotABusinessFailure`（改自 `nullTargetIsRefused`）、`BranchSourceTest.aNonRootBranchCannotExistWithoutProvenance`（改为断言抛异常且消息含 `provenance`）；`grep -rn "BRANCH_SOURCE_INVALID" android/` 零命中；`:core:test` 83 用例全绿 |
+| N8 | 中 | **「错误通道规则已全库统一」并不成立**：`Guard` 类注释当时只写了两条通道，而实际存在 **3 处反例**——① `GenerationState.transitionTo(null)` 返回 `ILLEGAL_STATE_TRANSITION` 业务码；② `Branch.child(topicId, null, now)` 返回 `BRANCH_SOURCE_INVALID` 业务码（与 ① 同类输入、走不同通道）；③ `GenerationState.recoveryTarget()` 对终态抛 `IllegalStateException`，**这条通道当时根本没被规则文本覆盖** | 把规则文本从两条改为**三条**（缺参数/格式非法 → `IllegalArgumentException`；参数合法但接收者状态不对 → `IllegalStateException`；参数合法、状态有效而业务拒绝 → `DomainResult` 失败），并明确 `DomainResult` 是**第三通道**、返回它的方法在前两种情况下仍须抛异常。①② 改为抛 `IllegalArgumentException`；`BRANCH_SOURCE_INVALID` 因此**再无生产者，一并删除**；`AnswerRevision.create` 的缺失策略版本改为在 javadoc 里**显式声明为有意例外**并写明理由 | `GenerationStateTest.aNullTransitionTargetIsACallerBugNotABusinessFailure`（改自 `nullTargetIsRefused`）、`BranchSourceTest.aNonRootBranchCannotExistWithoutProvenance`（改为断言抛异常且消息含 `provenance`）；`grep -rn "BRANCH_SOURCE_INVALID" android/` 零命中；`:core:test` 83 用例全绿（**第 2 轮当时的数**）。**记录修复轮更正**：本行原来的「零命中」当时为真，但 V2 把 `{@link}` 改成 `{@code}` 之后，仓库现有 **3 处**命中（`Branch.java:87/90`、`BranchSourceTest.java:184`），**全部是**说明「该常量已删」的注释；准确说法是「**无活符号引用，仅历史注释**」。复现：`rg -n "BRANCH_SOURCE_INVALID" android` |
 | N9 | 轻（诚实性） | javadoc 把 §7 的两处图偏离**统一宣称为「functionally required」**。verifier 确认 `SUBMITTING -> STREAMING_ANSWER` 由 §9.1 的 `thinking.disabled` 请求形状**确为必需**，但对 `STREAMING_REASONING -> STABLE` **找不到任何必需性证明**——两处证据强度不同却写成同一口径 | 不再统一宣称，改为**逐边诚实分级**：必需边写明证据出处；另一条标注「**defensive, not proven necessary**」并说明保留成本与替代方案 | `GenerationState` 类注释的 §7 偏离清单 |
-| N10 | 中（**由 T-021 实现期发现，回记本任务**） | N9 标注「未证明必需」之后，T-021 在实现 `GenerationOperation` 时**直接证明了该边不可达**：稳定化要求最终回答非空，而回答缓冲区的唯一写入者 `appendAnswer` 会先把状态推进到 `STREAMING_ANSWER`，因此「非空回答」蕴含「已在 `STREAMING_ANSWER`」——不存在从 `STREAMING_REASONING` 出发的稳定化执行路径。此外该边原单元测试给的理由（「模型不返回推理阶段直接给答案」）实际对应的是 `SUBMITTING -> STREAMING_ANSWER`，**与这条边并不相符**，即测试的理由和它断言的边对不上 | **删除该边**（保留它就成为「无可达生产者的规则」，与本任务 N3 删除 `immutableCopy`、N8 删除 `BRANCH_SOURCE_INVALID` 同一缺陷类）；`GenerationState` 类注释的「三处偏离」改为「两处偏离」并写入可达性论证；同步替换 `GenerationStateTest` 中该断言 | `GenerationStateTest` 15 用例通过，含新增 `aReasoningPhaseThatProducedNoAnswerCannotBecomeStable`（同时锁住「该边不可用」与「唯一前进方向是进入回答阶段」）；`:core:test` 116 用例全绿 |
+| N10 | 中（**由 T-021 实现期发现，回记本任务**） | N9 标注「未证明必需」之后，T-021 在实现 `GenerationOperation` 时**直接证明了该边不可达**：稳定化要求最终回答非空，而回答缓冲区的唯一写入者 `appendAnswer` 会先把状态推进到 `STREAMING_ANSWER`，因此「非空回答」蕴含「已在 `STREAMING_ANSWER`」——不存在从 `STREAMING_REASONING` 出发的稳定化执行路径。此外该边原单元测试给的理由（「模型不返回推理阶段直接给答案」）实际对应的是 `SUBMITTING -> STREAMING_ANSWER`，**与这条边并不相符**，即测试的理由和它断言的边对不上 | **删除该边**（保留它就成为「无可达生产者的规则」，与本任务 N3 删除 `immutableCopy`、N8 删除 `BRANCH_SOURCE_INVALID` 同一缺陷类）；`GenerationState` 类注释的偏离计数与可达性论证：**记录修复轮更正**——类注释现写「**不是 three deviations、也不是 two deviations——两处新增 + 一条删除，逐条列出**」，与本行原来的「改为『两处偏离』」措辞不一致（R2-5 命中的正是这处跨文件漂移）；**以类注释为准**；同步替换 `GenerationStateTest` 中该断言 | `GenerationStateTest` 15 用例通过，含新增 `aReasoningPhaseThatProducedNoAnswerCannotBecomeStable`（同时锁住「该边不可用」与「唯一前进方向是进入回答阶段」）；`:core:test` 116 用例全绿 |
 
 - 第 4 轮**另一项未闭环的不是缺陷而是待决事项**：742 生产代码行超过 500 行硬上限 48%（按物理行 150%），verifier 明确**不能**由我自行追认，须由用户批准规模例外，否则该任务不得判 `verified`。已写入「TDD or sizing exception」与最终交付报告的待追认清单。
 - N8 的处置被 verifier 当场验证过一次：它指出的 ② 与 ① 属同一类输入（缺失其中一个 ID）却走两种通道，这正是「规则写了两条、实现有三条」的典型症状。**规则文本本身漏掉一条通道时，实现会各自为政**——所以修法不是逐处打补丁，而是先把规则写全再回填实现。
@@ -283,16 +290,121 @@ java.lang.IllegalArgumentException: messageId must be a UUID string but was: m-1
   `[:core, :tree-layout]` 变为**只剩 `[:tree-layout]`**；verifier 在副本向 `:core` 注入
   `import android.util.Log;` 与 `import androidx.annotation.Nullable;` 后守门 exit 1 逐行点名。
 
+### 第六轮独立复核结论（verifier，2026-09-21 21:19–21:24；本轮不使用模拟器）
+
+> 轮次更正（记录修复轮）：本节原误标为「第五轮」。第 5 轮复核是**另一份文件**
+> `artifacts/evidence/T-003-verification-round5.md`（2026-09-21 11:59，判 FAIL，V1–V8）；
+> 本节是**复核那份报告**的那一轮，证据为 `artifacts/evidence/VERIFY-static-recheck-2026-09-21.txt`（21:19）
+> 与 `VERIFY-final-report-2026-09-21.md`（21:24），故为第六轮。
+
+- Verdict: **FAIL（记录层；领域行为层经独立复现为真）**。状态保持 `verifying`，不置 `verified`。
+- 本轮亲自复现（证据文件均在 `artifacts/evidence/`，命令与输出见 `VERIFY-static-recheck-2026-09-21.txt`）：
+  - `cd android; .\gradlew.bat :core:javadoc --no-daemon --console=plain` → `BUILD SUCCESSFUL`、exit 0（`VERIFY-core-javadoc.txt`）。第 5 轮 V2 的悬空 `{@link DomainErrorCode#BRANCH_SOURCE_INVALID}` 已改为 `{@code}`，**已修**。
+  - `:core:test --rerun-tasks` → `BUILD SUCCESSFUL`、exit 0；用例数取自 `core/build/test-results/test/*.xml`：13 套件 / **154 用例** / 0 失败 / 0 错误 / 0 跳过（`VERIFY-core-test.txt`、`VERIFY-core-test-counts.txt`）。
+  - `GenerationState.java` 的偏离计数现写「不是 three deviations、也不是 two deviations——两处偏离 + 一条删除，逐条列出」，V1 **已修**。
+  - `AnswerRevision.restore` 的 javadoc 已显式写明「重复水合不再做归属校验；身份字段仍校验」，V6 按方案 ① **收口**。
+- 记录层未通过项（不能判 PASS 的直接原因）：
+  1. **第 5 轮结论未落进本文件**：`artifacts/evidence/T-003-verification-round5.md`（2026-09-21 11:59）已判 **FAIL**（V1–V8），而本文件 Verification report 仍写「等待第 5 轮独立复核判定」。V1/V2 已在代码里修好、V6 已收口、V8 由用户 2026-09-21 裁定解除，但 **V3/V4/V5/V7 未处置**，第 5 轮结论本身也未记录。
+  2. **V3（规模不可复算）**：本文件「唯一权威值」741/1301 与逐文件表是第 4 轮快照。本轮实测同批 14 个文件为 **817 代码行**，其中 `DomainErrorCode` **18**（记 13）、`PromptPurpose` **65**（记 35）；目录现为 22 个文件（被 T-021/T-022/T-007 等继续编辑）。本文件已声明「741 不可按目录复算」属实，但逐文件表既未标注快照口径、也没有可粘贴复现的命令行。
+  3. **V4（当前态用例数过期）**：本文件写「8 个测试类 / 83 用例」「全库 11 类 / 116 用例」；本轮实测本任务 8 类 **95 用例**、全库 **13 套件 / 154 用例**（T-021 自有 3 类 37、T-007 的 2 类 22，其余属本任务）。83/116 是历史值，却被写成当前态。
+  4. **V5（本任务自有证据整体过期）**：`T-003-green.txt`（10:44）、`T-003-checks.txt`（10:45）早于 N8/N9/N10 修复，无一份反映当前树；当前态只能靠引用 T-021 的证据文件。
+  5. **V7 / R2-2（例外清单存了两处）**：`android/README.md:200` 仍逐字复制 `AnswerRevision.create`、`GenerationCommand.create`、`PromptSpec.of`，而 `Guard` 类注释是登记处；失败案例库明确要求「例外清单只存一处，README 只指向」。
+  6. **N8 行的检索结论已过期**：N8 行写 `grep -rn "BRANCH_SOURCE_INVALID" android/` **零命中**；本轮实测 **3 处命中**（`Branch.java:87/90`、`BranchSourceTest.java:184`，均为说明「该常量已删」的注释/`{@code}`）。零命中因 V2 的修法本身而不再成立，应改写为「无活符号引用，仅历史注释」。
+- 验收条件对照：①–④ 由单元测试与纯净性扫描复核通过，⑤ `:core:test` exit 0 复核通过。**本任务无设备侧验收条件，故本轮没有 deferred 项。**
+- 翻转条件：① 把第 5 轮 FAIL 结论与逐项处置写进本文件；② 更新 V3/V4 的数字，并把逐文件表标注为「第 4 轮快照」或给出可粘贴复现的命令；③ 重录 `T-003-green.txt`/`T-003-checks.txt`（V5）；④ 删掉 README 里的三处例外名（V7）；⑤ 改写 N8 的「零命中」。
+
+### 第七轮：记录修复轮（record repair，2026-09-21 下；本轮不使用模拟器）
+
+> 本节由**记录修复 lane**（与实现同方，**不是**独立 verifier）填写：只修记录、引用与证据重录。
+> 上方「第六轮独立复核结论」原样保留，本节是回应而不是覆盖。
+
+第 5 轮判 **FAIL**（V1-V8，`artifacts/evidence/T-003-verification-round5.md`，11:59），第 6 轮判
+**FAIL（记录层）**。两轮的未通过项逐条处置如下（每条给出「命令 + 读数位置」）：
+
+| 项 | 第 5/6 轮发现 | 处置（记录修复轮） | 修复后读数 |
+| :--- | :--- | :--- | :--- |
+| V1 | `GenerationState.java` 类注释写 `three deviations`，与同清单第三条「该边已删除」自相矛盾（实际两处新增 + 一条删除） | **已在生产代码修好**（非本轮改）：类注释现写「**两处新增 + 一条删除** -- not "three deviations" ... and not "two deviations"」。本轮把 N10 行的旧措辞改为与注释一致 | `rg -n "deviation" android/core/src/main/java/com/treelearn/core/domain/GenerationState.java` → 第 36/37 行 |
+| V2 | `Branch.java:77` 保留 `{@link DomainErrorCode#BRANCH_SOURCE_INVALID}`（该常量已删）→ `:core:javadoc` exit 1 | **已修**：现为 `{@code BRANCH_SOURCE_INVALID}`（历史事实，不是现存符号）。本轮**亲自重跑** javadoc 取闭合证据 | `artifacts/evidence/T-003-core-javadoc-2026-09-21.txt`：`BUILD SUCCESSFUL in 16s`（该文件第 328 行）、`EXITCODE=0`（第 330 行）；源码位置 `Branch.java:87/90` |
+| V3 | 规模数字不可复算（741/1301 与逐文件表为第 4 轮快照，`DomainErrorCode`/`PromptPurpose` 两格错） | **已处置**：逐文件表标注为「**第 4 轮验收时的快照，不是当前值**」并给出可粘贴的复算命令；补记当前同批 14 文件实测 **817** 代码行（差额来自 T-021/T-007/T-022/T-008 对同一目录的编辑；目录今测 22 文件 / 1621 行）。引用**本任务**规模时仍取第 4 轮的 **741** | 本文件 `### 变更规模` 段（817 与逐文件增量清单）；`artifacts/evidence/VERIFY-static-recheck-2026-09-21.txt` 的「T-003: current per-file code lines」段 |
+| V4 | 用例数过期：文件写 8 类 83 / 全库 116，实测 8 类 95 / 全库 154 | **已处置**：83/116 标注为历史快照，给出当前 95/154 及归属（T-003 8 类 95 + T-021 3 类 37 + T-007 2 类 22 = 154） | `artifacts/evidence/VERIFY-core-test-counts.txt` 末行 `TOTAL suites=13 tests=154 failures=0 errors=0 skipped=0`；本轮亲跑 `T-021-core-test-counts-current.txt` 同值 |
+| V5 | 本任务自有证据（`T-003-green.txt` 10:44、`T-003-checks.txt` 10:45）早于 N8/N9/N10 修复 | **已重录**：两份文件都在头部写明「RE-RECORDED in the record-repair round ... the previous capture predated the N8/N9/N10 fixes」，并重跑取数 | `T-003-green.txt` 第 2 行（重录说明）+ 逐类表；`T-003-checks.txt` 第 2 行 + 新增 PART 3 |
+| V6 | `AnswerRevision.restore` 的 javadoc 声称「corrupt row fails loudly」，对策略版本字段不成立 | **已收口（方案 ①）**：javadoc 明确限定为「身份字段仍校验；**重复水合不再做归属校验**」，与实现一致 | `android/core/src/main/java/com/treelearn/core/domain/AnswerRevision.java` 的 `restore` javadoc |
+| V7 | `android/README.md:200` 逐字复制三个例外入口名 + 「三处」计数，而登记处是 `Guard` 类注释 | **已修**：README 该段改为只**指向** `Guard` 类注释，删掉入口名与计数 | `rg -n "AnswerRevision\.create|GenerationCommand\.create|PromptSpec\.of" android/README.md` → 只剩第 233 行 DAO 说明里的写路径描述（非例外清单） |
+| V8 | 规模例外（762 行 vs 500 硬上限）未获用户批准 | **已由用户批准**（2026-09-21，属事后追认） | 本文件 Verdict 块：`尺寸例外已由用户 2026-09-21 明确批准（属事后追认）` |
+| N8 行 | N8 行的复核证据写 `grep -rn "BRANCH_SOURCE_INVALID" android/` **零命中**，V2 改用 `{@code}` 后已为假 | **已改写**：N8 行现写「**无活符号引用，仅历史注释**」，并给出 3 处命中的逐处位置 | `rg -n "BRANCH_SOURCE_INVALID" android` → `Branch.java:87`、`Branch.java:90`、`BranchSourceTest.java:184`（全部是说明该常量已删的注释） |
+
+- **全链复核（记录修复轮实测）**：把 T-003 的记录链完整重跑了一遍（`T-003-checks.txt` PART 3）。
+  `:core:test` / `:tree-layout:test` / `:app:assembleDebug` / `:app:assembleRelease` /
+  `:app:assembleDebugAndroidTest` / `verifyDependencyDirection` / `verifyNoKotlinDex` **在一次运行里全部 PASS**；
+  链尾 **`:app:lintDebug` FAILED**，唯一红点是 `MainActivity.java:76` 的 `GestureBackNavigation`——该文件由
+  **另一个 lane** 于 21:42 重写（本任务未 author 过 `:app` 代码）。**这是跨 lane 干扰，不是 T-003 回归**；
+  旧基线「`:app:lintDebug` 0 error / 11 warning」因此在当前工作树上**不可复现**，属**已上报、未修**（超出本 lane 范围）。
+- 本任务**无设备侧验收条件**，因此**没有 deferred 项**；本轮同样未使用模拟器（用户 2026-09-21 指令）。
+- 仍未闭环：`:app:lintDebug` 的 0 error 基线需在 UI lane 收工后重测；在此之前任何引用「0 error / 11 warning」
+  的地方（含 T-021）都应视为**基线值**而非当前值。
+
+### 第九轮独立复核结论（verifier #2，第四轮；2026-09-21；本轮不使用模拟器）
+
+> 本轮针对**第七轮：记录修复轮**列出的 V1–V8 + N8 行逐条独立复核。verifier 只读。
+> 自产证据：`VERIFY4-core-javadoc.txt`、`VERIFY5-jvm-suites.txt`、`VERIFY5-androidtest-javadoc-depdirection.txt`、`VERIFY4-T002-assemble-lint.txt`、`VERIFY4-T002-guard.txt`。
+
+- Verdict: **PASS**。功能面全部满足、规模例外已获用户明确批准、**本任务无设备侧验收条件**（且本文件第 183/341 行亦如此声明）。因此本轮把状态从 `verifying` 置为 **`verified`**。**这是本轮唯一一个置 `verified` 的任务**；同批其余任务各因设备判据 deferred（T-002/T-004/T-011/T-015/T-022）或规模未获批（T-011/T-015）或 TDD 例外登记不自洽（T-021）而保持 `verifying`。
+- V1–V8 + N8 的独立复核（逐条给出读数位置）：
+
+| 项 | 独立复核结果 |
+| :--- | :--- |
+| V1 | **已修**。`GenerationState.java:35–37` 现写 `two additions and one deletion — not "three deviations" … and not "two deviations"`，与「两处新增 + 一条删除」自洽 |
+| V2 | **已修，本轮亲自闭合**。`rg -n "BRANCH_SOURCE_INVALID" android` → 恰好 **3** 处且全部是注释：`Branch.java:87`、`Branch.java:90`、`BranchSourceTest.java:184`；`Branch.java:87/90` 用 `{@code}` 而非 `{@link}`。本轮 `:core:javadoc --rerun-tasks` → `> Task :core:javadoc` 真实执行、`BUILD SUCCESSFUL`、exit 0（`VERIFY5-androidtest-javadoc-depdirection.txt:408/728`） |
+| V3 | **已标注为快照**（属动目标，非缺陷）。本文件明写 741/1301 为第 4 轮实测并给出同批文件的当前值 817；本轮复测该目录已被 T-021/T-022/T-008/T-010 继续编辑，按目录重测必然得到不同的数。引用本任务规模只能取其第 4 轮实测值 |
+| V4 | **已标注为快照**。本任务 8 类 83（后为 95）与全库 116/154 均为验收时快照；**本轮实测全库 `:core` 已达 18 套件 / 187 用例**（`VERIFY5-jvm-suites.txt` 的 XML 回读），故 154 亦过期——引用时须连同时间戳 |
+| V5 | **已重录**。`T-003-green.txt:2` 与 `T-003-checks.txt:2` 均带 `[RE-RECORDED in the record-repair round 2026-09-21: the previous capture (10:44:xx) predated the N8/N9/N10 fixes …]`；`T-003-checks.txt` 含 `PART 3`（全链重跑） |
+| V6 | **已收口**。`AnswerRevision.restore` 的 javadoc 现写「on reload the stored row is the authority, so no policy-ownership check is repeated. **Identity fields are still validated** so a corrupt row fails loudly」——把原先过宽的「corrupt row fails loudly」限定到身份字段 |
+| V7 | **已修，本轮复核为真**。`android/README.md:199–207` 只指向 `Guard` 类注释并明写「不要在这里复制一份」；三个入口名与「三处」计数已消失（唯一残留的 `AnswerRevision.create` 在 `README.md:237`，是 DAO 写路径描述，非例外清单） |
+| V8 | **已批准（属事后追认）**。`sizing-adjudication-2026-09-21.txt` 裁定段：「T-003 的 741 行超 500 行硬上限 48%，已获用户批准并记录」；`.trae/rules/harness-tasks.md:51` 例外表同载。本任务的 sizing 节已如实记为**事后追认**、未冒称「事先批准」，符合规则要求 |
+| N8 行 | **已改写**。N8 行现写「无活符号引用，仅历史注释」并给出逐处位置，与上述 3 处命中一致 |
+
+- 本轮亲自复现的功能证据（自产）：
+  - `cd android; .\gradlew.bat :core:test :ai:testDebugUnitTest :data:testDebugUnitTest :tree-layout:test :app:testDebugUnitTest --rerun-tasks --no-daemon --console=plain` → `BUILD SUCCESSFUL`、exit 0；JUnit XML 回读 `:core` **18 套件 / 187 用例 / 0 失败 / 0 错误 / 0 跳过**、`:tree-layout` 3 套件 / 34 用例 / 全 0（`VERIFY5-jvm-suites.txt`）。本任务的 8 个测试类全在其中且全绿。
+  - 验收条件 1–3 的具名覆盖已在测试源中核对：`AnswerRevisionTest.resetCreatesNewRevisionAndOldBranchSourceKeepsTheOldOne`（重置成新 revision、旧 BranchSource 仍指旧 revision）、`AnswerRevisionTest.reasoningAndAnswerBelongToTheSameStableVersion`、`BranchSourceTest.everyUnfinishedOrFailedStateIsRefusedAsABranchSource`（非稳定来源被拒）、`AnswerRevisionTest.allFieldsAreFinalAndNoSetterExists` 与 `missingOrBlankPolicyVersionIsRefused`（不可变 + 非空版本）。
+  - 验收条件 4（`:core` 纯度）：`verifyDependencyDirection` → `PASS (downward-only module graph + pure-JVM module purity)`、exit 0、**无 `vacuous`**（`VERIFY5-androidtest-javadoc-depdirection.txt:404`）。`:core` 的纯净性自此为真实强制，不再是空跑。
+  - 验收条件 5（`:core:test` 返回 0）：同上，exit 0。
+  - 专项守门：Java-only guard `VERDICT: PASS (13 OK line(s))`、exit 0（`VERIFY4-T002-guard.txt`）。
+- **未决**：无设备判据，故**没有 deferred 项**。两条不影响结论的动目标记录：① `T-003-checks.txt:2033` 写「`:tree-layout` 仍是 vacuous 0-test suite」是 21:43 的快照，T-016 于其后落地了 **12** 个类型，现为 3 套件 / 34 用例（本轮实测）；② `T-003-checks.txt:2036/2073` 的 `:app:mergeDebugResources` 与 `:app:lintDebug` 阻塞均由**其它 lane 的在飞改动**造成（`:app` 非本任务所有），本轮实测 `:app:lintDebug` 已为 **0 error / 18 warning**（`VERIFY4-T002-assemble-lint.txt`），旧基线「0 error / 11 warning」不可再引为当前值。
+- RED 取证方式的历史注记（不改变本轮结论）：本任务的 RED 是把 `core/src/main/java` 临时移出仓库取得的，任务文件已如实披露；该做法在**多 lane 共享树**上现已不安全，故其 RED 只能作历史证据、不可重演；GREEN 半边本轮已用 `:core:test --rerun-tasks` 独立复现。
+
 ## Handoff notes
 
 - Completed: `:core` 领域层 14 个生产文件（`Guard`、`DomainErrorCode`、`DomainError`、`DomainResult`、`MessageRole`、`GenerationState`、`GenerationModel`、`PromptPurpose`、`Topic`、`BranchAnchor`、`BranchSource`、`Message`、`AnswerRevision`、`Branch`）+ **8 个测试类 83 个用例全绿**。
-- 变更规模（**第 4 轮复核后重算，口径写明**）：**生产代码 741 行非空非注释代码行 / 409 行注释 / 151 行空行 = 1301 物理行（14 文件）**；测试 8 文件 / 83 用例。全库当前为 11 个测试类 / 116 用例（含 T-021 新增 33 个）。
-  - **⚠ 预算偏离（如实记录，见「TDD or sizing exception」）**：`estimated_production_lines` 原为 190，实际 **741 代码行（1301 物理行）**，**超出 500 行硬上限 48%（按物理行计 160%）**，**尚未取得用户事前批准——这是本任务唯一的硬阻塞**。
-  - 逐文件代码行（降序，非空非注释行）：`Branch` 136、`GenerationState` 89、`Message` 86、`AnswerRevision` 75、`Guard` 65、`BranchSource` 58、`BranchAnchor` 51、`DomainResult` 46、`PromptPurpose` 35、`DomainError` 35、`Topic` 30、`GenerationModel` 17、`DomainErrorCode` 13、`MessageRole` 5。
+- 变更规模（**第 4 轮复核后重算，口径写明**）：**生产代码 741 行非空非注释代码行 / 409 行注释 / 151 行空行 = 1301 物理行（14 文件）**；测试 8 文件 / **83 用例（本任务验收时的快照）**。**当前树实测（记录修复轮）**：本任务这 8 个测试类合计 **95 用例**，全库 **13 套件 / 154 用例**（0 失败 / 0 错误 / 0 跳过）——读数命令与逐类输出见 `artifacts/evidence/VERIFY-core-test-counts.txt`（13 行 suites + 1 行 `TOTAL suites=13 tests=154`）。
+  - **⚠ 预算偏离（如实记录，见「TDD or sizing exception」）**：`estimated_production_lines` 原为 190，实际 **741 非空非注释代码行（1301 物理行）**，**超出 500 行硬上限 48%**。**例外已获用户 2026-09-21 明确批准**（属事后追认，流程缺陷见上）；此处不再改估算值去掩盖偏差，判定一律以实测为准。
+  - 逐文件代码行（降序，非空非注释行）——**这是第 4 轮验收时的快照，不是当前值**：
+    `Branch` 136、`GenerationState` 89、`Message` 86、`AnswerRevision` 75、`Guard` 65、`BranchSource` 58、
+    `BranchAnchor` 51、`DomainResult` 46、`PromptPurpose` 35、`DomainError` 35、`Topic` 30、
+    `GenerationModel` 17、`DomainErrorCode` 13、`MessageRole` 5。
     （`DomainErrorCode` 由 14 降为 13：删除 `BRANCH_SOURCE_INVALID`，见 N8。）
-- In progress: 无。第 4 轮 3 项（N8 错误通道收敛、N9 边必需性诚实分级、N10 删除不可达边）已全部修复并刷新证据，等待第 5 轮复核独立 verifier 判定。
-- Blocker: **尺寸例外待用户追认**（741 行 vs 500 行硬上限）。在此之前本任务不得判 `verified`；其余工作不阻塞。
-- Unblock condition: 用户批准规模例外，或在后续任务中进一步拆分至 ≤500 行。
+  - **同一批 14 个文件的当前值（记录修复轮实测；口径与上一行相同：非空非注释）**——可粘贴复现：
+    ```powershell
+    $files = @('AnswerRevision','Branch','BranchAnchor','BranchSource','DomainError','DomainErrorCode','DomainResult',
+               'GenerationModel','GenerationState','Guard','Message','MessageRole','PromptPurpose','Topic')
+    $tot = 0
+    foreach ($n in $files) {
+      $p = "android/core/src/main/java/com/treelearn/core/domain/$n.java"
+      $code = (Get-Content -LiteralPath $p | Where-Object { $_ -notmatch '^\s*$' -and $_ -notmatch '^\s*//' -and $_ -notmatch '^\s*\*' -and $_ -notmatch '^\s*/\*' }).Count
+      $tot += $code; "{0,-18} code={1,4}" -f $n, $code
+    }
+    "SUM code=$tot"
+    ```
+    实测（记录修复轮，逐文件）：`AnswerRevision 81`、`Branch 159`、`BranchAnchor 51`、`BranchSource 58`、
+    `DomainError 35`、`DomainErrorCode 18`、`DomainResult 46`、`GenerationModel 17`、`GenerationState 89`、
+    `Guard 65`、`Message 98`、`MessageRole 5`、`PromptPurpose 65`、`Topic 30`，**SUM = 817**
+    （同一段输出亦见 `artifacts/evidence/VERIFY-static-recheck-2026-09-21.txt` 的
+    「T-003: current per-file code lines」段）。
+    **817 不是本任务的规模**：`PromptPurpose 35→65`、`DomainErrorCode 13→18`、`Message 86→98`、`Branch 136→159`
+    等增量来自 T-021/T-007/T-022/T-008 等后续任务对**同一目录**的编辑（该目录今测 **22 个文件 / 1621 代码行**）。
+    引用**本任务**规模时只能取第 4 轮实测值 **741**（本任务认领的 14 个文件在那一时点的读数）。
+- In progress: 无。第 4 轮 3 项（N8/N9/N10）已修复；**第 5/6 轮 FAIL（记录层）的未通过项已在「第七轮：记录修复轮」逐条处置**（V1-V8、N8 行），自有证据已重录，等待下一轮独立复核。
+- Blocker: 无。尺寸例外已由用户 2026-09-21 批准解除。**一项跨 lane 待办（不阻塞本任务）**：`:app:lintDebug` 的 0 error 基线因别的 lane 正在重写 `MainActivity.java` / `res/layout/*.xml` 而暂不可复现，需其收工后重测（见「第七轮」末条）。
+- Unblock condition: 不适用。
 - Next steps: T-021（**已交付**：`GenerationCommand`/`GenerationOperation`/`PromptSpec`）、
   T-004（SQLite schema/DAO，依赖本任务实体）、T-007（上下文快照）、T-011（派生 AI 产物）、T-005、T-006、T-016。
 - Watch-outs:

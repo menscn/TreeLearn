@@ -10,3 +10,14 @@ __pycache__/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# 编译产物（Java class 属构建副产物，不作为证据或源码入库）
+*.class
+
+# 证据生成脚本的中间捕获（每次运行覆盖，结论段由它派生，本身不进版本库）
+artifacts/evidence/.captures/
+
+# 未展开的 %SystemDrive% 在仓库根留下的字面量目录（2026-09-22 发现：里面是 Windows 缓存 .db，
+# 由某次把 cmd 风格路径喂给非 cmd 上下文造成）。它不是任何源集的一部分，但会被 git 看见。
+# 已核实其绝对路径落在工作区根之下、且仓库内无任何引用；删除受本机删除策略限制，故先禁止入库。
+%SystemDrive%/
