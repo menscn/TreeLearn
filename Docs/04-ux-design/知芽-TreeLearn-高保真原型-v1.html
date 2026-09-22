@@ -19,20 +19,20 @@
 <style>
 /* ============ 设计系统 · 知芽「生长绿」 ============ */
 :root{
-  /* —— 色彩（保持不变） —— */
-  --bg:#F7F6F0;          /* 米白纸感底 */
-  --surface:#FFFFFF;
-  --ink:#1E2B23;         /* 深绿墨 */
-  --ink2:#5A6B60;        /* 次级灰绿 */
-  --ink3:#636F66;        /* 弱化 */
-  --line:#E6E3D6;
-  --hairline:rgba(30,43,35,.075);   /* 极淡分隔，替代重描边 */
-  --green:#2E7D4F;       /* 生长绿主色 */
-  --green-deep:#1F5C38;
-  --green-soft:#E3F0E7;
+  /* —— 色彩 —— */
+  --bg:#F4F1EB;          /* 米白纸感底 */
+  --surface:#FCFBF8;
+  --ink:#16241C;         /* 深绿墨 */
+  --ink2:#435449;        /* 次级灰绿 */
+  --ink3:#627067;        /* 弱化（修正值：新稿 #75867B 在 bg 上只有 3.42，低于 4.5） */
+  --line:#E2DFD6;
+  --hairline:rgba(26,40,32,.07);   /* 极淡分隔，替代重描边 */
+  --green:#2B6E45;       /* 生长绿主色 */
+  --green-deep:#164027;
+  --green-soft:#E3F0E7;  /* 新稿为 rgba；Android 只收不透明 hex，故保留不透明值 */
   --green-faint:#F0F7F1;
-  --blue:#2F6BFF;        /* 未读蓝点（BASE-13 指定实心蓝点） */
-  --amber:#B7791F;
+  --blue:#2563EB;        /* 未读蓝点（BASE-13 指定实心蓝点） */
+  --amber:#B05108;       /* 修正值：新稿 #B45309 在 bg 上只有 4.45，低于 4.5 */
   --amber-soft:#FBF3E2;
   --red:#C0392B;
   --red-soft:#FBEAE7;
@@ -42,33 +42,33 @@
   --gutter:20px;                     /* 页面左右安全边距 */
 
   /* —— 圆角系统：只保留 3 档 + 全圆 —— */
-  --r-sm:10px;    /* chip、小按钮 */
-  --r-md:16px;    /* 卡片 */
-  --r-lg:24px;    /* 输入框、大容器 */
+  --r-sm:8px;     /* chip、小按钮 */
+  --r-md:14px;    /* 卡片 */
+  --r-lg:18px;    /* 输入框、大容器 */
   --r-full:99px;
 
-  /* —— 字号系统：display 与 caption 拉开 2.7 倍对比 —— */
-  --fs-display:30px;   /* 首页 hero */
-  --fs-h1:22px;        /* 页面主标题 */
-  --fs-h2:17px;        /* 卡片/分支标题 */
-  --fs-body:16px;      /* 正文（阅读区，移动端建议值） */
+  /* —— 字号系统：display 与 caption 拉开约 2.4 倍对比 —— */
+  --fs-display:26px;   /* 首页 hero */
+  --fs-h1:20px;        /* 页面主标题 */
+  --fs-h2:16px;        /* 卡片/分支标题 */
+  --fs-body:15px;      /* 正文（阅读区，移动端建议值） */
   --fs-sm:13px;        /* 次要信息 */
   --fs-cap:11px;       /* 标注 */
 
   /* —— 阴影：只保留两档，克制 —— */
-  --sh-1:0 1px 2px rgba(30,43,35,.04);
-  --sh-2:0 10px 30px -12px rgba(30,43,35,.18);
+  --sh-1:0 1px 2px rgba(22,36,28,.04);
+  --sh-2:0 4px 12px rgba(22,36,28,.06);
 
-  /* —— 字体：全站楷体（手写与印刷之间，为长阅读优化） —— */
-  --kai:'LXGW WenKai','Noto Serif SC','Songti SC',serif;   /* 正文与绝大多数文字 */
-  --serif:'LXGW WenKai','Noto Serif SC','Songti SC',serif; /* 标题（配 700） */
+  /* —— 字体：正文走系统 sans-serif；品牌衬线走回退栈，本轮不打包字体 —— */
+  --kai:'LXGW WenKai','Noto Serif SC','Songti SC',serif;   /* 遗留楷体：本片保留不删，退役待定 */
+  --serif:'Noto Serif SC','Songti SC',Georgia,serif;       /* 品牌衬线回退栈（各 ROM 字形有差异） */
   --brush:'Ma Shan Zheng','LXGW WenKai',serif;             /* 品牌题字 */
-  --sans:'Noto Sans SC',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif; /* 仅原型脚手架用 */
+  --sans:'Noto Sans SC',-apple-system,sans-serif;          /* 正文；Android 落系统 sans-serif */
 
   /* —— 纸感：极淡横格，读作纹理而非参考线；正文行高对齐格距 —— */
   --paper-rule:rgba(30,43,35,.028);
   --paper-write:rgba(46,125,79,.075);
-  --lh-read:32px;   /* 阅读行高 == 格线间距，避免逐行错位 */
+  --lh-read:28px;   /* 阅读行高 == 格线间距，避免逐行错位 */
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;}
@@ -2402,6 +2402,7 @@ function App(){
         <ol className="guide-steps">
           <li><b>信纸与手写体</b>：全站正文用霞鹜文楷（手写与印刷之间的楷体）；首页题字用马善政毛笔楷书；底色带极淡横格，阅读行高与格距对齐（v2.0）</li>
           <li><b>单一首页</b>：品牌头 + 根问题输入框（带书写格线）+ 推荐弹幕 + 历史主题列表 + 搜索/归档/设置入口，全在一页（v1.2）</li>
+          <li><b>【叙事已作废 · 2026-09-22 · T-2026-09-22-051】</b>本条「单一首页」与上一条「全站正文用霞鹜文楷」两处口径均已被 Figma 新稿与 <code>Docs/03-prd-draft/V3.2-知芽（TreeLearn）产品需求文档（PRD）.md</code> 取代：新口径下首页不再是唯一的入口页，一级入口由底部标签栏（主页 / 学习库 / 设置）承载，主题列表与归档内容归学习库，搜索唯一入口是学习库顶部搜索框；字体口径也已作废——正文改用系统 sans-serif、品牌字走衬线回退栈（已由 T-050 落地）。<b>但请注意</b>：作废的只是上述信息架构叙事，本文件的 <code>:root</code> 区块<b>仍是设计 token 的权威源</b>（数值已由 T-050 更新），不随该叙事一并作废。本条为新增批注，未改动被指向的原有文案。</li>
           <li><b>点推荐气泡 → 直接作为新主题开聊</b>，不再只是预填；Key 不可用时输入保留在首页</li>
           <li>发送根问题 → 主题与根分支同时形成，临时标题 → AI 正式命名一次（BASE-06）</li>
           <li>回答<b>不是卡片</b>：正文直接落在纸面上，靠留白与标识行分层；标识行只保留产品名（v2.0 去卡片 / v2.1 去数据胶囊）</li>
