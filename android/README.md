@@ -634,7 +634,8 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
 对话页沿用 T-012 的外壳：同一个 `MainActivity`、同一个 `R.id.shell_host`，`ChatScreen` 是换进宿主的
 回答与 reasoning 使用 `screen.MarkdownRenderer` 将 CommonMark 转成原生 `Spannable`：标题、强调、列表、
 引用、代码块和链接均不把 Markdown 标记原样显示；回答仍保持可选择复制，链接使用 Android 原生
-`URLSpan`。解析依赖只在 `:app`，不进入领域层或数据层。
+`URLSpan`。T-074 起代码块（围栏/缩进）整体可点即复制——走 `onSelectionCopyPressed` 同一条剪贴板路径，
+敏感标记与提示一致。解析依赖只在 `:app`，不进入领域层或数据层。
 第三个子视图，因此没有第二个 Activity、没有导航库。消息、思考、版本与推荐全部来自 `ChatViewState`，
 View 自己不持内容。
 

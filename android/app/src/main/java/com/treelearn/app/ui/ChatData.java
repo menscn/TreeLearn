@@ -73,9 +73,16 @@ public interface ChatData {
          */
         public final List<Message> readingRows;
 
+        /**
+         * T-065: the read-only provenance card of a non-root branch, or null for a root branch (and
+         * for a read that never held a branch row). It rides the same read rather than a query of
+         * its own, so the card can never describe a different conversation than the rows next to it.
+         */
+        public final SourceCard sourceCard;
+
         private Snapshot(String branchTitle, List<ChatMessage> messages,
                 List<Recommendation> answerRecommendations, String recommendationsRevisionId,
-                Branch branch, List<Message> readingRows) {
+                Branch branch, List<Message> readingRows, SourceCard sourceCard) {
             this.branchTitle = branchTitle == null ? "" : branchTitle;
             this.messages = Collections.unmodifiableList(new ArrayList<ChatMessage>(messages));
             this.answerRecommendations = Collections.unmodifiableList(
@@ -84,16 +91,17 @@ public interface ChatData {
                     ? "" : recommendationsRevisionId;
             this.branch = branch;
             this.readingRows = Collections.unmodifiableList(new ArrayList<Message>(readingRows));
+            this.sourceCard = sourceCard;
         }
 
         public static Snapshot of(String branchTitle, List<ChatMessage> messages,
                 List<Recommendation> answerRecommendations, String recommendationsRevisionId,
-                Branch branch, List<Message> readingRows) {
+                Branch branch, List<Message> readingRows, SourceCard sourceCard) {
             Guard.object(messages, "messages");
             Guard.object(answerRecommendations, "answerRecommendations");
             Guard.object(readingRows, "readingRows");
             return new Snapshot(branchTitle, messages, answerRecommendations,
-                    recommendationsRevisionId, branch, readingRows);
+                    recommendationsRevisionId, branch, readingRows, sourceCard);
         }
 
     }

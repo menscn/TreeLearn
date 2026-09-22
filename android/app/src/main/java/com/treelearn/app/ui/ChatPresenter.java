@@ -9,6 +9,7 @@ import com.treelearn.core.domain.Guard;
 import com.treelearn.core.domain.Message;
 import com.treelearn.core.domain.ReadingAnchor;
 import com.treelearn.core.domain.ReadingPosition;
+import com.treelearn.app.ui.ChatViewState.Stage;
 
 import java.util.Collections;
 import java.util.List;
@@ -66,18 +67,38 @@ public final class ChatPresenter implements ChatActions {
     private final CopyLabels labels;
     private final String branchId;
     private final ReadingSession session;
+    /** T-076: where the composer's work waits out a process rebuild (073 §5). */
+    private final ChatDraftStore drafts;
 
     private ChatViewState state;
     /** The branch the last read carried, or null when it carried none. */
     private Branch readingBranch;
+    /**
+     * T-065: whether the anchor quote prefill has been attempted; one attempt per branch, so a
+     * quote the learner cleared is not forced back by the reads that follow.
+     */
+    private boolean anchorQuotePrefilled;
     /** The same conversation as stored rows: what the reading rules resolve against. */
     private List<Message> readingRows = Collections.emptyList();
     private final AtomicBoolean polling = new AtomicBoolean(false);
     private final Runnable generationChanged = this::onGenerationChanged;
+    /** T-075: the learner's stop request, consumed by the terminal read it explains. */
+    private boolean stopRequested;
+    /** T-075: an accepted send whose rows no read has brought back yet; it reads as sending. */
+    private boolean awaitingFirstRow;
+    /** T-075: the newest row's id and content sizes, so a growth while detached is one count. */
+    private String tailFingerprint = "";
 
     public ChatPresenter(ChatSink sink, UiThread ui, Executor background, KeyVault key, ChatData data,
             ChatCommands commands, SettingsStore settings, CopyLabels labels, String branchId,
             ReadingStore reading) {
+        this(sink, ui, background, key, data, commands, settings, labels, branchId, reading,
+                ChatDraftStore.NOOP);
+    }
+
+    public ChatPresenter(ChatSink sink, UiThread ui, Executor background, KeyVault key, ChatData data,
+            ChatCommands commands, SettingsStore settings, CopyLabels labels, String branchId,
+            ReadingStore reading, ChatDraftStore drafts) {
         this.sink = require(sink, "sink");
         this.ui = require(ui, "ui");
         this.background = require(background, "background");
@@ -87,6 +108,7 @@ public final class ChatPresenter implements ChatActions {
         this.settings = require(settings, "settings");
         this.labels = require(labels, "labels");
         this.branchId = Guard.id(branchId, "branchId");
+        this.drafts = drafts == null ? ChatDraftStore.NOOP : drafts;
         this.session = new ReadingSession(require(reading, "reading"));
         this.state = ChatViewState.initial(this.branchId, settings.model(), settings.thinkingEnabled(),
                 key.isConfigured());
@@ -104,8 +126,22 @@ public final class ChatPresenter implements ChatActions {
 
     /** First load: the reading phase is shown while the branch is read. */
     public void start() {
-        render(refreshed().withPhase(ChatViewState.Phase.LOADING));
+        render(restored().withPhase(ChatViewState.Phase.LOADING));
         background.execute(this::read);
+    }
+
+    /**
+     * T-076: what a process rebuild brings back (073 §5). The stored record's words and quote are
+     * put into the composer before the first render; the two preferences are not taken from it -
+     * they are global settings the {@code refreshed()} read already answers, so a per-branch copy
+     * would be a second source of the same fact.
+     */
+    private ChatViewState restored() {
+        ChatDraftStore.ChatDraft kept = drafts.load(branchId);
+        if (kept == null || (kept.text.isEmpty() && kept.quote.isEmpty())) {
+            return refreshed();
+        }
+        return refreshed().withDraft(kept.text).withQuote(kept.quote);
     }
 
     /**
@@ -161,19 +197,120 @@ public final class ChatPresenter implements ChatActions {
                 && snapshot.recommendationsRevisionId.equals(newest.activeRevisionId);
         readingBranch = snapshot.branch;
         readingRows = snapshot.readingRows;
-        return state.withPhase(ChatViewState.Phase.READY)
+        ChatViewState next = state.withPhase(ChatViewState.Phase.READY)
                 .withBranchTitle(snapshot.branchTitle)
                 .withMessages(snapshot.messages)
+                .withSourceCard(snapshot.sourceCard)
+                // T-076: the archived flag rides the read's branch row (073 §5's S-ARCHIVED).
+                .withArchived(snapshot.branch != null && snapshot.branch.isArchived())
                 .withRecommendations(
                         stripBelongsHere ? snapshot.answerRecommendations
                                 : Collections.<Recommendation>emptyList(),
                         stripBelongsHere ? newest.messageId : "");
+        return prefillAnchorQuote(withGenerationState(next, snapshot.messages), snapshot.branch);
+    }
+
+    /**
+     * T-075: the generation stage and the scroll-follow count, derived once per read in one place.
+     *
+     * <p>The stage reads the newest row; the missed count advances only while an attempt is
+     * streaming, the learner is detached, and the content actually grew - a repaint of the same
+     * words is not something the follow-latest button should count.
+     */
+    private ChatViewState withGenerationState(ChatViewState next, List<ChatMessage> messages) {
+        Stage stage = stageOf(messages);
+        ChatViewState reattached = next;
+        String fingerprint = fingerprintOf(messages);
+        boolean streaming = stage == Stage.REASONING || stage == Stage.ANSWERING;
+        if (streaming && !next.followLatest && !fingerprint.equals(tailFingerprint)) {
+            reattached = next.withFollow(next.followLatest, next.missedCount + 1);
+        }
+        tailFingerprint = fingerprint;
+        awaitingFirstRow = awaitingFirstRow && messages.isEmpty();
+        boolean terminal = stage == Stage.STABLE || stage == Stage.FAILED
+                || stage == Stage.CANCELED;
+        stopRequested = stopRequested && !terminal;
+        return reattached.withStage(stage);
+    }
+
+    /**
+     * The stage the newest row puts the screen in. An empty conversation reads as sending while the
+     * accepted send's first row has not landed yet, and as idle once it is known the conversation
+     * really is empty.
+     */
+    private Stage stageOf(List<ChatMessage> messages) {
+        ChatMessage newest = messages.isEmpty() ? null : messages.get(messages.size() - 1);
+        if (newest == null) { return awaitingFirstRow ? Stage.SENDING : Stage.IDLE; }
+        if (newest.isGenerating()) {
+            return newest.phase() == ChatMessage.Phase.REASONING ? Stage.REASONING : Stage.ANSWERING;
+        }
+        if (newest.isFailed()) { return stopRequested ? Stage.CANCELED : Stage.FAILED; }
+        return newest.isStable() ? Stage.STABLE : Stage.IDLE;
+    }
+
+    /** What "the content grew" means: the newest row's id plus the sizes of its two streams. */
+    private static String fingerprintOf(List<ChatMessage> messages) {
+        ChatMessage newest = messages.isEmpty() ? null : messages.get(messages.size() - 1);
+        return newest == null ? "" : newest.messageId + "#" + newest.text.length()
+                + "#" + newest.reasoning.length();
+    }
+
+    /**
+     * T-065: entering a child branch whose provenance anchors a sentence puts that sentence in the
+     * quote row, once. The prefill is a one-shot per presenter - a presenter is built per branch -
+     * so a quote the learner cleared afterwards is not forced back on the next read, and a quote
+     * the learner already carries is never overwritten.
+     */
+    private ChatViewState prefillAnchorQuote(ChatViewState next, Branch branch) {
+        if (anchorQuotePrefilled) {
+            return next;
+        }
+        anchorQuotePrefilled = true;
+        String anchored = anchoredQuote(branch);
+        if (!anchored.isEmpty() && next.quote.isEmpty()) {
+            return next.withQuote(anchored);
+        }
+        return next;
+    }
+
+    /** The sentence the branch's provenance anchors, or empty for a whole-answer fork. */
+    private static String anchoredQuote(Branch branch) {
+        if (branch == null || branch.source == null || branch.source.anchor.isWholeAnswer()) {
+            return "";
+        }
+        String quote = branch.source.anchor.quote;
+        return quote == null ? "" : quote;
+    }
+
+    @Override
+    public void onSourceCardToggled() {
+        render(state.withSourceCardExpanded(!state.sourceCardExpanded));
     }
 
     @Override
     public void onDraftChanged(String text) {
+        // T-076: every keystroke waits out a rebuild; the quote and the two preferences ride along
+        // so the record is always the whole composer as it stands.
+        drafts.save(branchId, new ChatDraftStore.ChatDraft(text, state.quote, state.model,
+                state.thinkingEnabled));
         ChatViewState next = state.withDraft(text);
         render(state.notice == null ? next : next.withNotice(null));
+    }
+
+    /**
+     * T-075: the learner wants the running attempt stopped. The command itself is the composer
+     * slice's; here the intent is recorded so the terminal read reports canceled instead of failed -
+     * cancel and failure are different sentences (069 E3), and the intent is consumed by the
+     * terminal it explains, so a stale stop can never label a later failure as canceled.
+     */
+    @Override
+    public void onStopRequested() {
+        stopRequested = true;
+    }
+
+    @Override
+    public void onFollowLatestPressed() {
+        render(state.withFollow(true, 0));
     }
 
     @Override
@@ -182,7 +319,10 @@ public final class ChatPresenter implements ChatActions {
         if (message == null || !message.canExpandReasoning()) {
             return;
         }
-        render(state.withReasoningExpanded(messageId, !state.isReasoningExpanded(messageId)));
+        // T-066: the tap flips the effective state - which during a reasoning stream is open by
+        // default - and the flip is recorded as an explicit intent that overrides that default.
+        render(state.withReasoningExpanded(messageId,
+                !state.isReasoningEffectivelyExpanded(messageId)));
     }
 
     @Override
@@ -220,10 +360,16 @@ public final class ChatPresenter implements ChatActions {
             sink.openSettings();
             return;
         }
+        if (state.archived) {
+            // T-076: an archived branch is read-only (073 §5); nothing is sent and nothing is lost.
+            return;
+        }
         final GenerationModel model = state.model;
         final boolean thinking = state.thinkingEnabled;
         final String quote = state.quote;
-        render(state.withSending(true));
+        // T-075: a new turn re-attaches the follow - the learner asked, so they want to see.
+        stopRequested = false;
+        render(state.withSending(true).withStage(Stage.SENDING).withFollow(true, 0));
         background.execute(
                 () -> publish(commands.send(branchId, text, quote, model, thinking), false, true));
     }
@@ -258,12 +404,12 @@ public final class ChatPresenter implements ChatActions {
     }
 
     @Override
-    public void onForkPressed(String messageId) {
+    public void onForkPressed(String messageId, String quote, int startInclusive, int endExclusive) {
         ChatMessage message = state.message(messageId);
         if (message == null || !message.canFork()) {
             return;
         }
-        fork(message.messageId, "");
+        fork(message.messageId, "", quote == null ? "" : quote, startInclusive, endExclusive);
     }
 
     @Override
@@ -280,7 +426,9 @@ public final class ChatPresenter implements ChatActions {
         if (!state.recommendationsVisible() || !usable(question)) {
             return;
         }
-        fork(state.recommendationsMessageId, question.trim());
+        // The suggestion fork asks the question directly and anchors no sentence: the quote and the
+        // question are two different forks' cargoes, and they never travel together.
+        fork(state.recommendationsMessageId, question.trim(), "", 0, 0);
     }
 
     @Override
@@ -429,6 +577,7 @@ public final class ChatPresenter implements ChatActions {
      */
     @Override
     public void onViewportChanged(Set<String> visibleMessageIds) {
+        updateFollow(visibleMessageIds);
         if (readingBranch == null || visibleMessageIds == null) {
             return;
         }
@@ -439,6 +588,26 @@ public final class ChatPresenter implements ChatActions {
                 background.execute(this::read);
             }
         });
+    }
+
+    /**
+     * T-075: the follow decision, from the viewport facts the screen already reports (073 §6). The
+     * newest row on screen is following; scrolled away is detached - the view belongs to the reader,
+     * and nothing here pulls it back. A read while detached counts what grew, so the follow-latest
+     * button can name the missed amount.
+     */
+    private void updateFollow(Set<String> visible) {
+        ChatMessage newest = state.messages.isEmpty() ? null
+                : state.messages.get(state.messages.size() - 1);
+        if (newest == null || visible == null) {
+            return;
+        }
+        boolean near = visible.contains(newest.messageId);
+        if (near && (!state.followLatest || state.missedCount > 0)) {
+            render(state.withFollow(true, 0));
+        } else if (!near && state.followLatest) {
+            render(state.withFollow(false, state.missedCount));
+        }
     }
 
     /**
@@ -476,8 +645,11 @@ public final class ChatPresenter implements ChatActions {
         ui.post(() -> render(state.withNotice(HomeViewState.Notice.READING_POSITION)));
     }
 
-    private void fork(final String messageId, final String question) {
-        background.execute(() -> publish(commands.fork(messageId, question), true, false));
+    private void fork(final String messageId, final String question, final String quote,
+            final int startInclusive, final int endExclusive) {
+        background.execute(() -> publish(
+                commands.fork(messageId, question, quote, startInclusive, endExclusive), true,
+                false));
     }
 
     /**
@@ -499,6 +671,9 @@ public final class ChatPresenter implements ChatActions {
                     sink.openBranch(result.branchId());
                 }
                 if (clearDraft) {
+                    // T-076: the sent turn is the store's now; the kept draft record is dropped.
+                    drafts.clear(branchId);
+                    awaitingFirstRow = true;
                     startGenerationPolling();
                 }
             } else {

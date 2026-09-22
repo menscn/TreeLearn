@@ -33,8 +33,17 @@ public interface ChatCommands {
     /** Switches which stored version the position displays (T-010 {@code AnswerVersions.selectRevision}). */
     ChatCommandResult selectRevision(String messageId, String revisionId, long now);
 
-    /** Opens a branch from this answer; {@code question} prefills it when the fork copies a suggestion. */
-    ChatCommandResult fork(String messageId, String question);
+    /**
+     * Opens a branch from this answer; {@code question} prefills it when the fork copies a
+     * suggestion (T-065).
+     *
+     * <p>{@code quote} with its offsets anchors the sentence the fork was made from: quote and
+     * offsets must describe the same range, and a fork whose quote is empty anchors the whole
+     * answer, as it always has. The suggestion fork carries the question and no quote; the
+     * selection fork carries the quote and no question.
+     */
+    ChatCommandResult fork(String messageId, String question, String quote, int startInclusive,
+            int endExclusive);
 
     /** The stored versions of one position, oldest first. Never null; empty when there is none. */
     List<AnswerRevision> versions(String messageId);

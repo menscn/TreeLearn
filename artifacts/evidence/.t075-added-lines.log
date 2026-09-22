@@ -1,0 +1,35 @@
+T-075 生产代码行数（本任务新增，非空非注释行，手工逐块清点；证据脚本 .gen-t075-linecount.ps1 另给出整文件口径）
+
+新增文件
+  app/src/main/java/com/treelearn/app/screen/ChatMotion.java            27
+
+修改文件（仅计本任务新增行）
+  app/src/main/java/com/treelearn/app/ui/ChatViewState.java             29
+    - Stage 枚举 9；stage/followLatest/missedCount 字段 3；构造签名 +2、赋值 +3；
+      withStage 5；withFollow 5；withSourceCard/Expanded 穿参各 +1
+  app/src/main/java/com/treelearn/app/ui/ChatPresenter.java             50
+    - import Stage 1；字段 3；withGenerationState 14；stageOf 9；fingerprintOf 4；
+      onStopRequested 1；onFollowLatestPressed 3；onSend +2；publish +1；updateFollow 12
+  app/src/main/java/com/treelearn/app/ui/ChatActions.java                2
+    - onStopRequested / onFollowLatestPressed 两个方法签名（javadoc 不计）
+  app/src/main/java/com/treelearn/app/screen/ChatScreen.java            65
+    - import 1；字段 3；构造 2；render +3；settle +3；renderFollow 7；
+      renderStageChange 15；Row 字段 2、findViewById 2；renderGenerationSlots 16；
+      enterStage 1；enterAnswer 3；fade 6；renderMessages +1
+  app/src/main/res/layout/screen_chat_body.xml                           9
+    - ScrollView 外包 FrameLayout（2+1）+ chat_follow 浮钮 6（chat_scroll/composer 原属性不动）
+  app/src/main/res/layout/item_chat_message.xml                         12
+    - chat_caret 5、chat_canceled 5、chat_failure 换 red token 2
+  app/src/main/res/values/strings.xml                                    3
+    - chat_stopped / chat_back_to_latest / chat_back_to_latest_count
+  app/src/main/res/values/dimens.xml                                     1
+    - caret_width（caret 高度复用 space_s4）
+
+总计（本任务新增生产行）                                                198
+预算：≤200（硬约束），目标 180 —— 达成硬约束；超出目标值部分主要为
+状态机推导（stageOf/withGenerationState）与滚动跟随判定（updateFollow），
+均为 TDD 断言直接覆盖的行为，不再压缩。
+
+整文件口径（非空非注释行，含既有代码，供对照）：
+  ChatMotion 27 / ChatScreen 591 / ChatViewState 203 / ChatPresenter 463 /
+  ChatActions 33 / screen_chat_body 254 / item_chat_message 163 / strings 218 / dimens 30

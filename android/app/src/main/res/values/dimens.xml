@@ -34,6 +34,19 @@
     <dimen name="rec_text_max">260dp</dimen>
     <dimen name="picker_min_width">240dp</dimen>
 
+    <!-- T-066: the reasoning disclosure's DeepSeek form. The rule is the 2dp subordinate line on
+         the disclosure's left; the cap is the half-folded body's scroll limit, about 40% of a
+         typical content height (the body grows with its content up to this, then scrolls). -->
+    <dimen name="reasoning_rule">2dp</dimen>
+    <dimen name="reasoning_max_height">320dp</dimen>
+
+    <!-- T-074: the AI answer body's left green edge (073 §3.3) - the same 2dp subordinate rule
+         the reasoning disclosure uses, in the identity green instead of the line color. -->
+    <dimen name="answer_rule">2dp</dimen>
+
+    <!-- T-075: the streaming caret (073 §4.1) - one character wide, one line (s4) tall, green. -->
+    <dimen name="caret_width">3dp</dimen>
+
     <!-- The reading measure the wide (sw600dp) layouts cap their column at. Declared in the base
          folder on purpose: a name that exists only under a qualifier is a crash waiting for the
          configuration that does not match it, and lint's MissingDefaultResource fails the release

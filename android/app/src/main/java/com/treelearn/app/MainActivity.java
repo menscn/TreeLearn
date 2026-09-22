@@ -581,7 +581,8 @@ public final class MainActivity extends Activity
         chatScreen = new ChatScreen(this);
         chatPresenter = new ChatPresenter(this, container.uiThread(), container.background(),
                 container.keyVault(), container.chatData(), container.chatCommands(),
-                container.settingsStore(), container.chatCopyLabels(), branchId, reading);
+                container.settingsStore(), container.chatCopyLabels(), branchId, reading,
+                container.chatDraftStore());
         chatScreen.setActions(chatPresenter);
         swap(chatScreen);
         if (explicitAnchor != null) {

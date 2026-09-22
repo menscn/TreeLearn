@@ -1,6 +1,7 @@
 package com.treelearn.app.screen;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
@@ -23,9 +24,11 @@ import com.treelearn.app.R;
 import com.treelearn.app.ui.ChatActions;
 import com.treelearn.app.ui.ChatMessage;
 import com.treelearn.app.ui.ChatViewState;
+import com.treelearn.app.ui.ChatViewState.Stage;
 import com.treelearn.app.ui.ChildBranch;
 import com.treelearn.app.ui.HomeViewState;
 import com.treelearn.app.ui.Recommendation;
+import com.treelearn.app.ui.SourceCard;
 import com.treelearn.app.ui.TextSelection;
 import com.treelearn.core.domain.AnswerRevision;
 import com.treelearn.core.domain.ReadingAnchor;
@@ -78,11 +81,18 @@ public final class ChatScreen extends LinearLayout {
     private final View error;
     /** The reading-state notice: a write the store refused, empty the rest of the time. */
     private final TextView notice;
+    /** T-065: the source card at the conversation's top; hidden on a root branch. */
+    private final View sourceCard;
+    private final TextView sourceSummary;
+    private final TextView sourceToggle;
+    private final LinearLayout sourceHistory;
     private final View quoteRow;
     private final TextView quoteText;
     private final EditText draft;
     private final ModelThinkingPicker modelChip;
     private final Button send;
+    /** T-075: the follow-latest pill (073 §6); hidden while the view follows on its own. */
+    private final Button followLatest;
 
     /** The rows of the last render, by message id, so a selection can be read back. */
     private final Map<String, Row> rows = new LinkedHashMap<String, Row>();
@@ -93,12 +103,18 @@ public final class ChatScreen extends LinearLayout {
 
     private ChatActions actions;
     private boolean rendering;
+    /** T-076: the send key's face as the last render drew it, so a click stops or sends, not both. */
+    private ChatViewState.SendState sendState = ChatViewState.SendState.DISABLED;
     /** Rows are reported to the presenter once per visit, after the first layout that has one. */
     private boolean rowsReported;
     /** The position the presenter resolved; applied once, after which the view belongs to the learner. */
     private ReadingPosition pendingPosition;
     /** The last message id of the last ready render, so only a new turn scrolls to the bottom. */
     private String renderedTail = "";
+    /** T-075: what the last render's follow state was, so a re-attach scrolls exactly once. */
+    private boolean renderedFollowing = true;
+    /** T-075: the stage the last render drew, so a transition's fade and sentence fire once. */
+    private Stage renderedStage = Stage.IDLE;
     /** Where the learner stopped, as the last settle measured it; null until the view settles once. */
     private ReadingAnchor settledAnchor;
     /** What the last settle reported as visible, so a scroll that shows nothing new stays silent. */
@@ -119,11 +135,16 @@ public final class ChatScreen extends LinearLayout {
         loading = findViewById(R.id.chat_loading);
         error = findViewById(R.id.chat_error);
         notice = findViewById(R.id.chat_notice);
+        sourceCard = findViewById(R.id.chat_source_card);
+        sourceSummary = findViewById(R.id.chat_source_summary);
+        sourceToggle = findViewById(R.id.chat_source_toggle);
+        sourceHistory = findViewById(R.id.chat_source_history);
         quoteRow = findViewById(R.id.chat_quote_row);
         quoteText = findViewById(R.id.chat_quote_text);
         draft = findViewById(R.id.chat_draft);
         modelChip = findViewById(R.id.chat_model_chip);
         send = findViewById(R.id.chat_send);
+        followLatest = findViewById(R.id.chat_follow);
 
         draft.addTextChangedListener(new TextWatcher() {
             @Override
@@ -148,7 +169,16 @@ public final class ChatScreen extends LinearLayout {
             }
             return false;
         });
-        send.setOnClickListener(view -> fire(actions -> actions.onSend()));
+        // T-076: one control, three faces. While it draws the stop state the same tap asks the
+        // presenter to stop; the state is the render's, never a second opinion of the view's.
+        send.setOnClickListener(view -> fire(actions -> {
+            if (sendState == ChatViewState.SendState.STOP) {
+                actions.onStopRequested();
+            } else {
+                actions.onSend();
+            }
+        }));
+        followLatest.setOnClickListener(view -> fire(actions -> actions.onFollowLatestPressed()));
         findViewById(R.id.chat_back).setOnClickListener(view -> fire(actions -> actions.onBackPressed()));
         findViewById(R.id.chat_overview)
                 .setOnClickListener(view -> fire(actions -> actions.onOverviewPressed()));
@@ -158,6 +188,8 @@ public final class ChatScreen extends LinearLayout {
                 .setOnClickListener(view -> fire(actions -> actions.onSettingsPressed()));
         findViewById(R.id.chat_quote_clear)
                 .setOnClickListener(view -> fire(actions -> actions.onQuoteCleared()));
+        findViewById(R.id.chat_source_header)
+                .setOnClickListener(view -> fire(actions -> actions.onSourceCardToggled()));
 
         // Both of these are measurements, not gestures: the presenter needs them before it can say
         // where the learner was, and neither can be taken before the rows have been laid out.
@@ -216,16 +248,19 @@ public final class ChatScreen extends LinearLayout {
             error.setVisibility(state.phase == ChatViewState.Phase.ERROR ? VISIBLE : GONE);
             renderMessages(state);
             renderNotice(state.notice);
+            renderSourceCard(state);
             renderQuote(state.quote);
+            renderFollow(state);
             if (!state.draft.contentEquals(draft.getText())) {
                 draft.setText(state.draft);
                 draft.setSelection(draft.getText().length());
             }
+            renderComposer(state);
             modelChip.render(state.model, state.thinkingEnabled);
-            send.setEnabled(state.canSubmit());
             if (state.phase == ChatViewState.Phase.READY) {
                 settle(state);
-            }
+                renderStageChange(state);
+            } else { renderedStage = Stage.IDLE; }
         } finally {
             rendering = false;
         }
@@ -235,20 +270,23 @@ public final class ChatScreen extends LinearLayout {
      * Where the view goes when a read lands.
      *
      * <p>A resolved position is applied instead of the bottom, and it is applied once: after that the
-     * view belongs to the learner, so a rebuild - a draft keystroke, a stream, an unread clear - must
-     * not drag it back. The bottom is scrolled to only when the conversation's tail changed, which
-     * shows a new turn without turning a repaint of the same turns into a jump.
+     * view belongs to the learner. T-075 hands that ownership a shape: while the follow state says
+     * following, new or grown content pulls the view down; once detached, nothing does (073 §6) -
+     * the fingerprint covers the tail's content sizes, so a repaint of the same words never scrolls,
+     * and a re-attach from the follow-latest button lands exactly once.
      */
     private void settle(ChatViewState state) {
-        String tail = state.messages.isEmpty()
-                ? "" : state.messages.get(state.messages.size() - 1).messageId;
-        boolean tailChanged = !tail.equals(renderedTail);
-        renderedTail = tail;
+        ChatMessage tail = state.messages.isEmpty() ? null : state.messages.get(state.messages.size() - 1);
+        String fingerprint = tail == null ? "" : tail.messageId + "#" + tail.text.length() + "#" + tail.reasoning.length();
+        boolean contentChanged = !fingerprint.equals(renderedTail);
+        renderedTail = fingerprint;
+        boolean following = state.followLatest;
         if (pendingPosition != null) {
             applyPosition();
-        } else if (tailChanged) {
+        } else if (following && (contentChanged || !renderedFollowing)) {
             scroll.post(() -> scroll.fullScroll(View.FOCUS_DOWN));
         }
+        renderedFollowing = following;
     }
 
     /**
@@ -366,9 +404,10 @@ public final class ChatScreen extends LinearLayout {
         rows.clear();
         messageFlow.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(getContext());
-        for (ChatMessage message : state.messages) {
+        for (int i = 0; i < state.messages.size(); i++) {
+            ChatMessage message = state.messages.get(i);
             Row row = new Row(inflater);
-            row.render(state, message);
+            row.render(state, message, i == state.messages.size() - 1);
             rows.put(message.messageId, row);
             messageFlow.addView(row.root);
         }
@@ -378,6 +417,96 @@ public final class ChatScreen extends LinearLayout {
         boolean quoted = !quote.isEmpty();
         quoteRow.setVisibility(quoted ? VISIBLE : GONE);
         quoteText.setText(quoted ? getContext().getString(R.string.chat_quoted, quote) : "");
+    }
+
+    /**
+     * T-076: the composer's two stateful surfaces (073 §5). The draft's hint names why sending is
+     * blocked - archived, no key, or the plain invitation - and the send key swaps between its
+     * three faces on the one control, so no state change can reflow the composer or move a hit box.
+     */
+    private void renderComposer(ChatViewState state) {
+        draft.setHint(getContext().getString(
+                state.archived ? R.string.chat_draft_hint_archived
+                        : !state.keyConfigured ? R.string.chat_draft_hint_no_key
+                        : R.string.chat_draft_hint));
+        sendState = state.sendState();
+        send.setEnabled(sendState != ChatViewState.SendState.DISABLED);
+        send.setBackgroundResource(sendState == ChatViewState.SendState.DISABLED
+                ? R.drawable.bg_field : R.drawable.bg_button_primary);
+        send.setContentDescription(getContext().getString(sendState == ChatViewState.SendState.STOP
+                ? R.string.cd_chat_send_stop : R.string.cd_chat_send));
+        int icon = sendState == ChatViewState.SendState.STOP
+                ? R.drawable.ic_chat_stop : R.drawable.ic_chat_send;
+        Drawable drawable = getResources().getDrawable(icon, getContext().getTheme());
+        drawable.setTint(getContext().getColor(sendState == ChatViewState.SendState.DISABLED
+                ? R.color.tl_ink3 : R.color.tl_surface));
+        send.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null);
+    }
+
+    /**
+     * T-075: the follow-latest pill (073 §6). Visible only while the learner is detached, and only
+     * on a ready screen; while it counts missed growths the count rides the label.
+     */
+    private void renderFollow(ChatViewState state) {
+        boolean detached = state.phase == ChatViewState.Phase.READY && !state.followLatest;
+        followLatest.setVisibility(detached ? VISIBLE : GONE);
+        followLatest.setText(detached && state.missedCount > 0
+                ? getContext().getString(R.string.chat_back_to_latest_count, state.missedCount)
+                : getContext().getString(R.string.chat_back_to_latest));
+    }
+
+    /**
+     * T-075: what a stage transition does, once - the one-shot entry fades of 073 §4 and the
+     * TalkBack sentence of §7. The fades read the system low-motion switch and go static there;
+     * the announcements never do (§7: low motion does not reduce what is spoken).
+     */
+    private void renderStageChange(ChatViewState state) {
+        Stage stage = state.stage;
+        if (stage == renderedStage || rows.isEmpty()) return;
+        Stage previous = renderedStage;
+        renderedStage = stage;
+        Row newest = rows.get(state.messages.get(state.messages.size() - 1).messageId);
+        if (newest == null) return;
+        if (stage == Stage.STABLE || stage == Stage.CANCELED) newest.enterStage(stage == Stage.CANCELED);
+        else if (stage == Stage.ANSWERING && previous == Stage.REASONING) newest.enterAnswer();
+        int sentence = stage == Stage.REASONING ? R.string.chat_generating_reasoning
+                : stage == Stage.ANSWERING || stage == Stage.SENDING ? R.string.chat_generating_answer
+                : stage == Stage.CANCELED ? R.string.chat_stopped
+                : stage == Stage.FAILED ? R.string.chat_failed : 0;
+        if (sentence != 0) announceForAccessibility(getContext().getString(sentence));
+    }
+
+    /**
+     * T-065: the source card, collapsed to the summary line until the learner opens it.
+     *
+     * <p>A root branch has no card and a missing upstream row renders as one line fewer - never as
+     * a placeholder (PRD §6.2.8 point 7's rule, applied to this list). The card offers no action:
+     * the header tap only folds and unfolds, and the history rows are plain text with no listener.
+     */
+    private void renderSourceCard(ChatViewState state) {
+        SourceCard card = state.sourceCard;
+        if (card == null || card.summary.isEmpty()) {
+            sourceCard.setVisibility(GONE);
+            return;
+        }
+        sourceCard.setVisibility(VISIBLE);
+        sourceSummary.setText(getContext().getString(R.string.source_card_summary, card.summary));
+        sourceToggle.setText(getContext().getString(state.sourceCardExpanded
+                ? R.string.source_card_collapse : R.string.source_card_expand));
+        sourceHistory.setVisibility(state.sourceCardExpanded ? VISIBLE : GONE);
+        sourceHistory.removeAllViews();
+        if (!state.sourceCardExpanded) {
+            return;
+        }
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        for (SourceCard.Entry entry : card.history) {
+            View row = inflater.inflate(R.layout.item_source_history, sourceHistory, false);
+            TextView text = (TextView) row.findViewById(R.id.source_history_text);
+            text.setText(getContext().getString(entry.user
+                    ? R.string.source_history_question : R.string.source_history_answer,
+                    entry.text));
+            sourceHistory.addView(row);
+        }
     }
 
     private void fire(Consumer<ChatActions> call) {
@@ -438,8 +567,10 @@ public final class ChatScreen extends LinearLayout {
         private final View answerBlock;
         private final TextView time;
         private final TextView answer;
+        private final View caret;
         private final TextView generating;
         private final View failure;
+        private final TextView canceled;
         private final Button retry;
         private final ReasoningDisclosure disclosure;
         private final AnswerActionBar actionBar;
@@ -459,8 +590,10 @@ public final class ChatScreen extends LinearLayout {
             time = root.findViewById(R.id.chat_time);
             answer = root.findViewById(R.id.chat_answer);
             answer.setMovementMethod(LinkMovementMethod.getInstance());
+            caret = root.findViewById(R.id.chat_caret);
             generating = root.findViewById(R.id.chat_generating_note);
             failure = root.findViewById(R.id.chat_failure);
+            canceled = root.findViewById(R.id.chat_canceled);
             retry = root.findViewById(R.id.chat_retry);
             disclosure = root.findViewById(R.id.chat_reasoning);
             actionBar = root.findViewById(R.id.chat_actions);
@@ -481,7 +614,7 @@ public final class ChatScreen extends LinearLayout {
             });
         }
 
-        void render(ChatViewState state, ChatMessage message) {
+        void render(ChatViewState state, ChatMessage message, boolean newestRow) {
             messageId = message.messageId;
             this.message = message;
             questionBlock.setVisibility(message.isAi() ? GONE : VISIBLE);
@@ -492,16 +625,56 @@ public final class ChatScreen extends LinearLayout {
             }
             time.setText(DateUtils.getRelativeTimeSpanString(message.createdAt,
                     System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS));
-            disclosure.render(message, state.isReasoningExpanded(message.messageId),
+            disclosure.render(message,
+                    state.isReasoningEffectivelyExpanded(message.messageId),
                     state.thinkingEnabled);
-            answer.setText(MarkdownRenderer.render(message.text), TextView.BufferType.SPANNABLE);
-            generating.setText(generatingNote(message, state.thinkingEnabled));
-            generating.setVisibility(message.isGenerating() ? VISIBLE : GONE);
-            failure.setVisibility(message.isFailed() ? VISIBLE : GONE);
+            // Matrix 1.2: a tap on a code block copies it, through the same clipboard path a
+            // selection copy takes - one write path, one sensitive-clip marking.
+            answer.setText(MarkdownRenderer.render(message.text,
+                    code -> fire(actions -> actions.onSelectionCopyPressed(code))),
+                    TextView.BufferType.SPANNABLE);
+            renderGenerationSlots(state, message, newestRow);
             retry.setEnabled(message.canRetry());
             actionBar.setVisibility(message.isStable() ? VISIBLE : GONE);
             actionBar.render(message);
             renderSuggestions(state, message);
+        }
+
+        /**
+         * T-075: the generation slots of one row (073 §2/§4). Exactly one of them shows at a
+         * time - reasoning note, caret, failure bar, stopped mark, action bar - so the row's own
+         * content area is the only thing a state change reflows and no neighbouring control's hit
+         * box ever moves.
+         */
+        private void renderGenerationSlots(ChatViewState state, ChatMessage message, boolean newestRow) {
+            boolean reasoning = message.isGenerating() && message.phase() == ChatMessage.Phase.REASONING;
+            boolean answering = message.isGenerating() && message.phase() == ChatMessage.Phase.ANSWER;
+            generating.setText(generatingNote(message, state.thinkingEnabled));
+            generating.setVisibility(reasoning ? VISIBLE : GONE);
+            caret.setVisibility(answering ? VISIBLE : GONE);
+            if (answering && !ChatMotion.reduced(getContext().getContentResolver())
+                    && caret.getAnimation() == null) {
+                caret.startAnimation(ChatMotion.caretBlink());
+            } else if (!answering || ChatMotion.reduced(getContext().getContentResolver())) {
+                caret.clearAnimation();
+            }
+            boolean stopped = newestRow && state.stage == Stage.CANCELED;
+            failure.setVisibility(message.isFailed() && !stopped ? VISIBLE : GONE);
+            canceled.setVisibility(stopped && message.isFailed() ? VISIBLE : GONE);
+        }
+
+        /** The one-shot entry fade a stage transition asked for; static under low motion. */
+        void enterStage(boolean stopped) { fade(stopped ? canceled : actionBar, ChatMotion.QUICK_MS); }
+
+        /** 073 §4.1: the first answer block's fade-in as the stream starts answering. */
+        void enterAnswer() {
+            if (!ChatMotion.reduced(getContext().getContentResolver())) fade(answer, ChatMotion.ENTER_MS);
+        }
+
+        private void fade(View view, long durationMs) {
+            if (ChatMotion.reduced(getContext().getContentResolver())) { view.setAlpha(1f); return; }
+            view.setAlpha(0f);
+            view.animate().alpha(1f).setDuration(durationMs).start();
         }
 
         private void renderQuestion(ChatMessage message) {
@@ -583,7 +756,8 @@ public final class ChatScreen extends LinearLayout {
 
         @Override
         public void onForkPressed(String id) {
-            fire(actions -> actions.onForkPressed(id));
+            // The bottom action bar forks without a selection: the whole answer stays the anchor.
+            fire(actions -> actions.onForkPressed(id, "", 0, 0));
         }
 
         @Override
@@ -624,7 +798,15 @@ public final class ChatScreen extends LinearLayout {
 
         @Override
         public void onForkRequested() {
-            onForkPressed(messageId);
+            // T-065: the menu's fork carries the selected sentence and the offsets it spans, read
+            // from the answer's own text view - the same selection 追问 and 复制 act on. The quote
+            // is the offset substring itself, never a trimmed copy, so the stored anchor's quote
+            // fills its span exactly. Nothing selected means a whole-answer fork, as before.
+            TextSelection selection = TextSelection.of(answer.getSelectionStart(),
+                    answer.getSelectionEnd());
+            String quote = selection.read(answer.getText().toString());
+            fire(actions -> actions.onForkPressed(messageId, quote, selection.start,
+                    selection.end));
         }
 
         @Override

@@ -291,7 +291,7 @@ public final class ChatReadingTest {
 
     private static ChatData.Snapshot snapshot(List<Message> rows, Branch branch) {
         return ChatData.Snapshot.of("Transformer attention", viewOf(rows),
-                Collections.<Recommendation>emptyList(), "", branch, rows);
+                Collections.<Recommendation>emptyList(), "", branch, rows, null);
     }
 
     /** The branch row as it comes back from the store, with the two unread sequences as stored. */

@@ -66,8 +66,14 @@
                 android:id="@+id/chat_ai_tag"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="@drawable/bg_tag"
+                android:backgroundTint="@color/tl_green_faint"
+                android:paddingStart="@dimen/space_s2"
+                android:paddingTop="@dimen/space_s1"
+                android:paddingEnd="@dimen/space_s2"
+                android:paddingBottom="@dimen/space_s1"
                 android:text="@string/chat_ai_tag"
-                android:textColor="@color/tl_green_deep"
+                android:textColor="@color/tl_ink3"
                 android:textSize="@dimen/text_cap" />
 
             <!-- The time sits on the tag line rather than in the action row: at 360dp the row would
@@ -87,13 +93,34 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <TextView
-            android:id="@+id/chat_answer"
+        <!-- 073 §3.3: no card around the answer - AI identity is the thin green rule on the
+             body's left edge, so the hierarchy stays one container deep. -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/tl_ink"
-            android:textIsSelectable="true"
-            android:textSize="@dimen/text_body" />
+            android:orientation="horizontal">
+
+            <View
+                android:layout_width="@dimen/answer_rule"
+                android:layout_height="match_parent"
+                android:background="@color/tl_green" />
+
+            <TextView
+                android:id="@+id/chat_answer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_s2"
+                android:textColor="@color/tl_ink"
+                android:textIsSelectable="true"
+                android:textSize="@dimen/text_body" />
+        </LinearLayout>
+
+        <!-- T-075: the streaming caret (073 §4.1) - its own reserved slot, visible only in the
+             answering stage, so no other slot's hit box ever moves when it appears. -->
+        <View android:id="@+id/chat_caret" android:layout_width="@dimen/caret_width"
+            android:layout_height="@dimen/space_s4" android:layout_marginTop="@dimen/space_s1"
+            android:layout_marginStart="@dimen/space_s2" android:background="@color/tl_green"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/chat_generating_note"
@@ -110,7 +137,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_s3"
             android:background="@drawable/bg_card"
-            android:backgroundTint="@color/tl_amber_soft"
+            android:backgroundTint="@color/tl_red_soft"
             android:orientation="vertical"
             android:paddingStart="@dimen/space_s4"
             android:paddingEnd="@dimen/space_s4"
@@ -123,7 +150,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/chat_failed"
-                android:textColor="@color/tl_amber"
+                android:textColor="@color/tl_red"
                 android:textSize="@dimen/text_sm" />
 
             <LinearLayout
@@ -152,6 +179,11 @@
                     android:textSize="@dimen/text_sm" />
             </LinearLayout>
         </LinearLayout>
+
+        <TextView android:id="@+id/chat_canceled" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_s3"
+            android:text="@string/chat_stopped" android:textColor="@color/tl_ink3"
+            android:textSize="@dimen/text_sm" android:visibility="gone" />
 
         <com.treelearn.app.screen.AnswerActionBar
             android:id="@+id/chat_actions"

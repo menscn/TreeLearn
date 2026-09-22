@@ -1,0 +1,34 @@
+T-076 生产代码行数（本任务新增，非空非注释行，手工逐块清点；整文件口径见文末脚本输出）
+
+新增文件
+  app/src/main/java/com/treelearn/app/ui/ChatDraftStore.java            31
+  app/src/main/java/com/treelearn/app/wiring/SharedPreferencesChatDraftStore.java   50
+  app/src/main/res/drawable/ic_chat_stop.xml                             9   （矢量资源）
+
+修改文件（仅计本任务新增行，整文件差额经脚本核对）
+  app/src/main/java/com/treelearn/app/ui/ChatViewState.java             27
+    - SendState 枚举 5；archived 字段 +构造赋值 2；attemptRunning 4；sendState 9；
+      withArchived 6；initial 等穿参 +1
+  app/src/main/java/com/treelearn/app/ui/ChatPresenter.java             22
+    - drafts 字段 1；构造重载 7；restored() 6；apply 归档穿参 1；
+      onDraftChanged 存草稿 2；onSend 归档拒绝 3；publish 清存储 1（含注释外代码）
+  app/src/main/java/com/treelearn/app/screen/ChatScreen.java            26
+    - import Drawable 1；sendState 字段 1；send 点击三态路由 7；
+      render() 换 renderComposer 1；renderComposer（hint 三态 + 发送键三态渲染）16
+  app/src/main/java/com/treelearn/app/AppContainer.java                  6
+    - import 2；字段 1；init 1；访问器 2（javadoc 不计）
+  app/src/main/java/com/treelearn/app/MainActivity.java                  1
+    - 构造传入 container.chatDraftStore()
+  app/src/main/res/values/strings.xml                                    3
+    - chat_draft_hint_no_key / chat_draft_hint_archived / cd_chat_send_stop
+  app/src/main/res/layout/screen_chat_body.xml                           0
+    - 引用行视觉对齐：2 行属性替换（text_cap/green_deep → text_sm/ink2），行数净变化 0
+
+总计（本任务新增生产行）                                                175
+预算：≤200（硬约束），目标 ≤190 —— 达成。
+（若不计矢量资源 ic_chat_stop.xml 9 行，代码行为 166。）
+
+整文件口径（非空非注释行，含既有代码，供对照，脚本 .t076-wholefile-lines.ps1）：
+  ChatDraftStore 31 / SharedPreferencesChatDraftStore 50 / ic_chat_stop 9 /
+  ChatViewState 230 / ChatPresenter 485 / ChatScreen 617 / AppContainer 168 /
+  MainActivity 528 / screen_chat_body 253 / strings 220

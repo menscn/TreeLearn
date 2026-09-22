@@ -56,6 +56,11 @@ public final class ChatMessage {
     public final Phase phase;
     /** The version displayed; empty while there is none. */
     public final String activeRevisionId;
+    /**
+     * T-074: the displayed version's number, the "n" of the switcher's "n/N". Zero when the row
+     * carries no version, and zero from the legacy factory that never knew the number.
+     */
+    public final int activeRevisionNo;
     /** How many versions this position has stored; more than one means a switcher is worth drawing. */
     public final int revisionCount;
     public final int childBranchCount;
@@ -65,8 +70,8 @@ public final class ChatMessage {
     public final long createdAt;
 
     private ChatMessage(String messageId, boolean ai, String text, String quote, String reasoning,
-            Status status, Phase phase, String activeRevisionId, int revisionCount,
-            int childBranchCount, boolean attemptRunning, long createdAt) {
+            Status status, Phase phase, String activeRevisionId, int activeRevisionNo,
+            int revisionCount, int childBranchCount, boolean attemptRunning, long createdAt) {
         this.messageId = Guard.id(messageId, "messageId");
         this.ai = ai;
         this.text = Guard.text(text, "text");
@@ -76,6 +81,7 @@ public final class ChatMessage {
         this.phase = Guard.object(phase, "phase");
         this.activeRevisionId = activeRevisionId == null || activeRevisionId.isEmpty()
                 ? "" : Guard.id(activeRevisionId, "activeRevisionId");
+        this.activeRevisionNo = Guard.atLeast(activeRevisionNo, 0, "activeRevisionNo");
         this.revisionCount = Guard.atLeast(revisionCount, 0, "revisionCount");
         this.childBranchCount = Guard.atLeast(childBranchCount, 0, "childBranchCount");
         this.attemptRunning = attemptRunning;
@@ -84,16 +90,24 @@ public final class ChatMessage {
 
     /** A learner row. Its content is immutable once created, so it owns no attempt and no version. */
     public static ChatMessage user(String messageId, String text, String quote, long createdAt) {
-        return new ChatMessage(messageId, false, text, quote, "", Status.STABLE, Phase.ANSWER, "", 0, 0,
-                false, createdAt);
+        return new ChatMessage(messageId, false, text, quote, "", Status.STABLE, Phase.ANSWER, "", 0,
+                0, 0, false, createdAt);
     }
 
-    /** An answer row, in whichever state the store reports. */
+    /** An answer row whose displayed version's number is not known by the caller. */
     public static ChatMessage ai(String messageId, String answer, String reasoning, Status status,
             Phase phase, String activeRevisionId, int revisionCount, int childBranchCount,
             boolean attemptRunning, long createdAt) {
+        return ai(messageId, answer, reasoning, status, phase, activeRevisionId, 0, revisionCount,
+                childBranchCount, attemptRunning, createdAt);
+    }
+
+    /** An answer row, in whichever state the store reports, with the displayed version's number. */
+    public static ChatMessage ai(String messageId, String answer, String reasoning, Status status,
+            Phase phase, String activeRevisionId, int activeRevisionNo, int revisionCount,
+            int childBranchCount, boolean attemptRunning, long createdAt) {
         return new ChatMessage(messageId, true, answer, "", reasoning, status, phase, activeRevisionId,
-                revisionCount, childBranchCount, attemptRunning, createdAt);
+                activeRevisionNo, revisionCount, childBranchCount, attemptRunning, createdAt);
     }
 
     public boolean isAi() {
@@ -114,6 +128,11 @@ public final class ChatMessage {
 
     public Phase phase() {
         return phase;
+    }
+
+    /** The "n" of the switcher's "n/N"; zero when the row carries no version or the number is unknown. */
+    public int activeRevisionNo() {
+        return activeRevisionNo;
     }
 
     public boolean hasReasoning() {

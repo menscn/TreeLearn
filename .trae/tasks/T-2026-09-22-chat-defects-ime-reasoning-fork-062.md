@@ -4,7 +4,7 @@ id: T-2026-09-22-062
 title: 对话页实测缺陷修复：键盘、思考区、分支上下文（父需求）
 template_version: 2
 task_type: requirement
-status: ready
+status: verifying
 parent_requirement: null
 requirements_confirmed: true
 generated_by: leader

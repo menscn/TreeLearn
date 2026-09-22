@@ -96,9 +96,11 @@ public final class AnswerActionBar extends LinearLayout {
                 : getContext().getString(R.string.chat_act_children));
         boolean hasVersions = message.hasVersionHistory();
         version.setVisibility(hasVersions ? VISIBLE : GONE);
-        version.setText(getContext().getString(R.string.chat_version_chip, message.revisionCount));
-        version.setContentDescription(
-                getContext().getString(R.string.chat_version_title, message.revisionCount));
+        // 073 §3.5: the switcher reads "n/N" - which version is displayed, out of how many are stored.
+        version.setText(getContext().getString(R.string.chat_version_chip,
+                message.activeRevisionNo(), message.revisionCount));
+        version.setContentDescription(getContext().getString(R.string.chat_version_title,
+                message.activeRevisionNo(), message.revisionCount));
     }
 
     /** The answer the row currently draws; the screen needs it to read a selection. */

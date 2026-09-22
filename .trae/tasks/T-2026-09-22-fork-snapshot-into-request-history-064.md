@@ -4,7 +4,7 @@ id: T-2026-09-22-064
 title: 创建快照进入请求上下文 + fork 守卫与串屏修复
 template_version: 2
 task_type: implementation
-status: ready
+status: verifying
 parent_requirement: T-2026-09-22-chat-defects-ime-reasoning-fork-062.md
 requirements_confirmed: true
 generated_by: leader
@@ -118,9 +118,9 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Verification report
 
-- Verdict: PENDING
-- Evidence: PENDING
-- Changed/deleted assertion rationale and equivalent behavior coverage: PENDING
+- Verdict: PARTIAL（verifier 独立复核 2026-09-23：代码与 JVM 层全部通过；真实 SQLite 引擎验证被用户豁免，上限 PARTIAL）
+- Evidence: verifier 逐项核对——`SqliteChatStore.history`:161–177 确经 `findByBranchId`+`fromStored` 读快照，ordinal 截断循环（:140–143）只作用于本分支行；`ChatWiring.fork`:273 missingKey 拦截在位；`MainActivity`:311/322 `isTheBranchOnScreen` 双守卫；`SnapshotHistoryMergerTest` 四个指定用例断言真实（读源码核对，非空断言）。证据文件 `.t064-red/green/fullregression/assemble.log` 均含命令行与 EXITCODE=，与任务记录一致。verifier 独立重跑全量 testDebugUnitTest EXITCODE=0、assembleDebug EXITCODE=0。
+- Changed/deleted assertion rationale and equivalent behavior coverage: 未删除既有用例；3 个既有 fork 用例仅补 missingKey 前置，断言未削弱（verifier 核对）。
 - Gaps: 真实 Android SQLite 验证被用户豁免（2026-09-22 指示「代码测试，不要用真机或者模拟器测试」）；与 `.trae/rules/sql.md` 的真实引擎要求存在已登记偏差。
 - Risks: JVM 假实现与 SQLite 真实行为不一致的漏检风险。
 

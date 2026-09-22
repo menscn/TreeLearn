@@ -11,10 +11,14 @@ import com.treelearn.app.ui.ChatCommandResult;
 import com.treelearn.app.ui.ChatData;
 import com.treelearn.app.ui.ChatMessage;
 import com.treelearn.app.ui.HomeViewState;
+import com.treelearn.app.ui.SourceCard;
 import com.treelearn.core.domain.AnswerRevision;
 import com.treelearn.core.domain.Branch;
+import com.treelearn.core.domain.BranchAnchor;
+import com.treelearn.core.domain.BranchSource;
 import com.treelearn.core.domain.ContextPlan;
 import com.treelearn.core.domain.ContextSnapshot;
+import com.treelearn.core.domain.ContextSnapshotCodec;
 import com.treelearn.core.domain.DomainErrorCode;
 import com.treelearn.core.domain.DomainResult;
 import com.treelearn.core.domain.GenerationCommand;
@@ -27,6 +31,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -290,7 +295,7 @@ public class ChatWiringTest {
         store.conversation = new ChatStore.Conversation("", Arrays.asList(
                 user(0, WiringDoubles.FIRST_QUESTION), answer(1, WiringDoubles.ANSWER_ID, stable)));
 
-        ChatCommandResult result = wiring().fork(WiringDoubles.ANSWER_ID, "");
+        ChatCommandResult result = wiring().fork(WiringDoubles.ANSWER_ID, "", "", 0, 0);
 
         assertEquals(1, store.createBranchCalls);
         assertEquals(0, generation.submitCalls);
@@ -316,7 +321,7 @@ public class ChatWiringTest {
         store.conversation = new ChatStore.Conversation("", Arrays.asList(
                 user(0, WiringDoubles.FIRST_QUESTION), answer(1, WiringDoubles.ANSWER_ID, null)));
 
-        ChatCommandResult result = wiring().fork(WiringDoubles.ANSWER_ID, "");
+        ChatCommandResult result = wiring().fork(WiringDoubles.ANSWER_ID, "", "", 0, 0);
 
         assertFalse(result.isAccepted());
         assertEquals(HomeViewState.Notice.STORAGE, result.notice());
@@ -329,7 +334,7 @@ public class ChatWiringTest {
                 WiringDoubles.NOW);
         store.positions.put(asked.id, asked);
 
-        ChatCommandResult result = wiring().fork(asked.id, "");
+        ChatCommandResult result = wiring().fork(asked.id, "", "", 0, 0);
 
         assertFalse(result.isAccepted());
         assertEquals(0, store.createBranchCalls);
@@ -353,7 +358,7 @@ public class ChatWiringTest {
                 user(0, WiringDoubles.FIRST_QUESTION), answer(1, WiringDoubles.ANSWER_ID, stable)));
         key.configured = false;
 
-        ChatCommandResult result = wiring().fork(WiringDoubles.ANSWER_ID, "");
+        ChatCommandResult result = wiring().fork(WiringDoubles.ANSWER_ID, "", "", 0, 0);
 
         assertFalse(result.isAccepted());
         assertEquals(HomeViewState.Notice.KEY_MISSING, result.notice());
@@ -396,10 +401,131 @@ public class ChatWiringTest {
                 user(0, WiringDoubles.FIRST_QUESTION), answer(1, WiringDoubles.ANSWER_ID, stable)));
         store.branchRefusal = com.treelearn.data.db.dao.BranchCreation.Refusal.SOURCE_NOT_IN_THIS_TOPIC;
 
-        ChatCommandResult result = wiring().fork(WiringDoubles.ANSWER_ID, "");
+        ChatCommandResult result = wiring().fork(WiringDoubles.ANSWER_ID, "", "", 0, 0);
 
         assertFalse(result.isAccepted());
         assertEquals(HomeViewState.Notice.STORAGE, result.notice());
+    }
+
+    /**
+     * T-065: a fork made from a selected sentence stores a ranged anchor - the quote, the offsets
+     * and the digest derived by the codec the snapshot already owns.
+     */
+    @Test
+    public void forkWithSelectionAnchorsRange() {
+        key.configured = true;
+        String answerText = "the answer";
+        AnswerRevision stable = revision(WiringDoubles.ANSWER_ID, "the reasoning", answerText);
+        Message source = Message.restore(WiringDoubles.ANSWER_ID, WiringDoubles.BRANCH_ID,
+                com.treelearn.core.domain.MessageRole.AI, 1, null, "", WiringDoubles.NOW, stable.id,
+                null);
+        store.positions.put(WiringDoubles.ANSWER_ID, source);
+        store.branch = Branch.root(WiringDoubles.TOPIC_ID, WiringDoubles.NOW);
+        store.conversation = new ChatStore.Conversation("", Arrays.asList(
+                user(0, WiringDoubles.FIRST_QUESTION), answer(1, WiringDoubles.ANSWER_ID, stable)));
+
+        ChatCommandResult result = wiring().fork(WiringDoubles.ANSWER_ID, "", answerText, 0,
+                answerText.length());
+
+        assertTrue(result.isAccepted());
+        BranchAnchor anchor = store.createdBranch.source.anchor;
+        assertFalse("a selected sentence must not be stored as a whole-answer anchor",
+                anchor.isWholeAnswer());
+        assertEquals(0, anchor.startInclusive.intValue());
+        assertEquals(answerText.length(), anchor.endExclusive.intValue());
+        assertEquals(answerText, anchor.quote);
+        assertEquals("the hash is the one digest derivation the codec owns",
+                ContextSnapshotCodec.digestOf(answerText), anchor.hash);
+    }
+
+    /** T-065: the bottom action bar forks without a selection, so the anchor stays whole-answer. */
+    @Test
+    public void forkWithoutSelectionKeepsWholeAnswer() {
+        key.configured = true;
+        AnswerRevision stable = revision(WiringDoubles.ANSWER_ID, "the reasoning", "the answer");
+        Message source = Message.restore(WiringDoubles.ANSWER_ID, WiringDoubles.BRANCH_ID,
+                com.treelearn.core.domain.MessageRole.AI, 1, null, "", WiringDoubles.NOW, stable.id,
+                null);
+        store.positions.put(WiringDoubles.ANSWER_ID, source);
+        store.branch = Branch.root(WiringDoubles.TOPIC_ID, WiringDoubles.NOW);
+        store.conversation = new ChatStore.Conversation("", Arrays.asList(
+                user(0, WiringDoubles.FIRST_QUESTION), answer(1, WiringDoubles.ANSWER_ID, stable)));
+
+        ChatCommandResult result = wiring().fork(WiringDoubles.ANSWER_ID, "", "", 0, 0);
+
+        assertTrue(result.isAccepted());
+        assertTrue("an empty selection keeps the whole-answer anchor",
+                store.createdBranch.source.anchor.isWholeAnswer());
+    }
+
+    /** T-065: a quote that disagrees with its offsets is refused in the domain, not stored. */
+    @Test
+    public void forkRefusesAQuoteThatDisagreesWithItsOffsets() {
+        key.configured = true;
+        AnswerRevision stable = revision(WiringDoubles.ANSWER_ID, "the reasoning", "the answer");
+        Message source = Message.restore(WiringDoubles.ANSWER_ID, WiringDoubles.BRANCH_ID,
+                com.treelearn.core.domain.MessageRole.AI, 1, null, "", WiringDoubles.NOW, stable.id,
+                null);
+        store.positions.put(WiringDoubles.ANSWER_ID, source);
+        store.branch = Branch.root(WiringDoubles.TOPIC_ID, WiringDoubles.NOW);
+        store.conversation = new ChatStore.Conversation("", Arrays.asList(
+                user(0, WiringDoubles.FIRST_QUESTION), answer(1, WiringDoubles.ANSWER_ID, stable)));
+
+        ChatCommandResult result = wiring().fork(WiringDoubles.ANSWER_ID, "", "the answer", 0, 4);
+
+        assertFalse(result.isAccepted());
+        assertEquals(HomeViewState.Notice.STORAGE, result.notice());
+        assertEquals(0, store.createBranchCalls);
+    }
+
+    /**
+     * T-065: the source card comes from the one snapshot read-back path (064), listing the upstream
+     * history in source order, with the collapsed line naming the source answer - or the anchored
+     * sentence when the fork carries one.
+     */
+    @Test
+    public void sourceCardListsSnapshotHistory() {
+        store.branch = childBranch(BranchAnchor.wholeAnswer());
+        store.conversation = new ChatStore.Conversation("child title",
+                Collections.<ChatStore.Position>emptyList(), store.branch,
+                Collections.<Message>emptyList());
+        store.history = Arrays.asList(
+                ContextPlan.Entry.userMessage(WiringDoubles.QUESTION_ID,
+                        WiringDoubles.FIRST_QUESTION),
+                ContextPlan.Entry.stableRevision(WiringDoubles.REVISION_ID, "",
+                        WiringDoubles.QUOTED_LINE));
+
+        ChatData.Snapshot snapshot = wiring().read(WiringDoubles.BRANCH_ID);
+
+        assertNotNull("a child branch carries a source card", snapshot.sourceCard);
+        assertEquals(2, snapshot.sourceCard.history.size());
+        assertTrue(snapshot.sourceCard.history.get(0).user);
+        assertEquals(WiringDoubles.FIRST_QUESTION, snapshot.sourceCard.history.get(0).text);
+        assertFalse(snapshot.sourceCard.history.get(1).user);
+        assertEquals(WiringDoubles.QUOTED_LINE, snapshot.sourceCard.history.get(1).text);
+        assertEquals("the collapsed line excerpts the source answer", WiringDoubles.QUOTED_LINE,
+                snapshot.sourceCard.summary);
+
+        store.branch = childBranch(BranchAnchor.ofRange(0, WiringDoubles.QUOTED_LINE.length(),
+                WiringDoubles.QUOTED_LINE, ContextSnapshotCodec.digestOf(WiringDoubles.QUOTED_LINE))
+                .value());
+        store.conversation = new ChatStore.Conversation("child title",
+                Collections.<ChatStore.Position>emptyList(), store.branch,
+                Collections.<Message>emptyList());
+
+        snapshot = wiring().read(WiringDoubles.BRANCH_ID);
+
+        assertEquals("a ranged fork summarizes with the anchored sentence", WiringDoubles.QUOTED_LINE,
+                snapshot.sourceCard.summary);
+    }
+
+    private static Branch childBranch(BranchAnchor anchor) {
+        DomainResult<Branch> created = Branch.child(WiringDoubles.TOPIC_ID,
+                BranchSource.restore("0e0e0e0e-0e0e-4e0e-8e0e-0e0e0e0e0e0e",
+                        WiringDoubles.ANSWER_ID, WiringDoubles.REVISION_ID, anchor,
+                        "0f0f0f0f-0f0f-4f0f-8f0f-0f0f0f0f0f0f"), WiringDoubles.NOW);
+        assertTrue(created.isOk());
+        return created.value();
     }
 
     @Test

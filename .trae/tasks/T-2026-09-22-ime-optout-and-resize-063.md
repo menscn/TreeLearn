@@ -4,7 +4,7 @@ id: T-2026-09-22-063
 title: 键盘顶起输入框：opt-out edge-to-edge + adjustResize
 template_version: 2
 task_type: config
-status: ready
+status: verifying
 parent_requirement: T-2026-09-22-chat-defects-ime-reasoning-fork-062.md
 requirements_confirmed: true
 generated_by: leader
@@ -111,8 +111,8 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Verification report
 
-- Verdict: PENDING
-- Evidence: PENDING
+- Verdict: PARTIAL（verifier 独立复核 2026-09-23：代码与构建层全部通过，真机键盘行为待用户自测）
+- Evidence: manifest:31 `adjustResize`、themes.xml:21 `windowOptOutEdgeToEdgeEnforcement` 均经实现者与独立 verifier 双重 grep 命中；assembleDebug EXITCODE=0、testDebugUnitTest EXITCODE=0（任务 GREEN 记录）。verifier 抽核备注：本片无独立证据文件（.t063*），构建退出码仅内联任务记录——已记为轻微缺口，不构成 FAIL。
 - Changed/deleted assertion rationale and equivalent behavior coverage: 不适用（无测试断言变更）。
 - Gaps: 真实键盘行为只能由用户真机自测提供（用户已豁免模拟器/仪器测试）。
 - Risks: opt-out 属权宜方案；未来做沉浸式时须移除并补 insets 监听。

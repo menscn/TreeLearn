@@ -13,12 +13,14 @@ import com.treelearn.app.ui.ChildBranch;
 import com.treelearn.app.ui.HomeViewState;
 import com.treelearn.app.ui.KeyVault;
 import com.treelearn.app.ui.Recommendation;
+import com.treelearn.app.ui.SourceCard;
 import com.treelearn.core.domain.AnswerRevision;
 import com.treelearn.core.domain.Branch;
 import com.treelearn.core.domain.BranchAnchor;
 import com.treelearn.core.domain.BranchSource;
 import com.treelearn.core.domain.ContextPlan;
 import com.treelearn.core.domain.ContextSnapshot;
+import com.treelearn.core.domain.ContextSnapshotCodec;
 import com.treelearn.core.domain.DomainResult;
 import com.treelearn.core.domain.GenerationCommand;
 import com.treelearn.core.domain.GenerationModel;
@@ -56,6 +58,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * reports success it did not get.
  */
 public final class ChatWiring implements ChatData, ChatCommands {
+
+    /** T-065: the collapsed source-card line excerpts the source answer to this many characters. */
+    private static final int SUMMARY_LIMIT = 120;
 
     private final ChatStore store;
     private final GenerationPort generation;
@@ -128,7 +133,66 @@ public final class ChatWiring implements ChatData, ChatCommands {
         }
         return Snapshot.of(conversation.branchTitle, messages,
                 Collections.<Recommendation>emptyList(), "", conversation.branch,
-                conversation.messages);
+                conversation.messages, sourceCard(conversation.branch));
+    }
+
+    /**
+     * T-065: the provenance card of a non-root branch, or null for a root branch.
+     *
+     * <p>The upstream history comes from the one snapshot read-back path T-064 built:
+     * {@code history} with a question ordinal of 0 truncates the branch's own rows to nothing and
+     * leaves the birth snapshot's prepended entries, decoded and row-resolved exactly as the request
+     * path resolves them. No second decode exists to drift from it. A snapshot that cannot be
+     * trusted raises there; the card is a rendering, not a request, so the unresolvable history is
+     * simply left out rather than rendered as placeholders - the collapsed line still names where
+     * the branch came from, and the request path refuses on its own terms (PRD 6.2.4 exception 2).
+     */
+    private SourceCard sourceCard(Branch branch) {
+        if (branch == null || branch.source == null) {
+            return null;
+        }
+        List<ContextPlan.Entry> upstream;
+        try {
+            upstream = store.history(branch.id, 0);
+        } catch (ChatStore.SnapshotUnreadable unreadable) {
+            upstream = Collections.emptyList();
+        }
+        return new SourceCard(summaryFor(branch.source.anchor, upstream), render(upstream));
+    }
+
+    /** The collapsed line: the anchored sentence, or an excerpt of the source answer. */
+    private static String summaryFor(BranchAnchor anchor, List<ContextPlan.Entry> upstream) {
+        if (!anchor.isWholeAnswer() && anchor.quote != null && !anchor.quote.isEmpty()) {
+            return anchor.quote;
+        }
+        String sourceAnswer = "";
+        for (ContextPlan.Entry entry : upstream) {
+            if (entry.kind == ContextPlan.EntryKind.STABLE_REVISION) {
+                sourceAnswer = entry.answerText;
+            }
+        }
+        return excerpt(sourceAnswer);
+    }
+
+    /** Long text is excerpted for the collapsed line; nothing is summarized or paraphrased. */
+    private static String excerpt(String text) {
+        if (text == null || text.length() <= SUMMARY_LIMIT) {
+            return text == null ? "" : text;
+        }
+        return text.substring(0, SUMMARY_LIMIT) + "…";
+    }
+
+    /** The upstream rows as the card renders them: learner messages and answer texts, in order. */
+    private static List<SourceCard.Entry> render(List<ContextPlan.Entry> upstream) {
+        List<SourceCard.Entry> rows = new ArrayList<SourceCard.Entry>(upstream.size());
+        for (ContextPlan.Entry entry : upstream) {
+            if (entry.kind == ContextPlan.EntryKind.USER_MESSAGE) {
+                rows.add(SourceCard.Entry.user(entry.userText));
+            } else if (entry.kind == ContextPlan.EntryKind.STABLE_REVISION) {
+                rows.add(SourceCard.Entry.answer(entry.answerText));
+            }
+        }
+        return rows;
     }
 
     private static boolean hasStableAnswer(ChatStore.Conversation conversation) {
@@ -200,7 +264,8 @@ public final class ChatWiring implements ChatData, ChatCommands {
     }
 
     @Override
-    public ChatCommandResult fork(String messageId, String question) {
+    public ChatCommandResult fork(String messageId, String question, String quote,
+            int startInclusive, int endExclusive) {
         Guard.id(messageId, "messageId");
         // The same guard send and replace answer to (PRD 6.2.3 exception 2): a fork spends store
         // writes and opens a branch the learner could not ask a question in without a key, so the
@@ -222,6 +287,19 @@ public final class ChatWiring implements ChatData, ChatCommands {
             // condition ChatMessage.canFork() shows the learner as an enabled button.
             return ChatCommandResult.refused(HomeViewState.Notice.STORAGE);
         }
+        // T-065: a fork made from a selected sentence anchors that sentence - quote plus offsets,
+        // with the digest derived by the one codec the snapshot already owns, so no second
+        // derivation exists to drift. A blank quote is the bottom action bar's whole-answer fork.
+        String anchored = quote == null ? "" : quote;
+        DomainResult<BranchAnchor> anchor = anchored.isEmpty()
+                ? DomainResult.ok(BranchAnchor.wholeAnswer())
+                : BranchAnchor.ofRange(startInclusive, endExclusive, anchored,
+                        ContextSnapshotCodec.digestOf(anchored));
+        if (anchor.isFailure()) {
+            // The domain refused the range (an offset span the quote does not fill exactly): the
+            // provenance row would be unrestorable, so nothing is written and the refusal is shown.
+            return ChatCommandResult.refused(HomeViewState.Notice.STORAGE);
+        }
         long now = clock.millis();
         // One id has to be chosen before the branch exists, and it is the snapshot's: the branch's id
         // is minted inside Branch.child, while BranchCreation refuses a snapshot row that names any
@@ -235,7 +313,7 @@ public final class ChatWiring implements ChatData, ChatCommands {
         String snapshotId = Guard.newId();
         DomainResult<BranchSource> provenance = BranchSource.fromOperation(source.branchId, messageId,
                 snapshotId, GenerationState.STABLE, sourcePosition.activeRevision.id,
-                BranchAnchor.wholeAnswer());
+                anchor.value());
         if (provenance.isFailure()) {
             return ChatCommandResult.refused(HomeViewState.Notice.STORAGE);
         }
@@ -406,8 +484,8 @@ public final class ChatWiring implements ChatData, ChatCommands {
         if (displayed != null) {
             return ChatMessage.ai(row.id, displayed.answerContent, displayed.reasoningContent,
                     ChatMessage.Status.STABLE, ChatMessage.Phase.ANSWER, displayed.id,
-                    position.revisionCount, position.childBranchCount, position.attemptRunning,
-                    row.createdAt);
+                    displayed.revisionNo, position.revisionCount, position.childBranchCount,
+                    position.attemptRunning, row.createdAt);
         }
         if (position.attemptRunning) {
             boolean answering = !position.attemptAnswer.isEmpty();

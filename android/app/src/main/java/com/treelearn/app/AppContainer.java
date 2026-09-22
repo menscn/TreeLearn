@@ -19,6 +19,7 @@ import com.treelearn.app.search.BranchTitles;
 import com.treelearn.app.search.SearchRepository;
 import com.treelearn.app.ui.ChatCommands;
 import com.treelearn.app.ui.ChatData;
+import com.treelearn.app.ui.ChatDraftStore;
 import com.treelearn.app.ui.CopyLabels;
 import com.treelearn.app.ui.HomeData;
 import com.treelearn.app.ui.KeyVault;
@@ -37,6 +38,7 @@ import com.treelearn.app.wiring.LibraryWiring;
 import com.treelearn.app.wiring.LogcatTelemetry;
 import com.treelearn.app.wiring.NavigationWiring;
 import com.treelearn.app.wiring.PromptLimits;
+import com.treelearn.app.wiring.SharedPreferencesChatDraftStore;
 import com.treelearn.app.wiring.SqliteChatStore;
 import com.treelearn.app.wiring.SqliteHomeStore;
 import com.treelearn.app.wiring.SqliteLibraryStore;
@@ -102,6 +104,9 @@ public final class AppContainer {
 
     private final ReadingStore readingStore;
 
+    /** T-076: the composer drafts that wait out a process rebuild. */
+    private final ChatDraftStore chatDraftStore;
+
     /** The search port: the statement runner, with its connection opened on first use. */
     private final SearchRepository searchRepository;
 
@@ -144,6 +149,7 @@ public final class AppContainer {
         this.libraryWiring = new LibraryWiring(new SqliteLibraryStore(helper), navigationWiring);
         this.readingStore = new SqliteReadingStore(helper);
         this.searchRepository = new SqliteSearchStore(helper);
+        this.chatDraftStore = new SharedPreferencesChatDraftStore(applicationContext);
     }
 
     public static synchronized AppContainer get(Context context) {
@@ -225,6 +231,11 @@ public final class AppContainer {
      */
     public ReadingStore readingStore() {
         return readingStore;
+    }
+
+    /** The composer drafts that wait out a process rebuild, one record per branch. */
+    public ChatDraftStore chatDraftStore() {
+        return chatDraftStore;
     }
 
     /**

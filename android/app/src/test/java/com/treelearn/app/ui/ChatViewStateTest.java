@@ -147,6 +147,86 @@ public final class ChatViewStateTest {
         assertEquals("", initial().withQuote("a sentence").withQuote("").quote);
     }
 
+    @Test
+    public void formingReasoningIsExpandedByDefault() {
+        ChatViewState state = initial().withMessages(Arrays.asList(
+                ChatTestDoubles.ask(ChatTestDoubles.M_ASK, ChatTestDoubles.QUESTION),
+                ChatTestDoubles.formingReasoning(ChatTestDoubles.M_ANSWER,
+                        ChatTestDoubles.REASONING)));
+
+        assertTrue("reasoning that is streaming is open without any tap",
+                state.isReasoningEffectivelyExpanded(ChatTestDoubles.M_ANSWER));
+
+        // A streaming refresh - more reasoning text, same attempt - keeps the default.
+        ChatViewState refreshed = state.withMessages(Arrays.asList(
+                ChatTestDoubles.ask(ChatTestDoubles.M_ASK, ChatTestDoubles.QUESTION),
+                ChatTestDoubles.formingReasoning(ChatTestDoubles.M_ANSWER,
+                        ChatTestDoubles.REASONING + " and more")));
+        assertTrue(refreshed.isReasoningEffectivelyExpanded(ChatTestDoubles.M_ANSWER));
+    }
+
+    @Test
+    public void manualCollapseSurvivesStreamingRefresh() {
+        ChatViewState state = initial().withMessages(Arrays.asList(
+                ChatTestDoubles.ask(ChatTestDoubles.M_ASK, ChatTestDoubles.QUESTION),
+                ChatTestDoubles.formingReasoning(ChatTestDoubles.M_ANSWER,
+                        ChatTestDoubles.REASONING)));
+
+        ChatViewState collapsed = state.withReasoningExpanded(ChatTestDoubles.M_ANSWER, false);
+        assertFalse(collapsed.isReasoningEffectivelyExpanded(ChatTestDoubles.M_ANSWER));
+
+        // The next read lands with more streamed text: the learner's fold must not spring back.
+        ChatViewState refreshed = collapsed.withMessages(Arrays.asList(
+                ChatTestDoubles.ask(ChatTestDoubles.M_ASK, ChatTestDoubles.QUESTION),
+                ChatTestDoubles.formingReasoning(ChatTestDoubles.M_ANSWER,
+                        ChatTestDoubles.REASONING + " and more")));
+        assertFalse("a manual fold overrides the streaming default",
+                refreshed.isReasoningEffectivelyExpanded(ChatTestDoubles.M_ANSWER));
+    }
+
+    @Test
+    public void leavingFormingAutoCollapses() {
+        ChatViewState state = initial().withMessages(Arrays.asList(
+                ChatTestDoubles.ask(ChatTestDoubles.M_ASK, ChatTestDoubles.QUESTION),
+                ChatTestDoubles.formingReasoning(ChatTestDoubles.M_ANSWER,
+                        ChatTestDoubles.REASONING)));
+        assertTrue(state.isReasoningEffectivelyExpanded(ChatTestDoubles.M_ANSWER));
+
+        // The attempt moved on to the answer: the disclosure folds itself.
+        ChatViewState done = state.withMessages(Arrays.asList(
+                ChatTestDoubles.ask(ChatTestDoubles.M_ASK, ChatTestDoubles.QUESTION),
+                ChatTestDoubles.stableAnswer(ChatTestDoubles.M_ANSWER, ChatTestDoubles.ANSWER)));
+        assertFalse("reasoning must fold when the stream leaves the reasoning phase",
+                done.isReasoningEffectivelyExpanded(ChatTestDoubles.M_ANSWER));
+    }
+
+    @Test
+    public void manualExpandSurvivesCompletion() {
+        ChatViewState state = initial().withMessages(Arrays.asList(
+                ChatTestDoubles.ask(ChatTestDoubles.M_ASK, ChatTestDoubles.QUESTION),
+                ChatTestDoubles.formingReasoning(ChatTestDoubles.M_ANSWER,
+                        ChatTestDoubles.REASONING)));
+
+        ChatViewState opened = state.withReasoningExpanded(ChatTestDoubles.M_ANSWER, true);
+        ChatViewState done = opened.withMessages(Arrays.asList(
+                ChatTestDoubles.ask(ChatTestDoubles.M_ASK, ChatTestDoubles.QUESTION),
+                ChatTestDoubles.stableAnswer(ChatTestDoubles.M_ANSWER, ChatTestDoubles.ANSWER)));
+        assertTrue("a manual open is an explicit intent and survives the completion",
+                done.isReasoningEffectivelyExpanded(ChatTestDoubles.M_ANSWER));
+    }
+
+    @Test
+    public void answerWithoutReasoningHasNoEntry() {
+        ChatViewState state = initial().withMessages(Arrays.asList(
+                ChatTestDoubles.ask(ChatTestDoubles.M_ASK, ChatTestDoubles.QUESTION),
+                ChatTestDoubles.stableAnswerWithoutReasoning(ChatTestDoubles.M_ANSWER,
+                        ChatTestDoubles.ANSWER)));
+
+        assertFalse("no reasoning means no disclosure at all",
+                state.message(ChatTestDoubles.M_ANSWER).canExpandReasoning());
+        assertFalse(state.isReasoningEffectivelyExpanded(ChatTestDoubles.M_ANSWER));
+    }
+
     private static ChatViewState initial() {
         return ChatViewState.initial(ChatTestDoubles.BRANCH, GenerationModel.FLASH, false, true);
     }

@@ -1,8 +1,12 @@
 package com.treelearn.app.ui;
 
 import com.treelearn.core.domain.AnswerRevision;
-import com.treelearn.core.domain.GenerationModel;
 import com.treelearn.core.domain.Branch;
+import com.treelearn.core.domain.BranchAnchor;
+import com.treelearn.core.domain.BranchSource;
+import com.treelearn.core.domain.ContextSnapshotCodec;
+import com.treelearn.core.domain.DomainResult;
+import com.treelearn.core.domain.GenerationModel;
 import com.treelearn.core.domain.Message;
 import com.treelearn.core.domain.ReadingAnchor;
 import com.treelearn.core.domain.ReadingPosition;
@@ -29,6 +33,9 @@ final class ChatTestDoubles {
     static final String REV_2 = "66666666-6666-4666-8666-666666666666";
     static final String OP = "77777777-7777-4777-8777-777777777777";
     static final String CHILD_BRANCH = "88888888-8888-4888-8888-888888888888";
+    static final String PARENT_BRANCH = "99999999-9999-4999-8999-999999999999";
+    static final String TOPIC = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+    static final String BIRTH_SNAPSHOT = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 
     static final String QUESTION = "why does attention scale by root d";
     static final String ANSWER = "because the dot products grow with d";
@@ -43,6 +50,18 @@ final class ChatTestDoubles {
 
     static ChatMessage stableAnswer(String id, String answer) {
         return ChatMessage.ai(id, answer, REASONING, ChatMessage.Status.STABLE,
+                ChatMessage.Phase.ANSWER, REV_1, 1, 0, false, 1_700_000_000_000L);
+    }
+
+    /** T-066: an attempt that is filling the reasoning stream right now. */
+    static ChatMessage formingReasoning(String id, String reasoning) {
+        return ChatMessage.ai(id, "", reasoning, ChatMessage.Status.GENERATING,
+                ChatMessage.Phase.REASONING, "", 0, 0, false, 1_700_000_000_000L);
+    }
+
+    /** T-066: a stable answer that never had reasoning - no disclosure at all. */
+    static ChatMessage stableAnswerWithoutReasoning(String id, String answer) {
+        return ChatMessage.ai(id, answer, "", ChatMessage.Status.STABLE,
                 ChatMessage.Phase.ANSWER, REV_1, 1, 0, false, 1_700_000_000_000L);
     }
 
@@ -62,7 +81,32 @@ final class ChatTestDoubles {
     static ChatData.Snapshot read(String title, List<ChatMessage> messages,
             List<Recommendation> recommendations, String revisionId) {
         return ChatData.Snapshot.of(title, messages, recommendations, revisionId, null,
-                Collections.<Message>emptyList());
+                Collections.<Message>emptyList(), null);
+    }
+
+    /** A read that also carries the branch row behind it and the source card the wiring built. */
+    static ChatData.Snapshot withBranch(List<ChatMessage> messages, Branch branch, SourceCard card) {
+        return ChatData.Snapshot.of("Transformer attention", messages,
+                Collections.<Recommendation>emptyList(), "", branch,
+                Collections.<Message>emptyList(), card);
+    }
+
+    /**
+     * A child branch whose provenance anchors the given sentence, or the whole answer when the
+     * quote is empty (T-065).
+     */
+    static Branch childBranch(String anchorQuote) {
+        boolean ranged = anchorQuote != null && !anchorQuote.isEmpty();
+        BranchAnchor anchor = ranged
+                ? BranchAnchor.ofRange(0, anchorQuote.length(), anchorQuote,
+                        ContextSnapshotCodec.digestOf(anchorQuote)).value()
+                : BranchAnchor.wholeAnswer();
+        DomainResult<Branch> created = Branch.child(TOPIC, BranchSource.restore(PARENT_BRANCH,
+                M_ANSWER, REV_1, anchor, BIRTH_SNAPSHOT), 1_700_000_000_000L);
+        if (created.isFailure()) {
+            throw new IllegalStateException("the test child branch was refused: " + created.error());
+        }
+        return created.value();
     }
 
     /** Records every call, so a test can assert that a gesture did or did not reach the store. */
@@ -81,6 +125,8 @@ final class ChatTestDoubles {
         String lastMessageId = "";
         String lastRevisionId = "";
         String lastQuestion = "";
+        int lastForkStart;
+        int lastForkEnd;
         GenerationModel lastModel;
         boolean lastThinking;
         long lastNow;
@@ -128,10 +174,14 @@ final class ChatTestDoubles {
         }
 
         @Override
-        public ChatCommandResult fork(String messageId, String question) {
+        public ChatCommandResult fork(String messageId, String question, String quote,
+                int startInclusive, int endExclusive) {
             calls.add("fork");
             lastMessageId = messageId;
             lastQuestion = question;
+            lastQuote = quote == null ? "" : quote;
+            lastForkStart = startInclusive;
+            lastForkEnd = endExclusive;
             return forkResult;
         }
 

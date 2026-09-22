@@ -4,7 +4,7 @@ id: T-2026-09-22-066
 title: 思考过程 DeepSeek 式披露：流式半折叠、自动折叠、次级样式
 template_version: 2
 task_type: implementation
-status: ready
+status: verifying
 parent_requirement: T-2026-09-22-chat-defects-ime-reasoning-fork-062.md
 requirements_confirmed: true
 generated_by: leader
@@ -69,39 +69,41 @@ Follow [code-document alignment](../rules/documentation.md).
 - Changed runtime facts: 思考披露默认展开时机。
 - Authoritative code/config/migration evidence: 上述文件。
 - Documentation surfaces checked: `V3.2 PRD` §6.2.19 F18 规格第 6 条「默认折叠」——**本片把「思考进行中」定义为折叠语义的例外阶段**，PRD 措辞须补一句注记（与 065 的 §6.2.5 注记同类，属口径澄清）。
-- Documentation files updated: §6.2.19 F18 注记。
-- Producer/consumer/sibling/compatibility paths checked: 既有 ReasoningDisclosureTest（如存在）同步。
-- Superseded phrases/examples reverse-searched: 「默认折叠」措辞在 Docs/ 与 README 的其他出现处核对。
+- Documentation files updated: §6.2.19 F18 规格第 6 条后新增口径注记（V3.2 PRD 第 780 行，格式沿用第 386 行既有注记）。
+- Producer/consumer/sibling/compatibility paths checked: 既有 ReasoningDisclosureTest（如存在）同步。——核对结果：无独立 ReasoningDisclosureTest（该视图无 JVM 测试），由新增 ReasoningDisclosureLayoutTest 承担布局断言。
+- Superseded phrases/examples reverse-searched: 「默认折叠」措辞在 Docs/ 与 README 的其他出现处核对。——反向检索结果（只记录，不扩大改动）：`Docs/01-demand/…V3.1增量.md:33,57`（BASE-23 冻结基准）、`Docs/03-prd-draft/V3.1-*.md:229,768,979,1014`（历史版本冻结）、`Docs/04-ux-design/…原型-v1.html:2413`（历史原型）、`Docs/05-technical-design/…技术架构方案_V1.0.md:292` 与 `…交付提示词.md:39`、`README.md:37`。均为稳态默认折叠的描述或冻结基准；流式期间例外属展示时机口径，不与其持久化/会话语义冲突，无需改动。
 - `documentation impact: none` reason and evidence, if applicable: 不适用。
 - Historical/PRD handling: 注记就地加，不新开版本。
 
 ## Acceptance criteria
 
-- [ ] RED：状态推导用例先失败（forming 默认展开 / 手动收起后流式不弹回 / 离开 forming 自动折叠 / 手动展开后保持），同一条命令转绿。
-- [ ] 布局断言：body 有界高滚动容器与左侧竖线；展开正文仍为 text_sm + tl_ink2（文件断言证据）。
-- [ ] 无思考内容的答案无入口（既有用例或新增用例证明不回归）。
-- [ ] 全量单测 + assembleDebug 绿；流式观感由用户真机自测补证。
-- [ ] PRD §6.2.19 F18 注记落地。
+- [x] RED：状态推导用例先失败（forming 默认展开 / 手动收起后流式不弹回 / 离开 forming 自动折叠 / 手动展开后保持），同一条命令转绿。
+- [x] 布局断言：body 有界高滚动容器与左侧竖线；展开正文仍为 text_sm + tl_ink2（文件断言证据）。
+- [x] 无思考内容的答案无入口（既有用例或新增用例证明不回归）。
+- [x] 全量单测 + assembleDebug 绿；流式观感由用户真机自测补证。
+- [x] PRD §6.2.19 F18 注记落地。
 
 ## TDD execution record
 
 ### RED — failing test first
-- Test/scenario: `formingReasoningIsExpandedByDefault`、`manualCollapseSurvivesStreamingRefresh`、`leavingFormingAutoCollapses`、`manualExpandSurvivesCompletion`、`answerWithoutReasoningHasNoEntry`。
+- Test/scenario: `formingReasoningIsExpandedByDefault`、`manualCollapseSurvivesStreamingRefresh`、`leavingFormingAutoCollapses`、`manualExpandSurvivesCompletion`、`answerWithoutReasoningHasNoEntry`（ChatViewStateTest）；`togglingAFormingAnswerFoldsItAgainstTheStreamingDefault`（ChatPresenterTest）；`theBodySitsInALimitedScrollingContainer`、`theSubordinateStyleSurvives`（新增 ReasoningDisclosureLayoutTest，参照 IconAssetsTest 文件断言模式）。
 - Command: ./gradlew.bat :app:testDebugUnitTest --tests "com.treelearn.app.ui.*"
-- Exit code: PENDING
-- Observed failure: PENDING
-- Failure reason validated: PENDING
+- Exit code: 1
+- Evidence log: artifacts/evidence/.t066-red.log（含 EXITCODE=1）
+- Observed failure: 11 个编译错误，全部为「找不到符号: 方法 isReasoningEffectivelyExpanded(String)」——新用例引用尚不存在的方法，编译期失败。
+- Failure reason validated: 是。失败原因正是待实现的状态推导 API 缺失，非环境或无关错误；布局断言用例同批编译，待 GREEN 一并验证。
 
 ### GREEN — minimum implementation
-- Implementation: PENDING
-- Command: PENDING（须与 RED 同一条目标测试命令）
-- Exit code: PENDING
-- Passing evidence: PENDING
-- Regression evidence: PENDING
+- Implementation: ChatViewState 增 `collapsedReasoning` 显式收起意图集与 `isReasoningEffectivelyExpanded`（显式收起 > 显式展开 > `ChatMessage.isFormingReasoning()` 默认）；`withReasoningExpanded` 记录显式意图并互斥清除反向意图；ChatPresenter.onReasoningToggled 按有效态取反；ChatScreen.Row.render 改读有效态；ReasoningDisclosure 增 ScrollView 容器限高钳制与左侧 2dp 竖线布局；dimens 新增 `reasoning_rule`/`reasoning_max_height`。
+- Command: ./gradlew.bat :app:testDebugUnitTest --tests "com.treelearn.app.ui.*"
+- Exit code: 0
+- Evidence log: artifacts/evidence/.t066-green.log（含 EXITCODE=0）
+- Passing evidence: BUILD SUCCESSFUL；测试报告核对 5 个状态用例 + presenter 用例 + 2 个布局用例均执行通过。
+- Regression evidence: 既有 `reasoningStartsCollapsedAndIsKeyedByMessageNotByPosition`、`reasoningTogglesPerMessageAndIgnoresWhatItCannotExpand`、`replacingTheMessagesKeepsWhatTheLearnerIsDoing` 等原样通过（显式意图语义兼容旧断言）。
 
 ### REFACTOR — optional
-- Cleanup: PENDING
-- Regression evidence: PENDING
+- Cleanup: 移除 `ReasoningDisclosure.render(message, expanded)` 两参重载（全库检索确认无调用方，唯一内部委托随 GREEN 一并消除）；类注释同步 T-066 语义。
+- Regression evidence: 全量 testDebugUnitTest EXITCODE=0（.t066-fullregression.log）+ assembleDebug EXITCODE=0（.t066-assemble.log）。
 
 ### TDD or sizing exception — only with prior user approval
 - Exception type: 不适用（tdd_mode: required）
@@ -114,12 +116,20 @@ Follow [code-document alignment](../rules/documentation.md).
 - 展开推导规则：`effective = 显式意图 ?? isFormingReasoning()`；显式意图在消息处于 forming 期间记录「收起」、离开 forming 后记录「展开」，二者都优先于默认。
 - 限高容器用 ScrollView 包 body（`android:maxHeight` 对 TextView 不构成滚动语义），高度值走 dimens token。
 - 布局文件断言模式参照 `app/src/test/java/com/treelearn/app/IconAssetsTest.java`。
+- 实现说明（T-066 落地）：
+  - `ChatViewState` 新增字段 `collapsedReasoning`（显式收起意图集）与查询 `isReasoningEffectivelyExpanded(messageId)`：显式收起 > 显式展开 > 该消息 `isFormingReasoning()` 默认；`isReasoningExpanded` 保留为显式展开集查询（既有测试语义不变）。
+  - `ReasoningDisclosure`：body 包进 `ScrollView`（id `reasoning_body_scroll`），可见性随展开态切换；`clampBodyHeight()` 在布局后测量——内容矮于 token 时 `WRAP_CONTENT`（流式初期不长出空盒）、超过时钳到 `reasoning_max_height` 内滚动。左侧竖线 View（id `reasoning_rule`，宽 `@dimen/reasoning_rule`=2dp，色 `@color/tl_line`），toggle+body 缩进 `space_s2`。
+  - dimens 新 token 登记（dimens.xml 手工维护，无守门脚本）：`reasoning_rule`=2dp；`reasoning_max_height`=320dp（约屏高 40% 量级）。
+  - 状态文案沿用既有 `chat_reasoning_*` 四键 + `chat_reasoning_pending`，strings.xml 零新增（未触碰 065 的 `source_*` 键）。
+  - `ReasoningDisclosure.render(message, expanded)` 两参重载：全库检索（主源/测试/androidTest）确认无调用方，已删除；三参版仅 ChatScreen.Row 调用。
+  - sw600dp 核对：`layout-sw600dp/` 仅 screen 级布局，无 `view_reasoning` 镜像，本片不涉及（与 Out of scope 预判一致）。
+  - 065 领地（fork/来源卡、`SourceCard` 相关状态与方法）零改动。
 
 ## Verification report
 
-- Verdict: PENDING
-- Evidence: PENDING
-- Changed/deleted assertion rationale and equivalent behavior coverage: PENDING
+- Verdict: PARTIAL（verifier 独立复核 2026-09-23：代码与 JVM 层全部通过；流式真机观感待用户自测，上限 PARTIAL）
+- Evidence: verifier 核对——`ChatViewState` 四条展开推导语义用例断言真实（含流式刷新不弹回、完成后保持）；`view_reasoning.xml`:68 ScrollView 限高、:27–30 `tl_line` 左侧竖线、正文 text_sm+tl_ink2 未变；`dimens.xml`:40–41 登记 `reasoning_rule`=2dp、`reasoning_max_height`=320dp；PRD §6.2.19 F18 注记（第 780 行）落地且未改条款。证据 `.t066-red(1)/green(0)/fullregression(0)/assemble(0).log` 全部含 EXITCODE=。verifier 独立重跑全量单测与 assembleDebug 均 EXITCODE=0。
+- Changed/deleted assertion rationale and equivalent behavior coverage: 未删除既有用例；`ReasoningDisclosure` 两参重载经全库核对确认无调用方后删除，等价行为覆盖不变（verifier 核对）。
 - Gaps: 流式观感只能由用户真机自测提供（豁免仪器测试）。
 - Risks: 轮询刷新（750ms）下展开态重算的渲染成本——行重建是既有的记录内性能风险，本片不扩大它。
 

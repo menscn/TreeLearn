@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The reasoning disclosure (prototype v2.5 `.reasoning-wrap`): a 44dp toggle over the reasoning body.
-  Collapsed unless opened; the body is drawn in the secondary ink so it reads as supporting material
-  rather than as the answer, and that pair (tl_ink2 on tl_surface / tl_bg) is the one a static check
-  measures against the WCAG 4.5:1 threshold.
+  The reasoning disclosure (prototype v2.5 `.reasoning-wrap`, T-066 DeepSeek form): a 44dp toggle
+  over a half-folded body - the body grows inside a ScrollView up to reasoning_max_height and then
+  scrolls in place - behind a 2dp rule, so the reasoning reads as subordinate to the answer. The
+  body is drawn in the secondary ink so it reads as supporting material rather than as the answer,
+  and that pair (tl_ink2 on tl_surface / tl_bg) is the one a static check measures against the
+  WCAG 4.5:1 threshold. Whether the body shows at all is the state's answer, not this file's.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/reasoning_root"
@@ -17,42 +19,70 @@
         android:background="@color/tl_line" />
 
     <LinearLayout
-        android:id="@+id/reasoning_toggle"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/touch_min"
-        android:background="?android:attr/selectableItemBackground"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center_vertical"
+        android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/reasoning_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/chat_reasoning_title"
-            android:textColor="@color/tl_ink3"
-            android:textSize="@dimen/text_sm" />
+        <View
+            android:id="@+id/reasoning_rule"
+            android:layout_width="@dimen/reasoning_rule"
+            android:layout_height="match_parent"
+            android:background="@color/tl_line" />
 
-        <TextView
-            android:id="@+id/reasoning_state"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="end"
-            android:textColor="@color/tl_ink3"
-            android:textSize="@dimen/text_cap" />
-    </LinearLayout>
+            android:orientation="vertical"
+            android:paddingStart="@dimen/space_s2"
+            android:paddingEnd="@dimen/space_s1">
 
-    <TextView
-        android:id="@+id/reasoning_body"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/space_s3"
-        android:lineSpacingExtra="@dimen/space_s1"
-        android:textColor="@color/tl_ink2"
-        android:textSize="@dimen/text_sm"
-        android:visibility="gone" />
+            <LinearLayout
+                android:id="@+id/reasoning_toggle"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/touch_min"
+                android:background="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/reasoning_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/chat_reasoning_title"
+                    android:textColor="@color/tl_ink3"
+                    android:textSize="@dimen/text_sm" />
+
+                <TextView
+                    android:id="@+id/reasoning_state"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:textColor="@color/tl_ink3"
+                    android:textSize="@dimen/text_cap" />
+            </LinearLayout>
+
+            <ScrollView
+                android:id="@+id/reasoning_body_scroll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/reasoning_body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/space_s3"
+                    android:lineSpacingExtra="@dimen/space_s1"
+                    android:textColor="@color/tl_ink2"
+                    android:textSize="@dimen/text_sm" />
+            </ScrollView>
+        </LinearLayout>
+    </LinearLayout>
 
     <View
         android:layout_width="match_parent"

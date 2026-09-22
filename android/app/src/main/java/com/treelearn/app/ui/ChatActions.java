@@ -19,6 +19,19 @@ public interface ChatActions {
 
     void onSend();
 
+    /**
+     * T-075: the learner asked to stop the running attempt. The presenter records the intent and the
+     * next read that finds the attempt ended reports it as canceled - the stop is a user semantic the
+     * failure path must never swallow (069 E3), and the command itself is wired by the composer slice.
+     */
+    void onStopRequested();
+
+    /**
+     * T-075: the follow-latest button. Re-attaches the automatic follow and clears the missed count;
+     * the screen then scrolls to where the generation stands.
+     */
+    void onFollowLatestPressed();
+
     /** Opens or closes the reasoning block of one answer. */
     void onReasoningToggled(String messageId);
 
@@ -43,8 +56,22 @@ public interface ChatActions {
 
     void onResetPressed(String messageId);
 
-    /** Opens a branch from this answer, with no question yet. */
-    void onForkPressed(String messageId);
+    /**
+     * Opens a branch from this answer (T-065).
+     *
+     * <p>The selection travels with the gesture: {@code quote} is the anchored sentence exactly as
+     * it stands inside the answer's own text, with the offsets it spans, so the store can persist a
+     * ranged anchor instead of a whole-answer one. An empty quote is the bottom action bar's fork -
+     * the whole answer, as before.
+     *
+     * @param quote the selected sentence, or empty for a whole-answer fork
+     * @param startInclusive the inclusive character offset of the quote in the answer text
+     * @param endExclusive the exclusive character offset of the quote in the answer text
+     */
+    void onForkPressed(String messageId, String quote, int startInclusive, int endExclusive);
+
+    /** Opens or closes the source card's upstream history (T-065). */
+    void onSourceCardToggled();
 
     void onChildrenPressed(String messageId);
 

@@ -2,6 +2,7 @@ package com.treelearn.app.ui;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -157,6 +158,28 @@ public final class ChatPresenterTest {
 
         presenter.onReasoningToggled(ChatTestDoubles.M_ANSWER);
         assertFalse(sink.last().isReasoningExpanded(ChatTestDoubles.M_ANSWER));
+    }
+
+    @Test
+    public void togglingAFormingAnswerFoldsItAgainstTheStreamingDefault() {
+        data.snapshot = ChatTestDoubles.read("Transformer attention",
+                ChatTestDoubles.messages(ChatTestDoubles.ask(ChatTestDoubles.M_ASK, "why"),
+                        ChatTestDoubles.formingReasoning(ChatTestDoubles.M_ANSWER,
+                                ChatTestDoubles.REASONING)),
+                Collections.<Recommendation>emptyList(), "");
+
+        ChatPresenter presenter = presenter();
+        presenter.start();
+
+        assertTrue("streaming reasoning is open before any tap",
+                sink.last().isReasoningEffectivelyExpanded(ChatTestDoubles.M_ANSWER));
+
+        presenter.onReasoningToggled(ChatTestDoubles.M_ANSWER);
+        assertFalse("the fold is an explicit intent",
+                sink.last().isReasoningEffectivelyExpanded(ChatTestDoubles.M_ANSWER));
+
+        presenter.onReasoningToggled(ChatTestDoubles.M_ANSWER);
+        assertTrue(sink.last().isReasoningEffectivelyExpanded(ChatTestDoubles.M_ANSWER));
     }
 
     @Test
@@ -373,11 +396,14 @@ public final class ChatPresenterTest {
 
         ChatPresenter presenter = presenter();
         presenter.start();
-        presenter.onForkPressed(ChatTestDoubles.M_ANSWER);
+        presenter.onForkPressed(ChatTestDoubles.M_ANSWER, "", 0, 0);
 
         assertEquals(Collections.singletonList("fork"), commands.calls);
         assertEquals(ChatTestDoubles.M_ANSWER, commands.lastMessageId);
         assertEquals("", commands.lastQuestion);
+        assertEquals("the bottom action bar carries no sentence", "", commands.lastQuote);
+        assertEquals(0, commands.lastForkStart);
+        assertEquals(0, commands.lastForkEnd);
         assertEquals(Collections.singletonList(ChatTestDoubles.BRANCH_2), sink.branchesOpened);
     }
 
@@ -387,7 +413,7 @@ public final class ChatPresenterTest {
 
         ChatPresenter presenter = presenter();
         presenter.start();
-        presenter.onForkPressed(ChatTestDoubles.M_ANSWER);
+        presenter.onForkPressed(ChatTestDoubles.M_ANSWER, "", 0, 0);
 
         assertTrue(commands.calls.isEmpty());
         assertTrue(sink.branchesOpened.isEmpty());
@@ -534,6 +560,9 @@ public final class ChatPresenterTest {
         assertEquals(Collections.singletonList("fork"), commands.calls);
         assertEquals(ChatTestDoubles.M_ANSWER, commands.lastMessageId);
         assertEquals("how does temperature affect it", commands.lastQuestion);
+        assertEquals("the suggestion fork anchors no sentence", "", commands.lastQuote);
+        assertEquals(0, commands.lastForkStart);
+        assertEquals(0, commands.lastForkEnd);
         assertEquals("the draft is not touched by a fork", "", sink.last().draft);
     }
 
@@ -588,6 +617,87 @@ public final class ChatPresenterTest {
         presenter.onBackPressed();
 
         assertEquals(1, sink.closed);
+    }
+
+    /**
+     * T-065: entering a child branch whose provenance anchors a sentence prefills that sentence as
+     * the quote, once - clearing it afterwards survives the reads that follow.
+     */
+    @Test
+    public void childBranchPrefillsQuoteFromAnchor() {
+        data.snapshot = ChatTestDoubles.withBranch(
+                ChatTestDoubles.messages(ChatTestDoubles.stableAnswer(ChatTestDoubles.M_ANSWER,
+                        "because")),
+                ChatTestDoubles.childBranch("the anchored sentence"), null);
+
+        ChatPresenter presenter = presenter();
+        presenter.start();
+
+        assertEquals("the anchored sentence", sink.last().quote);
+
+        presenter.onQuoteCleared();
+        presenter.onResumed();
+
+        assertEquals("a cleared quote stays cleared on later reads", "", sink.last().quote);
+    }
+
+    /** T-065: a whole-answer provenance has no sentence to carry, so nothing is prefilled. */
+    @Test
+    public void aBranchWithoutARangedAnchorPrefillsNothing() {
+        data.snapshot = ChatTestDoubles.withBranch(
+                ChatTestDoubles.messages(ChatTestDoubles.stableAnswer(ChatTestDoubles.M_ANSWER,
+                        "because")),
+                ChatTestDoubles.childBranch(null), null);
+
+        ChatPresenter presenter = presenter();
+        presenter.start();
+
+        assertEquals("", sink.last().quote);
+    }
+
+    /** T-065: the source card rides the read, starts collapsed, and expands on the learner's tap. */
+    @Test
+    public void sourceCardArrivesWithTheReadAndExpandsOnToggle() {
+        data.snapshot = ChatTestDoubles.withBranch(
+                ChatTestDoubles.messages(ChatTestDoubles.stableAnswer(ChatTestDoubles.M_ANSWER,
+                        "because")),
+                ChatTestDoubles.childBranch(null),
+                new SourceCard("the source answer",
+                        Arrays.asList(SourceCard.Entry.user("first question"),
+                                SourceCard.Entry.answer("the source answer"))));
+
+        ChatPresenter presenter = presenter();
+        presenter.start();
+
+        assertNotNull(sink.last().sourceCard);
+        assertFalse("the card starts collapsed", sink.last().sourceCardExpanded);
+        assertEquals(2, sink.last().sourceCard.history.size());
+        assertTrue(sink.last().sourceCard.history.get(0).user);
+        assertEquals("first question", sink.last().sourceCard.history.get(0).text);
+        assertFalse(sink.last().sourceCard.history.get(1).user);
+        assertEquals("the source answer", sink.last().sourceCard.history.get(1).text);
+
+        presenter.onSourceCardToggled();
+
+        assertTrue(sink.last().sourceCardExpanded);
+    }
+
+    /** T-065: the selected sentence and its offsets travel with the fork to the store. */
+    @Test
+    public void forkingWithASelectionForwardsTheSentenceToTheStore() {
+        data.snapshot = conversation();
+        ChatPresenter presenter = presenter();
+        presenter.start();
+
+        presenter.onForkPressed(ChatTestDoubles.M_ANSWER, ChatTestDoubles.ANSWER, 0,
+                ChatTestDoubles.ANSWER.length());
+
+        assertEquals(Collections.singletonList("fork"), commands.calls);
+        assertEquals(ChatTestDoubles.M_ANSWER, commands.lastMessageId);
+        assertEquals("a fork with a selection carries no question", "", commands.lastQuestion);
+        assertEquals(ChatTestDoubles.ANSWER, commands.lastQuote);
+        assertEquals(0, commands.lastForkStart);
+        assertEquals(ChatTestDoubles.ANSWER.length(), commands.lastForkEnd);
     }
 
     private ChatPresenter presenter() {
