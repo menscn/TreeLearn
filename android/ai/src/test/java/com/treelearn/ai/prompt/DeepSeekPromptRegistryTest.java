@@ -14,7 +14,7 @@ import java.util.Set;
 import org.junit.Test;
 
 /**
- * The versioned prompt registry (prompt design V1.0 §3.1, §4, §6): every purpose resolves to exactly
+ * The versioned prompt registry (prompt design V1.1 §3.1, §4, §6): every purpose resolves to exactly
  * one non-blank version and one non-blank system body, the bodies are transcribed verbatim from the
  * authoritative document, and the derived purposes stay isolated from the adaptive-tutor body.
  */
@@ -36,11 +36,11 @@ public class DeepSeekPromptRegistryTest {
     @Test
     public void versionsMatchThePromptDesignTable() {
         Map<PromptPurpose, String> expected = new EnumMap<>(PromptPurpose.class);
-        expected.put(PromptPurpose.LEARNING_ANSWER, "tl-learning-answer/1.0.0");
+        expected.put(PromptPurpose.LEARNING_ANSWER, "tl-learning-answer/1.1.0");
         expected.put(PromptPurpose.ROOT_TITLE, "tl-root-title/1.0.0");
         expected.put(PromptPurpose.BRANCH_TITLE, "tl-branch-title/1.0.0");
         expected.put(PromptPurpose.BRANCH_SUMMARY, "tl-branch-summary/1.0.0");
-        expected.put(PromptPurpose.ANSWER_RECOMMENDATIONS, "tl-answer-recommendations/1.0.0");
+        expected.put(PromptPurpose.ANSWER_RECOMMENDATIONS, "tl-answer-recommendations/1.1.0");
         expected.put(PromptPurpose.HOME_RECOMMENDATIONS, "tl-home-recommendations/1.0.0");
         expected.put(PromptPurpose.CONTEXT_COMPRESSION, "tl-context-compression/1.0.0");
         assertEquals(PromptPurpose.values().length, expected.size());
@@ -58,7 +58,7 @@ public class DeepSeekPromptRegistryTest {
     @Test
     public void everyBodyIsTranscribedVerbatimFromTheDesignDocument() {
         assertEquals("LEARNING_ANSWER_TUTOR",
-                "f9ac51e5712b031fbae2eeaa77daeba32934a05089f724060ba01de97e85de0d",
+                "c7cea4257df4aaf1cf03d0595b8279f05eb4cd74f69f6555fb67469dcebebbff",
                 sha256(PromptBodiesV1.LEARNING_ANSWER_TUTOR));
         assertEquals("THINKING_ADDENDUM",
                 "2ed824cc691e0ac00e7970e3b98171d02cefce5f2a5a45b585390fbc4bfe7dd9",
@@ -76,7 +76,7 @@ public class DeepSeekPromptRegistryTest {
                 "9eed73311670155b52649c434d03a13c0af44362869157c6273658f9db02b1ca",
                 sha256(PromptBodiesV1.BRANCH_SUMMARY_SUFFIX));
         assertEquals("ANSWER_RECOMMENDATIONS_SUFFIX",
-                "db03fdc3a492e56947455c0aa53107dce5c9c9a732816c3af144803476974eb1",
+                "249fdc9f438e0c025dc26bef23c9780e0945b6ad4becee1048d70964212f0ae6",
                 sha256(PromptBodiesV1.ANSWER_RECOMMENDATIONS_SUFFIX));
         assertEquals("HOME_RECOMMENDATIONS_SUFFIX",
                 "2122a1157db897d8e5fb5da2c4aebf9924ef1c6d8c91873d3ae08d1e725303b3",
@@ -91,6 +91,8 @@ public class DeepSeekPromptRegistryTest {
     public void mainAnswerBodyCarriesEveryMandatedTeachingInstruction() {
         String body = DeepSeekPromptRegistry.systemContent(PromptPurpose.LEARNING_ANSWER, false);
         assertTrue(body.contains("先直接回答核心问题"));
+        assertTrue(body.contains("概览或介绍类"));
+        assertTrue(body.contains("可核查的具体支撑"));
         assertTrue(body.contains("专业术语首次出现时"));
         assertTrue(body.contains("适合时使用例子、类比、反例或步骤"));
         assertTrue(body.contains("类比必须说明适用边界"));

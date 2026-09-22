@@ -32,7 +32,7 @@ public class DeepSeekRequestAssemblerTest {
                 history(user(FIRST_QUESTION), message(DeepSeekMessage.Role.ASSISTANT, FIRST_ANSWER)),
                 CURRENT_INPUT, generous());
         assertEquals(PromptPurpose.LEARNING_ANSWER, request.purpose);
-        assertEquals("tl-learning-answer/1.0.0", request.policyVersion);
+        assertEquals("tl-learning-answer/1.1.0", request.policyVersion);
         assertFalse(request.thinkingEnabled);
         assertEquals(4, request.messages.size());
         assertEquals(1, countRole(request, DeepSeekMessage.Role.SYSTEM));
@@ -73,7 +73,7 @@ public class DeepSeekRequestAssemblerTest {
                 true, history(user(attack), message(DeepSeekMessage.Role.ASSISTANT, attack)),
                 CURRENT_INPUT, generous());
         assertEquals(PromptPurpose.LEARNING_ANSWER, request.purpose);
-        assertEquals("tl-learning-answer/1.0.0", request.policyVersion);
+        assertEquals("tl-learning-answer/1.1.0", request.policyVersion);
         assertEquals(4, request.messages.size());
         assertEquals(1, countRole(request, DeepSeekMessage.Role.SYSTEM));
         SystemBodyAssertions.assertSameSystemText("history text is data",
@@ -232,7 +232,7 @@ public class DeepSeekRequestAssemblerTest {
         assertFalse(described, described.contains(secret));
         assertFalse(described, described.contains("SENTINEL"));
         assertTrue(described, described.contains("LEARNING_ANSWER"));
-        assertTrue(described, described.contains("tl-learning-answer/1.0.0"));
+        assertTrue(described, described.contains("tl-learning-answer/1.1.0"));
         assertTrue(described, described.contains(String.valueOf(request.systemChars)));
         PromptBuildException refusal = assertThrows(PromptBuildException.class,
                 () -> DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER, false,

@@ -2,7 +2,7 @@ package com.treelearn.ai.prompt;
 
 /**
  * The versioned system bodies of every TreeLearn DeepSeek call, transcribed verbatim (UTF-8)
- * from the authoritative prompt design V1.0: {@code Docs/05-technical-design/知芽（TreeLearn）DeepSeek自适应学习导师提示词设计_V1.0.md}.
+ * from the authoritative prompt design V1.1: {@code Docs/05-technical-design/知芽（TreeLearn）DeepSeek自适应学习导师提示词设计_V1.1.md}.
  *
  * <p>These constants are the <em>only</em> home of the prompt text. They never reach
  * {@code :core}, {@code :data}, an SQLite column, a log line or a test report: the database
@@ -33,6 +33,8 @@ final class PromptBodiesV1 {
 
             回答规则：
             - 先直接回答核心问题，再按复杂度补充解释，不用寒暄或重复用户问题。
+            - 当问题是概览或介绍类（例如“X是什么”“介绍一下X”）时，不要停留在一段概括：先给出精确定义与易混概念的对比，再展开主要构成或运作机制，每个部分配以具体的事实、数值、例子或过程，并指出常见的理解偏差与值得深入的具体方向；这些方向应当是用户可以直接提问的具体问题。
+            - 关键结论必须带有可核查的具体支撑（数值、实例、机制或对比），不得只用抽象概括收尾；概览类回答以“能独立读懂、也能看出可继续追问的方向”为完整标准。
             - 根据用户当前问题和对话表现自动调整深度，但不要宣称你知道用户的真实水平。
             - 专业术语首次出现时，用简洁语言解释；前置知识缺失时，只补足理解当前问题所必需的部分。
             - 适合时使用例子、类比、反例或步骤。类比必须说明适用边界，不能把类比当作事实。
@@ -78,7 +80,7 @@ final class PromptBodiesV1 {
 
     /** Prompt design §6.3. */
     static final String ANSWER_RECOMMENDATIONS_SUFFIX = """
-            基于 latest_answer 生成用户可以直接提交的后续学习问题，并参考 tree_outline 避免重复已经探索的方向。items 必须是对象数组，每项结构严格为 {"question":"..."}，数量不得超过 max_items；没有可靠推荐时返回空数组。问题应具体、互不重复，不写解释、答案或营销文案。输出结构必须严格为 {"items":[{"question":"..."}]}。\
+            基于 latest_answer 生成用户可以直接提交的后续学习问题，并参考 tree_outline 避免重复已经探索的方向。items 必须是对象数组，每项结构严格为 {"question":"..."}，数量不得超过 max_items；没有可靠推荐时返回空数组。问题应具体、互不重复，兼顾对 latest_answer 中具体细节的追问与更深层的原理或应用，覆盖不同深度层级，不全部停留在同等宽泛的程度；不写解释、答案或营销文案。输出结构必须严格为 {"items":[{"question":"..."}]}。\
             """;
 
     /** Prompt design §6.3. */

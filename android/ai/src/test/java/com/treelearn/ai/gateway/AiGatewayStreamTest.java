@@ -292,7 +292,7 @@ public class AiGatewayStreamTest {
         assertTrue(joined, joined.contains("stream_start"));
         assertTrue(joined, joined.contains("reasoningChars="));
         assertTrue(joined, joined.contains("answerChars="));
-        assertTrue(joined, joined.contains("tl-learning-answer/1.0.0"));
+        assertTrue(joined, joined.contains("tl-learning-answer/1.1.0"));
     }
 
     @Test

@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  * The versioned prompt registry — the only place a {@link PromptPurpose} becomes a system body
- * (prompt design V1.0 §3.1, §4, §6; technical design §9.2).
+ * (prompt design V1.1 §3.1, §4, §6; technical design §9.2).
  *
  * <p>It takes an enum and nothing else. There is no lookup by string, no caller-supplied template,
  * no fallback body and no interpolation: a purpose this build does not know is refused, so a request
@@ -79,11 +79,11 @@ public final class DeepSeekPromptRegistry {
     /** Exhaustive by construction: a new {@link PromptPurpose} does not compile until it has a version. */
     private static String versionOf(PromptPurpose purpose) {
         return switch (purpose) {
-            case LEARNING_ANSWER -> "tl-learning-answer/1.0.0";
+            case LEARNING_ANSWER -> "tl-learning-answer/1.1.0";
             case ROOT_TITLE -> "tl-root-title/1.0.0";
             case BRANCH_TITLE -> "tl-branch-title/1.0.0";
             case BRANCH_SUMMARY -> "tl-branch-summary/1.0.0";
-            case ANSWER_RECOMMENDATIONS -> "tl-answer-recommendations/1.0.0";
+            case ANSWER_RECOMMENDATIONS -> "tl-answer-recommendations/1.1.0";
             case HOME_RECOMMENDATIONS -> "tl-home-recommendations/1.0.0";
             case CONTEXT_COMPRESSION -> "tl-context-compression/1.0.0";
         };

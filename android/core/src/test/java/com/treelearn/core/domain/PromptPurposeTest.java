@@ -15,7 +15,7 @@ import org.junit.Test;
 
 /**
  * Locks the prompt purpose list to the authoritative source:
- * {@code Docs/05-technical-design/知芽（TreeLearn）DeepSeek自适应学习导师提示词设计_V1.0.md} §3.1
+ * {@code Docs/05-technical-design/知芽（TreeLearn）DeepSeek自适应学习导师提示词设计_V1.1.md} §3.1
  * ("首版 PromptPurpose") and its §6 version table.
  *
  * <p>A round-3-independent audit found the enum did not match that list — it had invented a separate

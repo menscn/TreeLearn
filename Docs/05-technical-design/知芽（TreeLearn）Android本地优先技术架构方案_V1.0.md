@@ -197,7 +197,7 @@ FAILED / INTERRUPTED -> 用户手动 RETRY -> 新 GenerationOperation
 
 ### 9.2 版本化系统提示词
 
-主回答采用 `tl-learning-answer/1.0.0` 自适应学习导师策略；完整正文、用途清单、派生输出协议和行为样例以 [DeepSeek 自适应学习导师提示词设计 V1.0](知芽（TreeLearn）DeepSeek自适应学习导师提示词设计_V1.0.md) 为权威。提示词不能作为普通 UI 文案散落在 Activity、Repository 或网络调用点。
+主回答采用 `tl-learning-answer/1.1.0` 自适应学习导师策略；完整正文、用途清单、派生输出协议和行为样例以 [DeepSeek 自适应学习导师提示词设计 V1.1](知芽（TreeLearn）DeepSeek自适应学习导师提示词设计_V1.1.md) 为权威。提示词不能作为普通 UI 文案散落在 Activity、Repository 或网络调用点。
 
 `:core` 定义供应商无关的 `PromptPurpose` 与 `PromptSpec(purpose, policyVersion, systemContent)`；`:ai` 的 `DeepSeekPromptRegistry` 维护固定版本正文，`DeepSeekRequestAssembler` 按以下顺序组装：
 

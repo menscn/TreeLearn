@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
  * <p>Each purpose owns its own version namespace. A title prompt can therefore never be swapped for
  * the teaching prompt by accident, and a change in one usage cannot silently change another. The
  * version string looks like {@code "<prefix>/<major>.<minor>.<patch>"}, for example
- * {@code tl-learning-answer/1.0.0}.
+ * {@code tl-learning-answer/1.1.0}.
  *
  * <p>This enum is the authoritative first-release list from the prompt design document §3.1. It
  * deliberately does <em>not</em> contain a separate key-points purpose: AI key points are one
@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
  */
 public enum PromptPurpose {
 
-    /** The main adaptive-tutor answer (policy {@code tl-learning-answer/1.0.0}). */
+    /** The main adaptive-tutor answer (policy {@code tl-learning-answer/1.1.0}). */
     LEARNING_ANSWER("tl-learning-answer"),
 
     /** The root branch title, derived from the root question alone. */
