@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Layout numbers, all taken from the prototype's :root token block
+  (Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html, mirrored by design-system/tokens.json).
+  Layouts reference these names and never spell a dp value inline, so a token change has one place
+  to land. Only the 4pt scale plus the documented gutter is used: 8 / 12 / 16 / 24 / 32.
+-->
+<resources>
+    <dimen name="space_s1">4dp</dimen>
+    <dimen name="space_s2">8dp</dimen>
+    <dimen name="space_s3">12dp</dimen>
+    <dimen name="space_s4">16dp</dimen>
+    <dimen name="space_s6">24dp</dimen>
+    <dimen name="space_s8">32dp</dimen>
+    <dimen name="page_gutter">20dp</dimen>
+
+    <dimen name="radius_sm">10dp</dimen>
+    <dimen name="radius_md">16dp</dimen>
+    <dimen name="radius_lg">24dp</dimen>
+    <dimen name="radius_full">99dp</dimen>
+    <dimen name="card_elevation">1dp</dimen>
+
+    <dimen name="text_display">30sp</dimen>
+    <dimen name="text_h1">22sp</dimen>
+    <dimen name="text_h2">17sp</dimen>
+    <dimen name="text_body">16sp</dimen>
+    <dimen name="text_sm">13sp</dimen>
+    <dimen name="text_cap">11sp</dimen>
+
+    <!-- Every tappable control respects this; the accessibility rule is 44dp, not 48dp, because
+         the prototype's own hit areas are built to it. -->
+    <dimen name="touch_min">44dp</dimen>
+    <dimen name="hairline">1dp</dimen>
+    <dimen name="rec_text_max">260dp</dimen>
+    <dimen name="picker_min_width">240dp</dimen>
+
+    <!-- The reading measure the wide (sw600dp) layouts cap their column at. Declared in the base
+         folder on purpose: a name that exists only under a qualifier is a crash waiting for the
+         configuration that does not match it, and lint's MissingDefaultResource fails the release
+         build over exactly that. The phone layouts do not read it - on a phone the column is the
+         screen width - so the value here is never applied to a phone; it is the name's default. -->
+    <dimen name="content_measure">640dp</dimen>
+</resources>

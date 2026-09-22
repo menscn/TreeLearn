@@ -164,4 +164,37 @@ public class MessageTest {
             assertTrue(expected.getMessage().contains("ordinal"));
         }
     }
+
+    // ------------------------------------------------------------------
+    // restore — the rehydration entry point read paths use
+    // ------------------------------------------------------------------
+
+    @Test
+    public void restoreCarriesTheActiveReferencesNoCreationPathCouldProduce() {
+        String revision = Guard.newId();
+        String operation = Guard.newId();
+        Message restored = Message.restore(Guard.newId(), Guard.newId(), MessageRole.AI, 4, null,
+                NOW, revision, operation);
+
+        assertEquals(MessageRole.AI, restored.role);
+        assertEquals(4, restored.ordinal);
+        assertNull("an AI position carries no learner text", restored.userContent);
+        assertEquals("the displayed revision survives the round trip", revision,
+                restored.activeRevisionId());
+        assertEquals("the running attempt survives the round trip", operation,
+                restored.activeOperationId());
+    }
+
+    @Test
+    public void restoreKeepsTheRoleAndContentRules() {
+        Message user = Message.restore(Guard.newId(), Guard.newId(), MessageRole.USER, 0, "text",
+                NOW, null, null);
+        assertEquals("text", user.userContent);
+        try {
+            Message.restore(Guard.newId(), Guard.newId(), MessageRole.USER, 0, "  ", NOW, null, null);
+            fail("a USER row must carry non-blank content");
+        } catch (IllegalArgumentException expected) {
+            assertTrue(expected.getMessage().contains("userContent"));
+        }
+    }
 }

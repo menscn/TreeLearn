@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Tablet home: the same column, capped at a comfortable reading measure and centred, so a landscape
+  tablet shows one readable page instead of a single column stretched across the full width. The
+  width-consuming screens are the ones with a canvas (T-017) and the conversation (T-013).
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/home_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <include
+            layout="@layout/screen_home_body"
+            android:layout_width="@dimen/content_measure"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal" />
+    </FrameLayout>
+</ScrollView>

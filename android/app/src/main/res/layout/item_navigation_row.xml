@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  One branch row. The row itself selects the branch; the trailing control opens the row's own menu.
+  The restore control is the archived list's arm of the same layout, so a live row and an archived row
+  cannot drift apart in height or in where their title sits.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/navigation_row"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?android:attr/selectableItemBackground"
+    android:gravity="center_vertical"
+    android:minHeight="@dimen/touch_min"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/page_gutter"
+    android:paddingEnd="@dimen/space_s2">
+
+    <TextView android:id="@+id/navigation_row_title"
+        android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+        android:ellipsize="end" android:maxLines="1"
+        android:paddingTop="@dimen/space_s2" android:paddingBottom="@dimen/space_s2"
+        android:textColor="@color/tl_ink" android:textSize="@dimen/text_h2" />
+
+    <TextView android:id="@+id/navigation_row_meta"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:paddingStart="@dimen/space_s2"
+        android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+
+    <Button android:id="@+id/navigation_row_more"
+        android:layout_width="wrap_content" android:layout_height="@dimen/touch_min"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:minWidth="@dimen/touch_min"
+        android:text="@string/navigation_row_more"
+        android:textColor="@color/tl_ink3" android:textSize="@dimen/text_sm" />
+
+    <Button android:id="@+id/navigation_row_restore"
+        android:layout_width="wrap_content" android:layout_height="@dimen/touch_min"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:minWidth="@dimen/touch_min"
+        android:text="@string/navigation_restore"
+        android:textColor="@color/tl_green_deep" android:textSize="@dimen/text_sm"
+        android:visibility="gone" />
+</LinearLayout>

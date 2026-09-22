@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The navigation column itself (technical design §12, prototype v2.5 `renderNav`): the bar, the branch
+  strip with its AI summary, the live branch list and the archived list. The phone layout and the
+  tablet layout both include it, so the two configurations cannot drift.
+
+  One card carries the branch the page is standing on: its title, the BASE-14 chip a root branch wears
+  instead of an archive control, and the branch's own summary under a foldable heading. Every control a
+  state can enable, disable or hide carries an id, and nothing here holds a decision: whether a branch
+  may be archived arrives from the view state, so this file never restates it.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/navigation_content"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/tl_bg"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/space_s6">
+
+    <!-- App bar: back to the conversation, the title, and the two moves out of this page. -->
+    <LinearLayout
+        android:id="@+id/navigation_appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/space_s2"
+        android:paddingTop="@dimen/space_s2"
+        android:paddingEnd="@dimen/page_gutter">
+
+        <Button
+            android:id="@+id/navigation_back"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/touch_min"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:minWidth="@dimen/touch_min"
+            android:text="@string/navigation_back"
+            android:textColor="@color/tl_green_deep"
+            android:textSize="@dimen/text_sm" />
+
+        <TextView
+            android:id="@+id/navigation_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_s2"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/navigation_title"
+            android:textColor="@color/tl_ink"
+            android:textSize="@dimen/text_h1"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/navigation_enter"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/touch_min"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:minWidth="@dimen/touch_min"
+            android:text="@string/navigation_enter"
+            android:textColor="@color/tl_green_deep"
+            android:textSize="@dimen/text_sm" />
+
+        <Button
+            android:id="@+id/navigation_canvas"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/touch_min"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:minWidth="@dimen/touch_min"
+            android:text="@string/navigation_canvas"
+            android:textColor="@color/tl_green_deep"
+            android:textSize="@dimen/text_sm" />
+    </LinearLayout>
+
+    <TextView android:id="@+id/navigation_notice"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:paddingStart="@dimen/page_gutter" android:paddingEnd="@dimen/page_gutter"
+        android:paddingBottom="@dimen/space_s2"
+        android:textColor="@color/tl_amber" android:textSize="@dimen/text_sm"
+        android:visibility="gone" />
+
+    <!-- The branch the page stands on, with its own summary under a foldable heading. -->
+    <LinearLayout
+        android:id="@+id/navigation_summary_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/page_gutter"
+        android:layout_marginEnd="@dimen/page_gutter"
+        android:background="@drawable/bg_card"
+        android:orientation="vertical"
+        android:padding="@dimen/space_s4">
+
+        <LinearLayout
+            android:id="@+id/navigation_summary_head"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/touch_min"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView android:id="@+id/navigation_current_title"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end" android:maxLines="1"
+                android:textColor="@color/tl_ink" android:textSize="@dimen/text_h2"
+                android:textStyle="bold" />
+
+            <TextView android:id="@+id/navigation_current_chip"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_s2"
+                android:background="@drawable/bg_chip"
+                android:paddingStart="@dimen/space_s2" android:paddingEnd="@dimen/space_s2"
+                android:paddingTop="@dimen/space_s1" android:paddingBottom="@dimen/space_s1"
+                android:text="@string/navigation_root_chip"
+                android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap"
+                android:visibility="gone" />
+
+            <TextView android:id="@+id/navigation_summary_fold"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_s2"
+                android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/navigation_summary_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_s2"
+                android:text="@string/navigation_summary_title"
+                android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+
+            <TextView android:id="@+id/navigation_summary_text"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_s1"
+                android:textColor="@color/tl_ink2" android:textSize="@dimen/text_sm" />
+
+            <TextView android:id="@+id/navigation_summary_stale"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_s2"
+                android:text="@string/navigation_summary_stale"
+                android:textColor="@color/tl_amber" android:textSize="@dimen/text_cap"
+                android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView android:id="@+id/navigation_rows_section"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:paddingStart="@dimen/page_gutter" android:paddingEnd="@dimen/page_gutter"
+        android:paddingTop="@dimen/space_s4" android:paddingBottom="@dimen/space_s2"
+        android:text="@string/navigation_rows_section"
+        android:textColor="@color/tl_ink" android:textSize="@dimen/text_sm"
+        android:textStyle="bold" />
+
+    <LinearLayout android:id="@+id/navigation_rows"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" />
+
+    <LinearLayout android:id="@+id/navigation_archived_section"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:visibility="gone">
+
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:paddingStart="@dimen/page_gutter" android:paddingEnd="@dimen/page_gutter"
+            android:paddingTop="@dimen/space_s4" android:paddingBottom="@dimen/space_s2"
+            android:text="@string/navigation_archived_section"
+            android:textColor="@color/tl_ink" android:textSize="@dimen/text_sm"
+            android:textStyle="bold" />
+
+        <LinearLayout android:id="@+id/navigation_archived_rows"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </LinearLayout>
+
+    <!-- One line carries all three read outcomes; the screen picks the sentence the phase calls for. -->
+    <TextView android:id="@+id/navigation_phase"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:padding="@dimen/page_gutter"
+        android:textColor="@color/tl_ink3" android:textSize="@dimen/text_sm"
+        android:visibility="gone" />
+</LinearLayout>

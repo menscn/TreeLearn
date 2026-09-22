@@ -235,4 +235,66 @@ public class BranchTest {
         assertEquals(0, branch.lastSeenStableSequence());
         assertEquals(0, branch.latestStableSequence());
     }
+
+    // ------------------------------------------------------------------
+    // restore — the rehydration entry point read paths use
+    // ------------------------------------------------------------------
+
+    @Test
+    public void restoreCarriesStateThatNoCreationPathCouldProduce() {
+        String parent = Guard.newId();
+        String message = Guard.newId();
+        String revision = Guard.newId();
+        String snapshot = Guard.newId();
+        BranchSource source = BranchSource.restore(parent, message, revision,
+                BranchAnchor.wholeAnswer(), snapshot);
+
+        // Every mutable field is set to something a freshly created branch would never hold, so a
+        // restore that quietly re-derived them would be caught here rather than in the field.
+        Branch restored = Branch.restore(Guard.newId(), Guard.newId(), parent, source,
+                "a title a session produced", NOW, NOW + 5_000, 7L, 3L, true, Long.valueOf(NOW + 6_000));
+
+        assertEquals("a title a session produced", restored.title());
+        assertEquals(NOW, restored.createdAt);
+        assertEquals(NOW + 5_000, restored.updatedAt());
+        assertEquals(7L, restored.latestStableSequence());
+        assertEquals(3L, restored.lastSeenStableSequence());
+        assertEquals(4L, restored.unreadCount());
+        assertTrue(restored.isCollapsed());
+        assertTrue(restored.isArchived());
+        assertEquals(Long.valueOf(NOW + 6_000), restored.archivedAt());
+        assertSame("provenance is carried, not rebuilt", source, restored.source);
+        assertFalse(restored.isRoot());
+    }
+
+    @Test
+    public void restoreRefusesAnUpdatedAtOlderThanCreation() {
+        try {
+            Branch.restore(Guard.newId(), Guard.newId(), null, null, null, NOW, NOW - 1, 0L, 0L,
+                    false, null);
+            fail("a row modified before it existed must be refused, not clamped");
+        } catch (IllegalArgumentException expected) {
+            assertTrue(expected.getMessage().contains("updatedAt"));
+        }
+    }
+
+    @Test
+    public void restoreKeepsTheRootAndProvenanceRulesOfTheConstructor() {
+        BranchSource source = BranchSource.restore(Guard.newId(), Guard.newId(), Guard.newId(),
+                BranchAnchor.wholeAnswer(), Guard.newId());
+        try {
+            Branch.restore(Guard.newId(), Guard.newId(), null, source, null, NOW, NOW, 0L, 0L,
+                    false, null);
+            fail("a root row carrying provenance must be refused");
+        } catch (IllegalArgumentException expected) {
+            assertTrue(expected.getMessage().contains("root"));
+        }
+        try {
+            Branch.restore(Guard.newId(), Guard.newId(), Guard.newId(), null, null, NOW, NOW, 0L,
+                    0L, false, null);
+            fail("a non-root row without provenance must be refused");
+        } catch (IllegalArgumentException expected) {
+            assertTrue(expected.getMessage().contains("provenance"));
+        }
+    }
 }

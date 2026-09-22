@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Tablet canvas: two columns (PRD 6.2.16, "平板横屏合理利用宽度"). The left column is the branch list
+  and the archiving controls; the right column is the drawable and its bar, included from the same body
+  the phone uses. The left column is reserved rather than filled here because the list belongs to the
+  navigation slice (T-014), and a placeholder list written here would be a second implementation of it.
+
+  The canvas gets the larger share: the tree is the content, the list is the way around it.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tree_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/tl_bg"
+    android:orientation="horizontal">
+
+    <FrameLayout
+        android:id="@+id/tree_nav_host"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+
+    <View
+        android:id="@+id/tree_divider"
+        android:layout_width="@dimen/hairline"
+        android:layout_height="match_parent"
+        android:background="@color/tl_line" />
+
+    <include
+        layout="@layout/screen_tree_body"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1.6" />
+</LinearLayout>

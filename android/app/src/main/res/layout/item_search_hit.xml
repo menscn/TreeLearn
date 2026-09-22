@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  One search result: which part of the branch matched, the branch's own name, and the snippet. The
+  ancestor path the prototype also draws needs a tree walk this task did not take on, and is recorded
+  as a gap rather than faked from one branch row.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/hit_row"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:minHeight="@dimen/touch_min"
+    android:orientation="vertical"
+    android:paddingStart="@dimen/page_gutter"
+    android:paddingTop="@dimen/space_s3"
+    android:paddingEnd="@dimen/page_gutter"
+    android:paddingBottom="@dimen/space_s3">
+
+    <TextView
+        android:id="@+id/hit_field"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/tl_ink3"
+        android:textSize="@dimen/text_cap" />
+
+    <TextView
+        android:id="@+id/hit_branch_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_s1"
+        android:textColor="@color/tl_ink"
+        android:textSize="@dimen/text_h2"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/hit_snippet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_s1"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textColor="@color/tl_ink2"
+        android:textSize="@dimen/text_sm" />
+</LinearLayout>

@@ -83,6 +83,32 @@ public enum PromptPurpose {
     }
 
     /**
+     * @return the purpose whose {@link #policyPrefix} is exactly {@code policyPrefix}.
+     *
+     * <p>The reverse direction of {@link #policyPrefix}. A stored operation keeps the two halves of
+     * the prompt contract in two columns — {@code prompt_purpose} holds the usage,
+     * {@code prompt_policy_version} the version — so a row mapper has to read a bare prefix back into
+     * a purpose. Deriving it from the version column instead would silently accept a row whose two
+     * columns contradict each other.
+     *
+     * @throws IllegalArgumentException when no purpose uses that prefix, which is the same choice
+     *         {@link GenerationModel#fromWireId} makes for an unknown wire id. Per the error-channel
+     *         rule in {@link Guard}, a value no purpose can produce is a caller bug rather than a
+     *         business condition: a row naming a purpose this build does not know is corrupt or from a
+     *         newer schema, and failing loudly is what keeps it from being mapped onto another
+     *         usage's prompt body.
+     */
+    public static PromptPurpose fromPrefix(String policyPrefix) {
+        for (PromptPurpose purpose : values()) {
+            if (purpose.policyPrefix.equals(policyPrefix)) {
+                return purpose;
+            }
+        }
+        throw new IllegalArgumentException("no prompt purpose uses the prefix <" + policyPrefix
+                + ">; a stored purpose must be one of this build's wire prefixes");
+    }
+
+    /**
      * @return true when {@code policyVersion} is absent — null or blank. The single definition of
      *         "this request pinned no version", shared by every prompt-policy entry point so the
      *         test cannot drift from the report: a caller that asks {@link #isAbsent} and a caller

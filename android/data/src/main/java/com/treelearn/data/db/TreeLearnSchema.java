@@ -36,6 +36,10 @@ import java.util.List;
  *       DAO cannot silently rewrite history. Revisions and snapshots additionally refuse a direct
  *       {@code DELETE}: they may only disappear together with their owner row, so a stray
  *       {@code DELETE FROM answer_revisions} cannot take a user's fork subtree with it.</li>
+ *   <li>The §6.2.19 quote invariant (a quote exists only on a USER row, and is never empty) is a
+ *       trigger rather than a {@code CHECK} because the upgrade path adds the column with
+ *       {@code ALTER TABLE ADD COLUMN}, which cannot carry one: a CHECK would exist on a fresh
+ *       install only. Both install paths execute the same statement text instead.</li>
  *   <li>"One active operation per branch" and "one root branch per topic" are <em>partial</em>
  *       unique indexes: terminal operations and child branches must remain insertable.</li>
  *   <li>Unread state has exactly one representation: the pair
@@ -48,13 +52,15 @@ import java.util.List;
 public final class TreeLearnSchema {
 
     /** Bumped only together with a new forward migration. */
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
 
     private TreeLearnSchema() {
     }
 
     // ------------------------------------------------------------------
-    // Table and column names. Namespaces only — never instantiated.
+    // Table and column names, plus the declaration text of a column whose definition has to
+    // be identical on both install paths (a fresh CREATE TABLE and an ALTER TABLE ADD COLUMN
+    // must not be able to disagree). Namespaces only — never instantiated.
     // ------------------------------------------------------------------
 
     public static final class Topics {
@@ -101,6 +107,19 @@ public final class TreeLearnSchema {
         public static final String ROLE = "role";
         /** §5.1: only a USER row carries content; an AI row is a pure logical position. */
         public static final String USER_CONTENT = "user_content";
+        /**
+         * §6.2.19: the passage of an answer that a USER row asks about. SQL {@code NULL} means
+         * "this position quotes nothing"; an empty string is never stored, and an AI row never
+         * carries one — the store enforces both, see
+         * {@link #MESSAGES_QUOTE_INVARIANT_CONDITION}.
+         */
+        public static final String QUOTED_TEXT = "quoted_text";
+        /**
+         * The column's declaration text, shared by the fresh install's {@code CREATE TABLE} and by
+         * the upgrade's {@code ALTER TABLE ADD COLUMN}, so the two installs cannot end up with two
+         * shapes of the same column.
+         */
+        public static final String QUOTED_TEXT_DECLARATION = QUOTED_TEXT + " TEXT";
         public static final String CREATED_AT = "created_at";
         /** §5.1: the AI row holds the currently displayed revision and attempt references. */
         public static final String ACTIVE_REVISION_ID = "active_revision_id";
@@ -217,6 +236,13 @@ public final class TreeLearnSchema {
             Branches.READING_VIEWPORT_OFFSET + " INTEGER",
             // Fork provenance. Deleting a source deletes the subtree that anchors on it, which is
             // the same semantics as "permanently delete this subtree" (§7).
+            //
+            // Known boundary, deliberately not enforced here: the schema does NOT require the source
+            // message/revision to belong to the same topic as the branch. A row written that way
+            // would make deleting topic A take topic B's branches with it. Nothing in the product
+            // writes such a row — the creation path reads its source from the topic it is forking —
+            // but raw SQL and future DAOs can, so the same-topic rule belongs to the write path
+            // (T-2026-09-21-025) rather than to a cross-table CHECK SQLite cannot express.
             Branches.SOURCE_MESSAGE_ID + " TEXT REFERENCES " + Messages.TABLE + "(" + Messages.ID
                     + ") ON DELETE CASCADE",
             Branches.SOURCE_REVISION_ID + " TEXT REFERENCES " + AnswerRevisions.TABLE + "("
@@ -234,15 +260,61 @@ public final class TreeLearnSchema {
                     + Branches.ANCHOR_END_EXCLUSIVE + " IS NULL AND " + Branches.ANCHOR_QUOTE
                     + " IS NULL AND " + Branches.ANCHOR_HASH + " IS NULL AND "
                     + Branches.CONTEXT_SNAPSHOT_ID + " IS NULL))",
-            // A non-root branch must always carry its source version and anchor hash
-            // (§5.2: 整条回答分叉时偏移为空，但版本引用仍必填).
+            // A non-root branch must always carry the revision it was forked from (§5.2).
+            //
+            // anchor_hash is deliberately NOT required here, and this is a correction: the first
+            // version of this CHECK demanded it, which made every whole-answer fork unwritable.
+            // :core's BranchAnchor.wholeAnswer() — the anchor of a fork of an entire answer — has no
+            // quote and therefore no hash by design, and §5.2 only makes the version reference
+            // mandatory ("整条回答分叉时偏移为空，但版本引用仍必填"). The schema follows the domain
+            // model, not the other way round; a ranged fork still stores its hash, and losing the
+            // offsets without a fallback remains a domain-level refusal (ANCHOR_INVALID) rather
+            // than something the store can paper over.
             "CHECK (" + Branches.PARENT_ID + " IS NULL OR (" + Branches.SOURCE_MESSAGE_ID
-                    + " IS NOT NULL AND " + Branches.SOURCE_REVISION_ID + " IS NOT NULL AND "
-                    + Branches.ANCHOR_HASH + " IS NOT NULL))",
-            "CHECK (" + Branches.ANCHOR_START_INCLUSIVE + " IS NULL OR "
-                    + Branches.ANCHOR_END_EXCLUSIVE + " IS NULL OR "
-                    + Branches.ANCHOR_START_INCLUSIVE + " <= " + Branches.ANCHOR_END_EXCLUSIVE
-                    + ")",
+                    + " IS NOT NULL AND " + Branches.SOURCE_REVISION_ID + " IS NOT NULL))",
+            // §5.2 stores two locators for a ranged fork — the character offsets and the
+            // quote+hash fallback — and they are only meaningful together. An offset without its
+            // fallback cannot be re-located once a rendering difference shifts the text, and a
+            // fallback without offsets cannot be ordered against the source at all. So the four
+            // columns are all-or-nothing: either a whole-answer fork (all NULL) or a ranged fork
+            // (all four present). This is the compensation for no longer requiring anchor_hash
+            // unconditionally — without it, half-filled anchors become writable and the read path
+            // has to cope with states the domain can never produce.
+            //
+            // Where the boundary to the domain sits, stated precisely rather than tidily:
+            //
+            //   * The store judges GROUPING (all four or none) and DIRECTION (start < end). Grouping
+            //     has no single judge anywhere else — no domain object validates four columns as a
+            //     group on the write path, and rows reach this table from raw SQL too — which is why
+            //     it belongs here.
+            //   * The store also judges DIRECTION even though BranchAnchor.ofRange judges it as well.
+            //     That overlap is deliberate and it is the only one: a row that is direction-inverted
+            //     is refused at write time with a stack pointing at the writer, instead of being
+            //     persisted and then making the whole topic unreadable, because a read that hits a
+            //     refused anchor throws and findByTopic fails for every branch in the topic. The cost
+            //     of the overlap is bounded: the two judgements agree on every input, so no caller can
+            //     observe two different outcomes.
+            //   * Everything else about a well-formed anchor's CONTENT is judged in exactly one place,
+            //     BranchAnchor.ofRange: a non-negative start, non-empty quote/hash, and the quote being
+            //     exactly as long as the range. Those rules are deliberately NOT copied into the DDL —
+            //     a second copy would be a second thing to keep in sync, and this repository has
+            //     already paid for that mistake twice. Rows that pass this CHECK and are refused by
+            //     ofRange (start = -1, quote = '', or a quote whose length does not match the span) are
+            //     readable only as a loud failure: BranchDao.readSource rethrows the domain's refusal
+            //     with its ANCHOR_INVALID code and detail. That is covered on a real device by
+            //     TopicBranchMessageDaoInstrumentedTest.readSourceFailsLoudOnARowTheCheckWouldHaveRejected.
+            //
+            // The ordering rule is folded into this CHECK rather than living in a second one: two
+            // overlapping anchor CHECKs would mean the store judges the same value twice and "which
+            // one reported it" becomes an artefact of declaration order.
+            "CHECK ((" + Branches.ANCHOR_START_INCLUSIVE + " IS NULL AND "
+                    + Branches.ANCHOR_END_EXCLUSIVE + " IS NULL AND " + Branches.ANCHOR_QUOTE
+                    + " IS NULL AND " + Branches.ANCHOR_HASH + " IS NULL) OR ("
+                    + Branches.ANCHOR_START_INCLUSIVE + " IS NOT NULL AND "
+                    + Branches.ANCHOR_END_EXCLUSIVE + " IS NOT NULL AND " + Branches.ANCHOR_QUOTE
+                    + " IS NOT NULL AND " + Branches.ANCHOR_HASH + " IS NOT NULL AND "
+                    + Branches.ANCHOR_START_INCLUSIVE + " < " + Branches.ANCHOR_END_EXCLUSIVE
+                    + "))",
     };
 
     private static final String[] MESSAGES_DEFINITIONS = {
@@ -257,6 +329,9 @@ public final class TreeLearnSchema {
                     + AnswerRevisions.ID + ") ON DELETE SET NULL",
             Messages.ACTIVE_OPERATION_ID + " TEXT REFERENCES " + GenerationOperations.TABLE + "("
                     + GenerationOperations.ID + ") ON DELETE SET NULL",
+            // §6.2.19: declared here and, through this very text, added by the V1 -> V2
+            // migration. Deliberately no CHECK beside it: see MESSAGES_QUOTE_INVARIANT_CONDITION.
+            Messages.QUOTED_TEXT_DECLARATION,
             // §5.1: a USER row is content, an AI row is a logical position without content.
             "CHECK (" + Messages.ROLE + " = 'AI' OR (" + Messages.USER_CONTENT
                     + " IS NOT NULL AND length(" + Messages.USER_CONTENT + ") > 0))",
@@ -397,6 +472,39 @@ public final class TreeLearnSchema {
             "trg_generation_operations_terminal_immutable";
     public static final String TRIGGER_MESSAGES_USER_CONTENT_IMMUTABLE =
             "trg_messages_user_content_immutable";
+    /** §6.2.19: a row invariant has to fire on both write events, so it needs one name each. */
+    public static final String TRIGGER_MESSAGES_QUOTE_INSERT =
+            "trg_messages_quote_requires_user_row";
+    public static final String TRIGGER_MESSAGES_QUOTE_UPDATE =
+            "trg_messages_quote_requires_user_row_on_update";
+
+    /**
+     * The one text of the §6.2.19 quote invariant: a stored quote may only exist on a USER row,
+     * and it must be non-empty.
+     *
+     * <p>It is spelled once on purpose. The rule cannot be a {@code CHECK} in the {@code messages}
+     * definition: {@code ALTER TABLE ADD COLUMN} cannot carry one, so a CHECK would exist on a
+     * fresh install and not on an upgraded database, and the same write would be accepted by one
+     * and refused by the other. The rule is therefore a trigger, and what both install paths share
+     * is exactly this condition — the DDL around it is mechanical.
+     */
+    public static final String MESSAGES_QUOTE_INVARIANT_CONDITION =
+            "NEW." + Messages.QUOTED_TEXT + " IS NOT NULL AND (NEW." + Messages.ROLE
+                    + " <> 'USER' OR length(NEW." + Messages.QUOTED_TEXT + ") = 0)";
+
+    /** The invariant's INSERT half. */
+    public static final String MESSAGES_QUOTE_INVARIANT_INSERT_STATEMENT =
+            quoteInvariantStatement(TRIGGER_MESSAGES_QUOTE_INSERT, "INSERT");
+
+    /** The invariant's UPDATE half; a row invariant guarding only INSERT would not be one. */
+    public static final String MESSAGES_QUOTE_INVARIANT_UPDATE_STATEMENT =
+            quoteInvariantStatement(TRIGGER_MESSAGES_QUOTE_UPDATE, "UPDATE");
+
+    /** Both halves, in the order both install paths execute them. */
+    public static final List<String> MESSAGES_QUOTE_INVARIANT_STATEMENTS =
+            Collections.unmodifiableList(Arrays.asList(
+                    MESSAGES_QUOTE_INVARIANT_INSERT_STATEMENT,
+                    MESSAGES_QUOTE_INVARIANT_UPDATE_STATEMENT));
 
     private static final String[] TRIGGER_STATEMENTS = {
             "CREATE TRIGGER " + TRIGGER_REVISIONS_IMMUTABLE + " BEFORE UPDATE ON "
@@ -424,7 +532,16 @@ public final class TreeLearnSchema {
                     + " = 'USER' AND NEW." + Messages.USER_CONTENT + " IS NOT OLD."
                     + Messages.USER_CONTENT
                     + " BEGIN SELECT RAISE(ABORT, 'user message content is immutable'); END",
+            MESSAGES_QUOTE_INVARIANT_INSERT_STATEMENT,
+            MESSAGES_QUOTE_INVARIANT_UPDATE_STATEMENT,
     };
+
+    private static String quoteInvariantStatement(String trigger, String event) {
+        return "CREATE TRIGGER " + trigger + " BEFORE " + event + " ON " + Messages.TABLE
+                + " WHEN " + MESSAGES_QUOTE_INVARIANT_CONDITION
+                + " BEGIN SELECT RAISE(ABORT, 'a quote may only be carried by a non-empty USER"
+                + " message'); END";
+    }
 
     /** The seven {@code CREATE TABLE} statements, in creation order. */
     public static final List<String> CREATE_TABLE_STATEMENTS =
@@ -474,13 +591,55 @@ public final class TreeLearnSchema {
     }
 
     /**
-     * V1 is the first published version, so there is no predecessor to migrate from and this list
-     * is intentionally empty. It is not a placeholder: {@code onUpgrade} delegates to
-     * {@link #applyForwardMigrations}, which fails closed when a step is missing, and the
-     * instrumentation suite proves the delegation and the fail-closed behaviour on a real device.
-     * Adding version 2 therefore only means appending one migration here and bumping the constant.
+     * V1 -> V2: the {@code messages} table learns the quoted passage of §6.2.19.
+     *
+     * <p>Three statements, in this order: the column, then the invariant's two halves. The column
+     * addition repeats the fresh install's declaration text verbatim, and the two trigger
+     * statements are <em>the same strings</em> a fresh install executes, so neither the column
+     * shape nor the rule can drift between the two install paths. The column is added last, which
+     * is where a fresh install declares it, so both installs also agree on column order.
+     *
+     * <p>Published steps are never rewritten: a released version's migration is part of the
+     * contract with the databases already on devices (rules/sql.md).
      */
-    public static final List<Migration> FORWARD_MIGRATIONS = Collections.emptyList();
+    public static final List<String> MIGRATION_V1_TO_V2_STATEMENTS =
+            Collections.unmodifiableList(Arrays.asList(
+                    "ALTER TABLE " + Messages.TABLE + " ADD COLUMN "
+                            + Messages.QUOTED_TEXT_DECLARATION,
+                    MESSAGES_QUOTE_INVARIANT_INSERT_STATEMENT,
+                    MESSAGES_QUOTE_INVARIANT_UPDATE_STATEMENT));
+
+    /**
+     * The registered forward steps. V1 was the first published version, so this list used to be
+     * empty; V2 adds the §6.2.19 quote column. {@code onUpgrade} delegates to
+     * {@link #applyForwardMigrations}, which fails closed when a step is missing, so bumping
+     * {@link #DATABASE_VERSION} without registering the matching step refuses to stamp
+     * {@code user_version} instead of leaving a half-migrated database that reports itself as
+     * current.
+     */
+    public static final List<Migration> FORWARD_MIGRATIONS =
+            Collections.unmodifiableList(Arrays.asList(new MigrationV1ToV2()));
+
+    /** The single V1 -> V2 step: executes {@link #MIGRATION_V1_TO_V2_STATEMENTS} in order. */
+    private static final class MigrationV1ToV2 implements Migration {
+
+        @Override
+        public int fromVersion() {
+            return 1;
+        }
+
+        @Override
+        public int toVersion() {
+            return 2;
+        }
+
+        @Override
+        public void apply(SQLiteDatabase database) {
+            for (String statement : MIGRATION_V1_TO_V2_STATEMENTS) {
+                database.execSQL(statement);
+            }
+        }
+    }
 
     /**
      * Applies every registered step that lies inside {@code (oldVersion, newVersion]}.

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  One suggested follow-up (prototype v2.5 `.sugg-item`). The whole row asks the question; the 44x44
+  zone on its right opens a branch from the same answer instead. They are two targets because they are
+  two different things - one continues this branch, the other starts a new one.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/suggestion_row"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/space_s2"
+    android:background="@drawable/bg_card"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center_vertical"
+    android:minHeight="@dimen/touch_min"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/suggestion_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:paddingStart="@dimen/space_s4"
+        android:paddingTop="@dimen/space_s2"
+        android:paddingEnd="@dimen/space_s2"
+        android:paddingBottom="@dimen/space_s2"
+        android:textColor="@color/tl_ink"
+        android:textSize="@dimen/text_sm" />
+
+    <Button
+        android:id="@+id/suggestion_fork"
+        android:layout_width="@dimen/touch_min"
+        android:layout_height="@dimen/touch_min"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/chat_suggestion_fork_title"
+        android:text="@string/chat_act_fork"
+        android:textColor="@color/tl_ink3"
+        android:textSize="@dimen/text_cap" />
+</LinearLayout>

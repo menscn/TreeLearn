@@ -3,6 +3,7 @@ package com.treelearn.core.domain;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -106,6 +107,36 @@ public class PromptPurposeTest {
         assertFalse(PromptPurpose.BRANCH_TITLE.ownsVersion("tl-learning-answer/1.0.0"));
         assertFalse(PromptPurpose.LEARNING_ANSWER.ownsVersion("tl-root-title/1.0.0"));
         assertNull(PromptPurpose.ownerOf("tl-not-a-purpose/1.0.0"));
+    }
+
+    /**
+     * The prefix direction, needed by readers that hold the bare usage a row stored rather than a
+     * full version. It must be the exact reverse of {@link PromptPurpose#policyPrefix} in both
+     * directions, and must refuse anything this build cannot name — a row carrying an unknown prefix
+     * is corrupt or newer than the build, and mapping it onto a default purpose would attribute an
+     * answer to a prompt that never produced it.
+     */
+    @Test
+    public void thePrefixDirectionIsTheExactReverseOfTheVersionDirection() {
+        for (PromptPurpose purpose : PromptPurpose.values()) {
+            assertEquals("the prefix must round-trip through fromPrefix", purpose,
+                    PromptPurpose.fromPrefix(purpose.policyPrefix));
+            assertEquals("and through the full version", purpose,
+                    PromptPurpose.fromPrefix(PromptPurpose.ownerOf(
+                            purpose.policyPrefix + "/1.0.0").policyPrefix));
+        }
+        for (String unknown : new String[] {
+                "tl-not-a-purpose",
+                "tl-learning-answer/1.0.0",
+                "TL-LEARNING-ANSWER",
+                "",
+        }) {
+            assertThrows("a prefix this build does not know must fail loudly, not resolve: "
+                    + unknown, IllegalArgumentException.class,
+                    () -> PromptPurpose.fromPrefix(unknown));
+        }
+        assertThrows("a missing prefix is a caller bug", IllegalArgumentException.class,
+                () -> PromptPurpose.fromPrefix(null));
     }
 
     @Test

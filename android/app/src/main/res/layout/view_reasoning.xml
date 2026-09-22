@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The reasoning disclosure (prototype v2.5 `.reasoning-wrap`): a 44dp toggle over the reasoning body.
+  Collapsed unless opened; the body is drawn in the secondary ink so it reads as supporting material
+  rather than as the answer, and that pair (tl_ink2 on tl_surface / tl_bg) is the one a static check
+  measures against the WCAG 4.5:1 threshold.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/reasoning_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/hairline"
+        android:background="@color/tl_line" />
+
+    <LinearLayout
+        android:id="@+id/reasoning_toggle"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/touch_min"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/reasoning_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/chat_reasoning_title"
+            android:textColor="@color/tl_ink3"
+            android:textSize="@dimen/text_sm" />
+
+        <TextView
+            android:id="@+id/reasoning_state"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="end"
+            android:textColor="@color/tl_ink3"
+            android:textSize="@dimen/text_cap" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/reasoning_body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/space_s3"
+        android:lineSpacingExtra="@dimen/space_s1"
+        android:textColor="@color/tl_ink2"
+        android:textSize="@dimen/text_sm"
+        android:visibility="gone" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/hairline"
+        android:background="@color/tl_line" />
+</LinearLayout>

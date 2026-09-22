@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One history row: display identity is the root branch title, plus the branch count and the last
+     use (PRD 6.2.16 point 4). The whole card is one tap target. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/topic_card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/space_s3"
+    android:background="@drawable/bg_card"
+    android:clickable="true"
+    android:focusable="true"
+    android:minHeight="@dimen/touch_min"
+    android:orientation="vertical"
+    android:padding="@dimen/space_s4">
+
+    <TextView
+        android:id="@+id/topic_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textColor="@color/tl_ink"
+        android:textSize="@dimen/text_h2" />
+
+    <TextView
+        android:id="@+id/topic_summary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_s1"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textColor="@color/tl_ink2"
+        android:textSize="@dimen/text_sm"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/topic_meta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_s2"
+        android:textColor="@color/tl_ink3"
+        android:textSize="@dimen/text_cap" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/topic_rename"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/touch_min"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:minWidth="@dimen/touch_min"
+            android:text="@string/home_topic_rename"
+            android:textColor="@color/tl_green_deep"
+            android:textSize="@dimen/text_cap" />
+
+        <Button
+            android:id="@+id/topic_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/touch_min"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:minWidth="@dimen/touch_min"
+            android:text="@string/home_topic_delete"
+            android:textColor="@color/tl_red"
+            android:textSize="@dimen/text_cap" />
+    </LinearLayout>
+</LinearLayout>

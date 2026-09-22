@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  T-005, data extraction rules for API 31+ (Android 12 changed how backup and
+  device-to-device transfer are declared).
+
+  Both sections exclude the Preferences file that holds the encrypted API key
+  envelope, so neither cloud backup nor a transfer to a new phone can read it -
+  and the Keystore key that would decrypt it never leaves the originating device
+  anyway (technical design 14).
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="treelearn_secret.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="treelearn_secret.xml" />
+    </device-transfer>
+</data-extraction-rules>

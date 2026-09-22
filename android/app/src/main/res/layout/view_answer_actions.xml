@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The row of answer actions (prototype v2.5 `.ai-actions`): five 44x44 targets and the version chip.
+  Each one is enabled only where the store would accept it, which the screen reads from the message's
+  own predicates; the actions a state does not offer are disabled rather than hidden, so the row does
+  not reflow as an attempt starts and finishes.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/answer_actions"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+
+    <Button
+        android:id="@+id/act_quote"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/touch_min"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:minWidth="@dimen/touch_min"
+        android:text="@string/chat_act_quote"
+        android:textColor="@color/tl_ink3"
+        android:textSize="@dimen/text_cap" />
+
+    <Button
+        android:id="@+id/act_copy"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/touch_min"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:minWidth="@dimen/touch_min"
+        android:text="@string/chat_act_copy"
+        android:textColor="@color/tl_ink3"
+        android:textSize="@dimen/text_cap" />
+
+    <Button
+        android:id="@+id/act_reset"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/touch_min"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:minWidth="@dimen/touch_min"
+        android:text="@string/chat_act_reset"
+        android:textColor="@color/tl_ink3"
+        android:textSize="@dimen/text_cap" />
+
+    <Button
+        android:id="@+id/act_fork"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/touch_min"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:minWidth="@dimen/touch_min"
+        android:text="@string/chat_act_fork"
+        android:textColor="@color/tl_ink3"
+        android:textSize="@dimen/text_cap" />
+
+    <Button
+        android:id="@+id/act_children"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/touch_min"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:minWidth="@dimen/touch_min"
+        android:textColor="@color/tl_ink3"
+        android:textSize="@dimen/text_cap"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/act_version"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/touch_min"
+        android:layout_marginStart="@dimen/space_s2"
+        android:background="@drawable/bg_pill"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:minWidth="@dimen/touch_min"
+        android:paddingStart="@dimen/space_s2"
+        android:paddingEnd="@dimen/space_s2"
+        android:textColor="@color/tl_ink3"
+        android:textSize="@dimen/text_cap"
+        android:visibility="gone" />
+</LinearLayout>

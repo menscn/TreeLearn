@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  T-005, Auto Backup rules for API <= 30.
+
+  android:allowBackup="false" in the manifest is the primary control: it disables
+  Auto Backup for the whole app. This file is the second line of defence, so that a
+  later change of allowBackup cannot quietly carry the encrypted API key off the
+  device. "treelearn_secret.xml" is the Preferences file the key envelope lives in
+  (KeystoreSecretStore.PREFERENCES_NAME) - the two must be renamed together, and
+  SecretBackupConfigInstrumentedTest fails if they drift apart.
+-->
+<full-backup-content>
+    <exclude domain="sharedpref" path="treelearn_secret.xml" />
+</full-backup-content>

@@ -1,6 +1,217 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  知芽（TreeLearn）user-visible text.
+
+  Copy is taken from the interaction authority: Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html
+  (v2.5) with the wording checked against Docs/03-prd-draft/V3.1-知芽（TreeLearn）产品需求文档（PRD）.md
+  sections 6.2.13 (credential), 6.2.16 (single home page), 6.2.17 (recommendations) and 6.2.18 (model).
+
+  No string here may ever carry an API key, a question, an answer or reasoning text: the screens
+  receive a failure *category* and pick one of these fixed sentences.
+-->
 <resources>
     <string name="app_name">知芽</string>
-    <string name="main_subtitle">树状学习工具 · 本地优先</string>
-    <string name="main_skeleton_status">五模块骨架已就绪：app / core / data / ai / tree-layout</string>
+
+    <!-- Shell / app bar -->
+    <string name="action_search">搜索</string>
+    <string name="action_archived">归档</string>
+    <string name="action_settings">设置</string>
+
+    <!--
+      Search (PRD 6.2.8). The scope line names what the statement actually matches: a branch title,
+      its anchor quote, and an answer or its reasoning. The prototype also offers 问题 there, but the
+      T-015 statement has no arm for the learner's own question text, and promising a scope the store
+      cannot answer is worse copy than a shorter true one.
+    -->
+    <string name="search_back">返回</string>
+    <string name="search_hint">标题、问题、锚定原文、回答、推理…</string>
+    <string name="search_scope">标题 · 问题 · 锚定原文 · 回答 · 推理</string>
+    <string name="search_guide">输入关键词开始搜索</string>
+    <string name="search_searching">正在搜索本机内容…</string>
+    <string name="search_empty">没有找到「%1$s」</string>
+    <string name="search_error">搜索暂时读不出来，稍后重试即可。</string>
+    <string name="search_field_title">分支标题</string>
+    <string name="search_field_question">我的问题</string>
+    <string name="search_field_anchor">锚定原文</string>
+    <string name="search_field_answer">AI 回答</string>
+    <string name="search_field_reasoning">AI 推理</string>
+    <string name="search_field_partial_answer">部分回答</string>
+    <string name="search_field_partial_reasoning">部分推理</string>
+
+    <!-- Home: hero and composer -->
+    <string name="home_hero_title">从一个问题开始，\n种下一棵学习树</string>
+    <string name="home_hero_sub">写下问题，长成一棵树。</string>
+    <string name="home_draft_hint">输入你的根问题，例如：帮我系统理解 Transformer 的注意力机制</string>
+    <string name="home_send">发送</string>
+    <string name="home_topic_rename">改名</string>
+    <string name="home_topic_delete">删除</string>
+    <string name="home_topic_rename_title">修改主题标题</string>
+    <string name="home_topic_delete_title">永久删除主题？</string>
+    <string name="home_topic_delete_message">将删除主题及其 %1$d 个分支，且无法恢复。</string>
+    <string name="home_topic_unread">%1$d 条未读</string>
+    <string name="home_key_missing">未配置 Key</string>
+    <string name="home_key_ready">DeepSeek 已就绪</string>
+
+    <!-- Home: recommendation strip -->
+    <string name="home_rec_starter">试试这些起点</string>
+    <string name="home_rec_history">猜你想学</string>
+    <string name="home_rec_tag_starter">入门</string>
+    <string name="home_rec_tag_follow">顺着你学的</string>
+    <string name="home_rec_tag_fresh">换个方向</string>
+
+    <!-- Home: topic list -->
+    <string name="home_section_topics">历史主题</string>
+    <string name="home_section_count">%1$d 个</string>
+    <string name="home_empty_topics">还没有主题</string>
+    <string name="home_empty_guide">开始写下第一个问题 →</string>
+    <string name="home_loading">正在读取本机主题…</string>
+    <string name="home_error">本机主题暂时读不出来，稍后重试即可。</string>
+    <string name="home_topic_meta">%1$d 个分支 · %2$s</string>
+    <!-- Tree canvas (T-017): the drawable, its bar, its read phases and the node card. -->
+    <string name="tree_title">学习树</string>
+    <string name="tree_back">返回</string>
+    <string name="tree_fold">折叠</string>
+    <string name="tree_unfold">展开</string>
+    <string name="tree_open">进入对话</string>
+    <string name="tree_nav">导航</string>
+    <string name="tree_fit">适应屏幕</string>
+    <string name="tree_loading">正在读取这棵树…</string>
+    <string name="tree_empty">这棵树还没有分支。</string>
+    <string name="tree_error">这棵树暂时读不出来，稍后重试即可。</string>
+    <string name="tree_storage_failed">本机写入失败，画布保持原样，可以直接重试。</string>
+    <string name="tree_node_unread">%1$d 条新回答</string>
+    <string name="tree_canvas_description">学习树画布：可拖动、双指缩放，点击节点查看操作</string>
+
+    <!-- Home: failure notices, one per category -->
+    <string name="notice_key_missing">还没有配置 DeepSeek API Key，先在设置里填一个再发送。</string>
+    <string name="notice_key_rejected">Key 被拒绝了，请在设置里确认或替换。</string>
+    <string name="notice_balance_unavailable">这个 Key 的额度不足，请在设置里更换。</string>
+    <string name="notice_request_rejected">请求被拒绝了，请检查模型与内容后重试。</string>
+    <string name="notice_rate_limited">请求太频繁了，稍后重试。</string>
+    <string name="notice_provider_unavailable">DeepSeek 暂时不可用，稍后重试。</string>
+    <string name="notice_network_interrupted">网络中断了，检查网络后重试。</string>
+    <string name="notice_storage">本机写入失败，输入已保留，可以直接重试。</string>
+    <string name="notice_reading_position">阅读进度没能保存，下次打开的位置与未读可能不准。</string>
+
+    <!-- Settings -->
+    <string name="settings_title">设置</string>
+    <string name="settings_back">返回</string>
+    <string name="settings_key_section">DEEPSEEK API KEY</string>
+    <string name="settings_key_state_ok">可用</string>
+    <string name="settings_key_state_none">未配置 · 发送将被阻止</string>
+    <string name="settings_key_state_unreadable">已保存，但本机读不出来 · 请重新保存</string>
+    <string name="settings_key_sub">仅存本机，可随时替换或删除。</string>
+    <string name="settings_key_input_hint">粘贴新的 DeepSeek API Key</string>
+    <string name="settings_key_save">保存</string>
+    <string name="settings_key_delete">删除 Key</string>
+    <string name="settings_notice_required">请先输入 Key。</string>
+    <string name="settings_notice_save_failed">保存失败：本机密钥库拒绝了写入，请重试。</string>
+    <string name="settings_boundary_title">数据边界</string>
+    <string name="settings_boundary_body">主题、分支、思考内容与 Key 仅存本机，无云同步与备份，卸载后不可恢复。\n生成时相关内容会交由外部 DeepSeek 服务处理；历史思考内容会按上下文策略再次提交。</string>
+
+    <!-- Composer model picker (PRD 6.2.18) -->
+    <string name="model_flash_short">V4.1 Flash</string>
+    <string name="model_flash_full">DeepSeek V4.1 Flash</string>
+    <string name="model_flash_desc">响应快 · 日常梳理</string>
+    <string name="model_pro_short">V4 Pro</string>
+    <string name="model_pro_full">DeepSeek V4 Pro</string>
+    <string name="model_pro_desc">推理强 · 深度推导</string>
+    <string name="model_thinking_suffix">· 思考</string>
+    <string name="model_thinking_label">思考过程</string>
+    <string name="model_thinking_desc">开启后先生成推理内容再给最终回答</string>
+    <string name="model_picker_close">收起</string>
+    <string name="model_thinking_on">已开启</string>
+    <string name="model_thinking_off">已关闭</string>
+    <!-- Conversation: the reasoning disclosure (PRD 6.2.14, prototype v2.5 .reasoning-*) -->
+    <string name="chat_reasoning_title">思考过程</string>
+    <string name="chat_reasoning_forming">正在形成</string>
+    <string name="chat_reasoning_collapse">收起</string>
+    <string name="chat_reasoning_expand">展开</string>
+    <string name="chat_reasoning_pending">正在梳理问题…</string>
+
+    <!-- Conversation: one answer (prototype v2.5 .ai-act / .fail-bar) -->
+    <string name="chat_ai_tag">知芽</string>
+    <string name="chat_generating_reasoning">正在思考</string>
+    <string name="chat_generating_answer">正在生成回答</string>
+    <string name="chat_failed">生成中断，以上为部分回答，不可作为分支来源。</string>
+    <string name="chat_retry">重试</string>
+    <string name="chat_retry_hint">重试不新增消息或分支</string>
+    <string name="chat_copy_title">复制整条回答</string>
+    <string name="chat_reset_title">重置：重新生成这条回答</string>
+    <string name="chat_fork_title">新建分支：从这条回答开一条独立路径</string>
+    <string name="chat_quote_title">引用选中的句子</string>
+    <string name="chat_quote_hint">先长按选中要引用的句子</string>
+    <string name="chat_quote_clear">取消引用</string>
+    <string name="chat_children_title">子分支列表：这条回答分出了 %1$d 个子分支</string>
+    <string name="chat_version_title">历史版本：这条回答有 %1$d 个版本</string>
+    <string name="chat_version_chip">共 %1$d 版</string>
+
+    <!-- Conversation: a recommendation under the latest answer (BASE-16) -->
+    <string name="chat_suggestion_fork_title">直接用这个问题新建分支</string>
+
+    <!-- Conversation: composer, list states and the clipboard headings -->
+    <string name="chat_back">返回</string>
+    <string name="chat_overview">总览</string>
+    <string name="chat_nav">导航</string>
+    <string name="chat_draft_hint">继续追问…</string>
+    <string name="chat_send">发送</string>
+    <string name="chat_loading">正在读取这段对话…</string>
+    <string name="chat_error">这段对话暂时读不出来，稍后重试即可。</string>
+    <string name="chat_copy_reasoning">思考过程</string>
+    <string name="chat_copy_answer">最终回答</string>
+    <!-- Conversation: the action labels (the prototype draws icons; see the note in the layout) -->
+    <string name="chat_act_quote">引用</string>
+    <string name="chat_act_copy">复制</string>
+    <string name="chat_act_reset">重置</string>
+    <string name="chat_act_fork">新建分支</string>
+    <string name="chat_act_children">子分支</string>
+    <string name="chat_act_children_count">子分支 %1$d</string>
+    <string name="chat_quoted">引用「%1$s」</string>
+    <string name="chat_version_item">v%1$d</string>
+    <!-- Conversation: the long-press selection menu and the child-branch popup (PRD 6.2.19/6.2.20) -->
+    <string name="chat_word_selection">选中「%1$s」</string>
+    <string name="chat_word_group_ai">AI 操作</string>
+    <string name="chat_word_group_system">系统操作</string>
+    <string name="chat_word_quote">追问</string>
+    <string name="chat_word_copy_desc">复制选中的这段文字</string>
+    <string name="chat_word_select_all">全选</string>
+    <string name="chat_word_select_all_desc">选中这条回答的完整内容</string>
+    <string name="chat_children_popup_title">子分支列表 · %1$d</string>
+    <string name="chat_children_unread">未读 %1$d</string>
+    <string name="chat_copy_clip_label">知芽 回答</string>
+    <string name="chat_copied">已复制整条回答。</string>
+
+    <!-- Navigation page (T-039): the branch list, its summary strip, archiving and the delete confirmation. -->
+    <string name="navigation_title">分支导航</string>
+    <string name="navigation_back">返回</string>
+    <string name="navigation_enter">进入对话</string>
+    <string name="navigation_canvas">画布</string>
+    <string name="navigation_summary_title">AI 总结</string>
+    <string name="navigation_summary_empty">这个分支还没有总结。</string>
+    <string name="navigation_summary_stale">总结暂时读不出来，下面显示的是上一次的结果。</string>
+    <string name="navigation_root_chip">根分支 · 不可归档</string>
+    <string name="navigation_rows_section">分支列表</string>
+    <string name="navigation_archived_section">已归档子树</string>
+    <string name="navigation_row_more">操作</string>
+    <string name="navigation_restore">恢复</string>
+    <string name="navigation_row_children">%1$d 子分支</string>
+    <string name="navigation_row_current">当前 · %1$d 子分支</string>
+    <string name="navigation_fold">折叠</string>
+    <string name="navigation_unfold">展开</string>
+    <string name="navigation_archive">归档此子树</string>
+    <string name="navigation_delete">永久删除子树</string>
+    <string name="navigation_delete_title">永久删除这棵子树？</string>
+    <!-- %1$s is the branch title, %2$d the number of branches the deletion removes, itself included. -->
+    <string name="navigation_delete_body">将永久删除「%1$s」及全部 %2$d 个分支，删除后不可恢复。取消不会改变任何内容。</string>
+    <string name="navigation_delete_ok">永久删除</string>
+    <string name="navigation_cancel">取消</string>
+    <string name="navigation_loading">正在读取这棵树…</string>
+    <string name="navigation_error">这棵树暂时读不出来，稍后重试即可。</string>
+    <string name="navigation_missing">这棵树已经不在了。</string>
+    <!-- Navigation: the refusals the presenter reports, one sentence per category. -->
+    <string name="navigation_notice_store_unreadable">本机数据读不出来，列表保持上一次的样子，可以直接重试。</string>
+    <string name="navigation_notice_branch_gone">这个分支已经不在了，列表已经刷新。</string>
+    <string name="navigation_notice_already_archived">这棵子树已经是归档状态了。</string>
+    <string name="navigation_notice_not_archived">这棵子树本来就没有归档，无需恢复。</string>
+    <string name="navigation_notice_scope_unresolvable">这棵树的结构读不全，算不出会删掉多少分支，所以先不提供删除。</string>
 </resources>

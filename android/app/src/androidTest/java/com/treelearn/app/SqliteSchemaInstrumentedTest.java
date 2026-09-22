@@ -26,9 +26,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -38,11 +40,17 @@ import java.util.TreeSet;
  *
  * <p>The expected schema below is derived from the confirmed authorities — the admission checklist
  * §2/§3, 技术方案 §5.1/§5.2/§6.1/§11, and the field surface of the {@code :core} entities those
- * sections describe — and deliberately does NOT read the production constants. Deriving it from the
- * constants would be comparing the implementation with itself: the first version of this file did
- * exactly that, and consequently could not notice that {@code answer_revisions} was missing the
- * model/thinking columns §5.1 requires and that {@code branches} stored an unread ordinal instead of
- * the §11 sequence pair.
+ * sections describe. Column <em>types</em> and NOT NULL are declared here independently, so a real
+ * schema change is still caught: an earlier version of this file compared the store against the
+ * production constants for everything, and consequently could not notice that
+ * {@code answer_revisions} was missing the model/thinking columns §5.1 requires.
+ *
+ * <p>What <em>is</em> read from {@link TreeLearnSchema} is mechanical identity that must never be
+ * restated: the schema version, the trigger names, and the column <em>name</em> of a column the
+ * schema itself introduces. Restating those is exactly how this suite silently inverted once — it
+ * hardcoded {@code user_version 1} and a {@code 1 -> 2} upgrade pair as the "must fail" case, and
+ * the V2 release then registered that very step. Deriving them means the next version bump carries
+ * this file along instead of flipping its assertions.
  *
  * <p>Every rejection is asserted <em>by cause</em>, not merely by "a constraint exception was
  * thrown". Claiming a CHECK fired while the insert actually died on a foreign key is a false
@@ -70,6 +78,15 @@ public final class SqliteSchemaInstrumentedTest {
 
     /** Synthetic policy version; the body of that policy never appears here. */
     private static final String POLICY_VERSION = "tl-learning-answer/1.0.0";
+
+    /**
+     * The one schema version this suite may name literally: the V1 fixture it hand-builds below.
+     *
+     * <p>Every other version expectation is read from {@link TreeLearnSchema#DATABASE_VERSION}, so
+     * a future bump carries them along. This constant exists so the hand-built V1 database is
+     * stamped and asserted through a name rather than a bare digit.
+     */
+    private static final int V1_SCHEMA_VERSION = 1;
 
     /** Confirmed permanent tables (checklist §2). */
     private static final Set<String> EXPECTED_TABLES = new LinkedHashSet<>(Arrays.asList(
@@ -102,11 +119,16 @@ public final class SqliteSchemaInstrumentedTest {
             "idx_branches_topic_parent", "idx_branches_source_revision",
             "idx_branches_archived", "idx_ai_artifacts_kind_scope"));
 
-    private static final Set<String> EXPECTED_TRIGGERS = new LinkedHashSet<>(Arrays.asList(
-            "trg_answer_revisions_immutable", "trg_answer_revisions_no_direct_delete",
-            "trg_context_snapshots_immutable", "trg_context_snapshots_no_direct_delete",
-            "trg_generation_operations_terminal_immutable",
-            "trg_messages_user_content_immutable"));
+    /**
+     * The declared trigger names, read from {@link TreeLearnSchema} rather than restated.
+     *
+     * <p>Restating them is how this suite inverted once: V2 added the two §6.2.19 quote triggers,
+     * the literal list here stayed at six, and the "declared trigger set" assertion would have kept
+     * passing while the store grew two triggers it never checked. The DB-side comparison below
+     * ({@code actualSchemaObjects}) is what still makes this non-vacuous — it proves the store has
+     * exactly these names, so a trigger declared but not created still fails.
+     */
+    private static final Set<String> EXPECTED_TRIGGERS = expectedTriggers();
 
     /**
      * SQLite extended result codes, measured on this device rather than assumed
@@ -186,7 +208,12 @@ public final class SqliteSchemaInstrumentedTest {
                 "user_content:TEXT:0",
                 "created_at:INTEGER:1",
                 "active_revision_id:TEXT:0",
-                "active_operation_id:TEXT:0"));
+                "active_operation_id:TEXT:0",
+                // §6.2.19. The name comes from the schema constant so a rename cannot silently
+                // drift; the type and nullability stay declared here so a real change is caught.
+                // It is last in both install paths: the fresh install declares it after
+                // active_operation_id, and ALTER TABLE ADD COLUMN appends it.
+                TreeLearnSchema.Messages.QUOTED_TEXT + ":TEXT:0"));
         spec.put("answer_revisions", String.join(", ",
                 "id:TEXT:1",
                 "message_id:TEXT:1",
@@ -241,6 +268,19 @@ public final class SqliteSchemaInstrumentedTest {
         return names;
     }
 
+    /** The schema's own trigger names, so a new trigger cannot go unchecked by staleness. */
+    private static Set<String> expectedTriggers() {
+        return new LinkedHashSet<>(Arrays.asList(
+                TreeLearnSchema.TRIGGER_REVISIONS_IMMUTABLE,
+                TreeLearnSchema.TRIGGER_REVISIONS_NO_DIRECT_DELETE,
+                TreeLearnSchema.TRIGGER_SNAPSHOTS_IMMUTABLE,
+                TreeLearnSchema.TRIGGER_SNAPSHOTS_NO_DIRECT_DELETE,
+                TreeLearnSchema.TRIGGER_OPERATIONS_TERMINAL_IMMUTABLE,
+                TreeLearnSchema.TRIGGER_MESSAGES_USER_CONTENT_IMMUTABLE,
+                TreeLearnSchema.TRIGGER_MESSAGES_QUOTE_INSERT,
+                TreeLearnSchema.TRIGGER_MESSAGES_QUOTE_UPDATE));
+    }
+
     // ------------------------------------------------------------------
     // 1. New install runs the production onCreate.
     // ------------------------------------------------------------------
@@ -249,10 +289,15 @@ public final class SqliteSchemaInstrumentedTest {
     public void newInstallCreatesExactlySevenTablesThroughProductionOnCreate() {
         SQLiteDatabase db = helper.getWritableDatabase();
 
-        assertEquals("schema version after a fresh install", 1, rawInt(db, "PRAGMA user_version"));
+        assertEquals("schema version after a fresh install", TreeLearnSchema.DATABASE_VERSION,
+                rawInt(db, "PRAGMA user_version"));
         assertEquals("permanent table set", EXPECTED_TABLES, actualTables(db));
-        assertEquals("DDL is bound to the current schema version",
-                1, TreeLearnSchema.DATABASE_VERSION);
+        // A second, independent read path for the same fact: the raw PRAGMA above and the platform
+        // API here must agree, and both must equal the version the helper was constructed with. The
+        // previous version of this assertion compared DATABASE_VERSION with itself, which cannot
+        // fail and proved nothing.
+        assertEquals("the platform API must report the version the helper was built with",
+                TreeLearnSchema.DATABASE_VERSION, db.getVersion());
         assertEquals("no permanent table may exist outside the confirmed seven",
                 EXPECTED_TABLES.size(), TableCensus.count(db));
     }
@@ -369,11 +414,22 @@ public final class SqliteSchemaInstrumentedTest {
 
     @Test
     public void foreignKeysAreEnabledAndIntegrityIsCleanOnEveryOpen() {
-        assertPragmasAreClean(helper.getWritableDatabase());
+        // On a brand-new database every pragma below also holds because there is nothing to
+        // violate, so the earlier version of this case was a claim about nothing. Writing a row
+        // first makes foreign_key_check and integrity_check mean something; the second pass after
+        // the reopen additionally proves the pragmas survive a real reconnect with data present.
+        SQLiteDatabase db = helper.getWritableDatabase();
+        seedTopicWithRoot(db, "t-pragma");
+        assertPragmasAreClean(db);
+        assertEquals("the pragmas are asserted against a non-empty database", 1,
+                rowCount(db, "topics"));
 
         helper.close();
         helper = new TreeLearnDatabaseHelper(context);
-        assertPragmasAreClean(helper.getWritableDatabase());
+        SQLiteDatabase reopened = helper.getWritableDatabase();
+        assertEquals("the row survived, so the reopen pass is not vacuous either", 1,
+                rowCount(reopened, "topics"));
+        assertPragmasAreClean(reopened);
     }
 
     private static void assertPragmasAreClean(SQLiteDatabase db) {
@@ -408,6 +464,8 @@ public final class SqliteSchemaInstrumentedTest {
         declared.addAll(EXPECTED_PLAIN_INDEXES);
         assertEquals("the declared index set", declared, actualSchemaObjects(db, "index"));
 
+        assertEquals("every declared trigger DDL has a name constant, and vice versa",
+                TreeLearnSchema.CREATE_TRIGGER_STATEMENTS.size(), EXPECTED_TRIGGERS.size());
         assertEquals("the declared trigger set", new TreeSet<>(EXPECTED_TRIGGERS),
                 actualSchemaObjects(db, "trigger"));
     }
@@ -585,11 +643,16 @@ public final class SqliteSchemaInstrumentedTest {
                 "role");
 
         // A non-root branch without its source version must be refused (技术方案 §5.2).
+        //
+        // Only one defect is planted on purpose. The earlier version of this fixture also carried an
+        // anchor_hash with no offsets, so the row violated the anchor CHECK *and* the provenance
+        // CHECK; the assertion then passed on the strength of DDL declaration order rather than on
+        // the rule it names. A fixture that violates two constraints cannot witness either one.
         String sourceFailure = constraintFailure("fork without a source revision", () -> db.execSQL(
                 "INSERT INTO branches(id, topic_id, parent_id, title, created_at, updated_at,"
-                        + " collapsed, anchor_hash) VALUES(?,?,?,?,?,?,?,?)",
-                new Object[]{"b-no-source", "t-fk", rootBranchOf("t-fk"), "", T0, T0, 0,
-                        "hash"})).getMessage();
+                        + " collapsed) VALUES(?,?,?,?,?,?,?)",
+                new Object[]{"b-no-source", "t-fk", rootBranchOf("t-fk"), "", T0, T0, 0}))
+                .getMessage();
         // Both branch provenance CHECKs are written on parent_id, so naming that column alone
         // cannot tell them apart; the mutually exclusive continuation does.
         assertCause("a non-root branch must carry its source version", sourceFailure, CODE_CHECK,
@@ -598,14 +661,88 @@ public final class SqliteSchemaInstrumentedTest {
         // A root branch must not carry fork provenance. This uses a topic with no root branch yet,
         // so the only constraint that can fire is the CHECK itself — pointing it at t-fk would let
         // the one-root unique index fire first and the assertion would blame the wrong constraint.
+        //
+        // The provenance planted here is a *resolvable* source message, not anchor_hash: anchor_hash
+        // without offsets trips the anchor CHECK too, which would again make the failure
+        // attributable to the wrong rule (and would make the outcome depend on which CHECK SQLite
+        // evaluates first). The source row has to live in another topic because messages need a
+        // branch and t-dirty deliberately has no branch yet; the "source must belong to the same
+        // topic" rule is not a schema constraint (recorded as a known boundary in the task Gaps).
         insertTopic(db, "t-dirty");
+        seedMessage(db, "m-foreign-src", rootBranchOf("t-fk"), 7, "AI");
         String rootProvenanceFailure = constraintFailure("root branch with provenance",
                 () -> db.execSQL("INSERT INTO branches(id, topic_id, parent_id, title, created_at,"
-                                + " updated_at, collapsed, anchor_hash) VALUES(?,?,?,?,?,?,?,?)",
+                                + " updated_at, collapsed, source_message_id)"
+                                + " VALUES(?,?,?,?,?,?,?,?)",
                         new Object[]{"b-root-dirty", "t-dirty", null, "", T0, T0, 0,
-                                "hash"})).getMessage();
+                                "m-foreign-src"})).getMessage();
         assertCause("a root branch must not carry provenance", rootProvenanceFailure, CODE_CHECK,
                 "source_message_id IS NULL");
+    }
+
+    /**
+     * The four anchor columns are all-or-nothing, and the range must point forward.
+     *
+     * <p>This is the DDL's own contract, so it is witnessed here rather than in a DAO suite. It has
+     * two halves and both are needed: the two shapes {@code :core} can actually produce must be
+     * writable, and every half-filled shape must be refused. Asserting only the refusals would be
+     * satisfied by a CHECK that rejects everything — which is exactly the defect this test exists
+     * because of: the first version of the non-root CHECK demanded {@code anchor_hash}
+     * unconditionally and therefore made every whole-answer fork unwritable.
+     */
+    @Test
+    public void forkAnchorColumnsAreAllOrNothing() {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        seedTopicWithRoot(db, "t-anchor");
+        seedMessage(db, "m-anchor-src", rootBranchOf("t-anchor"), 3, "AI");
+        seedRevision(db, "r-anchor-src", "m-anchor-src", 1);
+
+        // Positive 1 — the whole-answer fork: BranchAnchor.wholeAnswer() is (null,null,null,null),
+        // and §5.2 keeps only the version reference mandatory for a fork.
+        db.execSQL("INSERT INTO branches(id, topic_id, parent_id, title, created_at, updated_at,"
+                        + " collapsed, source_message_id, source_revision_id)"
+                        + " VALUES(?,?,?,?,?,?,?,?,?)",
+                new Object[]{"b-anchor-whole", "t-anchor", rootBranchOf("t-anchor"), "", T0, T0, 0,
+                        "m-anchor-src", "r-anchor-src"});
+
+        // Positive 2 — a ranged fork: both locators present, quote exactly as long as the range.
+        insertChildBranch(db, "b-anchor-ranged", "t-anchor", rootBranchOf("t-anchor"),
+                "m-anchor-src", "r-anchor-src");
+
+        assertEquals("both anchor shapes §5.2 allows must be writable", 3,
+                rowCount(db, "branches"));
+
+        // Every way of half-filling the group. While anchor_hash was required unconditionally these
+        // were blocked for the wrong reason; once that requirement was dropped they had to be
+        // blocked for the right one, otherwise the read path inherits states :core can never build
+        // (an offset with no fallback used to NPE on unboxing, and a fallback with no offsets was
+        // silently dropped and read back as a whole-answer fork).
+        assertForkRejected(db, "0", null, null, null, "an offset without its fallback");
+        assertForkRejected(db, "0", "4", null, null, "a range without its fallback");
+        assertForkRejected(db, null, null, "abcd", "hash-of-abcd", "a fallback without offsets");
+        assertForkRejected(db, "0", "4", "abcd", null, "a range whose fallback is half there");
+        // And the ordering rule lives in the same CHECK, so an empty or inverted range dies too.
+        assertForkRejected(db, "4", "4", "abcd", "hash-of-abcd", "an empty range");
+        assertForkRejected(db, "4", "0", "abcd", "hash-of-abcd", "an inverted range");
+
+        assertEquals("no malformed fork was written", 3, rowCount(db, "branches"));
+        assertEquals("no dangling references after the rejections", 0,
+                rawRows(db, "PRAGMA foreign_key_check"));
+    }
+
+    private void assertForkRejected(SQLiteDatabase db, String start, String end, String quote,
+                                    String hash, String scenario) {
+        String failure = constraintFailure(scenario, () -> db.execSQL(
+                "INSERT INTO branches(id, topic_id, parent_id, title, created_at, updated_at,"
+                        + " collapsed, source_message_id, source_revision_id,"
+                        + " anchor_start_inclusive, anchor_end_exclusive, anchor_quote, anchor_hash)"
+                        + " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                new Object[]{"b-anchor-bad", "t-anchor", rootBranchOf("t-anchor"), "", T0, T0, 0,
+                        "m-anchor-src", "r-anchor-src", start, end, quote, hash})).getMessage();
+        // No context_snapshot_id is passed, deliberately: no snapshot row exists, so supplying one
+        // would trip the foreign key and the failure would stop being about the anchor CHECK.
+        assertCause(scenario + " must be refused by the anchor CHECK", failure, CODE_CHECK,
+                "anchor_start_inclusive");
     }
 
     @Test
@@ -616,11 +753,8 @@ public final class SqliteSchemaInstrumentedTest {
         seedMessage(db, "m-ai", rootBranchOf("t-cascade"), 1, "AI");
         seedRevision(db, "r-ai", "m-ai", 1);
         insertOperation(db, "o-ai", rootBranchOf("t-cascade"), "m-ai", "STABLE");
+        // insertChildBranch already attaches the child's birth snapshot (one per branch).
         insertChildBranch(db, "b-child", "t-cascade", rootBranchOf("t-cascade"), "m-ai", "r-ai");
-        // A birth snapshot belongs to the branch it was created for, so the child points at it.
-        seedSnapshot(db, "s-birth", "b-child");
-        db.execSQL("UPDATE branches SET context_snapshot_id=? WHERE id=?",
-                new Object[]{"s-birth", "b-child"});
         seedMessage(db, "m-child", "b-child", 0, "USER");
         seedArtifact(db, "a-scope", "t-cascade", "r-ai");
 
@@ -710,8 +844,16 @@ public final class SqliteSchemaInstrumentedTest {
 
         // Android's beginTransaction() silently joins an enclosing transaction, so a work body that
         // commits on its own would otherwise bypass the runner's single boundary.
+        //
+        // The runner can only DETECT this, not prevent it: the work body receives the same
+        // SQLiteDatabase, and by the time the runner looks the commit has already happened. What
+        // must be pinned here is the resulting semantics, because the class name invites the
+        // opposite reading: the caller gets an exception, but the row is durable. Asserting only
+        // "an exception was thrown" would leave a future reader free to assume a rollback, and a
+        // caller that swallowed the exception on that assumption would be silently wrong.
         IllegalStateException stolen = expectedFailure(IllegalStateException.class,
                 "work body ending its own transaction", () -> runner.run(db, workDatabase -> {
+                    insertTopic(workDatabase, "t-stolen");
                     workDatabase.setTransactionSuccessful();
                     workDatabase.endTransaction();
                     return null;
@@ -719,6 +861,8 @@ public final class SqliteSchemaInstrumentedTest {
         assertTrue("the stolen transaction must be reported: " + stolen.getMessage(),
                 stolen.getMessage().contains("ended the transaction it was given"));
         assertFalse("no transaction is left open", db.inTransaction());
+        assertEquals("the stolen commit is already durable: the runner reports the violation but "
+                + "cannot undo it", 1, rowCountWhere(db, "topics", "id='t-stolen'"));
     }
 
     @Test
@@ -816,40 +960,52 @@ public final class SqliteSchemaInstrumentedTest {
     }
 
     // ------------------------------------------------------------------
-    // 8. Migration mechanism: delegation is proven, absence fails closed.
+    // 8. Migration mechanism: delegation, fail-closed, and a real V1 -> V2 upgrade.
     // ------------------------------------------------------------------
 
     @Test
-    public void onUpgradeDelegatesAndForwardMigrationsFailClosed() {
+    public void onUpgradeDelegatesAndUnregisteredStepsFailClosed() {
         SQLiteDatabase db = helper.getWritableDatabase();
 
-        assertEquals("V1 has exactly DATABASE_VERSION-1 published predecessors",
+        assertEquals("published predecessors of the current version",
                 TreeLearnSchema.DATABASE_VERSION - 1, TreeLearnSchema.FORWARD_MIGRATIONS.size());
 
-        // 1. The production onUpgrade really delegates: a same-version upgrade is a no-op.
-        helper.onUpgrade(db, TreeLearnSchema.DATABASE_VERSION, TreeLearnSchema.DATABASE_VERSION);
-        assertEquals("a same-version upgrade must leave the schema and its version alone", 1,
-                rawInt(db, "PRAGMA user_version"));
+        // 1. The production onUpgrade really delegates to the registry, and a step that is not
+        // registered fails closed. The pair MUST be unregistered AND derived. An earlier version of
+        // this assertion hardcoded "1 -> 2" as the pair that must throw; the V2 release then
+        // registered exactly that step, so the assertion silently inverted into one demanding that
+        // a real migration fail. "current -> current + 1" is unregistered by construction at every
+        // version, so this stays correct across future bumps.
+        int from = TreeLearnSchema.DATABASE_VERSION;
+        int to = TreeLearnSchema.DATABASE_VERSION + 1;
+        IllegalStateException delegated = expectedFailure(IllegalStateException.class,
+                "onUpgrade(" + from + ", " + to + ") with no migration registered",
+                () -> helper.onUpgrade(db, from, to));
+        assertTrue("onUpgrade must delegate to the forward-migration registry: "
+                        + delegated.getMessage(),
+                delegated.getMessage().contains("no forward migration is registered from schema"
+                        + " version " + from));
 
-        // 2. Any single missing step must fail closed instead of stamping a newer user_version on a
-        // half-migrated database (rules/sql.md). Without this check the task's own "upgrade is N/A
-        // for V1" note would be backed only by a test that executes zero assertions.
-        IllegalStateException missingStep = expectedFailure(IllegalStateException.class,
-                "a step with no registered migration", () ->
-                        TreeLearnSchema.applyForwardMigrations(db, 1, 2));
-        assertTrue("a missing migration must fail closed: " + missingStep.getMessage(),
-                missingStep.getMessage().contains("no forward migration is registered from schema"
-                        + " version 1"));
+        // 2. "Fail closed" means the database must not be stamped with a version it never reached.
+        // Asserting only the exception would leave the actual harm — a half-migrated database that
+        // reports itself as current — unproven in both directions.
+        assertEquals("a failed upgrade must leave user_version untouched",
+                TreeLearnSchema.DATABASE_VERSION, rawInt(db, "PRAGMA user_version"));
+        assertEquals("a failed upgrade must leave the schema untouched", EXPECTED_TABLES,
+                actualTables(db));
 
         IllegalStateException downgrade = expectedFailure(IllegalStateException.class,
-                "downgrade", () -> TreeLearnSchema.applyForwardMigrations(db, 3, 2));
+                "downgrade", () -> TreeLearnSchema.applyForwardMigrations(db,
+                        TreeLearnSchema.DATABASE_VERSION + 1, TreeLearnSchema.DATABASE_VERSION));
         assertTrue("a downgrade must be refused: " + downgrade.getMessage(),
                 downgrade.getMessage().contains("downgrade is not supported"));
 
-        // 3. The registry, when non-empty, must form a gap-free +1 chain. The loop counter is
-        // asserted against the list size so this can never silently iterate zero times.
+        // 3. The registry must form a gap-free +1 chain starting at 1 and ending at the current
+        // schema version. Both ends are asserted unconditionally: an earlier version guarded the
+        // final assertion with "if any migration was visited", which made it vacuously true for
+        // the empty registry this version actually has.
         int visited = 0;
-        int previousTo = 0;
+        int previousTo = 1;
         for (TreeLearnSchema.Migration migration : TreeLearnSchema.FORWARD_MIGRATIONS) {
             assertEquals("a migration may only step forward by exactly one version",
                     previousTo, migration.fromVersion());
@@ -860,10 +1016,71 @@ public final class SqliteSchemaInstrumentedTest {
         }
         assertEquals("every registered migration was inspected, none silently skipped",
                 TreeLearnSchema.FORWARD_MIGRATIONS.size(), visited);
-        if (visited > 0) {
-            assertEquals("the chain must reach the current schema version",
-                    TreeLearnSchema.DATABASE_VERSION, previousTo + 1);
+        assertEquals("the chain must end exactly at the current schema version",
+                TreeLearnSchema.DATABASE_VERSION, previousTo);
+    }
+
+    /**
+     * The only direct evidence that the published V1 -> V2 step upgrades a real V1 database.
+     *
+     * <p>It deliberately does not lean on a desktop replay of
+     * {@link TreeLearnSchema#MIGRATION_V1_TO_V2_STATEMENTS}: that replay shows the SQL text is
+     * well-formed, not that the production {@code SQLiteOpenHelper} runs it against a V1 file and
+     * stamps the result. This case does the latter.
+     *
+     * <p>The fixture is a genuine V1 database — the production DDL minus the two things V2
+     * introduced — stamped {@code user_version = 1} and holding rows written before the upgrade.
+     * Each assertion then checks one thing the upgrade must have changed, and the row assertions
+     * prove it did not destroy what was already there.
+     */
+    @Test
+    public void aVersionOneDatabaseIsUpgradedToTheCurrentSchemaByTheProductionHelper() {
+        // setUp() has already deleted the database and built an unopened helper bound to that same
+        // path, so filling the path with a V1 file and then opening the helper goes through the real
+        // onUpgrade, not through a hand-called applyForwardMigrations.
+        SQLiteDatabase v1 = SQLiteDatabase.openOrCreateDatabase(
+                context.getDatabasePath(TreeLearnDatabaseHelper.DATABASE_NAME), null);
+        try {
+            v1.execSQL("PRAGMA foreign_keys = ON");
+            for (String statement : versionOneCreateStatements()) {
+                v1.execSQL(statement);
+            }
+            seedTopicWithRoot(v1, "t-upgrade");
+            seedMessage(v1, "m-upgrade", rootBranchOf("t-upgrade"), 0, "USER");
+            // openOrCreateDatabase leaves user_version at 0, so the fixture must stamp V1 itself;
+            // without this the helper would treat the file as brand new and call onCreate instead of
+            // onUpgrade, and the whole case would silently test the wrong path.
+            v1.execSQL("PRAGMA user_version = " + V1_SCHEMA_VERSION);
+            assertEquals("the fixture must look like V1",
+                    V1_SCHEMA_VERSION, rawInt(v1, "PRAGMA user_version"));
+            assertTrue("a V1 database must not yet have the quoted_text column",
+                    !actualColumns(v1, TreeLearnSchema.Messages.TABLE)
+                            .contains(TreeLearnSchema.Messages.QUOTED_TEXT));
+        } finally {
+            v1.close();
         }
+
+        SQLiteDatabase upgraded = helper.getWritableDatabase();
+
+        assertEquals("the upgrade must stamp the current version",
+                TreeLearnSchema.DATABASE_VERSION, rawInt(upgraded, "PRAGMA user_version"));
+        assertTrue("the upgrade must add the §6.2.19 column",
+                actualColumns(upgraded, TreeLearnSchema.Messages.TABLE)
+                        .contains(TreeLearnSchema.Messages.QUOTED_TEXT));
+        assertEquals("the upgraded database must declare every trigger a fresh install does",
+                new TreeSet<>(EXPECTED_TRIGGERS), actualSchemaObjects(upgraded, "trigger"));
+        assertPragmasAreClean(upgraded);
+
+        // Pre-existing V1 rows must survive untouched, and the new column must read back as NULL
+        // ("no quote") for a row that predates it.
+        assertEquals("the pre-existing topic survived",
+                1, rowCountWhere(upgraded, "topics", "id='t-upgrade'"));
+        assertEquals("the pre-existing message survived",
+                1, rowCountWhere(upgraded, "messages", "id='m-upgrade'"));
+        assertEquals("the upgraded message kept its role", "USER",
+                rawString(upgraded, "SELECT role FROM messages WHERE id='m-upgrade'"));
+        assertNull("a row written before V2 has no quote, and NULL is how that is stored",
+                rawString(upgraded, "SELECT quoted_text FROM messages WHERE id='m-upgrade'"));
     }
 
     // ------------------------------------------------------------------
@@ -878,7 +1095,8 @@ public final class SqliteSchemaInstrumentedTest {
 
         helper = new TreeLearnDatabaseHelper(context);
         SQLiteDatabase reopened = helper.getWritableDatabase();
-        assertEquals("reopen must not rebuild or migrate", 1, rawInt(reopened, "PRAGMA user_version"));
+        assertEquals("reopen must not rebuild or migrate", TreeLearnSchema.DATABASE_VERSION,
+                rawInt(reopened, "PRAGMA user_version"));
         assertEquals("rows survive the reopen", 1, rowCount(reopened, "topics"));
         assertEquals("tree survives the reopen", 1, rowCount(reopened, "branches"));
         assertPragmasAreClean(reopened);
@@ -902,13 +1120,48 @@ public final class SqliteSchemaInstrumentedTest {
         SQLiteDatabase opened = helper.getWritableDatabase();
         assertEquals("the production helper must build the schema on the existing file",
                 EXPECTED_TABLES, actualTables(opened));
-        assertEquals("and stamp the schema version", 1, rawInt(opened, "PRAGMA user_version"));
+        assertEquals("and stamp the schema version", TreeLearnSchema.DATABASE_VERSION,
+                rawInt(opened, "PRAGMA user_version"));
         assertPragmasAreClean(opened);
     }
 
     // ------------------------------------------------------------------
     // Fixture helpers.
     // ------------------------------------------------------------------
+
+    /**
+     * The DDL a V1 database was created with: the current production statements, minus the two
+     * things V2 added — the {@code quoted_text} column and the two §6.2.19 quote triggers.
+     *
+     * <p>Deriving V1 from the live constants instead of pasting a frozen copy is deliberate. A
+     * pasted copy would drift the moment anything else changed, and this fixture would then prove
+     * the upgrade works on a schema no device ever had.
+     */
+    private static List<String> versionOneCreateStatements() {
+        List<String> statements = new ArrayList<>();
+        for (String statement : TreeLearnSchema.CREATE_TABLE_STATEMENTS) {
+            statements.add(withoutV2MessagesColumn(statement));
+        }
+        statements.addAll(TreeLearnSchema.CREATE_INDEX_STATEMENTS);
+        for (String trigger : TreeLearnSchema.CREATE_TRIGGER_STATEMENTS) {
+            if (!TreeLearnSchema.MESSAGES_QUOTE_INVARIANT_STATEMENTS.contains(trigger)) {
+                statements.add(trigger);
+            }
+        }
+        return statements;
+    }
+
+    /** Strips the V2 column from the {@code messages} DDL, leaving every other table untouched. */
+    private static String withoutV2MessagesColumn(String createTable) {
+        String prefix = "CREATE TABLE " + TreeLearnSchema.Messages.TABLE + " (";
+        if (!createTable.startsWith(prefix)) {
+            return createTable;
+        }
+        String column = ", " + TreeLearnSchema.Messages.QUOTED_TEXT_DECLARATION;
+        assertTrue("the messages DDL must declare the V2 column, otherwise V1 == V2 and this "
+                + "fixture would prove nothing: " + createTable, createTable.contains(column));
+        return createTable.replace(column, "");
+    }
 
     private void seedTopicWithRoot(SQLiteDatabase db, String topicId) {
         insertTopic(db, topicId);
@@ -926,11 +1179,32 @@ public final class SqliteSchemaInstrumentedTest {
 
     private void insertChildBranch(SQLiteDatabase db, String id, String topicId, String parentId,
                                    String sourceMessageId, String sourceRevisionId) {
+        // §5.2 keeps two locators for a fork — the offsets and the quote/hash fallback — and they
+        // are all-or-nothing (branches' four-column CHECK). This fixture writes a *ranged* anchor:
+        // the quote is exactly as long as the offsets span, which is the rule
+        // BranchAnchor.ofRange enforces on the domain side. An earlier version of this fixture
+        // wrote anchor_quote/anchor_hash and left both offsets NULL — a half-filled anchor that no
+        // domain path can produce — and the store now rejects it outright (code 275). Fixtures must
+        // not manufacture rows that the domain could never hand to the store.
         db.execSQL("INSERT INTO branches(id, topic_id, parent_id, title, created_at, updated_at,"
-                        + " collapsed, source_message_id, source_revision_id, anchor_quote,"
-                        + " anchor_hash) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+                        + " collapsed, source_message_id, source_revision_id, anchor_start_inclusive,"
+                        + " anchor_end_exclusive, anchor_quote, anchor_hash)"
+                        + " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 new Object[]{id, topicId, parentId, "", T0, T0, 0, sourceMessageId,
-                        sourceRevisionId, "quote", "hash"});
+                        sourceRevisionId, 0, 5, "quote", "hash"});
+        // §5.2 lists contextSnapshotId as a field a non-root branch holds, and :core's
+        // BranchSource.restore runs it through Guard.id, which rejects null. An earlier version of
+        // this fixture stopped here, so every "valid fork" row the suite inserted was one that
+        // :core could never rehydrate — the suite was quietly manufacturing the violation it was
+        // supposed to be guarding against.
+        //
+        // It takes two steps because the two foreign keys are mutually dependent: the branch
+        // points at the snapshot and the snapshot points back at the branch. The schema therefore
+        // cannot enforce this with NOT NULL, and the real use case must do both writes in a single
+        // transaction (handed to T-2026-09-21-023).
+        seedSnapshot(db, "s-birth-" + id, id);
+        db.execSQL("UPDATE branches SET context_snapshot_id=? WHERE id=?",
+                new Object[]{"s-birth-" + id, id});
     }
 
     private void seedMessage(SQLiteDatabase db, String id, String branchId, int ordinal,

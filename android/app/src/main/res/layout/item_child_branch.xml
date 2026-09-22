@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  One child branch in the popup: what it is called, and what it still owes. The row is its own 44dp
+  target, so a list of children is a list of reachable choices.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/child_branch_row"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/touch_min"
+    android:background="?android:attr/selectableItemBackground"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/child_branch_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/tl_ink"
+        android:textSize="@dimen/text_sm" />
+
+    <TextView
+        android:id="@+id/child_branch_unread"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/space_s2"
+        android:textColor="@color/tl_amber"
+        android:textSize="@dimen/text_cap" />
+</LinearLayout>

@@ -7,6 +7,12 @@ package com.treelearn.core.domain;
  * and never changes; an AI position only references the attempt currently running and the stable
  * revision currently displayed. Resetting the answer switches which revision this position shows —
  * it never overwrites one, which is exactly what lets an old child branch keep its own history.
+ *
+ * <p>§6.2.19: a USER position may also carry the passage of the answer it asks about, so a
+ * quoted follow-up still shows what it was asked about after it has been sent. The domain has one
+ * spelling for "no quote" — the empty string, never null — and the store's {@code NULL} is
+ * translated to it at the DAO boundary, so a freshly built position and a reloaded one look the
+ * same to a caller.
  */
 public final class Message {
 
@@ -18,6 +24,11 @@ public final class Message {
     /** Immutable learner text; null for {@link MessageRole#AI} positions. */
     public final String userContent;
     public final long createdAt;
+    /**
+     * §6.2.19: the passage of the answer this position asks about; the empty string when it
+     * quotes nothing. Never null, and never carried by an AI position.
+     */
+    private final String quotedText;
 
     private String activeRevisionId;
     private String activeOperationId;
@@ -28,6 +39,7 @@ public final class Message {
             MessageRole role,
             int ordinal,
             String userContent,
+            String quotedText,
             long createdAt,
             String activeRevisionId,
             String activeOperationId) {
@@ -38,23 +50,93 @@ public final class Message {
         this.createdAt = Guard.epochMillis(createdAt, "createdAt");
         if (role == MessageRole.USER) {
             this.userContent = Guard.nonBlank(userContent, "userContent");
+            this.quotedText = requiredQuote(quotedText);
             this.activeRevisionId = null;
             this.activeOperationId = null;
         } else {
             this.userContent = null;
+            if (quotedText != null && !quotedText.isEmpty()) {
+                throw new IllegalArgumentException("quotedText must be empty on an AI position:"
+                        + " the store cannot produce a quote there, so a row carrying one is a"
+                        + " corrupt row and must be named rather than quietly dropped");
+            }
+            this.quotedText = "";
             this.activeRevisionId = Guard.idOrNull(activeRevisionId, "activeRevisionId");
             this.activeOperationId = Guard.idOrNull(activeOperationId, "activeOperationId");
         }
     }
 
-    /** Creates an immutable learner position. */
+    /** Creates an immutable learner position that quotes nothing in particular. */
     public static Message user(String branchId, int ordinal, String content, long now) {
-        return new Message(Guard.newId(), branchId, MessageRole.USER, ordinal, content, now, null, null);
+        return user(branchId, ordinal, content, "", now);
     }
 
-    /** Creates an AI position with no revision and no running attempt. */
+    /**
+     * Creates an immutable learner position that quotes the passage it asks about (§6.2.19).
+     *
+     * @param quotedText the passage the learner selected, or the empty string for "no quote".
+     *                   It is kept exactly as handed over: the learner's selection is not trimmed
+     *                   here, and only the empty string means "none".
+     */
+    public static Message user(String branchId, int ordinal, String content, String quotedText,
+            long now) {
+        return new Message(Guard.newId(), branchId, MessageRole.USER, ordinal, content, quotedText,
+                now, null, null);
+    }
+
+    /** Creates an AI position with no revision, no running attempt and therefore no quote. */
     public static Message ai(String branchId, int ordinal, long now) {
-        return new Message(Guard.newId(), branchId, MessageRole.AI, ordinal, null, now, null, null);
+        return new Message(Guard.newId(), branchId, MessageRole.AI, ordinal, null, "", now, null,
+                null);
+    }
+
+    /**
+     * Rehydrates a position that was already persisted and quotes nothing (§6.2.19 columns did
+     * not exist when these rows were written, and a row without a quote is the common case).
+     *
+     * @see #restore(String, String, MessageRole, int, String, String, long, String, String)
+     */
+    public static Message restore(
+            String id,
+            String branchId,
+            MessageRole role,
+            int ordinal,
+            String userContent,
+            long createdAt,
+            String activeRevisionId,
+            String activeOperationId) {
+        return restore(id, branchId, role, ordinal, userContent, "", createdAt, activeRevisionId,
+                activeOperationId);
+    }
+
+    /**
+     * Rehydrates a message that was already persisted, including the passage it quotes and
+     * whichever revision and attempt an AI position currently points at.
+     *
+     * <p>This is not a creation path: on reload the row is the authority, so no business rule is
+     * re-decided. Identity, role, the role/content pairing and the role/quote pairing are still
+     * validated, so a corrupt row fails loudly instead of producing a half-built message.
+     *
+     * <p>It is needed because {@link #ai} and {@link #user} always start with no active references,
+     * and the only other way to set them ({@link #bindOperation}, {@link #activateRevision}) is a
+     * business transition with its own rules. Replaying those on every read would treat a reload as
+     * a state change.
+     *
+     * @param quotedText the stored quote, with the store's {@code NULL} already translated to the
+     *                   empty string by the caller that read the row ({@code MessageDao})
+     */
+    public static Message restore(
+            String id,
+            String branchId,
+            MessageRole role,
+            int ordinal,
+            String userContent,
+            String quotedText,
+            long createdAt,
+            String activeRevisionId,
+            String activeOperationId) {
+        return new Message(id, branchId, role, ordinal, userContent, quotedText, createdAt,
+                activeRevisionId, activeOperationId);
     }
 
     public boolean isUser() {
@@ -63,6 +145,26 @@ public final class Message {
 
     public boolean isAi() {
         return role == MessageRole.AI;
+    }
+
+    /**
+     * §6.2.19: the passage of the answer this position asks about, or the empty string when it
+     * asks about nothing in particular.
+     *
+     * <p>Absence has exactly one spelling on purpose. The store keeps it as {@code NULL} and the
+     * DAO translates it while reading, so no caller has to null-check before putting the quote on
+     * screen, and a rebuilt position and a freshly created one cannot look different.
+     */
+    public String quotedText() {
+        return quotedText;
+    }
+
+    private static String requiredQuote(String quotedText) {
+        if (quotedText == null) {
+            throw new IllegalArgumentException("quotedText must not be null; \"no quote\" is the"
+                    + " empty string, and the store's NULL is translated at the DAO boundary");
+        }
+        return quotedText;
     }
 
     public String activeRevisionId() {

@@ -34,6 +34,7 @@ public final class Branch {
             BranchSource source,
             String title,
             long createdAt,
+            long updatedAt,
             long latestStableSequence,
             long lastSeenStableSequence,
             boolean collapsed,
@@ -44,7 +45,16 @@ public final class Branch {
         this.source = source;
         this.title = title;
         this.createdAt = Guard.epochMillis(createdAt, "createdAt");
-        this.updatedAt = this.createdAt;
+        this.updatedAt = Guard.epochMillis(updatedAt, "updatedAt");
+        if (this.updatedAt < this.createdAt) {
+            // Previously the constructor pinned updatedAt to createdAt, so this invariant was not
+            // expressible inside the type at all. Now that restore carries a persisted updatedAt,
+            // the type can — and must — refuse a row that claims to have been modified before it
+            // existed, instead of silently clamping it.
+            throw new IllegalArgumentException(
+                    "updatedAt must not predate createdAt: " + this.updatedAt + " < "
+                            + this.createdAt);
+        }
         this.latestStableSequence = Guard.nonNegative(latestStableSequence, "latestStableSequence");
         this.lastSeenStableSequence = Guard.nonNegative(lastSeenStableSequence, "lastSeenStableSequence");
         this.collapsed = collapsed;
@@ -64,7 +74,7 @@ public final class Branch {
 
     /** Creates the single root branch of a topic. */
     public static Branch root(String topicId, long now) {
-        return new Branch(Guard.newId(), topicId, null, null, null, now, 0L, 0L, false, null);
+        return new Branch(Guard.newId(), topicId, null, null, null, now, now, 0L, 0L, false, null);
     }
 
     /**
@@ -92,7 +102,37 @@ public final class Branch {
                             + "use Branch.root(topicId, now) for a topic's root branch");
         }
         return DomainResult.ok(new Branch(
-                Guard.newId(), topicId, source.parentBranchId, source, null, now, 0L, 0L, false, null));
+                Guard.newId(), topicId, source.parentBranchId, source, null, now, now, 0L, 0L,
+                false, null));
+    }
+
+    /**
+     * Rehydrates a branch that was already persisted, including the state a session may have
+     * changed after creation.
+     *
+     * <p>This is not a creation path: on reload the row is the authority, so no business rule is
+     * re-decided. Identities, timestamps and the provenance/root pairing are still validated, so a
+     * corrupt row fails loudly instead of producing a half-built branch.
+     *
+     * <p>It exists because the mutable fields — title, collapse, archive, the unread sequence pair
+     * and {@code updatedAt} — cannot otherwise be carried back out of the store: every other entry
+     * point starts a branch from scratch. Without it a DAO could only rehydrate a branch by
+     * replaying mutations, which would silently rewrite {@code updatedAt} to "now" on every read.
+     */
+    public static Branch restore(
+            String id,
+            String topicId,
+            String parentBranchId,
+            BranchSource source,
+            String title,
+            long createdAt,
+            long updatedAt,
+            long latestStableSequence,
+            long lastSeenStableSequence,
+            boolean collapsed,
+            Long archivedAt) {
+        return new Branch(id, topicId, parentBranchId, source, title, createdAt, updatedAt,
+                latestStableSequence, lastSeenStableSequence, collapsed, archivedAt);
     }
 
     public boolean isRoot() {

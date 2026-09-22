@@ -11,6 +11,13 @@ package com.treelearn.core.domain;
  * argument is an {@link IllegalArgumentException} and a wrong-time call is an
  * {@link IllegalStateException}; neither gets a code here.
  *
+ * <p>Six of these codes carry the fail-closed refusals of the context pipeline ({@code SNAPSHOT_*} and
+ * {@code CONTEXT_*}): a stored birth snapshot that cannot be proven intact, a context source that
+ * cannot be resolved, a summary that was never produced, or a context that does not fit the capacity
+ * the caller already reserved. They are reported through {@link DomainResult} rather than thrown
+ * because every one of them is a condition the caller must handle — refuse the request, tell the
+ * learner it failed, offer a retry — and none of them is a crash.
+ *
  * <p>Every code here has at least one producer in this package. A code with no producer is not
  * "surface we may need later": it is a rule nobody can be held to, and it invites a caller to branch
  * on a value that can never arrive. {@code OPERATION_TERMINAL} was removed on exactly that ground —
@@ -44,5 +51,23 @@ public enum DomainErrorCode {
     SEQUENCE_OUT_OF_ORDER,
 
     /** The message role cannot carry the requested operation (for example a revision on a user message). */
-    MESSAGE_ROLE_MISMATCH
+    MESSAGE_ROLE_MISMATCH,
+
+    /** This build cannot read the snapshot schema version a stored row declares. */
+    SNAPSHOT_SCHEMA_UNSUPPORTED,
+
+    /** A stored snapshot payload is not this schema's canonical JSON. */
+    SNAPSHOT_PAYLOAD_INVALID,
+
+    /** A stored snapshot payload does not hash to the digest stored beside it. */
+    SNAPSHOT_DIGEST_MISMATCH,
+
+    /** A context source the snapshot pins cannot be resolved in the store. */
+    CONTEXT_SOURCE_MISSING,
+
+    /** A summary the snapshot pins has not been produced, so the turns it covers would be lost. */
+    CONTEXT_SUMMARY_MISSING,
+
+    /** The context plus the capacity the caller already reserved does not fit the request. */
+    CONTEXT_EXCEEDS_BUDGET
 }

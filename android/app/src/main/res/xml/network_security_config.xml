@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  T-018: the only host this app may reach, and only over TLS.
+
+  The base config refuses cleartext for everything and trusts the platform's own
+  anchors - no user-added CA, so a debugging proxy cannot be told to stand in for
+  the provider on a release build. There is deliberately no debug-only override:
+  the API key travels on this connection and a shipped build must not have a path
+  that lets it leave unencrypted.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The menu a long press opens (prototype v2.5 `.bubble-menu`, PRD 6.2.19 point 2): 追问 and 新建分支
+  under one caption, 复制 and 全选 under the other, with the selected sentence named at the top.
+
+  Every row is a 44dp-tall full-width target (`@dimen/touch_min`), so the four hotspots cannot overlap
+  and each one is comfortably reachable (PRD 6.2.19 point 8). The fork row is hidden rather than
+  disabled while an answer is unfinished, which is exception 1: the operation is not offered at all.
+
+  The card keeps one width - the same popover width the model picker uses - so the four rows line up
+  whatever the sentence is, and the label above them is capped at that width and ellipsised rather than
+  allowed to stretch the menu across the screen. Its own width and height are measured by
+  `WordMenuPopup`, which places the menu with those numbers, so nothing in this file decides where it
+  lands.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/word_menu"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_card"
+    android:minWidth="@dimen/picker_min_width"
+    android:orientation="vertical"
+    android:padding="@dimen/space_s2">
+
+    <TextView
+        android:id="@+id/word_menu_selection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxWidth="@dimen/picker_min_width"
+        android:maxLines="1"
+        android:paddingStart="@dimen/space_s2"
+        android:paddingEnd="@dimen/space_s2"
+        android:paddingTop="@dimen/space_s1"
+        android:paddingBottom="@dimen/space_s2"
+        android:textColor="@color/tl_ink3"
+        android:textSize="@dimen/text_cap" />
+
+    <TextView
+        android:id="@+id/word_menu_group_ai"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/space_s2"
+        android:paddingEnd="@dimen/space_s2"
+        android:text="@string/chat_word_group_ai"
+        android:textColor="@color/tl_ink3"
+        android:textSize="@dimen/text_cap" />
+
+    <TextView
+        android:id="@+id/word_menu_quote"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/touch_min"
+        android:background="?android:attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:paddingStart="@dimen/space_s2"
+        android:paddingEnd="@dimen/space_s2"
+        android:text="@string/chat_word_quote"
+        android:textColor="@color/tl_ink"
+        android:textSize="@dimen/text_sm" />
+
+    <TextView
+        android:id="@+id/word_menu_fork"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/touch_min"
+        android:background="?android:attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:paddingStart="@dimen/space_s2"
+        android:paddingEnd="@dimen/space_s2"
+        android:text="@string/chat_act_fork"
+        android:textColor="@color/tl_ink"
+        android:textSize="@dimen/text_sm" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/hairline"
+        android:layout_marginTop="@dimen/space_s1"
+        android:layout_marginBottom="@dimen/space_s1"
+        android:background="@color/tl_line" />
+
+    <TextView
+        android:id="@+id/word_menu_group_system"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/space_s2"
+        android:paddingEnd="@dimen/space_s2"
+        android:text="@string/chat_word_group_system"
+        android:textColor="@color/tl_ink3"
+        android:textSize="@dimen/text_cap" />
+
+    <TextView
+        android:id="@+id/word_menu_copy"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/touch_min"
+        android:background="?android:attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:paddingStart="@dimen/space_s2"
+        android:paddingEnd="@dimen/space_s2"
+        android:text="@string/chat_act_copy"
+        android:textColor="@color/tl_ink"
+        android:textSize="@dimen/text_sm" />
+
+    <TextView
+        android:id="@+id/word_menu_select_all"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/touch_min"
+        android:background="?android:attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:paddingStart="@dimen/space_s2"
+        android:paddingEnd="@dimen/space_s2"
+        android:text="@string/chat_word_select_all"
+        android:textColor="@color/tl_ink"
+        android:textSize="@dimen/text_sm" />
+</LinearLayout>
