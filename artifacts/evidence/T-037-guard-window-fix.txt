@@ -1,0 +1,609 @@
+# T-2026-09-21-037 FIX ROUND 2 -- static guard fail-open hole in check_no_hardcoded_user_version.
+# Subject: .trae/scripts/dev/check_androidtest_schema_expectations.py (window-based exemption, lines 106-127).
+# Reported defect: an injected SECOND hardcoded user_version expectation placed immediately adjacent to a
+#   legitimate (constant-derived) assertion is exempted by the +/-160-char window; the identical violation
+#   placed far from any allowed constant is caught. Same violation, opposite verdicts = fail-open.
+# captured-at: 2026-09-22T01:09:21.3067374+08:00
+# cwd: D:\Project\Android\Treelearn
+# shell: PowerShell 5.1 on Windows; python 3 invoked with -X utf8
+# checked script BEFORE the fix: SHA-256 = E05789F42CC85234BFACFB27E0593A85B49148F48DA45F1000662967047D16DD (318 lines)
+# frozen byte-identical copy used for the before/after pair: C:\Users\23745\AppData\Local\Temp\t037-guard-probe\guard-prefix.py
+# throwaway trees (NOT in the repo): C:\Users\23745\AppData\Local\Temp\t037-guard-probe\trees\{baseline,probe_a,control}
+#   built from the repo's TreeLearnSchema.java + SqliteSchemaInstrumentedTest.java at the SAME relative paths
+#   so the guard's --root sees a repo-shaped tree.
+# probe_a : violation inserted directly after the legitimate line-1099 anchor
+#           rawInt(reopened, "PRAGMA user_version"));
+# control : the SAME violation inserted after the SECOND assertPragmasAreClean(reopened); (line 1102), i.e.
+#           out of any allowed constant's window. The probe measures the distance from the nearest allowed
+#           constant and prints it (probe_a 143 chars, control 322 chars); that distance is the ONLY thing
+#           that differs between the two cases.
+# ---------- run 0: build the throwaway trees, measure distances, run the guard on each ----------
+# command: python -X utf8 C:\Users\23745\AppData\Local\Temp\t037-guard-probe\probe.py
+probe_a  injected violation: flat offset=36129 nearest allowed constant=143 chars away
+control  injected violation: flat offset=36308 nearest allowed constant=322 chars away
+baseline guard exit=0 VERDICT: PASS
+probe_a  guard exit=0 VERDICT: PASS
+control  guard exit=1 VERDICT: FAIL (1 problem(s))
+EXITCODE=0
+# reading: baseline PASS (unmodified tree); probe_a PASS = FAIL-OPEN, the reported defect; control FAIL (1 problem).
+# ---------- run 1 (PRE-FIX, real tree, cwd = repo root) ----------
+# command: python -X utf8 .trae/scripts/dev/check_androidtest_schema_expectations.py
+OK   schema declares 8 trigger constant(s); suite references 8
+OK   no hardcoded schema version literal in androidTest
+OK   no restated trigger/column name literals in androidTest
+OK   EXPECTED_TRIGGERS is derived from expectedTriggers()
+OK   the fail-closed case uses the derived unregistered pair
+VERDICT: PASS
+EXITCODE=0
+# ---------- run 2 (PRE-FIX, probe_a tree = violation adjacent to a legitimate assertion) ----------
+# command: python -X utf8 .trae/scripts/dev/check_androidtest_schema_expectations.py --root C:\Users\23745\AppData\Local\Temp\t037-guard-probe\trees\probe_a
+OK   schema declares 8 trigger constant(s); suite references 8
+OK   no hardcoded schema version literal in androidTest
+OK   no restated trigger/column name literals in androidTest
+OK   EXPECTED_TRIGGERS is derived from expectedTriggers()
+OK   the fail-closed case uses the derived unregistered pair
+VERDICT: PASS
+EXITCODE=0
+# ---------- run 3 (PRE-FIX, control tree = the SAME violation far from any allowed constant) ----------
+# command: python -X utf8 .trae/scripts/dev/check_androidtest_schema_expectations.py --root C:\Users\23745\AppData\Local\Temp\t037-guard-probe\trees\control
+OK   schema declares 8 trigger constant(s); suite references 8
+VERDICT: FAIL (1 problem(s))
+  - C:\Users\23745\AppData\Local\Temp\t037-guard-probe\trees\control\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java: a PRAGMA user_version expectation does not name a constant (context: ...atabaseFile = context.getDatabasePath(TreeLearnDatabaseHelper.DATABASE_NAME); File parent)
+EXITCODE=1
+# GATE (RED for this round): runs 2 and 3 are the SAME violation and MUST agree on exit code 1;
+#   pre-fix they disagree (run 2 = 0 = fail-open, run 3 = 1). That disagreement is the defect.
+# ---------- FIX applied; script SHA-256 now = D317A42021EBA432EF39E70A963AA509040006CFE280273B3DCEBFA34FA0FFAD ----------
+# Root cause: the exemption was read from a +/-160-char window around the pragma, i.e. from the
+#   NEIGHBOURHOOD instead of from the assertion being judged. It is now read from the judged call's
+#   OWN first/expected argument, resolved through a left-to-right paren stack over the real nesting;
+#   anything unparseable (no judged call, unbalanced argument list, unjudgeable arity) FAILS CLOSED.
+# ---------- run 4 (POST-FIX, real tree) ----------
+# command: python -X utf8 .trae/scripts/dev/check_androidtest_schema_expectations.py
+OK   judged 8 PRAGMA user_version expectation(s) in androidTest
+OK   schema declares 8 trigger constant(s); suite references 8
+OK   no hardcoded schema version literal in androidTest
+OK   no restated trigger/column name literals in androidTest
+OK   EXPECTED_TRIGGERS is derived from expectedTriggers()
+OK   the fail-closed case uses the derived unregistered pair
+VERDICT: PASS
+EXITCODE=0
+# ---------- run 5 (POST-FIX, probe_a -- the identical command that returned 0 in run 2) ----------
+# command: python -X utf8 .trae/scripts/dev/check_androidtest_schema_expectations.py --root C:\Users\23745\AppData\Local\Temp\t037-guard-probe\trees\probe_a
+OK   judged 9 PRAGMA user_version expectation(s) in androidTest
+OK   schema declares 8 trigger constant(s); suite references 8
+VERDICT: FAIL (1 problem(s))
+  - C:\Users\23745\AppData\Local\Temp\t037-guard-probe\trees\probe_a\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java: a PRAGMA user_version expectation does not name a constant (expected expression: 7)
+EXITCODE=1
+# ---------- run 6 (POST-FIX, control) ----------
+# command: python -X utf8 .trae/scripts/dev/check_androidtest_schema_expectations.py --root C:\Users\23745\AppData\Local\Temp\t037-guard-probe\trees\control
+OK   judged 9 PRAGMA user_version expectation(s) in androidTest
+OK   schema declares 8 trigger constant(s); suite references 8
+VERDICT: FAIL (1 problem(s))
+  - C:\Users\23745\AppData\Local\Temp\t037-guard-probe\trees\control\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java: a PRAGMA user_version expectation does not name a constant (expected expression: 7)
+EXITCODE=1
+# GATE (GREEN for this round): run 2 = 0 and run 5 = 1 are the SAME violation on the SAME tree; the
+#   hole is closed. run 5 and run 6 now agree (both 1), so the verdict no longer depends on distance.
+# ---------- run 7 (POST-FIX, self-test: every judgement path, both directions) ----------
+# command: python -X utf8 .trae/scripts/dev/check_androidtest_schema_expectations.py --selftest
+CASE baseline (unmodified tree) must PASS                 expected=0 actual=0  Ok
+CASE hardcoded user_version literal must FAIL             expected=1 actual=1  Ok
+CASE a SECOND hardcoded user_version expectation adjacent to a legitimate one must FAIL expected=1 actual=1  Ok
+CASE a SECOND derived user_version expectation adjacent to a legitimate one must PASS expected=0 actual=0  Ok
+CASE an execSQL user_version assignment by literal must FAIL expected=1 actual=1  Ok
+CASE a user_version expectation outside any judged call must FAIL expected=1 actual=1  Ok
+CASE a user_version expectation whose assertion arity cannot be judged must FAIL expected=1 actual=1  Ok
+CASE restated trigger name literal must FAIL              expected=1 actual=1  Ok
+CASE restated quote column literal must FAIL              expected=1 actual=1  Ok
+CASE unreferenced schema trigger constant must FAIL       expected=1 actual=1  Ok
+CASE inline EXPECTED_TRIGGERS literal must FAIL           expected=1 actual=1  Ok
+CASE hardcoded migration pair must FAIL                   expected=1 actual=1  Ok
+CASE missing androidTest tree must be INCONCLUSIVE        expected=2 actual=2  Ok
+OVERALL PASS (13 case(s), 0 broken)
+EXITCODE=0
+# ---------- run 8 (mutation test: is the NEW judgement load-bearing, or can it be vacuous?) ----------
+# command: python -X utf8 artifacts/evidence/T-037-guard-window-mutation.py
+guard        : D:\Project\Android\Treelearn\.trae\scripts\dev\check_androidtest_schema_expectations.py
+anchor count : 1
+original sha : d317a42021eba432ef39e70a963aa509040006cfe280273b3dcebfa34fa0ffad
+--- M1 judgement always accepts (mutated sha b730566fabec) ---
+    CASE hardcoded user_version literal must FAIL             expected=1 actual=0  BROKEN
+    CASE a SECOND hardcoded user_version expectation adjacent to a legitimate one must FAIL expected=1 actual=0  BROKEN
+    OVERALL FAIL (13 case(s), 2 broken)
+    MUTATED_EXITCODE=1
+--- M2 judgement always rejects (mutated sha aae632ac37cd) ---
+    CASE baseline (unmodified tree) must PASS                 expected=0 actual=1  BROKEN
+    CASE a SECOND derived user_version expectation adjacent to a legitimate one must PASS expected=0 actual=1  BROKEN
+    OVERALL FAIL (13 case(s), 2 broken)
+    MUTATED_EXITCODE=1
+restored sha : d317a42021eba432ef39e70a963aa509040006cfe280273b3dcebfa34fa0ffad  byte-identical=True
+EXITCODE=0
+# reading: M1 breaks exactly the two hardcoded-literal cases; M2 breaks exactly the two derived cases.
+#   Both mutate the same single line, so the guard's two directions are each load-bearing, and the
+#   self-test itself is able to fail (it is not a permanently-green ritual). Restore is byte-identical.
+# ---------- run 9 (what changed in the guard, pre-fix copy vs fixed) ----------
+# command: python -X utf8 -c <difflib.unified_diff> C:\Users\23745\AppData\Local\Temp\t037-guard-probe\guard-prefix.py .trae/scripts/dev/check_androidtest_schema_expectations.py
+--- C:\Users\23745\AppData\Local\Temp\t037-guard-probe\guard-prefix.py
++++ .trae/scripts/dev/check_androidtest_schema_expectations.py
+@@ -105,24 +105,213 @@
+ 
++JUDGED_CALLS = ("assertEquals", "execSQL")
++ALLOWED_USER_VERSION_EXPRESSIONS = ("TreeLearnSchema.DATABASE_VERSION", "V1_SCHEMA_VERSION")
++
++
++def _literal_mask(flat: str) -> list:
++    """True where a character sits inside a Java string/char literal.
++
++    Parens and commas inside a literal must not affect call or argument parsing: an assertion
++    message such as "reopen (again), must not rebuild" would otherwise invent a nesting level.
++    """
++    mask = [False] * len(flat)
++    quote = ""
++    index = 0
++    while index < len(flat):
++        char = flat[index]
++        if not quote:
++            if char == '"' or char == "'":
++                quote = char
++                mask[index] = True
++        else:
++            mask[index] = True
++            if char == "\\":
++                if index + 1 < len(flat):
++                    mask[index + 1] = True
++                    index += 2
++                    continue
++            elif char == quote:
++                quote = ""
++        index += 1
++    return mask
++
++
++def _identifier_before(flat: str, mask: list, opener: int) -> str:
++    """The (possibly dotted) identifier immediately left of the '(' at `opener`."""
++    end = opener - 1
++    while end >= 0 and flat[end] == " ":
++        end -= 1
++    start = end
++    while start >= 0 and not mask[start] and (flat[start].isalnum() or flat[start] in "_."):
++        start -= 1
++    return flat[start + 1:end + 1]
++
++
++def _top_level_arguments(flat: str, mask: list, opener: int):
++    """Split the argument list opened at `opener` on top-level commas.
++
++    Returns (arguments, closer), or (None, None) when the list does not balance; the caller fails
++    closed on that, so a truncated or unbalanced file can never be read as "fine".
++    """
++    arguments = []
++    depth = 0
++    start = opener + 1
++    index = opener + 1
++    while index < len(flat):
++        if not mask[index]:
++            char = flat[index]
++            if char in "([{":
++                depth += 1
++            elif char in ")]}":
++                if char == ")" and depth == 0:
++                    arguments.append(flat[start:index])
++                    return arguments, index
++                depth -= 1
++            elif char == "," and depth == 0:
++                arguments.append(flat[start:index])
++                start = index + 1
++        index += 1
++    return None, None
++
++
++def _open_paren_stack(flat: str, mask: list, index: int) -> list:
++    """The '(' indices still open immediately before `index`, innermost last.
++
++    A left-to-right scan of the real nesting. A right-to-left walk with a depth counter cannot do
++    this: the closers of a PREVIOUS statement inflate the depth, so the walk steps past the current
++    statement and can adopt a NEIGHBOURING assertion as the owner -- reading its legitimate argument
++    as this occurrence's expectation. That is the same fail-open class as the window this function
++    replaced (T-037 fix round 2).
++    """
++    stack = []
++    for position in range(index):
++        if mask[position]:
++            continue
++        if flat[position] == "(":
++            stack.append(position)
++        elif flat[position] == ")" and stack:
++            stack.pop()
++    return stack
++
++
++def _enclosing_call(flat: str, mask: list, index: int):
++    """The innermost enclosing JUDGED call around `index`, as (name, arguments).
++
++    Nested calls are skipped rather than judged. Returns ("UNPARSEABLE", None) when the judged call's
++    own argument list does not balance, and None when no judged call encloses the occurrence at all --
++    both are FAILED CLOSED by the caller.
++    """
++    for opener in reversed(_open_paren_stack(flat, mask, index)):
++        name = _identifier_before(flat, mask, opener).rsplit(".", 1)[-1]
++        if name in JUDGED_CALLS:
++            arguments, _closer = _top_level_arguments(flat, mask, opener)
++            if arguments is None:
++                return "UNPARSEABLE", None
++            return name, arguments
++    return None
++
++
++def _strip_outer_parens(text: str) -> str:
++    """`(EXPR)` and `EXPR` must judge the same; anything else keeps its parens."""
++    text = text.strip()
++    while text.startswith("(") and text.endswith(")"):
++        depth = 0
++        redundant = True
++        for char in text[1:-1]:
++            if char == "(":
++                depth += 1
++            elif char == ")":
++                depth -= 1
++                if depth < 0:
++                    redundant = False
++                    break
++        if not redundant or depth != 0:
++            break
++        text = text[1:-1].strip()
++    return text
++
++
++def _judged_expression(call_name: str, arguments: list):
++    """(expected expression, message expression) of a judged call, or (None, None) if unparseable.
++
++    `assertEquals` overloads differ in arity, so the arity decides which argument is the expected
++    value -- it is NOT always the first argument. `execSQL` is judged on its SQL expression, where
++    the assigned version must be supplied by a constant rather than a literal.
++    """
++    if call_name == "execSQL":
++        if len(arguments) == 1:
++            return arguments[0], None
++        return None, None
++    if len(arguments) == 3:
++        return arguments[1], arguments[0]
++    if len(arguments) == 2:
++        return arguments[0], None
++    return None, None
++
++
++def _is_untouched_zero(expected: str, message) -> bool:
++    """SQLite's own default for a file no schema has touched -- not a schema constant.
++
++    The exemption is read from the SAME call: its expected expression must be exactly 0 AND its own
++    message must say what that 0 means. It is never read from text around the call, because a window
++    near a call is not evidence about that call (T-037 fix round 2).
++    """
++    return _strip_outer_parens(expected) == "0" and "untouched" in (message or "").lower()
++
++
++def _user_version_is_derived(call_name: str, expected: str) -> bool:
++    """Whether this call's OWN argument derives the version from a schema constant.
++
++    The two judged shapes judge differently, because the argument means different things:
++    `assertEquals`'s expected argument must BE the constant, while `execSQL`'s argument is a whole
++    SQL expression, so the constant has to supply the ASSIGNED value -- it must appear in that
++    argument after the '='. A literal (`... = " + 7`) leaves the assigned part without a constant and
++    is rejected, and an argument with no '=' at all is rejected too (fail-closed).
++    """
++    if call_name == "execSQL":
++        assigned = expected.split("=", 1)[1] if "=" in expected else ""
++        return any(name in assigned for name in ALLOWED_USER_VERSION_EXPRESSIONS)
++    return _strip_outer_parens(expected) in ALLOWED_USER_VERSION_EXPRESSIONS
++
++
+ def check_no_hardcoded_user_version() -> None:
+-    """Every `PRAGMA user_version` expectation must be a named constant, not a bare digit.
+-
+-    Comments are stripped and whitespace collapsed before scanning, because an assertion's
+-    expected value sits on the line ABOVE the `rawInt(..., "PRAGMA user_version")` call. A
+-    line-based scan would watch the wrong line, and would also flag documentation that merely
+-    mentions the pragma.
+-    """
+-    allowed = ("TreeLearnSchema.DATABASE_VERSION", "V1_SCHEMA_VERSION")
++    """Every `PRAGMA user_version` expectation must be a schema constant, judged PER ASSERTION.
++
++    Comments are stripped and whitespace collapsed before scanning, because an expected value may sit
++    on a line ABOVE the `rawInt(..., "PRAGMA user_version")` call; a line-based scan would watch the
++    wrong line and would also flag documentation that merely mentions the pragma.
++
++    The raw occurrence scan is the parser-independent half: every occurrence it finds MUST be judged,
++    and an occurrence whose expected expression cannot be parsed FAILS CLOSED. Legitimacy is decided
++    only by the enclosing call's own argument -- never by text near the call, because a second
++    hardcoded expectation placed next to a legitimate one hides in any such window.
++    """
++    judged = 0
+     for path in android_test_java_files():
+         flat = re.sub(r"\s+", " ", strip_java_comments(read(path)))
++        mask = _literal_mask(flat)
+         for match in re.finditer(r"PRAGMA user_version", flat):
+-            # Both sides: an expected value may sit before the call (assertEquals) or after it
+-            # ("PRAGMA user_version = " + CONSTANT).
+-            window = flat[max(0, match.start() - 160):match.end() + 160]
+-            if any(name in window for name in allowed):
++            call_name, arguments = _enclosing_call(flat, mask, match.start())
++            if call_name is None:
++                fail("%s: a PRAGMA user_version expectation is not inside a %s call, so its "
++                     "expected value cannot be judged (fail-closed)"
++                     % (rel(path), "/".join(JUDGED_CALLS)))
+                 continue
+-            # The pre-install empty file legitimately reports 0; require it to say so.
+-            if re.search(r"\b0\b", window) and "untouched" in window.lower():
++            if arguments is None:
++                fail("%s: the %s call enclosing a PRAGMA user_version expectation has an unbalanced "
++                     "argument list (fail-closed)" % (rel(path), call_name))
++                continue
++            expected, message = _judged_expression(call_name, arguments)
++            if expected is None:
++                fail("%s: the %s call enclosing a PRAGMA user_version expectation has no parseable "
++                     "expected-value argument (fail-closed, %d argument(s))"
++                     % (rel(path), call_name, len(arguments)))
++                continue
++            judged += 1
++            if _user_version_is_derived(call_name, expected):
++                continue
++            if _is_untouched_zero(expected, message):
+                 continue
+             fail("%s: a PRAGMA user_version expectation does not name a constant "
+-                 "(context: ...%s)" % (rel(path), window[-90:].strip()))
++                 "(expected expression: %s)" % (rel(path), expected.strip()[:70]))
++    notes.append("judged %d PRAGMA user_version expectation(s) in androidTest" % judged)
+ 
+@@ -235,2 +424,29 @@
+       'assertEquals("reopen must not rebuild or migrate", 7,'), EXIT_FAIL),
++    # Adjacency is the whole point of the next pair: the SAME position, the SAME call shape, differing
++    # only in whether the expected value is derived. A window around the pragma cannot tell them apart,
++    # which is exactly the fail-open hole this pair was added for (T-037 fix round 2).
++    ("a SECOND hardcoded user_version expectation adjacent to a legitimate one must FAIL",
++     ('rawInt(reopened, "PRAGMA user_version"));',
++      'rawInt(reopened, "PRAGMA user_version")); '
++      'assertEquals("adjacent hardcoded expectation", 7, rawInt(reopened, "PRAGMA user_version"));'),
++     EXIT_FAIL),
++    ("a SECOND derived user_version expectation adjacent to a legitimate one must PASS",
++     ('rawInt(reopened, "PRAGMA user_version"));',
++      'rawInt(reopened, "PRAGMA user_version")); '
++      'assertEquals("adjacent derived expectation", TreeLearnSchema.DATABASE_VERSION, '
++      'rawInt(reopened, "PRAGMA user_version"));'),
++     EXIT_PASS),
++    # The remaining two judgement paths of this check need their own negative case, or a mistake in
++    # either could only ever make the guard LOOSER than it claims.
++    ("an execSQL user_version assignment by literal must FAIL",
++     ('"PRAGMA user_version = " + V1_SCHEMA_VERSION', '"PRAGMA user_version = " + 7'), EXIT_FAIL),
++    ("a user_version expectation outside any judged call must FAIL",
++     ('rawInt(reopened, "PRAGMA user_version"));',
++      'rawInt(reopened, "PRAGMA user_version")); '
++      'assertTrue("adjacent non-judged expectation", 0 == rawInt(reopened, "PRAGMA user_version"));'),
++     EXIT_FAIL),
++    ("a user_version expectation whose assertion arity cannot be judged must FAIL",
++     ('assertEquals("reopen must not rebuild or migrate", TreeLearnSchema.DATABASE_VERSION,',
++      'assertEquals("a four-argument assertion cannot be judged", 0, TreeLearnSchema.DATABASE_VERSION,'),
++     EXIT_FAIL),
+     ("restated trigger name literal must FAIL",
+EXITCODE=0
+# ---------- run 10 (parser-independent raw scan of the same criterion; does NOT share the guard's parser) ----------
+# command: rg -n --no-heading "PRAGMA user_version" android/app/src/androidTest
+android/app/src/androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:293:                rawInt(db, "PRAGMA user_version"));
+android/app/src/androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:993:                TreeLearnSchema.DATABASE_VERSION, rawInt(db, "PRAGMA user_version"));
+android/app/src/androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:1053:            v1.execSQL("PRAGMA user_version = " + V1_SCHEMA_VERSION);
+android/app/src/androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:1055:                    V1_SCHEMA_VERSION, rawInt(v1, "PRAGMA user_version"));
+android/app/src/androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:1066:                TreeLearnSchema.DATABASE_VERSION, rawInt(upgraded, "PRAGMA user_version"));
+android/app/src/androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:1099:                rawInt(reopened, "PRAGMA user_version"));
+android/app/src/androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:1115:                0, rawInt(raw, "PRAGMA user_version"));
+android/app/src/androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:1124:                rawInt(opened, "PRAGMA user_version"));
+RAW_OCCURRENCE_LINES=8
+EXITCODE=0
+# ---------- run 11 (boundary check: android/** untouched this round) ----------
+SUITE_SHA256=0423B1CE361CEA5CE6D30E3D78DBE7AC001CCA8746085C5840228B5EB88C7D26  (expected 0423B1CE361CEA5CE6D30E3D78DBE7AC001CCA8746085C5840228B5EB88C7D26)
+EXITCODE=0
+# ---------- run 12 (in-repo reproduction probe, same violation at two distances) ----------
+# command: python -X utf8 artifacts/evidence/T-037-guard-window-probe.py
+guard under test   : D:\Project\Android\Treelearn\.trae\scripts\dev\check_androidtest_schema_expectations.py
+guard sha256       : d317a42021eba432ef39e70a963aa509040006cfe280273b3dcebfa34fa0ffad
+throwaway trees at : C:\Users\23745\AppData\Local\Temp\t037-guard-probe\trees   (outside the repo)
+probe_a  violation offset=36129  nearest allowed constant=143 chars  guard_exit=1  VERDICT: FAIL (1 problem(s))
+control  violation offset=36308  nearest allowed constant=322 chars  guard_exit=1  VERDICT: FAIL (1 problem(s))
+SAME_VERDICT=True  (probe_a=1 control=1)
+OK: the verdict does not depend on where the violation sits
+EXITCODE=0
+# command: python -X utf8 artifacts/evidence/T-037-guard-window-probe.py --guard C:\Users\23745\AppData\Local\Temp\t037-guard-probe\guard-prefix.py
+guard under test   : C:\Users\23745\AppData\Local\Temp\t037-guard-probe\guard-prefix.py
+guard sha256       : e05789f42cc85234bfacfb27e0593a85b49148f48da45f1000662967047d16dd
+throwaway trees at : C:\Users\23745\AppData\Local\Temp\t037-guard-probe\trees   (outside the repo)
+probe_a  violation offset=36129  nearest allowed constant=143 chars  guard_exit=0  VERDICT: PASS
+control  violation offset=36308  nearest allowed constant=322 chars  guard_exit=1  VERDICT: FAIL (1 problem(s))
+SAME_VERDICT=False  (probe_a=0 control=1)
+FAIL-OPEN: the SAME violation is exempted when it sits near an allowed constant
+EXITCODE=1
+# reading: the frozen PRE-FIX copy reports SAME_VERDICT=False (probe_a 0 vs control 1) and exits 1;
+#   the fixed guard reports SAME_VERDICT=True (1 vs 1) and exits 0. Distance no longer decides.
+# ---------- run 13 (task-file contract gate, run after every task-file edit) ----------
+# command: python -X utf8 .trae/scripts/validate_tasks.py
+
+PASS T-2026-09-21-quote-persistence-messages-column-037.md
+SUMMARY files=43 errors=0 warnings=12
+
+EXITCODE=0
+# ---------- run 14 (final artifact identities) ----------
+# command: Get-FileHash -Algorithm SHA256 for each artefact (PowerShell)
+CHECKED_SCRIPT   D317A42021EBA432EF39E70A963AA509040006CFE280273B3DCEBFA34FA0FFAD  lines=534
+TASK_FILE        7798EFDB42F632F25C480E677D8ADC24D726D41DF60EB960874195C7FEA7DDA0  lines=205
+PROBE_SCRIPT     DDA28E3599C0DD69569A791DDD6AB978076873B8980C3ADC48FF5FB990152B04  lines=125
+MUTATION_SCRIPT  2A10631261AB807FA16AEBFD3C5B8DF790BE16121197048C6B19A3B3AD4F21A0  lines=68
+DEVICE_SUITE     0423B1CE361CEA5CE6D30E3D78DBE7AC001CCA8746085C5840228B5EB88C7D26  lines=1408
+# task file edited via generated apply_patch hunks; applied bytes were verified byte-identical to the
+#   intended text (both SHA-256 = 7798efdb42f632f25c480e677d8adc24d726d41df60eb960874195c7fea7dda0).
+EXITCODE=0
+# ---------- run 15 (post-edit task-file identity; supersedes the TASK_FILE line of run 14) ----------
+# command: Get-FileHash -Algorithm SHA256 .trae/tasks/T-2026-09-21-quote-persistence-messages-column-037.md
+TASK_FILE_SHA256=78D225D53702A2CE83C55C0B15CA8BD7E36F38C0D5E6535AFA7BBA2EEEC59312  lines=205
+# command: python -X utf8 .trae/scripts/validate_tasks.py   (after the last task-file edit)
+
+PASS T-2026-09-21-quote-persistence-messages-column-037.md
+SUMMARY files=43 errors=0 warnings=12
+
+EXITCODE=0
+# ---------- run 16 (boundary: files this round may touch, and nothing else) ----------
+# command: git status --porcelain for the allowed paths + Get-FileHash of the device suite
+?? .trae/scripts/dev/
+?? .trae/tasks/T-2026-09-21-quote-persistence-messages-column-037.md
+?? artifacts/evidence/T-037-guard-window-fix.txt
+?? artifacts/evidence/T-037-guard-window-mutation.py
+?? artifacts/evidence/T-037-guard-window-probe.py
+DEVICE_SUITE_SHA256=0423B1CE361CEA5CE6D30E3D78DBE7AC001CCA8746085C5840228B5EB88C7D26  (unchanged from run 11 = 0423B1CE…7D26)
+EXITCODE=0
+# ---------- run 17 (final gate re-confirmation on the frozen final artefacts) ----------
+# checked script SHA-256 = D317A42021EBA432EF39E70A963AA509040006CFE280273B3DCEBFA34FA0FFAD
+# command: python -X utf8 .trae/scripts/dev/check_androidtest_schema_expectations.py
+OK   judged 8 PRAGMA user_version expectation(s) in androidTest
+OK   schema declares 8 trigger constant(s); suite references 8
+OK   no hardcoded schema version literal in androidTest
+OK   no restated trigger/column name literals in androidTest
+OK   EXPECTED_TRIGGERS is derived from expectedTriggers()
+OK   the fail-closed case uses the derived unregistered pair
+VERDICT: PASS
+EXITCODE=0
+# command: python -X utf8 .trae/scripts/dev/check_androidtest_schema_expectations.py --selftest
+CASE baseline (unmodified tree) must PASS                 expected=0 actual=0  Ok
+CASE hardcoded user_version literal must FAIL             expected=1 actual=1  Ok
+CASE a SECOND hardcoded user_version expectation adjacent to a legitimate one must FAIL expected=1 actual=1  Ok
+CASE a SECOND derived user_version expectation adjacent to a legitimate one must PASS expected=0 actual=0  Ok
+CASE an execSQL user_version assignment by literal must FAIL expected=1 actual=1  Ok
+CASE a user_version expectation outside any judged call must FAIL expected=1 actual=1  Ok
+CASE a user_version expectation whose assertion arity cannot be judged must FAIL expected=1 actual=1  Ok
+CASE restated trigger name literal must FAIL              expected=1 actual=1  Ok
+CASE restated quote column literal must FAIL              expected=1 actual=1  Ok
+CASE unreferenced schema trigger constant must FAIL       expected=1 actual=1  Ok
+CASE inline EXPECTED_TRIGGERS literal must FAIL           expected=1 actual=1  Ok
+CASE hardcoded migration pair must FAIL                   expected=1 actual=1  Ok
+CASE missing androidTest tree must be INCONCLUSIVE        expected=2 actual=2  Ok
+OVERALL PASS (13 case(s), 0 broken)
+EXITCODE=0
+# command: python -X utf8 .trae/scripts/validate_tasks.py
+
+PASS T-2026-09-21-quote-persistence-messages-column-037.md
+SUMMARY files=43 errors=0 warnings=12
+
+EXITCODE=0
+# ---------- run 18 (residual limitations, recorded deliberately for the independent verifier) ----------
+# command: PowerShell append (this block is a record, not a measurement)
+# L1 The rewritten judgement recognises exactly two call shapes, JUDGED_CALLS = assertEquals / execSQL.
+#    A user_version expectation expressed through ANOTHER shape -- e.g.
+#    assertTrue(rawInt(db, "PRAGMA user_version") == TreeLearnSchema.DATABASE_VERSION) -- is reported
+#    FAIL (fail-closed) even though it IS derived. The old window rule would have passed it. That
+#    direction is deliberate (requirement: unparseable => FAIL, never pass), but it means a future
+#    author adding such a shape must ADD THE CALL to JUDGED_CALLS and to the self-test: it will not
+#    pass silently.
+# L2 An expectation that COMPUTES the version (e.g. TreeLearnSchema.DATABASE_VERSION + 1) is also
+#    reported FAIL: the judged argument must BE an allowed constant, not merely contain one.
+# L3 The parser is regex + paren-stack, not a Java parser: comment stripping, literal masking and
+#    paren pairing are self-implemented approximations. Skew is possible on exotic source text, but
+#    every skew observed so far resolves to FAIL, never to a silent PASS.
+# L4 Root AGENTS.md (failure library) and artifacts/evidence/T-037-androidtest-static-check.txt still
+#    record the ROUND-1 self-test count of 8 cases; after this round it is 13. Those two surfaces are
+#    OUTSIDE this round's declared write boundary (guard script / its self-test / evidence / this task
+#    file's record sections), so they were left untouched rather than silently rewritten.
+# L5 The real-device row is unchanged and still deferred: 用户自行装机验证（user decision 2026-09-21）.
+#    Nothing in this round ran on a device or emulator; the guard is a static check and cannot
+#    substitute for execution.
+EXITCODE=0
+# ---------- run 19 (independent re-verification by the implementing agent, after the fix was in place) ----------
+# captured-at: 2026-09-22T01:16:14.5853949+08:00
+# cwd: D:\Project\Android\Treelearn
+# purpose: re-run every claim this round's report cites, first-hand, on the CURRENT tree. The runs above
+#          were made while building the fix; this block reproduces them end-to-end so the report's numbers
+#          come from a command whose full output is in this file, not from memory.
+# ---- 19a: the guard on the real tree ----
+# command: python -X utf8 .trae/scripts/dev/check_androidtest_schema_expectations.py
+OK   judged 8 PRAGMA user_version expectation(s) in androidTest
+OK   schema declares 8 trigger constant(s); suite references 8
+OK   no hardcoded schema version literal in androidTest
+OK   no restated trigger/column name literals in androidTest
+OK   EXPECTED_TRIGGERS is derived from expectedTriggers()
+OK   the fail-closed case uses the derived unregistered pair
+VERDICT: PASS
+EXITCODE=0
+# ---- 19b: the guard's self-test (13 cases, two directions) ----
+# command: python -X utf8 .trae/scripts/dev/check_androidtest_schema_expectations.py --selftest
+CASE baseline (unmodified tree) must PASS                 expected=0 actual=0  Ok
+CASE hardcoded user_version literal must FAIL             expected=1 actual=1  Ok
+CASE a SECOND hardcoded user_version expectation adjacent to a legitimate one must FAIL expected=1 actual=1  Ok
+CASE a SECOND derived user_version expectation adjacent to a legitimate one must PASS expected=0 actual=0  Ok
+CASE an execSQL user_version assignment by literal must FAIL expected=1 actual=1  Ok
+CASE a user_version expectation outside any judged call must FAIL expected=1 actual=1  Ok
+CASE a user_version expectation whose assertion arity cannot be judged must FAIL expected=1 actual=1  Ok
+CASE restated trigger name literal must FAIL              expected=1 actual=1  Ok
+CASE restated quote column literal must FAIL              expected=1 actual=1  Ok
+CASE unreferenced schema trigger constant must FAIL       expected=1 actual=1  Ok
+CASE inline EXPECTED_TRIGGERS literal must FAIL           expected=1 actual=1  Ok
+CASE hardcoded migration pair must FAIL                   expected=1 actual=1  Ok
+CASE missing androidTest tree must be INCONCLUSIVE        expected=2 actual=2  Ok
+OVERALL PASS (13 case(s), 0 broken)
+EXITCODE=0
+# ---- 19c: the probe with the CURRENT (fixed) guard -- distance must no longer decide ----
+# command: python -X utf8 artifacts/evidence/T-037-guard-window-probe.py
+guard under test   : D:\Project\Android\Treelearn\.trae\scripts\dev\check_androidtest_schema_expectations.py
+guard sha256       : d317a42021eba432ef39e70a963aa509040006cfe280273b3dcebfa34fa0ffad
+throwaway trees at : C:\Users\23745\AppData\Local\Temp\t037-guard-probe\trees   (outside the repo)
+probe_a  violation offset=36129  nearest allowed constant=143 chars  guard_exit=1  VERDICT: FAIL (1 problem(s))
+control  violation offset=36308  nearest allowed constant=322 chars  guard_exit=1  VERDICT: FAIL (1 problem(s))
+SAME_VERDICT=True  (probe_a=1 control=1)
+OK: the verdict does not depend on where the violation sits
+EXITCODE=0
+# ---- 19d: the SAME probe with the frozen PRE-FIX copy -- this is the fail-open reproduction ----
+# frozen pre-fix copy: C:\Users\23745\AppData\Local\Temp\t037-guard-probe\guard-prefix.py
+# copy SHA-256: E05789F42CC85234BFACFB27E0593A85B49148F48DA45F1000662967047D16DD  (expected E05789F42CC85234BFACFB27E0593A85B49148F48DA45F1000662967047D16DD)
+# command: python -X utf8 artifacts/evidence/T-037-guard-window-probe.py --guard "C:\Users\23745\AppData\Local\Temp\t037-guard-probe\guard-prefix.py"
+guard under test   : C:\Users\23745\AppData\Local\Temp\t037-guard-probe\guard-prefix.py
+guard sha256       : e05789f42cc85234bfacfb27e0593a85b49148f48da45f1000662967047d16dd
+throwaway trees at : C:\Users\23745\AppData\Local\Temp\t037-guard-probe\trees   (outside the repo)
+probe_a  violation offset=36129  nearest allowed constant=143 chars  guard_exit=0  VERDICT: PASS
+control  violation offset=36308  nearest allowed constant=322 chars  guard_exit=1  VERDICT: FAIL (1 problem(s))
+SAME_VERDICT=False  (probe_a=0 control=1)
+FAIL-OPEN: the SAME violation is exempted when it sits near an allowed constant
+EXITCODE=1   (1 = the probe REPORTED the defect, i.e. fail-open reproduced)
+# ---- 19e: parser-independent raw scan (rg) of every PRAGMA user_version site on the real tree ----
+# command: rg -n 'PRAGMA user_version' android/app/src/androidTest
+android/app/src/androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:293:                rawInt(db, "PRAGMA user_version"));
+android/app/src/androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:993:                TreeLearnSchema.DATABASE_VERSION, rawInt(db, "PRAGMA user_version"));
+android/app/src/androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:1053:            v1.execSQL("PRAGMA user_version = " + V1_SCHEMA_VERSION);
+android/app/src/androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:1055:                    V1_SCHEMA_VERSION, rawInt(v1, "PRAGMA user_version"));
+android/app/src/androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:1066:                TreeLearnSchema.DATABASE_VERSION, rawInt(upgraded, "PRAGMA user_version"));
+android/app/src/androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:1099:                rawInt(reopened, "PRAGMA user_version"));
+android/app/src/androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:1115:                0, rawInt(raw, "PRAGMA user_version"));
+android/app/src/androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:1124:                rawInt(opened, "PRAGMA user_version"));
+EXITCODE=0   (rg: 0 = matches found; this scan does NOT share the guard's parser)
+# occurrence count: 8   -- must equal the guard's own note 'judged 8 PRAGMA user_version expectation(s)'
+# per-site judgement read off the source (each must be a constant, or the untouched-zero form):
+#   293  rawInt(db, "PRAGMA user_version")                          -> untouched-zero assertEquals(0, ...)
+#   993  TreeLearnSchema.DATABASE_VERSION, rawInt(...)              -> derived
+#   1053 execSQL("PRAGMA user_version = " + V1_SCHEMA_VERSION)      -> derived (constant after =)
+#   1055 V1_SCHEMA_VERSION, rawInt(v1, ...)                         -> derived
+#   1066 TreeLearnSchema.DATABASE_VERSION, rawInt(upgraded, ...)    -> derived
+#   1099 rawInt(reopened, "PRAGMA user_version")                    -> untouched-zero
+#   1115 0, rawInt(raw, "PRAGMA user_version")                      -> untouched-zero
+#   1124 rawInt(opened, "PRAGMA user_version")                      -> derived
+# ---- 19f: task-file validator ----
+# command: python -X utf8 .trae/scripts/validate_tasks.py
+PASS T-2026-09-21-quote-persistence-messages-column-037.md
+SUMMARY files=43 errors=0 warnings=12
+EXITCODE=0
+# ---- guard identity as of this block ----
+# guard script SHA-256: D317A42021EBA432EF39E70A963AA509040006CFE280273B3DCEBFA34FA0FFAD
+# ---- end of run 19 ----
+# ---------- run 20 (final identities after the task-file record edit) ----------
+# captured-at: 2026-09-22T01:17:08.6500473+08:00
+# what changed after run 19: the Evidence bullet of the task file gained the run-19 record (one line replaced,
+# line count unchanged at 205, LF-only, no BOM). No production or androidTest source touched in this round.
+# task file SHA-256: 558864FB554F46D2260970CAA39DF3177C51D75FAE31C185FFD0E2D5E76FF616
+# task file status line: status: verifying
+# guard script SHA-256: D317A42021EBA432EF39E70A963AA509040006CFE280273B3DCEBFA34FA0FFAD
+# ---- validator re-run after the edit ----
+# command: python -X utf8 .trae/scripts/validate_tasks.py
+PASS T-2026-09-21-quote-persistence-messages-column-037.md
+SUMMARY files=43 errors=0 warnings=12
+EXITCODE=0
+# ---- end of run 20 ----

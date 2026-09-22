@@ -1,0 +1,15 @@
+=== VERIFY3 T-005 independent source scans (verifier rerun)  2026-09-21 21:53:30
+Mode: verifier rerun; emulator not used. All commands run from repo root.
+
+Command 1: rg -n 'android.util.Log|System\.out|System\.err|printStackTrace' android/data/src/main/java/com/treelearn/data/secret android/data/src/main/java/com/treelearn/data/settings
+  hits=0  rgExit=1
+Command 2: rg -n 'Bundle|Intent|ClipboardManager|putExtra|Parcelable' <same two dirs>
+  hits=0  rgExit=1
+Command 3: rg -n 'SQLite|ContentValues|rawQuery|execSQL|database' <same two dirs>
+  hits=0  rgExit=1
+Command 4: rg -n 'SYNTHETIC' android --glob '*.java'
+  matching lines = 39  rgExit=0
+    20  android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java
+    19  android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java
+  => SYNTHETIC is confined to exactly 2 files, both TEST sources (data/src/test and app/src/androidTest); no production file carries it.
+EXITCODE=0

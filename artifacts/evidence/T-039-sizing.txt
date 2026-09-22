@@ -1,0 +1,96 @@
+T-039 sizing evidence
+captured-at: 2026-09-22T03:14:42.8092098+08:00
+cwd: D:\Project\Android\Treelearn
+command: python -X utf8 -   (stdin block below is the exact scanned text)
+note: judgement = non-blank non-comment; physical is reference only (.trae/rules/harness-tasks.md line 45)
+# T-039 sizing scan
+# judgement lines = non-blank non-comment per .trae/rules/harness-tasks.md line 45
+import re
+
+def is_prose(s):
+    t = s.strip()
+    if not t: return True
+    return t.startswith("//") or t.startswith("/*") or t.startswith("*") or t.startswith("<!--")
+
+def count(path):
+    lines = open(path, encoding="utf-8").read().splitlines()
+    n = 0; closer = None
+    for ln in lines:
+        s = ln.strip()
+        if closer is not None:
+            if closer in s: closer = None
+            continue
+        if s.startswith("<!--"):
+            if "-->" not in s: closer = "-->"
+            continue
+        if s.startswith("/*"):
+            if "*/" not in s: closer = "*/"
+            continue
+        if is_prose(ln): continue
+        n += 1
+    return n, len(lines)
+
+def count_matched(path, pattern):
+    rx = re.compile(pattern); n = 0; total = 0
+    for ln in open(path, encoding="utf-8").read().splitlines():
+        total += 1
+        if is_prose(ln): continue
+        if rx.search(ln): n += 1
+    return n, total
+
+NEW = [
+ "android/app/src/main/java/com/treelearn/app/screen/NavigationScreen.java",
+ "android/app/src/main/res/layout/screen_navigation.xml",
+ "android/app/src/main/res/layout/screen_navigation_body.xml",
+ "android/app/src/main/res/layout/item_navigation_row.xml",
+ "android/app/src/main/res/layout-sw600dp/screen_navigation.xml",
+]
+CHANGED = [
+ ("android/app/src/main/java/com/treelearn/app/navigation/NavigationViewState.java", r"archivable|childCount|liveChildren"),
+ ("android/app/src/main/res/values/strings.xml", r'name="navigation_'),
+]
+REFERENCE = [
+ "android/app/src/test/java/com/treelearn/app/navigation/NavigationRootGateTest.java",
+]
+
+print("== NEW files (all judgement lines count) ==")
+sub = 0; subp = 0
+for p in NEW:
+    j, ph = count(p); sub += j; subp += ph
+    print("%5d judgement %5d physical  %s" % (j, ph, p))
+print("subtotal NEW = %d judgement / %d physical" % (sub, subp))
+
+print("== CHANGED files (only lines matching this task's identifiers count) ==")
+sub2 = 0; sub2p = 0
+for p, rx in CHANGED:
+    j, ph = count_matched(p, rx); sub2 += j; sub2p += ph
+    print("%5d matched  %5d physical  %s   rx=%s" % (j, ph, p, rx))
+print("subtotal CHANGED = %d judgement / %d physical" % (sub2, sub2p))
+
+print("== REFERENCE (not counted) ==")
+for p in REFERENCE:
+    j, ph = count(p)
+    print("%5d judgement %5d physical  %s" % (j, ph, p))
+
+total = sub + sub2
+print("== VERDICT ==")
+print("T-039 touched production judgement lines = %d  (new %d + changed %d)" % (total, sub, sub2))
+print("hard cap 500 -> over by %d lines (%.1f%%)" % (total - 500, (total - 500) * 100.0 / 500))
+---- output ----
+== NEW files (all judgement lines count) ==
+  285 judgement   350 physical  android/app/src/main/java/com/treelearn/app/screen/NavigationScreen.java
+   11 judgement    16 physical  android/app/src/main/res/layout/screen_navigation.xml
+  150 judgement   184 physical  android/app/src/main/res/layout/screen_navigation_body.xml
+   34 judgement    43 physical  android/app/src/main/res/layout/item_navigation_row.xml
+   16 judgement    19 physical  android/app/src/main/res/layout-sw600dp/screen_navigation.xml
+subtotal NEW = 496 judgement / 612 physical
+== CHANGED files (only lines matching this task's identifiers count) ==
+    8 matched    259 physical  android/app/src/main/java/com/treelearn/app/navigation/NavigationViewState.java   rx=archivable|childCount|liveChildren
+   30 matched    188 physical  android/app/src/main/res/values/strings.xml   rx=name="navigation_
+subtotal CHANGED = 38 judgement / 447 physical
+== REFERENCE (not counted) ==
+   86 judgement   119 physical  android/app/src/test/java/com/treelearn/app/navigation/NavigationRootGateTest.java
+== VERDICT ==
+T-039 touched production judgement lines = 534  (new 496 + changed 38)
+hard cap 500 -> over by 34 lines (6.8%)
+EXITCODE=0

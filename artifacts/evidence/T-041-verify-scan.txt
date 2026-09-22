@@ -1,0 +1,324 @@
+T-041 independent verification - source / artifact / doc scans (another lane holds the Gradle lock, so no Gradle run)
+captured-at: 2026-09-22 04:52:47 (Asia/Shanghai)
+cwd: D:\Project\Android\Treelearn
+runner: artifacts/evidence/T-041-verify-scan-runner.py (python -X utf8), every step flushed to this file
+verifier: independent of the implementing lane; read-only judgements, no production file was edited
+
+### 1 - git tracking of the 13 files T-041 cites (the task claims no per-task diff exists)
+command: git -c core.quotepath=false status --porcelain -- android/app/src/main/java/com/treelearn/app/ui/TextSelection.java android/app/src/main/java/com/treelearn/app/ui/WordMenu.java android/app/src/main/java/com/treelearn/app/ui/ChildBranch.java android/app/src/main/java/com/treelearn/app/wiring/BranchChildren.java android/app/src/main/java/com/treelearn/app/screen/WordMenuPopup.java android/app/src/main/java/com/treelearn/app/screen/ChildBranchPopup.java android/app/src/main/res/layout/popup_word_action.xml android/app/src/main/res/layout/popup_child_branches.xml android/app/src/main/res/layout/item_child_branch.xml android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java android/app/src/main/java/com/treelearn/app/ui/ChatSink.java android/app/src/main/java/com/treelearn/app/MainActivity.java android/app/src/main/res/values/strings.xml
+ M android/app/src/main/java/com/treelearn/app/MainActivity.java
+ M android/app/src/main/res/values/strings.xml
+?? android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java
+?? android/app/src/main/java/com/treelearn/app/screen/ChildBranchPopup.java
+?? android/app/src/main/java/com/treelearn/app/screen/WordMenuPopup.java
+?? android/app/src/main/java/com/treelearn/app/ui/ChatSink.java
+?? android/app/src/main/java/com/treelearn/app/ui/ChildBranch.java
+?? android/app/src/main/java/com/treelearn/app/ui/TextSelection.java
+?? android/app/src/main/java/com/treelearn/app/ui/WordMenu.java
+?? android/app/src/main/java/com/treelearn/app/wiring/BranchChildren.java
+?? android/app/src/main/res/layout/item_child_branch.xml
+?? android/app/src/main/res/layout/popup_child_branches.xml
+?? android/app/src/main/res/layout/popup_word_action.xml
+EXITCODE=0
+
+### 2 - chain 1 - QUOTE: menu row -> Listener.onQuoteRequested -> ChatScreen.Row.onQuotePressed -> ChatPresenter.onQuotePressed
+command: rg -n --no-heading --glob !build -e word_menu_quote|onQuoteRequested|onQuotePressed|chat_word_quote android/app/src/main/java/com/treelearn/app/screen/WordMenuPopup.java
+  39:        void onQuoteRequested();
+  68:        quoteRow = content.findViewById(R.id.word_menu_quote);
+  75:        quoteRow.setOnClickListener(row -> choose(listener::onQuoteRequested));
+EXITCODE=0
+command: rg -n --no-heading --glob !build -e onQuoteRequested|onQuotePressed|quotedFromAnswer|private String selectedText android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java
+  505:        private String selectedText() {
+  514:        private String quotedFromAnswer() {
+  529:        public void onQuotePressed(String id) {
+  530:            final String selection = quotedFromAnswer();
+  532:                fire(actions -> actions.onQuotePressed(id, selection));
+  583:        public void onQuoteRequested() {
+  584:            onQuotePressed(messageId);
+EXITCODE=0
+command: rg -n --no-heading --glob !build -e onQuotePressed|state.withQuote android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java
+  175:    public void onQuotePressed(String messageId, String anchorText) {
+  181:        render(state.withQuote(anchor).withNotice(null));
+  186:        render(state.withQuote(""));
+EXITCODE=0
+  QUOTE hops: popup listener -> screen -> presenter -> withQuote             OK
+
+### 3 - chain 2 - FORK: menu row -> onForkRequested -> ChatPresenter.onForkPressed -> fork() -> commands.fork -> ChatWiring.fork -> BranchCreation
+command: rg -n --no-heading --glob !build -e word_menu_fork|onForkRequested|onForkPressed android/app/src/main/java/com/treelearn/app/screen/WordMenuPopup.java
+  42:        void onForkRequested();
+  69:        forkRow = content.findViewById(R.id.word_menu_fork);
+  76:        forkRow.setOnClickListener(row -> choose(listener::onForkRequested));
+EXITCODE=0
+command: rg -n --no-heading --glob !build -e onForkRequested|onForkPressed android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java
+  547:        public void onForkPressed(String id) {
+  548:            fire(actions -> actions.onForkPressed(id));
+  588:        public void onForkRequested() {
+  589:            onForkPressed(messageId);
+EXITCODE=0
+command: rg -n --no-heading --glob !build -e onForkPressed|private void fork|commands.fork android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java
+  238:    public void onForkPressed(String messageId) {
+  409:    private void fork(final String messageId, final String question) {
+  410:        background.execute(() -> publish(commands.fork(messageId, question), true, false));
+EXITCODE=0
+command: rg -n --no-heading --glob !build -e public ChatCommandResult fork|BranchCreation|Branch.child android/app/src/main/java/com/treelearn/app/wiring/ChatWiring.java
+  27:import com.treelearn.data.db.dao.BranchCreation;
+  39: * {@link com.treelearn.app.generation.AnswerVersions}, a fork is {@link BranchCreation}, the request
+  144:    public ChatCommandResult fork(String messageId, String question) {
+  161:        // is minted inside Branch.child, while BranchCreation refuses a snapshot row that names any
+  166:        // implementation of a derivation the codec already owns, and BranchCreation would then be
+  176:        DomainResult<Branch> fork = Branch.child(parent.topicId, provenance.value(), now);
+  180:        Branch child = fork.value();
+  192:        BranchCreation.Outcome created = store.createBranch(child, new ContextSnapshotDao.Row(
+  200:        return ChatCommandResult.openedBranch(child.id);
+EXITCODE=0
+  FORK reuses the existing fork path, not a second creation route            OK
+
+### 4 - chain 3 - COPY: menu row -> onCopyRequested -> onSelectionCopyPressed -> ChatSink.copyToClipboard -> MainActivity sensitive clip
+command: rg -n --no-heading --glob !build -e word_menu_copy|onCopyRequested android/app/src/main/java/com/treelearn/app/screen/WordMenuPopup.java
+  45:        void onCopyRequested();
+  70:        copyRow = content.findViewById(R.id.word_menu_copy);
+  77:        copyRow.setOnClickListener(row -> choose(listener::onCopyRequested));
+EXITCODE=0
+command: rg -n --no-heading --glob !build -e onCopyRequested|onSelectionCopy|onSelectionCopyPressed android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java
+  593:        public void onCopyRequested() {
+  594:            onSelectionCopy(messageId);
+  598:        private void onSelectionCopy(String id) {
+  599:            fire(actions -> actions.onSelectionCopyPressed(selectedText()));
+EXITCODE=0
+command: rg -n --no-heading --glob !build -e onSelectionCopyPressed|copyToClipboard android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java
+  171:        sink.copyToClipboard(message.copyText(labels));
+  281:    public void onSelectionCopyPressed(String selection) {
+  286:        sink.copyToClipboard(text);
+EXITCODE=0
+command: rg -n --no-heading --glob !build -e copyToClipboard|EXTRA_IS_SENSITIVE|setPrimaryClip android/app/src/main/java/com/treelearn/app/MainActivity.java
+  367:    public void copyToClipboard(String text) {
+  375:            extras.putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, true);
+  378:        clipboard.setPrimaryClip(clip);
+EXITCODE=0
+  COPY reaches the same sensitive clipboard path as the answer row copy      OK
+
+### 5 - chain 4 - SELECT_ALL: row -> WordMenuPopup.selectAll -> TextSelection.whole -> applied to this answer's TextView
+command: rg -n --no-heading --glob !build -e word_menu_select_all|selectAll android/app/src/main/java/com/treelearn/app/screen/WordMenuPopup.java
+  58:    private final TextView selectAllRow;
+  71:        selectAllRow = content.findViewById(R.id.word_menu_select_all);
+  73:        selectAllRow.setContentDescription(
+  78:        selectAllRow.setOnClickListener(row -> selectAll());
+  148:    private void selectAll() {
+  183:                return selectAllRow;
+EXITCODE=0
+command: rg -n --no-heading --glob !build -e public static TextSelection whole android/app/src/main/java/com/treelearn/app/ui/TextSelection.java
+  27:    public static TextSelection whole(int length) {
+EXITCODE=0
+  SELECT_ALL is answered in the popup and acts on its own TextView           OK
+
+### 6 - enablement is data driven: WordMenu.entriesFor reads the message predicate, the popup only paints
+  [WordMenu.entriesFor body]
+  WordMenu.java:64:     /** The items to draw for one answer, in menu order, with the flag each item is pressable at. */
+  WordMenu.java:65:     public static List<Entry> entriesFor(ChatMessage message, String selection) {
+  WordMenu.java:66:         boolean selected = selection != null && !selection.trim().isEmpty();
+  WordMenu.java:67:         List<Entry> entries = new ArrayList<Entry>(4);
+  WordMenu.java:68:         entries.add(new Entry(Item.QUOTE, message.canQuote() && selected));
+  WordMenu.java:69:         if (message.canFork()) {
+  WordMenu.java:70:             entries.add(new Entry(Item.FORK, message.canFork() && selected));
+  WordMenu.java:71:         }
+  WordMenu.java:72:         entries.add(new Entry(Item.COPY, selected));
+  WordMenu.java:73:         entries.add(new Entry(Item.SELECT_ALL, true));
+  WordMenu.java:74:         return entries;
+  WordMenu.java:75:     }
+  [ChatMessage predicates]
+  ChatMessage.java:137:     /** Only a finished version may be copied; a partial answer is not "the answer". */
+  ChatMessage.java:138:     public boolean canCopy() {
+  ChatMessage.java:139:         return isStable();
+  ChatMessage.java:140:     }
+  ChatMessage.java:141: 
+  ChatMessage.java:142:     public boolean canQuote() {
+  ChatMessage.java:143:         return isStable();
+  ChatMessage.java:144:     }
+  ChatMessage.java:145: 
+  ChatMessage.java:146:     public boolean canFork() {
+  ChatMessage.java:147:         return isStable();
+  ChatMessage.java:148:     }
+  [WordMenuPopup.bind - rows are shown/enabled/faded from the entries]
+  WordMenuPopup.java:134:     private void bind() {
+  WordMenuPopup.java:135:         String selected = current().read(answer.getText().toString());
+  WordMenuPopup.java:136:         selectionLabel.setText(answer.getContext()
+  WordMenuPopup.java:137:                 .getString(R.string.chat_word_selection, selected));
+  WordMenuPopup.java:138:         forkRow.setVisibility(View.GONE);
+  WordMenuPopup.java:139:         for (WordMenu.Entry entry : WordMenu.entriesFor(message, selected)) {
+  WordMenuPopup.java:140:             TextView row = row(entry.item);
+  WordMenuPopup.java:141:             row.setVisibility(View.VISIBLE);
+  WordMenuPopup.java:142:             row.setEnabled(entry.enabled);
+  WordMenuPopup.java:143:             row.setAlpha(entry.enabled ? 1f : DISABLED_ALPHA);
+  WordMenuPopup.java:144:         }
+  WordMenuPopup.java:145:     }
+  enabled flags come from ChatMessage predicates, never from a state check in the popup OK
+  note: a row set View.setEnabled(false) still consumes the touch but View.onTouchEvent returns early,
+  so the click listener is never invoked - a greyed item is not triggerable (platform rule; device-verifiable).
+EXITCODE=0
+
+### 7 - child-branch popup: construction, empty behavior, and the screen-overflow affordance
+command: rg -n --no-heading --glob !build -e openChildren android/app/src/main/java/com/treelearn/app/MainActivity.java
+  388:    public void openChildren(String branchId, String messageId, List<ChildBranch> children) {
+EXITCODE=0
+command: rg -n --no-heading --glob !build -e showChildren|ChildBranchPopup.show|children.isEmpty|childrenAnchor android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java
+  359:    public void showChildren(String messageId, List<ChildBranch> children,
+  363:        if (row == null || children.isEmpty()) {
+  366:        childrenPopup = ChildBranchPopup.show(row.childrenAnchor(), children, listener);
+  562:        View childrenAnchor() {
+EXITCODE=0
+command: rg -n --no-heading --glob !build -e showAsDropDown|addView android/app/src/main/java/com/treelearn/app/screen/ChildBranchPopup.java
+  63:            list.addView(row(inflater, list, context, child, shown, listener));
+  65:        popup.showAsDropDown(anchor);
+EXITCODE=0
+  [popup_child_branches.xml: is the list inside a scroll container?]
+  popup_child_branches.xml:22: 
+  popup_child_branches.xml:23:     <LinearLayout
+  popup_child_branches.xml:24:         android:id="@+id/child_branches_list"
+  popup_child_branches.xml:25:         android:layout_width="match_parent"
+  popup_child_branches.xml:26:         android:layout_height="wrap_content"
+  popup_child_branches.xml:27:         android:orientation="vertical" />
+  popup_child_branches.xml:28: </LinearLayout>
+  [contrast: the navigation page's list sits inside a ScrollView]
+command: rg -n --no-heading --glob !build -e ScrollView android/app/src/main/res/layout/screen_navigation.xml
+  6:<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+  16:</ScrollView>
+EXITCODE=0
+  popup adds every child with no cap and no scroll container, while the navigation list is inside a ScrollView OK
+
+### 8 - the openChildren seam: the branchId parameter has no consumer
+  MainActivity.java:383:      * The child-branch list of one answer. The branches were read before this was called, so the list
+  MainActivity.java:384:      * is drawn from what the presenter handed over; its rows open a branch the same way every other
+  MainActivity.java:385:      * branch is opened, and leaving the list without choosing one opens nothing.
+  MainActivity.java:386:      */
+  MainActivity.java:387:     @Override
+  MainActivity.java:388:     public void openChildren(String branchId, String messageId, List<ChildBranch> children) {
+  MainActivity.java:389:         chatScreen.showChildren(messageId, children, this::openBranch);
+  MainActivity.java:390:     }
+  MainActivity.openChildren ignores its branchId argument (dead parameter on the ChatSink port) OK
+
+### 9 - second judgement point / producer-less overload scan
+command: rg -n --no-heading --glob !build -e public boolean canFork android/app/src/main/java/com/treelearn/app/ui/ChatMessage.java
+  146:    public boolean canFork() {
+EXITCODE=0
+  canFork is defined exactly once in production code                         OK
+command: rg -n --no-heading --glob !build -e BranchChildren.of|BranchChildren.countsOf android/app/src/main
+  android/app/src/main\java\com\treelearn\app\wiring\SqliteChatStore.java:104:        for (Branch child : BranchChildren.of(BranchDao.findByTopic(database, branch.topicId),
+  android/app/src/main\java\com\treelearn\app\wiring\SqliteChatStore.java:227:        return BranchChildren.countsOf(BranchDao.findByTopic(database, topicId));
+EXITCODE=0
+  childBranchCount and the popup list share one rule (BranchChildren)        OK
+command: rg -n --no-heading --glob !build -e new ReadingSession|openChildren android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java
+  82:        this.session = new ReadingSession(require(reading, "reading"));
+  271:            ui.post(() -> sink.openChildren(branchId, messageId, children));
+EXITCODE=0
+command: rg -n --no-heading --glob !build -e openChildren android/app/src/main
+  android/app/src/main\java\com\treelearn\app\MainActivity.java:388:    public void openChildren(String branchId, String messageId, List<ChildBranch> children) {
+  android/app/src/main\java\com\treelearn\app\ui\ChatPresenter.java:271:            ui.post(() -> sink.openChildren(branchId, messageId, children));
+  android/app/src/main\java\com\treelearn\app\ui\ChatSink.java:37:    void openChildren(String branchId, String messageId, List<ChildBranch> children);
+EXITCODE=0
+  openChildren has a production caller in ChatPresenter                      OK
+
+### 10 - sizing recount (my own count, same rule as the task: new files all non-blank non-comment lines)
+     61  android/app/src/main/java/com/treelearn/app/ui/TextSelection.java
+     56  android/app/src/main/java/com/treelearn/app/ui/WordMenu.java
+     12  android/app/src/main/java/com/treelearn/app/ui/ChildBranch.java
+     41  android/app/src/main/java/com/treelearn/app/wiring/BranchChildren.java
+    135  android/app/src/main/java/com/treelearn/app/screen/WordMenuPopup.java
+     60  android/app/src/main/java/com/treelearn/app/screen/ChildBranchPopup.java
+     91  android/app/src/main/res/layout/popup_word_action.xml
+     21  android/app/src/main/res/layout/popup_child_branches.xml
+     25  android/app/src/main/res/layout/item_child_branch.xml
+  (A) my subtotal for the 9 new files = 502 (task reported 502)
+  ChatScreen.java                                                           29
+  ChatSink.java                                                              1
+  MainActivity.java                                                          2
+  strings.xml                                                               10
+  (B) my subtotal for the changed files = 42 (task reported 42)
+  my judgement total = 544 ; hard limit 500
+EXITCODE=0
+  the 9 new files alone exceed the 500-line hard limit without a recorded user approval OK
+
+### 11 - wording scans: the deleted placeholder, the fork button wording, and the canFork definition
+  scan android/ for the deleted placeholder + its string name: hits=0
+  the deleted placeholder has no producer and no reference in android/       OK
+  scan app/src/main for the button word: hits=0
+  no button word left under app/src/main                                     OK
+  scan android/ for the button word (data-concept prose is expected): hits=14
+    android\README.md:233: | `BranchDao` | `branches` | **`BranchSource.restore` 在 `:data` 生产源码里只出现这一次**（只读映射；检索命令与输出见 `artifacts/evidence/T-022-restore-location.txt`）；`insert` 
+    android\README.md:243: | `FirstTopicCreation` | `topics` + 根 `branches` + 两条 `messages` + `generation_operations`（跨表） | **首题的五类行在一个事务里全成或全败**：复用 `DatabaseTransactionRunner`，
+    android\README.md:244: | `SearchDao` | `branches` + `messages` + `answer_revisions` + `generation_operations`（六臂 `UNION ALL` 跨表） | 本仓唯一读多表的 SQL（技术方案 §6.3）。六个字段各一臂：标题、分叉锚点引文、
+    android\README.md:276: `anchor_quote` / `anchor_hash` **要么一起为空**（整条回答分叉），**要么一起非空且 `start < end`**
+    android\README.md:277: （ranged 分叉）。划界是刻意的，且**只有方向这一条是两层都判的**：
+    android\README.md:302: 带 `ON DELETE CASCADE`——直接删一条稳定回答会**连带删掉以它为来源的整棵分叉子树**，这是远超
+    android\README.md:551: 分叉、归档不可搜、展示顺序、阅读位置四列往返、`ON DELETE SET NULL`、清空）**只编译、未执行**，一律记为
+    android\README.md:601: 因此父分支切版（含手动切回旧版）之后，旧子分支仍指向它被分叉时的 revision 与正文。
+    android\README.md:678: - **按钮叫「新建分支」，数据仍叫「分叉」**：`chat_act_fork` 与相关 `contentDescription` 统一为「新建分支」
+    android\README.md:679: （PRD 6.2.19 第 4 条），`app/src/main` 下已无「分叉」二字；本节在描述 `anchor_quote` / `source_revision_id` /
+    android\README.md:680: 级联这类**数据概念**时仍写「分叉」，因为那是 schema 与既有文档里的名词，不是按钮文案。
+    android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:309: child.put(TreeLearnSchema.Branches.TITLE, "合成分叉标题");
+    android\app\src\androidTest\java\com\treelearn\app\TreeCanvasStoreInstrumentedTest.java:193: String forkEnvelope = summaryEnvelope("分叉自己的摘要。", "分叉要点");
+    android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:269: // mandatory ("整条回答分叉时偏移为空，但版本引用仍必填"). The schema follows the domain
+EXITCODE=0
+
+### 12 - evidence artifacts are self-证: captured-at / cwd / command / EXITCODE per file
+  file                                     captured-at cwd   command  EXITCODE 
+  T-041-check.txt                          True        True  True     True     
+  T-041-design-tokens-selftest.txt         True        True  True     True     
+  T-041-design-tokens.txt                  True        True  True     True     
+  T-041-green-counts.txt                   True        True  True     True     
+  T-041-green-uncached.txt                 True        True  True     True     
+  T-041-green.txt                          True        True  True     True     
+  T-041-hygiene.txt                        True        True  True     True     
+  T-041-no-kotlin.txt                      True        True  True     True     
+  T-041-red.txt                            True        True  True     True     
+  T-041-reverify-2026-09-22.txt            True        True  True     True     
+  T-041-scans.txt                          True        True  True     True     
+  T-041-sizing.txt                         True        True  True     True     
+  T-041-validate.txt                       True        True  True     True     
+  T-041-verify-scan.txt                    True        True  True     True     
+  every T-041 evidence file carries captured-at and EXITCODE                 OK
+EXITCODE=0
+
+### 13 - mtimes: the cited evidence against the source it describes
+  ChatScreen.java        2026-09-22 04:20:29.497823
+  MainActivity.java      2026-09-22 04:40:34.077716
+  strings.xml            2026-09-22 04:39:37.721411
+  ChildBranchPopup.java  2026-09-22 02:25:18.285343
+  WordMenuPopup.java     2026-09-22 02:25:13.138612
+  WordMenu.java          2026-09-22 02:20:52.251921
+  popup_child_branches.xml 2026-09-22 02:21:31.966223
+  T-041-check.txt        2026-09-22 02:28:40.357825
+  T-041-design-tokens-selftest.txt 2026-09-22 02:30:46.851174
+  T-041-design-tokens.txt 2026-09-22 02:30:46.770539
+  T-041-green-counts.txt 2026-09-22 02:27:57.505388
+  T-041-green-uncached.txt 2026-09-22 02:27:45.742399
+  T-041-green.txt        2026-09-22 02:27:10.496608
+  T-041-hygiene.txt      2026-09-22 02:37:54.945906
+  T-041-no-kotlin.txt    2026-09-22 02:30:13.761663
+  T-041-red.txt          2026-09-22 02:20:15.356103
+  T-041-reverify-2026-09-22.txt 2026-09-22 02:44:15.348008
+  T-041-scans.txt        2026-09-22 02:36:10.851745
+  T-041-sizing.txt       2026-09-22 02:33:39.864711
+  T-041-validate.txt     2026-09-22 02:37:13.792753
+  T-041-verify-scan.txt  2026-09-22 04:52:48.059237
+  newest T-041 evidence mtime = 2026-09-22 04:52:48.059237
+EXITCODE=0
+
+### 14 - the sizing numbers as written in the task file and the delivery report
+  task file mentions 544   : True
+  task file mentions 727   : True
+  task file mentions 502   : True
+  task file mentions 534   : False
+  task file mentions 549   : False
+  report: `WordMenuPopup` 11、`ChildBranchPopup` 4、`BranchChildren` 2（T-041）；`treelearn_quote` 4（T-044）；
+  report: | 对话页长按划词四项菜单（追问 / 新建分支 / 复制 / 全选）与「子分支」列表弹层〔2026-09-22 更新，T-041〕 | `screen/WordMenuPopup` 由 `ChatScreen.Row` 的 `OnLongClickListener` 构造；`screen/ChildBranchPopup` 由 `MainActivity.openChildren` 构造，行由 `wiring/BranchChildren` 判定 |
+  report: | T-041 划词四项菜单 + 子分支弹层 | `verifying` | 〔2026-09-22 更新〕实现已落盘且**已进入产物**（第 2 节 dex 核对 `WordMenuPopup` / `ChildBranchPopup` / `BranchChildren`）；实测规模 534~549 行（两口径）**超 500 硬上限，待用户裁定**，故未收口 |
+  report: T-041 的两口径：实现者给的 496（新增 5 文件）+ 38（改动行）= **534**；交付复核者按同一规则重数得 511 + 38 = **549**。
+  report: 重开读回 → 重试 / 分叉）代码路径可达；划词四项菜单（T-041）、引用进请求（T-044）、导航页与树画布
+  report: 1. **用户裁定规模例外**：第 7 节列出的越线任务（含 T-032 的 793 行、T-041 的 534~549、**T-039 的 646**）
+  report: T-039、T-041、T-044 已落盘并进入产物，不再重排。
+EXITCODE=0
+
+== overall ==
+checks run = 14 ; failed = 0
+VERIFY-SCAN PASSED
+EXITCODE=0

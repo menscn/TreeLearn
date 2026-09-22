@@ -1,0 +1,285 @@
+T-040 independent verification - static scans (another lane holds the Gradle lock; no Gradle was run)
+captured-at: 2026-09-22 05:05:26 (Asia/Shanghai)
+cwd: D:\Project\Android\Treelearn
+runner: artifacts/evidence/T-040-verify-scan-runner.py (python -X utf8), every section flushed
+verifier: independent of the implementing lane; read-only judgements, no production file was touched
+
+### 1 - home_search: no hard disable, a real listener, and no dynamic re-disable
+command: python -X utf8 (regex-extract every element block keyed by @+id in res/layout/screen_home_body.xml)
+  home_search: block found=True ; contains android:enabled=False
+  home_send: block found=True ; contains android:enabled=True
+EXITCODE=0
+
+JUDGEMENT home_search carries no android:enabled         OK   (extracted block)
+JUDGEMENT positive control home_send DOES carry one      OK   (extractor is not blind)
+command: python -X utf8 (count android:enabled="false" in screen_home_body.xml and name its owner)
+  screen_home_body.xml:159| android:enabled="false"
+EXITCODE=0
+
+command: python -X utf8 (read java/com/treelearn/app/screen/HomeScreen.java; keep lines containing findViewById(R.id.home_search) | search =  | search.setOnClickListener | actions.onSearchPressed() | setEnabled | Button search)
+  java/com/treelearn/app/screen/HomeScreen.java:39| private final Button search;
+  java/com/treelearn/app/screen/HomeScreen.java:62| search = findViewById(R.id.home_search);
+  java/com/treelearn/app/screen/HomeScreen.java:122| search.setOnClickListener(view -> {
+  java/com/treelearn/app/screen/HomeScreen.java:124| actions.onSearchPressed();
+  java/com/treelearn/app/screen/HomeScreen.java:160| send.setEnabled(state.canSubmit());
+  java/com/treelearn/app/screen/HomeScreen.java:161| archived.setEnabled(!state.topics.isEmpty());
+EXITCODE=0
+
+JUDGEMENT dynamic disable of search              OK   (search.setEnabled must not appear)
+
+### 2 - home entry -> presenter -> host -> real search screen (production call chain)
+command: python -X utf8 (read java/com/treelearn/app/ui/HomeActions.java; keep lines containing onSearchPressed)
+  java/com/treelearn/app/ui/HomeActions.java:28| void onSearchPressed();
+EXITCODE=0
+
+command: python -X utf8 (read java/com/treelearn/app/ui/HomeSink.java; keep lines containing openSearch)
+  java/com/treelearn/app/ui/HomeSink.java:35| void openSearch();
+EXITCODE=0
+
+command: python -X utf8 (read java/com/treelearn/app/ui/HomePresenter.java; keep lines containing onSearchPressed | openSearch | onArchivedPressed)
+  java/com/treelearn/app/ui/HomePresenter.java:115| public void onArchivedPressed() {
+  java/com/treelearn/app/ui/HomePresenter.java:166| * name, so the guard that lives on {@link #onArchivedPressed()} is not copied here.
+  java/com/treelearn/app/ui/HomePresenter.java:169| public void onSearchPressed() {
+  java/com/treelearn/app/ui/HomePresenter.java:170| sink.openSearch();
+EXITCODE=0
+
+command: python -X utf8 (read java/com/treelearn/app/MainActivity.java; keep lines containing public void openSearch() | private void showSearch() | new SearchScreen( | new SearchPresenter( | container.searchRepository() | container.branchTitles() | searchScreen = null)
+  java/com/treelearn/app/MainActivity.java:282| final BranchTitles titles = container.branchTitles();
+  java/com/treelearn/app/MainActivity.java:357| public void openSearch() {
+  java/com/treelearn/app/MainActivity.java:413| searchScreen = null;
+  java/com/treelearn/app/MainActivity.java:457| searchScreen = null;
+  java/com/treelearn/app/MainActivity.java:495| searchScreen = null;
+  java/com/treelearn/app/MainActivity.java:543| searchScreen = null;
+  java/com/treelearn/app/MainActivity.java:575| private void showSearch() {
+  java/com/treelearn/app/MainActivity.java:586| searchScreen = new SearchScreen(this);
+  java/com/treelearn/app/MainActivity.java:587| searchPresenter = new SearchPresenter(this, container.uiThread(), container.background(),
+  java/com/treelearn/app/MainActivity.java:588| container.searchRepository());
+EXITCODE=0
+
+
+### 3 - SearchPresenter.Sink: render(state) and openAnchor(topicId, branchId, ReadingAnchor)
+command: python -X utf8 (read java/com/treelearn/app/search/SearchPresenter.java; keep lines containing interface Sink | void render( | void openAnchor( | public class SearchPresenter | class SearchPresenter)
+  java/com/treelearn/app/search/SearchPresenter.java:31| public final class SearchPresenter {
+  java/com/treelearn/app/search/SearchPresenter.java:34| public interface Sink {
+  java/com/treelearn/app/search/SearchPresenter.java:36| void render(SearchViewState state);
+  java/com/treelearn/app/search/SearchPresenter.java:45| void openAnchor(String topicId, String branchId, ReadingAnchor anchor);
+  java/com/treelearn/app/search/SearchPresenter.java:151| private void render(SearchViewState next) {
+EXITCODE=0
+
+command: python -X utf8 (read java/com/treelearn/app/MainActivity.java; keep lines containing SearchPresenter.Sink | public void render(SearchViewState | public void openAnchor( | showChat(branchId, anchor))
+  java/com/treelearn/app/MainActivity.java:66| SearchPresenter.Sink {
+  java/com/treelearn/app/MainActivity.java:277| public void render(SearchViewState state) {
+  java/com/treelearn/app/MainActivity.java:299| public void openAnchor(String topicId, String branchId, ReadingAnchor anchor) {
+  java/com/treelearn/app/MainActivity.java:300| showChat(branchId, anchor);
+EXITCODE=0
+
+command: python -X utf8 (count every showChat( call site under app/src/main - is there a second door?)
+  java/com/treelearn/app/MainActivity.java:195| showChat(chatBranchId);
+  java/com/treelearn/app/MainActivity.java:204| showChat(navigationBranchId);
+  java/com/treelearn/app/MainActivity.java:208| showChat(treeBranchId);
+  java/com/treelearn/app/MainActivity.java:235| showChat(branchId);
+  java/com/treelearn/app/MainActivity.java:294| * {@link #showChat(String, ReadingAnchor)}, the door T-042 built, so a search jump and a restore on
+  java/com/treelearn/app/MainActivity.java:300| showChat(branchId, anchor);
+  java/com/treelearn/app/MainActivity.java:318| showChat(treeBranchId);
+  java/com/treelearn/app/MainActivity.java:431| private void showChat(String branchId) {
+  java/com/treelearn/app/MainActivity.java:432| showChat(branchId, null);
+  java/com/treelearn/app/MainActivity.java:445| private void showChat(String branchId, ReadingAnchor explicitAnchor) {
+  java/com/treelearn/app/MainActivity.java:558| showChat(selected);
+EXITCODE=0
+
+JUDGEMENT exactly one anchored jump call site            OK   (found 1)
+JUDGEMENT anchored jump lives in MainActivity            OK   (host only)
+
+### 4 - the store reads run on the injected background executor
+command: python -X utf8 (read java/com/treelearn/app/search/SearchPresenter.java; keep lines containing background.execute | repository.search( | isStillReachable( | ui.post | private void search()
+  java/com/treelearn/app/search/SearchPresenter.java:85| background.execute(() -> search(query));
+  java/com/treelearn/app/search/SearchPresenter.java:96| background.execute(() -> search(query));
+  java/com/treelearn/app/search/SearchPresenter.java:112| background.execute(() -> {
+  java/com/treelearn/app/search/SearchPresenter.java:113| final boolean reachable = repository.isStillReachable(hit);
+  java/com/treelearn/app/search/SearchPresenter.java:114| ui.post(() -> applyTap(hit, reachable));
+  java/com/treelearn/app/search/SearchPresenter.java:128| private void search(SearchQuery query) {
+  java/com/treelearn/app/search/SearchPresenter.java:130| List<SearchHit> hits = repository.search(query);
+  java/com/treelearn/app/search/SearchPresenter.java:131| ui.post(() -> apply(query, hits, null));
+  java/com/treelearn/app/search/SearchPresenter.java:134| ui.post(() -> apply(query, null, failure));
+EXITCODE=0
+
+
+### 5 - the screen/page never re-filter or re-sort the hits
+command: python -X utf8 (non-comment lines of java/com/treelearn/app/screen/SearchScreen.java matching sort|Comparator|filter)
+  non-comment lines=111 ; matches=0
+EXITCODE=0
+
+JUDGEMENT no re-sort/re-filter in SearchScreen.java      OK   (0 match(es))
+command: python -X utf8 (non-comment lines of java/com/treelearn/app/search/SearchPage.java matching sort|Comparator|filter)
+  non-comment lines=69 ; matches=0
+EXITCODE=0
+
+JUDGEMENT no re-sort/re-filter in SearchPage.java        OK   (0 match(es))
+command: python -X utf8 (read java/com/treelearn/app/search/SearchPage.java; keep lines containing for (SearchHit hit : state.hits) | paneOf | Pane.GUIDE | Pane.EMPTY | Pane.LIST)
+  java/com/treelearn/app/search/SearchPage.java:60| Pane pane = paneOf(state);
+  java/com/treelearn/app/search/SearchPage.java:61| if (pane != Pane.LIST) {
+  java/com/treelearn/app/search/SearchPage.java:66| for (SearchHit hit : state.hits) {
+  java/com/treelearn/app/search/SearchPage.java:79| public static Pane paneOf(SearchViewState state) {
+  java/com/treelearn/app/search/SearchPage.java:82| return Pane.GUIDE;
+  java/com/treelearn/app/search/SearchPage.java:86| return state.hits.isEmpty() ? Pane.EMPTY : Pane.LIST;
+EXITCODE=0
+
+
+### 6 - SqliteSearchRepository / SearchDao: signature and the T-015 semantics
+command: python -X utf8 (read java/com/treelearn/app/search/SearchRepository.java; keep lines containing List<SearchHit> search( | boolean isStillReachable()
+  java/com/treelearn/app/search/SearchRepository.java:23| List<SearchHit> search(SearchQuery query);
+  java/com/treelearn/app/search/SearchRepository.java:32| boolean isStillReachable(SearchHit hit);
+EXITCODE=0
+
+command: python -X utf8 (read java/com/treelearn/app/search/SqliteSearchRepository.java; keep lines containing public SqliteSearchRepository( | public List<SearchHit> search( | public boolean isStillReachable( | SearchDao.search( | BranchDao.findById( | MessageDao.findById()
+  java/com/treelearn/app/search/SqliteSearchRepository.java:31| public SqliteSearchRepository(SQLiteDatabase database) {
+  java/com/treelearn/app/search/SqliteSearchRepository.java:36| public List<SearchHit> search(SearchQuery query) {
+  java/com/treelearn/app/search/SqliteSearchRepository.java:37| return SearchDao.search(database, Guard.object(query, "query"));
+  java/com/treelearn/app/search/SqliteSearchRepository.java:41| public boolean isStillReachable(SearchHit hit) {
+  java/com/treelearn/app/search/SqliteSearchRepository.java:43| Branch branch = BranchDao.findById(database, hit.branchId);
+  java/com/treelearn/app/search/SqliteSearchRepository.java:50| return MessageDao.findById(database, hit.messageId) != null;
+EXITCODE=0
+
+command: python -X utf8 (SearchDao: the two phrases the T-015 contract rests on)
+  SearchDao.java contains ACTIVE_REVISION_ID       x1
+  SearchDao.java contains ARCHIVED_AT              x1
+  SearchDao.java contains IS NULL                  x1
+  SearchDao.java contains UNION ALL                x2
+EXITCODE=0
+
+### 7 - sizing recomputed independently (rule: new files whole, pre-existing files only by changed lines)
+command: python -X utf8 .trae/scripts/dev/count_production_lines.py <the 8 new files>
+       4  android/app/src/main/java/com/treelearn/app/search/BranchTitles.java
+      69  android/app/src/main/java/com/treelearn/app/search/SearchPage.java
+     111  android/app/src/main/java/com/treelearn/app/screen/SearchScreen.java
+      29  android/app/src/main/java/com/treelearn/app/wiring/SqliteSearchStore.java
+      11  android/app/src/main/res/layout/screen_search.xml
+     117  android/app/src/main/res/layout/screen_search_body.xml
+      38  android/app/src/main/res/layout/item_search_hit.xml
+      16  android/app/src/main/res/layout-sw600dp/screen_search.xml
+     395  TOTAL (non-blank, non-comment, production files only)
+EXITCODE=0
+
+command: python -X utf8 (split each patch at '*** Update File:'/'*** Add File:'; keep Update sections only;
+         take lines starting with '+' but not '+++'; drop blank; tight predicate also drops // /* * <!-- lines)
+  patch4.txt   update-section added lines: tight=6 loose=20
+  patch5.txt   update-section added lines: tight=0 loose=0
+  patch6.txt   update-section added lines: tight=13 loose=19
+  patch8.txt   update-section added lines: tight=33 loose=51
+  patch9.txt   update-section added lines: tight=70 loose=99
+EXITCODE=0
+
+JUDGEMENT patch record is non-empty (empty set must fail) OK   (tight=122)
+JUDGEMENT sizing: new files=395 + shared (tight)=122 .. 189 (loose) => TOTAL=517 .. 584 ; hard cap 500
+  => OVER the 500 hard cap on the strictest reading. Verifier records it; the approval is the user's.
+
+### 8 - the release APK carries the search page (dex string-table scan, done here, not copied)
+apk-path: D:\Project\Android\Treelearn\android\app\build\outputs\apk\release\app-release.apk
+apk-bytes: 522389
+apk-mtime: 2026-09-22 04:58:17
+apk-sha256: AA40169C6D40780B292B111115B24255AB44152B0705BBD30D97618080CD2240
+command: python -X utf8 (zipfile: scan every classes*.dex byte stream for the symbol names)
+dex files: classes.dex
+  [must be present] SearchScreen           = 7
+  [must be present] SearchPage             = 6
+  [must be present] BranchTitles           = 2
+  [must be present] SqliteSearchStore      = 2
+  [must be present] onSearchPressed        = 1
+  [must be present] openAnchor             = 1
+  [must be present] showSearch             = 1
+  [must be present] searchRepository       = 1
+  [must be absent ] SearchPageTest         = 0
+  [must be absent ] HomeSearchEntryTest    = 0
+  [must be absent ] SearchJumpTest         = 0
+  [must be absent ] SearchPresenterTest    = 0
+  [must be absent ] ChatReadingTest        = 0
+JUDGEMENT every file T-040 ADDED is older than the APK   OK   (newest added file SearchPage.java @04:44:58)
+  observation: shared pre-existing files, mtime vs APK (a later mtime means another lane wrote it)
+    05:05:02 AFTER-APK android/app/src/main/res/values/strings.xml
+    04:40:22 before    android/app/src/main/java/com/treelearn/app/screen/HomeScreen.java
+    04:40:22 before    android/app/src/main/java/com/treelearn/app/AppContainer.java
+    04:39:33 before    android/app/src/main/res/layout/screen_home_body.xml
+    04:38:42 before    android/app/src/main/java/com/treelearn/app/ui/HomePresenter.java
+    04:38:42 before    android/app/src/main/java/com/treelearn/app/ui/HomeActions.java
+    04:38:42 before    android/app/src/main/java/com/treelearn/app/ui/HomeSink.java
+  => a shared file touched after the build is the parallel lane's, not a T-040 defect; the package
+     must be rebuilt before shipping, and this ordering check re-run once the other lane settles
+  observation: files newer than the APK in the tree = 7 (the parallel lane's, not T-040's)
+    05:05:02 android/app/src/main/res/values/strings.xml
+    05:05:02 android/app/src/main/res/layout/screen_chat_body.xml
+    05:05:02 android/app/src/main/java/com/treelearn/app/ui/HomeViewState.java
+    05:05:02 android/app/src/main/java/com/treelearn/app/screen/NoticeText.java
+    05:04:49 android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java
+    05:04:26 android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java
+  => the package was built from the T-040 tree state; re-run this check after the other lane settles
+EXITCODE=0
+
+### 9 - documentation and resources
+command: python -X utf8 (read res/values/strings.xml; keep lines containing search_)
+  res/values/strings.xml:26| <string name="search_back">返回</string>
+  res/values/strings.xml:27| <string name="search_hint">标题、锚定原文、回答、推理…</string>
+  res/values/strings.xml:28| <string name="search_scope">标题 · 锚定原文 · 回答 · 推理</string>
+  res/values/strings.xml:29| <string name="search_guide">输入关键词开始搜索</string>
+  res/values/strings.xml:30| <string name="search_searching">正在搜索本机内容…</string>
+  res/values/strings.xml:31| <string name="search_empty">没有找到「%1$s」</string>
+  res/values/strings.xml:32| <string name="search_error">搜索暂时读不出来，稍后重试即可。</string>
+  res/values/strings.xml:33| <string name="search_field_title">分支标题</string>
+  res/values/strings.xml:34| <string name="search_field_anchor">锚定原文</string>
+  res/values/strings.xml:35| <string name="search_field_answer">AI 回答</string>
+  res/values/strings.xml:36| <string name="search_field_reasoning">AI 推理</string>
+  res/values/strings.xml:37| <string name="search_field_partial_answer">部分回答</string>
+  res/values/strings.xml:38| <string name="search_field_partial_reasoning">部分推理</string>
+EXITCODE=0
+
+command: python -X utf8 (README.md lines mentioning the search page)
+  android/README.md:425| 继续加进来（T-040，已于 2026-09-22 落地，见「搜索页与首页搜索入口（T-040）」）。
+  android/README.md:523| 搜索与阅读位置都在 `app/src/main/java/com/treelearn/app/{search,reading}/`。
+  android/README.md:537| - **搜索页的 UI 已接线（2026-09-22，T-040）**：`SearchPresenter` 不再只被验收套件引用——宿主 `MainActivity`
+  android/README.md:540| 死按钮。见「搜索页与首页搜索入口（T-040）」，原文扫描 `artifacts/evidence/T-040-source-scan.txt`。
+  android/README.md:559| ## 应用层入口索引（`:app`）—— 搜索页与首页搜索入口（T-040）
+  android/README.md:566| | `screen.SearchScreen` | 搜索页视图（输入、状态窗格、命中行） | 只画 `SearchPage` 给的窗格与行；**不重新过滤、不重新排序**；每次输入经 `afterTextChanged` 转发给 presenter |
+  android/README.md:567| | `search.SearchPage` | 搜索页的纯 JVM 页面对象（`Pane` / `Row`） | 五个窗格（引导/搜索中/列表/空/失败）互斥；每个分支标题只向 `BranchTitles` 问一次；标题查不到给空串而不是把行丢掉 |
+  android/README.md:571| - **首页搜索入口不再是死按钮（2026-09-22，T-040）**：`screen_home_body.xml` 的 `home_search` 不再带
+EXITCODE=0
+
+command: python -X utf8 (delivery report lines for T-040)
+  Docs/06-delivery/TreeLearn_V1_交付报告.md:15| | 首页/对话数据路径 | **已接线**（`T-2026-09-21-real-data-path-wiring-032`，2026-09-22）：两个占位类已删除，首页与对话走真实数据路径，dex 内 `PendingHomeWiring` / `PendingChatWiring` / `NOT_WIRED` 出现 0 次（证据文件
+  Docs/06-delivery/TreeLearn_V1_交付报告.md:16| | 装机后能用到什么 | **核心链路 + 导航页 + 树画布 + 搜索页可用、4 项 P0 能力缺失**（1 处入口不可达 + 3 处派生接线无生产者，逐条见第 2.1 节）。这是静态可达性结论，不是设备结论 |
+  Docs/06-delivery/TreeLearn_V1_交付报告.md:27| `522389` / `A79D66CE…` 已作废，不再是装机目标）。**号称来源**：`T-040` 收尾时**刻意**跑的
+  Docs/06-delivery/TreeLearn_V1_交付报告.md:29| 退出码 0），核对口径见 `artifacts/evidence/T-040-apk-build.txt` 与
+  Docs/06-delivery/TreeLearn_V1_交付报告.md:30| `artifacts/evidence/T-040-apk-contains-search.txt` 头部。
+  Docs/06-delivery/TreeLearn_V1_交付报告.md:36| （**T-040 搜索页与首页入口**）；`ReadingSession` 2、`SqliteReadingStore` 2、`onViewportChanged` 2（T-042）；
+  Docs/06-delivery/TreeLearn_V1_交付报告.md:40| 逐符号清单、源码新旧排序断言与判定见 `artifacts/evidence/T-040-apk-contains-search.txt`。
+  Docs/06-delivery/TreeLearn_V1_交付报告.md:43| （T-040 尚未落盘）」，那条随本版作废：`SearchScreen` 由 0 变 7 本身就说明这个探针不是恒零。
+  Docs/06-delivery/TreeLearn_V1_交付报告.md:63| `:app:assembleRelease` 退出码 0，且 dex 里同时扫出 T-040 与 T-042 的符号。装机前仍请重跑本节给出的
+  Docs/06-delivery/TreeLearn_V1_交付报告.md:113| | 搜索页（跨主题搜问题 / 回答 / 引用）〔2026-09-22 已接线，T-040〕 | 本行原记「无 `SearchScreen`、无布局；首页搜索是 `enabled="false"` 的死按钮；`SearchPresenter` 没有任何生产调用点」，**该状态已作废**：新增 `screen.SearchScreen` + 
+  Docs/06-delivery/TreeLearn_V1_交付报告.md:207| | T-040 搜索页 | `verifying` | 〔2026-09-22 更新〕实现已落盘：`screen/SearchScreen`（配 `search/SearchPage` 纯 JVM 页面对象与 `search/BranchTitles` 端口）+ `layout/screen_search*.xml` + `layout-
+  Docs/06-delivery/TreeLearn_V1_交付报告.md:209| | T-043 首页与主题级收口 | `ready` | 未开工；对应第 2.1 节「不能用」表中「首页空态引导、主题删除、根标题改名、未读徽标」一行。与 T-039 / T-040 共用 `MainActivity` 宿主，须串行 |
+  Docs/06-delivery/TreeLearn_V1_交付报告.md:262| （T-038/T-039）也已接线，**搜索页已由 T-040 接线**。仍不可用的是**首页主题级入口**一处入口，以及
+  Docs/06-delivery/TreeLearn_V1_交付报告.md:279| **T-042（阅读位置保存与恢复，已实现、待独立 verifier 判定）→ T-040（搜索页 + 首页搜索入口，**已实现、待独立
+  Docs/06-delivery/TreeLearn_V1_交付报告.md:281| 未读徽标；与 T-039、T-040 共用宿主）→ T-045（派生接线：根与分支标题、分支摘要）→ T-046（两类推荐）→
+EXITCODE=0
+
+### 10 - do the implementer's evidence files carry a command, a cwd and an exit code?
+command: python -X utf8 (for each T-040-*.txt count ^captured-at, ^cwd, ^command and EXITCODE lines)
+  T-040-apk-build.txt                lines=170   captured-at=1 cwd=1 command=1 EXITCODE=1
+  T-040-apk-contains-search.txt      lines=51    captured-at=1 cwd=1 command=1 EXITCODE=1
+  T-040-check.txt                    lines=413   captured-at=1 cwd=1 command=1 EXITCODE=1
+  T-040-green.txt                    lines=280   captured-at=3 cwd=3 command=4 EXITCODE=3
+  T-040-guards.txt                   lines=64    captured-at=4 cwd=4 command=4 EXITCODE=5
+  T-040-mutation-empty-pane.txt      lines=396   captured-at=2 cwd=0 command=0 EXITCODE=4
+  T-040-mutation-row-order.txt       lines=394   captured-at=2 cwd=0 command=0 EXITCODE=4
+  T-040-mutation-title-dedupe.txt    lines=396   captured-at=2 cwd=0 command=0 EXITCODE=4
+  T-040-plan.txt                     lines=23    captured-at=1 cwd=1 command=0 EXITCODE=0
+  T-040-red.txt                      lines=315   captured-at=1 cwd=1 command=1 EXITCODE=1
+  T-040-regression.txt               lines=89    captured-at=1 cwd=1 command=1 EXITCODE=1
+  T-040-sizing.txt                   lines=59    captured-at=3 cwd=2 command=4 EXITCODE=3
+  T-040-source-scan.txt              lines=80    captured-at=1 cwd=1 command=6 EXITCODE=1
+  T-040-verify-scan.txt              lines=278   captured-at=1 cwd=1 command=24 EXITCODE=23
+(exit codes counted by line prefix; a value written mid-sentence is NOT counted)
+EXITCODE=0
+
+== overall ==
+failing judgement(s) = 0
+VERIFY-SCAN PASSED
+EXITCODE=0

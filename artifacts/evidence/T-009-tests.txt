@@ -1,0 +1,86 @@
+# T-009 supporting evidence: JUnit counts read back from the XML result files (no emulator; user instruction 2026-09-21).
+Generated (local): 2026-09-21T21:29:28+08:00
+Every number below is produced by the command printed above it and read back from the file named in it,
+never from memory. The JVM command that produced these XML files is:
+  cd android; .\gradlew.bat :core:test :ai:testDebugUnitTest :data:testDebugUnitTest :tree-layout:test --no-daemon --console=plain
+  captured in artifacts/evidence/T-009-jvm.txt (EXITCODE=0).
+
+IMPORTANT: there is no on-device result set in this round. The instrumentation suite
+(BranchCreationInstrumentedTest, 10 cases) was COMPILED and is present in the built test APK, but was
+never executed: the owner instruction of 2026-09-21 forbids emulator use. Its behavioural verdict is
+deferred, never a pass.
+
+===== :core:test (android\core\build\test-results\test) =====
+$ Get-ChildItem -LiteralPath 'android\core\build\test-results\test' -Filter TEST-*.xml | Select-Object Name,LastWriteTime
+  com.treelearn.core.domain.AnswerRevisionTest               tests=13 failures=0 errors=0 skipped=0 timestamp=2026-09-21T12:46:26.158Z mtime=2026-09-21 21:28:45
+  com.treelearn.core.domain.BranchSourceTest                 tests=12 failures=0 errors=0 skipped=0 timestamp=2026-09-21T12:46:26.194Z mtime=2026-09-21 21:28:45
+  com.treelearn.core.domain.BranchTest                       tests=15 failures=0 errors=0 skipped=0 timestamp=2026-09-21T12:46:26.206Z mtime=2026-09-21 21:28:45
+  com.treelearn.core.domain.BuildContextPlanUseCaseTest      tests=10 failures=0 errors=0 skipped=0 timestamp=2026-09-21T12:46:26.216Z mtime=2026-09-21 21:28:45
+  com.treelearn.core.domain.ContextSnapshotTest              tests=12 failures=0 errors=0 skipped=0 timestamp=2026-09-21T12:46:26.232Z mtime=2026-09-21 21:28:45
+  com.treelearn.core.domain.GenerationCommandTest            tests=9 failures=0 errors=0 skipped=0 timestamp=2026-09-21T12:46:26.250Z mtime=2026-09-21 21:28:45
+  com.treelearn.core.domain.GenerationOperationTest          tests=20 failures=0 errors=0 skipped=0 timestamp=2026-09-21T12:46:26.263Z mtime=2026-09-21 21:28:45
+  com.treelearn.core.domain.GenerationStateTest              tests=16 failures=0 errors=0 skipped=0 timestamp=2026-09-21T12:46:26.275Z mtime=2026-09-21 21:28:45
+  com.treelearn.core.domain.GuardTest                        tests=6 failures=0 errors=0 skipped=0 timestamp=2026-09-21T12:46:26.278Z mtime=2026-09-21 21:28:45
+  com.treelearn.core.domain.MessageTest                      tests=15 failures=0 errors=0 skipped=0 timestamp=2026-09-21T12:46:26.282Z mtime=2026-09-21 21:28:45
+  com.treelearn.core.domain.PromptPurposeTest                tests=12 failures=0 errors=0 skipped=0 timestamp=2026-09-21T12:46:26.294Z mtime=2026-09-21 21:28:45
+  com.treelearn.core.domain.PromptSpecTest                   tests=8 failures=0 errors=0 skipped=0 timestamp=2026-09-21T12:46:26.298Z mtime=2026-09-21 21:28:45
+  com.treelearn.core.domain.TopicTest                        tests=6 failures=0 errors=0 skipped=0 timestamp=2026-09-21T12:46:26.304Z mtime=2026-09-21 21:28:45
+  TOTAL tests=154 failures=0 errors=0 skipped=0 over 13 classes
+
+===== :ai:testDebugUnitTest (android\ai\build\test-results\testDebugUnitTest) =====
+$ Get-ChildItem -LiteralPath 'android\ai\build\test-results\testDebugUnitTest' -Filter TEST-*.xml | Select-Object Name,LastWriteTime
+  com.treelearn.ai.gateway.AiGatewayBalanceTest              tests=9 failures=0 errors=0 skipped=0 timestamp=2026-09-21T12:45:19.072Z mtime=2026-09-21 21:28:45
+  com.treelearn.ai.gateway.AiGatewayStreamTest               tests=16 failures=0 errors=0 skipped=0 timestamp=2026-09-21T12:45:19.097Z mtime=2026-09-21 21:28:45
+  com.treelearn.ai.gateway.GatewayContractTest               tests=8 failures=0 errors=0 skipped=0 timestamp=2026-09-21T12:45:19.118Z mtime=2026-09-21 21:28:45
+  com.treelearn.ai.gateway.SseFrameParserTest                tests=12 failures=0 errors=0 skipped=0 timestamp=2026-09-21T12:45:19.136Z mtime=2026-09-21 21:28:45
+  com.treelearn.ai.prompt.DeepSeekContextEncoderTest         tests=8 failures=0 errors=0 skipped=0 timestamp=2026-09-21T12:45:19.144Z mtime=2026-09-21 21:28:45
+  com.treelearn.ai.prompt.DeepSeekPromptRegistryTest         tests=8 failures=0 errors=0 skipped=0 timestamp=2026-09-21T12:45:19.168Z mtime=2026-09-21 21:28:45
+  com.treelearn.ai.prompt.DeepSeekRequestAssemblerTest       tests=11 failures=0 errors=0 skipped=0 timestamp=2026-09-21T12:45:19.182Z mtime=2026-09-21 21:28:45
+  TOTAL tests=72 failures=0 errors=0 skipped=0 over 7 classes
+
+===== :data:testDebugUnitTest (android\data\build\test-results\testDebugUnitTest) =====
+$ Get-ChildItem -LiteralPath 'android\data\build\test-results\testDebugUnitTest' -Filter TEST-*.xml | Select-Object Name,LastWriteTime
+  com.treelearn.data.secret.SecretEnvelopeTest               tests=6 failures=0 errors=0 skipped=0 timestamp=2026-09-21T13:28:15.995Z mtime=2026-09-21 21:28:16
+  TOTAL tests=6 failures=0 errors=0 skipped=0 over 1 classes
+
+===== :tree-layout:test (android\tree-layout\build\test-results\test) =====
+$ Get-ChildItem -LiteralPath 'android\tree-layout\build\test-results\test' -Filter TEST-*.xml | Select-Object Name,LastWriteTime
+  com.treelearn.treelayout.TreeLayoutGeometryTest            tests=15 failures=0 errors=0 skipped=0 timestamp=2026-09-21T12:45:17.191Z mtime=2026-09-21 21:28:45
+  com.treelearn.treelayout.TreeLayoutHitFitAnchorTest        tests=11 failures=0 errors=0 skipped=0 timestamp=2026-09-21T12:45:17.319Z mtime=2026-09-21 21:28:45
+  com.treelearn.treelayout.TreeLayoutLabelTest               tests=8 failures=0 errors=0 skipped=0 timestamp=2026-09-21T12:45:17.346Z mtime=2026-09-21 21:28:45
+  TOTAL tests=34 failures=0 errors=0 skipped=0 over 3 classes
+
+===== :app:testDebugUnitTest (android\app\build\test-results\testDebugUnitTest) =====
+$ Get-ChildItem -LiteralPath 'android\app\build\test-results\testDebugUnitTest' -Filter TEST-*.xml | Select-Object Name,LastWriteTime
+  com.treelearn.app.generation.GenerationSchedulerTest       tests=5 failures=0 errors=0 skipped=0 timestamp=2026-09-21T13:27:42.641Z mtime=2026-09-21 21:28:46
+  com.treelearn.app.generation.LiveAttemptsTest              tests=3 failures=0 errors=0 skipped=0 timestamp=2026-09-21T13:27:42.613Z mtime=2026-09-21 21:28:46
+  com.treelearn.app.generation.RecoveryScanTest              tests=3 failures=0 errors=0 skipped=0 timestamp=2026-09-21T13:27:42.637Z mtime=2026-09-21 21:28:46
+  com.treelearn.app.generation.StreamBatchTest               tests=5 failures=0 errors=0 skipped=0 timestamp=2026-09-21T13:27:42.646Z mtime=2026-09-21 21:28:46
+  com.treelearn.data.db.dao.FirstTopicCreationRulesTest      tests=11 failures=0 errors=0 skipped=0 timestamp=2026-09-21T13:27:42.650Z mtime=2026-09-21 21:28:46
+  TOTAL tests=27 failures=0 errors=0 skipped=0 over 5 classes
+
+===== on-device result sets (expected: none, no emulator this round) =====
+$ Get-ChildItem -Recurse android\app\build\outputs\androidTest-results -ErrorAction SilentlyContinue
+  D:\Project\Android\Treelearn\android\app\build\outputs\androidTest-results\connected
+  D:\Project\Android\Treelearn\android\app\build\outputs\androidTest-results\connected\debug
+
+===== sizing: production lines of this task change (non-empty, non-comment is the binding count) =====
+$ $f='android\data\src\main\java\com\treelearn\data\db\dao\BranchCreation.java'; $l=Get-Content -LiteralPath $f; physical=$l.Count; nonEmpty=@($l|?{$_.Trim() -ne ''}).Count; code=@($l|?{$t=$_.Trim(); $t -ne '' -and -not $t.StartsWith('//') -and -not $t.StartsWith('/*') -and -not $t.StartsWith('*') -and -not $t.StartsWith('*/')}).Count
+  android/data/src/main/java/com/treelearn/data/db/dao/BranchCreation.java  (new file, all lines are this task change)
+  physical=226  nonEmpty=199  nonEmptyNonComment=109   (soft limit 200, hard limit 500)
+  sha256=4FBFC72B620B54BB9097FEFFB677EF76C0C0A839A704DE7E72238B3FB429B0F2
+EXITCODE=0
+
+===== two notes that a reader needs in order not to over-read the numbers above =====
+
+1) No device run: android/app/build/outputs/androidTest-results/connected/debug is an empty directory
+   left over from the pre-ban device round; the command above printed 0 files under it, and no connected
+   or device task was invoked in this round.
+
+2) The testsuite timestamp attributes of :core:test, :ai:testDebugUnitTest and :tree-layout:test are older
+   than the XML file mtimes because Gradle reported those three tasks UP-TO-DATE / restored their result
+   sets for the same input content (see the task lines in artifacts/evidence/T-009-jvm.txt). Only
+   :data:testDebugUnitTest executed inside that capture. The counts are therefore content-addressed by
+   Gradle, not copied over by hand; both numbers (attribute and mtime) are printed above so the reader can
+   tell which is which.
+EXITCODE=0

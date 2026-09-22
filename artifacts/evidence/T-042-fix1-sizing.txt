@@ -1,0 +1,162 @@
+T-042 Fix round 1 sizing - the change lives inside shared files, so caliper B attributes by symbol
+captured-at: 2026-09-22T05:12:07.8256034+08:00
+cwd: D:\Project\Android\Treelearn
+command: python -X utf8 %TEMP%\t042fix1_sizing.py
+note: judgement lines = non-blank non-comment (.trae/rules/harness-tasks.md). Caliper A is a whole-file UPPER bound because the same files carry other lanes' work; caliper B is a symbol-attributed read whose units were each asserted non-empty (mpty set is not a result).
+--- script (verbatim) ---
+import os, re, subprocess, sys
+
+REPO = r"D:\Project\Android\Treelearn"
+os.chdir(REPO)
+
+def strip(text, xml=False):
+    if xml:
+        return re.sub(r"<!--.*?-->", "", text, flags=re.S)
+    text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+    return re.sub(r"//[^\n]*", "", text)
+
+def count(text, xml=False):
+    return len([l for l in strip(text, xml).splitlines() if l.strip()])
+
+def read(path):
+    with open(path, encoding="utf-8") as h:
+        return h.read()
+
+def member(text, sig):
+    """brace-matched Java member starting at the line that contains sig"""
+    idx = text.find(sig)
+    if idx < 0:
+        return None
+    start = text.rfind("\n", 0, idx) + 1  # the signature line itself
+    brace = text.find("{", idx)
+    depth = 0
+    i = brace
+    while i < len(text):
+        if text[i] == "{":
+            depth += 1
+        elif text[i] == "}":
+            depth -= 1
+            if depth == 0:
+                return text[start:i + 1]
+        i += 1
+    return None
+
+def xml_element(text, marker):
+    idx = text.find(marker)
+    if idx < 0:
+        return None
+    start = text.rfind("<TextView", 0, idx)
+    end = text.find("/>", idx)
+    if start < 0 or end < 0:
+        return None
+    return text[start:end + 2]
+
+JAVA_MEMBERS = {
+    "android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java": [
+        "public void onRowsLaidOut(int itemHeightPx, Set<String> visibleMessageIds) {",
+        "private void remember(Branch branch, ReadingAnchor anchor) {",
+        "private boolean seen(Branch branch, List<Message> rows, Set<String> visible) {",
+        "private void noticeReadingFailure() {",
+    ],
+    "android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java": [
+        "private void reportRowsLaidOut() {",
+        "private Set<String> visibleRows() {",
+        "private void renderNotice(HomeViewState.Notice value) {",
+        "private void reportScroll() {",
+    ],
+}
+JAVA_DECLS = {
+    "android/app/src/main/java/com/treelearn/app/ui/ChatActions.java": [
+        "void onRowsLaidOut(int itemHeightPx, Set<String> visibleMessageIds);",
+    ],
+    "android/app/src/main/java/com/treelearn/app/ui/HomeViewState.java": [
+        "READING_POSITION;",
+    ],
+}
+WHOLE = [
+    "android/app/src/main/java/com/treelearn/app/screen/NoticeText.java",
+]
+XML = {
+    "android/app/src/main/res/values/strings.xml": ["notice_reading_position"],
+    "android/app/src/main/res/layout/screen_chat_body.xml": ["chat_notice"],
+}
+
+print("== caliper B: symbol attribution (lower bound of the Fix round 1 change) ==")
+total = 0
+found = 0
+for path, sigs in list(JAVA_MEMBERS.items()) + list(JAVA_DECLS.items()):
+    text = read(path)
+    for sig in sigs:
+        if sig in JAVA_DECLS.get(path, []):
+            idx = text.find(sig)
+            assert idx >= 0, "not found: %s in %s" % (sig, path)
+            start = text.rfind("\n", 0, idx) + 1
+            body = text[start:idx + len(sig)]
+        else:
+            body = member(text, sig)
+        assert body is not None, "not found: %s in %s" % (sig, path)
+        n = count(body, xml=False)
+        assert n > 0, "empty member counted as a result: %s" % sig
+        found += 1
+        total += n
+        print("%4d  %s :: %s" % (n, os.path.basename(path), sig[:64]))
+for path in WHOLE:
+    n = count(read(path))
+    assert n > 0, "empty file counted as a result: %s" % path
+    found += 1
+    total += n
+    print("%4d  %s :: <whole new file>" % (n, os.path.basename(path)))
+for path, markers in XML.items():
+    text = read(path)
+    for marker in markers:
+        body = xml_element(text, marker) if path.endswith(".xml") and marker == "chat_notice" else None
+        if body is None:
+            idx = text.find(marker)
+            assert idx >= 0, "not found: %s in %s" % (marker, path)
+            body = text[text.rfind("\n", 0, idx) + 1:text.find("\n", idx)]
+        n = count(body, xml=True)
+        assert n > 0, "empty block counted as a result: %s" % marker
+        found += 1
+        total += n
+        print("%4d  %s :: %s" % (n, os.path.basename(path), marker))
+assert found == 13, "expected 13 attributable units, found %d" % found
+assert total > 0, "EMPTY-SET-NOT-A-RESULT violated"
+print("units-found=%d subtotal-lower-bound=%d" % (found, total))
+print("SIZING ASSERTION PASSED (empty set is not a result; every unit matched exactly)")
+
+print()
+print("== caliper A: whole-file, non-blank non-comment (upper bound; the files carry other lanes' work) ==")
+files = list(JAVA_MEMBERS) + list(JAVA_DECLS) + WHOLE + list(XML)
+rc = subprocess.call([sys.executable, "-X", "utf8", ".trae/scripts/dev/count_production_lines.py"] + files)
+print("count-tool-exit=%d" % rc)
+sys.exit(rc)
+--- begin output ---
+   337  android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java
+   483  android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java
+    30  android/app/src/main/java/com/treelearn/app/ui/ChatActions.java
+   126  android/app/src/main/java/com/treelearn/app/ui/HomeViewState.java
+    31  android/app/src/main/java/com/treelearn/app/screen/NoticeText.java
+   166  android/app/src/main/res/values/strings.xml
+   184  android/app/src/main/res/layout/screen_chat_body.xml
+  1357  TOTAL (non-blank, non-comment, production files only)
+== caliper B: symbol attribution (lower bound of the Fix round 1 change) ==
+  17  ChatPresenter.java :: public void onRowsLaidOut(int itemHeightPx, Set<String> visibleM
+   7  ChatPresenter.java :: private void remember(Branch branch, ReadingAnchor anchor) {
+   8  ChatPresenter.java :: private boolean seen(Branch branch, List<Message> rows, Set<Stri
+   3  ChatPresenter.java :: private void noticeReadingFailure() {
+  13  ChatScreen.java :: private void reportRowsLaidOut() {
+  12  ChatScreen.java :: private Set<String> visibleRows() {
+   9  ChatScreen.java :: private void renderNotice(HomeViewState.Notice value) {
+  19  ChatScreen.java :: private void reportScroll() {
+   1  ChatActions.java :: void onRowsLaidOut(int itemHeightPx, Set<String> visibleMessageI
+   1  HomeViewState.java :: READING_POSITION;
+  31  NoticeText.java :: <whole new file>
+   1  strings.xml :: notice_reading_position
+  10  screen_chat_body.xml :: chat_notice
+units-found=13 subtotal-lower-bound=132
+SIZING ASSERTION PASSED (empty set is not a result; every unit matched exactly)
+
+== caliper A: whole-file, non-blank non-comment (upper bound; the files carry other lanes' work) ==
+count-tool-exit=0
+--- end output ---
+EXITCODE=0

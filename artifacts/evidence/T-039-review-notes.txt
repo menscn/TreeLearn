@@ -1,0 +1,81 @@
+T-039 review notes (android-dev, 2026-09-22)
+captured-at: 2026-09-22T03:15:38.5014295+08:00
+cwd: D:\Project\Android\Treelearn
+scope: review of T-039 progress + falsification of one claim in T-REV-2026-09-22-apk-and-gap-review.txt
+
+== A. sizing (judgement = non-blank non-comment; scan text in T-039-sizing.txt) ==
+new files       = 496 judgement / 612 physical  (5 files)
+changed files   =  38 judgement (identifier-matched lower bound)
+total so far    = 534 judgement -> over the 500 hard cap by 34 (6.8%)
+not yet written = AppContainer port + MainActivity host + chat/canvas/home entries + tree_nav mirror (~160)
+
+== B. claim under test: 'QUOTE-REACHES-PROMPT: NO' (section 6 of T-REV-2026-09-22-apk-and-gap-review.txt) ==
+the review script only looks for the literals quotedText / quoted_text under android/ai/src/main/java:
+COMMAND: Select-String -LiteralPath .trae/scripts/dev/review_quote_path.py -Pattern 'quotedText|quoted_text'
+  line 46: if "quotedText" in line or "quoted_text" in line:
+  line 56: print("  messages.quoted_text, read back as a chip, and never sent.")
+EXITCODE=(n/a - Select-String is a cmdlet; it does not set $LASTEXITCODE)
+but the parameter is named 'quote', so that scan cannot match it:
+COMMAND: rg -n --glob '*.java' 'currentInput' android
+android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekContextEncoderTest.java:155:        String input = DeepSeekContextEncoder.currentInput(QUESTION, CITED);
+android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekContextEncoderTest.java:169:        assertEquals(QUESTION, DeepSeekContextEncoder.currentInput(QUESTION, ""));
+android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekContextEncoderTest.java:170:        assertEquals(QUESTION, DeepSeekContextEncoder.currentInput(QUESTION, "   "));
+android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekContextEncoderTest.java:173:                DeepSeekContextEncoder.currentInput(QUESTION, null));
+android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekContextEncoderTest.java:175:                framingLines(DeepSeekContextEncoder.currentInput(QUESTION, "")));
+android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekContextEncoderTest.java:183:        String input = DeepSeekContextEncoder.currentInput(QUESTION, hostile);
+android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:51:        assertEquals(CURRENT_INPUT.length(), request.currentInputChars);
+android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:257:        String withCitation = DeepSeekContextEncoder.currentInput(question, sentence.toString());
+android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:263:        assertEquals(withCitation.length(), accepted.currentInputChars);
+android\app\src\test\java\com\treelearn\app\wiring\HomeWiringTest.java:130:        assertEquals(QUESTION.length(), generation.lastRequest.currentInputChars);
+android\app\src\test\java\com\treelearn\app\wiring\ChatWiringTest.java:168:        assertEquals(latest.length(), generation.lastRequest.currentInputChars);
+android\app\src\test\java\com\treelearn\app\wiring\ChatWiringTest.java:214:        assertEquals(latest.length(), generation.lastRequest.currentInputChars);
+android\app\src\test\java\com\treelearn\app\wiring\ChatWiringTest.java:403:        assertEquals("a follow-up".length(), generation.lastRequest.currentInputChars);
+android\app\src\test\java\com\treelearn\app\wiring\ChatWiringTest.java:421:                generation.lastRequest.currentInputChars);
+android\app\src\test\java\com\treelearn\app\wiring\ChatWiringTest.java:437:        assertEquals("a follow-up".length(), generation.lastRequest.currentInputChars);
+android\ai\src\main\java\com\treelearn\ai\prompt\DeepSeekRequestAssembler.java:29:     * @param currentInput the current question for {@code LEARNING_ANSWER}, or the structured JSON
+android\ai\src\main\java\com\treelearn\ai\prompt\DeepSeekRequestAssembler.java:37:            List<DeepSeekMessage> encodedHistory, String currentInput, PromptBudget budget) {
+android\ai\src\main\java\com\treelearn\ai\prompt\DeepSeekRequestAssembler.java:42:        String latest = validateCurrentInput(purpose, currentInput);
+android\ai\src\main\java\com\treelearn\ai\prompt\DeepSeekRequestAssembler.java:75:    private static String validateCurrentInput(PromptPurpose purpose, String currentInput) {
+android\ai\src\main\java\com\treelearn\ai\prompt\DeepSeekRequestAssembler.java:76:        if (currentInput == null || currentInput.trim().isEmpty()) {
+android\ai\src\main\java\com\treelearn\ai\prompt\DeepSeekRequestAssembler.java:80:        if (purpose != PromptPurpose.LEARNING_ANSWER && !JsonObjectText.isObject(currentInput)) {
+android\ai\src\main\java\com\treelearn\ai\prompt\DeepSeekRequestAssembler.java:85:        return currentInput;
+android\ai\src\main\java\com\treelearn\ai\prompt\DeepSeekRequestAssembler.java:93:    private static void reserveFor(PromptPurpose purpose, String systemContent, String currentInput,
+android\ai\src\main\java\com\treelearn\ai\prompt\DeepSeekRequestAssembler.java:95:        int reserved = systemContent.length() + currentInput.length() + budget.minAnswerChars;
+android\ai\src\main\java\com\treelearn\ai\prompt\DeepSeekRequestAssembler.java:99:                            + " + current input " + currentInput.length() + " + minimum answer "
+android\ai\src\main\java\com\treelearn\ai\prompt\DeepSeekRequest.java:25:    public final int currentInputChars;
+android\ai\src\main\java\com\treelearn\ai\prompt\DeepSeekRequest.java:29:            int currentInputChars) {
+android\ai\src\main\java\com\treelearn\ai\prompt\DeepSeekRequest.java:36:        this.currentInputChars = currentInputChars;
+android\ai\src\main\java\com\treelearn\ai\prompt\DeepSeekRequest.java:44:                + ", historyChars=" + historyChars + ", currentInputChars=" + currentInputChars + "]";
+android\ai\src\main\java\com\treelearn\ai\prompt\DeepSeekContextEncoder.java:24: * citation {@link #currentInput} frames, is {@link #escape escaped}, so a stored answer containing
+android\ai\src\main\java\com\treelearn\ai\prompt\DeepSeekContextEncoder.java:30: * sentence of an answer, so {@link #currentInput} wraps that sentence in {@code QUOTE_OPEN} /
+android\ai\src\main\java\com\treelearn\ai\prompt\DeepSeekContextEncoder.java:37: * {@link #currentInput}, because the framing literals live here and nowhere else.
+android\ai\src\main\java\com\treelearn\ai\prompt\DeepSeekContextEncoder.java:83:    public static String currentInput(String question, String quote) {
+android\app\src\main\java\com\treelearn\app\wiring\ChatWiring.java:112:        // turn has one is the adapter's decision (DeepSeekContextEncoder.currentInput), and it is
+android\app\src\main\java\com\treelearn\app\wiring\ChatWiring.java:251:                DeepSeekContextEncoder.currentInput(input, quote), budget);
+android\app\src\main\java\com\treelearn\app\wiring\HomeWiring.java:127:        final String currentInput = question;
+android\app\src\main\java\com\treelearn\app\wiring\HomeWiring.java:131:                currentInput, budget);
+EXITCODE=0
+and the send path hands the stored quote to that encoder at ChatWiring.java:251:
+COMMAND: Select-String -LiteralPath android/app/src/main/java/com/treelearn/app/wiring/ChatWiring.java -Pattern 'currentInput\\(input, quote\\)'
+  line 251: DeepSeekContextEncoder.currentInput(input, quote), budget);
+EXITCODE=0
+the encoder frames the citation (DeepSeekContextEncoder.java:83-89) and the framing is asserted by existing tests:
+COMMAND: rg -n --glob '*.java' 'QUOTE_OPEN|assertEquals\\(QUESTION, DeepSeekContextEncoder.currentInput' android/ai/src
+android/ai/src\test\java\com\treelearn\ai\prompt\DeepSeekContextEncoderTest.java:159:        assertEquals("<treelearn_quote>", DeepSeekContextEncoder.QUOTE_OPEN);
+android/ai/src\test\java\com\treelearn\ai\prompt\DeepSeekContextEncoderTest.java:169:        assertEquals(QUESTION, DeepSeekContextEncoder.currentInput(QUESTION, ""));
+android/ai/src\test\java\com\treelearn\ai\prompt\DeepSeekContextEncoderTest.java:170:        assertEquals(QUESTION, DeepSeekContextEncoder.currentInput(QUESTION, "   "));
+android/ai/src\main\java\com\treelearn\ai\prompt\DeepSeekContextEncoder.java:30: * sentence of an answer, so {@link #currentInput} wraps that sentence in {@code QUOTE_OPEN} /
+android/ai/src\main\java\com\treelearn\ai\prompt\DeepSeekContextEncoder.java:45:    public static final String QUOTE_OPEN = "<treelearn_quote>";
+android/ai/src\main\java\com\treelearn\ai\prompt\DeepSeekContextEncoder.java:50:            QUOTE_OPEN, QUOTE_CLOSE};
+android/ai/src\main\java\com\treelearn\ai\prompt\DeepSeekContextEncoder.java:89:        return QUOTE_OPEN + "\n" + escape(cited) + "\n" + QUOTE_CLOSE + "\n" + asked;
+EXITCODE=0
+
+CONCLUSION B: the review's NO is a false negative (its scan searched for the wrong identifier).
+The quote does reach the DeepSeek request: ChatWiring.submit -> DeepSeekContextEncoder.currentInput(input, quote)
+-> <treelearn_quote>..</treelearn_quote> + question as the request's current input. No product fix is implied here.
+
+== C. navigation reachability (from T-REV-2026-09-22-apk-and-gap-review.txt sections 4-5) ==
+NavigationScreen: no references at all; release dex occurrences=0 -> the page cannot be reached by any gesture.
+NavigationScreen exposes setActions(NavigationActions) / setHost(Host) / render(NavigationViewState); Host has
+leaveNavigation() / openBranch(String) / openOverview(String). It does not itself implement NavigationSink.
+EXITCODE=0

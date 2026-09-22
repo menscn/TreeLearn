@@ -1,0 +1,122 @@
+# 规模口径裁定（2026-09-21）—— 已完成任务的实测复算
+
+生成方式：bash artifacts/evidence/.gen-sizing-adjudication.sh ，生成时刻 2026-09-21T10:41:44Z（UTC）。
+每条命令当场执行，EXITCODE 取自命令自身。判定口径为**非空非注释的生产代码行**（2026-09-21 用户裁定）。
+本文件的目的：`.trae/rules/harness-tasks.md` 的例外表不靠抄任务正文，而是从这里复算得到。
+下方比对表的数字全部由本脚本从对应命令的捕获输出读出（value_of），不手写。
+
+计数口径（每条命令自带，可直接粘贴复现）：
+
+  grep -v -E '^[[:space:]]*$|^[[:space:]]*//|^[[:space:]]*\*|^[[:space:]]*/\*' <files> | wc -l
+
+（排除：空行、`//` 行注释、`*` javadoc 续行、`/*` 块注释起始行。）
+
+---
+
+## Command 1 —— T-003 认领的目录现在有几个文件（对照它记录的 14）
+
+$ ls -1 android/core/src/main/java/com/treelearn/core/domain/*.java | wc -l
+17
+EXITCODE=0
+
+## Command 2 —— T-003 目录整体：非空非注释（并集，含 T-021 新增的 3 个文件）
+
+$ grep -v -E '^[[:space:]]*$|^[[:space:]]*//|^[[:space:]]*\*|^[[:space:]]*/\*' android/core/src/main/java/com/treelearn/core/domain/*.java | wc -l
+1038
+EXITCODE=0
+
+## Command 3 —— T-003 目录整体：物理行
+
+$ cat android/core/src/main/java/com/treelearn/core/domain/*.java | wc -l
+2012
+EXITCODE=0
+
+## Command 4 —— T-021 认领的三个新文件：非空非注释（对照其逐文件表 139+62+26）
+
+$ grep -v -E '^[[:space:]]*$|^[[:space:]]*//|^[[:space:]]*\*|^[[:space:]]*/\*' android/core/src/main/java/com/treelearn/core/domain/GenerationOperation.java android/core/src/main/java/com/treelearn/core/domain/GenerationCommand.java android/core/src/main/java/com/treelearn/core/domain/PromptSpec.java | wc -l
+227
+EXITCODE=0
+
+## Command 5 —— T-004 文件集（db/*.java，与其自身记录同一命令范围）：非空非注释
+
+$ grep -v -E '^[[:space:]]*$|^[[:space:]]*//|^[[:space:]]*\*|^[[:space:]]*/\*' android/data/src/main/java/com/treelearn/data/db/*.java | wc -l
+458
+EXITCODE=0
+
+## Command 6 —— T-004 文件集：物理行
+
+$ cat android/data/src/main/java/com/treelearn/data/db/*.java | wc -l
+741
+EXITCODE=0
+
+## Command 7 —— T-022 的 4 个 DAO 文件（逐个列出）：非空非注释
+
+$ grep -v -E '^[[:space:]]*$|^[[:space:]]*//|^[[:space:]]*\*|^[[:space:]]*/\*' android/data/src/main/java/com/treelearn/data/db/dao/TopicDao.java android/data/src/main/java/com/treelearn/data/db/dao/BranchDao.java android/data/src/main/java/com/treelearn/data/db/dao/MessageDao.java android/data/src/main/java/com/treelearn/data/db/dao/Rows.java | wc -l
+349
+EXITCODE=0
+
+## Command 8 —— T-022 的 4 个 DAO 文件：物理行
+
+$ cat android/data/src/main/java/com/treelearn/data/db/dao/TopicDao.java android/data/src/main/java/com/treelearn/data/db/dao/BranchDao.java android/data/src/main/java/com/treelearn/data/db/dao/MessageDao.java android/data/src/main/java/com/treelearn/data/db/dao/Rows.java | wc -l
+535
+EXITCODE=0
+
+## Command 9 —— T-023 切片 A 的 5 个新文件：非空非注释
+
+$ grep -v -E '^[[:space:]]*$|^[[:space:]]*//|^[[:space:]]*\*|^[[:space:]]*/\*' android/data/src/main/java/com/treelearn/data/db/dao/AnswerRevisionDao.java android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationDao.java android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationRow.java android/data/src/main/java/com/treelearn/data/db/dao/GenerationStabilizer.java android/data/src/main/java/com/treelearn/data/db/dao/ConstraintFailures.java | wc -l
+454
+EXITCODE=0
+
+## Command 10 —— T-023 切片 A 的 5 个新文件：物理行
+
+$ cat android/data/src/main/java/com/treelearn/data/db/dao/AnswerRevisionDao.java android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationDao.java android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationRow.java android/data/src/main/java/com/treelearn/data/db/dao/GenerationStabilizer.java android/data/src/main/java/com/treelearn/data/db/dao/ConstraintFailures.java | wc -l
+827
+EXITCODE=0
+
+## Command 11 —— T-023 的 `:core` 改动（PromptPurpose 的 fromPrefix）：只计本次新增的非空非注释行
+
+$ git -c core.quotepath=false diff -U0 -- android/core/src/main/java/com/treelearn/core/domain/PromptPurpose.java 2>/dev/null | grep -E '^[+]' | grep -vE '^[+]{3}' | sed 's/^[+]//' | grep -v -E '^[[:space:]]*$|^[[:space:]]*//|^[[:space:]]*\*|^[[:space:]]*/\*' | wc -l
+9
+EXITCODE=0
+
+## Command 12 —— 对照：整个 dao 包现在有几个文件（T-022 + T-023 的并集，因此不能再当 T-022 的别名）
+
+$ ls -1 android/data/src/main/java/com/treelearn/data/db/dao/*.java | wc -l
+9
+EXITCODE=0
+
+---
+
+## 复算结果与任务记录的比对
+
+| 任务 | 记录：非空非注释（判定值） | 记录：物理行 | 本次复算（取自上面各 Command） | 是否可复算 |
+| :--- | ---: | ---: | :--- | :--- |
+| T-003 | 741（14 文件） | 1301 | 17 文件 / 1038 / 2012 | **否** —— T-021 后续在同一目录新增 3 个文件（17−3=14），且 T-022 又改了其中的 `Branch`/`Message`。直接测目录得到的是**并集**，不是 T-003 的残余。其 741 只能以该任务当时的证据为准。 |
+| T-021 | 230（新增 227 + 改动 3） | 763 | 三个新文件 = 227 | **是**（227/227 逐字相同） |
+| T-004 | 458 | 722 | 458 / 741 | **判定值可复算**（458/458 逐字相同）。物理行多 19 行，来自本轮 N2 对 `TreeLearnSchema` 注释段的改写——注释不计入预算，判定值不受影响。 |
+| T-022 | 386（DAO 349 + `:core` 37） | 600（DAO 531 + `:core` 69） | DAO 349 / 535 | **判定值可复算**（349/349 逐字相同）。DAO 物理行多 4 行，来自 N5/N6 的注释改写，同样不计入。 |
+| T-023（切片 A） | 463（新增类 454 + `:core` 9） | 827（新增类 827 + `:core` 26） | 新文件 454 / 827，`:core` 增量 9 | **是**（454 与新增类实测逐字相同、9 与 `:core` 增量实测逐字相同） |
+
+比对结论（这是本文件存在的主要理由）：
+
+1. 四个**可复算**的判定值与任务记录**逐字相同**（458 / 349 / 227 / 454+9），说明「非空非注释」口径在五个任务里
+   是同一套算法，不是各写一套。
+2. T-003 的 741 属于**不可复算的历史值**：同目录后来被两个任务继续编辑（现 17 文件 / 1038 代码行）。
+   因此权威规则里它的判定值必须写作「741（该任务第 4 轮实测）」，并写明目录已是共享的、不可再按目录复算；
+   否则下一个读规则的人按目录一测得 1038，会得出「T-003 又涨了 297 行」或「741 是错的」这类错误结论。
+3. **同一个陷阱在 dao 包上重演了一次**：T-022 当初把「dao 包」当作自己 4 个文件的别名，本轮 T-023 往同一包加了
+   5 个文件（现在共 9 个），那条按目录统计的命令随即失效。本脚本已把 T-022 的两次统计改成**逐个列出文件名**，
+   并把目录统计保留为 Command 12 作对照。教训：规模证据要绑定**文件清单**，不要绑定目录。
+4. 物理行在 T-004/T-022 上因注释增写而变多，判定值不变 —— 这恰好印证「注释不计入预算，但会改变物理
+   行数，两个数都要跟着更新」（T-003 第 4 轮对同一现象已有记录）。T-023 的两个数并列记录，判定值取
+   454+9 = 463 行，未超 500 行硬上限，但超 200 行软上限（verifier 警告级）。
+
+---
+
+## 裁定内容
+
+- 口径（用户 2026-09-21 裁定）：**非空非注释的生产代码行**；物理行只作参考并列记录，不作判定依据。
+- 例外：T-003 的 741 行超 500 行硬上限 48%，已获用户批准并记录；其余三个任务未越 500 硬上限，
+  仅超 200 行软上限（verifier 警告级）。
+- 依据：`.trae/rules/harness-tasks.md` 第 45 行（超 500 行须有已记录的、事先的用户批准例外）。
+

@@ -1,0 +1,202 @@
+Generated: 2026-09-21T22:20:07.6104308+08:00
+Command: cd android; .\gradlew.bat :app:testDebugUnitTest --no-daemon --console=plain
+WorkingDirectory: C:\Users\23745\AppData\Local\Temp\t010-green  (scratch copy OUTSIDE the repository)
+Mode: MUTATION PROBE. This is not a T-010 acceptance run. The repository was never modified: the probe edits the scratch copy only.
+Mutation: PositionCommands.positionRefusal stopped returning ATTEMPT_ALREADY_RUNNING (its last statement became 'return null'), so the in-flight-attempt judgement is gone while every other rule is untouched. Purpose: show that the T-010 acceptance suite actually detects the loss of the rule it exists to pin, rather than passing vacuously.
+Expected if the suite is falsifiable: the four cases that assert that judgement go red and nothing else does.
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac UP-TO-DATE
+> Task :ai:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :ai:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugLibraryResources UP-TO-DATE
+> Task :ai:writeDebugAarMetadata UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :ai:extractDeepLinksDebug UP-TO-DATE
+> Task :ai:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :data:extractDeepLinksDebug UP-TO-DATE
+> Task :data:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :data:compileDebugLibraryResources UP-TO-DATE
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac UP-TO-DATE
+> Task :data:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes NO-SOURCE
+> Task :data:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:compileDebugUnitTestJavaWithJavac UP-TO-DATE
+
+> Task :app:testDebugUnitTest FAILED
+
+PositionCommandsTest > thePreCheckAgreesWithTheDomainsOwnGuardsOnTheSameInputs FAILED
+    java.lang.AssertionError at PositionCommandsTest.java:171
+
+PositionCommandsTest > retryWhileAnAttemptIsRunningIsRefused FAILED
+    java.lang.AssertionError at PositionCommandsTest.java:64
+
+PositionCommandsTest > resetWhileAnAttemptIsRunningIsRefused FAILED
+    java.lang.AssertionError at PositionCommandsTest.java:93
+
+PositionCommandsTest > selectingWhileAnAttemptIsRunningIsRefused FAILED
+    java.lang.AssertionError at PositionCommandsTest.java:149
+
+[Incubating] Problems report is available at: file:///C:/Users/23745/AppData/Local/Temp/t010-green/android/build/reports/problems/problems-report.html
+
+126 tests completed, 4 failed
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:testDebugUnitTest'.
+> There were failing tests. See the report at: file:///C:/Users/23745/AppData/Local/Temp/t010-green/android/app/build/reports/tests/testDebugUnitTest/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 16s
+54 actionable tasks: 4 executed, 50 up-to-date
+EXITCODE=1
+
+RESTORE: the mutated file was restored from a byte copy of the repository version before this second run.
+Command: cd android; .\gradlew.bat :app:testDebugUnitTest --no-daemon --console=plain
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac UP-TO-DATE
+> Task :ai:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :ai:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugLibraryResources UP-TO-DATE
+> Task :ai:writeDebugAarMetadata UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :ai:extractDeepLinksDebug UP-TO-DATE
+> Task :ai:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :data:extractDeepLinksDebug UP-TO-DATE
+> Task :data:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :data:compileDebugLibraryResources UP-TO-DATE
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac UP-TO-DATE
+> Task :data:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes NO-SOURCE
+> Task :data:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:compileDebugUnitTestJavaWithJavac UP-TO-DATE
+> Task :app:testDebugUnitTest
+
+[Incubating] Problems report is available at: file:///C:/Users/23745/AppData/Local/Temp/t010-green/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 13s
+54 actionable tasks: 4 executed, 50 up-to-date
+EXITCODE=0
+
+Reading: the mutated run lost exactly the four cases that assert the in-flight-attempt judgement and no others, and the restored run is green again. The suite is therefore falsifiable for the rule it exists to pin, not merely passing. Note the run totals differ between the two sides because the scratch copy has the sibling lanes' not-yet-implementable test sources neutralised (126 tests there vs 198 in the repository); PositionCommandsTest itself is 22 tests on both sides.
+The repository was never the subject of this probe: PositionCommands.java in the repository was not touched, and the scratch copy was restored to a byte-identical copy of it before the second run.

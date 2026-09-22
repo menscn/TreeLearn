@@ -1,0 +1,13 @@
+=== VERIFY3 T-025 RED arithmetic re-check  2026-09-21 21:52:51
+Mode: verifier read-only recount from disk; emulator not used.
+Command: Select-String -LiteralPath artifacts/evidence/T-025-red.txt -Pattern '符号:\s+方法\s+decideSourceRefusal' | Measure-Object ; (same for classifyStorageRefusal)
+Command: Select-String -LiteralPath android/app/src/test/java/com/treelearn/data/db/dao/FirstTopicCreationRulesTest.java -SimpleMatch 'decideSourceRefusal(' / 'classifyStorageRefusal('
+--- measured ---
+T-025-red.txt 符号: 方法 decideSourceRefusal... = 12
+T-025-red.txt 符号: 方法 classifyStorageRefusal... = 16
+T-025-red.txt '个错误' lines = 2 (each prints '14 个错误')
+Test source decideSourceRefusal( call sites = 6
+Test source classifyStorageRefusal( call sites = 8
+--- inference ---
+12 symbol lines / 2 printed passes = 6 decide; 16 / 2 = 8 classify; 6+8 = 14 = javac self-report. Task lines 107-108 claim 7+7 (=14 total, wrong split).
+EXITCODE=0

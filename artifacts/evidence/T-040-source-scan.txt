@@ -1,0 +1,79 @@
+T-040 source scan - the entry and the jump, in the code that ships
+captured-at: 2026-09-22 04:49:21 (Asia/Shanghai)
+cwd: D:\Project\Android\Treelearn
+
+=== CLAIM 1: the home search button carries no hard disable ===
+command: $xmlText=[System.IO.File]::ReadAllText('android\app\src\main\res\layout\screen_home_body.xml'); [regex]::Match($xmlText,'<[A-Za-z.]+[^<>]*@\+id/<ID>.*?(?:/>|>)').Value -match 'android:enabled'
+extracted home_search element block:
+  | <Button
+  |                 android:id="@+id/home_search"
+  |                 android:layout_width="wrap_content"
+  |                 android:layout_height="@dimen/touch_min"
+  |                 android:background="?android:attr/selectableItemBackgroundBorderless"
+  |                 android:minWidth="@dimen/touch_min"
+  |                 android:text="@string/action_search"
+  |                 android:textColor="@color/tl_ink3"
+  |                 android:textSize="@dimen/text_sm" />
+JUDGEMENT: home_search block found=True; block contains android:enabled=False (must be False)
+CONTROL (same extractor, a control that IS disabled): home_send block found=True; contains android:enabled=True (must be True, else the check is blind)
+PASS: home_search is not hard-disabled, and the extractor does see a disable when one exists
+
+=== CLAIM 2: HomeScreen wires the button to the presenter ===
+command: Select-String -Path android\app\src\main\java\com\treelearn\app\screen\HomeScreen.java -Pattern 'home_search|onSearchPressed'
+line 62: search = findViewById(R.id.home_search);
+line 124: actions.onSearchPressed();
+JUDGEMENT: findViewById(R.id.home_search) lines=1 (must be >= 1); actions.onSearchPressed() lines=1 (must be >= 1)
+PASS: the button is bound and its tap reaches the presenter
+
+=== CLAIM 3: a real entry builds the search page and the presenter ===
+command: Select-String -Path android\app\src\main\java\com\treelearn\app\MainActivity.java -Pattern <needle> -SimpleMatch  (one run per needle)
+JUDGEMENT: MainActivity lines containing new SearchScreen( = 1 (must be >= 1)
+    line 586: searchScreen = new SearchScreen(this);
+JUDGEMENT: MainActivity lines containing new SearchPresenter( = 1 (must be >= 1)
+    line 587: searchPresenter = new SearchPresenter(this, container.uiThread(), container.background(),
+JUDGEMENT: MainActivity lines containing container.searchRepository() = 1 (must be >= 1)
+    line 588: container.searchRepository());
+JUDGEMENT: MainActivity lines containing container.branchTitles() = 1 (must be >= 1)
+    line 282: final BranchTitles titles = container.branchTitles();
+JUDGEMENT: MainActivity lines containing private void showSearch() = 1 (must be >= 1)
+    line 575: private void showSearch() {
+JUDGEMENT: MainActivity lines containing searchPresenter = null; = 4 (must be >= 1)
+    line 414: searchPresenter = null;
+    line 458: searchPresenter = null;
+    line 496: searchPresenter = null;
+    line 544: searchPresenter = null;
+
+=== CLAIM 4: the jump reuses the T-042 seam; no second locating path was added ===
+command: Get-ChildItem -Recurse -File android\app\src\main\java | Select-String -Pattern 'showChat\('
+android\app\src\main\java\com\treelearn\app\MainActivity.java:195: showChat(chatBranchId);
+android\app\src\main\java\com\treelearn\app\MainActivity.java:204: showChat(navigationBranchId);
+android\app\src\main\java\com\treelearn\app\MainActivity.java:208: showChat(treeBranchId);
+android\app\src\main\java\com\treelearn\app\MainActivity.java:235: showChat(branchId);
+android\app\src\main\java\com\treelearn\app\MainActivity.java:294: * {@link #showChat(String, ReadingAnchor)}, the door T-042 built, so a search jump and a restore on
+android\app\src\main\java\com\treelearn\app\MainActivity.java:300: showChat(branchId, anchor);
+android\app\src\main\java\com\treelearn\app\MainActivity.java:318: showChat(treeBranchId);
+android\app\src\main\java\com\treelearn\app\MainActivity.java:431: private void showChat(String branchId) {
+android\app\src\main\java\com\treelearn\app\MainActivity.java:432: showChat(branchId, null);
+android\app\src\main\java\com\treelearn\app\MainActivity.java:445: private void showChat(String branchId, ReadingAnchor explicitAnchor) {
+android\app\src\main\java\com\treelearn\app\MainActivity.java:558: showChat(selected);
+JUDGEMENT: showChat call sites = 11 (must be >= 2); anchored jump showChat(branchId, anchor) = 1 (must be = 1)
+PASS: search jumps through the T-042 door
+
+=== CLAIM 5: the search screen renders rows as given and adds no verdict of its own ===
+command: Select-String -Path android\app\src\main\java\com\treelearn\app\screen\SearchScreen.java -Pattern 'sort|Comparator|filter\('  then keep only non-comment lines (trimmed line not starting with * // /*)
+line 26 [comment]: * particular the screen never re-filters or re-sorts a result list - the store decided what a hit is
+JUDGEMENT: raw hits = 1; of them CODE = 0 (must be 0), comment = 1 (the disclaimer sentence)
+CONTROL (the comment filter must not swallow real code): non-comment lines in the file = 129; of them renderRows(page.rows) = 1 (must be >= 1), actions.onHitOpened(row.hit) = 1 (must be >= 1)
+PASS: no code-side re-sort/re-filter; the only match is the disclaimer; the filter keeps real code
+
+=== CLAIM 6: the wide-layout mirror ships ===
+command: Get-ChildItem -Recurse android\app\src\main\res -Filter *search*
+android\app\src\main\res\layout\item_search_hit.xml  1762 bytes
+android\app\src\main\res\layout\screen_search_body.xml  5209 bytes
+android\app\src\main\res\layout\screen_search.xml  618 bytes
+android\app\src\main\res\layout-sw600dp\screen_search.xml  832 bytes
+JUDGEMENT: search layout files = 4 (must be >= 4); in layout-sw600dp = 1 (must be >= 1)
+PASS: the search layouts ship, including the sw600dp mirror
+
+VERDICT: PASS (0 failing claim(s))
+EXITCODE=0 (observed exit code of the scan run above)

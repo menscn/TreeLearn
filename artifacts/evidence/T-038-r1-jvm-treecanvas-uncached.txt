@@ -1,0 +1,99 @@
+# T-038 round-1 gate 1/5: the focused JVM canvas suite, re-run with the cache disabled, because
+# round 0 served its green line from a cache hit, which is not a witness that the tests ran.
+# producer: artifacts/evidence/T-038-r1-gates.ps1  sha256=33B530677A593776209486D5221E26F644E4AA21D1910A0B83A8AC2076E7A67C  lines=232  -Gate jvm
+# captured-at: 2026-09-22T01:28:36.5844463+08:00
+# cwd: D:\Project\Android\Treelearn\android
+# command: .\gradlew.bat :app:testDebugUnitTest --tests "com.treelearn.app.wiring.TreeCanvasWiringTest" --no-daemon --console=plain --rerun-tasks --no-build-cache
+# mode: JVM unit test only; --rerun-tasks --no-build-cache so every task is EXECUTED, never FROM-CACHE.
+# sha256 TreeCanvasWiringTest.java  = CA0DDC6CEFDAFC12FF8525501EB16600ECA3E7DCF2C077FB6D9AB12B9663D104
+# sha256 SqliteTreeCanvasStore.java = 58BB1029E22AE0AF725065E433367879279768389E0EE83E8BF33B702DEF4523  (round-1 change: committedRounds javadoc only)
+# note: this file does not replace the RED/GREEN pair in the task file; it is the uncached re-witness.
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava
+> Task :core:processResources NO-SOURCE
+> Task :core:classes
+> Task :core:jar
+> Task :tree-layout:compileJava
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes
+> Task :tree-layout:jar
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues
+> Task :ai:generateDebugResources
+> Task :ai:packageDebugResources
+> Task :ai:processDebugNavigationResources
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :ai:javaPreCompileDebug
+> Task :app:javaPreCompileDebug
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :ai:compileDebugLibraryResources
+> Task :data:processDebugNavigationResources
+> Task :ai:writeDebugAarMetadata
+> Task :data:writeDebugAarMetadata
+> Task :app:processDebugNavigationResources
+> Task :app:checkDebugAarMetadata
+> Task :ai:parseDebugLocalResources
+> Task :app:generateDebugResValues
+> Task :app:compileDebugNavigationResources
+> Task :data:generateDebugResValues
+> Task :data:generateDebugResources
+> Task :data:packageDebugResources
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :ai:generateDebugRFile
+> Task :app:mergeDebugResources
+> Task :ai:compileDebugJavaWithJavac
+> Task :ai:bundleLibRuntimeToJarDebug
+> Task :ai:bundleLibCompileToJarDebug
+> Task :app:packageDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :ai:extractDeepLinksDebug
+> Task :app:extractDeepLinksDebug
+> Task :data:extractDeepLinksDebug
+> Task :data:compileDebugLibraryResources
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :data:javaPreCompileDebug
+> Task :data:parseDebugLocalResources
+> Task :app:javaPreCompileDebugUnitTest
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes NO-SOURCE
+> Task :data:generateDebugRFile
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :app:parseDebugLocalResources
+> Task :data:processDebugManifest
+> Task :ai:processDebugManifest
+> Task :data:compileDebugJavaWithJavac
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
+> Task :data:bundleLibCompileToJarDebug
+> Task :data:bundleLibRuntimeToJarDebug
+> Task :app:processDebugResources
+> Task :app:compileDebugJavaWithJavac
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:compileDebugUnitTestJavaWithJavac
+> Task :app:testDebugUnitTest
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 19s
+54 actionable tasks: 54 executed
+EXITCODE=0
+# reading-command: Select-String -LiteralPath android/app/build/test-results/testDebugUnitTest/TEST-com.treelearn.app.wiring.TreeCanvasWiringTest.xml -Pattern 'testsuite '
+# reading: files=1 tests=9 failures=0 errors=0 skipped=0 unreadable=0
+# <testsuite name="com.treelearn.app.wiring.TreeCanvasWiringTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-09-21T17:28:55.469Z" hostname="LAPTOP-0CT7CJ9O" time="0.016">
+# note: reading the XML is a cmdlet call and sets no exit code of its own; the code this file witnessed is the Gradle one above.
+# restated (the same measured value, so the last line of this file carries it too):
+EXITCODE=0

@@ -1,0 +1,437 @@
+T-042 independent verification - source / artifact / doc scans (another lane holds the Gradle lock, so no Gradle run)
+captured-at: 2026-09-22 04:46:08 (Asia/Shanghai)
+cwd: D:\Project\Android\Treelearn
+runner: artifacts/evidence/T-042-verify-scan-runner.py (python -X utf8), each step flushed to this file
+verifier: independent of the implementing lane; read-only judgements, no production file was edited
+
+### 1 - what does git track among the files T-042 cites?
+note: the task claims no per-task git diff exists; this records the tracking state that claim rests on
+command: git -c core.quotepath=false status --porcelain -- android/app/src/main/java/com/treelearn/app/ android/core/src/main/java/com/treelearn/core/domain/ReadingAnchor.java
+ M android/app/src/main/java/com/treelearn/app/MainActivity.java
+?? android/app/src/main/java/com/treelearn/app/AppContainer.java
+?? android/app/src/main/java/com/treelearn/app/artifact/
+?? android/app/src/main/java/com/treelearn/app/generation/
+?? android/app/src/main/java/com/treelearn/app/navigation/
+?? android/app/src/main/java/com/treelearn/app/reading/
+?? android/app/src/main/java/com/treelearn/app/screen/
+?? android/app/src/main/java/com/treelearn/app/search/
+?? android/app/src/main/java/com/treelearn/app/ui/
+?? android/app/src/main/java/com/treelearn/app/wiring/
+?? android/core/src/main/java/com/treelearn/core/domain/ReadingAnchor.java
+EXITCODE=0
+
+### 2a - the door, in the CURRENT MainActivity
+note: the task and the delivery report cite MainActivity.java:383; re-read the current line numbers
+command: rg -n -F -e "private void showChat" -e "new ChatPresenter" -e "reading.saveAnchor" -e "ReadingStore reading = container.readingStore();" -e "chatPresenter.start();" android/app/src/main/java/com/treelearn/app/MainActivity.java
+431:    private void showChat(String branchId) {
+445:    private void showChat(String branchId, ReadingAnchor explicitAnchor) {
+459:        ReadingStore reading = container.readingStore();
+461:        chatPresenter = new ChatPresenter(this, container.uiThread(), container.background(),
+467:            container.background().execute(() -> reading.saveAnchor(branchId, explicitAnchor));
+469:        chatPresenter.start();
+EXITCODE=0
+
+### 2b - the store, in the CURRENT AppContainer
+note: the task cites AppContainer.java:119 for 'new SqliteReadingStore'
+command: rg -n -F -e "new SqliteReadingStore" -e "public ReadingStore readingStore()" -e "readingStore" android/app/src/main/java/com/treelearn/app/AppContainer.java
+94:    private final ReadingStore readingStore;
+130:        this.readingStore = new SqliteReadingStore(helper);
+199:    public ReadingStore readingStore() {
+200:        return readingStore;
+EXITCODE=0
+
+### 2c - what is actually at the cited line 395 today
+note: MainActivity.java:395 is cited as a reading consumer by the task file and the delivery report
+command: rg -n --no-heading "." android/app/src/main/java/com/treelearn/app/MainActivity.java | rg "^(39[0-9]|44[0-9]|46[0-9]):"
+390:    }
+392:    @Override
+393:    public void openVersions(String messageId, List<AnswerRevision> versions) {
+394:        chatScreen.showVersions(messageId, versions);
+395:    }
+397:    @Override
+398:    public void close() {
+399:        showHome();
+440:     * port the session writes through and the ordinary restore finds it when the branch opens. The
+441:     * write is queued before the read that follows it, and the container's store thread is a single
+442:     * one, so the position is stored by the time the branch is read - and neither of the two runs on
+443:     * the UI thread.
+444:     */
+445:    private void showChat(String branchId, ReadingAnchor explicitAnchor) {
+446:        if (branchId == null || branchId.isEmpty()) {
+447:            return;
+448:        }
+449:        navigationBranchId = null;
+460:        chatScreen = new ChatScreen(this);
+461:        chatPresenter = new ChatPresenter(this, container.uiThread(), container.background(),
+462:                container.keyVault(), container.chatData(), container.chatCommands(),
+463:                container.settingsStore(), container.chatCopyLabels(), branchId, reading);
+464:        chatScreen.setActions(chatPresenter);
+465:        swap(chatScreen);
+466:        if (explicitAnchor != null) {
+467:            container.background().execute(() -> reading.saveAnchor(branchId, explicitAnchor));
+468:        }
+469:        chatPresenter.start();
+EXITCODE=0
+
+### 3 - production consumers of the reading ports (outside the reading package)
+note: acceptance: ReadingStore/ReadingSession must have production consumers, not test-only references
+command: rg -n "ReadingStore|ReadingSession|SqliteReadingStore" android/app/src/main/java --glob "!**/reading/**"
+android/app/src/main/java\com\treelearn\app\AppContainer.java:13:import com.treelearn.app.reading.ReadingStore;
+android/app/src/main/java\com\treelearn\app\AppContainer.java:14:import com.treelearn.app.reading.SqliteReadingStore;
+android/app/src/main/java\com\treelearn\app\AppContainer.java:94:    private final ReadingStore readingStore;
+android/app/src/main/java\com\treelearn\app\AppContainer.java:130:        this.readingStore = new SqliteReadingStore(helper);
+android/app/src/main/java\com\treelearn\app\AppContainer.java:199:    public ReadingStore readingStore() {
+android/app/src/main/java\com\treelearn\app\ui\ChatActions.java:89:     * {@code ReadingSession.remember} is the one write path for a reading position.
+android/app/src/main/java\com\treelearn\app\MainActivity.java:25:import com.treelearn.app.reading.ReadingStore;
+android/app/src/main/java\com\treelearn\app\MainActivity.java:459:        ReadingStore reading = container.readingStore();
+android/app/src/main/java\com\treelearn\app\ui\ChatPresenter.java:3:import com.treelearn.app.reading.ReadingSession;
+android/app/src/main/java\com\treelearn\app\ui\ChatPresenter.java:4:import com.treelearn.app.reading.ReadingStore;
+android/app/src/main/java\com\treelearn\app\ui\ChatPresenter.java:41: *       was and whether the unread badge may clear are {@link ReadingSession}'s two rules; this class
+android/app/src/main/java\com\treelearn\app\ui\ChatPresenter.java:62:    private final ReadingSession session;
+android/app/src/main/java\com\treelearn\app\ui\ChatPresenter.java:72:            ReadingStore reading) {
+android/app/src/main/java\com\treelearn\app\ui\ChatPresenter.java:82:        this.session = new ReadingSession(require(reading, "reading"));
+EXITCODE=0
+
+### 3b - every main-code producer of new ReadingSession / anchorOf / saveAnchor / saveSeen / remember / markSeenThrough
+note: second-decision-point check: one reader, one writer, one unread decision
+command: rg -n -F -e "new ReadingSession" -e "anchorOf(" -e "saveAnchor(" -e "saveSeen(" -e ".remember(" -e "markSeenThrough" android/app/src/main/java android/core/src/main/java --glob "*.java"
+android/core/src/main/java\com\treelearn\core\domain\Branch.java:235:    public DomainResult<Void> markSeenThrough(long sequence) {
+android/app/src/main/java\com\treelearn\app\MainActivity.java:467:            container.background().execute(() -> reading.saveAnchor(branchId, explicitAnchor));
+android/app/src/main/java\com\treelearn\app\reading\SqliteReadingStore.java:33:    public ReadingAnchor anchorOf(String branchId) {
+android/app/src/main/java\com\treelearn\app\reading\SqliteReadingStore.java:38:    public void saveAnchor(String branchId, ReadingAnchor anchor) {
+android/app/src/main/java\com\treelearn\app\reading\SqliteReadingStore.java:43:    public void saveSeen(Branch branch) {
+android/app/src/main/java\com\treelearn\app\reading\ReadingSession.java:49:        ReadingAnchor stored = store.anchorOf(branch.id);
+android/app/src/main/java\com\treelearn\app\reading\ReadingSession.java:66:        store.saveSeen(branch);
+android/app/src/main/java\com\treelearn\app\reading\ReadingSession.java:73:        store.saveAnchor(branch.id, Guard.object(anchor, "anchor"));
+android/app/src/main/java\com\treelearn\app\reading\ReadingStore.java:17:    ReadingAnchor anchorOf(String branchId);
+android/app/src/main/java\com\treelearn\app\reading\ReadingStore.java:20:    void saveAnchor(String branchId, ReadingAnchor anchor);
+android/app/src/main/java\com\treelearn\app\reading\ReadingStore.java:23:     * Persists the branch's unread sequences after {@link Branch#markSeenThrough} moved them.
+android/app/src/main/java\com\treelearn\app\reading\ReadingStore.java:28:    void saveSeen(Branch branch);
+android/core/src/main/java\com\treelearn\core\domain\ViewportSeen.java:15: * <p>A sequence is cleared through the branch's own authority ({@link Branch#markSeenThrough}), never
+android/core/src/main/java\com\treelearn\core\domain\ViewportSeen.java:50:        return branch.markSeenThrough(branch.latestStableSequence()).isOk();
+android/app/src/main/java\com\treelearn\app\ui\ChatPresenter.java:82:        this.session = new ReadingSession(require(reading, "reading"));
+android/app/src/main/java\com\treelearn\app\ui\ChatPresenter.java:383:        background.execute(() -> session.remember(branch, anchor));
+android/app/src/main/java\com\treelearn\app\ui\TreeCanvasPresenter.java:221:        Pt anchor = state.layout.anchorOf(state.currentBranchId);
+android/app/src/main/java\com\treelearn\app\ui\TreeCanvasPresenter.java:246:        Pt anchor = state.layout.anchorOf(hit.branchId);
+EXITCODE=0
+
+### 4 - the restore path from the real view callback to the store
+note: chain: layout listener -> reportRowsLaidOut -> onRowsLaidOut -> session.open -> anchorOf -> renderPosition -> scrollTo
+command: rg -n -F -e "addOnLayoutChangeListener" -e "reportRowsLaidOut" -e "onRowsLaidOut" -e "renderPosition" -e "scrollTo(0, target)" -e "setOnScrollChangeListener" -e "reportScroll" -e "onViewportChanged" android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java android/app/src/main/java/com/treelearn/app/MainActivity.java android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java
+android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java:361:    public void onRowsLaidOut(int itemHeightPx) {
+android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java:369:            ui.post(() -> sink.renderPosition(position));
+android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java:396:    public void onViewportChanged(Set<String> visibleMessageIds) {
+android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java:102:    private final Runnable scrollSettled = this::reportScroll;
+android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java:159:        messageFlow.addOnLayoutChangeListener((view, left, top, right, bottom, oldLeft, oldTop,
+android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java:160:                oldRight, oldBottom) -> reportRowsLaidOut());
+android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java:161:        scroll.setOnScrollChangeListener((view, x, y, oldX, oldY) -> {
+android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java:255:    public void renderPosition(ReadingPosition position) {
+android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java:275:        scroll.post(() -> scroll.scrollTo(0, target));
+android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java:286:    private void reportRowsLaidOut() {
+android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java:295:        fire(actions -> actions.onRowsLaidOut(itemHeightPx));
+android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java:306:    private void reportScroll() {
+android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java:327:        fire(actions -> actions.onViewportChanged(visible));
+android/app/src/main/java/com/treelearn/app/MainActivity.java:250:    public void renderPosition(ReadingPosition position) {
+android/app/src/main/java/com/treelearn/app/MainActivity.java:251:        chatScreen.renderPosition(position);
+android/app/src/main/java/com/treelearn/app/MainActivity.java:478:     * {@code onViewportChanged} the moment it is laid out, and that is the measurement every later
+EXITCODE=0
+
+### 5 - UI-thread IO check: every store call site vs AppContainer.background()
+note: reads and writes must sit inside background.execute; SqliteReadingStore must hold the helper, not an open db
+command: rg -n -F -e "container.background().execute" -e "Executors.newSingleThreadExecutor" -e "background.execute" -e "getWritableDatabase" android/app/src/main/java/com/treelearn/app/AppContainer.java android/app/src/main/java/com/treelearn/app/MainActivity.java android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java android/app/src/main/java/com/treelearn/app/reading/SqliteReadingStore.java
+android/app/src/main/java/com/treelearn/app/AppContainer.java:76:    private final Executor background = Executors.newSingleThreadExecutor(runnable -> {
+android/app/src/main/java/com/treelearn/app/reading/SqliteReadingStore.java:48:        return helper.getWritableDatabase();
+android/app/src/main/java/com/treelearn/app/MainActivity.java:283:        container.background().execute(() -> {
+android/app/src/main/java/com/treelearn/app/MainActivity.java:467:            container.background().execute(() -> reading.saveAnchor(branchId, explicitAnchor));
+android/app/src/main/java/com/treelearn/app/MainActivity.java:520:        container.background().execute(() -> {
+android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java:95:        background.execute(this::read);
+android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java:105:        background.execute(this::read);
+android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java:204:        background.execute(
+android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java:232:        background.execute(() -> publish(retry
+android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java:269:        background.execute(() -> {
+android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java:295:        background.execute(() -> {
+android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java:309:        background.execute(() -> publish(
+android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java:367:        background.execute(() -> {
+android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java:383:        background.execute(() -> session.remember(branch, anchor));
+android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java:402:        background.execute(() -> {
+android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java:404:                background.execute(this::read);
+android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java:410:        background.execute(() -> publish(commands.fork(messageId, question), true, false));
+android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java:434:            background.execute(this::read);
+EXITCODE=0
+
+### 6 - save-failure containment: which write can throw, and who catches it?
+note: the brief promises 'a failed save only records a visible notice'; the DAO documents ISE on a missing branch
+command: rg -n -F -e "try {" -e "catch (" -e "throw new IllegalStateException" android/app/src/main/java/com/treelearn/app/reading/SqliteReadingStore.java android/data/src/main/java/com/treelearn/data/db/dao/ReadingPositionDao.java android/data/src/main/java/com/treelearn/data/db/dao/BranchDao.java
+android/data/src/main/java/com/treelearn/data/db/dao/ReadingPositionDao.java:61:                throw new IllegalStateException("this branches row points at reading_anchor_message_id "
+android/data/src/main/java/com/treelearn/data/db/dao/ReadingPositionDao.java:96:            throw new IllegalStateException("writing the reading position of branch " + branchId
+android/data/src/main/java/com/treelearn/data/db/dao/ReadingPositionDao.java:120:            throw new IllegalStateException("clearing the reading position of branch " + branchId
+android/data/src/main/java/com/treelearn/data/db/dao/BranchDao.java:75:            throw new IllegalStateException("updating branch " + branch.id + " affected " + updated
+android/data/src/main/java/com/treelearn/data/db/dao/BranchDao.java:102:            throw new IllegalStateException("attaching the snapshot to branch " + branchId
+android/data/src/main/java/com/treelearn/data/db/dao/BranchDao.java:209:            throw new IllegalStateException("this branches row holds a half-filled anchor"
+android/data/src/main/java/com/treelearn/data/db/dao/BranchDao.java:222:                throw new IllegalStateException("the stored anchor is one the domain refuses ("
+android/data/src/main/java/com/treelearn/data/db/dao/BranchDao.java:233:            throw new IllegalStateException("this non-root branch has no birth snapshot, so it was"
+EXITCODE=0
+
+### 6b - is a global uncaught-exception handler installed anywhere in the app?
+note: an uncaught throw on the background thread reaches Android's default handler when none is installed
+command: rg -n -F -e "UncaughtExceptionHandler" -e "setDefaultUncaughtExceptionHandler" android --glob "*.java"
+EXITCODE=1
+
+### 7 - Snapshot.of overloads: production arg count vs test-only overload
+note: producer-less-overload check: which overload does production use, which only tests
+command: rg -n -A 3 -F "Snapshot.of(" android/app/src/main/java/com/treelearn/app/wiring/ChatWiring.java android/app/src/test/java/com/treelearn/app/ui/ChatTestDoubles.java android/app/src/test/java/com/treelearn/app/ui/ChatReadingTest.java
+android/app/src/test/java/com/treelearn/app/ui/ChatReadingTest.java:226:        return ChatData.Snapshot.of("Transformer attention", viewOf(rows),
+android/app/src/test/java/com/treelearn/app/ui/ChatReadingTest.java-227-                Collections.<Recommendation>emptyList(), "", branch, rows);
+android/app/src/test/java/com/treelearn/app/ui/ChatReadingTest.java-228-    }
+android/app/src/test/java/com/treelearn/app/ui/ChatReadingTest.java-229-
+--
+android/app/src/test/java/com/treelearn/app/ui/ChatTestDoubles.java:50:        return ChatData.Snapshot.of("Transformer attention", messages,
+android/app/src/test/java/com/treelearn/app/ui/ChatTestDoubles.java-51-                Collections.<Recommendation>emptyList(), "");
+android/app/src/test/java/com/treelearn/app/ui/ChatTestDoubles.java-52-    }
+android/app/src/test/java/com/treelearn/app/ui/ChatTestDoubles.java-53-
+--
+android/app/src/main/java/com/treelearn/app/wiring/ChatWiring.java:79:        return Snapshot.of(conversation.branchTitle, messages,
+android/app/src/main/java/com/treelearn/app/wiring/ChatWiring.java-80-                Collections.<Recommendation>emptyList(), "", conversation.branch,
+android/app/src/main/java/com/treelearn/app/wiring/ChatWiring.java-81-                conversation.messages);
+android/app/src/main/java/com/treelearn/app/wiring/ChatWiring.java-82-    }
+EXITCODE=0
+
+### 8 - the seam and its callers
+note: one door: showChat(String) must delegate to showChat(String, ReadingAnchor)
+command: rg -n -F -e "showChat(" -e "openAnchor(" -e "public void openBranch" android/app/src/main/java/com/treelearn/app/MainActivity.java android/app/src/main/java/com/treelearn/app/search/SearchPresenter.java
+android/app/src/main/java/com/treelearn/app/search/SearchPresenter.java:45:        void openAnchor(String topicId, String branchId, ReadingAnchor anchor);
+android/app/src/main/java/com/treelearn/app/search/SearchPresenter.java:125:        sink.openAnchor(hit.topicId, hit.branchId, hit.locatorAnchor());
+android/app/src/main/java/com/treelearn/app/MainActivity.java:195:                showChat(chatBranchId);
+android/app/src/main/java/com/treelearn/app/MainActivity.java:204:            showChat(navigationBranchId);
+android/app/src/main/java/com/treelearn/app/MainActivity.java:208:            showChat(treeBranchId);
+android/app/src/main/java/com/treelearn/app/MainActivity.java:234:    public void openBranch(String branchId) {
+android/app/src/main/java/com/treelearn/app/MainActivity.java:235:        showChat(branchId);
+android/app/src/main/java/com/treelearn/app/MainActivity.java:294:     * {@link #showChat(String, ReadingAnchor)}, the door T-042 built, so a search jump and a restore on
+android/app/src/main/java/com/treelearn/app/MainActivity.java:299:    public void openAnchor(String topicId, String branchId, ReadingAnchor anchor) {
+android/app/src/main/java/com/treelearn/app/MainActivity.java:300:        showChat(branchId, anchor);
+android/app/src/main/java/com/treelearn/app/MainActivity.java:318:        showChat(treeBranchId);
+android/app/src/main/java/com/treelearn/app/MainActivity.java:431:    private void showChat(String branchId) {
+android/app/src/main/java/com/treelearn/app/MainActivity.java:432:        showChat(branchId, null);
+android/app/src/main/java/com/treelearn/app/MainActivity.java:445:    private void showChat(String branchId, ReadingAnchor explicitAnchor) {
+android/app/src/main/java/com/treelearn/app/MainActivity.java:557:            public void openBranch(String selected) {
+android/app/src/main/java/com/treelearn/app/MainActivity.java:558:                showChat(selected);
+EXITCODE=0
+
+### 9 - mtime ordering: every T-042 artifact against the sources it claims to have measured
+note: the task discloses that RED and the first mutations predate the implementation; it does not disclose
+      that MainActivity.java and AppContainer.java were rewritten AFTER every artifact (parallel T-040 lane)
+command: python os.path.getmtime per path (equivalent to Get-Item | LastWriteTime)
+kind            mtime                path
+  artifacts/evidence/T-042-red.txt                             2026-09-22 04:02:27
+  artifacts/evidence/T-042-mutation-save-thread.txt            2026-09-22 04:22:53
+  artifacts/evidence/T-042-mutation-gone-anchor.txt            2026-09-22 04:23:14
+  artifacts/evidence/T-042-mutation-unread-monotonic.txt       2026-09-22 04:24:01
+  artifacts/evidence/T-042-mutation-reverted.txt               2026-09-22 04:24:49
+  artifacts/evidence/T-042-source-scan.txt                     2026-09-22 04:27:54
+  artifacts/evidence/T-042-sizing.txt                          2026-09-22 04:28:51
+  artifacts/evidence/T-042-green.txt                           2026-09-22 04:30:18
+  artifacts/evidence/T-042-java-only.txt                       2026-09-22 04:31:35
+  artifacts/evidence/T-042-apk-contains-wiring.txt             2026-09-22 04:32:21
+  android/app/build/outputs/apk/release/app-release.apk        2026-09-22 04:25:28
+  android/app/src/main/java/com/treelearn/app/ui/ChatData.java 2026-09-22 04:19:07
+  android/app/src/main/java/com/treelearn/app/ui/ChatSink.java 2026-09-22 04:19:17
+  android/app/src/main/java/com/treelearn/app/ui/ChatActions.java 2026-09-22 04:19:20
+  android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java 2026-09-22 04:23:00
+  android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java 2026-09-22 04:20:29
+  android/app/src/main/java/com/treelearn/app/wiring/ChatStore.java 2026-09-22 04:19:31
+  android/app/src/main/java/com/treelearn/app/wiring/SqliteChatStore.java 2026-09-22 04:19:34
+  android/app/src/main/java/com/treelearn/app/wiring/ChatWiring.java 2026-09-22 04:19:34
+  android/app/src/main/java/com/treelearn/app/reading/SqliteReadingStore.java 2026-09-22 04:20:08
+  android/app/src/main/java/com/treelearn/app/AppContainer.java 2026-09-22 04:40:22
+  android/app/src/main/java/com/treelearn/app/MainActivity.java 2026-09-22 04:40:34
+EXITCODE=0
+
+### 10 - release APK: size, mtime, SHA-256 and dex string-table scan (recomputed, not copied)
+note: same claim as T-042-apk-contains-wiring.txt; t he names live in the dex string table as MUTF-8,
+      so an ASCII byte scan finds them with no Android tooling. ChatReadingTest is the negative control.
+apk-path: D:\Project\Android\Treelearn\android\app\build\outputs\apk\release\app-release.apk
+apk-bytes: 507000
+apk-mtime: 2026-09-22 04:25:28
+apk-sha256: E4A6F4A6BC027576CBCA3E6506ADF1AAABB5F4CEEF29DB8959637466D5E603F0
+dex-files: classes.dex
+  ReadingSession           occurrences=2
+  SqliteReadingStore       occurrences=2
+  onViewportChanged        occurrences=2
+  renderPosition           occurrences=1
+  onRowsLaidOut            occurrences=3
+  onLeaving                occurrences=2
+  settle                   occurrences=6
+  ChatReadingTest          occurrences=0
+  PendingChatWiring        occurrences=0
+  NOT_WIRED                occurrences=0
+EXITCODE=0
+
+### 11 - JUnit XML actually on disk right now (the debug report may belong to the parallel lane now)
+android/app/build/test-results/testDebugUnitTest/TEST-com.treelearn.app.ui.ChatReadingTest.xml :: MISSING in the current build tree
+android/app/build/test-results/testReleaseUnitTest/TEST-com.treelearn.app.ui.ChatReadingTest.xml :: mtime 2026-09-22 04:25:15
+  <?xml version="1.0" encoding="UTF-8"?>
+  <testsuite name="com.treelearn.app.ui.ChatReadingTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-09-21T20:25:13.905Z" hostname="LAPTOP-0CT7CJ9O" time="0.005">
+  failure-elements=0 error-elements=0 testcase-elements=7
+EXITCODE=0
+
+### 12 - the runtime fact in the current docs
+note: README and the delivery report must carry the wired fact plus the deferred device item
+command: rg -n -F -e "T-042" -e "showChat(String, ReadingAnchor)" -e "deferred" android/README.md "Docs/06-delivery/TreeLearn_V1_交付报告.md"
+Docs/06-delivery/TreeLearn_V1_交付报告.md:5:> 本报告只写已经发生的事实；没有证据的条目一律标注为 deferred / blocked，**不写 PASS**。
+Docs/06-delivery/TreeLearn_V1_交付报告.md:28:    `T-042` 跑强制门禁时由 `:app:packageRelease` **顺带重打包**的结果，核对口径见
+Docs/06-delivery/TreeLearn_V1_交付报告.md:29:    `artifacts/evidence/T-042-apk-contains-wiring.txt` 头部。
+Docs/06-delivery/TreeLearn_V1_交付报告.md:32:    `SqliteReadingStore` 2、`onViewportChanged` 2、`renderPosition` 1（T-042 阅读位置接线）；
+Docs/06-delivery/TreeLearn_V1_交付报告.md:35:    `TreeCanvasWiring` 2（T-038）。T-042 更细的符号清单（`onRowsLaidOut` / `settle` / `applyPosition` 等）
+Docs/06-delivery/TreeLearn_V1_交付报告.md:56:    不是脚本故障）。**但 T-039 之后的任务（T-042 起）的改动还没有进入任何产物**：每落一个任务都会重建
+Docs/06-delivery/TreeLearn_V1_交付报告.md:81:> `deferred — 用户自行装机验证（user decision 2026-09-21）`**：本节只回答「代码路径可达 / 不可达」，
+Docs/06-delivery/TreeLearn_V1_交付报告.md:100:| 阅读位置恢复与「看过即清未读」〔2026-09-22 更新，T-042〕 | `MainActivity.showChat(String, ReadingAnchor)`（`MainActivity.java:383`）在打开分支时经 `container.readingStore()` 恢复位置、离开时经同一 port 保存；`screen/ChatScreen` 只上报滚动事实（`onRowsLaidOut` / `onViewportChanged` / `onLeaving`），读写库一律走 `AppContainer.background()`。原文扫描 `artifacts/evidence/T-042-source-scan.txt` 证明 `ReadingStore` / `ReadingSession` 已有生产消费者。**设备侧滚动观感与像素定位仍 `deferred — 用户自行装机验证（user decision 2026-09-21）`** |
+Docs/06-delivery/TreeLearn_V1_交付报告.md:106:| 搜索页（跨主题搜问题 / 回答 / 引用）〔T-040〕 | 无 `SearchScreen`、无布局；首页「搜索」是 `enabled="false"` 的死按钮（`screen_home_body.xml:35` 的 `home_search`，第 39 行 `enabled="false"`）。实测 `SearchPresenter` 在 `src/main` 内只被自己的类声明与构造器命中（`:31` / `:55`），**没有任何生产调用点**；唯一构造它的地方是 `src/test/.../SearchPresenterTest.java`。搜索跳转要落到命中位置，故复用 T-042 已接线的 `MainActivity.showChat(branchId, explicitAnchor)` |
+Docs/06-delivery/TreeLearn_V1_交付报告.md:132:| 安装、启动、无崩溃 | `deferred — emulator not used this round (user instruction 2026-09-21)` | 用户指令：本轮不使用 emulator/设备 |
+Docs/06-delivery/TreeLearn_V1_交付报告.md:134:| 手机竖屏与平板横屏实机布局、44dp 热区、字体放大 | `deferred` | 同上 |
+Docs/06-delivery/TreeLearn_V1_交付报告.md:135:| reasoning 折叠/灰色/展开的设备端观感与像素检查 | `deferred` | 同上 |
+Docs/06-delivery/TreeLearn_V1_交付报告.md:147:> `deferred — 用户自行装机验证（user decision 2026-09-21）`；本报告不把它写成 PASS。
+Docs/06-delivery/TreeLearn_V1_交付报告.md:196:| T-038 树画布生产装配 | `verifying` | 〔2026-09-22 更新〕实现已落盘（`wiring/TreeCanvasStore` / `SqliteTreeCanvasStore` / `TreeCanvasWiring` + `AppContainer` 两端口 + 对话页「总览」入口），实现者自检判 PARTIAL、独立 verifier 的第 1 轮定点修复已复现；**验收结论尚未落盘**，故仍为 `verifying`。设备项 `deferred` |
+Docs/06-delivery/TreeLearn_V1_交付报告.md:200:| T-040 搜索页 | `ready` | 未开工；无屏幕 / 无布局 / 无入口。`depends_on` 已补上 T-042 并注明顺序理由（搜索跳转要定位到命中位置，需先有 T-042 的阅读位置路径），故**串行排在 T-042 之后** |
+Docs/06-delivery/TreeLearn_V1_交付报告.md:201:| T-042 阅读位置保存与恢复接线 | `verifying` | 〔2026-09-22 更新〕实现已落盘：唯一接缝 `MainActivity.showChat(String, ReadingAnchor)`（`MainActivity.java:383`）在 `chatPresenter.start()` 之前经同一 port 保存显式锚点；`screen/ChatScreen` 只上报滚动事实（`onRowsLaidOut` / `onViewportChanged` / `onLeaving`）；`AppContainer` 装配 `SqliteReadingStore`。`ChatReadingTest` 7 例 RED→GREEN 0 失败，`:app` 单测 341 例与 `.\gradlew.bat check` 均退出码 0，Java-only guard PASS。**待独立 verifier 判定**；真机滚动与像素证据 `deferred — 用户自行装机验证（user decision 2026-09-21）` |
+Docs/06-delivery/TreeLearn_V1_交付报告.md:272:  **T-042（阅读位置保存与恢复，已实现、待独立 verifier 判定）→ T-040（搜索页 + 首页搜索入口；已补 `depends_on: T-042`，
+Docs/06-delivery/TreeLearn_V1_交付报告.md:273:   因为「跳进命中位置」要先用上 T-042 的阅读位置路径）→ T-043（首页空态引导 / 主题永久删除 / 根标题改名 /
+android/README.md:269:**编译验证、未执行**，设备结论按 deferred 记录，见 `artifacts/evidence/T-009-green.txt`。
+android/README.md:367:  一律记为 `deferred — emulator not used this round (user instruction 2026-09-21)`，
+android/README.md:411:  没有任何测试跑过；底层 CAS 语句属 T-024，另有真机套件（本轮同样 deferred）。
+android/README.md:412:  凡必须上真机才能证明的验收项一律记为 `deferred — emulator not used this round (user instruction 2026-09-21)`，
+android/README.md:503:  3. **新 SQL 的行级证据是 deferred，不是 PASS**：按用户 2026-09-21 的决定（放弃 emulator/真机轮次、
+android/README.md:505:     行为记为 `deferred — 用户自行装机验证（user decision 2026-09-21）`，用例已写好并通过编译，
+android/README.md:509:  证明的验收项一律记为 `deferred — emulator not used this round (user instruction 2026-09-21)`：
+android/README.md:538:  只出现在自己的包与验收套件里。搜索页入口属搜索 lane（T-040），且搜索跳转要落在命中位置，故复用 T-042
+android/README.md:541:- **阅读位置恢复与「看过即清未读」已接线（2026-09-22，T-042）**：`ReadingStore` / `ReadingSession` 不再只被
+android/README.md:542:  测试引用——宿主 `MainActivity.showChat(String, ReadingAnchor)` 在打开分支时经 `AppContainer.readingStore()`
+android/README.md:545:  `artifacts/evidence/T-042-source-scan.txt`。真机滚动观感与像素定位仍为
+android/README.md:546:  `deferred — 用户自行装机验证（user decision 2026-09-21）`。
+android/README.md:548:- **真机结论全部 deferred**：本轮按用户指令（2026-09-21）不使用模拟器/真机，`:app:assembleDebugAndroidTest`
+android/README.md:552:  `deferred — emulator not used this round (user instruction 2026-09-21)`。
+android/README.md:595:  `deferred — emulator not used this round (user instruction 2026-09-21)`，既不算 PASS 也不算 FAIL。
+android/README.md:680:  `deferred — 用户自行装机验证（user decision 2026-09-21）`，不得读成已解决。
+android/README.md:686:  本轮一律记为 `deferred — 用户自行装机验证（user decision 2026-09-21）`。
+android/README.md:700:  `deferred — emulator not used this round (user instruction 2026-09-21)`：真机上的流式刷新节奏、展开态在
+android/README.md:738:- **真机触控、像素观感与平板横屏仍是 deferred**：按用户 2026-09-21 的决定，本轮不跑 emulator/真机，
+android/README.md:740:  `deferred — 用户自行装机验证（user decision 2026-09-21）`，不得读成 PASS。
+android/README.md:779:- **真机观感与像素证据仍是 deferred**：按用户 2026-09-21 的决定，本轮不跑 emulator/真机，列表滚动、
+android/README.md:781:  `deferred — 用户自行装机验证（user decision 2026-09-21）`，不得读成 PASS。
+android/README.md:894:`deferred — emulator not used this round (user instruction 2026-09-21)`，不得当作通过。
+android/README.md:896:打包产物检查支撑，**已安装 APK 上的回读断言**同样属于该 deferred 项。
+EXITCODE=0
+
+### 13 - the doc that states what a stale anchor does
+note: authority for 'top of the branch' vs 'live end': the task file says top, the design says live end
+command: rg -n -F -e "atLiveEnd" -e "活动末端" -e "顶部" android/README.md "Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md"
+android/README.md:196:| `ReadingAnchor` / `ReadingPosition` | 语义阅读位置：message/revision + 列表项偏移 + 视口偏移 | **不保存绝对 `scrollY`**（版本切换或字号变化后必然失效）；`resolve` 先按稳定 id 定位再夹取偏移，锚点失效时回退到**当前活动末端**并显式标记 `atLiveEnd` |
+android/README.md:245:| `ReadingPositionDao` | `branches` 的四个 `reading_*` 列 | 阅读位置是**语义锚点**（message + revision + 两个相对偏移），不是滚动像素；四列同生同灭，`reading_anchor_message_id` 为 `NULL` 即「没有位置」（正是 `ON DELETE SET NULL` 之后的形态）；消息在而偏移缺 = 半截行，**大声失败**而不是当成「从顶部开始」 |
+EXITCODE=0
+
+### 14 - whole-file production line count (the upper-bound tool the task cites)
+note: the 94-line figure is the implementer's per-symbol attribution; this is the disclosed upper bound
+command: python -X utf8 .trae/scripts/dev/count_production_lines.py android/app/src/main/java/com/treelearn/app/ui/ChatData.java android/app/src/main/java/com/treelearn/app/ui/ChatSink.java android/app/src/main/java/com/treelearn/app/ui/ChatActions.java android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java android/app/src/main/java/com/treelearn/app/wiring/ChatStore.java android/app/src/main/java/com/treelearn/app/wiring/SqliteChatStore.java android/app/src/main/java/com/treelearn/app/wiring/ChatWiring.java android/app/src/main/java/com/treelearn/app/reading/SqliteReadingStore.java android/app/src/main/java/com/treelearn/app/AppContainer.java android/app/src/main/java/com/treelearn/app/MainActivity.java
+    45  android/app/src/main/java/com/treelearn/app/ui/ChatData.java
+    16  android/app/src/main/java/com/treelearn/app/ui/ChatSink.java
+    30  android/app/src/main/java/com/treelearn/app/ui/ChatActions.java
+   313  android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java
+   460  android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java
+    65  android/app/src/main/java/com/treelearn/app/wiring/ChatStore.java
+   195  android/app/src/main/java/com/treelearn/app/wiring/SqliteChatStore.java
+   276  android/app/src/main/java/com/treelearn/app/wiring/ChatWiring.java
+    29  android/app/src/main/java/com/treelearn/app/reading/SqliteReadingStore.java
+   148  android/app/src/main/java/com/treelearn/app/AppContainer.java
+   412  android/app/src/main/java/com/treelearn/app/MainActivity.java
+  1989  TOTAL (non-blank, non-comment, production files only)
+EXITCODE=0
+
+### 15 - re-apply the sizing evidence's own attribution patterns to the CURRENT tree
+note: T-042-sizing.txt declares its 94 as a FLOOR and lists the hit lines; those lines were taken before
+      MainActivity/AppContainer changed, so the same patterns are re-run here on today's files.
+patterns read out of T-042-sizing.txt: 11
+subtotal reported in T-042-sizing.txt: 94
+listed per-file counts: ChatData.java=7, ChatSink.java=2, ChatActions.java=4, ChatPresenter.java=17, ChatScreen.java=32, ChatStore.java=7, SqliteChatStore.java=2, ChatWiring.java=3, SqliteReadingStore.java=7, AppContainer.java=6, MainActivity.java=7
+sum of the listed counts: 94
+  ChatData.java                  7  lines 57,67,71,79,84,87,89
+  ChatSink.java                  2  lines 4,71
+  ChatActions.java               4  lines 4,83,91,99
+  ChatPresenter.java            17  lines 3,4,10,11,62,68,72,82,140,361,366,368,378,383,396,401,403
+  ChatScreen.java               32  lines 29,30,70,95,99,101,102,160,162,163,221,236,241,242,255,256,258,262,263,264,286,295,306,310,318,322,323,326,327,387,388,390
+  ChatStore.java                 7  lines 70,85,87,90,101,105,106
+  SqliteChatStore.java           2  lines 79,80
+  ChatWiring.java                3  lines 79,80,81
+  SqliteReadingStore.java        7  lines 8,26,28,34,39,44,47
+  AppContainer.java              6  lines 13,14,94,130,199,200
+  MainActivity.java              8  lines 25,44,45,250,251,299,445,459
+re-run subtotal on today's tree: 95
+EXITCODE=0
+
+### 16 - task contract validator
+note: errors must be 0 for T-042 to stand
+command: python -X utf8 .trae/scripts/validate_tasks.py
+PASS T-2026-09-20-bootstrap-java-android-modules-002.md
+PASS T-2026-09-20-chat-reasoning-answer-actions-013.md
+PASS T-2026-09-20-deepseek-stream-gateway-006.md
+PASS T-2026-09-20-derived-ai-artifacts-011.md
+PASS T-2026-09-20-generation-coordinator-recovery-008.md
+PASS T-2026-09-20-home-settings-ui-012.md
+PASS T-2026-09-20-immutable-context-snapshots-007.md
+PASS T-2026-09-20-independent-harness-verification-019.md
+PASS T-2026-09-20-keystore-secret-settings-005.md
+PASS T-2026-09-20-model-immutable-answer-domain-003.md
+PASS T-2026-09-20-navigation-archive-delete-014.md
+PASS T-2026-09-20-pure-java-tree-layout-016.md
+PASS T-2026-09-20-retry-reset-version-switching-010.md
+PASS T-2026-09-20-search-unread-reading-position-015.md
+PASS T-2026-09-20-security-release-core-hardening-018.md
+WARNING T-2026-09-20-sqlite-schema-dao-transactions-004.md: estimated production lines 300 exceeds soft limit 200
+PASS T-2026-09-20-sqlite-schema-dao-transactions-004.md
+PASS T-2026-09-20-topic-branch-lifecycle-009.md
+PASS T-2026-09-20-tree-canvas-tablet-ui-017.md
+PASS T-2026-09-20-treelearn-v1-android-local-first-001.md
+PASS T-2026-09-21-ai-native-sdlc-agent-team-026.md
+PASS T-2026-09-21-ai-persona-builtin-034.md
+PASS T-2026-09-21-ai-persona-spec-036.md
+WARNING T-2026-09-21-child-branches-popup-and-word-menu-041.md: estimated production lines 300 exceeds soft limit 200
+PASS T-2026-09-21-child-branches-popup-and-word-menu-041.md
+PASS T-2026-09-21-delivery-report-033.md
+PASS T-2026-09-21-first-topic-atomic-creation-025.md
+WARNING T-2026-09-21-generation-operation-prompt-anchoring-021.md: estimated production lines 210 exceeds soft limit 200
+PASS T-2026-09-21-generation-operation-prompt-anchoring-021.md
+WARNING T-2026-09-21-home-topic-level-entries-043.md: estimated production lines 330 exceeds soft limit 200
+PASS T-2026-09-21-home-topic-level-entries-043.md
+PASS T-2026-09-21-intent-capturer-agent-028.md
+PASS T-2026-09-21-intent-template-and-home-030.md
+WARNING T-2026-09-21-navigation-page-archive-delete-039.md: estimated production lines 430 exceeds soft limit 200
+PASS T-2026-09-21-navigation-page-archive-delete-039.md
+PASS T-2026-09-21-plan-stage-context-pack-027.md
+PASS T-2026-09-21-pm-discovery-skill-029.md
+PASS T-2026-09-21-quote-persistence-messages-column-037.md
+PASS T-2026-09-21-reading-position-wiring-042.md
+WARNING T-2026-09-21-real-data-path-wiring-032.md: estimated production lines 460 exceeds soft limit 200
+PASS T-2026-09-21-real-data-path-wiring-032.md
+PASS T-2026-09-21-roadmap-and-agent-routing-031.md
+WARNING T-2026-09-21-search-page-and-home-entry-040.md: estimated production lines 320 exceeds soft limit 200
+PASS T-2026-09-21-search-page-and-home-entry-040.md
+WARNING T-2026-09-21-spec-author-agent-and-template-035.md: estimated production lines 260 exceeds soft limit 200
+PASS T-2026-09-21-spec-author-agent-and-template-035.md
+WARNING T-2026-09-21-sqlite-dao-revisions-operations-023.md: estimated production lines 300 exceeds soft limit 200
+PASS T-2026-09-21-sqlite-dao-revisions-operations-023.md
+WARNING T-2026-09-21-sqlite-dao-snapshot-artifact-024.md: estimated production lines 220 exceeds soft limit 200
+PASS T-2026-09-21-sqlite-dao-snapshot-artifact-024.md
+WARNING T-2026-09-21-sqlite-dao-topic-branch-message-022.md: estimated production lines 320 exceeds soft limit 200
+PASS T-2026-09-21-sqlite-dao-topic-branch-message-022.md
+WARNING T-2026-09-21-tree-canvas-production-wiring-038.md: estimated production lines 240 exceeds soft limit 200
+PASS T-2026-09-21-tree-canvas-production-wiring-038.md
+PASS T-2026-09-21-versioned-learning-prompt-policy-020.md
+WARNING T-2026-09-22-context-compression-wiring-047.md: estimated production lines 260 exceeds soft limit 200
+PASS T-2026-09-22-context-compression-wiring-047.md
+WARNING T-2026-09-22-derived-caller-and-titles-045.md: estimated production lines 340 exceeds soft limit 200
+PASS T-2026-09-22-derived-caller-and-titles-045.md
+WARNING T-2026-09-22-derived-recommendations-046.md: estimated production lines 240 exceeds soft limit 200
+PASS T-2026-09-22-derived-recommendations-046.md
+PASS T-2026-09-22-quote-into-request-044.md
+SUMMARY files=47 errors=0 warnings=15
+EXITCODE=0
+
+END OF T-042 INDEPENDENT VERIFICATION SCAN

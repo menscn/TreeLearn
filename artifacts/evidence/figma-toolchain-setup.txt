@@ -1,0 +1,229 @@
+﻿# Figma / figwright toolchain setup evidence
+CapturedAt: 2026-09-21 21:01:51
+Working dir: D:\Project\Android\Treelearn
+Script: artifacts/evidence/.gen-figma-toolchain.ps1
+Upstream skills: D:\Project\Skills\figwright-main\skills
+
+=== Python version used by the checks ===
+Command: python --version
+--- output ---
+Python 3.13.12
+EXITCODE=0
+
+=== Node version used by the probe ===
+Command: node --version
+--- output ---
+v22.22.0
+EXITCODE=0
+
+=== ChatGPT/Codex host config carries the figwright MCP server ===
+Command: python C:\Users\23745\AppData\Local\Temp\figma-check-config.py
+--- snippet source ---
+import json, os, tomllib
+
+path = os.path.join(os.environ["USERPROFILE"], ".codex", "config.toml")
+data = tomllib.load(open(path, "rb"))
+server = data["mcp_servers"]["figwright"]
+print("config_path=" + path)
+print("command=" + server["command"])
+print("args=" + json.dumps(server["args"]))
+print("startup_timeout_sec=" + str(server.get("startup_timeout_sec")))
+print("all_servers=" + ",".join(sorted(data["mcp_servers"])))
+assert server["command"] == "npx", "unexpected command"
+assert server["args"][-1] == "@figwright/mcp@0.5.0", "server version is not pinned to 0.5.0"
+for name in ("pencil", "node_repl"):
+    assert name in data["mcp_servers"], "pre-existing server vanished: " + name
+print("OK figwright MCP entry present, version pinned, pre-existing servers intact")
+
+--- output ---
+config_path=C:\Users\23745\.codex\config.toml
+command=npx
+args=["-y", "@figwright/mcp@0.5.0"]
+startup_timeout_sec=120
+all_servers=figwright,node_repl,pencil
+OK figwright MCP entry present, version pinned, pre-existing servers intact
+EXITCODE=0
+
+=== Migrated skills match upstream byte-for-byte ===
+Command: python C:\Users\23745\AppData\Local\Temp\figma-check-skills.py
+--- snippet source ---
+import hashlib, io, os
+
+repo = r"D:\Project\Android\Treelearn"
+upstream = r"D:\Project\Skills\figwright-main\skills"
+problems = []
+
+def inventory(root):
+    out = {}
+    for base, _dirs, names in os.walk(root):
+        for name in names:
+            full = os.path.join(base, name)
+            rel = os.path.relpath(full, root).replace(os.sep, "/")
+            out[rel] = hashlib.sha256(open(full, "rb").read()).hexdigest()
+    return out
+
+for skill in ("figma-build", "figma-codegen"):
+    dst = os.path.join(repo, ".agents", "skills", skill)
+    src = os.path.join(upstream, skill)
+    migrated, original = inventory(dst), inventory(src)
+    print("skill=%s files=%d bytes_identical=%s" % (skill, len(migrated), migrated == original))
+    if migrated != original:
+        problems.append(skill + " differs: " + str(sorted(set(migrated) ^ set(original))))
+    lines = io.open(os.path.join(dst, "SKILL.md"), encoding="utf-8").read().splitlines()
+    name = next((l.split(":", 1)[1].strip() for l in lines if l.startswith("name:")), "")
+    has_desc = any(l.startswith("description:") for l in lines)
+    print("  frontmatter_name=%s name_matches_dir=%s has_description=%s" % (name, name == skill, has_desc))
+    if name != skill or not has_desc:
+        problems.append(skill + ": frontmatter incomplete")
+    for rel, digest in sorted(migrated.items()):
+        print("  sha256=%s %s" % (digest[:16], rel))
+assert not problems, problems
+print("OK both migrated skills byte-identical to upstream and self-identifying correctly")
+
+--- output ---
+skill=figma-build files=5 bytes_identical=True
+  frontmatter_name=figma-build name_matches_dir=True has_description=True
+  sha256=fc7e2b43a5bf2617 SKILL.md
+  sha256=1dfb039fb8acfb67 references/assemble-screens.md
+  sha256=46867c740968a89e references/author-design-system.md
+  sha256=f80f435267098731 references/motion.md
+  sha256=0af178d13eb35a63 references/write-rules.md
+skill=figma-codegen files=7 bytes_identical=True
+  frontmatter_name=figma-codegen name_matches_dir=True has_description=True
+  sha256=9ae551ed3710953c SKILL.md
+  sha256=7f7b68d6637bf96d references/assets-and-icons.md
+  sha256=58f377c325e3d0f2 references/grounding.md
+  sha256=c3e54f03ba247b39 references/motion.md
+  sha256=5f82532bedadc21c references/responsive.md
+  sha256=ed7f710875918c03 references/stylesheets.md
+  sha256=8ef7cdc3f0fa3840 references/verify.md
+OK both migrated skills byte-identical to upstream and self-identifying correctly
+EXITCODE=0
+
+=== Design-token guard self-test (positive and negative cases) ===
+Command: python .trae/scripts/dev/check_design_tokens.py --selftest
+--- output ---
+OK   selftest: 三方一致必须 PASS
+OK   selftest: token 值漂移必须 FAIL
+OK   selftest: 缺少 token 必须 FAIL
+OK   selftest: 凭空多出 token 必须 FAIL
+OK   selftest: colors.xml 少资源必须 FAIL
+OK   selftest: colors.xml 多资源必须 FAIL
+OK   selftest: colors.xml 数值漂移必须 FAIL
+OK   selftest: 全无色值（解析退化）必须 FAIL
+OK   selftest: :root 缺失必须 FAIL
+OK   selftest: 解析器能读同一行多条声明
+
+check_design_tokens --selftest: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+ASSERT OK   token guard self-test exits 0
+
+=== Design-token guard on the real files ===
+Command: python .trae/scripts/dev/check_design_tokens.py
+--- output ---
+OK   file exists: Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html
+OK   file exists: Docs/04-ux-design/design-system/tokens.json
+OK   file exists: android/app/src/main/res/values/colors.xml
+OK   tokens.json token 名唯一 — measured_dupes=[]
+OK   原型 :root 解析出 >= 40 个 token — measured=42
+OK   tokens.json 解析出 >= 40 个 token — measured=42
+OK   colors.xml 解析出 >= 1 个资源 — measured=15
+OK   三方一致（原型 :root ↔ tokens.json ↔ colors.xml） — measured_tokens=42 measured_resources=15
+
+check_design_tokens: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+ASSERT OK   prototype :root, tokens.json and colors.xml agree
+
+=== Mutation test: drifted value must turn the guard red, restore must turn it green ===
+Command: python C:\Users\23745\AppData\Local\Temp\figma-mutation-tokens.py
+--- snippet source ---
+import hashlib, os, shutil, subprocess, sys
+
+repo = r"D:\Project\Android\Treelearn"
+colors = os.path.join(repo, "android", "app", "src", "main", "res", "values", "colors.xml")
+guard = os.path.join(repo, ".trae", "scripts", "dev", "check_design_tokens.py")
+backup = colors + ".mutation-backup"
+
+def run():
+    done = subprocess.run([sys.executable, guard], cwd=repo, capture_output=True, text=True,
+                          encoding="utf-8", errors="replace")
+    verdict = [l for l in done.stdout.splitlines() if l.startswith("FAIL") or l.startswith("EXITCODE")]
+    return done.returncode, verdict
+
+shutil.copy2(colors, backup)
+before = hashlib.sha256(open(colors, "rb").read()).hexdigest()
+print("colors.xml sha256 before=%s" % before)
+
+data = open(colors, "rb").read()
+assert b"#2E7D4F" in data, "probe value #2E7D4F not found; the mutation would be a no-op"
+open(colors, "wb").write(data.replace(b"#2E7D4F", b"#2E7D50"))
+print("mutated: tl_green #2E7D4F -> #2E7D50 (one value drifted, nothing else touched)")
+
+red_code, red_lines = run()
+print("drifted run exit=%d" % red_code)
+for line in red_lines[:4]:
+    print("  " + line)
+
+shutil.copy2(backup, colors)
+os.remove(backup)
+after = hashlib.sha256(open(colors, "rb").read()).hexdigest()
+print("colors.xml sha256 after restore=%s identical=%s" % (after, after == before))
+
+green_code, green_lines = run()
+print("restored run exit=%d" % green_code)
+for line in green_lines[:4]:
+    print("  " + line)
+
+assert red_code == 1, "guard stayed green on a drifted value (not falsifiable)"
+assert after == before, "restore was not byte-identical"
+assert green_code == 0, "guard did not return green after restore"
+print("OK guard is falsifiable and the workspace is restored")
+
+--- output ---
+colors.xml sha256 before=e4f6b41a6b8336d5cb3223540008376fe1b2490734e1d6d876e23209c18eb5c8
+mutated: tl_green #2E7D4F -> #2E7D50 (one value drifted, nothing else touched)
+drifted run exit=1
+  FAIL 三方一致 — colors.xml 数值与 token 不一致：['tl_green: colors.xml=#2E7D50 应为 #2E7D4F']
+  EXITCODE=1
+colors.xml sha256 after restore=e4f6b41a6b8336d5cb3223540008376fe1b2490734e1d6d876e23209c18eb5c8 identical=True
+restored run exit=0
+  EXITCODE=0
+OK guard is falsifiable and the workspace is restored
+EXITCODE=0
+ASSERT OK   mutation red / restore green both observed
+
+=== Live MCP handshake (server spawned the way the config spawns it) ===
+Command: node .trae/scripts/dev/probe_figwright_mcp.mjs 0.5.0
+--- output ---
+COMMAND=npx -y @figwright/mcp@0.5.0
+INIT_MS=3225
+SERVER=figwright@0.5.0
+SERVER_VERSION_MATCHES_REQUEST=true
+PROTOCOL=2025-06-18
+INSTRUCTIONS_CHARS=1493
+TOOL_COUNT=112
+TOOLS=add_component_property,add_page,add_variable_mode,analyze_project,apply_animation_style,apply_manual_keyframe_track,apply_style_to_node,batch,batch_rename_nodes,bind_component_property,bind_variable_to_node,bind_variable_to_paint,clone_node,combine_as_variants,component_map,create_component,create_effect_style,create_ellipse,create_frame,create_grid_style,create_instance,create_paint_style,create_rectangle,create_section,create_text,create_text_style,create_variable,create_variable_collection,delete_component_property,delete_nodes,delete_page,delete_style,delete_variable,delete_variable_collection,design_diff,detach_instance,edit_component_property,export_pdf,export_video,find_replace_text,get_annotations,get_component_api,get_design_context,get_document,get_fonts,get_local_components,get_metadata,get_motion_styles,get_node,get_node_motion,get_nodes_info,get_pages,get_reactions,get_screenshot,get_selection,get_styles,get_variable_defs,get_viewport,group_nodes,icon_map,import_image,import_svg,list_files,lock_nodes,move_nodes,navigate_to_page,ping,remove_animation_style,remove_manual_keyframe_track,remove_reactions,rename_node,rename_page,rename_variable,reorder_nodes,reparent_nodes,resize_nodes,rotate_nodes,save_image_fills,save_screenshots,scan_components,scan_nodes_by_types,scan_text_nodes,search_nodes,set_arc,set_auto_layout,set_blend_mode,set_constraints,set_corner_radius,set_effects,set_fills,set_instance_properties,set_layout_grids,set_layout_props,set_mask,set_opacity,set_position,set_reactions,set_strokes,set_text,set_text_properties,set_text_range,set_timeline_duration,set_variable_code_syntax,set_variable_value,set_visible,swap_component,token_map,ungroup_nodes,unlock_nodes,update_effect_style,update_paint_style,update_text_style
+PING_OK=true
+PING_ROLE=leader
+PING_RELAY_PORT=3055
+PLUGIN_CONNECTED=false
+PLUGIN_SESSIONS=0
+SERVER_STDERR=[node] became LEADER on :3055
+SERVER_STDERR=[figwright] server 0.5.0 (protocol 0.1.0) ready as leader, relay on :3055
+EXITCODE=0
+EXITCODE=0
+ASSERT OK   live handshake exits 0
+ASSERT OK   handshake reported the server name and version
+ASSERT OK   handshake reported a protocol version
+ASSERT OK   ping answered ok=true
+ASSERT OK   tools/list reported a three-digit tool count
+ASSERT OK   evidence file contains no replacement character
+
+=== summary ===
+assert_failures=0
+step_failures=0
+note: PLUGIN_CONNECTED=False is expected while the Figma app/plugin is not running; it is a
+      live health reading, not a failure of this setup.
+EXITCODE=0

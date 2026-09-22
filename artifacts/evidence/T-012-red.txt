@@ -1,0 +1,884 @@
+=== T-012 RED (failing test first) ===
+Generated: 2026-09-21T21:55:57.3468114+08:00
+Command: cd android; .\gradlew.bat :app:testDebugUnitTest --no-daemon --console=plain
+Mode: scratch copy at C:\Users\23745\AppData\Local\Temp\t012-red (outside the repository). The T-012 implementation is absent there:
+  moved out  android/app/src/main/java/com/treelearn/app/{ui,screen,wiring}/ + AppContainer.java + MainActivity.java
+  excluded   android/app/src/test/java/com/treelearn/app/artifact/ and PositionCommandsTest.java, which belong to sibling lanes that were mid-RED, so every failure below is T-012's
+T-012's own JVM tests are left in place; the only thing missing is the code they test. This tree is byte-identical to the one behind T-012-green.txt except for that implementation.
+JAVA_HOME=D:\Environment\Jdk\jdk21
+--- gradle output ---
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac UP-TO-DATE
+> Task :ai:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :ai:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugLibraryResources UP-TO-DATE
+> Task :ai:writeDebugAarMetadata UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDebugNavigationResources FROM-CACHE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources FROM-CACHE
+> Task :app:mergeDebugResources FROM-CACHE
+> Task :app:packageDebugResources FROM-CACHE
+> Task :app:parseDebugLocalResources FROM-CACHE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :ai:extractDeepLinksDebug UP-TO-DATE
+> Task :ai:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :data:extractDeepLinksDebug UP-TO-DATE
+> Task :data:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :data:compileDebugLibraryResources UP-TO-DATE
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources FROM-CACHE
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac UP-TO-DATE
+> Task :data:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac FROM-CACHE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes NO-SOURCE
+> Task :data:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:bundleDebugClassesToRuntimeJar
+
+> Task :app:compileDebugUnitTestJavaWithJavac FAILED
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:51: 错误: 找不到符号
+    static final class RecordingHomeSink implements HomeSink {
+                                                    ^
+  符号:   类 HomeSink
+  位置: 类 TestDoubles
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:27: 错误: 找不到符号
+    static final class InlineUi implements UiThread {
+                                           ^
+  符号:   类 UiThread
+  位置: 类 TestDoubles
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:91: 错误: 找不到符号
+    static final class FakeKeyVault implements KeyVault {
+                                               ^
+  符号:   类 KeyVault
+  位置: 类 TestDoubles
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:106: 错误: 找不到符号
+    static final class FakeHomeData implements HomeData {
+                                               ^
+  符号:   类 HomeData
+  位置: 类 TestDoubles
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:130: 错误: 找不到符号
+    static final class FakeSubmitter implements RootQuestionSubmitter {
+                                                ^
+  符号:   类 RootQuestionSubmitter
+  位置: 类 TestDoubles
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:153: 错误: 找不到符号
+    static final class FakeSettingsStore implements SettingsStore {
+                                                    ^
+  符号:   类 SettingsStore
+  位置: 类 TestDoubles
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:34: 错误: 找不到符号
+    private HomePresenter presenter;
+            ^
+  符号:   类 HomePresenter
+  位置: 类 HomePresenterTest
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:157: 错误: 找不到符号
+        KeySnapshot key = KeySnapshot.missing();
+        ^
+  符号:   类 KeySnapshot
+  位置: 类 FakeSettingsStore
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:183: 错误: 找不到符号
+        public KeySnapshot readKey() {
+               ^
+  符号:   类 KeySnapshot
+  位置: 类 FakeSettingsStore
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:188: 错误: 找不到符号
+        public void saveKey(char[] secret) throws SecretStoreRefused {
+                                                  ^
+  符号:   类 SecretStoreRefused
+  位置: 类 FakeSettingsStore
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:132: 错误: 找不到符号
+        SubmitResult result = SubmitResult.refused(HomeViewState.Notice.STORAGE);
+        ^
+  符号:   类 SubmitResult
+  位置: 类 FakeSubmitter
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:140: 错误: 找不到符号
+        public SubmitResult submit(String question, GenerationModel model, boolean thinkingEnabled) {
+               ^
+  符号:   类 SubmitResult
+  位置: 类 FakeSubmitter
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:108: 错误: 找不到符号
+        List<TopicCard> topics = Collections.emptyList();
+             ^
+  符号:   类 TopicCard
+  位置: 类 FakeHomeData
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:110: 错误: 找不到符号
+        List<Recommendation> recommendations = StarterRecommendations.all();
+             ^
+  符号:   类 Recommendation
+  位置: 类 FakeHomeData
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:114: 错误: 找不到符号
+        public List<TopicCard> recentTopics() {
+                    ^
+  符号:   类 TopicCard
+  位置: 类 FakeHomeData
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:122: 错误: 找不到符号
+        public Recommendations recommendations(boolean hasTopics) {
+               ^
+  符号:   类 Recommendations
+  位置: 类 FakeHomeData
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:53: 错误: 找不到符号
+        final List<HomeViewState> states = new ArrayList<HomeViewState>();
+                   ^
+  符号:   类 HomeViewState
+  位置: 类 RecordingHomeSink
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:58: 错误: 找不到符号
+        public void render(HomeViewState state) {
+                           ^
+  符号:   类 HomeViewState
+  位置: 类 RecordingHomeSink
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:72: 错误: 找不到符号
+        HomeViewState last() {
+        ^
+  符号:   类 HomeViewState
+  位置: 类 RecordingHomeSink
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:203: 错误: 找不到符号
+    static TopicCard topic(String id, String title) {
+           ^
+  符号:   类 TopicCard
+  位置: 类 TestDoubles
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:77: 错误: 找不到符号
+    static final class RecordingSettingsSink implements SettingsSink {
+                                                        ^
+  符号:   类 SettingsSink
+  位置: 类 TestDoubles
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\SettingsPresenterTest.java:22: 错误: 找不到符号
+    private SettingsPresenter presenter;
+            ^
+  符号:   类 SettingsPresenter
+  位置: 类 SettingsPresenterTest
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:79: 错误: 找不到符号
+        final List<SettingsViewState> states = new ArrayList<SettingsViewState>();
+                   ^
+  符号:   类 SettingsViewState
+  位置: 类 RecordingSettingsSink
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:82: 错误: 找不到符号
+        public void render(SettingsViewState state) {
+                           ^
+  符号:   类 SettingsViewState
+  位置: 类 RecordingSettingsSink
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:86: 错误: 找不到符号
+        SettingsViewState last() {
+        ^
+  符号:   类 SettingsViewState
+  位置: 类 RecordingSettingsSink
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:45: 错误: 找不到符号
+        presenter = new HomePresenter(sink, ui, background, key, data, submitter, store);
+                        ^
+  符号:   类 HomePresenter
+  位置: 类 HomePresenterTest
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:53: 错误: 程序包HomeViewState不存在
+                sink.states.get(0).phase == HomeViewState.Phase.LOADING);
+                                                         ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:57: 错误: 程序包HomeViewState不存在
+                sink.last().phase == HomeViewState.Phase.EMPTY);
+                                                  ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:66: 错误: 程序包HomeViewState不存在
+        assertEquals(HomeViewState.Phase.READY, sink.last().phase);
+                                  ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:79: 错误: 程序包HomeViewState不存在
+        assertEquals(HomeViewState.Phase.ERROR, sink.last().phase);
+                                  ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:80: 错误: 程序包HomeViewState不存在
+        assertEquals(HomeViewState.Notice.STORAGE, sink.last().notice);
+                                  ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:91: 错误: 程序包HomeViewState不存在
+        assertEquals(HomeViewState.Phase.READY, sink.last().phase);
+                                  ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:101: 错误: 程序包HomeViewState不存在
+        assertEquals(HomeViewState.Phase.EMPTY, sink.last().phase);
+                                  ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:116: 错误: 程序包HomeViewState不存在
+        assertEquals(HomeViewState.Notice.KEY_MISSING, sink.last().notice);
+                                  ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:123: 错误: 程序包HomeViewState不存在
+        submitter.result = SubmitResult.refused(HomeViewState.Notice.BALANCE_UNAVAILABLE);
+                                                             ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:123: 错误: 找不到符号
+        submitter.result = SubmitResult.refused(HomeViewState.Notice.BALANCE_UNAVAILABLE);
+                           ^
+  符号:   变量 SubmitResult
+  位置: 类 HomePresenterTest
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:129: 错误: 程序包HomeViewState不存在
+        assertEquals(HomeViewState.Notice.BALANCE_UNAVAILABLE, sink.last().notice);
+                                  ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:143: 错误: 程序包HomeViewState不存在
+        assertEquals(HomeViewState.Notice.STORAGE, sink.last().notice);
+                                  ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:151: 错误: 找不到符号
+        submitter.result = SubmitResult.accepted(TestDoubles.BRANCH_ROOT);
+                           ^
+  符号:   变量 SubmitResult
+  位置: 类 HomePresenterTest
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:168: 错误: 找不到符号
+            submitter.result = SubmitResult.refused(
+                               ^
+  符号:   变量 SubmitResult
+  位置: 类 HomePresenterTest
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:169: 错误: 程序包HomeViewState不存在
+                    HomeViewState.Notice.from(AiGatewayError.forHttpStatus(status).kind));
+                                 ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:181: 错误: 找不到符号
+        Recommendation tapped = new Recommendation("从零理解向量检索的原理",
+        ^
+  符号:   类 Recommendation
+  位置: 类 HomePresenterTest
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:181: 错误: 找不到符号
+        Recommendation tapped = new Recommendation("从零理解向量检索的原理",
+                                    ^
+  符号:   类 Recommendation
+  位置: 类 HomePresenterTest
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:182: 错误: 程序包Recommendation不存在
+                Recommendation.Kind.STARTER);
+                              ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:183: 错误: 程序包HomeViewState不存在
+        submitter.result = SubmitResult.refused(HomeViewState.Notice.RATE_LIMITED);
+                                                             ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:183: 错误: 找不到符号
+        submitter.result = SubmitResult.refused(HomeViewState.Notice.RATE_LIMITED);
+                           ^
+  符号:   变量 SubmitResult
+  位置: 类 HomePresenterTest
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:196: 错误: 找不到符号
+        TopicCard card = new TopicCard(TestDoubles.TOPIC_1, TestDoubles.BRANCH_RESUME, "标题", "摘要", 3, 1_700_000_000_000L);
+        ^
+  符号:   类 TopicCard
+  位置: 类 HomePresenterTest
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:196: 错误: 找不到符号
+        TopicCard card = new TopicCard(TestDoubles.TOPIC_1, TestDoubles.BRANCH_RESUME, "标题", "摘要", 3, 1_700_000_000_000L);
+                             ^
+  符号:   类 TopicCard
+  位置: 类 HomePresenterTest
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:207: 错误: 程序包HomeViewState不存在
+        submitter.result = SubmitResult.refused(HomeViewState.Notice.NETWORK_INTERRUPTED);
+                                                             ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:207: 错误: 找不到符号
+        submitter.result = SubmitResult.refused(HomeViewState.Notice.NETWORK_INTERRUPTED);
+                           ^
+  符号:   变量 SubmitResult
+  位置: 类 HomePresenterTest
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:214: 错误: 程序包HomeViewState不存在
+        assertEquals(HomeViewState.Phase.READY, sink.last().phase);
+                                  ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:243: 错误: 程序包HomeViewState不存在
+        assertEquals(HomeViewState.Phase.EMPTY, sink.last().phase);
+                                  ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:31: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:53: 错误: 找不到符号
+        final List<HomeViewState> states = new ArrayList<HomeViewState>();
+                                                         ^
+  符号:   类 HomeViewState
+  位置: 类 RecordingHomeSink
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:57: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:62: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:67: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:79: 错误: 找不到符号
+        final List<SettingsViewState> states = new ArrayList<SettingsViewState>();
+                                                             ^
+  符号:   类 SettingsViewState
+  位置: 类 RecordingSettingsSink
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:81: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:99: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:110: 错误: 找不到符号
+        List<Recommendation> recommendations = StarterRecommendations.all();
+                                               ^
+  符号:   变量 StarterRecommendations
+  位置: 类 FakeHomeData
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:113: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:121: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:126: 错误: 找不到符号
+            return Recommendations.starterFallback(recommendations);
+                   ^
+  符号:   变量 Recommendations
+  位置: 类 FakeHomeData
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:132: 错误: 程序包HomeViewState不存在
+        SubmitResult result = SubmitResult.refused(HomeViewState.Notice.STORAGE);
+                                                                ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:132: 错误: 找不到符号
+        SubmitResult result = SubmitResult.refused(HomeViewState.Notice.STORAGE);
+                              ^
+  符号:   变量 SubmitResult
+  位置: 类 FakeSubmitter
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:139: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:157: 错误: 找不到符号
+        KeySnapshot key = KeySnapshot.missing();
+                          ^
+  符号:   变量 KeySnapshot
+  位置: 类 FakeSettingsStore
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:162: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:167: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:172: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:177: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:182: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:187: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:190: 错误: 找不到符号
+                throw new SecretStoreRefused("refused by the test");
+                          ^
+  符号:   类 SecretStoreRefused
+  位置: 类 FakeSettingsStore
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:193: 错误: 找不到符号
+            key = KeySnapshot.ofStoredKey(secret);
+                  ^
+  符号:   变量 KeySnapshot
+  位置: 类 FakeSettingsStore
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:196: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:199: 错误: 找不到符号
+            key = KeySnapshot.missing();
+                  ^
+  符号:   变量 KeySnapshot
+  位置: 类 FakeSettingsStore
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:204: 错误: 找不到符号
+        return new TopicCard(id, BRANCH_RESUME, title, "", 1, 1_700_000_000_000L);
+                   ^
+  符号:   类 TopicCard
+  位置: 类 TestDoubles
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:29: 错误: 程序包HomeViewState不存在
+            assertTrue("no notice for " + kind, HomeViewState.Notice.from(kind) != null);
+                                                             ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:31: 错误: 程序包HomeViewState不存在
+        assertEquals(HomeViewState.Notice.KEY_REJECTED,
+                                  ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:32: 错误: 程序包HomeViewState不存在
+                HomeViewState.Notice.from(AiGatewayError.Kind.AUTH_INVALID));
+                             ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:33: 错误: 程序包HomeViewState不存在
+        assertEquals(HomeViewState.Notice.BALANCE_UNAVAILABLE,
+                                  ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:34: 错误: 程序包HomeViewState不存在
+                HomeViewState.Notice.from(AiGatewayError.Kind.BALANCE_UNAVAILABLE));
+                             ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:35: 错误: 程序包HomeViewState不存在
+        assertEquals(HomeViewState.Notice.REQUEST_REJECTED,
+                                  ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:36: 错误: 程序包HomeViewState不存在
+                HomeViewState.Notice.from(AiGatewayError.Kind.REQUEST_INVALID));
+                             ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:37: 错误: 程序包HomeViewState不存在
+        assertEquals(HomeViewState.Notice.RATE_LIMITED,
+                                  ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:38: 错误: 程序包HomeViewState不存在
+                HomeViewState.Notice.from(AiGatewayError.Kind.RATE_LIMITED));
+                             ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:39: 错误: 程序包HomeViewState不存在
+        assertEquals(HomeViewState.Notice.PROVIDER_UNAVAILABLE,
+                                  ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:40: 错误: 程序包HomeViewState不存在
+                HomeViewState.Notice.from(AiGatewayError.Kind.PROVIDER_UNAVAILABLE));
+                             ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:41: 错误: 程序包HomeViewState不存在
+        assertEquals(HomeViewState.Notice.NETWORK_INTERRUPTED,
+                                  ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:42: 错误: 程序包HomeViewState不存在
+                HomeViewState.Notice.from(AiGatewayError.Kind.NETWORK_INTERRUPTED));
+                             ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:47: 错误: 程序包HomeViewState不存在
+        assertEquals(HomeViewState.Notice.KEY_REJECTED,
+                                  ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:48: 错误: 程序包HomeViewState不存在
+                HomeViewState.Notice.from(AiGatewayError.forHttpStatus(401).kind));
+                             ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:49: 错误: 程序包HomeViewState不存在
+        assertEquals(HomeViewState.Notice.BALANCE_UNAVAILABLE,
+                                  ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:50: 错误: 程序包HomeViewState不存在
+                HomeViewState.Notice.from(AiGatewayError.forHttpStatus(402).kind));
+                             ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:51: 错误: 程序包HomeViewState不存在
+        assertEquals(HomeViewState.Notice.REQUEST_REJECTED,
+                                  ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:52: 错误: 程序包HomeViewState不存在
+                HomeViewState.Notice.from(AiGatewayError.forHttpStatus(422).kind));
+                             ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:53: 错误: 程序包HomeViewState不存在
+        assertEquals(HomeViewState.Notice.RATE_LIMITED,
+                                  ^
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:54: 错误: 程序包HomeViewState不存在
+                HomeViewState.Notice.from(AiGatewayError.forHttpStatus(429).kind));
+                             ^
+100 个错误
+
+[Incubating] Problems report is available at: file:///C:/Users/23745/AppData/Local/Temp/t012-red/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugUnitTestJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:51: 错误: 找不到符号
+      static final class RecordingHomeSink implements HomeSink {
+                                                      ^
+    符号:   类 HomeSink
+    位置: 类 TestDoubles
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:27: 错误: 找不到符号
+      static final class InlineUi implements UiThread {
+                                             ^
+    符号:   类 UiThread
+    位置: 类 TestDoubles
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:91: 错误: 找不到符号
+      static final class FakeKeyVault implements KeyVault {
+                                                 ^
+    符号:   类 KeyVault
+    位置: 类 TestDoubles
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:106: 错误: 找不到符号
+      static final class FakeHomeData implements HomeData {
+                                                 ^
+    符号:   类 HomeData
+    位置: 类 TestDoubles
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:130: 错误: 找不到符号
+      static final class FakeSubmitter implements RootQuestionSubmitter {
+                                                  ^
+    符号:   类 RootQuestionSubmitter
+    位置: 类 TestDoubles
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:153: 错误: 找不到符号
+      static final class FakeSettingsStore implements SettingsStore {
+                                                      ^
+    符号:   类 SettingsStore
+    位置: 类 TestDoubles
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:34: 错误: 找不到符号
+      private HomePresenter presenter;
+              ^
+    符号:   类 HomePresenter
+    位置: 类 HomePresenterTest
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:157: 错误: 找不到符号
+          KeySnapshot key = KeySnapshot.missing();
+          ^
+    符号:   类 KeySnapshot
+    位置: 类 FakeSettingsStore
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:183: 错误: 找不到符号
+          public KeySnapshot readKey() {
+                 ^
+    符号:   类 KeySnapshot
+    位置: 类 FakeSettingsStore
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:188: 错误: 找不到符号
+          public void saveKey(char[] secret) throws SecretStoreRefused {
+                                                    ^
+    符号:   类 SecretStoreRefused
+    位置: 类 FakeSettingsStore
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:132: 错误: 找不到符号
+          SubmitResult result = SubmitResult.refused(HomeViewState.Notice.STORAGE);
+          ^
+    符号:   类 SubmitResult
+    位置: 类 FakeSubmitter
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:140: 错误: 找不到符号
+          public SubmitResult submit(String question, GenerationModel model, boolean thinkingEnabled) {
+                 ^
+    符号:   类 SubmitResult
+    位置: 类 FakeSubmitter
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:108: 错误: 找不到符号
+          List<TopicCard> topics = Collections.emptyList();
+               ^
+    符号:   类 TopicCard
+    位置: 类 FakeHomeData
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:110: 错误: 找不到符号
+          List<Recommendation> recommendations = StarterRecommendations.all();
+               ^
+    符号:   类 Recommendation
+    位置: 类 FakeHomeData
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:114: 错误: 找不到符号
+          public List<TopicCard> recentTopics() {
+                      ^
+    符号:   类 TopicCard
+    位置: 类 FakeHomeData
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:122: 错误: 找不到符号
+          public Recommendations recommendations(boolean hasTopics) {
+                 ^
+    符号:   类 Recommendations
+    位置: 类 FakeHomeData
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:53: 错误: 找不到符号
+          final List<HomeViewState> states = new ArrayList<HomeViewState>();
+                     ^
+    符号:   类 HomeViewState
+    位置: 类 RecordingHomeSink
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:58: 错误: 找不到符号
+          public void render(HomeViewState state) {
+                             ^
+    符号:   类 HomeViewState
+    位置: 类 RecordingHomeSink
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:72: 错误: 找不到符号
+          HomeViewState last() {
+          ^
+    符号:   类 HomeViewState
+    位置: 类 RecordingHomeSink
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:203: 错误: 找不到符号
+      static TopicCard topic(String id, String title) {
+             ^
+    符号:   类 TopicCard
+    位置: 类 TestDoubles
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:77: 错误: 找不到符号
+      static final class RecordingSettingsSink implements SettingsSink {
+                                                          ^
+    符号:   类 SettingsSink
+    位置: 类 TestDoubles
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\SettingsPresenterTest.java:22: 错误: 找不到符号
+      private SettingsPresenter presenter;
+              ^
+    符号:   类 SettingsPresenter
+    位置: 类 SettingsPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:79: 错误: 找不到符号
+          final List<SettingsViewState> states = new ArrayList<SettingsViewState>();
+                     ^
+    符号:   类 SettingsViewState
+    位置: 类 RecordingSettingsSink
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:82: 错误: 找不到符号
+          public void render(SettingsViewState state) {
+                             ^
+    符号:   类 SettingsViewState
+    位置: 类 RecordingSettingsSink
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:86: 错误: 找不到符号
+          SettingsViewState last() {
+          ^
+    符号:   类 SettingsViewState
+    位置: 类 RecordingSettingsSink
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:45: 错误: 找不到符号
+          presenter = new HomePresenter(sink, ui, background, key, data, submitter, store);
+                          ^
+    符号:   类 HomePresenter
+    位置: 类 HomePresenterTest
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:123: 错误: 找不到符号
+          submitter.result = SubmitResult.refused(HomeViewState.Notice.BALANCE_UNAVAILABLE);
+                             ^
+    符号:   变量 SubmitResult
+    位置: 类 HomePresenterTest
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:151: 错误: 找不到符号
+          submitter.result = SubmitResult.accepted(TestDoubles.BRANCH_ROOT);
+                             ^
+    符号:   变量 SubmitResult
+    位置: 类 HomePresenterTest
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:168: 错误: 找不到符号
+              submitter.result = SubmitResult.refused(
+                                 ^
+    符号:   变量 SubmitResult
+    位置: 类 HomePresenterTest
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:181: 错误: 找不到符号
+          Recommendation tapped = new Recommendation("从零理解向量检索的原理",
+          ^
+    符号:   类 Recommendation
+    位置: 类 HomePresenterTest
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:181: 错误: 找不到符号
+          Recommendation tapped = new Recommendation("从零理解向量检索的原理",
+                                      ^
+    符号:   类 Recommendation
+    位置: 类 HomePresenterTest
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:183: 错误: 找不到符号
+          submitter.result = SubmitResult.refused(HomeViewState.Notice.RATE_LIMITED);
+                             ^
+    符号:   变量 SubmitResult
+    位置: 类 HomePresenterTest
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:196: 错误: 找不到符号
+          TopicCard card = new TopicCard(TestDoubles.TOPIC_1, TestDoubles.BRANCH_RESUME, "标题", "摘要", 3, 1_700_000_000_000L);
+          ^
+    符号:   类 TopicCard
+    位置: 类 HomePresenterTest
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:196: 错误: 找不到符号
+          TopicCard card = new TopicCard(TestDoubles.TOPIC_1, TestDoubles.BRANCH_RESUME, "标题", "摘要", 3, 1_700_000_000_000L);
+                               ^
+    符号:   类 TopicCard
+    位置: 类 HomePresenterTest
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:207: 错误: 找不到符号
+          submitter.result = SubmitResult.refused(HomeViewState.Notice.NETWORK_INTERRUPTED);
+                             ^
+    符号:   变量 SubmitResult
+    位置: 类 HomePresenterTest
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:53: 错误: 找不到符号
+          final List<HomeViewState> states = new ArrayList<HomeViewState>();
+                                                           ^
+    符号:   类 HomeViewState
+    位置: 类 RecordingHomeSink
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:79: 错误: 找不到符号
+          final List<SettingsViewState> states = new ArrayList<SettingsViewState>();
+                                                               ^
+    符号:   类 SettingsViewState
+    位置: 类 RecordingSettingsSink
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:110: 错误: 找不到符号
+          List<Recommendation> recommendations = StarterRecommendations.all();
+                                                 ^
+    符号:   变量 StarterRecommendations
+    位置: 类 FakeHomeData
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:126: 错误: 找不到符号
+              return Recommendations.starterFallback(recommendations);
+                     ^
+    符号:   变量 Recommendations
+    位置: 类 FakeHomeData
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:132: 错误: 找不到符号
+          SubmitResult result = SubmitResult.refused(HomeViewState.Notice.STORAGE);
+                                ^
+    符号:   变量 SubmitResult
+    位置: 类 FakeSubmitter
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:157: 错误: 找不到符号
+          KeySnapshot key = KeySnapshot.missing();
+                            ^
+    符号:   变量 KeySnapshot
+    位置: 类 FakeSettingsStore
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:190: 错误: 找不到符号
+                  throw new SecretStoreRefused("refused by the test");
+                            ^
+    符号:   类 SecretStoreRefused
+    位置: 类 FakeSettingsStore
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:193: 错误: 找不到符号
+              key = KeySnapshot.ofStoredKey(secret);
+                    ^
+    符号:   变量 KeySnapshot
+    位置: 类 FakeSettingsStore
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:199: 错误: 找不到符号
+              key = KeySnapshot.missing();
+                    ^
+    符号:   变量 KeySnapshot
+    位置: 类 FakeSettingsStore
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:204: 错误: 找不到符号
+          return new TopicCard(id, BRANCH_RESUME, title, "", 1, 1_700_000_000_000L);
+                     ^
+    符号:   类 TopicCard
+    位置: 类 TestDoubles
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:31: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:57: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:62: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:67: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:81: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:99: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:113: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:121: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:139: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:162: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:167: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:172: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:177: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:182: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:187: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:196: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:53: 错误: 程序包HomeViewState不存在
+                  sink.states.get(0).phase == HomeViewState.Phase.LOADING);
+                                                           ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:57: 错误: 程序包HomeViewState不存在
+                  sink.last().phase == HomeViewState.Phase.EMPTY);
+                                                    ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:66: 错误: 程序包HomeViewState不存在
+          assertEquals(HomeViewState.Phase.READY, sink.last().phase);
+                                    ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:79: 错误: 程序包HomeViewState不存在
+          assertEquals(HomeViewState.Phase.ERROR, sink.last().phase);
+                                    ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:80: 错误: 程序包HomeViewState不存在
+          assertEquals(HomeViewState.Notice.STORAGE, sink.last().notice);
+                                    ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:91: 错误: 程序包HomeViewState不存在
+          assertEquals(HomeViewState.Phase.READY, sink.last().phase);
+                                    ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:101: 错误: 程序包HomeViewState不存在
+          assertEquals(HomeViewState.Phase.EMPTY, sink.last().phase);
+                                    ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:116: 错误: 程序包HomeViewState不存在
+          assertEquals(HomeViewState.Notice.KEY_MISSING, sink.last().notice);
+                                    ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:123: 错误: 程序包HomeViewState不存在
+          submitter.result = SubmitResult.refused(HomeViewState.Notice.BALANCE_UNAVAILABLE);
+                                                               ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:129: 错误: 程序包HomeViewState不存在
+          assertEquals(HomeViewState.Notice.BALANCE_UNAVAILABLE, sink.last().notice);
+                                    ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:143: 错误: 程序包HomeViewState不存在
+          assertEquals(HomeViewState.Notice.STORAGE, sink.last().notice);
+                                    ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:169: 错误: 程序包HomeViewState不存在
+                      HomeViewState.Notice.from(AiGatewayError.forHttpStatus(status).kind));
+                                   ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:182: 错误: 程序包Recommendation不存在
+                  Recommendation.Kind.STARTER);
+                                ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:183: 错误: 程序包HomeViewState不存在
+          submitter.result = SubmitResult.refused(HomeViewState.Notice.RATE_LIMITED);
+                                                               ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:207: 错误: 程序包HomeViewState不存在
+          submitter.result = SubmitResult.refused(HomeViewState.Notice.NETWORK_INTERRUPTED);
+                                                               ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:214: 错误: 程序包HomeViewState不存在
+          assertEquals(HomeViewState.Phase.READY, sink.last().phase);
+                                    ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:243: 错误: 程序包HomeViewState不存在
+          assertEquals(HomeViewState.Phase.EMPTY, sink.last().phase);
+                                    ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:132: 错误: 程序包HomeViewState不存在
+          SubmitResult result = SubmitResult.refused(HomeViewState.Notice.STORAGE);
+                                                                  ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:29: 错误: 程序包HomeViewState不存在
+              assertTrue("no notice for " + kind, HomeViewState.Notice.from(kind) != null);
+                                                               ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:31: 错误: 程序包HomeViewState不存在
+          assertEquals(HomeViewState.Notice.KEY_REJECTED,
+                                    ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:32: 错误: 程序包HomeViewState不存在
+                  HomeViewState.Notice.from(AiGatewayError.Kind.AUTH_INVALID));
+                               ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:33: 错误: 程序包HomeViewState不存在
+          assertEquals(HomeViewState.Notice.BALANCE_UNAVAILABLE,
+                                    ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:34: 错误: 程序包HomeViewState不存在
+                  HomeViewState.Notice.from(AiGatewayError.Kind.BALANCE_UNAVAILABLE));
+                               ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:35: 错误: 程序包HomeViewState不存在
+          assertEquals(HomeViewState.Notice.REQUEST_REJECTED,
+                                    ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:36: 错误: 程序包HomeViewState不存在
+                  HomeViewState.Notice.from(AiGatewayError.Kind.REQUEST_INVALID));
+                               ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:37: 错误: 程序包HomeViewState不存在
+          assertEquals(HomeViewState.Notice.RATE_LIMITED,
+                                    ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:38: 错误: 程序包HomeViewState不存在
+                  HomeViewState.Notice.from(AiGatewayError.Kind.RATE_LIMITED));
+                               ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:39: 错误: 程序包HomeViewState不存在
+          assertEquals(HomeViewState.Notice.PROVIDER_UNAVAILABLE,
+                                    ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:40: 错误: 程序包HomeViewState不存在
+                  HomeViewState.Notice.from(AiGatewayError.Kind.PROVIDER_UNAVAILABLE));
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+53 actionable tasks: 4 executed, 7 from cache, 42 up-to-date
+                               ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:41: 错误: 程序包HomeViewState不存在
+          assertEquals(HomeViewState.Notice.NETWORK_INTERRUPTED,
+                                    ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:42: 错误: 程序包HomeViewState不存在
+                  HomeViewState.Notice.from(AiGatewayError.Kind.NETWORK_INTERRUPTED));
+                               ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:47: 错误: 程序包HomeViewState不存在
+          assertEquals(HomeViewState.Notice.KEY_REJECTED,
+                                    ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:48: 错误: 程序包HomeViewState不存在
+                  HomeViewState.Notice.from(AiGatewayError.forHttpStatus(401).kind));
+                               ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:49: 错误: 程序包HomeViewState不存在
+          assertEquals(HomeViewState.Notice.BALANCE_UNAVAILABLE,
+                                    ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:50: 错误: 程序包HomeViewState不存在
+                  HomeViewState.Notice.from(AiGatewayError.forHttpStatus(402).kind));
+                               ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:51: 错误: 程序包HomeViewState不存在
+          assertEquals(HomeViewState.Notice.REQUEST_REJECTED,
+                                    ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:52: 错误: 程序包HomeViewState不存在
+                  HomeViewState.Notice.from(AiGatewayError.forHttpStatus(422).kind));
+                               ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:53: 错误: 程序包HomeViewState不存在
+          assertEquals(HomeViewState.Notice.RATE_LIMITED,
+                                    ^
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:54: 错误: 程序包HomeViewState不存在
+                  HomeViewState.Notice.from(AiGatewayError.forHttpStatus(429).kind));
+                               ^
+  100 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+BUILD FAILED in 14s
+EXITCODE=1

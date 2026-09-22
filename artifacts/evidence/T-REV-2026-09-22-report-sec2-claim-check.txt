@@ -1,0 +1,37 @@
+T-REV - independent re-scan of the shipped release APK, adjudicating the delivery report Sec.2 line-26 symbol claim
+captured-at: 2026-09-22T05:14:34.5680570+08:00
+cwd: D:\Project\Android\Treelearn
+role: leader/foreman - independent measurement, NOT the implementer of T-042 and NOT the verifier who wrote T-042-fix1-apk-contains-wiring.txt
+command: python -X utf8 artifacts/evidence/scripts/tl_apk_symbol_scan.py
+mode: read-only; zip-reads the release APK, counts ASCII occurrences of each symbol in every classes*.dex string table and each resource name in resources.arsc (utf-8 and utf-16le), recomputes bytes and SHA-256
+claim-under-test: Docs/06-delivery/TreeLearn_V1_交付报告.md line 26
+  -> NoticeText 3, READING_POSITION 1, noticeReadingFailure 2, visibleRows 1, onRowsLaidOut 3
+  -> resources notice_reading_position 1 / chat_notice 1 ; negatives ChatReadingTest / ChatPresenterTest = 0
+--- begin output ---
+apk-path: D:\Project\Android\Treelearn\android\app\build\outputs\apk\release\app-release.apk
+apk-bytes: 523861
+apk-sha256: 3dfe991de9ee31470cb86b9cabb87c5191848a1a0c02dc9e873f31f5851695e2
+apk-mtime: 2026-09-22 05:13:06
+dex-entries: classes.dex
+  NoticeText             dex-occurrences=3
+  READING_POSITION       dex-occurrences=1
+  noticeReadingFailure   dex-occurrences=2
+  visibleRows            dex-occurrences=1
+  onRowsLaidOut          dex-occurrences=3
+  Notice                 dex-occurrences=18
+  ReadingSession         dex-occurrences=2
+  SqliteReadingStore     dex-occurrences=2
+  onViewportChanged      dex-occurrences=2
+  renderPosition         dex-occurrences=1
+  ChatReadingTest        dex-occurrences=0
+  ChatPresenterTest      dex-occurrences=0
+  Lorg/junit             dex-occurrences=0
+  Lorg/jetbrains/kotlin  dex-occurrences=0
+  Landroidx/             dex-occurrences=0
+resources.arsc bytes=26180
+  notice_reading_position  utf8=1 utf16le=0
+  chat_notice              utf8=1 utf16le=0
+  notice_storage           utf8=1 utf16le=0
+  notice_reading_failure   utf8=0 utf16le=0
+--- end output ---
+EXITCODE=0

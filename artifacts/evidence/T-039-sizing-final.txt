@@ -1,0 +1,156 @@
+T-039 sizing evidence (final, after wiring + host + entries)
+captured-at: 2026-09-22T03:30:14.9596693+08:00
+cwd: D:\Project\Android\Treelearn
+judgement = non-blank non-comment per .trae/rules/harness-tasks.md line 45; XML and Java block/line comments stripped
+method: NEW files count in full; CHANGED files count only lines matching this task's identifiers (same method as T-039-sizing.txt)
+
+== command A: python -X utf8 .trae/scripts/dev/count_production_lines.py <6 NEW files> ==
+   285  android/app/src/main/java/com/treelearn/app/screen/NavigationScreen.java
+    35  android/app/src/main/java/com/treelearn/app/wiring/NavigationWiring.java
+    11  android/app/src/main/res/layout/screen_navigation.xml
+   150  android/app/src/main/res/layout/screen_navigation_body.xml
+    34  android/app/src/main/res/layout/item_navigation_row.xml
+    16  android/app/src/main/res/layout-sw600dp/screen_navigation.xml
+   531  TOTAL (non-blank, non-comment, production files only)
+EXITCODE=0
+
+== command B: python -X utf8 -  (stdin block counts CHANGED files by this task's identifiers) ==
+    8 matched  android/app/src/main/java/com/treelearn/app/navigation/NavigationViewState.java   rx=archivable|childCount|liveChildren
+        | public final boolean archivable;
+        | public final int childCount;
+        | Row(String branchId, String title, boolean archived, boolean current, boolean archivable,
+        | int childCount) {
+        | this.archivable = archivable;
+        | this.childCount = childCount;
+        | liveChildren(tree, node.branchId)));
+        | private static int liveChildren(NavigationData.Snapshot tree, String branchId) {
+    8 matched  android/app/src/main/java/com/treelearn/app/AppContainer.java   rx=[Nn]avigation
+        | import com.treelearn.app.navigation.NavigationData;
+        | import com.treelearn.app.navigation.SqliteNavigationStore;
+        | import com.treelearn.app.wiring.NavigationWiring;
+        | private final NavigationWiring navigationWiring;
+        | this.navigationWiring = new NavigationWiring(
+        | new SqliteNavigationStore(helper, transactions, coordinator));
+        | public NavigationData navigationData() {
+        | return navigationWiring;
+   42 matched  android/app/src/main/java/com/treelearn/app/MainActivity.java   rx=[Nn]avigation|openArchived
+        | import com.treelearn.app.screen.NavigationScreen;
+        | import com.treelearn.app.navigation.NavigationPresenter;
+        | import com.treelearn.app.navigation.NavigationSink;
+        | import com.treelearn.app.navigation.NavigationViewState;
+        | implements HomeSink, SettingsSink, ChatSink, TreeCanvasSink, NavigationSink {
+        | private NavigationScreen navigationScreen;
+        | private NavigationPresenter navigationPresenter;
+        | private String navigationBranchId;
+        | if (navigationBranchId != null) {
+        | navigationPresenter.onResumed();
+        | if (navigationBranchId != null) {
+        | showChat(navigationBranchId);
+        | public void render(NavigationViewState state) {
+        | if (navigationScreen != null) {
+        | navigationScreen.render(state);
+        | if (navigationBranchId != null) {
+        | public void openNavigation(String branchId) {
+        | showNavigation(branchId);
+        | public void openArchived(String branchId) {
+        | showNavigation(branchId);
+        | navigationBranchId = null;
+        | navigationScreen = null;
+        | navigationPresenter = null;
+        | navigationBranchId = null;
+        | navigationScreen = null;
+        | navigationPresenter = null;
+        | navigationBranchId = null;
+        | navigationScreen = null;
+        | navigationPresenter = null;
+        | private void showNavigation(String branchId) {
+        | final String topicId = container.navigationData().topicOf(branchId);
+        | enterNavigation(topicId, branchId);
+        | private void enterNavigation(String topicId, String branchId) {
+        | navigationBranchId = branchId;
+        | navigationScreen = new NavigationScreen(this);
+        | navigationPresenter = new NavigationPresenter(this, container.uiThread(),
+        | container.background(), container.navigationData(), topicId, branchId);
+        | navigationScreen.setActions(navigationPresenter);
+        | navigationScreen.setHost(new NavigationScreen.Host() {
+        | public void leaveNavigation() {
+        | swap(navigationScreen);
+        | navigationPresenter.start();
+    1 matched  android/app/src/main/java/com/treelearn/app/ui/ChatActions.java   rx=[Nn]avigation
+        | void onNavigationPressed();
+    1 matched  android/app/src/main/java/com/treelearn/app/ui/ChatSink.java   rx=[Nn]avigation
+        | void openNavigation(String branchId);
+    2 matched  android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java   rx=[Nn]avigation
+        | public void onNavigationPressed() {
+        | sink.openNavigation(branchId);
+    2 matched  android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java   rx=chat_nav|NavigationPressed
+        | findViewById(R.id.chat_nav)
+        | .setOnClickListener(view -> fire(actions -> actions.onNavigationPressed()));
+    2 matched  android/app/src/main/res/layout/screen_chat_body.xml   rx=chat_nav
+        | android:id="@+id/chat_nav"
+        | android:text="@string/chat_nav"
+    1 matched  android/app/src/main/java/com/treelearn/app/ui/TreeCanvasActions.java   rx=[Nn]avigation
+        | void onNavigationPressed();
+    1 matched  android/app/src/main/java/com/treelearn/app/ui/TreeCanvasSink.java   rx=[Nn]avigation
+        | void openNavigation(String branchId);
+    2 matched  android/app/src/main/java/com/treelearn/app/ui/TreeCanvasPresenter.java   rx=[Nn]avigation
+        | public void onNavigationPressed() {
+        | sink.openNavigation(current);
+    2 matched  android/app/src/main/java/com/treelearn/app/screen/TreeCanvasScreen.java   rx=R\.id\.tree_nav(?!_host)|onNavigationPressed
+        | findViewById(R.id.tree_nav)
+        | .setOnClickListener(view -> fire(TreeCanvasActions::onNavigationPressed));
+    2 matched  android/app/src/main/res/layout/screen_tree_body.xml   rx=@\+id/tree_nav\"|@string/tree_nav
+        | android:id="@+id/tree_nav"
+        | android:text="@string/tree_nav"
+    1 matched  android/app/src/main/java/com/treelearn/app/ui/HomeActions.java   rx=Archived
+        | void onArchivedPressed();
+    1 matched  android/app/src/main/java/com/treelearn/app/ui/HomeSink.java   rx=Archived
+        | void openArchived(String branchId);
+    2 matched  android/app/src/main/java/com/treelearn/app/ui/HomePresenter.java   rx=Archived
+        | public void onArchivedPressed() {
+        | sink.openArchived(topics.get(0).resumeBranchId);
+    4 matched  android/app/src/main/java/com/treelearn/app/screen/HomeScreen.java   rx=archived
+        | private final Button archived;
+        | archived = findViewById(R.id.home_archived);
+        | archived.setOnClickListener(view -> {
+        | archived.setEnabled(!state.topics.isEmpty());
+    1 matched  android/app/src/main/res/layout/screen_home_body.xml   rx=home_archived
+        | android:id="@+id/home_archived"
+   32 matched  android/app/src/main/res/values/strings.xml   rx=name="navigation_|name="chat_nav|name="tree_nav
+        | <string name="tree_nav">导航</string>
+        | <string name="chat_nav">导航</string>
+        | <string name="navigation_title">分支导航</string>
+        | <string name="navigation_back">返回</string>
+        | <string name="navigation_enter">进入对话</string>
+        | <string name="navigation_canvas">画布</string>
+        | <string name="navigation_summary_title">AI 总结</string>
+        | <string name="navigation_summary_empty">这个分支还没有总结。</string>
+        | <string name="navigation_summary_stale">总结暂时读不出来，下面显示的是上一次的结果。</string>
+        | <string name="navigation_root_chip">根分支 · 不可归档</string>
+        | <string name="navigation_rows_section">分支列表</string>
+        | <string name="navigation_archived_section">已归档子树</string>
+        | <string name="navigation_row_more">操作</string>
+        | <string name="navigation_restore">恢复</string>
+        | <string name="navigation_row_children">%1$d 子分支</string>
+        | <string name="navigation_row_current">当前 · %1$d 子分支</string>
+        | <string name="navigation_fold">折叠</string>
+        | <string name="navigation_unfold">展开</string>
+        | <string name="navigation_archive">归档此子树</string>
+        | <string name="navigation_delete">永久删除子树</string>
+        | <string name="navigation_delete_title">永久删除这棵子树？</string>
+        | <string name="navigation_delete_body">将永久删除「%1$s」及全部 %2$d 个分支，删除后不可恢复。取消不会改变任何内容。</string>
+        | <string name="navigation_delete_ok">永久删除</string>
+        | <string name="navigation_cancel">取消</string>
+        | <string name="navigation_loading">正在读取这棵树…</string>
+        | <string name="navigation_error">这棵树暂时读不出来，稍后重试即可。</string>
+        | <string name="navigation_missing">这棵树已经不在了。</string>
+        | <string name="navigation_notice_store_unreadable">本机数据读不出来，列表保持上一次的样子，可以直接重试。</string>
+        | <string name="navigation_notice_branch_gone">这个分支已经不在了，列表已经刷新。</string>
+        | <string name="navigation_notice_already_archived">这棵子树已经是归档状态了。</string>
+        | <string name="navigation_notice_not_archived">这棵子树本来就没有归档，无需恢复。</string>
+        | <string name="navigation_notice_scope_unresolvable">这棵树的结构读不全，算不出会删掉多少分支，所以先不提供删除。</string>
+subtotal NEW     = 531
+subtotal CHANGED = 115
+TOTAL T-039      = 646
+hard cap 500 -> over by 146 lines (29.2%)
+EXITCODE=0

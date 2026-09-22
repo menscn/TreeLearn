@@ -1,0 +1,90 @@
+# T-044 independent verification - items 3/4/5/6/7: docs vs code, the rewritten assertions, and evidence self-certification.
+# captured-at: 2026-09-22T04:44:52.0989639+08:00
+# cwd: D:\Project\Android\Treelearn
+# command: see each section header below; every section is a separate read-only command whose EXITCODE follows it.
+# mode: static reads only; no Gradle, no device. Another lane holds the build cache.
+
+=== A. the design doc's line format block (hits=1) ===
+121:### 5.1 引文的线格式（§6.2.19 划词追问）
+122-
+123-§6.2.19 允许学习者选中回答里的一句话追问。这句话属于**当前问题**的一部分，不是历史轮次：放进历史会新增第二条 user 消息，破坏上面「当前问题恰好一条且最后一条」的不变式，也会要求领域层的 `ContextPlan.Entry` 认识模型协议。因此引文编进第 3 条的正文：
+124-
+125-```text
+126-<treelearn_quote>
+127-<被转义的引文原文>
+128-</treelearn_quote>
+129-<学习者问题原文>
+130-```
+EXITCODE=0
+
+=== B. delivery report: the snapshot marker exists, and the one residual 'still holds' clause ===
+160:3. `ChatCommands.send(...)` 带一个 `quote` 参数，但 `messages` 表没有承接引用的列，提示词设计文档也没有定义引用的线格式——**引用追问在当前数据模型里无处安放**，接线时要么先补 schema（需 `db-migration-reviewer` 与用户确认），要么明确返回可见拒绝。 **〔历史快照 · 2026-09-21〕本条第前半句已过期**：`T-2026-09-21-quote-persistence-messages-column-037` 已新增 `messages.quoted_text`（`NULL` = 无引用）与其不变式触发器，并把 `DATABASE_VERSION` 升为 2；当前权威为 `android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java`。本条保留为当时的事实记录；「引用进入提示词的线格式未定义」仍成立，归 `T-2026-09-21-real-data-path-wiring-032`。
+164:### 5.1 引用失效：被引用的句子从未进入请求〔历史快照 · 2026-09-22 凌晨的发现；结论已被 T-044 推翻〕
+166:> **〔过期说明 · 2026-09-22 03:20〕本节结论「模型看不到被引用的那句话」已不再成立。**
+EXITCODE=0
+
+=== C. evidence self-certification: which T-044 files carry a command/EXITCODE ===
+T-044-checks.txt                   EXITCODE_lines=6 command_lines=6
+T-044-contract-guardian.txt        EXITCODE_lines=0 command_lines=1
+T-044-green-targeted.txt           EXITCODE_lines=1 command_lines=1
+T-044-green.txt                    EXITCODE_lines=3 command_lines=3
+T-044-red-ai.txt                   EXITCODE_lines=1 command_lines=1
+T-044-red.txt                      EXITCODE_lines=3 command_lines=3
+T-044-sizing.txt                   EXITCODE_lines=1 command_lines=0
+T-044-verify-callchain.txt         EXITCODE_lines=5 command_lines=0
+T-044-verify-doc-and-assertions.txt EXITCODE_lines=2 command_lines=0
+EXITCODE=0
+
+=== D. the two rewritten assertions, as they now read ===
+166:        String latest = lastMessage(generation.lastRequest);
+167-        assertEquals(cited("a follow-up"), latest);
+168-        assertEquals(latest.length(), generation.lastRequest.currentInputChars);
+169-        assertFalse(latest, latest.contains("  a follow-up  "));
+170-        assertTrue(result.isAccepted());
+--
+212:        String latest = lastMessage(generation.lastRequest);
+213-        assertEquals(cited(WiringDoubles.FIRST_QUESTION), latest);
+214-        assertEquals(latest.length(), generation.lastRequest.currentInputChars);
+215-        assertTrue(result.isAccepted());
+216-        assertEquals(WiringDoubles.OPERATION_ID, result.operationId());
+--
+435:        String latest = lastMessage(generation.lastRequest);
+436-        assertEquals("a follow-up", latest);
+437-        assertEquals("a follow-up".length(), generation.lastRequest.currentInputChars);
+438-        assertFalse(latest, latest.contains("<treelearn_"));
+439-    }
+EXITCODE=0
+479:    private static String cited(String question) {
+480-        // 信封刻意在这里写死，而不是引用适配器的常量：用被测代码自己的常量构造期望值，
+481-        // 断言就变成自证。常量与字面量的一致性由 :ai 的线格式用例负责钉死。
+482-        return "<treelearn_quote>\n" + WiringDoubles.QUOTED_LINE + "\n</treelearn_quote>\n" + question;
+483-    }
+484-}
+EXITCODE=0
+
+=== E. no-citation is byte-identical, and the budget test fails closed ===
+168:    public void aTurnWithoutACitationIsTheQuestionAlone() {
+169-        assertEquals(QUESTION, DeepSeekContextEncoder.currentInput(QUESTION, ""));
+170-        assertEquals(QUESTION, DeepSeekContextEncoder.currentInput(QUESTION, "   "));
+171-        assertEquals("the caller may hand over \"no citation\" as null; the adapter is the one "
+172-                + "place that decides what that means", QUESTION,
+173-                DeepSeekContextEncoder.currentInput(QUESTION, null));
+174-        assertEquals("no citation is no framing at all", 0,
+175-                framingLines(DeepSeekContextEncoder.currentInput(QUESTION, "")));
+176-    }
+EXITCODE=0
+249:    public void aCitationCountsIntoTheBudgetAndFailsClosedInsteadOfBeingTrimmed() {
+250-        String question = "这句引用在上下文里起什么作用？";
+251-        StringBuilder sentence = new StringBuilder();
+252-        for (int i = 0; i < 40; i++) {
+253-            sentence.append("被引用的原句");
+254-        }
+255-        int minAnswer = 256;
+EXITCODE=0
+
+=== F. task validation ===
+
+PASS T-2026-09-22-quote-into-request-044.md
+SUMMARY files=47 errors=0 warnings=15
+
+EXITCODE=0

@@ -1,0 +1,35 @@
+# T-015 sizing, same caliber as T-008 / the repository fixed on 2026-09-21 (non-empty, non-comment production lines)
+CapturedAt=2026-09-21T22:20:03.8602729+08:00
+Round=no-emulator round (user instruction 2026-09-21); Phase 1 (data/domain/JVM presenters) is what this round delivers.
+Caliber=the same four exclusions the earlier adjudication used, applied with PowerShell (no bash on this machine).
+Encoding=Get-Content -Encoding UTF8 (repo rule: never read UTF-8 with bare Get-Content).
+Command (judged lines, per file, then summed):
+  cd D:\Project\Android\Treelearn; per file: (Get-Content -LiteralPath <f> -Encoding UTF8 | Where-Object { $_ -notmatch '^\s*$' -and $_ -notmatch '^\s*//' -and $_ -notmatch '^\s*\*' -and $_ -notmatch '^\s*/\*' }).Count
+Scope=the 15 production files T-015 authored, all of them untracked in git (git status --porcelain shows '??' for every one), so attribution is not in doubt.
+--- per file (judged lines / physical lines) ---
+46	99	SearchQuery.java
+88	141	SearchHit.java
+64	124	ReadingAnchor.java
+34	65	ReadingPosition.java
+70	113	UnreadRollup.java
+30	62	ViewportSeen.java
+146	231	SearchDao.java
+86	130	ReadingPositionDao.java
+93	153	SearchPresenter.java
+8	33	SearchRepository.java
+41	63	SearchViewState.java
+32	52	SqliteSearchRepository.java
+36	75	ReadingSession.java
+8	29	ReadingStore.java
+25	41	SqliteReadingStore.java
+TOTAL	807	1411	(task estimate was 200 judged lines)
+--- verdict ---
+expected=200 (estimated_production_lines in the task file)
+observed=807 judged / 1411 physical
+excess=607 lines over the soft limit, and 307 lines over the 500-line hard limit
+approval=none: no user-approved sizing exception exists for T-015, so this is reported as an unresolved
+  deviation rather than recorded as an exception (harness-tasks.md: an implementer may not grant it).
+note=the 500-line hard cap is breached by 307 judged lines; the excess is concentrated in SearchDao.java (146),
+  SearchPresenter.java (93) and SearchHit.java (88). Precedent: T-006 (749), T-007 (671), T-008 (765),
+  T-011 (726) and T-016 (862) are all in the same position, so T-015 is the sixth task to flag the same issue.
+EXITCODE=0

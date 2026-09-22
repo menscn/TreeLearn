@@ -1,0 +1,81 @@
+﻿# T-007 GREEN evidence - immutable birth snapshot + later-context encoding (:core / :ai)
+# captured-at: 2026-09-21T20:27:28.0816050+08:00
+# command: cd android; .\gradlew.bat :core:test :ai:testDebugUnitTest --no-daemon --console=plain
+# mode: GREEN (same command as RED; the production types and the fixed fixtures are in place)
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :core:compileTestJava UP-TO-DATE
+> Task :core:processTestResources NO-SOURCE
+> Task :core:testClasses UP-TO-DATE
+> Task :core:test UP-TO-DATE
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac UP-TO-DATE
+> Task :ai:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :ai:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :ai:preDebugUnitTestBuild UP-TO-DATE
+> Task :ai:generateDebugUnitTestStubRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :ai:compileDebugUnitTestJavaWithJavac UP-TO-DATE
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :ai:processDebugUnitTestJavaRes NO-SOURCE
+> Task :ai:testDebugUnitTest UP-TO-DATE
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 18s
+18 actionable tasks: 18 up-to-date
+EXITCODE=0
+
+=== conclusion (derived by this script from the capture above; no number is typed by hand) ===
+BUILD SUCCESSFUL lines            : 1
+failed gradle tasks               : 0
+gradle task lines printed         : 27
+junit classes in the reports      : 20
+junit tests / failures / errors   : 226 / 0 / 0
+junit skipped                     : 0
+U+FFFD replacement characters     : 0
+
+authoritative per-class rows, re-summed above from these very rows:
+  com.treelearn.ai.gateway.AiGatewayBalanceTest              tests=9    failures=0   errors=0   skipped=0
+  com.treelearn.ai.gateway.AiGatewayStreamTest               tests=16   failures=0   errors=0   skipped=0
+  com.treelearn.ai.gateway.GatewayContractTest               tests=8    failures=0   errors=0   skipped=0
+  com.treelearn.ai.gateway.SseFrameParserTest                tests=12   failures=0   errors=0   skipped=0
+  com.treelearn.ai.prompt.DeepSeekContextEncoderTest         tests=8    failures=0   errors=0   skipped=0
+  com.treelearn.ai.prompt.DeepSeekPromptRegistryTest         tests=8    failures=0   errors=0   skipped=0
+  com.treelearn.ai.prompt.DeepSeekRequestAssemblerTest       tests=11   failures=0   errors=0   skipped=0
+  com.treelearn.core.domain.AnswerRevisionTest               tests=13   failures=0   errors=0   skipped=0
+  com.treelearn.core.domain.BranchSourceTest                 tests=12   failures=0   errors=0   skipped=0
+  com.treelearn.core.domain.BranchTest                       tests=15   failures=0   errors=0   skipped=0
+  com.treelearn.core.domain.BuildContextPlanUseCaseTest      tests=10   failures=0   errors=0   skipped=0
+  com.treelearn.core.domain.ContextSnapshotTest              tests=12   failures=0   errors=0   skipped=0
+  com.treelearn.core.domain.GenerationCommandTest            tests=9    failures=0   errors=0   skipped=0
+  com.treelearn.core.domain.GenerationOperationTest          tests=20   failures=0   errors=0   skipped=0
+  com.treelearn.core.domain.GenerationStateTest              tests=16   failures=0   errors=0   skipped=0
+  com.treelearn.core.domain.GuardTest                        tests=6    failures=0   errors=0   skipped=0
+  com.treelearn.core.domain.MessageTest                      tests=15   failures=0   errors=0   skipped=0
+  com.treelearn.core.domain.PromptPurposeTest                tests=12   failures=0   errors=0   skipped=0
+  com.treelearn.core.domain.PromptSpecTest                   tests=8    failures=0   errors=0   skipped=0
+  com.treelearn.core.domain.TopicTest                        tests=6    failures=0   errors=0   skipped=0
+
+commands that reproduce the numbers above:
+  Select-String -Path 'D:\Project\Android\Treelearn\artifacts\evidence\T-007-green.txt' -Pattern '^BUILD SUCCESSFUL' -Encoding UTF8
+  Get-ChildItem android/core/build/test-results/test, android/ai/build/test-results/testDebugUnitTest -Filter TEST-*.xml

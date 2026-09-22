@@ -1,0 +1,9 @@
+CAPTURED 2026-09-21 (serialized window). The round's compile-only pair now exists:
+  RED   - artifacts/evidence/T-005-red-compile-only.txt   (exit 1, on a scratch copy outside the repo)
+  GREEN - artifacts/evidence/T-005-green-compile-only.txt (exit 0, in the repository)
+Both were produced by the byte-identical command
+  cd android; .\gradlew.bat :data:testDebugUnitTest :app:assembleDebugAndroidTest --continue --rerun-tasks --no-build-cache --no-daemon --console=plain
+The earlier CORRECTION note in this file (that no T-005-green-compile-only.txt existed) was accurate when
+written and is now superseded by the capture above. The device run described at the top stays superseded:
+the repository is still not run on an emulator this round (project owner instruction 2026-09-21).
+

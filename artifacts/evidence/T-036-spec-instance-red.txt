@@ -1,0 +1,38 @@
+# Evidence: RED for T-2026-09-21-036 (first spec instance)
+# Generated: 2026-09-22 00:03:03+0800
+# NOTE: the instance file did not exist before this task, so the red is REPRODUCED in a
+# throwaway copy of the repo by removing the instance; the real repo is never modified.
+# Copy root: C:\Users\23745\AppData\Local\Temp\tl-036-red
+# The copy holds exactly the three files the guard can reach from the spec: the guard
+# itself (self-contained, no shared lib), the spec, and the intent its front matter points
+# at. Nothing else is copied, so no build output can leak in.
+# 'lines' = len(text.splitlines()) on the UTF-8 file (trailing newline is not counted).
+# Subject files as they exist in the real repo at generation time:
+  Docs/spec/SPEC-2026-09-21-ai-persona-preference.md  sha256=43D5C5E3ADA5E2E835BAD3326E3C8AC65E9DECD3638D571870741EB784C32568  lines=62
+  .trae/scripts/check_spec_author_agent.py  sha256=B48F031C97268D578E41C2711B902FECF2EECDA4616620CD4111E00A6AFBFA15  lines=118
+  .trae/templates/SPEC.md  sha256=FCCA6501B7222AA6D852BF94E480F179C372A90264C1D75B816893C2254F330F  lines=47
+  .trae/context/project-brief.md  sha256=55CEFC92BB219F0590148959A2CECCEBBB0F520522FF66F37CC8FD7476C768A6  lines=62
+
+STATE 0: instance removed (throwaway copy)
+COMMAND: cd C:\Users\23745\AppData\Local\Temp\tl-036-red && python -X utf8 .trae/scripts/check_spec_author_agent.py Docs/spec/SPEC-2026-09-21-ai-persona-preference.md
+target: Docs/spec/SPEC-2026-09-21-ai-persona-preference.md (instance)
+FAIL spec file exists — missing: Docs/spec/SPEC-2026-09-21-ai-persona-preference.md
+
+check_spec_author_agent: 1 check(s) failed
+EXITCODE=1
+OK_LINES=0  FAIL_LINES=1  EXITCODE=1  SECONDS=0.05
+
+STATE 1: instance restored to the copy (byte-identical to the real repo)
+COMMAND: cd C:\Users\23745\AppData\Local\Temp\tl-036-red && python -X utf8 .trae/scripts/check_spec_author_agent.py Docs/spec/SPEC-2026-09-21-ai-persona-preference.md
+target: Docs/spec/SPEC-2026-09-21-ai-persona-preference.md (instance)
+OK   declares the four content classes — sections=4; missing=[]
+OK   front-matter intent points at a real file — intent=Docs/intent/INTENT-2026-09-21-ai-persona-preference.md
+OK   no placeholder tokens — measured=[]
+OK   no bare hex or ad-hoc px values — hex=[] px=[]
+
+check_spec_author_agent: 0 check(s) failed
+EXITCODE=0
+OK_LINES=4  FAIL_LINES=0  EXITCODE=0  SECONDS=0.05
+
+ASSERTIONS: state0 = exit!=0 + FAIL_LINES>=1 + OK_LINES==0 -> True; state1 = exit==0 + FAIL_LINES==0 + OK_LINES==4 -> True
+

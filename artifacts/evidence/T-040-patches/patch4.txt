@@ -1,0 +1,43 @@
+*** Begin Patch
+*** Update File: android/app/src/main/java/com/treelearn/app/ui/HomeActions.java
+@@
+     /** Tapping the archive entry: navigate, no decision to make. */
+     void onArchivedPressed();
++
++    /** Tapping the search entry: navigate, no decision to make. */
++    void onSearchPressed();
+ 
+     void onModelSelected(GenerationModel model);
+*** Update File: android/app/src/main/java/com/treelearn/app/ui/HomeSink.java
+@@
+     void openArchived(String branchId);
++
++    /**
++     * Opens the search page.
++     *
++     * <p>Search spans every branch, so - unlike {@link #openArchived(String)} - this entry needs no
++     * topic to have been created first: an empty home is exactly where a learner has something to look
++     * for and nothing to browse.
++     */
++    void openSearch();
+ }
+*** Update File: android/app/src/main/java/com/treelearn/app/ui/HomePresenter.java
+@@
+     @Override
+     public void onSettingsPressed() {
+         sink.openSettings();
+     }
++
++    /**
++     * The search entry. Navigation only, and deliberately ungated: the archive entry needs a topic
++     * because it browses one topic's tree, while search spans every branch and is most useful before
++     * the first topic exists. Gating it on the topic list would be the same dead button under a new
++     * name, so the guard that lives on {@link #onArchivedPressed()} is not copied here.
++     */
++    @Override
++    public void onSearchPressed() {
++        sink.openSearch();
++    }
+ 
+     private void submit(String question, GenerationModel model, boolean thinking) {
+*** End Patch

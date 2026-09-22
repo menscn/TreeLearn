@@ -1,0 +1,40 @@
+Generated: 2026-09-21T22:19:56.5179821+08:00
+WorkingDirectory: D:\Project\Android\Treelearn
+Mode: source scans for T-010. This task handles no secret material and no conversation content at all; these scans record that, and that no conversation text leaked into this task's evidence files.
+
+Scan 1 - credential-shaped text in every file this task created or changed
+Command: rg -n --no-heading -e api[_-]?key -e Bearer -e Authorization -e sk-[A-Za-z0-9]{8,} <the 4 T-010 source files>
+RGGREP_EXITCODE=1   (expected 1 = no match)
+
+Scan 2 - credential-shaped text anywhere under android/ (whole module, to show the only hits are other lanes' synthetic placeholders)
+Command: rg -n --no-heading -e sk-[A-Za-z0-9]{16,} -e AKIA[0-9A-Z]{16} android --glob !**/build/**
+android\app\src\test\java\com\treelearn\app\ui\SettingsPresenterTest.java:34:        store.key = KeySnapshot.ofStoredKey("sk-abcdefghijklmnop".toCharArray());
+android\app\src\test\java\com\treelearn\app\ui\SettingsPresenterTest.java:55:        char[] typed = "sk-abcdefghijklmnop".toCharArray();
+android\app\src\test\java\com\treelearn\app\ui\SettingsPresenterTest.java:63:        assertEquals(KeySnapshot.mask("sk-abcdefghijklmnop".toCharArray()), sink.last().keyMask);
+android\app\src\test\java\com\treelearn\app\ui\SettingsPresenterTest.java:70:        store.key = KeySnapshot.ofStoredKey("sk-0000000000000000".toCharArray());
+android\app\src\test\java\com\treelearn\app\ui\SettingsPresenterTest.java:72:        char[] replacement = "sk-zzzzzzzzzzzzzzzz".toCharArray();
+android\app\src\test\java\com\treelearn\app\ui\SettingsPresenterTest.java:77:        assertEquals(KeySnapshot.mask("sk-zzzzzzzzzzzzzzzz".toCharArray()), sink.last().keyMask);
+android\app\src\test\java\com\treelearn\app\ui\SettingsPresenterTest.java:82:        store.key = KeySnapshot.ofStoredKey("sk-abcdefghijklmnop".toCharArray());
+android\app\src\test\java\com\treelearn\app\ui\SettingsPresenterTest.java:86:        char[] typed = "sk-abcdefghijklmnop".toCharArray();
+android\app\src\test\java\com\treelearn\app\ui\SettingsPresenterTest.java:97:        store.key = KeySnapshot.ofStoredKey("sk-abcdefghijklmnop".toCharArray());
+android\app\src\test\java\com\treelearn\app\ui\KeySnapshotTest.java:18:        String mask = KeySnapshot.mask("sk-abcdefghijklmnop".toCharArray());
+android\app\src\test\java\com\treelearn\app\ui\KeySnapshotTest.java:26:        char[] key = "sk-1234567890abcdef".toCharArray();
+RGGREP_EXITCODE=0   (0 = matches found)
+Scan 2 reading: all 13 hits are in two files this task never touched - app/src/test/.../ui/SettingsPresenterTest.java (9) and app/src/test/.../ui/KeySnapshotTest.java (4), both authored by the settings lane. Every value is an obviously synthetic placeholder (sk-abcdefghijklmnop, sk-1234567890abcdef, sk-0000000000000000, sk-zzzzzzzzzzzzzzzz), in test sources only; none appears in main sources. Scan 1 shows zero hits in any T-010 file, and this task adds no key handling at all.
+
+Scan 3 - conversation text must not appear in this task's evidence files
+Command: rg -n --no-heading -e 'why is the sky blue' -e 'synthetic answer' artifacts/evidence -g T-010-* -g !T-010-source-checks.txt
+Note: this file excludes itself, because the command line recorded above necessarily contains the search patterns; every other T-010 evidence file is scanned.
+RGGREP_EXITCODE=1   (expected 1 = no match)
+
+Scan 4 - the two production files hold no logger and no Bundle/Intent/toString surface
+Command: rg -n --no-heading -e android.util.Log -e System.out -e printStackTrace -e android.os.Bundle -e android.content.Intent -e toString <PositionCommands.java AnswerVersions.java>
+RGGREP_EXITCODE=1   (expected 1 = no match)
+
+Scan 5 - this task wrote only inside its own scope
+Command: git -c core.quotepath=false status --porcelain -- android/app/src/main/java/com/treelearn/app/generation/PositionCommands.java android/app/src/main/java/com/treelearn/app/generation/AnswerVersions.java android/app/src/test/java/com/treelearn/app/generation/PositionCommandsTest.java android/app/src/androidTest/java/com/treelearn/app/AnswerVersionsInstrumentedTest.java
+?? android/app/src/androidTest/java/com/treelearn/app/AnswerVersionsInstrumentedTest.java
+?? android/app/src/main/java/com/treelearn/app/generation/AnswerVersions.java
+?? android/app/src/main/java/com/treelearn/app/generation/PositionCommands.java
+?? android/app/src/test/java/com/treelearn/app/generation/PositionCommandsTest.java
+GIT_EXITCODE=0

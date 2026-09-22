@@ -1,0 +1,43 @@
+# T-012 verifier evidence: production call chain + stale-claim scan (read-only)
+# captured-at: 2026-09-22T05:12:16.3377914+08:00
+# cwd: D:\Project\Android\Treelearn
+# command: each block below prints the CMD: line it came from
+
+CMD: rg -n 'PendingHomeWiring|NOT_WIRED' android/app/src
+
+NOTE: zero hits => the task file Blocker 2 no longer describes this tree
+
+CMD: rg -n 'new HomeWiring|public HomeData homeData|public RootQuestionSubmitter rootQuestionSubmitter' android/app/src/main
+android/app/src/main\java\com\treelearn\app\AppContainer.java:122:        this.homeWiring = new HomeWiring(new SqliteHomeStore(helper, transactions), generation,
+android/app/src/main\java\com\treelearn\app\AppContainer.java:151:    public HomeData homeData() {
+android/app/src/main\java\com\treelearn\app\AppContainer.java:156:    public RootQuestionSubmitter rootQuestionSubmitter() {
+
+CMD: rg -n 'isConfigured\(\)' android/app/src/main
+android/app/src/main\java\com\treelearn\app\wiring\AndroidSettingsStore.java:23: * <p>{@link #isConfigured()} answers "is an envelope stored", which is deliberately weaker than "is
+android/app/src/main\java\com\treelearn\app\wiring\AndroidSettingsStore.java:59:    public boolean isConfigured() {
+android/app/src/main\java\com\treelearn\app\wiring\ChatWiring.java:362:        return keyVault.isConfigured() ? null : HomeViewState.Notice.KEY_MISSING;
+android/app/src/main\java\com\treelearn\app\ui\ChatPresenter.java:89:                key.isConfigured());
+android/app/src/main\java\com\treelearn\app\ui\ChatPresenter.java:115:        return state.withKeyConfigured(key.isConfigured()).withModel(settings.model())
+android/app/src/main\java\com\treelearn\app\ui\ChatPresenter.java:200:        if (!key.isConfigured()) {
+android/app/src/main\java\com\treelearn\app\ui\HomePresenter.java:55:                key.isConfigured());
+android/app/src/main\java\com\treelearn\app\ui\HomePresenter.java:85:        return state.withKeyConfigured(key.isConfigured()).withModel(settings.model())
+android/app/src/main\java\com\treelearn\app\ui\KeyVault.java:12:    boolean isConfigured();
+android/app/src/main\java\com\treelearn\app\wiring\HomeWiring.java:105:        if (!keyVault.isConfigured()) {
+
+CMD: Select-String SettingsRepository.java -Pattern 'not implemented yet|Provisional consumer|T-012'
+SettingsRepository.java:21: * <p>Provisional consumer: the settings screen (T-012) is not implemented yet, so nothing reads
+
+CMD: rg -n '#[0-9a-fA-F]{6,8}' screen_home_body.xml screen_settings_body.xml
+bare-hex-hits: 0
+
+CMD: foreach T-012-*.txt header scan
+T-012-androidtest-compile.txt      captured-at=False cwd=False command=True  EXITCODE=True
+T-012-green.txt                    captured-at=False cwd=False command=True  EXITCODE=True
+T-012-guard.txt                    captured-at=False cwd=False command=True  EXITCODE=True
+T-012-in-repo-suite.txt            captured-at=False cwd=False command=True  EXITCODE=True
+T-012-lint.txt                     captured-at=True  cwd=False command=True  EXITCODE=True
+T-012-red.txt                      captured-at=False cwd=False command=True  EXITCODE=True
+T-012-sizing.txt                   captured-at=True  cwd=False command=False EXITCODE=True
+T-012-static-ui-checks.txt         captured-at=False cwd=False command=False EXITCODE=True
+T-012-verify-jvm.txt               captured-at=True  cwd=True  command=True  EXITCODE=True
+EXITCODE=0

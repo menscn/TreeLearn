@@ -1,0 +1,95 @@
+
+# T-007 mutation evidence - are the two load-bearing refusals really falsifiable?
+# captured-at: 2026-09-21T20:32:02.7258310+08:00
+# command: powershell -ExecutionPolicy Bypass -File artifacts/evidence/.gen-t007-mutation.ps1 2>&1 | Out-File -LiteralPath artifacts/evidence/T-007-mutation.txt -Encoding utf8 -Append
+# mode: full (baseline + two single-defect mutations + restore, all on a temp copy)
+# java: D:\Environment\Jdk\jdk21\bin\java.exe
+# working tree under test: D:\Project\Android\Treelearn\android\core\src\main\java\com\treelearn\core\domain
+
+junit    : C:\Users\23745\.gradle\caches\modules-2\files-2.1\junit\junit\4.13.2\8ac9e16d933b6fb43bc7f576336b8f4d7eb5ba12\junit-4.13.2.jar
+hamcrest : C:\Users\23745\.gradle\caches\modules-2\files-2.1\org.hamcrest\hamcrest-core\1.3\42a25dc3219429f0e5d060061f71acb49bf010a0\hamcrest-core-1.3.jar
+longest path inside the temp copy: 113 characters (Windows limit 259)
+
+--- Baseline - pristine :core domain sources in the temp copy ---
+ContextSnapshot.java SHA-256: 8E1D9756647DF2060CF14704C57D5072311D84486D739F8E32BAD08F4F971E5B
+ContextSnapshotCodec.java SHA-256: F800436A819F928456184FCD3B0ADE730D603ED586A4E6EECF661EECA8069B73
+$ D:\Environment\Jdk\jdk21\bin\javac.exe -J-Duser.language=en -encoding UTF-8 -nowarn -d C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\classes -cp C:\Users\23745\.gradle\caches\modules-2\files-2.1\junit\junit\4.13.2\8ac9e16d933b6fb43bc7f576336b8f4d7eb5ba12\junit-4.13.2.jar;C:\Users\23745\.gradle\caches\modules-2\files-2.1\org.hamcrest\hamcrest-core\1.3\42a25dc3219429f0e5d060061f71acb49bf010a0\hamcrest-core-1.3.jar C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\AnswerRevision.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\Branch.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\BranchAnchor.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\BranchSource.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\BuildContextPlanUseCase.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\ContextPlan.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\ContextSnapshot.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\ContextSnapshotCodec.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\DomainError.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\DomainErrorCode.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\DomainResult.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\GenerationCommand.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\GenerationModel.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\GenerationOperation.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\GenerationState.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\Guard.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\JsonText.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\Message.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\MessageRole.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\PromptPurpose.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\PromptSpec.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\Topic.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\tst\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\tst\com\treelearn\core\domain\ContextSnapshotTest.java
+EXITCODE=0
+$ D:\Environment\Jdk\jdk21\bin\java.exe -Duser.language=en -Dfile.encoding=UTF-8 -cp C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\classes;C:\Users\23745\.gradle\caches\modules-2\files-2.1\junit\junit\4.13.2\8ac9e16d933b6fb43bc7f576336b8f4d7eb5ba12\junit-4.13.2.jar;C:\Users\23745\.gradle\caches\modules-2\files-2.1\org.hamcrest\hamcrest-core\1.3\42a25dc3219429f0e5d060061f71acb49bf010a0\hamcrest-core-1.3.jar org.junit.runner.JUnitCore com.treelearn.core.domain.ContextSnapshotTest com.treelearn.core.domain.BuildContextPlanUseCaseTest
+JUnit version 4.13.2
+......................
+Time: 0.256
+
+OK (22 tests)
+
+EXITCODE=0
+ASSERTION HELD: the pristine copy passes every test
+MUTATED ContextSnapshot.java : if (!recomputed.equals(digest)) {  ->  if (false) {
+
+--- Mutation A - fromStored never compares the stored digest ---
+ContextSnapshot.java SHA-256: 3353F3616A3F5F0E04780A31880DCCFAA7E0EFA6D2FE03DA15E61AC8C0E5EEF5
+ContextSnapshotCodec.java SHA-256: F800436A819F928456184FCD3B0ADE730D603ED586A4E6EECF661EECA8069B73
+$ D:\Environment\Jdk\jdk21\bin\javac.exe -J-Duser.language=en -encoding UTF-8 -nowarn -d C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\classes -cp C:\Users\23745\.gradle\caches\modules-2\files-2.1\junit\junit\4.13.2\8ac9e16d933b6fb43bc7f576336b8f4d7eb5ba12\junit-4.13.2.jar;C:\Users\23745\.gradle\caches\modules-2\files-2.1\org.hamcrest\hamcrest-core\1.3\42a25dc3219429f0e5d060061f71acb49bf010a0\hamcrest-core-1.3.jar C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\AnswerRevision.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\Branch.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\BranchAnchor.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\BranchSource.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\BuildContextPlanUseCase.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\ContextPlan.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\ContextSnapshot.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\ContextSnapshotCodec.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\DomainError.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\DomainErrorCode.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\DomainResult.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\GenerationCommand.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\GenerationModel.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\GenerationOperation.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\GenerationState.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\Guard.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\JsonText.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\Message.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\MessageRole.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\PromptPurpose.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\PromptSpec.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\Topic.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\tst\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\tst\com\treelearn\core\domain\ContextSnapshotTest.java
+EXITCODE=0
+$ D:\Environment\Jdk\jdk21\bin\java.exe -Duser.language=en -Dfile.encoding=UTF-8 -cp C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\classes;C:\Users\23745\.gradle\caches\modules-2\files-2.1\junit\junit\4.13.2\8ac9e16d933b6fb43bc7f576336b8f4d7eb5ba12\junit-4.13.2.jar;C:\Users\23745\.gradle\caches\modules-2\files-2.1\org.hamcrest\hamcrest-core\1.3\42a25dc3219429f0e5d060061f71acb49bf010a0\hamcrest-core-1.3.jar org.junit.runner.JUnitCore com.treelearn.core.domain.ContextSnapshotTest com.treelearn.core.domain.BuildContextPlanUseCaseTest
+JUnit version 4.13.2
+........E..............
+Time: 0.118
+There was 1 failure:
+1) aPayloadWhoseDigestDoesNotMatchIsRefused(com.treelearn.core.domain.ContextSnapshotTest)
+java.lang.AssertionError
+	at org.junit.Assert.fail(Assert.java:87)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertTrue(Assert.java:53)
+	at com.treelearn.core.domain.ContextSnapshotTest.aPayloadWhoseDigestDoesNotMatchIsRefused(ContextSnapshotTest.java:137)
+
+FAILURES!!!
+Tests run: 22,  Failures: 1
+
+EXITCODE=1
+ASSERTION HELD: removing the digest comparison turns exactly the digest test red
+MUTATED ContextSnapshotCodec.java : if (schemaVersion != ContextSnapshot.SCHEMA_VERSION) {  ->  if (false) {
+
+--- Mutation B - decode accepts every stored schema version ---
+ContextSnapshot.java SHA-256: 8E1D9756647DF2060CF14704C57D5072311D84486D739F8E32BAD08F4F971E5B
+ContextSnapshotCodec.java SHA-256: 83E54A070098846A67839AFCA89CD3DB1845E08B4BE3BA85C8DCC80376D66EA2
+$ D:\Environment\Jdk\jdk21\bin\javac.exe -J-Duser.language=en -encoding UTF-8 -nowarn -d C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\classes -cp C:\Users\23745\.gradle\caches\modules-2\files-2.1\junit\junit\4.13.2\8ac9e16d933b6fb43bc7f576336b8f4d7eb5ba12\junit-4.13.2.jar;C:\Users\23745\.gradle\caches\modules-2\files-2.1\org.hamcrest\hamcrest-core\1.3\42a25dc3219429f0e5d060061f71acb49bf010a0\hamcrest-core-1.3.jar C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\AnswerRevision.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\Branch.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\BranchAnchor.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\BranchSource.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\BuildContextPlanUseCase.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\ContextPlan.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\ContextSnapshot.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\ContextSnapshotCodec.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\DomainError.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\DomainErrorCode.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\DomainResult.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\GenerationCommand.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\GenerationModel.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\GenerationOperation.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\GenerationState.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\Guard.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\JsonText.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\Message.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\MessageRole.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\PromptPurpose.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\PromptSpec.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\Topic.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\tst\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\tst\com\treelearn\core\domain\ContextSnapshotTest.java
+EXITCODE=0
+$ D:\Environment\Jdk\jdk21\bin\java.exe -Duser.language=en -Dfile.encoding=UTF-8 -cp C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\classes;C:\Users\23745\.gradle\caches\modules-2\files-2.1\junit\junit\4.13.2\8ac9e16d933b6fb43bc7f576336b8f4d7eb5ba12\junit-4.13.2.jar;C:\Users\23745\.gradle\caches\modules-2\files-2.1\org.hamcrest\hamcrest-core\1.3\42a25dc3219429f0e5d060061f71acb49bf010a0\hamcrest-core-1.3.jar org.junit.runner.JUnitCore com.treelearn.core.domain.ContextSnapshotTest com.treelearn.core.domain.BuildContextPlanUseCaseTest
+JUnit version 4.13.2
+............E..........
+Time: 0.133
+There was 1 failure:
+1) aSchemaVersionThisBuildCannotReadIsRefused(com.treelearn.core.domain.ContextSnapshotTest)
+java.lang.IllegalArgumentException: schemaVersion must be >= 1 but was 0
+	at com.treelearn.core.domain.Guard.atLeast(Guard.java:144)
+	at com.treelearn.core.domain.ContextSnapshot.<init>(ContextSnapshot.java:96)
+	at com.treelearn.core.domain.ContextSnapshot.fromStored(ContextSnapshot.java:159)
+	at com.treelearn.core.domain.ContextSnapshotTest.aSchemaVersionThisBuildCannotReadIsRefused(ContextSnapshotTest.java:183)
+
+FAILURES!!!
+Tests run: 22,  Failures: 1
+
+EXITCODE=1
+ASSERTION HELD: removing the version gate turns exactly the version test red
+
+--- Restore - the pristine bytes copied back from the working tree ---
+ContextSnapshot.java SHA-256: 8E1D9756647DF2060CF14704C57D5072311D84486D739F8E32BAD08F4F971E5B
+ContextSnapshotCodec.java SHA-256: F800436A819F928456184FCD3B0ADE730D603ED586A4E6EECF661EECA8069B73
+$ D:\Environment\Jdk\jdk21\bin\javac.exe -J-Duser.language=en -encoding UTF-8 -nowarn -d C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\classes -cp C:\Users\23745\.gradle\caches\modules-2\files-2.1\junit\junit\4.13.2\8ac9e16d933b6fb43bc7f576336b8f4d7eb5ba12\junit-4.13.2.jar;C:\Users\23745\.gradle\caches\modules-2\files-2.1\org.hamcrest\hamcrest-core\1.3\42a25dc3219429f0e5d060061f71acb49bf010a0\hamcrest-core-1.3.jar C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\AnswerRevision.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\Branch.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\BranchAnchor.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\BranchSource.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\BuildContextPlanUseCase.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\ContextPlan.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\ContextSnapshot.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\ContextSnapshotCodec.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\DomainError.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\DomainErrorCode.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\DomainResult.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\GenerationCommand.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\GenerationModel.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\GenerationOperation.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\GenerationState.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\Guard.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\JsonText.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\Message.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\MessageRole.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\PromptPurpose.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\PromptSpec.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\src\com\treelearn\core\domain\Topic.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\tst\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\tst\com\treelearn\core\domain\ContextSnapshotTest.java
+EXITCODE=0
+$ D:\Environment\Jdk\jdk21\bin\java.exe -Duser.language=en -Dfile.encoding=UTF-8 -cp C:\Users\23745\AppData\Local\Temp\tl-t007-mutation\classes;C:\Users\23745\.gradle\caches\modules-2\files-2.1\junit\junit\4.13.2\8ac9e16d933b6fb43bc7f576336b8f4d7eb5ba12\junit-4.13.2.jar;C:\Users\23745\.gradle\caches\modules-2\files-2.1\org.hamcrest\hamcrest-core\1.3\42a25dc3219429f0e5d060061f71acb49bf010a0\hamcrest-core-1.3.jar org.junit.runner.JUnitCore com.treelearn.core.domain.ContextSnapshotTest com.treelearn.core.domain.BuildContextPlanUseCaseTest
+JUnit version 4.13.2
+......................
+Time: 0.125
+
+OK (22 tests)
+
+EXITCODE=0
+ASSERTION HELD: the restored copy is green again
+
+--- working tree ---
+domain source files fingerprinted before and after: 22
+ASSERTION HELD: the working tree is byte-identical to what it was before this run
+
+VERDICT: PASS (exit 0) - each removed behaviour turned exactly its own test red; the restore is green; the working tree never moved

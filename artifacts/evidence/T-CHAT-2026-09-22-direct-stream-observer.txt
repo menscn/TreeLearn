@@ -1,0 +1,9 @@
+# Chat generation UX fix
+# thinking-off: ReasoningDisclosure now receives ChatViewState.thinkingEnabled; when false it is GONE
+# even if a stored/generated row contains reasoning. The generating note also reports answer generation.
+# direct stream: GenerationCoordinator.Observer -> GenerationPort -> ChatWiring branch listener ->
+# ChatPresenter read. Each accepted/delta/terminal state change schedules an immediate DB read on the
+# presenter executor; the existing 750ms poll remains only as a bounded fallback.
+# verification: app testDebugUnitTest PASS; gradlew check PASS; Java-only guard PASS; latest signed release
+# installed on AWSS013807000356, MainActivity pid observed.
+# EXITCODE=0

@@ -1,0 +1,195 @@
+=== T-013 static checks (no device) ===
+# Generated: 2026-09-21T22:22:03.1620884+08:00
+# Command: powershell -ExecutionPolicy Bypass -File %TEMP%\t013-static-ui-checks.ps1
+# Mode: repo root D:\Project\Android\Treelearn, no emulator and no adb (user instruction 2026-09-21).
+#       These are the parts of the device-dependent criteria that can be checked statically; everything else stays
+#       deferred - emulator not used this round (user instruction 2026-09-21).
+# Script: pure ASCII, absolute paths inside, so the numbers do not depend on the working directory.
+# --- output ---
+
+--- CHECK 1: no logging and no credential-shaped text in the T-013 sources and resources ---
+CMD: rg -n "Log\.|System\.out|System\.err|printStackTrace|Bearer |sk-[A-Za-z0-9]" <15 T-013 java files>
+(no output: 0 matches)
+PASS no log call, no stdout write, no stack-trace dump and no credential-shaped literal in the 15 T-013 sources
+CMD: rg -n "Log\.|System\.out|System\.err|printStackTrace|Bearer |sk-[A-Za-z0-9]" android/app/src/main/res
+(no output: 0 matches)
+PASS no logging tag and no credential-shaped literal anywhere under main/res
+
+--- CHECK 2: the copy headings in strings.xml are the literals ChatMessageTest asserts ---
+CMD: regex CopyLabels\.of\("(headings)"\) in ChatMessageTest.java vs chat_copy_reasoning / chat_copy_answer in values/strings.xml
+test literal reasoning heading = 思考过程
+res/chat_copy_reasoning       = 思考过程
+test literal answer heading    = 最终回答
+res/chat_copy_answer          = 最终回答
+PASS both headings match: the presenter is handed exactly the two words the resource ships, so the test cannot be proving a format the app does not show
+
+--- CHECK 3: the reasoning text is readable (WCAG relative-luminance contrast) ---
+CMD: contrast(tl_ink2, tl_surface) and contrast(tl_ink2, tl_bg) computed from values/colors.xml
+tl_ink2 = #5A6B60  tl_ink3 = #8A938E  tl_surface = #FFFFFF  tl_bg = #F7F6F0
+tl_ink2 (#5A6B60) on tl_surface : 5.67:1
+tl_ink2 on tl_bg               : 5.23:1
+tl_ink3 on tl_surface          : 3.16:1
+tl_ink3 on tl_bg               : 2.92:1
+threshold: 4.5:1 (WCAG 2.1 AA for text below 18.66px bold / 24px regular; the body is 13sp)
+PASS the expanded reasoning body (view_reasoning.xml reasoning_body, textColor=tl_ink2) is 5.67:1 on the surface and 5.23:1 on the page background
+OPEN ITEM (recorded, not asserted): the disclosure's own label and the other small chrome labels use tl_ink3 = 3.16:1 on the surface and 2.92:1 on the page background, below 4.5:1.
+  tl_ink3 is one of the palette tokens taken from the v2.5 prototype and is read by both screens, so raising it is a token-level design ruling, not a local edit; it is listed as an open item for the design owner.
+
+--- CHECK 4: every interactive control in the T-013 layouts is at least 44dp tall ---
+CMD: XML walk of the T-013 layouts: for each Button/ImageButton/EditText or clickable="true" element, resolve layout_height and minHeight against values/dimens.xml
+@dimen/touch_min resolves to 44dp
+ok   @+id/chat_retry        Button                     height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/suggestion_row    LinearLayout               height=wrap_content       minHeight=@dimen/touch_min   effectiveMinHeight=44dp
+ok   @+id/suggestion_fork   Button                     height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/reasoning_toggle  LinearLayout               height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/act_quote         Button                     height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/act_copy          Button                     height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/act_reset         Button                     height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/act_fork          Button                     height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/act_children      Button                     height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/act_version       TextView                   height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/chat_back         Button                     height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/chat_settings     Button                     height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/chat_quote_clear  Button                     height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/chat_draft        EditText                   height=wrap_content       minHeight=@dimen/touch_min   effectiveMinHeight=44dp
+ok   @+id/chat_send         Button                     height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/model_chip        TextView                   height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+interactive elements found: 16; below 44dp: 0
+PASS every interactive element resolves to a minimum rendered height of at least 44dp
+
+--- CHECK 5: the reasoning body ships collapsed and the open state is keyed by message id ---
+CMD: rg -n "reasoning_body|visibility" layout/view_reasoning.xml ; rg -n "setVisibility|expanded|messageId" screen/ReasoningDisclosure.java ; rg -n "withReasoningExpanded" ui/ChatViewState.java
+48:        android:id="@+id/reasoning_body"
+55:        android:visibility="gone" />
+45:    private String messageId = "";
+78:        body.setVisibility(expanded ? VISIBLE : GONE);
+reasoning_body present in view_reasoning.xml : True
+reasoning_body default visibility=gone         : True
+body visibility driven by the expanded flag    : True
+open state keyed by message id (not position)  : True
+PASS collapsed on first draw, opened only by the flag the view state holds per message id
+
+--- CHECK 6: no deprecated onBackPressed override (the T-012 lint P0) ---
+CMD: rg -n "onBackPressed|registerOnBackInvokedCallback|dispatchKeyEvent|onBackRequested" MainActivity.java
+81:        settingsScreen.setOnBackPressed(this::onBackRequested);
+110:     * of to {@code onBackPressed}, and on API 36 it is not delivered as {@code KEYCODE_BACK} either -
+112:     * acceptance device. {@link #dispatchKeyEvent} keeps the same behaviour on API 28-32, where a back
+117:            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+118:                    OnBackInvokedDispatcher.PRIORITY_DEFAULT, this::onBackRequested);
+123:    public boolean dispatchKeyEvent(KeyEvent event) {
+127:            onBackRequested();
+130:        return super.dispatchKeyEvent(event);
+140:    private void onBackRequested() {
+PASS no onBackPressed override; the back request goes through the dispatcher callback and the key-event fallback
+
+--- CHECK 7: no connected instrumentation run happened this round ---
+CMD: Get-ChildItem D:\Project\Android\Treelearn\android\app\build\outputs\androidTest-results\connected\debug -Recurse -Force | Measure-Object
+entries: 0
+PASS 0 entries - no device result exists, so every device-only criterion stays deferred rather than claimed
+
+VERDICT: PASS (8 asserted check(s), 1 open item recorded)
+EXITCODE=0
+
+=== RE-RUN after the tl_ink3 palette fix (user instruction 2026-09-21) ===
+# captured at: 2026-09-21T22:34:20.2786904+08:00
+# command: powershell -ExecutionPolicy Bypass -File %TEMP%\t013-static-ui-checks.ps1
+# mode: identical script and mode as the block above. The only production change between the two blocks is one line of
+#       android/app/src/main/res/values/colors.xml: the tl_ink3 TOKEN, not any of its 27 call sites.
+#
+# What the first block recorded (unchanged, and it is why this fix was needed):
+#   tl_ink3 = #8A938E -> 3.16:1 on tl_surface (#FFFFFF), 2.92:1 on tl_bg (#F7F6F0). Below the 4.5:1 AA floor.
+# Command that produced those two numbers (same function, same file, before the edit):
+#   function Get-Ratio($a,$b){ WCAG relative luminance } ; (Get-Ratio "#8A938E" "#FFFFFF") ; (Get-Ratio "#8A938E" "#F7F6F0")
+#
+# Why the token and not the call site: tl_ink3 is read by 27 text colours across screen_home_body, screen_chat_body,
+#   screen_settings_body, item_topic, item_chat_message, item_chat_suggestion, view_reasoning, view_answer_actions,
+#   popup_model_picker and themes.xml textColorHint. Changing one site would have left the other 26 failing.
+#   The palette keeps its three tiers: tl_ink #1E2B23 (darkest) > tl_ink2 #5A6B60 > tl_ink3 #636F66 (faintest).
+# --- output ---
+
+--- CHECK 1: no logging and no credential-shaped text in the T-013 sources and resources ---
+CMD: rg -n "Log\.|System\.out|System\.err|printStackTrace|Bearer |sk-[A-Za-z0-9]" <15 T-013 java files>
+(no output: 0 matches)
+PASS no log call, no stdout write, no stack-trace dump and no credential-shaped literal in the 15 T-013 sources
+CMD: rg -n "Log\.|System\.out|System\.err|printStackTrace|Bearer |sk-[A-Za-z0-9]" android/app/src/main/res
+(no output: 0 matches)
+PASS no logging tag and no credential-shaped literal anywhere under main/res
+
+--- CHECK 2: the copy headings in strings.xml are the literals ChatMessageTest asserts ---
+CMD: regex CopyLabels\.of\("(headings)"\) in ChatMessageTest.java vs chat_copy_reasoning / chat_copy_answer in values/strings.xml
+test literal reasoning heading = 思考过程
+res/chat_copy_reasoning       = 思考过程
+test literal answer heading    = 最终回答
+res/chat_copy_answer          = 最终回答
+PASS both headings match: the presenter is handed exactly the two words the resource ships, so the test cannot be proving a format the app does not show
+
+--- CHECK 3: the reasoning text is readable (WCAG relative-luminance contrast) ---
+CMD: contrast(tl_ink2, tl_surface) and contrast(tl_ink2, tl_bg) computed from values/colors.xml
+tl_ink2 = #5A6B60  tl_ink3 = #636F66  tl_surface = #FFFFFF  tl_bg = #F7F6F0
+tl_ink2 (#5A6B60) on tl_surface : 5.67:1
+tl_ink2 on tl_bg               : 5.23:1
+tl_ink3 on tl_surface          : 5.26:1
+tl_ink3 on tl_bg               : 4.85:1
+threshold: 4.5:1 (WCAG 2.1 AA for text below 18.66px bold / 24px regular; the body is 13sp)
+PASS the expanded reasoning body (view_reasoning.xml reasoning_body, textColor=tl_ink2) is 5.67:1 on the surface and 5.23:1 on the page background
+PASS the faintest ink tl_ink3 (#636F66) is 5.26:1 on the surface and 4.85:1 on the page background
+  history: tl_ink3 was #8A938E (3.16:1 / 2.92:1) until the palette fix of 2026-09-21. The TOKEN was changed, not a call site;
+  the token is read by 27 text colours across both screens, so changing one call site would have left the rest failing.
+
+--- CHECK 4: every interactive control in the T-013 layouts is at least 44dp tall ---
+CMD: XML walk of the T-013 layouts: for each Button/ImageButton/EditText or clickable="true" element, resolve layout_height and minHeight against values/dimens.xml
+@dimen/touch_min resolves to 44dp
+ok   @+id/chat_retry        Button                     height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/suggestion_row    LinearLayout               height=wrap_content       minHeight=@dimen/touch_min   effectiveMinHeight=44dp
+ok   @+id/suggestion_fork   Button                     height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/reasoning_toggle  LinearLayout               height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/act_quote         Button                     height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/act_copy          Button                     height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/act_reset         Button                     height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/act_fork          Button                     height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/act_children      Button                     height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/act_version       TextView                   height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/chat_back         Button                     height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/chat_settings     Button                     height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/chat_quote_clear  Button                     height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/chat_draft        EditText                   height=wrap_content       minHeight=@dimen/touch_min   effectiveMinHeight=44dp
+ok   @+id/chat_send         Button                     height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+ok   @+id/model_chip        TextView                   height=@dimen/touch_min   minHeight=                   effectiveMinHeight=44dp
+interactive elements found: 16; below 44dp: 0
+PASS every interactive element resolves to a minimum rendered height of at least 44dp
+
+--- CHECK 5: the reasoning body ships collapsed and the open state is keyed by message id ---
+CMD: rg -n "reasoning_body|visibility" layout/view_reasoning.xml ; rg -n "setVisibility|expanded|messageId" screen/ReasoningDisclosure.java ; rg -n "withReasoningExpanded" ui/ChatViewState.java
+48:        android:id="@+id/reasoning_body"
+55:        android:visibility="gone" />
+45:    private String messageId = "";
+78:        body.setVisibility(expanded ? VISIBLE : GONE);
+reasoning_body present in view_reasoning.xml : True
+reasoning_body default visibility=gone         : True
+body visibility driven by the expanded flag    : True
+open state keyed by message id (not position)  : True
+PASS collapsed on first draw, opened only by the flag the view state holds per message id
+
+--- CHECK 6: no deprecated onBackPressed override (the T-012 lint P0) ---
+CMD: rg -n "onBackPressed|registerOnBackInvokedCallback|dispatchKeyEvent|onBackRequested" MainActivity.java
+81:        settingsScreen.setOnBackPressed(this::onBackRequested);
+110:     * of to {@code onBackPressed}, and on API 36 it is not delivered as {@code KEYCODE_BACK} either -
+112:     * acceptance device. {@link #dispatchKeyEvent} keeps the same behaviour on API 28-32, where a back
+117:            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+118:                    OnBackInvokedDispatcher.PRIORITY_DEFAULT, this::onBackRequested);
+123:    public boolean dispatchKeyEvent(KeyEvent event) {
+127:            onBackRequested();
+130:        return super.dispatchKeyEvent(event);
+140:    private void onBackRequested() {
+PASS no onBackPressed override; the back request goes through the dispatcher callback and the key-event fallback
+
+--- CHECK 7: no connected instrumentation run happened this round ---
+CMD: Get-ChildItem D:\Project\Android\Treelearn\android\app\build\outputs\androidTest-results\connected\debug -Recurse -Force | Measure-Object
+entries: 0
+PASS 0 entries - no device result exists, so every device-only criterion stays deferred rather than claimed
+
+VERDICT: PASS (8 asserted check(s), 0 open items)
+READING: tl_ink3 is now 5.26:1 on the surface and 4.85:1 on the page background, both above 4.5:1, and the token is still
+  lighter than tl_ink2 (5.67:1 / 5.23:1), so the three-tier palette survives. The open item recorded in the first block is
+  closed by changing the palette token rather than any call site. VERDICT: PASS (8 asserted check(s), 0 open items).
+EXITCODE=0

@@ -1,0 +1,159 @@
+T-041 independent verification - citation re-check of the line numbers the Verification report cites
+captured-at: 2026-09-22 04:56:45 (Asia/Shanghai)
+cwd: D:\Project\Android\Treelearn
+runner: artifacts/evidence/T-041-verify-citations-runner.py (python -X utf8), each section flushed
+purpose: the repo rule is that every number must be traceable to a file and line; this re-checks every
+         line number written into the T-041 Verification report against today's tree, source and docs.
+
+### C1 - focusable/outside-touchable of the two popups
+command: python -X utf8 (scan of java/com/treelearn/app/screen/WordMenuPopup.java for new PopupWindow( | setOutsideTouchable | setElevation)
+note: report cited WordMenuPopup.java:82-83 for BOTH flags; focusable is the 4th PopupWindow ctor arg
+  java/com/treelearn/app/screen/WordMenuPopup.java:79| popup = new PopupWindow(content, LinearLayout.LayoutParams.WRAP_CONTENT,
+  java/com/treelearn/app/screen/WordMenuPopup.java:82| popup.setOutsideTouchable(true);
+  java/com/treelearn/app/screen/WordMenuPopup.java:83| popup.setElevation(answer.getResources().getDimension(R.dimen.card_elevation));
+EXITCODE=0
+
+### C2 - child-branch popup: flags, height, placement
+command: python -X utf8 (scan of java/com/treelearn/app/screen/ChildBranchPopup.java for new PopupWindow( | setOutsideTouchable | LayoutParams.WRAP_CONTENT | showAsDropDown)
+note: report cited :62-63 (actually the for-loop/addView) and :60-61 (actually ctor+inflater)
+  java/com/treelearn/app/screen/ChildBranchPopup.java:55| PopupWindow popup = new PopupWindow(content, LinearLayout.LayoutParams.WRAP_CONTENT,
+  java/com/treelearn/app/screen/ChildBranchPopup.java:56| LinearLayout.LayoutParams.WRAP_CONTENT, true);
+  java/com/treelearn/app/screen/ChildBranchPopup.java:58| popup.setOutsideTouchable(true);
+  java/com/treelearn/app/screen/ChildBranchPopup.java:65| popup.showAsDropDown(anchor);
+EXITCODE=0
+
+### C3 - the child-branch list has no ScrollView and no maxHeight
+command: python -X utf8 (scan of res/layout/popup_child_branches.xml for child_branches_list | ScrollView | maxHeight | LinearLayout)
+note: report cited :23-27 - correct
+  res/layout/popup_child_branches.xml:7| <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  res/layout/popup_child_branches.xml:23| <LinearLayout
+  res/layout/popup_child_branches.xml:24| android:id="@+id/child_branches_list"
+  res/layout/popup_child_branches.xml:28| </LinearLayout>
+EXITCODE=0
+
+### C4 - comparator: the navigation page wraps its list in a ScrollView
+command: python -X utf8 (scan of res/layout/screen_navigation.xml for ScrollView)
+note: the repo's existing precedent for a long list
+  res/layout/screen_navigation.xml:6| <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+  res/layout/screen_navigation.xml:16| </ScrollView>
+EXITCODE=0
+
+### C5 - WordMenuPopup listener rows + enablement + selectAll
+command: python -X utf8 (scan of java/com/treelearn/app/screen/WordMenuPopup.java for onQuoteRequested | onForkRequested | onCopyRequested | selectAll() | setEnabled(entry.enabled) | entriesFor(message, selected))
+  java/com/treelearn/app/screen/WordMenuPopup.java:39| void onQuoteRequested();
+  java/com/treelearn/app/screen/WordMenuPopup.java:42| void onForkRequested();
+  java/com/treelearn/app/screen/WordMenuPopup.java:45| void onCopyRequested();
+  java/com/treelearn/app/screen/WordMenuPopup.java:75| quoteRow.setOnClickListener(row -> choose(listener::onQuoteRequested));
+  java/com/treelearn/app/screen/WordMenuPopup.java:76| forkRow.setOnClickListener(row -> choose(listener::onForkRequested));
+  java/com/treelearn/app/screen/WordMenuPopup.java:77| copyRow.setOnClickListener(row -> choose(listener::onCopyRequested));
+  java/com/treelearn/app/screen/WordMenuPopup.java:78| selectAllRow.setOnClickListener(row -> selectAll());
+  java/com/treelearn/app/screen/WordMenuPopup.java:139| for (WordMenu.Entry entry : WordMenu.entriesFor(message, selected)) {
+  java/com/treelearn/app/screen/WordMenuPopup.java:142| row.setEnabled(entry.enabled);
+  java/com/treelearn/app/screen/WordMenuPopup.java:148| private void selectAll() {
+EXITCODE=0
+
+### C6 - WordMenu.entriesFor is the only source of enablement
+command: python -X utf8 (scan of java/com/treelearn/app/ui/WordMenu.java for entriesFor | canQuote() | canFork() | Item.FORK | Item.SELECT_ALL)
+  java/com/treelearn/app/ui/WordMenu.java:65| public static List<Entry> entriesFor(ChatMessage message, String selection) {
+  java/com/treelearn/app/ui/WordMenu.java:68| entries.add(new Entry(Item.QUOTE, message.canQuote() && selected));
+  java/com/treelearn/app/ui/WordMenu.java:69| if (message.canFork()) {
+  java/com/treelearn/app/ui/WordMenu.java:70| entries.add(new Entry(Item.FORK, message.canFork() && selected));
+  java/com/treelearn/app/ui/WordMenu.java:73| entries.add(new Entry(Item.SELECT_ALL, true));
+EXITCODE=0
+
+### C7 - ChildBranchPopup row -> listener -> host
+command: python -X utf8 (scan of java/com/treelearn/app/screen/ChildBranchPopup.java for setOnClickListener | onBranchChosen | list.addView(row()
+  java/com/treelearn/app/screen/ChildBranchPopup.java:33| void onBranchChosen(String branchId);
+  java/com/treelearn/app/screen/ChildBranchPopup.java:63| list.addView(row(inflater, list, context, child, shown, listener));
+  java/com/treelearn/app/screen/ChildBranchPopup.java:83| row.setOnClickListener(view -> {
+  java/com/treelearn/app/screen/ChildBranchPopup.java:85| listener.onBranchChosen(child.branchId);
+EXITCODE=0
+
+### C8 - ChatScreen long press, forwards, guards, selection source
+command: python -X utf8 (scan of java/com/treelearn/app/screen/ChatScreen.java for setOnLongClickListener | setOnTouchListener | openWordMenu() | onQuotePressed(messageId) | onForkPressed(messageId) | onSelectionCopy( | private String selectedText() | selection.isEmpty() | children.isEmpty() | Row.onQuoteRequested)
+  java/com/treelearn/app/screen/ChatScreen.java:363| if (row == null || children.isEmpty()) {
+  java/com/treelearn/app/screen/ChatScreen.java:435| answer.setOnTouchListener((view, event) -> {
+  java/com/treelearn/app/screen/ChatScreen.java:442| answer.setOnLongClickListener(view -> {
+  java/com/treelearn/app/screen/ChatScreen.java:443| openWordMenu();
+  java/com/treelearn/app/screen/ChatScreen.java:505| private String selectedText() {
+  java/com/treelearn/app/screen/ChatScreen.java:531| if (!selection.isEmpty()) {
+  java/com/treelearn/app/screen/ChatScreen.java:571| private void openWordMenu() {
+  java/com/treelearn/app/screen/ChatScreen.java:574| if (selection.isEmpty()) {
+  java/com/treelearn/app/screen/ChatScreen.java:584| onQuotePressed(messageId);
+  java/com/treelearn/app/screen/ChatScreen.java:589| onForkPressed(messageId);
+  java/com/treelearn/app/screen/ChatScreen.java:594| onSelectionCopy(messageId);
+  java/com/treelearn/app/screen/ChatScreen.java:598| private void onSelectionCopy(String id) {
+EXITCODE=0
+
+### C9 - ChatPresenter executors of the four actions
+command: python -X utf8 (scan of java/com/treelearn/app/ui/ChatPresenter.java for public void onQuotePressed | public void onForkPressed | public void onSelectionCopyPressed | commands.fork(messageId, question) | copyToClipboard | withQuote()
+  java/com/treelearn/app/ui/ChatPresenter.java:171| sink.copyToClipboard(message.copyText(labels));
+  java/com/treelearn/app/ui/ChatPresenter.java:175| public void onQuotePressed(String messageId, String anchorText) {
+  java/com/treelearn/app/ui/ChatPresenter.java:181| render(state.withQuote(anchor).withNotice(null));
+  java/com/treelearn/app/ui/ChatPresenter.java:186| render(state.withQuote(""));
+  java/com/treelearn/app/ui/ChatPresenter.java:238| public void onForkPressed(String messageId) {
+  java/com/treelearn/app/ui/ChatPresenter.java:281| public void onSelectionCopyPressed(String selection) {
+  java/com/treelearn/app/ui/ChatPresenter.java:286| sink.copyToClipboard(text);
+  java/com/treelearn/app/ui/ChatPresenter.java:410| background.execute(() -> publish(commands.fork(messageId, question), true, false));
+  java/com/treelearn/app/ui/ChatPresenter.java:427| render(clearDraft ? next.withDraft("").withQuote("") : next);
+EXITCODE=0
+
+### C10 - MainActivity clipboard (sensitive), openChildren, openBranch
+command: python -X utf8 (scan of java/com/treelearn/app/MainActivity.java for EXTRA_IS_SENSITIVE | setPrimaryClip | public void openChildren | chatScreen.showChildren( | private void showChat(String branchId, ReadingAnchor)
+  java/com/treelearn/app/MainActivity.java:375| extras.putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, true);
+  java/com/treelearn/app/MainActivity.java:378| clipboard.setPrimaryClip(clip);
+  java/com/treelearn/app/MainActivity.java:388| public void openChildren(String branchId, String messageId, List<ChildBranch> children) {
+  java/com/treelearn/app/MainActivity.java:389| chatScreen.showChildren(messageId, children, this::openBranch);
+  java/com/treelearn/app/MainActivity.java:445| private void showChat(String branchId, ReadingAnchor explicitAnchor) {
+EXITCODE=0
+
+### C11 - ChatMessage predicates
+command: python -X utf8 (scan of java/com/treelearn/app/ui/ChatMessage.java for public boolean canCopy() | public boolean canQuote() | public boolean canFork() | public boolean hasChildren())
+  java/com/treelearn/app/ui/ChatMessage.java:138| public boolean canCopy() {
+  java/com/treelearn/app/ui/ChatMessage.java:142| public boolean canQuote() {
+  java/com/treelearn/app/ui/ChatMessage.java:146| public boolean canFork() {
+  java/com/treelearn/app/ui/ChatMessage.java:170| public boolean hasChildren() {
+EXITCODE=0
+
+### C12 - SqliteChatStore shares BranchChildren for counts and members
+command: python -X utf8 (scan of java/com/treelearn/app/wiring/SqliteChatStore.java for BranchChildren.of( | BranchChildren.countsOf()
+  java/com/treelearn/app/wiring/SqliteChatStore.java:104| for (Branch child : BranchChildren.of(BranchDao.findByTopic(database, branch.topicId),
+  java/com/treelearn/app/wiring/SqliteChatStore.java:227| return BranchChildren.countsOf(BranchDao.findByTopic(database, topicId));
+EXITCODE=0
+
+### D1 - delivery report: the T-041 index row and the status row
+command: python -X utf8 (scan of D:/Project/Android/Treelearn/Docs/06-delivery/TreeLearn_V1_交付报告.md for 对话页长按划词四项菜单 | T-041 划词四项菜单 + 子分支弹层)
+note: report cited :96 and :197
+  D:/Project/Android/Treelearn/Docs/06-delivery/TreeLearn_V1_交付报告.md:100| | 对话页长按划词四项菜单（追问 / 新建分支 / 复制 / 全选）与「子分支」列表弹层〔2026-09-22 更新，T-041〕 | `screen/WordMenuPopup` 由 `ChatScreen.Row` 的 `OnLongClickListener` 构造；`screen/ChildBranchPopup` 由 `MainActivity.openChildren` 构造，行由 `
+  D:/Project/Android/Treelearn/Docs/06-delivery/TreeLearn_V1_交付报告.md:201| | T-041 划词四项菜单 + 子分支弹层 | `verifying` | 〔2026-09-22 更新〕实现已落盘且**已进入产物**（第 2 节 dex 核对 `WordMenuPopup` / `ChildBranchPopup` / `BranchChildren`）；实测规模 534~549 行（两口径）**超 500 硬上限，待用户裁定**，故未收口 |
+EXITCODE=0
+
+### D2 - delivery report: the sizing numbers that conflict with the task
+command: python -X utf8 (scan of D:/Project/Android/Treelearn/Docs/06-delivery/TreeLearn_V1_交付报告.md for 534 ~ 549 | T-041 的两口径)
+note: report cited :197 for the 534~549 figure
+  D:/Project/Android/Treelearn/Docs/06-delivery/TreeLearn_V1_交付报告.md:227| | T-2026-09-21-word-menu-and-child-branches-041 〔2026-09-22 新增〕 | 534 ~ 549 | +7% ~ +10% |
+  D:/Project/Android/Treelearn/Docs/06-delivery/TreeLearn_V1_交付报告.md:230| T-041 的两口径：实现者给的 496（新增 5 文件）+ 38（改动行）= **534**；交付复核者按同一规则重数得 511 + 38 = **549**。
+EXITCODE=0
+
+### D3 - README: the child-branch popup description and the fork wording
+command: python -X utf8 (scan of D:/Project/Android/Treelearn/android/README.md for 「子分支」弹层列出的是 | 按钮叫「新建分支」 | 点一行经)
+note: report cited :645-652 and :678-680
+  D:/Project/Android/Treelearn/android/README.md:673| - **「子分支」弹层列出的是这条回答直接分出、且未归档的子分支（T-041）**：分支在点开之前就读好了，
+  D:/Project/Android/Treelearn/android/README.md:674| `ChatSink.openChildren` 把列表一起交出来，所以弹层在 UI 线程上不读库；点一行经 `ChatSink.openBranch` 进入该分支，
+  D:/Project/Android/Treelearn/android/README.md:678| - **按钮叫「新建分支」，数据仍叫「分叉」**：`chat_act_fork` 与相关 `contentDescription` 统一为「新建分支」
+EXITCODE=0
+
+
+== drift found by this re-check ==
+C1/C2 : the report wrote `WordMenuPopup.java:82-83` and `ChildBranchPopup.java:62-63` for
+        setFocusable+setOutsideTouchable. Truth: focusable is the 4th PopupWindow ctor arg
+        (WordMenuPopup.java:79-80, ChildBranchPopup.java:55-56); setOutsideTouchable is
+        WordMenuPopup.java:82 / ChildBranchPopup.java:58.
+C2    : the report wrote `:60-61` for WRAP_CONTENT; truth is ChildBranchPopup.java:55-56.
+C3/C4 : `popup_child_branches.xml:23-27` and `screen_navigation.xml:6` were already correct.
+D1/D2 : the report wrote delivery-report lines :96 / :197; today they are :100 / :201 (the shared
+        delivery report moved under another lane, so every doc line number drifts).
+D3    : the report wrote README :645-652; the child-branch bullet is actually README:673-675
+        (entry-index rows at :638-641); README:678-680 for the fork wording was correct.
+C5-C12: every other cited source line number re-read and found correct.
+EXITCODE=0

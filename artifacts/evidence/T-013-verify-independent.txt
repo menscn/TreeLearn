@@ -1,0 +1,187 @@
+# T-013 independent verification - evidence capture (verifier, read-only)
+# captured at: 2026-09-22T05:14:42.1035959+08:00
+# cwd: D:\Project\Android\Treelearn
+# role: independent verifier for T-2026-09-20-chat-reasoning-answer-actions-013.
+#   READ-ONLY: this file is the only artifact written by this role. No production code,
+#   test, layout, string, task text of other lanes, or other agent's evidence was modified.
+# note: another lane (T-042 reading-position wiring) is editing the same work tree and is
+#   using Gradle. Gradle is therefore NOT re-run by default here; see section B.
+
+===== A. captured-at / environment =====
+cwd                        : D:\Project\Android\Treelearn
+shell                      : 7.6.5 (Core)
+python                     : Python 3.13.12
+git HEAD                   : ae35e5441d42fd630e0f5a7542bd22f14b59cb6c
+EXITCODE=0
+
+===== B. Gradle contention check (and decision) - cmd: Get-Process | Where-Object { $_.ProcessName -match 'java|gradle' } =====
+(no java/gradle process)
+DECISION: if any java/gradle process is listed above, the shared ~/.gradle cache and android/app/build
+are in use by the T-042 lane; this verifier did not re-run Gradle and instead verified the
+implementer's Gradle evidence by readback plus independent source-level falsification.
+EXITCODE=0
+
+===== C..M. read-only source + evidence scans (cmd: python -X utf8 %TEMP%\T-013-verify-full.py) =====
+### C. RED/GREEN command identity
+red-isolated command lines : ['# command: cd android; .\\gradlew.bat :app:testDebugUnitTest --no-daemon --console=plain']
+green command lines        : ['# command: cd android; .\\gradlew.bat :app:testDebugUnitTest --no-daemon --console=plain', '# command: cd android; .\\gradlew.bat :app:testDebugUnitTest --rerun-tasks --no-daemon --console=plain']
+BYTE-IDENTICAL first pair  : True
+  red[0]   = '# command: cd android; .\\gradlew.bat :app:testDebugUnitTest --no-daemon --console=plain'
+  green[0] = '# command: cd android; .\\gradlew.bat :app:testDebugUnitTest --no-daemon --console=plain'
+green has a 2nd run (--rerun-tasks): True
+
+### D. red-isolated error census (the 200/168 claim)
+lines containing the javac error marker : 200
+distinct such lines                     : 168
+   by file ChatMessageTest.java               92
+   by file ChatTestDoubles.java               48
+   by file ChatPresenterTest.java             34
+   by file ChatPositionAgreementTest.java     22
+   by file ChatViewStateTest.java             4
+   sum by file                    = 200
+   by type 找不到符号                              124
+   by type 程序包ChatMessage不存在                  56
+   by type 程序包ChatData不存在                     14
+   by type 程序包ChatViewState不存在                6
+   sum by type                    = 200
+javac own summary lines:
+   '100 个错误'
+   '100 个错误'
+
+### E. evidence self-certification readback
+   T-013-androidtest-compile.txt  lines=138   | BUILD SUCCESSFUL x1 | EXITCODE= x2 | actionable tasks x1 | EXITCODE values=0,0
+   T-013-check.txt                lines=1294  | BUILD SUCCESSFUL x1 | BUILD FAILED x1 | EXITCODE= x2 | actionable tasks x2 | EXITCODE values=1,0
+   T-013-final-gate.txt           lines=209   | BUILD SUCCESSFUL x1 | EXITCODE= x1 | actionable tasks x1 | EXITCODE values=0
+   T-013-green-repo.txt           lines=88    | BUILD SUCCESSFUL x1 | EXITCODE= x1 | actionable tasks x1 | EXITCODE values=0
+   T-013-green.txt                lines=178   | BUILD SUCCESSFUL x2 | EXITCODE= x2 | actionable tasks x2 | EXITCODE values=0,0
+   T-013-guard.txt                lines=72    | EXITCODE= x2 | VERDICT: x2 | EXITCODE values=0,0
+   T-013-lint.txt                 lines=471   | BUILD SUCCESSFUL x3 | EXITCODE= x3 | actionable tasks x3 | EXITCODE values=0,0,0
+   T-013-red-isolated.txt         lines=951   | BUILD FAILED x1 | EXITCODE= x1 | actionable tasks x1 | EXITCODE values=1
+   T-013-red.txt                  lines=1004  | BUILD FAILED x1 | EXITCODE= x1 | actionable tasks x1 | EXITCODE values=1
+   T-013-sizing.txt               lines=73    | EXITCODE= x1 | VERDICT: x1 | EXITCODE values=0
+   T-013-static-ui-checks.txt     lines=195   | EXITCODE= x2 | VERDICT: x3 | EXITCODE values=0,0
+   T-013-verify-independent.txt   lines=24    | EXITCODE= x2 | EXITCODE values=0,0
+
+### F. sizing: T-013 claim vs independent recount (current tree)
+   AnswerActionBar.java       claim   81/114   now   81/114   SAME
+   ChatActions.java           claim   22/57    now   30/107   GREW +8/-50
+   ChatCommandResult.java     claim   34/59    now   36/73    GREW +2/-14
+   ChatCommands.java          claim   13/41    now   13/41    SAME
+   ChatData.java              claim   30/56    now   40/93    GREW +10/-37
+   ChatMessage.java           claim  107/186   now  107/186   SAME
+   ChatPresenter.java         claim  247/343   now  337/505   GREW +90/-162
+   ChatScreen.java            claim  299/358   now  483/636   GREW +184/-278
+   ChatSink.java              claim   12/40    now   16/72    GREW +4/-32
+   ChatViewState.java         claim  136/196   now  136/196   SAME
+   CopyLabels.java            claim   13/28    now   13/28    SAME
+   PendingChatWiring.java     claim   45/92    now  ABSENT (replaced by another lane)
+   ReasoningDisclosure.java   claim   66/101   now   66/101   SAME
+   13-file java total claim judgement=1105 ; now (12 present)=1358
+   arithmetic of the claim: 107+136+22+12+30+13+34+13+247+45+299+66+81 = 1105
+   resources claim: 10+167+11+139+35+49+68 = 479 ; +java 1105 = 1584
+
+### G. the four answer operations: gesture -> presenter -> command -> store
+   android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:210: () -> publish(commands.send(branchId, text, quote, model, thinking), false, true));
+   android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:238: ? commands.retry(messageId, model, thinking, now)
+   android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:239: : commands.reset(messageId, model, thinking, now), false, false));
+   android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:301: final List<AnswerRevision> versions = commands.versions(messageId);
+   android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:315: commands.selectRevision(messageId, revisionId, System.currentTimeMillis()), false,
+   android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:462: background.execute(() -> publish(commands.fork(messageId, question), true, false));
+   android\app\src\main\java\com\treelearn\app\wiring\ChatWiring.java:111: store.appendTurn(userMessage, aiMessage);
+   android\app\src\main\java\com\treelearn\app\wiring\ChatWiring.java:134: DomainResult<AnswerRevision> switched = store.selectRevision(messageId, revisionId, now);
+   android\app\src\main\java\com\treelearn\app\wiring\ChatWiring.java:219: ? store.reset(messageId, model, thinkingEnabled, now)
+   android\app\src\main\java\com\treelearn\app\wiring\ChatWiring.java:220: : store.retry(messageId, model, thinkingEnabled, now);
+   android\app\src\main\java\com\treelearn\app\wiring\ChatWiring.java:253: GenerationCoordinator.SubmitOutcome outcome = generation.submit(command, assembler);
+
+### H. reasoning disclosure: call sites of the predicate (single truth source?)
+   android\app\src\main\java\com\treelearn\app\screen\ReasoningDisclosure.java:70: if (!message.canExpandReasoning()) {
+   android\app\src\main\java\com\treelearn\app\ui\ChatMessage.java:128: public boolean canExpandReasoning() {
+   android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:164: if (message == null || !message.canExpandReasoning()) {
+   android\app\src\main\java\com\treelearn\app\screen\ReasoningDisclosure.java:84: if (message.isFormingReasoning()) {
+   android\app\src\main\java\com\treelearn\app\ui\ChatMessage.java:129: return ai && (hasReasoning() || isFormingReasoning());
+   android\app\src\main\java\com\treelearn\app\ui\ChatMessage.java:133: public boolean isFormingReasoning() {
+   android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java:493: disclosure.render(message, state.isReasoningExpanded(message.messageId));
+   android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:167: render(state.withReasoningExpanded(messageId, !state.isReasoningExpanded(messageId)));
+   android\app\src\main\java\com\treelearn\app\ui\ChatViewState.java:106: public boolean isReasoningExpanded(String messageId) {
+   android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:167: render(state.withReasoningExpanded(messageId, !state.isReasoningExpanded(messageId)));
+   android\app\src\main\java\com\treelearn\app\ui\ChatViewState.java:160: public ChatViewState withReasoningExpanded(String messageId, boolean expanded) {
+
+### I. live-refresh proof: who re-reads the conversation?
+   -- ChatPresenter read()/refresh call sites
+   android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:100: background.execute(this::read);
+   android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:108: public void onResumed() {
+   android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:110: background.execute(this::read);
+   android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:119: private void read() {
+   android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:385: background.execute(this::read);
+   android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:421: background.execute(this::read);
+   android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:486: background.execute(this::read);
+   android\app\src\main\java\com\treelearn\app\ui\HomePresenter.java:74: public void onResumed() {
+   android\app\src\main\java\com\treelearn\app\ui\TreeCanvasPresenter.java:89: background.execute(this::read);
+   android\app\src\main\java\com\treelearn\app\ui\TreeCanvasPresenter.java:96: public void onResumed() {
+   android\app\src\main\java\com\treelearn\app\ui\TreeCanvasPresenter.java:97: background.execute(this::read);
+   android\app\src\main\java\com\treelearn\app\ui\TreeCanvasPresenter.java:100: private void read() {
+   android\app\src\main\java\com\treelearn\app\ui\TreeCanvasPresenter.java:290: read();
+   -- GenerationCoordinator.Observer consumers in production
+      addObserver in app/src/main : ['android\\app\\src\\main\\java\\com\\treelearn\\app\\generation\\GenerationCoordinator.java:287: public void addObserver(Observer observer) {']
+      addObserver anywhere        : ['android\\app\\src\\androidTest\\java\\com\\treelearn\\app\\GenerationCoordinatorInstrumentedTest.java:480: coordinator.addObserver(observer);', 'android\\app\\src\\main\\java\\com\\treelearn\\app\\generation\\GenerationCoordinator.java:287: public void addObserver(Observer observer) {']
+      Handler/postDelayed in chat slice: []
+      postDelayed in ChatScreen   : ['android\\app\\src\\main\\java\\com\\treelearn\\app\\screen\\ChatScreen.java:167: scroll.postDelayed(scrollSettled, SCROLL_SETTLE_MS);', 'android\\app\\src\\main\\java\\com\\treelearn\\app\\screen\\RecommendationMarquee.java:58: postDelayed(this, DRIFT_INTERVAL_MILLIS);', 'android\\app\\src\\main\\java\\com\\treelearn\\app\\screen\\RecommendationMarquee.java:132: postDelayed(drift, DRIFT_INTERVAL_MILLIS);', 'android\\app\\src\\main\\java\\com\\treelearn\\app\\screen\\RecommendationMarquee.java:150: postDelayed(resume, RESUME_DELAY_MILLIS);']
+
+### J. HomeViewState.Notice arms and their producers in app/src/main
+   KEY_MISSING            producers=4
+        android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:201: render(state.withNotice(HomeViewState.Notice.KEY_MISSING));
+        android\app\src\main\java\com\treelearn\app\ui\HomePresenter.java:146: render(state.withNotice(HomeViewState.Notice.KEY_MISSING));
+        android\app\src\main\java\com\treelearn\app\wiring\ChatWiring.java:362: return keyVault.isConfigured() ? null : HomeViewState.Notice.KEY_MISSING;
+        android\app\src\main\java\com\treelearn\app\wiring\HomeWiring.java:108: return SubmitResult.refused(HomeViewState.Notice.KEY_MISSING);
+   KEY_REJECTED           producers=0
+   BALANCE_UNAVAILABLE    producers=0
+   REQUEST_REJECTED       producers=1
+        android\app\src\main\java\com\treelearn\app\wiring\RefusalNotices.java:27: return HomeViewState.Notice.REQUEST_REJECTED;
+   RATE_LIMITED           producers=0
+   PROVIDER_UNAVAILABLE   producers=0
+   NETWORK_INTERRUPTED    producers=0
+   STORAGE                producers=15
+        android\app\src\main\java\com\treelearn\app\ui\HomePresenter.java:179: .withNotice(HomeViewState.Notice.STORAGE));
+        android\app\src\main\java\com\treelearn\app\ui\HomePresenter.java:198: .withNotice(HomeViewState.Notice.STORAGE));
+        android\app\src\main\java\com\treelearn\app\ui\TreeCanvasPresenter.java:112: .withNotice(HomeViewState.Notice.STORAGE)));
+        android\app\src\main\java\com\treelearn\app\ui\TreeCanvasPresenter.java:282: ui.post(() -> render(state.withNotice(HomeViewState.Notice.STORAGE)));
+   READING_POSITION       producers=1
+        android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:458: ui.post(() -> render(state.withNotice(HomeViewState.Notice.READING_POSITION)));
+   -- callers of Notice.from(...) anywhere under android/app/src
+   android\app\src\test\java\com\treelearn\app\ui\HomePresenterTest.java:169: HomeViewState.Notice.from(AiGatewayError.forHttpStatus(status).kind));
+   android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:29: assertTrue("no notice for " + kind, HomeViewState.Notice.from(kind) != null);
+   android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:32: HomeViewState.Notice.from(AiGatewayError.Kind.AUTH_INVALID));
+   android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:34: HomeViewState.Notice.from(AiGatewayError.Kind.BALANCE_UNAVAILABLE));
+   android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:36: HomeViewState.Notice.from(AiGatewayError.Kind.REQUEST_INVALID));
+   android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:38: HomeViewState.Notice.from(AiGatewayError.Kind.RATE_LIMITED));
+   android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:40: HomeViewState.Notice.from(AiGatewayError.Kind.PROVIDER_UNAVAILABLE));
+   android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:42: HomeViewState.Notice.from(AiGatewayError.Kind.NETWORK_INTERRUPTED));
+   android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:48: HomeViewState.Notice.from(AiGatewayError.forHttpStatus(401).kind));
+   android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:50: HomeViewState.Notice.from(AiGatewayError.forHttpStatus(402).kind));
+   android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:52: HomeViewState.Notice.from(AiGatewayError.forHttpStatus(422).kind));
+   android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:54: HomeViewState.Notice.from(AiGatewayError.forHttpStatus(429).kind));
+   android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:56: HomeViewState.Notice.from(AiGatewayError.forHttpStatus(503).kind));
+   android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:63: HomeViewState.Notice.from(refusal));
+
+### K. production binding of the chat data path
+   android\app\src\main\java\com\treelearn\app\AppContainer.java:125: this.chatWiring = new ChatWiring(chatStore, generation, settingsStore, clock, budget);
+   android\app\src\main\java\com\treelearn\app\AppContainer.java:161: public ChatData chatData() {
+   android\app\src\main\java\com\treelearn\app\MainActivity.java:462: container.keyVault(), container.chatData(), container.chatCommands(),
+   android\app\src\main\java\com\treelearn\app\AppContainer.java:166: public ChatCommands chatCommands() {
+   android\app\src\main\java\com\treelearn\app\MainActivity.java:462: container.keyVault(), container.chatData(), container.chatCommands(),
+   android\app\src\main\java\com\treelearn\app\MainActivity.java:461: chatPresenter = new ChatPresenter(this, container.uiThread(), container.background(),
+
+### L. stale references in the task file
+   T-013:67: - Documentation files updated: `android/README.md` 新增小节「应用层入口索引（`:app`）—— 对话、思考披露与回答操作（T-013）」，记录了 13 个新类型的职责与不变量、展开集合按 messageId 键、复制格式与两个标题的来源、推荐条只挂最新稳定回答的判定、`PendingChatWiring` 
+   T-013:102: 都自动不显示（BASE-16），JVM 已断言。**真实推荐数据尚未接入**：`wiring.PendingChatWiring` 是占位，
+   T-013:138: - Implementation: 13 个新生产类型（`ui` 的 ChatMessage / ChatViewState / ChatActions / ChatSink / ChatData / ChatCommands / ChatCommandResult / CopyLabels / ChatPresenter，`screen` 的 ChatSc
+   T-013:184: - Blocker: ① **规模偏差需用户裁定**：新增 1584 非空非注释生产行（Java 1105 / 13 文件 + 资源 479 / 7 布局），超 500 行硬上限且无用户批准的例外，实现者不得自行追认（`artifacts/evidence/T-013-sizing.txt`）。② **对话数据路径整体仍是占位**（`wiring.Pendi
+   T-013:185: - Unblock condition: 用户对规模给裁定；装配任务把 `AppContainer` 的对话端口从 `PendingChatWiring` 换成真实实现（端口、Presenter 与 ViewState 都不需要改）；设计 owner 对 `tl_ink3` 给裁定；重新允许使用模拟器后，旋转/切分支/回到页面、真机展开交互、字体放大、平板横
+   T-013:186: - Next steps: 装配任务按 `PendingChatWiring` javadoc 点名的六条接真实实现（其中切版只需一个数据库句柄即可落地）；设计 owner 裁定 `tl_ink3`；`HomeViewState.Notice` → `FailureNotice` 的行为无关重命名（连同对话页偏窄的 `Notice.NOT_WIRED` 文案
+
+### M. README statements about the chat data path
+   README:496: 生产装配里不再有 `NOT_WIRED`。读者要注意的**残留缺口**：
+   README:641: | `wiring.ChatWiring` | 对话的**真实**数据路径（T-032）：读回 + 五条命令，实现 `ChatData` 与 `ChatCommands` | 读回走 `MessageDao.findByBranch` / `AnswerRevisionDao` / `GenerationOperationDao`；`send`/`retry
+   README:662: 所以「重新生成」不会把引用丢掉（两个入口逐字符一致的断言见 `ChatWiringTest`）。引用随 `currentInput` 一起
+   README:710: （`HomeViewState.Notice` → `FailureNotice`）记在这里作为后续工作。**`Notice.NOT_WIRED` 已随 T-032 一并
+EXITCODE=0

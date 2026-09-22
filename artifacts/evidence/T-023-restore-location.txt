@@ -1,0 +1,120 @@
+# T-023 验收证据 —— 再水合契约（`restore` 只出现在只读映射内；本任务不新增 GenerationOperation.restore）
+
+生成方式：bash artifacts/evidence/.gen-t023-source-checks.sh ，生成时刻 2026-09-21T10:45:42Z（UTC）。
+每条命令当场执行，EXITCODE 取自该命令自身；回显的命令按 shell 规则加引号，可直接粘回复现；
+被检文件的 SHA-256 见 §0。结论段的每个计数与落点都由脚本从对应捕获输出里提取（count_of / hit_of / files_of），不手写。
+
+被验证的断言（任务文件验收条件 6）：
+  (a) `AnswerRevision.restore` 只允许出现在 `AnswerRevisionDao` 的只读映射方法内；
+  (b) 写路径（创建、稳定化、重试、重置、分叉、迁移、回填）必须走 `AnswerRevision.create`；
+  (c) 本任务不得新增 `GenerationOperation.restore`（`:data` 与 `:core` 全部生产源码机械检索，要求零命中）。
+
+---
+
+## 0. 被检文件的 SHA-256（生成本文件时的工作树状态）
+
+$ sha256sum <被检文件>
+  953e2fbd87765a037253e56c5c52b8dc80787f393acb174689ad5d6f0cab84a7 *android/data/src/main/java/com/treelearn/data/db/dao/AnswerRevisionDao.java
+  6584d7c7c6762365ce7dd4863b9bff5b366ba3621cb34d65e99d72fdbbb4138b *android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationDao.java
+  757d95a5fecf788b64f9c6cba6c726c0cab5635c64afc10c1783ab8b8dc3eb82 *android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationRow.java
+  accc01b2fc6301e885b78cb33f53263d59eec42ca9cbc9a3d2c50bf78e8d7b5c *android/data/src/main/java/com/treelearn/data/db/dao/GenerationStabilizer.java
+  50de3b0aeb29febc7ef3fe226db083456391d45ec1760c2efd3330a295fecce0 *android/data/src/main/java/com/treelearn/data/db/dao/ConstraintFailures.java
+  e5a5fb78fbf6bb6478d0e8d4bf0e91170401e9756a199f64f7b469b89fdf076d *android/app/src/androidTest/java/com/treelearn/app/AnswerRevisionGenerationOperationDaoInstrumentedTest.java
+
+---
+
+## Command 1 —— 点号写法：AnswerRevision.restore 的生产调用点
+
+$ grep -rn 'AnswerRevision\.restore' android/data/src/main android/core/src/main android/app/src/main
+android/data/src/main/java/com/treelearn/data/db/dao/AnswerRevisionDao.java:105:     * {@code AnswerRevision.restore} states: on reload the row is the authority. Shape checks still
+android/data/src/main/java/com/treelearn/data/db/dao/AnswerRevisionDao.java:112:        return AnswerRevision.restore(
+android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:330:            // be rehydrated through AnswerRevision.restore without consulting the operation
+EXITCODE=0
+
+## Command 2 —— 井号写法：javadoc / 注释里的方法引用（同一范围）
+
+$ grep -rn 'AnswerRevision#restore' android/data/src/main android/core/src/main android/app/src/main
+android/data/src/main/java/com/treelearn/data/db/dao/AnswerRevisionDao.java:22: * and refuses a version no purpose owns. The single {@link AnswerRevision#restore} call in the
+android/data/src/main/java/com/treelearn/data/db/dao/AnswerRevisionDao.java:102:     * The read mapping, and the only production {@link AnswerRevision#restore} call site.
+EXITCODE=0
+
+## Command 3 —— 合并语义：两种写法一次搜全，覆盖测试源码以看清全貌
+
+$ grep -rnE 'AnswerRevision[.#]restore' '--include=*.java' android
+android/core/src/test/java/com/treelearn/core/domain/AnswerRevisionTest.java:99:        AnswerRevision restored = AnswerRevision.restore(
+android/core/src/test/java/com/treelearn/core/domain/AnswerRevisionTest.java:171:     * {@link AnswerRevision#restore} accepts it, because on reload the stored row is the authority and
+android/core/src/test/java/com/treelearn/core/domain/AnswerRevisionTest.java:181:        AnswerRevision restored = AnswerRevision.restore(
+android/core/src/test/java/com/treelearn/core/domain/AnswerRevisionTest.java:188:            AnswerRevision.restore(Guard.newId(), MESSAGE_ID, 1, "r", "a", GenerationModel.PRO, true,
+android/data/src/main/java/com/treelearn/data/db/dao/AnswerRevisionDao.java:22: * and refuses a version no purpose owns. The single {@link AnswerRevision#restore} call in the
+android/data/src/main/java/com/treelearn/data/db/dao/AnswerRevisionDao.java:102:     * The read mapping, and the only production {@link AnswerRevision#restore} call site.
+android/data/src/main/java/com/treelearn/data/db/dao/AnswerRevisionDao.java:105:     * {@code AnswerRevision.restore} states: on reload the row is the authority. Shape checks still
+android/data/src/main/java/com/treelearn/data/db/dao/AnswerRevisionDao.java:112:        return AnswerRevision.restore(
+android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:330:            // be rehydrated through AnswerRevision.restore without consulting the operation
+EXITCODE=0
+
+## Command 4 —— 写路径工厂 AnswerRevision.create 的落点（生产范围）
+
+$ grep -rn 'AnswerRevision\.create' android/data/src/main android/core/src/main android/app/src/main
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationStabilizer.java:43: * {@code AnswerRevision.create} would throw a caller-bug {@link IllegalArgumentException} for what is
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationStabilizer.java:126:        DomainResult<AnswerRevision> created = AnswerRevision.create(row.messageId, revisionNo,
+android/core/src/main/java/com/treelearn/core/domain/GenerationOperation.java:226:        // AnswerRevision.create re-checks both when it builds the revision; that is the invariant
+android/core/src/main/java/com/treelearn/core/domain/GenerationOperation.java:246:        DomainResult<AnswerRevision> created = AnswerRevision.create(
+EXITCODE=0
+
+## Command 5 —— 本任务不得新增 GenerationOperation.restore（全仓 .java，期望零命中）
+
+$ grep -rnE 'GenerationOperation[.#]restore' '--include=*.java' android
+EXITCODE=1
+
+## Command 6 —— GenerationOperation 的静态工厂只有 start（全仓 .java）
+
+$ grep -rnE 'GenerationOperation\.start' '--include=*.java' android
+android/app/src/androidTest/java/com/treelearn/app/AnswerRevisionGenerationOperationDaoInstrumentedTest.java:241:        GenerationOperation otherAttempt = GenerationOperation.start(
+android/app/src/androidTest/java/com/treelearn/app/AnswerRevisionGenerationOperationDaoInstrumentedTest.java:274:        GenerationOperation operation = GenerationOperation.start(commandFor(positions, T0), T0);
+android/app/src/androidTest/java/com/treelearn/app/AnswerRevisionGenerationOperationDaoInstrumentedTest.java:456:        GenerationOperation staged = GenerationOperation.start(commandFor(positions, T0), T0);
+android/app/src/androidTest/java/com/treelearn/app/AnswerRevisionGenerationOperationDaoInstrumentedTest.java:588:        GenerationOperation operation = GenerationOperation.start(command, T0);
+android/core/src/test/java/com/treelearn/core/domain/GenerationOperationTest.java:36:        return GenerationOperation.start(aCommand(), T0 + 1);
+android/core/src/test/java/com/treelearn/core/domain/GenerationOperationTest.java:51:        GenerationOperation operation = GenerationOperation.start(command, T0 + 5);
+EXITCODE=0
+
+## Command 7 —— 唯一能把行写成 STABLE 的入口（全仓 .java）
+
+$ grep -rn markStable '--include=*.java' android
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationDao.java:38: * {@link #markStable} is not public for the same reason.
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationDao.java:168:    static void markStable(SQLiteDatabase database, String operationId, long now) {
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationStabilizer.java:142:        GenerationOperationDao.markStable(database, operationId, now);
+EXITCODE=0
+
+## Command 8 —— DDL 落点：dao 包内不得出现 CREATE/ALTER/DROP（期望零输出）
+
+$ grep -rnE 'CREATE |ALTER |DROP ' '--include=*.java' android/data/src/main/java/com/treelearn/data/db/dao
+EXITCODE=1
+
+---
+
+## 结论（计数与落点由本脚本从上面各命令的捕获输出机械提取，非手写）
+
+- Command 1：生产源码里 `AnswerRevision.restore` 命中 3 行，落在 AnswerRevisionDao.java、TreeLearnSchema.java 内。
+  其中真实调用 1 处（`AnswerRevisionDao.java:112`）。注意这条模式的边界：只有写作 `AnswerRevision.restore(` 的行才算调用，
+  而 `:core` 里的方法定义写作 `AnswerRevision restore(`（没有点号），因此本行既不计入调用，也不出现在本轮捕获里。
+- Command 2：井号写法（javadoc 交叉引用）命中 2 行，位于 AnswerRevisionDao.java —— 它们是文字引用，不是调用，
+  因此断言 (a) 必须按「调用点」而不是「提及次数」来读。
+- Command 3：放宽到整个 `android/` 后共 9 行命中；`:app` 的 androidTest 侧直接调用为 0 处 ——
+  本任务的用例不自己构造 revision，一律走 `AnswerRevision.create`，所以测试侧不会成为再水合的第二个入口。
+- Command 4：写路径工厂 `AnswerRevision.create` 在生产源码里命中 4 行，落在 GenerationOperation.java、GenerationStabilizer.java；
+  调用点 `GenerationStabilizer.java:126` 即 `GenerationStabilizer` 的落盘入口，断言 (b) 的「写路径走 create」由此成立。
+- Command 5：全仓 `.java` 中 `GenerationOperation.restore`/`GenerationOperation#restore` 零命中，断言 (c) 成立。
+  EXITCODE=1 是 grep 的「无匹配」语义，不是执行失败。
+- Command 6：`GenerationOperation.start` 命中 6 处 —— 该类型只有这一个创建入口，与断言 (c) 互证：
+  没有 `restore`，行形态才是读取 attempt 的唯一方式。
+- Command 7：`markStable` 命中 3 行，位于 GenerationOperationDao.java、GenerationStabilizer.java；其中定义是 `GenerationOperationDao.java:168`（包私有），
+  `public` 修饰的命中 0 处 —— 即「唯一能把行写成 STABLE 的入口是 stabilize 事务内部的那次调用」，
+  外部没有第二条路可以绕过 revision 创建把 attempt 置为 STABLE。
+- Command 8：dao 包内 `CREATE`/`ALTER`/`DROP` 零命中，即本任务新增的生产类没有引入任何 DDL。
+
+### 本文件没有覆盖到的（如实列出）
+
+- 断言 (a) 的「只允许出现在只读映射内」是**结构判断**：Command 1 证明调用点唯一（`AnswerRevisionDao` 内），
+  该调用位于 `read(Cursor)` 这个私有只读映射中，由源码阅读确认，检索命令本身不区分方法名。
+- 断言 (b) 的「重试、重置、分叉、迁移、回填」这些写路径本任务尚未实现（属 T-006/T-008/T-009/T-010），
+  因此 Command 4 只能证明**本任务已存在的写路径**走 `create`；其余写路径的合规性要在各自任务里重复这条检索。

@@ -1,0 +1,120 @@
+# T-023 验收证据 —— 不落提示词正文（公开方法签名与写入内容两半）
+
+生成方式：bash artifacts/evidence/.gen-t023-source-checks.sh ，生成时刻 2026-09-21T10:46:20Z（UTC）。
+每条命令当场执行，EXITCODE 取自该命令自身；结论段由脚本从捕获输出提取，不手写。
+
+被验证的断言（任务文件验收条件 7）：本任务所有 DAO 的公开方法签名中不出现 `systemContent`/`systemPrompt`
+形态的入参，也不新增任何正文列；对两表写入夹具后扫描其全部 TEXT 列，断言不包含提示词正文哨兵子串。
+后一半（行为侧）在 `AnswerRevisionGenerationOperationDaoInstrumentedTest.onlyAnEnumeratedPurposeAndAnOwnedVersionReachTheTwoTables`
+（真机 API 36），本文件覆盖前一半（源码侧）。
+
+---
+
+## Command 1 —— 正文形态的标识符：持久化层（:data 生产源码）
+
+$ grep -rnE 'systemContent|systemPrompt|system_content|system_prompt|promptBody|prompt_body|systemMessage' android/data/src/main
+EXITCODE=1
+
+## Command 2 —— 同一检索放宽到 :core（对照，期望命中 PromptSpec）
+
+$ grep -rnE 'systemContent|systemPrompt|system_content|system_prompt|promptBody|prompt_body|systemMessage' android/core/src/main
+android/core/src/main/java/com/treelearn/core/domain/PromptSpec.java:42:    public final String systemContent;
+android/core/src/main/java/com/treelearn/core/domain/PromptSpec.java:44:    private PromptSpec(PromptPurpose purpose, String policyVersion, String systemContent) {
+android/core/src/main/java/com/treelearn/core/domain/PromptSpec.java:47:        this.systemContent = Guard.nonBlank(systemContent, "systemContent");
+android/core/src/main/java/com/treelearn/core/domain/PromptSpec.java:54:     * @throws IllegalArgumentException if {@code purpose} is null, or {@code systemContent} is null or
+android/core/src/main/java/com/treelearn/core/domain/PromptSpec.java:59:            PromptPurpose purpose, String policyVersion, String systemContent) {
+android/core/src/main/java/com/treelearn/core/domain/PromptSpec.java:65:        Guard.nonBlank(systemContent, "systemContent");
+android/core/src/main/java/com/treelearn/core/domain/PromptSpec.java:70:        return DomainResult.ok(new PromptSpec(purpose, policyVersion, systemContent));
+android/core/src/main/java/com/treelearn/core/domain/PromptSpec.java:76:        return "PromptSpec[" + purpose + " " + policyVersion + ", " + systemContent.length()
+EXITCODE=0
+
+## Command 3 —— 携带正文的类型是否进入持久化层（期望零命中）
+
+$ grep -rn PromptSpec android/data/src/main
+EXITCODE=1
+
+## Command 4 —— 本任务新增类的公开方法与构造签名全量清单
+
+$ grep -rnE '^\s+(public|static)' android/data/src/main/java/com/treelearn/data/db/dao/AnswerRevisionDao.java android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationDao.java android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationRow.java android/data/src/main/java/com/treelearn/data/db/dao/GenerationStabilizer.java
+android/data/src/main/java/com/treelearn/data/db/dao/AnswerRevisionDao.java:42:    public static void insert(SQLiteDatabase database, AnswerRevision revision) {
+android/data/src/main/java/com/treelearn/data/db/dao/AnswerRevisionDao.java:50:    public static AnswerRevision findById(SQLiteDatabase database, String revisionId) {
+android/data/src/main/java/com/treelearn/data/db/dao/AnswerRevisionDao.java:62:    public static List<AnswerRevision> findByMessage(SQLiteDatabase database, String messageId) {
+android/data/src/main/java/com/treelearn/data/db/dao/AnswerRevisionDao.java:86:    public static int nextRevisionNo(SQLiteDatabase database, String messageId) {
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationDao.java:59:    public static void insert(SQLiteDatabase database, GenerationOperation operation) {
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationDao.java:86:    public static void recordProgress(SQLiteDatabase database, String operationId,
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationDao.java:139:    public static void markTerminal(SQLiteDatabase database, String operationId,
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationDao.java:168:    static void markStable(SQLiteDatabase database, String operationId, long now) {
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationDao.java:174:    public static GenerationOperationRow findById(SQLiteDatabase database, String operationId) {
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationDao.java:191:    public static GenerationOperationRow findActiveByBranch(SQLiteDatabase database, String branchId) {
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationDao.java:218:    public static List<GenerationOperationRow> findRecoverable(SQLiteDatabase database) {
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationRow.java:23:    public final String id;
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationRow.java:25:    public final String commandId;
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationRow.java:26:    public final String branchId;
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationRow.java:27:    public final String messageId;
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationRow.java:28:    public final PromptPurpose purpose;
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationRow.java:29:    public final GenerationModel model;
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationRow.java:30:    public final boolean thinkingEnabled;
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationRow.java:32:    public final String promptPolicyVersion;
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationRow.java:33:    public final GenerationState state;
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationRow.java:38:    public final String partialReasoning;
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationRow.java:40:    public final String partialAnswer;
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationRow.java:42:    public final String errorCode;
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationRow.java:43:    public final long createdAt;
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationRow.java:44:    public final long updatedAt;
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationRow.java:67:    public String toString() {
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationStabilizer.java:58:    public GenerationStabilizer(DatabaseTransactionRunner runner) {
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationStabilizer.java:81:    public DomainResult<AnswerRevision> stabilize(SQLiteDatabase database, String operationId,
+EXITCODE=0
+
+## Command 5 —— 提示词相关的列/字段名（新增类内）
+
+$ grep -rnE 'prompt_policy_version|PROMPT_POLICY_VERSION|prompt_purpose|PROMPT_PURPOSE|PromptPurpose|policyPrefix' android/data/src/main/java/com/treelearn/data/db/dao
+android/data/src/main/java/com/treelearn/data/db/dao/AnswerRevisionDao.java:121:                Rows.string(cursor, TreeLearnSchema.AnswerRevisions.PROMPT_POLICY_VERSION),
+android/data/src/main/java/com/treelearn/data/db/dao/AnswerRevisionDao.java:134:        values.put(TreeLearnSchema.AnswerRevisions.PROMPT_POLICY_VERSION,
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationDao.java:11:import com.treelearn.core.domain.PromptPurpose;
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationDao.java:261:                PromptPurpose.fromPrefix(
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationDao.java:262:                        Rows.string(cursor, TreeLearnSchema.GenerationOperations.PROMPT_PURPOSE)),
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationDao.java:266:                Rows.string(cursor, TreeLearnSchema.GenerationOperations.PROMPT_POLICY_VERSION),
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationDao.java:282:        values.put(TreeLearnSchema.GenerationOperations.PROMPT_PURPOSE,
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationDao.java:283:                operation.purpose.policyPrefix);
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationDao.java:287:        values.put(TreeLearnSchema.GenerationOperations.PROMPT_POLICY_VERSION,
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationRow.java:5:import com.treelearn.core.domain.PromptPurpose;
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationRow.java:28:    public final PromptPurpose purpose;
+android/data/src/main/java/com/treelearn/data/db/dao/GenerationOperationRow.java:47:                           PromptPurpose purpose, GenerationModel model, boolean thinkingEnabled,
+EXITCODE=0
+
+## Command 6 —— 表结构侧的既有守门（T-004，未本任务改动）
+
+$ grep -rn noColumnIsDedicatedToTheSystemPromptBody android/app/src/androidTest/java
+android/app/src/androidTest/java/com/treelearn/app/SqliteSchemaInstrumentedTest.java:310:    public void noColumnIsDedicatedToTheSystemPromptBody() {
+EXITCODE=0
+
+## Command 7 —— 行为侧的哨兵用例名（本任务新增）
+
+$ grep -rn onlyAnEnumeratedPurposeAndAnOwnedVersionReachTheTwoTables android/app/src/androidTest/java
+android/app/src/androidTest/java/com/treelearn/app/AnswerRevisionGenerationOperationDaoInstrumentedTest.java:514:    public void onlyAnEnumeratedPurposeAndAnOwnedVersionReachTheTwoTables() {
+EXITCODE=0
+
+---
+
+## 结论（计数与判定由本脚本从上面各命令的捕获输出机械提取，非手写）
+
+- Command 1：持久化层 `:data` 生产源码 零命中 —— `systemContent`/`systemPrompt`/`promptBody`
+  形态的标识符一个也没有。这是断言「本任务所有 DAO 的公开方法签名中不出现此类入参」的正面证据。
+- Command 2（对照，刻意保留）：同一检索放宽到 `:core` 后 命中 8 行，位于 PromptSpec.java。
+  这不是本任务的违规，而是这条断言的**边界**：`PromptSpec` 是 T-021 的**内存态请求装配体**
+  （purpose + version + 正文），正文在设计上只存在于内存与 `:ai` 的注册表里，从不落库 ——
+  `PromptPurpose` 的 javadoc 与 `TreeLearnSchema` 的列清单都写了这一点。把它如实记下来，是为了让读者
+  不会用一条全仓检索去「证明」一个只对持久化层成立的断言（本仓库已经因为把搜索范围写错而误报过）。
+- Command 3：`PromptSpec` 在 `:data` 生产源码里 零命中，即携带正文的类型没有进入持久化层。
+- Command 4：本任务新增类的公开/静态签名共 28 行；其中入参为标识符的签名 11 处，
+  入参含 content/body 形态的签名 0 处。其余入参是 `delta`（模型输出增量）、`state`、
+  `terminal`、`errorCode`、`now`、实体对象或 `SQLiteDatabase` —— 没有任何方法可以接收一段 system prompt。
+- Command 5：新增类内与提示词相关的命中 12 行，其中引用列常量 6 处，全部指向
+  `prompt_purpose` 与 `prompt_policy_version` 两列；没有任何一处把正文写进列。
+- Command 6：表结构侧的既有守门仍在（命中 1 处），它断言七表里只有 `prompt_purpose` 与
+  `prompt_policy_version` 两列与提示词相关，且没有任何列名含 `system`。
+- Command 7：行为侧哨兵用例存在（命中 1 处），它在真机上扫描两表全部 TEXT 列。
+  证据强度已在用例 javadoc 中如实标注：purpose/version 两条断言有实质内容（写成正文或写成未经注册的版本都会失败），
+  哨兵扫描是**绊线**而非证明 —— 本任务的写路径根本不接受正文，因此它防的是未来新增的列或 DAO。
+

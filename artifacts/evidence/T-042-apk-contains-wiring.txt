@@ -1,0 +1,19 @@
+T-042 - the shipped release APK carries the reading-position wiring (dex string-table scan)
+captured-at: 2026-09-22 04:32:21 (Asia/Shanghai)
+cwd: D:\Project\Android\Treelearn
+command: PowerShell reads android/app/build/outputs/apk/release/app-release.apk as a zip, scans every classes*.dex byte stream for the T-042 symbol names (dex string tables are MUTF-8, so ASCII names are greppable), then SHA-256s the APK
+apk-path: D:\Project\Android\Treelearn\android\app\build\outputs\apk\release\app-release.apk
+apk-mtime: 2026-09-22 04:25:28  (must be later than the newest changed source)
+dex: classes.dex  bytes=451976
+  onViewportChanged    occurrences=2
+  onRowsLaidOut        occurrences=3
+  onLeaving            occurrences=2
+  settle               occurrences=6
+  applyPosition        occurrences=3
+  renderPosition       occurrences=1
+  SqliteReadingStore   occurrences=2
+  ReadingSession       occurrences=2
+  ChatReadingTest      occurrences=0
+apk-sha256: E4A6F4A6BC027576CBCA3E6506ADF1AAABB5F4CEEF29DB8959637466D5E603F0
+reading: the wiring symbols are present and the test class is absent, so the installed package contains the new behaviour and not the JVM suite
+EXITCODE=0

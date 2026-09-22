@@ -1,0 +1,17 @@
+T-039 evidence-order check - GREEN must be newer than every file it judges
+captured-at: 2026-09-22T03:32:20.1302791+08:00
+cwd: D:\Project\Android\Treelearn
+rule: artifacts must be produced after the source they judge; changing a judged source file after the run voids that artifact
+
+green evidence timestamp: 2026-09-22T03:28:02.2735826+08:00
+
+command: compare LastWriteTime of every file under android/app/src/main against artifacts/evidence/T-039-green.txt
+---- output ----
+OK no file under android/app/src/main is newer than the GREEN artifact
+count newer than GREEN = 0
+
+newest 3 files under android/app/src/main (for reference):
+  2026-09-22T03:26:23.7447960+08:00  D:\Project\Android\Treelearn\android\app\src\main\res\layout\screen_home_body.xml
+  2026-09-22T03:26:23.7437956+08:00  D:\Project\Android\Treelearn\android\app\src\main\java\com\treelearn\app\ui\HomePresenter.java
+  2026-09-22T03:26:23.7437956+08:00  D:\Project\Android\Treelearn\android\app\src\main\java\com\treelearn\app\screen\HomeScreen.java
+EXITCODE=0

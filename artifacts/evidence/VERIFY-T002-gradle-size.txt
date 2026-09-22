@@ -1,0 +1,15 @@
+﻿# T-002 gradle-size read-back (independent verifier lane; no emulator, no build)
+Generated : 2026-09-21T21:21:21+08:00
+Mode      : read-only
+Command   : Get-ChildItem -Path android -Recurse -Filter *.gradle -File | Where-Object { $_.FullName -notmatch '\\build\\' }  then per-file (Get-Content).Count
+
+  121  android\build.gradle
+   25  android\settings.gradle
+   39  android\ai\build.gradle
+  101  android\app\build.gradle
+   27  android\core\build.gradle
+   40  android\data\build.gradle
+  219  android\gradle\verify-no-kotlin.gradle
+   27  android\tree-layout\build.gradle
+files=8 total=599
+EXITCODE=0

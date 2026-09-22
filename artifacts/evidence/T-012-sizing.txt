@@ -1,0 +1,76 @@
+# T-012 sizing evidence — non-empty non-comment production lines
+# captured at: 2026-09-21T22:01:41.5807069+08:00
+# Convention (ratified 2026-09-21, see artifacts/evidence/sizing-adjudication-2026-09-21.txt):
+#   grep -v -E '^[[:space:]]*$|^[[:space:]]*//|^[[:space:]]*\*|^[[:space:]]*/\*' <files> | wc -l
+# The PowerShell below is the equivalent of that regex; the regex is printed so the two are comparable.
+# Resources use the XML equivalent (also excluding blank / <!-- / --> lines).
+# Contract: .trae/rules/harness-tasks.md — new files count by all their non-empty non-comment lines.
+
+# COMMAND 1 (production Java, per file):
+#   Get-ChildItem android\app\src\main\java\com\treelearn\app\{ui,screen,wiring}\*.java + AppContainer.java + MainActivity.java
+#   | ForEach-Object { (Get-Content -LiteralPath $_.FullName -Encoding UTF8 | Where-Object { $_ -notmatch '^\s*$|^\s*//|^\s*\*|^\s*/\*' }).Count }
+# --- output (N = non-empty non-comment, P = physical) ---
+     58     90  AppContainer.java
+    113    163  MainActivity.java
+    208    242  screen\HomeScreen.java
+    119    156  screen\ModelThinkingPicker.java
+    148    192  screen\RecommendationMarquee.java
+    110    140  screen\SettingsScreen.java
+     11     27  ui\HomeActions.java
+     26     65  ui\HomeData.java
+    142    203  ui\HomePresenter.java
+      6     19  ui\HomeSink.java
+    126    180  ui\HomeViewState.java
+     48     84  ui\KeySnapshot.java
+      4     13  ui\KeyVault.java
+     15     31  ui\Recommendation.java
+      5     20  ui\RootQuestionSubmitter.java
+      5     10  ui\SettingsActions.java
+     77    103  ui\SettingsPresenter.java
+      4      7  ui\SettingsSink.java
+     16     48  ui\SettingsStore.java
+     24     41  ui\SettingsViewState.java
+     23     38  ui\StarterRecommendations.java
+     25     42  ui\SubmitResult.java
+     19     36  ui\TopicCard.java
+      4     13  ui\UiThread.java
+     68     97  wiring\AndroidSettingsStore.java
+     24     59  wiring\PendingHomeWiring.java
+JAVA PRODUCTION : non-empty non-comment = 1428  (physical = 2119, files = 26)
+
+# COMMAND 2 (production resources authored by T-012: 7 bg_* drawables, the 9 layout/ files, the 2
+#   layout-sw600dp/ files, values/dimens.xml, values/strings.xml, values-sw600dp/dimens.xml).
+#   Pre-existing resources not authored here (colors, themes, ic_launcher_foreground, backup_rules,
+#   data_extraction_rules, the two res/xml files) are excluded from the total.
+# --- output ---
+     17     17  drawable\bg_button_danger.xml
+     17     17  drawable\bg_button_ghost.xml
+     21     21  drawable\bg_button_primary.xml
+      5      6  drawable\bg_card.xml
+      6      7  drawable\bg_chip.xml
+      6      7  drawable\bg_field.xml
+      5      6  drawable\bg_pill.xml
+     19     23  layout-sw600dp\screen_home.xml
+     16     19  layout-sw600dp\screen_settings.xml
+     15     20  layout\activity_main.xml
+     35     38  layout\item_recommendation.xml
+     39     43  layout\item_topic.xml
+    134    152  layout\popup_model_picker.xml
+    244    275  layout\screen_home_body.xml
+     12     15  layout\screen_home.xml
+    156    174  layout\screen_settings_body.xml
+     11     13  layout\screen_settings.xml
+     14     15  layout\view_model_chip.xml
+      9     11  values-sw600dp\dimens.xml
+     35     43  values\dimens.xml
+     68     86  values\strings.xml
+RESOURCE PRODUCTION : non-empty non-comment = 884  (physical = 1008, files = 21)
+
+# COMMAND 3 (tests, android/app/src/test/java/com/treelearn/app/ui/*.java — NOT counted against the budget)
+TESTS : non-empty non-comment = 586  (physical = 769, files = 5)
+
+SANITY (self-consistency): java 1428 + resources 884 = 2312 production lines; tests 586 are recorded
+  separately and are not part of that sum.
+VERDICT: FAIL against the 500-line hard cap (java production 1428, soft target 200, task estimate 200).
+  The overrun is recorded, NOT self-approved: it needs a user ruling (see the task file's sizing section).
+EXITCODE=0

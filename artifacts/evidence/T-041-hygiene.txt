@@ -1,0 +1,80 @@
+captured-at: 2026-09-22T02:37:50.7342657+08:00
+cwd: D:\Project\Android\Treelearn
+command: git -c core.quotepath=false diff --check ; then python -X utf8 - (encoding scan over the files this task touched)
+note-1: the first diff --check is scoped to this task's tracked paths and is the deciding one (EXITCODE=0 = no whitespace errors from this task)
+note-2: the second is repo-wide and is informational only - its hits are in artifacts/evidence/T-003-checks.txt, owned by another lane
+note-3: android/README.md arrived with mixed line endings (757 CRLF + 87 LF) while HEAD:android/README.md is LF-only; this task normalized it back to LF, content byte-identical (844 logical lines both before and after)
+--- git diff --check (scoped to this task's tracked paths) ---
+warning: in the working copy of 'android/README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'android/app/src/main/java/com/treelearn/app/MainActivity.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'android/app/src/main/res/values/strings.xml', LF will be replaced by CRLF the next time Git touches it
+EXITCODE=0
+--- git diff --check (whole repository, informational) ---
+artifacts/evidence/T-003-checks.txt:488: trailing whitespace.
++Daemon will be stopped at the end of the build 
+artifacts/evidence/T-003-checks.txt:960: trailing whitespace.
++Daemon will be stopped at the end of the build 
+artifacts/evidence/T-003-checks.txt:1618: trailing whitespace.
++Daemon will be stopped at the end of the build 
+EXITCODE=2
+--- output ---
+import os, sys
+files = [
+ "android/app/src/main/java/com/treelearn/app/ui/TextSelection.java",
+ "android/app/src/main/java/com/treelearn/app/ui/WordMenu.java",
+ "android/app/src/main/java/com/treelearn/app/ui/ChildBranch.java",
+ "android/app/src/main/java/com/treelearn/app/wiring/BranchChildren.java",
+ "android/app/src/main/java/com/treelearn/app/screen/WordMenuPopup.java",
+ "android/app/src/main/java/com/treelearn/app/screen/ChildBranchPopup.java",
+ "android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java",
+ "android/app/src/main/java/com/treelearn/app/ui/ChatSink.java",
+ "android/app/src/main/java/com/treelearn/app/MainActivity.java",
+ "android/app/src/main/res/layout/popup_word_action.xml",
+ "android/app/src/main/res/layout/popup_child_branches.xml",
+ "android/app/src/main/res/layout/item_child_branch.xml",
+ "android/app/src/main/res/values/strings.xml",
+ "android/README.md",
+ "Docs/06-delivery/TreeLearn_V1_交付报告.md",
+ ".trae/tasks/T-2026-09-21-child-branches-popup-and-word-menu-041.md",
+]
+bad = []
+print("%-7s %-9s %-6s %-6s %s" % ("bom", "replace", "trail", "crlf", "file"))
+for rel in files:
+    if not os.path.exists(rel):
+        bad.append("missing: " + rel); continue
+    raw = open(rel, "rb").read()
+    text = raw.decode("utf-8")          # raises if the file is not valid UTF-8
+    bom = raw.startswith(b"\xef\xbb\xbf")
+    repl = text.count("\ufffd")
+    trail = sum(1 for ln in text.splitlines() if ln != ln.rstrip())
+    crlf = raw.count(b"\r\n")
+    print("%-7s %-9d %-6d %-6d %s" % (bom, repl, trail, crlf, rel.split("/")[-1]))
+    if repl: bad.append("replacement char in " + rel)
+    if trail: bad.append("trailing whitespace in " + rel)
+    if crlf and crlf != raw.count(b"\n"): bad.append("mixed EOL in " + rel)
+print("")
+print("checked %d files; every one decodes as strict UTF-8" % len(files))
+for b in bad: print("FAILURE: " + b)
+print("HYGIENE " + ("PASSED" if not bad else "FAILED"))
+sys.exit(0 if not bad else 1)
+bom     replace   trail  crlf   file
+False   0         0      0      TextSelection.java
+False   0         0      0      WordMenu.java
+False   0         0      0      ChildBranch.java
+False   0         0      0      BranchChildren.java
+False   0         0      0      WordMenuPopup.java
+False   0         0      0      ChildBranchPopup.java
+False   0         0      0      ChatScreen.java
+False   0         0      0      ChatSink.java
+False   0         0      0      MainActivity.java
+False   0         0      0      popup_word_action.xml
+False   0         0      0      popup_child_branches.xml
+False   0         0      0      item_child_branch.xml
+False   0         0      0      strings.xml
+False   0         0      0      README.md
+False   0         0      0      TreeLearn_V1_交付报告.md
+False   0         0      0      T-2026-09-21-child-branches-popup-and-word-menu-041.md
+
+checked 16 files; every one decodes as strict UTF-8
+HYGIENE PASSED
+EXITCODE=0

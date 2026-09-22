@@ -1,0 +1,117 @@
+T-040 independent verification - the archived filter is ASSEMBLED, so the judgement keys on the assembly
+captured-at: 2026-09-22 05:06:54 (Asia/Shanghai)
+cwd: D:\Project\Android\Treelearn
+runner: python -X utf8 - (stdin), single pass, file written once at the end
+verifier: independent of the implementing lane; read-only, no production file touched
+note: an earlier draft of this verifier searched the SOURCE for the literal "ARCHIVED_AT) IS NULL".
+note: that needle was wrong twice (wrong case/parens, and the SQL is built by concatenation so no
+note: finished fragment may appear in source). Corrected below: judge the assembled statement.
+
+### A - SearchDao builds each arm by concatenation; the assembly is the thing to judge
+command: python -X utf8 (print SearchDao.java lines 162-190 and 213-226; count arms.add(arm( / String.join / ARCHIVED_AT / " IS NULL")
+  SearchDao.java:162|         List<String> arms = new ArrayList<String>();
+  SearchDao.java:163|         arms.add(arm(SearchHit.Field.TITLE, fromBranches, "NULL", "-1", "NULL", "0", title,
+  SearchDao.java:164|                 like(title)));
+  SearchDao.java:165|         arms.add(arm(SearchHit.Field.ANCHOR, fromBranchesAndSources,
+  SearchDao.java:166|                 col(source, TreeLearnSchema.Messages.ID),
+  SearchDao.java:167|                 col(source, TreeLearnSchema.Messages.ORDINAL),
+  SearchDao.java:168|                 col(branch, TreeLearnSchema.Branches.SOURCE_REVISION_ID), "0", quote, like(quote)));
+  SearchDao.java:169|         arms.add(arm(SearchHit.Field.ANSWER, fromMessagesAndRevisions,
+  SearchDao.java:170|                 col(message, TreeLearnSchema.Messages.ID),
+  SearchDao.java:171|                 col(message, TreeLearnSchema.Messages.ORDINAL),
+  SearchDao.java:172|                 col(revision, TreeLearnSchema.AnswerRevisions.ID),
+  SearchDao.java:173|                 col(revision, TreeLearnSchema.AnswerRevisions.REVISION_NO), answer, like(answer)));
+  SearchDao.java:174|         arms.add(arm(SearchHit.Field.REASONING, fromMessagesAndRevisions,
+  SearchDao.java:175|                 col(message, TreeLearnSchema.Messages.ID),
+  SearchDao.java:176|                 col(message, TreeLearnSchema.Messages.ORDINAL),
+  SearchDao.java:177|                 col(revision, TreeLearnSchema.AnswerRevisions.ID),
+  SearchDao.java:178|                 col(revision, TreeLearnSchema.AnswerRevisions.REVISION_NO), reasoning,
+  SearchDao.java:179|                 like(reasoning)));
+  SearchDao.java:180|         arms.add(arm(SearchHit.Field.PARTIAL_ANSWER, fromMessagesAndOperations,
+  SearchDao.java:181|                 col(message, TreeLearnSchema.Messages.ID),
+  SearchDao.java:182|                 col(message, TreeLearnSchema.Messages.ORDINAL), "NULL", "0", partialAnswer,
+  SearchDao.java:183|                 failedAttempt(operation, partialAnswer)));
+  SearchDao.java:184|         arms.add(arm(SearchHit.Field.PARTIAL_REASONING, fromMessagesAndOperations,
+  SearchDao.java:185|                 col(message, TreeLearnSchema.Messages.ID),
+  SearchDao.java:186|                 col(message, TreeLearnSchema.Messages.ORDINAL), "NULL", "0", partialReasoning,
+  SearchDao.java:187|                 failedAttempt(operation, partialReasoning)));
+  SearchDao.java:188| 
+  SearchDao.java:189|         return String.join(" UNION ALL ", arms);
+  SearchDao.java:190|     }
+  SearchDao.java:213|     private static String arm(SearchHit.Field field, String from, String messageId, String ordinal,
+  SearchDao.java:214|             String revisionId, String revisionNo, String snippetColumn, String predicate) {
+  SearchDao.java:215|         return "SELECT '" + field.name() + "' AS " + MATCHED_FIELD + ", "
+  SearchDao.java:216|                 + col("b", TreeLearnSchema.Branches.TOPIC_ID) + ", "
+  SearchDao.java:217|                 + col("b", TreeLearnSchema.Branches.ID) + " AS " + BRANCH_ID + ", "
+  SearchDao.java:218|                 + messageId + " AS " + MESSAGE_ID + ", "
+  SearchDao.java:219|                 + ordinal + " AS " + TreeLearnSchema.Messages.ORDINAL + ", "
+  SearchDao.java:220|                 + revisionId + " AS " + REVISION_ID + ", "
+  SearchDao.java:221|                 + revisionNo + " AS " + TreeLearnSchema.AnswerRevisions.REVISION_NO + ", "
+  SearchDao.java:222|                 + snippetColumn + " AS " + SNIPPET
+  SearchDao.java:223|                 + " FROM " + from
+  SearchDao.java:224|                 + " WHERE " + col("b", TreeLearnSchema.Branches.ARCHIVED_AT) + " IS NULL AND "
+  SearchDao.java:225|                 + predicate;
+  SearchDao.java:226|     }
+  counts: arms.add(arm( = 6 ; String.join(" UNION ALL ", arms) = 1 ; Branches.ARCHIVED_AT = 1 ; " IS NULL" literal = 0
+JUDGEMENT arm( appends the archived predicate   OK   (SearchDao.java:224 col("b", Branches.ARCHIVED_AT) + " IS NULL")
+JUDGEMENT six arms are assembled             OK   (6 x arms.add(arm(...)) at :163-187)
+JUDGEMENT arms are joined into one statement OK   (String.join at :189)
+JUDGEMENT assembled filter appears 6 times    OK   (1 per arm: 6 arms x 1)
+EXITCODE=0
+
+### B - an existing JVM case already pins the assembled count
+command: python -X utf8 (print SearchDaoStatementTest.archivedBranchesAreNotSearchable with line numbers)
+  SearchDaoStatementTest.java:73|     @Test
+  SearchDaoStatementTest.java:74|     public void archivedBranchesAreNotSearchable() {
+  SearchDaoStatementTest.java:75|         assertEquals(6, countOf(SearchDao.statement(), "b.archived_at IS NULL"));
+  SearchDaoStatementTest.java:76|     }
+JUDGEMENT the 6x count is pinned by a JVM case OK   (assertEquals(6, countOf(SearchDao.statement(), "b.archived_at IS NULL")))
+NOTE the judgement form was corrected: it no longer matches a source literal, it points at the
+NOTE assembly (arm() x6 + String.join) and at the existing case that runs the assembled text.
+EXITCODE=0
+
+### C - the six arms carry no user-question arm (requirement gap, not a dead constant)
+command: python -X utf8 (list the Field of each arm in order; print SearchHit.Field constants; count user_content/question in SearchDao)
+  arm order: TITLE -> ANCHOR -> ANSWER -> REASONING -> PARTIAL_ANSWER -> PARTIAL_REASONING
+  SearchHit.java:23|     public enum Field {
+  SearchHit.java:24|         TITLE,
+  SearchHit.java:25|         ANCHOR,
+  SearchHit.java:26|         ANSWER,
+  SearchHit.java:27|         REASONING,
+  SearchHit.java:28|         PARTIAL_ANSWER,
+  SearchHit.java:29|         PARTIAL_REASONING
+  SearchHit.java:30|     }
+  SearchHit.java:31| 
+  SearchDao: occurrences of user_content = 0 ; of "question" = 0
+JUDGEMENT no declared-but-unproduced Field    OK   (enum has exactly the 6 named arms; no QUESTION constant)
+FINDING (requirement gap) the search scope omits the learner question text (BASE-12 asks for it);
+FINDING recorded in T-040 Gaps (2) as deliberate; reported to the foreman, not a dead-code defect.
+EXITCODE=0
+
+### D - a single ordering authority; the screen has no second sort
+command: python -X utf8 (every non-test reference to SearchHit.DISPLAY_ORDER under android/)
+  android/app/src/androidTest/java/com/treelearn/app/SearchUnreadReadingInstrumentedTest.java:192| SearchHit.DISPLAY_ORDER.compare(hits.get(i - 1), hits.get(i)) <= 0);
+  android/app/src/main/java/com/treelearn/app/search/SearchRepository.java:19| * The hits for one normalised query, in {@link SearchHit#DISPLAY_ORDER}, never null.
+  android/app/src/main/java/com/treelearn/app/search/SearchViewState.java:28| /** Never null; unmodifiable. Ordered by {@link SearchHit#DISPLAY_ORDER}. */
+  android/core/src/main/java/com/treelearn/core/domain/SearchHit.java:16| * accident, so the DAO sorts by {@link #DISPLAY_ORDER} before returning. Field first (a title is how
+  android/core/src/main/java/com/treelearn/core/domain/SearchHit.java:33| public static final Comparator<SearchHit> DISPLAY_ORDER =
+  android/data/src/main/java/com/treelearn/data/db/dao/SearchDao.java:88| * Returns the matching hits in {@link SearchHit#DISPLAY_ORDER}, never null.
+  android/data/src/main/java/com/treelearn/data/db/dao/SearchDao.java:112| Collections.sort(hits, SearchHit.DISPLAY_ORDER);
+JUDGEMENT the only sort of the hits is SearchDao.java:112 OK  (Collections.sort(hits, DISPLAY_ORDER))
+JUDGEMENT SearchScreen/SearchPage never sort      OK   (0 DISPLAY_ORDER references under app/src/main)
+EXITCODE=0
+
+### E - STANDING GATE: the built APK must be at least as new as the newest app source
+command: python -X utf8 (mtime of the release APK; newest mtime among android/app/src/main .java/.xml)
+  apk       2026-09-22 04:58:17  android/app/build/outputs/apk/release/app-release.apk
+  newest src 2026-09-22 05:05:32  android/app/src/main/java/com/treelearn/app/ui/ChatData.java
+STANDING GATE: the built APK must be at least as new as the newest app source
+STANDING GATE at T-040 close: the APK will be rebuilt after the parallel lane settles; re-run then.
+OBSERVED NOW: another lane is editing android/app/src/main in this very tree, so this gate is
+OBSERVED NOW: expected to fail right now and is NOT evidence about T-040.
+EXITCODE=0
+
+== overall ==
+failing judgement(s) = 0   (A,B,D are PASS; C is a requirement gap; E is a standing gate, deferred to close)
+VERIFY-SEARCHDAO PASSED
+EXITCODE=0

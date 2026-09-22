@@ -1,0 +1,217 @@
+﻿# captured-at: 2026-09-22 03:18:02
+# cwd: D:\Project\Android\Treelearn
+# script: D:\Project\Android\Treelearn\.trae\scripts\dev\review_apk_and_gaps.ps1
+# command: powershell -ExecutionPolicy Bypass -File .trae/scripts/dev/review_apk_and_gaps.ps1
+# repo-root: D:\Project\Android\Treelearn
+
+# android-sdk: D:\Environment\Android\SDK
+
+== 1. release APK identity ==
+COMMAND: Get-Item -LiteralPath D:\Project\Android\Treelearn\android\app\build\outputs\apk\release\app-release.apk
+size=472488
+mtime=2026-09-22 02:58:02
+COMMAND: Get-FileHash -Algorithm SHA256 <apk>
+sha256=E0C30A3F029BB9AA4B68BDED572D311ADD7B703E4C1D59E089952E60B83BB055
+COMMAND: newest mtime under android\app\src\main
+newest-source=android\app\src\main\java\com\treelearn\app\screen\NavigationScreen.java  mtime=2026-09-22 03:13:05
+CHECK apk-newer-than-newest-source: FAIL (apk=2026-09-22 02:58:02 source=2026-09-22 03:13:05)
+
+== 2. signing ==
+COMMAND: D:\Environment\Android\SDK\build-tools\36.1.0\apksigner.bat verify --print-certs --verbose D:\Project\Android\Treelearn\android\app\build\outputs\apk\release\app-release.apk
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): false
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+Signer #1 certificate DN: CN=Treelearn Personal Sideload, OU=Personal, O=Treelearn, L=Shanghai, ST=Shanghai, C=CN
+Signer #1 certificate SHA-256 digest: d8670c863d692a90e21b7a895cf0f717bc8a1cc4ba82a48ff771f09a8780c561
+Signer #1 certificate SHA-1 digest: ab80340942e1d12bdac23245de139b3afa360d2f
+Signer #1 certificate MD5 digest: c6202582a565ed8735e06ed1471df73a
+Signer #1 key algorithm: RSA
+Signer #1 key size (bits): 4096
+Signer #1 public key SHA-256 digest: 4c514425e362230a866d8a6811280c2c0e951f897b0f04a027db7f99d2591dd0
+Signer #1 public key SHA-1 digest: 909730c3f5142f6aa9ca5ea63038e49dba0efb46
+Signer #1 public key MD5 digest: c418d3d8dc08b327b0408267b9657b10
+EXITCODE=0
+
+== 3. manifest identity ==
+COMMAND: D:\Environment\Android\SDK\build-tools\36.1.0\aapt2.exe dump badging D:\Project\Android\Treelearn\android\app\build\outputs\apk\release\app-release.apk
+package: name='com.treelearn' versionCode='1' versionName='1.0' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'
+minSdkVersion:'28'
+targetSdkVersion:'36'
+uses-permission: name='android.permission.INTERNET'
+application-label:'知芽'
+application-icon-160:'res/E4.xml'
+application-icon-65534:'res/E4.xml'
+application: label='知芽' icon='res/E4.xml'
+launchable-activity: name='com.treelearn.app.MainActivity'  label='' icon=''
+feature-group: label=''
+  uses-feature: name='android.hardware.faketouch'
+  uses-implied-feature: name='android.hardware.faketouch' reason='default feature for all apps'
+main
+supports-screens: 'small' 'normal' 'large' 'xlarge'
+supports-any-density: 'true'
+locales: '--_--'
+densities: '160' '65534'
+EXITCODE=0
+
+== 4. which production symbols are actually inside the shipped dex ==
+COMMAND: python -X utf8 D:\Project\Android\Treelearn\.trae\scripts\dev\review_dex_symbols.py D:\Project\Android\Treelearn\android\app\build\outputs\apk\release\app-release.apk
+dex files: classes.dex
+TreeCanvasWiring             occurrences=2  expected=present
+SqliteTreeCanvasStore        occurrences=3  expected=present
+ChatWiring                   occurrences=4  expected=present
+HomeWiring                   occurrences=4  expected=present
+SqliteChatStore              occurrences=3  expected=present
+KeystoreSecretStore          occurrences=2  expected=present
+PendingHomeWiring            occurrences=0  expected=absent
+PendingChatWiring            occurrences=0  expected=absent
+NOT_WIRED                    occurrences=0  expected=absent
+NavigationScreen             occurrences=0  expected=absent
+SearchScreen                 occurrences=0  expected=absent
+EXITCODE=0
+
+== 5. unreachable P0 entries: who references these presenters at all ==
+A presenter referenced only from its own package plus src/test has no screen class, no layout and
+no src/main caller, so no user gesture can reach it. That is the evidence these areas are unbuilt.
+COMMAND: python -X utf8 D:\Project\Android\Treelearn\.trae\scripts\dev\review_refs.py D:\Project\Android\Treelearn
+NavigationPresenter:
+  main (2 file(s)):
+    android\app\src\main\java\com\treelearn\app\navigation\NavigationActions.java
+    android\app\src\main\java\com\treelearn\app\navigation\NavigationPresenter.java
+  test (2 file(s)):
+    android\app\src\test\java\com\treelearn\app\navigation\NavigationPresenterTest.java
+    android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java
+  androidTest (1 file(s)):
+    android\app\src\androidTest\java\com\treelearn\app\NavigationStoreInstrumentedTest.java
+
+NavigationScreen:
+  main (1 file(s)):
+    android\app\src\main\java\com\treelearn\app\screen\NavigationScreen.java
+
+NavigationViewState:
+  main (4 file(s)):
+    android\app\src\main\java\com\treelearn\app\navigation\NavigationPresenter.java
+    android\app\src\main\java\com\treelearn\app\navigation\NavigationSink.java
+    android\app\src\main\java\com\treelearn\app\navigation\NavigationViewState.java
+    android\app\src\main\java\com\treelearn\app\screen\NavigationScreen.java
+  test (2 file(s)):
+    android\app\src\test\java\com\treelearn\app\navigation\NavigationPresenterTest.java
+    android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java
+
+SearchPresenter:
+  main (1 file(s)):
+    android\app\src\main\java\com\treelearn\app\search\SearchPresenter.java
+  test (1 file(s)):
+    android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java
+
+SearchScreen:
+  no references at all
+
+ReadingSession:
+  main (1 file(s)):
+    android\app\src\main\java\com\treelearn\app\reading\ReadingSession.java
+  test (1 file(s)):
+    android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java
+
+ReadingStore:
+  main (3 file(s)):
+    android\app\src\main\java\com\treelearn\app\reading\ReadingSession.java
+    android\app\src\main\java\com\treelearn\app\reading\ReadingStore.java
+    android\app\src\main\java\com\treelearn\app\reading\SqliteReadingStore.java
+  test (1 file(s)):
+    android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java
+
+SqliteNavigationStore:
+  main (1 file(s)):
+    android\app\src\main\java\com\treelearn\app\navigation\SqliteNavigationStore.java
+  androidTest (1 file(s)):
+    android\app\src\androidTest\java\com\treelearn\app\NavigationStoreInstrumentedTest.java
+
+SqliteSearchRepository:
+  main (1 file(s)):
+    android\app\src\main\java\com\treelearn\app\search\SqliteSearchRepository.java
+
+TreeCanvasScreen:
+  main (2 file(s)):
+    android\app\src\main\java\com\treelearn\app\MainActivity.java
+    android\app\src\main\java\com\treelearn\app\screen\TreeCanvasScreen.java
+
+TreeCanvasPresenter:
+  main (2 file(s)):
+    android\app\src\main\java\com\treelearn\app\MainActivity.java
+    android\app\src\main\java\com\treelearn\app\ui\TreeCanvasPresenter.java
+  test (5 file(s)):
+    android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java
+    android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java
+    android\app\src\test\java\com\treelearn\app\ui\TreeCanvasLabelsTest.java
+    android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java
+    android\app\src\test\java\com\treelearn\app\wiring\TreeCanvasWiringTest.java
+
+EXITCODE=0
+
+== 6. does the quoted sentence reach the DeepSeek request ==
+COMMAND: python -X utf8 D:\Project\Android\Treelearn\.trae\scripts\dev\review_quote_path.py D:\Project\Android\Treelearn
+--- android/app/src/main/java/com/treelearn/app/wiring/ChatWiring.java:249-253  (submit(): what becomes the request's current input)
+249:                 forCommand.purpose, forCommand.thinkingEnabled,
+250:                 DeepSeekContextEncoder.encode(new ContextPlan(store.history(branchId, questionOrdinal))),
+251:                 DeepSeekContextEncoder.currentInput(input, quote), budget);
+252:         GenerationCoordinator.SubmitOutcome outcome = generation.submit(command, assembler);
+253:         if (outcome.isAccepted()) {
+
+--- android/ai/src/main/java/com/treelearn/ai/prompt/DeepSeekContextEncoder.java:83-90  (currentInput(): where a quote is framed)
+83:     public static String currentInput(String question, String quote) {
+84:         String asked = Guard.text(question, "question");
+85:         String cited = quote == null ? "" : quote.trim();
+86:         if (cited.isEmpty()) {
+87:             return asked;
+88:         }
+89:         return QUOTE_OPEN + "\n" + escape(cited) + "\n" + QUOTE_CLOSE + "\n" + asked;
+90:     }
+
+envelope literal: <treelearn_quote>
+files defining the envelope across android/*/src/main: 1
+  android\ai\src\main\java\com\treelearn\ai\prompt\DeepSeekContextEncoder.java
+
+QUOTE-REACHES-PROMPT: YES
+  reason: the sender hands the stored quote to currentInput( at android/app/src/main/java/com/treelearn/app/wiring/ChatWiring.java:251, and the encoder
+  frames a non-blank quote as <treelearn_quote>...</treelearn_quote> ahead of the question, which is sent verbatim.
+EXITCODE=0
+
+CHECK quote-reaches-prompt: PASS (python-exit=0)
+== 7. dead entries visible in the shipped layouts ==
+COMMAND (in-process): Select-String -LiteralPath D:\Project\Android\Treelearn\android\app\src\main\res\layout\screen_home_body.xml -Pattern enabled="false"
+39: android:enabled="false"   [id=home_search]
+50: android:enabled="false"   [id=home_archived]
+161: android:enabled="false"   [id=home_send]
+matches=3
+CHECK dead-buttons-exist: PASS (matches=3)
+disabled-ids=home_search,home_archived,home_send
+CHECK dead-buttons-are-search-and-archived: PASS (ids=home_search,home_archived,home_send)
+
+NOTE: home_send carries the same layout default (enabled="false") but is NOT a dead entry, so the
+layout default alone proves nothing - what separates the two is whether runtime code drives it.
+COMMAND (in-process): Select-String -LiteralPath D:\Project\Android\Treelearn\android\app\src\main\java\com\treelearn\app\screen\HomeScreen.java -Pattern send\\.setEnabled
+146: send.setEnabled(state.canSubmit());
+matches=1
+CHECK the-composer-button-is-driven-at-runtime: PASS (matches=1)
+
+COMMAND (in-process): Select-String -LiteralPath D:\Project\Android\Treelearn\android\app\src\main\java\com\treelearn\app\screen\HomeScreen.java -Pattern home_search|home_archived
+matches=0
+CHECK no-listener-registered: PASS (matches=0)
+
+COMMAND (in-process): Select-String -Path <src\main\**\*.java> -Pattern home_entry_pending|chat_children_pending
+HomeScreen.java:114: .makeText(context, R.string.home_entry_pending, Toast.LENGTH_SHORT).show());
+matches=1
+CHECK toast-placeholders-exist: PASS (matches=1)
+
+== 8. how to read this file ==
+Section 1 is the identity of the exact APK the user installs (byte count, SHA-256, mtime).
+Sections 4-7 are the mechanical half of the review: what shipped, what is dead, and what the
+request does or does not carry to the model. Every CHECK line above is an assertion, not a note.
+The prose conclusions are in the delivery report under Docs/06-delivery/.
+
+REVIEW-VERDICT: FAIL (1 check(s) failed)

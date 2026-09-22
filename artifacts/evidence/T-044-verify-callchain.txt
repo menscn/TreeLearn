@@ -1,0 +1,34 @@
+# T-044 independent verification - item 1/2: the citation reaches the request, and the decision point is unique.
+# captured-at: 2026-09-22T04:44:45.1338721+08:00
+# cwd: D:\Project\Android\Treelearn
+# command: rg -n --glob '!**/build/**' -g '!**/test/**' -g '!**/androidTest/**' 'currentInput' android
+# mode: static source read only; no Gradle, no device.
+=== 1. production call sites of the adapter's currentInput ===
+android\README.md:642:  **只有一处**——`DeepSeekContextEncoder.currentInput`；发送与重试/重置两条入口都只转发存行里的原文，
+android\app\src\main\java\com\treelearn\app\wiring\ChatWiring.java:113:        // turn has one is the adapter's decision (DeepSeekContextEncoder.currentInput), and it is
+android\app\src\main\java\com\treelearn\app\wiring\ChatWiring.java:252:                DeepSeekContextEncoder.currentInput(input, quote), budget);
+EXITCODE=0
+
+=== 2. the two entries forward into one submit (ChatWiring) ===
+113:        // turn has one is the adapter's decision (DeepSeekContextEncoder.currentInput), and it is
+115:        return submit(command, questionOrdinal, userMessage.userContent, userMessage.quotedText());
+234:        return submit(decided.value(), asked.ordinal, asked.text, asked.quote);
+246:    private ChatCommandResult submit(GenerationCommand command, int questionOrdinal,
+252:                DeepSeekContextEncoder.currentInput(input, quote), budget);
+EXITCODE=0
+
+=== 3. assembler puts the current input verbatim as the last USER message ===
+42:        String latest = validateCurrentInput(purpose, currentInput);
+47:        messages.add(new DeepSeekMessage(DeepSeekMessage.Role.USER, latest));
+EXITCODE=0
+
+=== 4. normalization expression, every production occurrence ===
+android\ai\src\main\java\com\treelearn\ai\prompt\DeepSeekContextEncoder.java:85:        String cited = quote == null ? "" : quote.trim();
+android\app\src\main\java\com\treelearn\app\wiring\ChatWiring.java:104:                quote == null ? "" : quote.trim(), now);
+android\app\src\main\java\com\treelearn\app\ui\ChatMessage.java:73:        this.quote = quote == null ? "" : quote.trim();
+EXITCODE=0
+
+=== 5. envelope literal outside the adapter, production sources ===
+android\ai\src\main\java\com\treelearn\ai\prompt\DeepSeekContextEncoder.java:45:    public static final String QUOTE_OPEN = "<treelearn_quote>";
+android\ai\src\main\java\com\treelearn\ai\prompt\DeepSeekContextEncoder.java:46:    public static final String QUOTE_CLOSE = "</treelearn_quote>";
+EXITCODE=0

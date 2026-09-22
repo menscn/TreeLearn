@@ -1,0 +1,84 @@
+T-042 fix round 1 - verifier PREPARATION ONLY (task status is still in_progress; no source judged)
+captured-at: 2026-09-22 05:09:53 (Asia/Shanghai)
+cwd: D:\Project\Android\Treelearn
+command: python -X utf8 - (stdin), synthesised checklist; status/evidence inventory read from disk
+verifier: independent; read-only. The implementer is editing the task file right now, so this round
+verifier: does NOT judge the half-edited source and does NOT report defects from it.
+
+### 0 - the gate that decides whether judging may start
+status: in_progress   (from .trae/tasks/T-2026-09-21-reading-position-wiring-042.md)
+RULE: do not judge source while status=in_progress. Wait for status=verifying.
+JUDGEMENT status is in_progress -> PREPARATION ONLY   OK   (no judging this round)
+EXITCODE=0
+
+### 1 - fix-round evidence already on disk (inventory, not judged)
+  T-042-fix1-gate-check.txt                   21819  2026-09-22 05:08:07
+  T-042-fix1-gate-design-tokens.txt             808  2026-09-22 05:08:42
+  T-042-fix1-gate-no-kotlin.txt                3084  2026-09-22 05:08:39
+  T-042-fix1-gate-tests.txt                    4396  2026-09-22 05:07:27
+  T-042-fix1-green.txt                         4322  2026-09-22 05:05:57
+  T-042-fix1-mutation-d1.txt                   6126  2026-09-22 05:06:33
+  T-042-fix1-mutation-d2.txt                   6140  2026-09-22 05:06:50
+  T-042-fix1-red-d1.txt                        5091  2026-09-22 05:03:33
+  T-042-fix1-red-d2.txt                        8454  2026-09-22 05:04:01
+  T-042-fix1-revert-green.txt                  4473  2026-09-22 05:07:09
+  T-042-fix1-source-scan.txt                  19643  2026-09-22 05:08:54
+  (12 files; check/revert-green/source-scan are the newest - the implementer is still closing out)
+EXITCODE=0
+
+### 2 - the five rulings, verbatim targets, and how each will be judged
+
+J1 - D1: only the CALL SITES are fixed; the DAO is NOT weakened
+  target A: data/.../dao/ReadingPositionDao.write and BranchDao.update must still THROW when the
+            write does not land (no silent return, no "if (!ok) return" softening).
+  target B: the two background write paths (save anchor, advance unread) are wrapped in try/catch.
+  target C: the failure notice uses its OWN string, not notice_storage ("input kept"), at strings.xml.
+  target D: the new case asserts NO crash + notice only + pre-existing visible state unchanged.
+  commands: rg -n "class ReadingPositionDao" -A 40 ; rg -n "void update" BranchDao.java -A 25 ;
+            rg -n "try|catch|notice_" app/src/main/java/.../ChatPresenter.java app/src/main/res/values/strings.xml
+
+J2 - D2: first frame reports the viewport, but the README rule still holds
+  target A: the extra report runs only when the newest answer really is in the visible set.
+  target B: still exactly ONE verdict point (ViewportSeen); no second verdict point, no new counter.
+  target C: android/README.md "opening a branch does not clear unread" still true.
+  target D: new cases: fits-one-screen + newest visible -> cleared after first frame; newest not
+            visible -> not cleared.
+  commands: rg -n "ViewportSeen" android/app/src/main ; rg -n "new ReadingSession" android/app/src/main ;
+            rg -n "setOnScrollChangeListener|addOnLayoutChangeListener|reportRowsLaidOut" ChatScreen.java
+
+J3 - the two mutations each red ONLY their target case, then back to green
+  read T-042-fix1-mutation-d1.txt and -d2.txt: count the failing cases and read their names; confirm
+  they equal the single target and that no other case moved; then T-042-fix1-revert-green.txt is green.
+
+J4 - D3 / D4 / D5 really done
+  D3: the task body (three places) says "activity end + atLiveEnd"; the IMPLEMENTATION is not changed.
+      command: rg -n "分支顶部|活动末端|atLiveEnd|liveEnd" .trae/tasks/T-2026-09-21-reading-position-wiring-042.md
+  D4: a source scan was RE-RUN and the line references refreshed to scan-time measured values; the
+      Handoff says the referenced lines changed after the evidence was taken.
+      command: compare T-042-fix1-source-scan.txt line numbers with the values written in the task
+               file and Docs/06-delivery/TreeLearn_V1_交付报告.md; check the Handoff wording.
+  D5: ChatData.Snapshot.of 4-arg overload DELETED; ChatTestDoubles + ChatPresenterTest call shapes
+      updated. command: rg -n "Snapshot.of" android --glob "!**/build/**"
+
+J5 - evidence is self-justifying
+  every T-042-fix1-*.txt: header has captured-at / cwd / command / mode; body carries EXITCODE=
+  AND judgement lines (an exit code alone is not evidence).
+  T-042-fix1-gate-no-kotlin.txt must carry a "VERDICT: PASS (N OK line(s))" judgement line.
+  command: python -X utf8 .trae/scripts/validate_tasks.py  -> errors must be 0
+EXITCODE=0
+
+### 3 - environment right now (so a later Gradle retry has a baseline)
+  java/gradle processes: none observed (Get-Process | Where-Object { $_.ProcessName -match "java|gradle" })
+  NOTE: the implementing lane may start Gradle again at any moment; re-check before any run.
+EXITCODE=0
+
+### 4 - ordering risk to re-check at judging time
+  fix-round evidence mtimes are 05:03-05:09; any source edited AFTER that makes the evidence stale for
+  the lines it cites. Re-read mtimes and state the relationship honestly at judging time (D4 class).
+
+### 5 - deferred, never PASS/FAIL
+  device-side items: deferred - 用户自行装机验证（user decision 2026-09-21）
+
+== overall ==
+PREPARATION ONLY - nothing judged this round; the task is still in_progress.
+EXITCODE=0

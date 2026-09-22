@@ -1,0 +1,1209 @@
+# T-024: repo-wide gradlew check attempt that FAILED FOR ANOTHER LANE'S REASON
+# captured-at: 2026-09-21T20:06:21.4511468+08:00
+# command: cmd /c (cd android && gradlew.bat check --no-daemon --console=plain)
+# read this as: NOT a red for T-024. Failures below come from :ai unit-test sources that
+# the parallel T-020 lane was still writing (":ai:compileDebugUnitTestJavaWithJavac FAILED").
+# T-024's own evidence is T-024-red.txt / T-024-green.txt / T-024-tests.txt / T-024-guard.txt.
+# The repo-wide check must be re-run once every lane is quiet, in the verification stage.
+# T-024 regression: gradlew check --no-daemon --console=plain 
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Task :verifyDependencyDirection
+verifyDependencyDirection: WARNING :tree-layout has no src/main/java sources yet, so its purity contract is vacuous until T-003 / T-016 land code
+verifyDependencyDirection: PASS (downward-only module graph + pure-JVM module purity) ; purity NOT yet enforced for [:tree-layout] (no sources)
+
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :tree-layout:compileJava NO-SOURCE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugLibraryResources UP-TO-DATE
+> Task :ai:writeDebugAarMetadata UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :ai:extractDeepLinksDebug UP-TO-DATE
+> Task :ai:bundleLibCompileToJarDebug
+> Task :ai:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :data:extractDeepLinksDebug UP-TO-DATE
+> Task :data:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :data:compileDebugLibraryResources UP-TO-DATE
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac UP-TO-DATE
+> Task :data:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :ai:generateDebugAssets UP-TO-DATE
+> Task :ai:mergeDebugAssets UP-TO-DATE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :data:generateDebugAssets UP-TO-DATE
+> Task :data:mergeDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :data:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:dexBuilderDebug UP-TO-DATE
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :ai:bundleLibRuntimeToJarDebug
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :app:mergeDebugJavaResource UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :data:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :app:mergeProjectDexDebug UP-TO-DATE
+> Task :ai:mergeDebugJniLibFolders UP-TO-DATE
+> Task :ai:bundleLibRuntimeToDirDebug
+> Task :ai:mergeDebugNativeLibs NO-SOURCE
+> Task :ai:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :data:mergeDebugJniLibFolders UP-TO-DATE
+> Task :data:mergeDebugNativeLibs NO-SOURCE
+> Task :data:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :app:processDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:compileDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugAndroidTestResources UP-TO-DATE
+> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :app:processDebugAndroidTestManifest UP-TO-DATE
+> Task :app:processDebugAndroidTestResources UP-TO-DATE
+> Task :app:compileDebugAndroidTestJavaWithJavac UP-TO-DATE
+> Task :app:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :app:mergeDebugAndroidTestAssets UP-TO-DATE
+> Task :app:compressDebugAndroidTestAssets UP-TO-DATE
+> Task :app:desugarDebugAndroidTestFileDependencies UP-TO-DATE
+> Task :app:dexBuilderDebugAndroidTest UP-TO-DATE
+> Task :app:processDebugAndroidTestJavaRes NO-SOURCE
+> Task :app:mergeDebugAndroidTestJavaResource UP-TO-DATE
+> Task :app:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :app:mergeExtDexDebugAndroidTest UP-TO-DATE
+> Task :app:mergeProjectDexDebugAndroidTest UP-TO-DATE
+> Task :app:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
+> Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :app:validateSigningDebugAndroidTest UP-TO-DATE
+> Task :app:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
+> Task :ai:preReleaseBuild UP-TO-DATE
+> Task :ai:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :ai:mergeReleaseNativeLibs NO-SOURCE
+> Task :ai:copyReleaseJniLibsProjectOnly UP-TO-DATE
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :data:preReleaseBuild UP-TO-DATE
+> Task :data:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :data:mergeReleaseNativeLibs NO-SOURCE
+> Task :data:copyReleaseJniLibsProjectOnly UP-TO-DATE
+> Task :app:mergeReleaseNativeLibs NO-SOURCE
+> Task :app:stripReleaseDebugSymbols NO-SOURCE
+> Task :app:extractReleaseNativeSymbolTables NO-SOURCE
+> Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
+> Task :data:generateReleaseResValues UP-TO-DATE
+> Task :data:generateReleaseResources UP-TO-DATE
+> Task :data:packageReleaseResources UP-TO-DATE
+> Task :data:processReleaseNavigationResources UP-TO-DATE
+> Task :data:parseReleaseLocalResources UP-TO-DATE
+> Task :data:generateReleaseRFile UP-TO-DATE
+> Task :data:javaPreCompileRelease UP-TO-DATE
+> Task :data:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :data:bundleLibRuntimeToDirRelease UP-TO-DATE
+> Task :ai:generateReleaseResValues UP-TO-DATE
+> Task :ai:generateReleaseResources UP-TO-DATE
+> Task :ai:packageReleaseResources UP-TO-DATE
+> Task :ai:processReleaseNavigationResources UP-TO-DATE
+> Task :ai:parseReleaseLocalResources UP-TO-DATE
+> Task :ai:generateReleaseRFile UP-TO-DATE
+> Task :ai:javaPreCompileRelease UP-TO-DATE
+> Task :ai:compileReleaseJavaWithJavac FROM-CACHE
+> Task :app:checkReleaseDuplicateClasses UP-TO-DATE
+> Task :ai:bundleLibRuntimeToDirRelease
+> Task :app:javaPreCompileRelease UP-TO-DATE
+> Task :ai:compileReleaseLibraryResources UP-TO-DATE
+> Task :ai:bundleLibCompileToJarRelease
+> Task :ai:writeReleaseAarMetadata UP-TO-DATE
+> Task :data:writeReleaseAarMetadata UP-TO-DATE
+> Task :app:checkReleaseAarMetadata UP-TO-DATE
+> Task :app:processReleaseNavigationResources UP-TO-DATE
+> Task :app:compileReleaseNavigationResources UP-TO-DATE
+> Task :app:generateReleaseResValues UP-TO-DATE
+> Task :app:mapReleaseSourceSetPaths UP-TO-DATE
+> Task :app:generateReleaseResources UP-TO-DATE
+> Task :app:mergeReleaseResources UP-TO-DATE
+> Task :app:packageReleaseResources UP-TO-DATE
+> Task :app:parseReleaseLocalResources UP-TO-DATE
+> Task :app:createReleaseCompatibleScreenManifests UP-TO-DATE
+> Task :ai:extractDeepLinksRelease UP-TO-DATE
+> Task :ai:processReleaseManifest UP-TO-DATE
+> Task :app:extractDeepLinksRelease UP-TO-DATE
+> Task :data:extractDeepLinksRelease UP-TO-DATE
+> Task :data:processReleaseManifest UP-TO-DATE
+> Task :app:processReleaseMainManifest UP-TO-DATE
+> Task :app:processReleaseManifest UP-TO-DATE
+> Task :app:processReleaseManifestForPackage UP-TO-DATE
+> Task :data:compileReleaseLibraryResources UP-TO-DATE
+> Task :app:processReleaseResources UP-TO-DATE
+> Task :data:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :app:compileReleaseJavaWithJavac FROM-CACHE
+> Task :app:dexBuilderRelease UP-TO-DATE
+> Task :app:desugarReleaseFileDependencies UP-TO-DATE
+> Task :app:mergeReleaseStartupProfile UP-TO-DATE
+> Task :app:mergeExtDexRelease UP-TO-DATE
+> Task :ai:prepareReleaseArtProfile UP-TO-DATE
+> Task :data:prepareReleaseArtProfile UP-TO-DATE
+> Task :app:mergeReleaseArtProfile UP-TO-DATE
+> Task :data:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :ai:generateReleaseAssets UP-TO-DATE
+> Task :ai:mergeReleaseAssets UP-TO-DATE
+> Task :app:generateReleaseAssets UP-TO-DATE
+> Task :data:generateReleaseAssets UP-TO-DATE
+> Task :ai:bundleLibRuntimeToJarRelease
+> Task :data:mergeReleaseAssets UP-TO-DATE
+> Task :app:mergeReleaseAssets UP-TO-DATE
+> Task :app:compressReleaseAssets UP-TO-DATE
+> Task :app:extractReleaseVersionControlInfo UP-TO-DATE
+> Task :ai:extractProguardFiles UP-TO-DATE
+> Task :ai:generateReleaseLintVitalModel
+> Task :ai:prepareLintJarForPublish UP-TO-DATE
+> Task :ai:processReleaseJavaRes NO-SOURCE
+> Task :ai:createFullJarRelease
+> Task :ai:generateReleaseLintModel
+> Task :app:extractProguardFiles UP-TO-DATE
+> Task :data:processReleaseJavaRes NO-SOURCE
+> Task :data:createFullJarRelease UP-TO-DATE
+> Task :data:extractProguardFiles UP-TO-DATE
+> Task :data:generateReleaseLintModel UP-TO-DATE
+> Task :data:prepareLintJarForPublish UP-TO-DATE
+
+> Task :app:generateReleaseLintVitalReportModel
+Warning: Lint will treat :core as an external dependency and not analyze it.
+ * Recommended Action: Apply the 'com.android.lint' plugin to java library project :core. to enable lint to analyze those sources.
+
+Warning: Lint will treat :tree-layout as an external dependency and not analyze it.
+ * Recommended Action: Apply the 'com.android.lint' plugin to java library project :tree-layout. to enable lint to analyze those sources.
+
+
+> Task :data:checkReleaseAarMetadata UP-TO-DATE
+> Task :data:stripReleaseDebugSymbols NO-SOURCE
+> Task :data:copyReleaseJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :data:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :data:extractReleaseAnnotations UP-TO-DATE
+> Task :data:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :data:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :data:mergeReleaseJavaResource UP-TO-DATE
+> Task :data:syncReleaseLibJars UP-TO-DATE
+> Task :data:bundleReleaseLocalLintAar UP-TO-DATE
+> Task :ai:checkReleaseAarMetadata UP-TO-DATE
+> Task :ai:stripReleaseDebugSymbols NO-SOURCE
+> Task :ai:copyReleaseJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :ai:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :ai:extractReleaseAnnotations
+> Task :ai:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :ai:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :ai:mergeReleaseJavaResource UP-TO-DATE
+> Task :ai:syncReleaseLibJars
+> Task :ai:bundleReleaseLocalLintAar
+> Task :ai:writeReleaseLintModelMetadata UP-TO-DATE
+> Task :data:lintVitalAnalyzeRelease UP-TO-DATE
+> Task :data:writeReleaseLintModelMetadata UP-TO-DATE
+> Task :data:generateReleaseLintVitalModel UP-TO-DATE
+> Task :app:processReleaseJavaRes NO-SOURCE
+> Task :app:mergeReleaseJavaResource UP-TO-DATE
+> Task :app:optimizeReleaseResources UP-TO-DATE
+> Task :app:collectReleaseDependencies UP-TO-DATE
+> Task :app:sdkReleaseDependencyData UP-TO-DATE
+> Task :app:writeReleaseAppMetadata UP-TO-DATE
+> Task :app:writeReleaseSigningConfigVersions UP-TO-DATE
+> Task :ai:checkDebugAarMetadata UP-TO-DATE
+> Task :ai:stripDebugDebugSymbols NO-SOURCE
+> Task :ai:copyDebugJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :ai:extractDebugAnnotations FROM-CACHE
+> Task :ai:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :ai:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :ai:mergeDebugConsumerProguardFiles UP-TO-DATE
+> Task :ai:prepareDebugArtProfile UP-TO-DATE
+> Task :ai:mergeDebugJavaResource UP-TO-DATE
+> Task :ai:syncDebugLibJars
+> Task :ai:bundleDebugLocalLintAar
+> Task :ai:createFullJarDebug
+> Task :ai:preDebugAndroidTestBuild UP-TO-DATE
+> Task :ai:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :ai:writeDebugLintModelMetadata UP-TO-DATE
+> Task :ai:generateDebugAndroidTestLintModel
+
+> Task :ai:generateDebugLintReportModel
+Warning: Lint will treat :core as an external dependency and not analyze it.
+ * Recommended Action: Apply the 'com.android.lint' plugin to java library project :core. to enable lint to analyze those sources.
+
+
+> Task :ai:preDebugUnitTestBuild UP-TO-DATE
+> Task :ai:generateDebugUnitTestLintModel
+> Task :ai:generateDebugUnitTestStubRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebugUnitTest UP-TO-DATE
+
+> Task :ai:compileDebugUnitTestJavaWithJavac FAILED
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:242: 错误: 找不到符号
+    private static int countRole(DeepSeekRequest request, DeepSeekMessage.Role role) {
+                                 ^
+  符号:   类 DeepSeekRequest
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:242: 错误: 程序包DeepSeekMessage不存在
+    private static int countRole(DeepSeekRequest request, DeepSeekMessage.Role role) {
+                                                                         ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:252: 错误: 找不到符号
+    private static DeepSeekMessage user(String content) {
+                   ^
+  符号:   类 DeepSeekMessage
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:256: 错误: 程序包DeepSeekMessage不存在
+    private static DeepSeekMessage message(DeepSeekMessage.Role role, String content) {
+                                                          ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:256: 错误: 找不到符号
+    private static DeepSeekMessage message(DeepSeekMessage.Role role, String content) {
+                   ^
+  符号:   类 DeepSeekMessage
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:260: 错误: 找不到符号
+    private static List<DeepSeekMessage> history(DeepSeekMessage... messages) {
+                                                 ^
+  符号:   类 DeepSeekMessage
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:260: 错误: 找不到符号
+    private static List<DeepSeekMessage> history(DeepSeekMessage... messages) {
+                        ^
+  符号:   类 DeepSeekMessage
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:264: 错误: 找不到符号
+    private static PromptBudget generous() {
+                   ^
+  符号:   类 PromptBudget
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:30: 错误: 找不到符号
+            PromptSpec spec = DeepSeekPromptRegistry.spec(purpose);
+                              ^
+  符号:   变量 DeepSeekPromptRegistry
+  位置: 类 DeepSeekPromptRegistryTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:52: 错误: 找不到符号
+                    DeepSeekPromptRegistry.spec(entry.getKey()).policyVersion);
+                    ^
+  符号:   变量 DeepSeekPromptRegistry
+  位置: 类 DeepSeekPromptRegistryTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:95: 错误: 找不到符号
+        String body = DeepSeekPromptRegistry.systemContent(PromptPurpose.LEARNING_ANSWER, false);
+                      ^
+  符号:   变量 DeepSeekPromptRegistry
+  位置: 类 DeepSeekPromptRegistryTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:111: 错误: 找不到符号
+            String content = DeepSeekPromptRegistry.systemContent(purpose, false);
+                             ^
+  符号:   变量 DeepSeekPromptRegistry
+  位置: 类 DeepSeekPromptRegistryTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:120: 错误: 找不到符号
+        String tutor = DeepSeekPromptRegistry.spec(PromptPurpose.LEARNING_ANSWER).systemContent;
+                       ^
+  符号:   变量 DeepSeekPromptRegistry
+  位置: 类 DeepSeekPromptRegistryTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:127: 错误: 找不到符号
+            String content = DeepSeekPromptRegistry.systemContent(purpose, false);
+                             ^
+  符号:   变量 DeepSeekPromptRegistry
+  位置: 类 DeepSeekPromptRegistryTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:148: 错误: 找不到符号
+        String base = DeepSeekPromptRegistry.spec(PromptPurpose.LEARNING_ANSWER).systemContent;
+                      ^
+  符号:   变量 DeepSeekPromptRegistry
+  位置: 类 DeepSeekPromptRegistryTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:149: 错误: 找不到符号
+        assertEquals(base, DeepSeekPromptRegistry.systemContent(PromptPurpose.LEARNING_ANSWER, false));
+                           ^
+  符号:   变量 DeepSeekPromptRegistry
+  位置: 类 DeepSeekPromptRegistryTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:150: 错误: 找不到符号
+        String thinking = DeepSeekPromptRegistry.systemContent(PromptPurpose.LEARNING_ANSWER, true);
+                          ^
+  符号:   变量 DeepSeekPromptRegistry
+  位置: 类 DeepSeekPromptRegistryTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:152: 错误: 找不到符号
+        assertEquals(thinking, DeepSeekPromptRegistry.systemContent(PromptPurpose.LEARNING_ANSWER, true));
+                               ^
+  符号:   变量 DeepSeekPromptRegistry
+  位置: 类 DeepSeekPromptRegistryTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:157: 错误: 找不到符号
+            assertEquals(DeepSeekPromptRegistry.spec(purpose).systemContent,
+                         ^
+  符号:   变量 DeepSeekPromptRegistry
+  位置: 类 DeepSeekPromptRegistryTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:158: 错误: 找不到符号
+                    DeepSeekPromptRegistry.systemContent(purpose, false));
+                    ^
+  符号:   变量 DeepSeekPromptRegistry
+  位置: 类 DeepSeekPromptRegistryTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:159: 错误: 找不到符号
+            PromptBuildException refusal = assertThrows(PromptBuildException.class,
+            ^
+  符号:   类 PromptBuildException
+  位置: 类 DeepSeekPromptRegistryTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:159: 错误: 找不到符号
+            PromptBuildException refusal = assertThrows(PromptBuildException.class,
+                                                        ^
+  符号:   类 PromptBuildException
+  位置: 类 DeepSeekPromptRegistryTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:160: 错误: 找不到符号
+                    () -> DeepSeekPromptRegistry.systemContent(purpose, true));
+                          ^
+  符号:   变量 DeepSeekPromptRegistry
+  位置: 类 DeepSeekPromptRegistryTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:161: 错误: 程序包PromptBuildException不存在
+            assertEquals(PromptBuildException.Reason.THINKING_NOT_APPLICABLE_FOR_PURPOSE,
+                                             ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:168: 错误: 找不到符号
+        PromptBuildException unknown = assertThrows(PromptBuildException.class,
+        ^
+  符号:   类 PromptBuildException
+  位置: 类 DeepSeekPromptRegistryTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:168: 错误: 找不到符号
+        PromptBuildException unknown = assertThrows(PromptBuildException.class,
+                                                    ^
+  符号:   类 PromptBuildException
+  位置: 类 DeepSeekPromptRegistryTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:169: 错误: 找不到符号
+                () -> DeepSeekPromptRegistry.spec(null));
+                      ^
+  符号:   变量 DeepSeekPromptRegistry
+  位置: 类 DeepSeekPromptRegistryTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:170: 错误: 程序包PromptBuildException不存在
+        assertEquals(PromptBuildException.Reason.UNKNOWN_PURPOSE, unknown.reason);
+                                         ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:171: 错误: 找不到符号
+        PromptBuildException unknownContent = assertThrows(PromptBuildException.class,
+        ^
+  符号:   类 PromptBuildException
+  位置: 类 DeepSeekPromptRegistryTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:171: 错误: 找不到符号
+        PromptBuildException unknownContent = assertThrows(PromptBuildException.class,
+                                                           ^
+  符号:   类 PromptBuildException
+  位置: 类 DeepSeekPromptRegistryTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:172: 错误: 找不到符号
+                () -> DeepSeekPromptRegistry.systemContent(null, false));
+                      ^
+  符号:   变量 DeepSeekPromptRegistry
+  位置: 类 DeepSeekPromptRegistryTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:173: 错误: 程序包PromptBuildException不存在
+        assertEquals(PromptBuildException.Reason.UNKNOWN_PURPOSE, unknownContent.reason);
+                                         ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:177: 错误: 找不到符号
+        return DeepSeekPromptRegistry.systemContent(purpose, false).contains(schema);
+               ^
+  符号:   变量 DeepSeekPromptRegistry
+  位置: 类 DeepSeekPromptRegistryTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:30: 错误: 找不到符号
+        DeepSeekRequest request = DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER,
+        ^
+  符号:   类 DeepSeekRequest
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:30: 错误: 找不到符号
+        DeepSeekRequest request = DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER,
+                                  ^
+  符号:   变量 DeepSeekRequestAssembler
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:32: 错误: 程序包DeepSeekMessage不存在
+                history(user(FIRST_QUESTION), message(DeepSeekMessage.Role.ASSISTANT, FIRST_ANSWER)),
+                                                                     ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:38: 错误: 程序包DeepSeekMessage不存在
+        assertEquals(1, countRole(request, DeepSeekMessage.Role.SYSTEM));
+                                                          ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:39: 错误: 程序包DeepSeekMessage不存在
+        assertEquals(DeepSeekMessage.Role.SYSTEM, request.messages.get(0).role);
+                                    ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:40: 错误: 找不到符号
+        assertEquals(DeepSeekPromptRegistry.spec(PromptPurpose.LEARNING_ANSWER).systemContent,
+                     ^
+  符号:   变量 DeepSeekPromptRegistry
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:42: 错误: 程序包DeepSeekMessage不存在
+        assertEquals(DeepSeekMessage.Role.USER, request.messages.get(1).role);
+                                    ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:44: 错误: 程序包DeepSeekMessage不存在
+        assertEquals(DeepSeekMessage.Role.ASSISTANT, request.messages.get(2).role);
+                                    ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:46: 错误: 程序包DeepSeekMessage不存在
+        assertEquals(DeepSeekMessage.Role.USER, request.messages.get(3).role);
+                                    ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:55: 错误: 找不到符号
+        List<DeepSeekMessage> callerHistory = history(user(FIRST_QUESTION));
+             ^
+  符号:   类 DeepSeekMessage
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:56: 错误: 找不到符号
+        DeepSeekRequest request = DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER,
+        ^
+  符号:   类 DeepSeekRequest
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:56: 错误: 找不到符号
+        DeepSeekRequest request = DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER,
+                                  ^
+  符号:   变量 DeepSeekRequestAssembler
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:71: 错误: 找不到符号
+        DeepSeekRequest request = DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER,
+        ^
+  符号:   类 DeepSeekRequest
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:71: 错误: 找不到符号
+        DeepSeekRequest request = DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER,
+                                  ^
+  符号:   变量 DeepSeekRequestAssembler
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:72: 错误: 程序包DeepSeekMessage不存在
+                true, history(user(attack), message(DeepSeekMessage.Role.ASSISTANT, attack)),
+                                                                   ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:77: 错误: 程序包DeepSeekMessage不存在
+        assertEquals(1, countRole(request, DeepSeekMessage.Role.SYSTEM));
+                                                          ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:78: 错误: 找不到符号
+        assertEquals(DeepSeekPromptRegistry.systemContent(PromptPurpose.LEARNING_ANSWER, true),
+                     ^
+  符号:   变量 DeepSeekPromptRegistry
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:80: 错误: 程序包DeepSeekMessage不存在
+        assertEquals(DeepSeekMessage.Role.USER, request.messages.get(1).role);
+                                    ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:82: 错误: 程序包DeepSeekMessage不存在
+        assertEquals(DeepSeekMessage.Role.ASSISTANT, request.messages.get(2).role);
+                                    ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:84: 错误: 程序包DeepSeekMessage不存在
+        assertEquals(DeepSeekMessage.Role.USER, request.messages.get(3).role);
+                                    ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:92: 错误: 找不到符号
+        DeepSeekRequest withSecret = DeepSeekRequestAssembler.assemble(
+        ^
+  符号:   类 DeepSeekRequest
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:92: 错误: 找不到符号
+        DeepSeekRequest withSecret = DeepSeekRequestAssembler.assemble(
+                                     ^
+  符号:   变量 DeepSeekRequestAssembler
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:95: 错误: 找不到符号
+        DeepSeekRequest other = DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER,
+        ^
+  符号:   类 DeepSeekRequest
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:95: 错误: 找不到符号
+        DeepSeekRequest other = DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER,
+                                ^
+  符号:   变量 DeepSeekRequestAssembler
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:98: 错误: 找不到符号
+        assertEquals(DeepSeekPromptRegistry.systemContent(PromptPurpose.LEARNING_ANSWER, true),
+                     ^
+  符号:   变量 DeepSeekPromptRegistry
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:108: 错误: 找不到符号
+        DeepSeekRequest request = DeepSeekRequestAssembler.assemble(PromptPurpose.ROOT_TITLE,
+        ^
+  符号:   类 DeepSeekRequest
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:108: 错误: 找不到符号
+        DeepSeekRequest request = DeepSeekRequestAssembler.assemble(PromptPurpose.ROOT_TITLE,
+                                  ^
+  符号:   变量 DeepSeekRequestAssembler
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:113: 错误: 程序包DeepSeekMessage不存在
+        assertEquals(DeepSeekMessage.Role.SYSTEM, request.messages.get(0).role);
+                                    ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:114: 错误: 找不到符号
+        assertEquals(DeepSeekPromptRegistry.systemContent(PromptPurpose.ROOT_TITLE, false),
+                     ^
+  符号:   变量 DeepSeekPromptRegistry
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:118: 错误: 程序包DeepSeekMessage不存在
+        assertEquals(DeepSeekMessage.Role.USER, request.messages.get(1).role);
+                                    ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:121: 错误: 找不到符号
+        DeepSeekRequest attacked = DeepSeekRequestAssembler.assemble(PromptPurpose.ROOT_TITLE,
+        ^
+  符号:   类 DeepSeekRequest
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:121: 错误: 找不到符号
+        DeepSeekRequest attacked = DeepSeekRequestAssembler.assemble(PromptPurpose.ROOT_TITLE,
+                                   ^
+  符号:   变量 DeepSeekRequestAssembler
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:129: 错误: 找不到符号
+        PromptBuildException freeText = assertThrows(PromptBuildException.class,
+        ^
+  符号:   类 PromptBuildException
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:129: 错误: 找不到符号
+        PromptBuildException freeText = assertThrows(PromptBuildException.class,
+                                                     ^
+  符号:   类 PromptBuildException
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:130: 错误: 找不到符号
+                () -> DeepSeekRequestAssembler.assemble(PromptPurpose.ROOT_TITLE, false, history(),
+                      ^
+  符号:   变量 DeepSeekRequestAssembler
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:132: 错误: 程序包PromptBuildException不存在
+        assertEquals(PromptBuildException.Reason.DERIVED_INPUT_NOT_JSON, freeText.reason);
+                                         ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:133: 错误: 找不到符号
+        PromptBuildException unbalanced = assertThrows(PromptBuildException.class,
+        ^
+  符号:   类 PromptBuildException
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:133: 错误: 找不到符号
+        PromptBuildException unbalanced = assertThrows(PromptBuildException.class,
+                                                       ^
+  符号:   类 PromptBuildException
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:134: 错误: 找不到符号
+                () -> DeepSeekRequestAssembler.assemble(PromptPurpose.BRANCH_SUMMARY, false,
+                      ^
+  符号:   变量 DeepSeekRequestAssembler
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:136: 错误: 程序包PromptBuildException不存在
+        assertEquals(PromptBuildException.Reason.DERIVED_INPUT_NOT_JSON, unbalanced.reason);
+                                         ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:143: 错误: 找不到符号
+            PromptBuildException refusal = assertThrows(PromptBuildException.class,
+            ^
+  符号:   类 PromptBuildException
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:143: 错误: 找不到符号
+            PromptBuildException refusal = assertThrows(PromptBuildException.class,
+                                                        ^
+  符号:   类 PromptBuildException
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:144: 错误: 找不到符号
+                    () -> DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER, false,
+                          ^
+  符号:   变量 DeepSeekRequestAssembler
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:147: 错误: 程序包PromptBuildException不存在
+                    PromptBuildException.Reason.BLANK_CURRENT_INPUT, refusal.reason);
+                                        ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:153: 错误: 程序包PromptBuildException不存在
+        assertEquals(PromptBuildException.Reason.MISSING_HISTORY,
+                                         ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:154: 错误: 找不到符号
+                assertThrows(PromptBuildException.class,
+                             ^
+  符号:   类 PromptBuildException
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:155: 错误: 找不到符号
+                        () -> DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER, false,
+                              ^
+  符号:   变量 DeepSeekRequestAssembler
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:157: 错误: 程序包PromptBuildException不存在
+        assertEquals(PromptBuildException.Reason.MALFORMED_HISTORY_MESSAGE,
+                                         ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:158: 错误: 找不到符号
+                assertThrows(PromptBuildException.class,
+                             ^
+  符号:   类 PromptBuildException
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:159: 错误: 找不到符号
+                        () -> DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER, false,
+                              ^
+  符号:   变量 DeepSeekRequestAssembler
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:160: 错误: 找不到符号
+                                history((DeepSeekMessage) null), CURRENT_INPUT, generous())).reason);
+                                         ^
+  符号:   类 DeepSeekMessage
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:161: 错误: 程序包PromptBuildException不存在
+        assertEquals(PromptBuildException.Reason.MALFORMED_HISTORY_MESSAGE,
+                                         ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:162: 错误: 找不到符号
+                assertThrows(PromptBuildException.class,
+                             ^
+  符号:   类 PromptBuildException
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:163: 错误: 找不到符号
+                        () -> DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER, false,
+                              ^
+  符号:   变量 DeepSeekRequestAssembler
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:165: 错误: 程序包PromptBuildException不存在
+        assertEquals(PromptBuildException.Reason.SYSTEM_MESSAGE_IN_HISTORY,
+                                         ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:166: 错误: 找不到符号
+                assertThrows(PromptBuildException.class,
+                             ^
+  符号:   类 PromptBuildException
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:167: 错误: 找不到符号
+                        () -> DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER, false,
+                              ^
+  符号:   变量 DeepSeekRequestAssembler
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:168: 错误: 程序包DeepSeekMessage不存在
+                                history(message(DeepSeekMessage.Role.SYSTEM, "偷偷塞进来的系统消息")),
+                                                               ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:178: 错误: 找不到符号
+        DeepSeekRequest exact = DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER,
+        ^
+  符号:   类 DeepSeekRequest
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:180: 错误: 找不到符号
+                new PromptBudget(system + input + minAnswer + historyChars, minAnswer));
+                    ^
+  符号:   类 PromptBudget
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:178: 错误: 找不到符号
+        DeepSeekRequest exact = DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER,
+                                ^
+  符号:   变量 DeepSeekRequestAssembler
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:182: 错误: 找不到符号
+        PromptBuildException historyOverflow = assertThrows(PromptBuildException.class,
+        ^
+  符号:   类 PromptBuildException
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:182: 错误: 找不到符号
+        PromptBuildException historyOverflow = assertThrows(PromptBuildException.class,
+                                                            ^
+  符号:   类 PromptBuildException
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:185: 错误: 找不到符号
+                        new PromptBudget(system + input + minAnswer + historyChars - 1, minAnswer)));
+                            ^
+  符号:   类 PromptBudget
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:183: 错误: 找不到符号
+                () -> DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER, false,
+                      ^
+  符号:   变量 DeepSeekRequestAssembler
+  位置: 类 DeepSeekRequestAssemblerTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:186: 错误: 程序包PromptBuildException不存在
+        assertEquals(PromptBuildException.Reason.HISTORY_EXCEEDS_BUDGET, historyOverflow.reason);
+                                         ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:187: 错误: 找不到符号
+        PromptBuildException reserveOverflow = assertThrows(PromptBuildException.class,
+        ^
+  符号:   类 PromptBuildException
+  位置: 类 DeepSeekRequestAssemblerTest
+100 个错误
+
+> Task :ai:lintAnalyzeDebugAndroidTest
+> Task :ai:lintVitalAnalyzeRelease
+> Task :ai:lintAnalyzeDebug
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':ai:compileDebugUnitTestJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:242: 错误: 找不到符号
+      private static int countRole(DeepSeekRequest request, DeepSeekMessage.Role role) {
+                                   ^
+    符号:   类 DeepSeekRequest
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:252: 错误: 找不到符号
+      private static DeepSeekMessage user(String content) {
+                     ^
+    符号:   类 DeepSeekMessage
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:256: 错误: 找不到符号
+      private static DeepSeekMessage message(DeepSeekMessage.Role role, String content) {
+                     ^
+    符号:   类 DeepSeekMessage
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:260: 错误: 找不到符号
+      private static List<DeepSeekMessage> history(DeepSeekMessage... messages) {
+                                                   ^
+    符号:   类 DeepSeekMessage
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:260: 错误: 找不到符号
+      private static List<DeepSeekMessage> history(DeepSeekMessage... messages) {
+                          ^
+    符号:   类 DeepSeekMessage
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:264: 错误: 找不到符号
+      private static PromptBudget generous() {
+                     ^
+    符号:   类 PromptBudget
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:30: 错误: 找不到符号
+              PromptSpec spec = DeepSeekPromptRegistry.spec(purpose);
+                                ^
+    符号:   变量 DeepSeekPromptRegistry
+    位置: 类 DeepSeekPromptRegistryTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:52: 错误: 找不到符号
+                      DeepSeekPromptRegistry.spec(entry.getKey()).policyVersion);
+                      ^
+    符号:   变量 DeepSeekPromptRegistry
+    位置: 类 DeepSeekPromptRegistryTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:95: 错误: 找不到符号
+          String body = DeepSeekPromptRegistry.systemContent(PromptPurpose.LEARNING_ANSWER, false);
+                        ^
+    符号:   变量 DeepSeekPromptRegistry
+    位置: 类 DeepSeekPromptRegistryTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:111: 错误: 找不到符号
+              String content = DeepSeekPromptRegistry.systemContent(purpose, false);
+                               ^
+    符号:   变量 DeepSeekPromptRegistry
+    位置: 类 DeepSeekPromptRegistryTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:120: 错误: 找不到符号
+          String tutor = DeepSeekPromptRegistry.spec(PromptPurpose.LEARNING_ANSWER).systemContent;
+                         ^
+    符号:   变量 DeepSeekPromptRegistry
+    位置: 类 DeepSeekPromptRegistryTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:127: 错误: 找不到符号
+              String content = DeepSeekPromptRegistry.systemContent(purpose, false);
+                               ^
+    符号:   变量 DeepSeekPromptRegistry
+    位置: 类 DeepSeekPromptRegistryTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:148: 错误: 找不到符号
+          String base = DeepSeekPromptRegistry.spec(PromptPurpose.LEARNING_ANSWER).systemContent;
+                        ^
+    符号:   变量 DeepSeekPromptRegistry
+    位置: 类 DeepSeekPromptRegistryTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:149: 错误: 找不到符号
+          assertEquals(base, DeepSeekPromptRegistry.systemContent(PromptPurpose.LEARNING_ANSWER, false));
+                             ^
+    符号:   变量 DeepSeekPromptRegistry
+    位置: 类 DeepSeekPromptRegistryTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:150: 错误: 找不到符号
+          String thinking = DeepSeekPromptRegistry.systemContent(PromptPurpose.LEARNING_ANSWER, true);
+                            ^
+    符号:   变量 DeepSeekPromptRegistry
+    位置: 类 DeepSeekPromptRegistryTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:152: 错误: 找不到符号
+          assertEquals(thinking, DeepSeekPromptRegistry.systemContent(PromptPurpose.LEARNING_ANSWER, true));
+                                 ^
+    符号:   变量 DeepSeekPromptRegistry
+    位置: 类 DeepSeekPromptRegistryTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:157: 错误: 找不到符号
+              assertEquals(DeepSeekPromptRegistry.spec(purpose).systemContent,
+                           ^
+    符号:   变量 DeepSeekPromptRegistry
+    位置: 类 DeepSeekPromptRegistryTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:158: 错误: 找不到符号
+                      DeepSeekPromptRegistry.systemContent(purpose, false));
+                      ^
+    符号:   变量 DeepSeekPromptRegistry
+    位置: 类 DeepSeekPromptRegistryTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:159: 错误: 找不到符号
+              PromptBuildException refusal = assertThrows(PromptBuildException.class,
+              ^
+    符号:   类 PromptBuildException
+    位置: 类 DeepSeekPromptRegistryTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:159: 错误: 找不到符号
+              PromptBuildException refusal = assertThrows(PromptBuildException.class,
+                                                          ^
+    符号:   类 PromptBuildException
+    位置: 类 DeepSeekPromptRegistryTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:160: 错误: 找不到符号
+                      () -> DeepSeekPromptRegistry.systemContent(purpose, true));
+                            ^
+    符号:   变量 DeepSeekPromptRegistry
+    位置: 类 DeepSeekPromptRegistryTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:168: 错误: 找不到符号
+          PromptBuildException unknown = assertThrows(PromptBuildException.class,
+          ^
+    符号:   类 PromptBuildException
+    位置: 类 DeepSeekPromptRegistryTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:168: 错误: 找不到符号
+          PromptBuildException unknown = assertThrows(PromptBuildException.class,
+                                                      ^
+    符号:   类 PromptBuildException
+    位置: 类 DeepSeekPromptRegistryTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:169: 错误: 找不到符号
+                  () -> DeepSeekPromptRegistry.spec(null));
+                        ^
+    符号:   变量 DeepSeekPromptRegistry
+    位置: 类 DeepSeekPromptRegistryTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:171: 错误: 找不到符号
+          PromptBuildException unknownContent = assertThrows(PromptBuildException.class,
+          ^
+    符号:   类 PromptBuildException
+    位置: 类 DeepSeekPromptRegistryTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:171: 错误: 找不到符号
+          PromptBuildException unknownContent = assertThrows(PromptBuildException.class,
+                                                             ^
+    符号:   类 PromptBuildException
+    位置: 类 DeepSeekPromptRegistryTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:172: 错误: 找不到符号
+                  () -> DeepSeekPromptRegistry.systemContent(null, false));
+                        ^
+    符号:   变量 DeepSeekPromptRegistry
+    位置: 类 DeepSeekPromptRegistryTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:177: 错误: 找不到符号
+          return DeepSeekPromptRegistry.systemContent(purpose, false).contains(schema);
+                 ^
+    符号:   变量 DeepSeekPromptRegistry
+    位置: 类 DeepSeekPromptRegistryTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:30: 错误: 找不到符号
+          DeepSeekRequest request = DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER,
+          ^
+    符号:   类 DeepSeekRequest
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:30: 错误: 找不到符号
+          DeepSeekRequest request = DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER,
+                                    ^
+    符号:   变量 DeepSeekRequestAssembler
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:40: 错误: 找不到符号
+          assertEquals(DeepSeekPromptRegistry.spec(PromptPurpose.LEARNING_ANSWER).systemContent,
+                       ^
+    符号:   变量 DeepSeekPromptRegistry
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:55: 错误: 找不到符号
+          List<DeepSeekMessage> callerHistory = history(user(FIRST_QUESTION));
+               ^
+    符号:   类 DeepSeekMessage
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:56: 错误: 找不到符号
+          DeepSeekRequest request = DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER,
+          ^
+    符号:   类 DeepSeekRequest
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:56: 错误: 找不到符号
+          DeepSeekRequest request = DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER,
+                                    ^
+    符号:   变量 DeepSeekRequestAssembler
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:71: 错误: 找不到符号
+          DeepSeekRequest request = DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER,
+          ^
+    符号:   类 DeepSeekRequest
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:71: 错误: 找不到符号
+          DeepSeekRequest request = DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER,
+                                    ^
+    符号:   变量 DeepSeekRequestAssembler
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:78: 错误: 找不到符号
+          assertEquals(DeepSeekPromptRegistry.systemContent(PromptPurpose.LEARNING_ANSWER, true),
+                       ^
+    符号:   变量 DeepSeekPromptRegistry
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:92: 错误: 找不到符号
+          DeepSeekRequest withSecret = DeepSeekRequestAssembler.assemble(
+          ^
+    符号:   类 DeepSeekRequest
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:92: 错误: 找不到符号
+          DeepSeekRequest withSecret = DeepSeekRequestAssembler.assemble(
+                                       ^
+    符号:   变量 DeepSeekRequestAssembler
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:95: 错误: 找不到符号
+          DeepSeekRequest other = DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER,
+          ^
+    符号:   类 DeepSeekRequest
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:95: 错误: 找不到符号
+          DeepSeekRequest other = DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER,
+                                  ^
+    符号:   变量 DeepSeekRequestAssembler
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:98: 错误: 找不到符号
+          assertEquals(DeepSeekPromptRegistry.systemContent(PromptPurpose.LEARNING_ANSWER, true),
+                       ^
+    符号:   变量 DeepSeekPromptRegistry
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:108: 错误: 找不到符号
+          DeepSeekRequest request = DeepSeekRequestAssembler.assemble(PromptPurpose.ROOT_TITLE,
+          ^
+    符号:   类 DeepSeekRequest
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:108: 错误: 找不到符号
+          DeepSeekRequest request = DeepSeekRequestAssembler.assemble(PromptPurpose.ROOT_TITLE,
+                                    ^
+    符号:   变量 DeepSeekRequestAssembler
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:114: 错误: 找不到符号
+          assertEquals(DeepSeekPromptRegistry.systemContent(PromptPurpose.ROOT_TITLE, false),
+                       ^
+    符号:   变量 DeepSeekPromptRegistry
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:121: 错误: 找不到符号
+          DeepSeekRequest attacked = DeepSeekRequestAssembler.assemble(PromptPurpose.ROOT_TITLE,
+          ^
+    符号:   类 DeepSeekRequest
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:121: 错误: 找不到符号
+          DeepSeekRequest attacked = DeepSeekRequestAssembler.assemble(PromptPurpose.ROOT_TITLE,
+                                     ^
+    符号:   变量 DeepSeekRequestAssembler
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:129: 错误: 找不到符号
+          PromptBuildException freeText = assertThrows(PromptBuildException.class,
+          ^
+    符号:   类 PromptBuildException
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:129: 错误: 找不到符号
+          PromptBuildException freeText = assertThrows(PromptBuildException.class,
+                                                       ^
+    符号:   类 PromptBuildException
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:130: 错误: 找不到符号
+                  () -> DeepSeekRequestAssembler.assemble(PromptPurpose.ROOT_TITLE, false, history(),
+                        ^
+    符号:   变量 DeepSeekRequestAssembler
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:133: 错误: 找不到符号
+          PromptBuildException unbalanced = assertThrows(PromptBuildException.class,
+          ^
+    符号:   类 PromptBuildException
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:133: 错误: 找不到符号
+          PromptBuildException unbalanced = assertThrows(PromptBuildException.class,
+                                                         ^
+    符号:   类 PromptBuildException
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:134: 错误: 找不到符号
+                  () -> DeepSeekRequestAssembler.assemble(PromptPurpose.BRANCH_SUMMARY, false,
+                        ^
+    符号:   变量 DeepSeekRequestAssembler
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:143: 错误: 找不到符号
+              PromptBuildException refusal = assertThrows(PromptBuildException.class,
+              ^
+    符号:   类 PromptBuildException
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:143: 错误: 找不到符号
+              PromptBuildException refusal = assertThrows(PromptBuildException.class,
+                                                          ^
+    符号:   类 PromptBuildException
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:144: 错误: 找不到符号
+                      () -> DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER, false,
+                            ^
+    符号:   变量 DeepSeekRequestAssembler
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:154: 错误: 找不到符号
+                  assertThrows(PromptBuildException.class,
+                               ^
+    符号:   类 PromptBuildException
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:155: 错误: 找不到符号
+                          () -> DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER, false,
+                                ^
+    符号:   变量 DeepSeekRequestAssembler
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:158: 错误: 找不到符号
+                  assertThrows(PromptBuildException.class,
+                               ^
+    符号:   类 PromptBuildException
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:159: 错误: 找不到符号
+                          () -> DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER, false,
+                                ^
+    符号:   变量 DeepSeekRequestAssembler
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:160: 错误: 找不到符号
+                                  history((DeepSeekMessage) null), CURRENT_INPUT, generous())).reason);
+                                           ^
+    符号:   类 DeepSeekMessage
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:162: 错误: 找不到符号
+                  assertThrows(PromptBuildException.class,
+                               ^
+    符号:   类 PromptBuildException
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:163: 错误: 找不到符号
+                          () -> DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER, false,
+                                ^
+    符号:   变量 DeepSeekRequestAssembler
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:166: 错误: 找不到符号
+                  assertThrows(PromptBuildException.class,
+                               ^
+    符号:   类 PromptBuildException
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:167: 错误: 找不到符号
+                          () -> DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER, false,
+                                ^
+    符号:   变量 DeepSeekRequestAssembler
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:178: 错误: 找不到符号
+          DeepSeekRequest exact = DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER,
+          ^
+    符号:   类 DeepSeekRequest
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:180: 错误: 找不到符号
+                  new PromptBudget(system + input + minAnswer + historyChars, minAnswer));
+                      ^
+    符号:   类 PromptBudget
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:178: 错误: 找不到符号
+          DeepSeekRequest exact = DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER,
+                                  ^
+    符号:   变量 DeepSeekRequestAssembler
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:182: 错误: 找不到符号
+          PromptBuildException historyOverflow = assertThrows(PromptBuildException.class,
+          ^
+    符号:   类 PromptBuildException
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:182: 错误: 找不到符号
+          PromptBuildException historyOverflow = assertThrows(PromptBuildException.class,
+                                                              ^
+    符号:   类 PromptBuildException
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:185: 错误: 找不到符号
+                          new PromptBudget(system + input + minAnswer + historyChars - 1, minAnswer)));
+                              ^
+    符号:   类 PromptBudget
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:183: 错误: 找不到符号
+                  () -> DeepSeekRequestAssembler.assemble(PromptPurpose.LEARNING_ANSWER, false,
+                        ^
+    符号:   变量 DeepSeekRequestAssembler
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:187: 错误: 找不到符号
+          PromptBuildException reserveOverflow = assertThrows(PromptBuildException.class,
+          ^
+    符号:   类 PromptBuildException
+    位置: 类 DeepSeekRequestAssemblerTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:242: 错误: 程序包DeepSeekMessage不存在
+      private static int countRole(DeepSeekRequest request, DeepSeekMessage.Role role) {
+                                                                           ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:256: 错误: 程序包DeepSeekMessage不存在
+      private static DeepSeekMessage message(DeepSeekMessage.Role role, String content) {
+                                                            ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:161: 错误: 程序包PromptBuildException不存在
+              assertEquals(PromptBuildException.Reason.THINKING_NOT_APPLICABLE_FOR_PURPOSE,
+                                               ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:170: 错误: 程序包PromptBuildException不存在
+          assertEquals(PromptBuildException.Reason.UNKNOWN_PURPOSE, unknown.reason);
+                                           ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekPromptRegistryTest.java:173: 错误: 程序包PromptBuildException不存在
+          assertEquals(PromptBuildException.Reason.UNKNOWN_PURPOSE, unknownContent.reason);
+                                           ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:32: 错误: 程序包DeepSeekMessage不存在
+                  history(user(FIRST_QUESTION), message(DeepSeekMessage.Role.ASSISTANT, FIRST_ANSWER)),
+                                                                       ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:38: 错误: 程序包DeepSeekMessage不存在
+          assertEquals(1, countRole(request, DeepSeekMessage.Role.SYSTEM));
+                                                            ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:39: 错误: 程序包DeepSeekMessage不存在
+          assertEquals(DeepSeekMessage.Role.SYSTEM, request.messages.get(0).role);
+                                      ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:42: 错误: 程序包DeepSeekMessage不存在
+          assertEquals(DeepSeekMessage.Role.USER, request.messages.get(1).role);
+                                      ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:44: 错误: 程序包DeepSeekMessage不存在
+          assertEquals(DeepSeekMessage.Role.ASSISTANT, request.messages.get(2).role);
+                                      ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:46: 错误: 程序包DeepSeekMessage不存在
+          assertEquals(DeepSeekMessage.Role.USER, request.messages.get(3).role);
+                                      ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:72: 错误: 程序包DeepSeekMessage不存在
+                  true, history(user(attack), message(DeepSeekMessage.Role.ASSISTANT, attack)),
+                                                                     ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:77: 错误: 程序包DeepSeekMessage不存在
+          assertEquals(1, countRole(request, DeepSeekMessage.Role.SYSTEM));
+                                                            ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:80: 错误: 程序包DeepSeekMessage不存在
+          assertEquals(DeepSeekMessage.Role.USER, request.messages.get(1).role);
+                                      ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:82: 错误: 程序包DeepSeekMessage不存在
+          assertEquals(DeepSeekMessage.Role.ASSISTANT, request.messages.get(2).role);
+                                      ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:84: 错误: 程序包DeepSeekMessage不存在
+          assertEquals(DeepSeekMessage.Role.USER, request.messages.get(3).role);
+                                      ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:113: 错误: 程序包DeepSeekMessage不存在
+          assertEquals(DeepSeekMessage.Role.SYSTEM, request.messages.get(0).role);
+                                      ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:118: 错误: 程序包DeepSeekMessage不存在
+          assertEquals(DeepSeekMessage.Role.USER, request.messages.get(1).role);
+                                      ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:132: 错误: 程序包PromptBuildException不存在
+          assertEquals(PromptBuildException.Reason.DERIVED_INPUT_NOT_JSON, freeText.reason);
+                                           ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:136: 错误: 程序包PromptBuildException不存在
+          assertEquals(PromptBuildException.Reason.DERIVED_INPUT_NOT_JSON, unbalanced.reason);
+                                           ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:147: 错误: 程序包PromptBuildException不存在
+                      PromptBuildException.Reason.BLANK_CURRENT_INPUT, refusal.reason);
+                                          ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:153: 错误: 程序包PromptBuildException不存在
+          assertEquals(PromptBuildException.Reason.MISSING_HISTORY,
+                                           ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:157: 错误: 程序包PromptBuildException不存在
+          assertEquals(PromptBuildException.Reason.MALFORMED_HISTORY_MESSAGE,
+                                           ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:161: 错误: 程序包PromptBuildException不存在
+          assertEquals(PromptBuildException.Reason.MALFORMED_HISTORY_MESSAGE,
+                                           ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:165: 错误: 程序包PromptBuildException不存在
+          assertEquals(PromptBuildException.Reason.SYSTEM_MESSAGE_IN_HISTORY,
+                                           ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:168: 错误: 程序包DeepSeekMessage不存在
+                                  history(message(DeepSeekMessage.Role.SYSTEM, "偷偷塞进来的系统消息")),
+                                                                 ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\prompt\DeepSeekRequestAssemblerTest.java:186: 错误: 程序包PromptBuildException不存在
+          assertEquals(PromptBuildException.Reason.HISTORY_EXCEEDS_BUDGET, historyOverflow.reason);
+                                           ^
+  100 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 22s
+218 actionable tasks: 25 executed, 3 from cache, 190 up-to-date

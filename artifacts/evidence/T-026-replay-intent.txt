@@ -1,0 +1,111 @@
+# Evidence: 历史需求回放（父任务 T-2026-09-21-026 验收标准第 4 条）
+# Generated: 2026-09-21 21:09:08+08:00
+# Input requirement: .trae/tasks/T-2026-09-21-first-topic-atomic-creation-025.md（真实需求，非新造）
+# Mode: full（回放校验器不可裁剪，无 fast 模式）
+# Command: python -X utf8 .trae/scripts/dev/check_intent_replay.py Docs/intent/INTENT-2026-09-21-replay-first-topic-atomic-creation.md
+# Checker (SHA-256, lines): .trae/scripts/dev/check_intent_replay.py  sha256=81D6204B84EEEB900E0C9DEDB61F8243E89B9E068A3AB3F2D716ADCA722A3650  lines=108
+# Shared lib (SHA-256): .trae\scripts\harness_check_lib.py  sha256=B7F374B657E2C01BD4ABC3062B08122018DF8BEB50195F108C0282EA35DA4E19
+# Replay file (SHA-256, lines): Docs/intent/INTENT-2026-09-21-replay-first-topic-atomic-creation.md  sha256=9A4694F591B9DEB0F2B909BA3AB6EEE28D8389A75FE6D9B96F0AA3D7C908CC51  lines=80
+# Reconstruction: 下方 marker 之后即原文件全文（逐行原样，含空行）；以 LF 连接并在末尾补一个 LF 即可无损重建，
+#   本轮实测重建后 SHA-256 与上面记录一致（match=True）。回放文件本身在取数后退删，Docs/intent/ 只保留 README.md。
+# 注：EXITCODE 行由校验器自身打印（来自其失败计数），PROCESS_EXITCODE 为进程真实退出码，两者本轮一致。
+
+OK   file exists: Docs/intent/INTENT-2026-09-21-replay-first-topic-atomic-creation.md
+OK   front matter has exactly the 6 metadata keys — measured=6 diff=[]
+OK   sections equal the template sections, in order — template=9 instance=9 diff=[]
+OK   every field named by the template marker appears in the instance — measured=15 missing=[]
+OK   verdict pairs a conclusion with evidence: 有价值吗
+OK   verdict pairs a conclusion with evidence: 值得做吗
+OK   verdict pairs a conclusion with evidence: 可以做吗
+OK   decision record states exactly one terminal state — measured=['accepted']
+OK   front matter status equals the decision-record terminal state — status='accepted' measured=['accepted']
+OK   handoff checklist names >= 3 slices — measured=3
+OK   handoff checklist states the dependency order
+OK   handoff checklist states what cannot run in parallel
+OK   no placeholder tokens — measured=[]
+
+check_intent_replay: 0 check(s) failed
+EXITCODE=0
+PROCESS_EXITCODE=0
+
+# ---- replay file content (verbatim; the file itself is deleted after capture) ----
+# Intent: 首题原子创建——五类行同事务、全败不留空树
+
+id: INTENT-2026-09-21-replay-first-topic-atomic-creation
+title: 首题原子创建——五类行同事务、全败不留空树
+date: 2026-09-21
+author: leader（回放：以 T-2026-09-21-025 的真实需求为输入）
+origin: 产品事故
+status: accepted
+
+## Problem（问题与背景）
+
+- 问题/背景：现在没有任何「一个事务里把首个主题写完整」的入口。五类行（topics 1 / branches 1 根 / messages 2 / generation_operations 1）如果分多次写入，中途被打断就会留下半成品。观察到的现象出现在恢复路径上：重启后恢复逻辑看到「有 topic 没有根分支」或「有分支没有 operation」，推导出一棵空树，用户看到首屏空白且重试不了。推测的原因是写入没有事务边界，而不是恢复算法本身有缺陷。
+- 用户/场景：用户发出根问题后立刻断网或杀进程，随后重启应用。
+
+## Users and scenarios（用户与场景）
+
+- 一人开发自用；本期只有提出者本人使用，没有第二位使用者，也没有服务端账号体系。
+
+## Expected outcome（预期结果）
+
+- 预期结果：`:data` 提供一个事务入口，单个事务内写入五类行并返回显式提交结果；重启后要么看到完整的主题树加上一个可重试的生成操作，要么一行都没有，绝不出现空树。
+
+## Core flow（核心流程）
+
+- 核心流程（含中断、撤销、重试）：topic → 根 branch → 用户 message → AI message → operation；中断时整体回滚，用户重新发一次即可，不存在「修半成品」这种操作；撤销就是删掉该主题（级联），不新增撤销入口。
+- 输入/输出：输入是已由 `:core` 工厂构造好的 `Topic`/`Branch`/`Message` 与 operation 构造参数；输出是显式成功结果（含新主题 id）或分类错误。
+- 状态与异常：失败必须回滚到该主题零行；错误必须是分类错误，不允许裸 `SQLException`/`IllegalStateException` 穿透调用方；重复创建同一主题 id 要有明确错误。
+
+## Constraints and non-goals（约束与非目标）
+
+- 约束：DDL 不在本件事里；时间统一 UTC epoch millis；参数化 SQL；复用既有的 `DatabaseTransactionRunner`，不新造事务机制；单个切片生产代码 ≤ 200 行。
+- 权衡偏好：宁可事务大一点、锁等待稍长，也不接受半成品；正确性优先于写入吞吐。
+- 非目标（non-goals）：不做网络与 SSE；不做 UI；不做非首题的分支分叉创建；不做稳定化落盘。
+
+## Open questions（开放问题）
+
+- 已确认事实、假设、未知项：
+  - 已确认事实：七张逻辑表与提示词用途/版本字段已冻结；根分支不写快照，`context_snapshot_id` 为 NULL。
+  - 假设：调用方已经用 `:core` 工厂构造好实体，本件事不重复做领域校验。
+  - 未知项：无。
+
+## Convergence verdict（收敛判定）
+
+### 有价值吗
+
+结论：是
+证据：不做会让恢复路径推导出空树——重启后首屏空白且重试不了；受害人是提出者本人，具体后果是「丢掉一次提问并卡住重试」。今天的凑合做法是「祈祷别在中途被杀」。
+
+### 值得做吗
+
+结论：是
+证据：它是恢复（T-008）、UI 首屏（T-012）、分支创建（T-009）的前置，这三条都假设五类行齐备。不做它，后面三条都要各自处理半成品状态，返工面更大。边界一句话说得清：只做「首题、五类行、同事务、全败回滚」。
+
+### 可以做吗
+
+结论：是
+证据：`:data` 已有 `DatabaseTransactionRunner`（T-004）与三表/两表 DAO（T-022/T-023）可复用；验收能写成「instrumentation 命令 + 期望行数 + `PRAGMA foreign_key_check` 无结果」；依赖可得，无外部服务与密钥。风险已具名：事务范围过大造成锁等待；「五类行写成四类」会让原子性在恢复路径上失效——两条都进了验收。
+
+## Decision record（决策记录）
+
+- 决策权归属：产品与范围由提出者拍板，实现细节可自主决定。
+- 决策人：提出者本人。
+- 决策日期：2026-09-21
+- 终态：accepted
+- 否决理由（status 为 rejected 时必填）：不适用。
+- 验收标准与证据：五类行同事务可读、注入失败后整体回滚无残留、`PRAGMA foreign_key_check` 无结果、跨主题 source 被拒、关闭重开后逐字段一致；证据来源为 Android instrumentation 整包运行与 JUnit XML。
+- 风险与后续范围：事务锁等待；分叉的两步写（branch → 快照行 → 回填）留给后续切片。
+
+## Next step（下一步）
+
+- accepted：已移交 requirement-decomposer，附下方「移交清单」。
+
+### 移交清单
+
+- 切片 1：跨主题 source 判定——在写入路径拒绝 source 消息/版本与目标主题不同属的分支行，并断言拒绝后不残留分支行。
+- 切片 2：首题五类行同事务入口——单事务写入 topics 1 + branches 1（根）+ messages 2 + generation_operations 1，并断言根分支 `context_snapshot_id` 为 NULL、无 source。
+- 切片 3：失败回滚与错误分类——注入失败后该主题零残留、不抛裸异常、下一次同主题创建成功。
+- 依赖顺序：切片 1 → 切片 2 → 切片 3；切片 2 依赖既有 DAO 与事务基础（T-004/T-022/T-023）。
+- 不可并行的部分：切片 1 的判定入口被切片 2 调用，两者会改同一批文件，不能并行。
+- 每个切片的验收方式：同一 instrumentation 命令 + 期望行数 + `PRAGMA foreign_key_check` 无结果。

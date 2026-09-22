@@ -1,0 +1,172 @@
+# T-020 GREEN evidence — versioned learning prompt policy (:ai)
+# captured at: 2026-09-21T20:08:29+08:00
+# command: cd android; .\gradlew.bat :ai:testDebugUnitTest --no-daemon --console=plain
+# state: same test bytes as T-020-red.txt; production code restored under android/ai/src/main/java/com/treelearn/ai/prompt
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac
+> Task :ai:preDebugUnitTestBuild UP-TO-DATE
+> Task :ai:generateDebugUnitTestStubRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :ai:processDebugUnitTestJavaRes NO-SOURCE
+> Task :ai:bundleLibRuntimeToJarDebug
+> Task :ai:bundleLibCompileToJarDebug
+> Task :ai:compileDebugUnitTestJavaWithJavac
+> Task :ai:testDebugUnitTest
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 16s
+16 actionable tasks: 5 executed, 11 up-to-date
+
+EXITCODE=0
+
+# --- mechanical check: the recorded command above really produced passing results ---
+# (exit code 0 alone is not evidence; this reads the JUnit XML the task wrote) 
+
+$ Get-ChildItem android/ai/build/test-results/testDebugUnitTest/*.xml -> read tests/failures/errors/skipped
+$xmlFiles = Get-ChildItem -LiteralPath 'android/ai/build/test-results/testDebugUnitTest' -Filter '*.xml'
+$tests = 0; $failures = 0; $errors = 0; $skipped = 0
+foreach ($file in $xmlFiles) {
+    $suite = ([xml](Get-Content -LiteralPath $file.FullName -Encoding UTF8)).testsuite
+    "{0}: tests={1} failures={2} errors={3} skipped={4} lastWrite={5:yyyy-MM-ddTHH:mm:ss}" -f $file.Name, $suite.tests, $suite.failures, $suite.errors, $suite.skipped, $file.LastWriteTime
+    $tests += [int]$suite.tests; $failures += [int]$suite.failures; $errors += [int]$suite.errors; $skipped += [int]$suite.skipped
+}
+"TOTAL tests=$tests failures=$failures errors=$errors skipped=$skipped"
+if ($tests -eq 0) { "VERDICT=FAIL (the task produced no test results at all)" }
+elseif ($failures -ne 0 -or $errors -ne 0) { "VERDICT=FAIL (failing results present)" }
+else { "VERDICT=PASS ($tests tests, 0 failures, 0 errors, $skipped skipped)" }
+--- output ---
+TEST-com.treelearn.ai.prompt.DeepSeekPromptRegistryTest.xml: tests=8 failures=0 errors=0 skipped=0 lastWrite=2026-09-21T20:08:45
+TEST-com.treelearn.ai.prompt.DeepSeekRequestAssemblerTest.xml: tests=11 failures=0 errors=0 skipped=0 lastWrite=2026-09-21T20:08:45
+TOTAL tests=19 failures=0 errors=0 skipped=0
+VERDICT=PASS (19 tests, 0 failures, 0 errors, 0 skipped)
+
+
+# ===================================================================
+# RE-RUN at 2026-09-21T20:16:49+08:00 (after the sibling gateway lane added
+# android/ai/src/main/java/com/treelearn/ai/gateway/** so the module now compiles
+# as a whole; the capture above predates those files and therefore only saw the
+# two prompt test classes).
+# command: cd android; .\gradlew.bat :ai:testDebugUnitTest --no-daemon --console=plain
+# note: the two JUnit XML suites printed below are the ones this re-run wrote.
+# ===================================================================
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac UP-TO-DATE
+> Task :ai:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :ai:preDebugUnitTestBuild UP-TO-DATE
+> Task :ai:generateDebugUnitTestStubRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :ai:bundleLibRuntimeToJarDebug
+> Task :ai:compileDebugUnitTestJavaWithJavac
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :ai:processDebugUnitTestJavaRes NO-SOURCE
+> Task :ai:testDebugUnitTest
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 21s
+16 actionable tasks: 3 executed, 13 up-to-date
+EXITCODE=0
+
+
+# ===================================================================
+# RE-RUN #2 at 2026-09-21T20:27+08:00 — after hardening the system-body assertions.
+# The first GREEN (above) printed a whole system body into the JUnit report whenever one of the
+# body-equality assertions went red: the mutation run in T-020-mutation.txt shows exactly that
+# happening (a JUnit ComparisonFailure carrying all 715 characters of the adaptive-tutor body).
+# Both test classes now compare bodies through SystemBodyAssertions, which reports only the two
+# lengths and the two SHA-256 digests. Test count is unchanged; the assertions are as strict.
+# command: cd android; .\gradlew.bat :ai:cleanTestDebugUnitTest :ai:testDebugUnitTest --no-daemon --console=plain --no-build-cache --rerun-tasks
+# (--rerun-tasks + cleanTest force a real compile and run: the plain form reported UP-TO-DATE,
+#  which is a replayed result and therefore not evidence.)
+# ===================================================================
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :ai:cleanTestDebugUnitTest
+> Task :core:compileJava
+> Task :core:processResources NO-SOURCE
+> Task :core:classes
+> Task :core:jar
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues
+> Task :ai:generateDebugResources
+> Task :ai:packageDebugResources
+> Task :ai:processDebugNavigationResources
+> Task :ai:preDebugUnitTestBuild UP-TO-DATE
+> Task :ai:javaPreCompileDebugUnitTest
+> Task :ai:javaPreCompileDebug
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :ai:processDebugUnitTestJavaRes NO-SOURCE
+> Task :ai:parseDebugLocalResources
+> Task :ai:generateDebugRFile
+> Task :ai:compileDebugJavaWithJavac
+> Task :ai:bundleLibRuntimeToJarDebug
+> Task :ai:generateDebugUnitTestStubRFile
+> Task :ai:bundleLibCompileToJarDebug
+> Task :ai:compileDebugUnitTestJavaWithJavac
+> Task :ai:testDebugUnitTest
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 18s
+17 actionable tasks: 17 executed
+# --- mechanical check on the JUnit XML this run wrote ---
+  TEST-com.treelearn.ai.gateway.AiGatewayBalanceTest.xml: tests=9 failures=0 errors=0 skipped=0
+  TEST-com.treelearn.ai.gateway.AiGatewayStreamTest.xml: tests=16 failures=0 errors=0 skipped=0
+  TEST-com.treelearn.ai.gateway.GatewayContractTest.xml: tests=8 failures=0 errors=0 skipped=0
+  TEST-com.treelearn.ai.gateway.SseFrameParserTest.xml: tests=12 failures=0 errors=0 skipped=0
+  TEST-com.treelearn.ai.prompt.DeepSeekContextEncoderTest.xml: tests=8 failures=0 errors=0 skipped=0
+  TEST-com.treelearn.ai.prompt.DeepSeekPromptRegistryTest.xml: tests=8 failures=0 errors=0 skipped=0
+  TEST-com.treelearn.ai.prompt.DeepSeekRequestAssemblerTest.xml: tests=11 failures=0 errors=0 skipped=0
+TOTAL suites=7 tests=72 failures=0 errors=0 skipped=0 newestResult=2026-09-21T20:27:28
+VERDICT=PASS (72 tests, 0 failures, 0 errors, 0 skipped)
+EXITCODE=0

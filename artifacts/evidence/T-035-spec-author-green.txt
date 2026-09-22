@@ -1,0 +1,44 @@
+# Evidence: GREEN for T-2026-09-21-035 (spec-author role + SPEC.md template)
+
+# Generated: 2026-09-21 23:35:04+0800
+# Subject files (SHA-256, line count; frozen before the runs):
+  .trae\scripts\check_spec_author_agent.py  sha256=4E2FCEBC50C4E2EB882690637CB2FE8AC72464BBBAF3A616E03B8BDB4416C814  lines=302
+  .trae\agents\spec-author.md  sha256=51C19E969FF427A7384306195BCA9D4E77B1F3E19A7C1599D0A59DAE31B279BE  lines=86
+  .trae\templates\SPEC.md  sha256=31A2720533656B1AC8273757BD721904AAB7FD8FFB9D77FA861AED541A5E5807  lines=45
+  .trae\scripts\dev\checkers_selftest.py  sha256=1359DC2A14C396D06616C60BEA230A5649EC7BD360F560A012CCD49ED088F2F9  lines=459
+
+COMMAND A (no argument): python -X utf8 .trae/scripts/check_spec_author_agent.py
+OK_LINES=16  FAIL_LINES=0  EXITCODE=0
+OK   role file and SPEC template exist — agent=True template=True
+OK   agent declares every required section — required=7; missing=[]
+OK   declares writable and read-only scopes — writable=True missing_readonly=[]
+OK   names every prerequisite file — required=4; missing=[]
+OK   every prerequisite path named by the agent exists on disk — measured_named=5 dead=[]
+OK   agent output field set equals the template FIELDS marker — agent=10 template=10 diff=[]
+OK   every template field appears backticked in the output-format section — measured=10; missing=[]
+OK   listed body sections equal the template ## titles — template=4 agent=4 diff=[]
+OK   SPEC template carries every content class — required=4; missing_in_headings=[]; missing_outside_comments=[]
+OK   every SPEC content class names where it came from — sections=4 without_source=[]
+OK   agent states the traceability rule and the token-only rule — traceability=True token_rule=True
+OK   handoff target is requirement-decomposer
+OK   no placeholder tokens — measured=[]
+OK   every printed branch is registered — measured_unregistered=[]
+OK   guard branch registry matches its injected-violation cases — measured_without_case=[]
+OK   no orphan self-test case for this guard — measured_orphans=[]
+
+check_spec_author_agent: 0 check(s) failed
+EXITCODE=0
+
+COMMAND B (the SPEC template passed as an instance; expected to FAIL on the intent path):
+python -X utf8 .trae/scripts/check_spec_author_agent.py .trae/templates/SPEC.md
+OK_LINES=16  FAIL_LINES=1  EXITCODE=1
+FAIL spec instance is complete and traceable — path=.trae/templates/SPEC.md problems=['intent path does not exist: Docs/intent/INTENT-YYYY-MM-DD-<kebab-case>.md']
+
+check_spec_author_agent: 1 check(s) failed
+EXITCODE=1
+
+# Post-run recheck of subject hashes:
+  .trae\scripts\check_spec_author_agent.py  sha256=4E2FCEBC50C4E2EB882690637CB2FE8AC72464BBBAF3A616E03B8BDB4416C814  lines=302
+  .trae\agents\spec-author.md  sha256=51C19E969FF427A7384306195BCA9D4E77B1F3E19A7C1599D0A59DAE31B279BE  lines=86
+  .trae\templates\SPEC.md  sha256=31A2720533656B1AC8273757BD721904AAB7FD8FFB9D77FA861AED541A5E5807  lines=45
+  .trae\scripts\dev\checkers_selftest.py  sha256=1359DC2A14C396D06616C60BEA230A5649EC7BD360F560A012CCD49ED088F2F9  lines=459

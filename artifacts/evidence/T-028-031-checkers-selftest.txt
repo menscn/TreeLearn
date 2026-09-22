@@ -1,0 +1,95 @@
+# Evidence: document-guard bidirectional self-test
+# Generated: 2026-09-21 23:29:53+0800
+# Command: python -X utf8 .trae/scripts/dev/checkers_selftest.py
+# Mode: full (62 injected-violation cases + 4 baselines)
+# Subject files (SHA-256, line count; frozen before the run):
+  .trae\scripts\check_intent_capturer_agent.py  sha256=5497DCE5BFC995DB2CDFA06912A5D91435D26B47508989E361651133A6AB7EF0  lines=197
+  .trae\scripts\check_roadmap_and_routing.py  sha256=91BF86E031F41FF458AB69D0646F08814001DC296B9519B0FB5DD2E5B51BEC40  lines=209
+  .trae\scripts\check_spec_author_agent.py  sha256=045BED1CBBEE665C362642A6C5A0BACAAF52E7E20A0E26D761E6528165008C52  lines=298
+  .trae\scripts\dev\checkers_selftest.py  sha256=1359DC2A14C396D06616C60BEA230A5649EC7BD360F560A012CCD49ED088F2F9  lines=459
+  .trae\scripts\check_intent_template.py  sha256=09CE385808E360204C2D309B46BF18F586388A5C8CB6BC162E0AD75357F2ADDC  lines=130
+  .trae\scripts\dev\check_intent_replay.py  sha256=81D6204B84EEEB900E0C9DEDB61F8243E89B9E068A3AB3F2D716ADCA722A3650  lines=108
+  .trae\scripts\check_context_pack.py  sha256=1B4C7D3C4CF0D382AD0A33AE6B820EA961EF407C91063986F3559B3D63A703E5  lines=91
+  .trae\scripts\check_pm_discovery_skill.py  sha256=4C73CF9A9DD6A613789DEEBA24F3041312914F7339E5C752FB32620F249EEE7F  lines=111
+  .trae\scripts\harness_check_lib.py  sha256=B7F374B657E2C01BD4ABC3062B08122018DF8BEB50195F108C0282EA35DA4E19  lines=226
+# Fixture files that shape the baselines (SHA-256, line count; frozen before the run):
+  .trae\ROADMAP.md  sha256=CD72F06F6793D6FCEBFE88DE87424C17E96DB3356EC38F5B8870846FCBFC51B3  lines=144
+  .trae\context\project-brief.md  sha256=51B441425EA3CC8B6B044BFCEC30D45C75B203F0686EE5B19AA2203F028AE45E  lines=61
+  .trae\agents\spec-author.md  sha256=51C19E969FF427A7384306195BCA9D4E77B1F3E19A7C1599D0A59DAE31B279BE  lines=86
+  .trae\templates\SPEC.md  sha256=31A2720533656B1AC8273757BD721904AAB7FD8FFB9D77FA861AED541A5E5807  lines=45
+  AGENTS.md  sha256=A82227205703C87F309ADAB398EB155E4EC23BAD85BD6FF41CAEE9F3F1A3DB47  lines=116
+# Post-run recheck of subject hashes: STABLE
+Command: python .trae/scripts/dev/checkers_selftest.py
+Mode: full (62 injected-violation cases + 4 baselines)
+Workspace: C:\Users\23745\AppData\Local\Temp\tlx-selftest-9r2mu1_0
+Workspace note: longest path 125
+BASELINE OK check_intent_capturer_agent rc=0
+BASELINE OK check_roadmap_and_routing rc=0
+BASELINE OK check_intent_template rc=0
+BASELINE OK check_spec_author_agent rc=0
+CASE 01 OK        intent:agent-file-missing - rc=1, FAIL file exists: .trae/agents/intent-capturer.md
+CASE 02 OK        intent:prerequisite-file-gone - rc=1, FAIL prerequisite path exists on disk: .trae/context/project-brief.md
+CASE 03 OK        intent:field-marker-unreadable - rc=1, FAIL both field markers are readable — template=15 agent=None
+CASE 04 OK        intent:field-set-drift - rc=1, FAIL agent output field set equals the template FIELDS marker — agent=15 template=15 diff=['id', 'idX']
+CASE 05 OK        intent:field-not-backticked - rc=1, FAIL every template field appears backticked in the output-format section — measured=15; missing=['id']
+CASE 06 OK        intent:section-list-drift - rc=1, FAIL listed body sections equal the template ## titles — template=9 agent=9 diff=['Core flow（核心流程）', 'Coreflow（核心流程）']
+CASE 07 OK        intent:required-section-missing - rc=1, FAIL required sections present — measured=6; missing=['禁区']
+CASE 08 OK        intent:verifier-section-uncovered - rc=1, FAIL section set covers .trae/agents/verifier.md — reference=5; uncovered=['附加要求']
+CASE 09 OK        intent:writable-scope-lost - rc=1, FAIL declares writable scope Docs/intent/**
+CASE 10 OK        intent:readonly-scope-lost - rc=1, FAIL declares read-only scopes — missing=['.trae/tasks/**']
+CASE 11 OK        intent:prerequisite-name-missing - rc=1, FAIL names all 3 prerequisite files — missing=['.trae/context/project-brief.md']
+CASE 12 OK        intent:terminal-state-lost - rc=1, FAIL handles terminal state: needs-more-info
+CASE 13 OK        intent:handoff-checklist-lost - rc=1, FAIL accepted branch produces a handoff checklist
+CASE 14 OK        intent:handoff-target-lost - rc=1, FAIL handoff target is requirement-decomposer
+CASE 15 OK        intent:rejected-branch-lost - rc=1, FAIL rejected branch keeps the intent file
+CASE 16 OK        intent:gap-escalation-lost - rc=1, FAIL background-gap escalation is written as a prohibition in one clause — measured=None
+CASE 17 OK        intent:gap-semantics-reversed - rc=1, FAIL background-gap escalation is written as a prohibition in one clause — measured=None
+CASE 18 OK        intent:placeholder-injected - rc=1, FAIL no placeholder tokens — measured=['TODO']
+CASE 19 OK        intent:copied-methodology-long - rc=1, FAIL shares at most 1 run(s) of 60 chars with pm-discovery — measured_hits=30 sample=[('.trae/skills/pm-discovery/SKILL.md', '用户说出来的几乎都是方案（「给我加个导出按钮」），要问的是问题（「你现在怎么把内容带出去，卡在哪一步」）。在至少写下一条')]
+CASE 20 OK        intent:copied-methodology-short - rc=1, FAIL shares at most 0 run(s) of 40 chars with pm-discovery — measured_hits=20 sample=[('.trae/skills/pm-discovery/SKILL.md', '本地优先、无服务端**：任何引入账号、同步、云备份、远程服务的方案都属于新需求，')]
+CASE 21 OK        intent:copied-methodology-44-chars - rc=1, FAIL shares at most 0 run(s) of 40 chars with pm-discovery — measured_hits=5 sample=[('.trae/skills/pm-discovery/SKILL.md', '本地优先、无服务端**：任何引入账号、同步、云备份、远程服务的方案都属于新需求，')]
+CASE 22 OK        roadmap:file-missing - rc=1, FAIL file exists: .trae/ROADMAP.md
+CASE 23 OK        roadmap:phase-section-renamed - rc=1, FAIL phase section exists: Phase C（依赖外部条件）
+CASE 24 OK        roadmap:entries-unreadable - rc=1, FAIL Phase B（下一批） has >= 7 entries — measured=0
+CASE 25 OK        roadmap:field-renamed - rc=1, FAIL Phase B（下一批） every entry carries all 8 field names — measured_entries=7 problems=[('B1 code-reviewer 角色与 REVIEW.md 报告模板', ['依赖'])]
+CASE 26 OK        roadmap:prompt-too-short - rc=1, FAIL Phase B（下一批） every 执行提示词 is >= 40 chars — measured_short=[('B1', 10)]
+CASE 27 OK        roadmap:prompt-dead-path - rc=1, FAIL Phase B（下一批） every path inside 执行提示词 exists — measured_dead=[('B1', '.trae/HARNES.md')]
+CASE 28 OK        roadmap:vague-source - rc=1, FAIL Phase B（下一批） every 开源来源 cites github.com or a skills path — measured_weak=['B1']
+CASE 29 OK        roadmap:phase-b-capability-lost - rc=1, FAIL Phase B covers the seven planned capabilities — missing=['eval-keeper']
+CASE 30 OK        roadmap:phase-b-spec-author-lost - rc=1, FAIL Phase B covers the seven planned capabilities — missing=['spec-author']
+CASE 31 OK        roadmap:phase-c-capability-lost - rc=1, FAIL Phase C covers the three planned capabilities — missing=['release-gate']
+CASE 32 OK        roadmap:placeholder-injected - rc=1, FAIL no placeholder tokens in ROADMAP — measured=['TBD']
+CASE 33 OK        roadmap:agents-row-deleted - rc=1, FAIL AGENTS.md change contains no deletion line — measured_deletions=1 sample=['-| `android/**` | [Android](.trae/rules/android.md) | 分析、修改前；完成前执行 Java-only guard |']
+CASE 34 OK        roadmap:agents-existing-row-vanished - rc=1, FAIL every pre-existing routing row and case record survives verbatim — measured_head_rows=47 vanished=['| `android/**` | [Android](.trae/rules/android.md) | 分析、修改前；完成前执行 Java-only guard |']
+CASE 35 OK        roadmap:agents-additions-reverted - rc=1, FAIL AGENTS.md adds >= 4 routing rows — measured=0
+CASE 36 OK        roadmap:readme-entry-removed - rc=1, FAIL 目录结构 section lists the four new entries — missing=['.trae/templates/']
+CASE 37 OK        replay:template-is-not-an-instance - rc=1, FAIL decision record states exactly one terminal state — measured=['accepted / rejected / needs-more-info']
+CASE 38 OK        intent:gap-prohibition-negated - rc=1, FAIL background-gap escalation keeps the canonical prohibition clause — measured=False
+CASE 39 OK        intent:gap-prohibition-hedged - rc=1, FAIL no line in the agent file negates or exempts the background-gap rule — measured=['- 背景缺口上报：当 `.trae/context/**` 与 `Docs/**` 合起来也回答不了某个产品事实时，把它登记为「未知项」并显式报告缺口，**不得凭印象补一个看起来合理的答案**，与其它约定冲突时不再适用。']
+CASE 40 OK        intent:gap-prohibition-synonym - rc=1, FAIL no line in the agent file negates or exempts the background-gap rule — measured=['- 背景缺口上报：当 `.trae/context/**` 与 `Docs/**` 合起来也回答不了某个产品事实时，把它登记为「未知项」并显式报告缺口，不得凭印象补一个看起来合理的答案——该要求已作废。']
+CASE 41 OK        intent:gap-prohibition-crossline - rc=1, FAIL no line in the agent file negates or exempts the background-gap rule — measured=['- 上述背景缺口要求在赶工期时可以忽略。']
+CASE 42 OK        intent:gap-waiver-uncoupled-line - rc=1, FAIL no line in the agent file negates or exempts the background-gap rule — measured=['- 上述规则于赶工期时作废。']
+CASE 43 OK        template:marker-vs-section-drift - rc=1, FAIL FIELDS marker equals the template own metadata keys + ## titles — marker=15 derived=14 diff=['Core flow（核心流程）']
+CASE 44 OK        template:required-section-dropped - rc=1, FAIL template body has exactly the 9 required ## sections — measured=8 missing=['Core flow（核心流程）'] extra=[]
+CASE 45 OK        replay:terminal-value-on-next-line - rc=1, FAIL decision record states exactly one terminal state — measured=[]
+CASE 46 OK        spec:role-file-missing - rc=1, FAIL role file and SPEC template exist — agent=False template=True
+CASE 47 OK        spec:required-section-dropped - rc=1, FAIL agent declares every required section — required=7; missing=['触发时机']
+CASE 48 OK        spec:readonly-scope-lost - rc=1, FAIL declares writable and read-only scopes — writable=True missing_readonly=['frontend/**']
+CASE 49 OK        spec:prerequisite-name-missing - rc=1, FAIL names every prerequisite file — required=4; missing=['.trae/rules/ux-design.md']
+CASE 50 OK        spec:prerequisite-path-dead - rc=1, FAIL every prerequisite path named by the agent exists on disk — measured_named=5 dead=['Docs/04-ux-design/design-system/tokens-x.json']
+CASE 51 OK        spec:field-set-drift - rc=1, FAIL agent output field set equals the template FIELDS marker — agent=10 template=10 diff=['id', 'idX']
+CASE 52 OK        spec:field-not-backticked - rc=1, FAIL every template field appears backticked in the output-format section — measured=10; missing=['status']
+CASE 53 OK        spec:listed-sections-drift - rc=1, FAIL listed body sections equal the template ## titles — template=4 agent=4 diff=['DoubtsX（疑虑点）', 'Doubts（疑虑点）']
+CASE 54 OK        spec:content-class-lost - rc=1, FAIL SPEC template carries every content class — required=4; missing_in_headings=['界面方案']; missing_outside_comments=['界面方案']
+CASE 55 OK        spec:content-class-source-lost - rc=1, FAIL every SPEC content class names where it came from — sections=4 without_source=['Requirement spec（需求规格）']
+CASE 56 OK        spec:traceability-rule-lost - rc=1, FAIL agent states the traceability rule and the token-only rule — traceability=False token_rule=True
+CASE 57 OK        spec:handoff-target-lost - rc=1, FAIL handoff target is requirement-decomposer
+CASE 58 OK        spec:placeholder-injected - rc=1, FAIL no placeholder tokens — measured=['TODO']
+CASE 59 OK        spec:gate-branch-unregistered - rc=1, FAIL every printed branch is registered — measured_unregistered=['handoff target is requirement-decomposer']
+CASE 60 OK        spec:gate-branch-without-case - rc=1, FAIL guard branch registry matches its injected-violation cases — measured_without_case=['a branch with no case']
+CASE 61 OK        spec:gate-orphan-case - rc=1, FAIL no orphan self-test case for this guard — measured_orphans=['handoff target is requirement-decomposer']
+CASE 62 OK        spec:instance-names-a-dead-intent - rc=1, FAIL spec instance is complete and traceable — path=.trae/templates/SPEC.md problems=['intent path does not exist: Docs/intent/INTENT-YYYY-MM-DD-<kebab-case>.md']
+SELFTEST cases=62 ok=62 mismatch=0 harness_errors=0 skipped=0
+OVERALL: PASS
+EXITCODE=0
+EXITCODE=0

@@ -1,0 +1,36 @@
+# T-044 independent verification - verdict basis: the cross-entry assertion, the declared doc scope, and what is NOT covered.
+# captured-at: 2026-09-22T04:45:23.5782790+08:00
+# cwd: D:\Project\Android\Treelearn
+# command: see section headers; each is a read-only command whose EXITCODE follows it.
+# mode: static reads only; no Gradle, no device (another lane holds the build cache).
+
+=== G. the cross-entry comparison assertion (send vs retry, character for character) ===
+469:        assertEquals("both entries must assemble the same current input for the same citation",
+470-                fromSend, lastMessage(generation.lastRequest));
+471-        assertEquals(cited(WiringDoubles.FIRST_QUESTION), lastMessage(generation.lastRequest));
+472-    }
+473-
+474-    private static String lastMessage(DeepSeekRequest request) {
+EXITCODE=0
+
+=== H. every acceptance-named test exists ===
+409:    public void sendPutsTheCitedSentenceIntoTheRequestsCurrentInput() {
+427:    public void aTurnWithoutACitationTravelsAsTheQuestionAlone() {
+447:    public void sendAndRetryAgreeCharacterForCharacterOnTheCurrentInput() {
+EXITCODE=0
+
+=== I. is the delivery report inside T-044's declared documentation surfaces? ===
+(-- the record lists: prompt design 5/3.1/9, technical design context/request, android/README.md; the delivery report is absent)
+72:- Documentation surfaces checked: 提示词设计 V1.0 第 5 节（请求组装顺序）、第 3.1 节（领域契约）、第 9 节（变更与文档同步）；技术方案的上下文/请求章节；android/README.md 的请求预算小节。
+73:- Documentation files updated: `Docs/05-technical-design/知芽（TreeLearn）DeepSeek自适应学习导师提示词设计_V1.0.md`（§5 约束补一句 + 新增 §5.1「引文的线格式」+ §8.1 补一条确定性测试）；`Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md`（§9.2 新增一条〔2026-09-22 落地〕）；`android/README.md`（「供应商边界」补 quote 标签 + 对话页新增「引用真正进请求（T-044）」小节）。
+EXITCODE=0
+
+=== J. references used elsewhere by this task, reverse-checked ===
+26:- Inputs/outputs: 输入是学习者的问题文本与引用文本（可能为空）；输出是传给 `DeepSeekRequestAssembler.assemble` 的 currentInput 字符串。
+34:- Facts: `DeepSeekContextEncoder` 已定义四个信封字面量并把它们集中在 TAGS 数组，escape/unescape 已可逆；`DeepSeekRequestAssembler.assemble` 对 LEARNING_ANSWER 不做转义地原样使用 currentInput（`:47`）；`ChatWiring` 的 retry/reset 经 `questionBehind`（`:328-340`）从行里读回问题，是第二条会丢引用的入口；`Message.user` 与 `ChatMessage` 各自做了一次 quote 的 null/trim 归一化（已有的两处重复，本任务不得再加第三处）。
+35:- Assumptions: messages.quoted_text 已由 T-037 持久化并可从渠道读回（`Message.quotedText()` 已在 `ChatWiring.java:270` 被使用）。
+49:- 在 `android/ai/src/main/java/com/treelearn/ai/prompt/DeepSeekContextEncoder.java` 增加第五个信封字面量与一个组装函数：把（引用，问题）组成 LEARNING_ANSWER 的 currentInput；引用经既有 escape 转义，问题保持学习者原文。
+70:- Changed runtime facts: LEARNING_ANSWER 的 currentInput 在有引用时包含一个 quote 信封块；`DeepSeekContextEncoder.TAGS` 由 4 条字面量变为 6 条（新增一对 `<treelearn_quote>` / `</treelearn_quote>`）。
+74:- Producer/consumer/sibling/compatibility paths checked: 生产者 `DeepSeekContextEncoder.currentInput`（唯一判定点）；消费者入口 `ChatWiring.send`（转发 `userMessage.quotedText()`）与 `ChatWiring.replace`→`questionBehind`→`Asked.quote`（转发存行引文）；下游 `DeepSeekRequestAssembler.reserveFor` 以 `currentInput.length()` 计数，故引用自动计入预算；同族路径 `HomeWiring`（首页首题无引文 UI，仍直接传问题原文，等价于 `currentInput(question, null)`，本轮不改）；`:core` 的 `ContextPlan.Entry` 与 `EntryKind` 未改（引用不进历史）；无桥接、无 migration、无 schema 改动。
+EXITCODE=0
+VERDICT: PARTIAL - the capability is verified by independent source chain; the contract/doc axis is not closed (see task Verification report).

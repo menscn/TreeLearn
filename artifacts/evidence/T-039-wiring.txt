@@ -1,0 +1,37 @@
+T-039 wiring evidence - the page is reachable from production source (not test-only)
+captured-at: 2026-09-22T03:28:09.3390226+08:00
+cwd: D:\Project\Android\Treelearn
+reason: the host wiring (screen construction, presenter construction, entry-point listeners) is Android View code with no JVM seam, so the acceptance evidence is (a) the build compiles and (b) production source contains the construction point and the three entries.
+
+command: rg -n --no-heading '<patterns>' android/app/src/main
+---- output ----
+android/app/src/main\java\com\treelearn\app\AppContainer.java:171:    public NavigationData navigationData() {
+android/app/src/main\java\com\treelearn\app\MainActivity.java:22:import com.treelearn.app.navigation.NavigationSink;
+android/app/src/main\java\com\treelearn\app\MainActivity.java:57:        implements HomeSink, SettingsSink, ChatSink, TreeCanvasSink, NavigationSink {
+android/app/src/main\java\com\treelearn\app\MainActivity.java:247:     * <p>{@link TreeCanvasSink#leaveTree()} and {@link NavigationSink#leaveTree()} share a signature and
+android/app/src/main\java\com\treelearn\app\MainActivity.java:278:    public void openNavigation(String branchId) {
+android/app/src/main\java\com\treelearn\app\MainActivity.java:288:    public void openArchived(String branchId) {
+android/app/src/main\java\com\treelearn\app\MainActivity.java:428:            final String topicId = container.navigationData().topicOf(branchId);
+android/app/src/main\java\com\treelearn\app\MainActivity.java:451:        navigationScreen = new NavigationScreen(this);
+android/app/src/main\java\com\treelearn\app\MainActivity.java:452:        navigationPresenter = new NavigationPresenter(this, container.uiThread(),
+android/app/src/main\java\com\treelearn\app\MainActivity.java:453:                container.background(), container.navigationData(), topicId, branchId);
+android/app/src/main\java\com\treelearn\app\MainActivity.java:455:        navigationScreen.setHost(new NavigationScreen.Host() {
+android/app/src/main\java\com\treelearn\app\navigation\NavigationSink.java:9:public interface NavigationSink {
+android/app/src/main\java\com\treelearn\app\navigation\NavigationPresenter.java:41:    private final NavigationSink sink;
+android/app/src/main\java\com\treelearn\app\navigation\NavigationPresenter.java:52:    public NavigationPresenter(NavigationSink sink, UiThread ui, Executor background,
+EXITCODE=0
+
+command: rg -n --no-heading "R.id.chat_nav|R.id.tree_nav|R.id.home_archived" android/app/src/main/java
+---- output ----
+android/app/src/main/java\com\treelearn\app\screen\TreeCanvasScreen.java:71:        navHost = findViewById(R.id.tree_nav_host);
+android/app/src/main/java\com\treelearn\app\screen\TreeCanvasScreen.java:78:        findViewById(R.id.tree_nav)
+android/app/src/main/java\com\treelearn\app\screen\ChatScreen.java:127:        findViewById(R.id.chat_nav)
+android/app/src/main/java\com\treelearn\app\screen\HomeScreen.java:61:        archived = findViewById(R.id.home_archived);
+EXITCODE=0
+
+command: rg -n --no-heading enabled="false" android/app/src/main/res/layout/screen_home_body.xml
+---- output (home_archived must NOT appear; home_search(:39) and home_send stay disabled - both out of this task's scope) ----
+39:                android:enabled="false"
+160:                    android:enabled="false"
+EXITCODE=0
+note: EXITCODE=0 means matches found (rg), 1 means none. Lines above are raw scanner output.

@@ -1,0 +1,166 @@
+captured-at: 2026-09-22T05:08:54.2909009+08:00
+cwd: D:\Project\Android\Treelearn
+purpose: refresh every line-number reference the T-042 task file and delivery report make; the previous numbers were measured before the parallel T-040 lane rewrote MainActivity/AppContainer
+tool: Get-ChildItem/Select-String over the working tree (build dirs excluded); each section prints file:line: text
+--- begin output ---
+### seam: MainActivity.showChat declarations and delegation
+  android\app\src\main\java\com\treelearn\app\MainActivity.java:195: showChat(chatBranchId);
+  android\app\src\main\java\com\treelearn\app\MainActivity.java:204: showChat(navigationBranchId);
+  android\app\src\main\java\com\treelearn\app\MainActivity.java:208: showChat(treeBranchId);
+  android\app\src\main\java\com\treelearn\app\MainActivity.java:235: showChat(branchId);
+  android\app\src\main\java\com\treelearn\app\MainActivity.java:294: * {@link #showChat(String, ReadingAnchor)}, the door T-042 built, so a search jump and a restore on
+  android\app\src\main\java\com\treelearn\app\MainActivity.java:300: showChat(branchId, anchor);
+  android\app\src\main\java\com\treelearn\app\MainActivity.java:318: showChat(treeBranchId);
+  android\app\src\main\java\com\treelearn\app\MainActivity.java:431: private void showChat(String branchId) {
+  android\app\src\main\java\com\treelearn\app\MainActivity.java:432: showChat(branchId, null);
+  android\app\src\main\java\com\treelearn\app\MainActivity.java:445: private void showChat(String branchId, ReadingAnchor explicitAnchor) {
+  android\app\src\main\java\com\treelearn\app\MainActivity.java:558: showChat(selected);
+  hits=11
+### reading store production wiring (AppContainer)
+  android\app\src\main\java\com\treelearn\app\AppContainer.java:14: import com.treelearn.app.reading.SqliteReadingStore;
+  android\app\src\main\java\com\treelearn\app\AppContainer.java:130: this.readingStore = new SqliteReadingStore(helper);
+  android\app\src\main\java\com\treelearn\app\AppContainer.java:199: public ReadingStore readingStore() {
+  android\app\src\main\java\com\treelearn\app\MainActivity.java:459: ReadingStore reading = container.readingStore();
+  android\app\src\main\java\com\treelearn\app\reading\SqliteReadingStore.java:24: public final class SqliteReadingStore implements ReadingStore {
+  android\app\src\main\java\com\treelearn\app\reading\SqliteReadingStore.java:28: public SqliteReadingStore(TreeLearnDatabaseHelper helper) {
+  hits=6
+### reading port consumers outside the reading package
+  android\app\src\main\java\com\treelearn\app\AppContainer.java:13: import com.treelearn.app.reading.ReadingStore;
+  android\app\src\main\java\com\treelearn\app\AppContainer.java:14: import com.treelearn.app.reading.SqliteReadingStore;
+  android\app\src\main\java\com\treelearn\app\AppContainer.java:94: private final ReadingStore readingStore;
+  android\app\src\main\java\com\treelearn\app\AppContainer.java:130: this.readingStore = new SqliteReadingStore(helper);
+  android\app\src\main\java\com\treelearn\app\AppContainer.java:199: public ReadingStore readingStore() {
+  android\app\src\main\java\com\treelearn\app\AppContainer.java:200: return readingStore;
+  android\app\src\main\java\com\treelearn\app\MainActivity.java:25: import com.treelearn.app.reading.ReadingStore;
+  android\app\src\main\java\com\treelearn\app\MainActivity.java:44: import com.treelearn.core.domain.ReadingAnchor;
+  android\app\src\main\java\com\treelearn\app\MainActivity.java:45: import com.treelearn.core.domain.ReadingPosition;
+  android\app\src\main\java\com\treelearn\app\MainActivity.java:250: public void renderPosition(ReadingPosition position) {
+  android\app\src\main\java\com\treelearn\app\MainActivity.java:294: * {@link #showChat(String, ReadingAnchor)}, the door T-042 built, so a search jump and a restore on
+  android\app\src\main\java\com\treelearn\app\MainActivity.java:299: public void openAnchor(String topicId, String branchId, ReadingAnchor anchor) {
+  android\app\src\main\java\com\treelearn\app\MainActivity.java:445: private void showChat(String branchId, ReadingAnchor explicitAnchor) {
+  android\app\src\main\java\com\treelearn\app\MainActivity.java:459: ReadingStore reading = container.readingStore();
+  android\app\src\main\java\com\treelearn\app\reading\ReadingSession.java:6: import com.treelearn.core.domain.ReadingAnchor;
+  android\app\src\main\java\com\treelearn\app\reading\ReadingSession.java:7: import com.treelearn.core.domain.ReadingPosition;
+  android\app\src\main\java\com\treelearn\app\reading\ReadingSession.java:17: * {@link ReadingAnchor#resolve} and {@link ViewportSeen#onViewport} — and it is deliberately the
+  android\app\src\main\java\com\treelearn\app\reading\ReadingSession.java:27: public final class ReadingSession {
+  android\app\src\main\java\com\treelearn\app\reading\ReadingSession.java:29: private final ReadingStore store;
+  android\app\src\main\java\com\treelearn\app\reading\ReadingSession.java:31: public ReadingSession(ReadingStore store) {
+  android\app\src\main\java\com\treelearn\app\reading\ReadingSession.java:46: public ReadingPosition open(Branch branch, List<Message> messages, int itemHeightPx) {
+  android\app\src\main\java\com\treelearn\app\reading\ReadingSession.java:49: ReadingAnchor stored = store.anchorOf(branch.id);
+  android\app\src\main\java\com\treelearn\app\reading\ReadingSession.java:51: return ReadingPosition.liveEnd(messages);
+  android\app\src\main\java\com\treelearn\app\reading\ReadingSession.java:71: public void remember(Branch branch, ReadingAnchor anchor) {
+  android\app\src\main\java\com\treelearn\app\reading\ReadingStore.java:4: import com.treelearn.core.domain.ReadingAnchor;
+  android\app\src\main\java\com\treelearn\app\reading\ReadingStore.java:14: public interface ReadingStore {
+  android\app\src\main\java\com\treelearn\app\reading\ReadingStore.java:17: ReadingAnchor anchorOf(String branchId);
+  android\app\src\main\java\com\treelearn\app\reading\ReadingStore.java:20: void saveAnchor(String branchId, ReadingAnchor anchor);
+  android\app\src\main\java\com\treelearn\app\reading\SqliteReadingStore.java:7: import com.treelearn.core.domain.ReadingAnchor;
+  android\app\src\main\java\com\treelearn\app\reading\SqliteReadingStore.java:10: import com.treelearn.data.db.dao.ReadingPositionDao;
+  android\app\src\main\java\com\treelearn\app\reading\SqliteReadingStore.java:13: * The SQLite side of {@link ReadingStore}: the reading position comes from
+  android\app\src\main\java\com\treelearn\app\reading\SqliteReadingStore.java:14: * {@code ReadingPositionDao}, the seen sequence from the branch row {@code BranchDao} already owns.
+  android\app\src\main\java\com\treelearn\app\reading\SqliteReadingStore.java:24: public final class SqliteReadingStore implements ReadingStore {
+  android\app\src\main\java\com\treelearn\app\reading\SqliteReadingStore.java:28: public SqliteReadingStore(TreeLearnDatabaseHelper helper) {
+  android\app\src\main\java\com\treelearn\app\reading\SqliteReadingStore.java:33: public ReadingAnchor anchorOf(String branchId) {
+  android\app\src\main\java\com\treelearn\app\reading\SqliteReadingStore.java:34: return ReadingPositionDao.read(database(), branchId);
+  android\app\src\main\java\com\treelearn\app\reading\SqliteReadingStore.java:38: public void saveAnchor(String branchId, ReadingAnchor anchor) {
+  android\app\src\main\java\com\treelearn\app\reading\SqliteReadingStore.java:39: ReadingPositionDao.write(database(), branchId, Guard.object(anchor, "anchor"));
+  android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java:30: import com.treelearn.core.domain.ReadingAnchor;
+  android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java:31: import com.treelearn.core.domain.ReadingPosition;
+  android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java:98: private ReadingPosition pendingPosition;
+  android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java:102: private ReadingAnchor settledAnchor;
+  android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java:260: public void renderPosition(ReadingPosition position) {
+  android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java:268: ReadingPosition position = pendingPosition;
+  android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java:346: ReadingAnchor anchor = null;
+  android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java:351: anchor = ReadingAnchor.of(entry.getKey(), null, Math.max(0, into),
+  android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java:422: ReadingAnchor anchor = settledAnchor;
+  android\app\src\main\java\com\treelearn\app\search\SearchPresenter.java:4: import com.treelearn.core.domain.ReadingAnchor;
+  android\app\src\main\java\com\treelearn\app\search\SearchPresenter.java:45: void openAnchor(String topicId, String branchId, ReadingAnchor anchor);
+  android\app\src\main\java\com\treelearn\app\ui\ChatActions.java:4: import com.treelearn.core.domain.ReadingAnchor;
+  android\app\src\main\java\com\treelearn\app\ui\ChatActions.java:96: * {@code ReadingSession.remember} is the one write path for a reading position.
+  android\app\src\main\java\com\treelearn\app\ui\ChatActions.java:98: void onLeaving(ReadingAnchor anchor);
+  android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:3: import com.treelearn.app.reading.ReadingSession;
+  android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:4: import com.treelearn.app.reading.ReadingStore;
+  android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:10: import com.treelearn.core.domain.ReadingAnchor;
+  android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:11: import com.treelearn.core.domain.ReadingPosition;
+  android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:41: *       was and whether the unread badge may clear are {@link ReadingSession}'s two rules; this class
+  android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:67: private final ReadingSession session;
+  android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:77: ReadingStore reading) {
+  android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:87: this.session = new ReadingSession(require(reading, "reading"));
+  android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:381: final ReadingPosition position = session.open(branch, rows, itemHeightPx);
+  android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:395: public void onLeaving(ReadingAnchor anchor) {
+  android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:429: * <p>{@code ReadingPositionDao} and {@code BranchDao} are fail-closed: a write that did not land
+  android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:433: private void remember(Branch branch, ReadingAnchor anchor) {
+  android\app\src\main\java\com\treelearn\app\ui\ChatSink.java:4: import com.treelearn.core.domain.ReadingPosition;
+  android\app\src\main\java\com\treelearn\app\ui\ChatSink.java:71: void renderPosition(ReadingPosition position);
+  android\app\src\main\java\com\treelearn\app\ui\HomeViewState.java:60: * <p>{@code ReadingPositionDao} and {@code BranchDao} refuse rather than report a write that
+  hits=67
+### the first-frame viewport report and its port
+  android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java:105: private final Runnable scrollSettled = this::reportScroll;
+  android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java:164: oldRight, oldBottom) -> reportRowsLaidOut());
+  android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java:297: private void reportRowsLaidOut() {
+  android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java:306: Set<String> visible = visibleRows();
+  android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java:308: fire(actions -> actions.onRowsLaidOut(itemHeightPx, visible));
+  android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java:312: private Set<String> visibleRows() {
+  android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java:344: private void reportScroll() {
+  android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java:356: Set<String> visible = visibleRows();
+  android\app\src\main\java\com\treelearn\app\ui\ChatActions.java:90: void onRowsLaidOut(int itemHeightPx, Set<String> visibleMessageIds);
+  android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:372: public void onRowsLaidOut(int itemHeightPx, Set<String> visibleMessageIds) {
+  hits=10
+### the two guarded writes and the notice they raise
+  android\app\src\main\java\com\treelearn\app\screen\NoticeText.java:39: case READING_POSITION:
+  android\app\src\main\java\com\treelearn\app\screen\NoticeText.java:40: return R.string.notice_reading_position;
+  android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:433: private void remember(Branch branch, ReadingAnchor anchor) {
+  android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:437: noticeReadingFailure();
+  android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:447: private boolean seen(Branch branch, List<Message> rows, Set<String> visible) {
+  android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:451: noticeReadingFailure();
+  android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:457: private void noticeReadingFailure() {
+  android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:458: ui.post(() -> render(state.withNotice(HomeViewState.Notice.READING_POSITION)));
+  android\app\src\main\java\com\treelearn\app\ui\HomeViewState.java:64: READING_POSITION;
+  hits=9
+### ChatScreen measurements and notice surface
+  android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java:105: private final Runnable scrollSettled = this::reportScroll;
+  android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java:120: notice = findViewById(R.id.chat_notice);
+  android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java:163: messageFlow.addOnLayoutChangeListener((view, left, top, right, bottom, oldLeft, oldTop,
+  android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java:165: scroll.setOnScrollChangeListener((view, x, y, oldX, oldY) -> {
+  android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java:217: renderNotice(state.notice);
+  android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java:326: private void renderNotice(HomeViewState.Notice value) {
+  android\app\src\main\java\com\treelearn\app\screen\HomeScreen.java:163: renderNotice(state.notice);
+  android\app\src\main\java\com\treelearn\app\screen\HomeScreen.java:194: private void renderNotice(HomeViewState.Notice value) {
+  hits=8
+### the deleted four-argument factory and the test-side replacement
+  android\app\src\main\java\com\treelearn\app\ui\TreeCanvasPresenter.java:347: return TreeSnapshot.of(rootId, nodes);
+  android\app\src\main\java\com\treelearn\app\wiring\ChatWiring.java:79: return Snapshot.of(conversation.branchTitle, messages,
+  android\app\src\test\java\com\treelearn\app\ui\ChatReadingTest.java:293: return ChatData.Snapshot.of("Transformer attention", viewOf(rows),
+  android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:62: static ChatData.Snapshot read(String title, List<ChatMessage> messages,
+  android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:64: return ChatData.Snapshot.of(title, messages, recommendations, revisionId, null,
+  android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:49: return TreeLayout.compute(TreeSnapshot.of("r", nodes), "a", density,
+  android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:94: LayoutResult layout = TreeLayout.compute(TreeSnapshot.of("r", nodes), "r", Density.MID, phone());
+  android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:133: TreeSnapshot snapshot = TreeSnapshot.of("r", List.of(
+  hits=8
+### DAO failure-closed throw sites (unchanged this round)
+  android\data\src\main\java\com\treelearn\data\db\DatabaseTransactionRunner.java:56: throw new IllegalStateException(
+  android\data\src\main\java\com\treelearn\data\db\DatabaseTransactionRunner.java:70: throw new IllegalStateException(
+  android\data\src\main\java\com\treelearn\data\db\TreeLearnDatabaseHelper.java:54: throw new IllegalStateException("TreeLearn does not downgrade the local schema ("
+  android\data\src\main\java\com\treelearn\data\db\TreeLearnDatabaseHelper.java:64: throw new IllegalStateException(
+  android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:655: throw new IllegalStateException("downgrade is not supported: " + oldVersion + " -> "
+  android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:661: throw new IllegalStateException("no forward migration is registered from schema"
+  android\data\src\main\java\com\treelearn\data\db\dao\AiArtifactDao.java:96: throw new IllegalStateException("an artifact for kind=" + row.kind + " scope="
+  android\data\src\main\java\com\treelearn\data\db\dao\AiArtifactDao.java:114: throw new IllegalStateException("kind=" + kind + " scope=" + scopeId + " has more"
+  android\data\src\main\java\com\treelearn\data\db\dao\AiArtifactDao.java:153: throw new IllegalStateException("a baseline write-back for kind=" + candidate.kind + " scope="
+  android\data\src\main\java\com\treelearn\data\db\dao\AiArtifactDao.java:200: throw new IllegalStateException("SELECT changes() returned no row");
+  android\data\src\main\java\com\treelearn\data\db\dao\BranchDao.java:75: throw new IllegalStateException("updating branch " + branch.id + " affected " + updated
+  android\data\src\main\java\com\treelearn\data\db\dao\BranchDao.java:102: throw new IllegalStateException("attaching the snapshot to branch " + branchId
+  android\data\src\main\java\com\treelearn\data\db\dao\BranchDao.java:209: throw new IllegalStateException("this branches row holds a half-filled anchor"
+  android\data\src\main\java\com\treelearn\data\db\dao\BranchDao.java:222: throw new IllegalStateException("the stored anchor is one the domain refuses ("
+  android\data\src\main\java\com\treelearn\data\db\dao\BranchDao.java:233: throw new IllegalStateException("this non-root branch has no birth snapshot, so it was"
+  android\data\src\main\java\com\treelearn\data\db\dao\ContextSnapshotDao.java:91: throw new IllegalStateException("branch " + branchId + " has more than one birth"
+  android\data\src\main\java\com\treelearn\data\db\dao\GenerationOperationDao.java:325: throw new IllegalStateException("writing " + what + " affected " + updated
+  android\data\src\main\java\com\treelearn\data\db\dao\MessageDao.java:59: throw new IllegalStateException("updating message " + message.id + " affected "
+  android\data\src\main\java\com\treelearn\data\db\dao\ReadingPositionDao.java:61: throw new IllegalStateException("this branches row points at reading_anchor_message_id "
+  android\data\src\main\java\com\treelearn\data\db\dao\ReadingPositionDao.java:96: throw new IllegalStateException("writing the reading position of branch " + branchId
+  android\data\src\main\java\com\treelearn\data\db\dao\ReadingPositionDao.java:120: throw new IllegalStateException("clearing the reading position of branch " + branchId
+  android\data\src\main\java\com\treelearn\data\db\dao\TopicDao.java:51: throw new IllegalStateException("updating topic " + topic.id + " affected " + updated
+  hits=22
+### global uncaught-exception handler (still zero hits by design)
+  hits=0
+--- end output ---
+EXITCODE=0

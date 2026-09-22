@@ -1,0 +1,43 @@
+# Evidence: T-2026-09-21-035 -- verifier FAIL items falsified again AFTER the fix
+# Subject files at the time these experiments ran (SHA-256, line count; re-verified after the runs):
+  .trae\scripts\check_spec_author_agent.py  sha256=045BED1CBBEE665C362642A6C5A0BACAAF52E7E20A0E26D761E6528165008C52  lines=298
+  .trae\templates\SPEC.md  sha256=31A2720533656B1AC8273757BD721904AAB7FD8FFB9D77FA861AED541A5E5807  lines=45
+  .trae\agents\spec-author.md  sha256=51C19E969FF427A7384306195BCA9D4E77B1F3E19A7C1599D0A59DAE31B279BE  lines=86
+  .trae\scripts\dev\checkers_selftest.py  sha256=1359DC2A14C396D06616C60BEA230A5649EC7BD360F560A012CCD49ED088F2F9  lines=459
+# Generated: 2026-09-21 23:29:09+0800
+# Method: copy .trae/ + Docs/ + AGENTS.md into a temp dir, inject there, run the copied guard.
+# The working tree is not modified by any experiment below.
+
+EXPERIMENT: A: extra branch printed with c.check() at the end of main()
+COMMAND: python -X utf8 .trae\scripts\check_spec_author_agent.py
+EXITCODE=1  FAIL_LINES=1
+  FAIL every printed branch is registered — measured_unregistered=['a branch nobody expected']
+
+EXPERIMENT: B: extra branch printed with c.ok() (not via c.check)
+COMMAND: python -X utf8 .trae\scripts\check_spec_author_agent.py
+EXITCODE=1  FAIL_LINES=1
+  FAIL every printed branch is registered — measured_unregistered=['a branch nobody expected']
+
+EXPERIMENT: C: class names left only in the FIELDS comment, removed from the ## headings
+COMMAND: python -X utf8 .trae\scripts\check_spec_author_agent.py
+EXITCODE=1  FAIL_LINES=2
+  FAIL listed body sections equal the template ## titles — template=4 agent=4 diff=['Requirement spec', 'Requirement spec（需求规格）']
+  FAIL SPEC template carries every content class — required=4; missing_in_headings=['需求规格']; missing_outside_comments=['需求规格']
+
+EXPERIMENT: C2: same idea, all four headings stripped of their Chinese class name
+COMMAND: python -X utf8 .trae\scripts\check_spec_author_agent.py
+EXITCODE=1  FAIL_LINES=2
+  FAIL listed body sections equal the template ## titles — template=4 agent=4 diff=['Doubts', 'Doubts（疑虑点）', 'Interface plan', 'Interface plan（界面方案）', 'Requirement spec', 'Requirement spec（需求规格）', 'Technical spec', 'Technical spec（技术规格）']
+  FAIL SPEC template carries every content class — required=4; missing_in_headings=['需求规格', '界面方案', '技术规格', '疑虑点']; missing_outside_comments=['需求规格', '界面方案', '技术规格', '疑虑点']
+
+EXPERIMENT: D: whole '## Interface plan（界面方案）' section deleted
+COMMAND: python -X utf8 .trae\scripts\check_spec_author_agent.py
+EXITCODE=1  FAIL_LINES=3
+  FAIL listed body sections equal the template ## titles — template=3 agent=4 diff=['Interface plan（界面方案）']
+  FAIL SPEC template carries every content class — required=4; missing_in_headings=['界面方案']; missing_outside_comments=['界面方案']
+
+EXPERIMENT: E: one whole spec: case block removed from the self-test (3 lines)
+COMMAND: python -X utf8 .trae\scripts\check_spec_author_agent.py
+EXITCODE=1  FAIL_LINES=1
+  FAIL guard branch registry matches its injected-violation cases — measured_without_case=['handoff target is requirement-decomposer']
+

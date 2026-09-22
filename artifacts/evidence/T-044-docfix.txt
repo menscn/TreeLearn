@@ -1,0 +1,43 @@
+# T-044 contract-guardian FAIL fix round - documentation only (Docs/06-delivery/TreeLearn_V1_交付报告.md).
+# captured-at: 2026-09-22T05:10:08.4082901+08:00
+# cwd: D:\Project\Android\Treelearn
+# command: rg -n for each judgement; each section's EXITCODE follows it.
+# mode: documentation edit only; no Gradle, no production code, no other task's files.
+# scope: Docs/06-delivery/TreeLearn_V1_交付报告.md (+ android/README.md inspected, no change needed).
+
+=== 1. the stale tail clause is gone (expect 0) ===
+EXITCODE=1
+
+=== 2. the correction now points at the current authority ===
+167:3. `ChatCommands.send(...)` 带一个 `quote` 参数，但 `messages` 表没有承接引用的列，提示词设计文档也没有定义引用的线格式——**引用追问在当前数据模型里无处安放**，接线时要么先补 schema（需 `db-migration-reviewer` 与用户确认），要么明确返回可见拒绝。 **〔历史快照 · 2026-09-21〕本条第前半句已过期**：`T-2026-09-21-quote-persistence-messages-column-037` 已新增 `messages.quoted_text`（`NULL` = 无引用）与其不变式触发器，并把 `DATABASE_VERSION` 升为 2；当前权威为 `android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java`。本条保留为当时的事实记录。**〔2026-09-22 修正〕尾句已不成立**：线格式已由 `T-2026-09-22-quote-into-request-044` 定稿，当前权威为提示词设计 V1.0 §5.1 与 `android/ai/src/main/java/com/treelearn/ai/prompt/DeepSeekContextEncoder.java` 的 `currentInput`；尾句原先指向的 `T-2026-09-21-real-data-path-wiring-032` 并未交付此项。
+174:> `T-2026-09-22-quote-into-request-044` 定稿了引用进入提示词的线格式（提示词设计 §5.1），并让
+EXITCODE=0
+
+=== 3. off-by-one line reference fixed (expect 0 hits for :251) ===
+106:| 划词追问的**引用文本进入发给模型的请求**〔2026-09-22 更新，T-044〕 | `ChatWiring.java:252` 把存储的引用交给 `DeepSeekContextEncoder.currentInput(input, quote)`，由后者包成 `<treelearn_quote>…</treelearn_quote>` 前置在问题正文之前；判定脚本 `.trae/scripts/dev/review_quote_path.py` 从代码推导该结论（证据文件第 6 节 `CHECK quote-reaches-prompt: PASS`）。**T-044 仍为 `verifying`，独立 verifier 尚未判定通过** |
+175:> `ChatWiring.java:252` 把存储的引用交给 `DeepSeekContextEncoder.currentInput(input, quote)`，由后者包成
+EXITCODE=0
+
+=== 4. items 1/3/4 were already satisfied before this round (evidence) ===
+171:### 5.1 引用失效：被引用的句子从未进入请求〔历史快照 · 2026-09-22 凌晨的发现；结论已被 T-044 推翻〕
+204:| T-041 划词四项菜单 + 子分支弹层 | `verifying` | 〔2026-09-22 更新〕实现已落盘且**已进入产物**（第 2 节 dex 核对 `WordMenuPopup` / `ChildBranchPopup` / `BranchChildren`）；实测规模 534~549 行（两口径）**超 500 硬上限，待用户裁定**，故未收口 |
+205:| T-044 引用进请求 | `verifying` | 〔2026-09-22 更新〕实现已落盘并进入产物（dex 内含 `<treelearn_quote>`）；contract-guardian 复核 6 问中 4 PASS / 1 PARTIAL / 1 FAIL，**唯一 FAIL 是文档面**（本报告与 `android/README.md` 滞后）。**〔2026-09-22 修正〕该文档面已同步**：本报告 §5.1 已加历史快照标记并指向当前权威、本节原先的尾句已修、本行已修；`android/README.md:666` 的残留风险出处已写作 §5.1、无需另改。**文档面同步不等于验收通过**——T-044 仍为 `verifying`，独立 verifier 已判 **PARTIAL**（残留项含归一化非唯一，见 `artifacts/evidence/T-044-verify-*.txt`），本条不记作已通过 |
+EXITCODE=0
+
+=== 5. encoding check: first bytes, replacement chars ===
+first3bytes=23 20 E7 (BOM would be EF BB BF)
+U+FFFD_count=0
+EXITCODE=0
+
+=== reading note (do not misread section 1) ===
+rg exits 1 when it finds nothing; section 1 asserts the stale clause is ABSENT, so EXITCODE=1 there is the expected
+and desired reading, not a failure. Sections 2-4 assert presence and therefore read EXITCODE=0.
+
+=== android/README.md was inspected and left unchanged (residual-risk source already reads §5.1) ===
+660:  而不是作为第二条 user 消息进历史：提示词设计 §5 把「当前问题」定为恰好一条且最后一条，引用是对这句话的限定，
+666:  发给 provider——该残留风险与理由写在提示词设计 V1.0 §5.1（引文的线格式）。
+EXITCODE=0
+=== git status for the touched paths ===
+ M android/README.md
+?? Docs/06-delivery/TreeLearn_V1_交付报告.md
+EXITCODE=0

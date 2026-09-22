@@ -1,0 +1,386 @@
+# T-008 test + compile-only evidence, no-emulator round (user instruction 2026-09-21)
+CapturedAt=2026-09-21T21:29:03.8982672+08:00
+
+## 1. JVM suite counts, read back from the JUnit XML (not from memory or console prose)
+Command: cd android; .\gradlew.bat :app:testDebugUnitTest --no-daemon --console=plain
+Read from: android/app/build/test-results/testDebugUnitTest/TEST-<class>.xml (tests/failures/errors/skipped attributes)
+Exit code: 0   (BUILD SUCCESSFUL)
+com.treelearn.app.generation.GenerationSchedulerTest  tests=5  failures=0  errors=0  skipped=0
+com.treelearn.app.generation.StreamBatchTest          tests=5  failures=0  errors=0  skipped=0
+com.treelearn.app.generation.LiveAttemptsTest         tests=3  failures=0  errors=0  skipped=0
+com.treelearn.app.generation.RecoveryScanTest         tests=3  failures=0  errors=0  skipped=0
+-> T-008 own JVM suites: 16 tests, 0 failures, 0 errors. (The same run also carries 11 passing tests of a
+   sibling lane, FirstTopicCreationRulesTest, which is why the Gradle summary line reads 27 tests completed.)
+
+## 2. Which guarantee each JVM suite proves (the T-008 acceptance criteria that do not need a device)
+- at most two concurrent generations, the third waits, and the wait is FIFO      -> GenerationSchedulerTest
+- one attempt per branch, running or waiting, and a refusal takes no slot/place  -> GenerationSchedulerTest
+- 250 ms / 256 character write window, both boundary pairs, window re-opened      -> StreamBatchTest
+- an event after the attempt has an outcome is no longer current (late drop)      -> LiveAttemptsTest
+- retrying in place under the same command makes the earlier operation stale      -> LiveAttemptsTest
+- cancel-by-operation resolves the live attempt, unknown ids resolve to nothing   -> LiveAttemptsTest
+- startup recovery moves every leftover to a terminal, reportable outcome         -> RecoveryScanTest
+- a row that should already be terminal is refused, not relabelled                -> RecoveryScanTest
+
+## 3. Instrumentation source set: COMPILED, never executed
+Command: cd android; .\gradlew.bat :app:assembleDebugAndroidTest --rerun-tasks --no-build-cache --no-daemon --console=plain
+Why forced: running the round command alone reported :app:compileDebugAndroidTestJavaWithJavac as
+  FROM-CACHE, which is a cache hit, not a fresh compile. --rerun-tasks --no-build-cache removes both
+  shortcuts, so the javac task really ran against the current sources.
+Observed task lines:
+  > Task :app:compileDebugAndroidTestJavaWithJavac      (no UP-TO-DATE, no FROM-CACHE)
+  BUILD SUCCESSFUL in 22s
+  EXITCODE=0
+That compiles every file in app/src/androidTest, including GenerationCoordinatorInstrumentedTest,
+  which is kept as a compiling source this round and is NOT executed.
+
+## 4. Deferred because no emulator may be used this round
+deferred - emulator not used this round (user instruction 2026-09-21):
+- every one of the 15 GenerationCoordinatorInstrumentedTest cases (device SQLite, real callback threads)
+- restore-after-restart on a device, rotation/navigation not cancelling an attempt, background survival
+- the atomicity of the startup recovery transaction over GenerationOperationDao.findRecoverable
+- the end-to-end "row durable before the call opens" and "first topic written inside accepted" paths
+None of these is claimed as PASS anywhere in the task file or in android/README.md.
+
+--- raw output of the forced compile-only run ---
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava
+> Task :core:processResources NO-SOURCE
+> Task :core:classes
+> Task :core:jar
+> Task :tree-layout:compileJava
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes
+> Task :tree-layout:jar
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues
+> Task :ai:generateDebugResources
+> Task :ai:packageDebugResources
+> Task :ai:processDebugNavigationResources
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug
+> Task :ai:javaPreCompileDebug
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :ai:compileDebugLibraryResources
+> Task :data:writeDebugAarMetadata
+> Task :data:processDebugNavigationResources
+> Task :ai:writeDebugAarMetadata
+> Task :app:processDebugNavigationResources
+> Task :ai:parseDebugLocalResources
+> Task :app:checkDebugAarMetadata
+> Task :app:generateDebugResValues
+> Task :data:generateDebugResValues
+> Task :app:compileDebugNavigationResources
+> Task :data:generateDebugResources
+> Task :data:packageDebugResources
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :ai:generateDebugRFile
+> Task :ai:compileDebugJavaWithJavac
+> Task :ai:bundleLibCompileToJarDebug
+> Task :app:packageDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :ai:extractDeepLinksDebug
+> Task :app:extractDeepLinksDebug
+> Task :data:extractDeepLinksDebug
+> Task :data:compileDebugLibraryResources
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :data:javaPreCompileDebug
+> Task :data:parseDebugLocalResources
+> Task :app:javaPreCompileDebugAndroidTest
+> Task :app:parseDebugLocalResources
+> Task :app:mergeDebugResources
+> Task :app:checkDebugAndroidTestAarMetadata
+> Task :app:processDebugAndroidTestNavigationResources
+> Task :app:compileDebugAndroidTestNavigationResources
+> Task :data:generateDebugRFile
+> Task :app:generateDebugAndroidTestResValues
+> Task :ai:processDebugManifest
+> Task :data:processDebugManifest
+> Task :data:compileDebugJavaWithJavac
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :data:bundleLibCompileToJarDebug
+> Task :app:mapDebugAndroidTestSourceSetPaths
+> Task :app:generateDebugAndroidTestResources
+> Task :app:mergeDebugAndroidTestResources
+> Task :app:processDebugAndroidTestManifest
+> Task :ai:generateDebugAssets UP-TO-DATE
+> Task :ai:mergeDebugAssets
+> Task :app:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :data:generateDebugAssets UP-TO-DATE
+> Task :data:mergeDebugAssets
+> Task :app:mergeDebugAndroidTestAssets
+> Task :app:compressDebugAndroidTestAssets
+> Task :app:desugarDebugAndroidTestFileDependencies
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :ai:bundleLibRuntimeToJarDebug
+> Task :data:bundleLibRuntimeToJarDebug
+> Task :app:processDebugAndroidTestJavaRes NO-SOURCE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :app:checkDebugAndroidTestDuplicateClasses
+> Task :ai:mergeDebugJniLibFolders
+> Task :ai:mergeDebugNativeLibs NO-SOURCE
+> Task :app:processDebugManifestForPackage
+> Task :ai:copyDebugJniLibsProjectOnly
+> Task :app:mergeDebugAndroidTestJniLibFolders
+> Task :app:mergeDebugJniLibFolders
+> Task :data:mergeDebugJniLibFolders
+> Task :data:mergeDebugNativeLibs NO-SOURCE
+> Task :data:copyDebugJniLibsProjectOnly
+> Task :data:bundleLibRuntimeToDirDebug
+> Task :ai:bundleLibRuntimeToDirDebug
+> Task :app:mergeDebugAndroidTestJavaResource
+> Task :app:processDebugAndroidTestResources
+> Task :app:validateSigningDebugAndroidTest
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :app:mergeLibDexDebugAndroidTest
+> Task :app:processDebugResources
+> Task :app:writeDebugAndroidTestSigningConfigVersions
+> Task :app:compileDebugJavaWithJavac
+> Task :app:bundleDebugClassesToCompileJar
+
+> Task :app:compileDebugAndroidTestJavaWithJavac
+注: 某些输入文件使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+
+> Task :app:mergeExtDexDebugAndroidTest
+> Task :app:dexBuilderDebugAndroidTest
+> Task :app:mergeDebugAndroidTestGlobalSynthetics
+> Task :app:mergeProjectDexDebugAndroidTest
+> Task :app:packageDebugAndroidTest
+> Task :app:createDebugAndroidTestApkListingFileRedirect
+> Task :app:assembleDebugAndroidTest
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 22s
+85 actionable tasks: 85 executed
+EXITCODE=0
+
+--- raw output of the JVM count run ---
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac UP-TO-DATE
+> Task :ai:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :ai:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugLibraryResources UP-TO-DATE
+> Task :ai:writeDebugAarMetadata UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :ai:extractDeepLinksDebug UP-TO-DATE
+> Task :ai:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :data:extractDeepLinksDebug UP-TO-DATE
+> Task :data:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :data:compileDebugLibraryResources UP-TO-DATE
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac UP-TO-DATE
+> Task :data:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:bundleDebugClassesToRuntimeJar UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :app:compileDebugUnitTestJavaWithJavac UP-TO-DATE
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes NO-SOURCE
+> Task :data:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :app:testDebugUnitTest UP-TO-DATE
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 13s
+54 actionable tasks: 54 up-to-date
+EXITCODE=0
+
+
+--- re-run of the forced compile-only check after the javadoc-only edit of GenerationCoordinatorInstrumentedTest (2026-09-21T21:31:08.0757505+08:00) ---
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava
+> Task :core:processResources NO-SOURCE
+> Task :core:classes
+> Task :core:jar
+> Task :tree-layout:compileJava
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes
+> Task :tree-layout:jar
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues
+> Task :ai:generateDebugResources
+> Task :ai:packageDebugResources
+> Task :ai:processDebugNavigationResources
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :ai:javaPreCompileDebug
+> Task :app:javaPreCompileDebug
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :ai:compileDebugLibraryResources
+> Task :ai:writeDebugAarMetadata
+> Task :data:writeDebugAarMetadata
+> Task :data:processDebugNavigationResources
+> Task :app:processDebugNavigationResources
+> Task :ai:parseDebugLocalResources
+> Task :app:checkDebugAarMetadata
+> Task :app:compileDebugNavigationResources
+> Task :app:generateDebugResValues
+> Task :data:generateDebugResValues
+> Task :data:generateDebugResources
+> Task :data:packageDebugResources
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :ai:generateDebugRFile
+> Task :app:mergeDebugResources
+> Task :ai:compileDebugJavaWithJavac
+> Task :app:packageDebugResources
+> Task :ai:bundleLibCompileToJarDebug
+> Task :app:createDebugCompatibleScreenManifests
+> Task :ai:extractDeepLinksDebug
+> Task :app:extractDeepLinksDebug
+> Task :data:extractDeepLinksDebug
+> Task :data:compileDebugLibraryResources
+> Task :app:parseDebugLocalResources
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :data:javaPreCompileDebug
+> Task :data:parseDebugLocalResources
+> Task :app:javaPreCompileDebugAndroidTest
+> Task :data:generateDebugRFile
+> Task :app:checkDebugAndroidTestAarMetadata
+> Task :ai:processDebugManifest
+> Task :data:processDebugManifest
+> Task :data:compileDebugJavaWithJavac
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:processDebugAndroidTestNavigationResources
+> Task :app:compileDebugAndroidTestNavigationResources
+> Task :app:generateDebugAndroidTestResValues
+> Task :data:bundleLibCompileToJarDebug
+> Task :app:mapDebugAndroidTestSourceSetPaths
+> Task :app:generateDebugAndroidTestResources
+> Task :app:mergeDebugAndroidTestResources
+> Task :app:processDebugAndroidTestManifest
+> Task :ai:generateDebugAssets UP-TO-DATE
+> Task :ai:mergeDebugAssets
+> Task :app:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :data:generateDebugAssets UP-TO-DATE
+> Task :data:mergeDebugAssets
+> Task :app:mergeDebugAndroidTestAssets
+> Task :app:compressDebugAndroidTestAssets
+> Task :app:desugarDebugAndroidTestFileDependencies
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :data:bundleLibRuntimeToJarDebug
+> Task :app:processDebugAndroidTestJavaRes NO-SOURCE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :ai:bundleLibRuntimeToJarDebug
+> Task :app:checkDebugAndroidTestDuplicateClasses
+> Task :ai:mergeDebugJniLibFolders
+> Task :ai:mergeDebugNativeLibs NO-SOURCE
+> Task :app:mergeDebugAndroidTestJniLibFolders
+> Task :ai:copyDebugJniLibsProjectOnly
+> Task :app:mergeDebugJniLibFolders
+> Task :data:mergeDebugJniLibFolders
+> Task :data:mergeDebugNativeLibs NO-SOURCE
+> Task :data:copyDebugJniLibsProjectOnly
+> Task :data:bundleLibRuntimeToDirDebug
+> Task :ai:bundleLibRuntimeToDirDebug
+> Task :app:processDebugAndroidTestResources
+> Task :app:validateSigningDebugAndroidTest
+> Task :app:mergeDebugAndroidTestJavaResource
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :app:mergeLibDexDebugAndroidTest
+> Task :app:writeDebugAndroidTestSigningConfigVersions
+> Task :app:processDebugManifestForPackage
+> Task :app:processDebugResources
+> Task :app:compileDebugJavaWithJavac
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:mergeExtDexDebugAndroidTest
+
+> Task :app:compileDebugAndroidTestJavaWithJavac
+注: 某些输入文件使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+
+> Task :app:dexBuilderDebugAndroidTest
+> Task :app:mergeDebugAndroidTestGlobalSynthetics
+> Task :app:mergeProjectDexDebugAndroidTest
+> Task :app:packageDebugAndroidTest
+> Task :app:createDebugAndroidTestApkListingFileRedirect
+> Task :app:assembleDebugAndroidTest
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 19s
+85 actionable tasks: 85 executed
+EXITCODE=0
+

@@ -1,0 +1,78 @@
+# T-007 mechanical checks - sizing, error-code producers, provider-tag leakage, file list
+# captured-at: 2026-09-21T20:36:27.4714479+08:00
+# mode: full; every number below was produced by the command printed immediately above it in this run
+# note: this file REPLACES the first version, which recorded 670 = 664 + 6. That 6 dropped the
+#   modified line (MESSAGE_ROLE_MISMATCH gained the comma that separates it from the new constants).
+#   The judgement value is 671 = 664 new + 7 changed, as re-measured and printed below.
+
+== 1. production lines (rule: non-empty, non-comment; a new file is counted in full, an existing file only by the lines it changed) ==
+command (PowerShell, run from the repository root):
+  per file: strip /* */ blocks, drop blank lines and lines whose first non-space characters are //, count the rest
+  DomainErrorCode.java: count added/modified lines from git diff --unified=0, dropping comment-only lines
+
+    210  android/core/src/main/java/com/treelearn/core/domain/JsonText.java
+    101  android/core/src/main/java/com/treelearn/core/domain/ContextSnapshotCodec.java
+     91  android/core/src/main/java/com/treelearn/core/domain/ContextSnapshot.java
+     66  android/core/src/main/java/com/treelearn/core/domain/ContextPlan.java
+    109  android/core/src/main/java/com/treelearn/core/domain/BuildContextPlanUseCase.java
+     87  android/ai/src/main/java/com/treelearn/ai/prompt/DeepSeekContextEncoder.java
+    664  TOTAL of the six new production files
+      7  DomainErrorCode.java changed lines (6 added constants + the comma added to MESSAGE_ROLE_MISMATCH)
+    671  TOTAL production lines this task claims
+
+  the 7 changed lines, verbatim from git diff:
+    MESSAGE_ROLE_MISMATCH,
+    SNAPSHOT_SCHEMA_UNSUPPORTED,
+    SNAPSHOT_PAYLOAD_INVALID,
+    SNAPSHOT_DIGEST_MISMATCH,
+    CONTEXT_SOURCE_MISSING,
+    CONTEXT_SUMMARY_MISSING,
+    CONTEXT_EXCEEDS_BUDGET
+
+  budget verdict: 671 is over the 500 line hard limit by 34 percent. No user approval was obtained, so this
+                  task may not claim the sizing criterion; it is recorded as a deviation in the task file.
+
+== 2. every DomainErrorCode constant this task added has a producer in this task own code ==
+command: rg -n "DomainErrorCode\.<CONST>" android --glob "!**/build/**"   (main-source hits only)
+
+  android\core\src\main\java\com\treelearn\core\domain\ContextSnapshotCodec.java:83:            return DomainResult.fail(DomainErrorCode.SNAPSHOT_SCHEMA_UNSUPPORTED,
+  android\core\src\main\java\com\treelearn\core\domain\ContextSnapshotCodec.java:91:            return DomainResult.fail(DomainErrorCode.SNAPSHOT_PAYLOAD_INVALID,
+  android\core\src\main\java\com\treelearn\core\domain\ContextSnapshot.java:154:            return DomainResult.fail(DomainErrorCode.SNAPSHOT_DIGEST_MISMATCH,
+  android\core\src\main\java\com\treelearn\core\domain\BuildContextPlanUseCase.java:196:        return DomainResult.fail(DomainErrorCode.CONTEXT_SOURCE_MISSING,
+  android\core\src\main\java\com\treelearn\core\domain\BuildContextPlanUseCase.java:174:            return DomainResult.fail(DomainErrorCode.CONTEXT_SUMMARY_MISSING,
+  android\core\src\main\java\com\treelearn\core\domain\BuildContextPlanUseCase.java:146:            return DomainResult.fail(DomainErrorCode.CONTEXT_EXCEEDS_BUDGET,
+  producer count: 6 of 6
+
+== 3. the provider framing literals live only in the :ai adapter ==
+command: rg -n "treelearn_reasoning|treelearn_answer" android/core/src/main/java/com/treelearn/core/domain
+
+  matches under :core production sources: 0
+  the JUnit case theProviderFramingLivesOnlyInThisAdapter asserts the same property, and fails if a tag appears in :core
+
+== 4. files this task wrote ==
+  android/core/src/main/java/com/treelearn/core/domain/JsonText.java                    (new)
+  android/core/src/main/java/com/treelearn/core/domain/ContextSnapshot.java            (new)
+  android/core/src/main/java/com/treelearn/core/domain/ContextSnapshotCodec.java       (new)
+  android/core/src/main/java/com/treelearn/core/domain/ContextPlan.java                (new)
+  android/core/src/main/java/com/treelearn/core/domain/BuildContextPlanUseCase.java    (new)
+  android/core/src/main/java/com/treelearn/core/domain/DomainErrorCode.java            (7 lines changed)
+  android/ai/src/main/java/com/treelearn/ai/prompt/DeepSeekContextEncoder.java         (new)
+  android/core/src/test/java/com/treelearn/core/domain/ContextSnapshotTest.java        (new, 12 cases)
+  android/core/src/test/java/com/treelearn/core/domain/BuildContextPlanUseCaseTest.java (new, 10 cases)
+  android/ai/src/test/java/com/treelearn/ai/prompt/DeepSeekContextEncoderTest.java     (new, 8 cases)
+  android/README.md                                                                    (documentation impact)
+  artifacts/evidence/T-007-red.txt / -green.txt / -tests.txt / -regression.txt / -mutation.txt / -checks.txt / -guard.txt
+  artifacts/evidence/.gen-t007-red.ps1 / .gen-t007-green.ps1 / .gen-t007-mutation.ps1  (capture generators, house convention)
+  .trae/tasks/T-2026-09-20-immutable-context-snapshots-007.md                          (this task file)
+
+  No file under android/data/** was written by this task. ContextSnapshotDao is owned by T-024 and is
+  used read-only from here; its payload stays an opaque string at that layer. android/build.gradle and
+  android/settings.gradle were not touched, and no new task file was created.
+
+== 5. companion evidence ==
+  artifacts/evidence/T-007-red.txt         EXITCODE=1, javac reported 100 errors over 2 :core test files
+  artifacts/evidence/T-007-green.txt       EXITCODE=0, BUILD SUCCESSFUL, 0 FAILED tasks
+  artifacts/evidence/T-007-tests.txt       20 classes, 226 tests, 0 failures, 0 errors, 0 skipped
+  artifacts/evidence/T-007-regression.txt  full --rerun-tasks re-run on the current tree: same 226/0/0/0, EXITCODE=0
+  artifacts/evidence/T-007-mutation.txt    VERDICT: PASS - each removed behaviour turned exactly its own test red
+  artifacts/evidence/T-007-guard.txt       VERDICT: PASS (13 OK line(s)), GUARD EXITCODE=0, 1 accepted NOTICE (androidTest APK)

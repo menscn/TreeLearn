@@ -1,0 +1,34 @@
+Generated: 2026-09-21T21:51:57+08:00
+Command (every run below): .\gradlew.bat :app:testDebugUnitTest --no-daemon --console=plain    WorkingDirectory: C:\tl-red\android
+Mode: mutation testing of the T-011 regression locks, run in the scratch copy only (the shared tree is never mutated).
+Each mutation degrades one decision to its defective form; the run must turn exactly the named assertions red and leave the rest green.
+
+### M1 - a gone scope is no longer refused: if (live != null && !live.equals(baseline))
+EXITCODE=1
+RED cases (1):
+  - com.treelearn.app.artifact.DerivedOperationTest.aCallbackAfterTheScopeWasDeletedNeverCreatesAnArtifact
+
+### M2 - the live baseline is read but never compared: if (live == null || false)
+EXITCODE=1
+RED cases (2):
+  - com.treelearn.app.artifact.DerivedOperationTest.aLateResultForADigestBaselineIsDiscardedTheSameWay
+  - com.treelearn.app.artifact.DerivedOperationTest.aLateResultWhoseRevisionMovedOnIsDiscardedAndKeepsTheStoredPayload
+
+### M3 - a compression that did not shrink is accepted: the OVER_WINDOW check removed
+EXITCODE=1
+RED cases (1):
+  - com.treelearn.app.artifact.DerivedOperationTest.aCompressionThatDidNotShrinkTheContextFailsClosed
+
+### M4 - a blank string is no longer refused by the codec: nonBlank() accepts ""
+EXITCODE=1
+RED cases (4):
+  - com.treelearn.app.artifact.ArtifactSchemaTest.aBranchSummaryOwesBothFieldsButMayCarryAnEmptySummary
+  - com.treelearn.app.artifact.ArtifactSchemaTest.aRefusedParseCarriesNoPartialPayload
+  - com.treelearn.app.artifact.ArtifactSchemaTest.aTitleShapeAcceptsExactlyOneNonBlankStringField
+  - com.treelearn.app.artifact.ArtifactSchemaTest.eachRecommendationShapeUsesItsOwnItemKey
+
+### RESTORED - the unmutated copy is green again
+EXITCODE=0
+RED cases (0):
+
+EXITCODE=0

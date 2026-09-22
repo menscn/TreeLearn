@@ -1,0 +1,33 @@
+=== VERIFY3 T-016 documentation re-check (leader fix, independent re-read)  2026-09-21 21:52:57
+Mode: verifier read-only; emulator not used (module is pure JVM, no device criterion).
+Command A: Get-Content android/README.md  (lines 34-40)
+Command B: Get-Content 'Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md' (line 54)
+Command C: Get-Content android/build.gradle (lines 25-34)
+Command D: Get-ChildItem <mod>/src/main/java -Recurse -File -Filter *.java | Measure-Object
+--- A: android/README.md 34-40 ---
+> **覆盖状态（2026-09-21 更新）**：`:core` 已由 T-003（领域身份与不可变版本）、T-007（出生快照与上下文组装）、
+> T-020/T-021（提示词与生成操作）与 T-022（锚点与消息）填入 22 个领域类型（22 个 .java 文件，
+> 每个文件一个顶层类型）；`:tree-layout` 已由 T-016 填入 12 个纯 JVM 类型（树几何、标签避碰、
+> 命中测试、视野拟合）。两个纯 JVM 模块现在都有真实源码，纯净性扫描对二者均为真实强制，
+> 不再打印 `WARNING … purity contract is vacuous …`。实测
+> `.\gradlew.bat verifyDependencyDirection` → `verifyDependencyDirection: PASS (downward-only module graph +`
+> `pure-JVM module purity)`，退出码 0（证据：`artifacts/evidence/T-016-doc-sync-2026-09-21.txt`）。
+--- B: technical design line 54 ---
+依赖只能向下：`:app` 依赖其他模块，`:data`、`:ai` 只依赖 `:core`，`:tree-layout` 不依赖任何模块（纯 JVM），`:core` 不依赖 Android UI、网络或数据库实现。模块间只传领域对象和接口，不暴露 Cursor、HTTP Response 或 View。
+--- C: android/build.gradle 26-30 ---
+        ':core'       : [],
+        ':tree-layout': [],
+        ':data'       : [':core'],
+        ':ai'         : [':core'],
+        ':app'        : [':core', ':data', ':ai', ':tree-layout'],
+--- D: counts ---
+core java files = 22
+tree-layout java files = 12
+--- E: old vacuous claim gone? ---
+README 'vacuous' hits = 1 (expected 1: the new blockquote quoting the WARNING it no longer prints)
+README '没有 src/main/java' hits = 0
+--- F: T-016 RED vs GREEN command identity ---
+- Command: cd android; .\gradlew.bat :tree-layout:test --no-daemon --console=plain
+- Command: cd android; .\gradlew.bat :tree-layout:test --no-daemon --console=plain
+identical(-ceq) = True
+EXITCODE=0

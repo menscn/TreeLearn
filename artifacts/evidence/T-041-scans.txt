@@ -1,0 +1,147 @@
+captured-at: 2026-09-22T02:36:10.5635925+08:00
+cwd: D:\Project\Android\Treelearn
+command: python -X utf8 -  (source scans over android/**; exit code is the assertion's; re-run after the README edit)
+note: every assertion below has a non-empty subject; scan 1 is the one that keeps the deleted placeholder out of android/
+import os, sys
+root = r"D:\Project\Android\Treelearn"
+android = os.path.join(root, "android")
+main = os.path.join(android, "app", "src", "main")
+skip_dirs = {".gradle", "build", ".git", ".idea"}
+PLACEHOLDER = "\u5b50\u5206\u652f\u5217\u8868\u5c1a\u672a\u63a5\u5165\u672c\u7248\u672c"
+FORK_WORD = "\u5206\u53c9"
+
+class Hit:
+    def __init__(self, path, number, line):
+        self.path, self.number, self.line = path, number, line
+
+def walk(base):
+    for dirpath, dirnames, filenames in os.walk(base):
+        dirnames[:] = sorted(d for d in dirnames if d not in skip_dirs)
+        for name in sorted(filenames):
+            yield os.path.join(dirpath, name)
+
+def scan(base, needles):
+    hits = []
+    for path in walk(base):
+        try:
+            text = open(path, encoding="utf-8", errors="replace").read()
+        except OSError:
+            continue
+        for number, line in enumerate(text.splitlines(), 1):
+            if any(needle in line for needle in needles):
+                hits.append(Hit(os.path.relpath(path, root), number, line.strip()))
+    return hits
+
+def show(title, hits, limit=40):
+    print("== %s ==" % title)
+    for hit in hits[:limit]:
+        print("  %s:%d: %s" % (hit.path, hit.number, hit.line[:150]))
+    if len(hits) > limit:
+        print("  ... %d more" % (len(hits) - limit))
+    print("  hits=%d" % len(hits))
+    print("")
+    return hits
+
+failures = []
+def require(label, ok):
+    print("  %-78s %s" % (label, "OK" if ok else "FAILED"))
+    if not ok:
+        failures.append(label)
+
+dead = show("scan 1: the deleted placeholder inside android/ (expect none)",
+            scan(android, ["chat_children_pending", PLACEHOLDER]))
+show("scan 2: chat_children_pending repo-wide (historical documents only)",
+     scan(root, ["chat_children_pending"]))
+fork_hits = show("scan 3: every mention of canFork under app/src/main",
+                 scan(main, ["canFork"]))
+
+def is_read(hit):
+    return "message.canFork()" in hit.line or hit.line.startswith("*") \
+        or hit.line.startswith("//") or hit.line.startswith("public boolean canFork()")
+
+print("== assertions ==")
+require("the placeholder has no producer and no reference in android/", not dead)
+require("the canFork listing is not empty (a silent scan cannot pass)",
+        len(fork_hits) >= 5)
+require("canFork is defined exactly once in production code",
+        len([h for h in fork_hits if h.line.startswith("public boolean canFork()")]) == 1)
+require("every other mention is a read of message.canFork(), a javadoc link or a comment",
+        all(is_read(h) for h in fork_hits))
+require("no mention re-derives forkability from the generation state",
+        not [h for h in fork_hits
+             if "isGenerating" in h.line or "Phase" in h.line or "phase" in h.line])
+require("the menu that draws the four items reads the predicate",
+        any("ui\\WordMenu.java" in h.path or "ui/WordMenu.java" in h.path for h in fork_hits))
+require("the popup that hosts the menu never mentions it",
+        not scan([os.path.join(main, "java", "com", "treelearn", "app", "screen",
+                               "WordMenuPopup.java")][0], ["canFork"]))
+word = show("scan 4: the word %s under app/src/main (button wording, expect none)" % FORK_WORD,
+            scan(main, [FORK_WORD]))
+require("no %s left in the app's own layouts, strings or code" % FORK_WORD, not word)
+show("scan 5: the word %s in android/README.md (prose, for the documentation check)" % FORK_WORD,
+     [h for h in scan(android, [FORK_WORD]) if h.path.endswith("README.md")])
+print("")
+for item in failures:
+    print("FAILURE: " + item)
+print("SCAN ASSERTION " + ("PASSED" if not failures else "FAILED"))
+sys.exit(0 if not failures else 1)
+--- output ---
+== scan 1: the deleted placeholder inside android/ (expect none) ==
+  hits=0
+
+== scan 2: chat_children_pending repo-wide (historical documents only) ==
+  .trae\scripts\dev\review_apk_and_gaps.ps1:140: W 'COMMAND (in-process): Select-String -Path <src\main\**\*.java> -Pattern home_entry_pending|chat_children_pending'
+  .trae\scripts\dev\review_apk_and_gaps.ps1:141: $toasts = Get-ChildItem -LiteralPath (Join-Path $root 'android\app\src\main\java') -Recurse -Filter *.java | Select-String -Pattern 'home_entry_pendin
+  .trae\tasks\T-2026-09-21-child-branches-popup-and-word-menu-041.md:22: - Problem/background: `ChatScreen` 只靠 `item_chat_message.xml` 的 `textIsSelectable="true"` 唤起**系统**文本工具条（全仓 `src/main` 对 `OnLongClickListener`/`ActionM
+  .trae\tasks\T-2026-09-21-child-branches-popup-and-word-menu-041.md:33: - Acceptance evidence: RED→GREEN 的 JVM 测试（四项动作各自被正确转发、生成中不给新建分支、子分支列表只列未归档子分支并可跳转）、`:app` 单测与 `.\gradlew.bat check` 退出码 0、Java-only guard PASS、原文扫描证明 
+  .trae\tasks\T-2026-09-21-child-branches-popup-and-word-menu-041.md:37: - Risks: 与系统文本工具条同时出现造成两套菜单；把「能否新建分支」判定复制到屏幕；`chat_children_pending` 删除后遗漏引用。
+  .trae\tasks\T-2026-09-21-child-branches-popup-and-word-menu-041.md:53: - `MainActivity.openChildren` 由 Toast 占位改为打开弹层；删除 `chat_children_pending` 文案与其引用。
+  .trae\tasks\T-2026-09-21-child-branches-popup-and-word-menu-041.md:72: - Changed runtime facts: 长按划词有应用自有四项菜单；子分支列表可跳转；「分叉」文案改为「新建分支」；`chat_children_pending` 文案被移除。
+  .trae\tasks\T-2026-09-21-child-branches-popup-and-word-menu-041.md:84: - [ ] 原文扫描证明 `chat_children_pending` 不再有任何生产者与引用，且 `strings.xml` 中已无该条目。
+  .trae\tasks\T-2026-09-21-child-branches-popup-and-word-menu-041.md:118: - `chat_children_pending` 文案整体删除，不得以注释形式保留（本仓库失败案例库明确禁止保留无生产者代码）。
+  artifacts\evidence\T-041-scans.txt:52: scan(android, ["chat_children_pending", PLACEHOLDER]))
+  artifacts\evidence\T-041-scans.txt:53: show("scan 2: chat_children_pending repo-wide (historical documents only)",
+  artifacts\evidence\T-041-scans.txt:54: scan(root, ["chat_children_pending"]))
+  artifacts\evidence\T-REV-2026-09-22-apk-and-gap-review.txt:280: COMMAND (in-process): Select-String -Path <src\main\**\*.java> -Pattern home_entry_pending|chat_children_pending
+  artifacts\evidence\T-REV-2026-09-22-apk-and-gap-review.txt:281: MainActivity.java:255: Toast.makeText(this, R.string.chat_children_pending, Toast.LENGTH_SHORT).show();
+  hits=14
+
+== scan 3: every mention of canFork under app/src/main ==
+  android\app\src\main\java\com\treelearn\app\screen\AnswerActionBar.java:87: fork.setEnabled(message.canFork());
+  android\app\src\main\java\com\treelearn\app\ui\ChatMessage.java:20: * <p>{@link #canCopy}, {@link #canQuote} and {@link #canFork} are different: they say the answer is a
+  android\app\src\main\java\com\treelearn\app\ui\ChatMessage.java:146: public boolean canFork() {
+  android\app\src\main\java\com\treelearn\app\ui\ChatPresenter.java:220: if (message == null || !message.canFork()) {
+  android\app\src\main\java\com\treelearn\app\ui\WordMenu.java:69: if (message.canFork()) {
+  android\app\src\main\java\com\treelearn\app\ui\WordMenu.java:70: entries.add(new Entry(Item.FORK, message.canFork() && selected));
+  android\app\src\main\java\com\treelearn\app\wiring\ChatWiring.java:152: // condition ChatMessage.canFork() shows the learner as an enabled button.
+  hits=7
+
+== assertions ==
+  the placeholder has no producer and no reference in android/                   OK
+  the canFork listing is not empty (a silent scan cannot pass)                   OK
+  canFork is defined exactly once in production code                             OK
+  every other mention is a read of message.canFork(), a javadoc link or a comment OK
+  no mention re-derives forkability from the generation state                    OK
+  the menu that draws the four items reads the predicate                         OK
+  the popup that hosts the menu never mentions it                                OK
+== scan 4: the word 分叉 under app/src/main (button wording, expect none) ==
+  hits=0
+
+  no 分叉 left in the app's own layouts, strings or code                           OK
+== scan 5: the word 分叉 in android/README.md (prose, for the documentation check) ==
+  android\README.md:233: | `BranchDao` | `branches` | **`BranchSource.restore` 在 `:data` 生产源码里只出现这一次**（只读映射；检索命令与输出见 `artifacts/evidence/T-022-restore-location.txt`）；`insert` 
+  android\README.md:243: | `FirstTopicCreation` | `topics` + 根 `branches` + 两条 `messages` + `generation_operations`（跨表） | **首题的五类行在一个事务里全成或全败**：复用 `DatabaseTransactionRunner`，
+  android\README.md:244: | `SearchDao` | `branches` + `messages` + `answer_revisions` + `generation_operations`（六臂 `UNION ALL` 跨表） | 本仓唯一读多表的 SQL（技术方案 §6.3）。六个字段各一臂：标题、分叉锚点引文、
+  android\README.md:276: `anchor_quote` / `anchor_hash` **要么一起为空**（整条回答分叉），**要么一起非空且 `start < end`**
+  android\README.md:277: （ranged 分叉）。划界是刻意的，且**只有方向这一条是两层都判的**：
+  android\README.md:302: 带 `ON DELETE CASCADE`——直接删一条稳定回答会**连带删掉以它为来源的整棵分叉子树**，这是远超
+  android\README.md:542: 分叉、归档不可搜、展示顺序、阅读位置四列往返、`ON DELETE SET NULL`、清空）**只编译、未执行**，一律记为
+  android\README.md:572: 因此父分支切版（含手动切回旧版）之后，旧子分支仍指向它被分叉时的 revision 与正文。
+  android\README.md:640: - **按钮叫「新建分支」，数据仍叫「分叉」**：`chat_act_fork` 与相关 `contentDescription` 统一为「新建分支」
+  android\README.md:641: （PRD 6.2.19 第 4 条），`app/src/main` 下已无「分叉」二字；本节在描述 `anchor_quote` / `source_revision_id` /
+  android\README.md:642: 级联这类**数据概念**时仍写「分叉」，因为那是 schema 与既有文档里的名词，不是按钮文案。
+  hits=11
+
+
+SCAN ASSERTION PASSED
+EXITCODE=0

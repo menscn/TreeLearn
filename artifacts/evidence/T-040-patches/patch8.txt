@@ -1,0 +1,113 @@
+*** Begin Patch
+*** Update File: android/app/src/main/java/com/treelearn/app/screen/HomeScreen.java
+@@
+     private final EditText draft;
+     private final Button send;
++    private final Button search;
+     private final Button archived;
+@@
+         draft = findViewById(R.id.home_draft);
+         send = findViewById(R.id.home_send);
++        search = findViewById(R.id.home_search);
+         archived = findViewById(R.id.home_archived);
+@@
+         archived.setOnClickListener(view -> {
+             if (actions != null) {
+                 actions.onArchivedPressed();
+             }
+         });
++        search.setOnClickListener(view -> {
++            if (actions != null) {
++                actions.onSearchPressed();
++            }
++        });
+*** Update File: android/app/src/main/java/com/treelearn/app/AppContainer.java
+@@
+ import com.treelearn.app.reading.ReadingStore;
+ import com.treelearn.app.reading.SqliteReadingStore;
++import com.treelearn.app.search.BranchTitles;
++import com.treelearn.app.search.SearchRepository;
+ import com.treelearn.app.ui.ChatCommands;
+@@
+ import com.treelearn.app.wiring.AndroidSettingsStore;
+ import com.treelearn.app.wiring.ChatWiring;
++import com.treelearn.app.wiring.ChatStore;
+ import com.treelearn.app.wiring.CoordinatorGenerationPort;
+@@
+ import com.treelearn.app.wiring.SqliteHomeStore;
++import com.treelearn.app.wiring.SqliteSearchStore;
+ import com.treelearn.app.wiring.SqliteTreeCanvasStore;
+ import com.treelearn.app.wiring.TreeCanvasWiring;
++import com.treelearn.core.domain.Branch;
+ import com.treelearn.data.db.DatabaseTransactionRunner;
+@@
+     private final ReadingStore readingStore;
++
++    /** The search port: the statement runner, with its connection opened on first use. */
++    private final SearchRepository searchRepository;
++
++    /** The branch rows the search page names its results from - the conversation store, not a copy. */
++    private final ChatStore chatStore;
+ 
+     private final Context context;
+@@
+-        this.chatWiring = new ChatWiring(new SqliteChatStore(helper, transactions), generation,
+-                settingsStore, clock, budget);
++        this.chatStore = new SqliteChatStore(helper, transactions);
++        this.chatWiring = new ChatWiring(chatStore, generation, settingsStore, clock, budget);
+@@
+         this.readingStore = new SqliteReadingStore(helper);
++        this.searchRepository = new SqliteSearchStore(helper);
+     }
+@@
+     public ReadingStore readingStore() {
+         return readingStore;
+     }
++
++    /**
++     * One query's hits, read from the local database.
++     *
++     * <p>The connection is opened on the first question asked rather than here, so assembling this
++     * container never touches the database - see {@link SqliteSearchStore}, whose whole reason for
++     * existing is that timing.
++     */
++    public SearchRepository searchRepository() {
++        return searchRepository;
++    }
++
++    /**
++     * The one owner of "what is this branch called": the conversation store's own branch rows.
++     *
++     * <p>Asked instead of joining a title into the search statement, because a second copy of the
++     * branch-title read is a second answer to the same question - and a search row and the
++     * conversation it opens must never name two different branches.
++     */
++    public BranchTitles branchTitles() {
++        return branchId -> {
++            Branch branch = chatStore.branch(branchId);
++            return branch == null ? null : branch.title();
++        };
++    }
+*** Update File: android/app/src/main/java/com/treelearn/app/search/SearchPresenter.java
+@@
+     public void onHitOpened(SearchHit hit) {
+         if (hit == null) {
+             return;
+         }
+-        if (!repository.isStillReachable(hit)) {
++        // Reachability is a store read, so it runs off the UI thread like every other read here; only
++        // the verdict comes back to the UI thread, to move the screen or to drop the row.
++        background.execute(() -> {
++            final boolean reachable = repository.isStillReachable(hit);
++            ui.post(() -> applyTap(hit, reachable));
++        });
++    }
++
++    private void applyTap(SearchHit hit, boolean reachable) {
++        if (!reachable) {
+             List<SearchHit> remaining = new ArrayList<SearchHit>(state.hits);
+             remaining.remove(hit);
+             render(state.withHits(remaining));
+             return;
+         }
+*** End Patch

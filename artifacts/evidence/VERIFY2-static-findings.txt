@@ -1,0 +1,73 @@
+# VERIFY2 static cross-checks (verifier #2)  2026-09-21 21:01:20
+# Commands are listed per section; every number was read back off disk in this session.
+
+== 1. RED/GREEN key hygiene (six task files) ==
+Command: Select-String -Path .trae/tasks/<each>.md -Pattern '^### (RED|GREEN)|^- Command:|^- Exit code:|^- Observed failure:'
+Result: all six have pure 'Exit code: 0|1', a one-line 'Observed failure:', and byte-identical
+        RED/GREEN Command strings within each task. No bold/fenced values in those keys.
+
+== 2. Arithmetic self-consistency in RED claims ==
+T-006: task says 100 (:ai) + 55 (:app) = 155. Evidence T-006-red.txt lines 373 and 620 carry
+       '100 个错误' and '55 个错误' -> 155. Per-symbol categories sum 36+32+25+22+16+10+9+4+1 = 155.
+T-020: 147 errors, with the javac 100-print cap explained; evidence states -Xmaxerrs used.
+T-016: 34 tests completed, 25 failed; 12+7+6 = 25.
+T-007: 100 errors; 49+48+3 = 100.
+T-023: 53 errors, 53 '找不到符号', 0 '程序包...不存在' -> 0+53 = 53.
+
+== 3. DomainErrorCode producers (no unreachable code) ==
+Command: rg -n 'DomainErrorCode\.<CONST>' android --glob '!**/build/**' (main vs test split)
+Result: 15 constants; every one has >=1 producer in main sources. Examples:
+  SNAPSHOT_SCHEMA_UNSUPPORTED -> ContextSnapshotCodec.java:83
+  REVISION_IMMUTABLE         -> Message.java:140
+  OPERATION_NOT_STABLE       -> BranchSource.java:71
+  CONTEXT_*                  -> BuildContextPlanUseCase.java:146/174/196, ContextSnapshot.java:154
+  OPERATION_TERMINAL         -> absent (removed; generationoperation not in enum)
+
+== 4. GenerationState migration edges ==
+Command: read android/core/src/main/java/com/treelearn/core/domain/GenerationState.java
+Result: STREAMING_REASONING -> STABLE is absent from canTransitionTo (lines 153-155), with the
+        unreachability argument spelled out in the class javadoc (lines 52-63).
+        STABLE is reachable only from STREAMING_ANSWER (line 157). recoverableStates/recoveryTarget
+        have no default-less gap: recoveryTarget throws for terminal states (line 220).
+
+== 5. Provider-tag containment (:core/:data/:app/:tree-layout) ==
+Command: rg -n 'treelearn_reasoning|treelearn_answer|treelearn_question|treelearn_source'
+         android/core/src/main android/data/src/main android/tree-layout/src/main android/app/src/main
+Result: 0 hits. Tags live only in :ai (README:204 states the same rule).
+
+== 6. :tree-layout purity ==
+Command: rg -n '^import (android|androidx|kotlin)' android/tree-layout/src  -> 0 hits
+Command: Select-String android/tree-layout/build.gradle -Pattern 'project\(' -> 0 hits
+Command: android/build.gradle line 27 ':tree-layout': [] (moduleDependencyRules)
+
+== 7. Documentation drift found (not written by me) ==
+(a) android/README.md:36-37 still asserts ':tree-layout 仍没有 src/main/java 源码, 扫描在该模块上仍是空跑'.
+    T-016 landed 12 production .java files there -> the claim now contradicts active production facts.
+(b) Docs/05-technical-design/...技术架构方案_V1.0.md:54 asserts ':tree-layout 只依赖 :core'.
+    android/build.gradle:27 allows ':tree-layout' zero project dependencies -> contradicted.
+(c) T-006 documentation record claims the :ai gateway is undescribed by android/README.md.
+    README.md:46 already describes :ai as 'DeepSeek HTTPS/SSE, 上下文编码, 版本化提示词注册表与请求组装',
+    and 技术方案 9.1 (base URL/HTTPS), 9.3 (SSE framing) and 9.5 (error table) already state the facts.
+    So (c) is a self-reported gap that is NOT a contradiction -> documentation criterion can PASS.
+
+== 8. T-007 documentation claim ==
+Command: Select-String android/README.md -Pattern 'JsonText|ContextSnapshot|ContextPlan|BuildContextPlanUseCase'
+Result: rows present at README lines 180,181,185,186,192 -> the five claimed rows exist.
+        ContextSnapshotDao row at 235, AiArtifactDao row at 236 (T-024 claim) also present.
+
+== 9. T-020 redaction fix ==
+See VERIFY2-T020-leakscan.txt: 0 of 1661 CJK 14-char windows shared between any evidence file
+and the prompt-design doc; helper android/ai/src/test/.../SystemBodyAssertions.java reports only
+lengths + SHA-256 (lines 28-34). Residual: T-020-mutation.txt still prints two SYNTHETIC fixture
+question strings through a JUnit ComparisonFailure in mutation A (failures 1 and 4). Those strings
+are test data published in the test source, not real user content and not the prompt body.
+
+== 10. Secrets / encoding ==
+Command: scan artifacts/evidence/** and .trae/tasks/*.md for /sk-[A-Za-z0-9]{16,}/
+Result: no match. 2 evidence files (T-008-guard.txt, VERIFY-T002-guard-selftest-run2.txt) were
+        locked by other lanes and could not be scanned -> scan is partial, both out of my scope.
+Command: U+FFFD count in my six task files -> 0 in all six.
+
+== 11. Validator ==
+Command: python .trae/scripts/validate_tasks.py  -> SUMMARY files=31 errors=0 warnings=5
+        All six in-scope tasks PASS; warnings are 'estimated production lines' soft-limit notes.

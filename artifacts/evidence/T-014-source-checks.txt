@@ -1,0 +1,41 @@
+Generated: 2026-09-21T22:42:04.6327253+08:00
+Command: rg -n <pattern> on the paths named per scan; each scan prints its own command, match count and verdict
+WorkingDirectory: D:\Project\Android\Treelearn
+Mode: SOURCE CHECKS - credentials, content leaks and platform surfaces in the T-014 files, plus the same scan over the T-014 evidence files
+
+== SCAN 1: credential shapes in the T-014 navigation sources and their tests ==
+Command: rg -n --no-heading -e <pattern> android/app/src/main/java/com/treelearn/app/navigation android/app/src/test/java/com/treelearn/app/navigation android/app/src/androidTest/java/com/treelearn/app/NavigationStoreInstrumentedTest.java
+EXITCODE=1  (rg: 0 = matches found, 1 = no match)
+hits=0  expected=no-match  verdict=OK
+
+== SCAN 2: content-carrying log / Bundle / Intent / toString surfaces in the T-014 navigation sources ==
+Command: rg -n --no-heading -e <pattern> android/app/src/main/java/com/treelearn/app/navigation
+EXITCODE=1  (rg: 0 = matches found, 1 = no match)
+hits=0  expected=no-match  verdict=OK
+
+== SCAN 3: platform storage the navigation slice must not touch (KeyStore and SharedPreferences belong to the secret lane) ==
+Command: rg -n --no-heading -e <pattern> android/app/src/main/java/com/treelearn/app/navigation android/app/src/test/java/com/treelearn/app/navigation android/app/src/androidTest/java/com/treelearn/app/NavigationStoreInstrumentedTest.java
+EXITCODE=1  (rg: 0 = matches found, 1 = no match)
+hits=0  expected=no-match  verdict=OK
+
+== SCAN 4: answer/question/reasoning field names in the T-014 navigation sources (the list carries titles and summaries, never a turn) ==
+Command: rg -n --no-heading -e <pattern> android/app/src/main/java/com/treelearn/app/navigation
+EXITCODE=1  (rg: 0 = matches found, 1 = no match)
+hits=0  expected=no-match  verdict=OK
+
+== SCAN 5: credential shapes anywhere in the T-014 evidence files ==
+Command: rg -n --no-heading -e <pattern> D:\Project\Android\Treelearn\artifacts\evidence\T-014-green.txt D:\Project\Android\Treelearn\artifacts\evidence\T-014-guard.txt D:\Project\Android\Treelearn\artifacts\evidence\T-014-mutation.txt D:\Project\Android\Treelearn\artifacts\evidence\T-014-red.txt D:\Project\Android\Treelearn\artifacts\evidence\T-014-regression.txt D:\Project\Android\Treelearn\artifacts\evidence\T-014-source-checks.txt
+EXITCODE=1  (rg: 0 = matches found, 1 = no match)
+hits=0  expected=no-match  verdict=OK
+
+== SCAN 6: every content literal in the new androidTest class is an obvious synthetic placeholder (a positive scan, so it cannot pass on a vacuous pattern) ==
+Command: rg -n --no-heading -e <pattern> android/app/src/androidTest/java/com/treelearn/app/NavigationStoreInstrumentedTest.java
+EXITCODE=0  (rg: 0 = matches found, 1 = no match)
+hits=5  expected=match  verdict=OK
+  79:    private static final String TITLE_PAYLOAD = "{\"title\":\"SYNTHETIC-TITLE\"}";
+  81:            "{\"summary\":\"SYNTHETIC-SUMMARY\",\"key_points\":[\"SYNTHETIC-KEY-POINT-1\",\"SYNTHETIC-KEY-POINT-2\"]}";
+  186:        assertEquals("SYNTHETIC-SUMMARY", summary.text);
+  187:        assertEquals(Arrays.asList("SYNTHETIC-KEY-POINT-1", "SYNTHETIC-KEY-POINT-2"), summary.keyPoints);
+  196:        MessageDao.insert(database, Message.user(root.id, 1, "SYNTHETIC-USER-TURN", T0 + 1_000L));
+
+Subject note: the JSON payload literals in NavigationStoreInstrumentedTest.java are synthetic summary envelopes the codec would have produced; SCAN 5 confirms no key-shaped string reached any T-014 evidence file, and SCAN 6 confirms the one turn literal in a fixture is the placeholder SYNTHETIC-USER-TURN.

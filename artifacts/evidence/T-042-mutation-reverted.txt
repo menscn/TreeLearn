@@ -1,0 +1,46 @@
+captured-at: 2026-09-22T04:24:10.8219529+08:00
+cwd: D:\Project\Android\Treelearn
+purpose: the three mutation runs above are reverted, and the suite is green again on the
+         unmutated implementation.
+note: android/core is untracked in this working tree, so 'git status' cannot prove a revert;
+      the two mutated files are verified by content below instead.
+
+>         if (index < 0) {
+              return ReadingPosition.liveEnd(messages);
+          }
+          Guard.object(visibleMessageIds, "visibleMessageIds");
+>         if (branch.unreadCount() == 0L) {
+              return false;
+          }
+        background.execute(() -> session.remember(branch, anchor));
+
+command: .\gradlew.bat --no-daemon --console=plain --rerun-tasks --no-build-cache :app:testDebugUnitTest --tests "com.treelearn.app.ui.ChatReadingTest"
+mode: forced execution after the reverts
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+BUILD SUCCESSFUL in 20s
+EXITCODE=0
+<testsuite name="com.treelearn.app.ui.ChatReadingTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-09-21T20:24:35.013Z" hostname="LAPTOP-0CT7CJ9O" time="0.015">
+
+command: .\gradlew.bat --no-daemon --console=plain :app:testDebugUnitTest   (the whole module suite)
+mode: full-suite regression run
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+BUILD SUCCESSFUL in 13s
+EXITCODE=0

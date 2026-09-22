@@ -1,0 +1,33 @@
+# VERIFY2 independent T-020 transcription digest check  2026-09-21 21:28:40
+Command: python .trae-verify2-transcription.py  (recomputes sha256 from the design doc's fenced blocks; no body text printed)
+doc fenced blocks: 15
+  MATCH  LEARNING_ANSWER_TUTOR            chars(claim)=715 blockLen=715 mode=join fence=```text
+  MATCH  THINKING_ADDENDUM                chars(claim)=101 blockLen=101 mode=join fence=```text
+  MATCH  DERIVED_PROCESSOR_BASE           chars(claim)=186 blockLen=186 mode=join fence=```text
+  MATCH  ROOT_TITLE_SUFFIX                chars(claim)=102 blockLen=102 mode=join fence=```text
+  MATCH  BRANCH_TITLE_SUFFIX              chars(claim)=116 blockLen=116 mode=join fence=```text
+  MATCH  BRANCH_SUMMARY_SUFFIX            chars(claim)=156 blockLen=156 mode=join fence=```text
+  MATCH  ANSWER_RECOMMENDATIONS_SUFFIX    chars(claim)=200 blockLen=200 mode=join fence=```text
+  MATCH  HOME_RECOMMENDATIONS_SUFFIX      chars(claim)=187 blockLen=187 mode=join fence=```text
+  MATCH  CONTEXT_COMPRESSION_SUFFIX       chars(claim)=174 blockLen=174 mode=join fence=```text
+matched 9/9
+EXITCODE=0
+
+=== does the shipped source hash to the same values? 2026-09-21 21:28:47 ===
+Command: python .trae-verify2-source-digest.py  (extracts Java text blocks from PromptBodiesV1.java and hashes them)
+text blocks in PromptBodiesV1.java: 9; matched 0/9
+EXITCODE=0
+
+=== corrected source digest check (text-block line-continuation handled) 2026-09-21 21:29:16 ===
+Command: python .trae-verify2-source-digest3.py
+  MATCH  LEARNING_ANSWER_TUTOR            chars=715 (claim 715)
+  MATCH  THINKING_ADDENDUM                chars=101 (claim 101)
+  MATCH  DERIVED_PROCESSOR_BASE           chars=186 (claim 186)
+  MATCH  ROOT_TITLE_SUFFIX                chars=102 (claim 102)
+  MATCH  BRANCH_TITLE_SUFFIX              chars=116 (claim 116)
+  MATCH  BRANCH_SUMMARY_SUFFIX            chars=156 (claim 156)
+  MATCH  ANSWER_RECOMMENDATIONS_SUFFIX    chars=200 (claim 200)
+  MATCH  HOME_RECOMMENDATIONS_SUFFIX      chars=187 (claim 187)
+  MATCH  CONTEXT_COMPRESSION_SUFFIX       chars=174 (claim 174)
+matched 9/9
+EXITCODE=0

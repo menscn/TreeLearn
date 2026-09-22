@@ -1,9 +1,20 @@
-Command: grep -rn "CREATE TABLE|ALTER TABLE|CREATE INDEX" android --include=*.java
+Command: grep -rnE "CREATE TABLE|ALTER TABLE|CREATE (UNIQUE )?INDEX|CREATE TRIGGER|DROP (TABLE|INDEX|TRIGGER)" android --include=*.java
 --- matches ---
 android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:356:            "CREATE INDEX " + INDEX_BRANCHES_TOPIC_PARENT + " ON " + Branches.TABLE + "("
 android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:358:            "CREATE INDEX " + INDEX_BRANCHES_SOURCE_REVISION + " ON " + Branches.TABLE + "("
 android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:360:            "CREATE INDEX " + INDEX_BRANCHES_ARCHIVED + " ON " + Branches.TABLE + "("
+android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:363:            "CREATE UNIQUE INDEX " + INDEX_BRANCHES_ROOT + " ON " + Branches.TABLE + "("
+android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:365:            "CREATE UNIQUE INDEX " + INDEX_MESSAGES_BRANCH_ORDINAL + " ON " + Messages.TABLE + "("
+android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:367:            "CREATE UNIQUE INDEX " + INDEX_REVISIONS_MESSAGE_NO + " ON "
+android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:370:            "CREATE UNIQUE INDEX " + INDEX_SNAPSHOTS_BRANCH + " ON " + ContextSnapshots.TABLE + "("
 android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:372:            "CREATE INDEX " + INDEX_ARTIFACTS_KIND_SCOPE + " ON " + AiArtifacts.TABLE + "("
+android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:375:            "CREATE UNIQUE INDEX " + INDEX_OPERATIONS_ACTIVE + " ON "
+android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:402:            "CREATE TRIGGER " + TRIGGER_REVISIONS_IMMUTABLE + " BEFORE UPDATE ON "
+android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:405:            "CREATE TRIGGER " + TRIGGER_REVISIONS_NO_DIRECT_DELETE + " BEFORE DELETE ON "
+android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:410:            "CREATE TRIGGER " + TRIGGER_SNAPSHOTS_IMMUTABLE + " BEFORE UPDATE ON "
+android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:413:            "CREATE TRIGGER " + TRIGGER_SNAPSHOTS_NO_DIRECT_DELETE + " BEFORE DELETE ON "
+android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:418:            "CREATE TRIGGER " + TRIGGER_OPERATIONS_TERMINAL_IMMUTABLE + " BEFORE UPDATE ON "
+android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:422:            "CREATE TRIGGER " + TRIGGER_MESSAGES_USER_CONTENT_IMMUTABLE + " BEFORE UPDATE OF "
 android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:429:    /** The seven {@code CREATE TABLE} statements, in creation order. */
 android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:520:        StringBuilder sql = new StringBuilder("CREATE TABLE ").append(table).append(" (");
 EXIT=0

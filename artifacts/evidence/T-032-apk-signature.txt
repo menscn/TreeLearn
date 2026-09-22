@@ -1,0 +1,35 @@
+================================================================
+T-032 supplement - release APK signature + freshness (material to the user's goal: a sideloadable APK)
+captured-at: 
+2026-09-22T00:29:29.9964490+08:00
+cwd: 
+D:\Project\Android\Treelearn
+apk: android/app/build/outputs/apk/release/app-release.apk
+note: an earlier handoff block claimed this APK had no signature because META-INF listed no .RSA/.SF.
+      That inference was WRONG: v2/v3 signatures live in the APK Signing Block, not in META-INF.
+      apksigner below is the authoritative check and it verifies.
+----------------------------------------------------------------
+command: & "D:\Environment\Android\SDK\build-tools\36.1.0\apksigner.bat" verify --verbose --print-certs "android/app/build/outputs/apk/release/app-release.apk"
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): false
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+Signer #1 certificate DN: CN=Treelearn Personal Sideload, OU=Personal, O=Treelearn, L=Shanghai, ST=Shanghai, C=CN
+Signer #1 certificate SHA-256 digest: d8670c863d692a90e21b7a895cf0f717bc8a1cc4ba82a48ff771f09a8780c561
+Signer #1 certificate SHA-1 digest: ab80340942e1d12bdac23245de139b3afa360d2f
+Signer #1 certificate MD5 digest: c6202582a565ed8735e06ed1471df73a
+Signer #1 key algorithm: RSA
+Signer #1 key size (bits): 4096
+Signer #1 public key SHA-256 digest: 4c514425e362230a866d8a6811280c2c0e951f897b0f04a027db7f99d2591dd0
+Signer #1 public key SHA-1 digest: 909730c3f5142f6aa9ca5ea63038e49dba0efb46
+Signer #1 public key MD5 digest: c418d3d8dc08b327b0408267b9657b10
+EXITCODE=0
+command: (PowerShell) compare the APK mtime against every *.java/*.xml/*.gradle under android/ excluding build/
+apk mtime: 2026-09-22T00:25:23.5462938+08:00  bytes=448376
+APK is newer than every source file (not stale)
+dex class-name probe: com/treelearn/app/wiring/ChatWiring=3  HomeWiring=3  PendingHomeWiring=0  PendingChatWiring=0  NOT_WIRED=0
+EXITCODE=0

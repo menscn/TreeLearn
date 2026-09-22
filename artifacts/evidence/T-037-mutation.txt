@@ -1,0 +1,178 @@
+# T-037 mutation tests: the drift / single-source assertions must be falsifiable.
+# Why required: treelearn-data TreeLearnSchemaQuoteInvariantTest is the ONLY evidence that the
+#             §6.2.19 rule text exists once and that both install paths execute the same text.
+#             rules/regression.md + the AGENTS.md failure library require a mutation run when an
+#             assertion is the sole alternative evidence or a defect regression lock.
+# captured-at: 2026-09-21T23:49:36.2273777+08:00
+# cwd: D:\Project\Android\Treelearn
+# command (both mutated runs and the restored run):
+#   cd android; .\gradlew.bat :data:testDebugUnitTest --tests "com.treelearn.data.db.TreeLearnSchemaQuoteInvariantTest" --no-daemon --console=plain
+
+# ===========================================================================
+# MUTATION A - MESSAGES_QUOTE_INVARIANT_STATEMENTS loses its UPDATE half
+#   (the shared statement list that BOTH install paths reference drops the UPDATE trigger)
+#   file: android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java
+#   expected: the suite must go red; a suite that still passes here verifies nothing.
+# ===========================================================================
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac
+> Task :data:preDebugUnitTestBuild UP-TO-DATE
+> Task :data:generateDebugUnitTestStubRFile UP-TO-DATE
+> Task :data:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :data:processDebugUnitTestJavaRes NO-SOURCE
+> Task :data:bundleLibRuntimeToJarDebug
+> Task :data:bundleLibCompileToJarDebug
+> Task :data:compileDebugUnitTestJavaWithJavac UP-TO-DATE
+
+> Task :data:testDebugUnitTest FAILED
+
+TreeLearnSchemaQuoteInvariantTest > theRuleIsOneConditionTextWrappedOncePerWriteEvent FAILED
+    java.lang.AssertionError at TreeLearnSchemaQuoteInvariantTest.java:61
+
+TreeLearnSchemaQuoteInvariantTest > nothingElseInEitherPathNamesTheColumn FAILED
+    java.lang.AssertionError at TreeLearnSchemaQuoteInvariantTest.java:107
+
+TreeLearnSchemaQuoteInvariantTest > bothPathsExecuteTheSameInvariantText FAILED
+    java.lang.AssertionError at TreeLearnSchemaQuoteInvariantTest.java:85
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+7 tests completed, 3 failed
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':data:testDebugUnitTest'.
+> There were failing tests. See the report at: file:///D:/Project/Android/Treelearn/android/data/build/reports/tests/testDebugUnitTest/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+BUILD FAILED in 13s
+16 actionable tasks: 4 executed, 12 up-to-date
+MUTATION_A_EXITCODE=1
+
+# ===========================================================================
+# MUTATION B - MIGRATION_V1_TO_V2_STATEMENTS loses its UPDATE half
+#   (the UPGRADE path silently diverges from a fresh install: fresh install keeps both
+#    triggers, an upgraded database would get only the INSERT one) - the exact drift
+#    this task exists to prevent.
+#   expected: the drift lock must go red and nothing else.
+# ===========================================================================
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac
+> Task :data:preDebugUnitTestBuild UP-TO-DATE
+> Task :data:generateDebugUnitTestStubRFile UP-TO-DATE
+> Task :data:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :data:processDebugUnitTestJavaRes NO-SOURCE
+> Task :data:bundleLibCompileToJarDebug
+> Task :data:bundleLibRuntimeToJarDebug
+> Task :data:compileDebugUnitTestJavaWithJavac UP-TO-DATE
+
+> Task :data:testDebugUnitTest FAILED
+
+TreeLearnSchemaQuoteInvariantTest > bothPathsExecuteTheSameInvariantText FAILED
+    java.lang.AssertionError at TreeLearnSchemaQuoteInvariantTest.java:82
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+7 tests completed, 1 failed
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':data:testDebugUnitTest'.
+> There were failing tests. See the report at: file:///D:/Project/Android/Treelearn/android/data/build/reports/tests/testDebugUnitTest/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 12s
+16 actionable tasks: 4 executed, 12 up-to-date
+MUTATION_B_EXITCODE=1
+
+# ===========================================================================
+# RESTORED - the mutation reverted; TreeLearnSchema.java is byte-identical again
+#   sha256 = 48d7589c378822a8d123b4ed89a848fb40415f7efdc6ca31366ff3c8dd2c6cc1 (same as before A)
+#   expected: green, proving the red runs above were caused by the mutation alone.
+# ===========================================================================
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac FROM-CACHE
+> Task :data:preDebugUnitTestBuild UP-TO-DATE
+> Task :data:generateDebugUnitTestStubRFile UP-TO-DATE
+> Task :data:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :data:processDebugUnitTestJavaRes NO-SOURCE
+> Task :data:bundleLibRuntimeToJarDebug
+> Task :data:bundleLibCompileToJarDebug
+> Task :data:compileDebugUnitTestJavaWithJavac UP-TO-DATE
+> Task :data:testDebugUnitTest
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 11s
+16 actionable tasks: 3 executed, 1 from cache, 12 up-to-date
+RESTORED_EXITCODE=0

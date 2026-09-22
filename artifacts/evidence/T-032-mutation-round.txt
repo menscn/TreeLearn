@@ -1,0 +1,356 @@
+================================================================
+T-032 mutation round - each lock below is the sole evidence for one rule
+captured-at: 2026-09-22T00:16:31+08:00
+cwd: D:\Project\Android\Treelearn
+command: cd android; .\gradlew.bat :app:testDebugUnitTest --tests "com.treelearn.app.wiring.*" --no-daemon --console=plain
+
+Mutations applied simultaneously (all reverted before the GREEN run):
+  M1 ChatWiring.view            FAILED -> STABLE   locks readMapsAnEndedAttemptWithNoVersionToFailed
+  M2 ChatWiring.questionBehind  break -> continue  locks retryReassemblesTheRequestFromTheQuestionBehindThePosition
+  M3 RefusalNotices.of          PROMPT_BUILD -> STORAGE  locks submitSurfacesAnUnbuildableRequestAsRequestRejected
+                                                       and sendSurfacesAnUnbuildableRequestAsRequestRejected
+  M4 BranchHeading.of           first-question fallback removed  locks recentTopicsFallsBackToTheRootQuestionWhenNoTitleIsStored
+Expected: exactly those 5 test methods fail and nothing else does.
+The fork regression lock is NOT repeated here: T-032-red.txt IS that mutation
+(the pre-fix fork id pinning), and it failed exactly forkOpensTheChildBranchWithoutStartingAnAttempt.
+----------------------------------------------------------------
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac UP-TO-DATE
+> Task :ai:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :ai:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugLibraryResources UP-TO-DATE
+> Task :ai:writeDebugAarMetadata UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :ai:extractDeepLinksDebug UP-TO-DATE
+> Task :ai:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :data:extractDeepLinksDebug UP-TO-DATE
+> Task :data:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :data:compileDebugLibraryResources UP-TO-DATE
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac UP-TO-DATE
+> Task :data:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes NO-SOURCE
+> Task :data:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:compileDebugUnitTestJavaWithJavac UP-TO-DATE
+
+> Task :app:testDebugUnitTest FAILED
+
+ChatWiringTest > readMapsAnEndedAttemptWithNoVersionToFailed FAILED
+    java.lang.AssertionError at ChatWiringTest.java:135
+
+ChatWiringTest > sendSurfacesAnUnbuildableRequestAsRequestRejected FAILED
+    java.lang.AssertionError at ChatWiringTest.java:375
+
+HomeWiringTest > submitSurfacesAnUnbuildableRequestAsRequestRejected FAILED
+    java.lang.AssertionError at HomeWiringTest.java:184
+
+HomeWiringTest > recentTopicsFallsBackToTheRootQuestionWhenNoTitleIsStored FAILED
+    java.lang.IllegalArgumentException at HomeWiringTest.java:52
+
+32 tests completed, 4 failed
+
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:testDebugUnitTest'.
+> There were failing tests. See the report at: file:///D:/Project/Android/Treelearn/android/app/build/reports/tests/testDebugUnitTest/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+54 actionable tasks: 4 executed, 50 up-to-date
+BUILD FAILED in 12s
+EXITCODE=1
+FAILED-CASE com.treelearn.app.wiring.ChatWiringTest.readMapsAnEndedAttemptWithNoVersionToFailed
+FAILED-CASE com.treelearn.app.wiring.ChatWiringTest.sendSurfacesAnUnbuildableRequestAsRequestRejected
+FAILED-CASE com.treelearn.app.wiring.HomeWiringTest.submitSurfacesAnUnbuildableRequestAsRequestRejected
+FAILED-CASE com.treelearn.app.wiring.HomeWiringTest.recentTopicsFallsBackToTheRootQuestionWhenNoTitleIsStored
+
+================================================================
+T-032 mutation round - ROUND 2 (round 1 is preserved above; see the note at its end)
+captured-at: 2026-09-22T00:16:59+08:00
+cwd: D:\Project\Android\Treelearn
+command: cd android; .\gradlew.bat :app:testDebugUnitTest --tests "com.treelearn.app.wiring.*" --no-daemon --console=plain
+
+ROUND 1 OUTCOME (recorded for honesty): M2 written as `break;` -> `continue;` was NOT detected.
+Reason: `continue` skips the very candidates `break` would have stopped at, so the two are
+behaviourally identical for "the last learner message strictly before the position". It was an
+equivalent mutant - a mutation that does not degrade the implementation - so no assertion could
+have caught it. M2 was rewritten as a real boundary degradation:
+  M2 ChatWiring.questionBehind  `ordinal >= position.ordinal` -> `ordinal < position.ordinal`
+Expected in round 2: exactly 5 test methods fail and nothing else does.
+The fork regression lock is NOT repeated here: T-032-red.txt IS that mutation (the pre-fix fork
+id pinning), and it failed exactly forkOpensTheChildBranchWithoutStartingAnAttempt.
+----------------------------------------------------------------
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac UP-TO-DATE
+> Task :ai:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :ai:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugLibraryResources UP-TO-DATE
+> Task :ai:writeDebugAarMetadata UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :ai:extractDeepLinksDebug UP-TO-DATE
+> Task :ai:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :data:extractDeepLinksDebug UP-TO-DATE
+> Task :data:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :data:compileDebugLibraryResources UP-TO-DATE
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac UP-TO-DATE
+> Task :data:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes NO-SOURCE
+> Task :data:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:compileDebugUnitTestJavaWithJavac UP-TO-DATE
+
+> Task :app:testDebugUnitTest FAILED
+
+ChatWiringTest > readMapsAnEndedAttemptWithNoVersionToFailed FAILED
+    java.lang.AssertionError at ChatWiringTest.java:135
+
+ChatWiringTest > sendSurfacesAnUnbuildableRequestAsRequestRejected FAILED
+    java.lang.AssertionError at ChatWiringTest.java:375
+
+ChatWiringTest > resetRunsTheStoresResetVerdictOnTheSameRoute FAILED
+    java.lang.AssertionError at ChatWiringTest.java:241
+
+ChatWiringTest > retryReassemblesTheRequestFromTheQuestionBehindThePosition FAILED
+    java.lang.AssertionError at ChatWiringTest.java:203
+
+HomeWiringTest > submitSurfacesAnUnbuildableRequestAsRequestRejected FAILED
+    java.lang.AssertionError at HomeWiringTest.java:184
+
+HomeWiringTest > recentTopicsFallsBackToTheRootQuestionWhenNoTitleIsStored FAILED
+    java.lang.IllegalArgumentException at HomeWiringTest.java:52
+
+32 tests completed, 6 failed
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:testDebugUnitTest'.
+> There were failing tests. See the report at: file:///D:/Project/Android/Treelearn/android/app/build/reports/tests/testDebugUnitTest/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+BUILD FAILED in 13s
+54 actionable tasks: 4 executed, 50 up-to-date
+EXITCODE=1
+FAILED-CASE com.treelearn.app.wiring.ChatWiringTest.readMapsAnEndedAttemptWithNoVersionToFailed
+FAILED-CASE com.treelearn.app.wiring.ChatWiringTest.sendSurfacesAnUnbuildableRequestAsRequestRejected
+FAILED-CASE com.treelearn.app.wiring.ChatWiringTest.resetRunsTheStoresResetVerdictOnTheSameRoute
+FAILED-CASE com.treelearn.app.wiring.ChatWiringTest.retryReassemblesTheRequestFromTheQuestionBehindThePosition
+FAILED-CASE com.treelearn.app.wiring.HomeWiringTest.submitSurfacesAnUnbuildableRequestAsRequestRejected
+FAILED-CASE com.treelearn.app.wiring.HomeWiringTest.recentTopicsFallsBackToTheRootQuestionWhenNoTitleIsStored
+FAILED-COUNT=6
+
+RESTORE + verify:
+command: Copy-Item <temp backup> -> <working file>, then the same gradle command again
+captured-at: 2026-09-22T00:17:20+08:00
+sha256 BranchHeading 08C754FEBC68A8D93729F3A421D606B9C0A060B6CFAAC131C667BE2E3EBD21E4
+sha256 ChatWiring 18F83D0527E24E945908A7A4CD33BB727AA22AD05874ADDAED4C3062196A7E89
+sha256 RefusalNotices 2282DD751EBE9216A1E0D88E0216F3A33760E3A92D96A1502E3BED84EB773BDF
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac UP-TO-DATE
+> Task :ai:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :ai:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugLibraryResources UP-TO-DATE
+> Task :ai:writeDebugAarMetadata UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :ai:extractDeepLinksDebug UP-TO-DATE
+> Task :ai:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :data:extractDeepLinksDebug UP-TO-DATE
+> Task :data:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :data:compileDebugLibraryResources UP-TO-DATE
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac UP-TO-DATE
+> Task :data:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac FROM-CACHE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes NO-SOURCE
+> Task :data:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:compileDebugUnitTestJavaWithJavac UP-TO-DATE
+> Task :app:testDebugUnitTest FROM-CACHE
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 10s
+54 actionable tasks: 2 executed, 2 from cache, 50 up-to-date
+EXITCODE=0 (restored)
+com.treelearn.app.wiring.ChatWiringTest: tests=19 failures=0
+com.treelearn.app.wiring.HomeWiringTest: tests=13 failures=0

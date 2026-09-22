@@ -1,0 +1,76 @@
+T-042 source scan - ReadingStore/ReadingSession production consumers + single unread decision
+captured-at: 2026-09-22 04:27:53 (Asia/Shanghai)
+cwd: D:\Project\Android\Treelearn
+shell: Windows PowerShell 5.1; rg = ripgrep
+purpose: acceptance criterion - prove ReadingStore/ReadingSession have production consumers in :app (no longer only test references), and that there is no second unread decision.
+
+### SECTION 1 - reading ports referenced from :app main, excluding the reading/ package itself
+command: rg -n "ReadingStore|ReadingSession|SqliteReadingStore" android/app/src/main/java --glob '!**/reading/**'
+android/app/src/main/java\com\treelearn\app\AppContainer.java:13:import com.treelearn.app.reading.ReadingStore;
+android/app/src/main/java\com\treelearn\app\AppContainer.java:14:import com.treelearn.app.reading.SqliteReadingStore;
+android/app/src/main/java\com\treelearn\app\AppContainer.java:89:    private final ReadingStore readingStore;
+android/app/src/main/java\com\treelearn\app\AppContainer.java:119:        this.readingStore = new SqliteReadingStore(helper);
+android/app/src/main/java\com\treelearn\app\AppContainer.java:187:    public ReadingStore readingStore() {
+android/app/src/main/java\com\treelearn\app\MainActivity.java:24:import com.treelearn.app.reading.ReadingStore;
+android/app/src/main/java\com\treelearn\app\MainActivity.java:395:        ReadingStore reading = container.readingStore();
+android/app/src/main/java\com\treelearn\app\ui\ChatActions.java:89:     * {@code ReadingSession.remember} is the one write path for a reading position.
+android/app/src/main/java\com\treelearn\app\ui\ChatPresenter.java:3:import com.treelearn.app.reading.ReadingSession;
+android/app/src/main/java\com\treelearn\app\ui\ChatPresenter.java:4:import com.treelearn.app.reading.ReadingStore;
+android/app/src/main/java\com\treelearn\app\ui\ChatPresenter.java:41: *       was and whether the unread badge may clear are {@link ReadingSession}'s two rules; this class
+android/app/src/main/java\com\treelearn\app\ui\ChatPresenter.java:62:    private final ReadingSession session;
+android/app/src/main/java\com\treelearn\app\ui\ChatPresenter.java:72:            ReadingStore reading) {
+android/app/src/main/java\com\treelearn\app\ui\ChatPresenter.java:82:        this.session = new ReadingSession(require(reading, "reading"));
+EXITCODE=0
+SECTION 1 VERDICT: consumers exist outside reading/ - AppContainer constructs SqliteReadingStore (:119) and exposes it (:187); MainActivity reads it (:395); ChatPresenter builds the session (:82). Callers were previously zero.
+
+### SECTION 2 - ReadingSession construction sites in production code
+command: rg -n "new ReadingSession" android/app/src/main/java android/core/src/main/java
+android/app/src/main/java\com\treelearn\app\ui\ChatPresenter.java:82:        this.session = new ReadingSession(require(reading, "reading"));
+EXITCODE=0
+SECTION 2 VERDICT: exactly one production construction site (ChatPresenter:82).
+
+### SECTION 3 - every write of the unread pair across all production modules
+command: rg -n "LAST_SEEN_STABLE_SEQUENCE|lastSeenStableSequence" android/data/src/main/java
+android/data/src/main/java\com\treelearn\data\db\TreeLearnSchema.java:86:        public static final String LAST_SEEN_STABLE_SEQUENCE = "last_seen_stable_sequence";
+android/data/src/main/java\com\treelearn\data\db\TreeLearnSchema.java:225:            Branches.LAST_SEEN_STABLE_SEQUENCE + " INTEGER NOT NULL DEFAULT 0 CHECK ("
+android/data/src/main/java\com\treelearn\data\db\TreeLearnSchema.java:226:                    + Branches.LAST_SEEN_STABLE_SEQUENCE + " >= 0 AND "
+android/data/src/main/java\com\treelearn\data\db\TreeLearnSchema.java:227:                    + Branches.LAST_SEEN_STABLE_SEQUENCE + " <= " + Branches.LATEST_STABLE_SEQUENCE
+android/data/src/main/java\com\treelearn\data\db\dao\BranchDao.java:70:        values.put(TreeLearnSchema.Branches.LAST_SEEN_STABLE_SEQUENCE,
+android/data/src/main/java\com\treelearn\data\db\dao\BranchDao.java:71:                branch.lastSeenStableSequence());
+android/data/src/main/java\com\treelearn\data\db\dao\BranchDao.java:184:                Rows.longOf(cursor, TreeLearnSchema.Branches.LAST_SEEN_STABLE_SEQUENCE),
+android/data/src/main/java\com\treelearn\data\db\dao\BranchDao.java:258:        values.put(TreeLearnSchema.Branches.LAST_SEEN_STABLE_SEQUENCE,
+android/data/src/main/java\com\treelearn\data\db\dao\BranchDao.java:259:                branch.lastSeenStableSequence());
+EXITCODE=0
+SECTION 3 VERDICT: the column is written only by BranchDao.values(Branch) (:258-259), used by insert (:48) and update (:60). No second writer.
+
+### SECTION 4 - production callers of BranchDao.update (the only way last_seen moves)
+command: rg -n "BranchDao.update\(" android/app/src/main/java android/data/src/main/java
+android/app/src/main/java\com\treelearn\app\generation\GenerationCoordinator.java:540:                            BranchDao.update(database, branch);
+android/app/src/main/java\com\treelearn\app\wiring\SqliteTreeCanvasStore.java:103:                BranchDao.update(open, branch);
+android/app/src/main/java\com\treelearn\app\reading\SqliteReadingStore.java:44:        BranchDao.update(database(), Guard.object(branch, "branch"));
+android/app/src/main/java\com\treelearn\app\navigation\SqliteNavigationStore.java:106:            BranchDao.update(open, branch);
+EXITCODE=0
+SECTION 4 VERDICT: the seen-advancing caller is SqliteReadingStore:44 (ReadingStore.markSeen); the other three callers persist unrelated branch fields, not the seen counter.
+
+### SECTION 5 - the single unread decision and its only caller
+command: rg -n "onViewport|branch.unreadCount" android/core/src/main/java/com/treelearn/core/domain/ViewportSeen.java android/app/src/main/java/com/treelearn/app/reading/ReadingSession.java
+android/core/src/main/java/com/treelearn/core/domain/ViewportSeen.java:38:    public static boolean onViewport(Branch branch, List<Message> messages,
+android/core/src/main/java/com/treelearn/core/domain/ViewportSeen.java:43:        if (branch.unreadCount() == 0L) {
+android/app/src/main/java/com/treelearn/app/reading/ReadingSession.java:17: * {@link ReadingAnchor#resolve} and {@link ViewportSeen#onViewport} — and it is deliberately the
+android/app/src/main/java/com/treelearn/app/reading/ReadingSession.java:61:    public boolean onViewport(Branch branch, List<Message> messages, Set<String> visibleMessageIds) {
+android/app/src/main/java/com/treelearn/app/reading/ReadingSession.java:63:        if (!ViewportSeen.onViewport(branch, messages, visibleMessageIds)) {
+EXITCODE=0
+SECTION 5 VERDICT: one decision - ViewportSeen.onViewport (guarded by Branch.unreadCount()==0); ReadingSession.onViewport delegates to it and is the sole entry from the UI.
+
+### SECTION 6 - ChatPresenter wiring of the session to the screen
+command: rg -n "session\.|onViewportChanged|onLeaving|onRowsLaidOut" android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java
+361:    public void onRowsLaidOut(int itemHeightPx) {
+368:            final ReadingPosition position = session.open(branch, rows, itemHeightPx);
+374:     * The position the learner stopped at, written through the session. The anchor is what the screen
+378:    public void onLeaving(ReadingAnchor anchor) {
+383:        background.execute(() -> session.remember(branch, anchor));
+387:     * The unread clear, judged by {@code ViewportSeen} through the session.
+396:    public void onViewportChanged(Set<String> visibleMessageIds) {
+403:            if (session.onViewport(branch, rows, visibleMessageIds)) {
+EXITCODE=0
+SECTION 6 VERDICT: the presenter holds the only ReadingSession and advances it from the viewport callback; no screen-side read of the unread pair.

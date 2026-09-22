@@ -1,0 +1,12 @@
+== static facts readback 2026-09-21T20:42:49.5379004+08:00
+gradle files: 8
+gradle total lines: 529
+--- T-002 production java/res/manifest ---
+app java files: 7 lines: 821
+app res files: 9 lines: 141
+manifest lines: 31
+===== [2026-09-21T21:26:00+08:00] CORRECTION (independent verifier), MODE=read-only
+The "gradle total lines: 529" line above does NOT reproduce and must not be cited.
+Command: Get-ChildItem -Path android -Recurse -Filter *.gradle -File | Where-Object { $_.FullName -notmatch '\build\' } then per-file (Get-Content).Count
+Result: files=8 total=599  (see VERIFY-T002-gradle-size.txt for the per-file breakdown)
+EXITCODE=0

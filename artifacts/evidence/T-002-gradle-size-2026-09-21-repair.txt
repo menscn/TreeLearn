@@ -1,0 +1,20 @@
+# T-002 gradle-size read-back (record-repair lane, this session)
+Generated : 2026-09-21T21:47:21+08:00
+Mode      : read-only, no build
+Command   : Get-ChildItem -Path android -Recurse -Filter *.gradle -File | Where-Object { $_.FullName -notmatch '\\build\\' } | Sort-Object FullName  ; per-file (Get-Content $_.FullName).Count
+Cwd       : D:\Project\Android\Treelearn
+
+   39  android\ai\build.gradle   (mtime 2026-09-21 02:05:35)
+  108  android\app\build.gradle   (mtime 2026-09-21 21:36:33)
+  121  android\build.gradle   (mtime 2026-09-21 02:05:29)
+   27  android\core\build.gradle   (mtime 2026-09-21 00:35:09)
+   40  android\data\build.gradle   (mtime 2026-09-21 02:05:35)
+  219  android\gradle\verify-no-kotlin.gradle   (mtime 2026-09-21 12:13:37)
+   25  android\settings.gradle   (mtime 2026-09-21 00:34:55)
+   27  android\tree-layout\build.gradle   (mtime 2026-09-21 00:35:09)
+files=8 total=606
+
+# Why this differs from VERIFY-T002-gradle-size.txt (599 @ 21:21):
+#   android/app/build.gradle was edited at 21:36:33 by the leader (signingConfigs moved before
+#   buildTypes; +17/-10 = +7 lines), so 599 -> 606. The file count (8) is unchanged.
+EXITCODE=0

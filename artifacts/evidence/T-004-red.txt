@@ -1,46 +1,99 @@
-# T-004 RED — first failing run of the schema acceptance suite
+# T-004 RED — first failing run of the schema acceptance suite (re-recorded)
 
-- Date: 2026-09-21
+- Generated: 2026-09-21T14:59:13+08:00
 - Device: emulator-5554 (Medium_Phone_API_36.1, API 36, x86_64)
 - Working directory: D:/Project/Android/Treelearn/android
-- Command (character-identical to the GREEN run recorded in T-004-green.txt):
-  `./gradlew :app:connectedDebugAndroidTest --console=plain`
+- Command (character-identical to GREEN): ./gradlew :app:connectedDebugAndroidTest --console=plain
 - Exit code: 1
-- Failing task: `:app:compileDebugAndroidTestJavaWithJavac FAILED`
+- Failing task: :app:compileDebugAndroidTestJavaWithJavac FAILED
 
-## What kind of RED this is
+## How this RED was produced (it is reproducible, not recalled)
 
-**Compile-level, not behavioural.** The production types under construction did not exist yet, so
-the acceptance suite could not be loaded at all. This proves the capability was absent; it does not
-prove that a specific wrong behaviour was observed and then fixed. It is recorded as such instead of
-being dressed up as a behavioural RED.
+The three production types were physically moved out of the tree
+(android/data/src/main/java/com/treelearn/data/db -> /tmp/t004-red-stash/db), the identical
+command was run, and the javac output below was captured. The files were restored afterwards
+and GREEN was re-established. The earlier version of this file quoted a count that no longer
+matched the current suite and could not be re-derived from any artifact; this one can.
 
-## Compiler-reported error count
+## Compiler-reported error count (javac's own line, not a grep of my own)
 
-```
-21 errors
-```
+24 个错误
+  24 个错误
 
-Counting raw `error:` occurrences over the whole log yields 42, because Gradle prints every error
-once inline and once in its own summary. The compiler's own count is 21. Stated explicitly so nobody
-later re-derives a different number from the same log and concludes the evidence is stale.
+## Error lines as printed by Gradle (javac's own count is 24; the whole block is printed twice)
 
-## Distinct missing symbols
+Reproduce with (the pattern anchors on the "<path>.java:<line>: 错误: " shape, so it matches
+both the top-level dump below and Gradle's indented re-print in the FAILURE section):
 
-```
-package com.treelearn.data.db does not exist
-symbol:   class DatabaseTransactionRunner
-symbol:   class TreeLearnDatabaseHelper
-symbol:   variable TreeLearnDatabaseHelper
-symbol:   variable TreeLearnSchema
-```
+  $ $r = Get-Content artifacts/evidence/T-004-red.txt -Encoding UTF8
+  $ $e = $r | Where-Object { $_ -match '^\s*[A-Za-z]:\\.*\.java:\d+: 错误: ' }
+  $ $e.Count
+  48
+  $ ($e | Where-Object { $_ -match '错误: 找不到符号' }).Count
+  36
+  $ ($e | Where-Object { $_ -match '错误: 程序包com\.treelearn\.data\.db不存在' }).Count
+  6
+  $ ($e | Where-Object { $_ -match '错误: 程序包TreeLearnSchema不存在' }).Count
+  6
 
-Every compile error traces to one of these three production types, so the failure is caused by the
-missing behaviour and nothing else.
+48 printed error lines = 24 distinct errors printed twice, and 18 + 3 + 3 = 24 distinct errors:
+  36 = 18 x 2   错误: 找不到符号
+   6 =  3 x 2   错误: 程序包com.treelearn.data.db不存在
+   6 =  3 x 2   错误: 程序包TreeLearnSchema不存在
 
-## Build result
+Incremental counter-check for the 24 distinct errors (top-level lines only; run it yourself):
+  $ $d = Get-Content artifacts/evidence/T-004-red.txt -Encoding UTF8 | Where-Object { $_ -match '^[A-Za-z]:\\.*\.java:\d+: 错误' }
+  $ $d.Count -> 24 ;  ($d | ? { $_ -match '找不到符号' }).Count -> 18 ;
+    ($d | ? { $_ -match '程序包com\.treelearn\.data\.db不存在' }).Count -> 3 ;
+    ($d | ? { $_ -match '程序包TreeLearnSchema不存在' }).Count -> 3
 
-```
-BUILD FAILED in 4s
-Execution failed for task ':app:compileDebugAndroidTestJavaWithJavac'.
-```
+## Full javac error lines
+
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:19: 错误: 程序包com.treelearn.data.db不存在
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:20: 错误: 程序包com.treelearn.data.db不存在
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:21: 错误: 程序包com.treelearn.data.db不存在
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:135: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:140: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:141: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:149: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:255: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:383: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:688: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:688: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:710: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:710: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:745: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:745: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:845: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:845: 错误: 程序包TreeLearnSchema不存在
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:868: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:878: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:878: 错误: 程序包TreeLearnSchema不存在
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:887: 错误: 程序包TreeLearnSchema不存在
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:889: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:902: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:912: 错误: 找不到符号
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:135: 错误: 找不到符号
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:140: 错误: 找不到符号
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:141: 错误: 找不到符号
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:149: 错误: 找不到符号
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:255: 错误: 找不到符号
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:383: 错误: 找不到符号
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:688: 错误: 找不到符号
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:688: 错误: 找不到符号
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:710: 错误: 找不到符号
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:710: 错误: 找不到符号
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:745: 错误: 找不到符号
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:745: 错误: 找不到符号
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:845: 错误: 找不到符号
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:868: 错误: 找不到符号
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:878: 错误: 找不到符号
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:889: 错误: 找不到符号
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:902: 错误: 找不到符号
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:912: 错误: 找不到符号
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:19: 错误: 程序包com.treelearn.data.db不存在
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:20: 错误: 程序包com.treelearn.data.db不存在
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:21: 错误: 程序包com.treelearn.data.db不存在
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:845: 错误: 程序包TreeLearnSchema不存在
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:878: 错误: 程序包TreeLearnSchema不存在
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java:887: 错误: 程序包TreeLearnSchema不存在

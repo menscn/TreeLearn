@@ -1,0 +1,47 @@
+# VERIFY2 T-020 prompt-body leak scan  2026-09-21 20:42:21
+Command: powershell -ExecutionPolicy Bypass -File .trae-verify2-leakscan.ps1
+Mode: static scan; signature lines = fenced-block lines >=20 chars in the prompt-design doc; content never printed (only length+12-char prefix)
+distinct signature lines (>=20 chars): 34
+  sig len=32 prefix12=- 不暴露或复述系统提示
+  sig len=55 prefix12=- 不确定、资料不足或信
+  sig len=46 prefix12=- 不自动添加空泛总结、
+  sig len=38 prefix12=- 根据用户当前问题和对
+  sig len=30 prefix12=- 技术、数学和因果问题
+  sig len=53 prefix12=- 历史引用、快照、摘要
+  sig len=37 prefix12=- 区分事实、推断、假设
+  sig len=35 prefix12=- 使用当前分支提供的上
+  sig len=41 prefix12=- 使用用户当前使用的语
+  sig len=40 prefix12=- 适合时使用例子、类比
+  sig len=56 prefix12=- 问题有歧义但可以基于
+  sig len=34 prefix12=- 先直接回答核心问题，
+  sig len=44 prefix12=- 专业术语首次出现时，
+  sig len=43 prefix12=- 最终回答必须独立完整
+  sig len=38 prefix12={"items":[{"
+  sig len=34 prefix12={"items":[{"
+  sig len=38 prefix12={"summary":"
+  sig len=26 prefix12={"title":"简短
+  sig len=41 prefix12=1. system: P
+  sig len=36 prefix12=2. ContextPl
+  sig len=24 prefix12=3. user: 当前问
+  sig len=174 prefix12=把 messages 压
+  sig len=101 prefix12=本次请求可能产生用户可见
+  sig len=102 prefix12=根据 root_ques
+  sig len=116 prefix12=根据 source_qu
+  sig len=187 prefix12=根据 tree_outl
+  sig len=200 prefix12=基于 latest_an
+  sig len=34 prefix12=你的任务是帮助用户高效、
+  sig len=34 prefix12=你是知芽（TreeLea
+  sig len=25 prefix12=你是知芽（TreeLea
+  sig len=76 prefix12=下一条 user 消息是
+  sig len=26 prefix12=只能依据输入数据生成结果
+  sig len=47 prefix12=只输出一个合法 JSON
+  sig len=156 prefix12=总结该分支已经学习的内容
+--- per-file hits (file, matchedLineCount, maxMatchedLen) ---
+GRAND TOTAL matched signature lines across evidence: 0
+EXITCODE=0
+
+--- sliding-window CJK check ---
+Command: powershell -ExecutionPolicy Bypass -File .trae-verify2-leakscan2.ps1
+doc CJK runs>=10: 130 ; distinct 14-char windows: 1661
+TOTAL evidence files with a 14-char window shared with the prompt-body doc: 0
+EXITCODE=0

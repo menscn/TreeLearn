@@ -1,0 +1,114 @@
+# T-022 验收条件 7 证据 —— 再水合入口（BranchSource.restore）的落点
+
+生成方式：bash artifacts/evidence/.gen-t022-restore-location.sh ，生成时刻 2026-09-21T10:46:49Z（UTC）。
+本文件中每条命令都是当场执行，EXITCODE 取自该命令自身，不是事后补记；被检文件的 SHA-256 见 §0。
+回显的命令按 shell 规则加了引号，可以直接粘回终端复现。
+结论段的每个行号与计数都由生成脚本从对应命令的捕获输出里提取（hit_of / count_of / files_of），
+不手写 —— 上一版正是在这里漂移：正文输出 :227/:238/:174/:330，手写的结论却仍引用 :224/:235/:171/:311。
+
+被验证的断言（任务文件验收条件 7）：`BranchSource.restore` 在 `:data` 生产源码中恰好出现 1 次，
+且该次调用位于 `BranchDao` 的只读映射（read path）内。
+
+---
+
+## 0. 被检文件的 SHA-256（生成本文件时的工作树状态）
+
+$ sha256sum <被检文件>
+  4b693fb196a8fb9e8961ff5e959703de7c2aeffb4cd07afb4a7fe54d27a75431 *android/data/src/main/java/com/treelearn/data/db/dao/BranchDao.java
+  0f2331fa1a4c538c86bccfa95f35f40c20d636dc64ec417536511e5593b43542 *android/data/src/main/java/com/treelearn/data/db/dao/MessageDao.java
+  f509b9acf06400ecbb1376aae221a71ceaae5b55967fc52e63efe235ddd3d3ec *android/data/src/main/java/com/treelearn/data/db/dao/TopicDao.java
+  8eddaf5682b12e1b71041040bb3a4f9db01a4f3fb988bd93d5f8f408bf15c57f *android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java
+  b21d6a58a914fe5cc9581cd8720f6b57d6c3d129d35def5625c240322df4c056 *android/core/src/main/java/com/treelearn/core/domain/BranchSource.java
+  0ce915b32b800eb5e2fe8bb798a282f4ab57151f2f83c026fc4381a01c007356 *android/app/src/androidTest/java/com/treelearn/app/TopicBranchMessageDaoInstrumentedTest.java
+  dc21831832e3b42eb65f7436fe9b58e2b5e6bc5bc535a5bb8c8c442cafde085d *android/app/src/androidTest/java/com/treelearn/app/SqliteSchemaInstrumentedTest.java
+
+说明：`.` 在正则中是通配符，会同时命中 `BranchSource#restore`（javadoc / 注释里的方法引用），
+因此下面把两种写法分开统计，再给一条合并语义的检索。上一版证据正是在这里出错：它把 `.` 当字面量，
+记录命中 1 条而实测 3 条。
+
+---
+
+## Command 1 —— 点号写法（转义为字面量），只看生产源码
+
+$ grep -rn 'BranchSource\.restore' android/data/src/main/java android/core/src/main/java android/app/src/main/java
+android/data/src/main/java/com/treelearn/data/db/dao/BranchDao.java:228:        // Checked here rather than left to BranchSource.restore, which rejects a null id with a
+android/data/src/main/java/com/treelearn/data/db/dao/BranchDao.java:239:        return BranchSource.restore(
+EXITCODE=0
+
+## Command 2 —— 井号写法（javadoc / 注释里的方法引用），同一范围
+
+$ grep -rn 'BranchSource#restore' android/data/src/main/java android/core/src/main/java android/app/src/main/java
+android/data/src/main/java/com/treelearn/data/db/dao/BranchDao.java:19: * <p>This class holds the <em>only</em> permitted use of {@link BranchSource#restore} in
+android/data/src/main/java/com/treelearn/data/db/dao/BranchDao.java:165:     * id. It used to fall through to {@link BranchSource#restore},
+android/core/src/main/java/com/treelearn/core/domain/AnswerRevision.java:112:     * {@link BranchSource#restore}.
+EXITCODE=0
+
+## Command 3 —— 合并语义：两种写法一次搜全（{1} 只吃一个任意字符），覆盖测试源码以看清全貌
+
+$ grep -rnE 'BranchSource.{1}restore' '--include=*.java' android
+android/app/src/androidTest/java/com/treelearn/app/SqliteSchemaInstrumentedTest.java:1045:        // BranchSource.restore runs it through Guard.id, which rejects null. An earlier version of
+android/core/src/main/java/com/treelearn/core/domain/AnswerRevision.java:112:     * {@link BranchSource#restore}.
+android/core/src/main/java/com/treelearn/core/domain/BranchSource.java:94:    public static BranchSource restore(
+android/core/src/test/java/com/treelearn/core/domain/BranchSourceTest.java:143:            BranchSource.restore("not-a-uuid", Guard.newId(), Guard.newId(),
+android/core/src/test/java/com/treelearn/core/domain/BranchSourceTest.java:170:        BranchSource restored = BranchSource.restore(
+android/core/src/test/java/com/treelearn/core/domain/BranchTest.java:215:            BranchSource.restore("x", Guard.newId(), Guard.newId(),
+android/core/src/test/java/com/treelearn/core/domain/BranchTest.java:249:        BranchSource source = BranchSource.restore(parent, message, revision,
+android/core/src/test/java/com/treelearn/core/domain/BranchTest.java:283:        BranchSource source = BranchSource.restore(Guard.newId(), Guard.newId(), Guard.newId(),
+android/data/src/main/java/com/treelearn/data/db/dao/BranchDao.java:19: * <p>This class holds the <em>only</em> permitted use of {@link BranchSource#restore} in
+android/data/src/main/java/com/treelearn/data/db/dao/BranchDao.java:165:     * id. It used to fall through to {@link BranchSource#restore},
+android/data/src/main/java/com/treelearn/data/db/dao/BranchDao.java:228:        // Checked here rather than left to BranchSource.restore, which rejects a null id with a
+android/data/src/main/java/com/treelearn/data/db/dao/BranchDao.java:239:        return BranchSource.restore(
+EXITCODE=0
+
+## Command 4 —— 各再水合入口在 :data 生产源码里的落点
+
+$ grep -rnE '(BranchSource|Branch|Message|AnswerRevision)[.#]restore' '--include=*.java' android/data/src/main android/core/src/main android/app/src/main
+android/data/src/main/java/com/treelearn/data/db/dao/AnswerRevisionDao.java:22: * and refuses a version no purpose owns. The single {@link AnswerRevision#restore} call in the
+android/data/src/main/java/com/treelearn/data/db/dao/AnswerRevisionDao.java:102:     * The read mapping, and the only production {@link AnswerRevision#restore} call site.
+android/data/src/main/java/com/treelearn/data/db/dao/AnswerRevisionDao.java:105:     * {@code AnswerRevision.restore} states: on reload the row is the authority. Shape checks still
+android/data/src/main/java/com/treelearn/data/db/dao/AnswerRevisionDao.java:112:        return AnswerRevision.restore(
+android/data/src/main/java/com/treelearn/data/db/dao/BranchDao.java:19: * <p>This class holds the <em>only</em> permitted use of {@link BranchSource#restore} in
+android/data/src/main/java/com/treelearn/data/db/dao/BranchDao.java:165:     * id. It used to fall through to {@link BranchSource#restore},
+android/data/src/main/java/com/treelearn/data/db/dao/BranchDao.java:175:        return Branch.restore(
+android/data/src/main/java/com/treelearn/data/db/dao/BranchDao.java:228:        // Checked here rather than left to BranchSource.restore, which rejects a null id with a
+android/data/src/main/java/com/treelearn/data/db/dao/BranchDao.java:239:        return BranchSource.restore(
+android/data/src/main/java/com/treelearn/data/db/dao/MessageDao.java:85:        return Message.restore(
+android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:330:            // be rehydrated through AnswerRevision.restore without consulting the operation
+android/core/src/main/java/com/treelearn/core/domain/AnswerRevision.java:112:     * {@link BranchSource#restore}.
+EXITCODE=0
+
+## Command 5 —— DDL 落点：DAO 包内不得出现 CREATE/ALTER/DROP（期望零匹配）
+
+$ grep -rnE 'CREATE |ALTER |DROP ' '--include=*.java' android/data/src/main/java/com/treelearn/data/db/dao
+EXITCODE=1
+
+## Command 6 —— DDL 落点（对照）：含 DDL 关键字的 :data 生产文件
+
+$ grep -rlE 'CREATE |ALTER |DROP ' '--include=*.java' android/data/src/main/java
+android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java
+EXITCODE=0
+
+---
+
+## 结论（行号与计数由本脚本从上面各命令的捕获输出机械提取，非手写）
+
+- Command 1：生产源码里 `BranchSource.restore` 共 2 行命中，且全部落在同一个文件 `BranchDao.java` 内。
+  其中 1 行是注释里的文字引用（`BranchDao.java:228`，解释为什么空快照要在这里先判），
+  1 行是真实调用（`BranchDao.java:239`）。
+  因此「`:data` 生产源码中 `BranchSource.restore` 恰好 1 处调用」成立；该调用点就在
+  `BranchDao` 内，且同一文件里与它相邻的注释行 `BranchDao.java:228` 正是 `readSource` 的空快照前置判，
+  故限定词「位于只读映射（read path）内」与命中位置一致。
+- Command 2：井号写法命中 3 行；其中 `:core` 的 `AnswerRevision.java:112` 是 javadoc 交叉引用，
+  提醒这条断言的范围必须限定在 `:data` 生产源码，而不是「全仓零命中」。
+- Command 3：把范围放宽到整个 `android/` 后共 12 行命中 —— `:core` 的 `BranchSource.java:94` 是定义本身，
+  其余分布在 `:core` 测试与 `:app` 测试。这正是任务文件在验收条件 7 上加了限定词的依据。
+  与本任务修复直接相关的一项：androidTest 侧的真实调用（`BranchSource.restore(`）为 0 处，
+  与本任务把创建用法改走真实创建入口 `BranchSource.fromOperation(..., GenerationState.STABLE, ...)` 相符。
+- Command 4：`Branch.restore`（`BranchDao.java:175`）与 `Message.restore`（`MessageDao.java:85`）各自只出现在
+  所属 DAO 的只读映射内；`TreeLearnSchema.java:330` 是注释里提到 `AnswerRevision.restore` 的文字，不是调用。
+- Command 5：捕获输出为空、按输出行数计 0 行，即零匹配；EXITCODE=1 表示「没有匹配」（grep 以 1
+  表示无匹配，不是执行失败）。这一条由「输出段是否为空」直接读出，不靠退出码反推。
+- Command 6：对照命令 —— 全 `:data` 生产源码里含 DDL 关键字的文件共 1 个（TreeLearnSchema.java），
+  EXITCODE=0 且匹配集非空。Command 5 + Command 6 共同支持 android/README.md 中「DDL 单产地」的声明。
+  上一版证据在此处的结论行与自身输出相矛盾（输出有匹配却写着 no output），本次改为对输出的直接陈述。
+

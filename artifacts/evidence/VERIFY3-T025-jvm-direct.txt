@@ -1,0 +1,14 @@
+=== VERIFY3 direct JVM execution of T-025's judgement tests  2026-09-21 21:47:28
+javac -d artifacts\evidence\.verify3\t025-classes -cp <core.jar;data classes;android.jar;junit;hamcrest> android/app/src/test/java/com/treelearn/data/db/dao/FirstTopicCreationRulesTest.java
+javac EXITCODE=0
+java -cp <same + artifacts\evidence\.verify3\t025-classes> org.junit.runner.JUnitCore com.treelearn.data.db.dao.FirstTopicCreationRulesTest
+����: �Ҳ������޷��������� .encoding=UTF-8
+ԭ��: java.lang.ClassNotFoundException: /encoding=UTF-8
+EXITCODE=1
+JUnit version 4.13.2
+...........
+Time: 0.015
+
+OK (11 tests)
+
+EXITCODE=0

@@ -1,0 +1,29 @@
+T-039 observation - the release APK was re-packaged by the mandated 'check' gate and now carries the navigation page
+captured-at: 2026-09-22T03:33:07.0950247+08:00
+cwd: D:\Project\Android\Treelearn
+disclosure: the implementer did NOT run a release build on purpose. '.\gradlew.bat check' (a required gate) executes :app:packageRelease and :app:assembleRelease, so the artifact was re-packaged as a side effect. Recorded here so nobody reads it as a deliberate leader action.
+
+---- artifact facts ----
+path: D:\Project\Android\Treelearn\android\app\build\outputs\apk\release\app-release.apk
+written: 2026-09-22T03:28:55.5186277+08:00
+bytes: 498904
+sha256: B92D6D293CBA5C9C1A2DEF970932E669159768F5DC851BE55450CCA2B8014EE1
+newest file under android/app/src/main: 2026-09-22T03:26:23.7447960+08:00
+-> apk mtime is later than the newest source file, so the APK is not stale
+
+command: python -X utf8 -c <zip probe of release app-release.apk classes.dex for T-039 symbols>
+---- output ----
+dex entries: ['classes.dex']
+  NavigationScreen present in classes.dex -> True
+  NavigationWiring present in classes.dex -> True
+  NavigationPresenter present in classes.dex -> True
+  NavigationViewState present in classes.dex -> True
+EXITCODE=0
+
+command: D:\Environment\Android\SDK\build-tools\36.1.0\apksigner.bat verify --print-certs <apk>
+---- output ----
+Signer #1 certificate DN: CN=Treelearn Personal Sideload, OU=Personal, O=Treelearn, L=Shanghai, ST=Shanghai, C=CN
+Signer #1 certificate SHA-256 digest: d8670c863d692a90e21b7a895cf0f717bc8a1cc4ba82a48ff771f09a8780c561
+Signer #1 certificate SHA-1 digest: ab80340942e1d12bdac23245de139b3afa360d2f
+Signer #1 certificate MD5 digest: c6202582a565ed8735e06ed1471df73a
+EXITCODE=0

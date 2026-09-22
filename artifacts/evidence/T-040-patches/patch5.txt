@@ -1,0 +1,232 @@
+*** Begin Patch
+*** Update File: android/app/src/main/res/layout/screen_home_body.xml
+@@
+             <Button
+                 android:id="@+id/home_search"
+                 android:layout_width="wrap_content"
+                 android:layout_height="@dimen/touch_min"
+                 android:background="?android:attr/selectableItemBackgroundBorderless"
+-                android:enabled="false"
+                 android:minWidth="@dimen/touch_min"
+                 android:text="@string/action_search"
+*** Add File: android/app/src/main/res/layout/screen_search.xml
++<?xml version="1.0" encoding="utf-8"?>
++<!--
++  Phone search: one column, full width. The column itself lives in screen_search_body.xml, so the
++  phone page and the tablet page cannot drift; only the width that surrounds it differs.
++-->
++<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
++    android:id="@+id/search_root"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    android:fillViewport="true">
++
++    <include
++        layout="@layout/screen_search_body"
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content" />
++</ScrollView>
+*** Add File: android/app/src/main/res/layout/screen_search_body.xml
++<?xml version="1.0" encoding="utf-8"?>
++<!--
++  The search column (PRD 6.2.8). It draws exactly one of the five panes at a time and decides
++  nothing: the presenter owns the query, the store read and the verdict, and SearchPage says which
++  pane the current state is. The five state views below are shown and hidden, never rebuilt.
++-->
++<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    android:id="@+id/search_content"
++    android:layout_width="match_parent"
++    android:layout_height="wrap_content"
++    android:orientation="vertical"
++    android:paddingBottom="@dimen/space_s8">
++
++    <LinearLayout
++        android:id="@+id/search_appbar"
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:gravity="center_vertical"
++        android:orientation="horizontal"
++        android:paddingStart="@dimen/page_gutter"
++        android:paddingTop="@dimen/space_s4"
++        android:paddingEnd="@dimen/page_gutter">
++
++        <Button
++            android:id="@+id/search_back"
++            android:layout_width="wrap_content"
++            android:layout_height="@dimen/touch_min"
++            android:background="?android:attr/selectableItemBackgroundBorderless"
++            android:minWidth="@dimen/touch_min"
++            android:text="@string/search_back"
++            android:textColor="@color/tl_ink2"
++            android:textSize="@dimen/text_sm" />
++
++        <TextView
++            android:id="@+id/search_title"
++            android:layout_width="0dp"
++            android:layout_height="wrap_content"
++            android:layout_weight="1"
++            android:paddingStart="@dimen/space_s3"
++            android:text="@string/action_search"
++            android:textColor="@color/tl_ink"
++            android:textSize="@dimen/text_h1"
++            android:textStyle="bold" />
++    </LinearLayout>
++
++    <EditText
++        android:id="@+id/search_query"
++        android:layout_width="match_parent"
++        android:layout_height="@dimen/touch_min"
++        android:layout_marginStart="@dimen/page_gutter"
++        android:layout_marginTop="@dimen/space_s2"
++        android:layout_marginEnd="@dimen/page_gutter"
++        android:background="@color/tl_surface"
++        android:hint="@string/search_hint"
++        android:imeOptions="actionSearch"
++        android:inputType="text"
++        android:maxLines="1"
++        android:paddingStart="@dimen/space_s3"
++        android:paddingEnd="@dimen/space_s3"
++        android:textColor="@color/tl_ink"
++        android:textColorHint="@color/tl_ink3"
++        android:textSize="@dimen/text_body" />
++
++    <TextView
++        android:id="@+id/search_scope"
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:paddingStart="@dimen/page_gutter"
++        android:paddingTop="@dimen/space_s2"
++        android:paddingEnd="@dimen/page_gutter"
++        android:text="@string/search_scope"
++        android:textColor="@color/tl_ink3"
++        android:textSize="@dimen/text_cap" />
++
++    <TextView
++        android:id="@+id/search_guide"
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:paddingStart="@dimen/page_gutter"
++        android:paddingTop="@dimen/space_s8"
++        android:paddingEnd="@dimen/page_gutter"
++        android:gravity="center_horizontal"
++        android:text="@string/search_guide"
++        android:textColor="@color/tl_ink3"
++        android:textSize="@dimen/text_sm" />
++
++    <TextView
++        android:id="@+id/search_searching"
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:paddingStart="@dimen/page_gutter"
++        android:paddingTop="@dimen/space_s8"
++        android:paddingEnd="@dimen/page_gutter"
++        android:gravity="center_horizontal"
++        android:text="@string/search_searching"
++        android:textColor="@color/tl_ink3"
++        android:textSize="@dimen/text_sm"
++        android:visibility="gone" />
++
++    <TextView
++        android:id="@+id/search_empty"
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:paddingStart="@dimen/page_gutter"
++        android:paddingTop="@dimen/space_s8"
++        android:paddingEnd="@dimen/page_gutter"
++        android:gravity="center_horizontal"
++        android:textColor="@color/tl_ink3"
++        android:textSize="@dimen/text_sm"
++        android:visibility="gone" />
++
++    <TextView
++        android:id="@+id/search_error"
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:paddingStart="@dimen/page_gutter"
++        android:paddingTop="@dimen/space_s8"
++        android:paddingEnd="@dimen/page_gutter"
++        android:gravity="center_horizontal"
++        android:text="@string/search_error"
++        android:textColor="@color/tl_amber"
++        android:textSize="@dimen/text_sm"
++        android:visibility="gone" />
++
++    <LinearLayout
++        android:id="@+id/search_results"
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:layout_marginTop="@dimen/space_s2"
++        android:orientation="vertical"
++        android:visibility="gone" />
++</LinearLayout>
+*** Add File: android/app/src/main/res/layout/item_search_hit.xml
++<?xml version="1.0" encoding="utf-8"?>
++<!--
++  One search result: which part of the branch matched, the branch's own name, and the snippet. The
++  ancestor path the prototype also draws needs a tree walk this task did not take on, and is recorded
++  as a gap rather than faked from one branch row.
++-->
++<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    android:id="@+id/hit_row"
++    android:layout_width="match_parent"
++    android:layout_height="wrap_content"
++    android:background="?android:attr/selectableItemBackground"
++    android:clickable="true"
++    android:focusable="true"
++    android:minHeight="@dimen/touch_min"
++    android:orientation="vertical"
++    android:paddingStart="@dimen/page_gutter"
++    android:paddingTop="@dimen/space_s3"
++    android:paddingEnd="@dimen/page_gutter"
++    android:paddingBottom="@dimen/space_s3">
++
++    <TextView
++        android:id="@+id/hit_field"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:textColor="@color/tl_ink3"
++        android:textSize="@dimen/text_cap" />
++
++    <TextView
++        android:id="@+id/hit_branch_title"
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:layout_marginTop="@dimen/space_s1"
++        android:textColor="@color/tl_ink"
++        android:textSize="@dimen/text_h2"
++        android:textStyle="bold" />
++
++    <TextView
++        android:id="@+id/hit_snippet"
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:layout_marginTop="@dimen/space_s1"
++        android:ellipsize="end"
++        android:maxLines="2"
++        android:textColor="@color/tl_ink2"
++        android:textSize="@dimen/text_sm" />
++</LinearLayout>
+*** Add File: android/app/src/main/res/layout-sw600dp/screen_search.xml
++<?xml version="1.0" encoding="utf-8"?>
++<!--
++  Tablet search: the same column, capped at a comfortable reading measure and centred, so a landscape
++  tablet shows one readable page instead of a result list stretched across the full width.
++-->
++<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
++    android:id="@+id/search_root"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    android:fillViewport="true">
++
++    <FrameLayout
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content">
++
++        <include
++            layout="@layout/screen_search_body"
++            android:layout_width="@dimen/content_measure"
++            android:layout_height="wrap_content"
++            android:layout_gravity="center_horizontal" />
++    </FrameLayout>
++</ScrollView>
+*** End Patch

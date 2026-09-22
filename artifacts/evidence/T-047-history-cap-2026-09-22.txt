@@ -1,0 +1,9 @@
+# Treelearn T-047 history cap evidence
+# implementation: ChatWiring.historyForRequest counts stable answer rounds, keeps the latest 10
+# complete user+stable-answer rounds, and asks DerivedService for one CONTEXT_COMPRESSION SUMMARY over
+# older entries. A failed/absent compression returns the original plan and preserves the existing
+# HISTORY_EXCEEDS_BUDGET refusal; no silent truncation occurs.
+# unit command: android\gradlew.bat :app:testDebugUnitTest --no-daemon --console=plain --rerun-tasks --no-build-cache
+# result: BUILD SUCCESSFUL; app JVM suite passed
+# device note: no DeepSeek Key was supplied, so provider-backed compression was not network-smoked.
+# EXITCODE=0

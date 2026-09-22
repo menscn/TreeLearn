@@ -1,0 +1,137 @@
+T-044 契约守门复核（contract-guardian · 只读）
+captured-at: 2026-09-22 03:03:33 +08:00
+cwd: D:\Project\Android\Treelearn
+mode: READONLY — 未修改任何生产代码、测试、他人证据或文档；本文件是本轮唯一写入。
+command: 只读检索，未运行 Gradle（另一实现者占用构建缓存）。本轮实际执行：
+  Get-Content -LiteralPath android/ai/src/main/java/com/treelearn/ai/prompt/DeepSeekContextEncoder.java -Encoding UTF8
+  Get-Content -LiteralPath android/app/src/main/java/com/treelearn/app/wiring/ChatWiring.java -Encoding UTF8
+  Get-Content -LiteralPath android/app/src/main/java/com/treelearn/app/ui/ChatCommands.java -Encoding UTF8
+  Get-Content -LiteralPath android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java -Encoding UTF8   （第 140-205 行）
+  Get-Content -LiteralPath android/core/src/main/java/com/treelearn/core/domain/Message.java -Encoding UTF8   （第 60-170 行）
+  Get-Content -LiteralPath android/ai/src/main/java/com/treelearn/ai/prompt/DeepSeekRequestAssembler.java -Encoding UTF8
+  Get-Content -LiteralPath android/ai/src/test/java/com/treelearn/ai/prompt/DeepSeekContextEncoderTest.java -Encoding UTF8（第 140-230 行）
+  Get-Content -LiteralPath android/app/src/test/java/com/treelearn/app/wiring/ChatWiringTest.java -Encoding UTF8（第 409-473 行）
+  rg -n --glob '!**/build/**' --glob '!**/.gradle/**' "treelearn_quote" .
+  rg -ni --glob '!**/build/**' --glob '!**/.gradle/**' --glob '!artifacts/**' "treelearn[_ \-]?quote" .
+  rg -n --glob '!**/build/**' --glob '!**/.gradle/**' -g '!**/DeepSeekContextEncoder*.java' "<[a-zA-Z_\-]*quote[a-zA-Z_\-]*>" .
+  rg -n --glob '!**/build/**' --glob '!**/.gradle/**' "currentInput" .
+  rg -n --glob '!**/build/**' --glob '!**/.gradle/**' "quotedText" .
+  rg -n -F 'quote == null ? "" : quote.trim()' android --glob '!**/build/**'
+  rg -n --glob '!**/build/**' -g '!**/test/**' -g '!**/androidTest/**' "treelearn_" android
+  rg -n "T-044|044" Docs/06-delivery/TreeLearn_V1_交付报告.md            （命中 0 行）
+  rg -n --glob '!**/build/**' -B 8 -A 26 "public List<ContextPlan.Entry> history" android/app/src/main/java/com/treelearn/app/wiring/SqliteChatStore.java
+被核文件指纹（SHA-256 / 物理行数）：
+  F545BDFF87A6C5930B15EA97D57F154EC7A9EF2EE860528C229F89F2640CD862  187  android/ai/src/main/java/com/treelearn/ai/prompt/DeepSeekContextEncoder.java
+  6D05E2015DC832978CB3FD737035777C0C88904666ADAF0BFCCC0A0D35E9686A  384  android/app/src/main/java/com/treelearn/app/wiring/ChatWiring.java
+  3877DB84DC5037BE7B149C78E835C2BAF2A63C437BAA538EB11ED51B525AA5C0  186  android/app/src/main/java/com/treelearn/app/ui/ChatMessage.java
+  20CBC833128EA029D83A537CE27C038BFE039100CBDF17D3DB7F3DE7FE115693  196  android/app/src/main/java/com/treelearn/app/ui/ChatViewState.java
+  3DA8E8F19852F1FC193EE47B84AB1E6812B386AC893700F57A01E849B5F9CE3F  286  Docs/05-technical-design/知芽（TreeLearn）DeepSeek自适应学习导师提示词设计_V1.0.md
+  757D50A71DF68336E142F7025D8FC4F0E6D4093A992C4704AC61A0635F5BD5F9  372  Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md
+  3330463B3F5A3F2BB401994B7B10D931C3ACCA834B09AD520B1E8374F0D201D0  216  Docs/06-delivery/TreeLearn_V1_交付报告.md
+  EC2495A856D5C7723443D85C4DBA57A831C4C78D86F287BF5309E1C8F7293112  853  android/README.md
+
+[contract-guardian 报告]
+契约面命中: 原生桥接（ChatCommands.send 的 quote 参数）+ 应用↔模型提供方的请求线格式（提示词设计 §5 / §5.1）+ 当前态文档同步（android/README.md、技术方案 §9.2、交付报告 §5.1）
+
+端点级一致性:
+  - 线格式 vs 实现（§5.1 ↔ DeepSeekContextEncoder.currentInput）: PASS
+  - 信封字面量唯一性（:core / :app / UI / res 布局）: PASS
+  - 单一判定点（send / retry-reset / 第三入口）: PARTIAL — 「有没有引文」的判定唯一；但同一归一化表达式在生产代码有 4 处，本轮新增 1 处
+  - 提示词设计 §5 不变式（system 恰好一条且在 0；当前问题恰好一条且最后）: PASS
+  - 文档反查: FAIL — 交付报告 §5.1（:128-142）与 :124 尾句仍以**当前态**宣称「引用进不了请求」，且未加历史快照标记
+时间字段契约: N/A（本变更不涉及时间字段）
+错误语义: PASS（引文超预算仍按既有 RESERVE_EXCEEDS_BUDGET 失败关闭；未新增错误码、未改错误封装）
+向后兼容: PASS（无 schema / migration / DTO 改动；无引文时请求字节不变，由 :ai 与 :app 双侧断言钉住）
+文档同步: FAIL（见「文档反查」）
+结论: PARTIAL
+失败修复指令: 见文末「修复指令」
+
+--------------------------------------------------------------------------------
+问 1. 线格式与代码是否逐字一致 —— PASS
+--------------------------------------------------------------------------------
+文档 §5.1 第 126-129 行的格式块，与 DeepSeekContextEncoder.java 第 89 行逐项对照：
+  - 标签字面量: 文档 <treelearn_quote> / </treelearn_quote>；实现 :45-46 的 QUOTE_OPEN / QUOTE_CLOSE 值逐字符相同（测试 DeepSeekContextEncoderTest:159-160 另行钉住字面量本身）。
+  - 顺序: 信封开 → 引文 → 信封闭 → 问题原文。一致。
+  - 换行: 开标签后一个、闭标签前一个、闭标签后一个；问题之后无换行。与文档块呈现的换行位置一致。
+  - 转义范围: 第 89 行只对 cited 调 escape，问题 asked 原样拼接。与文档 :133「只转义引文，不转义问题」一致。
+  - 无引文: :86-88 直接返回 asked（既不返回空串，也不加任何标签）。与文档 :132 一致。
+  - 参数语义: :85 把 null 与纯空白归一为「没有引文」，与文档 :136 的括注一致。
+唯一精度缺口（不影响本项判定）: 文档把第 3 条画成一个固定 4 行的块，而 escape 不触及换行字符，故**多行引文**会让信封内出现多行、问题不再是第 4 行。建议 §5.1 补一句「引文自身可含换行，信封内因此可多行」。旁证: 测试 DeepSeekContextEncoderTest:164 的 input.split("\n", -1)[3] 只对单行引文的例子成立（该用法是举例，不是不变式断言）。
+
+--------------------------------------------------------------------------------
+问 2. 信封字面量是否存在第二处定义 —— PASS（不存在）
+--------------------------------------------------------------------------------
+全仓检索（排除 build/ 与 .gradle/）命中 27 行，分类如下：
+  - 唯一生产定义: DeepSeekContextEncoder.java:45-46（并已并入 :49-50 的 TAGS，4 → 6 条）。
+  - 测试: DeepSeekContextEncoderTest.java:157/159/160/180/189/193/210；ChatWiringTest.java:482（期望串夹具）。
+  - 文档: 提示词设计 :118/126/128/134；技术方案 :213；android/README.md :209/:630。
+  - 证据副本（非生产代码）: artifacts/evidence/T-044-red.txt、T-044-red-ai.txt、T-044-sizing.mjs。
+定向结论:
+  - :core 生产源码 0 命中；:app 生产源码（含 ui / screen / wiring）0 命中；res/（strings.xml、layout/、xml/）0 命中。
+  - 变体扫描两种形状（大小写不敏感 treelearn[_ \-]?quote；以及 <…quote…>）都没有近似拼写，也没有同义标签。另一族 treelearn_ 命中是无关的 SharedPreferences 名（treelearn_settings / treelearn_secret）。
+  - 「运行时拼接绕过」在 rg 的 regex 能力之外，但生产源码里的 treelearn_ 字面量只剩编码器常量本身（见上），故不存在第二个来源。
+守护用例形状正确: DeepSeekContextEncoderTest.theProviderFramingLivesOnlyInThisAdapter（:196-211）递归扫 core/src/main/java，先断言匹配集非空（:200-201，满足仓库「匹配集为空必须判 FAIL」的要求），再按 TAGS 逐个断言（:204-207），另有不依赖 TAGS 数组的前缀原文兜底（:208-210，已含 treelearn_quote）。
+
+--------------------------------------------------------------------------------
+问 3. 唯一判定点是否真的唯一 —— PARTIAL
+--------------------------------------------------------------------------------
+(a) 生产调用点唯一: DeepSeekContextEncoder.currentInput 在生产代码只有一个调用点 —— ChatWiring.submit（:248-251）。两个消费者入口都只把**存行里的值**交出去：send（:114 转发 userMessage.quotedText()）与 replace（:233 转发 questionUsed 的 Asked.quote，经 :345-358 的 questionBehind 从行里读回）。两者都不自行决定「是否加信封」。
+(b) 无第三个入口构造带引文的当前输入: 全仓 currentInput 只出现在 :ai 组装器的形参名、ChatWiring:251 与测试。另有两条同族路径各自构造当前输入，但都不可能带信封：HomeWiring:127（首页首题，无引文 UI，等价于 currentInput(question, null)，本轮未改）；DerivedRequest:189-190（派生用途的 JSON 正文，被 DeepSeekRequestAssembler:80-84 以 DERIVED_INPUT_NOT_JSON 失败关闭）。画布、导航、派生均不构造 currentInput。
+(c) 但「都只是转发、不各自再判断一次」不成立 —— 同一归一化表达式在生产代码有 4 处，其中 1 处是本轮新增：
+      android/ai/src/main/java/com/treelearn/ai/prompt/DeepSeekContextEncoder.java:85    ← 本任务新增
+      android/app/src/main/java/com/treelearn/app/wiring/ChatWiring.java:103
+      android/app/src/main/java/com/treelearn/app/ui/ChatMessage.java:73
+      android/app/src/main/java/com/treelearn/app/ui/ChatViewState.java:77              （这一处不 trim，形状略有差异）
+    来源: rg -n -F 'quote == null ? "" : quote.trim()' android --glob '!**/build/**' 命中前 3 行；rg -n -F 'null ? "" : quote' 另命中 ChatViewState:77。
+    与任务自身的边界冲突: .trae/tasks/T-2026-09-22-quote-into-request-044.md:58（Out of scope）明写「既有的 quote 归一化…只允许收敛到一处，**不允许新增第三处**」。按 rg 读数，该表达式在本轮之后是 4 处（若按任务所称「两处」计，则本轮正好新增了第三处）。
+    今天的实际后果为**零**：null、空串、纯空白三种输入在四处归一出同一结果（send 落库前已 trim → 存行即归一值 → 展示侧再 trim 幂等 → currentInput 收到的已是归一值），因此不存在「同一输入两条通道」的现网缺陷。
+    风险性质: 这正是本仓失败库记过两次的形态（「同一条规则写在两个入口」）的**未爆形态**——归一化规则一旦改动一处，展示值 / 落库值 / 发出去的字节就会分叉。
+(d) 仓库规则要求的跨入口比对断言已存在: ChatWiringTest.sendAndRetryAgreeCharacterForCharacterOnTheCurrentInput（:447-472）把 send 与 retry 的当前输入做逐字符 assertEquals（:469-471），另有 ChatWiringTest:423 断言 messages.size() == 2（system + 当前输入，未因引文多出一条 user 消息）。
+
+--------------------------------------------------------------------------------
+问 4. 不变式是否被破坏 —— PASS
+--------------------------------------------------------------------------------
+  - system 恰好一条且在位置 0: DeepSeekRequestAssembler:44-47 以**构造**而非事后校验实现（add(SYSTEM) → addAll(history) → add(USER)）；历史里出现 SYSTEM 直接按 SYSTEM_MESSAGE_IN_HISTORY 拒绝（:64-69）。
+  - 当前问题恰好一条且最后一条: 信封进的是 latest 这**一个字符串**，作为一条 USER 消息追加（:47）；字符串内部的换行不产生第二条消息（DeepSeekMessage 的粒度是消息，不是行）。
+  - 引用不会被送两次: 持有引文的那条用户消息不会同时进历史 —— SqliteChatStore.history:137 在 row.ordinal >= questionOrdinal 处 break，正是持有引文的那条行；ChatWiring:250 传给 history 的就是该 ordinal。
+  - 文档把新形态写进了不变式语境: 提示词设计 §5.1:123 明写「放进历史会新增第二条 user 消息，破坏上面『当前问题恰好一条且最后一条』的不变式」；技术方案 :213 同义；§5 的 :109-111 三行不变式本身无需修改且仍为真。
+  - 一处措辞张力（建议，不构成本项 FAIL）: §8.1:253 把「有引文时最后一条 user 消息**恰好含一对**引文信封与问题原文」写成无条件不变式，而 §5.1:137 自认问题原文里的信封字面量会原样发出。两者并不矛盾（253 描述的是引文侧转义后的结果），但建议给 253 补一句限定，避免读者误以为「问题里也不可能出现第二个信封」。
+
+--------------------------------------------------------------------------------
+问 5. 文档反查：是否还有与新区线格式矛盾的旧表述 —— FAIL（本轮唯一 FAIL，且仅限文档面）
+--------------------------------------------------------------------------------
+交付报告仍以**当前态**口径写着「引用进不了请求」，且全报告没有任何 T-044 痕迹：
+  - Docs/06-delivery/TreeLearn_V1_交付报告.md:139 「结论：引用目前是『存下来 + 显示出来』，**模型看不到被引用的那句话**」——生产事实已相反（DeepSeekContextEncoder:89 + ChatWiring:114 / :233）。
+  - 同文件 :140-142 「提示词设计文档没有定义引用进入提示词正文的线格式…在定稿之前，本报告不把它记作『已实现』」——线格式已于 §5.1 定稿并实现。
+  - 同文件 :124 尾句「『引用进入提示词的线格式未定义』仍成立，归 T-2026-09-21-real-data-path-wiring-032」——已不成立。
+  - rg -n "T-044|044" Docs/06-delivery/TreeLearn_V1_交付报告.md → 命中 0 行。
+  - 同一报告的 §6 标题是「任务状态一览（本轮结束时）」，:151 仍把 T-041 记为 ready 且「均未开工」，而 T-041 已被实现者置为 verifying（该条超出 T-044 范围，仅登记）。
+该报告已有既定的历史处置惯例（:124 的〔历史快照 · 2026-09-21〕、:106-111 的引用块），故修复应是**加标记 + 指向当前权威**，不是改写历史。
+次要（nit，不构成 FAIL）:
+  - DeepSeekRequestAssembler.java:29-30 的 @param currentInput 仍写「the current question」/「the structured JSON payload」，未提「可能是带引文信封的正文」。§5.1 是权威，但这一行属仓库反复强调的「调用方义务」型注释，建议补半句。
+  - android/README.md:637 与 DeepSeekContextEncoder.java:74 把残留风险的出处写作「提示词设计 §5」，而它在 §5.1（技术方案 :213 引作 §5.1）。§5.1 ⊂ §5，读者能找到，属定位不精确。
+  - ChatCommands.java:23 的 javadoc 只说「quote is the sentence it was asked from, or empty」，未写明 null 也被接受（ChatWiring:103 与 currentInput:85 都容忍 null）。契约文本比实现窄，实现侧更宽松。
+
+--------------------------------------------------------------------------------
+问 6. 残留风险是否被如实登记 —— PASS
+--------------------------------------------------------------------------------
+§5.1:137 有独立条目，三项都写到: ① 具体条件（问题原文含信封字面量 → **未转义**发给 provider，可能被读成引文边界）；② 边界（由学习者自己键入、同屏可见、不是「存储内容走私指令」的通道）；③ 取舍（消除它需要让「发出去的」与「存下来的」不一致，代价大于收益，V1 记录而不消除）。
+实现侧有对应证据、且方向诚实: DeepSeekContextEncoderTest.aCitationThatImitatesTheFramingCanNotForgeABoundary（:178-194）证明**引文侧**伪造被转义（信流行数仍为 2，unescape 可逆恢复原文）；问题侧按设计**不设防**，文档也没有把「不设防」写成「已设防」。
+README:636-637 与 §5.1 同口径（明确写出「代价是问题自身若含信封字面量会原样发给 provider」）。
+
+--------------------------------------------------------------------------------
+我无法判定的事项
+--------------------------------------------------------------------------------
+1. 真实 DeepSeek 收到该信封后的行为（是否需要 system 提示词交代标签语义、模型是否会把 <treelearn_quote> 当噪声）: **需运行验证，本轮未做**（无 Key；且我只读、不跑构建）。可静态确认的一点: PromptBodiesV1:45-46 用「内部标签」泛指、不枚举具体标签，因此新增第三个信封**不需要**同步 system 正文，也不与 system 正文矛盾。
+2. 设备侧观感、最终 APK 指纹与装机行为: 不属契约面，按用户 2026-09-21 决定记为 deferred。
+3. RED / GREEN 证据文件与实跑的一致性、以及既有断言改写（ChatWiringTest:163 / :204）后的覆盖强度: 属 verifier 职责，我未复跑（只读，且不与在飞构建争用缓存）。
+
+--------------------------------------------------------------------------------
+修复指令（最小）
+--------------------------------------------------------------------------------
+1. 交付报告（必做）: 给 §5.1（:128-142）加〔历史快照 · 2026-09-22〕标记并指向当前权威（提示词设计 §5.1 + DeepSeekContextEncoder.currentInput），修正 :124 尾句；顺带把 :151 的 T-041 状态改为 verifying 或补〔2026-09-22 更新〕（照 :150 对 T-038 的写法）。
+2. 归一化收敛（择一并留记录）: ① 把归一化收敛到 :core 的一个共享谓词（:ai 已依赖 :core，Message.requiredQuote 就在那里），四处引用它；或 ② 接受现状，但在提示词设计 §5.1 与任务文件里把「唯一」限定为「判定唯一、归一化不唯一」并说明理由。§5.1:136 现在的措辞（「null 与纯空白在此归一化」）与 ChatWiring:103 的存在并不完全一致，无论选哪条都应让它与代码对齐。
+3. 三处 nit（可一并补，均一行以内）: 组装器 :29-30 的 @param 补「可能带引文信封」；README:637 与编码器 :74 的「§5」改为「§5.1」；ChatCommands:23 补 null 语义。
+4. 另建议（可选，与仓库规则 ③ 同源）: 给「四种输入的归一出同一结果」加一条断言（null / 空串 / 纯空白 / 带空白的正常引文，逐个比对展示值、落库值与组装出的正文），使这次收敛有托底而不是靠人工核对。
+
+VERDICT: PARTIAL

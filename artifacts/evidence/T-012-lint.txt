@@ -1,0 +1,664 @@
+=== T-012 lint + back-navigation fix (MainActivity) ===
+Generated: 2026-09-21T21:58:36.4412793+08:00
+Reported by the record-repair lane at 2026-09-21 21:42 and reproduced here, not taken on trust.
+
+--- BEFORE (reproduced in the disposable copy at %TEMP%\t012-red, which carries the pre-fix MainActivity with the deprecated override) ---
+Command: cd android; .\gradlew.bat :app:lintDebug --no-daemon --console=plain
+--- gradle output (tail) ---
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:checkDebugAarMetadata
+> Task :ai:mergeDebugJniLibFolders
+> Task :ai:mergeDebugNativeLibs NO-SOURCE
+> Task :ai:stripDebugDebugSymbols NO-SOURCE
+> Task :ai:copyDebugJniLibsProjectAndLocalJars
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:extractDebugAnnotations FROM-CACHE
+> Task :ai:extractDeepLinksForAarDebug FROM-CACHE
+> Task :ai:generateDebugAssets UP-TO-DATE
+> Task :ai:mergeDebugAssets
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac UP-TO-DATE
+> Task :ai:mergeDebugGeneratedProguardFiles
+> Task :ai:mergeDebugConsumerProguardFiles
+> Task :ai:prepareDebugArtProfile
+> Task :ai:prepareLintJarForPublish
+> Task :ai:processDebugManifest UP-TO-DATE
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :ai:writeDebugAarMetadata UP-TO-DATE
+> Task :ai:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :ai:createFullJarDebug
+> Task :ai:preDebugAndroidTestBuild UP-TO-DATE
+> Task :ai:generateDebugAndroidTestResValues FROM-CACHE
+> Task :ai:writeDebugLintModelMetadata
+> Task :ai:mergeDebugJavaResource
+> Task :ai:extractProguardFiles
+> Task :ai:syncDebugLibJars FROM-CACHE
+> Task :ai:bundleDebugLocalLintAar
+> Task :ai:generateDebugLintModel
+> Task :ai:generateDebugAndroidTestLintModel
+> Task :ai:preDebugUnitTestBuild UP-TO-DATE
+> Task :ai:generateDebugUnitTestLintModel
+> Task :ai:lintAnalyzeDebug FROM-CACHE
+> Task :ai:lintAnalyzeDebugAndroidTest FROM-CACHE
+> Task :ai:lintAnalyzeDebugUnitTest FROM-CACHE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:checkDebugAarMetadata
+> Task :data:mergeDebugJniLibFolders
+> Task :data:mergeDebugNativeLibs NO-SOURCE
+> Task :data:stripDebugDebugSymbols NO-SOURCE
+> Task :data:copyDebugJniLibsProjectAndLocalJars
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :data:extractDebugAnnotations FROM-CACHE
+> Task :data:extractDeepLinksForAarDebug FROM-CACHE
+> Task :data:generateDebugAssets UP-TO-DATE
+> Task :data:mergeDebugAssets
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac UP-TO-DATE
+> Task :data:mergeDebugGeneratedProguardFiles
+> Task :data:mergeDebugConsumerProguardFiles
+> Task :data:prepareDebugArtProfile
+> Task :data:prepareLintJarForPublish
+> Task :data:processDebugManifest UP-TO-DATE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :data:writeDebugAarMetadata UP-TO-DATE
+> Task :data:mergeDebugJavaResource
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :data:syncDebugLibJars FROM-CACHE
+> Task :data:bundleDebugLocalLintAar
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+> Task :ai:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugLibraryResources UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :ai:extractDeepLinksDebug UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :data:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :data:compileDebugLibraryResources UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :data:bundleLibCompileToJarDebug UP-TO-DATE
+
+> Task :app:compileDebugJavaWithJavac
+注: C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\main\java\com\treelearn\app\MainActivity.java使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:generateDebugAndroidTestResValues FROM-CACHE
+> Task :data:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :data:createFullJarDebug
+> Task :app:bundleDebugClassesToCompileJar
+> Task :data:writeDebugLintModelMetadata
+> Task :app:generateDebugAndroidTestLintModel
+> Task :app:extractProguardFiles
+> Task :data:extractProguardFiles
+> Task :data:generateDebugLintModel
+
+> Task :app:generateDebugLintReportModel
+Warning: Lint will treat :core as an external dependency and not analyze it.
+ * Recommended Action: Apply the 'com.android.lint' plugin to java library project :core. to enable lint to analyze those sources.
+
+Warning: Lint will treat :tree-layout as an external dependency and not analyze it.
+ * Recommended Action: Apply the 'com.android.lint' plugin to java library project :tree-layout. to enable lint to analyze those sources.
+
+
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:generateDebugUnitTestLintModel
+> Task :data:lintAnalyzeDebug FROM-CACHE
+> Task :data:preDebugAndroidTestBuild UP-TO-DATE
+> Task :data:generateDebugAndroidTestResValues FROM-CACHE
+> Task :data:generateDebugAndroidTestLintModel
+> Task :data:preDebugUnitTestBuild UP-TO-DATE
+> Task :data:generateDebugUnitTestLintModel
+> Task :app:lintAnalyzeDebugUnitTest
+> Task :data:lintAnalyzeDebugAndroidTest FROM-CACHE
+> Task :data:lintAnalyzeDebugUnitTest FROM-CACHE
+> Task :app:lintAnalyzeDebugAndroidTest
+> Task :app:lintAnalyzeDebug
+
+> Task :app:lintReportDebug
+Wrote HTML report to file:///C:/Users/23745/AppData/Local/Temp/t012-red/android/app/build/reports/lint-results-debug.html
+Lint found 1 error and 17 warnings. First failure:
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\main\java\com\treelearn\app\MainActivity.java:65: Error: onBackPressed is no longer called for back gestures; migrate to AndroidX's backward compatible OnBackPressedDispatcher [GestureBackNavigation]
+    public void onBackPressed() {
+                ~~~~~~~~~~~~~
+
+
+> Task :app:lintDebug FAILED
+Lint found 1 error, 17 warnings. First failure:
+
+C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\main\java\com\treelearn\app\MainActivity.java:65: Error: onBackPressed is no longer called for back gestures; migrate to AndroidX's backward compatible OnBackPressedDispatcher [GestureBackNavigation]
+    public void onBackPressed() {
+                ~~~~~~~~~~~~~
+
+   Explanation for issues of type "GestureBackNavigation":
+   For apps targeting and running on Android 16+ (API 36+), predictive back
+   animations are enabled by default. A back gesture does not trigger
+   {Activity,Dialog}.onBackPressed, and does not dispatch
+   KeyEvent.KEYCODE_BACK.
+
+   Apps should migrate to AndroidX's backward compatible
+   OnBackPressedDispatcher.
+
+   This lint check does not consider per-activity opt-in/opt-out, so you may
+   need to suppress or baseline reported incidents if migrating per-activity.
+
+   https://developer.android.com/guide/navigation/custom-back/predictive-back-gesture
+
+
+The full lint text report is located at:
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\build\intermediates\lint_intermediate_text_report\debug\lintReportDebug\lint-results-debug.txt
+
+[Incubating] Problems report is available at: file:///C:/Users/23745/AppData/Local/Temp/t012-red/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:lintDebug'.
+> Lint found errors in the project; aborting build.
+  
+  Fix the issues identified by lint, or create a baseline to see only new errors.
+  To create a baseline, run `gradlew updateLintBaseline` after adding the following to the module's build.gradle file:
+  ```
+  android {
+      lint {
+          baseline = file("lint-baseline.xml")
+      }
+  }
+  ```
+  For more details, see https://developer.android.com/studio/write/lint#snapshot
+  
+  Lint found 1 error, 17 warnings. First failure:
+  
+  C:\Users\23745\AppData\Local\Temp\t012-red\android\app\src\main\java\com\treelearn\app\MainActivity.java:65: Error: onBackPressed is no longer called for back gestures; migrate to AndroidX's backward compatible OnBackPressedDispatcher [GestureBackNavigation]
+      public void onBackPressed() {
+                  ~~~~~~~~~~~~~
+  
+     Explanation for issues of type "GestureBackNavigation":
+     For apps targeting and running on Android 16+ (API 36+), predictive back
+     animations are enabled by default. A back gesture does not trigger
+     {Activity,Dialog}.onBackPressed, and does not dispatch
+     KeyEvent.KEYCODE_BACK.
+  
+     Apps should migrate to AndroidX's backward compatible
+     OnBackPressedDispatcher.
+  
+     This lint check does not consider per-activity opt-in/opt-out, so you may
+     need to suppress or baseline reported incidents if migrating per-activity.
+  
+     https://developer.android.com/guide/navigation/custom-back/predictive-back-gesture
+  
+  
+  The full lint text report is located at:
+    C:\Users\23745\AppData\Local\Temp\t012-red\android\app\build\intermediates\lint_intermediate_text_report\debug\lintReportDebug\lint-results-debug.txt
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 30s
+106 actionable tasks: 43 executed, 15 from cache, 48 up-to-date
+EXITCODE=1
+
+--- AFTER (same disposable tree, fixed MainActivity; the only change between the two runs) ---
+Command: cd android; .\gradlew.bat :app:lintDebug --no-daemon --console=plain
+--- gradle output (tail) ---
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:checkDebugAarMetadata UP-TO-DATE
+> Task :ai:mergeDebugJniLibFolders UP-TO-DATE
+> Task :ai:mergeDebugNativeLibs NO-SOURCE
+> Task :ai:stripDebugDebugSymbols NO-SOURCE
+> Task :ai:copyDebugJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:extractDebugAnnotations UP-TO-DATE
+> Task :ai:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :ai:generateDebugAssets UP-TO-DATE
+> Task :ai:mergeDebugAssets UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac UP-TO-DATE
+> Task :ai:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :ai:mergeDebugConsumerProguardFiles UP-TO-DATE
+> Task :ai:prepareDebugArtProfile UP-TO-DATE
+> Task :ai:prepareLintJarForPublish UP-TO-DATE
+> Task :ai:processDebugManifest UP-TO-DATE
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :ai:mergeDebugJavaResource UP-TO-DATE
+> Task :ai:syncDebugLibJars UP-TO-DATE
+> Task :ai:writeDebugAarMetadata UP-TO-DATE
+> Task :ai:bundleDebugLocalLintAar UP-TO-DATE
+> Task :ai:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :ai:createFullJarDebug UP-TO-DATE
+> Task :ai:preDebugAndroidTestBuild UP-TO-DATE
+> Task :ai:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :ai:writeDebugLintModelMetadata UP-TO-DATE
+> Task :ai:generateDebugAndroidTestLintModel UP-TO-DATE
+> Task :ai:extractProguardFiles UP-TO-DATE
+> Task :ai:generateDebugLintModel UP-TO-DATE
+> Task :ai:preDebugUnitTestBuild UP-TO-DATE
+> Task :ai:generateDebugUnitTestLintModel UP-TO-DATE
+> Task :ai:lintAnalyzeDebug UP-TO-DATE
+> Task :ai:lintAnalyzeDebugAndroidTest UP-TO-DATE
+> Task :ai:lintAnalyzeDebugUnitTest UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:checkDebugAarMetadata UP-TO-DATE
+> Task :data:mergeDebugJniLibFolders UP-TO-DATE
+> Task :data:mergeDebugNativeLibs NO-SOURCE
+> Task :data:stripDebugDebugSymbols NO-SOURCE
+> Task :data:copyDebugJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :data:extractDebugAnnotations UP-TO-DATE
+> Task :data:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :data:generateDebugAssets UP-TO-DATE
+> Task :data:mergeDebugAssets UP-TO-DATE
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac UP-TO-DATE
+> Task :data:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :data:mergeDebugConsumerProguardFiles UP-TO-DATE
+> Task :data:prepareDebugArtProfile UP-TO-DATE
+> Task :data:prepareLintJarForPublish UP-TO-DATE
+> Task :data:processDebugManifest UP-TO-DATE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :data:mergeDebugJavaResource UP-TO-DATE
+> Task :data:syncDebugLibJars UP-TO-DATE
+> Task :data:writeDebugAarMetadata UP-TO-DATE
+> Task :data:bundleDebugLocalLintAar UP-TO-DATE
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+> Task :ai:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugLibraryResources UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :ai:extractDeepLinksDebug UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :data:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :data:compileDebugLibraryResources UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :data:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :data:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :data:createFullJarDebug UP-TO-DATE
+> Task :data:writeDebugLintModelMetadata UP-TO-DATE
+> Task :app:extractProguardFiles UP-TO-DATE
+> Task :data:extractProguardFiles UP-TO-DATE
+> Task :data:generateDebugLintModel UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar
+
+> Task :app:generateDebugLintReportModel
+Warning: Lint will treat :core as an external dependency and not analyze it.
+ * Recommended Action: Apply the 'com.android.lint' plugin to java library project :core. to enable lint to analyze those sources.
+
+Warning: Lint will treat :tree-layout as an external dependency and not analyze it.
+ * Recommended Action: Apply the 'com.android.lint' plugin to java library project :tree-layout. to enable lint to analyze those sources.
+
+
+> Task :app:generateDebugAndroidTestLintModel
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:generateDebugUnitTestLintModel
+> Task :data:lintAnalyzeDebug UP-TO-DATE
+> Task :data:preDebugAndroidTestBuild UP-TO-DATE
+> Task :data:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :data:generateDebugAndroidTestLintModel UP-TO-DATE
+> Task :data:preDebugUnitTestBuild UP-TO-DATE
+> Task :data:generateDebugUnitTestLintModel UP-TO-DATE
+> Task :app:lintAnalyzeDebugUnitTest
+> Task :data:lintAnalyzeDebugAndroidTest UP-TO-DATE
+> Task :data:lintAnalyzeDebugUnitTest UP-TO-DATE
+> Task :app:lintAnalyzeDebugAndroidTest
+> Task :app:lintAnalyzeDebug
+
+> Task :app:lintReportDebug
+Wrote HTML report to file:///C:/Users/23745/AppData/Local/Temp/t012-red/android/app/build/reports/lint-results-debug.html
+
+> Task :app:lintDebug
+
+[Incubating] Problems report is available at: file:///C:/Users/23745/AppData/Local/Temp/t012-red/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 31s
+106 actionable tasks: 10 executed, 96 up-to-date
+EXITCODE=0
+
+--- WHY NOT getOnBackPressedDispatcher() (androidx.activity) ---
+Command: cd android; .\gradlew.bat -q :app:dependencies --configuration debugCompileClasspath --no-daemon --console=plain
+--- output ---
++--- project :core
++--- project :data
++--- project :ai
+\--- project :tree-layout
+androidx hits in debugCompileClasspath: 0  (12 output lines total)
+EXITCODE=0
+READING: :app main code resolves against ZERO AndroidX coordinates - the whole compile classpath is the
+  four project modules. androidx.activity is not on it and is not in the local Gradle cache either, so
+  the AndroidX dispatcher the lint message suggests would have to be ADDED, and android/README.md's
+  dependency policy records that androidx.core / androidx.lifecycle / androidx.test.* all drag in
+  org.jetbrains.kotlin:kotlin-stdlib (rejected on sight by the Java-only rule). The framework
+  OnBackInvokedDispatcher (API 33+) is therefore the supported path this module can actually use, with
+  dispatchKeyEvent(KEYCODE_BACK) for API 28-32, and the deprecated override is gone from the file.
+
+--- IN-REPO CONFIRMATION (the tree under review, not the copy) ---
+Command: cd android; .\gradlew.bat :app:lintDebug --no-daemon --console=plain
+  BUILD SUCCESSFUL in 32s / 106 actionable tasks: 14 executed, 92 up-to-date / EXITCODE=0
+  report: app/build/intermediates/lint_intermediate_text_report/debug/lintReportDebug/lint-results-debug.txt
+  last line of that report: 0 errors, 17 warnings
+  the 17 warnings are pre-existing categories (e.g. ClickableViewAccessibility on the marquee); none is
+  an error, and android/app/build.gradle has warningsAsErrors false / abortOnError true, so the
+  mandatory 'gradlew check' lint gate is satisfied.
+
+# --- P0 confirmation from the T-013 lane (user report 2026-09-21: :app:lintDebug failed at MainActivity.java:76) ---
+# captured at: 2026-09-21T22:31:14.4304357+08:00
+# state under test: android/app/src/main/java/com/treelearn/app/MainActivity.java as it is in the shared tree now -
+#   no onBackPressed() override; API 33+ uses getOnBackInvokedDispatcher().registerOnBackInvokedCallback(...),
+#   API 28-32 falls back to dispatchKeyEvent(KEYCODE_BACK); both converge on onBackRequested().
+# command: rg -n "onBackPressed" android/app/src/main/java/com/treelearn/app/MainActivity.java
+# --- output (only the javadoc references to the name remain, no override) ---
+110:     * of to {@code onBackPressed}, and on API 36 it is not delivered as {@code KEYCODE_BACK} either -
+rg exit=0
+# command: cd android; .\gradlew.bat :app:lintDebug --rerun-tasks --no-daemon --console=plain
+# --- output ---
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:checkDebugAarMetadata
+> Task :ai:mergeDebugJniLibFolders
+> Task :ai:mergeDebugNativeLibs NO-SOURCE
+> Task :ai:stripDebugDebugSymbols NO-SOURCE
+> Task :ai:copyDebugJniLibsProjectAndLocalJars
+> Task :core:compileJava
+> Task :core:processResources NO-SOURCE
+> Task :core:classes
+> Task :core:jar
+> Task :ai:generateDebugResValues
+> Task :ai:generateDebugResources
+> Task :ai:packageDebugResources
+> Task :ai:processDebugNavigationResources
+> Task :ai:extractDeepLinksForAarDebug
+> Task :ai:generateDebugAssets UP-TO-DATE
+> Task :ai:mergeDebugAssets
+> Task :ai:prepareDebugArtProfile
+> Task :ai:javaPreCompileDebug
+> Task :ai:prepareLintJarForPublish
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :ai:preDebugAndroidTestBuild UP-TO-DATE
+> Task :ai:parseDebugLocalResources
+> Task :ai:generateDebugAndroidTestResValues
+> Task :ai:writeDebugAarMetadata
+> Task :ai:writeDebugLintModelMetadata
+> Task :ai:generateDebugRFile
+> Task :ai:extractProguardFiles
+> Task :ai:mergeDebugJavaResource
+> Task :ai:processDebugManifest
+> Task :ai:extractDebugAnnotations
+> Task :ai:compileDebugJavaWithJavac
+> Task :ai:mergeDebugGeneratedProguardFiles
+> Task :ai:mergeDebugConsumerProguardFiles
+> Task :ai:syncDebugLibJars
+> Task :ai:bundleDebugLocalLintAar
+> Task :ai:bundleLibRuntimeToJarDebug FAILED
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':ai:bundleLibRuntimeToJarDebug'.
+> java.nio.file.FileSystemException: D:\Project\Android\Treelearn\android\ai\build\intermediates\runtime_library_classes_jar\debug\bundleLibRuntimeToJarDebug\classes.jar: 另一个程序正在使用此文件，进程无法访问。
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 18s
+29 actionable tasks: 29 executed
+EXITCODE=1
+
+# NOTE: the run above FAILED with a transient Windows file lock, not with a lint finding:
+#   java.nio.file.FileSystemException: android\ai\build\intermediates\runtime_library_classes_jar\debug\bundleLibRuntimeToJarDebug\classes.jar
+#   "another program is using this file" - a sibling lane was building :ai at the same time. Re-run below.
+# captured at: 2026-09-21T22:32:03.6170835+08:00
+# command: cd android; .\gradlew.bat :app:lintDebug --rerun-tasks --no-daemon --console=plain
+# --- output ---
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:checkDebugAarMetadata
+> Task :ai:mergeDebugJniLibFolders
+> Task :ai:mergeDebugNativeLibs NO-SOURCE
+> Task :ai:stripDebugDebugSymbols NO-SOURCE
+> Task :ai:copyDebugJniLibsProjectAndLocalJars
+> Task :core:compileJava
+> Task :core:processResources NO-SOURCE
+> Task :core:classes
+> Task :core:jar
+> Task :ai:generateDebugResValues
+> Task :ai:generateDebugResources
+> Task :ai:packageDebugResources
+> Task :ai:processDebugNavigationResources
+> Task :ai:extractDeepLinksForAarDebug
+> Task :ai:generateDebugAssets UP-TO-DATE
+> Task :ai:mergeDebugAssets
+> Task :ai:prepareDebugArtProfile
+> Task :ai:javaPreCompileDebug
+> Task :ai:prepareLintJarForPublish
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :ai:preDebugAndroidTestBuild UP-TO-DATE
+> Task :ai:generateDebugAndroidTestResValues
+> Task :ai:writeDebugAarMetadata
+> Task :ai:parseDebugLocalResources
+> Task :ai:writeDebugLintModelMetadata
+> Task :ai:extractProguardFiles
+> Task :ai:preDebugUnitTestBuild UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:checkDebugAarMetadata
+> Task :data:mergeDebugJniLibFolders
+> Task :ai:generateDebugRFile
+> Task :ai:mergeDebugJavaResource
+> Task :ai:processDebugManifest
+> Task :ai:extractDebugAnnotations
+> Task :ai:compileDebugJavaWithJavac
+> Task :ai:mergeDebugGeneratedProguardFiles
+> Task :ai:mergeDebugConsumerProguardFiles
+> Task :ai:syncDebugLibJars
+> Task :ai:bundleDebugLocalLintAar
+> Task :ai:bundleLibRuntimeToJarDebug
+> Task :ai:generateDebugLintModel
+> Task :ai:createFullJarDebug
+> Task :ai:generateDebugAndroidTestLintModel
+> Task :ai:generateDebugUnitTestLintModel
+> Task :data:mergeDebugNativeLibs NO-SOURCE
+> Task :data:stripDebugDebugSymbols NO-SOURCE
+> Task :data:copyDebugJniLibsProjectAndLocalJars
+> Task :data:generateDebugResValues
+> Task :data:generateDebugResources
+> Task :data:packageDebugResources
+> Task :data:processDebugNavigationResources
+> Task :data:extractDeepLinksForAarDebug
+> Task :data:generateDebugAssets UP-TO-DATE
+> Task :data:parseDebugLocalResources
+> Task :data:mergeDebugAssets
+> Task :data:prepareDebugArtProfile
+> Task :data:javaPreCompileDebug
+> Task :data:prepareLintJarForPublish
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :data:generateDebugRFile
+> Task :data:mergeDebugJavaResource
+> Task :data:processDebugManifest
+> Task :data:extractDebugAnnotations
+> Task :data:compileDebugJavaWithJavac
+> Task :data:mergeDebugGeneratedProguardFiles
+> Task :data:mergeDebugConsumerProguardFiles
+> Task :data:syncDebugLibJars
+> Task :data:writeDebugAarMetadata
+> Task :tree-layout:compileJava
+> Task :data:bundleDebugLocalLintAar
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes
+> Task :tree-layout:jar
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug
+> Task :ai:bundleLibCompileToJarDebug
+> Task :app:checkDebugAarMetadata
+> Task :ai:compileDebugLibraryResources
+> Task :app:processDebugNavigationResources
+> Task :app:generateDebugResValues
+> Task :app:compileDebugNavigationResources
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :app:packageDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :ai:extractDeepLinksDebug
+> Task :app:extractDeepLinksDebug
+> Task :data:extractDeepLinksDebug
+> Task :app:processDebugMainManifest
+> Task :app:parseDebugLocalResources
+> Task :app:mergeDebugResources
+> Task :app:processDebugManifest
+> Task :data:compileDebugLibraryResources
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:generateDebugAndroidTestResValues
+> Task :data:writeDebugLintModelMetadata
+> Task :data:bundleLibCompileToJarDebug
+> Task :app:extractProguardFiles
+> Task :data:bundleLibRuntimeToJarDebug
+> Task :data:extractProguardFiles
+> Task :data:createFullJarDebug
+> Task :data:generateDebugLintModel
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :data:preDebugAndroidTestBuild UP-TO-DATE
+> Task :data:generateDebugAndroidTestResValues
+> Task :data:generateDebugAndroidTestLintModel
+> Task :data:preDebugUnitTestBuild UP-TO-DATE
+> Task :data:generateDebugUnitTestLintModel
+> Task :app:processDebugManifestForPackage
+> Task :app:processDebugResources
+> Task :app:compileDebugJavaWithJavac
+> Task :app:bundleDebugClassesToCompileJar
+
+> Task :app:generateDebugLintReportModel
+Warning: Lint will treat :core as an external dependency and not analyze it.
+ * Recommended Action: Apply the 'com.android.lint' plugin to java library project :core. to enable lint to analyze those sources.
+
+Warning: Lint will treat :tree-layout as an external dependency and not analyze it.
+ * Recommended Action: Apply the 'com.android.lint' plugin to java library project :tree-layout. to enable lint to analyze those sources.
+
+
+> Task :app:generateDebugAndroidTestLintModel
+> Task :app:generateDebugUnitTestLintModel
+> Task :ai:lintAnalyzeDebugAndroidTest
+> Task :ai:lintAnalyzeDebugUnitTest
+> Task :app:lintAnalyzeDebugAndroidTest
+> Task :app:lintAnalyzeDebugUnitTest
+> Task :data:lintAnalyzeDebugAndroidTest
+> Task :data:lintAnalyzeDebugUnitTest
+> Task :ai:lintAnalyzeDebug
+> Task :data:lintAnalyzeDebug
+> Task :app:lintAnalyzeDebug
+
+> Task :app:lintReportDebug
+Wrote HTML report to file:///D:/Project/Android/Treelearn/android/app/build/reports/lint-results-debug.html
+
+> Task :app:lintDebug
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 37s
+106 actionable tasks: 106 executed
+EXITCODE=0

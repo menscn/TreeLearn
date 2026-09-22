@@ -1,0 +1,75 @@
+=== T-012 static checks (no device) ===
+Generated: 2026-09-21T21:55:36.6348193+08:00
+Mode: repo root. These are the parts of the device-dependent criteria that CAN be checked statically;
+      the rest stays 'deferred - emulator not used this round (user instruction 2026-09-21)'.
+
+--- CHECK 1: no key material and no logging in T-012 own sources and resources ---
+CMD: rg -n "Log\.|System\.out|printStackTrace|sk-|Bearer " android/app/src/main/java/com/treelearn/app/{ui,screen,wiring} + AppContainer.java + MainActivity.java + android/app/src/main/res
+--- output ---
+android/app/src/main/java/com/treelearn/app/ui\KeySnapshot.java:74:            out.append("sk-");
+EXITCODE=0
+READING: one hit, and it is not key material: KeySnapshot.java:74 appends the literal prefix "sk-"
+  to the MASK, i.e. it is the shape of the preview, not a stored value. There is no Log. / System.out /
+  printStackTrace anywhere in the 26 T-012 sources. So "no UI or log echoes the full key" holds
+  structurally: the only producer of key-ish text is KeySnapshot.mask(), which emits at most the
+  prefix plus 10 bullets plus the last 4 characters, and masks a key shorter than 12 characters
+  entirely. Both arms are fixed by KeySnapshotTest.
+
+--- CHECK 2: layouts use the sp design tokens, never a literal sp ---
+CMD: rg -n --glob "*.xml" "[0-9]+sp" android/app/src/main/res
+--- output ---
+android/app/src/main/res\values\dimens.xml:23:    <dimen name="text_display">30sp</dimen>
+android/app/src/main/res\values\dimens.xml:24:    <dimen name="text_h1">22sp</dimen>
+android/app/src/main/res\values\dimens.xml:25:    <dimen name="text_h2">17sp</dimen>
+android/app/src/main/res\values\dimens.xml:26:    <dimen name="text_body">16sp</dimen>
+android/app/src/main/res\values\dimens.xml:27:    <dimen name="text_sm">13sp</dimen>
+android/app/src/main/res\values\dimens.xml:28:    <dimen name="text_cap">11sp</dimen>
+EXITCODE=0
+READING: the only sp literals in the whole resource tree are the six font-size TOKENS in
+  values/dimens.xml. No layout spells a sp value inline, so a font-scale change has exactly one
+  place to land and cannot be bypassed by a hardcoded size. Whether the text still fits at a large
+  font scale is a rendering question and stays deferred with the device items.
+
+--- CHECK 3: every tappable control is sized from the 44dp token ---
+CMD: rg -n --glob "*.xml" "touch_min" android/app/src/main/res
+--- output ---
+android/app/src/main/res\layout\view_model_chip.xml:6:    android:layout_height="@dimen/touch_min"
+android/app/src/main/res\layout\view_model_chip.xml:11:    android:minWidth="@dimen/touch_min"
+android/app/src/main/res\values\dimens.xml:32:    <dimen name="touch_min">44dp</dimen>
+android/app/src/main/res\layout\screen_settings_body.xml:23:                android:layout_height="@dimen/touch_min"
+android/app/src/main/res\layout\screen_settings_body.xml:25:                android:minWidth="@dimen/touch_min"
+android/app/src/main/res\layout\screen_settings_body.xml:99:                android:layout_height="@dimen/touch_min"
+android/app/src/main/res\layout\screen_settings_body.xml:123:                    android:layout_height="@dimen/touch_min"
+android/app/src/main/res\layout\screen_settings_body.xml:125:                    android:minWidth="@dimen/touch_min"
+android/app/src/main/res\layout\screen_settings_body.xml:133:                    android:layout_height="@dimen/touch_min"
+android/app/src/main/res\layout\screen_settings_body.xml:136:                    android:minWidth="@dimen/touch_min"
+android/app/src/main/res\layout\item_recommendation.xml:7:    android:layout_height="@dimen/touch_min"
+android/app/src/main/res\layout\popup_model_picker.xml:22:        android:minHeight="@dimen/touch_min"
+android/app/src/main/res\layout\popup_model_picker.xml:66:        android:minHeight="@dimen/touch_min"
+android/app/src/main/res\layout\popup_model_picker.xml:118:        android:minHeight="@dimen/touch_min"
+android/app/src/main/res\layout\item_topic.xml:12:    android:minHeight="@dimen/touch_min"
+android/app/src/main/res\layout\screen_home_body.xml:37:                android:layout_height="@dimen/touch_min"
+android/app/src/main/res\layout\screen_home_body.xml:40:                android:minWidth="@dimen/touch_min"
+android/app/src/main/res\layout\screen_home_body.xml:48:                android:layout_height="@dimen/touch_min"
+android/app/src/main/res\layout\screen_home_body.xml:51:                android:minWidth="@dimen/touch_min"
+android/app/src/main/res\layout\screen_home_body.xml:59:                android:layout_height="@dimen/touch_min"
+android/app/src/main/res\layout\screen_home_body.xml:61:                android:minWidth="@dimen/touch_min"
+android/app/src/main/res\layout\screen_home_body.xml:159:                    android:layout_height="@dimen/touch_min"
+android/app/src/main/res\layout\screen_home_body.xml:162:                    android:minWidth="@dimen/touch_min"
+android/app/src/main/res\layout\screen_home_body.xml:267:                android:layout_height="@dimen/touch_min"
+android/app/src/main/res\layout\screen_home_body.xml:270:                android:minWidth="@dimen/touch_min"
+EXITCODE=0
+READING: 25 references across 6 layout files plus the token definition in values/dimens.xml.
+  item_topic.xml:12 minHeight; item_recommendation.xml:7 height; view_model_chip.xml:6/11;
+  popup_model_picker.xml:22/66/118; screen_home_body.xml rows 37/40, 48/51, 59/61, 159/162, 267/270;
+  screen_settings_body.xml rows 23/25, 99, 123/125, 133/136. Every clickable row, button and chip in
+  the two screens takes its height (or minWidth/minHeight) from @dimen/touch_min = 44dp.
+  What this does NOT prove: that the rendered hit box is 44dp on a real device under the user font
+  scale - that measurement is deferred with the device items.
+
+--- CHECK 4: no device test result was produced this round ---
+CMD: Get-ChildItem android/app/build/outputs/androidTest-results/connected/debug -Recurse -Force
+--- output ---
+entries: 0
+EXITCODE=0
+Conclusion: 0 entries - no connected run happened, so every device criterion stays deferred.

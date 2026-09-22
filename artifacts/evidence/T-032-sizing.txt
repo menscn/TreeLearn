@@ -1,0 +1,54 @@
+================================================================
+T-032 sizing - non-blank non-comment production lines (the adjudicated yardstick, 2026-09-21)
+captured-at: 2026-09-22T00:24:15.6669395+08:00
+cwd: D:\Project\Android\Treelearn
+command: python -X utf8 artifacts/evidence/sizing_t032.py   (the script text is appended below)
+note: python is used only to strip // and /* */ comments; no project file is written by it
+----------------------------------------------------------------
+wiring/ (all 14 files) -> 861 non-blank non-comment lines in 14 file(s)
+       68  AndroidSettingsStore.java
+       11  AnswerPolicy.java
+       14  BranchHeading.java
+       54  ChatStore.java
+      265  ChatWiring.java
+       23  CoordinatorGenerationPort.java
+        9  GenerationPort.java
+       31  HomeStore.java
+      108  HomeWiring.java
+       15  LogcatTelemetry.java
+       11  PromptLimits.java
+       19  RefusalNotices.java
+      188  SqliteChatStore.java
+       45  SqliteHomeStore.java
+
+wiring/ minus AndroidSettingsStore.java (T-012's file) -> 793 non-blank non-comment lines in 13 file(s)
+       11  AnswerPolicy.java
+       14  BranchHeading.java
+       54  ChatStore.java
+      265  ChatWiring.java
+       23  CoordinatorGenerationPort.java
+        9  GenerationPort.java
+       31  HomeStore.java
+      108  HomeWiring.java
+       15  LogcatTelemetry.java
+       11  PromptLimits.java
+       19  RefusalNotices.java
+      188  SqliteChatStore.java
+       45  SqliteHomeStore.java
+
+AndroidSettingsStore.java (T-012, not this task) -> 68 non-blank non-comment lines in 1 file(s)
+       68  AndroidSettingsStore.java
+
+RealDataPathWiringInstrumentedTest.java (test, not counted in the budget) -> 332 non-blank non-comment lines in 1 file(s)
+      332  RealDataPathWiringInstrumentedTest.java
+
+EXITCODE=0
+----------------------------------------------------------------
+Second block - the two shared files. Both are UNTRACKED versus HEAD, so a whole-file count is the
+union over every task that ever wrote them (T-012 landed AppContainer; T-022 landed TopicDao).
+These numbers are therefore an UPPER BOUND for T-032, not this task own delta.
+command: python -X utf8 -c "<the same counter>" <file>
+----------------------------------------------------------------
+  102  android/app/src/main/java/com/treelearn/app/AppContainer.java
+  142  android/data/src/main/java/com/treelearn/data/db/dao/TopicDao.java
+EXITCODE=0

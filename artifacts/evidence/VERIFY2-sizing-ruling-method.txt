@@ -1,0 +1,30 @@
+# VERIFY2 sizing recomputed with the RULING methodology (verifier #2)  2026-09-21 21:35:05
+# Why: artifacts/evidence/sizing-adjudication-2026-09-21.txt fixes the authoritative 口径 as
+#      "非空非注释的生产代码行" measured by
+#        grep -v -E '^[[:space:]]*$|^[[:space:]]*//|^[[:space:]]*\*|^[[:space:]]*/\*' <files> | wc -l
+#      and records an approved >500 exception for T-003 ONLY. This file re-measures the six tasks in
+#      my scope with that same line-based predicate, so the numbers are comparable to the ruling.
+# Mode: read-only. No emulator (user instruction 2026-09-21). File lists are EXPLICIT, not by directory.
+Command (per task, PowerShell translation of the same regex):
+  Get-Content -LiteralPath <files> | Where-Object { $_ -notmatch '^\s*$|^\s*//|^\s*\*|^\s*/\*' }  -> .Count
+
+  T-006  android/ai/src/main/java/com/treelearn/ai/gateway/*.java            (11 files) = 749
+  T-007  5 new :core domain files + DeepSeekContextEncoder.java             (6 files)  = 664
+         + DomainErrorCode.java added non-empty non-comment lines (git diff -U0)          = 7
+         => T-007 total = 664 + 7 = 671
+  T-016  android/tree-layout/src/main/java/**/*.java                        (12 files) = 861
+  T-020  android/ai/src/main/java/com/treelearn/ai/prompt/*.java MINUS DeepSeekContextEncoder.java
+         (DeepSeekContextEncoder is T-007's file)                            (8 files)  = 344
+  T-023  AnswerRevisionDao + ConstraintFailures + GenerationOperationDao +
+         GenerationOperationRow + GenerationStabilizer                       (5 files)  = 454
+  T-024  ContextSnapshotDao.java + AiArtifactDao.java                       (2 files)  = 205
+
+Traceability: T-006 749, T-020 344, T-023 454 and T-024 205 reproduce the task self-reports VERBATIM.
+              T-016 measures 861 here vs the task's 862 -- a one-line boundary case between the grep
+              predicate and a string/text-block-aware counter. Both are far above 500, so no verdict
+              changes.
+Gate verdict: T-006 (749), T-007 (671) and T-016 (861) exceed the 500 hard cap and do NOT appear in
+              the approved-exception table of sizing-adjudication-2026-09-21.txt (which approves T-003
+              only, per .trae/rules/harness-tasks.md line 45) -> the sizing criterion is OPEN and awaits
+              explicit user ratification. T-020 (344), T-023 (454) and T-024 (205) are inside 500.
+EXITCODE=0

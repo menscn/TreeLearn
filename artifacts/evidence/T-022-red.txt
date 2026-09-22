@@ -1,0 +1,758 @@
+# ---------------------------------------------------------------------------
+# 补记的来历头（2026-09-21T08:58:21Z）——以下内容不是本次运行产生的，是对文件里那次运行的说明。
+# Command    : cd android && ./gradlew :app:connectedDebugAndroidTest --console=plain
+# Working dir: D:/Project/Android/Treelearn
+# Exit code  : 1（以文件末尾的 GRADLE_EXIT 为准，那是那次运行自己的记录）
+# 套件规模   : T-022 的 13 例版本（交付版为 15 例；编译期失败成因完全相同，都是同一批待建 DAO）
+# 说明       : 编译级 RED：javac 自报 66 个错误 = 程序包com.treelearn.data.db.dao不存在 ×3 + 找不到符号 ×63。
+# 头以下全部是当时运行的原样输出，未做任何编辑。
+# ---------------------------------------------------------------------------
+
+Starting a Gradle Daemon, 4 busy and 2 incompatible and 16 stopped Daemons could not be reused, use --status for details
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :tree-layout:compileJava NO-SOURCE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac NO-SOURCE
+> Task :ai:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugLibraryResources UP-TO-DATE
+> Task :ai:writeDebugAarMetadata UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :ai:extractDeepLinksDebug UP-TO-DATE
+> Task :ai:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :data:extractDeepLinksDebug UP-TO-DATE
+> Task :data:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :data:compileDebugLibraryResources UP-TO-DATE
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac UP-TO-DATE
+> Task :data:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :app:processDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:compileDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugAndroidTestResources UP-TO-DATE
+> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :app:processDebugAndroidTestManifest UP-TO-DATE
+> Task :app:processDebugAndroidTestResources UP-TO-DATE
+
+> Task :app:compileDebugAndroidTestJavaWithJavac FAILED
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:26: 错误: 程序包com.treelearn.data.db.dao不存在
+import com.treelearn.data.db.dao.BranchDao;
+                                ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:27: 错误: 程序包com.treelearn.data.db.dao不存在
+import com.treelearn.data.db.dao.MessageDao;
+                                ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:28: 错误: 程序包com.treelearn.data.db.dao不存在
+import com.treelearn.data.db.dao.TopicDao;
+                                ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:88: 错误: 找不到符号
+        TopicDao.insert(db, written);
+        ^
+  符号:   变量 TopicDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:90: 错误: 找不到符号
+        Topic readBack = TopicDao.findById(db, written.id);
+                         ^
+  符号:   变量 TopicDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:96: 错误: 找不到符号
+        TopicDao.update(db, visited);
+        ^
+  符号:   变量 TopicDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:97: 错误: 找不到符号
+        Topic afterVisit = TopicDao.findById(db, written.id);
+                           ^
+  符号:   变量 TopicDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:106: 错误: 找不到符号
+        Topic afterReopen = TopicDao.findById(reopened, written.id);
+                            ^
+  符号:   变量 TopicDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:115: 错误: 找不到符号
+        TopicDao.insert(db, topic);
+        ^
+  符号:   变量 TopicDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:117: 错误: 找不到符号
+        BranchDao.insert(db, root);
+        ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:126: 错误: 找不到符号
+        BranchDao.update(db, root);
+        ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:128: 错误: 找不到符号
+        Branch readBack = BranchDao.findById(db, root.id);
+                          ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:135: 错误: 找不到符号
+        Branch afterReopen = BranchDao.findById(reopened, root.id);
+                             ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:144: 错误: 找不到符号
+        TopicDao.insert(db, topic);
+        ^
+  符号:   变量 TopicDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:146: 错误: 找不到符号
+        BranchDao.insert(db, branch);
+        ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:149: 错误: 找不到符号
+        MessageDao.insert(db, user);
+        ^
+  符号:   变量 MessageDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:150: 错误: 找不到符号
+        Message readUser = MessageDao.findById(db, user.id);
+                           ^
+  符号:   变量 MessageDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:157: 错误: 找不到符号
+        MessageDao.insert(db, ai);
+        ^
+  符号:   变量 MessageDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:158: 错误: 找不到符号
+        Message readAi = MessageDao.findById(db, ai.id);
+                         ^
+  符号:   变量 MessageDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:172: 错误: 找不到符号
+        TopicDao.insert(db, topic);
+        ^
+  符号:   变量 TopicDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:174: 错误: 找不到符号
+        BranchDao.insert(db, root);
+        ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:183: 错误: 找不到符号
+        BranchDao.insert(db, child);
+        ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:185: 错误: 找不到符号
+        Branch readBack = BranchDao.findById(db, child.id);
+                          ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:213: 错误: 找不到符号
+        TopicDao.insert(db, topic);
+        ^
+  符号:   变量 TopicDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:215: 错误: 找不到符号
+        BranchDao.insert(db, branch);
+        ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:217: 错误: 找不到符号
+        MessageDao.insert(db, first);
+        ^
+  符号:   变量 MessageDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:221: 错误: 找不到符号
+                () -> MessageDao.insert(db, duplicate));
+                      ^
+  符号:   变量 MessageDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:228: 错误: 找不到符号
+                MessageDao.findById(db, duplicate.id));
+                ^
+  符号:   变量 MessageDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:235: 错误: 找不到符号
+        TopicDao.insert(db, topic);
+        ^
+  符号:   变量 TopicDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:236: 错误: 找不到符号
+        BranchDao.insert(db, Branch.root(topic.id, T0));
+        ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:240: 错误: 找不到符号
+                () -> BranchDao.insert(db, secondRoot));
+                      ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:256: 错误: 找不到符号
+        TopicDao.insert(db, topic);
+        ^
+  符号:   变量 TopicDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:258: 错误: 找不到符号
+        BranchDao.insert(db, root);
+        ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:259: 错误: 找不到符号
+        MessageDao.insert(db, Message.user(root.id, 0, "text", T0));
+        ^
+  符号:   变量 MessageDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:260: 错误: 找不到符号
+        MessageDao.insert(db, Message.ai(root.id, 1, T0 + 1));
+        ^
+  符号:   变量 MessageDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:264: 错误: 找不到符号
+        TopicDao.delete(db, topic.id);
+        ^
+  符号:   变量 TopicDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:270: 错误: 找不到符号
+        assertNull("the topic itself is gone", TopicDao.findById(db, topic.id));
+                                               ^
+  符号:   变量 TopicDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:277: 错误: 找不到符号
+        TopicDao.insert(db, topic);
+        ^
+  符号:   变量 TopicDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:279: 错误: 找不到符号
+        BranchDao.insert(db, root);
+        ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:286: 错误: 找不到符号
+        BranchDao.insert(db, child);
+        ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:287: 错误: 找不到符号
+        MessageDao.insert(db, Message.user(child.id, 0, "in the child", T0 + 2));
+        ^
+  符号:   变量 MessageDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:288: 错误: 找不到符号
+        MessageDao.insert(db, Message.user(root.id, 0, "in the root", T0 + 3));
+        ^
+  符号:   变量 MessageDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:290: 错误: 找不到符号
+        BranchDao.delete(db, child.id);
+        ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:292: 错误: 找不到符号
+        assertNull("the child is gone", BranchDao.findById(db, child.id));
+                                        ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:293: 错误: 找不到符号
+        assertNotNull("the root survives a subtree delete", BranchDao.findById(db, root.id));
+                                                            ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:296: 错误: 找不到符号
+                MessageDao.findByBranch(db, root.id).get(0).userContent);
+                ^
+  符号:   变量 MessageDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:308: 错误: 找不到符号
+        TopicDao.insert(db, topic);
+        ^
+  符号:   变量 TopicDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:310: 错误: 找不到符号
+        BranchDao.insert(db, branch);
+        ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:311: 错误: 找不到符号
+        MessageDao.insert(db, Message.user(branch.id, 2, "third", T0));
+        ^
+  符号:   变量 MessageDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:312: 错误: 找不到符号
+        MessageDao.insert(db, Message.user(branch.id, 0, "first", T0));
+        ^
+  符号:   变量 MessageDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:313: 错误: 找不到符号
+        MessageDao.insert(db, Message.ai(branch.id, 1, T0));
+        ^
+  符号:   变量 MessageDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:315: 错误: 找不到符号
+        List<Message> messages = MessageDao.findByBranch(db, branch.id);
+                                 ^
+  符号:   变量 MessageDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:327: 错误: 找不到符号
+        TopicDao.insert(db, topic);
+        ^
+  符号:   变量 TopicDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:329: 错误: 找不到符号
+        BranchDao.insert(db, root);
+        ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:335: 错误: 找不到符号
+        BranchDao.insert(db, Branch.child(topic.id, source, T0 + 1).value());
+        ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:337: 错误: 找不到符号
+        Branch found = BranchDao.findRootOfTopic(db, topic.id);
+                       ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:342: 错误: 找不到符号
+        List<Branch> all = BranchDao.findByTopic(db, topic.id);
+                           ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:350: 错误: 找不到符号
+        TopicDao.insert(db, topic);
+        ^
+  符号:   变量 TopicDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:352: 错误: 找不到符号
+        BranchDao.insert(db, branch);
+        ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:357: 错误: 找不到符号
+            MessageDao.insert(work, Message.user(branch.id, 0, "first", T0));
+            ^
+  符号:   变量 MessageDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:358: 错误: 找不到符号
+            MessageDao.insert(work, Message.user(branch.id, 0, "collides", T0 + 1));
+            ^
+  符号:   变量 MessageDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:374: 错误: 找不到符号
+        TopicDao.insert(db, topic);
+        ^
+  符号:   变量 TopicDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:376: 错误: 找不到符号
+        BranchDao.insert(db, branch);
+        ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:377: 错误: 找不到符号
+        MessageDao.insert(db, Message.user(branch.id, 0, "text", T0));
+        ^
+  符号:   变量 MessageDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:392: 错误: 找不到符号
+        TopicDao.insert(db, topic);
+        ^
+  符号:   变量 TopicDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:394: 错误: 找不到符号
+        BranchDao.insert(db, branch);
+        ^
+  符号:   变量 BranchDao
+  位置: 类 TopicBranchMessageDaoInstrumentedTest
+注: D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+66 个错误
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugAndroidTestJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  注: D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java使用或覆盖了已过时的 API。
+  注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:88: 错误: 找不到符号
+          TopicDao.insert(db, written);
+          ^
+    符号:   变量 TopicDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:90: 错误: 找不到符号
+          Topic readBack = TopicDao.findById(db, written.id);
+                           ^
+    符号:   变量 TopicDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:96: 错误: 找不到符号
+          TopicDao.update(db, visited);
+          ^
+    符号:   变量 TopicDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:97: 错误: 找不到符号
+          Topic afterVisit = TopicDao.findById(db, written.id);
+                             ^
+    符号:   变量 TopicDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:106: 错误: 找不到符号
+          Topic afterReopen = TopicDao.findById(reopened, written.id);
+                              ^
+    符号:   变量 TopicDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:115: 错误: 找不到符号
+          TopicDao.insert(db, topic);
+          ^
+    符号:   变量 TopicDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:117: 错误: 找不到符号
+          BranchDao.insert(db, root);
+          ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:126: 错误: 找不到符号
+          BranchDao.update(db, root);
+          ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:128: 错误: 找不到符号
+          Branch readBack = BranchDao.findById(db, root.id);
+                            ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:135: 错误: 找不到符号
+          Branch afterReopen = BranchDao.findById(reopened, root.id);
+                               ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:144: 错误: 找不到符号
+          TopicDao.insert(db, topic);
+          ^
+    符号:   变量 TopicDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:146: 错误: 找不到符号
+          BranchDao.insert(db, branch);
+          ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:149: 错误: 找不到符号
+          MessageDao.insert(db, user);
+          ^
+    符号:   变量 MessageDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:150: 错误: 找不到符号
+          Message readUser = MessageDao.findById(db, user.id);
+                             ^
+    符号:   变量 MessageDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:157: 错误: 找不到符号
+          MessageDao.insert(db, ai);
+          ^
+    符号:   变量 MessageDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:158: 错误: 找不到符号
+          Message readAi = MessageDao.findById(db, ai.id);
+                           ^
+    符号:   变量 MessageDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:172: 错误: 找不到符号
+          TopicDao.insert(db, topic);
+          ^
+    符号:   变量 TopicDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:174: 错误: 找不到符号
+          BranchDao.insert(db, root);
+          ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:183: 错误: 找不到符号
+          BranchDao.insert(db, child);
+          ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:185: 错误: 找不到符号
+          Branch readBack = BranchDao.findById(db, child.id);
+                            ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:213: 错误: 找不到符号
+          TopicDao.insert(db, topic);
+          ^
+    符号:   变量 TopicDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:215: 错误: 找不到符号
+          BranchDao.insert(db, branch);
+          ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:217: 错误: 找不到符号
+          MessageDao.insert(db, first);
+          ^
+    符号:   变量 MessageDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:221: 错误: 找不到符号
+                  () -> MessageDao.insert(db, duplicate));
+                        ^
+    符号:   变量 MessageDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:228: 错误: 找不到符号
+                  MessageDao.findById(db, duplicate.id));
+                  ^
+    符号:   变量 MessageDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:235: 错误: 找不到符号
+          TopicDao.insert(db, topic);
+          ^
+    符号:   变量 TopicDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:236: 错误: 找不到符号
+          BranchDao.insert(db, Branch.root(topic.id, T0));
+          ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:240: 错误: 找不到符号
+                  () -> BranchDao.insert(db, secondRoot));
+                        ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:256: 错误: 找不到符号
+          TopicDao.insert(db, topic);
+          ^
+    符号:   变量 TopicDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:258: 错误: 找不到符号
+          BranchDao.insert(db, root);
+          ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:259: 错误: 找不到符号
+          MessageDao.insert(db, Message.user(root.id, 0, "text", T0));
+          ^
+    符号:   变量 MessageDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:260: 错误: 找不到符号
+          MessageDao.insert(db, Message.ai(root.id, 1, T0 + 1));
+          ^
+    符号:   变量 MessageDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:264: 错误: 找不到符号
+          TopicDao.delete(db, topic.id);
+          ^
+    符号:   变量 TopicDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:270: 错误: 找不到符号
+          assertNull("the topic itself is gone", TopicDao.findById(db, topic.id));
+                                                 ^
+    符号:   变量 TopicDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:277: 错误: 找不到符号
+          TopicDao.insert(db, topic);
+          ^
+    符号:   变量 TopicDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:279: 错误: 找不到符号
+          BranchDao.insert(db, root);
+          ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:286: 错误: 找不到符号
+          BranchDao.insert(db, child);
+          ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:287: 错误: 找不到符号
+          MessageDao.insert(db, Message.user(child.id, 0, "in the child", T0 + 2));
+          ^
+    符号:   变量 MessageDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:288: 错误: 找不到符号
+          MessageDao.insert(db, Message.user(root.id, 0, "in the root", T0 + 3));
+          ^
+    符号:   变量 MessageDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:290: 错误: 找不到符号
+          BranchDao.delete(db, child.id);
+          ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:292: 错误: 找不到符号
+          assertNull("the child is gone", BranchDao.findById(db, child.id));
+                                          ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:293: 错误: 找不到符号
+          assertNotNull("the root survives a subtree delete", BranchDao.findById(db, root.id));
+                                                              ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:296: 错误: 找不到符号
+                  MessageDao.findByBranch(db, root.id).get(0).userContent);
+                  ^
+    符号:   变量 MessageDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:308: 错误: 找不到符号
+          TopicDao.insert(db, topic);
+          ^
+    符号:   变量 TopicDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:310: 错误: 找不到符号
+          BranchDao.insert(db, branch);
+          ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:311: 错误: 找不到符号
+          MessageDao.insert(db, Message.user(branch.id, 2, "third", T0));
+          ^
+    符号:   变量 MessageDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:312: 错误: 找不到符号
+          MessageDao.insert(db, Message.user(branch.id, 0, "first", T0));
+          ^
+    符号:   变量 MessageDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:313: 错误: 找不到符号
+          MessageDao.insert(db, Message.ai(branch.id, 1, T0));
+          ^
+    符号:   变量 MessageDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:315: 错误: 找不到符号
+          List<Message> messages = MessageDao.findByBranch(db, branch.id);
+                                   ^
+    符号:   变量 MessageDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:327: 错误: 找不到符号
+          TopicDao.insert(db, topic);
+          ^
+    符号:   变量 TopicDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:329: 错误: 找不到符号
+          BranchDao.insert(db, root);
+          ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:335: 错误: 找不到符号
+          BranchDao.insert(db, Branch.child(topic.id, source, T0 + 1).value());
+          ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:337: 错误: 找不到符号
+          Branch found = BranchDao.findRootOfTopic(db, topic.id);
+                         ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:342: 错误: 找不到符号
+          List<Branch> all = BranchDao.findByTopic(db, topic.id);
+                             ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:350: 错误: 找不到符号
+          TopicDao.insert(db, topic);
+          ^
+    符号:   变量 TopicDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:352: 错误: 找不到符号
+          BranchDao.insert(db, branch);
+          ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:357: 错误: 找不到符号
+              MessageDao.insert(work, Message.user(branch.id, 0, "first", T0));
+              ^
+    符号:   变量 MessageDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:358: 错误: 找不到符号
+              MessageDao.insert(work, Message.user(branch.id, 0, "collides", T0 + 1));
+              ^
+    符号:   变量 MessageDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:374: 错误: 找不到符号
+          TopicDao.insert(db, topic);
+          ^
+    符号:   变量 TopicDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:376: 错误: 找不到符号
+          BranchDao.insert(db, branch);
+          ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:377: 错误: 找不到符号
+          MessageDao.insert(db, Message.user(branch.id, 0, "text", T0));
+          ^
+    符号:   变量 MessageDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:392: 错误: 找不到符号
+          TopicDao.insert(db, topic);
+          ^
+    符号:   变量 TopicDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:394: 错误: 找不到符号
+          BranchDao.insert(db, branch);
+          ^
+    符号:   变量 BranchDao
+    位置: 类 TopicBranchMessageDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:26: 错误: 程序包com.treelearn.data.db.dao不存在
+  import com.treelearn.data.db.dao.BranchDao;
+                                  ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:27: 错误: 程序包com.treelearn.data.db.dao不存在
+  import com.treelearn.data.db.dao.MessageDao;
+                                  ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\TopicBranchMessageDaoInstrumentedTest.java:28: 错误: 程序包com.treelearn.data.db.dao不存在
+  import com.treelearn.data.db.dao.TopicDao;
+                                  ^
+  66 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 15s
+57 actionable tasks: 1 executed, 56 up-to-date
+GRADLE_EXIT=1

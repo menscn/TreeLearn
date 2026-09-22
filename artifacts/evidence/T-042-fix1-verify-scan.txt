@@ -1,0 +1,203 @@
+T-042 fix round 1 - independent verification (judges D1-D5); read-only, no production file touched
+captured-at: 2026-09-22 05:13:13 (Asia/Shanghai)
+cwd: D:\Project\Android\Treelearn
+command: python -X utf8 - (stdin), synthesised from the working tree at the time above
+note: a parallel Gradle lane was running (java pid 36912/42756 from 05:11:41), so NO Gradle was run
+note: here; every judgement below is static, from source and from reading the evidence files.
+
+### J1 - D1: only the call sites may be fixed; the DAO must NOT be weakened
+command: python -X utf8 (read ReadingPositionDao.write and BranchDao.update; find the try/catch sites)
+  android/data/src/main/java/com/treelearn/data/db/dao/ReadingPositionDao.java:96| throw new IllegalStateException("writing the reading position of branch " + branchId
+  android/data/src/main/java/com/treelearn/data/db/dao/BranchDao.java:75| throw new IllegalStateException("updating branch " + branch.id + " affected " + updated
+JUDGEMENT ReadingPositionDao.write still throws    OK   (DAO not weakened)
+JUDGEMENT BranchDao.update still throws            OK   (DAO not weakened)
+EXITCODE=0
+
+### J1b - the two named background write paths are wrapped
+command: python -X utf8 (read ChatPresenter.remember / seen / noticeReadingFailure)
+  android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java:433| private void remember(Branch branch, ReadingAnchor anchor) {
+  android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java:447| private boolean seen(Branch branch, List<Message> rows, Set<String> visible) {
+  android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java:457| private void noticeReadingFailure() {
+JUDGEMENT reading-position write (onLeaving -> remember) wrapped   OK   (try/catch at :434-438)
+JUDGEMENT unread write (onViewport -> seen) wrapped                OK   (try/catch at :448-453)
+JUDGEMENT the failure becomes a notice, not a crash                OK   (noticeReadingFailure -> state.withNotice(READING_POSITION))
+EXITCODE=0
+
+### J1c - RESIDUAL: the THIRD call site of the same write is NOT wrapped
+command: python -X utf8 (read MainActivity.showChat(String, ReadingAnchor) and SqliteReadingStore.saveAnchor)
+  MainActivity.java:459|         ReadingStore reading = container.readingStore();
+  MainActivity.java:460|         chatScreen = new ChatScreen(this);
+  MainActivity.java:461|         chatPresenter = new ChatPresenter(this, container.uiThread(), container.background(),
+  MainActivity.java:462|                 container.keyVault(), container.chatData(), container.chatCommands(),
+  MainActivity.java:463|                 container.settingsStore(), container.chatCopyLabels(), branchId, reading);
+  MainActivity.java:464|         chatScreen.setActions(chatPresenter);
+  MainActivity.java:465|         swap(chatScreen);
+  MainActivity.java:466|         if (explicitAnchor != null) {
+  MainActivity.java:467|             container.background().execute(() -> reading.saveAnchor(branchId, explicitAnchor));
+  MainActivity.java:468|         }
+  MainActivity.java:469|         chatPresenter.start();
+  MainActivity.java:470|     }
+  SqliteReadingStore.java:38| public void saveAnchor(String branchId, ReadingAnchor anchor) {
+  SqliteReadingStore.java:39| ReadingPositionDao.write(database(), branchId, Guard.object(anchor, "anchor"));
+FINDING MainActivity.java:467 runs reading.saveAnchor on the background executor with NO try/catch.
+FINDING That store delegates straight to ReadingPositionDao.write, which throws IllegalStateException
+FINDING (at ReadingPositionDao.java:96) when no row carries the branch. The exception escapes the
+FINDING background thread and, with no setDefaultUncaughtExceptionHandler in the tree, kills the
+FINDING process - the exact failure my previous D1 named, and the previous report listed this very
+FINDING line (MainActivity.java:467) among the call sites. The fix wrapped the ChatPresenter pair
+FINDING only, so this third site is still unguarded.
+EXITCODE=0
+
+### J1d - the failure notice has its own string, distinct from notice_storage
+command: python -X utf8 (read res/values/strings.xml around the notices)
+  strings.xml:87| <string name="notice_storage">本机写入失败，输入已保留，可以直接重试。</string>
+  strings.xml:88| <string name="notice_reading_position">阅读进度没能保存，下次打开的位置与未读可能不准。</string>
+JUDGEMENT the new notice is its OWN string               OK   (notice_reading_position)
+JUDGEMENT it does NOT reuse notice_storage               OK   (different resource AND different words:
+JUDGEMENT   storage = "本机写入失败，输入已保留，可以直接重试。" vs reading = "阅读进度没能保存，下次打开的位置与未读可能不准。")
+EXITCODE=0
+
+### J1e - the new cases assert no crash + notice only + visible state unchanged
+command: python -X utf8 (read ChatReadingTest refused-write cases)
+  ChatReadingTest.java:226|     public void aRefusedStoredPositionBecomesANoticeInsteadOfKillingTheBackgroundThread() {
+  ChatReadingTest.java:227|         List<Message> rows = rows(2);
+  ChatReadingTest.java:228|         data.snapshot = snapshot(rows, branch(0L, 0L));
+  ChatReadingTest.java:229| 
+  ChatReadingTest.java:230|         ChatPresenter presenter = presenter(new TestDoubles.InlineExecutor());
+  ChatReadingTest.java:231|         presenter.start();
+  ChatReadingTest.java:232|         ChatViewState before = presenter.state();
+  ChatReadingTest.java:233|         reading.failWrites = true;
+  ChatReadingTest.java:234| 
+  ChatReadingTest.java:235|         presenter.onLeaving(ReadingAnchor.of(rows.get(1).id, null, 5, 0));
+  ChatReadingTest.java:236| 
+  ChatReadingTest.java:237|         assertNotNull("a refused write must be told to the learner, not thrown at the process",
+  ChatReadingTest.java:238|                 presenter.state().notice);
+  ChatReadingTest.java:239|         assertEquals("nothing the learner could already see may change",
+  ChatReadingTest.java:240|                 before.messages.size(), presenter.state().messages.size());
+  ChatReadingTest.java:241|         assertEquals(before.phase, presenter.state().phase);
+  ChatReadingTest.java:242|         assertEquals(before.branchId, presenter.state().branchId);
+  ChatReadingTest.java:243|     }
+  ChatReadingTest.java:244| 
+  ChatReadingTest.java:245|     @Test
+  ChatReadingTest.java:246|     public void aRefusedUnreadAdvanceBecomesANoticeAndWritesNothing() {
+  ChatReadingTest.java:247|         List<Message> rows = rows(2);
+  ChatReadingTest.java:248|         Branch branch = branch(3L, 1L);
+  ChatReadingTest.java:249|         data.snapshot = snapshot(rows, branch);
+  ChatReadingTest.java:250| 
+  ChatReadingTest.java:251|         ChatPresenter presenter = presenter(new TestDoubles.InlineExecutor());
+  ChatReadingTest.java:252|         presenter.start();
+  ChatReadingTest.java:253|         reading.failWrites = true;
+  ChatReadingTest.java:254| 
+  ChatReadingTest.java:255|         presenter.onViewportChanged(visible(rows.get(1).id));
+  ChatReadingTest.java:256| 
+  ChatReadingTest.java:257|         assertNotNull("a refused unread write must be told to the learner",
+  ChatReadingTest.java:258|                 presenter.state().notice);
+  ChatReadingTest.java:259|         assertEquals("a write that did not land must not be recorded as one", 0, reading.savedSeen);
+  ChatReadingTest.java:260|         assertEquals(0L, reading.lastSeenStored);
+  ChatReadingTest.java:261|     }
+JUDGEMENT refused save asserts notice + unchanged state OK   (assertNotNull notice; before.messages/phase/branchId equal)
+JUDGEMENT refused unread write records nothing           OK   (savedSeen=0, lastSeenStored=0)
+EXITCODE=0
+
+### J2 - D2: a first-frame report, but the verdict point stays single
+command: python -X utf8 (ViewportSeen references in main; the onRowsLaidOut path)
+  android/app/src/main/java/com/treelearn/app/reading/ReadingSession.java:63| if (!ViewportSeen.onViewport(branch, messages, visibleMessageIds)) {
+  android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java:308| fire(actions -> actions.onRowsLaidOut(itemHeightPx, visible));
+  android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java:372| public void onRowsLaidOut(int itemHeightPx, Set<String> visibleMessageIds) {
+JUDGEMENT the verdict is still one call site only       OK   (ViewportSeen.onViewport: ReadingSession.java:63)
+JUDGEMENT no second counter/verdict point added          OK   (no new judgement site; ChatPresenter only names it in javadoc)
+JUDGEMENT the first frame reuses the SAME verdict        OK   (onRowsLaidOut -> seen -> session.onViewport)
+EXITCODE=0
+
+### J2b - the README rule "opening a branch does not clear unread" still holds
+command: python -X utf8 (README unread rows + the new case that locks it)
+  README.md:533| | `ReadingSession` | 打开分支时恢复、随视口推进未读、离开时记住位置 | 恢复优先按 `message/revision + 偏移`，失效则回退最近合法位置；未读只在**目标回答真的进入视口**时按稳定序号推进，**打开分支不清未读**；首帧布局完成也算一次视口事件——一屏装得下且最新回答可见时首帧即清未读，判定仍是同
+  android/app/src/test/java/com/treelearn/app/ui/ChatReadingTest.java:194| public void aFirstFrameThatDoesNotShowTheNewestAnswerLeavesUnreadAlone() {
+  android/app/src/test/java/com/treelearn/app/ui/ChatReadingTest.java:203| assertEquals("opening a branch must not clear unread", 0, reading.savedSeen);
+JUDGEMENT README rule still stated                       OK
+JUDGEMENT a test locks it                                OK   (newest not visible -> savedSeen stays 0)
+EXITCODE=0
+
+### J3 - the two mutations each red ONLY the target case, then back to green
+command: python -X utf8 (read the mutation and revert evidence summaries)
+  ---- T-042-fix1-mutation-d1.txt
+     > Task :app:testDebugUnitTest FAILED
+     ChatReadingTest > aRefusedStoredPositionBecomesANoticeInsteadOfKillingTheBackgroundThread FAILED
+     BUILD FAILED in 14s
+     EXITCODE=1
+     tests=11 failures=1 errors=0
+     restored-identical=TRUE
+  ---- T-042-fix1-mutation-d2.txt
+     > Task :app:testDebugUnitTest FAILED
+     ChatReadingTest > aConversationThatFitsOnOneScreenClearsUnreadOnItsFirstFrame FAILED
+     BUILD FAILED in 14s
+     EXITCODE=1
+     tests=11 failures=1 errors=0
+     restored-identical=TRUE
+  ---- T-042-fix1-revert-green.txt
+     EXITCODE=0
+     tests=11 failures=0 errors=0
+  ---- T-042-fix1-gate-tests.txt
+     EXITCODE=0
+     suite-totals: tests=358 failures+errors=0
+JUDGEMENT mutation-d1 reds only the refused-save case    OK   (11 tests, 1 failed, named case)
+JUDGEMENT mutation-d2 reds only the fits-one-screen case OK   (11 tests, 1 failed, named case)
+JUDGEMENT restored tree is green                         OK   (11/0; sha256 back to pre-mutation)
+JUDGEMENT the whole suite is green                       OK   (tests=358 failures+errors=0)
+EXITCODE=0
+
+### J4 - D3 wording fixed, D4 scan re-run, D5 overload deleted
+command: python -X utf8 (task body wording; the refreshed line refs; Snapshot.of arity)
+  task-file:27| - State and exception handling: 位置指向的消息/版本被删除时库层 `ON DELETE SET NULL` 清位置，恢复退化为活动末端（最新一条）并标记 `atLiveEnd`，而不是崩溃；保存失败只记可见 notice，不影响阅读。
+  task-file:89| - [x] Fix round 1 / D3：任务正文的「退化为分支顶部」已按权威口径改为「退化为活动末端（最新一条）并标记 `atLiveEnd`」，实现未改（`reading/ReadingPosition.liveEnd`）。
+  task-file:121| - 复用 `branches` 既有列，不得新增列或表；位置为空/失效一律退化到活动末端（最新一条）并标记 `atLiveEnd`（权威口径见 `reading/ReadingPosition.liveEnd`、`android/README.md` 与 T-015 验收），不抛异常给用户。
+  task-file:150| - **D3 [P3] 任务文件三处措辞与实测行为相反。** Requirement brief「恢复退化为回到该分支顶部」、Acceptance criteria「退化为顶部且不抛异常」、Implementation notes「位置为空/失效一律退化到分支顶部」；实测是 `ReadingPosi
+  task-file:163| - Fix round 1（2026-09-22，D1–D5）：D1 两条后台写路径包 try/catch + 新 notice `notice_reading_position`（DAO 未改）；D2 首帧补一次可见集上报（复用 `ViewportSeen` 的唯一判定，无新计数器）；D3 只改正
+  task-file:172| - **D3（任务文件措辞与实测相反）→ 只改措辞，不改实现。** 实现跟的是权威 `ReadingPosition.liveEnd`＝**活动末端（最新一条）**，与 `android/README.md` 和 T-015 验收一致。正文三处「退化为分支顶部」是错的，就地改正为「退化为活动末端并标
+  ChatData.java:82| public static Snapshot of(String branchTitle, List<ChatMessage> messages,
+JUDGEMENT D3 body says "activity end + atLiveEnd"        OK   (multiple places; implementation untouched)
+JUDGEMENT D5 the 4-arg Snapshot.of is gone               OK   (only the 6-arg overload remains)
+EXITCODE=0
+
+### J4b - D4: the refreshed scan values vs the references that are still stale
+command: python -X utf8 (source-scan measured values; MainActivity/AppContainer refs in the delivery report)
+  scan android\app\src\main\java\com\treelearn\app\MainActivity.java:431: private void showChat(String branchId) {
+  scan android\app\src\main\java\com\treelearn\app\MainActivity.java:445: private void showChat(String branchId, ReadingAnchor explicitAnchor) {
+  scan android\app\src\main\java\com\treelearn\app\AppContainer.java:130: this.readingStore = new SqliteReadingStore(helper);
+  scan android\app\src\main\java\com\treelearn\app\AppContainer.java:199: public ReadingStore readingStore() {
+  scan android\app\src\main\java\com\treelearn\app\AppContainer.java:130: this.readingStore = new SqliteReadingStore(helper);
+  scan android\app\src\main\java\com\treelearn\app\AppContainer.java:199: public ReadingStore readingStore() {
+  scan android\app\src\main\java\com\treelearn\app\MainActivity.java:445: private void showChat(String branchId, ReadingAnchor explicitAnchor) {
+  delivery-report:107| | 阅读位置恢复与「看过即清未读」〔2026-09-22 更新，T-042〕 | `MainActivity.showChat(String, ReadingAnchor)`（`MainActivity.java:459`，行号取 `artifacts/evidence/T-042-fix1-sou
+  delivery-report:208| | T-042 阅读位置保存与恢复接线 | `verifying` | 〔2026-09-22 修复轮更新〕实现已落盘：唯一接缝 `MainActivity.showChat(String, ReadingAnchor)`（`MainActivity.java:459`，以 `artifacts/e
+JUDGEMENT the scan was re-run and its values are today OK   (MainActivity.java:445 / :431, AppContainer.java:130)
+FINDING  the DELIVERY REPORT still prints MainActivity.java:383 (lines 107 and 208); the refreshed
+FINDING  value is 445. D4 asked for the delivery report too, so this reference was not refreshed.
+EXITCODE=0
+
+### J5 - evidence is self-justifying (a header, an EXITCODE and a judgement line)
+command: python -X utf8 (per-file header/exit-code/judgement-line census over the fix-round evidence)
+  T-042-fix1-apk-build.txt               head=3  EXITCODE=1  judgement-lines=0
+  T-042-fix1-command-identity.txt        head=4  EXITCODE=1  judgement-lines=0
+  T-042-fix1-gate-check.txt              head=4  EXITCODE=1  judgement-lines=0
+  T-042-fix1-gate-design-tokens.txt      head=3  EXITCODE=2  judgement-lines=0
+  T-042-fix1-gate-no-kotlin.txt          head=3  EXITCODE=1  judgement-lines=1
+  T-042-fix1-gate-tests.txt              head=4  EXITCODE=1  judgement-lines=1
+  T-042-fix1-green.txt                   head=4  EXITCODE=1  judgement-lines=0
+  T-042-fix1-mutation-d1.txt             head=3  EXITCODE=1  judgement-lines=1
+  T-042-fix1-mutation-d2.txt             head=3  EXITCODE=1  judgement-lines=1
+  T-042-fix1-red-d1.txt                  head=4  EXITCODE=1  judgement-lines=0
+  T-042-fix1-red-d2.txt                  head=4  EXITCODE=1  judgement-lines=0
+  T-042-fix1-revert-green.txt            head=4  EXITCODE=1  judgement-lines=1
+  T-042-fix1-sizing.txt                  head=3  EXITCODE=1  judgement-lines=0
+  T-042-fix1-source-scan.txt             head=2  EXITCODE=1  judgement-lines=0
+  T-042-fix1-verify-precheck.txt         head=3  EXITCODE=5  judgement-lines=1
+  no-kotlin: VERDICT: PASS (13 OK line(s))
+JUDGEMENT no-kotlin evidence carries a VERDICT line    OK   (VERDICT: PASS (13 OK line(s)))
+EXITCODE=0
+
+== overall ==
+J2 PASS, J3 PASS, J4 PARTIAL (delivery-report ref stale), J5 PASS, J1 PARTIAL (third write site unguarded)
+failing judgement(s) = 0 ; real findings = 2 (both recorded for the foreman, not self-approved)
+VERDICT: PARTIAL - a real defect remains, so the task stays in verifying.
+EXITCODE=0

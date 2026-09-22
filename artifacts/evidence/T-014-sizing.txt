@@ -1,0 +1,31 @@
+# T-014 sizing evidence - non-empty non-comment production lines
+# CapturedAt=2026-09-21T22:44:26.114269+08:00
+# Command: powershell -ExecutionPolicy Bypass -File %TEMP%\t014-sizing.ps1
+# Mode: read-only measurement of the repository tree, no build, no emulator (user instruction 2026-09-21).
+# Caliber: .trae/rules/harness-tasks.md - a NEW file counts by ALL of its non-empty non-comment lines.
+# Scope: the 6 NEW production Java files under android/app/src/main/java/com/treelearn/app/navigation.
+# Two independent calipers were run: this PowerShell one, and
+#   python: sum(1 for l in lines if l.strip() and not l.strip().startswith(('//','*','/*')))
+# They agree (570 judged / 836 physical) and the per-file parts sum to the whole.
+
+    5    19  NavigationSink.java
+   13    31  NavigationActions.java
+   78   139  NavigationData.java
+  116   174  NavigationViewState.java
+  253   330  NavigationPresenter.java
+  105   143  SqliteNavigationStore.java
+NEW PRODUCTION TOTAL judged=570 physical=836 files=6
+  388   496  NavigationPresenterTest.java
+  188   240  NavigationStoreInstrumentedTest.java
+TESTS are recorded separately and are not part of the budget
+SIZING-SCRIPT DONE
+EXITCODE=0
+
+--- verdict ---
+expected=200 (estimated_production_lines in the task file)
+measured=570 judged / 836 physical lines for the 6 new production files
+parts sum to the whole: 5+13+78+116+253+105 = 570 judged ; 19+31+139+174+330+143 = 836 physical
+soft cap=200 -> exceeded. hard cap=500 -> EXCEEDED by 70 judged lines (14% over).
+Recorded as a PENDING SIZING DEVIATION, never as an approved exception: no user ruling exists for T-014.
+Per .trae/rules/harness-tasks.md this slice needs a user decision (split, or a user-approved exception).
+Tests (388 + 188 = 576 judged) are recorded separately and are NOT counted against the budget.

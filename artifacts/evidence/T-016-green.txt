@@ -1,0 +1,855 @@
+# T-016 GREEN evidence - the targeted acceptance command, zero exit
+Generated : 2026-09-21T20:16:04.8564823+08:00
+Command   : cd android; .\gradlew.bat :tree-layout:test --no-daemon --console=plain
+Working   : D:\Project\Android\Treelearn
+Prep      : .\gradlew.bat :tree-layout:clean ran first as a SEPARATE invocation (PREP-EXITCODE=0,
+            appended below) so the judged run really recompiles and re-executes the suite instead
+            of reporting UP-TO-DATE with no test lines. The judged command is unchanged.
+
+# --- prep (separate invocation, not the judged command): .\gradlew.bat :tree-layout:clean --no-daemon --console=plain ---
+PREP-EXITCODE=0 (BUILD SUCCESSFUL in 13s, 1 actionable task: 1 executed)
+
+# --- judged run: cd android; .\gradlew.bat :tree-layout:test --no-daemon --console=plain ---
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :tree-layout:compileJava FROM-CACHE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:compileTestJava FROM-CACHE
+> Task :tree-layout:processTestResources NO-SOURCE
+> Task :tree-layout:testClasses UP-TO-DATE
+> Task :tree-layout:test FROM-CACHE
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 11s
+3 actionable tasks: 3 from cache
+EXITCODE=0
+Seconds=11.7
+
+# --- supplementary forced execution (NOT the judged command): --rerun-tasks ---
+# Reason: the local Gradle build cache can restore :tree-layout:test FROM-CACHE, which yields exit 0
+# but no judgement lines. This run forces real compilation and real test execution so the file is
+# self-evidencing: it carries the per-test PASSED lines and the suite totals.
+Command   : .\gradlew.bat :tree-layout:test --rerun-tasks --no-daemon --console=plain
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :tree-layout:compileJava
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes
+> Task :tree-layout:compileTestJava
+> Task :tree-layout:processTestResources NO-SOURCE
+> Task :tree-layout:testClasses
+
+> Task :tree-layout:test
+
+TreeLayoutGeometryTest > segmentLengthUsesRoundsDepthDecayAndTheCap PASSED
+
+TreeLayoutGeometryTest > siblingsFanOutByLeafWeightAndSproutAlongTheirParent PASSED
+
+TreeLayoutGeometryTest > emptySnapshotProducesAnEmptyFiniteResult PASSED
+
+TreeLayoutGeometryTest > rootIsATrunkGrowingStraightUpWithRoundDerivedLength PASSED
+
+TreeLayoutGeometryTest > collapsedBranchWithoutVisibleChildrenIsStillALeaf PASSED
+
+TreeLayoutGeometryTest > snapshotChildrenKeepTheirInputOrder PASSED
+
+TreeLayoutGeometryTest > singleNodeTreeIsOneLeafAndKeepsTheSoilBand PASSED
+
+TreeLayoutGeometryTest > currentPathIsFlaggedAndFallsBackToTheRootWhenTargetIsNotVisible PASSED
+
+TreeLayoutGeometryTest > deepChainStaysFinite PASSED
+
+TreeLayoutGeometryTest > sameInputProducesBitIdenticalOutput PASSED
+
+TreeLayoutGeometryTest > collapsedBranchCountsHiddenDescendantsAndTheirUnread PASSED
+
+TreeLayoutGeometryTest > branchWithOnlyArchivedChildrenBecomesALeaf PASSED
+
+TreeLayoutGeometryTest > largeTreeStaysFiniteAndReportsItsSize PASSED
+
+TreeLayoutGeometryTest > archivedSubtreesLeaveTheDefaultLayout PASSED
+
+TreeLayoutGeometryTest > childOrderFollowsTheSnapshotOrder PASSED
+
+TreeLayoutHitFitAnchorTest > screenPointsRoundTripThroughTheFitTransform PASSED
+
+TreeLayoutHitFitAnchorTest > hitTestOutsideEveryRegionReturnsNull PASSED
+
+TreeLayoutHitFitAnchorTest > degenerateViewportsStayFinite PASSED
+
+TreeLayoutHitFitAnchorTest > collapseNeverMovesTheSurvivingNodes PASSED
+
+TreeLayoutHitFitAnchorTest > archivingASiblingReportsTheExactAnchorShift PASSED
+
+TreeLayoutHitFitAnchorTest > boundsCoverEveryTipBaseAndLabel PASSED
+
+TreeLayoutHitFitAnchorTest > everyVisibleNodeIsHittableAtItsOwnAnchor PASSED
+
+TreeLayoutHitFitAnchorTest > viewTransformRefusesANonPositiveScale PASSED
+
+TreeLayoutHitFitAnchorTest > fitKeepsTheTreeInsideTheViewportAndAlignsTheBottom PASSED
+
+TreeLayoutHitFitAnchorTest > hitTestAtALabelCentreReturnsTheLabeledBranch PASSED
+
+TreeLayoutHitFitAnchorTest > viewportRefusesNegativeOrZeroTouchTarget PASSED
+
+TreeLayoutLabelTest > midDensityPlacesOneBarLabelPerLeafAtTheMeasuredPosition PASSED
+
+TreeLayoutLabelTest > crowdedBarOmitsLabelsButKeepsEveryNodeHittable PASSED
+
+TreeLayoutLabelTest > farDensityPlacesNoLabelsAndKeepsEveryNodeHittable PASSED
+
+TreeLayoutLabelTest > nearDensityAddsTheSummaryLineOnlyWhenTheBranchHasOne PASSED
+
+TreeLayoutLabelTest > canopyBarSitsEntirelyAboveTheCrownAndAboveEveryLeafBox PASSED
+
+TreeLayoutLabelTest > currentBranchLeafTakesTheFirstRow PASSED
+
+TreeLayoutLabelTest > barLabelsNeverOverlapAndNeverCoverALeaf PASSED
+
+TreeLayoutLabelTest > densityIsDerivedFromTheZoomScale PASSED
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 23s
+3 actionable tasks: 3 executed
+EXITCODE=0
+
+# --- regression run (as instructed): cd android; .\gradlew.bat :core:test :tree-layout:test --no-daemon --console=plain ---
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:compileTestJava UP-TO-DATE
+> Task :core:processTestResources NO-SOURCE
+> Task :core:testClasses UP-TO-DATE
+> Task :core:test UP-TO-DATE
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:compileTestJava UP-TO-DATE
+> Task :tree-layout:processTestResources NO-SOURCE
+> Task :tree-layout:testClasses UP-TO-DATE
+> Task :tree-layout:test UP-TO-DATE
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 20s
+6 actionable tasks: 6 up-to-date
+EXITCODE=0
+
+# --- supplementary forced regression (NOT the instructed command): --rerun-tasks, so both modules really run ---
+Command   : .\gradlew.bat :core:test :tree-layout:test --rerun-tasks --no-daemon --console=plain
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava
+> Task :core:processResources NO-SOURCE
+> Task :core:classes
+> Task :core:compileTestJava
+> Task :core:processTestResources NO-SOURCE
+> Task :core:testClasses
+> Task :core:test
+AnswerRevisionTest > restoreIsRehydrationOnly PASSED
+AnswerRevisionTest > resetCreatesNewRevisionAndOldBranchSourceKeepsTheOldOne PASSED
+AnswerRevisionTest > missingOrBlankPolicyVersionIsRefused PASSED
+AnswerRevisionTest > theConstructorIsNotAPublicCreationPath PASSED
+AnswerRevisionTest > reasoningAndAnswerBelongToTheSameStableVersion PASSED
+AnswerRevisionTest > revisionNumberMustBePositive PASSED
+AnswerRevisionTest > blankAnswerCannotBecomeStable PASSED
+AnswerRevisionTest > createChecksPolicyOwnershipWhileRestoreTrustsTheStoredRow PASSED
+AnswerRevisionTest > policyVersionIsCopiedVerbatim PASSED
+AnswerRevisionTest > allFieldsAreFinalAndNoSetterExists PASSED
+AnswerRevisionTest > aPolicyVersionThatNoPurposeOwnsIsRefused PASSED
+AnswerRevisionTest > thinkingDisabledKeepsAnEmptyReasoningFieldButNoNull PASSED
+AnswerRevisionTest > aCallerBugIsReportedBeforeTheVersionDecision PASSED
+BranchSourceTest > provenanceRejectsMalformedIdentifiers PASSED
+BranchSourceTest > aRangedAnchorNeedsBothOffsetsAndTheQuoteAndHashFallback PASSED
+BranchSourceTest > stableStateYieldsProvenanceThatPinsExactlyThatRevision PASSED
+BranchSourceTest > everyUnfinishedOrFailedStateIsRefusedAsABranchSource PASSED
+BranchSourceTest > theConstructorIsNotAPublicCreationPath PASSED
+BranchSourceTest > aChildBranchInheritsItsParentFromTheProvenance PASSED
+BranchSourceTest > restoreIsRehydrationOnlyButStillValidatesItsInput PASSED
+BranchSourceTest > aRootBranchCarriesNoProvenance PASSED
+BranchSourceTest > theQuoteMustBeExactlyTheAnchoredRange PASSED
+BranchSourceTest > wholeAnswerForkCarriesNoOffsetsButStillPinsARevision PASSED
+BranchSourceTest > aNonRootBranchCannotExistWithoutProvenance PASSED
+BranchSourceTest > aStableStateWithoutARevisionIdIsACallerBugNotABusinessFailure PASSED
+BranchTest > aBranchKnowsWhetherItIsRoot PASSED
+BranchTest > lastSeenCanNeverExceedLatestByConstruction PASSED
+BranchTest > readingPositionCannotRunAheadOfWhatExists PASSED
+BranchTest > aRejectedMutationLeavesTheBranchUntouched PASSED
+BranchTest > readingPositionCannotMoveBackwards PASSED
+BranchTest > unreadDerivesFromTheSequenceGap PASSED
+BranchTest > topicAndBranchIdentifiersAreUuidStrings PASSED
+BranchTest > titleAndCollapseUpdatesNeverCreateUnread PASSED
+BranchTest > archivingStampsUpdatedAtWithTheArchiveTime PASSED
+BranchTest > updatedAtIsReadableAndNeverPredatesCreation PASSED
+BranchTest > titleMayBeAbsentButNeverBlank PASSED
+BranchTest > restoreKeepsTheRootAndProvenanceRulesOfTheConstructor PASSED
+BranchTest > restoreRefusesAnUpdatedAtOlderThanCreation PASSED
+BranchTest > archivingKeepsTheBranchesOwnHistory PASSED
+BranchTest > restoreCarriesStateThatNoCreationPathCouldProduce PASSED
+GenerationCommandTest > versionLookalikesAreRefused PASSED
+GenerationCommandTest > aMissingVersionIsRefusedWithThePromptPolicyCode PASSED
+GenerationCommandTest > malformedArgumentsAreCallerBugsNotBusinessFailures PASSED
+GenerationCommandTest > theVersionIsPinnedWithoutReformatting PASSED
+GenerationCommandTest > aCallerBugIsReportedBeforeTheVersionDecision PASSED
+GenerationCommandTest > aCommandPinsTheVersionOfItsDeclaredPurpose PASSED
+GenerationCommandTest > aVersionOwnedByAnotherPurposeIsRefused PASSED
+GenerationCommandTest > theDescriptionNamesThePinAndCarriesNoPromptText PASSED
+GenerationCommandTest > thePinnedVersionIsFinal PASSED
+GenerationOperationTest > thePinnedVersionCannotBeRewrittenForTheLifeOfTheOperation PASSED
+GenerationOperationTest > aNullDeltaIsACallerBug PASSED
+GenerationOperationTest > reachingStableDirectlyIsRefusedBecauseStabilizeOwnsThatMove PASSED
+GenerationOperationTest > aLateReasoningDeltaIsAppendedWithoutSteppingBack PASSED
+GenerationOperationTest > aThinkingDisabledAttemptStabilizesWithEmptyReasoning PASSED
+GenerationOperationTest > stabilizeCopiesTheBuffersAndThePinnedVersionVerbatim PASSED
+GenerationOperationTest > anEmptyDeltaIsAcceptedWithoutOpeningAChannel PASSED
+GenerationOperationTest > anInterruptedAttemptBehavesLikeAFailedOne PASSED
+GenerationOperationTest > illegalTransitionsAreReportedAsDomainErrors PASSED
+GenerationOperationTest > aBadRevisionNumberIsRefusedByTheRevisionItself PASSED
+GenerationOperationTest > aFailedAttemptRejectsLateCallbacksAndCannotBeStabilized PASSED
+GenerationOperationTest > stabilizeRequiresANonEmptyAnswer PASSED
+GenerationOperationTest > aNullTransitionTargetIsACallerBugNotABusinessFailure PASSED
+GenerationOperationTest > aDeltaThatArrivedBeforeStreamingIsRefused PASSED
+GenerationOperationTest > anOperationInheritsThePinnedVersionAndIdentityFromItsCommand PASSED
+GenerationOperationTest > anAnswerDeltaMovesSubmittingStraightIntoTheAnswerPhase PASSED
+GenerationOperationTest > aSecondStabilizationIsRefused PASSED
+GenerationOperationTest > aCallerBugIsReportedBeforeTheAttemptStateIsConsulted PASSED
+GenerationOperationTest > theOperationDescriptionNamesTheStateAndTheBuffers PASSED
+GenerationOperationTest > aReasoningDeltaOpensTheReasoningPhase PASSED
+GenerationStateTest > theDerivedPredicatesCoverEveryState PASSED
+GenerationStateTest > legalTransitionReturnsTheNextState PASSED
+GenerationStateTest > happyPathTransitionsAreLegal PASSED
+GenerationStateTest > anyUnfinishedStateCanFailBeInterruptedOrBeCanceled PASSED
+GenerationStateTest > everyRecoverableStateMapsToExactlyOneTerminalTarget PASSED
+GenerationStateTest > terminalStatesHaveNoRecoveryTarget PASSED
+GenerationStateTest > skippingForwardIsRefused PASSED
+GenerationStateTest > processRecoveryCoversEveryStateThatCannotSurviveARestart PASSED
+GenerationStateTest > illegalTransitionIsReportedAsADomainError PASSED
+GenerationStateTest > lateCallbackOnATerminalStateIsReportedAsADomainError PASSED
+GenerationStateTest > aNullTransitionTargetIsACallerBugNotABusinessFailure PASSED
+GenerationStateTest > onlyStableCountsAsStable PASSED
+GenerationStateTest > movingBackwardsIsRefused PASSED
+GenerationStateTest > onlyFailedAndInterruptedAreRetryableInPlace PASSED
+GenerationStateTest > aReasoningPhaseThatProducedNoAnswerCannotBecomeStable PASSED
+GenerationStateTest > terminalStatesNeverChangeAgain PASSED
+GuardTest > newIdProducesCanonicalDistinctUuids PASSED
+GuardTest > objectChecksAcceptEnumsAndValueObjectsAndRefuseNull PASSED
+GuardTest > canonicalUuidStringsAreAccepted PASSED
+GuardTest > countersRefuseNegativeValues PASSED
+GuardTest > nullAndEmptyIdentifiersAreRefused PASSED
+GuardTest > nonCanonicalSpellingsOfAValidUuidAreRefused PASSED
+MessageTest > restoreKeepsTheRoleAndContentRules PASSED
+MessageTest > aUserPositionCarriesNoRevisionAndNoAttempt PASSED
+MessageTest > endingTheAttemptInTheSameTransactionThenAllowsTheSwitch PASSED
+MessageTest > blankLearnerTextIsRefused PASSED
+MessageTest > learnerTextIsFinalAndThePositionExposesNoSetter PASSED
+MessageTest > clearingAFailedAttemptKeepsTheDisplayedRevision PASSED
+MessageTest > activatingANewRevisionSwitchesTheDisplayedVersion PASSED
+MessageTest > aStableRevisionCannotBeAttachedToALearnerPosition PASSED
+MessageTest > aSecondAttemptAtTheSamePositionIsRefusedWhileOneIsRunning PASSED
+MessageTest > ordinalIsBranchLocalAndNonNegative PASSED
+MessageTest > theDisplayedRevisionCannotBeSwitchedWhileAnAttemptIsRunning PASSED
+MessageTest > anAttemptCannotBeBoundToALearnerPosition PASSED
+MessageTest > reactivatingTheSameRevisionIsRefused PASSED
+MessageTest > anAiPositionCannotBeGivenLearnerText PASSED
+MessageTest > restoreCarriesTheActiveReferencesNoCreationPathCouldProduce PASSED
+PromptPurposeTest > everyPurposeOwnsItsDocumentedVersion PASSED
+PromptPurposeTest > theEnumMatchesTheAuthoritativeFirstReleaseListExactly PASSED
+PromptPurposeTest > thePrefixDirectionIsTheExactReverseOfTheVersionDirection PASSED
+PromptPurposeTest > theDeclarationOrderMatchesTheDocument PASSED
+PromptPurposeTest > aVersionOfAnotherPurposeIsRefused PASSED
+PromptPurposeTest > absenceOfAVersionHasOneDefinition PASSED
+PromptPurposeTest > theTeachingAnswerPurposeOwnsTheDocumentedVersion PASSED
+PromptPurposeTest > aCanonicalSemverSuffixIsAccepted PASSED
+PromptPurposeTest > everyPrefixIsUnambiguous PASSED
+PromptPurposeTest > theVersionDecisionIsExpressedAsADomainError PASSED
+PromptPurposeTest > aNonSemverSuffixIsRefused PASSED
+PromptPurposeTest > thereIsNoSeparateKeyPointsPurpose PASSED
+PromptSpecTest > aMissingBodyOrPurposeIsACallerBug PASSED
+PromptSpecTest > theVersionDecisionIsTheSameOneGenerationCommandMakes PASSED
+PromptSpecTest > aVersionOwnedByAnotherPurposeIsReportedAsAMismatch PASSED
+PromptSpecTest > aSpecCarriesItsPurposeVersionAndBody PASSED
+PromptSpecTest > aBlankSystemContentIsRefused PASSED
+PromptSpecTest > aBlankVersionIsReportedAsTheMissingPolicyCode PASSED
+PromptSpecTest > theSpecHasNoProviderSpecificField PASSED
+PromptSpecTest > theDescriptionNeverCarriesThePromptBody PASSED
+TopicTest > anUpdateMustNotPredateCreation PASSED
+TopicTest > malformedIdentifiersAreRefusedAtConstruction PASSED
+TopicTest > visitingABranchKeepsIdentityAndCreationTime PASSED
+TopicTest > aFreshTopicHasNotBeenVisitedYet PASSED
+TopicTest > timestampsAreUtcEpochMillisAndNeverNegative PASSED
+TopicTest > aTopicCarriesNoNameOfItsOwn PASSED
+> Task :tree-layout:compileJava
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes
+> Task :tree-layout:compileTestJava
+> Task :tree-layout:processTestResources NO-SOURCE
+> Task :tree-layout:testClasses
+> Task :tree-layout:test
+TreeLayoutGeometryTest > segmentLengthUsesRoundsDepthDecayAndTheCap PASSED
+TreeLayoutGeometryTest > siblingsFanOutByLeafWeightAndSproutAlongTheirParent PASSED
+TreeLayoutGeometryTest > emptySnapshotProducesAnEmptyFiniteResult PASSED
+TreeLayoutGeometryTest > rootIsATrunkGrowingStraightUpWithRoundDerivedLength PASSED
+TreeLayoutGeometryTest > collapsedBranchWithoutVisibleChildrenIsStillALeaf PASSED
+TreeLayoutGeometryTest > snapshotChildrenKeepTheirInputOrder PASSED
+TreeLayoutGeometryTest > singleNodeTreeIsOneLeafAndKeepsTheSoilBand PASSED
+TreeLayoutGeometryTest > currentPathIsFlaggedAndFallsBackToTheRootWhenTargetIsNotVisible PASSED
+TreeLayoutGeometryTest > deepChainStaysFinite PASSED
+TreeLayoutGeometryTest > sameInputProducesBitIdenticalOutput PASSED
+TreeLayoutGeometryTest > collapsedBranchCountsHiddenDescendantsAndTheirUnread PASSED
+TreeLayoutGeometryTest > branchWithOnlyArchivedChildrenBecomesALeaf PASSED
+TreeLayoutGeometryTest > largeTreeStaysFiniteAndReportsItsSize PASSED
+TreeLayoutGeometryTest > archivedSubtreesLeaveTheDefaultLayout PASSED
+TreeLayoutGeometryTest > childOrderFollowsTheSnapshotOrder PASSED
+TreeLayoutHitFitAnchorTest > screenPointsRoundTripThroughTheFitTransform PASSED
+TreeLayoutHitFitAnchorTest > hitTestOutsideEveryRegionReturnsNull PASSED
+TreeLayoutHitFitAnchorTest > degenerateViewportsStayFinite PASSED
+TreeLayoutHitFitAnchorTest > collapseNeverMovesTheSurvivingNodes PASSED
+TreeLayoutHitFitAnchorTest > archivingASiblingReportsTheExactAnchorShift PASSED
+TreeLayoutHitFitAnchorTest > boundsCoverEveryTipBaseAndLabel PASSED
+TreeLayoutHitFitAnchorTest > everyVisibleNodeIsHittableAtItsOwnAnchor PASSED
+TreeLayoutHitFitAnchorTest > viewTransformRefusesANonPositiveScale PASSED
+TreeLayoutHitFitAnchorTest > fitKeepsTheTreeInsideTheViewportAndAlignsTheBottom PASSED
+TreeLayoutHitFitAnchorTest > hitTestAtALabelCentreReturnsTheLabeledBranch PASSED
+TreeLayoutHitFitAnchorTest > viewportRefusesNegativeOrZeroTouchTarget PASSED
+TreeLayoutLabelTest > midDensityPlacesOneBarLabelPerLeafAtTheMeasuredPosition PASSED
+TreeLayoutLabelTest > crowdedBarOmitsLabelsButKeepsEveryNodeHittable PASSED
+TreeLayoutLabelTest > farDensityPlacesNoLabelsAndKeepsEveryNodeHittable PASSED
+TreeLayoutLabelTest > nearDensityAddsTheSummaryLineOnlyWhenTheBranchHasOne PASSED
+TreeLayoutLabelTest > canopyBarSitsEntirelyAboveTheCrownAndAboveEveryLeafBox PASSED
+TreeLayoutLabelTest > currentBranchLeafTakesTheFirstRow PASSED
+TreeLayoutLabelTest > barLabelsNeverOverlapAndNeverCoverALeaf PASSED
+TreeLayoutLabelTest > densityIsDerivedFromTheZoomScale PASSED
+BUILD SUCCESSFUL in 15s
+EXITCODE=0
+
+# --- judgement-line summary read back from the JUnit XML the forced runs produced ---
+# (:tree-layout:test --rerun-tasks then :core:test --rerun-tasks; read at 2026-09-21T20:18:09.9804549+08:00)
+tree-layout <testsuite name="com.treelearn.treelayout.TreeLayoutGeometryTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-09-21T12:17:54.192Z" hostname="LAPTOP-0CT7CJ9O" time="0.089">
+tree-layout <testsuite name="com.treelearn.treelayout.TreeLayoutHitFitAnchorTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-09-21T12:17:54.284Z" hostname="LAPTOP-0CT7CJ9O" time="0.014">
+tree-layout <testsuite name="com.treelearn.treelayout.TreeLayoutLabelTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-09-21T12:17:54.301Z" hostname="LAPTOP-0CT7CJ9O" time="0.012">
+core tests="13" skipped="0" failures="0" errors="0"
+core tests="12" skipped="0" failures="0" errors="0"
+core tests="15" skipped="0" failures="0" errors="0"
+core tests="9" skipped="0" failures="0" errors="0"
+core tests="20" skipped="0" failures="0" errors="0"
+core tests="16" skipped="0" failures="0" errors="0"
+core tests="6" skipped="0" failures="0" errors="0"
+core tests="15" skipped="0" failures="0" errors="0"
+core tests="12" skipped="0" failures="0" errors="0"
+core tests="8" skipped="0" failures="0" errors="0"
+core tests="6" skipped="0" failures="0" errors="0"
+core TOTAL tests=132 failures=0 errors=0
+tree-layout perf line: <system-out><![CDATA[[T-016] nodes=9331 leaves=7776 labels=19 elapsedMs=15
+
+# --- post-restore re-confirmation of GREEN (after the RED run-3 probe was reverted) ---
+Context   : TreeLayout.java sha256 = 141FD56572D31E22BDA6143DC40509F15DA3F889109B65FA7AC56352375C810D
+Command   : .\gradlew.bat :tree-layout:test --rerun-tasks --no-daemon --console=plain
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :tree-layout:compileJava
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes
+> Task :tree-layout:compileTestJava
+> Task :tree-layout:processTestResources NO-SOURCE
+> Task :tree-layout:testClasses
+> Task :tree-layout:test
+TreeLayoutGeometryTest > segmentLengthUsesRoundsDepthDecayAndTheCap PASSED
+TreeLayoutGeometryTest > siblingsFanOutByLeafWeightAndSproutAlongTheirParent PASSED
+TreeLayoutGeometryTest > emptySnapshotProducesAnEmptyFiniteResult PASSED
+TreeLayoutGeometryTest > rootIsATrunkGrowingStraightUpWithRoundDerivedLength PASSED
+TreeLayoutGeometryTest > collapsedBranchWithoutVisibleChildrenIsStillALeaf PASSED
+TreeLayoutGeometryTest > snapshotChildrenKeepTheirInputOrder PASSED
+TreeLayoutGeometryTest > singleNodeTreeIsOneLeafAndKeepsTheSoilBand PASSED
+TreeLayoutGeometryTest > currentPathIsFlaggedAndFallsBackToTheRootWhenTargetIsNotVisible PASSED
+TreeLayoutGeometryTest > deepChainStaysFinite PASSED
+TreeLayoutGeometryTest > sameInputProducesBitIdenticalOutput PASSED
+TreeLayoutGeometryTest > collapsedBranchCountsHiddenDescendantsAndTheirUnread PASSED
+TreeLayoutGeometryTest > branchWithOnlyArchivedChildrenBecomesALeaf PASSED
+TreeLayoutGeometryTest > largeTreeStaysFiniteAndReportsItsSize PASSED
+TreeLayoutGeometryTest > archivedSubtreesLeaveTheDefaultLayout PASSED
+TreeLayoutGeometryTest > childOrderFollowsTheSnapshotOrder PASSED
+TreeLayoutHitFitAnchorTest > screenPointsRoundTripThroughTheFitTransform PASSED
+TreeLayoutHitFitAnchorTest > hitTestOutsideEveryRegionReturnsNull PASSED
+TreeLayoutHitFitAnchorTest > degenerateViewportsStayFinite PASSED
+TreeLayoutHitFitAnchorTest > collapseNeverMovesTheSurvivingNodes PASSED
+TreeLayoutHitFitAnchorTest > archivingASiblingReportsTheExactAnchorShift PASSED
+TreeLayoutHitFitAnchorTest > boundsCoverEveryTipBaseAndLabel PASSED
+TreeLayoutHitFitAnchorTest > everyVisibleNodeIsHittableAtItsOwnAnchor PASSED
+TreeLayoutHitFitAnchorTest > viewTransformRefusesANonPositiveScale PASSED
+TreeLayoutHitFitAnchorTest > fitKeepsTheTreeInsideTheViewportAndAlignsTheBottom PASSED
+TreeLayoutHitFitAnchorTest > hitTestAtALabelCentreReturnsTheLabeledBranch PASSED
+TreeLayoutHitFitAnchorTest > viewportRefusesNegativeOrZeroTouchTarget PASSED
+TreeLayoutLabelTest > midDensityPlacesOneBarLabelPerLeafAtTheMeasuredPosition PASSED
+TreeLayoutLabelTest > crowdedBarOmitsLabelsButKeepsEveryNodeHittable PASSED
+TreeLayoutLabelTest > farDensityPlacesNoLabelsAndKeepsEveryNodeHittable PASSED
+TreeLayoutLabelTest > nearDensityAddsTheSummaryLineOnlyWhenTheBranchHasOne PASSED
+TreeLayoutLabelTest > canopyBarSitsEntirelyAboveTheCrownAndAboveEveryLeafBox PASSED
+TreeLayoutLabelTest > currentBranchLeafTakesTheFirstRow PASSED
+TreeLayoutLabelTest > barLabelsNeverOverlapAndNeverCoverALeaf PASSED
+TreeLayoutLabelTest > densityIsDerivedFromTheZoomScale PASSED
+BUILD SUCCESSFUL in 13s
+EXITCODE=0
+tree-layout TOTAL tests=34 failures=0 errors=0 (JUnit XML read back at 2026-09-21T20:19:40.5642854+08:00)
+
+# --- regression re-check under concurrent :core edits (2026-09-21T20:24:56.1991716+08:00) ---
+# Other lanes are editing android/core and android/ai in this shared workspace, so the combined run was
+# repeated and forced. Outcome: no cross-lane interference at this moment; :tree-layout stays green.
+Command   : cd android; .\gradlew.bat :core:test :tree-layout:test --no-daemon --console=plain   (plain: exit 0, all tasks UP-TO-DATE)
+Command   : cd android; .\gradlew.bat :core:test :tree-layout:test --rerun-tasks --no-daemon --console=plain   (raw output follows)
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava
+> Task :core:processResources NO-SOURCE
+> Task :core:classes
+> Task :core:compileTestJava
+> Task :core:processTestResources NO-SOURCE
+> Task :core:testClasses
+
+> Task :core:test
+
+AnswerRevisionTest > restoreIsRehydrationOnly PASSED
+
+AnswerRevisionTest > resetCreatesNewRevisionAndOldBranchSourceKeepsTheOldOne PASSED
+
+AnswerRevisionTest > missingOrBlankPolicyVersionIsRefused PASSED
+
+AnswerRevisionTest > theConstructorIsNotAPublicCreationPath PASSED
+
+AnswerRevisionTest > reasoningAndAnswerBelongToTheSameStableVersion PASSED
+
+AnswerRevisionTest > revisionNumberMustBePositive PASSED
+
+AnswerRevisionTest > blankAnswerCannotBecomeStable PASSED
+
+AnswerRevisionTest > createChecksPolicyOwnershipWhileRestoreTrustsTheStoredRow PASSED
+
+AnswerRevisionTest > policyVersionIsCopiedVerbatim PASSED
+
+AnswerRevisionTest > allFieldsAreFinalAndNoSetterExists PASSED
+
+AnswerRevisionTest > aPolicyVersionThatNoPurposeOwnsIsRefused PASSED
+
+AnswerRevisionTest > thinkingDisabledKeepsAnEmptyReasoningFieldButNoNull PASSED
+
+AnswerRevisionTest > aCallerBugIsReportedBeforeTheVersionDecision PASSED
+
+BranchSourceTest > provenanceRejectsMalformedIdentifiers PASSED
+
+BranchSourceTest > aRangedAnchorNeedsBothOffsetsAndTheQuoteAndHashFallback PASSED
+
+BranchSourceTest > stableStateYieldsProvenanceThatPinsExactlyThatRevision PASSED
+
+BranchSourceTest > everyUnfinishedOrFailedStateIsRefusedAsABranchSource PASSED
+
+BranchSourceTest > theConstructorIsNotAPublicCreationPath PASSED
+
+BranchSourceTest > aChildBranchInheritsItsParentFromTheProvenance PASSED
+
+BranchSourceTest > restoreIsRehydrationOnlyButStillValidatesItsInput PASSED
+
+BranchSourceTest > aRootBranchCarriesNoProvenance PASSED
+
+BranchSourceTest > theQuoteMustBeExactlyTheAnchoredRange PASSED
+
+BranchSourceTest > wholeAnswerForkCarriesNoOffsetsButStillPinsARevision PASSED
+
+BranchSourceTest > aNonRootBranchCannotExistWithoutProvenance PASSED
+
+BranchSourceTest > aStableStateWithoutARevisionIdIsACallerBugNotABusinessFailure PASSED
+
+BranchTest > aBranchKnowsWhetherItIsRoot PASSED
+
+BranchTest > lastSeenCanNeverExceedLatestByConstruction PASSED
+
+BranchTest > readingPositionCannotRunAheadOfWhatExists PASSED
+
+BranchTest > aRejectedMutationLeavesTheBranchUntouched PASSED
+
+BranchTest > readingPositionCannotMoveBackwards PASSED
+
+BranchTest > unreadDerivesFromTheSequenceGap PASSED
+
+BranchTest > topicAndBranchIdentifiersAreUuidStrings PASSED
+
+BranchTest > titleAndCollapseUpdatesNeverCreateUnread PASSED
+
+BranchTest > archivingStampsUpdatedAtWithTheArchiveTime PASSED
+
+BranchTest > updatedAtIsReadableAndNeverPredatesCreation PASSED
+
+BranchTest > titleMayBeAbsentButNeverBlank PASSED
+
+BranchTest > restoreKeepsTheRootAndProvenanceRulesOfTheConstructor PASSED
+
+BranchTest > restoreRefusesAnUpdatedAtOlderThanCreation PASSED
+
+BranchTest > archivingKeepsTheBranchesOwnHistory PASSED
+
+BranchTest > restoreCarriesStateThatNoCreationPathCouldProduce PASSED
+
+BuildContextPlanUseCaseTest > theBranchesOwnTurnFollowsTheRevisionThatPositionDisplays PASSED
+
+BuildContextPlanUseCaseTest > aSummaryTheCompressionNeverProducedForbidsTheRequestInsteadOfDroppingReasoning PASSED
+
+BuildContextPlanUseCaseTest > theCapacityTheCallerReservedForSystemAndTheQuestionIsNotFree PASSED
+
+BuildContextPlanUseCaseTest > aSummaryThatCoversQuestionReasoningAndAnswerTravelsAsOneEntry PASSED
+
+BuildContextPlanUseCaseTest > thePlanIsOrderedBirthFirstThenThisBranchesOwnTurns PASSED
+
+BuildContextPlanUseCaseTest > aSourceTheStoreCannotResolveForbidsTheRequest PASSED
+
+BuildContextPlanUseCaseTest > malformedArgumentsAreCallerBugs PASSED
+
+BuildContextPlanUseCaseTest > theBirthHalfIsPinnedToTheSnapshotEvenAfterTheParentMovesOn PASSED
+
+BuildContextPlanUseCaseTest > anEmptyHistoryIsAValidRequest PASSED
+
+BuildContextPlanUseCaseTest > anAnswerPositionWithoutADisplayedRevisionContributesNoTurn PASSED
+
+ContextSnapshotTest > laterMutationsOfTheCallerListCannotReachTheSnapshot PASSED
+
+ContextSnapshotTest > malformedIdentifiersAndTimestampsAreCallerBugs PASSED
+
+ContextSnapshotTest > theSnapshotIdentityNeverCarriesContent PASSED
+
+ContextSnapshotTest > everyPayloadOutsideTheSchemaIsRefused PASSED
+
+ContextSnapshotTest > aStoredSnapshotReadsBackThroughTheStructuredParser PASSED
+
+ContextSnapshotTest > aSnapshotWithoutSourcesIsNotASnapshot PASSED
+
+ContextSnapshotTest > theCanonicalPayloadIsTheDocumentedWireShapeAndItsDigestIsDerived PASSED
+
+ContextSnapshotTest > aPayloadWhoseDigestDoesNotMatchIsRefused PASSED
+
+ContextSnapshotTest > theSnapshotIsUnaffectedByEverythingThatHappensUpstreamAfterwards PASSED
+
+ContextSnapshotTest > equalContextsProduceByteIdenticalPayloads PASSED
+
+ContextSnapshotTest > everySourceKindSurvivesTheCodec PASSED
+
+ContextSnapshotTest > aSchemaVersionThisBuildCannotReadIsRefused PASSED
+
+GenerationCommandTest > versionLookalikesAreRefused PASSED
+
+GenerationCommandTest > aMissingVersionIsRefusedWithThePromptPolicyCode PASSED
+
+GenerationCommandTest > malformedArgumentsAreCallerBugsNotBusinessFailures PASSED
+
+GenerationCommandTest > theVersionIsPinnedWithoutReformatting PASSED
+
+GenerationCommandTest > aCallerBugIsReportedBeforeTheVersionDecision PASSED
+
+GenerationCommandTest > aCommandPinsTheVersionOfItsDeclaredPurpose PASSED
+
+GenerationCommandTest > aVersionOwnedByAnotherPurposeIsRefused PASSED
+
+GenerationCommandTest > theDescriptionNamesThePinAndCarriesNoPromptText PASSED
+
+GenerationCommandTest > thePinnedVersionIsFinal PASSED
+
+GenerationOperationTest > thePinnedVersionCannotBeRewrittenForTheLifeOfTheOperation PASSED
+
+GenerationOperationTest > aNullDeltaIsACallerBug PASSED
+
+GenerationOperationTest > reachingStableDirectlyIsRefusedBecauseStabilizeOwnsThatMove PASSED
+
+GenerationOperationTest > aLateReasoningDeltaIsAppendedWithoutSteppingBack PASSED
+
+GenerationOperationTest > aThinkingDisabledAttemptStabilizesWithEmptyReasoning PASSED
+
+GenerationOperationTest > stabilizeCopiesTheBuffersAndThePinnedVersionVerbatim PASSED
+
+GenerationOperationTest > anEmptyDeltaIsAcceptedWithoutOpeningAChannel PASSED
+
+GenerationOperationTest > anInterruptedAttemptBehavesLikeAFailedOne PASSED
+
+GenerationOperationTest > illegalTransitionsAreReportedAsDomainErrors PASSED
+
+GenerationOperationTest > aBadRevisionNumberIsRefusedByTheRevisionItself PASSED
+
+GenerationOperationTest > aFailedAttemptRejectsLateCallbacksAndCannotBeStabilized PASSED
+
+GenerationOperationTest > stabilizeRequiresANonEmptyAnswer PASSED
+
+GenerationOperationTest > aNullTransitionTargetIsACallerBugNotABusinessFailure PASSED
+
+GenerationOperationTest > aDeltaThatArrivedBeforeStreamingIsRefused PASSED
+
+GenerationOperationTest > anOperationInheritsThePinnedVersionAndIdentityFromItsCommand PASSED
+
+GenerationOperationTest > anAnswerDeltaMovesSubmittingStraightIntoTheAnswerPhase PASSED
+
+GenerationOperationTest > aSecondStabilizationIsRefused PASSED
+
+GenerationOperationTest > aCallerBugIsReportedBeforeTheAttemptStateIsConsulted PASSED
+
+GenerationOperationTest > theOperationDescriptionNamesTheStateAndTheBuffers PASSED
+
+GenerationOperationTest > aReasoningDeltaOpensTheReasoningPhase PASSED
+
+GenerationStateTest > theDerivedPredicatesCoverEveryState PASSED
+
+GenerationStateTest > legalTransitionReturnsTheNextState PASSED
+
+GenerationStateTest > happyPathTransitionsAreLegal PASSED
+
+GenerationStateTest > anyUnfinishedStateCanFailBeInterruptedOrBeCanceled PASSED
+
+GenerationStateTest > everyRecoverableStateMapsToExactlyOneTerminalTarget PASSED
+
+GenerationStateTest > terminalStatesHaveNoRecoveryTarget PASSED
+
+GenerationStateTest > skippingForwardIsRefused PASSED
+
+GenerationStateTest > processRecoveryCoversEveryStateThatCannotSurviveARestart PASSED
+
+GenerationStateTest > illegalTransitionIsReportedAsADomainError PASSED
+
+GenerationStateTest > lateCallbackOnATerminalStateIsReportedAsADomainError PASSED
+
+GenerationStateTest > aNullTransitionTargetIsACallerBugNotABusinessFailure PASSED
+
+GenerationStateTest > onlyStableCountsAsStable PASSED
+
+GenerationStateTest > movingBackwardsIsRefused PASSED
+
+GenerationStateTest > onlyFailedAndInterruptedAreRetryableInPlace PASSED
+
+GenerationStateTest > aReasoningPhaseThatProducedNoAnswerCannotBecomeStable PASSED
+
+GenerationStateTest > terminalStatesNeverChangeAgain PASSED
+
+GuardTest > newIdProducesCanonicalDistinctUuids PASSED
+
+GuardTest > objectChecksAcceptEnumsAndValueObjectsAndRefuseNull PASSED
+
+GuardTest > canonicalUuidStringsAreAccepted PASSED
+
+GuardTest > countersRefuseNegativeValues PASSED
+
+GuardTest > nullAndEmptyIdentifiersAreRefused PASSED
+
+GuardTest > nonCanonicalSpellingsOfAValidUuidAreRefused PASSED
+
+MessageTest > restoreKeepsTheRoleAndContentRules PASSED
+
+MessageTest > aUserPositionCarriesNoRevisionAndNoAttempt PASSED
+
+MessageTest > endingTheAttemptInTheSameTransactionThenAllowsTheSwitch PASSED
+
+MessageTest > blankLearnerTextIsRefused PASSED
+
+MessageTest > learnerTextIsFinalAndThePositionExposesNoSetter PASSED
+
+MessageTest > clearingAFailedAttemptKeepsTheDisplayedRevision PASSED
+
+MessageTest > activatingANewRevisionSwitchesTheDisplayedVersion PASSED
+
+MessageTest > aStableRevisionCannotBeAttachedToALearnerPosition PASSED
+
+MessageTest > aSecondAttemptAtTheSamePositionIsRefusedWhileOneIsRunning PASSED
+
+MessageTest > ordinalIsBranchLocalAndNonNegative PASSED
+
+MessageTest > theDisplayedRevisionCannotBeSwitchedWhileAnAttemptIsRunning PASSED
+
+MessageTest > anAttemptCannotBeBoundToALearnerPosition PASSED
+
+MessageTest > reactivatingTheSameRevisionIsRefused PASSED
+
+MessageTest > anAiPositionCannotBeGivenLearnerText PASSED
+
+MessageTest > restoreCarriesTheActiveReferencesNoCreationPathCouldProduce PASSED
+
+PromptPurposeTest > everyPurposeOwnsItsDocumentedVersion PASSED
+
+PromptPurposeTest > theEnumMatchesTheAuthoritativeFirstReleaseListExactly PASSED
+
+PromptPurposeTest > thePrefixDirectionIsTheExactReverseOfTheVersionDirection PASSED
+
+PromptPurposeTest > theDeclarationOrderMatchesTheDocument PASSED
+
+PromptPurposeTest > aVersionOfAnotherPurposeIsRefused PASSED
+
+PromptPurposeTest > absenceOfAVersionHasOneDefinition PASSED
+
+PromptPurposeTest > theTeachingAnswerPurposeOwnsTheDocumentedVersion PASSED
+
+PromptPurposeTest > aCanonicalSemverSuffixIsAccepted PASSED
+
+PromptPurposeTest > everyPrefixIsUnambiguous PASSED
+
+PromptPurposeTest > theVersionDecisionIsExpressedAsADomainError PASSED
+
+PromptPurposeTest > aNonSemverSuffixIsRefused PASSED
+
+PromptPurposeTest > thereIsNoSeparateKeyPointsPurpose PASSED
+
+PromptSpecTest > aMissingBodyOrPurposeIsACallerBug PASSED
+
+PromptSpecTest > theVersionDecisionIsTheSameOneGenerationCommandMakes PASSED
+
+PromptSpecTest > aVersionOwnedByAnotherPurposeIsReportedAsAMismatch PASSED
+
+PromptSpecTest > aSpecCarriesItsPurposeVersionAndBody PASSED
+
+PromptSpecTest > aBlankSystemContentIsRefused PASSED
+
+PromptSpecTest > aBlankVersionIsReportedAsTheMissingPolicyCode PASSED
+
+PromptSpecTest > theSpecHasNoProviderSpecificField PASSED
+
+PromptSpecTest > theDescriptionNeverCarriesThePromptBody PASSED
+
+TopicTest > anUpdateMustNotPredateCreation PASSED
+
+TopicTest > malformedIdentifiersAreRefusedAtConstruction PASSED
+
+TopicTest > visitingABranchKeepsIdentityAndCreationTime PASSED
+
+TopicTest > aFreshTopicHasNotBeenVisitedYet PASSED
+
+TopicTest > timestampsAreUtcEpochMillisAndNeverNegative PASSED
+
+TopicTest > aTopicCarriesNoNameOfItsOwn PASSED
+
+> Task :tree-layout:compileJava
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes
+> Task :tree-layout:compileTestJava
+> Task :tree-layout:processTestResources NO-SOURCE
+> Task :tree-layout:testClasses
+
+> Task :tree-layout:test
+
+TreeLayoutGeometryTest > segmentLengthUsesRoundsDepthDecayAndTheCap PASSED
+
+TreeLayoutGeometryTest > siblingsFanOutByLeafWeightAndSproutAlongTheirParent PASSED
+
+TreeLayoutGeometryTest > emptySnapshotProducesAnEmptyFiniteResult PASSED
+
+TreeLayoutGeometryTest > rootIsATrunkGrowingStraightUpWithRoundDerivedLength PASSED
+
+TreeLayoutGeometryTest > collapsedBranchWithoutVisibleChildrenIsStillALeaf PASSED
+
+TreeLayoutGeometryTest > snapshotChildrenKeepTheirInputOrder PASSED
+
+TreeLayoutGeometryTest > singleNodeTreeIsOneLeafAndKeepsTheSoilBand PASSED
+
+TreeLayoutGeometryTest > currentPathIsFlaggedAndFallsBackToTheRootWhenTargetIsNotVisible PASSED
+
+TreeLayoutGeometryTest > deepChainStaysFinite PASSED
+
+TreeLayoutGeometryTest > sameInputProducesBitIdenticalOutput PASSED
+
+TreeLayoutGeometryTest > collapsedBranchCountsHiddenDescendantsAndTheirUnread PASSED
+
+TreeLayoutGeometryTest > branchWithOnlyArchivedChildrenBecomesALeaf PASSED
+
+TreeLayoutGeometryTest > largeTreeStaysFiniteAndReportsItsSize PASSED
+
+TreeLayoutGeometryTest > archivedSubtreesLeaveTheDefaultLayout PASSED
+
+TreeLayoutGeometryTest > childOrderFollowsTheSnapshotOrder PASSED
+
+TreeLayoutHitFitAnchorTest > screenPointsRoundTripThroughTheFitTransform PASSED
+
+TreeLayoutHitFitAnchorTest > hitTestOutsideEveryRegionReturnsNull PASSED
+
+TreeLayoutHitFitAnchorTest > degenerateViewportsStayFinite PASSED
+
+TreeLayoutHitFitAnchorTest > collapseNeverMovesTheSurvivingNodes PASSED
+
+TreeLayoutHitFitAnchorTest > archivingASiblingReportsTheExactAnchorShift PASSED
+
+TreeLayoutHitFitAnchorTest > boundsCoverEveryTipBaseAndLabel PASSED
+
+TreeLayoutHitFitAnchorTest > everyVisibleNodeIsHittableAtItsOwnAnchor PASSED
+
+TreeLayoutHitFitAnchorTest > viewTransformRefusesANonPositiveScale PASSED
+
+TreeLayoutHitFitAnchorTest > fitKeepsTheTreeInsideTheViewportAndAlignsTheBottom PASSED
+
+TreeLayoutHitFitAnchorTest > hitTestAtALabelCentreReturnsTheLabeledBranch PASSED
+
+TreeLayoutHitFitAnchorTest > viewportRefusesNegativeOrZeroTouchTarget PASSED
+
+TreeLayoutLabelTest > midDensityPlacesOneBarLabelPerLeafAtTheMeasuredPosition PASSED
+
+TreeLayoutLabelTest > crowdedBarOmitsLabelsButKeepsEveryNodeHittable PASSED
+
+TreeLayoutLabelTest > farDensityPlacesNoLabelsAndKeepsEveryNodeHittable PASSED
+
+TreeLayoutLabelTest > nearDensityAddsTheSummaryLineOnlyWhenTheBranchHasOne PASSED
+
+TreeLayoutLabelTest > canopyBarSitsEntirelyAboveTheCrownAndAboveEveryLeafBox PASSED
+
+TreeLayoutLabelTest > currentBranchLeafTakesTheFirstRow PASSED
+
+TreeLayoutLabelTest > barLabelsNeverOverlapAndNeverCoverALeaf PASSED
+
+TreeLayoutLabelTest > densityIsDerivedFromTheZoomScale PASSED
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 24s
+6 actionable tasks: 6 executed
+EXITCODE=0 (BUILD SUCCESSFUL in 24s, 6 actionable tasks: 6 executed)
+# Judgement lines read back from the JUnit XML written by this run:
+core total tests=154 failures+errors=0 (was 132 at 20:17; other lanes added cases since)
+tree-layout total tests=34 failures+errors=0
+
+# --- final state check of the judged command (2026-09-21T20:25:44.2703575+08:00) ---
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:compileTestJava UP-TO-DATE
+> Task :tree-layout:processTestResources NO-SOURCE
+> Task :tree-layout:testClasses UP-TO-DATE
+> Task :tree-layout:test UP-TO-DATE
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 12s
+3 actionable tasks: 3 up-to-date
+EXITCODE=0

@@ -1,0 +1,8 @@
+# Chat stream UI fix
+# symptom: after send, ChatPresenter rendered the first GENERATING snapshot but never re-read after
+# GenerationCoordinator persisted deltas/terminal state.
+# fix: accepted sends start a daemon poller (750ms interval, 180s deadline); each read stops polling
+# once no message is generating. Derived artifact reads are now asynchronous and de-duplicated per branch.
+# verification: :app:testDebugUnitTest PASS; gradlew check PASS; latest signed release installed on
+# AWSS013807000356 and MainActivity process observed alive.
+# EXITCODE=0

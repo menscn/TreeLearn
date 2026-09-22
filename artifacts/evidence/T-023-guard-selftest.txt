@@ -1,0 +1,130 @@
+Generated: 2026-09-21T10:32:56Z
+Working dir: D:/Project/Android/Treelearn
+Command  : powershell -NoProfile -ExecutionPolicy Bypass -File D:/Project/Android/Treelearn/android/scripts/dev/guard-selftest.ps1
+
+=== Treelearn Java-only guard self-test ===
+Generated : 2026-09-21T18:32:57+08:00
+Command   : powershell -NoProfile -ExecutionPolicy Bypass -File D:\Project\Android\Treelearn\android\scripts\dev\guard-selftest.ps1
+Guard     : D:\Project\Android\Treelearn\android\scripts\no-kotlin-check.ps1  [SHA-256 5F3FDB52F9EF8E6F0B20D016065A06F4A925F18353B5DE1AFC28D6277C7A3C32 lines 692]
+Library   : D:\Project\Android\Treelearn\android\scripts\lib\evidence-integrity.ps1  [SHA-256 DD2E4A55A6641D949C735AFDDBCE1A6D8654BD158F07119E59099786CA65B426 lines 169]
+
+CASE 0  untouched copy
+  scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+  OK       untouched copy => PASS (expected 0, got 0)
+CASE 1  slashy string swallowing following lines (round-3 bypass)
+  scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+  OK       slashy + releaseImplementation kotlin => FAIL (expected 1, got 1)
+CASE 2  slashy string + Kotlin Gradle plugin
+  scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+  OK       slashy + id("kotlin") plugin => FAIL (expected 1, got 1)
+CASE 3  injection matrix (each must be caught by the static stage)
+  scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+  OK       injected implementation => FAIL (expected 1, got 1)
+  scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+  OK       injected compileOnly => FAIL (expected 1, got 1)
+  scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+  OK       injected androidTestImpl => FAIL (expected 1, got 1)
+  scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+  OK       injected kapt plugin => FAIL (expected 1, got 1)
+  scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+  OK       injected kapt block => FAIL (expected 1, got 1)
+  scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+  OK       injected ksp plugin => FAIL (expected 1, got 1)
+  scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+  OK       injected kotlinOptions => FAIL (expected 1, got 1)
+  scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+  OK       injected kotlin.ext => FAIL (expected 1, got 1)
+  scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+  OK       injected kotlinVersion => FAIL (expected 1, got 1)
+  scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+  OK       injected libs.plugins => FAIL (expected 1, got 1)
+  scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+  OK       injected code.style => FAIL (expected 1, got 1)
+  scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+  OK       injected -ktx artifact => FAIL (expected 1, got 1)
+CASE 4  legitimate patterns (must NOT fail the static stage)
+  scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+  OK       legitimate exclude kotlin group => no problem (expected 2, got 2)
+  scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+  OK       legitimate line comment => no problem (expected 2, got 2)
+  scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+  OK       legitimate plain java dep => no problem (expected 2, got 2)
+CASE 5  lexer desync (fail-closed measure 1)
+  scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+  OK       unterminated comment => FAIL (expected 1, got 1)
+CASE 6  dollar-slashy hiding a compileOnly coordinate (round-5 fix)
+  scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+  OK       dollar-slashy + compileOnly => FAIL (expected 1, got 1)
+CASE 7  GString coordinate on compileOnly (round-5 fix: stage 3 pattern)
+  scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+  OK       GString compileOnly kotlin => FAIL (stage 3) (expected 1, got 1)
+CASE 8  Kotlin-carrying APK under a non-standard directory (round-5 fix: stage 3b)
+  scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+  OK       Kotlin-carrying APK in app/build/outputs/apk/staging => FAIL (expected 1, got 1)
+CASE 9  evidence-integrity assertions (must fire, and must not misfire)
+  OK       guard imports the shared evidence-integrity library (else CASE 9/10 test a copy)
+  OK       unreplaced {0}/{1} placeholders are detected
+  OK       fully substituted OK line is not flagged
+  OK       -f binds tighter than + (measured: [a{0}b3])
+CASE 10  dex-stage evidence must exist and must be non-empty (round-6 fix: stage 3b)
+  OK       exit 0 with zero judgement lines => FAIL (task up-to-date/skipped)
+  OK       per-APK lines but no final PASS verdict => FAIL
+  OK       PASS over 0 APK(s) => FAIL (stale discovery pattern)
+  OK       PASS line without an APK count => FAIL (scale not auditable)
+  OK       child exit 1 => FAIL even with judgement output
+  OK       judgement lines + PASS (3 APK(s)) => no problem
+  OK       APK count is parsed for the OK line (measured: 3)
+  OK       an Out-String blob yields 5 judgement line(s), not 1
+  OK       array shape and Out-String shape agree on the problem count
+  OK       array shape and Out-String shape agree on the parsed APK count
+  OK       the placeholder check also reads a blob line by line
+CASE 11  parse gate: the guard, which stage 0 excludes by design
+  OK       the guard parses (0 error(s))
+  OK       the guard ran its sibling parse gate (CASE 0 output shows it)
+  OK       the sibling parse gate reported a non-zero script count
+
+======================================================================
+SELFTEST SUMMARY
+  PASS untouched copy => PASS
+  PASS slashy + releaseImplementation kotlin => FAIL
+  PASS slashy + id("kotlin") plugin => FAIL
+  PASS injected implementation => FAIL
+  PASS injected compileOnly => FAIL
+  PASS injected androidTestImpl => FAIL
+  PASS injected kapt plugin => FAIL
+  PASS injected kapt block => FAIL
+  PASS injected ksp plugin => FAIL
+  PASS injected kotlinOptions => FAIL
+  PASS injected kotlin.ext => FAIL
+  PASS injected kotlinVersion => FAIL
+  PASS injected libs.plugins => FAIL
+  PASS injected code.style => FAIL
+  PASS injected -ktx artifact => FAIL
+  PASS legitimate exclude kotlin group => no problem
+  PASS legitimate line comment => no problem
+  PASS legitimate plain java dep => no problem
+  PASS unterminated comment => FAIL
+  PASS dollar-slashy + compileOnly => FAIL
+  PASS GString compileOnly kotlin => FAIL (stage 3)
+  PASS Kotlin-carrying APK in app/build/outputs/apk/staging => FAIL
+  PASS guard imports the shared evidence-integrity library (else CASE 9/10 test a copy)
+  PASS unreplaced {0}/{1} placeholders are detected
+  PASS fully substituted OK line is not flagged
+  PASS -f binds tighter than + (measured: [a{0}b3])
+  PASS exit 0 with zero judgement lines => FAIL (task up-to-date/skipped)
+  PASS per-APK lines but no final PASS verdict => FAIL
+  PASS PASS over 0 APK(s) => FAIL (stale discovery pattern)
+  PASS PASS line without an APK count => FAIL (scale not auditable)
+  PASS child exit 1 => FAIL even with judgement output
+  PASS judgement lines + PASS (3 APK(s)) => no problem
+  PASS APK count is parsed for the OK line (measured: 3)
+  PASS an Out-String blob yields 5 judgement line(s), not 1
+  PASS array shape and Out-String shape agree on the problem count
+  PASS array shape and Out-String shape agree on the parsed APK count
+  PASS the placeholder check also reads a blob line by line
+  PASS the guard parses (0 error(s))
+  PASS the guard ran its sibling parse gate (CASE 0 output shows it)
+  PASS the sibling parse gate reported a non-zero script count
+OVERALL = SELFTEST PASS (40 case(s))
+
+EXITCODE=0

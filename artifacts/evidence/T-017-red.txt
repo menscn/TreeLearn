@@ -1,0 +1,912 @@
+# T-017 RED — failing test first (tree canvas + tablet UI)
+TIMESTAMP: 2026-09-21 22:41:42
+COMMAND: cd android; .\gradlew.bat :app:testDebugUnitTest --no-daemon --console=plain
+MODE: RED (production sources for T-017 absent; the five T-017 test sources present)
+TREE: %TEMP%\t017 (scratch copy outside the repo, so the shared tree stays compilable)
+WHY: RED is measured in a scratch copy because a compile-only RED measured in the shared
+     tree would leave the repository unbuildable for every sibling lane.
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava FROM-CACHE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar
+> Task :tree-layout:compileJava FROM-CACHE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues FROM-CACHE
+> Task :ai:generateDebugResources FROM-CACHE
+> Task :ai:packageDebugResources FROM-CACHE
+> Task :ai:processDebugNavigationResources FROM-CACHE
+> Task :ai:parseDebugLocalResources FROM-CACHE
+> Task :ai:generateDebugRFile FROM-CACHE
+> Task :ai:javaPreCompileDebug FROM-CACHE
+> Task :ai:compileDebugJavaWithJavac FROM-CACHE
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug FROM-CACHE
+> Task :ai:compileDebugLibraryResources FROM-CACHE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :ai:writeDebugAarMetadata
+> Task :data:writeDebugAarMetadata
+> Task :data:processDebugNavigationResources FROM-CACHE
+> Task :app:checkDebugAarMetadata
+> Task :ai:bundleLibRuntimeToJarDebug
+> Task :ai:bundleLibCompileToJarDebug
+> Task :app:processDebugNavigationResources FROM-CACHE
+> Task :app:compileDebugNavigationResources FROM-CACHE
+> Task :app:generateDebugResValues FROM-CACHE
+> Task :data:generateDebugResValues FROM-CACHE
+> Task :data:generateDebugResources FROM-CACHE
+> Task :data:packageDebugResources FROM-CACHE
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources FROM-CACHE
+> Task :app:mergeDebugResources FROM-CACHE
+> Task :app:packageDebugResources FROM-CACHE
+> Task :app:parseDebugLocalResources FROM-CACHE
+> Task :app:createDebugCompatibleScreenManifests
+> Task :ai:extractDeepLinksDebug FROM-CACHE
+> Task :ai:processDebugManifest FROM-CACHE
+> Task :app:extractDeepLinksDebug FROM-CACHE
+> Task :data:extractDeepLinksDebug FROM-CACHE
+> Task :data:processDebugManifest FROM-CACHE
+> Task :app:processDebugMainManifest FROM-CACHE
+> Task :app:processDebugManifest FROM-CACHE
+> Task :app:processDebugManifestForPackage FROM-CACHE
+> Task :data:compileDebugLibraryResources FROM-CACHE
+> Task :data:parseDebugLocalResources FROM-CACHE
+> Task :data:generateDebugRFile FROM-CACHE
+> Task :app:processDebugResources FROM-CACHE
+> Task :data:javaPreCompileDebug FROM-CACHE
+> Task :data:compileDebugJavaWithJavac FROM-CACHE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest FROM-CACHE
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes NO-SOURCE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :data:bundleLibRuntimeToJarDebug
+> Task :data:bundleLibCompileToJarDebug
+> Task :app:compileDebugJavaWithJavac FROM-CACHE
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
+
+> Task :app:compileDebugUnitTestJavaWithJavac FAILED
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:85: 错误: 找不到符号
+    static final class FakeData implements TreeCanvasData {
+                                           ^
+  符号:   类 TreeCanvasData
+  位置: 类 TreeCanvasDoubles
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:146: 错误: 找不到符号
+    static final class FakeSink implements TreeCanvasSink {
+                                           ^
+  符号:   类 TreeCanvasSink
+  位置: 类 TreeCanvasDoubles
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:121: 错误: 找不到符号
+    static final class FakeCommands implements TreeCanvasCommands {
+                                               ^
+  符号:   类 TreeCanvasCommands
+  位置: 类 TreeCanvasDoubles
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:205: 错误: 找不到符号
+    static TreeCanvasPresenter presenterOf(FakeSink sink, FakeData data, FakeCommands commands,
+           ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasDoubles
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:148: 错误: 找不到符号
+        TreeCanvasViewState last;
+        ^
+  符号:   类 TreeCanvasViewState
+  位置: 类 FakeSink
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:154: 错误: 找不到符号
+        public void render(TreeCanvasViewState state) {
+                           ^
+  符号:   类 TreeCanvasViewState
+  位置: 类 FakeSink
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:104: 错误: 找不到符号
+        public Tree load(String topicId) {
+               ^
+  符号:   类 Tree
+  位置: 类 FakeData
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:34: 错误: 找不到符号
+    private TreeCanvasPresenter started() {
+            ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasGeometryTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasLabelsTest.java:32: 错误: 找不到符号
+    private TreeCanvasPresenter started() {
+            ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasLabelsTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasLabelsTest.java:40: 错误: 找不到符号
+    private void zoomTo(TreeCanvasPresenter presenter, Density wanted) {
+                        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasLabelsTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:48: 错误: 找不到符号
+    private TreeCanvasPresenter phone(String branchId) {
+            ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasPresenterTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:147: 错误: 找不到符号
+    private static void assertSameFrame(TreeCanvasViewState expected, TreeCanvasViewState actual) {
+                                        ^
+  符号:   类 TreeCanvasViewState
+  位置: 类 TreeCanvasViewStateTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:147: 错误: 找不到符号
+    private static void assertSameFrame(TreeCanvasViewState expected, TreeCanvasViewState actual) {
+                                                                      ^
+  符号:   类 TreeCanvasViewState
+  位置: 类 TreeCanvasViewStateTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:95: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:103: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:109: 错误: 找不到符号
+            List<Row> rows = new ArrayList<>();
+                 ^
+  符号:   类 Row
+  位置: 类 FakeData
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:113: 错误: 找不到符号
+                rows.add(new Row(branch, summary == null ? "" : summary,
+                             ^
+  符号:   类 Row
+  位置: 类 FakeData
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:116: 错误: 找不到符号
+            return new Tree(topicId, rows);
+                       ^
+  符号:   类 Tree
+  位置: 类 FakeData
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:131: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:153: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:159: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:164: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:207: 错误: 找不到符号
+        return new TreeCanvasPresenter(sink, new InlineUi(), new DirectExecutor(), data, commands,
+                   ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasDoubles
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:35: 错误: 找不到符号
+        TreeCanvasPresenter presenter = TreeCanvasDoubles.presenterOf(sink, data, commands,
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasGeometryTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:59: 错误: 找不到符号
+        TreeCanvasPresenter presenter = started();
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasGeometryTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:120: 错误: 找不到符号
+        TreeCanvasPresenter presenter = started();
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasGeometryTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:138: 错误: 找不到符号
+        TreeCanvasPresenter presenter = started();
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasGeometryTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:162: 错误: 找不到符号
+        TreeCanvasPresenter presenter = started();
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasGeometryTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:176: 错误: 找不到符号
+        PopupPlacement popup = PopupPlacement.place("b", 500f, 400f, 200f, 100f, 1000f, 800f);
+        ^
+  符号:   类 PopupPlacement
+  位置: 类 TreeCanvasGeometryTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:176: 错误: 找不到符号
+        PopupPlacement popup = PopupPlacement.place("b", 500f, 400f, 200f, 100f, 1000f, 800f);
+                               ^
+  符号:   变量 PopupPlacement
+  位置: 类 TreeCanvasGeometryTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:177: 错误: 找不到符号
+        assertEquals(400f - 100f - PopupPlacement.MARGIN, popup.y, EPS);
+                                   ^
+  符号:   变量 PopupPlacement
+  位置: 类 TreeCanvasGeometryTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:186: 错误: 找不到符号
+        PopupPlacement popup = PopupPlacement.place("b", 500f, 50f, 200f, 100f, 1000f, 800f);
+        ^
+  符号:   类 PopupPlacement
+  位置: 类 TreeCanvasGeometryTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:186: 错误: 找不到符号
+        PopupPlacement popup = PopupPlacement.place("b", 500f, 50f, 200f, 100f, 1000f, 800f);
+                               ^
+  符号:   变量 PopupPlacement
+  位置: 类 TreeCanvasGeometryTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:188: 错误: 找不到符号
+        assertEquals(50f + PopupPlacement.MARGIN, popup.y, EPS);
+                           ^
+  符号:   变量 PopupPlacement
+  位置: 类 TreeCanvasGeometryTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:194: 错误: 找不到符号
+        PopupPlacement right = PopupPlacement.place("b", 990f, 400f, 200f, 100f, 1000f, 800f);
+        ^
+  符号:   类 PopupPlacement
+  位置: 类 TreeCanvasGeometryTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:194: 错误: 找不到符号
+        PopupPlacement right = PopupPlacement.place("b", 990f, 400f, 200f, 100f, 1000f, 800f);
+                               ^
+  符号:   变量 PopupPlacement
+  位置: 类 TreeCanvasGeometryTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:197: 错误: 找不到符号
+        assertEquals(1000f - 200f - PopupPlacement.MARGIN, right.x, EPS);
+                                    ^
+  符号:   变量 PopupPlacement
+  位置: 类 TreeCanvasGeometryTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:202: 错误: 找不到符号
+        PopupPlacement popup = PopupPlacement.place("b", 500f, 400f, 1200f, 100f, 1000f, 800f);
+        ^
+  符号:   类 PopupPlacement
+  位置: 类 TreeCanvasGeometryTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:202: 错误: 找不到符号
+        PopupPlacement popup = PopupPlacement.place("b", 500f, 400f, 1200f, 100f, 1000f, 800f);
+                               ^
+  符号:   变量 PopupPlacement
+  位置: 类 TreeCanvasGeometryTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:203: 错误: 找不到符号
+        assertEquals(PopupPlacement.MARGIN, popup.x, EPS);
+                     ^
+  符号:   变量 PopupPlacement
+  位置: 类 TreeCanvasGeometryTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasLabelsTest.java:33: 错误: 找不到符号
+        TreeCanvasPresenter presenter = TreeCanvasDoubles.presenterOf(sink, data, commands,
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasLabelsTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasLabelsTest.java:60: 错误: 找不到符号
+        TreeCanvasPresenter presenter = started();
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasLabelsTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasLabelsTest.java:75: 错误: 找不到符号
+        TreeCanvasPresenter presenter = started();
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasLabelsTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasLabelsTest.java:87: 错误: 找不到符号
+        TreeCanvasPresenter presenter = started();
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasLabelsTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasLabelsTest.java:104: 错误: 找不到符号
+        TreeCanvasPresenter presenter = started();
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasLabelsTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasLabelsTest.java:129: 错误: 找不到符号
+        TreeCanvasPresenter presenter = started();
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasLabelsTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasLabelsTest.java:141: 错误: 找不到符号
+        TreeCanvasPresenter presenter = started();
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasLabelsTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:55: 错误: 找不到符号
+        TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasPresenterTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:58: 错误: 找不到符号
+        TreeCanvasViewState state = sink.last;
+        ^
+  符号:   类 TreeCanvasViewState
+  位置: 类 TreeCanvasPresenterTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:60: 错误: 程序包TreeCanvasViewState不存在
+        assertEquals(TreeCanvasViewState.Phase.READY, state.phase);
+                                        ^
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:77: 错误: 找不到符号
+        TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.ARCHIVED);
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasPresenterTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:87: 错误: 找不到符号
+        TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.ROOT);
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasPresenterTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:90: 错误: 程序包TreeCanvasViewState不存在
+        assertEquals(TreeCanvasViewState.Phase.EMPTY, sink.last.phase);
+                                        ^
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:98: 错误: 找不到符号
+        TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.ROOT);
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasPresenterTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:101: 错误: 程序包TreeCanvasViewState不存在
+        assertEquals(TreeCanvasViewState.Phase.EMPTY, sink.last.phase);
+                                        ^
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:108: 错误: 找不到符号
+        TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasPresenterTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:116: 错误: 程序包TreeCanvasViewState不存在
+        assertEquals(TreeCanvasViewState.Phase.ERROR, sink.last.phase);
+                                        ^
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:124: 错误: 找不到符号
+        TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasPresenterTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:142: 错误: 找不到符号
+        TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasPresenterTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:164: 错误: 找不到符号
+        TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasPresenterTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:181: 错误: 找不到符号
+        TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasPresenterTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:192: 错误: 程序包TreeCanvasViewState不存在
+                sink.last.phase == TreeCanvasViewState.Phase.ERROR);
+                                                      ^
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:203: 错误: 找不到符号
+        TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasPresenterTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:225: 错误: 找不到符号
+        TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasPresenterTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:243: 错误: 找不到符号
+        TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasPresenterTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:259: 错误: 找不到符号
+        TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasPresenterTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:269: 错误: 找不到符号
+        TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.ROOT);
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasPresenterTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:278: 错误: 找不到符号
+        TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasPresenterTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:293: 错误: 找不到符号
+        TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
+        ^
+  符号:   类 TreeCanvasPresenter
+  位置: 类 TreeCanvasPresenterTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:59: 错误: 找不到符号
+        TreeCanvasViewState state = TreeCanvasViewState.initial(TreeCanvasDoubles.TOPIC,
+        ^
+  符号:   类 TreeCanvasViewState
+  位置: 类 TreeCanvasViewStateTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:59: 错误: 找不到符号
+        TreeCanvasViewState state = TreeCanvasViewState.initial(TreeCanvasDoubles.TOPIC,
+                                    ^
+  符号:   变量 TreeCanvasViewState
+  位置: 类 TreeCanvasViewStateTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:61: 错误: 程序包TreeCanvasViewState不存在
+        assertEquals(TreeCanvasViewState.Phase.LOADING, state.phase);
+                                        ^
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:76: 错误: 找不到符号
+        TreeCanvasViewState state = TreeCanvasViewState.initial(TreeCanvasDoubles.TOPIC, "a", phone())
+        ^
+  符号:   类 TreeCanvasViewState
+  位置: 类 TreeCanvasViewStateTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:76: 错误: 找不到符号
+        TreeCanvasViewState state = TreeCanvasViewState.initial(TreeCanvasDoubles.TOPIC, "a", phone())
+                                    ^
+  符号:   变量 TreeCanvasViewState
+  位置: 类 TreeCanvasViewStateTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:96: 错误: 找不到符号
+        TreeCanvasViewState state = TreeCanvasViewState.initial(TreeCanvasDoubles.TOPIC, "r", phone())
+        ^
+  符号:   类 TreeCanvasViewState
+  位置: 类 TreeCanvasViewStateTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:96: 错误: 找不到符号
+        TreeCanvasViewState state = TreeCanvasViewState.initial(TreeCanvasDoubles.TOPIC, "r", phone())
+                                    ^
+  符号:   变量 TreeCanvasViewState
+  位置: 类 TreeCanvasViewStateTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:107: 错误: 找不到符号
+            TreeCanvasViewState state = TreeCanvasViewState
+            ^
+  符号:   类 TreeCanvasViewState
+  位置: 类 TreeCanvasViewStateTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:107: 错误: 找不到符号
+            TreeCanvasViewState state = TreeCanvasViewState
+                                        ^
+  符号:   变量 TreeCanvasViewState
+  位置: 类 TreeCanvasViewStateTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:117: 错误: 找不到符号
+        TreeCanvasViewState state = TreeCanvasViewState
+        ^
+  符号:   类 TreeCanvasViewState
+  位置: 类 TreeCanvasViewStateTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:120: 错误: 程序包TreeCanvasViewState不存在
+                .withPhase(TreeCanvasViewState.Phase.READY);
+                                              ^
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:117: 错误: 找不到符号
+        TreeCanvasViewState state = TreeCanvasViewState
+                                    ^
+  符号:   变量 TreeCanvasViewState
+  位置: 类 TreeCanvasViewStateTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:122: 错误: 找不到符号
+        TreeCanvasViewState moved = state.withTransform(new ViewTransform(0.5f, 12f, -7f));
+        ^
+  符号:   类 TreeCanvasViewState
+  位置: 类 TreeCanvasViewStateTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:123: 错误: 程序包TreeCanvasViewState不存在
+        assertEquals(TreeCanvasViewState.Phase.READY, moved.phase);
+                                        ^
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:133: 错误: 找不到符号
+        TreeCanvasViewState base = TreeCanvasViewState
+        ^
+  符号:   类 TreeCanvasViewState
+  位置: 类 TreeCanvasViewStateTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:136: 错误: 程序包TreeCanvasViewState不存在
+                .withPhase(TreeCanvasViewState.Phase.READY);
+                                              ^
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:133: 错误: 找不到符号
+        TreeCanvasViewState base = TreeCanvasViewState
+                                   ^
+  符号:   变量 TreeCanvasViewState
+  位置: 类 TreeCanvasViewStateTest
+C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:140: 错误: 找不到符号
+        assertSameFrame(base, base.withPopup(new PopupPlacement("a", 1f, 2f, 3f, 4f, false, false)));
+                                                 ^
+  符号:   类 PopupPlacement
+  位置: 类 TreeCanvasViewStateTest
+87 个错误
+
+[Incubating] Problems report is available at: file:///C:/Users/23745/AppData/Local/Temp/t017/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugUnitTestJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:85: 错误: 找不到符号
+      static final class FakeData implements TreeCanvasData {
+                                             ^
+    符号:   类 TreeCanvasData
+    位置: 类 TreeCanvasDoubles
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:146: 错误: 找不到符号
+      static final class FakeSink implements TreeCanvasSink {
+                                             ^
+    符号:   类 TreeCanvasSink
+    位置: 类 TreeCanvasDoubles
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:121: 错误: 找不到符号
+      static final class FakeCommands implements TreeCanvasCommands {
+                                                 ^
+    符号:   类 TreeCanvasCommands
+    位置: 类 TreeCanvasDoubles
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:205: 错误: 找不到符号
+      static TreeCanvasPresenter presenterOf(FakeSink sink, FakeData data, FakeCommands commands,
+             ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasDoubles
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:148: 错误: 找不到符号
+          TreeCanvasViewState last;
+          ^
+    符号:   类 TreeCanvasViewState
+    位置: 类 FakeSink
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:154: 错误: 找不到符号
+          public void render(TreeCanvasViewState state) {
+                             ^
+    符号:   类 TreeCanvasViewState
+    位置: 类 FakeSink
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:104: 错误: 找不到符号
+          public Tree load(String topicId) {
+                 ^
+    符号:   类 Tree
+    位置: 类 FakeData
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:34: 错误: 找不到符号
+      private TreeCanvasPresenter started() {
+              ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasGeometryTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasLabelsTest.java:32: 错误: 找不到符号
+      private TreeCanvasPresenter started() {
+              ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasLabelsTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasLabelsTest.java:40: 错误: 找不到符号
+      private void zoomTo(TreeCanvasPresenter presenter, Density wanted) {
+                          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasLabelsTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:48: 错误: 找不到符号
+      private TreeCanvasPresenter phone(String branchId) {
+              ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:147: 错误: 找不到符号
+      private static void assertSameFrame(TreeCanvasViewState expected, TreeCanvasViewState actual) {
+                                          ^
+    符号:   类 TreeCanvasViewState
+    位置: 类 TreeCanvasViewStateTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:147: 错误: 找不到符号
+      private static void assertSameFrame(TreeCanvasViewState expected, TreeCanvasViewState actual) {
+                                                                        ^
+    符号:   类 TreeCanvasViewState
+    位置: 类 TreeCanvasViewStateTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:109: 错误: 找不到符号
+              List<Row> rows = new ArrayList<>();
+                   ^
+    符号:   类 Row
+    位置: 类 FakeData
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:113: 错误: 找不到符号
+                  rows.add(new Row(branch, summary == null ? "" : summary,
+                               ^
+    符号:   类 Row
+    位置: 类 FakeData
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:116: 错误: 找不到符号
+              return new Tree(topicId, rows);
+                         ^
+    符号:   类 Tree
+    位置: 类 FakeData
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:207: 错误: 找不到符号
+          return new TreeCanvasPresenter(sink, new InlineUi(), new DirectExecutor(), data, commands,
+                     ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasDoubles
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:35: 错误: 找不到符号
+          TreeCanvasPresenter presenter = TreeCanvasDoubles.presenterOf(sink, data, commands,
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasGeometryTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:59: 错误: 找不到符号
+          TreeCanvasPresenter presenter = started();
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasGeometryTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:120: 错误: 找不到符号
+          TreeCanvasPresenter presenter = started();
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasGeometryTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:138: 错误: 找不到符号
+          TreeCanvasPresenter presenter = started();
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasGeometryTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:162: 错误: 找不到符号
+          TreeCanvasPresenter presenter = started();
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasGeometryTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:176: 错误: 找不到符号
+          PopupPlacement popup = PopupPlacement.place("b", 500f, 400f, 200f, 100f, 1000f, 800f);
+          ^
+    符号:   类 PopupPlacement
+    位置: 类 TreeCanvasGeometryTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:176: 错误: 找不到符号
+          PopupPlacement popup = PopupPlacement.place("b", 500f, 400f, 200f, 100f, 1000f, 800f);
+                                 ^
+    符号:   变量 PopupPlacement
+    位置: 类 TreeCanvasGeometryTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:177: 错误: 找不到符号
+          assertEquals(400f - 100f - PopupPlacement.MARGIN, popup.y, EPS);
+                                     ^
+    符号:   变量 PopupPlacement
+    位置: 类 TreeCanvasGeometryTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:186: 错误: 找不到符号
+          PopupPlacement popup = PopupPlacement.place("b", 500f, 50f, 200f, 100f, 1000f, 800f);
+          ^
+    符号:   类 PopupPlacement
+    位置: 类 TreeCanvasGeometryTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:186: 错误: 找不到符号
+          PopupPlacement popup = PopupPlacement.place("b", 500f, 50f, 200f, 100f, 1000f, 800f);
+                                 ^
+    符号:   变量 PopupPlacement
+    位置: 类 TreeCanvasGeometryTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:188: 错误: 找不到符号
+          assertEquals(50f + PopupPlacement.MARGIN, popup.y, EPS);
+                             ^
+    符号:   变量 PopupPlacement
+    位置: 类 TreeCanvasGeometryTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:194: 错误: 找不到符号
+          PopupPlacement right = PopupPlacement.place("b", 990f, 400f, 200f, 100f, 1000f, 800f);
+          ^
+    符号:   类 PopupPlacement
+    位置: 类 TreeCanvasGeometryTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:194: 错误: 找不到符号
+          PopupPlacement right = PopupPlacement.place("b", 990f, 400f, 200f, 100f, 1000f, 800f);
+                                 ^
+    符号:   变量 PopupPlacement
+    位置: 类 TreeCanvasGeometryTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:197: 错误: 找不到符号
+          assertEquals(1000f - 200f - PopupPlacement.MARGIN, right.x, EPS);
+                                      ^
+    符号:   变量 PopupPlacement
+    位置: 类 TreeCanvasGeometryTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:202: 错误: 找不到符号
+          PopupPlacement popup = PopupPlacement.place("b", 500f, 400f, 1200f, 100f, 1000f, 800f);
+          ^
+    符号:   类 PopupPlacement
+    位置: 类 TreeCanvasGeometryTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:202: 错误: 找不到符号
+          PopupPlacement popup = PopupPlacement.place("b", 500f, 400f, 1200f, 100f, 1000f, 800f);
+                                 ^
+    符号:   变量 PopupPlacement
+    位置: 类 TreeCanvasGeometryTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasGeometryTest.java:203: 错误: 找不到符号
+          assertEquals(PopupPlacement.MARGIN, popup.x, EPS);
+                       ^
+    符号:   变量 PopupPlacement
+    位置: 类 TreeCanvasGeometryTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasLabelsTest.java:33: 错误: 找不到符号
+          TreeCanvasPresenter presenter = TreeCanvasDoubles.presenterOf(sink, data, commands,
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasLabelsTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasLabelsTest.java:60: 错误: 找不到符号
+          TreeCanvasPresenter presenter = started();
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasLabelsTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasLabelsTest.java:75: 错误: 找不到符号
+          TreeCanvasPresenter presenter = started();
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasLabelsTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasLabelsTest.java:87: 错误: 找不到符号
+          TreeCanvasPresenter presenter = started();
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasLabelsTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasLabelsTest.java:104: 错误: 找不到符号
+          TreeCanvasPresenter presenter = started();
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasLabelsTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasLabelsTest.java:129: 错误: 找不到符号
+          TreeCanvasPresenter presenter = started();
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasLabelsTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasLabelsTest.java:141: 错误: 找不到符号
+          TreeCanvasPresenter presenter = started();
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasLabelsTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:55: 错误: 找不到符号
+          TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:58: 错误: 找不到符号
+          TreeCanvasViewState state = sink.last;
+          ^
+    符号:   类 TreeCanvasViewState
+    位置: 类 TreeCanvasPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:77: 错误: 找不到符号
+          TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.ARCHIVED);
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:87: 错误: 找不到符号
+          TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.ROOT);
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:98: 错误: 找不到符号
+          TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.ROOT);
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:108: 错误: 找不到符号
+          TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:124: 错误: 找不到符号
+          TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:142: 错误: 找不到符号
+          TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:164: 错误: 找不到符号
+          TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:181: 错误: 找不到符号
+          TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:203: 错误: 找不到符号
+          TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:225: 错误: 找不到符号
+          TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:243: 错误: 找不到符号
+          TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:259: 错误: 找不到符号
+          TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:269: 错误: 找不到符号
+          TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.ROOT);
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:278: 错误: 找不到符号
+          TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:293: 错误: 找不到符号
+          TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
+          ^
+    符号:   类 TreeCanvasPresenter
+    位置: 类 TreeCanvasPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:59: 错误: 找不到符号
+          TreeCanvasViewState state = TreeCanvasViewState.initial(TreeCanvasDoubles.TOPIC,
+          ^
+    符号:   类 TreeCanvasViewState
+    位置: 类 TreeCanvasViewStateTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:59: 错误: 找不到符号
+          TreeCanvasViewState state = TreeCanvasViewState.initial(TreeCanvasDoubles.TOPIC,
+                                      ^
+    符号:   变量 TreeCanvasViewState
+    位置: 类 TreeCanvasViewStateTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:76: 错误: 找不到符号
+          TreeCanvasViewState state = TreeCanvasViewState.initial(TreeCanvasDoubles.TOPIC, "a", phone())
+          ^
+    符号:   类 TreeCanvasViewState
+    位置: 类 TreeCanvasViewStateTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:76: 错误: 找不到符号
+          TreeCanvasViewState state = TreeCanvasViewState.initial(TreeCanvasDoubles.TOPIC, "a", phone())
+                                      ^
+    符号:   变量 TreeCanvasViewState
+    位置: 类 TreeCanvasViewStateTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:96: 错误: 找不到符号
+          TreeCanvasViewState state = TreeCanvasViewState.initial(TreeCanvasDoubles.TOPIC, "r", phone())
+          ^
+    符号:   类 TreeCanvasViewState
+    位置: 类 TreeCanvasViewStateTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:96: 错误: 找不到符号
+          TreeCanvasViewState state = TreeCanvasViewState.initial(TreeCanvasDoubles.TOPIC, "r", phone())
+                                      ^
+    符号:   变量 TreeCanvasViewState
+    位置: 类 TreeCanvasViewStateTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:107: 错误: 找不到符号
+              TreeCanvasViewState state = TreeCanvasViewState
+              ^
+    符号:   类 TreeCanvasViewState
+    位置: 类 TreeCanvasViewStateTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:107: 错误: 找不到符号
+              TreeCanvasViewState state = TreeCanvasViewState
+                                          ^
+    符号:   变量 TreeCanvasViewState
+    位置: 类 TreeCanvasViewStateTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:117: 错误: 找不到符号
+          TreeCanvasViewState state = TreeCanvasViewState
+          ^
+    符号:   类 TreeCanvasViewState
+    位置: 类 TreeCanvasViewStateTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:117: 错误: 找不到符号
+          TreeCanvasViewState state = TreeCanvasViewState
+                                      ^
+    符号:   变量 TreeCanvasViewState
+    位置: 类 TreeCanvasViewStateTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:122: 错误: 找不到符号
+          TreeCanvasViewState moved = state.withTransform(new ViewTransform(0.5f, 12f, -7f));
+          ^
+    符号:   类 TreeCanvasViewState
+    位置: 类 TreeCanvasViewStateTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:133: 错误: 找不到符号
+          TreeCanvasViewState base = TreeCanvasViewState
+          ^
+    符号:   类 TreeCanvasViewState
+    位置: 类 TreeCanvasViewStateTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:133: 错误: 找不到符号
+          TreeCanvasViewState base = TreeCanvasViewState
+                                     ^
+    符号:   变量 TreeCanvasViewState
+    位置: 类 TreeCanvasViewStateTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:140: 错误: 找不到符号
+          assertSameFrame(base, base.withPopup(new PopupPlacement("a", 1f, 2f, 3f, 4f, false, false)));
+                                                   ^
+    符号:   类 PopupPlacement
+    位置: 类 TreeCanvasViewStateTest
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:95: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:103: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:131: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:153: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:159: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasDoubles.java:164: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:60: 错误: 程序包TreeCanvasViewState不存在
+          assertEquals(TreeCanvasViewState.Phase.READY, state.phase);
+                                          ^
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:90: 错误: 程序包TreeCanvasViewState不存在
+          assertEquals(TreeCanvasViewState.Phase.EMPTY, sink.last.phase);
+                                          ^
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:101: 错误: 程序包TreeCanvasViewState不存在
+          assertEquals(TreeCanvasViewState.Phase.EMPTY, sink.last.phase);
+                                          ^
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:116: 错误: 程序包TreeCanvasViewState不存在
+          assertEquals(TreeCanvasViewState.Phase.ERROR, sink.last.phase);
+                                          ^
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasPresenterTest.java:192: 错误: 程序包TreeCanvasViewState不存在
+                  sink.last.phase == TreeCanvasViewState.Phase.ERROR);
+                                                        ^
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:61: 错误: 程序包TreeCanvasViewState不存在
+          assertEquals(TreeCanvasViewState.Phase.LOADING, state.phase);
+                                          ^
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:120: 错误: 程序包TreeCanvasViewState不存在
+                  .withPhase(TreeCanvasViewState.Phase.READY);
+                                                ^
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:123: 错误: 程序包TreeCanvasViewState不存在
+          assertEquals(TreeCanvasViewState.Phase.READY, moved.phase);
+                                          ^
+  C:\Users\23745\AppData\Local\Temp\t017\android\app\src\test\java\com\treelearn\app\ui\TreeCanvasViewStateTest.java:136: 错误: 程序包TreeCanvasViewState不存在
+                  .withPhase(TreeCanvasViewState.Phase.READY);
+                                                ^
+  87 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 20s
+53 actionable tasks: 14 executed, 39 from cache
+EXITCODE=1

@@ -1,0 +1,38 @@
+# Evidence: Round-2 verifier follow-ups for T-2026-09-21-035
+
+# Generated: 2026-09-21 23:35:04+0800
+# Subject files (SHA-256, line count; frozen before the runs):
+  .trae\scripts\check_spec_author_agent.py  sha256=4E2FCEBC50C4E2EB882690637CB2FE8AC72464BBBAF3A616E03B8BDB4416C814  lines=302
+  .trae\agents\spec-author.md  sha256=51C19E969FF427A7384306195BCA9D4E77B1F3E19A7C1599D0A59DAE31B279BE  lines=86
+  .trae\templates\SPEC.md  sha256=31A2720533656B1AC8273757BD721904AAB7FD8FFB9D77FA861AED541A5E5807  lines=45
+  .trae\scripts\dev\checkers_selftest.py  sha256=1359DC2A14C396D06616C60BEA230A5649EC7BD360F560A012CCD49ED088F2F9  lines=459
+
+### A. self-test harness (regression chain)
+COMMAND: python -X utf8 .trae/scripts/dev/checkers_selftest.py
+Mode: full (62 injected-violation cases + 4 baselines)
+BASELINE OK check_intent_capturer_agent rc=0
+BASELINE OK check_roadmap_and_routing rc=0
+BASELINE OK check_intent_template rc=0
+BASELINE OK check_spec_author_agent rc=0
+SELFTEST cases=62 ok=62 mismatch=0 harness_errors=0 skipped=0
+OVERALL: PASS
+EXITCODE=0
+EXITCODE=0
+
+### B. task contract validator
+COMMAND: python -X utf8 .trae/scripts/validate_tasks.py
+SUMMARY files=42 errors=0 warnings=11
+EXITCODE=0
+
+### C. sibling guards (regression chain)
+.trae\scripts\check_roadmap_and_routing.py -> check_roadmap_and_routing: 0 check(s) failed  EXITCODE=0
+.trae\scripts\check_intent_capturer_agent.py -> check_intent_capturer_agent: 0 check(s) failed  EXITCODE=0
+.trae\scripts\check_intent_template.py -> check_intent_template: 0 check(s) failed  EXITCODE=0
+.trae\scripts\check_context_pack.py -> check_context_pack: 0 check(s) failed  EXITCODE=0
+.trae\scripts\check_pm_discovery_skill.py -> check_pm_discovery_skill: 0 check(s) failed  EXITCODE=0
+
+# Post-run recheck of subject hashes:
+  .trae\scripts\check_spec_author_agent.py  sha256=4E2FCEBC50C4E2EB882690637CB2FE8AC72464BBBAF3A616E03B8BDB4416C814  lines=302
+  .trae\agents\spec-author.md  sha256=51C19E969FF427A7384306195BCA9D4E77B1F3E19A7C1599D0A59DAE31B279BE  lines=86
+  .trae\templates\SPEC.md  sha256=31A2720533656B1AC8273757BD721904AAB7FD8FFB9D77FA861AED541A5E5807  lines=45
+  .trae\scripts\dev\checkers_selftest.py  sha256=1359DC2A14C396D06616C60BEA230A5649EC7BD360F560A012CCD49ED088F2F9  lines=459

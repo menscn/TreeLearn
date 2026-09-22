@@ -1,0 +1,64 @@
+Generated: 2026-09-21T21:35:21.6394029+08:00
+WorkingDirectory: D:\Project\Android\Treelearn
+Mode: source-level checks behind the T-005 no-leak claims; each block records its own command, exit code and hit count
+Note: this capture REPLACES the 20:47:30 one, which predated the 21:09:31 mutation revert of KeystoreSecretStore.java.
+
+
+===== no logging in the secret/settings packages =====
+Command: rg -n "android.util.Log|System\.out|System\.err|printStackTrace" android/data/src/main/java/com/treelearn/data/secret android/data/src/main/java/com/treelearn/data/settings
+EXITCODE=1  (rg: 0 = matches found, 1 = no match)
+hits=0  expected=no-match  verdict=OK
+
+===== no Bundle / Intent / clipboard / Parcelable in the secret/settings packages =====
+Command: rg -n "Bundle|Intent|ClipboardManager|putExtra|Parcelable" android/data/src/main/java/com/treelearn/data/secret android/data/src/main/java/com/treelearn/data/settings
+EXITCODE=1  (rg: 0 = matches found, 1 = no match)
+hits=0  expected=no-match  verdict=OK
+
+===== no SQLite / ContentValues / raw SQL in the secret/settings packages =====
+Command: rg -n "SQLite|ContentValues|rawQuery|execSQL|database" android/data/src/main/java/com/treelearn/data/secret android/data/src/main/java/com/treelearn/data/settings
+EXITCODE=1  (rg: 0 = matches found, 1 = no match)
+hits=0  expected=no-match  verdict=OK
+
+===== the synthetic placeholder literal exists only in test sources =====
+Command: rg -n "SYNTHETIC" android --glob "*.java"
+android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:27:    private static final String SYNTHETIC_SECRET = "SYNTHETIC T005 PLACEHOLDER (not a real credential)";
+android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:29:    private static final byte[] SYNTHETIC_IV = "t005-iv-0001".getBytes(StandardCharsets.UTF_8);
+android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:33:        byte[] ciphertext = SYNTHETIC_SECRET.getBytes(StandardCharsets.UTF_8);
+android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:35:        SecretEnvelope encoded = SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, ciphertext);
+android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:39:        assertArrayEquals(SYNTHETIC_IV, decoded.initialisationVector());
+android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:45:        byte[] ciphertext = SYNTHETIC_SECRET.getBytes(StandardCharsets.UTF_8);
+android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:46:        SecretEnvelope envelope = SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, ciphertext);
+android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:50:        assertFalse("toString must not carry the plaintext", rendered.contains(SYNTHETIC_SECRET));
+android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:54:                rendered.contains(Base64.getEncoder().encodeToString(SYNTHETIC_IV)));
+android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:61:        byte[] ciphertext = SYNTHETIC_SECRET.getBytes(StandardCharsets.UTF_8);
+android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:62:        SecretEnvelope envelope = SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, ciphertext);
+android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:67:        assertArrayEquals(SYNTHETIC_IV, envelope.initialisationVector());
+android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:73:        byte[] ciphertext = SYNTHETIC_SECRET.getBytes(StandardCharsets.UTF_8);
+android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:76:                () -> SecretEnvelope.of(0, SYNTHETIC_IV, ciphertext));
+android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:82:                () -> SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, null));
+android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:84:                () -> SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, new byte[0]));
+android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:114:        byte[] ciphertext = SYNTHETIC_SECRET.getBytes(StandardCharsets.UTF_8);
+android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:115:        String fromTheFuture = "2:" + Base64.getEncoder().encodeToString(SYNTHETIC_IV) + ":"
+android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:122:        assertFalse(failure.getMessage(), failure.getMessage().contains(SYNTHETIC_SECRET));
+android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:53:    private static final String SYNTHETIC_SECRET =
+android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:54:            "SYNTHETIC T005 PLACEHOLDER KEY (not a real credential)";
+android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:56:    private static final String SYNTHETIC_REPLACEMENT =
+android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:57:            "SYNTHETIC T005 REPLACEMENT VALUE (also not a real credential)";
+android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:79:        store.save(SYNTHETIC_SECRET.toCharArray());
+android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:84:        assertEquals(SYNTHETIC_SECRET, new String(afterRestart.read()));
+android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:89:        store.save(SYNTHETIC_SECRET.toCharArray());
+android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:96:                filesContaining(SYNTHETIC_SECRET.getBytes(StandardCharsets.UTF_8));
+android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:108:        store.save(SYNTHETIC_SECRET.toCharArray());
+android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:111:        store.save(SYNTHETIC_REPLACEMENT.toCharArray());
+android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:116:        assertEquals(SYNTHETIC_REPLACEMENT, new String(store.read()));
+android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:117:        assertTrue(filesContaining(SYNTHETIC_SECRET.getBytes(StandardCharsets.UTF_8)).isEmpty());
+android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:122:        store.save(SYNTHETIC_SECRET.toCharArray());
+android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:141:        assertDiagnosable(failure, SYNTHETIC_SECRET);
+android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:146:        store.save(SYNTHETIC_SECRET.toCharArray());
+android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:154:        assertDiagnosable(failure, SYNTHETIC_SECRET);
+android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:159:        store.save(SYNTHETIC_SECRET.toCharArray());
+android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:174:        assertDiagnosable(failure, SYNTHETIC_SECRET);
+android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:179:        store.save(SYNTHETIC_SECRET.toCharArray());
+android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:187:        assertDiagnosable(failure, SYNTHETIC_SECRET);
+EXITCODE=0  (rg: 0 = matches found, 1 = no match)
+hits=39  expected=match  verdict=OK

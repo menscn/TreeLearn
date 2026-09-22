@@ -1,0 +1,217 @@
+== same scratch copy, torn :data build dir moved aside, guard dex stage re-run
+CapturedAt: 2026-09-21T20:55:33.9023019+08:00
+moved: data\build -> data\build-torn (exists=True)
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac UP-TO-DATE
+> Task :ai:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugLibraryResources UP-TO-DATE
+> Task :ai:writeDebugAarMetadata UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:writeDebugAarMetadata
+> Task :data:processDebugNavigationResources FROM-CACHE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResValues FROM-CACHE
+> Task :data:generateDebugResources FROM-CACHE
+> Task :data:packageDebugResources FROM-CACHE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :ai:extractDeepLinksDebug UP-TO-DATE
+> Task :ai:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :data:extractDeepLinksDebug FROM-CACHE
+> Task :data:processDebugManifest FROM-CACHE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :data:compileDebugLibraryResources FROM-CACHE
+> Task :data:parseDebugLocalResources FROM-CACHE
+> Task :data:generateDebugRFile FROM-CACHE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :data:javaPreCompileDebug FROM-CACHE
+> Task :data:compileDebugJavaWithJavac FROM-CACHE
+> Task :ai:generateDebugAssets UP-TO-DATE
+> Task :ai:mergeDebugAssets UP-TO-DATE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :data:generateDebugAssets UP-TO-DATE
+> Task :data:mergeDebugAssets
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :ai:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :app:mergeDebugJavaResource UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :ai:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :ai:mergeDebugJniLibFolders UP-TO-DATE
+> Task :ai:mergeDebugNativeLibs NO-SOURCE
+> Task :ai:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :data:mergeDebugJniLibFolders
+> Task :data:mergeDebugNativeLibs NO-SOURCE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :data:copyDebugJniLibsProjectOnly
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :data:bundleLibRuntimeToJarDebug
+> Task :data:bundleLibCompileToJarDebug
+> Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :data:bundleLibRuntimeToDirDebug
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:dexBuilderDebug UP-TO-DATE
+> Task :app:mergeProjectDexDebug UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:processDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:compileDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugAndroidTestResources UP-TO-DATE
+> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :app:processDebugAndroidTestManifest UP-TO-DATE
+> Task :app:processDebugAndroidTestResources UP-TO-DATE
+
+> Transform classes.jar (project :data) with DexingNoClasspathTransform
+ERROR: C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\data\build\intermediates\runtime_library_classes_jar\debug\bundleLibRuntimeToJarDebug\classes.jar: D8: Class BranchCreation$Refusal requires its nest host BranchCreation to be on program or class path.
+
+ERROR: C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\data\build\intermediates\runtime_library_classes_dir\debug\bundleLibRuntimeToDirDebug\com\treelearn\data\db\dao\BranchCreation$Refusal.class: D8: Class BranchCreation$Refusal requires its nest host BranchCreation to be on program or class path.
+> Transform bundleLibRuntimeToDirDebug (project :data) with DexingNoClasspathTransform
+
+> Task :app:compileDebugAndroidTestJavaWithJavac
+C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\app\src\androidTest\java\com\treelearn\app\BranchCreationInstrumentedTest.java:28: 错误: 找不到符号
+import com.treelearn.data.db.dao.BranchCreation;
+                                ^
+  符号:   类 BranchCreation
+  位置: 程序包 com.treelearn.data.db.dao
+C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\app\src\androidTest\java\com\treelearn\app\BranchCreationInstrumentedTest.java:83: 错误: 找不到符号
+    private BranchCreation creation;
+            ^
+  符号:   类 BranchCreation
+  位置: 类 BranchCreationInstrumentedTest
+C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\app\src\androidTest\java\com\treelearn\app\BranchCreationInstrumentedTest.java:90: 错误: 找不到符号
+        creation = new BranchCreation(runner);
+                       ^
+  符号:   类 BranchCreation
+  位置: 类 BranchCreationInstrumentedTest
+C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\app\src\androidTest\java\com\treelearn\app\BranchCreationInstrumentedTest.java:110: 错误: 程序包BranchCreation不存在
+        BranchCreation.Outcome outcome =
+                      ^
+C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\app\src\androidTest\java\com\treelearn\app\BranchCreationInstrumentedTest.java:181: 错误: 程序包BranchCreation不存在
+        BranchCreation.Outcome outcome =
+                      ^
+C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\app\src\androidTest\java\com\treelearn\app\BranchCreationInstrumentedTest.java:185: 错误: 程序包BranchCreation不存在
+        assertEquals(BranchCreation.Refusal.STORAGE_REFUSED, outcome.refusal);
+                                   ^
+C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\app\src\androidTest\java\com\treelearn\app\BranchCreationInstrumentedTest.java:208: 错误: 程序包BranchCreation不存在
+        BranchCreation.Outcome outcome =
+                      ^
+C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\app\src\androidTest\java\com\treelearn\app\BranchCreationInstrumentedTest.java:213: 错误: 程序包BranchCreation不存在
+        assertEquals(BranchCreation.Refusal.SOURCE_NOT_IN_THIS_TOPIC, outcome.refusal);
+                                   ^
+C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\app\src\androidTest\java\com\treelearn\app\BranchCreationInstrumentedTest.java:229: 错误: 程序包BranchCreation不存在
+        BranchCreation.Outcome again =
+                      ^
+C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\app\src\androidTest\java\com\treelearn\app\BranchCreationInstrumentedTest.java:234: 错误: 程序包BranchCreation不存在
+        assertEquals(BranchCreation.Refusal.STORAGE_REFUSED, again.refusal);
+                                   ^
+注: 某些输入文件使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+10 个错误
+
+> Task :app:compileDebugAndroidTestJavaWithJavac FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/23745/AppData/Local/Temp/tl-verify-copy/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugAndroidTestJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+  C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\app\src\androidTest\java\com\treelearn\app\BranchCreationInstrumentedTest.java:28: 错误: 找不到符号
+  import com.treelearn.data.db.dao.BranchCreation;
+                                  ^
+    符号:   类 BranchCreation
+    位置: 程序包 com.treelearn.data.db.dao
+  C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\app\src\androidTest\java\com\treelearn\app\BranchCreationInstrumentedTest.java:83: 错误: 找不到符号
+      private BranchCreation creation;
+              ^
+    符号:   类 BranchCreation
+    位置: 类 BranchCreationInstrumentedTest
+  C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\app\src\androidTest\java\com\treelearn\app\BranchCreationInstrumentedTest.java:90: 错误: 找不到符号
+          creation = new BranchCreation(runner);
+                         ^
+    符号:   类 BranchCreation
+    位置: 类 BranchCreationInstrumentedTest
+  注: 某些输入文件使用或覆盖了已过时的 API。
+  C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\app\src\androidTest\java\com\treelearn\app\BranchCreationInstrumentedTest.java:110: 错误: 程序包BranchCreation不存在
+          BranchCreation.Outcome outcome =
+                        ^
+  C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\app\src\androidTest\java\com\treelearn\app\BranchCreationInstrumentedTest.java:181: 错误: 程序包BranchCreation不存在
+          BranchCreation.Outcome outcome =
+                        ^
+  C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\app\src\androidTest\java\com\treelearn\app\BranchCreationInstrumentedTest.java:185: 错误: 程序包BranchCreation不存在
+          assertEquals(BranchCreation.Refusal.STORAGE_REFUSED, outcome.refusal);
+                                     ^
+  C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\app\src\androidTest\java\com\treelearn\app\BranchCreationInstrumentedTest.java:208: 错误: 程序包BranchCreation不存在
+          BranchCreation.Outcome outcome =
+                        ^
+  C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\app\src\androidTest\java\com\treelearn\app\BranchCreationInstrumentedTest.java:213: 错误: 程序包BranchCreation不存在
+          assertEquals(BranchCreation.Refusal.SOURCE_NOT_IN_THIS_TOPIC, outcome.refusal);
+                                     ^
+  C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\app\src\androidTest\java\com\treelearn\app\BranchCreationInstrumentedTest.java:229: 错误: 程序包BranchCreation不存在
+          BranchCreation.Outcome again =
+                        ^
+  C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\app\src\androidTest\java\com\treelearn\app\BranchCreationInstrumentedTest.java:234: 错误: 程序包BranchCreation不存在
+          assertEquals(BranchCreation.Refusal.STORAGE_REFUSED, again.refusal);
+                                     ^
+  10 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+
+BUILD FAILED in 22s
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+81 actionable tasks: 8 executed, 11 from cache, 62 up-to-date
+EXITCODE=1

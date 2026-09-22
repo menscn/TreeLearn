@@ -1,0 +1,145 @@
+# T-037 FIX ROUND: external blocker - the app module does not compile right now.
+# captured-at: 2026-09-22T00:04:03.0517101+08:00
+# NOT caused by this task. android/app/src/main/java/com/treelearn/app/wiring/ is UNTRACKED
+#   (git status: ?? android/app/src/main/java/com/treelearn/app/wiring/) and is being written
+#   concurrently by T-2026-09-21-real-data-path-wiring-032.
+# Evidence that it is not mine: the failing symbols (TopicDao.listOverviews, TopicDao.Overview)
+#   do not exist in the data module, and this task touched no src/main file.
+# command: cd android; .\gradlew.bat :app:assembleDebugAndroidTest --no-daemon --console=plain
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac UP-TO-DATE
+> Task :ai:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugLibraryResources UP-TO-DATE
+> Task :ai:writeDebugAarMetadata UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :ai:extractDeepLinksDebug UP-TO-DATE
+> Task :ai:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :data:extractDeepLinksDebug UP-TO-DATE
+> Task :data:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :data:compileDebugLibraryResources UP-TO-DATE
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac UP-TO-DATE
+> Task :data:bundleLibCompileToJarDebug UP-TO-DATE
+
+> Task :app:compileDebugJavaWithJavac FAILED
+D:\Project\Android\Treelearn\android\app\src\main\java\com\treelearn\app\wiring\ChatWiring.java:129: 错误: 找不到符号
+        return ChatCommandResult.succeeded();
+                                ^
+  符号:   方法 succeeded()
+  位置: 类 ChatCommandResult
+D:\Project\Android\Treelearn\android\app\src\main\java\com\treelearn\app\wiring\ChatWiring.java:170: 错误: 无法将类 ChatCommandResult中的方法 openedBranch应用到给定类型;
+        return ChatCommandResult.openedBranch(branchId);
+                                ^
+  需要: String,String
+  找到:    String
+  原因: 实际参数列表和形式参数列表长度不同
+D:\Project\Android\Treelearn\android\app\src\main\java\com\treelearn\app\wiring\SqliteHomeStore.java:47: 错误: 找不到符号
+        List<TopicDao.Overview> overviews = TopicDao.listOverviews(helper.getWritableDatabase(),
+                     ^
+  符号:   类 Overview
+  位置: 类 TopicDao
+D:\Project\Android\Treelearn\android\app\src\main\java\com\treelearn\app\wiring\SqliteHomeStore.java:47: 错误: 找不到符号
+        List<TopicDao.Overview> overviews = TopicDao.listOverviews(helper.getWritableDatabase(),
+                                                    ^
+  符号:   方法 listOverviews(SQLiteDatabase,String)
+  位置: 类 TopicDao
+D:\Project\Android\Treelearn\android\app\src\main\java\com\treelearn\app\wiring\SqliteHomeStore.java:50: 错误: 找不到符号
+        for (TopicDao.Overview overview : overviews) {
+                     ^
+  符号:   类 Overview
+  位置: 类 TopicDao
+5 个错误
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  D:\Project\Android\Treelearn\android\app\src\main\java\com\treelearn\app\wiring\ChatWiring.java:170: 错误: 无法将类 ChatCommandResult中的方法 openedBranch应用到给定类型;
+          return ChatCommandResult.openedBranch(branchId);
+                                  ^
+    需要: String,String
+    找到:    String
+    原因: 实际参数列表和形式参数列表长度不同
+  D:\Project\Android\Treelearn\android\app\src\main\java\com\treelearn\app\wiring\SqliteHomeStore.java:47: 错误: 找不到符号
+          List<TopicDao.Overview> overviews = TopicDao.listOverviews(helper.getWritableDatabase(),
+                       ^
+    符号:   类 Overview
+    位置: 类 TopicDao
+  D:\Project\Android\Treelearn\android\app\src\main\java\com\treelearn\app\wiring\SqliteHomeStore.java:50: 错误: 找不到符号
+          for (TopicDao.Overview overview : overviews) {
+                       ^
+    符号:   类 Overview
+    位置: 类 TopicDao
+  D:\Project\Android\Treelearn\android\app\src\main\java\com\treelearn\app\wiring\ChatWiring.java:129: 错误: 找不到符号
+          return ChatCommandResult.succeeded();
+                                  ^
+    符号:   方法 succeeded()
+    位置: 类 ChatCommandResult
+  D:\Project\Android\Treelearn\android\app\src\main\java\com\treelearn\app\wiring\SqliteHomeStore.java:47: 错误: 找不到符号
+          List<TopicDao.Overview> overviews = TopicDao.listOverviews(helper.getWritableDatabase(),
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+                                                      ^
+    符号:   方法 listOverviews(SQLiteDatabase,String)
+    位置: 类 TopicDao
+  5 个错误
+
+47 actionable tasks: 1 executed, 46 up-to-date
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+BUILD FAILED in 12s
+EXITCODE=1

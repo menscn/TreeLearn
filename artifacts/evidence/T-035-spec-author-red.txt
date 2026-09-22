@@ -1,0 +1,38 @@
+# Evidence: RED for T-2026-09-21-035 (spec-author capability)
+
+# Generated: 2026-09-21 23:35:04+0800
+# NOTE: this RED is an AFTER-THE-FACT reproduction (the implementation already
+# existed when it was recorded); the run happens in a throwaway copy so the
+# reproduction cannot perturb the real repo. The copy is a full .trae/ + Docs/,
+# so every repository path the guard resolves points at real files.
+# Copy root: C:\Users\23745\AppData\Local\Temp\tl-035-red
+# Subject files as they exist in the real repo at generation time:
+  .trae\scripts\check_spec_author_agent.py  sha256=4E2FCEBC50C4E2EB882690637CB2FE8AC72464BBBAF3A616E03B8BDB4416C814  lines=302
+  .trae\agents\spec-author.md  sha256=51C19E969FF427A7384306195BCA9D4E77B1F3E19A7C1599D0A59DAE31B279BE  lines=86
+  .trae\templates\SPEC.md  sha256=31A2720533656B1AC8273757BD721904AAB7FD8FFB9D77FA861AED541A5E5807  lines=45
+  .trae\scripts\dev\checkers_selftest.py  sha256=1359DC2A14C396D06616C60BEA230A5649EC7BD360F560A012CCD49ED088F2F9  lines=459
+
+STATE 0: copy as-is (the capability is present)
+COMMAND: cd <copy>; python -X utf8 .trae/scripts/check_spec_author_agent.py
+OK_LINES=16  FAIL_LINES=0  EXITCODE=0
+
+STATE A: .trae/agents/spec-author.md and .trae/templates/SPEC.md moved out of the copy
+COMMAND: cd <copy>; python -X utf8 .trae/scripts/check_spec_author_agent.py
+OK_LINES=3  FAIL_LINES=1  EXITCODE=1
+FAIL role file and SPEC template exist — agent=False template=False
+OK   every printed branch is registered — measured_unregistered=[]
+OK   guard branch registry matches its injected-violation cases — measured_without_case=[]
+OK   no orphan self-test case for this guard — measured_orphans=[]
+
+check_spec_author_agent: 1 check(s) failed
+EXITCODE=1
+
+STATE B: deliverables restored in the copy (causation check)
+COMMAND: cd <copy>; python -X utf8 .trae/scripts/check_spec_author_agent.py
+OK_LINES=16  FAIL_LINES=0  EXITCODE=0
+
+# Post-run recheck of subject hashes:
+  .trae\scripts\check_spec_author_agent.py  sha256=4E2FCEBC50C4E2EB882690637CB2FE8AC72464BBBAF3A616E03B8BDB4416C814  lines=302
+  .trae\agents\spec-author.md  sha256=51C19E969FF427A7384306195BCA9D4E77B1F3E19A7C1599D0A59DAE31B279BE  lines=86
+  .trae\templates\SPEC.md  sha256=31A2720533656B1AC8273757BD721904AAB7FD8FFB9D77FA861AED541A5E5807  lines=45
+  .trae\scripts\dev\checkers_selftest.py  sha256=1359DC2A14C396D06616C60BEA230A5649EC7BD360F560A012CCD49ED088F2F9  lines=459

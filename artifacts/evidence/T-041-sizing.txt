@@ -1,0 +1,129 @@
+captured-at: 2026-09-22T02:33:39.8109769+08:00
+cwd: D:\Project\Android\Treelearn
+command: python -X utf8 -  (sizing scan; the exact text fed on stdin is the block below)
+note: judgement lines = non-blank non-comment per .trae/rules/harness-tasks.md line 45; physical lines are reference only
+import os, re, sys
+
+def is_prose(s):
+    t = s.strip()
+    if not t: return True
+    return t.startswith("//") or t.startswith("/*") or t.startswith("*") or t.startswith("<!--")
+
+def count_judgement(path):
+    lines = open(path, encoding="utf-8").read().splitlines()
+    n = 0
+    closer = None
+    for ln in lines:
+        s = ln.strip()
+        if closer is not None:
+            if closer in s: closer = None
+            continue
+        if s.startswith("<!--"):
+            if "-->" not in s: closer = "-->"
+            continue
+        if s.startswith("/*"):
+            if "*/" not in s: closer = "*/"
+            continue
+        if is_prose(ln): continue
+        n += 1
+    return n, len(lines)
+
+NEW = [
+ ("android/app/src/main/java/com/treelearn/app/ui/TextSelection.java",),
+ ("android/app/src/main/java/com/treelearn/app/ui/WordMenu.java",),
+ ("android/app/src/main/java/com/treelearn/app/ui/ChildBranch.java",),
+ ("android/app/src/main/java/com/treelearn/app/wiring/BranchChildren.java",),
+ ("android/app/src/main/java/com/treelearn/app/screen/WordMenuPopup.java",),
+ ("android/app/src/main/java/com/treelearn/app/screen/ChildBranchPopup.java",),
+ ("android/app/src/main/res/layout/popup_word_action.xml",),
+ ("android/app/src/main/res/layout/popup_child_branches.xml",),
+ ("android/app/src/main/res/layout/item_child_branch.xml",),
+]
+CHANGED = [
+ ("android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java",
+  r"WordMenu|TextSelection|ChildBranch|pressX|pressY|openWordMenu|showChildren|dismissPopups|onSelectionCopy|MotionEvent|onDetachedFromWindow"),
+ ("android/app/src/main/java/com/treelearn/app/ui/ChatSink.java", r"ChildBranch|openChildren"),
+ ("android/app/src/main/java/com/treelearn/app/MainActivity.java", r"ChildBranch|openChildren"),
+ ("android/app/src/main/res/values/strings.xml",
+  r"chat_word_|chat_children_popup|chat_children_unread|chat_act_fork"),
+]
+
+failures = []
+print("== (A) new production files created by T-041: every non-blank non-comment line counts ==")
+print("%6s %8s  %s" % ("judge", "physical", "file"))
+a_judge = a_phys = 0
+for (rel,) in NEW:
+    if not os.path.exists(rel):
+        failures.append("missing new file: " + rel); continue
+    n, p = count_judgement(rel)
+    a_judge += n; a_phys += p
+    print("%6d %8d  %s" % (n, p, rel))
+print("%6d %8d  (A) subtotal" % (a_judge, a_phys))
+print("")
+
+print("== (B) changed lines in pre-existing files: only the lines this task touched ==")
+print("    a line counts when it names one of this task's own symbols; comments excluded, so this")
+print("    undercounts the braces and returns of the new blocks - it is a floor, not an estimate")
+b_judge = 0
+for rel, pattern in CHANGED:
+    if not os.path.exists(rel):
+        failures.append("missing changed file: " + rel); continue
+    rx = re.compile(pattern)
+    lines = open(rel, encoding="utf-8").read().splitlines()
+    hits = [i + 1 for i, ln in enumerate(lines) if rx.search(ln) and not is_prose(ln)]
+    b_judge += len(hits)
+    print("  %-70s %3d  lines %s" % (rel.split("/")[-1], len(hits),
+          ",".join(str(h) for h in hits)))
+print("  (B) subtotal                                                             %3d" % b_judge)
+print("")
+
+total = a_judge + b_judge
+print("== verdict ==")
+print("judgement lines (deciding value) = (A) %d + (B) %d = %d" % (a_judge, b_judge, total))
+print("physical lines, reference only    = %d new-file lines (+ the (B) lines above)" % a_phys)
+print("soft limit 200 ; hard limit 500")
+if total > 500:
+    print("VERDICT: OVER the 500 hard limit by %d lines (%.0f%%). A recorded user-approved sizing" % (total - 500, 100.0 * (total - 500) / 500))
+    print("         exception is required (.trae/rules/harness-tasks.md line 45); the implementer may")
+    print("         not self-approve one.")
+elif total > 200:
+    print("VERDICT: over the soft limit 200, under the hard limit 500 (verifier warning).")
+else:
+    print("VERDICT: within the soft limit.")
+print("")
+for f in failures: print("FAILURE: " + f)
+print("SIZING ASSERTION " + ("PASSED" if not failures else "FAILED"))
+sys.exit(0 if not failures else 1)
+--- output ---
+== (A) new production files created by T-041: every non-blank non-comment line counts ==
+ judge physical  file
+    61       89  android/app/src/main/java/com/treelearn/app/ui/TextSelection.java
+    56      103  android/app/src/main/java/com/treelearn/app/ui/WordMenu.java
+    12       24  android/app/src/main/java/com/treelearn/app/ui/ChildBranch.java
+    41       64  android/app/src/main/java/com/treelearn/app/wiring/BranchChildren.java
+   135      186  android/app/src/main/java/com/treelearn/app/screen/WordMenuPopup.java
+    60       89  android/app/src/main/java/com/treelearn/app/screen/ChildBranchPopup.java
+    91      113  android/app/src/main/res/layout/popup_word_action.xml
+    21       28  android/app/src/main/res/layout/popup_child_branches.xml
+    25       31  android/app/src/main/res/layout/item_child_branch.xml
+   502      727  (A) subtotal
+
+== (B) changed lines in pre-existing files: only the lines this task touched ==
+    a line counts when it names one of this task's own symbols; comments excluded, so this
+    undercounts the braces and returns of the new blocks - it is a floor, not an estimate
+  ChatScreen.java                                                         29  lines 10,25,27,75,76,174,223,224,225,230,237,249,250,251,256,274,275,295,296,297,302,430,431,432,436,437,453,457,458
+  ChatSink.java                                                            1  lines 36
+  MainActivity.java                                                        2  lines 23,258
+  strings.xml                                                             10  lines 137,143,144,145,146,147,148,149,150,151
+  (B) subtotal                                                              42
+
+== verdict ==
+judgement lines (deciding value) = (A) 502 + (B) 42 = 544
+physical lines, reference only    = 727 new-file lines (+ the (B) lines above)
+soft limit 200 ; hard limit 500
+VERDICT: OVER the 500 hard limit by 44 lines (9%). A recorded user-approved sizing
+         exception is required (.trae/rules/harness-tasks.md line 45); the implementer may
+         not self-approve one.
+
+SIZING ASSERTION PASSED
+EXITCODE=0

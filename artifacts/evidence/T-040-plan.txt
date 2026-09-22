@@ -1,0 +1,22 @@
+T-040 plan and design decisions (working notes; not a verification record)
+captured-at: 2026-09-22 04:35:30 (Asia/Shanghai)
+cwd: D:\Project\Android\Treelearn
+FACTS ESTABLISHED (read from source, no guessing)
+- SearchPresenter.Sink = render(SearchViewState) + openAnchor(topicId, branchId, ReadingAnchor); presenter already: blank query never reaches the store (IDLE), stale answer dropped, failure keeps draft, hit whose branch is gone is dropped from the list via repository.isStillReachable. onQueryChanged/onResumed run the read on the injected background executor; states are handed to the sink on the ui thread. NO change needed to SearchPresenter.
+- SearchViewState: phase IDLE/SEARCHING/RESULTS/ERROR, draft, hits (never null, unmodifiable), showsResults() = RESULTS && !hits.isEmpty().
+- SearchHit fields: field (TITLE/ANCHOR/ANSWER/REASONING/PARTIAL_ANSWER/PARTIAL_REASONING), topicId, branchId, messageId, messageOrdinal, revisionId, revisionNo, snippet; locatorAnchor() = messageId == null ? null : ReadingAnchor.atMessage(messageId, revisionId). IT CARRIES NO BRANCH TITLE.
+- SearchDao/statement: six UNION ALL arms, columns branch_id/message_id/revision_id/matched_field/snippet + topic_id. No title column in the union => titles are NOT obtainable from a hit. T-015 contract must not change (task: no signature/semantics change).
+- SqliteSearchRepository takes a SQLiteDatabase in its constructor (like SqliteReadingStore did before T-042) => AppContainer must build it lazily or it opens the DB on the UI thread.
+- Existing branch-title read port: ChatStore.branch(String branchId): Branch (ChatWiring already uses it at :153). AppContainer.chatData() is the ChatWiring.
+
+DECISION 1 - branch title on a hit row (product goal: "hit shows the branch it belongs to")
+The prototype row is: type chip + branch title (prominent) + snippet + ancestor path (renderSearch at prototype :2215-2231).
+Ancestor path needs a tree walk; NOT in this task's scope and not in its In scope list => omitted and recorded as a gap.
+Branch title: resolved by the HOST, not the screen. MainActivity implements SearchPresenter.Sink; in render(state) it resolves the distinct branch ids of state.hits through the existing ChatStore.branch port on container.background(), then posts searchScreen.show(state, titles) to the ui thread. The screen never reads a store and never filters a hit (no second decision point: it draws exactly state.hits in order).
+Cost: one small Map + a re-render; benefit: the row names the branch, which is the whole point of "I forgot which branch".
+
+DECISION 2 - home search entry enablement
+screen_home_body.xml:39 android:enabled="false" is removed (hard disable gone). HomeScreen:34-43 gets a click listener next to the archived precedent (HomeScreen:115-119) and a data-driven setEnabled like the archived button. HomeActions gains onSearchPressed(); HomeSink gains openSearch(); HomePresenter gains onSearchPressed() forwarding to sink.openSearch() (pure navigation, same shape as onSettingsPressed / onArchivedPressed).
+
+DECISION 3 - tiers (In scope)
+Immediate search (no submit button): afterTextChanged -> actions.onQueryChanged(text); the presenter already debounces nothing but does run the store read on background, and drops stale answers, so typing in Chinese does not block the UI.

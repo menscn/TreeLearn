@@ -1,0 +1,120 @@
+# T-023 变异证据 —— 证明验收套件真的会「咬」
+
+生成方式：bash artifacts/evidence/.gen-t023-mutation.sh ，生成时刻 2026-09-21T10:49:39Z（UTC）。
+每条命令当场执行，EXITCODE 取自该命令自身；回显的命令可直接粘回复现。
+结论段的每个计数、用例名与还原校验都由本脚本从对应捕获输出里机械提取（failed_method_of /
+selected_count_of / sha256sum 比对），不手写。脚本在结束前把源码还原并用 SHA-256 证明还原成功。
+
+被注入的两处缺陷，正是本任务设计上专门防的两类：
+
+  1. stabilize 把版本「从用途常量重新推导」而不是「从 operation 行原样复制」——行完好时两种写法
+     产生同一个字符串，只有夹具篡改过行才能把二者区分开（对应验收条件：**版本随同复制**）。
+  2. 拒绝改为从工作体返回而不抛异常——DatabaseTransactionRunner 会提交工作体返回的任何东西，
+     于是「revision 已写但 operation 非终态」的中间态被提交而不是回滚（对应验收条件：**稳定化全败**）。
+
+---
+
+## 变异 1 —— 把版本从用途常量重新推导，而不是从 operation 行复制
+
+被改文件：`android/data/src/main/java/com/treelearn/data/db/dao/GenerationStabilizer.java` ；应当捕获它的用例：`stabilizeCopiesThePinnedVersionFromTheRowVerbatim`
+
+### 1. 注入（把左边这段原文换成右边这段）
+
+```diff
+-                row.promptPolicyVersion, now);
++                com.treelearn.core.domain.PromptPurpose.LEARNING_ANSWER.policyPrefix + "/1.0.0", now);
+```
+
+$ python（字面量替换，注入前先断言该片段在文件中恰好出现 1 次）
+EXITCODE=0  （3=片段不唯一，已中止且未改动文件；0=注入成功）
+
+$ sha256sum android/data/src/main/java/com/treelearn/data/db/dao/GenerationStabilizer.java
+  注入前 accc01b2fc6301e885b78cb33f53263d59eec42ca9cbc9a3d2c50bf78e8d7b5c
+  注入后 8d6e2eb591674006ad356232b99eda88a634a3d9cbce950ac0afe6f71bb8951f
+
+### 2. 在该变异下运行「本应捕获它」的那一条用例
+
+$ cd android && ./gradlew :app:connectedDebugAndroidTest --console=plain \
+      -Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.AnswerRevisionGenerationOperationDaoInstrumentedTest#stabilizeCopiesThePinnedVersionFromTheRowVerbatim
+Starting 1 tests on Medium_Phone_API_36.1(AVD) - 16
+com.treelearn.app.AnswerRevisionGenerationOperationDaoInstrumentedTest > stabilizeCopiesThePinnedVersionFromTheRowVerbatim[Medium_Phone_API_36.1(AVD) - 16] [31mFAILED [0m
+	org.junit.ComparisonFailure: the revision records the version the operation row pinned expected:<tl-[branch-title]/1.0.0> but was:<tl-[learning-answer]/1.0.0>
+Finished 1 tests on Medium_Phone_API_36.1(AVD) - 16
+> Task :app:connectedDebugAndroidTest FAILED
+BUILD FAILED in 50s
+EXITCODE=1
+
+### 3. 还原
+
+EXITCODE=0  （0=已还原）
+还原后 sha256 accc01b2fc6301e885b78cb33f53263d59eec42ca9cbc9a3d2c50bf78e8d7b5c
+与注入前逐字相同：是
+
+---
+
+## 变异 2 —— 把拒绝改为从工作体返回（不抛异常），于是事务被提交而非回滚
+
+被改文件：`android/data/src/main/java/com/treelearn/data/db/dao/GenerationStabilizer.java` ；应当捕获它的用例：`stabilizeRollsBackBothWritesWhenTheRevisionNumberIsAlreadyTaken`
+
+### 1. 注入（把左边这段原文换成右边这段）
+
+```diff
+-        try {
+-            return runner.run(database,
+-                    work -> stabilizeInside(work, operationId, revisionNo, now));
+-        } catch (Refused refused) {
+-            // The unwinding is the point. Returning the failure from inside the work body would
+-            // *commit* the transaction — DatabaseTransactionRunner commits whatever a work body
+-            // returns — and a refusal that committed is one statement-order change away from leaving
+-            // a revision beside an attempt that is not STABLE.
+-            return refused.result;
+-        }
++        return runner.run(database, work -> {
++            try {
++                return stabilizeInside(work, operationId, revisionNo, now);
++            } catch (Refused refused) {
++                return refused.result;
++            }
++        });
+```
+
+$ python（字面量替换，注入前先断言该片段在文件中恰好出现 1 次）
+EXITCODE=0  （3=片段不唯一，已中止且未改动文件；0=注入成功）
+
+$ sha256sum android/data/src/main/java/com/treelearn/data/db/dao/GenerationStabilizer.java
+  注入前 accc01b2fc6301e885b78cb33f53263d59eec42ca9cbc9a3d2c50bf78e8d7b5c
+  注入后 dd24f9c80b0256bdf03b226db43d512317cbad723b4dc6c756fd3432d908f8ad
+
+### 2. 在该变异下运行「本应捕获它」的那一条用例
+
+$ cd android && ./gradlew :app:connectedDebugAndroidTest --console=plain \
+      -Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.AnswerRevisionGenerationOperationDaoInstrumentedTest#stabilizeRollsBackBothWritesWhenTheRevisionNumberIsAlreadyTaken
+Starting 1 tests on Medium_Phone_API_36.1(AVD) - 16
+com.treelearn.app.AnswerRevisionGenerationOperationDaoInstrumentedTest > stabilizeRollsBackBothWritesWhenTheRevisionNumberIsAlreadyTaken[Medium_Phone_API_36.1(AVD) - 16] [31mFAILED [0m
+	java.lang.AssertionError: the attempt is still streaming, not stranded in STABLE expected:<STREAMING_ANSWER> but was:<STABLE>
+Finished 1 tests on Medium_Phone_API_36.1(AVD) - 16
+> Task :app:connectedDebugAndroidTest FAILED
+BUILD FAILED in 22s
+EXITCODE=1
+
+### 3. 还原
+
+EXITCODE=0  （0=已还原）
+还原后 sha256 accc01b2fc6301e885b78cb33f53263d59eec42ca9cbc9a3d2c50bf78e8d7b5c
+与注入前逐字相同：是
+
+---
+
+## 结论（用例名、计数与还原校验均由本脚本从捕获输出机械提取，不手写）
+
+- m1：预期捕获用例 `stabilizeCopiesThePinnedVersionFromTheRowVerbatim`；本次运行选中 Starting 1 tests，EXITCODE=1，
+  实际报告的失败用例 `未读到` → **未被捕获**。
+  失败首行：	org.junit.ComparisonFailure: the revision records the version the operation row pinned expected:<tl-[branch-title]/1.0.0> but was:<tl-[learning-answer]/1.0.0>
+  还原状态：restored
+- m2：预期捕获用例 `stabilizeRollsBackBothWritesWhenTheRevisionNumberIsAlreadyTaken`；本次运行选中 Starting 1 tests，EXITCODE=1，
+  实际报告的失败用例 `未读到` → **未被捕获**。
+  失败首行：	java.lang.AssertionError: the attempt is still streaming, not stranded in STABLE expected:<STREAMING_ANSWER> but was:<STABLE>
+  还原状态：restored
+
+两次注入后源码均已还原，且还原哈希与注入前逐字相同（见各节第 3 步）。
+

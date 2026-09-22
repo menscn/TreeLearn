@@ -1,0 +1,41 @@
+=== VERIFY5 report read-back  2026-09-21T22:40:45+08:00 ===
+FILE T-2026-09-20-bootstrap-java-android-modules-002
+  status: verifying
+  lines=387 bytes=63127 BOM=False U+FFFD=0 round9_sections=1 ninth_addendum=0
+  headline: - Verdict: 第 6 轮 **FAIL（记录层）**、第 7 轮 **FAIL（记录层；工程实体层未发现回归）**（见下方「第七轮独立复核结论」，2026-09-21）。两轮判词对工程实体都是肯定的：字节码级 Java-only、五模块、构建/lint/测试 exit 0、守门 PASS、自检全 PASS 均被独立复现且未发现回归；判 FAIL 只因**证据引用与当前态数字失真**（第六轮 F1 阻塞）与守门一条**静默退化路径**（第六轮 F3）以及**自检证据无法绑定到当前脚本**（第七轮①②）。F1–F13 与第七轮两条未通过项已全部修复并刷新证据，见「第八轮：记录修复轮」；**等待下一轮独立复核**。**不得把自述读作验收结论。**
+FILE T-2026-09-20-model-immutable-answer-domain-003
+  status: verified
+  lines=428 bytes=66065 BOM=False U+FFFD=0 round9_sections=1 ninth_addendum=0
+  headline: - Verdict: **FAIL（记录层）** ——第 5 轮判 **FAIL**（V1–V8，报告 `artifacts/evidence/T-003-verification-round5.md`，11:59），
+FILE T-2026-09-20-sqlite-schema-dao-transactions-004
+  status: verifying
+  lines=371 bytes=55007 BOM=False U+FFFD=0 round9_sections=1 ninth_addendum=0
+  headline: - Verdict: **VERIFYING（不得报 PASS）**。原先的治理阻塞（规模例外）**已由用户 2026-09-21 的裁定解除**：按「非空非注释」口径 458 < 500，未越线。**仍不报 PASS 的原因有两条，都不是技术原因**：① 本任务自设的 400 行拆分门槛是否随本次例外一并豁免，属对裁定的解释问题，已登入建表入场确认清单（见 sizing 节）；② 按仓库规则，verifier 的 PARTIAL 不能由实现者自行改判为 PASS。TDD 的 RED/GREEN 与全部专项守门证据均已取得且可复现，**技术面上各轮守门提出的缺陷已全部修复并复验（见 D1–D13）**，本条不因技术原因挂起。
+FILE T-2026-09-21-generation-operation-prompt-anchoring-021
+  status: verifying
+  lines=512 bytes=56133 BOM=False U+FFFD=0 round9_sections=1 ninth_addendum=0
+  headline: - Verdict: `PARTIAL`（第 1 轮，见 `artifacts/evidence/T-021-verification.md`）→ **第 2 轮 `PARTIAL`**
+FILE T-2026-09-21-sqlite-dao-topic-branch-message-022
+  status: verifying
+  lines=339 bytes=52200 BOM=False U+FFFD=0 round9_sections=1 ninth_addendum=0
+  headline: - Verdict: **VERIFYING（不得报 PASS）**。八条验收条件**全部满足且证据可核**；两个独立方均已复核并各自在其职责轴内判定：独立 `verifier` 判「技术面成立」（F1–F4 与跨任务发现均已修），`db-migration-reviewer` 第二/第三轮判「**数据库轴可以判 PASS**」。
+FILE T-2026-09-20-derived-ai-artifacts-011
+  status: verifying
+  lines=219 bytes=21177 BOM=False U+FFFD=0 round9_sections=0 ninth_addendum=1
+  headline: - Verdict: PARTIAL（JVM/GREEN 判据 PASS；设备判据 deferred；规模偏差未获批）
+FILE T-2026-09-20-search-unread-reading-position-015
+  status: verifying
+  lines=200 bytes=23872 BOM=False U+FFFD=0 round9_sections=1 ninth_addendum=0
+  headline: - Verdict: PENDING（本轮只把任务推进到 `verifying`；verdict 由 verifier 给出）
+EXITCODE=0
+
+--- final read-back after adding the '最新结论' pointers ---
+  T-2026-09-20-bootstrap-java-android-modules-002            status: verifying  U+FFFD=0 pointer=1 BOM=False bytes=63315
+  T-2026-09-20-model-immutable-answer-domain-003             status: verified  U+FFFD=0 pointer=1 BOM=False bytes=66253
+  T-2026-09-20-sqlite-schema-dao-transactions-004            status: verifying  U+FFFD=0 pointer=1 BOM=False bytes=55195
+  T-2026-09-21-generation-operation-prompt-anchoring-021     status: verifying  U+FFFD=0 pointer=1 BOM=False bytes=56321
+  T-2026-09-21-sqlite-dao-topic-branch-message-022           status: verifying  U+FFFD=0 pointer=1 BOM=False bytes=52388
+  T-2026-09-20-derived-ai-artifacts-011                      status: verifying  U+FFFD=0 pointer=1 BOM=False bytes=21353
+  T-2026-09-20-search-unread-reading-position-015            status: verifying  U+FFFD=0 pointer=1 BOM=False bytes=24060
+--- RED/GREEN Command byte-identity: all 7 in-scope tasks identical=True ---
+EXITCODE=0

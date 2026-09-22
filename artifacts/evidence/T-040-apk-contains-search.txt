@@ -1,0 +1,50 @@
+T-040 - the shipped release APK carries the search page, its home entry and the anchored jump; and T-039/T-041/T-042/T-044 did not regress (dex string-table scan)
+captured-at: 2026-09-22 04:58:24 (Asia/Shanghai)
+cwd: D:\Project\Android\Treelearn
+command: .\gradlew.bat --no-daemon --console=plain :app:assembleRelease --rerun-tasks (a real relink, 118 tasks executed; captured in T-040-apk-build.txt, exit 0); then PowerShell opens D:\Project\Android\Treelearn\android\app\build\outputs\apk\release\app-release.apk as a zip, scans every classes*.dex byte stream for the symbol names (dex string tables are MUTF-8, so ASCII names are greppable), then SHA-256s the APK
+apk-path: D:\Project\Android\Treelearn\android\app\build\outputs\apk\release\app-release.apk
+apk-bytes: 522389
+apk-mtime: 2026-09-22 04:58:17
+
+--- ordering: the APK must be at least as new as every changed source ---
+newest source under android\app\src\main, android\core\src\main, android\data\src\main: android\app\src\main\java\com\treelearn\app\search\SearchPage.java  mtime=2026-09-22 04:44:58
+JUDGEMENT: sources newer than the APK = 0 (must be 0)
+PASS: no source is newer than the APK, so this package was built from the current tree
+
+--- dex string-table scan ---
+dex: classes.dex  bytes=463068
+  [T-040 symbols - must be present]
+    SearchScreen = 7
+    SearchPage = 6
+    BranchTitles = 2
+    SqliteSearchStore = 2
+    onSearchPressed = 1
+    openAnchor = 1
+    showSearch = 1
+    drawSearch = 1
+    searchRepository = 1
+  [earlier tasks - must still be present, no rollback]
+    ReadingSession = 2
+    SqliteReadingStore = 2
+    onViewportChanged = 2
+    NavigationScreen = 23
+    NavigationPresenter = 13
+    NavigationWiring = 2
+    WordMenuPopup = 11
+    ChildBranchPopup = 4
+    BranchChildren = 2
+    treelearn_quote = 4
+    TreeCanvasWiring = 2
+  [negative controls - must be absent]
+    SearchPageTest = 0
+    HomeSearchEntryTest = 0
+    SearchJumpTest = 0
+    SearchPresenterTest = 0
+    ChatReadingTest = 0
+JUDGEMENT: dex files scanned = 1 (must be >= 1)
+PASS: every dex in the package was scanned, not just a named one
+apk-sha256: AA40169C6D40780B292B111115B24255AB44152B0705BBD30D97618080CD2240
+
+VERDICT: PASS (0 failing check(s))
+reading: the search page, its home entry and the anchored jump are in the installed package; the T-039/T-041/T-042/T-044 wiring they were built on is still there; and the JVM suite is not
+EXITCODE=0 (observed exit code of the scan run above)

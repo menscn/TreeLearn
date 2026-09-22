@@ -1,0 +1,337 @@
+=== T-012 in-repo (:app) unit-test suite — why GREEN is measured in a scratch tree ===
+Generated: 2026-09-21T21:52:45.2213389+08:00
+Command: cd android; .\gradlew.bat :app:testDebugUnitTest --no-daemon --console=plain
+Mode: the SHARED repo tree, for comparison with artifacts/evidence/T-012-green.txt (same command string, scratch tree).
+JAVA_HOME=D:\Environment\Jdk\jdk21
+--- gradle output (tail) ---
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac UP-TO-DATE
+> Task :ai:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :ai:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugLibraryResources UP-TO-DATE
+> Task :ai:writeDebugAarMetadata UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :ai:extractDeepLinksDebug UP-TO-DATE
+> Task :ai:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :data:extractDeepLinksDebug UP-TO-DATE
+> Task :data:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :data:compileDebugLibraryResources UP-TO-DATE
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac UP-TO-DATE
+> Task :data:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:bundleDebugClassesToRuntimeJar UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+
+> Task :app:compileDebugUnitTestJavaWithJavac FAILED
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:41: 错误: 程序包PositionCommands不存在
+        assertEquals(PositionCommands.Refusal.MESSAGE_NOT_FOUND,
+                                     ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:42: 错误: 找不到符号
+                PositionCommands.retryRefusal(null, false));
+                ^
+  符号:   变量 PositionCommands
+  位置: 类 PositionCommandsTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:48: 错误: 程序包PositionCommands不存在
+        assertEquals(PositionCommands.Refusal.NOT_AN_AI_POSITION,
+                                     ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:49: 错误: 找不到符号
+                PositionCommands.retryRefusal(learner, false));
+                ^
+  符号:   变量 PositionCommands
+  位置: 类 PositionCommandsTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:54: 错误: 程序包PositionCommands不存在
+        assertEquals(PositionCommands.Refusal.ATTEMPT_ALREADY_RUNNING,
+                                     ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:55: 错误: 找不到符号
+                PositionCommands.retryRefusal(aiPosition(null, null), true));
+                ^
+  符号:   变量 PositionCommands
+  位置: 类 PositionCommandsTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:60: 错误: 找不到符号
+        assertNull(PositionCommands.retryRefusal(aiPosition(null, null), false));
+                   ^
+  符号:   变量 PositionCommands
+  位置: 类 PositionCommandsTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:65: 错误: 找不到符号
+        assertNull(PositionCommands.retryRefusal(aiPosition("revision-1", null), false));
+                   ^
+  符号:   变量 PositionCommands
+  位置: 类 PositionCommandsTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:72: 错误: 程序包PositionCommands不存在
+        assertEquals(PositionCommands.Refusal.NO_STABLE_VERSION,
+                                     ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:73: 错误: 找不到符号
+                PositionCommands.resetRefusal(aiPosition(null, null), false));
+                ^
+  符号:   变量 PositionCommands
+  位置: 类 PositionCommandsTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:78: 错误: 找不到符号
+        assertNull(PositionCommands.resetRefusal(aiPosition("revision-1", null), false));
+                   ^
+  符号:   变量 PositionCommands
+  位置: 类 PositionCommandsTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:83: 错误: 程序包PositionCommands不存在
+        assertEquals(PositionCommands.Refusal.ATTEMPT_ALREADY_RUNNING,
+                                     ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:84: 错误: 找不到符号
+                PositionCommands.resetRefusal(aiPosition("revision-1", null), true));
+                ^
+  符号:   变量 PositionCommands
+  位置: 类 PositionCommandsTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:90: 错误: 程序包PositionCommands不存在
+        assertEquals(PositionCommands.Refusal.NOT_AN_AI_POSITION,
+                                     ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:91: 错误: 找不到符号
+                PositionCommands.resetRefusal(learner, false));
+                ^
+  符号:   变量 PositionCommands
+  位置: 类 PositionCommandsTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:99: 错误: 程序包PositionCommands不存在
+        assertEquals(PositionCommands.Refusal.REVISION_ALREADY_ACTIVE,
+                                     ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:100: 错误: 找不到符号
+                PositionCommands.selectRefusal(position, "revision-2", position.id));
+                ^
+  符号:   变量 PositionCommands
+  位置: 类 PositionCommandsTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:106: 错误: 程序包PositionCommands不存在
+        assertEquals(PositionCommands.Refusal.REVISION_NOT_OF_THIS_POSITION,
+                                     ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:107: 错误: 找不到符号
+                PositionCommands.selectRefusal(position, "revision-1", Guard.newId()));
+                ^
+  符号:   变量 PositionCommands
+  位置: 类 PositionCommandsTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:113: 错误: 程序包PositionCommands不存在
+        assertEquals(PositionCommands.Refusal.REVISION_NOT_OF_THIS_POSITION,
+                                     ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:114: 错误: 找不到符号
+                PositionCommands.selectRefusal(position, "revision-9", null));
+                ^
+  符号:   变量 PositionCommands
+  位置: 类 PositionCommandsTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:120: 错误: 找不到符号
+        assertNull(PositionCommands.selectRefusal(position, "revision-1", position.id));
+                   ^
+  符号:   变量 PositionCommands
+  位置: 类 PositionCommandsTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:126: 错误: 程序包PositionCommands不存在
+        assertEquals(PositionCommands.Refusal.NOT_AN_AI_POSITION,
+                                     ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:127: 错误: 找不到符号
+                PositionCommands.selectRefusal(learner, "revision-1", learner.id));
+                ^
+  符号:   变量 PositionCommands
+  位置: 类 PositionCommandsTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:133: 错误: 找不到符号
+        assertNull(PositionCommands.selectRefusal(position, "revision-1", position.id));
+                   ^
+  符号:   变量 PositionCommands
+  位置: 类 PositionCommandsTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:142: 错误: 找不到符号
+                PositionCommands.replacementCommand(previous, POLICY_VERSION, NOW + 1);
+                ^
+  符号:   变量 PositionCommands
+  位置: 类 PositionCommandsTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:163: 错误: 找不到符号
+                PositionCommands.replacementCommand(previous, FOREIGN_POLICY_VERSION, NOW + 1);
+                ^
+  符号:   变量 PositionCommands
+  位置: 类 PositionCommandsTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:173: 错误: 找不到符号
+            PositionCommands.replacementCommand(previous, null, NOW + 1);
+            ^
+  符号:   变量 PositionCommands
+
+  位置: 类 PositionCommandsTest
+28 个错误
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugUnitTestJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:42: 错误: 找不到符号
+                  PositionCommands.retryRefusal(null, false));
+                  ^
+    符号:   变量 PositionCommands
+    位置: 类 PositionCommandsTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:49: 错误: 找不到符号
+                  PositionCommands.retryRefusal(learner, false));
+                  ^
+    符号:   变量 PositionCommands
+    位置: 类 PositionCommandsTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:55: 错误: 找不到符号
+                  PositionCommands.retryRefusal(aiPosition(null, null), true));
+                  ^
+    符号:   变量 PositionCommands
+    位置: 类 PositionCommandsTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:60: 错误: 找不到符号
+          assertNull(PositionCommands.retryRefusal(aiPosition(null, null), false));
+                     ^
+    符号:   变量 PositionCommands
+    位置: 类 PositionCommandsTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:65: 错误: 找不到符号
+          assertNull(PositionCommands.retryRefusal(aiPosition("revision-1", null), false));
+                     ^
+    符号:   变量 PositionCommands
+    位置: 类 PositionCommandsTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:73: 错误: 找不到符号
+                  PositionCommands.resetRefusal(aiPosition(null, null), false));
+                  ^
+    符号:   变量 PositionCommands
+    位置: 类 PositionCommandsTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:78: 错误: 找不到符号
+          assertNull(PositionCommands.resetRefusal(aiPosition("revision-1", null), false));
+                     ^
+    符号:   变量 PositionCommands
+    位置: 类 PositionCommandsTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:84: 错误: 找不到符号
+                  PositionCommands.resetRefusal(aiPosition("revision-1", null), true));
+                  ^
+    符号:   变量 PositionCommands
+    位置: 类 PositionCommandsTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:91: 错误: 找不到符号
+                  PositionCommands.resetRefusal(learner, false));
+                  ^
+    符号:   变量 PositionCommands
+    位置: 类 PositionCommandsTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:100: 错误: 找不到符号
+                  PositionCommands.selectRefusal(position, "revision-2", position.id));
+                  ^
+    符号:   变量 PositionCommands
+    位置: 类 PositionCommandsTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:107: 错误: 找不到符号
+                  PositionCommands.selectRefusal(position, "revision-1", Guard.newId()));
+                  ^
+    符号:   变量 PositionCommands
+    位置: 类 PositionCommandsTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:114: 错误: 找不到符号
+                  PositionCommands.selectRefusal(position, "revision-9", null));
+                  ^
+    符号:   变量 PositionCommands
+    位置: 类 PositionCommandsTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:120: 错误: 找不到符号
+          assertNull(PositionCommands.selectRefusal(position, "revision-1", position.id));
+                     ^
+    符号:   变量 PositionCommands
+    位置: 类 PositionCommandsTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:127: 错误: 找不到符号
+                  PositionCommands.selectRefusal(learner, "revision-1", learner.id));
+                  ^
+    符号:   变量 PositionCommands
+    位置: 类 PositionCommandsTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:133: 错误: 找不到符号
+          assertNull(PositionCommands.selectRefusal(position, "revision-1", position.id));
+                     ^
+    符号:   变量 PositionCommands
+    位置: 类 PositionCommandsTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:142: 错误: 找不到符号
+                  PositionCommands.replacementCommand(previous, POLICY_VERSION, NOW + 1);
+                  ^
+    符号:   变量 PositionCommands
+    位置: 类 PositionCommandsTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:163: 错误: 找不到符号
+                  PositionCommands.replacementCommand(previous, FOREIGN_POLICY_VERSION, NOW + 1);
+                  ^
+    符号:   变量 PositionCommands
+    位置: 类 PositionCommandsTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:173: 错误: 找不到符号
+              PositionCommands.replacementCommand(previous, null, NOW + 1);
+              ^
+    符号:   变量 PositionCommands
+    位置: 类 PositionCommandsTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:41: 错误: 程序包PositionCommands不存在
+          assertEquals(PositionCommands.Refusal.MESSAGE_NOT_FOUND,
+                                       ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:48: 错误: 程序包PositionCommands不存在
+          assertEquals(PositionCommands.Refusal.NOT_AN_AI_POSITION,
+                                       ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:54: 错误: 程序包PositionCommands不存在
+          assertEquals(PositionCommands.Refusal.ATTEMPT_ALREADY_RUNNING,
+                                       ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:72: 错误: 程序包PositionCommands不存在
+          assertEquals(PositionCommands.Refusal.NO_STABLE_VERSION,
+                                       ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:83: 错误: 程序包PositionCommands不存在
+          assertEquals(PositionCommands.Refusal.ATTEMPT_ALREADY_RUNNING,
+                                       ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:90: 错误: 程序包PositionCommands不存在
+          assertEquals(PositionCommands.Refusal.NOT_AN_AI_POSITION,
+                                       ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:99: 错误: 程序包PositionCommands不存在
+          assertEquals(PositionCommands.Refusal.REVISION_ALREADY_ACTIVE,
+                                       ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:106: 错误: 程序包PositionCommands不存在
+          assertEquals(PositionCommands.Refusal.REVISION_NOT_OF_THIS_POSITION,
+                                       ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:113: 错误: 程序包PositionCommands不存在
+          assertEquals(PositionCommands.Refusal.REVISION_NOT_OF_THIS_POSITION,
+                                       ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\generation\PositionCommandsTest.java:126: 错误: 程序包PositionCommands不存在
+          assertEquals(PositionCommands.Refusal.NOT_AN_AI_POSITION,
+                                       ^
+  28 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+
+BUILD FAILED in 13s
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+52 actionable tasks: 1 executed, 51 up-to-date
+EXITCODE=1

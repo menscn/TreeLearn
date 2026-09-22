@@ -1,0 +1,26 @@
+# T-008 sizing, same caliber as the repository fixed on 2026-09-21 (non-empty, non-comment production lines)
+CapturedAt=2026-09-21T21:29:43.7498950+08:00
+Round=no-emulator round (user instruction 2026-09-21); the three JVM-testable seams are new in this round.
+Caliber=the same four exclusions the earlier adjudication used, applied with PowerShell (no bash on this machine)
+Command (judged lines, per file, then summed):
+  Get-ChildItem android/app/src/main/java/com/treelearn/app/generation -Filter *.java | ForEach-Object {
+    (Get-Content -LiteralPath \.FullName | Where-Object { \ -notmatch '^\s*\$' -and \ -notmatch '^\s*//' -and \ -notmatch '^\s*\*' -and \ -notmatch '^\s*/\*' }).Count }
+--- per file (judged lines / physical lines) ---
+61	85	AiGatewayStreams.java
+488	640	GenerationCoordinator.java
+11	25	GenerationGateway.java
+74	120	GenerationScheduler.java
+18	40	GenerationTelemetry.java
+21	34	LiveAttempt.java
+26	52	LiveAttempts.java
+18	34	RecoveryScan.java
+48	86	StreamBatch.java
+765	1116	TOTAL (task estimate was 200 judged lines)
+--- verdict ---
+expected=200 (estimated_production_lines in the task file)
+observed=765 judged / 1116 physical
+excess=565 lines over the soft limit, and 265 lines over the 500-line hard limit
+approval=none: no user-approved sizing exception exists for T-008, so this is reported as an unresolved
+  deviation rather than recorded as an exception (harness-tasks.md: an implementer may not grant it).
+note=this number grew by 31 judged lines in the no-emulator round, because the coordinator clock/scheduling
+  seam that the round needs (LiveAttempt, LiveAttempts, RecoveryScan) is production code.

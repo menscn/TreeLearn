@@ -1,0 +1,81 @@
+# T-037 documentation-impact evidence (rules/documentation.md minimum checks)
+# captured-at: 2026-09-21T23:46:39.6843955+08:00
+# cwd: D:\Project\Android\Treelearn
+
+# --- 1. changed documentation surfaces (diff --stat) ---
+# command: git -c core.quotepath=false diff --stat -- <the four files>
+
+warning: in the working copy of 'Docs/05-technical-design/知芽（TreeLearn）Android SQLite 建表入场确认清单_V1.0.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'android/README.md', LF will be replaced by CRLF the next time Git touches it
+ ...TreeLearn）Android SQLite 建表入场确认清单_V1.0.md |   7 +-
+ ...�（TreeLearn）Android本地优先技术架构方案_V1.0.md |  10 +-
+ android/README.md                                  | 494 ++++++++++++++++++++-
+ 3 files changed, 486 insertions(+), 25 deletions(-)
+
+# --- 2. whitespace check ---
+# command: git -c core.quotepath=false diff --check -- <the four files>
+# (LF/CRLF lines below are git warnings on stderr, not --check findings)
+warning: in the working copy of 'Docs/05-technical-design/知芽（TreeLearn）Android SQLite 建表入场确认清单_V1.0.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'android/README.md', LF will be replaced by CRLF the next time Git touches it
+DIFF_CHECK_EXITCODE=0
+
+# --- 3. UTF-8 / replacement-character scan of the four files ---
+# command: read each file as UTF-8 and count U+FFFD and U+0000
+android/README.md: replacement-char=0 nul=0
+Docs/05-technical-design/知芽（TreeLearn）Android SQLite 建表入场确认清单_V1.0.md: replacement-char=0 nul=0
+Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md: replacement-char=0 nul=0
+Docs/06-delivery/TreeLearn_V1_交付报告.md: replacement-char=0 nul=0
+
+# --- 4. reverse search for the superseded phrases the task names ---
+# command: rg -n --no-heading "没有承接引用|无处安放" .
+# expected: only the delivery report keeps them, carrying a visible historical-snapshot
+#           marker that points at the current authority.
+
+.\Docs\06-delivery\TreeLearn_V1_交付报告.md:77:3. `ChatCommands.send(...)` 带一个 `quote` 参数，但 `messages` 表没有承接引用的列，提示词设计文档也没有定义引用的线格式——**引用追问在当前数据模型里无处安放**，接线时要么先补 schema（需 `db-migration-reviewer` 与用户确认），要么明确返回可见拒绝。 **〔历史快照 · 2026-09-21〕本条第前半句已过期**：`T-2026-09-21-quote-persistence-messages-column-037` 已新增 `messages.quoted_text`（`NULL` = 无引用）与其不变式触发器，并把 `DATABASE_VERSION` 升为 2；当前权威为 `android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java`。本条保留为当时的事实记录；「引用进入提示词的线格式未定义」仍成立，归 `T-2026-09-21-real-data-path-wiring-032`。
+.\artifacts\evidence\T-037-docs.txt:32:# command: rg -n --no-heading "没有承接引用|无处安放" .
+.\artifacts\evidence\T-037-docs.txt:36:.\Docs\06-delivery\TreeLearn_V1_交付报告.md:77:3. `ChatCommands.send(...)` 带一个 `quote` 参数，但 `messages` 表没有承接引用的列，提示词设计文档也没有定义引用的线格式——**引用追问在当前数据模型里无处安放**，接线时要么先补 schema（需 `db-migration-reviewer` 与用户确认），要么明确返回可见拒绝。 **〔历史快照 · 2026-09-21〕本条第前半句已过期**：`T-2026-09-21-quote-persistence-messages-column-037` 已新增 `messages.quoted_text`（`NULL` = 无引用）与其不变式触发器，并把 `DATABASE_VERSION` 升为 2；当前权威为 `android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java`。本条保留为当时的事实记录；「引用进入提示词的线格式未定义」仍成立，归 `T-2026-09-21-real-data-path-wiring-032`。
+RG_EXITCODE=0
+
+# --- 5. the edited lines, read back (which line each fact landed on) ---
+# command: read the file and index the specific line
+README.md:235  | `MessageDao` | `messages` | `user_content` 只对 `USER` 行写入，且创建后不可变（触发器兜底）；`updateActiveReferences` 只移动当前版本/尝试引用，不覆盖任何历史；**§6.2.19 引用文字的两种拼法（域的 `''` ↔ 列的 `NULL`）在本类各存一处**（`quoteColumnValue` / `quoteFromColumn`），「引用只许出现在非空 `USER` 行」由库层触发器判定，本类不重复校验 |
+checklist:26    | `messages` | 分支内有序的用户消息与 AI 逻辑位置 | `ConversationRepository` → 聊天、搜索、上下文 | UUID PK | 每轮约 2 行；随对话增长 | 随分支删除 | 用户原文；`quoted_text` 亦为用户内容 | `branch_id + ordinal` **唯一**；AI 行持有当前版本/当前操作引用；用户消息正文创建后不可变；`quoted_text`（V2 新增）承接 §6.2.19 引用追问所选原文，`NULL` 表示无引用，**只允许出现在非空 `USER` 行**——该不变式是触发器（`ALTER TABLE ADD COLUMN` 无法带 CHECK），见 §3 迁移 | 消息序列模型被替代 |
+checklist:37    - **迁移**：DDL 只允许位于生产 `SQLiteOpenHelper.onCreate/onUpgrade`（或集中版本化 migration runner）；`DATABASE_VERSION` 单调递增，已发布版本的迁移步骤不可改写，禁止运行时散落 DDL。**已知限制（2026-09-21）**：V1 在开发期被修正过两次（`branches` 的锚点 CHECK），而当时 `DATABASE_VERSION` 为 1、前向迁移表为空——因此这些修正**只对新建库生效**。现状（T-037 之后）：`DATABASE_VERSION` 已升为 **2**，前向迁移表注册了一条 **V1→V2**（新增 `messages.quoted_text` 与其不变式触发器，见 §2 `messages`），该步骤**不重建 `branches`**，所以上述锚点限制**仍未被任何迁移覆盖**；任何已用旧 V1 DDL 建过库的设备会永久保留旧约束。首发前仍须处置：清库，或为 `branches` 另写一条前向迁移（SQLite 需重建该表并复制数据）。**承接者：首个发行版的版本切割任务（`T-2026-09-20-security-release-core-hardening-018` 的发布检查项）**；该任务必须在本限制被处置或明确豁免并记录之前，不得宣告可发布。
+arch:95         - `Message` 表示分支内固定的逻辑位置。用户消息正文创建后不可变；AI 消息只保存当前展示版本和当前生成操作的引用。用户消息还可以携带 §6.2.19 的引用追问文字（`quoted_text`，无引用时为 `NULL`）；该列只允许出现在非空用户消息行，由库层触发器判定（`ALTER TABLE ADD COLUMN` 无法带 CHECK，故不用 CHECK）。
+arch:130        | `messages` | 分支内有序用户消息和 AI 逻辑位置 | `branch_id,ordinal` 唯一；AI 当前版本/操作引用；`quoted_text`（V2 新增，§6.2.19 引用追问原文，`NULL` 为无引用，只许出现在非空 `USER` 行） |
+report:77       3. `ChatCommands.send(...)` 带一个 `quote` 参数，但 `messages` 表没有承接引用的列，提示词设计文档也没有定义引用的线格式——**引用追问在当前数据模型里无处安放**，接线时要么先补 schema（需 `db-migration-reviewer` 与用户确认），要么明确返回可见拒绝。 **〔历史快照 · 2026-09-21〕本条第前半句已过期**：`T-2026-09-21-quote-persistence-messages-column-037` 已新增 `messages.quoted_text`（`NULL` = 无引用）与其不变式触发器，并把 `DATABASE_VERSION` 升为 2；当前权威为 `android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java`。本条保留为当时的事实记录；「引用进入提示词的线格式未定义」仍成立，归 `T-2026-09-21-real-data-path-wiring-032`。
+EXITCODE=0
+
+# --- 6. tracked/untracked status of the four surfaces (why section 1 lists only 3) ---
+# command: git -c core.quotepath=false status --porcelain=v1 -- <the four files>
+ M "Docs/05-technical-design/知芽（TreeLearn）Android SQLite 建表入场确认清单_V1.0.md"
+ M Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md
+ M android/README.md
+?? Docs/06-delivery/TreeLearn_V1_交付报告.md
+# The delivery report is untracked (authored by T-033 and not yet committed), so `git diff`
+# cannot show it; the edit is evidenced by the report:77 read-back in section 5 instead.
+# android/README.md shows 494 changed lines in section 1 because earlier tasks already had
+# uncommitted edits in it; this task changed exactly one line (README.md:235, section 5).
+
+# --- 7. this task compiles and its suites pass (the same command as before the doc edits) ---
+# command: cd android; .\gradlew.bat check --no-daemon --console=plain   -> see T-037-check.txt
+CHECK_EXITCODE=0
+
+# --- 8. FIX ROUND (2026-09-22): documentation-impact re-check ---
+# captured-at: 2026-09-22T00:12:21.9150565+08:00
+# Why: the fix round changed no current-state runtime fact, so no doc surface needed editing;
+#   the only new fact is procedural (gradlew check is JVM-only -> the device-only androidTest
+#   suite is never compiled by it). That fact was recorded in the task file Gaps and in the
+#   root AGENTS.md failure library, not in a Docs/ page.
+# command (count the failure-library entries): read AGENTS.md, index the last line of the
+#   subsection "失败案例库", count lines matching ^- \[ and read the trailing tally note.
+  failure-library heading line = 69
+  entries (^- \[)            = 43
+  last entry tag             = - [2026-09-2
+  trailing tally note        = > 本节条目已超过 30 条（现 43 条），按本节开头「条
+EXITCODE=0
+  # added this round: [2026-09-22] [guard] 'a gate that cannot compile the suite it claims to cover'.
+  # encoding check on AGENTS.md: 
+  U+0000 count = 0 ; U+FFFD count = 0 ; bytes = 47582

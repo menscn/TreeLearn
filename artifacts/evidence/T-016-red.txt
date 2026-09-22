@@ -1,0 +1,1471 @@
+# T-016 RED evidence - run 1 (compile-level): the acceptance suite exists, no production source yet
+Generated : 2026-09-21T20:07:01+08:00
+Command   : cd android; .\gradlew.bat :tree-layout:test --no-daemon --console=plain
+Working   : D:\Project\Android\Treelearn
+Expected  : non-zero exit, javac stops on the com.treelearn.treelayout types that do not exist yet
+
+# raw output below (unmodified)
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :tree-layout:compileJava NO-SOURCE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+
+> Task :tree-layout:compileTestJava FAILED
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:15: 错误: 找不到符号
+    static final ViewportConstraints PHONE = ViewportConstraints.of(412f, 700f);
+                 ^
+  符号:   类 ViewportConstraints
+  位置: 类 Fixtures
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:18: 错误: 找不到符号
+    static final ViewportConstraints TABLET = ViewportConstraints.of(1024f, 640f);
+                 ^
+  符号:   类 ViewportConstraints
+  位置: 类 Fixtures
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:73: 错误: 找不到符号
+    static TreeSnapshot snapshot(String rootId, N... nodes) {
+           ^
+  符号:   类 TreeSnapshot
+  位置: 类 Fixtures
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:95: 错误: 找不到符号
+    static TreeSnapshot fixtureA(boolean bCollapsed) {
+           ^
+  符号:   类 TreeSnapshot
+  位置: 类 Fixtures
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:111: 错误: 找不到符号
+    static TreeSnapshot fixtureA() {
+           ^
+  符号:   类 TreeSnapshot
+  位置: 类 Fixtures
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:116: 错误: 找不到符号
+    static TreeSnapshot fixtureAWithoutSummary() {
+           ^
+  符号:   类 TreeSnapshot
+  位置: 类 Fixtures
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:127: 错误: 找不到符号
+    static TreeSnapshot twoLeaves(boolean qArchived) {
+           ^
+  符号:   类 TreeSnapshot
+  位置: 类 Fixtures
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:136: 错误: 找不到符号
+    static TreeSnapshot wideLeaves(int count, int rounds) {
+           ^
+  符号:   类 TreeSnapshot
+  位置: 类 Fixtures
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:146: 错误: 找不到符号
+    static TreeSnapshot balanced(int branching, int depth) {
+           ^
+  符号:   类 TreeSnapshot
+  位置: 类 Fixtures
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:167: 错误: 找不到符号
+    static TreeSnapshot chain(int length) {
+           ^
+  符号:   类 TreeSnapshot
+  位置: 类 Fixtures
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:175: 错误: 找不到符号
+    static String lastId(TreeSnapshot snapshot) {
+                         ^
+  符号:   类 TreeSnapshot
+  位置: 类 Fixtures
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:185: 错误: 找不到符号
+    static float[] leafBox(BranchGeometry branch) {
+                           ^
+  符号:   类 BranchGeometry
+  位置: 类 Fixtures
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:212: 错误: 找不到符号
+    static float leafTipX(BranchGeometry branch) {
+                          ^
+  符号:   类 BranchGeometry
+  位置: 类 Fixtures
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:216: 错误: 找不到符号
+    static float leafTipY(BranchGeometry branch) {
+                          ^
+  符号:   类 BranchGeometry
+  位置: 类 Fixtures
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:68: 错误: 找不到符号
+        LayoutNode build() {
+        ^
+  符号:   类 LayoutNode
+  位置: 类 N
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:25: 错误: 找不到符号
+    private static LayoutResult layout(TreeSnapshot snapshot, String current) {
+                                       ^
+  符号:   类 TreeSnapshot
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:25: 错误: 找不到符号
+    private static LayoutResult layout(TreeSnapshot snapshot, String current) {
+                   ^
+  符号:   类 LayoutResult
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:29: 错误: 找不到符号
+    private static List<String> ids(LayoutResult result) {
+                                    ^
+  符号:   类 LayoutResult
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:308: 错误: 找不到符号
+    private static int countLeaves(LayoutResult result) {
+                                   ^
+  符号:   类 LayoutResult
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutHitFitAnchorTest.java:19: 错误: 找不到符号
+    private static LayoutResult layout(TreeSnapshot snapshot, String current, Density density) {
+                                       ^
+  符号:   类 TreeSnapshot
+  位置: 类 TreeLayoutHitFitAnchorTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutHitFitAnchorTest.java:19: 错误: 找不到符号
+    private static LayoutResult layout(TreeSnapshot snapshot, String current, Density density) {
+                                                                              ^
+  符号:   类 Density
+  位置: 类 TreeLayoutHitFitAnchorTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutHitFitAnchorTest.java:19: 错误: 找不到符号
+    private static LayoutResult layout(TreeSnapshot snapshot, String current, Density density) {
+                   ^
+  符号:   类 LayoutResult
+  位置: 类 TreeLayoutHitFitAnchorTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutLabelTest.java:21: 错误: 找不到符号
+    private static LayoutResult layout(TreeSnapshot snapshot, String current, Density density) {
+                                       ^
+  符号:   类 TreeSnapshot
+  位置: 类 TreeLayoutLabelTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutLabelTest.java:21: 错误: 找不到符号
+    private static LayoutResult layout(TreeSnapshot snapshot, String current, Density density) {
+                                                                              ^
+  符号:   类 Density
+  位置: 类 TreeLayoutLabelTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutLabelTest.java:21: 错误: 找不到符号
+    private static LayoutResult layout(TreeSnapshot snapshot, String current, Density density) {
+                   ^
+  符号:   类 LayoutResult
+  位置: 类 TreeLayoutLabelTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutLabelTest.java:25: 错误: 找不到符号
+    private static LabelGeometry labelOf(LayoutResult result, String branchId) {
+                                         ^
+  符号:   类 LayoutResult
+  位置: 类 TreeLayoutLabelTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutLabelTest.java:25: 错误: 找不到符号
+    private static LabelGeometry labelOf(LayoutResult result, String branchId) {
+                   ^
+  符号:   类 LabelGeometry
+  位置: 类 TreeLayoutLabelTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutLabelTest.java:34: 错误: 找不到符号
+    private static List<BranchGeometry> leaves(LayoutResult result) {
+                                               ^
+  符号:   类 LayoutResult
+  位置: 类 TreeLayoutLabelTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutLabelTest.java:34: 错误: 找不到符号
+    private static List<BranchGeometry> leaves(LayoutResult result) {
+                        ^
+  符号:   类 BranchGeometry
+  位置: 类 TreeLayoutLabelTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutLabelTest.java:44: 错误: 找不到符号
+    private static float[] labelBox(LabelGeometry label) {
+                                    ^
+  符号:   类 LabelGeometry
+  位置: 类 TreeLayoutLabelTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:15: 错误: 找不到符号
+    static final ViewportConstraints PHONE = ViewportConstraints.of(412f, 700f);
+                                             ^
+  符号:   变量 ViewportConstraints
+  位置: 类 Fixtures
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:18: 错误: 找不到符号
+    static final ViewportConstraints TABLET = ViewportConstraints.of(1024f, 640f);
+                                              ^
+  符号:   变量 ViewportConstraints
+  位置: 类 Fixtures
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:69: 错误: 找不到符号
+            return new LayoutNode(id, parent, title, summary, rounds, unread, collapsed, archived);
+                       ^
+  符号:   类 LayoutNode
+  位置: 类 N
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:74: 错误: 找不到符号
+        List<LayoutNode> built = new ArrayList<>();
+             ^
+  符号:   类 LayoutNode
+  位置: 类 Fixtures
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:78: 错误: 找不到符号
+        return TreeSnapshot.of(rootId, built);
+               ^
+  符号:   变量 TreeSnapshot
+  位置: 类 Fixtures
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:176: 错误: 找不到符号
+        List<LayoutNode> nodes = snapshot.nodes();
+             ^
+  符号:   类 LayoutNode
+  位置: 类 Fixtures
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:26: 错误: 找不到符号
+        return TreeLayout.compute(snapshot, current, Density.MID, Fixtures.PHONE);
+                                                     ^
+  符号:   变量 Density
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:26: 错误: 找不到符号
+        return TreeLayout.compute(snapshot, current, Density.MID, Fixtures.PHONE);
+               ^
+  符号:   变量 TreeLayout
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:31: 错误: 找不到符号
+        for (BranchGeometry branch : result.branches()) {
+             ^
+  符号:   类 BranchGeometry
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:39: 错误: 找不到符号
+        BranchGeometry root = layout(Fixtures.fixtureA(), "a1").branch("r");
+        ^
+  符号:   类 BranchGeometry
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:41: 错误: 程序包BranchGeometry不存在
+        assertEquals(BranchGeometry.Kind.LIMB, root.kind);
+                                   ^
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:55: 错误: 找不到符号
+        TreeSnapshot snapshot = Fixtures.snapshot("r",
+        ^
+  符号:   类 TreeSnapshot
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:59: 错误: 找不到符号
+        LayoutResult chain = layout(snapshot, "a");
+        ^
+  符号:   类 LayoutResult
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:67: 错误: 找不到符号
+        TreeSnapshot capped = Fixtures.snapshot("r",
+        ^
+  符号:   类 TreeSnapshot
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:70: 错误: 找不到符号
+        LayoutResult capResult = layout(capped, "b");
+        ^
+  符号:   类 LayoutResult
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:79: 错误: 找不到符号
+        TreeSnapshot snapshot = Fixtures.snapshot("r",
+        ^
+  符号:   类 TreeSnapshot
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:84: 错误: 找不到符号
+        LayoutResult result = layout(snapshot, "r");
+        ^
+  符号:   类 LayoutResult
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:96: 错误: 找不到符号
+        LayoutResult forward = layout(Fixtures.snapshot("r",
+        ^
+  符号:   类 LayoutResult
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:98: 错误: 找不到符号
+        LayoutResult reversed = layout(Fixtures.snapshot("r",
+        ^
+  符号:   类 LayoutResult
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:110: 错误: 找不到符号
+        TreeSnapshot snapshot = Fixtures.snapshot("r",
+        ^
+  符号:   类 TreeSnapshot
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:112: 错误: 找不到符号
+        List<LayoutNode> children = snapshot.childrenOf("r");
+             ^
+  符号:   类 LayoutNode
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:123: 错误: 找不到符号
+        LayoutResult result = layout(Fixtures.fixtureA(), "a1");
+        ^
+  符号:   类 LayoutResult
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:127: 错误: 程序包BranchGeometry不存在
+        assertEquals(BranchGeometry.Kind.LEAF, result.branch("a1").kind);
+                                   ^
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:128: 错误: 程序包BranchGeometry不存在
+        assertEquals(BranchGeometry.Kind.LIMB, result.branch("a").kind);
+                                   ^
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:129: 错误: 程序包BranchGeometry不存在
+        assertEquals(BranchGeometry.Kind.BUD, result.branch("b").kind);
+                                   ^
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:134: 错误: 找不到符号
+        TreeSnapshot snapshot = Fixtures.snapshot("r",
+        ^
+  符号:   类 TreeSnapshot
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:138: 错误: 找不到符号
+        LayoutResult result = layout(snapshot, "r");
+        ^
+  符号:   类 LayoutResult
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:140: 错误: 程序包BranchGeometry不存在
+        assertEquals(BranchGeometry.Kind.LEAF, result.branch("a").kind);
+                                   ^
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:146: 错误: 找不到符号
+        LayoutResult result = layout(Fixtures.fixtureA(), "a1");
+        ^
+  符号:   类 LayoutResult
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:147: 错误: 找不到符号
+        BranchGeometry bud = result.branch("b");
+        ^
+  符号:   类 BranchGeometry
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:162: 错误: 找不到符号
+        TreeSnapshot snapshot = Fixtures.snapshot("r",
+        ^
+  符号:   类 TreeSnapshot
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:166: 错误: 找不到符号
+        LayoutResult result = layout(snapshot, "x");
+        ^
+  符号:   类 LayoutResult
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:168: 错误: 程序包BranchGeometry不存在
+        assertEquals(BranchGeometry.Kind.LEAF, result.branch("x").kind);
+                                   ^
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:175: 错误: 找不到符号
+        LayoutResult result = layout(Fixtures.fixtureA(), "a1");
+        ^
+  符号:   类 LayoutResult
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:182: 错误: 找不到符号
+            LayoutResult fallback = TreeLayout.compute(Fixtures.fixtureA(), hidden, Density.MID, Fixtures.PHONE);
+            ^
+  符号:   类 LayoutResult
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:182: 错误: 找不到符号
+            LayoutResult fallback = TreeLayout.compute(Fixtures.fixtureA(), hidden, Density.MID, Fixtures.PHONE);
+                                                                                    ^
+  符号:   变量 Density
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:182: 错误: 找不到符号
+            LayoutResult fallback = TreeLayout.compute(Fixtures.fixtureA(), hidden, Density.MID, Fixtures.PHONE);
+                                    ^
+  符号:   变量 TreeLayout
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:191: 错误: 找不到符号
+        LayoutResult first = layout(Fixtures.fixtureA(), "a1");
+        ^
+  符号:   类 LayoutResult
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:192: 错误: 找不到符号
+        LayoutResult second = layout(Fixtures.fixtureA(), "a1");
+        ^
+  符号:   类 LayoutResult
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:195: 错误: 找不到符号
+            BranchGeometry a = first.branches().get(i);
+            ^
+  符号:   类 BranchGeometry
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:196: 错误: 找不到符号
+            BranchGeometry b = second.branches().get(i);
+            ^
+  符号:   类 BranchGeometry
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:216: 错误: 找不到符号
+            LabelGeometry a = first.labels().get(i);
+            ^
+  符号:   类 LabelGeometry
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:217: 错误: 找不到符号
+            LabelGeometry b = second.labels().get(i);
+            ^
+  符号:   类 LabelGeometry
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:242: 错误: 找不到符号
+        LayoutResult result = TreeLayout.compute(TreeSnapshot.empty(), null, Density.NEAR, Fixtures.PHONE);
+        ^
+  符号:   类 LayoutResult
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:242: 错误: 找不到符号
+        LayoutResult result = TreeLayout.compute(TreeSnapshot.empty(), null, Density.NEAR, Fixtures.PHONE);
+                                                                             ^
+  符号:   变量 Density
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:242: 错误: 找不到符号
+        LayoutResult result = TreeLayout.compute(TreeSnapshot.empty(), null, Density.NEAR, Fixtures.PHONE);
+                              ^
+  符号:   变量 TreeLayout
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:242: 错误: 找不到符号
+        LayoutResult result = TreeLayout.compute(TreeSnapshot.empty(), null, Density.NEAR, Fixtures.PHONE);
+                                                 ^
+  符号:   变量 TreeSnapshot
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:249: 错误: 找不到符号
+        ViewTransform transform = result.fit(Fixtures.PHONE);
+        ^
+  符号:   类 ViewTransform
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:258: 错误: 找不到符号
+        TreeSnapshot snapshot = Fixtures.snapshot("r", Fixtures.n("r", null).rounds(3));
+        ^
+  符号:   类 TreeSnapshot
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:259: 错误: 找不到符号
+        LayoutResult result = TreeLayout.compute(snapshot, "r", Density.NEAR, Fixtures.PHONE);
+        ^
+  符号:   类 LayoutResult
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:259: 错误: 找不到符号
+        LayoutResult result = TreeLayout.compute(snapshot, "r", Density.NEAR, Fixtures.PHONE);
+                                                                ^
+  符号:   变量 Density
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:259: 错误: 找不到符号
+        LayoutResult result = TreeLayout.compute(snapshot, "r", Density.NEAR, Fixtures.PHONE);
+                              ^
+  符号:   变量 TreeLayout
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:261: 错误: 找不到符号
+        BranchGeometry root = result.branch("r");
+        ^
+  符号:   类 BranchGeometry
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:262: 错误: 程序包BranchGeometry不存在
+        assertEquals(BranchGeometry.Kind.LEAF, root.kind);
+                                   ^
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:272: 错误: 找不到符号
+        TreeSnapshot snapshot = Fixtures.chain(1200);
+        ^
+  符号:   类 TreeSnapshot
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:273: 错误: 找不到符号
+        LayoutResult result = layout(snapshot, "n1199");
+        ^
+  符号:   类 LayoutResult
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:275: 错误: 找不到符号
+        for (BranchGeometry branch : result.branches()) {
+             ^
+  符号:   类 BranchGeometry
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:287: 错误: 程序包BranchGeometry不存在
+        assertEquals(BranchGeometry.Kind.LEAF, result.branch("n1199").kind);
+                                   ^
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:288: 错误: 程序包BranchGeometry不存在
+        assertEquals(BranchGeometry.Kind.LIMB, result.branch("n0").kind);
+                                   ^
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:293: 错误: 找不到符号
+        TreeSnapshot snapshot = Fixtures.balanced(6, 5);
+        ^
+  符号:   类 TreeSnapshot
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:295: 错误: 找不到符号
+        LayoutResult result = layout(snapshot, Fixtures.lastId(snapshot));
+        ^
+  符号:   类 LayoutResult
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:301: 错误: 找不到符号
+        for (BranchGeometry branch : result.branches()) {
+             ^
+  符号:   类 BranchGeometry
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:310: 错误: 找不到符号
+        for (BranchGeometry branch : result.branches()) {
+             ^
+  符号:   类 BranchGeometry
+  位置: 类 TreeLayoutGeometryTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:311: 错误: 程序包BranchGeometry不存在
+            if (branch.kind == BranchGeometry.Kind.LEAF) {
+                                             ^
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutHitFitAnchorTest.java:20: 错误: 找不到符号
+        return TreeLayout.compute(snapshot, current, density, Fixtures.PHONE);
+               ^
+  符号:   变量 TreeLayout
+  位置: 类 TreeLayoutHitFitAnchorTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutHitFitAnchorTest.java:25: 错误: 找不到符号
+        for (Density density : new Density[] {Density.FAR, Density.MID, Density.NEAR}) {
+                                   ^
+  符号:   类 Density
+  位置: 类 TreeLayoutHitFitAnchorTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutHitFitAnchorTest.java:25: 错误: 找不到符号
+        for (Density density : new Density[] {Density.FAR, Density.MID, Density.NEAR}) {
+                                              ^
+  符号:   变量 Density
+  位置: 类 TreeLayoutHitFitAnchorTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutHitFitAnchorTest.java:25: 错误: 找不到符号
+        for (Density density : new Density[] {Density.FAR, Density.MID, Density.NEAR}) {
+                                                           ^
+  符号:   变量 Density
+  位置: 类 TreeLayoutHitFitAnchorTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutHitFitAnchorTest.java:25: 错误: 找不到符号
+        for (Density density : new Density[] {Density.FAR, Density.MID, Density.NEAR}) {
+                                                                        ^
+  符号:   变量 Density
+  位置: 类 TreeLayoutHitFitAnchorTest
+D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutHitFitAnchorTest.java:25: 错误: 找不到符号
+        for (Density density : new Density[] {Density.FAR, Density.MID, Density.NEAR}) {
+             ^
+  符号:   类 Density
+  位置: 类 TreeLayoutHitFitAnchorTest
+100 个错误
+
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':tree-layout:compileTestJava'.
+> Compilation failed; see the compiler output below.
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:15: 错误: 找不到符号
+      static final ViewportConstraints PHONE = ViewportConstraints.of(412f, 700f);
+                   ^
+    符号:   类 ViewportConstraints
+    位置: 类 Fixtures
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:18: 错误: 找不到符号
+      static final ViewportConstraints TABLET = ViewportConstraints.of(1024f, 640f);
+                   ^
+    符号:   类 ViewportConstraints
+    位置: 类 Fixtures
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:73: 错误: 找不到符号
+      static TreeSnapshot snapshot(String rootId, N... nodes) {
+             ^
+    符号:   类 TreeSnapshot
+    位置: 类 Fixtures
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:95: 错误: 找不到符号
+      static TreeSnapshot fixtureA(boolean bCollapsed) {
+             ^
+    符号:   类 TreeSnapshot
+    位置: 类 Fixtures
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:111: 错误: 找不到符号
+      static TreeSnapshot fixtureA() {
+             ^
+    符号:   类 TreeSnapshot
+    位置: 类 Fixtures
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:116: 错误: 找不到符号
+      static TreeSnapshot fixtureAWithoutSummary() {
+             ^
+    符号:   类 TreeSnapshot
+    位置: 类 Fixtures
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:127: 错误: 找不到符号
+      static TreeSnapshot twoLeaves(boolean qArchived) {
+             ^
+    符号:   类 TreeSnapshot
+    位置: 类 Fixtures
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:136: 错误: 找不到符号
+      static TreeSnapshot wideLeaves(int count, int rounds) {
+             ^
+    符号:   类 TreeSnapshot
+    位置: 类 Fixtures
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:146: 错误: 找不到符号
+      static TreeSnapshot balanced(int branching, int depth) {
+             ^
+    符号:   类 TreeSnapshot
+    位置: 类 Fixtures
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:167: 错误: 找不到符号
+      static TreeSnapshot chain(int length) {
+             ^
+    符号:   类 TreeSnapshot
+    位置: 类 Fixtures
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:175: 错误: 找不到符号
+      static String lastId(TreeSnapshot snapshot) {
+                           ^
+    符号:   类 TreeSnapshot
+    位置: 类 Fixtures
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:185: 错误: 找不到符号
+      static float[] leafBox(BranchGeometry branch) {
+                             ^
+    符号:   类 BranchGeometry
+    位置: 类 Fixtures
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:212: 错误: 找不到符号
+      static float leafTipX(BranchGeometry branch) {
+                            ^
+    符号:   类 BranchGeometry
+    位置: 类 Fixtures
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:216: 错误: 找不到符号
+      static float leafTipY(BranchGeometry branch) {
+                            ^
+    符号:   类 BranchGeometry
+    位置: 类 Fixtures
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:68: 错误: 找不到符号
+          LayoutNode build() {
+          ^
+    符号:   类 LayoutNode
+    位置: 类 N
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:25: 错误: 找不到符号
+      private static LayoutResult layout(TreeSnapshot snapshot, String current) {
+                                         ^
+    符号:   类 TreeSnapshot
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:25: 错误: 找不到符号
+      private static LayoutResult layout(TreeSnapshot snapshot, String current) {
+                     ^
+    符号:   类 LayoutResult
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:29: 错误: 找不到符号
+      private static List<String> ids(LayoutResult result) {
+                                      ^
+    符号:   类 LayoutResult
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:308: 错误: 找不到符号
+      private static int countLeaves(LayoutResult result) {
+                                     ^
+    符号:   类 LayoutResult
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutHitFitAnchorTest.java:19: 错误: 找不到符号
+      private static LayoutResult layout(TreeSnapshot snapshot, String current, Density density) {
+                                         ^
+    符号:   类 TreeSnapshot
+    位置: 类 TreeLayoutHitFitAnchorTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutHitFitAnchorTest.java:19: 错误: 找不到符号
+      private static LayoutResult layout(TreeSnapshot snapshot, String current, Density density) {
+                                                                                ^
+    符号:   类 Density
+    位置: 类 TreeLayoutHitFitAnchorTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutHitFitAnchorTest.java:19: 错误: 找不到符号
+      private static LayoutResult layout(TreeSnapshot snapshot, String current, Density density) {
+                     ^
+    符号:   类 LayoutResult
+    位置: 类 TreeLayoutHitFitAnchorTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutLabelTest.java:21: 错误: 找不到符号
+      private static LayoutResult layout(TreeSnapshot snapshot, String current, Density density) {
+                                         ^
+    符号:   类 TreeSnapshot
+    位置: 类 TreeLayoutLabelTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutLabelTest.java:21: 错误: 找不到符号
+      private static LayoutResult layout(TreeSnapshot snapshot, String current, Density density) {
+                                                                                ^
+    符号:   类 Density
+    位置: 类 TreeLayoutLabelTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutLabelTest.java:21: 错误: 找不到符号
+      private static LayoutResult layout(TreeSnapshot snapshot, String current, Density density) {
+                     ^
+    符号:   类 LayoutResult
+    位置: 类 TreeLayoutLabelTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutLabelTest.java:25: 错误: 找不到符号
+      private static LabelGeometry labelOf(LayoutResult result, String branchId) {
+                                           ^
+    符号:   类 LayoutResult
+    位置: 类 TreeLayoutLabelTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutLabelTest.java:25: 错误: 找不到符号
+      private static LabelGeometry labelOf(LayoutResult result, String branchId) {
+                     ^
+    符号:   类 LabelGeometry
+    位置: 类 TreeLayoutLabelTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutLabelTest.java:34: 错误: 找不到符号
+      private static List<BranchGeometry> leaves(LayoutResult result) {
+                                                 ^
+    符号:   类 LayoutResult
+    位置: 类 TreeLayoutLabelTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutLabelTest.java:34: 错误: 找不到符号
+      private static List<BranchGeometry> leaves(LayoutResult result) {
+                          ^
+    符号:   类 BranchGeometry
+    位置: 类 TreeLayoutLabelTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutLabelTest.java:44: 错误: 找不到符号
+      private static float[] labelBox(LabelGeometry label) {
+                                      ^
+    符号:   类 LabelGeometry
+    位置: 类 TreeLayoutLabelTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:15: 错误: 找不到符号
+      static final ViewportConstraints PHONE = ViewportConstraints.of(412f, 700f);
+                                               ^
+    符号:   变量 ViewportConstraints
+    位置: 类 Fixtures
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:18: 错误: 找不到符号
+      static final ViewportConstraints TABLET = ViewportConstraints.of(1024f, 640f);
+                                                ^
+    符号:   变量 ViewportConstraints
+    位置: 类 Fixtures
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:69: 错误: 找不到符号
+              return new LayoutNode(id, parent, title, summary, rounds, unread, collapsed, archived);
+                         ^
+    符号:   类 LayoutNode
+    位置: 类 N
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:74: 错误: 找不到符号
+          List<LayoutNode> built = new ArrayList<>();
+               ^
+    符号:   类 LayoutNode
+    位置: 类 Fixtures
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:78: 错误: 找不到符号
+          return TreeSnapshot.of(rootId, built);
+                 ^
+    符号:   变量 TreeSnapshot
+    位置: 类 Fixtures
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\Fixtures.java:176: 错误: 找不到符号
+          List<LayoutNode> nodes = snapshot.nodes();
+               ^
+    符号:   类 LayoutNode
+    位置: 类 Fixtures
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:26: 错误: 找不到符号
+          return TreeLayout.compute(snapshot, current, Density.MID, Fixtures.PHONE);
+                                                       ^
+    符号:   变量 Density
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:26: 错误: 找不到符号
+          return TreeLayout.compute(snapshot, current, Density.MID, Fixtures.PHONE);
+                 ^
+    符号:   变量 TreeLayout
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:31: 错误: 找不到符号
+          for (BranchGeometry branch : result.branches()) {
+               ^
+    符号:   类 BranchGeometry
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:39: 错误: 找不到符号
+          BranchGeometry root = layout(Fixtures.fixtureA(), "a1").branch("r");
+          ^
+    符号:   类 BranchGeometry
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:55: 错误: 找不到符号
+          TreeSnapshot snapshot = Fixtures.snapshot("r",
+          ^
+    符号:   类 TreeSnapshot
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:59: 错误: 找不到符号
+          LayoutResult chain = layout(snapshot, "a");
+          ^
+    符号:   类 LayoutResult
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:67: 错误: 找不到符号
+          TreeSnapshot capped = Fixtures.snapshot("r",
+          ^
+    符号:   类 TreeSnapshot
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:70: 错误: 找不到符号
+          LayoutResult capResult = layout(capped, "b");
+          ^
+    符号:   类 LayoutResult
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:79: 错误: 找不到符号
+          TreeSnapshot snapshot = Fixtures.snapshot("r",
+          ^
+    符号:   类 TreeSnapshot
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:84: 错误: 找不到符号
+          LayoutResult result = layout(snapshot, "r");
+          ^
+    符号:   类 LayoutResult
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:96: 错误: 找不到符号
+          LayoutResult forward = layout(Fixtures.snapshot("r",
+          ^
+    符号:   类 LayoutResult
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:98: 错误: 找不到符号
+          LayoutResult reversed = layout(Fixtures.snapshot("r",
+          ^
+    符号:   类 LayoutResult
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:110: 错误: 找不到符号
+          TreeSnapshot snapshot = Fixtures.snapshot("r",
+          ^
+    符号:   类 TreeSnapshot
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:112: 错误: 找不到符号
+          List<LayoutNode> children = snapshot.childrenOf("r");
+               ^
+    符号:   类 LayoutNode
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:123: 错误: 找不到符号
+          LayoutResult result = layout(Fixtures.fixtureA(), "a1");
+          ^
+    符号:   类 LayoutResult
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:134: 错误: 找不到符号
+          TreeSnapshot snapshot = Fixtures.snapshot("r",
+          ^
+    符号:   类 TreeSnapshot
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:138: 错误: 找不到符号
+          LayoutResult result = layout(snapshot, "r");
+          ^
+    符号:   类 LayoutResult
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:146: 错误: 找不到符号
+          LayoutResult result = layout(Fixtures.fixtureA(), "a1");
+          ^
+    符号:   类 LayoutResult
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:147: 错误: 找不到符号
+          BranchGeometry bud = result.branch("b");
+          ^
+    符号:   类 BranchGeometry
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:162: 错误: 找不到符号
+          TreeSnapshot snapshot = Fixtures.snapshot("r",
+          ^
+    符号:   类 TreeSnapshot
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:166: 错误: 找不到符号
+          LayoutResult result = layout(snapshot, "x");
+          ^
+    符号:   类 LayoutResult
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:175: 错误: 找不到符号
+          LayoutResult result = layout(Fixtures.fixtureA(), "a1");
+          ^
+    符号:   类 LayoutResult
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:182: 错误: 找不到符号
+              LayoutResult fallback = TreeLayout.compute(Fixtures.fixtureA(), hidden, Density.MID, Fixtures.PHONE);
+              ^
+    符号:   类 LayoutResult
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:182: 错误: 找不到符号
+              LayoutResult fallback = TreeLayout.compute(Fixtures.fixtureA(), hidden, Density.MID, Fixtures.PHONE);
+                                                                                      ^
+    符号:   变量 Density
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:182: 错误: 找不到符号
+              LayoutResult fallback = TreeLayout.compute(Fixtures.fixtureA(), hidden, Density.MID, Fixtures.PHONE);
+                                      ^
+    符号:   变量 TreeLayout
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:191: 错误: 找不到符号
+          LayoutResult first = layout(Fixtures.fixtureA(), "a1");
+          ^
+    符号:   类 LayoutResult
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:192: 错误: 找不到符号
+          LayoutResult second = layout(Fixtures.fixtureA(), "a1");
+          ^
+    符号:   类 LayoutResult
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:195: 错误: 找不到符号
+              BranchGeometry a = first.branches().get(i);
+              ^
+    符号:   类 BranchGeometry
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:196: 错误: 找不到符号
+              BranchGeometry b = second.branches().get(i);
+              ^
+    符号:   类 BranchGeometry
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:216: 错误: 找不到符号
+              LabelGeometry a = first.labels().get(i);
+              ^
+    符号:   类 LabelGeometry
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:217: 错误: 找不到符号
+              LabelGeometry b = second.labels().get(i);
+              ^
+    符号:   类 LabelGeometry
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:242: 错误: 找不到符号
+          LayoutResult result = TreeLayout.compute(TreeSnapshot.empty(), null, Density.NEAR, Fixtures.PHONE);
+          ^
+    符号:   类 LayoutResult
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:242: 错误: 找不到符号
+          LayoutResult result = TreeLayout.compute(TreeSnapshot.empty(), null, Density.NEAR, Fixtures.PHONE);
+                                                                               ^
+    符号:   变量 Density
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:242: 错误: 找不到符号
+          LayoutResult result = TreeLayout.compute(TreeSnapshot.empty(), null, Density.NEAR, Fixtures.PHONE);
+                                ^
+    符号:   变量 TreeLayout
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:242: 错误: 找不到符号
+          LayoutResult result = TreeLayout.compute(TreeSnapshot.empty(), null, Density.NEAR, Fixtures.PHONE);
+                                                   ^
+    符号:   变量 TreeSnapshot
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:249: 错误: 找不到符号
+          ViewTransform transform = result.fit(Fixtures.PHONE);
+          ^
+    符号:   类 ViewTransform
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:258: 错误: 找不到符号
+          TreeSnapshot snapshot = Fixtures.snapshot("r", Fixtures.n("r", null).rounds(3));
+          ^
+    符号:   类 TreeSnapshot
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:259: 错误: 找不到符号
+          LayoutResult result = TreeLayout.compute(snapshot, "r", Density.NEAR, Fixtures.PHONE);
+          ^
+    符号:   类 LayoutResult
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:259: 错误: 找不到符号
+          LayoutResult result = TreeLayout.compute(snapshot, "r", Density.NEAR, Fixtures.PHONE);
+                                                                  ^
+    符号:   变量 Density
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:259: 错误: 找不到符号
+          LayoutResult result = TreeLayout.compute(snapshot, "r", Density.NEAR, Fixtures.PHONE);
+                                ^
+    符号:   变量 TreeLayout
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:261: 错误: 找不到符号
+          BranchGeometry root = result.branch("r");
+          ^
+    符号:   类 BranchGeometry
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:272: 错误: 找不到符号
+          TreeSnapshot snapshot = Fixtures.chain(1200);
+          ^
+    符号:   类 TreeSnapshot
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:273: 错误: 找不到符号
+          LayoutResult result = layout(snapshot, "n1199");
+          ^
+    符号:   类 LayoutResult
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:275: 错误: 找不到符号
+          for (BranchGeometry branch : result.branches()) {
+               ^
+    符号:   类 BranchGeometry
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:293: 错误: 找不到符号
+          TreeSnapshot snapshot = Fixtures.balanced(6, 5);
+          ^
+    符号:   类 TreeSnapshot
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:295: 错误: 找不到符号
+          LayoutResult result = layout(snapshot, Fixtures.lastId(snapshot));
+          ^
+    符号:   类 LayoutResult
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:301: 错误: 找不到符号
+          for (BranchGeometry branch : result.branches()) {
+               ^
+    符号:   类 BranchGeometry
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:310: 错误: 找不到符号
+          for (BranchGeometry branch : result.branches()) {
+               ^
+    符号:   类 BranchGeometry
+    位置: 类 TreeLayoutGeometryTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutHitFitAnchorTest.java:20: 错误: 找不到符号
+          return TreeLayout.compute(snapshot, current, density, Fixtures.PHONE);
+                 ^
+    符号:   变量 TreeLayout
+    位置: 类 TreeLayoutHitFitAnchorTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutHitFitAnchorTest.java:25: 错误: 找不到符号
+          for (Density density : new Density[] {Density.FAR, Density.MID, Density.NEAR}) {
+                                     ^
+    符号:   类 Density
+    位置: 类 TreeLayoutHitFitAnchorTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutHitFitAnchorTest.java:25: 错误: 找不到符号
+          for (Density density : new Density[] {Density.FAR, Density.MID, Density.NEAR}) {
+                                                ^
+    符号:   变量 Density
+    位置: 类 TreeLayoutHitFitAnchorTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutHitFitAnchorTest.java:25: 错误: 找不到符号
+          for (Density density : new Density[] {Density.FAR, Density.MID, Density.NEAR}) {
+                                                             ^
+    符号:   变量 Density
+    位置: 类 TreeLayoutHitFitAnchorTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutHitFitAnchorTest.java:25: 错误: 找不到符号
+          for (Density density : new Density[] {Density.FAR, Density.MID, Density.NEAR}) {
+                                                                          ^
+    符号:   变量 Density
+    位置: 类 TreeLayoutHitFitAnchorTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutHitFitAnchorTest.java:25: 错误: 找不到符号
+          for (Density density : new Density[] {Density.FAR, Density.MID, Density.NEAR}) {
+               ^
+    符号:   类 Density
+    位置: 类 TreeLayoutHitFitAnchorTest
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:41: 错误: 程序包BranchGeometry不存在
+          assertEquals(BranchGeometry.Kind.LIMB, root.kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:127: 错误: 程序包BranchGeometry不存在
+          assertEquals(BranchGeometry.Kind.LEAF, result.branch("a1").kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:128: 错误: 程序包BranchGeometry不存在
+          assertEquals(BranchGeometry.Kind.LIMB, result.branch("a").kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:129: 错误: 程序包BranchGeometry不存在
+          assertEquals(BranchGeometry.Kind.BUD, result.branch("b").kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:140: 错误: 程序包BranchGeometry不存在
+          assertEquals(BranchGeometry.Kind.LEAF, result.branch("a").kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:168: 错误: 程序包BranchGeometry不存在
+          assertEquals(BranchGeometry.Kind.LEAF, result.branch("x").kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:262: 错误: 程序包BranchGeometry不存在
+          assertEquals(BranchGeometry.Kind.LEAF, root.kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:287: 错误: 程序包BranchGeometry不存在
+          assertEquals(BranchGeometry.Kind.LEAF, result.branch("n1199").kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:288: 错误: 程序包BranchGeometry不存在
+          assertEquals(BranchGeometry.Kind.LIMB, result.branch("n0").kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\tree-layout\src\test\java\com\treelearn\treelayout\TreeLayoutGeometryTest.java:311: 错误: 程序包BranchGeometry不存在
+              if (branch.kind == BranchGeometry.Kind.LEAF) {
+                                               ^
+  100 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+BUILD FAILED in 12s
+1 actionable task: 1 executed
+EXITCODE=1
+
+
+# T-016 RED evidence - run 2 (behavioural): the input/output model is in place and
+# TreeLayout.compute is a fail-closed stub (returns LayoutResult.empty()), so the suite
+# now fails on real assertions instead of on missing names. Same command as run 1.
+Generated : 2026-09-21T20:08:25+08:00
+Command   : cd android; .\gradlew.bat :tree-layout:test --no-daemon --console=plain
+
+# raw output below (unmodified)
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :tree-layout:compileJava
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes
+> Task :tree-layout:compileTestJava
+> Task :tree-layout:processTestResources NO-SOURCE
+> Task :tree-layout:testClasses
+
+> Task :tree-layout:test FAILED
+
+TreeLayoutGeometryTest > segmentLengthUsesRoundsDepthDecayAndTheCap FAILED
+    java.lang.NullPointerException: Cannot read field "length" because the return value of "com.treelearn.treelayout.LayoutResult.branch(String)" is null
+        at com.treelearn.treelayout.TreeLayoutGeometryTest.segmentLengthUsesRoundsDepthDecayAndTheCap(TreeLayoutGeometryTest.java:60)
+
+TreeLayoutGeometryTest > siblingsFanOutByLeafWeightAndSproutAlongTheirParent FAILED
+    java.lang.NullPointerException: Cannot read field "direction" because the return value of "com.treelearn.treelayout.LayoutResult.branch(String)" is null
+        at com.treelearn.treelayout.TreeLayoutGeometryTest.siblingsFanOutByLeafWeightAndSproutAlongTheirParent(TreeLayoutGeometryTest.java:85)
+
+TreeLayoutGeometryTest > emptySnapshotProducesAnEmptyFiniteResult PASSED
+
+TreeLayoutGeometryTest > rootIsATrunkGrowingStraightUpWithRoundDerivedLength FAILED
+    java.lang.AssertionError
+        at org.junit.Assert.fail(Assert.java:87)
+        at org.junit.Assert.assertTrue(Assert.java:42)
+        at org.junit.Assert.assertNotNull(Assert.java:713)
+        at org.junit.Assert.assertNotNull(Assert.java:723)
+        at com.treelearn.treelayout.TreeLayoutGeometryTest.rootIsATrunkGrowingStraightUpWithRoundDerivedLength(TreeLayoutGeometryTest.java:40)
+
+TreeLayoutGeometryTest > collapsedBranchWithoutVisibleChildrenIsStillALeaf FAILED
+    java.lang.AssertionError: expected:<2> but was:<0>
+        at org.junit.Assert.fail(Assert.java:89)
+        at org.junit.Assert.failNotEquals(Assert.java:835)
+        at org.junit.Assert.assertEquals(Assert.java:647)
+        at org.junit.Assert.assertEquals(Assert.java:633)
+        at com.treelearn.treelayout.TreeLayoutGeometryTest.collapsedBranchWithoutVisibleChildrenIsStillALeaf(TreeLayoutGeometryTest.java:167)
+
+TreeLayoutGeometryTest > snapshotChildrenKeepTheirInputOrder PASSED
+
+TreeLayoutGeometryTest > singleNodeTreeIsOneLeafAndKeepsTheSoilBand FAILED
+    java.lang.AssertionError: expected:<1> but was:<0>
+        at org.junit.Assert.fail(Assert.java:89)
+        at org.junit.Assert.failNotEquals(Assert.java:835)
+        at org.junit.Assert.assertEquals(Assert.java:647)
+        at org.junit.Assert.assertEquals(Assert.java:633)
+        at com.treelearn.treelayout.TreeLayoutGeometryTest.singleNodeTreeIsOneLeafAndKeepsTheSoilBand(TreeLayoutGeometryTest.java:260)
+
+TreeLayoutGeometryTest > currentPathIsFlaggedAndFallsBackToTheRootWhenTargetIsNotVisible FAILED
+    java.lang.NullPointerException: Cannot read field "onCurrentPath" because the return value of "com.treelearn.treelayout.LayoutResult.branch(String)" is null
+        at com.treelearn.treelayout.TreeLayoutGeometryTest.currentPathIsFlaggedAndFallsBackToTheRootWhenTargetIsNotVisible(TreeLayoutGeometryTest.java:176)
+
+TreeLayoutGeometryTest > deepChainStaysFinite FAILED
+    java.lang.AssertionError: expected:<1200> but was:<0>
+        at org.junit.Assert.fail(Assert.java:89)
+        at org.junit.Assert.failNotEquals(Assert.java:835)
+        at org.junit.Assert.assertEquals(Assert.java:647)
+        at org.junit.Assert.assertEquals(Assert.java:633)
+        at com.treelearn.treelayout.TreeLayoutGeometryTest.deepChainStaysFinite(TreeLayoutGeometryTest.java:274)
+
+TreeLayoutGeometryTest > sameInputProducesBitIdenticalOutput PASSED
+
+TreeLayoutGeometryTest > collapsedBranchCountsHiddenDescendantsAndTheirUnread FAILED
+    java.lang.NullPointerException: Cannot read field "hiddenDescendants" because "bud" is null
+        at com.treelearn.treelayout.TreeLayoutGeometryTest.collapsedBranchCountsHiddenDescendantsAndTheirUnread(TreeLayoutGeometryTest.java:148)
+
+TreeLayoutGeometryTest > branchWithOnlyArchivedChildrenBecomesALeaf FAILED
+    java.lang.AssertionError: expected:<2> but was:<0>
+        at org.junit.Assert.fail(Assert.java:89)
+        at org.junit.Assert.failNotEquals(Assert.java:835)
+        at org.junit.Assert.assertEquals(Assert.java:647)
+        at org.junit.Assert.assertEquals(Assert.java:633)
+        at com.treelearn.treelayout.TreeLayoutGeometryTest.branchWithOnlyArchivedChildrenBecomesALeaf(TreeLayoutGeometryTest.java:139)
+
+TreeLayoutGeometryTest > largeTreeStaysFiniteAndReportsItsSize FAILED
+    java.lang.AssertionError: expected:<9331> but was:<0>
+        at org.junit.Assert.fail(Assert.java:89)
+        at org.junit.Assert.failNotEquals(Assert.java:835)
+        at org.junit.Assert.assertEquals(Assert.java:647)
+        at org.junit.Assert.assertEquals(Assert.java:633)
+        at com.treelearn.treelayout.TreeLayoutGeometryTest.largeTreeStaysFiniteAndReportsItsSize(TreeLayoutGeometryTest.java:297)
+
+TreeLayoutGeometryTest > archivedSubtreesLeaveTheDefaultLayout FAILED
+    java.lang.AssertionError: expected:<4> but was:<0>
+        at org.junit.Assert.fail(Assert.java:89)
+        at org.junit.Assert.failNotEquals(Assert.java:835)
+        at org.junit.Assert.assertEquals(Assert.java:647)
+        at org.junit.Assert.assertEquals(Assert.java:633)
+        at com.treelearn.treelayout.TreeLayoutGeometryTest.archivedSubtreesLeaveTheDefaultLayout(TreeLayoutGeometryTest.java:124)
+
+TreeLayoutGeometryTest > childOrderFollowsTheSnapshotOrder FAILED
+    java.lang.NullPointerException: Cannot read field "direction" because the return value of "com.treelearn.treelayout.LayoutResult.branch(String)" is null
+        at com.treelearn.treelayout.TreeLayoutGeometryTest.childOrderFollowsTheSnapshotOrder(TreeLayoutGeometryTest.java:100)
+
+TreeLayoutHitFitAnchorTest > screenPointsRoundTripThroughTheFitTransform PASSED
+
+TreeLayoutHitFitAnchorTest > hitTestOutsideEveryRegionReturnsNull PASSED
+
+TreeLayoutHitFitAnchorTest > degenerateViewportsStayFinite FAILED
+    java.lang.IllegalArgumentException: width must be finite and non-negative: -10.0
+        at com.treelearn.treelayout.ViewportConstraints.requireFiniteNonNegative(ViewportConstraints.java:46)
+        at com.treelearn.treelayout.ViewportConstraints.<init>(ViewportConstraints.java:34)
+        at com.treelearn.treelayout.ViewportConstraints.of(ViewportConstraints.java:28)
+        at com.treelearn.treelayout.TreeLayoutHitFitAnchorTest.degenerateViewportsStayFinite(TreeLayoutHitFitAnchorTest.java:119)
+
+TreeLayoutHitFitAnchorTest > collapseNeverMovesTheSurvivingNodes FAILED
+    java.lang.AssertionError
+        at org.junit.Assert.fail(Assert.java:87)
+        at org.junit.Assert.assertTrue(Assert.java:42)
+        at org.junit.Assert.assertNotNull(Assert.java:713)
+        at org.junit.Assert.assertNotNull(Assert.java:723)
+        at com.treelearn.treelayout.TreeLayoutHitFitAnchorTest.collapseNeverMovesTheSurvivingNodes(TreeLayoutHitFitAnchorTest.java:152)
+
+TreeLayoutHitFitAnchorTest > archivingASiblingReportsTheExactAnchorShift FAILED
+    java.lang.NullPointerException: Cannot read field "tipX" because the return value of "com.treelearn.treelayout.LayoutResult.branch(String)" is null
+        at com.treelearn.treelayout.TreeLayoutHitFitAnchorTest.archivingASiblingReportsTheExactAnchorShift(TreeLayoutHitFitAnchorTest.java:170)
+
+TreeLayoutHitFitAnchorTest > boundsCoverEveryTipBaseAndLabel FAILED
+    java.lang.AssertionError
+        at org.junit.Assert.fail(Assert.java:87)
+        at org.junit.Assert.assertTrue(Assert.java:42)
+        at org.junit.Assert.assertTrue(Assert.java:53)
+        at com.treelearn.treelayout.TreeLayoutHitFitAnchorTest.boundsCoverEveryTipBaseAndLabel(TreeLayoutHitFitAnchorTest.java:202)
+
+TreeLayoutHitFitAnchorTest > everyVisibleNodeIsHittableAtItsOwnAnchor FAILED
+    java.lang.AssertionError: expected:<4> but was:<0>
+        at org.junit.Assert.fail(Assert.java:89)
+        at org.junit.Assert.failNotEquals(Assert.java:835)
+        at org.junit.Assert.assertEquals(Assert.java:647)
+        at org.junit.Assert.assertEquals(Assert.java:633)
+        at com.treelearn.treelayout.TreeLayoutHitFitAnchorTest.everyVisibleNodeIsHittableAtItsOwnAnchor(TreeLayoutHitFitAnchorTest.java:27)
+
+TreeLayoutHitFitAnchorTest > viewTransformRefusesANonPositiveScale PASSED
+
+TreeLayoutHitFitAnchorTest > fitKeepsTheTreeInsideTheViewportAndAlignsTheBottom FAILED
+    java.lang.AssertionError: r 412.0x700.0 expected:<1.25> but was:<1.0>
+        at org.junit.Assert.fail(Assert.java:89)
+        at org.junit.Assert.failNotEquals(Assert.java:835)
+        at org.junit.Assert.assertEquals(Assert.java:577)
+        at com.treelearn.treelayout.TreeLayoutHitFitAnchorTest.fitKeepsTheTreeInsideTheViewportAndAlignsTheBottom(TreeLayoutHitFitAnchorTest.java:100)
+
+TreeLayoutHitFitAnchorTest > hitTestAtALabelCentreReturnsTheLabeledBranch FAILED
+    java.lang.AssertionError
+        at org.junit.Assert.fail(Assert.java:87)
+        at org.junit.Assert.assertTrue(Assert.java:42)
+        at org.junit.Assert.assertTrue(Assert.java:53)
+        at com.treelearn.treelayout.TreeLayoutHitFitAnchorTest.hitTestAtALabelCentreReturnsTheLabeledBranch(TreeLayoutHitFitAnchorTest.java:62)
+
+TreeLayoutLabelTest > midDensityPlacesOneBarLabelPerLeafAtTheMeasuredPosition FAILED
+    java.lang.AssertionError: expected:<1> but was:<0>
+        at org.junit.Assert.fail(Assert.java:89)
+        at org.junit.Assert.failNotEquals(Assert.java:835)
+        at org.junit.Assert.assertEquals(Assert.java:647)
+        at org.junit.Assert.assertEquals(Assert.java:633)
+        at com.treelearn.treelayout.TreeLayoutLabelTest.midDensityPlacesOneBarLabelPerLeafAtTheMeasuredPosition(TreeLayoutLabelTest.java:80)
+
+TreeLayoutLabelTest > crowdedBarOmitsLabelsButKeepsEveryNodeHittable FAILED
+    java.lang.AssertionError
+        at org.junit.Assert.fail(Assert.java:87)
+        at org.junit.Assert.assertTrue(Assert.java:42)
+        at org.junit.Assert.assertFalse(Assert.java:65)
+        at org.junit.Assert.assertFalse(Assert.java:75)
+        at com.treelearn.treelayout.TreeLayoutLabelTest.crowdedBarOmitsLabelsButKeepsEveryNodeHittable(TreeLayoutLabelTest.java:148)
+
+TreeLayoutLabelTest > farDensityPlacesNoLabelsAndKeepsEveryNodeHittable PASSED
+
+TreeLayoutLabelTest > nearDensityAddsTheSummaryLineOnlyWhenTheBranchHasOne FAILED
+    java.lang.AssertionError
+        at org.junit.Assert.fail(Assert.java:87)
+        at org.junit.Assert.assertTrue(Assert.java:42)
+        at org.junit.Assert.assertNotNull(Assert.java:713)
+        at org.junit.Assert.assertNotNull(Assert.java:723)
+        at com.treelearn.treelayout.TreeLayoutLabelTest.nearDensityAddsTheSummaryLineOnlyWhenTheBranchHasOne(TreeLayoutLabelTest.java:97)
+
+TreeLayoutLabelTest > canopyBarSitsEntirelyAboveTheCrownAndAboveEveryLeafBox FAILED
+    java.lang.AssertionError
+        at org.junit.Assert.fail(Assert.java:87)
+        at org.junit.Assert.assertTrue(Assert.java:42)
+        at org.junit.Assert.assertFalse(Assert.java:65)
+        at org.junit.Assert.assertFalse(Assert.java:75)
+        at com.treelearn.treelayout.TreeLayoutLabelTest.canopyBarSitsEntirelyAboveTheCrownAndAboveEveryLeafBox(TreeLayoutLabelTest.java:182)
+
+TreeLayoutLabelTest > currentBranchLeafTakesTheFirstRow FAILED
+    java.lang.AssertionError
+        at org.junit.Assert.fail(Assert.java:87)
+        at org.junit.Assert.assertTrue(Assert.java:42)
+        at org.junit.Assert.assertNotNull(Assert.java:713)
+        at org.junit.Assert.assertNotNull(Assert.java:723)
+        at com.treelearn.treelayout.TreeLayoutLabelTest.currentBranchLeafTakesTheFirstRow(TreeLayoutLabelTest.java:168)
+
+TreeLayoutLabelTest > barLabelsNeverOverlapAndNeverCoverALeaf FAILED
+    java.lang.AssertionError
+        at org.junit.Assert.fail(Assert.java:87)
+        at org.junit.Assert.assertTrue(Assert.java:42)
+        at org.junit.Assert.assertFalse(Assert.java:65)
+        at org.junit.Assert.assertFalse(Assert.java:75)
+        at com.treelearn.treelayout.TreeLayoutLabelTest.barLabelsNeverOverlapAndNeverCoverALeaf(TreeLayoutLabelTest.java:115)
+
+TreeLayoutLabelTest > densityIsDerivedFromTheZoomScale PASSED
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+
+33 tests completed, 25 failed
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':tree-layout:test'.
+> There were failing tests. See the report at: file:///D:/Project/Android/Treelearn/android/tree-layout/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+BUILD FAILED in 14s
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+3 actionable tasks: 3 executed
+EXITCODE=1
+
+# T-016 RED evidence - run 3 (re-measured against the shipped 34-test suite).
+# Why: runs 1-2 measured a 33-test revision; the suite was extended while still red, so those counts
+# are stale and cannot be re-derived from any artifact. To keep RED self-consistent with the shipped
+# suite, TreeLayout.compute was temporarily degraded to a fail-closed stub
+# (return LayoutResult.empty(); stub sha256 FA72FB2E...F4252097) and the same command re-run.
+Generated : 2026-09-21T20:18:54.8609537+08:00
+Command   : cd android; .\gradlew.bat :tree-layout:test --no-daemon --console=plain
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :tree-layout:compileJava
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes
+> Task :tree-layout:compileTestJava UP-TO-DATE
+> Task :tree-layout:processTestResources NO-SOURCE
+> Task :tree-layout:testClasses UP-TO-DATE
+
+> Task :tree-layout:test FAILED
+
+TreeLayoutGeometryTest > segmentLengthUsesRoundsDepthDecayAndTheCap FAILED
+    java.lang.NullPointerException: Cannot read field "length" because the return value of "com.treelearn.treelayout.LayoutResult.branch(String)" is null
+        at com.treelearn.treelayout.TreeLayoutGeometryTest.segmentLengthUsesRoundsDepthDecayAndTheCap(TreeLayoutGeometryTest.java:63)
+
+TreeLayoutGeometryTest > siblingsFanOutByLeafWeightAndSproutAlongTheirParent FAILED
+    java.lang.NullPointerException: Cannot read field "direction" because the return value of "com.treelearn.treelayout.LayoutResult.branch(String)" is null
+        at com.treelearn.treelayout.TreeLayoutGeometryTest.siblingsFanOutByLeafWeightAndSproutAlongTheirParent(TreeLayoutGeometryTest.java:88)
+
+TreeLayoutGeometryTest > emptySnapshotProducesAnEmptyFiniteResult PASSED
+
+TreeLayoutGeometryTest > rootIsATrunkGrowingStraightUpWithRoundDerivedLength FAILED
+    java.lang.AssertionError
+        at org.junit.Assert.fail(Assert.java:87)
+        at org.junit.Assert.assertTrue(Assert.java:42)
+        at org.junit.Assert.assertNotNull(Assert.java:713)
+        at org.junit.Assert.assertNotNull(Assert.java:723)
+        at com.treelearn.treelayout.TreeLayoutGeometryTest.rootIsATrunkGrowingStraightUpWithRoundDerivedLength(TreeLayoutGeometryTest.java:40)
+
+TreeLayoutGeometryTest > collapsedBranchWithoutVisibleChildrenIsStillALeaf FAILED
+    java.lang.AssertionError: expected:<2> but was:<0>
+        at org.junit.Assert.fail(Assert.java:89)
+        at org.junit.Assert.failNotEquals(Assert.java:835)
+        at org.junit.Assert.assertEquals(Assert.java:647)
+        at org.junit.Assert.assertEquals(Assert.java:633)
+        at com.treelearn.treelayout.TreeLayoutGeometryTest.collapsedBranchWithoutVisibleChildrenIsStillALeaf(TreeLayoutGeometryTest.java:170)
+
+TreeLayoutGeometryTest > snapshotChildrenKeepTheirInputOrder PASSED
+
+TreeLayoutGeometryTest > singleNodeTreeIsOneLeafAndKeepsTheSoilBand FAILED
+    java.lang.AssertionError: expected:<1> but was:<0>
+        at org.junit.Assert.fail(Assert.java:89)
+        at org.junit.Assert.failNotEquals(Assert.java:835)
+        at org.junit.Assert.assertEquals(Assert.java:647)
+        at org.junit.Assert.assertEquals(Assert.java:633)
+        at com.treelearn.treelayout.TreeLayoutGeometryTest.singleNodeTreeIsOneLeafAndKeepsTheSoilBand(TreeLayoutGeometryTest.java:263)
+
+TreeLayoutGeometryTest > currentPathIsFlaggedAndFallsBackToTheRootWhenTargetIsNotVisible FAILED
+    java.lang.NullPointerException: Cannot read field "onCurrentPath" because the return value of "com.treelearn.treelayout.LayoutResult.branch(String)" is null
+        at com.treelearn.treelayout.TreeLayoutGeometryTest.currentPathIsFlaggedAndFallsBackToTheRootWhenTargetIsNotVisible(TreeLayoutGeometryTest.java:179)
+
+TreeLayoutGeometryTest > deepChainStaysFinite FAILED
+    java.lang.AssertionError: expected:<1200> but was:<0>
+        at org.junit.Assert.fail(Assert.java:89)
+        at org.junit.Assert.failNotEquals(Assert.java:835)
+        at org.junit.Assert.assertEquals(Assert.java:647)
+        at org.junit.Assert.assertEquals(Assert.java:633)
+        at com.treelearn.treelayout.TreeLayoutGeometryTest.deepChainStaysFinite(TreeLayoutGeometryTest.java:277)
+
+TreeLayoutGeometryTest > sameInputProducesBitIdenticalOutput PASSED
+
+TreeLayoutGeometryTest > collapsedBranchCountsHiddenDescendantsAndTheirUnread FAILED
+    java.lang.NullPointerException: Cannot read field "hiddenDescendants" because "bud" is null
+        at com.treelearn.treelayout.TreeLayoutGeometryTest.collapsedBranchCountsHiddenDescendantsAndTheirUnread(TreeLayoutGeometryTest.java:151)
+
+TreeLayoutGeometryTest > branchWithOnlyArchivedChildrenBecomesALeaf FAILED
+    java.lang.AssertionError: expected:<2> but was:<0>
+        at org.junit.Assert.fail(Assert.java:89)
+        at org.junit.Assert.failNotEquals(Assert.java:835)
+        at org.junit.Assert.assertEquals(Assert.java:647)
+        at org.junit.Assert.assertEquals(Assert.java:633)
+        at com.treelearn.treelayout.TreeLayoutGeometryTest.branchWithOnlyArchivedChildrenBecomesALeaf(TreeLayoutGeometryTest.java:142)
+
+TreeLayoutGeometryTest > largeTreeStaysFiniteAndReportsItsSize FAILED
+    java.lang.AssertionError: expected:<9331> but was:<0>
+        at org.junit.Assert.fail(Assert.java:89)
+        at org.junit.Assert.failNotEquals(Assert.java:835)
+        at org.junit.Assert.assertEquals(Assert.java:647)
+        at org.junit.Assert.assertEquals(Assert.java:633)
+        at com.treelearn.treelayout.TreeLayoutGeometryTest.largeTreeStaysFiniteAndReportsItsSize(TreeLayoutGeometryTest.java:300)
+
+TreeLayoutGeometryTest > archivedSubtreesLeaveTheDefaultLayout FAILED
+    java.lang.AssertionError: expected:<4> but was:<0>
+        at org.junit.Assert.fail(Assert.java:89)
+        at org.junit.Assert.failNotEquals(Assert.java:835)
+        at org.junit.Assert.assertEquals(Assert.java:647)
+        at org.junit.Assert.assertEquals(Assert.java:633)
+        at com.treelearn.treelayout.TreeLayoutGeometryTest.archivedSubtreesLeaveTheDefaultLayout(TreeLayoutGeometryTest.java:127)
+
+TreeLayoutGeometryTest > childOrderFollowsTheSnapshotOrder FAILED
+    java.lang.NullPointerException: Cannot read field "direction" because the return value of "com.treelearn.treelayout.LayoutResult.branch(String)" is null
+        at com.treelearn.treelayout.TreeLayoutGeometryTest.childOrderFollowsTheSnapshotOrder(TreeLayoutGeometryTest.java:103)
+
+TreeLayoutHitFitAnchorTest > screenPointsRoundTripThroughTheFitTransform PASSED
+
+TreeLayoutHitFitAnchorTest > hitTestOutsideEveryRegionReturnsNull PASSED
+
+TreeLayoutHitFitAnchorTest > degenerateViewportsStayFinite FAILED
+    java.lang.AssertionError: expected:<1.25> but was:<1.0>
+        at org.junit.Assert.fail(Assert.java:89)
+        at org.junit.Assert.failNotEquals(Assert.java:835)
+        at org.junit.Assert.assertEquals(Assert.java:577)
+        at org.junit.Assert.assertEquals(Assert.java:701)
+        at com.treelearn.treelayout.TreeLayoutHitFitAnchorTest.degenerateViewportsStayFinite(TreeLayoutHitFitAnchorTest.java:130)
+
+TreeLayoutHitFitAnchorTest > collapseNeverMovesTheSurvivingNodes FAILED
+    java.lang.AssertionError
+        at org.junit.Assert.fail(Assert.java:87)
+        at org.junit.Assert.assertTrue(Assert.java:42)
+        at org.junit.Assert.assertNotNull(Assert.java:713)
+        at org.junit.Assert.assertNotNull(Assert.java:723)
+        at com.treelearn.treelayout.TreeLayoutHitFitAnchorTest.collapseNeverMovesTheSurvivingNodes(TreeLayoutHitFitAnchorTest.java:169)
+
+TreeLayoutHitFitAnchorTest > archivingASiblingReportsTheExactAnchorShift FAILED
+    java.lang.NullPointerException: Cannot read field "tipX" because the return value of "com.treelearn.treelayout.LayoutResult.branch(String)" is null
+        at com.treelearn.treelayout.TreeLayoutHitFitAnchorTest.archivingASiblingReportsTheExactAnchorShift(TreeLayoutHitFitAnchorTest.java:189)
+
+TreeLayoutHitFitAnchorTest > boundsCoverEveryTipBaseAndLabel FAILED
+    java.lang.AssertionError
+        at org.junit.Assert.fail(Assert.java:87)
+        at org.junit.Assert.assertTrue(Assert.java:42)
+        at org.junit.Assert.assertTrue(Assert.java:53)
+        at com.treelearn.treelayout.TreeLayoutHitFitAnchorTest.boundsCoverEveryTipBaseAndLabel(TreeLayoutHitFitAnchorTest.java:221)
+
+TreeLayoutHitFitAnchorTest > everyVisibleNodeIsHittableAtItsOwnAnchor FAILED
+    java.lang.AssertionError: expected:<4> but was:<0>
+        at org.junit.Assert.fail(Assert.java:89)
+        at org.junit.Assert.failNotEquals(Assert.java:835)
+        at org.junit.Assert.assertEquals(Assert.java:647)
+        at org.junit.Assert.assertEquals(Assert.java:633)
+        at com.treelearn.treelayout.TreeLayoutHitFitAnchorTest.everyVisibleNodeIsHittableAtItsOwnAnchor(TreeLayoutHitFitAnchorTest.java:27)
+
+TreeLayoutHitFitAnchorTest > viewTransformRefusesANonPositiveScale PASSED
+
+TreeLayoutHitFitAnchorTest > fitKeepsTheTreeInsideTheViewportAndAlignsTheBottom FAILED
+    java.lang.AssertionError: r 412.0x700.0 expected:<1.25> but was:<1.0>
+        at org.junit.Assert.fail(Assert.java:89)
+        at org.junit.Assert.failNotEquals(Assert.java:835)
+        at org.junit.Assert.assertEquals(Assert.java:577)
+        at com.treelearn.treelayout.TreeLayoutHitFitAnchorTest.fitKeepsTheTreeInsideTheViewportAndAlignsTheBottom(TreeLayoutHitFitAnchorTest.java:100)
+
+TreeLayoutHitFitAnchorTest > hitTestAtALabelCentreReturnsTheLabeledBranch FAILED
+    java.lang.AssertionError
+        at org.junit.Assert.fail(Assert.java:87)
+        at org.junit.Assert.assertTrue(Assert.java:42)
+        at org.junit.Assert.assertTrue(Assert.java:53)
+        at com.treelearn.treelayout.TreeLayoutHitFitAnchorTest.hitTestAtALabelCentreReturnsTheLabeledBranch(TreeLayoutHitFitAnchorTest.java:62)
+
+TreeLayoutHitFitAnchorTest > viewportRefusesNegativeOrZeroTouchTarget PASSED
+
+TreeLayoutLabelTest > midDensityPlacesOneBarLabelPerLeafAtTheMeasuredPosition FAILED
+    java.lang.AssertionError: expected:<1> but was:<0>
+        at org.junit.Assert.fail(Assert.java:89)
+        at org.junit.Assert.failNotEquals(Assert.java:835)
+        at org.junit.Assert.assertEquals(Assert.java:647)
+        at org.junit.Assert.assertEquals(Assert.java:633)
+        at com.treelearn.treelayout.TreeLayoutLabelTest.midDensityPlacesOneBarLabelPerLeafAtTheMeasuredPosition(TreeLayoutLabelTest.java:80)
+
+TreeLayoutLabelTest > crowdedBarOmitsLabelsButKeepsEveryNodeHittable FAILED
+    java.lang.AssertionError
+        at org.junit.Assert.fail(Assert.java:87)
+        at org.junit.Assert.assertTrue(Assert.java:42)
+        at org.junit.Assert.assertFalse(Assert.java:65)
+        at org.junit.Assert.assertFalse(Assert.java:75)
+        at com.treelearn.treelayout.TreeLayoutLabelTest.crowdedBarOmitsLabelsButKeepsEveryNodeHittable(TreeLayoutLabelTest.java:148)
+
+TreeLayoutLabelTest > farDensityPlacesNoLabelsAndKeepsEveryNodeHittable PASSED
+
+TreeLayoutLabelTest > nearDensityAddsTheSummaryLineOnlyWhenTheBranchHasOne FAILED
+    java.lang.AssertionError
+        at org.junit.Assert.fail(Assert.java:87)
+        at org.junit.Assert.assertTrue(Assert.java:42)
+        at org.junit.Assert.assertNotNull(Assert.java:713)
+        at org.junit.Assert.assertNotNull(Assert.java:723)
+        at com.treelearn.treelayout.TreeLayoutLabelTest.nearDensityAddsTheSummaryLineOnlyWhenTheBranchHasOne(TreeLayoutLabelTest.java:97)
+
+TreeLayoutLabelTest > canopyBarSitsEntirelyAboveTheCrownAndAboveEveryLeafBox FAILED
+    java.lang.AssertionError
+        at org.junit.Assert.fail(Assert.java:87)
+        at org.junit.Assert.assertTrue(Assert.java:42)
+        at org.junit.Assert.assertFalse(Assert.java:65)
+        at org.junit.Assert.assertFalse(Assert.java:75)
+        at com.treelearn.treelayout.TreeLayoutLabelTest.canopyBarSitsEntirelyAboveTheCrownAndAboveEveryLeafBox(TreeLayoutLabelTest.java:182)
+
+TreeLayoutLabelTest > currentBranchLeafTakesTheFirstRow FAILED
+    java.lang.AssertionError
+        at org.junit.Assert.fail(Assert.java:87)
+        at org.junit.Assert.assertTrue(Assert.java:42)
+        at org.junit.Assert.assertNotNull(Assert.java:713)
+        at org.junit.Assert.assertNotNull(Assert.java:723)
+        at com.treelearn.treelayout.TreeLayoutLabelTest.currentBranchLeafTakesTheFirstRow(TreeLayoutLabelTest.java:168)
+
+TreeLayoutLabelTest > barLabelsNeverOverlapAndNeverCoverALeaf FAILED
+    java.lang.AssertionError
+        at org.junit.Assert.fail(Assert.java:87)
+        at org.junit.Assert.assertTrue(Assert.java:42)
+        at org.junit.Assert.assertFalse(Assert.java:65)
+        at org.junit.Assert.assertFalse(Assert.java:75)
+        at com.treelearn.treelayout.TreeLayoutLabelTest.barLabelsNeverOverlapAndNeverCoverALeaf(TreeLayoutLabelTest.java:115)
+
+TreeLayoutLabelTest > densityIsDerivedFromTheZoomScale PASSED
+
+34 tests completed, 25 failed
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':tree-layout:test'.
+> There were failing tests. See the report at: file:///D:/Project/Android/Treelearn/android/tree-layout/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 14s
+3 actionable tasks: 2 executed, 1 up-to-date
+EXITCODE=1
+# Restore: the probe above was reverted immediately afterwards; TreeLayout.java sha256 after restore
+# = 141FD56572D31E22BDA6143DC40509F15DA3F889109B65FA7AC56352375C810D, byte-identical to before the probe.
+# The production source therefore never changed for the delivered revision; only this probe did.
+
+# --- RED run-1 numbers, read back from this file by command (2026-09-21T20:25:36.1223713+08:00) ---
+Command   : $l=Get-Content artifacts/evidence/T-016-red.txt -Encoding UTF8; $s=$l[0..999]; ($s|Select-String "错误: 程序包.+不存在").Count; ($s|Select-String "错误: 找不到符号").Count; ($s|Select-String "^\s*\d+ 个错误\s*$")
+Interpretation: javac prints each message twice (inline list + grouped summary), so the raw 20 + 180
+= 200 is two copies of 100 = 10 x 程序包...不存在 + 90 x 找不到符号. The compiler-reported total is 100.

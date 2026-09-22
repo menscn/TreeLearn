@@ -1,0 +1,198 @@
+# T-037 JVM test counts, read from the JUnit XML of the GREEN run (not from memory)
+# captured-at: 2026-09-21T23:41:01.5461988+08:00
+# command: Get-ChildItem android/{core,data,app}/build/test-results/*/TEST-*.xml | ForEach-Object { [xml] read } | select name/tests/failures/errors/skipped
+
+suite                                                   tests failures errors skipped
+-----                                                   ----- -------- ------ -------
+com.treelearn.app.artifact.ArtifactInputTest                8        0      0       0
+com.treelearn.app.artifact.ArtifactSchemaTest              11        0      0       0
+com.treelearn.app.artifact.DerivedOperationTest            13        0      0       0
+com.treelearn.app.artifact.DerivedRequestTest               8        0      0       0
+com.treelearn.app.generation.GenerationSchedulerTest        5        0      0       0
+com.treelearn.app.generation.LiveAttemptsTest               3        0      0       0
+com.treelearn.app.generation.PositionCommandsTest          22        0      0       0
+com.treelearn.app.generation.RecoveryScanTest               3        0      0       0
+com.treelearn.app.generation.StreamBatchTest                5        0      0       0
+com.treelearn.app.navigation.NavigationPresenterTest       21        0      0       0
+com.treelearn.app.reading.ReadingSessionTest                7        0      0       0
+com.treelearn.app.search.SearchPresenterTest                8        0      0       0
+com.treelearn.app.ui.ChatMessageTest                       11        0      0       0
+com.treelearn.app.ui.ChatPositionAgreementTest              3        0      0       0
+com.treelearn.app.ui.ChatPresenterTest                     34        0      0       0
+com.treelearn.app.ui.ChatViewStateTest                      9        0      0       0
+com.treelearn.app.ui.HomePresenterTest                     17        0      0       0
+com.treelearn.app.ui.HomeViewStateTest                      7        0      0       0
+com.treelearn.app.ui.KeySnapshotTest                        6        0      0       0
+com.treelearn.app.ui.SettingsPresenterTest                  7        0      0       0
+com.treelearn.app.ui.TreeCanvasGeometryTest                11        0      0       0
+com.treelearn.app.ui.TreeCanvasLabelsTest                   7        0      0       0
+com.treelearn.app.ui.TreeCanvasPresenterTest               16        0      0       0
+com.treelearn.app.ui.TreeCanvasViewStateTest                7        0      0       0
+com.treelearn.core.domain.AnswerRevisionTest               13        0      0       0
+com.treelearn.core.domain.BranchSourceTest                 12        0      0       0
+com.treelearn.core.domain.BranchTest                       15        0      0       0
+com.treelearn.core.domain.BuildContextPlanUseCaseTest      10        0      0       0
+com.treelearn.core.domain.ContextSnapshotTest              12        0      0       0
+com.treelearn.core.domain.GenerationCommandTest             9        0      0       0
+com.treelearn.core.domain.GenerationOperationTest          20        0      0       0
+com.treelearn.core.domain.GenerationStateTest              16        0      0       0
+com.treelearn.core.domain.GuardTest                         6        0      0       0
+com.treelearn.core.domain.MessageQuoteTest                 10        0      0       0
+com.treelearn.core.domain.MessageTest                      15        0      0       0
+com.treelearn.core.domain.PromptPurposeTest                12        0      0       0
+com.treelearn.core.domain.PromptSpecTest                    8        0      0       0
+com.treelearn.core.domain.ReadingAnchorTest                 7        0      0       0
+com.treelearn.core.domain.SearchHitTest                     7        0      0       0
+com.treelearn.core.domain.SearchQueryTest                   7        0      0       0
+com.treelearn.core.domain.TopicTest                         6        0      0       0
+com.treelearn.core.domain.UnreadRollupTest                  6        0      0       0
+com.treelearn.core.domain.ViewportSeenTest                  6        0      0       0
+com.treelearn.data.db.dao.FirstTopicCreationRulesTest      11        0      0       0
+com.treelearn.data.db.dao.MessageQuoteColumnTest            6        0      0       0
+com.treelearn.data.db.dao.SearchDaoStatementTest            7        0      0       0
+com.treelearn.data.db.TreeLearnSchemaQuoteInvariantTest     7        0      0       0
+com.treelearn.data.secret.SecretEnvelopeTest                6        0      0       0
+
+TOTAL suite=48 tests=483 failures=0 errors=0 skipped=0
+NEW-THIS-TASK suites:
+
+suite                                                   tests failures errors skipped
+-----                                                   ----- -------- ------ -------
+com.treelearn.core.domain.MessageQuoteTest                 10        0      0       0
+com.treelearn.data.db.dao.MessageQuoteColumnTest            6        0      0       0
+com.treelearn.data.db.TreeLearnSchemaQuoteInvariantTest     7        0      0       0
+
+
+# ---------------------------------------------------------------------------
+# RE-DERIVATION [2026-09-21T23:51:35.4452111+08:00]
+# The 48/483 figure above was captured right after the FOCUSED green run
+#   (:core:test :data:testDebugUnitTest :app:testDebugUnitTest), whose test-results
+#   tree contains only the "test" and "testDebugUnitTest" dirs (19 + 29 = 48 suites).
+# The later full `.\gradlew.bat check` run ALSO executes testReleaseUnitTest and adds
+#   a third results dir, so the same glob now yields 77 suites. Both readings are correct
+#   for their own command; the figure quoted against `check` must be the 77 one.
+# command: $files = Get-ChildItem android/core/build/test-results,android/data/build/test-results,android/app/build/test-results -Recurse -Filter "TEST-*.xml"; then parse each <testsuite> char attrs and sum per results-dir.
+  task=test                 suites= 19 tests= 197 failures=0 errors=0 skipped=0
+  task=testDebugUnitTest    suites= 29 tests= 286 failures=0 errors=0 skipped=0
+  task=testReleaseUnitTest  suites= 29 tests= 286 failures=0 errors=0 skipped=0
+  TOTAL suites=77 tests=769 failures=0 errors=0 skipped=0
+EXITCODE=0  # child process: powershell -NoProfile -ExecutionPolicy Bypass -File artifacts/evidence/_t037-count.ps1 (temporary aggregator run 2026-09-21; exits 1 when failures/errors != 0, 2 when no XML found)
+
+
+
+# ---------------------------------------------------------------------------
+# FIX ROUND RE-DERIVATION [2026-09-22T00:03:09.6986752+08:00]
+# Purpose: an earlier --tests-filtered mutation run had left only stale/partial XML in
+#   data/build/test-results/testDebugUnitTest/, so any count taken before a fresh run was
+#   untrustworthy. The focused command was re-run and the counts below come from that XML.
+# command (run): cd android; .\gradlew.bat :core:test :data:testDebugUnitTest :app:testDebugUnitTest :app:assembleDebugAndroidTest --continue --no-daemon --console=plain   -> EXITCODE=0
+#   evidence: artifacts/evidence/T-037-jvm-rerun.txt
+# command (derive): powershell -NoProfile -ExecutionPolicy Bypass -File artifacts/evidence/_t037-count.ps1
+#   scoped to EXACTLY the three dirs that command writes, so the stale testReleaseUnitTest
+#   dirs left by the earlier `check` run cannot leak in.
+  dir=android/core/build/test-results/test                 suites= 19 tests= 197 failures=0 errors=0 skipped=0
+  dir=android/data/build/test-results/testDebugUnitTest    suites=  4 tests=  26 failures=0 errors=0 skipped=0
+  dir=android/app/build/test-results/testDebugUnitTest     suites= 25 tests= 260 failures=0 errors=0 skipped=0
+  TOTAL suites=48 tests=483 failures=0 errors=0 skipped=0
+# Cross-check: android/data/src/test contains exactly 4 test classes, and the 4 XML files
+#   above match them 1:1 - the low data count is the real suite size, not a truncated run.
+EXITCODE=0  # child process: powershell -NoProfile -ExecutionPolicy Bypass -File artifacts/evidence/_t037-count.ps1
+
+# --- reproduction: the temporary aggregator was deleted after use (repo rule: probes are not
+#     left behind). Its full source, so the counts above stay reproducible, was:
+# ---------------------------------------------------------------------------
+# # Temporary aggregator for the T-037 fix-round re-derivation. Deleted immediately after use.
+# # Scoped to EXACTLY the three results dirs the focused command writes, so the stale
+# # testReleaseUnitTest dirs left by an earlier `check` run cannot leak into the total.
+# $dirs = @(
+#     'android/core/build/test-results/test',
+#     'android/data/build/test-results/testDebugUnitTest',
+#     'android/app/build/test-results/testDebugUnitTest'
+# )
+# $totalSuites = 0; $totalTests = 0; $totalFail = 0; $totalErr = 0; $totalSkip = 0
+# foreach ($dir in $dirs) {
+#     $files = @(Get-ChildItem -LiteralPath $dir -Filter 'TEST-*.xml' -ErrorAction SilentlyContinue)
+#     if ($files.Count -eq 0) { Write-Error "no TEST-*.xml under $dir"; exit 2 }
+#     $suites = 0; $tests = 0; $fail = 0; $err = 0; $skip = 0
+#     foreach ($f in $files) {
+#         $x = [xml](Get-Content -LiteralPath $f.FullName -Raw)
+#         $s = $x.testsuite
+#         $suites++; $tests += [int]$s.tests; $fail += [int]$s.failures
+#         $err += [int]$s.errors; $skip += [int]$s.skipped
+#     }
+#     Write-Output ("dir={0,-52} suites={1,3} tests={2,4} failures={3} errors={4} skipped={5}" -f $dir, $suites, $tests, $fail, $err, $skip)
+#     $totalSuites += $suites; $totalTests += $tests; $totalFail += $fail
+#     $totalErr += $err; $totalSkip += $skip
+# }
+# Write-Output ("TOTAL suites={0} tests={1} failures={2} errors={3} skipped={4}" -f $totalSuites, $totalTests, $totalFail, $totalErr, $totalSkip)
+# if ($totalFail -ne 0 -or $totalErr -ne 0) { exit 1 }
+# exit 0
+# ---------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------
+# FINAL RE-DERIVATION [2026-09-22T00:11:44]
+# Purpose: T-032 landed its src/main work, so `gradlew check` completed again and rewrote the
+#   release XML dirs. Both cited figures are re-derived here from the XML on disk, now that the
+#   gradle lock contention and the concurrent src/main breakage are both gone.
+# command (produce): cd android; .\gradlew.bat check --no-daemon --console=plain  -> EXITCODE=0
+#   evidence: artifacts/evidence/T-037-check.txt run 3
+# command (derive): powershell -NoProfile -ExecutionPolicy Bypass -File %TEMP%/_t037-count2.ps1
+#   (from the repo root). The focused-command figure is rows 1 + 2 + 4 of the table below
+#   (core/test + data/testDebugUnitTest + app/testDebugUnitTest): 19+4+25=48 suites,
+#   197+26+260=483 tests. Rows 3 and 5 (testReleaseUnitTest) are what `check` adds.
+dir=android/core/build/test-results/test                   suites= 19 tests= 197 failures=0 errors=0 skipped=0
+dir=android/data/build/test-results/testDebugUnitTest      suites=  4 tests=  26 failures=0 errors=0 skipped=0
+dir=android/data/build/test-results/testReleaseUnitTest    suites=  4 tests=  26 failures=0 errors=0 skipped=0
+dir=android/app/build/test-results/testDebugUnitTest       suites= 25 tests= 260 failures=0 errors=0 skipped=0
+dir=android/app/build/test-results/testReleaseUnitTest     suites= 25 tests= 260 failures=0 errors=0 skipped=0
+TOTAL suites=77 tests=769 failures=0 errors=0 skipped=0
+EXITCODE=0  # full set of 5 dirs = the check figure
+--- focused-command subset (core/test + data/testDebugUnitTest + app/testDebugUnitTest)
+  19 + 4 + 25 = 48 suites ; 197 + 26 + 260 = 483 tests
+# --- reproduction: the temporary aggregator (this run) was deleted after use; its source was:
+$dirs = @(
+    'android/core/build/test-results/test',
+    'android/data/build/test-results/testDebugUnitTest',
+    'android/data/build/test-results/testReleaseUnitTest',
+    'android/app/build/test-results/testDebugUnitTest',
+    'android/app/build/test-results/testReleaseUnitTest'
+)
+$totalSuites = 0; $totalTests = 0; $totalFail = 0; $totalErr = 0; $totalSkip = 0
+foreach ($dir in $dirs) {
+    $files = @(Get-ChildItem -LiteralPath $dir -Filter 'TEST-*.xml' -ErrorAction SilentlyContinue)
+    if ($files.Count -eq 0) { Write-Error "no TEST-*.xml under $dir"; exit 2 }
+    $suites = 0; $tests = 0; $fail = 0; $err = 0; $skip = 0
+    foreach ($f in $files) {
+        $x = [xml](Get-Content -LiteralPath $f.FullName -Raw)
+        $s = $x.testsuite
+        $suites++; $tests += [int]$s.tests; $fail += [int]$s.failures
+        $err += [int]$s.errors; $skip += [int]$s.skipped
+    }
+    Write-Output ("dir={0,-54} suites={1,3} tests={2,4} failures={3} errors={4} skipped={5}" -f $dir, $suites, $tests, $fail, $err, $skip)
+    $totalSuites += $suites; $totalTests += $tests; $totalFail += $fail
+    $totalErr += $err; $totalSkip += $skip
+}
+Write-Output ("TOTAL suites={0} tests={1} failures={2} errors={3} skipped={4}" -f $totalSuites, $totalTests, $totalFail, $totalErr, $totalSkip)
+if ($totalFail -ne 0 -or $totalErr -ne 0) { exit 1 }
+exit 0
+# ---
+
+# POST-RUN RE-DERIVATION [2026-09-22T00:13:17]
+# command (produce): cd android; .\gradlew.bat :core:test :data:testDebugUnitTest :app:testDebugUnitTest :app:assembleDebugAndroidTest --continue --no-daemon --console=plain -> EXITCODE=0
+#   evidence: artifacts/evidence/T-037-jvm-rerun.txt run 3
+# command (derive): powershell -NoProfile -Command "<inline: parse each TEST-*.xml testsuite, sum>"
+#   scoped to EXACTLY the three dirs that command writes. Totals are COMPUTED below, not typed.
+dir=android/core/build/test-results/test                   suites= 19 tests= 197 failures=0 errors=0 skipped=0
+dir=android/data/build/test-results/testDebugUnitTest      suites=  4 tests=  26 failures=0 errors=0 skipped=0
+dir=android/app/build/test-results/testDebugUnitTest       suites= 26 tests= 273 failures=0 errors=0 skipped=0
+TOTAL suites=49 tests=496 failures=0 errors=0 skipped=0
+EXITCODE=0
+# ---
+# WHY THIS IS 49/496 AND NOT THE 48/483 THE TASK FILE QUOTES FOR THIS COMMAND:
+#   the 48/483 figure was derived from the run at 2026-09-22T00:02 (T-037's own implementation state:
+#   core/test 19/197 + data/testDebugUnitTest 4/26 + app/testDebugUnitTest 25/260 = 48/483).
+#   Since then a PARALLEL task added android/app/src/test/java/com/treelearn/app/wiring/HomeWiringTest.java
+#   (LastWriteTime 2026-09-22T00:12:42, i.e. 4 s before this run), which is +1 suite / +13 tests in :app.
+#   26-25 = 1 suite and 273-260 = 13 tests; 48+1 = 49 and 483+13 = 496. None of it is T-037's.
+#   The whole-repo totals therefore move with the other lane; only the 48/483 delta is T-037's to claim.

@@ -1,0 +1,33 @@
+T-010 build attempts that were DISCARDED, with the reason. None of them is evidence about T-010.
+Written so that the canonical records (T-010-red.txt, T-010-green.txt) can each be a single run.
+No prompt body, question, answer, reasoning text or API key appears here.
+
+RED, superseded (a defect of the fixture, not of the record):
+  The first two RED captures ran against a revision of PositionCommandsTest that still used readable
+  placeholders ("branch-1", "revision-1", "operation-1") exactly where the domain requires canonical
+  UUIDs (Guard.id validates every id). Those placeholders would have thrown IllegalArgumentException at
+  runtime, so the suite could never have gone green as written. The fixture was corrected to real UUIDs
+  and RED was re-captured from scratch; the run now on disk is the one that matches the shipped test.
+    attempt 2026-09-21T21:57  -> 29 errors   (superseded)
+    attempt 2026-09-21T21:59  -> 40 errors   (superseded)
+    canonical (in T-010-red.txt) -> 52 errors
+
+GREEN, discarded - every one of these failed inside files this task did not author:
+  1. :ai:bundleLibCompileToJarDebug FAILED
+     java.nio.file.FileSystemException: android/ai/build/intermediates/compile_library_classes_jar/
+     debug/bundleLibCompileToJarDebug/classes.jar - another program is using the file.
+     A Windows file lock held by a sibling lane's concurrent build; retried after ~90s and it passed.
+  2. :app:compileDebugUnitTestJavaWithJavac FAILED - javac truncated at its 100-error cap, every error
+     line in a sibling lane's source: reading/ReadingSessionTest.java, search/SearchPresenterTest.java,
+     ui/ChatMessageTest.java, ui/ChatTestDoubles.java.
+  3. Same compiler task, a few minutes later: reading/ReadingSessionTest.java, search/SearchPresenterTest.java,
+     ui/ChatPresenterTest.java, ui/ChatViewStateTest.java, ui/ChatTestDoubles.java, plus 8 errors in the
+     androidTest source SearchUnreadReadingInstrumentedTest.java. Still none in a T-010 file.
+  4. :app:testDebugUnitTest FAILED - 1 failure of 197 tests, and it is the reading lane's own test
+     (ReadingSessionTest > aStoredPositionWhoseMessageIsGoneFallsBackToTheLiveEnd). In this same run
+     :app:assembleDebugAndroidTest PASSED, so this task's instrumentation source compiled in-repo.
+
+Scratch copy (outside the repository), because the shared tree could not produce a clean run:
+  C:\Users\23745\AppData\Local\Temp\t010-green  -  256/256 file mirror of android/, no extra files.
+  The repository was NOT modified for it. The same command string was used. The result is recorded in
+  T-010-green-scratch.txt.

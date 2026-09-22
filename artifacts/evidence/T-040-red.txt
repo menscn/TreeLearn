@@ -1,0 +1,314 @@
+T-040 RED - first failing run
+captured-at: 
+2026-09-22 04:38:02
+ (Asia/Shanghai)
+cwd: D:\Project\Android\Treelearn\android
+command: .\gradlew.bat --no-daemon --console=plain --rerun-tasks --no-build-cache :app:testDebugUnitTest --tests "com.treelearn.app.search.SearchPageTest" --tests "com.treelearn.app.search.SearchJumpTest" --tests "com.treelearn.app.ui.HomeSearchEntryTest"
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava
+> Task :core:processResources NO-SOURCE
+> Task :core:classes
+> Task :core:jar
+> Task :tree-layout:compileJava
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes
+> Task :tree-layout:jar
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues
+> Task :ai:generateDebugResources
+> Task :ai:packageDebugResources
+> Task :ai:processDebugNavigationResources
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :ai:javaPreCompileDebug
+> Task :app:javaPreCompileDebug
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :ai:compileDebugLibraryResources
+> Task :ai:writeDebugAarMetadata
+> Task :data:writeDebugAarMetadata
+> Task :data:processDebugNavigationResources
+> Task :ai:parseDebugLocalResources
+> Task :app:processDebugNavigationResources
+> Task :app:checkDebugAarMetadata
+> Task :app:generateDebugResValues
+> Task :app:compileDebugNavigationResources
+> Task :data:generateDebugResValues
+> Task :data:generateDebugResources
+> Task :ai:generateDebugRFile
+> Task :data:packageDebugResources
+> Task :ai:compileDebugJavaWithJavac
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :ai:bundleLibRuntimeToJarDebug
+> Task :ai:bundleLibCompileToJarDebug
+> Task :app:packageDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :ai:extractDeepLinksDebug
+> Task :app:extractDeepLinksDebug
+> Task :data:extractDeepLinksDebug
+> Task :data:compileDebugLibraryResources
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :data:javaPreCompileDebug
+> Task :app:javaPreCompileDebugUnitTest
+> Task :data:parseDebugLocalResources
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes NO-SOURCE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :data:generateDebugRFile
+> Task :ai:processDebugManifest
+> Task :data:processDebugManifest
+> Task :app:parseDebugLocalResources
+> Task :app:mergeDebugResources
+> Task :data:compileDebugJavaWithJavac
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
+> Task :data:bundleLibCompileToJarDebug
+> Task :data:bundleLibRuntimeToJarDebug
+> Task :app:processDebugResources
+> Task :app:compileDebugJavaWithJavac
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:bundleDebugClassesToRuntimeJar
+
+> Task :app:compileDebugUnitTestJavaWithJavac FAILED
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:138: 错误: 找不到符号
+    private static final class CountingTitles implements BranchTitles {
+                                                         ^
+  符号:   类 BranchTitles
+  位置: 类 SearchPageTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:42: 错误: 找不到符号
+        SearchPage page = SearchPage.of(SearchViewState.initial(), titles);
+        ^
+  符号:   类 SearchPage
+  位置: 类 SearchPageTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:42: 错误: 找不到符号
+        SearchPage page = SearchPage.of(SearchViewState.initial(), titles);
+                          ^
+  符号:   变量 SearchPage
+  位置: 类 SearchPageTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:44: 错误: 程序包SearchPage不存在
+        assertEquals(SearchPage.Pane.GUIDE, page.pane);
+                               ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:54: 错误: 程序包SearchPage不存在
+        assertEquals(SearchPage.Pane.SEARCHING, SearchPage.of(state, titles).pane);
+                               ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:54: 错误: 找不到符号
+        assertEquals(SearchPage.Pane.SEARCHING, SearchPage.of(state, titles).pane);
+                                                ^
+  符号:   变量 SearchPage
+  位置: 类 SearchPageTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:62: 错误: 找不到符号
+        SearchPage page = SearchPage.of(state, titles);
+        ^
+  符号:   类 SearchPage
+  位置: 类 SearchPageTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:62: 错误: 找不到符号
+        SearchPage page = SearchPage.of(state, titles);
+                          ^
+  符号:   变量 SearchPage
+  位置: 类 SearchPageTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:64: 错误: 程序包SearchPage不存在
+        assertEquals(SearchPage.Pane.EMPTY, page.pane);
+                               ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:73: 错误: 程序包SearchPage不存在
+        assertEquals(SearchPage.Pane.ERROR, SearchPage.of(state, titles).pane);
+                               ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:73: 错误: 找不到符号
+        assertEquals(SearchPage.Pane.ERROR, SearchPage.of(state, titles).pane);
+                                            ^
+  符号:   变量 SearchPage
+  位置: 类 SearchPageTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:82: 错误: 找不到符号
+        SearchPage page = SearchPage.of(results(Arrays.asList(first, second, third)), titles);
+        ^
+  符号:   类 SearchPage
+  位置: 类 SearchPageTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:82: 错误: 找不到符号
+        SearchPage page = SearchPage.of(results(Arrays.asList(first, second, third)), titles);
+                          ^
+  符号:   变量 SearchPage
+  位置: 类 SearchPageTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:84: 错误: 程序包SearchPage不存在
+        assertEquals(SearchPage.Pane.LIST, page.pane);
+                               ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:94: 错误: 找不到符号
+        SearchPage page = SearchPage.of(results(Arrays.asList(answerHit(BRANCH_A), titleHit(BRANCH_B))),
+        ^
+  符号:   类 SearchPage
+  位置: 类 SearchPageTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:94: 错误: 找不到符号
+        SearchPage page = SearchPage.of(results(Arrays.asList(answerHit(BRANCH_A), titleHit(BRANCH_B))),
+                          ^
+  符号:   变量 SearchPage
+  位置: 类 SearchPageTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:104: 错误: 找不到符号
+        SearchPage page = SearchPage.of(results(Arrays.asList(answerHit(BRANCH_A), answerHit(BRANCH_A))),
+        ^
+  符号:   类 SearchPage
+  位置: 类 SearchPageTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:104: 错误: 找不到符号
+        SearchPage page = SearchPage.of(results(Arrays.asList(answerHit(BRANCH_A), answerHit(BRANCH_A))),
+                          ^
+  符号:   变量 SearchPage
+  位置: 类 SearchPageTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:115: 错误: 找不到符号
+        SearchPage page = SearchPage.of(results(Collections.singletonList(hit)), titles);
+        ^
+  符号:   类 SearchPage
+  位置: 类 SearchPageTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:115: 错误: 找不到符号
+        SearchPage page = SearchPage.of(results(Collections.singletonList(hit)), titles);
+                          ^
+  符号:   变量 SearchPage
+  位置: 类 SearchPageTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:149: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:80: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\HomeSearchEntryTest.java:35: 错误: 找不到符号
+        presenter.onSearchPressed();
+                 ^
+  符号:   方法 onSearchPressed()
+  位置: 类型为HomePresenter的变量 presenter
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\HomeSearchEntryTest.java:44: 错误: 找不到符号
+        presenter.onSearchPressed();
+                 ^
+  符号:   方法 onSearchPressed()
+  位置: 类型为HomePresenter的变量 presenter
+24 个错误
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugUnitTestJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:138: 错误: 找不到符号
+      private static final class CountingTitles implements BranchTitles {
+                                                           ^
+    符号:   类 BranchTitles
+    位置: 类 SearchPageTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:42: 错误: 找不到符号
+          SearchPage page = SearchPage.of(SearchViewState.initial(), titles);
+          ^
+    符号:   类 SearchPage
+    位置: 类 SearchPageTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:42: 错误: 找不到符号
+          SearchPage page = SearchPage.of(SearchViewState.initial(), titles);
+                            ^
+    符号:   变量 SearchPage
+    位置: 类 SearchPageTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:54: 错误: 找不到符号
+          assertEquals(SearchPage.Pane.SEARCHING, SearchPage.of(state, titles).pane);
+                                                  ^
+    符号:   变量 SearchPage
+    位置: 类 SearchPageTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:62: 错误: 找不到符号
+          SearchPage page = SearchPage.of(state, titles);
+          ^
+    符号:   类 SearchPage
+    位置: 类 SearchPageTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:62: 错误: 找不到符号
+          SearchPage page = SearchPage.of(state, titles);
+                            ^
+    符号:   变量 SearchPage
+    位置: 类 SearchPageTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:73: 错误: 找不到符号
+          assertEquals(SearchPage.Pane.ERROR, SearchPage.of(state, titles).pane);
+                                              ^
+    符号:   变量 SearchPage
+    位置: 类 SearchPageTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:82: 错误: 找不到符号
+          SearchPage page = SearchPage.of(results(Arrays.asList(first, second, third)), titles);
+          ^
+    符号:   类 SearchPage
+    位置: 类 SearchPageTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:82: 错误: 找不到符号
+          SearchPage page = SearchPage.of(results(Arrays.asList(first, second, third)), titles);
+                            ^
+    符号:   变量 SearchPage
+    位置: 类 SearchPageTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:94: 错误: 找不到符号
+          SearchPage page = SearchPage.of(results(Arrays.asList(answerHit(BRANCH_A), titleHit(BRANCH_B))),
+          ^
+    符号:   类 SearchPage
+    位置: 类 SearchPageTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:94: 错误: 找不到符号
+          SearchPage page = SearchPage.of(results(Arrays.asList(answerHit(BRANCH_A), titleHit(BRANCH_B))),
+                            ^
+    符号:   变量 SearchPage
+    位置: 类 SearchPageTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:104: 错误: 找不到符号
+          SearchPage page = SearchPage.of(results(Arrays.asList(answerHit(BRANCH_A), answerHit(BRANCH_A))),
+          ^
+    符号:   类 SearchPage
+    位置: 类 SearchPageTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:104: 错误: 找不到符号
+          SearchPage page = SearchPage.of(results(Arrays.asList(answerHit(BRANCH_A), answerHit(BRANCH_A))),
+                            ^
+    符号:   变量 SearchPage
+    位置: 类 SearchPageTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:115: 错误: 找不到符号
+          SearchPage page = SearchPage.of(results(Collections.singletonList(hit)), titles);
+          ^
+    符号:   类 SearchPage
+    位置: 类 SearchPageTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:115: 错误: 找不到符号
+          SearchPage page = SearchPage.of(results(Collections.singletonList(hit)), titles);
+                            ^
+    符号:   变量 SearchPage
+    位置: 类 SearchPageTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:149: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:80: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\HomeSearchEntryTest.java:35: 错误: 找不到符号
+          presenter.onSearchPressed();
+                   ^
+    符号:   方法 onSearchPressed()
+    位置: 类型为HomePresenter的变量 presenter
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\HomeSearchEntryTest.java:44: 错误: 找不到符号
+          presenter.onSearchPressed();
+                   ^
+    符号:   方法 onSearchPressed()
+    位置: 类型为HomePresenter的变量 presenter
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:44: 错误: 程序包SearchPage不存在
+          assertEquals(SearchPage.Pane.GUIDE, page.pane);
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:54: 错误: 程序包SearchPage不存在
+          assertEquals(SearchPage.Pane.SEARCHING, SearchPage.of(state, titles).pane);
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:64: 错误: 程序包SearchPage不存在
+          assertEquals(SearchPage.Pane.EMPTY, page.pane);
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:73: 错误: 程序包SearchPage不存在
+          assertEquals(SearchPage.Pane.ERROR, SearchPage.of(state, titles).pane);
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPageTest.java:84: 错误: 程序包SearchPage不存在
+          assertEquals(SearchPage.Pane.LIST, page.pane);
+                                 ^
+  24 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 18s
+53 actionable tasks: 53 executed
+EXITCODE=1

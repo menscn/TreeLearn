@@ -1,0 +1,73 @@
+# T-013 sizing evidence - non-empty non-comment production lines
+# captured at: 2026-09-21T22:24:05.3708896+08:00
+# Command: powershell -ExecutionPolicy Bypass -File %TEMP%\t013-sizing.ps1
+# Mode: repo tree D:\Project\Android\Treelearn, read-only measurement, no build.
+# Convention: .trae/rules/harness-tasks.md - new files count by all their non-empty non-comment lines.
+#   Java  : grep -v -E '^[[:space:]]*$|^[[:space:]]*//|^[[:space:]]*\*|^[[:space:]]*/\*'
+#   XML   : two readings are printed. JUDGE strips <!-- --> blocks with a state machine (a comment body line is
+#           a comment line). LOOSE is the T-012 convention (only blank / <!-- / --> prefixed lines are excluded),
+#           printed so the two slices can be compared at all; the T-012 comparison below uses LOOSE on both sides.
+# Scope of the headline number: the 13 NEW production Java files and the 7 NEW layout files of T-013.
+#   values/strings.xml, MainActivity.java and AppContainer.java are EXTENDED files authored by T-012; their growth
+#   is reported separately and is not folded into the headline, because git has no commit between the two slices
+#   and a raw git diff would charge T-012 own additions to T-013.
+# --- output ---
+NEW Java production (:app sources, per file): N = non-empty non-comment, P = physical
+     107    186  ui\ChatMessage.java
+     136    196  ui\ChatViewState.java
+      22     57  ui\ChatActions.java
+      12     40  ui\ChatSink.java
+      30     56  ui\ChatData.java
+      13     41  ui\ChatCommands.java
+      34     59  ui\ChatCommandResult.java
+      13     28  ui\CopyLabels.java
+     247    343  ui\ChatPresenter.java
+      45     92  wiring\PendingChatWiring.java
+     299    358  screen\ChatScreen.java
+      66    101  screen\ReasoningDisclosure.java
+      81    114  screen\AnswerActionBar.java
+NEW JAVA TOTAL : judgement=1105 physical=1671 files=13
+
+NEW resources (T-013 layouts). JUDGE = XML comment state machine; LOOSE = T-012 regex convention (blank / <!-- / --> prefixed lines only)
+  judge=  10 loose=  12 physical=  15  layout\screen_chat.xml
+  judge= 167 loose= 173 physical= 197  layout\screen_chat_body.xml
+  judge=  11 loose=  14 physical=  17  layout-sw600dp\screen_chat.xml
+  judge= 139 loose= 145 physical= 168  layout\item_chat_message.xml
+  judge=  35 loose=  38 physical=  42  layout\item_chat_suggestion.xml
+  judge=  49 loose=  53 physical=  61  layout\view_reasoning.xml
+  judge=  68 loose=  72 physical=  80  layout\view_answer_actions.xml
+NEW RESOURCE TOTAL : judge=479 loose=507 physical=580 files=7
+
+NEW-FILE PRODUCTION TOTAL (13 java + 7 layouts):
+  judge convention : 1584  (java 1105 + resources 479)
+  loose convention : 1612  (java 1105 + resources 507)
+
+EXTENDED production files written by T-012 and grown by T-013 (whole-file size, same conventions)
+     188    261  MainActivity.java
+      75    113  AppContainer.java
+  judge=101 loose=107 physical=133  values\strings.xml
+
+GROWTH of those three extended files since the T-012 sizing snapshot
+  (git has no commit between the two slices, so git diff -U0 would charge T-012 own additions to T-013;
+   the delta is therefore taken against the numbers T-012-sizing.txt recorded, same conventions)
+  java judgement convention (both sides):
+    MainActivity.java   T-012-sizing.txt 113 -> now 188
+    AppContainer.java   T-012-sizing.txt  58 -> now 75
+  loose XML convention (the one T-012 used for resources): strings.xml 68 -> now 107
+  deltas: MainActivity +75, AppContainer +17, strings.xml +39
+  extended-file growth total = 131   (NOT folded into the cap comparison below; reported so the whole slice is visible)
+
+TESTS (android/app/src/test/java/com/treelearn/app/ui/*.java - recorded separately, not part of the budget)
+     185    229  ChatTestDoubles.java
+     104    140  ChatMessageTest.java
+     431    569  ChatPresenterTest.java
+      68     95  ChatPositionAgreementTest.java
+     123    159  ChatViewStateTest.java
+TESTS TOTAL : judgement=911 files=5
+
+SANITY
+  sum of the two new-file parts: java 1105 + resources 479 = 1584
+  sum with the extended files' added lines: 1584 +  = 1584
+  cap comparison uses the new-file total: 1584 against soft 200 / hard 500 (task estimate 200)
+VERDICT: FAIL against the hard cap (1584 new-file judgement lines > 500). Recorded, NOT self-approved: needs a user ruling.
+EXITCODE=0

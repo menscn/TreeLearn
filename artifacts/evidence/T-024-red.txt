@@ -1,0 +1,626 @@
+# T-024 RED evidence
+# captured-at: 
+2026-09-21T20:01:24.8445067+08:00
+# command: cd android; .\gradlew.bat :app:connectedDebugAndroidTest --no-daemon --console=plain
+# mode: full connectedDebugAndroidTest (instrumentation), files stashed so the new DAOs are absent
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :tree-layout:compileJava NO-SOURCE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac NO-SOURCE
+> Task :ai:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugLibraryResources UP-TO-DATE
+> Task :ai:writeDebugAarMetadata UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :ai:extractDeepLinksDebug UP-TO-DATE
+> Task :ai:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :data:extractDeepLinksDebug UP-TO-DATE
+> Task :data:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :data:compileDebugLibraryResources UP-TO-DATE
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac UP-TO-DATE
+> Task :data:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :app:processDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:compileDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugAndroidTestResources UP-TO-DATE
+> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :app:processDebugAndroidTestManifest UP-TO-DATE
+> Task :app:processDebugAndroidTestResources UP-TO-DATE
+
+> Task :app:compileDebugAndroidTestJavaWithJavac
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:23: 错误: 找不到符号
+import com.treelearn.data.db.dao.AiArtifactDao;
+                                ^
+  符号:   类 AiArtifactDao
+  位置: 程序包 com.treelearn.data.db.dao
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:25: 错误: 找不到符号
+import com.treelearn.data.db.dao.ContextSnapshotDao;
+                                ^
+  符号:   类 ContextSnapshotDao
+  位置: 程序包 com.treelearn.data.db.dao
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:418: 错误: 程序包AiArtifactDao不存在
+    private static AiArtifactDao.Row artifact(String id, String kind, String scopeId, String payload,
+                                ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:102: 错误: 程序包ContextSnapshotDao不存在
+        ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1,
+                                                            ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:102: 错误: 找不到符号
+        ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1,
+        ^
+  符号:   变量 ContextSnapshotDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:108: 错误: 程序包ContextSnapshotDao不存在
+        ContextSnapshotDao.Row readBack = ContextSnapshotDao.findByBranchId(reopened, branch.id);
+                          ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:108: 错误: 找不到符号
+        ContextSnapshotDao.Row readBack = ContextSnapshotDao.findByBranchId(reopened, branch.id);
+                                          ^
+  符号:   变量 ContextSnapshotDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:123: 错误: 程序包ContextSnapshotDao不存在
+        ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1,
+                                                            ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:123: 错误: 找不到符号
+        ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1,
+        ^
+  符号:   变量 ContextSnapshotDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:127: 错误: 程序包ContextSnapshotDao不存在
+                () -> ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_B, branch.id,
+                                                                          ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:127: 错误: 找不到符号
+                () -> ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_B, branch.id,
+                      ^
+  符号:   变量 ContextSnapshotDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:132: 错误: 找不到符号
+                SNAPSHOT_A, ContextSnapshotDao.findByBranchId(db, branch.id).id);
+                            ^
+  符号:   变量 ContextSnapshotDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:142: 错误: 程序包ContextSnapshotDao不存在
+                () -> new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1, "  ", "{}", T0));
+                                            ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:145: 错误: 程序包ContextSnapshotDao不存在
+                () -> new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1, "digest-a", "", T0));
+                                            ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:148: 错误: 程序包ContextSnapshotDao不存在
+                () -> new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 0, "digest-a", "{}", T0));
+                                            ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:151: 错误: 程序包ContextSnapshotDao不存在
+                () -> new ContextSnapshotDao.Row("not-a-uuid", branch.id, 1, "digest-a", "{}", T0));
+                                            ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:166: 错误: 程序包ContextSnapshotDao不存在
+        ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1,
+                                                            ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:166: 错误: 找不到符号
+        ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1,
+        ^
+  符号:   变量 ContextSnapshotDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:183: 错误: 找不到符号
+                ContextSnapshotDao.findByBranchId(db, branch.id));
+                ^
+  符号:   变量 ContextSnapshotDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:198: 错误: 程序包ContextSnapshotDao不存在
+        ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1,
+                                                            ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:198: 错误: 找不到符号
+        ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1,
+        ^
+  符号:   变量 ContextSnapshotDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:201: 错误: 找不到符号
+        String stored = ContextSnapshotDao.findByBranchId(db, branch.id).payload;
+                        ^
+  符号:   变量 ContextSnapshotDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:226: 错误: 程序包AiArtifactDao不存在
+                () -> new AiArtifactDao.Row(ARTIFACT_1, KIND, branch.id, "  ", POLICY_VERSION,
+                                       ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:229: 错误: 程序包AiArtifactDao不存在
+                () -> new AiArtifactDao.Row(ARTIFACT_1, KIND, branch.id, PURPOSE, "", "payload",
+                                       ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:232: 错误: 程序包AiArtifactDao不存在
+                () -> new AiArtifactDao.Row(ARTIFACT_1, KIND, branch.id, PURPOSE, POLICY_VERSION,
+                                       ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:235: 错误: 程序包AiArtifactDao不存在
+                () -> new AiArtifactDao.Row("nope", KIND, branch.id, PURPOSE, POLICY_VERSION,
+                                       ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:253: 错误: 找不到符号
+        AiArtifactDao.insert(db, artifact(ARTIFACT_1, KIND, branch.id, "first payload", REVISION_1,
+        ^
+  符号:   变量 AiArtifactDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:257: 错误: 找不到符号
+                () -> AiArtifactDao.insert(db, artifact(ARTIFACT_2, KIND, branch.id, "second payload",
+                      ^
+  符号:   变量 AiArtifactDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:262: 错误: 找不到符号
+                AiArtifactDao.findByKindAndScope(db, KIND, branch.id).payload);
+                ^
+  符号:   变量 AiArtifactDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:270: 错误: 找不到符号
+        AiArtifactDao.insert(db, artifact(ARTIFACT_1, KIND, branch.id, "v1", REVISION_1, "in-1", T0));
+        ^
+  符号:   变量 AiArtifactDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:272: 错误: 程序包AiArtifactDao不存在
+        assertEquals("a matching baseline replaces the payload", AiArtifactDao.Writeback.APPLIED,
+                                                                              ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:273: 错误: 找不到符号
+                AiArtifactDao.applyIfBaselineMatches(db,
+                ^
+  符号:   变量 AiArtifactDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:276: 错误: 找不到符号
+                AiArtifactDao.findByKindAndScope(db, KIND, branch.id).payload);
+                ^
+  符号:   变量 AiArtifactDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:278: 错误: 程序包AiArtifactDao不存在
+        assertEquals("a different input digest is stale", AiArtifactDao.Writeback.DISCARDED_STALE,
+                                                                       ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:279: 错误: 找不到符号
+                AiArtifactDao.applyIfBaselineMatches(db,
+                ^
+  符号:   变量 AiArtifactDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:282: 错误: 找不到符号
+                AiArtifactDao.findByKindAndScope(db, KIND, branch.id).payload);
+                ^
+  符号:   变量 AiArtifactDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:285: 错误: 程序包AiArtifactDao不存在
+                AiArtifactDao.Writeback.DISCARDED_STALE,
+                             ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:286: 错误: 找不到符号
+                AiArtifactDao.applyIfBaselineMatches(db,
+                ^
+  符号:   变量 AiArtifactDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:290: 错误: 找不到符号
+                AiArtifactDao.findByKindAndScope(db, KIND, branch.id).payload);
+                ^
+  符号:   变量 AiArtifactDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:293: 错误: 程序包AiArtifactDao不存在
+                AiArtifactDao.Writeback.DISCARDED_STALE,
+                             ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:294: 错误: 找不到符号
+                AiArtifactDao.applyIfBaselineMatches(db,
+                ^
+  符号:   变量 AiArtifactDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:297: 错误: 找不到符号
+                AiArtifactDao.findByKindAndScope(db, OTHER_KIND, branch.id));
+                ^
+  符号:   变量 AiArtifactDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:310: 错误: 找不到符号
+        AiArtifactDao.insert(db, artifact(ARTIFACT_1, KIND, branch.id, "v1", REVISION_1, "in-1", T0));
+        ^
+  符号:   变量 AiArtifactDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:314: 错误: 找不到符号
+                AiArtifactDao.findByKindAndScope(db, KIND, branch.id).basedOnRevisionId);
+                ^
+  符号:   变量 AiArtifactDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:317: 错误: 程序包AiArtifactDao不存在
+                AiArtifactDao.Writeback.DISCARDED_STALE,
+                             ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:318: 错误: 找不到符号
+                AiArtifactDao.applyIfBaselineMatches(db,
+                ^
+  符号:   变量 AiArtifactDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:321: 错误: 找不到符号
+                AiArtifactDao.findByKindAndScope(db, KIND, branch.id).payload);
+                ^
+  符号:   变量 AiArtifactDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:330: 错误: 找不到符号
+        AiArtifactDao.insert(db, artifact(ARTIFACT_1, KIND, branch.id, "a", REVISION_1, "in-1", T0));
+        ^
+  符号:   变量 AiArtifactDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:331: 错误: 找不到符号
+        AiArtifactDao.insert(db, artifact(ARTIFACT_2, OTHER_KIND, branch.id, "b", REVISION_1,
+        ^
+  符号:   变量 AiArtifactDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:333: 错误: 找不到符号
+        AiArtifactDao.insert(db, artifact("ddddddd3-1111-4111-8111-111111111111", KIND,
+        ^
+  符号:   变量 AiArtifactDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:337: 错误: 找不到符号
+                AiArtifactDao.deleteByScope(db, KIND, branch.id));
+                ^
+  符号:   变量 AiArtifactDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:338: 错误: 找不到符号
+        assertNull(AiArtifactDao.findByKindAndScope(db, KIND, branch.id));
+                   ^
+  符号:   变量 AiArtifactDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:340: 错误: 找不到符号
+                AiArtifactDao.findByKindAndScope(db, OTHER_KIND, branch.id));
+                ^
+  符号:   变量 AiArtifactDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:342: 错误: 找不到符号
+                AiArtifactDao.findByKindAndScope(db, KIND, otherBranch.id));
+                ^
+  符号:   变量 AiArtifactDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:356: 错误: 程序包ContextSnapshotDao不存在
+        ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1,
+                                                            ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:356: 错误: 找不到符号
+        ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1,
+        ^
+  符号:   变量 ContextSnapshotDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:360: 错误: 找不到符号
+                ContextSnapshotDao.findByBranchId(db, branch.id).payload);
+                ^
+  符号:   变量 ContextSnapshotDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:376: 错误: 程序包ContextSnapshotDao不存在
+        ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1,
+                                                            ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:376: 错误: 找不到符号
+        ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1,
+        ^
+  符号:   变量 ContextSnapshotDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:378: 错误: 找不到符号
+        AiArtifactDao.insert(db, artifact(ARTIFACT_1, KIND, branch.id,
+        ^
+  符号:   变量 AiArtifactDao
+  位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:421: 错误: 程序包AiArtifactDao不存在
+        return new AiArtifactDao.Row(id, kind, scopeId, PURPOSE, POLICY_VERSION, payload,
+                                ^
+注: D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+61 个错误
+
+> Task :app:compileDebugAndroidTestJavaWithJavac FAILED
+
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugAndroidTestJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  注: D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java使用或覆盖了已过时的 API。
+  注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:23: 错误: 找不到符号
+  import com.treelearn.data.db.dao.AiArtifactDao;
+                                  ^
+    符号:   类 AiArtifactDao
+    位置: 程序包 com.treelearn.data.db.dao
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:25: 错误: 找不到符号
+  import com.treelearn.data.db.dao.ContextSnapshotDao;
+                                  ^
+    符号:   类 ContextSnapshotDao
+    位置: 程序包 com.treelearn.data.db.dao
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:102: 错误: 找不到符号
+          ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1,
+          ^
+    符号:   变量 ContextSnapshotDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:108: 错误: 找不到符号
+          ContextSnapshotDao.Row readBack = ContextSnapshotDao.findByBranchId(reopened, branch.id);
+                                            ^
+    符号:   变量 ContextSnapshotDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:123: 错误: 找不到符号
+          ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1,
+          ^
+    符号:   变量 ContextSnapshotDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:127: 错误: 找不到符号
+                  () -> ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_B, branch.id,
+                        ^
+    符号:   变量 ContextSnapshotDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:132: 错误: 找不到符号
+                  SNAPSHOT_A, ContextSnapshotDao.findByBranchId(db, branch.id).id);
+                              ^
+    符号:   变量 ContextSnapshotDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:166: 错误: 找不到符号
+          ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1,
+          ^
+    符号:   变量 ContextSnapshotDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:183: 错误: 找不到符号
+                  ContextSnapshotDao.findByBranchId(db, branch.id));
+                  ^
+    符号:   变量 ContextSnapshotDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:198: 错误: 找不到符号
+          ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1,
+          ^
+    符号:   变量 ContextSnapshotDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:201: 错误: 找不到符号
+          String stored = ContextSnapshotDao.findByBranchId(db, branch.id).payload;
+                          ^
+    符号:   变量 ContextSnapshotDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:253: 错误: 找不到符号
+          AiArtifactDao.insert(db, artifact(ARTIFACT_1, KIND, branch.id, "first payload", REVISION_1,
+          ^
+    符号:   变量 AiArtifactDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:257: 错误: 找不到符号
+                  () -> AiArtifactDao.insert(db, artifact(ARTIFACT_2, KIND, branch.id, "second payload",
+                        ^
+    符号:   变量 AiArtifactDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:262: 错误: 找不到符号
+                  AiArtifactDao.findByKindAndScope(db, KIND, branch.id).payload);
+                  ^
+    符号:   变量 AiArtifactDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:270: 错误: 找不到符号
+          AiArtifactDao.insert(db, artifact(ARTIFACT_1, KIND, branch.id, "v1", REVISION_1, "in-1", T0));
+          ^
+    符号:   变量 AiArtifactDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:273: 错误: 找不到符号
+                  AiArtifactDao.applyIfBaselineMatches(db,
+                  ^
+    符号:   变量 AiArtifactDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:276: 错误: 找不到符号
+                  AiArtifactDao.findByKindAndScope(db, KIND, branch.id).payload);
+                  ^
+    符号:   变量 AiArtifactDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:279: 错误: 找不到符号
+                  AiArtifactDao.applyIfBaselineMatches(db,
+                  ^
+    符号:   变量 AiArtifactDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:282: 错误: 找不到符号
+                  AiArtifactDao.findByKindAndScope(db, KIND, branch.id).payload);
+                  ^
+    符号:   变量 AiArtifactDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:286: 错误: 找不到符号
+                  AiArtifactDao.applyIfBaselineMatches(db,
+                  ^
+    符号:   变量 AiArtifactDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:290: 错误: 找不到符号
+                  AiArtifactDao.findByKindAndScope(db, KIND, branch.id).payload);
+                  ^
+    符号:   变量 AiArtifactDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:294: 错误: 找不到符号
+                  AiArtifactDao.applyIfBaselineMatches(db,
+                  ^
+    符号:   变量 AiArtifactDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:297: 错误: 找不到符号
+                  AiArtifactDao.findByKindAndScope(db, OTHER_KIND, branch.id));
+                  ^
+    符号:   变量 AiArtifactDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:310: 错误: 找不到符号
+          AiArtifactDao.insert(db, artifact(ARTIFACT_1, KIND, branch.id, "v1", REVISION_1, "in-1", T0));
+          ^
+    符号:   变量 AiArtifactDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:314: 错误: 找不到符号
+                  AiArtifactDao.findByKindAndScope(db, KIND, branch.id).basedOnRevisionId);
+                  ^
+    符号:   变量 AiArtifactDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:318: 错误: 找不到符号
+                  AiArtifactDao.applyIfBaselineMatches(db,
+                  ^
+    符号:   变量 AiArtifactDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:321: 错误: 找不到符号
+                  AiArtifactDao.findByKindAndScope(db, KIND, branch.id).payload);
+                  ^
+    符号:   变量 AiArtifactDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:330: 错误: 找不到符号
+          AiArtifactDao.insert(db, artifact(ARTIFACT_1, KIND, branch.id, "a", REVISION_1, "in-1", T0));
+          ^
+    符号:   变量 AiArtifactDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:331: 错误: 找不到符号
+          AiArtifactDao.insert(db, artifact(ARTIFACT_2, OTHER_KIND, branch.id, "b", REVISION_1,
+          ^
+    符号:   变量 AiArtifactDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:333: 错误: 找不到符号
+          AiArtifactDao.insert(db, artifact("ddddddd3-1111-4111-8111-111111111111", KIND,
+          ^
+    符号:   变量 AiArtifactDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:337: 错误: 找不到符号
+                  AiArtifactDao.deleteByScope(db, KIND, branch.id));
+                  ^
+    符号:   变量 AiArtifactDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:338: 错误: 找不到符号
+          assertNull(AiArtifactDao.findByKindAndScope(db, KIND, branch.id));
+                     ^
+    符号:   变量 AiArtifactDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:340: 错误: 找不到符号
+                  AiArtifactDao.findByKindAndScope(db, OTHER_KIND, branch.id));
+                  ^
+    符号:   变量 AiArtifactDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:342: 错误: 找不到符号
+                  AiArtifactDao.findByKindAndScope(db, KIND, otherBranch.id));
+                  ^
+    符号:   变量 AiArtifactDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:356: 错误: 找不到符号
+          ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1,
+          ^
+    符号:   变量 ContextSnapshotDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:360: 错误: 找不到符号
+                  ContextSnapshotDao.findByBranchId(db, branch.id).payload);
+                  ^
+    符号:   变量 ContextSnapshotDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:376: 错误: 找不到符号
+          ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1,
+          ^
+    符号:   变量 ContextSnapshotDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:378: 错误: 找不到符号
+          AiArtifactDao.insert(db, artifact(ARTIFACT_1, KIND, branch.id,
+          ^
+    符号:   变量 AiArtifactDao
+    位置: 类 ContextSnapshotAiArtifactDaoInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:418: 错误: 程序包AiArtifactDao不存在
+      private static AiArtifactDao.Row artifact(String id, String kind, String scopeId, String payload,
+                                  ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:102: 错误: 程序包ContextSnapshotDao不存在
+          ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1,
+                                                              ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:108: 错误: 程序包ContextSnapshotDao不存在
+          ContextSnapshotDao.Row readBack = ContextSnapshotDao.findByBranchId(reopened, branch.id);
+                            ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:123: 错误: 程序包ContextSnapshotDao不存在
+          ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1,
+                                                              ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:127: 错误: 程序包ContextSnapshotDao不存在
+                  () -> ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_B, branch.id,
+                                                                            ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:142: 错误: 程序包ContextSnapshotDao不存在
+                  () -> new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1, "  ", "{}", T0));
+                                              ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:145: 错误: 程序包ContextSnapshotDao不存在
+                  () -> new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1, "digest-a", "", T0));
+                                              ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:148: 错误: 程序包ContextSnapshotDao不存在
+                  () -> new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 0, "digest-a", "{}", T0));
+                                              ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:151: 错误: 程序包ContextSnapshotDao不存在
+                  () -> new ContextSnapshotDao.Row("not-a-uuid", branch.id, 1, "digest-a", "{}", T0));
+                                              ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:166: 错误: 程序包ContextSnapshotDao不存在
+          ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1,
+                                                              ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:198: 错误: 程序包ContextSnapshotDao不存在
+          ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1,
+                                                              ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:226: 错误: 程序包AiArtifactDao不存在
+                  () -> new AiArtifactDao.Row(ARTIFACT_1, KIND, branch.id, "  ", POLICY_VERSION,
+                                         ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:229: 错误: 程序包AiArtifactDao不存在
+                  () -> new AiArtifactDao.Row(ARTIFACT_1, KIND, branch.id, PURPOSE, "", "payload",
+                                         ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:232: 错误: 程序包AiArtifactDao不存在
+                  () -> new AiArtifactDao.Row(ARTIFACT_1, KIND, branch.id, PURPOSE, POLICY_VERSION,
+                                         ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:235: 错误: 程序包AiArtifactDao不存在
+                  () -> new AiArtifactDao.Row("nope", KIND, branch.id, PURPOSE, POLICY_VERSION,
+                                         ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:272: 错误: 程序包AiArtifactDao不存在
+          assertEquals("a matching baseline replaces the payload", AiArtifactDao.Writeback.APPLIED,
+                                                                                ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:278: 错误: 程序包AiArtifactDao不存在
+          assertEquals("a different input digest is stale", AiArtifactDao.Writeback.DISCARDED_STALE,
+                                                                         ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:285: 错误: 程序包AiArtifactDao不存在
+                  AiArtifactDao.Writeback.DISCARDED_STALE,
+                               ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:293: 错误: 程序包AiArtifactDao不存在
+                  AiArtifactDao.Writeback.DISCARDED_STALE,
+                               ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:317: 错误: 程序包AiArtifactDao不存在
+                  AiArtifactDao.Writeback.DISCARDED_STALE,
+                               ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:356: 错误: 程序包ContextSnapshotDao不存在
+          ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1,
+                                                              ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:376: 错误: 程序包ContextSnapshotDao不存在
+          ContextSnapshotDao.insert(db, new ContextSnapshotDao.Row(SNAPSHOT_A, branch.id, 1,
+                                                              ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\ContextSnapshotAiArtifactDaoInstrumentedTest.java:421: 错误: 程序包AiArtifactDao不存在
+          return new AiArtifactDao.Row(id, kind, scopeId, PURPOSE, POLICY_VERSION, payload,
+                                  ^
+  61 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 46s
+57 actionable tasks: 1 executed, 56 up-to-date
+EXITCODE=1

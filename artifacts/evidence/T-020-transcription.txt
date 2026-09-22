@@ -1,0 +1,120 @@
+# T-020 transcription evidence — do the compiled prompt bodies match the authoritative document?
+# captured at: 2026-09-21T20:15:14+08:00
+# Authority: Docs/05-technical-design/知芽（TreeLearn）DeepSeek自适应学习导师提示词设计_V1.0.md §4, §4.1, §6.
+# Section 1 prints what the compiled constants contain AT RUNTIME (probe compiled from a temp directory
+# outside the repository). Section 2 recomputes the same digests straight from the document and compares
+# the two sides; neither side is a copy of the other.
+
+# COMMAND 1:
+#   javac -encoding UTF-8 -d C:\Users\23745\AppData\Local\Temp\t020-trans-201514\classes -cp "<:core jar>" <android/ai/src/main/java/com/treelearn/ai/prompt/*.java> <probe>
+#   java -cp "C:\Users\23745\AppData\Local\Temp\t020-trans-201514\classes;<:core jar>" com.treelearn.ai.prompt.BodyDigestProbe
+--- output ---
+LEARNING_ANSWER_TUTOR chars=715 sha256=f9ac51e5712b031fbae2eeaa77daeba32934a05089f724060ba01de97e85de0d
+THINKING_ADDENDUM chars=101 sha256=2ed824cc691e0ac00e7970e3b98171d02cefce5f2a5a45b585390fbc4bfe7dd9
+DERIVED_PROCESSOR_BASE chars=186 sha256=9a939cbe2c19c67ec9edd6a4f2fdd0f9321c560d271b334e8602b9c84f3f4b79
+ROOT_TITLE_SUFFIX chars=102 sha256=35daa90046f4f5474b0aeaf4b581bc797004d944605f259fe9823a7e69a703bd
+BRANCH_TITLE_SUFFIX chars=116 sha256=2211c74eeb96d2b3e7fa3f0da7c265da00b238f8df6ac0da4b3c2efa18bbd655
+BRANCH_SUMMARY_SUFFIX chars=156 sha256=9eed73311670155b52649c434d03a13c0af44362869157c6273658f9db02b1ca
+ANSWER_RECOMMENDATIONS_SUFFIX chars=200 sha256=db03fdc3a492e56947455c0aa53107dce5c9c9a732816c3af144803476974eb1
+HOME_RECOMMENDATIONS_SUFFIX chars=187 sha256=2122a1157db897d8e5fb5da2c4aebf9924ef1c6d8c91873d3ae08d1e725303b3
+CONTEXT_COMPRESSION_SUFFIX chars=174 sha256=ab3415cac396fd4b142da37bbcb63f8b86d164735bb836c9ec8be91da4dba20f
+# COMMAND 2: python C:\Users\23745\AppData\Local\Temp\t020-transcription-check.py  (its source is printed below; it reads section 1 of this file)
+import hashlib, pathlib, re, sys
+
+REPO = pathlib.Path(r"D:\Project\Android\Treelearn")
+DOC_REL = "Docs/05-technical-design/\u77e5\u82bd\uff08TreeLearn\uff09DeepSeek\u81ea\u9002\u5e94\u5b66\u4e60\u5bfc\u5e08\u63d0\u793a\u8bcd\u8bbe\u8ba1_V1.0.md"
+EVIDENCE = REPO / "artifacts/evidence/T-020-transcription.txt"
+NAMES = ["LEARNING_ANSWER_TUTOR", "THINKING_ADDENDUM", "DERIVED_PROCESSOR_BASE",
+         "ROOT_TITLE_SUFFIX", "BRANCH_TITLE_SUFFIX", "BRANCH_SUMMARY_SUFFIX",
+         "ANSWER_RECOMMENDATIONS_SUFFIX", "HOME_RECOMMENDATIONS_SUFFIX",
+         "CONTEXT_COMPRESSION_SUFFIX"]
+FENCE = chr(96) * 3
+
+raw = (REPO / DOC_REL).read_bytes().decode("utf-8").replace("\r\n", "\n")
+blocks, cur = [], None
+for line in raw.split("\n"):
+    stripped = line.strip()
+    if stripped == FENCE + "text":
+        cur = []; continue
+    if stripped == FENCE and cur is not None:
+        blocks.append(cur); cur = None; continue
+    if cur is not None:
+        cur.append(line)
+doc_bodies = [b for b in blocks
+              if not b[0].startswith("PromptPurpose") and not b[0].startswith("1. system:")]
+
+runtime = {}
+pattern = re.compile(r"^([A-Z_]+) chars=(\d+) sha256=([0-9a-f]{64})$")
+for line in EVIDENCE.read_text(encoding="utf-8").splitlines():
+    found = pattern.match(line.strip())
+    if found:
+        runtime[found.group(1)] = (int(found.group(2)), found.group(3))
+
+print()
+print("# COMMAND 2 (this section): python <the script printed below> - recomputes the digests from the document")
+print("--- output ---")
+print("doc blocks found: %d (fenced text blocks: %d)" % (len(doc_bodies), len(blocks)))
+print("runtime lines parsed from section 1: %d" % len(runtime))
+print()
+print("%-30s %6s %6s %s" % ("BODY", "doc", "run", "MATCH"))
+verdict_ok = len(doc_bodies) == len(NAMES) and len(runtime) == len(NAMES)
+for name, block in zip(NAMES, doc_bodies):
+    text = "\n".join(block)
+    digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
+    if name not in runtime:
+        print("%-30s %6d %6s %s" % (name, len(text), "-", "MISSING FROM RUNTIME OUTPUT"))
+        verdict_ok = False
+        continue
+    chars, got = runtime[name]
+    same = (chars == len(text) and got == digest)
+    verdict_ok = verdict_ok and same
+    print("%-30s %6d %6d %s" % (name, len(text), chars, "MATCH" if same else "MISMATCH doc=%s run=%s" % (digest, got)))
+print()
+print("VERDICT: %s (compiled bodies are byte-identical to the document's fenced blocks)"
+      % ("PASS" if verdict_ok else "FAIL"))
+sys.exit(0 if verdict_ok else 1)
+
+
+# COMMAND 2 (this section): python <the script printed below> - recomputes the digests from the document
+--- output ---
+doc blocks found: 9 (fenced text blocks: 11)
+runtime lines parsed from section 1: 9
+
+BODY                              doc    run MATCH
+LEARNING_ANSWER_TUTOR             715    715 MATCH
+THINKING_ADDENDUM                 101    101 MATCH
+DERIVED_PROCESSOR_BASE            186    186 MATCH
+ROOT_TITLE_SUFFIX                 102    102 MATCH
+BRANCH_TITLE_SUFFIX               116    116 MATCH
+BRANCH_SUMMARY_SUFFIX             156    156 MATCH
+ANSWER_RECOMMENDATIONS_SUFFIX     200    200 MATCH
+HOME_RECOMMENDATIONS_SUFFIX       187    187 MATCH
+CONTEXT_COMPRESSION_SUFFIX        174    174 MATCH
+
+VERDICT: PASS (compiled bodies are byte-identical to the document's fenced blocks)
+EXITCODE=0
+
+
+# ===================================================================
+# INDEPENDENT RE-CHECK at 2026-09-21T20:18+08:00 by the same implementer lane,
+# re-deriving both sides from scratch rather than re-reading section 1 above.
+# command: python C:\Users\23745\AppData\Local\Temp\t020-verify-bodies3.py
+#   (script sha256=5C85DC1340F86616A5B032C87A03D000A54AD61F56D14BAB2ABED020F282626B)
+# method: python extracts the doc's 9 prompt fenced blocks directly and emulates the Java
+#   text-block compiler (min-indent strip, trailing newline and line-continuation removal)
+#   on the source of PromptBodiesV1.java, then compares sha256 of the two sides.
+# ===================================================================
+doc text-blocks=11  candidate prompt bodies=9
+LEARNING_ANSWER_TUTOR          match=True  chars 715/715 sha f9ac51e5712b / f9ac51e5712b
+THINKING_ADDENDUM              match=True  chars 101/101 sha 2ed824cc691e / 2ed824cc691e
+DERIVED_PROCESSOR_BASE         match=True  chars 186/186 sha 9a939cbe2c19 / 9a939cbe2c19
+ROOT_TITLE_SUFFIX              match=True  chars 102/102 sha 35daa90046f4 / 35daa90046f4
+BRANCH_TITLE_SUFFIX            match=True  chars 116/116 sha 2211c74eeb96 / 2211c74eeb96
+BRANCH_SUMMARY_SUFFIX          match=True  chars 156/156 sha 9eed73311670 / 9eed73311670
+ANSWER_RECOMMENDATIONS_SUFFIX  match=True  chars 200/200 sha db03fdc3a492 / db03fdc3a492
+HOME_RECOMMENDATIONS_SUFFIX    match=True  chars 187/187 sha 2122a1157db8 / 2122a1157db8
+CONTEXT_COMPRESSION_SUFFIX     match=True  chars 174/174 sha ab3415cac396 / ab3415cac396
+MATCHED 9/9
+TOTAL chars(java)=1937  sum-of-parts=1937   (self-consistency: total == sum of the nine parts)
+VERDICT=PASS (9/9 bodies byte-identical to the design document)
+EXITCODE=0

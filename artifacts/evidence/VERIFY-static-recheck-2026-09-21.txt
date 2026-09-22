@@ -1,0 +1,211 @@
+﻿# Independent verifier static re-check (T-003/T-004/T-021/T-022) - no emulator used (user instruction 2026-09-21)
+
+===== [2026-09-21T21:19:34+08:00] MODE=read-only | T-003 own evidence files: name | mtime | size
+$ Get-ChildItem artifacts\evidence\T-003-*.txt | ForEach-Object { $_.Name + ' | ' + $_.LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss') + ' | ' + $_.Length + ' B' }
+T-003-checks.txt | 2026-09-21 10:45:24 | 23148 B
+T-003-green.txt | 2026-09-21 10:44:39 | 8349 B
+T-003-guard.txt | 2026-09-21 10:46:35 | 2568 B
+T-003-n11-red.txt | 2026-09-21 12:03:20 | 11068 B
+T-003-red.txt | 2026-09-21 10:09:35 | 64593 B
+EXITCODE=
+
+===== [2026-09-21T21:19:34+08:00] MODE=read-only | T-003: GenerationState.java deviation wording (round-5 V1)
+$ Select-String -Path 'android/core/src/main/java/com/treelearn/core/domain/GenerationState.java' -Pattern 'deviation' | ForEach-Object { [string]$_.LineNumber + ': ' + $_.Line }
+20:  * <p>Recorded deviations from the technical-design §7 diagram. The diagram's last block is
+36:  * deletion</strong> — not "three deviations", which would count a removed edge as though it were
+37:  * still present, and not "two deviations", which would hide the deletion. All three are listed
+EXITCODE=
+
+===== [2026-09-21T21:19:34+08:00] MODE=read-only | T-003: residual occurrences of deleted symbol BRANCH_SOURCE_INVALID (round-5 V2)
+$ rg -n 'BRANCH_SOURCE_INVALID' android
+android\core\src\test\java\com\treelearn\core\domain\BranchSourceTest.java:184:        // BRANCH_SOURCE_INVALID while BranchSource.fromOperation threw for the same mistake; the
+android\core\src\main\java\com\treelearn\core\domain\Branch.java:87:     * {@code BRANCH_SOURCE_INVALID} code for null while
+android\core\src\main\java\com\treelearn\core\domain\Branch.java:90:     * The name is written as {@code BRANCH_SOURCE_INVALID} rather than as a javadoc link on purpose: a
+EXITCODE=0
+
+===== [2026-09-21T21:19:34+08:00] MODE=read-only | T-003/T-021 V7/R2-2: does android/README.md still copy the exception list?
+$ Select-String -LiteralPath 'android/README.md' -Pattern 'AnswerRevision\.create|GenerationCommand\.create|PromptSpec\.of' | ForEach-Object { [string]$_.LineNumber + ': ' + $_.Line }
+200: **三处**例外——`AnswerRevision.create`、`GenerationCommand.create`、`PromptSpec.of`，它们在**策略版本
+232: | `AnswerRevisionDao` | `answer_revisions` | **`AnswerRevision.restore` 在其只读映射 `read(Cursor)` 里，是全仓唯一的生产调用点**（检索命令与输出见 `artifacts/evidence/T-023-restore-location.txt`）；写路径一律走 `AnswerRevision.create`，即 `insert` 不接受「已存在的实体」以外的形态。边界写明在 javadoc 里：库层只要求 `length(answer_content) > 0`，领域要求非空白，因此**纯空白回答会被本映射以 `IllegalArgumentException` 大声拒绝**，而不是作为空回答落库 |
+EXITCODE=0
+
+===== [2026-09-21T21:19:34+08:00] MODE=read-only | T-003: current per-file code lines (non-blank, non-comment) for the 14 files it claims
+$ $files = @('AnswerRevision','Branch','BranchAnchor','BranchSource','DomainError','DomainErrorCode','DomainResult','GenerationModel','GenerationState','Guard','Message','MessageRole','PromptPurpose','Topic')
+  $tot = 0
+  foreach ($n in $files) {
+    $p = "android/core/src/main/java/com/treelearn/core/domain/$n.java"
+    if (Test-Path $p) {
+      $code = (Get-Content -LiteralPath $p | Where-Object { $_ -notmatch '^\s*$' -and $_ -notmatch '^\s*//' -and $_ -notmatch '^\s*\*' -and $_ -notmatch '^\s*/\*' }).Count
+      $tot += $code
+      "{0,-18} code={1,4}" -f $n, $code
+    } else { "{0,-18} MISSING" -f $n }
+  }
+  "SUM(T-003 14 files, current tree) code=$tot"
+AnswerRevision     code=  81
+Branch             code= 159
+BranchAnchor       code=  51
+BranchSource       code=  58
+DomainError        code=  35
+DomainErrorCode    code=  18
+DomainResult       code=  46
+GenerationModel    code=  17
+GenerationState    code=  89
+Guard              code=  65
+Message            code=  98
+MessageRole        code=   5
+PromptPurpose      code=  65
+Topic              code=  30
+SUM(T-003 14 files, current tree) code=817
+EXITCODE=0
+
+===== [2026-09-21T21:19:35+08:00] MODE=read-only | T-003/T-021: current :core test XML per-class counts
+$ foreach ($x in Get-ChildItem android/core/build/test-results/test/TEST-*.xml) {
+    [xml]$d = Get-Content -LiteralPath $x.FullName -Raw -Encoding UTF8
+    $ts = $d.testsuite
+    "{0,-55} tests={1} failures={2} errors={3} skipped={4} ts={5}" -f $ts.name, $ts.tests, $ts.failures, $ts.errors, $ts.skipped, $ts.timestamp
+  }
+com.treelearn.core.domain.AnswerRevisionTest            tests=13 failures=0 errors=0 skipped=0 ts=2026-09-21T12:46:26.158Z
+com.treelearn.core.domain.BranchSourceTest              tests=12 failures=0 errors=0 skipped=0 ts=2026-09-21T12:46:26.194Z
+com.treelearn.core.domain.BranchTest                    tests=15 failures=0 errors=0 skipped=0 ts=2026-09-21T12:46:26.206Z
+com.treelearn.core.domain.BuildContextPlanUseCaseTest   tests=10 failures=0 errors=0 skipped=0 ts=2026-09-21T12:46:26.216Z
+com.treelearn.core.domain.ContextSnapshotTest           tests=12 failures=0 errors=0 skipped=0 ts=2026-09-21T12:46:26.232Z
+com.treelearn.core.domain.GenerationCommandTest         tests=9 failures=0 errors=0 skipped=0 ts=2026-09-21T12:46:26.250Z
+com.treelearn.core.domain.GenerationOperationTest       tests=20 failures=0 errors=0 skipped=0 ts=2026-09-21T12:46:26.263Z
+com.treelearn.core.domain.GenerationStateTest           tests=16 failures=0 errors=0 skipped=0 ts=2026-09-21T12:46:26.275Z
+com.treelearn.core.domain.GuardTest                     tests=6 failures=0 errors=0 skipped=0 ts=2026-09-21T12:46:26.278Z
+com.treelearn.core.domain.MessageTest                   tests=15 failures=0 errors=0 skipped=0 ts=2026-09-21T12:46:26.282Z
+com.treelearn.core.domain.PromptPurposeTest             tests=12 failures=0 errors=0 skipped=0 ts=2026-09-21T12:46:26.294Z
+com.treelearn.core.domain.PromptSpecTest                tests=8 failures=0 errors=0 skipped=0 ts=2026-09-21T12:46:26.298Z
+com.treelearn.core.domain.TopicTest                     tests=6 failures=0 errors=0 skipped=0 ts=2026-09-21T12:46:26.304Z
+EXITCODE=0
+
+===== [2026-09-21T21:19:35+08:00] MODE=read-only | T-004: T-004-red.txt counts (javac self-report vs col-0 detail vs the file's deduped block)
+$ $c = Get-Content -LiteralPath artifacts\evidence\T-004-red.txt -Encoding UTF8
+  "total lines = " + $c.Count
+  "javac self-report lines containing '个错误':"
+  $c | Select-String -Pattern '个错误' | ForEach-Object { [string]$_.LineNumber + ': ' + $_.Line }
+  "indented summary block lines (^\s+\d+ 错误):"
+  $c | Where-Object { $_ -match '^\s+\d+ 错误' } | ForEach-Object { '[' + $_ + ']' }
+  "col0 detail lines: 找不到符号 = " + ($c | Where-Object { $_ -match '^[A-Z]:\\.*错误: 找不到符号' }).Count
+  "col0 detail lines: 程序包...不存在 total = " + ($c | Where-Object { $_ -match '^[A-Z]:\\.*错误: 程序包' }).Count
+  "col0 detail lines: program package com.treelearn.data.db = " + ($c | Where-Object { $_ -match '^[A-Z]:\\.*程序包com\.treelearn\.data\.db不存在' }).Count
+  "col0 detail lines: program package TreeLearnSchema = " + ($c | Where-Object { $_ -match '^[A-Z]:\\.*程序包TreeLearnSchema不存在' }).Count
+total lines = 78
+javac self-report lines containing '个错误':
+20: 24 个错误
+21:   24 个错误
+indented summary block lines (^\s+\d+ 错误):
+[     36 错误: 找不到符号]
+[      6 错误: 程序包com.treelearn.data.db不存在]
+[      6 错误: 程序包TreeLearnSchema不存在]
+col0 detail lines: 找不到符号 = 18
+col0 detail lines: 程序包...不存在 total = 6
+col0 detail lines: program package com.treelearn.data.db = 3
+col0 detail lines: program package TreeLearnSchema = 3
+EXITCODE=0
+
+===== [2026-09-21T21:19:35+08:00] MODE=read-only | T-004: what does the cited T-004-green.txt / T-004-tests.txt actually say about suite size?
+$ Select-String -LiteralPath artifacts\evidence\T-004-green.txt -Pattern 'Starting|Finished|套件规模|Exit code|EXITCODE' | ForEach-Object { [string]$_.LineNumber + ': ' + $_.Line }
+  Select-String -LiteralPath artifacts\evidence\T-004-tests.txt -Pattern 'testsuite' | ForEach-Object { [string]$_.LineNumber + ': ' + $_.Line }
+5: Exit code: 0（与文件末尾 EXITCODE 一致，取自同一次运行）
+6: 套件规模 : T-004 的 24 例 + T-022 的 15 例 + T-002 启动 1 例 = 40 例（本轮加入 T-023 后为 52 例，见 T-023-green.txt）
+10: Starting a Gradle Daemon, 4 busy and 2 incompatible and 8 stopped Daemons could not be reused, use --status for details
+138: Starting 52 tests on Medium_Phone_API_36.1(AVD) - 16
+141: Finished 52 tests on Medium_Phone_API_36.1(AVD) - 16
+154: EXITCODE=0
+6: <testsuite name="com.treelearn.app.AnswerRevisionGenerationOperationDaoInstrumentedTest" tests="52" failures="0" errors="0" skipped="0" time="12.105" timestamp="2026-09-21T10:38:26" hostname="localhost"
+EXITCODE=0
+
+===== [2026-09-21T21:19:35+08:00] MODE=read-only | T-021: T-021-red.txt counts (task claims 49 / 3 files / 49 errors x2)
+$ $c = Get-Content -LiteralPath artifacts\evidence\T-021-red.txt -Encoding UTF8
+  "col0 'error: cannot find symbol' = " + ($c | Where-Object { $_ -match 'error: cannot find symbol' -and $_ -notmatch '^\s' }).Count
+  "any  'error: cannot find symbol' = " + ($c | Where-Object { $_ -match 'error: cannot find symbol' }).Count
+  $c | Select-String -Pattern '\d+ errors' | ForEach-Object { [string]$_.LineNumber + ': ' + $_.Line }
+col0 'error: cannot find symbol' = 49
+any  'error: cannot find symbol' = 98
+254: 49 errors
+508:   49 errors
+EXITCODE=0
+
+===== [2026-09-21T21:19:35+08:00] MODE=read-only | T-021 R2-6: do the RED evidence line numbers match the current test source?
+$ "RED evidence promises line PromptSpecTest.java:23 with content:"
+  (Get-Content -LiteralPath artifacts\evidence\T-021-red.txt -Encoding UTF8)[209]
+  "current PromptSpecTest.java line 23  : " + (Get-Content -LiteralPath 'android/core/src/test/java/com/treelearn/core/domain/PromptSpecTest.java' -Encoding UTF8)[22]
+  "current PromptSpecTest.java line 33  : " + (Get-Content -LiteralPath 'android/core/src/test/java/com/treelearn/core/domain/PromptSpecTest.java' -Encoding UTF8)[32]
+  "current PromptSpecTest.java line 45  : " + (Get-Content -LiteralPath 'android/core/src/test/java/com/treelearn/core/domain/PromptSpecTest.java' -Encoding UTF8)[44]
+RED evidence promises line PromptSpecTest.java:23 with content:
+        PromptSpec spec = PromptSpec.of(PromptPurpose.LEARNING_ANSWER, LEARNING, "You are a tutor.");
+current PromptSpecTest.java line 23  : public class PromptSpecTest {
+current PromptSpecTest.java line 33  :     @Test
+current PromptSpecTest.java line 45  :                 PromptSpec.of(PromptPurpose.LEARNING_ANSWER, LEARNING, blank);
+EXITCODE=0
+
+===== [2026-09-21T21:19:36+08:00] MODE=read-only | T-021: verdict line of the round-2 verifier report already on disk
+$ Get-Content -LiteralPath artifacts\evidence\T-021-verification-round2.md -Encoding UTF8 | Select-Object -Skip 9 -First 12
+## 1. Verdict
+
+**`PARTIAL`**
+
+- 7 条验收条件**全部实质满足**，F1–F10 中 **9 项已真正修好**（我逐项用自写探针/命令复核，不复述交付方证据）。
+- 但仍有 **2 项中等**发现与 **6 项轻/观察**发现：
+  - **R2-1（中）**：本轮把「参数形状先于业务判定」定为**包级规则**并写进当前态文档（`android/README.md:171`）与 Handoff，但**同包第四个返回 `DomainResult` 的入口 `AnswerRevision.create` 仍让业务码遮住 4 个调用方 bug**——F9 的修复在自己的声明范围内**不完整**，且文档现在对全包宣称了一条不成立的规则。
+  - **R2-6（中）**：任务文件仍写着「RED 证据引用的测试行号与**当前落盘的测试源一致**，说明 RED 跑的就是最终测试源」。**这句在本轮已被改成不实**：RED 证据引用的 `PromptSpecTest` 8 处行号**全部**与当前源不符（整体后移 11 行），且 RED 源里 `PromptSpec.of` 是**直接返回值**（`PromptSpec spec = PromptSpec.of(...)`），而交付的 API 返回 `DomainResult`。即 RED 跑的是 F3 改 API **之前**的测试源；其余两个测试文件的前段逐字未变、只有尾部因本轮新增用例后移。
+- 未发现伪造证据：RED 的 49 errors / 三个文件、GREEN 的 121 用例与命令行+退出码、规模表 5 个文件逐格**与我独立复算完全相同**。
+- 未发现规模超 500 硬上限；未发现隐藏的行为破坏（38400 步随机动作序列穷举 0 反例）。
+
+## 2. 逐项核实（核实项 → 命令 → 观察输出 → 结论）
+EXITCODE=0
+
+===== [2026-09-21T21:19:36+08:00] MODE=read-only | T-022: T-022-green.txt suite size vs the task file GREEN record
+$ Select-String -LiteralPath artifacts\evidence\T-022-green.txt -Pattern 'Starting|Finished|套件规模|Exit code|EXITCODE' | ForEach-Object { [string]$_.LineNumber + ': ' + $_.Line }
+  Select-String -LiteralPath artifacts\evidence\T-022-tests.txt -Pattern 'testsuite' | ForEach-Object { [string]$_.LineNumber + ': ' + $_.Line }
+5: Exit code: 0（与文件末尾 EXITCODE 一致，取自同一次运行）
+6: 套件规模 : T-022 的 15 例 + T-004 的 24 例 + T-002 启动 1 例 = 40 例（本轮加入 T-023 后为 52 例，见 T-023-green.txt）
+10: Starting a Gradle Daemon, 4 busy and 2 incompatible and 8 stopped Daemons could not be reused, use --status for details
+138: Starting 52 tests on Medium_Phone_API_36.1(AVD) - 16
+141: Finished 52 tests on Medium_Phone_API_36.1(AVD) - 16
+154: EXITCODE=0
+6: <testsuite name="com.treelearn.app.AnswerRevisionGenerationOperationDaoInstrumentedTest" tests="52" failures="0" errors="0" skipped="0" time="12.105" timestamp="2026-09-21T10:38:26" hostname="localhost"
+EXITCODE=0
+
+===== [2026-09-21T21:19:36+08:00] MODE=read-only | T-022: T-022-red.txt composition (task claims 3 + 63 = 66)
+$ $r = Get-Content -LiteralPath artifacts\evidence\T-022-red.txt -Encoding UTF8
+  "col0 找不到符号 = " + ($r | Where-Object { $_ -match '^[A-Z]:\\.*错误: 找不到符号' }).Count
+  "col0 程序包com.treelearn.data.db.dao不存在 = " + ($r | Where-Object { $_ -match '^[A-Z]:\\.*错误: 程序包com\.treelearn\.data\.db\.dao不存在' }).Count
+  $r | Select-String -Pattern '个错误' | ForEach-Object { [string]$_.LineNumber + ': ' + $_.Line }
+col0 找不到符号 = 63
+col0 程序包com.treelearn.data.db.dao不存在 = 3
+7: # 说明       : 编译级 RED：javac 自报 66 个错误 = 程序包com.treelearn.data.db.dao不存在 ×3 + 找不到符号 ×63。
+409: 66 个错误
+744:   66 个错误
+EXITCODE=0
+
+===== [2026-09-21T21:19:36+08:00] MODE=read-only | T-022 acceptance 7: BranchSource.restore call sites in android/data production sources
+$ rg -n 'BranchSource\.restore|AnswerRevision\.restore' android/data/src/main/java
+android/data/src/main/java\com\treelearn\data\db\TreeLearnSchema.java:330:            // be rehydrated through AnswerRevision.restore without consulting the operation
+android/data/src/main/java\com\treelearn\data\db\dao\BranchDao.java:228:        // Checked here rather than left to BranchSource.restore, which rejects a null id with a
+android/data/src/main/java\com\treelearn\data\db\dao\BranchDao.java:239:        return BranchSource.restore(
+android/data/src/main/java\com\treelearn\data\db\dao\AnswerRevisionDao.java:105:     * {@code AnswerRevision.restore} states: on reload the row is the authority. Shape checks still
+android/data/src/main/java\com\treelearn\data\db\dao\AnswerRevisionDao.java:112:        return AnswerRevision.restore(
+EXITCODE=0
+
+===== [2026-09-21T21:19:36+08:00] MODE=read-only | T-004 acceptance: DDL producers under android (CREATE TABLE / ALTER TABLE / CREATE INDEX)
+$ rg -n 'CREATE TABLE|ALTER TABLE|CREATE INDEX|CREATE UNIQUE INDEX|CREATE TRIGGER' android --glob '*.java'
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:409:            "CREATE INDEX " + INDEX_BRANCHES_TOPIC_PARENT + " ON " + Branches.TABLE + "("
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:411:            "CREATE INDEX " + INDEX_BRANCHES_SOURCE_REVISION + " ON " + Branches.TABLE + "("
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:413:            "CREATE INDEX " + INDEX_BRANCHES_ARCHIVED + " ON " + Branches.TABLE + "("
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:416:            "CREATE UNIQUE INDEX " + INDEX_BRANCHES_ROOT + " ON " + Branches.TABLE + "("
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:418:            "CREATE UNIQUE INDEX " + INDEX_MESSAGES_BRANCH_ORDINAL + " ON " + Messages.TABLE + "("
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:420:            "CREATE UNIQUE INDEX " + INDEX_REVISIONS_MESSAGE_NO + " ON "
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:423:            "CREATE UNIQUE INDEX " + INDEX_SNAPSHOTS_BRANCH + " ON " + ContextSnapshots.TABLE + "("
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:425:            "CREATE INDEX " + INDEX_ARTIFACTS_KIND_SCOPE + " ON " + AiArtifacts.TABLE + "("
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:428:            "CREATE UNIQUE INDEX " + INDEX_OPERATIONS_ACTIVE + " ON "
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:455:            "CREATE TRIGGER " + TRIGGER_REVISIONS_IMMUTABLE + " BEFORE UPDATE ON "
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:458:            "CREATE TRIGGER " + TRIGGER_REVISIONS_NO_DIRECT_DELETE + " BEFORE DELETE ON "
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:463:            "CREATE TRIGGER " + TRIGGER_SNAPSHOTS_IMMUTABLE + " BEFORE UPDATE ON "
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:466:            "CREATE TRIGGER " + TRIGGER_SNAPSHOTS_NO_DIRECT_DELETE + " BEFORE DELETE ON "
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:471:            "CREATE TRIGGER " + TRIGGER_OPERATIONS_TERMINAL_IMMUTABLE + " BEFORE UPDATE ON "
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:475:            "CREATE TRIGGER " + TRIGGER_MESSAGES_USER_CONTENT_IMMUTABLE + " BEFORE UPDATE OF "
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:482:    /** The seven {@code CREATE TABLE} statements, in creation order. */
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:573:        StringBuilder sql = new StringBuilder("CREATE TABLE ").append(table).append(" (");
+EXITCODE=0

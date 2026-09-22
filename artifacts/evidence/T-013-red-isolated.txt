@@ -1,0 +1,951 @@
+# T-013 RED (isolated) - failing test first; the authoritative RED for the RED/GREEN pair
+# captured at: 2026-09-21T22:16:27.4189748+08:00
+# command: cd android; .\gradlew.bat :app:testDebugUnitTest --no-daemon --console=plain
+# mode: scratch copy C:\Users\23745\AppData\Local\Temp\t013 (a mirror of the repo minus .git/.gradle/build/artifacts). Moved to
+#   _excluded-impl/: the thirteen T-013 production files plus the two shell files T-013 rewrote
+#   (MainActivity.java, AppContainer.java) - that is what the implementation being absent means here.
+#   Nothing else differs, so this run is directly comparable with T-013-green.txt.
+# --- output ---
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac UP-TO-DATE
+> Task :ai:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :ai:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugLibraryResources UP-TO-DATE
+> Task :ai:writeDebugAarMetadata UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :ai:extractDeepLinksDebug UP-TO-DATE
+> Task :ai:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :data:extractDeepLinksDebug UP-TO-DATE
+> Task :data:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :data:compileDebugLibraryResources UP-TO-DATE
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac UP-TO-DATE
+> Task :data:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes NO-SOURCE
+> Task :data:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:bundleDebugClassesToRuntimeJar
+
+> Task :app:compileDebugUnitTestJavaWithJavac FAILED
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:24: 错误: 找不到符号
+    private static final CopyLabels LABELS = CopyLabels.of("思考过程", "最终回答");
+                         ^
+  符号:   类 CopyLabels
+  位置: 类 ChatMessageTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:114: 错误: 找不到符号
+    private static ChatMessage stable() {
+                   ^
+  符号:   类 ChatMessage
+  位置: 类 ChatMessageTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:119: 错误: 找不到符号
+    private static ChatMessage aiWithChildren(int children) {
+                   ^
+  符号:   类 ChatMessage
+  位置: 类 ChatMessageTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:125: 错误: 找不到符号
+    private static ChatMessage aiWithVersions(int versions) {
+                   ^
+  符号:   类 ChatMessage
+  位置: 类 ChatMessageTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:131: 错误: 程序包ChatMessage不存在
+    private static ChatMessage generating(ChatMessage.Phase phase) {
+                                                     ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:131: 错误: 找不到符号
+    private static ChatMessage generating(ChatMessage.Phase phase) {
+                   ^
+  符号:   类 ChatMessage
+  位置: 类 ChatMessageTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:136: 错误: 找不到符号
+    private static ChatMessage failed() {
+                   ^
+  符号:   类 ChatMessage
+  位置: 类 ChatMessageTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:70: 错误: 找不到符号
+    private static void assertVersionSwitchAgrees(Message position, ChatMessage rendered,
+                                                                    ^
+  符号:   类 ChatMessage
+  位置: 类 ChatPositionAgreementTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:90: 错误: 程序包ChatMessage不存在
+    private static ChatMessage rendered(ChatMessage.Status status, String activeRevisionId,
+                                                   ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:90: 错误: 找不到符号
+    private static ChatMessage rendered(ChatMessage.Status status, String activeRevisionId,
+                   ^
+  符号:   类 ChatMessage
+  位置: 类 ChatPositionAgreementTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:36: 错误: 找不到符号
+    private static final CopyLabels LABELS = CopyLabels.of("思考过程", "最终回答");
+                         ^
+  符号:   类 CopyLabels
+  位置: 类 ChatPresenterTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:172: 错误: 找不到符号
+    static final class RecordingChatSink implements ChatSink {
+                                                    ^
+  符号:   类 ChatSink
+  位置: 类 ChatTestDoubles
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:154: 错误: 找不到符号
+    static final class FakeChatData implements ChatData {
+                                               ^
+  符号:   类 ChatData
+  位置: 类 ChatTestDoubles
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:50: 错误: 找不到符号
+    static final class FakeChatCommands implements ChatCommands {
+                                                   ^
+  符号:   类 ChatCommands
+  位置: 类 ChatTestDoubles
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:530: 错误: 找不到符号
+    private ChatPresenter presenter() {
+            ^
+  符号:   类 ChatPresenter
+  位置: 类 ChatPresenterTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:535: 错误: 程序包ChatData不存在
+    private static ChatData.Snapshot conversation() {
+                           ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:542: 错误: 程序包ChatData不存在
+    private static ChatData.Snapshot failedConversation() {
+                           ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:550: 错误: 程序包ChatData不存在
+    private static ChatData.Snapshot withVersions() {
+                           ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:559: 错误: 程序包ChatData不存在
+    private static ChatData.Snapshot withStrip(Recommendation strip, String revisionId) {
+                           ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:52: 错误: 找不到符号
+        ChatCommandResult sendResult = ChatCommandResult.ran(OP);
+        ^
+  符号:   类 ChatCommandResult
+  位置: 类 FakeChatCommands
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:53: 错误: 找不到符号
+        ChatCommandResult retryResult = ChatCommandResult.ran(OP);
+        ^
+  符号:   类 ChatCommandResult
+  位置: 类 FakeChatCommands
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:54: 错误: 找不到符号
+        ChatCommandResult resetResult = ChatCommandResult.ran(OP);
+        ^
+  符号:   类 ChatCommandResult
+  位置: 类 FakeChatCommands
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:55: 错误: 找不到符号
+        ChatCommandResult selectResult = ChatCommandResult.ran(OP);
+        ^
+  符号:   类 ChatCommandResult
+  位置: 类 FakeChatCommands
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:56: 错误: 找不到符号
+        ChatCommandResult forkResult = ChatCommandResult.openedBranch(OP, BRANCH_2);
+        ^
+  符号:   类 ChatCommandResult
+  位置: 类 FakeChatCommands
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:70: 错误: 找不到符号
+        public ChatCommandResult send(String branchId, String text, String quote, GenerationModel model,
+               ^
+  符号:   类 ChatCommandResult
+  位置: 类 FakeChatCommands
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:81: 错误: 找不到符号
+        public ChatCommandResult retry(String messageId, GenerationModel model,
+               ^
+  符号:   类 ChatCommandResult
+  位置: 类 FakeChatCommands
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:92: 错误: 找不到符号
+        public ChatCommandResult reset(String messageId, GenerationModel model,
+               ^
+  符号:   类 ChatCommandResult
+  位置: 类 FakeChatCommands
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:103: 错误: 找不到符号
+        public ChatCommandResult selectRevision(String messageId, String revisionId, long now) {
+               ^
+  符号:   类 ChatCommandResult
+  位置: 类 FakeChatCommands
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:112: 错误: 找不到符号
+        public ChatCommandResult fork(String messageId, String question) {
+               ^
+  符号:   类 ChatCommandResult
+  位置: 类 FakeChatCommands
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:156: 错误: 程序包ChatData不存在
+        ChatData.Snapshot snapshot = snapshot(Collections.<ChatMessage>emptyList());
+                ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:162: 错误: 找不到符号
+        public Snapshot read(String branchId) {
+               ^
+  符号:   类 Snapshot
+  位置: 类 FakeChatData
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:174: 错误: 找不到符号
+        final List<ChatViewState> states = new ArrayList<ChatViewState>();
+                   ^
+  符号:   类 ChatViewState
+  位置: 类 RecordingChatSink
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:183: 错误: 找不到符号
+        public void render(ChatViewState state) {
+                           ^
+  符号:   类 ChatViewState
+  位置: 类 RecordingChatSink
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:217: 错误: 找不到符号
+        ChatViewState last() {
+        ^
+  符号:   类 ChatViewState
+  位置: 类 RecordingChatSink
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:34: 错误: 找不到符号
+    static ChatMessage ask(String id, String text) {
+           ^
+  符号:   类 ChatMessage
+  位置: 类 ChatTestDoubles
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:38: 错误: 找不到符号
+    static ChatMessage stableAnswer(String id, String answer) {
+           ^
+  符号:   类 ChatMessage
+  位置: 类 ChatTestDoubles
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:44: 错误: 找不到符号
+    static ChatData.Snapshot snapshot(List<ChatMessage> messages) {
+                                           ^
+  符号:   类 ChatMessage
+  位置: 类 ChatTestDoubles
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:44: 错误: 程序包ChatData不存在
+    static ChatData.Snapshot snapshot(List<ChatMessage> messages) {
+                   ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:226: 错误: 找不到符号
+    static List<ChatMessage> messages(ChatMessage... items) {
+                                      ^
+  符号:   类 ChatMessage
+  位置: 类 ChatTestDoubles
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:226: 错误: 找不到符号
+    static List<ChatMessage> messages(ChatMessage... items) {
+                ^
+  符号:   类 ChatMessage
+  位置: 类 ChatTestDoubles
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatViewStateTest.java:150: 错误: 找不到符号
+    private static ChatViewState initial() {
+                   ^
+  符号:   类 ChatViewState
+  位置: 类 ChatViewStateTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatViewStateTest.java:154: 错误: 找不到符号
+    private static ChatViewState withConversation() {
+                   ^
+  符号:   类 ChatViewState
+  位置: 类 ChatViewStateTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:24: 错误: 找不到符号
+    private static final CopyLabels LABELS = CopyLabels.of("思考过程", "最终回答");
+                                             ^
+  符号:   变量 CopyLabels
+  位置: 类 ChatMessageTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:33: 错误: 找不到符号
+        ChatMessage message = ChatMessage.ai(ChatTestDoubles.M_ANSWER, "the answer", "",
+        ^
+  符号:   类 ChatMessage
+  位置: 类 ChatMessageTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:34: 错误: 程序包ChatMessage不存在
+                ChatMessage.Status.STABLE, ChatMessage.Phase.ANSWER, ChatTestDoubles.REV_1, 1, 0, false, 1L);
+                           ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:34: 错误: 程序包ChatMessage不存在
+                ChatMessage.Status.STABLE, ChatMessage.Phase.ANSWER, ChatTestDoubles.REV_1, 1, 0, false, 1L);
+                                                      ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:33: 错误: 找不到符号
+        ChatMessage message = ChatMessage.ai(ChatTestDoubles.M_ANSWER, "the answer", "",
+                              ^
+  符号:   变量 ChatMessage
+  位置: 类 ChatMessageTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:42: 错误: 程序包ChatMessage不存在
+        assertFalse(generating(ChatMessage.Phase.ANSWER).canCopy());
+                                          ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:43: 错误: 程序包ChatMessage不存在
+        assertFalse(generating(ChatMessage.Phase.REASONING).canCopy());
+                                          ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:45: 错误: 找不到符号
+        assertFalse(ChatMessage.user(ChatTestDoubles.M_ASK, "q", "", 1L).canCopy());
+                    ^
+  符号:   变量 ChatMessage
+  位置: 类 ChatMessageTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:51: 错误: 程序包ChatMessage不存在
+        assertFalse(ChatMessage.ai(ChatTestDoubles.M_ANSWER, "a", "", ChatMessage.Status.STABLE,
+                                                                                 ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:52: 错误: 程序包ChatMessage不存在
+                ChatMessage.Phase.ANSWER, ChatTestDoubles.REV_1, 1, 0, false, 1L).canExpandReasoning());
+                           ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:51: 错误: 找不到符号
+        assertFalse(ChatMessage.ai(ChatTestDoubles.M_ANSWER, "a", "", ChatMessage.Status.STABLE,
+                    ^
+  符号:   变量 ChatMessage
+  位置: 类 ChatMessageTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:53: 错误: 找不到符号
+        assertFalse(ChatMessage.user(ChatTestDoubles.M_ASK, "q", "", 1L).canExpandReasoning());
+                    ^
+  符号:   变量 ChatMessage
+  位置: 类 ChatMessageTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:58: 错误: 找不到符号
+        ChatMessage forming = ChatMessage.ai(ChatTestDoubles.M_ANSWER, "", "",
+        ^
+  符号:   类 ChatMessage
+  位置: 类 ChatMessageTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:59: 错误: 程序包ChatMessage不存在
+                ChatMessage.Status.GENERATING, ChatMessage.Phase.REASONING, "", 0, 0, false, 1L);
+                           ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:59: 错误: 程序包ChatMessage不存在
+                ChatMessage.Status.GENERATING, ChatMessage.Phase.REASONING, "", 0, 0, false, 1L);
+                                                          ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:58: 错误: 找不到符号
+        ChatMessage forming = ChatMessage.ai(ChatTestDoubles.M_ANSWER, "", "",
+                              ^
+  符号:   变量 ChatMessage
+  位置: 类 ChatMessageTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:68: 错误: 程序包ChatMessage不存在
+        assertEquals(ChatMessage.Phase.REASONING, generating(ChatMessage.Phase.REASONING).phase());
+                                ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:68: 错误: 程序包ChatMessage不存在
+        assertEquals(ChatMessage.Phase.REASONING, generating(ChatMessage.Phase.REASONING).phase());
+                                                                        ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:69: 错误: 程序包ChatMessage不存在
+        assertEquals(ChatMessage.Phase.ANSWER, generating(ChatMessage.Phase.ANSWER).phase());
+                                ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:69: 错误: 程序包ChatMessage不存在
+        assertEquals(ChatMessage.Phase.ANSWER, generating(ChatMessage.Phase.ANSWER).phase());
+                                                                     ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:70: 错误: 程序包ChatMessage不存在
+        assertTrue(generating(ChatMessage.Phase.REASONING).isGenerating());
+                                         ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:81: 错误: 程序包ChatMessage不存在
+        assertFalse(generating(ChatMessage.Phase.ANSWER).canFork());
+                                          ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:82: 错误: 找不到符号
+        assertFalse(ChatMessage.user(ChatTestDoubles.M_ASK, "q", "", 1L).canQuote());
+                    ^
+  符号:   变量 ChatMessage
+  位置: 类 ChatMessageTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:105: 错误: 找不到符号
+        ChatMessage question = ChatMessage.user(ChatTestDoubles.M_ASK, "q", "the quoted sentence", 1L);
+        ^
+  符号:   类 ChatMessage
+  位置: 类 ChatMessageTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:105: 错误: 找不到符号
+        ChatMessage question = ChatMessage.user(ChatTestDoubles.M_ASK, "q", "the quoted sentence", 1L);
+                               ^
+  符号:   变量 ChatMessage
+  位置: 类 ChatMessageTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:116: 错误: 程序包ChatMessage不存在
+                ChatMessage.Status.STABLE, ChatMessage.Phase.ANSWER, ChatTestDoubles.REV_1, 1, 0, false, 1L);
+                           ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:116: 错误: 程序包ChatMessage不存在
+                ChatMessage.Status.STABLE, ChatMessage.Phase.ANSWER, ChatTestDoubles.REV_1, 1, 0, false, 1L);
+                                                      ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:115: 错误: 找不到符号
+        return ChatMessage.ai(ChatTestDoubles.M_ANSWER, "the answer", "the reasoning",
+               ^
+  符号:   变量 ChatMessage
+  位置: 类 ChatMessageTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:121: 错误: 程序包ChatMessage不存在
+                ChatMessage.Status.STABLE, ChatMessage.Phase.ANSWER, ChatTestDoubles.REV_1, 1, children,
+                           ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:121: 错误: 程序包ChatMessage不存在
+                ChatMessage.Status.STABLE, ChatMessage.Phase.ANSWER, ChatTestDoubles.REV_1, 1, children,
+                                                      ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:120: 错误: 找不到符号
+        return ChatMessage.ai(ChatTestDoubles.M_ANSWER, "the answer", "the reasoning",
+               ^
+  符号:   变量 ChatMessage
+  位置: 类 ChatMessageTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:127: 错误: 程序包ChatMessage不存在
+                ChatMessage.Status.STABLE, ChatMessage.Phase.ANSWER, ChatTestDoubles.REV_1, versions, 0,
+                           ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:127: 错误: 程序包ChatMessage不存在
+                ChatMessage.Status.STABLE, ChatMessage.Phase.ANSWER, ChatTestDoubles.REV_1, versions, 0,
+                                                      ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:126: 错误: 找不到符号
+        return ChatMessage.ai(ChatTestDoubles.M_ANSWER, "the answer", "the reasoning",
+               ^
+  符号:   变量 ChatMessage
+  位置: 类 ChatMessageTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:133: 错误: 程序包ChatMessage不存在
+                ChatMessage.Status.GENERATING, phase, "", 0, 0, false, 1L);
+                           ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:132: 错误: 找不到符号
+        return ChatMessage.ai(ChatTestDoubles.M_ANSWER, "half an ans", "half a thou",
+               ^
+  符号:   变量 ChatMessage
+  位置: 类 ChatMessageTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:138: 错误: 程序包ChatMessage不存在
+                ChatMessage.Status.FAILED, ChatMessage.Phase.ANSWER, "", 1, 0, false, 1L);
+                           ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:138: 错误: 程序包ChatMessage不存在
+                ChatMessage.Status.FAILED, ChatMessage.Phase.ANSWER, "", 1, 0, false, 1L);
+                                                      ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:137: 错误: 找不到符号
+        return ChatMessage.ai(ChatTestDoubles.M_ANSWER, "half an ans", "half a thou",
+               ^
+  符号:   变量 ChatMessage
+  位置: 类 ChatMessageTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:32: 错误: 找不到符号
+            ChatMessage rendered = rendered(ChatMessage.Status.STABLE, ChatTestDoubles.REV_1, running);
+            ^
+  符号:   类 ChatMessage
+  位置: 类 ChatPositionAgreementTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:32: 错误: 程序包ChatMessage不存在
+            ChatMessage rendered = rendered(ChatMessage.Status.STABLE, ChatTestDoubles.REV_1, running);
+                                                       ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:46: 错误: 找不到符号
+            ChatMessage rendered = rendered(ChatMessage.Status.FAILED, "", running);
+            ^
+  符号:   类 ChatMessage
+  位置: 类 ChatPositionAgreementTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:46: 错误: 程序包ChatMessage不存在
+            ChatMessage rendered = rendered(ChatMessage.Status.FAILED, "", running);
+                                                       ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:60: 错误: 找不到符号
+            ChatMessage rendered = ChatMessage.user(ChatTestDoubles.M_ASK, "a question", "", 1L);
+            ^
+  符号:   类 ChatMessage
+  位置: 类 ChatPositionAgreementTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:60: 错误: 找不到符号
+            ChatMessage rendered = ChatMessage.user(ChatTestDoubles.M_ASK, "a question", "", 1L);
+                                   ^
+  符号:   变量 ChatMessage
+  位置: 类 ChatPositionAgreementTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:93: 错误: 程序包ChatMessage不存在
+                ChatMessage.Phase.ANSWER, activeRevisionId, 1, 0, attemptRunning, 1L);
+                           ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:92: 错误: 找不到符号
+        return ChatMessage.ai(ChatTestDoubles.M_ANSWER, "an answer", "a thought", status,
+               ^
+  符号:   变量 ChatMessage
+  位置: 类 ChatPositionAgreementTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:36: 错误: 找不到符号
+    private static final CopyLabels LABELS = CopyLabels.of("思考过程", "最终回答");
+                                             ^
+  符号:   变量 CopyLabels
+  位置: 类 ChatPresenterTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:48: 错误: 找不到符号
+        ChatPresenter presenter = presenter();
+        ^
+  符号:   类 ChatPresenter
+  位置: 类 ChatPresenterTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:51: 错误: 程序包ChatViewState不存在
+        assertEquals(ChatViewState.Phase.LOADING, sink.states.get(0).phase);
+                                  ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:52: 错误: 程序包ChatViewState不存在
+        assertEquals(ChatViewState.Phase.READY, sink.last().phase);
+                                  ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:63: 错误: 找不到符号
+        ChatPresenter presenter = presenter();
+        ^
+  符号:   类 ChatPresenter
+  位置: 类 ChatPresenterTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:67: 错误: 程序包ChatViewState不存在
+        assertEquals(ChatViewState.Phase.ERROR, sink.last().phase);
+                                  ^
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:76: 错误: 找不到符号
+        ChatPresenter presenter = new ChatPresenter(sink, new TestDoubles.InlineUi(), deferred, key,
+        ^
+  符号:   类 ChatPresenter
+  位置: 类 ChatPresenterTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:76: 错误: 找不到符号
+        ChatPresenter presenter = new ChatPresenter(sink, new TestDoubles.InlineUi(), deferred, key,
+                                      ^
+  符号:   类 ChatPresenter
+  位置: 类 ChatPresenterTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:92: 错误: 找不到符号
+        ChatPresenter presenter = presenter();
+        ^
+  符号:   类 ChatPresenter
+  位置: 类 ChatPresenterTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:103: 错误: 找不到符号
+        ChatPresenter presenter = presenter();
+        ^
+  符号:   类 ChatPresenter
+  位置: 类 ChatPresenterTest
+C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:107: 错误: 程序包ChatData不存在
+        data.snapshot = ChatData.Snapshot.of("Transformer attention",
+                                ^
+100 个错误
+
+[Incubating] Problems report is available at: file:///C:/Users/23745/AppData/Local/Temp/t013/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugUnitTestJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:24: 错误: 找不到符号
+      private static final CopyLabels LABELS = CopyLabels.of("思考过程", "最终回答");
+                           ^
+    符号:   类 CopyLabels
+    位置: 类 ChatMessageTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:114: 错误: 找不到符号
+      private static ChatMessage stable() {
+                     ^
+    符号:   类 ChatMessage
+    位置: 类 ChatMessageTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:119: 错误: 找不到符号
+      private static ChatMessage aiWithChildren(int children) {
+                     ^
+    符号:   类 ChatMessage
+    位置: 类 ChatMessageTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:125: 错误: 找不到符号
+      private static ChatMessage aiWithVersions(int versions) {
+                     ^
+    符号:   类 ChatMessage
+    位置: 类 ChatMessageTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:131: 错误: 找不到符号
+      private static ChatMessage generating(ChatMessage.Phase phase) {
+                     ^
+    符号:   类 ChatMessage
+    位置: 类 ChatMessageTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:136: 错误: 找不到符号
+      private static ChatMessage failed() {
+                     ^
+    符号:   类 ChatMessage
+    位置: 类 ChatMessageTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:70: 错误: 找不到符号
+      private static void assertVersionSwitchAgrees(Message position, ChatMessage rendered,
+                                                                      ^
+    符号:   类 ChatMessage
+    位置: 类 ChatPositionAgreementTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:90: 错误: 找不到符号
+      private static ChatMessage rendered(ChatMessage.Status status, String activeRevisionId,
+                     ^
+    符号:   类 ChatMessage
+    位置: 类 ChatPositionAgreementTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:36: 错误: 找不到符号
+      private static final CopyLabels LABELS = CopyLabels.of("思考过程", "最终回答");
+                           ^
+    符号:   类 CopyLabels
+    位置: 类 ChatPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:172: 错误: 找不到符号
+      static final class RecordingChatSink implements ChatSink {
+                                                      ^
+    符号:   类 ChatSink
+    位置: 类 ChatTestDoubles
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:154: 错误: 找不到符号
+      static final class FakeChatData implements ChatData {
+                                                 ^
+    符号:   类 ChatData
+    位置: 类 ChatTestDoubles
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:50: 错误: 找不到符号
+      static final class FakeChatCommands implements ChatCommands {
+                                                     ^
+    符号:   类 ChatCommands
+    位置: 类 ChatTestDoubles
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:530: 错误: 找不到符号
+      private ChatPresenter presenter() {
+              ^
+    符号:   类 ChatPresenter
+    位置: 类 ChatPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:52: 错误: 找不到符号
+          ChatCommandResult sendResult = ChatCommandResult.ran(OP);
+          ^
+    符号:   类 ChatCommandResult
+    位置: 类 FakeChatCommands
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:53: 错误: 找不到符号
+          ChatCommandResult retryResult = ChatCommandResult.ran(OP);
+          ^
+    符号:   类 ChatCommandResult
+    位置: 类 FakeChatCommands
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:54: 错误: 找不到符号
+          ChatCommandResult resetResult = ChatCommandResult.ran(OP);
+          ^
+    符号:   类 ChatCommandResult
+    位置: 类 FakeChatCommands
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:55: 错误: 找不到符号
+          ChatCommandResult selectResult = ChatCommandResult.ran(OP);
+          ^
+    符号:   类 ChatCommandResult
+    位置: 类 FakeChatCommands
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:56: 错误: 找不到符号
+          ChatCommandResult forkResult = ChatCommandResult.openedBranch(OP, BRANCH_2);
+          ^
+    符号:   类 ChatCommandResult
+    位置: 类 FakeChatCommands
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:70: 错误: 找不到符号
+          public ChatCommandResult send(String branchId, String text, String quote, GenerationModel model,
+                 ^
+    符号:   类 ChatCommandResult
+    位置: 类 FakeChatCommands
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:81: 错误: 找不到符号
+          public ChatCommandResult retry(String messageId, GenerationModel model,
+                 ^
+    符号:   类 ChatCommandResult
+    位置: 类 FakeChatCommands
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:92: 错误: 找不到符号
+          public ChatCommandResult reset(String messageId, GenerationModel model,
+                 ^
+    符号:   类 ChatCommandResult
+    位置: 类 FakeChatCommands
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:103: 错误: 找不到符号
+          public ChatCommandResult selectRevision(String messageId, String revisionId, long now) {
+                 ^
+    符号:   类 ChatCommandResult
+    位置: 类 FakeChatCommands
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:112: 错误: 找不到符号
+          public ChatCommandResult fork(String messageId, String question) {
+                 ^
+    符号:   类 ChatCommandResult
+    位置: 类 FakeChatCommands
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:162: 错误: 找不到符号
+          public Snapshot read(String branchId) {
+                 ^
+    符号:   类 Snapshot
+    位置: 类 FakeChatData
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:174: 错误: 找不到符号
+          final List<ChatViewState> states = new ArrayList<ChatViewState>();
+                     ^
+    符号:   类 ChatViewState
+    位置: 类 RecordingChatSink
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:183: 错误: 找不到符号
+          public void render(ChatViewState state) {
+                             ^
+    符号:   类 ChatViewState
+    位置: 类 RecordingChatSink
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:217: 错误: 找不到符号
+          ChatViewState last() {
+          ^
+    符号:   类 ChatViewState
+    位置: 类 RecordingChatSink
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:34: 错误: 找不到符号
+      static ChatMessage ask(String id, String text) {
+             ^
+    符号:   类 ChatMessage
+    位置: 类 ChatTestDoubles
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:38: 错误: 找不到符号
+      static ChatMessage stableAnswer(String id, String answer) {
+             ^
+    符号:   类 ChatMessage
+    位置: 类 ChatTestDoubles
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:44: 错误: 找不到符号
+      static ChatData.Snapshot snapshot(List<ChatMessage> messages) {
+                                             ^
+    符号:   类 ChatMessage
+    位置: 类 ChatTestDoubles
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:226: 错误: 找不到符号
+      static List<ChatMessage> messages(ChatMessage... items) {
+                                        ^
+    符号:   类 ChatMessage
+    位置: 类 ChatTestDoubles
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:226: 错误: 找不到符号
+      static List<ChatMessage> messages(ChatMessage... items) {
+                  ^
+    符号:   类 ChatMessage
+    位置: 类 ChatTestDoubles
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatViewStateTest.java:150: 错误: 找不到符号
+      private static ChatViewState initial() {
+                     ^
+    符号:   类 ChatViewState
+    位置: 类 ChatViewStateTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatViewStateTest.java:154: 错误: 找不到符号
+      private static ChatViewState withConversation() {
+                     ^
+    符号:   类 ChatViewState
+    位置: 类 ChatViewStateTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:24: 错误: 找不到符号
+      private static final CopyLabels LABELS = CopyLabels.of("思考过程", "最终回答");
+                                               ^
+    符号:   变量 CopyLabels
+    位置: 类 ChatMessageTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:33: 错误: 找不到符号
+          ChatMessage message = ChatMessage.ai(ChatTestDoubles.M_ANSWER, "the answer", "",
+          ^
+    符号:   类 ChatMessage
+    位置: 类 ChatMessageTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:33: 错误: 找不到符号
+          ChatMessage message = ChatMessage.ai(ChatTestDoubles.M_ANSWER, "the answer", "",
+                                ^
+    符号:   变量 ChatMessage
+    位置: 类 ChatMessageTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:45: 错误: 找不到符号
+          assertFalse(ChatMessage.user(ChatTestDoubles.M_ASK, "q", "", 1L).canCopy());
+                      ^
+    符号:   变量 ChatMessage
+    位置: 类 ChatMessageTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:51: 错误: 找不到符号
+          assertFalse(ChatMessage.ai(ChatTestDoubles.M_ANSWER, "a", "", ChatMessage.Status.STABLE,
+                      ^
+    符号:   变量 ChatMessage
+    位置: 类 ChatMessageTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:53: 错误: 找不到符号
+          assertFalse(ChatMessage.user(ChatTestDoubles.M_ASK, "q", "", 1L).canExpandReasoning());
+                      ^
+    符号:   变量 ChatMessage
+    位置: 类 ChatMessageTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:58: 错误: 找不到符号
+          ChatMessage forming = ChatMessage.ai(ChatTestDoubles.M_ANSWER, "", "",
+          ^
+    符号:   类 ChatMessage
+    位置: 类 ChatMessageTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:58: 错误: 找不到符号
+          ChatMessage forming = ChatMessage.ai(ChatTestDoubles.M_ANSWER, "", "",
+                                ^
+    符号:   变量 ChatMessage
+    位置: 类 ChatMessageTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:82: 错误: 找不到符号
+          assertFalse(ChatMessage.user(ChatTestDoubles.M_ASK, "q", "", 1L).canQuote());
+                      ^
+    符号:   变量 ChatMessage
+    位置: 类 ChatMessageTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:105: 错误: 找不到符号
+          ChatMessage question = ChatMessage.user(ChatTestDoubles.M_ASK, "q", "the quoted sentence", 1L);
+          ^
+    符号:   类 ChatMessage
+    位置: 类 ChatMessageTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:105: 错误: 找不到符号
+          ChatMessage question = ChatMessage.user(ChatTestDoubles.M_ASK, "q", "the quoted sentence", 1L);
+                                 ^
+    符号:   变量 ChatMessage
+    位置: 类 ChatMessageTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:115: 错误: 找不到符号
+          return ChatMessage.ai(ChatTestDoubles.M_ANSWER, "the answer", "the reasoning",
+                 ^
+    符号:   变量 ChatMessage
+    位置: 类 ChatMessageTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:120: 错误: 找不到符号
+          return ChatMessage.ai(ChatTestDoubles.M_ANSWER, "the answer", "the reasoning",
+                 ^
+    符号:   变量 ChatMessage
+    位置: 类 ChatMessageTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:126: 错误: 找不到符号
+          return ChatMessage.ai(ChatTestDoubles.M_ANSWER, "the answer", "the reasoning",
+                 ^
+    符号:   变量 ChatMessage
+    位置: 类 ChatMessageTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:132: 错误: 找不到符号
+          return ChatMessage.ai(ChatTestDoubles.M_ANSWER, "half an ans", "half a thou",
+                 ^
+    符号:   变量 ChatMessage
+    位置: 类 ChatMessageTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:137: 错误: 找不到符号
+          return ChatMessage.ai(ChatTestDoubles.M_ANSWER, "half an ans", "half a thou",
+                 ^
+    符号:   变量 ChatMessage
+    位置: 类 ChatMessageTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:32: 错误: 找不到符号
+              ChatMessage rendered = rendered(ChatMessage.Status.STABLE, ChatTestDoubles.REV_1, running);
+              ^
+    符号:   类 ChatMessage
+    位置: 类 ChatPositionAgreementTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:46: 错误: 找不到符号
+              ChatMessage rendered = rendered(ChatMessage.Status.FAILED, "", running);
+              ^
+    符号:   类 ChatMessage
+    位置: 类 ChatPositionAgreementTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:60: 错误: 找不到符号
+              ChatMessage rendered = ChatMessage.user(ChatTestDoubles.M_ASK, "a question", "", 1L);
+              ^
+    符号:   类 ChatMessage
+    位置: 类 ChatPositionAgreementTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:60: 错误: 找不到符号
+              ChatMessage rendered = ChatMessage.user(ChatTestDoubles.M_ASK, "a question", "", 1L);
+                                     ^
+    符号:   变量 ChatMessage
+    位置: 类 ChatPositionAgreementTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:92: 错误: 找不到符号
+          return ChatMessage.ai(ChatTestDoubles.M_ANSWER, "an answer", "a thought", status,
+                 ^
+    符号:   变量 ChatMessage
+    位置: 类 ChatPositionAgreementTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:36: 错误: 找不到符号
+      private static final CopyLabels LABELS = CopyLabels.of("思考过程", "最终回答");
+                                               ^
+    符号:   变量 CopyLabels
+    位置: 类 ChatPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:48: 错误: 找不到符号
+          ChatPresenter presenter = presenter();
+          ^
+    符号:   类 ChatPresenter
+    位置: 类 ChatPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:63: 错误: 找不到符号
+          ChatPresenter presenter = presenter();
+          ^
+    符号:   类 ChatPresenter
+    位置: 类 ChatPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:76: 错误: 找不到符号
+          ChatPresenter presenter = new ChatPresenter(sink, new TestDoubles.InlineUi(), deferred, key,
+          ^
+    符号:   类 ChatPresenter
+    位置: 类 ChatPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:76: 错误: 找不到符号
+          ChatPresenter presenter = new ChatPresenter(sink, new TestDoubles.InlineUi(), deferred, key,
+                                        ^
+    符号:   类 ChatPresenter
+    位置: 类 ChatPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:92: 错误: 找不到符号
+          ChatPresenter presenter = presenter();
+          ^
+    符号:   类 ChatPresenter
+    位置: 类 ChatPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:103: 错误: 找不到符号
+          ChatPresenter presenter = presenter();
+          ^
+    符号:   类 ChatPresenter
+    位置: 类 ChatPresenterTest
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:131: 错误: 程序包ChatMessage不存在
+      private static ChatMessage generating(ChatMessage.Phase phase) {
+                                                       ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:90: 错误: 程序包ChatMessage不存在
+      private static ChatMessage rendered(ChatMessage.Status status, String activeRevisionId,
+                                                     ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:535: 错误: 程序包ChatData不存在
+      private static ChatData.Snapshot conversation() {
+                             ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:542: 错误: 程序包ChatData不存在
+      private static ChatData.Snapshot failedConversation() {
+                             ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:550: 错误: 程序包ChatData不存在
+      private static ChatData.Snapshot withVersions() {
+                             ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:559: 错误: 程序包ChatData不存在
+      private static ChatData.Snapshot withStrip(Recommendation strip, String revisionId) {
+                             ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:156: 错误: 程序包ChatData不存在
+          ChatData.Snapshot snapshot = snapshot(Collections.<ChatMessage>emptyList());
+                  ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:44: 错误: 程序包ChatData不存在
+      static ChatData.Snapshot snapshot(List<ChatMessage> messages) {
+                     ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:34: 错误: 程序包ChatMessage不存在
+                  ChatMessage.Status.STABLE, ChatMessage.Phase.ANSWER, ChatTestDoubles.REV_1, 1, 0, false, 1L);
+                             ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:34: 错误: 程序包ChatMessage不存在
+                  ChatMessage.Status.STABLE, ChatMessage.Phase.ANSWER, ChatTestDoubles.REV_1, 1, 0, false, 1L);
+                                                        ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:42: 错误: 程序包ChatMessage不存在
+          assertFalse(generating(ChatMessage.Phase.ANSWER).canCopy());
+                                            ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:43: 错误: 程序包ChatMessage不存在
+          assertFalse(generating(ChatMessage.Phase.REASONING).canCopy());
+                                            ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:51: 错误: 程序包ChatMessage不存在
+          assertFalse(ChatMessage.ai(ChatTestDoubles.M_ANSWER, "a", "", ChatMessage.Status.STABLE,
+                                                                                   ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:52: 错误: 程序包ChatMessage不存在
+                  ChatMessage.Phase.ANSWER, ChatTestDoubles.REV_1, 1, 0, false, 1L).canExpandReasoning());
+                             ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:59: 错误: 程序包ChatMessage不存在
+                  ChatMessage.Status.GENERATING, ChatMessage.Phase.REASONING, "", 0, 0, false, 1L);
+                             ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:59: 错误: 程序包ChatMessage不存在
+                  ChatMessage.Status.GENERATING, ChatMessage.Phase.REASONING, "", 0, 0, false, 1L);
+                                                            ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:68: 错误: 程序包ChatMessage不存在
+          assertEquals(ChatMessage.Phase.REASONING, generating(ChatMessage.Phase.REASONING).phase());
+                                  ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:68: 错误: 程序包ChatMessage不存在
+          assertEquals(ChatMessage.Phase.REASONING, generating(ChatMessage.Phase.REASONING).phase());
+                                                                          ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:69: 错误: 程序包ChatMessage不存在
+          assertEquals(ChatMessage.Phase.ANSWER, generating(ChatMessage.Phase.ANSWER).phase());
+                                  ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:69: 错误: 程序包ChatMessage不存在
+          assertEquals(ChatMessage.Phase.ANSWER, generating(ChatMessage.Phase.ANSWER).phase());
+                                                                       ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:70: 错误: 程序包ChatMessage不存在
+          assertTrue(generating(ChatMessage.Phase.REASONING).isGenerating());
+                                           ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:81: 错误: 程序包ChatMessage不存在
+          assertFalse(generating(ChatMessage.Phase.ANSWER).canFork());
+                                            ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:116: 错误: 程序包ChatMessage不存在
+                  ChatMessage.Status.STABLE, ChatMessage.Phase.ANSWER, ChatTestDoubles.REV_1, 1, 0, false, 1L);
+                             ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:116: 错误: 程序包ChatMessage不存在
+                  ChatMessage.Status.STABLE, ChatMessage.Phase.ANSWER, ChatTestDoubles.REV_1, 1, 0, false, 1L);
+                                                        ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:121: 错误: 程序包ChatMessage不存在
+                  ChatMessage.Status.STABLE, ChatMessage.Phase.ANSWER, ChatTestDoubles.REV_1, 1, children,
+                             ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:121: 错误: 程序包ChatMessage不存在
+                  ChatMessage.Status.STABLE, ChatMessage.Phase.ANSWER, ChatTestDoubles.REV_1, 1, children,
+                                                        ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:127: 错误: 程序包ChatMessage不存在
+                  ChatMessage.Status.STABLE, ChatMessage.Phase.ANSWER, ChatTestDoubles.REV_1, versions, 0,
+                             ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:127: 错误: 程序包ChatMessage不存在
+                  ChatMessage.Status.STABLE, ChatMessage.Phase.ANSWER, ChatTestDoubles.REV_1, versions, 0,
+                                                        ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:133: 错误: 程序包ChatMessage不存在
+                  ChatMessage.Status.GENERATING, phase, "", 0, 0, false, 1L);
+                             ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:138: 错误: 程序包ChatMessage不存在
+                  ChatMessage.Status.FAILED, ChatMessage.Phase.ANSWER, "", 1, 0, false, 1L);
+                             ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:138: 错误: 程序包ChatMessage不存在
+                  ChatMessage.Status.FAILED, ChatMessage.Phase.ANSWER, "", 1, 0, false, 1L);
+                                                        ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:32: 错误: 程序包ChatMessage不存在
+              ChatMessage rendered = rendered(ChatMessage.Status.STABLE, ChatTestDoubles.REV_1, running);
+                                                         ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:46: 错误: 程序包ChatMessage不存在
+              ChatMessage rendered = rendered(ChatMessage.Status.FAILED, "", running);
+                                                         ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:93: 错误: 程序包ChatMessage不存在
+                  ChatMessage.Phase.ANSWER, activeRevisionId, 1, 0, attemptRunning, 1L);
+                             ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:51: 错误: 程序包ChatViewState不存在
+          assertEquals(ChatViewState.Phase.LOADING, sink.states.get(0).phase);
+                                    ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:52: 错误: 程序包ChatViewState不存在
+          assertEquals(ChatViewState.Phase.READY, sink.last().phase);
+                                    ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:67: 错误: 程序包ChatViewState不存在
+          assertEquals(ChatViewState.Phase.ERROR, sink.last().phase);
+                                    ^
+  C:\Users\23745\AppData\Local\Temp\t013\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:107: 错误: 程序包ChatData不存在
+          data.snapshot = ChatData.Snapshot.of("Transformer attention",
+                                  ^
+  100 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+53 actionable tasks: 4 executed, 49 up-to-date
+
+BUILD FAILED in 20s
+EXITCODE=1

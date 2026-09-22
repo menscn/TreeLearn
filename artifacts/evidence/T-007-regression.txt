@@ -1,0 +1,382 @@
+# T-007 regression re-run on the current working tree (other lanes edits included)
+# captured-at: 2026-09-21T20:34:50.4899930+08:00
+# command: cd android; .\gradlew.bat :core:test :ai:testDebugUnitTest --no-daemon --console=plain --rerun-tasks
+# mode: full re-run (--rerun-tasks), so no task can be reported up-to-date
+# why this file exists: the GREEN capture (T-007-green.txt) reported "18 actionable tasks: 18 up-to-date",
+#   so its per-class counts were read from the XML an earlier run had written. This run forces execution.
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava
+> Task :core:processResources NO-SOURCE
+> Task :core:classes
+> Task :core:jar
+> Task :core:compileTestJava
+> Task :core:processTestResources NO-SOURCE
+> Task :core:testClasses
+
+> Task :core:test
+
+AnswerRevisionTest > restoreIsRehydrationOnly PASSED
+
+AnswerRevisionTest > resetCreatesNewRevisionAndOldBranchSourceKeepsTheOldOne PASSED
+
+AnswerRevisionTest > missingOrBlankPolicyVersionIsRefused PASSED
+
+AnswerRevisionTest > theConstructorIsNotAPublicCreationPath PASSED
+
+AnswerRevisionTest > reasoningAndAnswerBelongToTheSameStableVersion PASSED
+
+AnswerRevisionTest > revisionNumberMustBePositive PASSED
+
+AnswerRevisionTest > blankAnswerCannotBecomeStable PASSED
+
+AnswerRevisionTest > createChecksPolicyOwnershipWhileRestoreTrustsTheStoredRow PASSED
+
+AnswerRevisionTest > policyVersionIsCopiedVerbatim PASSED
+
+AnswerRevisionTest > allFieldsAreFinalAndNoSetterExists PASSED
+
+AnswerRevisionTest > aPolicyVersionThatNoPurposeOwnsIsRefused PASSED
+
+AnswerRevisionTest > thinkingDisabledKeepsAnEmptyReasoningFieldButNoNull PASSED
+
+AnswerRevisionTest > aCallerBugIsReportedBeforeTheVersionDecision PASSED
+
+BranchSourceTest > provenanceRejectsMalformedIdentifiers PASSED
+
+BranchSourceTest > aRangedAnchorNeedsBothOffsetsAndTheQuoteAndHashFallback PASSED
+
+BranchSourceTest > stableStateYieldsProvenanceThatPinsExactlyThatRevision PASSED
+
+BranchSourceTest > everyUnfinishedOrFailedStateIsRefusedAsABranchSource PASSED
+
+BranchSourceTest > theConstructorIsNotAPublicCreationPath PASSED
+
+BranchSourceTest > aChildBranchInheritsItsParentFromTheProvenance PASSED
+
+BranchSourceTest > restoreIsRehydrationOnlyButStillValidatesItsInput PASSED
+
+BranchSourceTest > aRootBranchCarriesNoProvenance PASSED
+
+BranchSourceTest > theQuoteMustBeExactlyTheAnchoredRange PASSED
+
+BranchSourceTest > wholeAnswerForkCarriesNoOffsetsButStillPinsARevision PASSED
+
+BranchSourceTest > aNonRootBranchCannotExistWithoutProvenance PASSED
+
+BranchSourceTest > aStableStateWithoutARevisionIdIsACallerBugNotABusinessFailure PASSED
+
+BranchTest > aBranchKnowsWhetherItIsRoot PASSED
+
+BranchTest > lastSeenCanNeverExceedLatestByConstruction PASSED
+
+BranchTest > readingPositionCannotRunAheadOfWhatExists PASSED
+
+BranchTest > aRejectedMutationLeavesTheBranchUntouched PASSED
+
+BranchTest > readingPositionCannotMoveBackwards PASSED
+
+BranchTest > unreadDerivesFromTheSequenceGap PASSED
+
+BranchTest > topicAndBranchIdentifiersAreUuidStrings PASSED
+
+BranchTest > titleAndCollapseUpdatesNeverCreateUnread PASSED
+
+BranchTest > archivingStampsUpdatedAtWithTheArchiveTime PASSED
+
+BranchTest > updatedAtIsReadableAndNeverPredatesCreation PASSED
+
+BranchTest > titleMayBeAbsentButNeverBlank PASSED
+
+BranchTest > restoreKeepsTheRootAndProvenanceRulesOfTheConstructor PASSED
+
+BranchTest > restoreRefusesAnUpdatedAtOlderThanCreation PASSED
+
+BranchTest > archivingKeepsTheBranchesOwnHistory PASSED
+
+BranchTest > restoreCarriesStateThatNoCreationPathCouldProduce PASSED
+
+BuildContextPlanUseCaseTest > theBranchesOwnTurnFollowsTheRevisionThatPositionDisplays PASSED
+
+BuildContextPlanUseCaseTest > aSummaryTheCompressionNeverProducedForbidsTheRequestInsteadOfDroppingReasoning PASSED
+
+BuildContextPlanUseCaseTest > theCapacityTheCallerReservedForSystemAndTheQuestionIsNotFree PASSED
+
+BuildContextPlanUseCaseTest > aSummaryThatCoversQuestionReasoningAndAnswerTravelsAsOneEntry PASSED
+
+BuildContextPlanUseCaseTest > thePlanIsOrderedBirthFirstThenThisBranchesOwnTurns PASSED
+
+BuildContextPlanUseCaseTest > aSourceTheStoreCannotResolveForbidsTheRequest PASSED
+
+BuildContextPlanUseCaseTest > malformedArgumentsAreCallerBugs PASSED
+
+BuildContextPlanUseCaseTest > theBirthHalfIsPinnedToTheSnapshotEvenAfterTheParentMovesOn PASSED
+
+BuildContextPlanUseCaseTest > anEmptyHistoryIsAValidRequest PASSED
+
+BuildContextPlanUseCaseTest > anAnswerPositionWithoutADisplayedRevisionContributesNoTurn PASSED
+
+ContextSnapshotTest > laterMutationsOfTheCallerListCannotReachTheSnapshot PASSED
+
+ContextSnapshotTest > malformedIdentifiersAndTimestampsAreCallerBugs PASSED
+
+ContextSnapshotTest > theSnapshotIdentityNeverCarriesContent PASSED
+
+ContextSnapshotTest > everyPayloadOutsideTheSchemaIsRefused PASSED
+
+ContextSnapshotTest > aStoredSnapshotReadsBackThroughTheStructuredParser PASSED
+
+ContextSnapshotTest > aSnapshotWithoutSourcesIsNotASnapshot PASSED
+
+ContextSnapshotTest > theCanonicalPayloadIsTheDocumentedWireShapeAndItsDigestIsDerived PASSED
+
+ContextSnapshotTest > aPayloadWhoseDigestDoesNotMatchIsRefused PASSED
+
+ContextSnapshotTest > theSnapshotIsUnaffectedByEverythingThatHappensUpstreamAfterwards PASSED
+
+ContextSnapshotTest > equalContextsProduceByteIdenticalPayloads PASSED
+
+ContextSnapshotTest > everySourceKindSurvivesTheCodec PASSED
+
+ContextSnapshotTest > aSchemaVersionThisBuildCannotReadIsRefused PASSED
+
+GenerationCommandTest > versionLookalikesAreRefused PASSED
+
+GenerationCommandTest > aMissingVersionIsRefusedWithThePromptPolicyCode PASSED
+
+GenerationCommandTest > malformedArgumentsAreCallerBugsNotBusinessFailures PASSED
+
+GenerationCommandTest > theVersionIsPinnedWithoutReformatting PASSED
+
+GenerationCommandTest > aCallerBugIsReportedBeforeTheVersionDecision PASSED
+
+GenerationCommandTest > aCommandPinsTheVersionOfItsDeclaredPurpose PASSED
+
+GenerationCommandTest > aVersionOwnedByAnotherPurposeIsRefused PASSED
+
+GenerationCommandTest > theDescriptionNamesThePinAndCarriesNoPromptText PASSED
+
+GenerationCommandTest > thePinnedVersionIsFinal PASSED
+
+GenerationOperationTest > thePinnedVersionCannotBeRewrittenForTheLifeOfTheOperation PASSED
+
+GenerationOperationTest > aNullDeltaIsACallerBug PASSED
+
+GenerationOperationTest > reachingStableDirectlyIsRefusedBecauseStabilizeOwnsThatMove PASSED
+
+GenerationOperationTest > aLateReasoningDeltaIsAppendedWithoutSteppingBack PASSED
+
+GenerationOperationTest > aThinkingDisabledAttemptStabilizesWithEmptyReasoning PASSED
+
+GenerationOperationTest > stabilizeCopiesTheBuffersAndThePinnedVersionVerbatim PASSED
+
+GenerationOperationTest > anEmptyDeltaIsAcceptedWithoutOpeningAChannel PASSED
+
+GenerationOperationTest > anInterruptedAttemptBehavesLikeAFailedOne PASSED
+
+GenerationOperationTest > illegalTransitionsAreReportedAsDomainErrors PASSED
+
+GenerationOperationTest > aBadRevisionNumberIsRefusedByTheRevisionItself PASSED
+
+GenerationOperationTest > aFailedAttemptRejectsLateCallbacksAndCannotBeStabilized PASSED
+
+GenerationOperationTest > stabilizeRequiresANonEmptyAnswer PASSED
+
+GenerationOperationTest > aNullTransitionTargetIsACallerBugNotABusinessFailure PASSED
+
+GenerationOperationTest > aDeltaThatArrivedBeforeStreamingIsRefused PASSED
+
+GenerationOperationTest > anOperationInheritsThePinnedVersionAndIdentityFromItsCommand PASSED
+
+GenerationOperationTest > anAnswerDeltaMovesSubmittingStraightIntoTheAnswerPhase PASSED
+
+GenerationOperationTest > aSecondStabilizationIsRefused PASSED
+
+GenerationOperationTest > aCallerBugIsReportedBeforeTheAttemptStateIsConsulted PASSED
+
+GenerationOperationTest > theOperationDescriptionNamesTheStateAndTheBuffers PASSED
+
+GenerationOperationTest > aReasoningDeltaOpensTheReasoningPhase PASSED
+
+GenerationStateTest > theDerivedPredicatesCoverEveryState PASSED
+
+GenerationStateTest > legalTransitionReturnsTheNextState PASSED
+
+GenerationStateTest > happyPathTransitionsAreLegal PASSED
+
+GenerationStateTest > anyUnfinishedStateCanFailBeInterruptedOrBeCanceled PASSED
+
+GenerationStateTest > everyRecoverableStateMapsToExactlyOneTerminalTarget PASSED
+
+GenerationStateTest > terminalStatesHaveNoRecoveryTarget PASSED
+
+GenerationStateTest > skippingForwardIsRefused PASSED
+
+GenerationStateTest > processRecoveryCoversEveryStateThatCannotSurviveARestart PASSED
+
+GenerationStateTest > illegalTransitionIsReportedAsADomainError PASSED
+
+GenerationStateTest > lateCallbackOnATerminalStateIsReportedAsADomainError PASSED
+
+GenerationStateTest > aNullTransitionTargetIsACallerBugNotABusinessFailure PASSED
+
+GenerationStateTest > onlyStableCountsAsStable PASSED
+
+GenerationStateTest > movingBackwardsIsRefused PASSED
+
+GenerationStateTest > onlyFailedAndInterruptedAreRetryableInPlace PASSED
+
+GenerationStateTest > aReasoningPhaseThatProducedNoAnswerCannotBecomeStable PASSED
+
+GenerationStateTest > terminalStatesNeverChangeAgain PASSED
+
+GuardTest > newIdProducesCanonicalDistinctUuids PASSED
+
+GuardTest > objectChecksAcceptEnumsAndValueObjectsAndRefuseNull PASSED
+
+GuardTest > canonicalUuidStringsAreAccepted PASSED
+
+GuardTest > countersRefuseNegativeValues PASSED
+
+GuardTest > nullAndEmptyIdentifiersAreRefused PASSED
+
+GuardTest > nonCanonicalSpellingsOfAValidUuidAreRefused PASSED
+
+MessageTest > restoreKeepsTheRoleAndContentRules PASSED
+
+MessageTest > aUserPositionCarriesNoRevisionAndNoAttempt PASSED
+
+MessageTest > endingTheAttemptInTheSameTransactionThenAllowsTheSwitch PASSED
+
+MessageTest > blankLearnerTextIsRefused PASSED
+
+MessageTest > learnerTextIsFinalAndThePositionExposesNoSetter PASSED
+
+MessageTest > clearingAFailedAttemptKeepsTheDisplayedRevision PASSED
+
+MessageTest > activatingANewRevisionSwitchesTheDisplayedVersion PASSED
+
+MessageTest > aStableRevisionCannotBeAttachedToALearnerPosition PASSED
+
+MessageTest > aSecondAttemptAtTheSamePositionIsRefusedWhileOneIsRunning PASSED
+
+MessageTest > ordinalIsBranchLocalAndNonNegative PASSED
+
+MessageTest > theDisplayedRevisionCannotBeSwitchedWhileAnAttemptIsRunning PASSED
+
+MessageTest > anAttemptCannotBeBoundToALearnerPosition PASSED
+
+MessageTest > reactivatingTheSameRevisionIsRefused PASSED
+
+MessageTest > anAiPositionCannotBeGivenLearnerText PASSED
+
+MessageTest > restoreCarriesTheActiveReferencesNoCreationPathCouldProduce PASSED
+
+PromptPurposeTest > everyPurposeOwnsItsDocumentedVersion PASSED
+
+PromptPurposeTest > theEnumMatchesTheAuthoritativeFirstReleaseListExactly PASSED
+
+PromptPurposeTest > thePrefixDirectionIsTheExactReverseOfTheVersionDirection PASSED
+
+PromptPurposeTest > theDeclarationOrderMatchesTheDocument PASSED
+
+PromptPurposeTest > aVersionOfAnotherPurposeIsRefused PASSED
+
+PromptPurposeTest > absenceOfAVersionHasOneDefinition PASSED
+
+PromptPurposeTest > theTeachingAnswerPurposeOwnsTheDocumentedVersion PASSED
+
+PromptPurposeTest > aCanonicalSemverSuffixIsAccepted PASSED
+
+PromptPurposeTest > everyPrefixIsUnambiguous PASSED
+
+PromptPurposeTest > theVersionDecisionIsExpressedAsADomainError PASSED
+
+PromptPurposeTest > aNonSemverSuffixIsRefused PASSED
+
+PromptPurposeTest > thereIsNoSeparateKeyPointsPurpose PASSED
+
+PromptSpecTest > aMissingBodyOrPurposeIsACallerBug PASSED
+
+PromptSpecTest > theVersionDecisionIsTheSameOneGenerationCommandMakes PASSED
+
+PromptSpecTest > aVersionOwnedByAnotherPurposeIsReportedAsAMismatch PASSED
+
+PromptSpecTest > aSpecCarriesItsPurposeVersionAndBody PASSED
+
+PromptSpecTest > aBlankSystemContentIsRefused PASSED
+
+PromptSpecTest > aBlankVersionIsReportedAsTheMissingPolicyCode PASSED
+
+PromptSpecTest > theSpecHasNoProviderSpecificField PASSED
+
+PromptSpecTest > theDescriptionNeverCarriesThePromptBody PASSED
+
+TopicTest > anUpdateMustNotPredateCreation PASSED
+
+TopicTest > malformedIdentifiersAreRefusedAtConstruction PASSED
+
+TopicTest > visitingABranchKeepsIdentityAndCreationTime PASSED
+
+TopicTest > aFreshTopicHasNotBeenVisitedYet PASSED
+
+TopicTest > timestampsAreUtcEpochMillisAndNeverNegative PASSED
+
+TopicTest > aTopicCarriesNoNameOfItsOwn PASSED
+
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues
+> Task :ai:generateDebugResources
+> Task :ai:packageDebugResources
+> Task :ai:processDebugNavigationResources
+> Task :ai:preDebugUnitTestBuild UP-TO-DATE
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :ai:javaPreCompileDebugUnitTest
+> Task :ai:javaPreCompileDebug
+> Task :ai:processDebugUnitTestJavaRes NO-SOURCE
+> Task :ai:parseDebugLocalResources
+> Task :ai:generateDebugRFile
+> Task :ai:compileDebugJavaWithJavac
+> Task :ai:generateDebugUnitTestStubRFile
+> Task :ai:bundleLibRuntimeToJarDebug
+> Task :ai:bundleLibCompileToJarDebug
+> Task :ai:compileDebugUnitTestJavaWithJavac
+> Task :ai:testDebugUnitTest
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 23s
+18 actionable tasks: 18 executed
+EXITCODE=0
+
+JUnit counts read back from the XML this run wrote (per-class, then totals):
+  com.treelearn.ai.gateway.AiGatewayBalanceTest              tests=9    failures=0 errors=0 skipped=0
+  com.treelearn.ai.gateway.AiGatewayStreamTest               tests=16   failures=0 errors=0 skipped=0
+  com.treelearn.ai.gateway.GatewayContractTest               tests=8    failures=0 errors=0 skipped=0
+  com.treelearn.ai.gateway.SseFrameParserTest                tests=12   failures=0 errors=0 skipped=0
+  com.treelearn.ai.prompt.DeepSeekContextEncoderTest         tests=8    failures=0 errors=0 skipped=0
+  com.treelearn.ai.prompt.DeepSeekPromptRegistryTest         tests=8    failures=0 errors=0 skipped=0
+  com.treelearn.ai.prompt.DeepSeekRequestAssemblerTest       tests=11   failures=0 errors=0 skipped=0
+  com.treelearn.core.domain.AnswerRevisionTest               tests=13   failures=0 errors=0 skipped=0
+  com.treelearn.core.domain.BranchSourceTest                 tests=12   failures=0 errors=0 skipped=0
+  com.treelearn.core.domain.BranchTest                       tests=15   failures=0 errors=0 skipped=0
+  com.treelearn.core.domain.BuildContextPlanUseCaseTest      tests=10   failures=0 errors=0 skipped=0
+  com.treelearn.core.domain.ContextSnapshotTest              tests=12   failures=0 errors=0 skipped=0
+  com.treelearn.core.domain.GenerationCommandTest            tests=9    failures=0 errors=0 skipped=0
+  com.treelearn.core.domain.GenerationOperationTest          tests=20   failures=0 errors=0 skipped=0
+  com.treelearn.core.domain.GenerationStateTest              tests=16   failures=0 errors=0 skipped=0
+  com.treelearn.core.domain.GuardTest                        tests=6    failures=0 errors=0 skipped=0
+  com.treelearn.core.domain.MessageTest                      tests=15   failures=0 errors=0 skipped=0
+  com.treelearn.core.domain.PromptPurposeTest                tests=12   failures=0 errors=0 skipped=0
+  com.treelearn.core.domain.PromptSpecTest                   tests=8    failures=0 errors=0 skipped=0
+  com.treelearn.core.domain.TopicTest                        tests=6    failures=0 errors=0 skipped=0
+  TOTAL                                                      tests=226  failures=0 errors=0 skipped=0
+  classes=20  sum-of-parts: tests=226 failures=0 errors=0 skipped=0

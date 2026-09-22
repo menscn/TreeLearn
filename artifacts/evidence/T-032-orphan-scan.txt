@@ -1,0 +1,37 @@
+================================================================
+T-032 orphan scan - any surviving reference to the deleted placeholder wiring
+captured-at: 2026-09-22T00:18:49.6140503+08:00
+cwd: D:\Project\Android\Treelearn
+command: rg -n --glob '!artifacts/**' --glob '!.trae/tasks/**' "PendingHomeWiring|PendingChatWiring|NOT_WIRED" .
+excluded from the scan: artifacts/** (evidence files, including this one) and .trae/tasks/** (task files, which quote the deleted names as history)
+----------------------------------------------------------------
+.\Docs\06-delivery\TreeLearn_V1_交付报告.md:15:| 首页/对话数据路径 | **仍未接线**：`PendingHomeWiring` / `PendingChatWiring` 仍在生产装配中，两者对未实现命令返回可见的 `NOT_WIRED` |
+.\Docs\06-delivery\TreeLearn_V1_交付报告.md:66:`android/app/src/main/java/com/treelearn/app/wiring/PendingHomeWiring.java` 与 `PendingChatWiring.java`
+.\Docs\06-delivery\TreeLearn_V1_交付报告.md:67:仍在 `AppContainer` 的生产装配中，两者把每个无法实现的命令变成**屏幕上可见的** `NOT_WIRED` 提示，
+.\Docs\06-delivery\TreeLearn_V1_交付报告.md:70:- 首页的「最近主题」列表恒为空，提交首个问题返回 `NOT_WIRED`；
+.\Docs\06-delivery\TreeLearn_V1_交付报告.md:71:- 对话页能画界面，但 `send/retry/reset/selectRevision/fork` 一律返回 `NOT_WIRED`，不写任何一行。
+.\android\README.md:440:| `wiring.PendingHomeWiring` | 首页数据路径的**记录缺口**占位（见下） | 主题列表为空、推荐恒为启动兜底、提交返回可见的 `NOT_WIRED`，不假装建了主题 |
+.\android\README.md:477:- **首页的数据路径有一半是占位**：`wiring.PendingHomeWiring` 真的能满足的只有两件事——新装机的
+.\android\README.md:485:     在此之前 `submit()` 返回 `SubmitResult.refused(NOT_WIRED)`，页面明说「本题已保留，本版本还不能发送」。
+.\android\README.md:591:| `wiring.PendingChatWiring` | 对话数据路径的**记录缺口**占位 | 每个命令都返回可见的 `NOT_WIRED`，一行都不写 |
+.\android\README.md:607:- **对话数据路径整体是占位**（`wiring.PendingChatWiring`）：本轮不接读行、不接真实推荐条、不接追问发送、
+.\android\README.md:612:  因此不写。占位的可见行为是明确的：命令返回 `NOT_WIRED`，界面说这个版本还不能做这件事。
+.\android\README.md:617:  （`HomeViewState.Notice` → `FailureNotice`）记在这里作为后续工作。已知的同源小瑕疵：`PendingChatWiring`
+.\android\README.md:618:  复用的 `Notice.NOT_WIRED` 文案写的是首次提问流程，对对话页偏窄，属这次重命名要顺手修的东西。
+EXITCODE=0
+================================================================
+T-032 orphan scan - RERUN after docs were annotated as expired
+captured-at: 2026-09-22T00:27:09.2776990+08:00
+cwd: D:\Project\Android\Treelearn
+command: rg -n --glob '!artifacts/**' --glob '!.trae/tasks/**' "PendingHomeWiring|PendingChatWiring|NOT_WIRED" .
+excluded from the scan: artifacts/** (evidence, incl. this file) and .trae/tasks/** (tasks quote the deleted names as history)
+----------------------------------------------------------------
+.\Docs\06-delivery\TreeLearn_V1_交付报告.md:15:| 首页/对话数据路径 | **〔历史快照 · 2026-09-21〕仍未接线**：`PendingHomeWiring` / `PendingChatWiring` 仍在生产装配中，两者对未实现命令返回可见的 `NOT_WIRED`。**这条已过期**：`T-2026-09-21-real-data-path-wiring-032` 已删除两个占位类并接上真实数据路径，见第 5 节的过期说明 |
+.\Docs\06-delivery\TreeLearn_V1_交付报告.md:67:> `T-2026-09-21-real-data-path-wiring-032` 已删除 `wiring.PendingHomeWiring` 与 `wiring.PendingChatWiring`，
+.\Docs\06-delivery\TreeLearn_V1_交付报告.md:74:`android/app/src/main/java/com/treelearn/app/wiring/PendingHomeWiring.java` 与 `PendingChatWiring.java`
+.\Docs\06-delivery\TreeLearn_V1_交付报告.md:75:仍在 `AppContainer` 的生产装配中，两者把每个无法实现的命令变成**屏幕上可见的** `NOT_WIRED` 提示，
+.\Docs\06-delivery\TreeLearn_V1_交付报告.md:78:- 首页的「最近主题」列表恒为空，提交首个问题返回 `NOT_WIRED`；
+.\Docs\06-delivery\TreeLearn_V1_交付报告.md:79:- 对话页能画界面，但 `send/retry/reset/selectRevision/fork` 一律返回 `NOT_WIRED`，不写任何一行。
+.\android\README.md:494:  生产装配里不再有 `NOT_WIRED`。读者要注意的**残留缺口**：
+.\android\README.md:642:  （`HomeViewState.Notice` → `FailureNotice`）记在这里作为后续工作。**`Notice.NOT_WIRED` 已随 T-032 一并
+EXITCODE=0

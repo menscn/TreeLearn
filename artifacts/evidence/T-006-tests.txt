@@ -1,0 +1,74 @@
+# T-006 JVM unit suite - forced fresh execution (counts source for T-006-tests)
+CapturedAt: 2026-09-21 20:36:58
+Command: cd android; .\gradlew.bat :ai:testDebugUnitTest --no-daemon --console=plain --rerun-tasks
+Mode: counts (--rerun-tasks: the JVM suites really execute here, so the XML counts below come from this run, not from a cache/up-to-date restore)
+--- output ---
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava
+> Task :core:processResources NO-SOURCE
+> Task :core:classes
+> Task :core:jar
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues
+> Task :ai:generateDebugResources
+> Task :ai:packageDebugResources
+> Task :ai:processDebugNavigationResources
+> Task :ai:preDebugUnitTestBuild UP-TO-DATE
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :ai:processDebugUnitTestJavaRes NO-SOURCE
+> Task :ai:javaPreCompileDebugUnitTest
+> Task :ai:javaPreCompileDebug
+> Task :ai:parseDebugLocalResources
+> Task :ai:generateDebugRFile
+> Task :ai:compileDebugJavaWithJavac
+> Task :ai:generateDebugUnitTestStubRFile
+> Task :ai:bundleLibRuntimeToJarDebug
+> Task :ai:bundleLibCompileToJarDebug
+> Task :ai:compileDebugUnitTestJavaWithJavac
+> Task :ai:testDebugUnitTest
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 17s
+16 actionable tasks: 16 executed
+--- end of output ---
+EXITCODE=0
+=== JUnit counts read back from the report files ===
+JVM side - source: android/ai/build/test-results/testDebugUnitTest/TEST-*.xml, written by the --rerun-tasks run
+recorded in the header above ("16 actionable tasks: 16 executed", exit 0), i.e. these numbers come from a real
+execution and not from an up-to-date/cache restore:
+  com.treelearn.ai.gateway.SseFrameParserTest            tests=12 failures=0 errors=0 skipped=0
+  com.treelearn.ai.gateway.AiGatewayStreamTest           tests=16 failures=0 errors=0 skipped=0
+  com.treelearn.ai.gateway.AiGatewayBalanceTest          tests=9  failures=0 errors=0 skipped=0
+  com.treelearn.ai.gateway.GatewayContractTest           tests=8  failures=0 errors=0 skipped=0
+    -> T-006 gateway subtotal: 45 tests, 0 failures, 0 errors, 0 skipped
+  com.treelearn.ai.prompt.DeepSeekContextEncoderTest     tests=8  failures=0 errors=0 skipped=0  (parallel lane, same :ai task)
+  com.treelearn.ai.prompt.DeepSeekPromptRegistryTest     tests=8  failures=0 errors=0 skipped=0  (parallel lane)
+  com.treelearn.ai.prompt.DeepSeekRequestAssemblerTest   tests=11 failures=0 errors=0 skipped=0  (parallel lane)
+    -> whole :ai module in this run: 9+16+8+12+8+8+11 = 72 tests, 0 failures
+
+Device side - source: T-006-green.txt, the stdout of the recorded GREEN run (byte-identical command to RED, exit 0):
+  "Starting 99 tests on Medium_Phone_API_36.1(AVD) - 16"
+  "Medium_Phone_API_36.1(AVD) - 16 Tests 44/99 completed. (0 skipped) (0 failed)"
+  "Finished 99 tests on Medium_Phone_API_36.1(AVD) - 16" / "BUILD SUCCESSFUL in 53s"
+T-006's own three instrumented classes, re-run alone on the same emulator - source: T-006-device-isolated.txt
+("OK (16 tests)"):
+  com.treelearn.app.DeepSeekStreamInstrumentedTest          3 tests
+  com.treelearn.app.DeepSeekRequestBodyInstrumentedTest     3 tests
+  com.treelearn.app.DeepSeekPayloadDecoderInstrumentedTest 10 tests
+    -> T-006 device subtotal: 3+3+10 = 16 tests, 0 failures
+
+Why the device counts are not read from the aggregate XML: android/app/build/outputs/androidTest-results/connected/debug/
+holds ONE per-device file (TEST-Medium_Phone_API_36.1(AVD) - 16-_app-.xml) that every later connected run overwrites.
+At 2026-09-21 20:33:56 it already belonged to another lane's run and lists AnswerRevisionGenerationOperationDaoInstrumentedTest
+with failures="1", which has nothing to do with T-006. Gradle only writes that file at the end of a connected run, so
+whichever lane runs last owns it; T-006's device numbers are therefore quoted from its own recorded run plus the
+isolated adb re-run.

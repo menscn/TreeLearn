@@ -1,0 +1,539 @@
+Generated: 2026-09-21T21:33:54.0052346+08:00
+Command: cd android; .\gradlew.bat :data:testDebugUnitTest :app:assembleDebugAndroidTest --continue --rerun-tasks --no-build-cache --no-daemon --console=plain
+WorkingDirectory: C:\Users\23745\AppData\Local\Temp\t005-red
+Mode: RED - compile-only acceptance suite, written before the implementation exists
+Subject: SCRATCH COPY at %TEMP%\t005-red\android (a 160/160 mirror of android\ excluding build/.gradle).
+The repository at D:\Project\Android\Treelearn was NOT modified - the five production classes were
+removed from the copy only (re-verified just before this run: SecretEnvelope.java absent in the copy,
+present in the repo).
+RemovedInCopyOnly: data/src/main/java/com/treelearn/data/secret/{SecretStoreError,SecretStoreException,SecretEnvelope,KeystoreSecretStore}.java
+RemovedInCopyOnly: data/src/main/java/com/treelearn/data/settings/SettingsRepository.java
+Note: an earlier pair of runs used a command without --rerun-tasks; its GREEN came back
+'89 actionable tasks: 89 up-to-date' (vacuous) and was discarded. This file and
+T-005-green-compile-only.txt are that same command with --rerun-tasks --no-build-cache so that every
+task really executes; the two command strings are byte-identical to each other.
+Incident log for the superseded in-repo experiment: artifacts/evidence/T-005-red-stash.txt
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava
+> Task :core:processResources NO-SOURCE
+> Task :core:classes
+> Task :core:jar
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:generateDebugResValues
+> Task :data:generateDebugResources
+> Task :data:packageDebugResources
+> Task :data:processDebugNavigationResources
+> Task :data:preDebugUnitTestBuild UP-TO-DATE
+> Task :data:javaPreCompileDebugUnitTest
+> Task :data:javaPreCompileDebug
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :data:processDebugUnitTestJavaRes NO-SOURCE
+> Task :data:parseDebugLocalResources
+> Task :tree-layout:compileJava
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes
+> Task :data:generateDebugRFile
+> Task :tree-layout:jar
+> Task :data:compileDebugJavaWithJavac
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues
+> Task :data:generateDebugUnitTestStubRFile
+> Task :ai:generateDebugResources
+> Task :data:bundleLibRuntimeToJarDebug
+> Task :data:bundleLibCompileToJarDebug
+> Task :ai:packageDebugResources
+
+> Task :data:compileDebugUnitTestJavaWithJavac FAILED
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:35: 错误: 找不到符号
+        SecretEnvelope encoded = SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, ciphertext);
+        ^
+  符号:   类 SecretEnvelope
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:35: 错误: 找不到符号
+        SecretEnvelope encoded = SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, ciphertext);
+                                                   ^
+  符号:   变量 SecretEnvelope
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:35: 错误: 找不到符号
+        SecretEnvelope encoded = SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, ciphertext);
+                                 ^
+  符号:   变量 SecretEnvelope
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:36: 错误: 找不到符号
+        SecretEnvelope decoded = SecretEnvelope.decode(encoded.encode());
+        ^
+  符号:   类 SecretEnvelope
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:36: 错误: 找不到符号
+        SecretEnvelope decoded = SecretEnvelope.decode(encoded.encode());
+                                 ^
+  符号:   变量 SecretEnvelope
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:38: 错误: 找不到符号
+        assertEquals(SecretEnvelope.CURRENT_SCHEMA_VERSION, decoded.schemaVersion());
+                     ^
+  符号:   变量 SecretEnvelope
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:46: 错误: 找不到符号
+        SecretEnvelope envelope = SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, ciphertext);
+        ^
+  符号:   类 SecretEnvelope
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:46: 错误: 找不到符号
+        SecretEnvelope envelope = SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, ciphertext);
+                                                    ^
+  符号:   变量 SecretEnvelope
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:46: 错误: 找不到符号
+        SecretEnvelope envelope = SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, ciphertext);
+                                  ^
+  符号:   变量 SecretEnvelope
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:62: 错误: 找不到符号
+        SecretEnvelope envelope = SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, ciphertext);
+        ^
+  符号:   类 SecretEnvelope
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:62: 错误: 找不到符号
+        SecretEnvelope envelope = SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, ciphertext);
+                                                    ^
+  符号:   变量 SecretEnvelope
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:62: 错误: 找不到符号
+        SecretEnvelope envelope = SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, ciphertext);
+                                  ^
+  符号:   变量 SecretEnvelope
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:76: 错误: 找不到符号
+                () -> SecretEnvelope.of(0, SYNTHETIC_IV, ciphertext));
+                      ^
+  符号:   变量 SecretEnvelope
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:78: 错误: 找不到符号
+                () -> SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, null, ciphertext));
+                                        ^
+  符号:   变量 SecretEnvelope
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:78: 错误: 找不到符号
+                () -> SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, null, ciphertext));
+                      ^
+  符号:   变量 SecretEnvelope
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:80: 错误: 找不到符号
+                () -> SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, new byte[0], ciphertext));
+                                        ^
+  符号:   变量 SecretEnvelope
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:80: 错误: 找不到符号
+                () -> SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, new byte[0], ciphertext));
+                      ^
+  符号:   变量 SecretEnvelope
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:82: 错误: 找不到符号
+                () -> SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, null));
+                                        ^
+  符号:   变量 SecretEnvelope
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:82: 错误: 找不到符号
+                () -> SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, null));
+                      ^
+  符号:   变量 SecretEnvelope
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:84: 错误: 找不到符号
+                () -> SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, new byte[0]));
+                                        ^
+  符号:   变量 SecretEnvelope
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:84: 错误: 找不到符号
+                () -> SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, new byte[0]));
+                      ^
+  符号:   变量 SecretEnvelope
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:103: 错误: 找不到符号
+            SecretStoreException failure =
+            ^
+  符号:   类 SecretStoreException
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:105: 错误: 找不到符号
+                            SecretStoreException.class, () -> SecretEnvelope.decode(candidate));
+                            ^
+  符号:   类 SecretStoreException
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:105: 错误: 找不到符号
+                            SecretStoreException.class, () -> SecretEnvelope.decode(candidate));
+                                                              ^
+  符号:   变量 SecretEnvelope
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:107: 错误: 找不到符号
+                    SecretStoreError.CORRUPTED_ENVELOPE, failure.code());
+                    ^
+  符号:   变量 SecretStoreError
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:109: 错误: 找不到符号
+        assertThrows(SecretStoreException.class, () -> SecretEnvelope.decode(null));
+                     ^
+  符号:   类 SecretStoreException
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:109: 错误: 找不到符号
+        assertThrows(SecretStoreException.class, () -> SecretEnvelope.decode(null));
+                                                       ^
+  符号:   变量 SecretEnvelope
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:118: 错误: 找不到符号
+        SecretStoreException failure = assertThrows(SecretStoreException.class,
+        ^
+  符号:   类 SecretStoreException
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:118: 错误: 找不到符号
+        SecretStoreException failure = assertThrows(SecretStoreException.class,
+                                                    ^
+  符号:   类 SecretStoreException
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:119: 错误: 找不到符号
+                () -> SecretEnvelope.decode(fromTheFuture));
+                      ^
+  符号:   变量 SecretEnvelope
+  位置: 类 SecretEnvelopeTest
+C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:121: 错误: 找不到符号
+        assertEquals(SecretStoreError.UNSUPPORTED_ENVELOPE_VERSION, failure.code());
+                     ^
+  符号:   变量 SecretStoreError
+  位置: 类 SecretEnvelopeTest
+31 个错误
+
+> Task :ai:processDebugNavigationResources
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :ai:javaPreCompileDebug
+> Task :ai:parseDebugLocalResources
+> Task :app:javaPreCompileDebug
+> Task :ai:compileDebugLibraryResources
+> Task :ai:generateDebugRFile
+> Task :data:writeDebugAarMetadata
+> Task :ai:writeDebugAarMetadata
+> Task :ai:compileDebugJavaWithJavac
+> Task :ai:bundleLibCompileToJarDebug
+> Task :app:checkDebugAarMetadata
+> Task :app:processDebugNavigationResources
+> Task :app:generateDebugResValues
+> Task :app:compileDebugNavigationResources
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :app:packageDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :ai:extractDeepLinksDebug
+> Task :app:mergeDebugResources
+> Task :app:parseDebugLocalResources
+> Task :app:extractDeepLinksDebug
+> Task :data:extractDeepLinksDebug
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :data:compileDebugLibraryResources
+> Task :app:javaPreCompileDebugAndroidTest
+> Task :app:checkDebugAndroidTestAarMetadata
+> Task :app:processDebugAndroidTestNavigationResources
+> Task :app:compileDebugAndroidTestNavigationResources
+> Task :app:generateDebugAndroidTestResValues
+> Task :ai:processDebugManifest
+> Task :data:processDebugManifest
+> Task :app:mapDebugAndroidTestSourceSetPaths
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:generateDebugAndroidTestResources
+> Task :app:mergeDebugAndroidTestResources
+> Task :app:processDebugAndroidTestManifest
+> Task :ai:generateDebugAssets UP-TO-DATE
+> Task :ai:mergeDebugAssets
+> Task :app:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :data:generateDebugAssets UP-TO-DATE
+> Task :data:mergeDebugAssets
+> Task :app:mergeDebugAndroidTestAssets
+> Task :app:compressDebugAndroidTestAssets
+> Task :app:processDebugManifestForPackage
+> Task :ai:bundleLibRuntimeToJarDebug
+> Task :app:desugarDebugAndroidTestFileDependencies
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :app:processDebugAndroidTestJavaRes NO-SOURCE
+> Task :app:checkDebugAndroidTestDuplicateClasses
+> Task :ai:mergeDebugJniLibFolders
+> Task :ai:mergeDebugNativeLibs NO-SOURCE
+> Task :app:mergeDebugAndroidTestJniLibFolders
+> Task :app:mergeDebugJniLibFolders
+> Task :ai:copyDebugJniLibsProjectOnly
+> Task :data:bundleLibRuntimeToDirDebug
+> Task :app:processDebugAndroidTestResources
+> Task :data:mergeDebugJniLibFolders
+> Task :data:mergeDebugNativeLibs NO-SOURCE
+> Task :data:copyDebugJniLibsProjectOnly
+> Task :ai:bundleLibRuntimeToDirDebug
+> Task :app:processDebugResources
+> Task :app:mergeDebugAndroidTestJavaResource
+> Task :app:validateSigningDebugAndroidTest
+
+> Task :app:compileDebugJavaWithJavac FAILED
+C:\Users\23745\AppData\Local\Temp\t005-red\android\app\src\main\java\com\treelearn\app\generation\AiGatewayStreams.java:9: 错误: 程序包com.treelearn.data.secret不存在
+import com.treelearn.data.secret.KeystoreSecretStore;
+                                ^
+C:\Users\23745\AppData\Local\Temp\t005-red\android\app\src\main\java\com\treelearn\app\generation\AiGatewayStreams.java:10: 错误: 程序包com.treelearn.data.secret不存在
+import com.treelearn.data.secret.SecretStoreException;
+                                ^
+C:\Users\23745\AppData\Local\Temp\t005-red\android\app\src\main\java\com\treelearn\app\generation\AiGatewayStreams.java:43: 错误: 找不到符号
+    private final KeystoreSecretStore secrets;
+                  ^
+  符号:   类 KeystoreSecretStore
+  位置: 类 AiGatewayStreams
+C:\Users\23745\AppData\Local\Temp\t005-red\android\app\src\main\java\com\treelearn\app\generation\AiGatewayStreams.java:45: 错误: 找不到符号
+    public AiGatewayStreams(AiGateway gateway, KeystoreSecretStore secrets) {
+                                               ^
+  符号:   类 KeystoreSecretStore
+  位置: 类 AiGatewayStreams
+C:\Users\23745\AppData\Local\Temp\t005-red\android\app\src\main\java\com\treelearn\app\generation\AiGatewayStreams.java:62: 错误: 找不到符号
+        } catch (SecretStoreException unreadable) {
+                 ^
+  符号:   类 SecretStoreException
+  位置: 类 AiGatewayStreams
+5 个错误
+
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :app:mergeLibDexDebugAndroidTest
+> Task :app:writeDebugAndroidTestSigningConfigVersions
+> Task :app:mergeExtDexDebugAndroidTest
+
+[Incubating] Problems report is available at: file:///C:/Users/23745/AppData/Local/Temp/t005-red/android/build/reports/problems/problems-report.html
+
+FAILURE: Build completed with 2 failures.
+
+1: Task failed with an exception.
+-----------
+* What went wrong:
+Execution failed for task ':data:compileDebugUnitTestJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:35: 错误: 找不到符号
+          SecretEnvelope encoded = SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, ciphertext);
+          ^
+    符号:   类 SecretEnvelope
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:35: 错误: 找不到符号
+          SecretEnvelope encoded = SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, ciphertext);
+                                                     ^
+    符号:   变量 SecretEnvelope
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:35: 错误: 找不到符号
+          SecretEnvelope encoded = SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, ciphertext);
+                                   ^
+    符号:   变量 SecretEnvelope
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:36: 错误: 找不到符号
+          SecretEnvelope decoded = SecretEnvelope.decode(encoded.encode());
+          ^
+    符号:   类 SecretEnvelope
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:36: 错误: 找不到符号
+          SecretEnvelope decoded = SecretEnvelope.decode(encoded.encode());
+                                   ^
+    符号:   变量 SecretEnvelope
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:38: 错误: 找不到符号
+          assertEquals(SecretEnvelope.CURRENT_SCHEMA_VERSION, decoded.schemaVersion());
+                       ^
+    符号:   变量 SecretEnvelope
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:46: 错误: 找不到符号
+          SecretEnvelope envelope = SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, ciphertext);
+          ^
+    符号:   类 SecretEnvelope
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:46: 错误: 找不到符号
+          SecretEnvelope envelope = SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, ciphertext);
+                                                      ^
+    符号:   变量 SecretEnvelope
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:46: 错误: 找不到符号
+          SecretEnvelope envelope = SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, ciphertext);
+                                    ^
+    符号:   变量 SecretEnvelope
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:62: 错误: 找不到符号
+          SecretEnvelope envelope = SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, ciphertext);
+          ^
+    符号:   类 SecretEnvelope
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:62: 错误: 找不到符号
+          SecretEnvelope envelope = SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, ciphertext);
+                                                      ^
+    符号:   变量 SecretEnvelope
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:62: 错误: 找不到符号
+          SecretEnvelope envelope = SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, ciphertext);
+                                    ^
+    符号:   变量 SecretEnvelope
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:76: 错误: 找不到符号
+                  () -> SecretEnvelope.of(0, SYNTHETIC_IV, ciphertext));
+                        ^
+    符号:   变量 SecretEnvelope
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:78: 错误: 找不到符号
+                  () -> SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, null, ciphertext));
+                                          ^
+    符号:   变量 SecretEnvelope
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:78: 错误: 找不到符号
+                  () -> SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, null, ciphertext));
+                        ^
+    符号:   变量 SecretEnvelope
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:80: 错误: 找不到符号
+                  () -> SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, new byte[0], ciphertext));
+                                          ^
+    符号:   变量 SecretEnvelope
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:80: 错误: 找不到符号
+                  () -> SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, new byte[0], ciphertext));
+                        ^
+    符号:   变量 SecretEnvelope
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:82: 错误: 找不到符号
+                  () -> SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, null));
+                                          ^
+    符号:   变量 SecretEnvelope
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:82: 错误: 找不到符号
+                  () -> SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, null));
+                        ^
+    符号:   变量 SecretEnvelope
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:84: 错误: 找不到符号
+                  () -> SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, new byte[0]));
+                                          ^
+    符号:   变量 SecretEnvelope
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:84: 错误: 找不到符号
+                  () -> SecretEnvelope.of(SecretEnvelope.CURRENT_SCHEMA_VERSION, SYNTHETIC_IV, new byte[0]));
+                        ^
+    符号:   变量 SecretEnvelope
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:103: 错误: 找不到符号
+              SecretStoreException failure =
+              ^
+    符号:   类 SecretStoreException
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:105: 错误: 找不到符号
+                              SecretStoreException.class, () -> SecretEnvelope.decode(candidate));
+                              ^
+    符号:   类 SecretStoreException
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:105: 错误: 找不到符号
+                              SecretStoreException.class, () -> SecretEnvelope.decode(candidate));
+                                                                ^
+    符号:   变量 SecretEnvelope
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:107: 错误: 找不到符号
+                      SecretStoreError.CORRUPTED_ENVELOPE, failure.code());
+                      ^
+    符号:   变量 SecretStoreError
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:109: 错误: 找不到符号
+          assertThrows(SecretStoreException.class, () -> SecretEnvelope.decode(null));
+                       ^
+    符号:   类 SecretStoreException
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:109: 错误: 找不到符号
+          assertThrows(SecretStoreException.class, () -> SecretEnvelope.decode(null));
+                                                         ^
+    符号:   变量 SecretEnvelope
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:118: 错误: 找不到符号
+          SecretStoreException failure = assertThrows(SecretStoreException.class,
+          ^
+    符号:   类 SecretStoreException
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:118: 错误: 找不到符号
+          SecretStoreException failure = assertThrows(SecretStoreException.class,
+                                                      ^
+    符号:   类 SecretStoreException
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:119: 错误: 找不到符号
+                  () -> SecretEnvelope.decode(fromTheFuture));
+                        ^
+    符号:   变量 SecretEnvelope
+    位置: 类 SecretEnvelopeTest
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\data\src\test\java\com\treelearn\data\secret\SecretEnvelopeTest.java:121: 错误: 找不到符号
+          assertEquals(SecretStoreError.UNSUPPORTED_ENVELOPE_VERSION, failure.code());
+                       ^
+    符号:   变量 SecretStoreError
+    位置: 类 SecretEnvelopeTest
+  31 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+==============================================================================
+
+2: Task failed with an exception.
+-----------
+* What went wrong:
+Execution failed for task ':app:compileDebugJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\app\src\main\java\com\treelearn\app\generation\AiGatewayStreams.java:43: 错误: 找不到符号
+      private final KeystoreSecretStore secrets;
+                    ^
+    符号:   类 KeystoreSecretStore
+    位置: 类 AiGatewayStreams
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\app\src\main\java\com\treelearn\app\generation\AiGatewayStreams.java:45: 错误: 找不到符号
+      public AiGatewayStreams(AiGateway gateway, KeystoreSecretStore secrets) {
+                                                 ^
+    符号:   类 KeystoreSecretStore
+    位置: 类 AiGatewayStreams
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\app\src\main\java\com\treelearn\app\generation\AiGatewayStreams.java:62: 错误: 找不到符号
+          } catch (SecretStoreException unreadable) {
+                   ^
+    符号:   类 SecretStoreException
+    位置: 类 AiGatewayStreams
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\app\src\main\java\com\treelearn\app\generation\AiGatewayStreams.java:9: 错误: 程序包com.treelearn.data.secret不存在
+  import com.treelearn.data.secret.KeystoreSecretStore;
+                                  ^
+  C:\Users\23745\AppData\Local\Temp\t005-red\android\app\src\main\java\com\treelearn\app\generation\AiGatewayStreams.java:10: 错误: 程序包com.treelearn.data.secret不存在
+  import com.treelearn.data.secret.SecretStoreException;
+                                  ^
+  5 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+==============================================================================
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 17s
+81 actionable tasks: 81 executed
+EXITCODE=1
+
+
+===== attribution, read back from this same file (line numbers are the ones above) =====
+Failing tasks: ':data:compileDebugUnitTestJavaWithJavac' (line 314) and ':app:compileDebugJavaWithJavac' (line 481);
+'BUILD FAILED in 17s' (line 517); '81 actionable tasks: 81 executed' (line 518) - nothing was up-to-date; EXITCODE=1 (line 519).
+Error lines carrying a source path: 72 total = SecretEnvelopeTest.java 62 + AiGatewayStreams.java 10.
+Error kinds: 72 = 找不到符号 68 + 程序包不存在 4   (Gradle reprints each error in the FAILURE block, so 72/2 = 36 distinct errors).
+Missing symbols named in those lines: SecretEnvelope 48, SecretStoreException 12, SecretStoreError 4, KeystoreSecretStore 4  (= 68 lines, 34 distinct).
+Every one of them belongs to the five classes listed under RemovedInCopyOnly above - there is no other cause in this log.
+
+Why AiGatewayStreams.java appears (a consequence of the experiment, not cross-lane interference):
+it is a :app consumer that imports com.treelearn.data.secret.KeystoreSecretStore and SecretStoreException, two of
+the classes removed in the copy, so removing the production classes breaks its compile as well. It fails
+':app' main before ':app' compileDebugAndroidTestJavaWithJavac can run, so the two :app androidTest classes are
+not reached by this RED - they are reached and compiled by the GREEN run (same command string, exit 0) and by
+the historical full-suite RED in artifacts/evidence/T-005-red.txt. The repository was never modified, so no
+other lane is affected.
+Scope of the RED claim: the acceptance suite for the secret store does not compile before the implementation
+exists - ':data:compileDebugUnitTestJavaWithJavac' fails on SecretEnvelopeTest.java with 找不到符号 SecretEnvelope.
+

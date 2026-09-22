@@ -1,0 +1,84 @@
+# T-037 FIX ROUND: STATIC check that androidTest schema expectations cannot go stale.
+# captured-at: 2026-09-22T00:03:23.0680844+08:00
+# cwd: D:\Project\Android\Treelearn
+# checked script: .trae/scripts/dev/check_androidtest_schema_expectations.py
+#   SHA-256 = E05789F42CC85234BFACFB27E0593A85B49148F48DA45F1000662967047D16DD
+# command 1 (real tree): python -X utf8 .trae/scripts/dev/check_androidtest_schema_expectations.py
+# command 2 (self-test): python -X utf8 .trae/scripts/dev/check_androidtest_schema_expectations.py --selftest
+# Why: `gradlew check` is JVM-only, so the device-only instrumentation suite was never even
+#      compiled by it. That blind spot let DATABASE_VERSION move 1 -> 2 while the suite kept
+#      hardcoded literals. This checker guards the derived-expectations property.
+
+=== run 1: real tree ===
+OK   schema declares 8 trigger constant(s); suite references 8
+OK   no hardcoded schema version literal in androidTest
+OK   no restated trigger/column name literals in androidTest
+OK   EXPECTED_TRIGGERS is derived from expectedTriggers()
+OK   the fail-closed case uses the derived unregistered pair
+VERDICT: PASS
+EXITCODE=0
+
+=== run 2: self-test (every detection branch must be able to fail) ===
+CASE baseline (unmodified tree) must PASS                 expected=0 actual=0  Ok
+CASE hardcoded user_version literal must FAIL             expected=1 actual=1  Ok
+CASE restated trigger name literal must FAIL              expected=1 actual=1  Ok
+CASE restated quote column literal must FAIL              expected=1 actual=1  Ok
+CASE unreferenced schema trigger constant must FAIL       expected=1 actual=1  Ok
+CASE inline EXPECTED_TRIGGERS literal must FAIL           expected=1 actual=1  Ok
+CASE hardcoded migration pair must FAIL                   expected=1 actual=1  Ok
+CASE missing androidTest tree must be INCONCLUSIVE        expected=2 actual=2  Ok
+OVERALL PASS (8 case(s), 0 broken)
+EXITCODE=0
+
+=== run 3: RED - the checker against the PRE-FIX suite (git HEAD version) ===
+# Why: the checker must be shown rejecting the exact defect it was written to prevent, not
+#   merely passing on the fixed tree. This is the fix round's RED.
+# pre-fix suite SHA-256 = CA598321498DE6A81E751E17B05788D309131344EE6CF98E5174635839AD6A1A
+# command: python -X utf8 .trae/scripts/dev/check_androidtest_schema_expectations.py --root artifacts/evidence/_t037-red-tree
+
+OK   schema declares 8 trigger constant(s); suite references 0
+VERDICT: FAIL (14 problem(s))
+  - artifacts\evidence\_t037-red-tree\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java: a PRAGMA user_version expectation does not name a constant (context: ...(db)); assertEquals("DDL is bound to the current schema version", 1, TreeLearnSchema.DATAB)
+  - artifacts\evidence\_t037-red-tree\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java: a PRAGMA user_version expectation does not name a constant (context: ...pics")); assertEquals("tree survives the reopen", 1, rowCount(reopened, "branches")); asse)
+  - artifacts\evidence\_t037-red-tree\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java: a PRAGMA user_version expectation does not name a constant (context: ...QLiteDatabase db, String topicId) { insertTopic(db, topicId); db.execSQL("INSERT INTO bran)
+  - artifacts\evidence\_t037-red-tree\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java restates a trigger name as a literal: "trg_answer_revisions_immutable"
+  - artifacts\evidence\_t037-red-tree\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java restates a trigger name as a literal: "trg_answer_revisions_no_direct_delete"
+  - artifacts\evidence\_t037-red-tree\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java restates a trigger name as a literal: "trg_context_snapshots_immutable"
+  - artifacts\evidence\_t037-red-tree\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java restates a trigger name as a literal: "trg_context_snapshots_no_direct_delete"
+  - artifacts\evidence\_t037-red-tree\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java restates a trigger name as a literal: "trg_generation_operations_terminal_immutable"
+  - artifacts\evidence\_t037-red-tree\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java restates a trigger name as a literal: "trg_messages_user_content_immutable"
+  - artifacts\evidence\_t037-red-tree\android\app\src\androidTest\java\com\treelearn\app\SqliteSchemaInstrumentedTest.java does not reference every declared trigger constant; missing: TRIGGER_MESSAGES_QUOTE_INSERT, TRIGGER_MESSAGES_QUOTE_UPDATE, TRIGGER_MESSAGES_USER_CONTENT_IMMUTABLE, TRIGGER_OPERATIONS_TERMINAL_IMMUTABLE, TRIGGER_REVISIONS_IMMUTABLE, TRIGGER_REVISIONS_NO_DIRECT_DELETE, TRIGGER_SNAPSHOTS_IMMUTABLE, TRIGGER_SNAPSHOTS_NO_DIRECT_DELETE
+  - EXPECTED_TRIGGERS is not initialised from expectedTriggers()
+  - the suite does not reference TreeLearnSchema.Messages.QUOTED_TEXT
+  - applyForwardMigrations is called with a hardcoded literal version pair
+  - the fail-closed case is not bound to the derived unregistered pair (DATABASE_VERSION + 1)
+EXITCODE=1
+
+=== run 4: fix-round re-confirmation on the current tree ===
+# captured-at: 2026-09-22T00:07:07.8279839+08:00
+# cwd: D:\Project\Android\Treelearn
+# command: python -X utf8 .trae/scripts/dev/check_androidtest_schema_expectations.py
+# checked script SHA-256 = E05789F42CC85234BFACFB27E0593A85B49148F48DA45F1000662967047D16DD
+# Why: runs 1-3 were captured before the task-file/AGENTS.md edits of this fix round; this
+#      re-confirms the guarded property on the tree as it stands now.
+OK   schema declares 8 trigger constant(s); suite references 8
+OK   no hardcoded schema version literal in androidTest
+OK   no restated trigger/column name literals in androidTest
+OK   EXPECTED_TRIGGERS is derived from expectedTriggers()
+OK   the fail-closed case uses the derived unregistered pair
+VERDICT: PASS
+EXITCODE=0
+
+=== run 5: self-test re-confirmation ===
+# captured-at: 2026-09-22T00:07:07.9169306+08:00
+# command: python -X utf8 .trae/scripts/dev/check_androidtest_schema_expectations.py --selftest
+CASE baseline (unmodified tree) must PASS                 expected=0 actual=0  Ok
+CASE hardcoded user_version literal must FAIL             expected=1 actual=1  Ok
+CASE restated trigger name literal must FAIL              expected=1 actual=1  Ok
+CASE restated quote column literal must FAIL              expected=1 actual=1  Ok
+CASE unreferenced schema trigger constant must FAIL       expected=1 actual=1  Ok
+CASE inline EXPECTED_TRIGGERS literal must FAIL           expected=1 actual=1  Ok
+CASE hardcoded migration pair must FAIL                   expected=1 actual=1  Ok
+CASE missing androidTest tree must be INCONCLUSIVE        expected=2 actual=2  Ok
+OVERALL PASS (8 case(s), 0 broken)
+EXITCODE=0

@@ -1,0 +1,318 @@
+# T-037 supplementary: the SHIPPED DDL executed on a real desktop SQLite engine.
+# NOT device evidence. Device evidence for the same facts is recorded as:
+#   blocked - 缺少设备（用户 2026-09-21 指令：放弃 emulator/真机，改由用户安装 APK 实测）
+# Desktop SQLite only supplements the real engine; it never substitutes for API 28+ Android
+# SQLite under rules/sql.md, and this file is never reported as PASS for that requirement.
+# captured-at: 2026-09-21T23:44:12.5831916+08:00
+# cwd        : D:\Project\Android\Treelearn
+# why        : ALTER TABLE ADD COLUMN cannot carry a CHECK, so the quote invariant is a trigger
+#              and its DDL text has to be executed by a real engine to show it really refuses.
+#              The DDL is dumped from the COMPILED constants of this working tree, never copied
+#              by hand, so what the engine ran is the shipped text.
+
+# --- step 1: compile the dumper against the compiled :data classes + android.jar ---
+# command: & "D:\Environment\Jdk\jdk21\bin\javac.exe" -cp "D:\Project\Android\Treelearn\android\data\build\intermediates\javac\debug\compileDebugJavaWithJavac\classes;D:\Environment\Android\SDK\platforms\android-36\android.jar" -d "C:\Users\23745\AppData\Local\Temp\t037-sqlite-probe" "C:\Users\23745\AppData\Local\Temp\t037-sqlite-probe\DumpSchema.java"
+STEP1_EXITCODE=0
+
+# --- step 2: dump the shipped DDL text (this writes ddl-dump.txt) ---
+# command: & "D:\Environment\Jdk\jdk21\bin\java.exe" -cp "C:\Users\23745\AppData\Local\Temp\t037-sqlite-probe;D:\Project\Android\Treelearn\android\data\build\intermediates\javac\debug\compileDebugJavaWithJavac\classes;D:\Environment\Android\SDK\platforms\android-36\android.jar" DumpSchema > ddl-dump.txt
+STEP2_EXITCODE=0
+ddl sha256: 8ec9a81c3943f43a99f45dc5674d9decaf7aa6790bd212e598622fbe8bccb8a0
+
+# --- step 3: the recorded run (both install paths, real SQLite, PRAGMA foreign_keys=ON) ---
+# command: python -X utf8 "C:\Users\23745\AppData\Local\Temp\t037-sqlite-probe\probe.py"
+DDL source  : C:\Users\23745\AppData\Local\Temp\t037-sqlite-probe\ddl-dump.txt
+DDL sha256  : 8ec9a81c3943f43a99f45dc5674d9decaf7aa6790bd212e598622fbe8bccb8a0
+SQLite      : 3.50.4
+DATABASE_VERSION=2  QUOTED_TEXT=quoted_text  DECLARATION=quoted_text TEXT
+
+upgraded before migration, messages columns: ['id', 'branch_id', 'ordinal', 'role', 'user_content', 'created_at', 'active_revision_id', 'active_operation_id']
+fresh    messages columns: ['id', 'branch_id', 'ordinal', 'role', 'user_content', 'created_at', 'active_revision_id', 'active_operation_id', 'quoted_text']
+upgraded messages columns: ['id', 'branch_id', 'ordinal', 'role', 'user_content', 'created_at', 'active_revision_id', 'active_operation_id', 'quoted_text']
+column shapes identical  : True
+
+fresh install (onCreate):
+  C1-user-with-quote         accepted   
+  C2-user-null-quote         accepted   
+  C3-user-empty-quote        refused    1811
+  C4-ai-with-quote           refused    1811
+  C5-ai-null-quote           accepted   
+  C6-update-ai-sets-quote    refused    1811
+  C7-readback-user-quote     the quoted sentence 
+  C8-readback-null           None       
+
+upgraded install (onUpgrade -> V1->V2):
+  C1-user-with-quote         accepted   
+  C2-user-null-quote         accepted   
+  C3-user-empty-quote        refused    1811
+  C4-ai-with-quote           refused    1811
+  C5-ai-null-quote           accepted   
+  C6-update-ai-sets-quote    refused    1811
+  C7-readback-user-quote     the quoted sentence 
+  C8-readback-null           None       
+
+OK: no device evidence is claimed here; this is a desktop-SQLite supplement only.
+SUPPLEMENT PASS: both install paths accept and refuse the same inputs, and every refusal carries extended code 1811 (SQLITE_CONSTRAINT_TRIGGER).
+EXITCODE=0
+
+# ---------------------------------------------------------------------------
+# Appendix: the exact DDL text step 2 dumped and the probe executed (verbatim).
+# The two quote triggers below are the same strings a fresh install executes
+# (CREATE_TRIGGER_STATEMENTS) and the same strings the migration executes
+# (MIGRATION_V1_TO_V2_STATEMENTS): one rule text, wrapped once per write event.
+# ---------------------------------------------------------------------------
+@@SCALAR@@DATABASE_VERSION@@2
+@@SCALAR@@QUOTED_TEXT@@quoted_text
+@@SCALAR@@QUOTED_TEXT_DECLARATION@@quoted_text TEXT
+@@STMT@@CREATE_TABLE_STATEMENTS@@CREATE TABLE topics (id TEXT NOT NULL PRIMARY KEY, last_visited_branch_id TEXT REFERENCES branches(id) ON DELETE SET NULL, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)
+@@STMT@@CREATE_TABLE_STATEMENTS@@CREATE TABLE branches (id TEXT NOT NULL PRIMARY KEY, topic_id TEXT NOT NULL REFERENCES topics(id) ON DELETE CASCADE, parent_id TEXT REFERENCES branches(id) ON DELETE CASCADE, title TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, archived_at INTEGER, collapsed INTEGER NOT NULL DEFAULT 0 CHECK (collapsed IN (0,1)), latest_stable_sequence INTEGER NOT NULL DEFAULT 0 CHECK (latest_stable_sequence >= 0), last_seen_stable_sequence INTEGER NOT NULL DEFAULT 0 CHECK (last_seen_stable_sequence >= 0 AND last_seen_stable_sequence <= latest_stable_sequence), reading_anchor_message_id TEXT REFERENCES messages(id) ON DELETE SET NULL, reading_anchor_revision_id TEXT REFERENCES answer_revisions(id) ON DELETE SET NULL, reading_list_item_offset INTEGER, reading_viewport_offset INTEGER, source_message_id TEXT REFERENCES messages(id) ON DELETE CASCADE, source_revision_id TEXT REFERENCES answer_revisions(id) ON DELETE CASCADE, anchor_start_inclusive INTEGER, anchor_end_exclusive INTEGER, anchor_quote TEXT, anchor_hash TEXT, context_snapshot_id TEXT REFERENCES context_snapshots(id) ON DELETE CASCADE, CHECK (parent_id IS NOT NULL OR (source_message_id IS NULL AND source_revision_id IS NULL AND anchor_start_inclusive IS NULL AND anchor_end_exclusive IS NULL AND anchor_quote IS NULL AND anchor_hash IS NULL AND context_snapshot_id IS NULL)), CHECK (parent_id IS NULL OR (source_message_id IS NOT NULL AND source_revision_id IS NOT NULL)), CHECK ((anchor_start_inclusive IS NULL AND anchor_end_exclusive IS NULL AND anchor_quote IS NULL AND anchor_hash IS NULL) OR (anchor_start_inclusive IS NOT NULL AND anchor_end_exclusive IS NOT NULL AND anchor_quote IS NOT NULL AND anchor_hash IS NOT NULL AND anchor_start_inclusive < anchor_end_exclusive)))
+@@STMT@@CREATE_TABLE_STATEMENTS@@CREATE TABLE messages (id TEXT NOT NULL PRIMARY KEY, branch_id TEXT NOT NULL REFERENCES branches(id) ON DELETE CASCADE, ordinal INTEGER NOT NULL CHECK (ordinal >= 0), role TEXT NOT NULL CHECK (role IN ('USER','AI')), user_content TEXT, created_at INTEGER NOT NULL, active_revision_id TEXT REFERENCES answer_revisions(id) ON DELETE SET NULL, active_operation_id TEXT REFERENCES generation_operations(id) ON DELETE SET NULL, quoted_text TEXT, CHECK (role = 'AI' OR (user_content IS NOT NULL AND length(user_content) > 0)), CHECK (role = 'USER' OR user_content IS NULL))
+@@STMT@@CREATE_TABLE_STATEMENTS@@CREATE TABLE answer_revisions (id TEXT NOT NULL PRIMARY KEY, message_id TEXT NOT NULL REFERENCES messages(id) ON DELETE CASCADE, revision_no INTEGER NOT NULL CHECK (revision_no > 0), reasoning_content TEXT NOT NULL DEFAULT '', answer_content TEXT NOT NULL CHECK (length(answer_content) > 0), model TEXT NOT NULL, thinking_enabled INTEGER NOT NULL CHECK (thinking_enabled IN (0,1)), prompt_policy_version TEXT NOT NULL, created_at INTEGER NOT NULL)
+@@STMT@@CREATE_TABLE_STATEMENTS@@CREATE TABLE generation_operations (id TEXT NOT NULL PRIMARY KEY, branch_id TEXT NOT NULL REFERENCES branches(id) ON DELETE CASCADE, message_id TEXT NOT NULL REFERENCES messages(id) ON DELETE CASCADE, command_id TEXT NOT NULL, prompt_purpose TEXT NOT NULL, model TEXT NOT NULL, thinking_enabled INTEGER NOT NULL CHECK (thinking_enabled IN (0,1)), prompt_policy_version TEXT NOT NULL, state TEXT NOT NULL CHECK (state IN ('STAGED','VALIDATING','SUBMITTING','STREAMING_REASONING','STREAMING_ANSWER','STABLE','FAILED','INTERRUPTED','CANCELED')), partial_reasoning TEXT NOT NULL DEFAULT '', partial_answer TEXT NOT NULL DEFAULT '', error_code TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)
+@@STMT@@CREATE_TABLE_STATEMENTS@@CREATE TABLE context_snapshots (id TEXT NOT NULL PRIMARY KEY, branch_id TEXT NOT NULL REFERENCES branches(id) ON DELETE CASCADE, schema_version INTEGER NOT NULL CHECK (schema_version > 0), digest TEXT NOT NULL, payload TEXT NOT NULL, created_at INTEGER NOT NULL)
+@@STMT@@CREATE_TABLE_STATEMENTS@@CREATE TABLE ai_artifacts (id TEXT NOT NULL PRIMARY KEY, kind TEXT NOT NULL, scope_id TEXT NOT NULL, prompt_purpose TEXT NOT NULL, prompt_policy_version TEXT NOT NULL, payload TEXT NOT NULL, based_on_revision_id TEXT REFERENCES answer_revisions(id) ON DELETE SET NULL, input_digest TEXT NOT NULL, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)
+@@END@@CREATE_TABLE_STATEMENTS
+@@STMT@@CREATE_INDEX_STATEMENTS@@CREATE INDEX idx_branches_topic_parent ON branches(topic_id, parent_id)
+@@STMT@@CREATE_INDEX_STATEMENTS@@CREATE INDEX idx_branches_source_revision ON branches(source_revision_id)
+@@STMT@@CREATE_INDEX_STATEMENTS@@CREATE INDEX idx_branches_archived ON branches(archived_at)
+@@STMT@@CREATE_INDEX_STATEMENTS@@CREATE UNIQUE INDEX uq_branches_root ON branches(topic_id) WHERE parent_id IS NULL
+@@STMT@@CREATE_INDEX_STATEMENTS@@CREATE UNIQUE INDEX uq_messages_branch_ordinal ON messages(branch_id, ordinal)
+@@STMT@@CREATE_INDEX_STATEMENTS@@CREATE UNIQUE INDEX uq_answer_revisions_message_no ON answer_revisions(message_id, revision_no)
+@@STMT@@CREATE_INDEX_STATEMENTS@@CREATE UNIQUE INDEX uq_context_snapshots_branch ON context_snapshots(branch_id)
+@@STMT@@CREATE_INDEX_STATEMENTS@@CREATE INDEX idx_ai_artifacts_kind_scope ON ai_artifacts(kind, scope_id)
+@@STMT@@CREATE_INDEX_STATEMENTS@@CREATE UNIQUE INDEX uq_generation_operations_active ON generation_operations(branch_id) WHERE state IN ('STAGED','VALIDATING','SUBMITTING','STREAMING_REASONING','STREAMING_ANSWER')
+@@END@@CREATE_INDEX_STATEMENTS
+@@STMT@@CREATE_TRIGGER_STATEMENTS@@CREATE TRIGGER trg_answer_revisions_immutable BEFORE UPDATE ON answer_revisions BEGIN SELECT RAISE(ABORT, 'answer_revisions rows are immutable'); END
+@@STMT@@CREATE_TRIGGER_STATEMENTS@@CREATE TRIGGER trg_answer_revisions_no_direct_delete BEFORE DELETE ON answer_revisions WHEN EXISTS (SELECT 1 FROM messages WHERE id = OLD.message_id) BEGIN SELECT RAISE(ABORT, 'a stable revision is deleted only together with its message, never on its own'); END
+@@STMT@@CREATE_TRIGGER_STATEMENTS@@CREATE TRIGGER trg_context_snapshots_immutable BEFORE UPDATE ON context_snapshots BEGIN SELECT RAISE(ABORT, 'context_snapshots rows are immutable'); END
+@@STMT@@CREATE_TRIGGER_STATEMENTS@@CREATE TRIGGER trg_context_snapshots_no_direct_delete BEFORE DELETE ON context_snapshots WHEN EXISTS (SELECT 1 FROM branches WHERE id = OLD.branch_id) BEGIN SELECT RAISE(ABORT, 'a birth snapshot is deleted only together with its branch, never on its own'); END
+@@STMT@@CREATE_TRIGGER_STATEMENTS@@CREATE TRIGGER trg_generation_operations_terminal_immutable BEFORE UPDATE ON generation_operations WHEN OLD.state IN ('STABLE','FAILED','INTERRUPTED','CANCELED') BEGIN SELECT RAISE(ABORT, 'a terminal generation operation is final'); END
+@@STMT@@CREATE_TRIGGER_STATEMENTS@@CREATE TRIGGER trg_messages_user_content_immutable BEFORE UPDATE OF user_content ON messages WHEN OLD.role = 'USER' AND NEW.user_content IS NOT OLD.user_content BEGIN SELECT RAISE(ABORT, 'user message content is immutable'); END
+@@STMT@@CREATE_TRIGGER_STATEMENTS@@CREATE TRIGGER trg_messages_quote_requires_user_row BEFORE INSERT ON messages WHEN NEW.quoted_text IS NOT NULL AND (NEW.role <> 'USER' OR length(NEW.quoted_text) = 0) BEGIN SELECT RAISE(ABORT, 'a quote may only be carried by a non-empty USER message'); END
+@@STMT@@CREATE_TRIGGER_STATEMENTS@@CREATE TRIGGER trg_messages_quote_requires_user_row_on_update BEFORE UPDATE ON messages WHEN NEW.quoted_text IS NOT NULL AND (NEW.role <> 'USER' OR length(NEW.quoted_text) = 0) BEGIN SELECT RAISE(ABORT, 'a quote may only be carried by a non-empty USER message'); END
+@@END@@CREATE_TRIGGER_STATEMENTS
+@@STMT@@MESSAGES_QUOTE_INVARIANT_STATEMENTS@@CREATE TRIGGER trg_messages_quote_requires_user_row BEFORE INSERT ON messages WHEN NEW.quoted_text IS NOT NULL AND (NEW.role <> 'USER' OR length(NEW.quoted_text) = 0) BEGIN SELECT RAISE(ABORT, 'a quote may only be carried by a non-empty USER message'); END
+@@STMT@@MESSAGES_QUOTE_INVARIANT_STATEMENTS@@CREATE TRIGGER trg_messages_quote_requires_user_row_on_update BEFORE UPDATE ON messages WHEN NEW.quoted_text IS NOT NULL AND (NEW.role <> 'USER' OR length(NEW.quoted_text) = 0) BEGIN SELECT RAISE(ABORT, 'a quote may only be carried by a non-empty USER message'); END
+@@END@@MESSAGES_QUOTE_INVARIANT_STATEMENTS
+@@STMT@@MIGRATION_V1_TO_V2_STATEMENTS@@ALTER TABLE messages ADD COLUMN quoted_text TEXT
+@@STMT@@MIGRATION_V1_TO_V2_STATEMENTS@@CREATE TRIGGER trg_messages_quote_requires_user_row BEFORE INSERT ON messages WHEN NEW.quoted_text IS NOT NULL AND (NEW.role <> 'USER' OR length(NEW.quoted_text) = 0) BEGIN SELECT RAISE(ABORT, 'a quote may only be carried by a non-empty USER message'); END
+@@STMT@@MIGRATION_V1_TO_V2_STATEMENTS@@CREATE TRIGGER trg_messages_quote_requires_user_row_on_update BEFORE UPDATE ON messages WHEN NEW.quoted_text IS NOT NULL AND (NEW.role <> 'USER' OR length(NEW.quoted_text) = 0) BEGIN SELECT RAISE(ABORT, 'a quote may only be carried by a non-empty USER message'); END
+@@END@@MIGRATION_V1_TO_V2_STATEMENTS
+
+# ---------------------------------------------------------------------------
+# Appendix 2: the probe sources, so this supplement stays reproducible after the
+# session temp directory is gone. Recreate the directory, write these two files,
+# then run step 1 / step 2 / step 3 from the header above.
+#   DumpSchema.java  - compiled against android/data/build/.../classes + android.jar;
+#                      reads the public constants and prints the DDL text verbatim.
+#   probe.py         - builds both install paths with that text and drives the inputs.
+# ---------------------------------------------------------------------------
+# ----- BEGIN DumpSchema.java -----
+import java.lang.reflect.Field;
+import java.util.List;
+
+/** Temporary probe: prints the real DDL strings the production schema builds, so the desktop
+ *  SQLite supplement executes the shipped text instead of a hand-copied second edition. */
+public final class DumpSchema {
+
+    public static void main(String[] args) throws Exception {
+        Class<?> schema = Class.forName("com.treelearn.data.db.TreeLearnSchema");
+        Class<?> messages = Class.forName("com.treelearn.data.db.TreeLearnSchema$Messages");
+        scalar("DATABASE_VERSION", schema.getField("DATABASE_VERSION").get(null));
+        scalar("QUOTED_TEXT", messages.getField("QUOTED_TEXT").get(null));
+        scalar("QUOTED_TEXT_DECLARATION", messages.getField("QUOTED_TEXT_DECLARATION").get(null));
+        list("CREATE_TABLE_STATEMENTS", schema.getField("CREATE_TABLE_STATEMENTS"));
+        list("CREATE_INDEX_STATEMENTS", schema.getField("CREATE_INDEX_STATEMENTS"));
+        list("CREATE_TRIGGER_STATEMENTS", schema.getField("CREATE_TRIGGER_STATEMENTS"));
+        list("MESSAGES_QUOTE_INVARIANT_STATEMENTS",
+                schema.getField("MESSAGES_QUOTE_INVARIANT_STATEMENTS"));
+        list("MIGRATION_V1_TO_V2_STATEMENTS",
+                schema.getField("MIGRATION_V1_TO_V2_STATEMENTS"));
+    }
+
+    private static void scalar(String name, Object value) {
+        System.out.println("@@SCALAR@@" + name + "@@" + value);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void list(String name, Field field) throws Exception {
+        for (String statement : (List<String>) field.get(null)) {
+            System.out.println("@@STMT@@" + name + "@@" + statement);
+        }
+        System.out.println("@@END@@" + name);
+    }
+}
+# ----- END DumpSchema.java -----
+# ----- BEGIN probe.py -----
+"""T-037 supplementary probe (NOT device evidence).
+
+Executes the DDL text the production schema builds (dumped from the compiled
+com.treelearn.data.db.TreeLearnSchema constants by DumpSchema.java, so this is the shipped
+text and not a hand-copied second edition) on a real SQLite engine, on BOTH install paths:
+
+  fresh   : CREATE_TABLE + CREATE_INDEX + CREATE_TRIGGER              (onCreate)
+  upgraded: V1 shape + MIGRATION_V1_TO_V2_STATEMENTS                  (onUpgrade)
+
+and compares the two paths input by input.
+
+Desktop SQLite is a supplement, never a substitute for API 28+ Android SQLite (rules/sql.md);
+it is recorded as such. The device rounds were abandoned by the user on 2026-09-21.
+"""
+import hashlib
+import os
+import sqlite3
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+DUMP = os.path.join(HERE, "ddl-dump.txt")
+
+SECTIONS = ("CREATE_TABLE_STATEMENTS", "CREATE_INDEX_STATEMENTS", "CREATE_TRIGGER_STATEMENTS",
+            "MESSAGES_QUOTE_INVARIANT_STATEMENTS", "MIGRATION_V1_TO_V2_STATEMENTS")
+
+
+def load(path):
+    scalars, statements = {}, {name: [] for name in SECTIONS}
+    with open(path, "r", encoding="utf-8") as handle:
+        for raw in handle:
+            line = raw.rstrip("\n")
+            if line.startswith("@@SCALAR@@"):
+                name, value = line[len("@@SCALAR@@"):].split("@@", 1)
+                scalars[name] = value
+            elif line.startswith("@@STMT@@"):
+                name, value = line[len("@@STMT@@"):].split("@@", 1)
+                statements[name].append(value)
+    return scalars, statements
+
+
+def v1_shape(statements, declaration):
+    """The V1 database: the same DDL minus the V2 column and minus the V2 triggers.
+
+    Derived mechanically from the shipped text so V1 differs from V2 in exactly one column.
+    """
+    drop = ", " + declaration
+    tables = []
+    for statement in statements["CREATE_TABLE_STATEMENTS"]:
+        if statement.startswith("CREATE TABLE messages "):
+            assert statement.count(drop) == 1, "expected exactly one declaration to remove"
+            statement = statement.replace(drop, "")
+        tables.append(statement)
+    invariant = set(statements["MESSAGES_QUOTE_INVARIANT_STATEMENTS"])
+    triggers = [s for s in statements["CREATE_TRIGGER_STATEMENTS"] if s not in invariant]
+    return tables, statements["CREATE_INDEX_STATEMENTS"], triggers
+
+
+def build(stmts):
+    conn = sqlite3.connect(":memory:")
+    conn.execute("PRAGMA foreign_keys=ON")
+    for statement in stmts:
+        conn.execute(statement)
+    return conn
+
+
+def columns(conn, table):
+    return [row[1] for row in conn.execute("PRAGMA table_info(" + table + ")")]
+
+
+def scenario(conn):
+    """Every input is a state the domain layer can ask the store to hold. Each probe violates at
+    most one rule."""
+    results = []
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO topics (id, created_at, updated_at) VALUES ('topic-1', 1, 1)")
+    cursor.execute("INSERT INTO branches (id, topic_id, created_at, updated_at) VALUES"
+                   " ('branch-1', 'topic-1', 1, 1)")
+
+    def insert(case, ordinal, role, content, quoted):
+        try:
+            cursor.execute("INSERT INTO messages (id, branch_id, ordinal, role, user_content,"
+                           " created_at, quoted_text) VALUES (?, 'branch-1', ?, ?, ?, 1, ?)",
+                           ("m-" + case, ordinal, role, content, quoted))
+            return {"case": case, "outcome": "accepted", "code": None}
+        except sqlite3.IntegrityError as exc:
+            return {"case": case, "outcome": "refused",
+                    "code": getattr(exc, "sqlite_errorcode", None)}
+
+    results.append(insert("C1-user-with-quote", 0, "USER", "q1", "the quoted sentence"))
+    results.append(insert("C2-user-null-quote", 1, "USER", "q2", None))
+    results.append(insert("C3-user-empty-quote", 2, "USER", "q3", ""))
+    results.append(insert("C4-ai-with-quote", 3, "AI", None, "the quoted sentence"))
+    results.append(insert("C5-ai-null-quote", 4, "AI", None, None))
+
+    # C6 drives the UPDATE half: the invariant has to hold on both write events.
+    try:
+        cursor.execute("UPDATE messages SET quoted_text='x' WHERE id='m-C5-ai-null-quote'")
+        results.append({"case": "C6-update-ai-sets-quote", "outcome": "accepted", "code": None})
+    except sqlite3.IntegrityError as exc:
+        results.append({"case": "C6-update-ai-sets-quote", "outcome": "refused",
+                        "code": getattr(exc, "sqlite_errorcode", None)})
+
+    # Read-back: what the DAO would see through the cursor.
+    read = cursor.execute("SELECT quoted_text FROM messages WHERE id='m-C1-user-with-quote'") \
+        .fetchone()[0]
+    results.append({"case": "C7-readback-user-quote", "outcome": read, "code": None})
+    read = cursor.execute("SELECT quoted_text FROM messages WHERE id='m-C2-user-null-quote'") \
+        .fetchone()[0]
+    results.append({"case": "C8-readback-null", "outcome": read, "code": None})
+    return results
+
+
+def render(rows):
+    return ["  %-26s %-10s %s" % (r["case"], r["outcome"],
+                                  "" if r["code"] is None else str(r["code"])) for r in rows]
+
+
+def main():
+    scalars, statements = load(DUMP)
+    declaration = scalars["QUOTED_TEXT_DECLARATION"]
+    print("DDL source  : %s" % DUMP)
+    print("DDL sha256  : %s" % hashlib.sha256(open(DUMP, "rb").read()).hexdigest())
+    print("SQLite      : %s" % sqlite3.sqlite_version)
+    print("DATABASE_VERSION=%s  QUOTED_TEXT=%s  DECLARATION=%s"
+          % (scalars["DATABASE_VERSION"], scalars["QUOTED_TEXT"], declaration))
+
+    fresh = build(statements["CREATE_TABLE_STATEMENTS"]
+                  + statements["CREATE_INDEX_STATEMENTS"]
+                  + statements["CREATE_TRIGGER_STATEMENTS"])
+
+    v1_tables, v1_indexes, v1_triggers = v1_shape(statements, declaration)
+    upgraded = build(v1_tables + v1_indexes + v1_triggers)
+    print("\nupgraded before migration, messages columns: %s" % columns(upgraded, "messages"))
+    assert scalars["QUOTED_TEXT"] not in columns(upgraded, "messages"), "V1 must not have the column"
+    for statement in statements["MIGRATION_V1_TO_V2_STATEMENTS"]:
+        upgraded.execute(statement)
+
+    fresh_columns = columns(fresh, "messages")
+    upgraded_columns = columns(upgraded, "messages")
+    print("fresh    messages columns: %s" % fresh_columns)
+    print("upgraded messages columns: %s" % upgraded_columns)
+    print("column shapes identical  : %s" % (fresh_columns == upgraded_columns))
+
+    print("\nfresh install (onCreate):")
+    fresh_rows = scenario(fresh)
+    print("\n".join(render(fresh_rows)))
+    print("\nupgraded install (onUpgrade -> V1->V2):")
+    upgraded_rows = scenario(upgraded)
+    print("\n".join(render(upgraded_rows)))
+
+    print("\nOK: no device evidence is claimed here; this is a desktop-SQLite supplement only.")
+    failures = []
+    if fresh_columns != upgraded_columns:
+        failures.append("column shapes differ")
+    if fresh_rows != upgraded_rows:
+        failures.append("the two install paths disagree on an input")
+    for row in fresh_rows:
+        if row["case"].startswith(("C3", "C4", "C6")) and row["code"] != 1811:
+            failures.append("%s expected extended code 1811, got %s" % (row["case"], row["code"]))
+    if [r for r in fresh_rows if r["case"] == "C8-readback-null"][0]["outcome"] is not None:
+        failures.append("a NULL quote must read back as SQL NULL to the DAO")
+    if failures:
+        print("\nSUPPLEMENT FAIL: " + "; ".join(failures))
+        return 1
+    print("SUPPLEMENT PASS: both install paths accept and refuse the same inputs, and every"
+          " refusal carries extended code 1811 (SQLITE_CONSTRAINT_TRIGGER).")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+# ----- END probe.py -----

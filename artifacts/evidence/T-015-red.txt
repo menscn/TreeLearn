@@ -1,0 +1,2540 @@
+# T-015 RED — first run of the acceptance command
+CapturedAt=2026-09-21T22:07:53.3708201+08:00
+Command: cd android; .\gradlew.bat :core:test :data:testDebugUnitTest :app:testDebugUnitTest :app:assembleDebugAndroidTest --no-daemon --console=plain --continue
+Mode: shared tree (sibling lanes' in-flight work is visible; failures in files this task did not author are called out separately)
+--- output ---
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+
+> Task :core:compileTestJava FAILED
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:116: 错误: 找不到符号
+    private static List<SearchHit.Field> fields(List<SearchHit> hits) {
+                                                     ^
+  符号:   类 SearchHit
+  位置: 类 SearchHitTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:116: 错误: 程序包SearchHit不存在
+    private static List<SearchHit.Field> fields(List<SearchHit> hits) {
+                                 ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:124: 错误: 找不到符号
+    private static SearchHit title(String topicId, String branchId) {
+                   ^
+  符号:   类 SearchHit
+  位置: 类 SearchHitTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:128: 错误: 找不到符号
+    private static SearchHit answer(String topicId, String branchId, String messageId, int ordinal,
+                   ^
+  符号:   类 SearchHit
+  位置: 类 SearchHitTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:134: 错误: 找不到符号
+    private static SearchHit reasoning(String topicId, String branchId, String messageId, int ordinal,
+                   ^
+  符号:   类 SearchHit
+  位置: 类 SearchHitTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:39: 错误: 找不到符号
+        ReadingAnchor anchor = ReadingAnchor.of(messages.get(1).id, null, 12, 30);
+        ^
+  符号:   类 ReadingAnchor
+  位置: 类 ReadingAnchorTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:39: 错误: 找不到符号
+        ReadingAnchor anchor = ReadingAnchor.of(messages.get(1).id, null, 12, 30);
+                               ^
+  符号:   变量 ReadingAnchor
+  位置: 类 ReadingAnchorTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:41: 错误: 找不到符号
+        ReadingPosition position = anchor.resolve(messages, 100);
+        ^
+  符号:   类 ReadingPosition
+  位置: 类 ReadingAnchorTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:55: 错误: 找不到符号
+        ReadingAnchor anchor = ReadingAnchor.of(messages.get(2).id, null, 400, -7);
+        ^
+  符号:   类 ReadingAnchor
+  位置: 类 ReadingAnchorTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:55: 错误: 找不到符号
+        ReadingAnchor anchor = ReadingAnchor.of(messages.get(2).id, null, 400, -7);
+                               ^
+  符号:   变量 ReadingAnchor
+  位置: 类 ReadingAnchorTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:57: 错误: 找不到符号
+        ReadingPosition position = anchor.resolve(messages, 100);
+        ^
+  符号:   类 ReadingPosition
+  位置: 类 ReadingAnchorTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:67: 错误: 找不到符号
+        ReadingAnchor dangling = ReadingAnchor.of(Guard.newId(), REVISION, 40, 80);
+        ^
+  符号:   类 ReadingAnchor
+  位置: 类 ReadingAnchorTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:67: 错误: 找不到符号
+        ReadingAnchor dangling = ReadingAnchor.of(Guard.newId(), REVISION, 40, 80);
+                                 ^
+  符号:   变量 ReadingAnchor
+  位置: 类 ReadingAnchorTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:69: 错误: 找不到符号
+        ReadingPosition position = dangling.resolve(messages, 100);
+        ^
+  符号:   类 ReadingPosition
+  位置: 类 ReadingAnchorTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:82: 错误: 找不到符号
+        ReadingPosition position = ReadingAnchor.of(Guard.newId(), null, 0, 0)
+        ^
+  符号:   类 ReadingPosition
+  位置: 类 ReadingAnchorTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:82: 错误: 找不到符号
+        ReadingPosition position = ReadingAnchor.of(Guard.newId(), null, 0, 0)
+                                   ^
+  符号:   变量 ReadingAnchor
+  位置: 类 ReadingAnchorTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:95: 错误: 找不到符号
+        ReadingAnchor pinned = ReadingAnchor.of(messages.get(1).id, REVISION, 5, 5);
+        ^
+  符号:   类 ReadingAnchor
+  位置: 类 ReadingAnchorTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:95: 错误: 找不到符号
+        ReadingAnchor pinned = ReadingAnchor.of(messages.get(1).id, REVISION, 5, 5);
+                               ^
+  符号:   变量 ReadingAnchor
+  位置: 类 ReadingAnchorTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:97: 错误: 找不到符号
+        ReadingAnchor rebased = pinned.rebasedOn(messages.get(1).activeRevisionId());
+        ^
+  符号:   类 ReadingAnchor
+  位置: 类 ReadingAnchorTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:105: 错误: 找不到符号
+        assertSame(pinned, ReadingAnchor.of(messages.get(1).id, REVISION_2, 5, 5).rebasedOn(REVISION_2));
+                           ^
+  符号:   变量 ReadingAnchor
+  位置: 类 ReadingAnchorTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:110: 错误: 找不到符号
+        ReadingAnchor unbound = ReadingAnchor.atMessage(Guard.newId(), null);
+        ^
+  符号:   类 ReadingAnchor
+  位置: 类 ReadingAnchorTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:110: 错误: 找不到符号
+        ReadingAnchor unbound = ReadingAnchor.atMessage(Guard.newId(), null);
+                                ^
+  符号:   变量 ReadingAnchor
+  位置: 类 ReadingAnchorTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:120: 错误: 找不到符号
+                () -> ReadingAnchor.of("not-a-uuid", null, 0, 0));
+                      ^
+  符号:   变量 ReadingAnchor
+  位置: 类 ReadingAnchorTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:122: 错误: 找不到符号
+                () -> ReadingAnchor.of(Guard.newId(), null, -1, 0));
+                      ^
+  符号:   变量 ReadingAnchor
+  位置: 类 ReadingAnchorTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:124: 错误: 找不到符号
+                () -> ReadingAnchor.of(Guard.newId(), null, 0, -1));
+                      ^
+  符号:   变量 ReadingAnchor
+  位置: 类 ReadingAnchorTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:126: 错误: 找不到符号
+                () -> ReadingAnchor.atMessage(Guard.newId(), null)
+                      ^
+  符号:   变量 ReadingAnchor
+  位置: 类 ReadingAnchorTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:129: 错误: 找不到符号
+                () -> ReadingAnchor.atMessage(Guard.newId(), null).resolve(null, 100));
+                      ^
+  符号:   变量 ReadingAnchor
+  位置: 类 ReadingAnchorTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:37: 错误: 找不到符号
+        List<SearchHit> hits = new ArrayList<SearchHit>(Arrays.asList(
+             ^
+  符号:   类 SearchHit
+  位置: 类 SearchHitTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:37: 错误: 找不到符号
+        List<SearchHit> hits = new ArrayList<SearchHit>(Arrays.asList(
+                                             ^
+  符号:   类 SearchHit
+  位置: 类 SearchHitTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:44: 错误: 找不到符号
+        Collections.sort(hits, SearchHit.DISPLAY_ORDER);
+                               ^
+  符号:   变量 SearchHit
+  位置: 类 SearchHitTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:47: 错误: 程序包SearchHit不存在
+                        SearchHit.Field.TITLE,
+                                 ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:48: 错误: 程序包SearchHit不存在
+                        SearchHit.Field.ANSWER,
+                                 ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:49: 错误: 程序包SearchHit不存在
+                        SearchHit.Field.ANSWER,
+                                 ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:50: 错误: 程序包SearchHit不存在
+                        SearchHit.Field.ANSWER,
+                                 ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:51: 错误: 程序包SearchHit不存在
+                        SearchHit.Field.REASONING),
+                                 ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:62: 错误: 找不到符号
+        SearchHit hit = title(TOPIC, BRANCH_A);
+        ^
+  符号:   类 SearchHit
+  位置: 类 SearchHitTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:71: 错误: 找不到符号
+        SearchHit hit = answer(TOPIC, BRANCH_A, MESSAGE, 2, REVISION, 3);
+        ^
+  符号:   类 SearchHit
+  位置: 类 SearchHitTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:73: 错误: 找不到符号
+        ReadingAnchor anchor = hit.locatorAnchor();
+        ^
+  符号:   类 ReadingAnchor
+  位置: 类 SearchHitTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:83: 错误: 找不到符号
+        SearchHit hit = SearchHit.of(SearchHit.Field.PARTIAL_ANSWER, TOPIC, BRANCH_A, MESSAGE, 7,
+        ^
+  符号:   类 SearchHit
+  位置: 类 SearchHitTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:83: 错误: 程序包SearchHit不存在
+        SearchHit hit = SearchHit.of(SearchHit.Field.PARTIAL_ANSWER, TOPIC, BRANCH_A, MESSAGE, 7,
+                                              ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:83: 错误: 找不到符号
+        SearchHit hit = SearchHit.of(SearchHit.Field.PARTIAL_ANSWER, TOPIC, BRANCH_A, MESSAGE, 7,
+                        ^
+  符号:   变量 SearchHit
+  位置: 类 SearchHitTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:94: 错误: 程序包SearchHit不存在
+                () -> SearchHit.of(SearchHit.Field.TITLE, TOPIC, BRANCH_A, null, 3, null, 0, "x"));
+                                            ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:94: 错误: 找不到符号
+                () -> SearchHit.of(SearchHit.Field.TITLE, TOPIC, BRANCH_A, null, 3, null, 0, "x"));
+                      ^
+  符号:   变量 SearchHit
+  位置: 类 SearchHitTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:96: 错误: 程序包SearchHit不存在
+                () -> SearchHit.of(SearchHit.Field.ANSWER, TOPIC, BRANCH_A, MESSAGE, -1,
+                                            ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:96: 错误: 找不到符号
+                () -> SearchHit.of(SearchHit.Field.ANSWER, TOPIC, BRANCH_A, MESSAGE, -1,
+                      ^
+  符号:   变量 SearchHit
+  位置: 类 SearchHitTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:103: 错误: 程序包SearchHit不存在
+                () -> SearchHit.of(SearchHit.Field.ANSWER, TOPIC, BRANCH_A, null, -1, REVISION, 1, "x"));
+                                            ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:103: 错误: 找不到符号
+                () -> SearchHit.of(SearchHit.Field.ANSWER, TOPIC, BRANCH_A, null, -1, REVISION, 1, "x"));
+                      ^
+  符号:   变量 SearchHit
+  位置: 类 SearchHitTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:109: 错误: 程序包SearchHit不存在
+                () -> SearchHit.of(SearchHit.Field.TITLE, "not-a-uuid", BRANCH_A, null, -1, null, 0, "x"));
+                                            ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:109: 错误: 找不到符号
+                () -> SearchHit.of(SearchHit.Field.TITLE, "not-a-uuid", BRANCH_A, null, -1, null, 0, "x"));
+                      ^
+  符号:   变量 SearchHit
+  位置: 类 SearchHitTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:111: 错误: 程序包SearchHit不存在
+                () -> SearchHit.of(SearchHit.Field.TITLE, TOPIC, BRANCH_A, null, -1, null, 0, null));
+                                            ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:111: 错误: 找不到符号
+                () -> SearchHit.of(SearchHit.Field.TITLE, TOPIC, BRANCH_A, null, -1, null, 0, null));
+                      ^
+  符号:   变量 SearchHit
+  位置: 类 SearchHitTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:113: 错误: 找不到符号
+                () -> SearchHit.of(null, TOPIC, BRANCH_A, null, -1, null, 0, "x"));
+                      ^
+  符号:   变量 SearchHit
+  位置: 类 SearchHitTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:117: 错误: 程序包SearchHit不存在
+        List<SearchHit.Field> fields = new ArrayList<SearchHit.Field>();
+                      ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:117: 错误: 程序包SearchHit不存在
+        List<SearchHit.Field> fields = new ArrayList<SearchHit.Field>();
+                                                              ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:118: 错误: 找不到符号
+        for (SearchHit hit : hits) {
+             ^
+  符号:   类 SearchHit
+  位置: 类 SearchHitTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:125: 错误: 程序包SearchHit不存在
+        return SearchHit.of(SearchHit.Field.TITLE, topicId, branchId, null, -1, null, 0, "title text");
+                                     ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:125: 错误: 找不到符号
+        return SearchHit.of(SearchHit.Field.TITLE, topicId, branchId, null, -1, null, 0, "title text");
+               ^
+  符号:   变量 SearchHit
+  位置: 类 SearchHitTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:130: 错误: 程序包SearchHit不存在
+        return SearchHit.of(SearchHit.Field.ANSWER, topicId, branchId, messageId, ordinal, revisionId,
+                                     ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:130: 错误: 找不到符号
+        return SearchHit.of(SearchHit.Field.ANSWER, topicId, branchId, messageId, ordinal, revisionId,
+               ^
+  符号:   变量 SearchHit
+  位置: 类 SearchHitTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:136: 错误: 程序包SearchHit不存在
+        return SearchHit.of(SearchHit.Field.REASONING, topicId, branchId, messageId, ordinal,
+                                     ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:136: 错误: 找不到符号
+        return SearchHit.of(SearchHit.Field.REASONING, topicId, branchId, messageId, ordinal,
+               ^
+  符号:   变量 SearchHit
+  位置: 类 SearchHitTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:27: 错误: 找不到符号
+        SearchQuery query = SearchQuery.of("  Hello   World  ");
+        ^
+  符号:   类 SearchQuery
+  位置: 类 SearchQueryTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:27: 错误: 找不到符号
+        SearchQuery query = SearchQuery.of("  Hello   World  ");
+                            ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchQueryTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:36: 错误: 找不到符号
+        SearchQuery query = SearchQuery.of("  搜索   关键词  ");
+        ^
+  符号:   类 SearchQuery
+  位置: 类 SearchQueryTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:36: 错误: 找不到符号
+        SearchQuery query = SearchQuery.of("  搜索   关键词  ");
+                            ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchQueryTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:44: 错误: 找不到符号
+        assertEquals("%100\\%%", SearchQuery.of("100%").likePattern());
+                                 ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchQueryTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:45: 错误: 找不到符号
+        assertEquals("%a\\_b%", SearchQuery.of("a_b").likePattern());
+                                ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchQueryTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:46: 错误: 找不到符号
+        assertEquals("%\\%%", SearchQuery.of("%").likePattern());
+                              ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchQueryTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:47: 错误: 找不到符号
+        assertEquals("%\\_%", SearchQuery.of("_").likePattern());
+                              ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchQueryTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:52: 错误: 找不到符号
+        assertEquals("%c\\\\d%", SearchQuery.of("c\\d").likePattern());
+                                 ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchQueryTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:53: 错误: 找不到符号
+        assertEquals("\\\\", SearchQuery.of("\\").escapePattern());
+                             ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchQueryTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:58: 错误: 找不到符号
+        SearchQuery blank = SearchQuery.of("   \t  ");
+        ^
+  符号:   类 SearchQuery
+  位置: 类 SearchQueryTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:58: 错误: 找不到符号
+        SearchQuery blank = SearchQuery.of("   \t  ");
+                            ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchQueryTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:68: 错误: 找不到符号
+        assertThrows(IllegalArgumentException.class, () -> SearchQuery.of(null));
+                                                           ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchQueryTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:75: 错误: 找不到符号
+        assertEquals(SearchQuery.of(" TreeLearn ").likePattern(),
+                     ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchQueryTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:76: 错误: 找不到符号
+                SearchQuery.of("treelearn").likePattern());
+                ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchQueryTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\UnreadRollupTest.java:40: 错误: 找不到符号
+        Map<String, Long> visible = UnreadRollup.visibleUnread(Arrays.asList(root, child, grandchild));
+                                    ^
+  符号:   变量 UnreadRollup
+  位置: 类 UnreadRollupTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\UnreadRollupTest.java:58: 错误: 找不到符号
+        Map<String, Long> visible = UnreadRollup.visibleUnread(Arrays.asList(root, child, grandchild));
+                                    ^
+  符号:   变量 UnreadRollup
+  位置: 类 UnreadRollupTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\UnreadRollupTest.java:77: 错误: 找不到符号
+                UnreadRollup.visibleUnread(Arrays.asList(root, archived, hidden));
+                ^
+  符号:   变量 UnreadRollup
+  位置: 类 UnreadRollupTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\UnreadRollupTest.java:95: 错误: 找不到符号
+        Map<String, Long> visible = UnreadRollup.visibleUnread(Arrays.asList(root, archived));
+                                    ^
+  符号:   变量 UnreadRollup
+  位置: 类 UnreadRollupTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\UnreadRollupTest.java:104: 错误: 找不到符号
+        Map<String, Long> visible = UnreadRollup.visibleUnread(Collections.singletonList(root));
+                                    ^
+  符号:   变量 UnreadRollup
+  位置: 类 UnreadRollupTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\UnreadRollupTest.java:118: 错误: 找不到符号
+        Map<String, Long> visible = UnreadRollup.visibleUnread(Collections.singletonList(orphan));
+                                    ^
+  符号:   变量 UnreadRollup
+  位置: 类 UnreadRollupTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ViewportSeenTest.java:40: 错误: 找不到符号
+        boolean advanced = ViewportSeen.onViewport(branch, messages,
+                           ^
+  符号:   变量 ViewportSeen
+  位置: 类 ViewportSeenTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ViewportSeenTest.java:56: 错误: 找不到符号
+        boolean advanced = ViewportSeen.onViewport(branch, messages,
+                           ^
+  符号:   变量 ViewportSeen
+  位置: 类 ViewportSeenTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ViewportSeenTest.java:71: 错误: 找不到符号
+        assertFalse(ViewportSeen.onViewport(branch, messages, visible(messages.get(0).id)));
+                    ^
+  符号:   变量 ViewportSeen
+  位置: 类 ViewportSeenTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ViewportSeenTest.java:82: 错误: 找不到符号
+        assertFalse(ViewportSeen.onViewport(branch, messages, visible()));
+                    ^
+  符号:   变量 ViewportSeen
+  位置: 类 ViewportSeenTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ViewportSeenTest.java:93: 错误: 找不到符号
+        assertFalse(ViewportSeen.onViewport(branch, messages, visible(messages.get(1).id)));
+                    ^
+  符号:   变量 ViewportSeen
+  位置: 类 ViewportSeenTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ViewportSeenTest.java:103: 错误: 找不到符号
+        assertFalse(ViewportSeen.onViewport(branch, messages, visible()));
+                    ^
+  符号:   变量 ViewportSeen
+  位置: 类 ViewportSeenTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ViewportSeenTest.java:104: 错误: 找不到符号
+        assertFalse(ViewportSeen.onViewport(branch, Collections.<Message>emptyList(), visible()));
+                    ^
+  符号:   变量 ViewportSeen
+  位置: 类 ViewportSeenTest
+89 个错误
+
+> Task :core:processTestResources NO-SOURCE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac UP-TO-DATE
+> Task :data:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :data:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :data:preDebugUnitTestBuild UP-TO-DATE
+> Task :data:generateDebugUnitTestStubRFile UP-TO-DATE
+> Task :data:javaPreCompileDebugUnitTest UP-TO-DATE
+
+> Task :data:compileDebugUnitTestJavaWithJavac FAILED
+D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:8: 错误: 找不到符号
+import com.treelearn.core.domain.SearchQuery;
+                                ^
+  符号:   类 SearchQuery
+  位置: 程序包 com.treelearn.core.domain
+D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:27: 错误: 找不到符号
+        String statement = SearchDao.statement();
+                           ^
+  符号:   变量 SearchDao
+  位置: 类 SearchDaoStatementTest
+D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:30: 错误: 找不到符号
+        assertEquals(6, SearchDao.arguments(SearchQuery.of("需求")).length);
+                        ^
+  符号:   变量 SearchDao
+  位置: 类 SearchDaoStatementTest
+D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:30: 错误: 找不到符号
+        assertEquals(6, SearchDao.arguments(SearchQuery.of("需求")).length);
+                                            ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchDaoStatementTest
+D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:40: 错误: 找不到符号
+        assertEquals(6, countOf(SearchDao.statement(), "ESCAPE '\\'"));
+                                ^
+  符号:   变量 SearchDao
+  位置: 类 SearchDaoStatementTest
+D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:45: 错误: 找不到符号
+        SearchQuery query = SearchQuery.of(" 100% ");
+        ^
+  符号:   类 SearchQuery
+  位置: 类 SearchDaoStatementTest
+D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:45: 错误: 找不到符号
+        SearchQuery query = SearchQuery.of(" 100% ");
+                            ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchDaoStatementTest
+D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:47: 错误: 找不到符号
+        String[] arguments = SearchDao.arguments(query);
+                             ^
+  符号:   变量 SearchDao
+  位置: 类 SearchDaoStatementTest
+D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:58: 错误: 找不到符号
+                () -> SearchDao.arguments(SearchQuery.of("   ")));
+                      ^
+  符号:   变量 SearchDao
+  位置: 类 SearchDaoStatementTest
+D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:58: 错误: 找不到符号
+                () -> SearchDao.arguments(SearchQuery.of("   ")));
+                                          ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchDaoStatementTest
+D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:66: 错误: 找不到符号
+        assertEquals(2, countOf(SearchDao.statement(), "answer_revisions ar"));
+                                ^
+  符号:   变量 SearchDao
+  位置: 类 SearchDaoStatementTest
+D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:67: 错误: 找不到符号
+        assertEquals(2, countOf(SearchDao.statement(),
+                                ^
+  符号:   变量 SearchDao
+  位置: 类 SearchDaoStatementTest
+D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:70: 错误: 找不到符号
+                SearchDao.statement().contains("b.source_revision_id"));
+                ^
+  符号:   变量 SearchDao
+  位置: 类 SearchDaoStatementTest
+D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:75: 错误: 找不到符号
+        assertEquals(6, countOf(SearchDao.statement(), "b.archived_at IS NULL"));
+                                ^
+  符号:   变量 SearchDao
+  位置: 类 SearchDaoStatementTest
+D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:82: 错误: 找不到符号
+        String statement = SearchDao.statement();
+                           ^
+  符号:   变量 SearchDao
+  位置: 类 SearchDaoStatementTest
+15 个错误
+
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :data:processDebugUnitTestJavaRes NO-SOURCE
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac UP-TO-DATE
+> Task :ai:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :ai:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugLibraryResources UP-TO-DATE
+> Task :ai:writeDebugAarMetadata UP-TO-DATE
+> Task :data:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :ai:extractDeepLinksDebug UP-TO-DATE
+> Task :ai:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :data:extractDeepLinksDebug UP-TO-DATE
+> Task :data:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :data:compileDebugLibraryResources UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:bundleDebugClassesToRuntimeJar UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+
+> Task :app:compileDebugUnitTestJavaWithJavac FAILED
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:12: 错误: 找不到符号
+import com.treelearn.core.domain.ReadingAnchor;
+                                ^
+  符号:   类 ReadingAnchor
+  位置: 程序包 com.treelearn.core.domain
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:13: 错误: 找不到符号
+import com.treelearn.core.domain.ReadingPosition;
+                                ^
+  符号:   类 ReadingPosition
+  位置: 程序包 com.treelearn.core.domain
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:158: 错误: 找不到符号
+    private static final class FakeStore implements ReadingStore {
+                                                    ^
+  符号:   类 ReadingStore
+  位置: 类 ReadingSessionTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:160: 错误: 找不到符号
+        ReadingAnchor anchor;
+        ^
+  符号:   类 ReadingAnchor
+  位置: 类 FakeStore
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:162: 错误: 找不到符号
+        ReadingAnchor savedAnchor;
+        ^
+  符号:   类 ReadingAnchor
+  位置: 类 FakeStore
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:167: 错误: 找不到符号
+        public ReadingAnchor anchorOf(String branchId) {
+               ^
+  符号:   类 ReadingAnchor
+  位置: 类 FakeStore
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:172: 错误: 找不到符号
+        public void saveAnchor(String branchId, ReadingAnchor anchor) {
+                                                ^
+  符号:   类 ReadingAnchor
+  位置: 类 FakeStore
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:7: 错误: 找不到符号
+import com.treelearn.core.domain.ReadingAnchor;
+                                ^
+  符号:   类 ReadingAnchor
+  位置: 程序包 com.treelearn.core.domain
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:8: 错误: 找不到符号
+import com.treelearn.core.domain.SearchHit;
+                                ^
+  符号:   类 SearchHit
+  位置: 程序包 com.treelearn.core.domain
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:9: 错误: 找不到符号
+import com.treelearn.core.domain.SearchQuery;
+                                ^
+  符号:   类 SearchQuery
+  位置: 程序包 com.treelearn.core.domain
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:140: 错误: 找不到符号
+    private static SearchHit answerHit() {
+                   ^
+  符号:   类 SearchHit
+  位置: 类 SearchPresenterTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:222: 错误: 程序包SearchPresenter不存在
+    private static final class RecordingSink implements SearchPresenter.Sink {
+                                                                       ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:196: 错误: 找不到符号
+    private static final class FakeRepository implements SearchRepository {
+                                                         ^
+  符号:   类 SearchRepository
+  位置: 类 SearchPresenterTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:151: 错误: 找不到符号
+        final SearchPresenter presenter;
+              ^
+  符号:   类 SearchPresenter
+  位置: 类 Fixture
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:198: 错误: 找不到符号
+        List<SearchHit> hits = Collections.emptyList();
+             ^
+  符号:   类 SearchHit
+  位置: 类 FakeRepository
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:203: 错误: 找不到符号
+        SearchQuery lastQuery;
+        ^
+  符号:   类 SearchQuery
+  位置: 类 FakeRepository
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:206: 错误: 找不到符号
+        public List<SearchHit> search(SearchQuery query) {
+                                      ^
+  符号:   类 SearchQuery
+  位置: 类 FakeRepository
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:206: 错误: 找不到符号
+        public List<SearchHit> search(SearchQuery query) {
+                    ^
+  符号:   类 SearchHit
+  位置: 类 FakeRepository
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:216: 错误: 找不到符号
+        public boolean isStillReachable(SearchHit hit) {
+                                        ^
+  符号:   类 SearchHit
+  位置: 类 FakeRepository
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:226: 错误: 找不到符号
+        ReadingAnchor openedAnchor;
+        ^
+  符号:   类 ReadingAnchor
+  位置: 类 RecordingSink
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:229: 错误: 找不到符号
+        public void render(SearchViewState state) {
+                           ^
+  符号:   类 SearchViewState
+  位置: 类 RecordingSink
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:233: 错误: 找不到符号
+        public void openAnchor(String topicId, String branchId, ReadingAnchor anchor) {
+                                                                ^
+  符号:   类 ReadingAnchor
+  位置: 类 RecordingSink
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:24: 错误: 找不到符号
+    private static final CopyLabels LABELS = CopyLabels.of("思考过程", "最终回答");
+                         ^
+  符号:   类 CopyLabels
+  位置: 类 ChatMessageTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:104: 错误: 找不到符号
+    private static ChatMessage stable() {
+                   ^
+  符号:   类 ChatMessage
+  位置: 类 ChatMessageTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:109: 错误: 找不到符号
+    private static ChatMessage aiWithChildren(int children) {
+                   ^
+  符号:   类 ChatMessage
+  位置: 类 ChatMessageTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:115: 错误: 找不到符号
+    private static ChatMessage aiWithVersions(int versions) {
+                   ^
+  符号:   类 ChatMessage
+  位置: 类 ChatMessageTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:121: 错误: 程序包ChatMessage不存在
+    private static ChatMessage generating(ChatMessage.Phase phase) {
+                                                     ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:121: 错误: 找不到符号
+    private static ChatMessage generating(ChatMessage.Phase phase) {
+                   ^
+  符号:   类 ChatMessage
+  位置: 类 ChatMessageTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:126: 错误: 找不到符号
+    private static ChatMessage failed() {
+                   ^
+  符号:   类 ChatMessage
+  位置: 类 ChatMessageTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:70: 错误: 找不到符号
+    private static void assertVersionSwitchAgrees(Message position, ChatMessage rendered,
+                                                                    ^
+  符号:   类 ChatMessage
+  位置: 类 ChatPositionAgreementTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:90: 错误: 程序包ChatMessage不存在
+    private static ChatMessage rendered(ChatMessage.Status status, String activeRevisionId,
+                                                   ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:90: 错误: 找不到符号
+    private static ChatMessage rendered(ChatMessage.Status status, String activeRevisionId,
+                   ^
+  符号:   类 ChatMessage
+  位置: 类 ChatPositionAgreementTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:36: 错误: 找不到符号
+    private static final CopyLabels LABELS = CopyLabels.of("思考过程", "最终回答");
+                         ^
+  符号:   类 CopyLabels
+  位置: 类 ChatPresenterTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:149: 错误: 找不到符号
+    static final class RecordingChatSink implements ChatSink {
+                                                    ^
+  符号:   类 ChatSink
+  位置: 类 ChatTestDoubles
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:131: 错误: 找不到符号
+    static final class FakeChatData implements ChatData {
+                                               ^
+  符号:   类 ChatData
+  位置: 类 ChatTestDoubles
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:50: 错误: 找不到符号
+    static final class FakeChatCommands implements ChatCommands {
+                                                   ^
+  符号:   类 ChatCommands
+  位置: 类 ChatTestDoubles
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:528: 错误: 找不到符号
+    private ChatPresenter presenter() {
+            ^
+  符号:   类 ChatPresenter
+  位置: 类 ChatPresenterTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:533: 错误: 程序包ChatData不存在
+    private static ChatData.Snapshot conversation() {
+                           ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:540: 错误: 程序包ChatData不存在
+    private static ChatData.Snapshot failedConversation() {
+                           ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:548: 错误: 程序包ChatData不存在
+    private static ChatData.Snapshot withVersions() {
+                           ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:557: 错误: 程序包ChatData不存在
+    private static ChatData.Snapshot withStrip(Recommendation strip, String revisionId) {
+                           ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:568: 错误: 找不到符号
+    private static List<ChatMessage> messages(ChatMessage... items) {
+                                              ^
+  符号:   类 ChatMessage
+  位置: 类 ChatPresenterTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:568: 错误: 找不到符号
+    private static List<ChatMessage> messages(ChatMessage... items) {
+                        ^
+  符号:   类 ChatMessage
+  位置: 类 ChatPresenterTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:52: 错误: 找不到符号
+        ChatCommandResult sendResult = ChatCommandResult.ran(OP);
+        ^
+  符号:   类 ChatCommandResult
+  位置: 类 FakeChatCommands
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:53: 错误: 找不到符号
+        ChatCommandResult retryResult = ChatCommandResult.ran(OP);
+        ^
+  符号:   类 ChatCommandResult
+  位置: 类 FakeChatCommands
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:54: 错误: 找不到符号
+        ChatCommandResult resetResult = ChatCommandResult.ran(OP);
+        ^
+  符号:   类 ChatCommandResult
+  位置: 类 FakeChatCommands
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:55: 错误: 找不到符号
+        ChatCommandResult selectResult = ChatCommandResult.ran(OP);
+        ^
+  符号:   类 ChatCommandResult
+  位置: 类 FakeChatCommands
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:56: 错误: 找不到符号
+        ChatCommandResult forkResult = ChatCommandResult.openedBranch(OP, BRANCH_2);
+        ^
+  符号:   类 ChatCommandResult
+  位置: 类 FakeChatCommands
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:70: 错误: 找不到符号
+        public ChatCommandResult send(String branchId, String text, String quote, GenerationModel model,
+               ^
+  符号:   类 ChatCommandResult
+  位置: 类 FakeChatCommands
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:81: 错误: 找不到符号
+        public ChatCommandResult retry(String messageId, GenerationModel model,
+               ^
+  符号:   类 ChatCommandResult
+  位置: 类 FakeChatCommands
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:92: 错误: 找不到符号
+        public ChatCommandResult reset(String messageId, GenerationModel model,
+               ^
+  符号:   类 ChatCommandResult
+  位置: 类 FakeChatCommands
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:103: 错误: 找不到符号
+        public ChatCommandResult selectRevision(String messageId, String revisionId, long now) {
+               ^
+  符号:   类 ChatCommandResult
+  位置: 类 FakeChatCommands
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:112: 错误: 找不到符号
+        public ChatCommandResult fork(String messageId, String question) {
+               ^
+  符号:   类 ChatCommandResult
+  位置: 类 FakeChatCommands
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:133: 错误: 程序包ChatData不存在
+        ChatData.Snapshot snapshot = snapshot(Collections.<ChatMessage>emptyList());
+                ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:139: 错误: 找不到符号
+        public Snapshot read(String branchId) {
+               ^
+  符号:   类 Snapshot
+  位置: 类 FakeChatData
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:151: 错误: 找不到符号
+        final List<ChatViewState> states = new ArrayList<ChatViewState>();
+                   ^
+  符号:   类 ChatViewState
+  位置: 类 RecordingChatSink
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:160: 错误: 找不到符号
+        public void render(ChatViewState state) {
+                           ^
+  符号:   类 ChatViewState
+  位置: 类 RecordingChatSink
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:194: 错误: 找不到符号
+        ChatViewState last() {
+        ^
+  符号:   类 ChatViewState
+  位置: 类 RecordingChatSink
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:34: 错误: 找不到符号
+    static ChatMessage ask(String id, String text) {
+           ^
+  符号:   类 ChatMessage
+  位置: 类 ChatTestDoubles
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:38: 错误: 找不到符号
+    static ChatMessage stableAnswer(String id, String answer) {
+           ^
+  符号:   类 ChatMessage
+  位置: 类 ChatTestDoubles
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:44: 错误: 找不到符号
+    static ChatData.Snapshot snapshot(List<ChatMessage> messages) {
+                                           ^
+  符号:   类 ChatMessage
+  位置: 类 ChatTestDoubles
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:44: 错误: 程序包ChatData不存在
+    static ChatData.Snapshot snapshot(List<ChatMessage> messages) {
+                   ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:203: 错误: 找不到符号
+    static List<ChatMessage> messages(ChatMessage... items) {
+                                      ^
+  符号:   类 ChatMessage
+  位置: 类 ChatTestDoubles
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:203: 错误: 找不到符号
+    static List<ChatMessage> messages(ChatMessage... items) {
+                ^
+  符号:   类 ChatMessage
+  位置: 类 ChatTestDoubles
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatViewStateTest.java:150: 错误: 找不到符号
+    private static ChatViewState initial() {
+                   ^
+  符号:   类 ChatViewState
+  位置: 类 ChatViewStateTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatViewStateTest.java:154: 错误: 找不到符号
+    private static ChatViewState withConversation() {
+                   ^
+  符号:   类 ChatViewState
+  位置: 类 ChatViewStateTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:42: 错误: 找不到符号
+        store.anchor = ReadingAnchor.of(messages.get(1).id, REVISION, 18, 6);
+                       ^
+  符号:   变量 ReadingAnchor
+  位置: 类 ReadingSessionTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:44: 错误: 找不到符号
+        ReadingPosition position = new ReadingSession(store).open(branch, messages, 90);
+        ^
+  符号:   类 ReadingPosition
+  位置: 类 ReadingSessionTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:44: 错误: 找不到符号
+        ReadingPosition position = new ReadingSession(store).open(branch, messages, 90);
+                                       ^
+  符号:   类 ReadingSession
+  位置: 类 ReadingSessionTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:58: 错误: 找不到符号
+        ReadingPosition position = new ReadingSession(new FakeStore()).open(branch, messages, 90);
+        ^
+  符号:   类 ReadingPosition
+  位置: 类 ReadingSessionTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:58: 错误: 找不到符号
+        ReadingPosition position = new ReadingSession(new FakeStore()).open(branch, messages, 90);
+                                       ^
+  符号:   类 ReadingSession
+  位置: 类 ReadingSessionTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:70: 错误: 找不到符号
+        store.anchor = ReadingAnchor.of(Guard.newId(), null, 40, 40);
+                       ^
+  符号:   变量 ReadingAnchor
+  位置: 类 ReadingSessionTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:72: 错误: 找不到符号
+        ReadingPosition position = new ReadingSession(store).open(branch, messages, 90);
+        ^
+  符号:   类 ReadingPosition
+  位置: 类 ReadingSessionTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:72: 错误: 找不到符号
+        ReadingPosition position = new ReadingSession(store).open(branch, messages, 90);
+                                       ^
+  符号:   类 ReadingSession
+  位置: 类 ReadingSessionTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:89: 错误: 找不到符号
+        store.anchor = ReadingAnchor.of(messages.get(2).id, REVISION, 11, 0);
+                       ^
+  符号:   变量 ReadingAnchor
+  位置: 类 ReadingSessionTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:91: 错误: 找不到符号
+        ReadingPosition position = new ReadingSession(store).open(branch, messages, 90);
+        ^
+  符号:   类 ReadingPosition
+  位置: 类 ReadingSessionTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:91: 错误: 找不到符号
+        ReadingPosition position = new ReadingSession(store).open(branch, messages, 90);
+                                       ^
+  符号:   类 ReadingSession
+  位置: 类 ReadingSessionTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:106: 错误: 找不到符号
+        boolean advanced = new ReadingSession(store).onViewport(branch, messages,
+                               ^
+  符号:   类 ReadingSession
+  位置: 类 ReadingSessionTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:122: 错误: 找不到符号
+        boolean advanced = new ReadingSession(store).onViewport(branch, messages,
+                               ^
+  符号:   类 ReadingSession
+  位置: 类 ReadingSessionTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:136: 错误: 找不到符号
+        new ReadingSession(store).remember(branch,
+            ^
+  符号:   类 ReadingSession
+  位置: 类 ReadingSessionTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:137: 错误: 找不到符号
+                ReadingAnchor.of(messages.get(1).id, null, 37, 12));
+                ^
+  符号:   变量 ReadingAnchor
+  位置: 类 ReadingSessionTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:166: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:171: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:177: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:41: 错误: 程序包SearchViewState不存在
+        assertEquals(SearchViewState.Phase.IDLE, fixture.presenter.state().phase);
+                                    ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:53: 错误: 程序包SearchViewState不存在
+        assertEquals(SearchViewState.Phase.RESULTS, fixture.presenter.state().phase);
+                                    ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:69: 错误: 程序包SearchViewState不存在
+        assertEquals(SearchViewState.Phase.ERROR, fixture.presenter.state().phase);
+                                    ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:76: 错误: 找不到符号
+        SearchHit hit = answerHit();
+        ^
+  符号:   类 SearchHit
+  位置: 类 SearchPresenterTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:90: 错误: 程序包SearchHit不存在
+        fixture.presenter.onHitOpened(SearchHit.of(SearchHit.Field.TITLE, TOPIC, BRANCH, null, -1,
+                                                            ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:90: 错误: 找不到符号
+        fixture.presenter.onHitOpened(SearchHit.of(SearchHit.Field.TITLE, TOPIC, BRANCH, null, -1,
+                                      ^
+  符号:   变量 SearchHit
+  位置: 类 SearchPresenterTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:100: 错误: 找不到符号
+        fixture.repository.hits = new ArrayList<SearchHit>(Arrays.asList(answerHit(), answerHit()));
+                                                ^
+  符号:   类 SearchHit
+  位置: 类 SearchPresenterTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:123: 错误: 程序包SearchViewState不存在
+        assertEquals(SearchViewState.Phase.RESULTS, fixture.presenter.state().phase);
+                                    ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:141: 错误: 程序包SearchHit不存在
+        return SearchHit.of(SearchHit.Field.ANSWER, TOPIC, BRANCH, MESSAGE, 3, REVISION, 2,
+                                     ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:141: 错误: 找不到符号
+        return SearchHit.of(SearchHit.Field.ANSWER, TOPIC, BRANCH, MESSAGE, 3, REVISION, 2,
+               ^
+  符号:   变量 SearchHit
+  位置: 类 SearchPresenterTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:154: 错误: 找不到符号
+            this.presenter = new SearchPresenter(sink, ui, background, repository);
+                                 ^
+  符号:   类 SearchPresenter
+  位置: 类 Fixture
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:205: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:215: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:228: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:232: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:24: 错误: 找不到符号
+    private static final CopyLabels LABELS = CopyLabels.of("思考过程", "最终回答");
+                                             ^
+  符号:   变量 CopyLabels
+  位置: 类 ChatMessageTest
+100 个错误
+
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes NO-SOURCE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :app:processDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:compileDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugAndroidTestResources UP-TO-DATE
+> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :app:processDebugAndroidTestManifest UP-TO-DATE
+> Task :app:processDebugAndroidTestResources UP-TO-DATE
+
+> Task :app:compileDebugAndroidTestJavaWithJavac FAILED
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:22: 错误: 找不到符号
+import com.treelearn.core.domain.ReadingAnchor;
+                                ^
+  符号:   类 ReadingAnchor
+  位置: 程序包 com.treelearn.core.domain
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:23: 错误: 找不到符号
+import com.treelearn.core.domain.SearchHit;
+                                ^
+  符号:   类 SearchHit
+  位置: 程序包 com.treelearn.core.domain
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:24: 错误: 找不到符号
+import com.treelearn.core.domain.SearchQuery;
+                                ^
+  符号:   类 SearchQuery
+  位置: 程序包 com.treelearn.core.domain
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:31: 错误: 找不到符号
+import com.treelearn.data.db.dao.ReadingPositionDao;
+                                ^
+  符号:   类 ReadingPositionDao
+  位置: 程序包 com.treelearn.data.db.dao
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:32: 错误: 找不到符号
+import com.treelearn.data.db.dao.SearchDao;
+                                ^
+  符号:   类 SearchDao
+  位置: 程序包 com.treelearn.data.db.dao
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:330: 错误: 找不到符号
+    private static String[] fields(List<SearchHit> hits) {
+                                        ^
+  符号:   类 SearchHit
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:98: 错误: 找不到符号
+                fields(SearchDao.search(db, SearchQuery.of("细胞"))));
+                       ^
+  符号:   变量 SearchDao
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:98: 错误: 找不到符号
+                fields(SearchDao.search(db, SearchQuery.of("细胞"))));
+                                            ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:100: 错误: 找不到符号
+                fields(SearchDao.search(db, SearchQuery.of("膜间隙"))));
+                       ^
+  符号:   变量 SearchDao
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:100: 错误: 找不到符号
+                fields(SearchDao.search(db, SearchQuery.of("膜间隙"))));
+                                            ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:102: 错误: 找不到符号
+                fields(SearchDao.search(db, SearchQuery.of("能量工厂"))));
+                       ^
+  符号:   变量 SearchDao
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:102: 错误: 找不到符号
+                fields(SearchDao.search(db, SearchQuery.of("能量工厂"))));
+                                            ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:103: 错误: 找不到符号
+        assertTrue(SearchDao.search(db, SearchQuery.of("不存在的词")).isEmpty());
+                   ^
+  符号:   变量 SearchDao
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:103: 错误: 找不到符号
+        assertTrue(SearchDao.search(db, SearchQuery.of("不存在的词")).isEmpty());
+                                        ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:114: 错误: 找不到符号
+        List<SearchHit> hits = SearchDao.search(db, SearchQuery.of("100%"));
+             ^
+  符号:   类 SearchHit
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:114: 错误: 找不到符号
+        List<SearchHit> hits = SearchDao.search(db, SearchQuery.of("100%"));
+                               ^
+  符号:   变量 SearchDao
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:114: 错误: 找不到符号
+        List<SearchHit> hits = SearchDao.search(db, SearchQuery.of("100%"));
+                                                    ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:128: 错误: 找不到符号
+        List<SearchHit> hits = SearchDao.search(db, SearchQuery.of("a_b"));
+             ^
+  符号:   类 SearchHit
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:128: 错误: 找不到符号
+        List<SearchHit> hits = SearchDao.search(db, SearchQuery.of("a_b"));
+                               ^
+  符号:   变量 SearchDao
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:128: 错误: 找不到符号
+        List<SearchHit> hits = SearchDao.search(db, SearchQuery.of("a_b"));
+                                                    ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:141: 错误: 找不到符号
+        assertTrue(SearchDao.search(db, SearchQuery.of("' OR '1'='1")).isEmpty());
+                   ^
+  符号:   变量 SearchDao
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:141: 错误: 找不到符号
+        assertTrue(SearchDao.search(db, SearchQuery.of("' OR '1'='1")).isEmpty());
+                                        ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:160: 错误: 找不到符号
+        List<SearchHit> hits = SearchDao.search(db, SearchQuery.of("TOKEN_A"));
+             ^
+  符号:   类 SearchHit
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:160: 错误: 找不到符号
+        List<SearchHit> hits = SearchDao.search(db, SearchQuery.of("TOKEN_A"));
+                               ^
+  符号:   变量 SearchDao
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:160: 错误: 找不到符号
+        List<SearchHit> hits = SearchDao.search(db, SearchQuery.of("TOKEN_A"));
+                                                    ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:164: 错误: 找不到符号
+        List<SearchHit> viaFork = SearchDao.search(db, SearchQuery.of("TOKEN_A"));
+             ^
+  符号:   类 SearchHit
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:164: 错误: 找不到符号
+        List<SearchHit> viaFork = SearchDao.search(db, SearchQuery.of("TOKEN_A"));
+                                  ^
+  符号:   变量 SearchDao
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:164: 错误: 找不到符号
+        List<SearchHit> viaFork = SearchDao.search(db, SearchQuery.of("TOKEN_A"));
+                                                       ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:176: 错误: 找不到符号
+        assertTrue(SearchDao.search(db, SearchQuery.of("合成归档标题")).isEmpty());
+                   ^
+  符号:   变量 SearchDao
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:176: 错误: 找不到符号
+        assertTrue(SearchDao.search(db, SearchQuery.of("合成归档标题")).isEmpty());
+                                        ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:187: 错误: 找不到符号
+        List<SearchHit> hits = SearchDao.search(db, SearchQuery.of("合成排序"));
+             ^
+  符号:   类 SearchHit
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:187: 错误: 找不到符号
+        List<SearchHit> hits = SearchDao.search(db, SearchQuery.of("合成排序"));
+                               ^
+  符号:   变量 SearchDao
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:187: 错误: 找不到符号
+        List<SearchHit> hits = SearchDao.search(db, SearchQuery.of("合成排序"));
+                                                    ^
+  符号:   变量 SearchQuery
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:192: 错误: 程序包SearchHit不存在
+                    SearchHit.DISPLAY_ORDER.compare(hits.get(i - 1), hits.get(i)) <= 0);
+                             ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:211: 错误: 找不到符号
+        ReadingAnchor written = ReadingAnchor.of(messages.get(1).id, null, 23, 8);
+        ^
+  符号:   类 ReadingAnchor
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:211: 错误: 找不到符号
+        ReadingAnchor written = ReadingAnchor.of(messages.get(1).id, null, 23, 8);
+                                ^
+  符号:   变量 ReadingAnchor
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:213: 错误: 找不到符号
+        ReadingPositionDao.write(db, branch.id, written);
+        ^
+  符号:   变量 ReadingPositionDao
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:214: 错误: 找不到符号
+        ReadingAnchor readBack = ReadingPositionDao.read(db, branch.id);
+        ^
+  符号:   类 ReadingAnchor
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:214: 错误: 找不到符号
+        ReadingAnchor readBack = ReadingPositionDao.read(db, branch.id);
+                                 ^
+  符号:   变量 ReadingPositionDao
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:229: 错误: 找不到符号
+        ReadingPositionDao.write(db, branch.id, ReadingAnchor.of(message.id, null, 5, 5));
+        ^
+  符号:   变量 ReadingPositionDao
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:229: 错误: 找不到符号
+        ReadingPositionDao.write(db, branch.id, ReadingAnchor.of(message.id, null, 5, 5));
+                                                ^
+  符号:   变量 ReadingAnchor
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:235: 错误: 找不到符号
+                ReadingPositionDao.read(db, branch.id));
+                ^
+  符号:   变量 ReadingPositionDao
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:244: 错误: 找不到符号
+        ReadingPositionDao.write(db, branch.id, ReadingAnchor.atMessage(message.id, null));
+        ^
+  符号:   变量 ReadingPositionDao
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:244: 错误: 找不到符号
+        ReadingPositionDao.write(db, branch.id, ReadingAnchor.atMessage(message.id, null));
+                                                ^
+  符号:   变量 ReadingAnchor
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:246: 错误: 找不到符号
+        ReadingPositionDao.clear(db, branch.id);
+        ^
+  符号:   变量 ReadingPositionDao
+  位置: 类 SearchUnreadReadingInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:248: 错误: 找不到符号
+        assertNull(ReadingPositionDao.read(db, branch.id));
+                   ^
+  符号:   变量 ReadingPositionDao
+  位置: 类 SearchUnreadReadingInstrumentedTest
+注: D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+46 个错误
+
+> Task :ai:generateDebugAssets UP-TO-DATE
+> Task :ai:mergeDebugAssets UP-TO-DATE
+> Task :app:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :data:generateDebugAssets UP-TO-DATE
+> Task :data:mergeDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAndroidTestAssets UP-TO-DATE
+> Task :app:compressDebugAndroidTestAssets UP-TO-DATE
+> Task :app:desugarDebugAndroidTestFileDependencies UP-TO-DATE
+> Task :app:processDebugAndroidTestJavaRes NO-SOURCE
+> Task :app:mergeDebugAndroidTestJavaResource UP-TO-DATE
+> Task :app:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :app:mergeExtDexDebugAndroidTest UP-TO-DATE
+> Task :data:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :ai:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :ai:mergeDebugJniLibFolders UP-TO-DATE
+> Task :ai:mergeDebugNativeLibs NO-SOURCE
+> Task :ai:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :app:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
+> Task :app:mergeLibDexDebugAndroidTest UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :data:mergeDebugJniLibFolders UP-TO-DATE
+> Task :data:mergeDebugNativeLibs NO-SOURCE
+> Task :data:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :app:validateSigningDebugAndroidTest UP-TO-DATE
+> Task :app:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+FAILURE: Build completed with 4 failures.
+
+1: Task failed with an exception.
+-----------
+* What went wrong:
+Execution failed for task ':core:compileTestJava'.
+> Compilation failed; see the compiler output below.
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:116: 错误: 找不到符号
+      private static List<SearchHit.Field> fields(List<SearchHit> hits) {
+                                                       ^
+    符号:   类 SearchHit
+    位置: 类 SearchHitTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:124: 错误: 找不到符号
+      private static SearchHit title(String topicId, String branchId) {
+                     ^
+    符号:   类 SearchHit
+    位置: 类 SearchHitTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:128: 错误: 找不到符号
+      private static SearchHit answer(String topicId, String branchId, String messageId, int ordinal,
+                     ^
+    符号:   类 SearchHit
+    位置: 类 SearchHitTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:134: 错误: 找不到符号
+      private static SearchHit reasoning(String topicId, String branchId, String messageId, int ordinal,
+                     ^
+    符号:   类 SearchHit
+    位置: 类 SearchHitTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:39: 错误: 找不到符号
+          ReadingAnchor anchor = ReadingAnchor.of(messages.get(1).id, null, 12, 30);
+          ^
+    符号:   类 ReadingAnchor
+    位置: 类 ReadingAnchorTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:39: 错误: 找不到符号
+          ReadingAnchor anchor = ReadingAnchor.of(messages.get(1).id, null, 12, 30);
+                                 ^
+    符号:   变量 ReadingAnchor
+    位置: 类 ReadingAnchorTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:41: 错误: 找不到符号
+          ReadingPosition position = anchor.resolve(messages, 100);
+          ^
+    符号:   类 ReadingPosition
+    位置: 类 ReadingAnchorTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:55: 错误: 找不到符号
+          ReadingAnchor anchor = ReadingAnchor.of(messages.get(2).id, null, 400, -7);
+          ^
+    符号:   类 ReadingAnchor
+    位置: 类 ReadingAnchorTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:55: 错误: 找不到符号
+          ReadingAnchor anchor = ReadingAnchor.of(messages.get(2).id, null, 400, -7);
+                                 ^
+    符号:   变量 ReadingAnchor
+    位置: 类 ReadingAnchorTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:57: 错误: 找不到符号
+          ReadingPosition position = anchor.resolve(messages, 100);
+          ^
+    符号:   类 ReadingPosition
+    位置: 类 ReadingAnchorTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:67: 错误: 找不到符号
+          ReadingAnchor dangling = ReadingAnchor.of(Guard.newId(), REVISION, 40, 80);
+          ^
+    符号:   类 ReadingAnchor
+    位置: 类 ReadingAnchorTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:67: 错误: 找不到符号
+          ReadingAnchor dangling = ReadingAnchor.of(Guard.newId(), REVISION, 40, 80);
+                                   ^
+    符号:   变量 ReadingAnchor
+    位置: 类 ReadingAnchorTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:69: 错误: 找不到符号
+          ReadingPosition position = dangling.resolve(messages, 100);
+          ^
+    符号:   类 ReadingPosition
+    位置: 类 ReadingAnchorTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:82: 错误: 找不到符号
+          ReadingPosition position = ReadingAnchor.of(Guard.newId(), null, 0, 0)
+          ^
+    符号:   类 ReadingPosition
+    位置: 类 ReadingAnchorTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:82: 错误: 找不到符号
+          ReadingPosition position = ReadingAnchor.of(Guard.newId(), null, 0, 0)
+                                     ^
+    符号:   变量 ReadingAnchor
+    位置: 类 ReadingAnchorTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:95: 错误: 找不到符号
+          ReadingAnchor pinned = ReadingAnchor.of(messages.get(1).id, REVISION, 5, 5);
+          ^
+    符号:   类 ReadingAnchor
+    位置: 类 ReadingAnchorTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:95: 错误: 找不到符号
+          ReadingAnchor pinned = ReadingAnchor.of(messages.get(1).id, REVISION, 5, 5);
+                                 ^
+    符号:   变量 ReadingAnchor
+    位置: 类 ReadingAnchorTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:97: 错误: 找不到符号
+          ReadingAnchor rebased = pinned.rebasedOn(messages.get(1).activeRevisionId());
+          ^
+    符号:   类 ReadingAnchor
+    位置: 类 ReadingAnchorTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:105: 错误: 找不到符号
+          assertSame(pinned, ReadingAnchor.of(messages.get(1).id, REVISION_2, 5, 5).rebasedOn(REVISION_2));
+                             ^
+    符号:   变量 ReadingAnchor
+    位置: 类 ReadingAnchorTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:110: 错误: 找不到符号
+          ReadingAnchor unbound = ReadingAnchor.atMessage(Guard.newId(), null);
+          ^
+    符号:   类 ReadingAnchor
+    位置: 类 ReadingAnchorTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:110: 错误: 找不到符号
+          ReadingAnchor unbound = ReadingAnchor.atMessage(Guard.newId(), null);
+                                  ^
+    符号:   变量 ReadingAnchor
+    位置: 类 ReadingAnchorTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:120: 错误: 找不到符号
+                  () -> ReadingAnchor.of("not-a-uuid", null, 0, 0));
+                        ^
+    符号:   变量 ReadingAnchor
+    位置: 类 ReadingAnchorTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:122: 错误: 找不到符号
+                  () -> ReadingAnchor.of(Guard.newId(), null, -1, 0));
+                        ^
+    符号:   变量 ReadingAnchor
+    位置: 类 ReadingAnchorTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:124: 错误: 找不到符号
+                  () -> ReadingAnchor.of(Guard.newId(), null, 0, -1));
+                        ^
+    符号:   变量 ReadingAnchor
+    位置: 类 ReadingAnchorTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:126: 错误: 找不到符号
+                  () -> ReadingAnchor.atMessage(Guard.newId(), null)
+                        ^
+    符号:   变量 ReadingAnchor
+    位置: 类 ReadingAnchorTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ReadingAnchorTest.java:129: 错误: 找不到符号
+                  () -> ReadingAnchor.atMessage(Guard.newId(), null).resolve(null, 100));
+                        ^
+    符号:   变量 ReadingAnchor
+    位置: 类 ReadingAnchorTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:37: 错误: 找不到符号
+          List<SearchHit> hits = new ArrayList<SearchHit>(Arrays.asList(
+               ^
+    符号:   类 SearchHit
+    位置: 类 SearchHitTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:37: 错误: 找不到符号
+          List<SearchHit> hits = new ArrayList<SearchHit>(Arrays.asList(
+                                               ^
+    符号:   类 SearchHit
+    位置: 类 SearchHitTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:44: 错误: 找不到符号
+          Collections.sort(hits, SearchHit.DISPLAY_ORDER);
+                                 ^
+    符号:   变量 SearchHit
+    位置: 类 SearchHitTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:62: 错误: 找不到符号
+          SearchHit hit = title(TOPIC, BRANCH_A);
+          ^
+    符号:   类 SearchHit
+    位置: 类 SearchHitTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:71: 错误: 找不到符号
+          SearchHit hit = answer(TOPIC, BRANCH_A, MESSAGE, 2, REVISION, 3);
+          ^
+    符号:   类 SearchHit
+    位置: 类 SearchHitTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:73: 错误: 找不到符号
+          ReadingAnchor anchor = hit.locatorAnchor();
+          ^
+    符号:   类 ReadingAnchor
+    位置: 类 SearchHitTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:83: 错误: 找不到符号
+          SearchHit hit = SearchHit.of(SearchHit.Field.PARTIAL_ANSWER, TOPIC, BRANCH_A, MESSAGE, 7,
+          ^
+    符号:   类 SearchHit
+    位置: 类 SearchHitTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:83: 错误: 找不到符号
+          SearchHit hit = SearchHit.of(SearchHit.Field.PARTIAL_ANSWER, TOPIC, BRANCH_A, MESSAGE, 7,
+                          ^
+    符号:   变量 SearchHit
+    位置: 类 SearchHitTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:94: 错误: 找不到符号
+                  () -> SearchHit.of(SearchHit.Field.TITLE, TOPIC, BRANCH_A, null, 3, null, 0, "x"));
+                        ^
+    符号:   变量 SearchHit
+    位置: 类 SearchHitTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:96: 错误: 找不到符号
+                  () -> SearchHit.of(SearchHit.Field.ANSWER, TOPIC, BRANCH_A, MESSAGE, -1,
+                        ^
+    符号:   变量 SearchHit
+    位置: 类 SearchHitTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:103: 错误: 找不到符号
+                  () -> SearchHit.of(SearchHit.Field.ANSWER, TOPIC, BRANCH_A, null, -1, REVISION, 1, "x"));
+                        ^
+    符号:   变量 SearchHit
+    位置: 类 SearchHitTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:109: 错误: 找不到符号
+                  () -> SearchHit.of(SearchHit.Field.TITLE, "not-a-uuid", BRANCH_A, null, -1, null, 0, "x"));
+                        ^
+    符号:   变量 SearchHit
+    位置: 类 SearchHitTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:111: 错误: 找不到符号
+                  () -> SearchHit.of(SearchHit.Field.TITLE, TOPIC, BRANCH_A, null, -1, null, 0, null));
+                        ^
+    符号:   变量 SearchHit
+    位置: 类 SearchHitTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:113: 错误: 找不到符号
+                  () -> SearchHit.of(null, TOPIC, BRANCH_A, null, -1, null, 0, "x"));
+                        ^
+    符号:   变量 SearchHit
+    位置: 类 SearchHitTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:118: 错误: 找不到符号
+          for (SearchHit hit : hits) {
+               ^
+    符号:   类 SearchHit
+    位置: 类 SearchHitTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:125: 错误: 找不到符号
+          return SearchHit.of(SearchHit.Field.TITLE, topicId, branchId, null, -1, null, 0, "title text");
+                 ^
+    符号:   变量 SearchHit
+    位置: 类 SearchHitTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:130: 错误: 找不到符号
+          return SearchHit.of(SearchHit.Field.ANSWER, topicId, branchId, messageId, ordinal, revisionId,
+                 ^
+    符号:   变量 SearchHit
+    位置: 类 SearchHitTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:136: 错误: 找不到符号
+          return SearchHit.of(SearchHit.Field.REASONING, topicId, branchId, messageId, ordinal,
+                 ^
+    符号:   变量 SearchHit
+    位置: 类 SearchHitTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:27: 错误: 找不到符号
+          SearchQuery query = SearchQuery.of("  Hello   World  ");
+          ^
+    符号:   类 SearchQuery
+    位置: 类 SearchQueryTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:27: 错误: 找不到符号
+          SearchQuery query = SearchQuery.of("  Hello   World  ");
+                              ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchQueryTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:36: 错误: 找不到符号
+          SearchQuery query = SearchQuery.of("  搜索   关键词  ");
+          ^
+    符号:   类 SearchQuery
+    位置: 类 SearchQueryTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:36: 错误: 找不到符号
+          SearchQuery query = SearchQuery.of("  搜索   关键词  ");
+                              ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchQueryTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:44: 错误: 找不到符号
+          assertEquals("%100\\%%", SearchQuery.of("100%").likePattern());
+                                   ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchQueryTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:45: 错误: 找不到符号
+          assertEquals("%a\\_b%", SearchQuery.of("a_b").likePattern());
+                                  ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchQueryTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:46: 错误: 找不到符号
+          assertEquals("%\\%%", SearchQuery.of("%").likePattern());
+                                ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchQueryTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:47: 错误: 找不到符号
+          assertEquals("%\\_%", SearchQuery.of("_").likePattern());
+                                ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchQueryTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:52: 错误: 找不到符号
+          assertEquals("%c\\\\d%", SearchQuery.of("c\\d").likePattern());
+                                   ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchQueryTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:53: 错误: 找不到符号
+          assertEquals("\\\\", SearchQuery.of("\\").escapePattern());
+                               ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchQueryTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:58: 错误: 找不到符号
+          SearchQuery blank = SearchQuery.of("   \t  ");
+          ^
+    符号:   类 SearchQuery
+    位置: 类 SearchQueryTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:58: 错误: 找不到符号
+          SearchQuery blank = SearchQuery.of("   \t  ");
+                              ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchQueryTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:68: 错误: 找不到符号
+          assertThrows(IllegalArgumentException.class, () -> SearchQuery.of(null));
+                                                             ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchQueryTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:75: 错误: 找不到符号
+          assertEquals(SearchQuery.of(" TreeLearn ").likePattern(),
+                       ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchQueryTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchQueryTest.java:76: 错误: 找不到符号
+                  SearchQuery.of("treelearn").likePattern());
+                  ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchQueryTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\UnreadRollupTest.java:40: 错误: 找不到符号
+          Map<String, Long> visible = UnreadRollup.visibleUnread(Arrays.asList(root, child, grandchild));
+                                      ^
+    符号:   变量 UnreadRollup
+    位置: 类 UnreadRollupTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\UnreadRollupTest.java:58: 错误: 找不到符号
+          Map<String, Long> visible = UnreadRollup.visibleUnread(Arrays.asList(root, child, grandchild));
+                                      ^
+    符号:   变量 UnreadRollup
+    位置: 类 UnreadRollupTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\UnreadRollupTest.java:77: 错误: 找不到符号
+                  UnreadRollup.visibleUnread(Arrays.asList(root, archived, hidden));
+                  ^
+    符号:   变量 UnreadRollup
+    位置: 类 UnreadRollupTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\UnreadRollupTest.java:95: 错误: 找不到符号
+          Map<String, Long> visible = UnreadRollup.visibleUnread(Arrays.asList(root, archived));
+                                      ^
+    符号:   变量 UnreadRollup
+    位置: 类 UnreadRollupTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\UnreadRollupTest.java:104: 错误: 找不到符号
+          Map<String, Long> visible = UnreadRollup.visibleUnread(Collections.singletonList(root));
+                                      ^
+    符号:   变量 UnreadRollup
+    位置: 类 UnreadRollupTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\UnreadRollupTest.java:118: 错误: 找不到符号
+          Map<String, Long> visible = UnreadRollup.visibleUnread(Collections.singletonList(orphan));
+                                      ^
+    符号:   变量 UnreadRollup
+    位置: 类 UnreadRollupTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ViewportSeenTest.java:40: 错误: 找不到符号
+          boolean advanced = ViewportSeen.onViewport(branch, messages,
+                             ^
+    符号:   变量 ViewportSeen
+    位置: 类 ViewportSeenTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ViewportSeenTest.java:56: 错误: 找不到符号
+          boolean advanced = ViewportSeen.onViewport(branch, messages,
+                             ^
+    符号:   变量 ViewportSeen
+    位置: 类 ViewportSeenTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ViewportSeenTest.java:71: 错误: 找不到符号
+          assertFalse(ViewportSeen.onViewport(branch, messages, visible(messages.get(0).id)));
+                      ^
+    符号:   变量 ViewportSeen
+    位置: 类 ViewportSeenTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ViewportSeenTest.java:82: 错误: 找不到符号
+          assertFalse(ViewportSeen.onViewport(branch, messages, visible()));
+                      ^
+    符号:   变量 ViewportSeen
+    位置: 类 ViewportSeenTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ViewportSeenTest.java:93: 错误: 找不到符号
+          assertFalse(ViewportSeen.onViewport(branch, messages, visible(messages.get(1).id)));
+                      ^
+    符号:   变量 ViewportSeen
+    位置: 类 ViewportSeenTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ViewportSeenTest.java:103: 错误: 找不到符号
+          assertFalse(ViewportSeen.onViewport(branch, messages, visible()));
+                      ^
+    符号:   变量 ViewportSeen
+    位置: 类 ViewportSeenTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ViewportSeenTest.java:104: 错误: 找不到符号
+          assertFalse(ViewportSeen.onViewport(branch, Collections.<Message>emptyList(), visible()));
+                      ^
+    符号:   变量 ViewportSeen
+    位置: 类 ViewportSeenTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:116: 错误: 程序包SearchHit不存在
+      private static List<SearchHit.Field> fields(List<SearchHit> hits) {
+                                   ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:47: 错误: 程序包SearchHit不存在
+                          SearchHit.Field.TITLE,
+                                   ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:48: 错误: 程序包SearchHit不存在
+                          SearchHit.Field.ANSWER,
+                                   ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:49: 错误: 程序包SearchHit不存在
+                          SearchHit.Field.ANSWER,
+                                   ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:50: 错误: 程序包SearchHit不存在
+                          SearchHit.Field.ANSWER,
+                                   ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:51: 错误: 程序包SearchHit不存在
+                          SearchHit.Field.REASONING),
+                                   ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:83: 错误: 程序包SearchHit不存在
+          SearchHit hit = SearchHit.of(SearchHit.Field.PARTIAL_ANSWER, TOPIC, BRANCH_A, MESSAGE, 7,
+                                                ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:94: 错误: 程序包SearchHit不存在
+                  () -> SearchHit.of(SearchHit.Field.TITLE, TOPIC, BRANCH_A, null, 3, null, 0, "x"));
+                                              ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:96: 错误: 程序包SearchHit不存在
+                  () -> SearchHit.of(SearchHit.Field.ANSWER, TOPIC, BRANCH_A, MESSAGE, -1,
+                                              ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:103: 错误: 程序包SearchHit不存在
+                  () -> SearchHit.of(SearchHit.Field.ANSWER, TOPIC, BRANCH_A, null, -1, REVISION, 1, "x"));
+                                              ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:109: 错误: 程序包SearchHit不存在
+                  () -> SearchHit.of(SearchHit.Field.TITLE, "not-a-uuid", BRANCH_A, null, -1, null, 0, "x"));
+                                              ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:111: 错误: 程序包SearchHit不存在
+                  () -> SearchHit.of(SearchHit.Field.TITLE, TOPIC, BRANCH_A, null, -1, null, 0, null));
+                                              ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:117: 错误: 程序包SearchHit不存在
+          List<SearchHit.Field> fields = new ArrayList<SearchHit.Field>();
+                        ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:117: 错误: 程序包SearchHit不存在
+          List<SearchHit.Field> fields = new ArrayList<SearchHit.Field>();
+                                                                ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:125: 错误: 程序包SearchHit不存在
+          return SearchHit.of(SearchHit.Field.TITLE, topicId, branchId, null, -1, null, 0, "title text");
+                                       ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:130: 错误: 程序包SearchHit不存在
+          return SearchHit.of(SearchHit.Field.ANSWER, topicId, branchId, messageId, ordinal, revisionId,
+                                       ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java:136: 错误: 程序包SearchHit不存在
+          return SearchHit.of(SearchHit.Field.REASONING, topicId, branchId, messageId, ordinal,
+                                       ^
+  89 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+==============================================================================
+
+2: Task failed with an exception.
+-----------
+* What went wrong:
+Execution failed for task ':data:compileDebugUnitTestJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:8: 错误: 找不到符号
+  import com.treelearn.core.domain.SearchQuery;
+                                  ^
+    符号:   类 SearchQuery
+    位置: 程序包 com.treelearn.core.domain
+  D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:27: 错误: 找不到符号
+          String statement = SearchDao.statement();
+                             ^
+    符号:   变量 SearchDao
+    位置: 类 SearchDaoStatementTest
+  D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:30: 错误: 找不到符号
+          assertEquals(6, SearchDao.arguments(SearchQuery.of("需求")).length);
+                          ^
+    符号:   变量 SearchDao
+    位置: 类 SearchDaoStatementTest
+  D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:30: 错误: 找不到符号
+          assertEquals(6, SearchDao.arguments(SearchQuery.of("需求")).length);
+                                              ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchDaoStatementTest
+  D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:40: 错误: 找不到符号
+          assertEquals(6, countOf(SearchDao.statement(), "ESCAPE '\\'"));
+                                  ^
+    符号:   变量 SearchDao
+    位置: 类 SearchDaoStatementTest
+  D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:45: 错误: 找不到符号
+          SearchQuery query = SearchQuery.of(" 100% ");
+          ^
+    符号:   类 SearchQuery
+    位置: 类 SearchDaoStatementTest
+  D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:45: 错误: 找不到符号
+          SearchQuery query = SearchQuery.of(" 100% ");
+                              ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchDaoStatementTest
+  D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:47: 错误: 找不到符号
+          String[] arguments = SearchDao.arguments(query);
+                               ^
+    符号:   变量 SearchDao
+    位置: 类 SearchDaoStatementTest
+  D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:58: 错误: 找不到符号
+                  () -> SearchDao.arguments(SearchQuery.of("   ")));
+                        ^
+    符号:   变量 SearchDao
+    位置: 类 SearchDaoStatementTest
+  D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:58: 错误: 找不到符号
+                  () -> SearchDao.arguments(SearchQuery.of("   ")));
+                                            ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchDaoStatementTest
+  D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:66: 错误: 找不到符号
+          assertEquals(2, countOf(SearchDao.statement(), "answer_revisions ar"));
+                                  ^
+    符号:   变量 SearchDao
+    位置: 类 SearchDaoStatementTest
+  D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:67: 错误: 找不到符号
+          assertEquals(2, countOf(SearchDao.statement(),
+                                  ^
+    符号:   变量 SearchDao
+    位置: 类 SearchDaoStatementTest
+  D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:70: 错误: 找不到符号
+                  SearchDao.statement().contains("b.source_revision_id"));
+                  ^
+    符号:   变量 SearchDao
+    位置: 类 SearchDaoStatementTest
+  D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:75: 错误: 找不到符号
+          assertEquals(6, countOf(SearchDao.statement(), "b.archived_at IS NULL"));
+                                  ^
+    符号:   变量 SearchDao
+    位置: 类 SearchDaoStatementTest
+  D:\Project\Android\Treelearn\android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:82: 错误: 找不到符号
+          String statement = SearchDao.statement();
+                             ^
+    符号:   变量 SearchDao
+    位置: 类 SearchDaoStatementTest
+  15 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+==============================================================================
+
+3: Task failed with an exception.
+-----------
+* What went wrong:
+Execution failed for task ':app:compileDebugUnitTestJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:12: 错误: 找不到符号
+  import com.treelearn.core.domain.ReadingAnchor;
+                                  ^
+    符号:   类 ReadingAnchor
+    位置: 程序包 com.treelearn.core.domain
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:13: 错误: 找不到符号
+  import com.treelearn.core.domain.ReadingPosition;
+                                  ^
+    符号:   类 ReadingPosition
+    位置: 程序包 com.treelearn.core.domain
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:158: 错误: 找不到符号
+      private static final class FakeStore implements ReadingStore {
+                                                      ^
+    符号:   类 ReadingStore
+    位置: 类 ReadingSessionTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:160: 错误: 找不到符号
+          ReadingAnchor anchor;
+          ^
+    符号:   类 ReadingAnchor
+    位置: 类 FakeStore
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:162: 错误: 找不到符号
+          ReadingAnchor savedAnchor;
+          ^
+    符号:   类 ReadingAnchor
+    位置: 类 FakeStore
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:167: 错误: 找不到符号
+          public ReadingAnchor anchorOf(String branchId) {
+                 ^
+    符号:   类 ReadingAnchor
+    位置: 类 FakeStore
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:172: 错误: 找不到符号
+          public void saveAnchor(String branchId, ReadingAnchor anchor) {
+                                                  ^
+    符号:   类 ReadingAnchor
+    位置: 类 FakeStore
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:7: 错误: 找不到符号
+  import com.treelearn.core.domain.ReadingAnchor;
+                                  ^
+    符号:   类 ReadingAnchor
+    位置: 程序包 com.treelearn.core.domain
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:8: 错误: 找不到符号
+  import com.treelearn.core.domain.SearchHit;
+                                  ^
+    符号:   类 SearchHit
+    位置: 程序包 com.treelearn.core.domain
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:9: 错误: 找不到符号
+  import com.treelearn.core.domain.SearchQuery;
+                                  ^
+    符号:   类 SearchQuery
+    位置: 程序包 com.treelearn.core.domain
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:140: 错误: 找不到符号
+      private static SearchHit answerHit() {
+                     ^
+    符号:   类 SearchHit
+    位置: 类 SearchPresenterTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:196: 错误: 找不到符号
+      private static final class FakeRepository implements SearchRepository {
+                                                           ^
+    符号:   类 SearchRepository
+    位置: 类 SearchPresenterTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:151: 错误: 找不到符号
+          final SearchPresenter presenter;
+                ^
+    符号:   类 SearchPresenter
+    位置: 类 Fixture
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:198: 错误: 找不到符号
+          List<SearchHit> hits = Collections.emptyList();
+               ^
+    符号:   类 SearchHit
+    位置: 类 FakeRepository
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:203: 错误: 找不到符号
+          SearchQuery lastQuery;
+          ^
+    符号:   类 SearchQuery
+    位置: 类 FakeRepository
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:206: 错误: 找不到符号
+          public List<SearchHit> search(SearchQuery query) {
+                                        ^
+    符号:   类 SearchQuery
+    位置: 类 FakeRepository
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:206: 错误: 找不到符号
+          public List<SearchHit> search(SearchQuery query) {
+                      ^
+    符号:   类 SearchHit
+    位置: 类 FakeRepository
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:216: 错误: 找不到符号
+          public boolean isStillReachable(SearchHit hit) {
+                                          ^
+    符号:   类 SearchHit
+    位置: 类 FakeRepository
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:226: 错误: 找不到符号
+          ReadingAnchor openedAnchor;
+          ^
+    符号:   类 ReadingAnchor
+    位置: 类 RecordingSink
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:229: 错误: 找不到符号
+          public void render(SearchViewState state) {
+                             ^
+    符号:   类 SearchViewState
+    位置: 类 RecordingSink
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:233: 错误: 找不到符号
+          public void openAnchor(String topicId, String branchId, ReadingAnchor anchor) {
+                                                                  ^
+    符号:   类 ReadingAnchor
+    位置: 类 RecordingSink
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:24: 错误: 找不到符号
+      private static final CopyLabels LABELS = CopyLabels.of("思考过程", "最终回答");
+                           ^
+    符号:   类 CopyLabels
+    位置: 类 ChatMessageTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:104: 错误: 找不到符号
+      private static ChatMessage stable() {
+                     ^
+    符号:   类 ChatMessage
+    位置: 类 ChatMessageTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:109: 错误: 找不到符号
+      private static ChatMessage aiWithChildren(int children) {
+                     ^
+    符号:   类 ChatMessage
+    位置: 类 ChatMessageTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:115: 错误: 找不到符号
+      private static ChatMessage aiWithVersions(int versions) {
+                     ^
+    符号:   类 ChatMessage
+    位置: 类 ChatMessageTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:121: 错误: 找不到符号
+      private static ChatMessage generating(ChatMessage.Phase phase) {
+                     ^
+    符号:   类 ChatMessage
+    位置: 类 ChatMessageTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:126: 错误: 找不到符号
+      private static ChatMessage failed() {
+                     ^
+    符号:   类 ChatMessage
+    位置: 类 ChatMessageTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:70: 错误: 找不到符号
+      private static void assertVersionSwitchAgrees(Message position, ChatMessage rendered,
+                                                                      ^
+    符号:   类 ChatMessage
+    位置: 类 ChatPositionAgreementTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:90: 错误: 找不到符号
+      private static ChatMessage rendered(ChatMessage.Status status, String activeRevisionId,
+                     ^
+    符号:   类 ChatMessage
+    位置: 类 ChatPositionAgreementTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:36: 错误: 找不到符号
+      private static final CopyLabels LABELS = CopyLabels.of("思考过程", "最终回答");
+                           ^
+    符号:   类 CopyLabels
+    位置: 类 ChatPresenterTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:149: 错误: 找不到符号
+      static final class RecordingChatSink implements ChatSink {
+                                                      ^
+    符号:   类 ChatSink
+    位置: 类 ChatTestDoubles
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:131: 错误: 找不到符号
+      static final class FakeChatData implements ChatData {
+                                                 ^
+    符号:   类 ChatData
+    位置: 类 ChatTestDoubles
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:50: 错误: 找不到符号
+      static final class FakeChatCommands implements ChatCommands {
+                                                     ^
+    符号:   类 ChatCommands
+    位置: 类 ChatTestDoubles
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:528: 错误: 找不到符号
+      private ChatPresenter presenter() {
+              ^
+    符号:   类 ChatPresenter
+    位置: 类 ChatPresenterTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:568: 错误: 找不到符号
+      private static List<ChatMessage> messages(ChatMessage... items) {
+                                                ^
+    符号:   类 ChatMessage
+    位置: 类 ChatPresenterTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:568: 错误: 找不到符号
+      private static List<ChatMessage> messages(ChatMessage... items) {
+                          ^
+    符号:   类 ChatMessage
+    位置: 类 ChatPresenterTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:52: 错误: 找不到符号
+          ChatCommandResult sendResult = ChatCommandResult.ran(OP);
+          ^
+    符号:   类 ChatCommandResult
+    位置: 类 FakeChatCommands
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:53: 错误: 找不到符号
+          ChatCommandResult retryResult = ChatCommandResult.ran(OP);
+          ^
+    符号:   类 ChatCommandResult
+    位置: 类 FakeChatCommands
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:54: 错误: 找不到符号
+          ChatCommandResult resetResult = ChatCommandResult.ran(OP);
+          ^
+    符号:   类 ChatCommandResult
+    位置: 类 FakeChatCommands
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:55: 错误: 找不到符号
+          ChatCommandResult selectResult = ChatCommandResult.ran(OP);
+          ^
+    符号:   类 ChatCommandResult
+    位置: 类 FakeChatCommands
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:56: 错误: 找不到符号
+          ChatCommandResult forkResult = ChatCommandResult.openedBranch(OP, BRANCH_2);
+          ^
+    符号:   类 ChatCommandResult
+    位置: 类 FakeChatCommands
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:70: 错误: 找不到符号
+          public ChatCommandResult send(String branchId, String text, String quote, GenerationModel model,
+                 ^
+    符号:   类 ChatCommandResult
+    位置: 类 FakeChatCommands
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:81: 错误: 找不到符号
+          public ChatCommandResult retry(String messageId, GenerationModel model,
+                 ^
+    符号:   类 ChatCommandResult
+    位置: 类 FakeChatCommands
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:92: 错误: 找不到符号
+          public ChatCommandResult reset(String messageId, GenerationModel model,
+                 ^
+    符号:   类 ChatCommandResult
+    位置: 类 FakeChatCommands
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:103: 错误: 找不到符号
+          public ChatCommandResult selectRevision(String messageId, String revisionId, long now) {
+                 ^
+    符号:   类 ChatCommandResult
+    位置: 类 FakeChatCommands
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:112: 错误: 找不到符号
+          public ChatCommandResult fork(String messageId, String question) {
+                 ^
+    符号:   类 ChatCommandResult
+    位置: 类 FakeChatCommands
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:139: 错误: 找不到符号
+          public Snapshot read(String branchId) {
+                 ^
+    符号:   类 Snapshot
+    位置: 类 FakeChatData
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:151: 错误: 找不到符号
+          final List<ChatViewState> states = new ArrayList<ChatViewState>();
+                     ^
+    符号:   类 ChatViewState
+    位置: 类 RecordingChatSink
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:160: 错误: 找不到符号
+          public void render(ChatViewState state) {
+                             ^
+    符号:   类 ChatViewState
+    位置: 类 RecordingChatSink
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:194: 错误: 找不到符号
+          ChatViewState last() {
+          ^
+    符号:   类 ChatViewState
+    位置: 类 RecordingChatSink
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:34: 错误: 找不到符号
+      static ChatMessage ask(String id, String text) {
+             ^
+    符号:   类 ChatMessage
+    位置: 类 ChatTestDoubles
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:38: 错误: 找不到符号
+      static ChatMessage stableAnswer(String id, String answer) {
+             ^
+    符号:   类 ChatMessage
+    位置: 类 ChatTestDoubles
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:44: 错误: 找不到符号
+      static ChatData.Snapshot snapshot(List<ChatMessage> messages) {
+                                             ^
+    符号:   类 ChatMessage
+    位置: 类 ChatTestDoubles
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:203: 错误: 找不到符号
+      static List<ChatMessage> messages(ChatMessage... items) {
+                                        ^
+    符号:   类 ChatMessage
+    位置: 类 ChatTestDoubles
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:203: 错误: 找不到符号
+      static List<ChatMessage> messages(ChatMessage... items) {
+                  ^
+    符号:   类 ChatMessage
+    位置: 类 ChatTestDoubles
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatViewStateTest.java:150: 错误: 找不到符号
+      private static ChatViewState initial() {
+                     ^
+    符号:   类 ChatViewState
+    位置: 类 ChatViewStateTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatViewStateTest.java:154: 错误: 找不到符号
+      private static ChatViewState withConversation() {
+                     ^
+    符号:   类 ChatViewState
+    位置: 类 ChatViewStateTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:42: 错误: 找不到符号
+          store.anchor = ReadingAnchor.of(messages.get(1).id, REVISION, 18, 6);
+                         ^
+    符号:   变量 ReadingAnchor
+    位置: 类 ReadingSessionTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:44: 错误: 找不到符号
+          ReadingPosition position = new ReadingSession(store).open(branch, messages, 90);
+          ^
+    符号:   类 ReadingPosition
+    位置: 类 ReadingSessionTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:44: 错误: 找不到符号
+          ReadingPosition position = new ReadingSession(store).open(branch, messages, 90);
+                                         ^
+    符号:   类 ReadingSession
+    位置: 类 ReadingSessionTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:58: 错误: 找不到符号
+          ReadingPosition position = new ReadingSession(new FakeStore()).open(branch, messages, 90);
+          ^
+    符号:   类 ReadingPosition
+    位置: 类 ReadingSessionTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:58: 错误: 找不到符号
+          ReadingPosition position = new ReadingSession(new FakeStore()).open(branch, messages, 90);
+                                         ^
+    符号:   类 ReadingSession
+    位置: 类 ReadingSessionTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:70: 错误: 找不到符号
+          store.anchor = ReadingAnchor.of(Guard.newId(), null, 40, 40);
+                         ^
+    符号:   变量 ReadingAnchor
+    位置: 类 ReadingSessionTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:72: 错误: 找不到符号
+          ReadingPosition position = new ReadingSession(store).open(branch, messages, 90);
+          ^
+    符号:   类 ReadingPosition
+    位置: 类 ReadingSessionTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:72: 错误: 找不到符号
+          ReadingPosition position = new ReadingSession(store).open(branch, messages, 90);
+                                         ^
+    符号:   类 ReadingSession
+    位置: 类 ReadingSessionTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:89: 错误: 找不到符号
+          store.anchor = ReadingAnchor.of(messages.get(2).id, REVISION, 11, 0);
+                         ^
+    符号:   变量 ReadingAnchor
+    位置: 类 ReadingSessionTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:91: 错误: 找不到符号
+          ReadingPosition position = new ReadingSession(store).open(branch, messages, 90);
+          ^
+    符号:   类 ReadingPosition
+    位置: 类 ReadingSessionTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:91: 错误: 找不到符号
+          ReadingPosition position = new ReadingSession(store).open(branch, messages, 90);
+                                         ^
+    符号:   类 ReadingSession
+    位置: 类 ReadingSessionTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:106: 错误: 找不到符号
+          boolean advanced = new ReadingSession(store).onViewport(branch, messages,
+                                 ^
+    符号:   类 ReadingSession
+    位置: 类 ReadingSessionTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:122: 错误: 找不到符号
+          boolean advanced = new ReadingSession(store).onViewport(branch, messages,
+                                 ^
+    符号:   类 ReadingSession
+    位置: 类 ReadingSessionTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:136: 错误: 找不到符号
+          new ReadingSession(store).remember(branch,
+              ^
+    符号:   类 ReadingSession
+    位置: 类 ReadingSessionTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:137: 错误: 找不到符号
+                  ReadingAnchor.of(messages.get(1).id, null, 37, 12));
+                  ^
+    符号:   变量 ReadingAnchor
+    位置: 类 ReadingSessionTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:76: 错误: 找不到符号
+          SearchHit hit = answerHit();
+          ^
+    符号:   类 SearchHit
+    位置: 类 SearchPresenterTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:90: 错误: 找不到符号
+          fixture.presenter.onHitOpened(SearchHit.of(SearchHit.Field.TITLE, TOPIC, BRANCH, null, -1,
+                                        ^
+    符号:   变量 SearchHit
+    位置: 类 SearchPresenterTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:100: 错误: 找不到符号
+          fixture.repository.hits = new ArrayList<SearchHit>(Arrays.asList(answerHit(), answerHit()));
+                                                  ^
+    符号:   类 SearchHit
+    位置: 类 SearchPresenterTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:141: 错误: 找不到符号
+          return SearchHit.of(SearchHit.Field.ANSWER, TOPIC, BRANCH, MESSAGE, 3, REVISION, 2,
+                 ^
+    符号:   变量 SearchHit
+    位置: 类 SearchPresenterTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:154: 错误: 找不到符号
+              this.presenter = new SearchPresenter(sink, ui, background, repository);
+                                   ^
+    符号:   类 SearchPresenter
+    位置: 类 Fixture
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:24: 错误: 找不到符号
+      private static final CopyLabels LABELS = CopyLabels.of("思考过程", "最终回答");
+                                               ^
+    符号:   变量 CopyLabels
+    位置: 类 ChatMessageTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:166: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:171: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\reading\ReadingSessionTest.java:177: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:205: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:215: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:228: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:232: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:222: 错误: 程序包SearchPresenter不存在
+      private static final class RecordingSink implements SearchPresenter.Sink {
+                                                                         ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatMessageTest.java:121: 错误: 程序包ChatMessage不存在
+      private static ChatMessage generating(ChatMessage.Phase phase) {
+                                                       ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPositionAgreementTest.java:90: 错误: 程序包ChatMessage不存在
+      private static ChatMessage rendered(ChatMessage.Status status, String activeRevisionId,
+                                                     ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:533: 错误: 程序包ChatData不存在
+      private static ChatData.Snapshot conversation() {
+                             ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:540: 错误: 程序包ChatData不存在
+      private static ChatData.Snapshot failedConversation() {
+                             ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:548: 错误: 程序包ChatData不存在
+      private static ChatData.Snapshot withVersions() {
+                             ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:557: 错误: 程序包ChatData不存在
+      private static ChatData.Snapshot withStrip(Recommendation strip, String revisionId) {
+                             ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:133: 错误: 程序包ChatData不存在
+          ChatData.Snapshot snapshot = snapshot(Collections.<ChatMessage>emptyList());
+                  ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:44: 错误: 程序包ChatData不存在
+      static ChatData.Snapshot snapshot(List<ChatMessage> messages) {
+                     ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:41: 错误: 程序包SearchViewState不存在
+          assertEquals(SearchViewState.Phase.IDLE, fixture.presenter.state().phase);
+                                      ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:53: 错误: 程序包SearchViewState不存在
+          assertEquals(SearchViewState.Phase.RESULTS, fixture.presenter.state().phase);
+                                      ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:69: 错误: 程序包SearchViewState不存在
+          assertEquals(SearchViewState.Phase.ERROR, fixture.presenter.state().phase);
+                                      ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:90: 错误: 程序包SearchHit不存在
+          fixture.presenter.onHitOpened(SearchHit.of(SearchHit.Field.TITLE, TOPIC, BRANCH, null, -1,
+                                                              ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:123: 错误: 程序包SearchViewState不存在
+          assertEquals(SearchViewState.Phase.RESULTS, fixture.presenter.state().phase);
+                                      ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:141: 错误: 程序包SearchHit不存在
+          return SearchHit.of(SearchHit.Field.ANSWER, TOPIC, BRANCH, MESSAGE, 3, REVISION, 2,
+                                       ^
+  100 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+==============================================================================
+
+4: Task failed with an exception.
+-----------
+* What went wrong:
+Execution failed for task ':app:compileDebugAndroidTestJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  注: D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java使用或覆盖了已过时的 API。
+  注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:22: 错误: 找不到符号
+  import com.treelearn.core.domain.ReadingAnchor;
+                                  ^
+    符号:   类 ReadingAnchor
+    位置: 程序包 com.treelearn.core.domain
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:23: 错误: 找不到符号
+  import com.treelearn.core.domain.SearchHit;
+                                  ^
+    符号:   类 SearchHit
+    位置: 程序包 com.treelearn.core.domain
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:24: 错误: 找不到符号
+  import com.treelearn.core.domain.SearchQuery;
+                                  ^
+    符号:   类 SearchQuery
+    位置: 程序包 com.treelearn.core.domain
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:31: 错误: 找不到符号
+  import com.treelearn.data.db.dao.ReadingPositionDao;
+                                  ^
+    符号:   类 ReadingPositionDao
+    位置: 程序包 com.treelearn.data.db.dao
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:32: 错误: 找不到符号
+  import com.treelearn.data.db.dao.SearchDao;
+                                  ^
+    符号:   类 SearchDao
+    位置: 程序包 com.treelearn.data.db.dao
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:330: 错误: 找不到符号
+      private static String[] fields(List<SearchHit> hits) {
+                                          ^
+    符号:   类 SearchHit
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:98: 错误: 找不到符号
+                  fields(SearchDao.search(db, SearchQuery.of("细胞"))));
+                         ^
+    符号:   变量 SearchDao
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:98: 错误: 找不到符号
+                  fields(SearchDao.search(db, SearchQuery.of("细胞"))));
+                                              ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:100: 错误: 找不到符号
+                  fields(SearchDao.search(db, SearchQuery.of("膜间隙"))));
+                         ^
+    符号:   变量 SearchDao
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:100: 错误: 找不到符号
+                  fields(SearchDao.search(db, SearchQuery.of("膜间隙"))));
+                                              ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:102: 错误: 找不到符号
+                  fields(SearchDao.search(db, SearchQuery.of("能量工厂"))));
+                         ^
+    符号:   变量 SearchDao
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:102: 错误: 找不到符号
+                  fields(SearchDao.search(db, SearchQuery.of("能量工厂"))));
+                                              ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:103: 错误: 找不到符号
+          assertTrue(SearchDao.search(db, SearchQuery.of("不存在的词")).isEmpty());
+                     ^
+    符号:   变量 SearchDao
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:103: 错误: 找不到符号
+          assertTrue(SearchDao.search(db, SearchQuery.of("不存在的词")).isEmpty());
+                                          ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:114: 错误: 找不到符号
+          List<SearchHit> hits = SearchDao.search(db, SearchQuery.of("100%"));
+               ^
+    符号:   类 SearchHit
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:114: 错误: 找不到符号
+          List<SearchHit> hits = SearchDao.search(db, SearchQuery.of("100%"));
+                                 ^
+    符号:   变量 SearchDao
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:114: 错误: 找不到符号
+          List<SearchHit> hits = SearchDao.search(db, SearchQuery.of("100%"));
+                                                      ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:128: 错误: 找不到符号
+          List<SearchHit> hits = SearchDao.search(db, SearchQuery.of("a_b"));
+               ^
+    符号:   类 SearchHit
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:128: 错误: 找不到符号
+          List<SearchHit> hits = SearchDao.search(db, SearchQuery.of("a_b"));
+                                 ^
+    符号:   变量 SearchDao
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:128: 错误: 找不到符号
+          List<SearchHit> hits = SearchDao.search(db, SearchQuery.of("a_b"));
+                                                      ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:141: 错误: 找不到符号
+          assertTrue(SearchDao.search(db, SearchQuery.of("' OR '1'='1")).isEmpty());
+                     ^
+    符号:   变量 SearchDao
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:141: 错误: 找不到符号
+          assertTrue(SearchDao.search(db, SearchQuery.of("' OR '1'='1")).isEmpty());
+                                          ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:160: 错误: 找不到符号
+          List<SearchHit> hits = SearchDao.search(db, SearchQuery.of("TOKEN_A"));
+               ^
+    符号:   类 SearchHit
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:160: 错误: 找不到符号
+          List<SearchHit> hits = SearchDao.search(db, SearchQuery.of("TOKEN_A"));
+                                 ^
+    符号:   变量 SearchDao
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:160: 错误: 找不到符号
+          List<SearchHit> hits = SearchDao.search(db, SearchQuery.of("TOKEN_A"));
+                                                      ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:164: 错误: 找不到符号
+          List<SearchHit> viaFork = SearchDao.search(db, SearchQuery.of("TOKEN_A"));
+               ^
+    符号:   类 SearchHit
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:164: 错误: 找不到符号
+          List<SearchHit> viaFork = SearchDao.search(db, SearchQuery.of("TOKEN_A"));
+                                    ^
+    符号:   变量 SearchDao
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:164: 错误: 找不到符号
+          List<SearchHit> viaFork = SearchDao.search(db, SearchQuery.of("TOKEN_A"));
+                                                         ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:176: 错误: 找不到符号
+          assertTrue(SearchDao.search(db, SearchQuery.of("合成归档标题")).isEmpty());
+                     ^
+    符号:   变量 SearchDao
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:176: 错误: 找不到符号
+          assertTrue(SearchDao.search(db, SearchQuery.of("合成归档标题")).isEmpty());
+                                          ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:187: 错误: 找不到符号
+          List<SearchHit> hits = SearchDao.search(db, SearchQuery.of("合成排序"));
+               ^
+    符号:   类 SearchHit
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:187: 错误: 找不到符号
+          List<SearchHit> hits = SearchDao.search(db, SearchQuery.of("合成排序"));
+                                 ^
+    符号:   变量 SearchDao
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:187: 错误: 找不到符号
+          List<SearchHit> hits = SearchDao.search(db, SearchQuery.of("合成排序"));
+                                                      ^
+    符号:   变量 SearchQuery
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:211: 错误: 找不到符号
+          ReadingAnchor written = ReadingAnchor.of(messages.get(1).id, null, 23, 8);
+          ^
+    符号:   类 ReadingAnchor
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:211: 错误: 找不到符号
+          ReadingAnchor written = ReadingAnchor.of(messages.get(1).id, null, 23, 8);
+                                  ^
+    符号:   变量 ReadingAnchor
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:213: 错误: 找不到符号
+          ReadingPositionDao.write(db, branch.id, written);
+          ^
+    符号:   变量 ReadingPositionDao
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:214: 错误: 找不到符号
+          ReadingAnchor readBack = ReadingPositionDao.read(db, branch.id);
+          ^
+    符号:   类 ReadingAnchor
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:214: 错误: 找不到符号
+          ReadingAnchor readBack = ReadingPositionDao.read(db, branch.id);
+                                   ^
+    符号:   变量 ReadingPositionDao
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:229: 错误: 找不到符号
+          ReadingPositionDao.write(db, branch.id, ReadingAnchor.of(message.id, null, 5, 5));
+          ^
+    符号:   变量 ReadingPositionDao
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:229: 错误: 找不到符号
+          ReadingPositionDao.write(db, branch.id, ReadingAnchor.of(message.id, null, 5, 5));
+                                                  ^
+    符号:   变量 ReadingAnchor
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:235: 错误: 找不到符号
+                  ReadingPositionDao.read(db, branch.id));
+                  ^
+    符号:   变量 ReadingPositionDao
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:244: 错误: 找不到符号
+          ReadingPositionDao.write(db, branch.id, ReadingAnchor.atMessage(message.id, null));
+          ^
+    符号:   变量 ReadingPositionDao
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:244: 错误: 找不到符号
+          ReadingPositionDao.write(db, branch.id, ReadingAnchor.atMessage(message.id, null));
+                                                  ^
+    符号:   变量 ReadingAnchor
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:246: 错误: 找不到符号
+          ReadingPositionDao.clear(db, branch.id);
+          ^
+    符号:   变量 ReadingPositionDao
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:248: 错误: 找不到符号
+          assertNull(ReadingPositionDao.read(db, branch.id));
+                     ^
+    符号:   变量 ReadingPositionDao
+    位置: 类 SearchUnreadReadingInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java:192: 错误: 程序包SearchHit不存在
+                      SearchHit.DISPLAY_ORDER.compare(hits.get(i - 1), hits.get(i)) <= 0);
+                               ^
+  46 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+==============================================================================
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 13s
+87 actionable tasks: 4 executed, 83 up-to-date
+EXITCODE=1

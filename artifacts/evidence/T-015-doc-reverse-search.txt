@@ -1,0 +1,25 @@
+# T-015 documentation impact - reverse search for the phrasings this slice supersedes
+CapturedAt=2026-09-21T22:21:48.2252839+08:00
+Scope: production Java only (android/{app,core,data}/src/main/java).
+Why: four mechanisms are deliberately NOT used by this slice; the record must show they were searched for,
+  not merely asserted absent.  scrollY = absolute pixel position (design requires a semantic anchor);
+  fts4/fts5/MATCH = default SQLite full-text search (Chinese FTS is unreliable and is not relied on);
+  isUnread / boolean unread = the boolean flag that loses events (unread derives from the stable sequence).
+
+--- query 1 (the phrases, comments included) ---
+Command: Set-Location D:\Project\Android\Treelearn; rg -n --no-heading "scrollY|fts4|fts5|MATCH |isUnread|boolean unread" android/app/src/main/java android/core/src/main/java android/data/src/main/java
+android/core/src/main/java\com\treelearn\core\domain\ReadingAnchor.java:8: * <p><strong>Why not a scroll offset.</strong> An absolute {@code scrollY} stops meaning anything
+rg exit code: 0
+Matches: 1  (one line, and it is a javadoc sentence in ReadingAnchor.java that NAMES scrollY in order
+  to reject it - 'an absolute scrollY stops meaning anything'. It is not a use of an absolute offset.)
+
+--- query 2 (actual uses, comments cannot satisfy these) ---
+Command: Set-Location D:\Project\Android\Treelearn; rg -n --no-heading "getScrollY\(|scrollY\s*=|setScrollY|USING fts|CREATE VIRTUAL TABLE" android/app/src/main/java android/core/src/main/java android/data/src/main/java
+(no lines)
+rg exit code: 1
+Matches: 0
+
+Interpretation: no production code reads or writes an absolute scroll offset, and no FTS table or MATCH
+  query exists. The single query-1 hit is a comment that documents the rejection. Therefore no current-state
+  document needs correcting for these four phrasings, and this slice introduces none of them.
+EXITCODE=0

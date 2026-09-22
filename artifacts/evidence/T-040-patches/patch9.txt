@@ -1,0 +1,170 @@
+*** Begin Patch
+*** Update File: android/app/src/main/java/com/treelearn/app/MainActivity.java
+@@
+ import com.treelearn.app.screen.HomeScreen;
+ import com.treelearn.app.screen.NavigationScreen;
++import com.treelearn.app.screen.SearchScreen;
+ import com.treelearn.app.screen.SettingsScreen;
+@@
+ import com.treelearn.app.reading.ReadingStore;
++import com.treelearn.app.search.BranchTitles;
++import com.treelearn.app.search.SearchPage;
++import com.treelearn.app.search.SearchPresenter;
++import com.treelearn.app.search.SearchViewState;
+ import com.treelearn.app.ui.ChatPresenter;
+@@
+- * host, not second Activities. Search is still to come.
++ * host, not second Activities. Search arrived in T-040 the same way.
+@@
+ public final class MainActivity extends Activity
+-        implements HomeSink, SettingsSink, ChatSink, TreeCanvasSink, NavigationSink {
++        implements HomeSink, SettingsSink, ChatSink, TreeCanvasSink, NavigationSink,
++        SearchPresenter.Sink {
+@@
+     /** The branch one pending entry is resolving a topic for; null when no entry is in flight. */
+     private String navigatingTo;
++
++    /** The search page and its decisions; null while the page is not on screen. */
++    private SearchScreen searchScreen;
++    private SearchPresenter searchPresenter;
+@@
+         if (chatBranchId != null) {
+             chatPresenter.onResumed();
+             return;
+         }
++        if (searchScreen != null) {
++            searchPresenter.onResumed();
++            return;
++        }
+         if (homeStarted) {
+@@
+-     * from - the same move the prototype's canvas appbar makes - a conversation steps back to the home
+-     * page, and the home page leaves the app.
++     * from - the same move the prototype's canvas appbar makes. The search page steps back to the home
++     * page, a conversation steps back to the home page, and the home page leaves the app.
+@@
+         if (showingSettings) {
+             if (chatBranchId == null) {
+                 showHome();
+             } else {
+                 showChat(chatBranchId);
+             }
+             return;
+         }
++        if (searchScreen != null) {
++            showHome();
++            return;
++        }
+         if (navigationBranchId != null) {
+@@
+     public void render(NavigationViewState state) {
+         if (navigationScreen != null) {
+             navigationScreen.render(state);
+         }
+     }
++
++    /**
++     * The search page's state. The page object is built off the UI thread, because naming a row's
++     * branch is a store read like any other; only the finished page comes back to be drawn, and a page
++     * whose screen has been left in the meantime is dropped rather than drawn into.
++     */
++    @Override
++    public void render(SearchViewState state) {
++        final SearchScreen screen = searchScreen;
++        if (screen == null) {
++            return;
++        }
++        final BranchTitles titles = container.branchTitles();
++        container.background().execute(() -> {
++            final SearchPage page = SearchPage.of(state, titles);
++            container.uiThread().post(() -> drawSearch(screen, state, page));
++        });
++    }
++
++    /**
++     * A tapped search row: the branch it belongs to, standing where the row was found.
++     *
++     * <p>{@code topicId} travels with the hit but is not needed for the move - the branch row already
++     * knows its topic - and it is not looked up again here. This is the one production caller of
++     * {@link #showChat(String, ReadingAnchor)}, the door T-042 built, so a search jump and a restore on
++     * the way back in are one position written through one store rather than two ways of pointing at a
++     * conversation.
++     */
++    @Override
++    public void openAnchor(String topicId, String branchId, ReadingAnchor anchor) {
++        showChat(branchId, anchor);
++    }
+@@
+     public void openArchived(String branchId) {
+         showNavigation(branchId);
+     }
++
++    /**
++     * The home page's search entry. It opens a page of its own rather than a branch screen, so it reads
++     * no branch and resolves no topic: search spans every branch, including the ones the learner has
++     * never opened.
++     */
++    @Override
++    public void openSearch() {
++        showSearch();
++    }
+@@
+         treeCanvasPresenter = null;
+         showingSettings = false;
++        searchScreen = null;
++        searchPresenter = null;
+         swap(homeScreen);
+@@
+         treeCanvasPresenter = null;
+         showingSettings = false;
++        searchScreen = null;
++        searchPresenter = null;
+         ReadingStore reading = container.readingStore();
+@@
+         chatPresenter = null;
+         showingSettings = false;
++        searchScreen = null;
++        searchPresenter = null;
+         treeCanvasScreen = new TreeCanvasScreen(this);
+@@
+         chatPresenter = null;
+         showingSettings = false;
++        searchScreen = null;
++        searchPresenter = null;
+         navigationBranchId = branchId;
+@@
+-    private void swap(View screen) {
++    /**
++     * Opens the search page. Built here and dropped when it is left, like every other screen, so the
++     * query lives for exactly one visit: no draft is left behind to surprise the learner the next time
++     * the entry is tapped.
++     */
++    private void showSearch() {
++        navigationBranchId = null;
++        navigationScreen = null;
++        navigationPresenter = null;
++        treeBranchId = null;
++        treeCanvasScreen = null;
++        treeCanvasPresenter = null;
++        chatBranchId = null;
++        chatScreen = null;
++        chatPresenter = null;
++        showingSettings = false;
++        searchScreen = new SearchScreen(this);
++        searchPresenter = new SearchPresenter(this, container.uiThread(), container.background(),
++                container.searchRepository());
++        searchScreen.setActions(searchPresenter);
++        searchScreen.setHost(this::onBackRequested);
++        swap(searchScreen);
++        searchPresenter.start();
++    }
++
++    /** A page whose screen has been left is dropped rather than drawn into. */
++    private void drawSearch(SearchScreen screen, SearchViewState state, SearchPage page) {
++        if (searchScreen == screen) {
++            screen.show(state, page);
++        }
++    }
++
++    private void swap(View screen) {
+*** End Patch

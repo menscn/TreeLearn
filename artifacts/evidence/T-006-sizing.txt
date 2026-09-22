@@ -1,0 +1,24 @@
+# T-006 sizing - non-empty non-comment production lines (harness-tasks.md counting rule)
+CapturedAt: 2026-09-21 20:37:35
+Command: inline PowerShell over android/ai/src/main/java/com/treelearn/ai/gateway/*.java (block-comment state machine; blank and comment-only lines dropped)
+Mode: sizing self-check (.trae/rules/harness-tasks.md: 被修改的生产代码行 non-empty non-comment, 200 target / 500 hard limit)
+Scope: T-006 production files only (the 11 files of com.treelearn.ai.gateway); com.treelearn.ai.prompt.** belongs to a parallel lane and is not counted here.
+--- per file ---
+  AiGateway.java               non-empty non-comment= 264   physical= 336
+  AiGatewayError.java          non-empty non-comment=  61   physical= 108
+  DeepSeekGatewayFactory.java  non-empty non-comment=  29   physical=  51
+  GatewayEndpoints.java        non-empty non-comment=  21   physical=  42
+  GatewayPorts.java            non-empty non-comment=  53   physical= 105
+  GenerationSink.java          non-empty non-comment=   6   physical=  32
+  HttpsTransport.java          non-empty non-comment=  75   physical= 105
+  JsonChatRequestBody.java     non-empty non-comment=  52   physical=  72
+  ProviderJson.java            non-empty non-comment=  67   physical=  96
+  SseFrameParser.java          non-empty non-comment=  93   physical= 123
+  StreamOutcome.java           non-empty non-comment=  28   physical=  51
+  TOTAL non-empty non-comment = 749
+  TOTAL physical lines        = 1121
+--- official line-budget.ps1, narrowed to this task's production directory ---
+[line-budget] 基点: HEAD ; 范围: android/ai/src/main/java/com/treelearn/ai/gateway
+业务变更行: 1121 (已跟踪 新增+删除 与 未跟踪 全部行；已排除生成/迁移/文档/证据 0 行；扫描业务文件 11 个，其中未跟踪 11 个)
+[line-budget] FAIL: 业务变更 >500 行，超出硬预算，须拆 task
+EXITCODE=2

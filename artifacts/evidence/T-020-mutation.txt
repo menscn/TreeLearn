@@ -1,0 +1,148 @@
+# T-020 mutation evidence — does each load-bearing assertion really go red when the behaviour breaks?
+# captured at: 2026-09-21T20:29:16
+# Method: each mutation is applied to a TEMP COPY of the package (the working tree is never mutated),
+# the copy is recompiled and the two prompt test classes are run with JUnitCore; then the copy is
+# restored from the pristine bytes and re-verified by SHA-256 plus a green re-run.
+#
+# THIS FILE REPLACES the run captured at 2026-09-21T20:14:31. That run mutated the working tree and
+# its captured JUnit output printed the whole adaptive-tutor body into this file through a JUnit
+# ComparisonFailure — a redaction violation (prompt design V1.0; technical design §9.2: a test report
+# may record the purpose and the version, never the prompt text). Both test classes now compare
+# bodies through SystemBodyAssertions, which reports lengths and SHA-256 digests only, so a red
+# assertion cannot print prompt text any more. Everything below is the hardened suite.
+#
+# COMMAND (identical for every run below):
+#   javac -encoding UTF-8 -d <tmp>\classes -cp "<:core jar>;<junit 4.13.2>;<hamcrest-core 1.3>" <8 main + 3 test .java>
+#   java -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8 -cp "<tmp>\classes;<:core jar>;<junit 4.13.2>;<hamcrest-core 1.3>" org.junit.runner.JUnitCore com.treelearn.ai.prompt.DeepSeekPromptRegistryTest com.treelearn.ai.prompt.DeepSeekRequestAssemblerTest
+#
+# untouched SHA-256 of DeepSeekRequestAssembler.java: 6E35ACDF6C705236A295FA8297737F073DEC5279A09FC624DBF1191B311AD8D8
+
+## Baseline — unchanged sources
+
+--- output ---
+JUnit version 4.13.2
+...................
+Time: 0.083
+
+OK (19 tests)
+
+EXITCODE=0
+
+## Mutation A — the system message is appended last instead of sitting at position 0
+
+MUTATED SHA-256: B9A62AA7866E321E71B69F46C6C11C44A4E83A7E7E6B38E6120552A3CA599192
+
+--- output ---
+JUnit version 4.13.2
+.........E..E....E.E...E
+Time: 0.087
+There were 5 failures:
+1) assemblyCopiesTheCallerHistoryAndExposesAnImmutableList(com.treelearn.ai.prompt.DeepSeekRequestAssemblerTest)
+org.junit.ComparisonFailure: expected:<[第一问：什么是梯度下降？]> but was:<[再举一个简单例子]>
+	at org.junit.Assert.assertEquals(Assert.java:117)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at com.treelearn.ai.prompt.DeepSeekRequestAssemblerTest.assemblyCopiesTheCallerHistoryAndExposesAnImmutableList(DeepSeekRequestAssemblerTest.java:62)
+2) derivedPurposesTakeOneStructuredJsonObjectAndKeepTheirDeclaredSchema(com.treelearn.ai.prompt.DeepSeekRequestAssemblerTest)
+java.lang.AssertionError: expected:<SYSTEM> but was:<USER>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at com.treelearn.ai.prompt.DeepSeekRequestAssemblerTest.derivedPurposesTakeOneStructuredJsonObjectAndKeepTheirDeclaredSchema(DeepSeekRequestAssemblerTest.java:117)
+3) maliciousHistoryTextStaysDataAndCannotChangeRoleOrderOrPurpose(com.treelearn.ai.prompt.DeepSeekRequestAssemblerTest)
+java.lang.AssertionError: history text is data: system bodies differ — lengths 817 and 85, sha256 de6cae8ade9c4b077e4513da90171bf247a08c5a7ee503f69a4d1b923bf626ba and 84bdbe6c3752096103c44474407f153dec80fc17e4c63a7264d35ce22f0ce468
+	at org.junit.Assert.fail(Assert.java:89)
+	at com.treelearn.ai.prompt.SystemBodyAssertions.assertSameSystemText(SystemBodyAssertions.java:32)
+	at com.treelearn.ai.prompt.DeepSeekRequestAssemblerTest.maliciousHistoryTextStaysDataAndCannotChangeRoleOrderOrPurpose(DeepSeekRequestAssemblerTest.java:79)
+4) mainAnswerIsSystemFirstThenHistoryThenTheCurrentUserLast(com.treelearn.ai.prompt.DeepSeekRequestAssemblerTest)
+java.lang.AssertionError: expected:<SYSTEM> but was:<USER>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at com.treelearn.ai.prompt.DeepSeekRequestAssemblerTest.mainAnswerIsSystemFirstThenHistoryThenTheCurrentUserLast(DeepSeekRequestAssemblerTest.java:39)
+5) systemContentNeverInterpolatesRuntimeValuesOrCredentials(com.treelearn.ai.prompt.DeepSeekRequestAssemblerTest)
+java.lang.AssertionError: two different calls: system bodies differ — lengths 7 and 16, sha256 84017217f21cc4a83c6b918833ffa7dbace0eb2afc37e74c253010a43f12f8af and 592295281ff158a5799a35bb1533d3998fb0c25f028cb71cf7e53ca188466b1e
+	at org.junit.Assert.fail(Assert.java:89)
+	at com.treelearn.ai.prompt.SystemBodyAssertions.assertSameSystemText(SystemBodyAssertions.java:32)
+	at com.treelearn.ai.prompt.DeepSeekRequestAssemblerTest.systemContentNeverInterpolatesRuntimeValuesOrCredentials(DeepSeekRequestAssemblerTest.java:99)
+
+FAILURES!!!
+Tests run: 19,  Failures: 5
+
+EXITCODE=1
+POST-RESTORE sha256=6E35ACDF6C705236A295FA8297737F073DEC5279A09FC624DBF1191B311AD8D8
+POST-RESTORE VERDICT: identical to the pre-mutation file
+--- re-run after restore ---
+JUnit version 4.13.2
+...................
+Time: 0.083
+
+OK (19 tests)
+
+EXITCODE=0
+
+## Mutation B — the reservation silently stops counting the current input and the minimum answer
+
+MUTATED SHA-256: B6567A3281322E9026CBC8733AED709492073079494AE434962DA96EF1B7286D
+
+--- output ---
+JUnit version 4.13.2
+..........E.......E..
+Time: 0.086
+There were 2 failures:
+1) budgetReservesSystemCurrentInputAndMinimumAnswerBeforeHistory(com.treelearn.ai.prompt.DeepSeekRequestAssemblerTest)
+java.lang.AssertionError: expected com.treelearn.ai.prompt.PromptBuildException to be thrown, but nothing was thrown
+	at org.junit.Assert.assertThrows(Assert.java:1028)
+	at org.junit.Assert.assertThrows(Assert.java:981)
+	at com.treelearn.ai.prompt.DeepSeekRequestAssemblerTest.budgetReservesSystemCurrentInputAndMinimumAnswerBeforeHistory(DeepSeekRequestAssemblerTest.java:188)
+2) budgetRefusesInsteadOfTrimmingTheSystemPromptOrDroppingHistory(com.treelearn.ai.prompt.DeepSeekRequestAssemblerTest)
+java.lang.AssertionError: expected com.treelearn.ai.prompt.PromptBuildException to be thrown, but nothing was thrown
+	at org.junit.Assert.assertThrows(Assert.java:1028)
+	at org.junit.Assert.assertThrows(Assert.java:981)
+	at com.treelearn.ai.prompt.DeepSeekRequestAssemblerTest.budgetRefusesInsteadOfTrimmingTheSystemPromptOrDroppingHistory(DeepSeekRequestAssemblerTest.java:219)
+
+FAILURES!!!
+Tests run: 19,  Failures: 2
+
+EXITCODE=1
+POST-RESTORE sha256=6E35ACDF6C705236A295FA8297737F073DEC5279A09FC624DBF1191B311AD8D8
+POST-RESTORE VERDICT: identical to the pre-mutation file
+--- re-run after restore ---
+JUnit version 4.13.2
+...................
+Time: 0.084
+
+OK (19 tests)
+
+EXITCODE=0
+
+## Mutation C — the guard against a second system message in the history is removed
+
+MUTATED SHA-256: E77D7F5B5BA8ED15E0FC5F57D85A3091D71DFDDB0BF36E53A26077400DBF120C
+
+--- output ---
+JUnit version 4.13.2
+..................E.
+Time: 0.084
+There was 1 failure:
+1) missingOrMalformedHistoryFailsClosed(com.treelearn.ai.prompt.DeepSeekRequestAssemblerTest)
+java.lang.AssertionError: expected com.treelearn.ai.prompt.PromptBuildException to be thrown, but nothing was thrown
+	at org.junit.Assert.assertThrows(Assert.java:1028)
+	at org.junit.Assert.assertThrows(Assert.java:981)
+	at com.treelearn.ai.prompt.DeepSeekRequestAssemblerTest.missingOrMalformedHistoryFailsClosed(DeepSeekRequestAssemblerTest.java:172)
+
+FAILURES!!!
+Tests run: 19,  Failures: 1
+
+EXITCODE=1
+POST-RESTORE sha256=6E35ACDF6C705236A295FA8297737F073DEC5279A09FC624DBF1191B311AD8D8
+POST-RESTORE VERDICT: identical to the pre-mutation file
+--- re-run after restore ---
+JUnit version 4.13.2
+...................
+Time: 0.081
+
+OK (19 tests)
+
+EXITCODE=0

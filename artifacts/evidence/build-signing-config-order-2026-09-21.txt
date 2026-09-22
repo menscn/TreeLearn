@@ -1,0 +1,103 @@
+﻿Generated: 2026-09-21T21:36:01.3542389+08:00
+Command: cd android; .\gradlew.bat :app:help --no-daemon --console=plain
+Mode: reproduce the configuration-time failure with a real keystore.properties present (BEFORE fix).
+keystore.properties restored from %TEMP%\verify2-parked-keystore.properties (sha256 DF377FB5...BE45, per VERIFY2-buildconfig-blocker.txt).
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+gradlew.bat : 
+At C:\Users\23745\AppData\Local\Temp\tl-signing-repro.ps1:15 char:1
++ & .\gradlew.bat :app:help --no-daemon --console=plain 2>&1 | Out-File ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+FAILURE: Build failed with an exception.
+
+* Where:
+Build file 'D:\Project\Android\Treelearn\android\app\build.gradle' line: 53
+
+* What went wrong:
+A problem occurred evaluating project ':app'.
+> Could not get unknown property 'release' for SigningConfig container of type org.gradle.api.internal.FactoryNamedDoma
+inObjectContainer.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 11s
+EXITCODE=1
+keystore.properties present = True
+
+--- AFTER FIX: same command, same tree state -------------------------------
+Command: cd android; .\gradlew.bat :app:help --no-daemon --console=plain
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Task :app:help
+
+Welcome to Gradle 8.14.3.
+
+To run a build, run gradlew <task> ...
+
+To see a list of available tasks, run gradlew tasks
+
+To see more detail about a task, run gradlew help --task <task>
+
+To see a list of command-line options, run gradlew --help
+
+For more detail on using Gradle, see https://docs.gradle.org/8.14.3/userguide/command_line_interface.html
+
+For troubleshooting, visit https://help.gradle.org
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 11s
+1 actionable task: 1 executed
+EXITCODE=0
+--- signReport: proof the release signing config is now actually populated ---
+Command: cd android; .\gradlew.bat :app:signingReport --no-daemon --console=plain
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+Variant: debug
+Config: debug
+Store: C:\Users\23745\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 4A:FD:3C:A2:44:70:D6:B2:3A:F2:06:50:88:8A:48:A4
+SHA-256: 00:11:B2:B6:AA:07:9B:EE:9F:30:4D:A3:75:2F:31:85:04:AF:0B:EF:C2:81:72:0C:F7:CC:89:69:F6:C7:9D:5B
+Valid until: 2056年3月11日星期六
+Variant: release
+Config: release
+Store: D:\Environment\Android\keystore\treelearn-release.jks
+Alias: treelearn
+MD5: C6:20:25:82:A5:65:ED:87:35:E0:6E:D1:47:1D:F7:3A
+SHA-256: D8:67:0C:86:3D:69:2A:90:E2:1B:7A:89:5C:F0:F7:17:BC:8A:1C:C4:BA:82:A4:8F:F7:71:F0:9A:87:80:C5:61
+Valid until: 2054年2月6日星期五
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\23745\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 4A:FD:3C:A2:44:70:D6:B2:3A:F2:06:50:88:8A:48:A4
+SHA-256: 00:11:B2:B6:AA:07:9B:EE:9F:30:4D:A3:75:2F:31:85:04:AF:0B:EF:C2:81:72:0C:F7:CC:89:69:F6:C7:9D:5B
+Valid until: 2056年3月11日星期六
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+BUILD SUCCESSFUL in 9s
+EXITCODE=0

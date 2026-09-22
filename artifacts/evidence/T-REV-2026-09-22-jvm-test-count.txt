@@ -1,0 +1,23 @@
+# Treelearn evidence - JVM unit test count, two readings (fresh parse of build/test-results)
+# captured-at : 2026-09-22T02:46:16+08:00
+# cwd         : D:\Project\Android\Treelearn
+# command     : python -X utf8 .trae/scripts/dev/count_jvm_tests.py
+# notes       : run from the repo root; the script resolves the root from its own path, not the cwd.
+# scope       : android/*/build/test-results/<variant>/TEST-*.xml left by the T-041 re-verification run.
+# why         : the delivery report used to print one bare number (98 suites / 1011 tests) without
+#               saying which reading it was. app/ai/data run BOTH the debug and the release variant
+#               of the same classes, so the two readings differ by roughly 2x.
+# ---------------------------------------------------------------------------
+app          testDebugUnitTest      suites= 31 tests= 326 failures=0 errors=0 skipped=0
+app          testReleaseUnitTest    suites= 31 tests= 326 failures=0 errors=0 skipped=0
+core         test                   suites= 19 tests= 197 failures=0 errors=0 skipped=0
+ai           testDebugUnitTest      suites=  7 tests=  72 failures=0 errors=0 skipped=0
+ai           testReleaseUnitTest    suites=  7 tests=  72 failures=0 errors=0 skipped=0
+data         testDebugUnitTest      suites=  4 tests=  26 failures=0 errors=0 skipped=0
+data         testReleaseUnitTest    suites=  4 tests=  26 failures=0 errors=0 skipped=0
+tree-layout  test                   suites=  3 tests=  34 failures=0 errors=0 skipped=0
+
+reading A - one variant per module: app=326, core=197, ai=72, data=26, tree-layout=34 -> total 655
+reading B - every variant counted: suites=106 tests=1079 failures=0 errors=0 skipped=0
+VERDICT: OK - 106 suite(s) counted
+EXITCODE=0

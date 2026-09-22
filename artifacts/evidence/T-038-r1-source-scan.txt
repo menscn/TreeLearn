@@ -1,0 +1,55 @@
+# T-038 round-1 re-scan: src/main changed in this round (the committedRounds javadoc was rewritten), so the
+# round-0 scan is stale - its section E line numbers were read against the previous revision of that file.
+# captured-at: 2026-09-22T01:26:47.7895863+08:00
+# cwd: D:\Project\Android\Treelearn
+# command: pwsh -NoProfile -NonInteractive -File D:\Project\Android\Treelearn\artifacts\evidence\T-038-source-scan.ps1
+# producer: artifacts/evidence/T-038-source-scan.ps1  sha256=572DFF359FAE76BCD383E1A157866A8B3E1094E87EDB91022FCF411D77B358F6  lines=122
+# subject: android/app/src/main/java/com/treelearn/app/wiring/SqliteTreeCanvasStore.java  sha256=58BB1029E22AE0AF725065E433367879279768389E0EE83E8BF33B702DEF4523  (javadoc-only change)
+# subject: android/app/src/androidTest/java/com/treelearn/app/TreeCanvasStoreInstrumentedTest.java  sha256=F7E0797336AFCAE1B4875B6304A60D043B5FE2163B420D9F842E0D5D2C7C9B16  (new this round; not read by this scan)
+# mode: static source read only; no build, no device.
+# note: the scanner itself is unchanged from round 0; only the sources it reads moved.
+=== A: the canvas construction point ===
+A lines=1 occurrences=1 (expected 1, in MainActivity)
+  android\app\src\main\java\com\treelearn\app\MainActivity.java:330: treeCanvasScreen = new TreeCanvasScreen(this);
+=== B: the presenter construction point ===
+B lines=1 occurrences=1 (expected 1, in MainActivity)
+  android\app\src\main\java\com\treelearn\app\MainActivity.java:331: treeCanvasPresenter = new TreeCanvasPresenter(this, container.uiThread(),
+=== C: the screen files under scan ===
+C files=3 (expected 3, or the scan shrank without saying so)
+  android\app\src\main\java\com\treelearn\app\screen\ChatScreen.java
+  android\app\src\main\java\com\treelearn\app\screen\TreeCanvasScreen.java
+  android\app\src\main\java\com\treelearn\app\screen\TreeCanvasView.java
+=== D: no screen file reaches the database ===
+D lines=0 occurrences=0 (expected 0)
+=== D+: positive control, the same pattern over the wiring package ===
+D+ lines=60 occurrences=68 (expected > 0)
+  the pattern also matches prose, so 0 hits under D means the screens do not even name these types
+  android\app\src\main\java\com\treelearn\app\wiring\GenerationPort.java:9: * <p>The coordinator takes a {@code TreeLearnDatabaseHelper}, so it cannot be constructed on a plain
+  android\app\src\main\java\com\treelearn\app\wiring\HomeStore.java:16: * {@code SQLiteDatabase} cannot be constructed there. The SQL half lives in
+  android\app\src\main\java\com\treelearn\app\wiring\HomeStore.java:17: * {@link SqliteHomeStore}, which is the only implementation that names a table, and this interface
+  android\app\src\main\java\com\treelearn\app\wiring\SqliteChatStore.java:3: import android.database.sqlite.SQLiteDatabase;
+  android\app\src\main\java\com\treelearn\app\wiring\SqliteChatStore.java:15: import com.treelearn.data.db.DatabaseTransactionRunner;
+=== E: the fold appears only in its declared owners ===
+E lines=8 occurrences=8 (expected >= 4, all inside: TreeCanvasCommands.java, TreeCanvasStore.java, TreeCanvasWiring.java, SqliteTreeCanvasStore.java, TreeCanvasPresenter.java)
+  android\app\src\main\java\com\treelearn\app\ui\TreeCanvasCommands.java:16: DomainResult<Void> setCollapsed(String branchId, boolean collapsed, long now);
+  android\app\src\main\java\com\treelearn\app\ui\TreeCanvasPresenter.java:280: result = commands.setCollapsed(branchId, fold, System.currentTimeMillis());
+  android\app\src\main\java\com\treelearn\app\wiring\SqliteTreeCanvasStore.java:27: * {@code Branch.setCollapsed}, so the 0/1 column rule stays where it is declared.
+  android\app\src\main\java\com\treelearn\app\wiring\SqliteTreeCanvasStore.java:92: public DomainResult<Void> setCollapsed(String branchId, boolean collapsed, long now) {
+  android\app\src\main\java\com\treelearn\app\wiring\SqliteTreeCanvasStore.java:102: branch.setCollapsed(collapsed, now);
+  android\app\src\main\java\com\treelearn\app\wiring\TreeCanvasStore.java:42: DomainResult<Void> setCollapsed(String branchId, boolean collapsed, long now);
+  android\app\src\main\java\com\treelearn\app\wiring\TreeCanvasWiring.java:72: public DomainResult<Void> setCollapsed(String branchId, boolean collapsed, long now) {
+  android\app\src\main\java\com\treelearn\app\wiring\TreeCanvasWiring.java:73: return store.setCollapsed(branchId, collapsed, now);
+E2 fold occurrences inside the screen files=0 (expected 0)
+=== F: the production implementation of both canvas ports ===
+F lines=1 (expected 1)
+  android\app\src\main\java\com\treelearn\app\wiring\TreeCanvasWiring.java:30: public final class TreeCanvasWiring implements TreeCanvasData, TreeCanvasCommands {
+=== G: the container exposes both ports and the host asks for both ===
+G definitions=2 (expected 2), uses=2 (expected 2, counted per occurrence because both are on one line)
+  def android\app\src\main\java\com\treelearn\app\AppContainer.java:146: public TreeCanvasData treeCanvasData() {
+  def android\app\src\main\java\com\treelearn\app\AppContainer.java:151: public TreeCanvasCommands treeCanvasCommands() {
+  use android\app\src\main\java\com\treelearn\app\MainActivity.java:332: container.background(), container.treeCanvasData(), container.treeCanvasCommands(),
+=== H: the app main source set still resolves zero AndroidX coordinates ===
+H occurrences=0 (expected 0; the app main code depends on platform APIs only)
+=== VERDICT ===
+VERDICT: PASS
+EXITCODE=0

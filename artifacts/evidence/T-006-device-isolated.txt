@@ -1,0 +1,17 @@
+# T-006 device suite - the three T-006 androidTest classes re-run alone on the API 36 emulator
+CapturedAt: 2026-09-21 20:34:12
+Command: cd android; adb shell am instrument -w -e class com.treelearn.app.DeepSeekPayloadDecoderInstrumentedTest,com.treelearn.app.DeepSeekRequestBodyInstrumentedTest,com.treelearn.app.DeepSeekStreamInstrumentedTest com.treelearn.test/androidx.test.runner.AndroidJUnitRunner
+Mode: supplementary device evidence (adb instrumentation runner; the aggregate Gradle run in T-006-green.txt is the recorded TDD command; judge on the OK (N tests) line, not on adb's exit code)
+--- output ---
+
+com.treelearn.app.DeepSeekStreamInstrumentedTest:...
+com.treelearn.app.DeepSeekRequestBodyInstrumentedTest:...
+com.treelearn.app.DeepSeekPayloadDecoderInstrumentedTest:..........
+
+Time: 0.227
+
+OK (16 tests)
+
+
+--- end of output ---
+EXITCODE=0

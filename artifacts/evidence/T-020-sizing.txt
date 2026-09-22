@@ -1,0 +1,41 @@
+# T-020 sizing evidence — non-empty non-comment production lines
+# captured at: 2026-09-21T20:15:33+08:00
+# Convention: the one ratified on 2026-09-21 in .trae/rules/harness-tasks.md and re-measured in
+# artifacts/evidence/sizing-adjudication-2026-09-21.txt, where the count is produced by:
+#   grep -v -E '^[[:space:]]*$|^[[:space:]]*//|^[[:space:]]*\*|^[[:space:]]*/\*' <files> | wc -l
+# (excludes blank lines, // line comments, * javadoc continuation lines, /* block-comment starts).
+# bash on this machine is only the WSL stub (wsl.exe --install <Distro>), so the two commands below are
+# the PowerShell equivalent of that regex, and the regex itself is printed here so the two are comparable.
+# Tests and evidence files do not count against the task budget (harness-tasks.md).
+
+# COMMAND 1 (production, per file):
+#   Get-ChildItem android\ai\src\main\java\com\treelearn\ai\prompt\*.java | ForEach-Object { [pscustomobject]@{ Line = (Get-Content -LiteralPath $_.FullName -Encoding UTF8 | Where-Object { $_ -notmatch '^\s*$|^\s*//|^\s*\*|^\s*/\*' }).Count; Name = $_.Name } }
+--- output ---
+    19  DeepSeekMessage.java
+    72  DeepSeekPromptRegistry.java
+    30  DeepSeekRequest.java
+    84  DeepSeekRequestAssembler.java
+    42  JsonObjectText.java
+    55  PromptBodiesV1.java
+    19  PromptBudget.java
+    23  PromptBuildException.java
+
+PRODUCTION :ai prompt package, non-empty non-comment = 344  (physical lines = 555)
+TESTS      :ai prompt package, non-empty non-comment = 428  (physical lines = 484)  [not counted against the budget]
+VERDICT: WARN (over the 200 soft limit, under the 500 hard limit)
+
+# COMMAND 2 (physical line count):
+#   Get-ChildItem android\ai\src\main\java\com\treelearn\ai\prompt\*.java | ForEach-Object { (Get-Content -LiteralPath $_.FullName -Encoding UTF8).Count } | Measure-Object -Sum
+
+# --- correction appended at 2026-09-21T20:32+08:00 (after hardening the body assertions) ---
+# The production figure is UNCHANGED: 344 non-empty non-comment lines, still the judged value.
+# Only the informational test figure moved, because the two test classes were hardened and a third
+# file (SystemBodyAssertions.java) was added:
+#   TESTS (this task's 3 files): nonEmptyNonComment = 454, physical = 533
+#     DeepSeekPromptRegistryTest.java      177
+#     DeepSeekRequestAssemblerTest.java    247
+#     SystemBodyAssertions.java             30
+# Note for anyone re-measuring the directory: it now also holds DeepSeekContextEncoder.java (87) and
+# DeepSeekContextEncoderTest.java from a sibling lane, so a directory-wide sum is the union, not this
+# task's share. Measure the 8 named production files for the judged number.
+# Command shape: the same non-empty non-comment convention as above, per file, listed on stdout.

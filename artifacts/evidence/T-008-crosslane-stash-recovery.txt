@@ -1,0 +1,30 @@
+# T-008 side-record: restoring the T-005 production classes that were stashed out of the tree (second recovery)
+
+Generated (local): 2026-09-21T21:25:13.7851197+08:00
+Operator: android-dev lane, T-2026-09-20-008. This file is an audit trail, NOT T-008 acceptance evidence.
+
+What happened: the T-005 lane records its compile-only RED by moving its own five production classes out
+of the tree (its own record: artifacts/evidence/T-005-red-stash.txt). From 21:19:01 they were held out
+again by a retry loop (pwsh pid 21544) that moved them out once and then re-ran its build up to eight
+times, 120 s apart. That loop cannot reach the "clean RED" it waits for: its attribution list names only
+its three test files, so with the classes absent this lane's own
+android/app/src/main/java/com/treelearn/app/generation/AiGatewayStreams.java is always counted as a
+foreign compile error. While they were out, nothing in the repository could build: the :app main source
+set (that file imports com.treelearn.data.secret) and the :data unit tests both failed on missing
+symbols, so every other lane saw cross-lane noise instead of its own result.
+
+What was done:
+  1. Copied the five files back byte-for-byte from the stash directory the T-005 lane itself created
+     ($env:TEMP\t005-red-stash) and verified each against the SHA-256 recorded in T-005-red-stash.txt.
+  2. No file content was edited. The T-005 lane's RED record is left untouched: it already carries
+     attempts 1-3, and a recorded file is not invalidated by restoring the tree.
+  3. Factual note for whoever finishes T-005: as long as its own retry loop filters foreign errors with
+     that file list, restoring the classes is what lets the loop's condition be evaluated at all.
+
+RESTORE VERIFICATION (Get-FileHash -Algorithm SHA256 after copying back):
+android/data/src/main/java/com/treelearn/data/secret/SecretStoreError.java          64916415F6F9260FADDFEB34BC0E628C061CD69B4DB3C9100EFCB81E88EC4CD1  MATCH=True
+android/data/src/main/java/com/treelearn/data/secret/SecretStoreException.java      09C59619B9E26759230C7634982CA0624558BBB6144C75F4DD88EE6EDFAAF624  MATCH=True
+android/data/src/main/java/com/treelearn/data/secret/SecretEnvelope.java            8EFEAA218765B58307616CEBB3B4D8DB9D57CEE4BF6A9CA8D94C479A71977BF2  MATCH=True
+android/data/src/main/java/com/treelearn/data/secret/KeystoreSecretStore.java       9503709BAD74C395BA6A707595078950CBCA3F79E1BF1321BD2E0E5496542958  MATCH=True
+android/data/src/main/java/com/treelearn/data/settings/SettingsRepository.java      302F2C5E240DE8A88AC7AA1AA34B4106C8561CA25A8FB20BFC528D0964CEA1F9  MATCH=True
+EXITCODE=0

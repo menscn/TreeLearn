@@ -1,0 +1,60 @@
+# T-015 test counts read back from the JUnit XML on disk
+CapturedAt=2026-09-21T22:19:05.3145549+08:00
+Source run: T-015-green-rerun.txt (forced execution, EXITCODE=0, 60 actionable tasks: 60 executed, BUILD SUCCESSFUL in 32s)
+Source command: cd android; .\gradlew.bat :core:test :data:testDebugUnitTest :app:testDebugUnitTest --rerun-tasks --no-daemon --console=plain
+Method: for every TEST-*.xml below, read the <testsuite> element attributes tests/failures/errors/skipped.
+
+== module :core == 18 suite file(s)
+  AnswerRevisionTest                                   tests=13   failures=0 errors=0 skipped=0
+  BranchSourceTest                                     tests=12   failures=0 errors=0 skipped=0
+  BranchTest                                           tests=15   failures=0 errors=0 skipped=0
+  BuildContextPlanUseCaseTest                          tests=10   failures=0 errors=0 skipped=0
+  ContextSnapshotTest                                  tests=12   failures=0 errors=0 skipped=0
+  GenerationCommandTest                                tests=9    failures=0 errors=0 skipped=0
+  GenerationOperationTest                              tests=20   failures=0 errors=0 skipped=0
+  GenerationStateTest                                  tests=16   failures=0 errors=0 skipped=0
+  GuardTest                                            tests=6    failures=0 errors=0 skipped=0
+  MessageTest                                          tests=15   failures=0 errors=0 skipped=0
+  PromptPurposeTest                                    tests=12   failures=0 errors=0 skipped=0
+  PromptSpecTest                                       tests=8    failures=0 errors=0 skipped=0
+  ReadingAnchorTest                                    tests=7    failures=0 errors=0 skipped=0  <= T-015
+  SearchHitTest                                        tests=7    failures=0 errors=0 skipped=0  <= T-015
+  SearchQueryTest                                      tests=7    failures=0 errors=0 skipped=0  <= T-015
+  TopicTest                                            tests=6    failures=0 errors=0 skipped=0
+  UnreadRollupTest                                     tests=6    failures=0 errors=0 skipped=0  <= T-015
+  ViewportSeenTest                                     tests=6    failures=0 errors=0 skipped=0  <= T-015
+  MODULE TOTAL: tests=187 failures=0 errors=0 skipped=0
+  T-015 OWN SUITES in :core: tests=33
+
+== module :data == 2 suite file(s)
+  SearchDaoStatementTest                               tests=7    failures=0 errors=0 skipped=0  <= T-015
+  SecretEnvelopeTest                                   tests=6    failures=0 errors=0 skipped=0
+  MODULE TOTAL: tests=13 failures=0 errors=0 skipped=0
+  T-015 OWN SUITES in :data: tests=7
+
+== module :app == 20 suite file(s)
+  ArtifactInputTest                                    tests=8    failures=0 errors=0 skipped=0
+  ArtifactSchemaTest                                   tests=11   failures=0 errors=0 skipped=0
+  DerivedOperationTest                                 tests=13   failures=0 errors=0 skipped=0
+  DerivedRequestTest                                   tests=8    failures=0 errors=0 skipped=0
+  GenerationSchedulerTest                              tests=5    failures=0 errors=0 skipped=0
+  LiveAttemptsTest                                     tests=3    failures=0 errors=0 skipped=0
+  PositionCommandsTest                                 tests=22   failures=0 errors=0 skipped=0
+  RecoveryScanTest                                     tests=3    failures=0 errors=0 skipped=0
+  StreamBatchTest                                      tests=5    failures=0 errors=0 skipped=0
+  ReadingSessionTest                                   tests=7    failures=0 errors=0 skipped=0  <= T-015
+  SearchPresenterTest                                  tests=8    failures=0 errors=0 skipped=0  <= T-015
+  ChatMessageTest                                      tests=11   failures=0 errors=0 skipped=0
+  ChatPositionAgreementTest                            tests=3    failures=0 errors=0 skipped=0
+  ChatPresenterTest                                    tests=34   failures=0 errors=0 skipped=0
+  ChatViewStateTest                                    tests=9    failures=0 errors=0 skipped=0
+  HomePresenterTest                                    tests=17   failures=0 errors=0 skipped=0
+  HomeViewStateTest                                    tests=7    failures=0 errors=0 skipped=0
+  KeySnapshotTest                                      tests=6    failures=0 errors=0 skipped=0
+  SettingsPresenterTest                                tests=7    failures=0 errors=0 skipped=0
+  FirstTopicCreationRulesTest                          tests=11   failures=0 errors=0 skipped=0
+  MODULE TOTAL: tests=198 failures=0 errors=0 skipped=0
+  T-015 OWN SUITES in :app: tests=15
+
+GRAND TOTAL across :core + :data + :app: tests=398 failures=0 errors=0
+EXITCODE=0

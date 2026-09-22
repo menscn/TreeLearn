@@ -1,0 +1,30 @@
+T-042 Fix round 1 - the shipped release APK carries the notice path and the first-frame report (dex + resources.arsc scan)
+captured-at: 2026-09-22T05:13:23.1259829+08:00
+cwd: D:\Project\Android\Treelearn
+command: python -X utf8 %TEMP%\t042fix1_apk_scan.py   (zip-reads the release APK, counts symbols in every classes*.dex string table and in resources.arsc, SHA-256s the file)
+apk-mtime: 2026-09-22 05:13:06
+newest-changed-source-mtime: 2026-09-22 05:05:32
+--- begin output ---
+apk-path: D:\Project\Android\Treelearn\android\app\build\outputs\apk\release\app-release.apk
+apk-bytes: 523861
+apk-sha256: 3dfe991de9ee31470cb86b9cabb87c5191848a1a0c02dc9e873f31f5851695e2
+dex-scope: every classes*.dex in the archive
+dex-entries: classes.dex
+
+  NoticeText             dex-occurrences=3  classes.dex:3
+  READING_POSITION       dex-occurrences=1  classes.dex:1
+  noticeReadingFailure   dex-occurrences=2  classes.dex:2
+  visibleRows            dex-occurrences=1  classes.dex:1
+  onRowsLaidOut          dex-occurrences=3  classes.dex:3
+  remember               dex-occurrences=1  classes.dex:1
+  seen                   dex-occurrences=5  classes.dex:5
+  ChatReadingTest        dex-occurrences=0  
+  ChatPresenterTest      dex-occurrences=0  
+
+resources.arsc  bytes=26180
+  notice_reading_position arsc-occurrences=1
+  chat_notice            arsc-occurrences=1
+
+VERDICT: positive=True negative-control-clean=True resource-name=True
+--- end output ---
+EXITCODE=0

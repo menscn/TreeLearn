@@ -1,0 +1,143 @@
+== guard dex stage inside a scratch copy (reproduce selftest CASE 0)
+CapturedAt: 2026-09-21T20:54:57.0181856+08:00
+Copy: C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android
+Command: cd <copy>; .\gradlew.bat verifyNoKotlinDex --no-daemon --console=plain
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :core:compileJava FROM-CACHE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar
+> Task :tree-layout:compileJava FROM-CACHE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues FROM-CACHE
+> Task :ai:generateDebugResources FROM-CACHE
+> Task :ai:packageDebugResources FROM-CACHE
+> Task :ai:processDebugNavigationResources FROM-CACHE
+> Task :ai:parseDebugLocalResources FROM-CACHE
+> Task :ai:generateDebugRFile FROM-CACHE
+> Task :ai:javaPreCompileDebug FROM-CACHE
+> Task :ai:compileDebugJavaWithJavac FROM-CACHE
+> Task :app:javaPreCompileDebug FROM-CACHE
+> Task :ai:compileDebugLibraryResources FROM-CACHE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :ai:writeDebugAarMetadata
+> Task :data:writeDebugAarMetadata
+> Task :data:processDebugNavigationResources FROM-CACHE
+> Task :app:checkDebugAarMetadata
+> Task :app:processDebugNavigationResources FROM-CACHE
+> Task :app:compileDebugNavigationResources FROM-CACHE
+> Task :app:generateDebugResValues FROM-CACHE
+> Task :data:generateDebugResValues FROM-CACHE
+> Task :data:generateDebugResources FROM-CACHE
+> Task :data:packageDebugResources FROM-CACHE
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources FROM-CACHE
+> Task :ai:bundleLibCompileToJarDebug
+> Task :app:mergeDebugResources FROM-CACHE
+> Task :app:packageDebugResources FROM-CACHE
+> Task :app:parseDebugLocalResources FROM-CACHE
+> Task :app:createDebugCompatibleScreenManifests
+> Task :ai:extractDeepLinksDebug FROM-CACHE
+> Task :ai:processDebugManifest FROM-CACHE
+> Task :app:extractDeepLinksDebug FROM-CACHE
+> Task :data:extractDeepLinksDebug FROM-CACHE
+> Task :data:processDebugManifest FROM-CACHE
+> Task :app:processDebugMainManifest FROM-CACHE
+> Task :app:processDebugManifest FROM-CACHE
+> Task :app:processDebugManifestForPackage FROM-CACHE
+> Task :data:compileDebugLibraryResources FROM-CACHE
+> Task :data:parseDebugLocalResources FROM-CACHE
+> Task :data:generateDebugRFile FROM-CACHE
+> Task :app:processDebugResources FROM-CACHE
+> Task :data:javaPreCompileDebug FROM-CACHE
+> Task :data:compileDebugJavaWithJavac FROM-CACHE
+> Task :ai:generateDebugAssets UP-TO-DATE
+> Task :ai:mergeDebugAssets
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :data:generateDebugAssets UP-TO-DATE
+> Task :data:mergeDebugAssets
+> Task :app:mergeDebugAssets
+> Task :app:compressDebugAssets FROM-CACHE
+> Task :app:desugarDebugFileDependencies FROM-CACHE
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :ai:bundleLibRuntimeToJarDebug
+> Task :app:checkDebugDuplicateClasses
+> Task :data:bundleLibCompileToJarDebug
+> Task :data:bundleLibRuntimeToJarDebug
+> Task :app:mergeDebugJavaResource
+> Task :data:bundleLibRuntimeToDirDebug
+> Task :app:compileDebugJavaWithJavac FROM-CACHE
+> Task :app:dexBuilderDebug FROM-CACHE
+> Task :app:mergeExtDexDebug FROM-CACHE
+> Task :app:mergeProjectDexDebug FROM-CACHE
+> Task :ai:mergeDebugJniLibFolders
+> Task :ai:mergeDebugNativeLibs NO-SOURCE
+> Task :ai:copyDebugJniLibsProjectOnly
+> Task :app:mergeDebugJniLibFolders
+> Task :data:mergeDebugJniLibFolders
+> Task :data:mergeDebugNativeLibs NO-SOURCE
+> Task :data:copyDebugJniLibsProjectOnly
+> Task :ai:bundleLibRuntimeToDirDebug
+> Task :app:validateSigningDebug
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:javaPreCompileDebugAndroidTest FROM-CACHE
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:checkDebugAndroidTestAarMetadata
+> Task :app:processDebugAndroidTestNavigationResources FROM-CACHE
+> Task :app:compileDebugAndroidTestNavigationResources FROM-CACHE
+> Task :app:generateDebugAndroidTestResValues FROM-CACHE
+> Task :app:mapDebugAndroidTestSourceSetPaths
+> Task :app:generateDebugAndroidTestResources FROM-CACHE
+> Task :app:mergeDebugAndroidTestResources FROM-CACHE
+> Task :app:processDebugAndroidTestManifest
+
+> Transform bundleLibRuntimeToDirDebug (project :data) with DexingNoClasspathTransform
+
+> Transform classes.jar (project :data) with DexingNoClasspathTransform
+
+> Task :app:processDebugAndroidTestResources FROM-CACHE
+> Task :app:mergeDebugGlobalSynthetics FAILED
+ERROR: C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\data\build\intermediates\runtime_library_classes_dir\debug\bundleLibRuntimeToDirDebug\com\treelearn\data\db\dao\BranchCreation$Refusal.class: D8: Class BranchCreation$Refusal requires its nest host BranchCreation to be on program or class path.
+ERROR: C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\data\build\intermediates\runtime_library_classes_jar\debug\bundleLibRuntimeToJarDebug\classes.jar: D8: Class BranchCreation$Refusal requires its nest host BranchCreation to be on program or class path.
+
+
+[Incubating] Problems report is available at: file:///C:/Users/23745/AppData/Local/Temp/tl-verify-copy/android/build/reports/problems/problems-report.html
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:mergeDebugGlobalSynthetics'.
+> Could not resolve all files for configuration ':app:debugRuntimeClasspath'.
+   > Failed to transform classes.jar (project :data) to match attributes {artifactType=android-global-synthetics, com.android.build.api.attributes.AgpVersionAttr=8.13.2, com.android.build.api.attributes.BuildTypeAttr=debug, com.android.build.gradle.internal.attributes.VariantAttr=debug, dexing-component-attributes=ComponentSpecificParameters(minSdkVersion=28, debuggable=true, enableCoreLibraryDesugaring=false, enableGlobalSynthetics=true, enableApiModeling=false, dependenciesClassesAreInstrumented=false, asmTransformComponent=null, useJacocoTransformInstrumentation=false, enableDesugaring=true, needsClasspath=false, useFullClasspath=false, componentIfUsingFullClasspath=null), org.gradle.libraryelements=jar, org.gradle.usage=java-runtime}.
+      > Execution failed for DexingNoClasspathTransform: C:\Users\23745\AppData\Local\Temp\tl-verify-copy\android\data\build\intermediates\runtime_library_classes_jar\debug\bundleLibRuntimeToJarDebug\classes.jar.
+         > Error while dexing.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+81 actionable tasks: 31 executed, 50 from cache
+
+BUILD FAILED in 24s
+EXITCODE=1

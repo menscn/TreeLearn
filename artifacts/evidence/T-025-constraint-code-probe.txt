@@ -1,0 +1,1129 @@
+# T-025 constraint code probe (TEMPORARY diagnostic; the probe test file is deleted after this run)
+# captured-at: 2026-09-21T20:11:15.9059074+08:00
+# command: cd android; .\gradlew.bat :app:connectedDebugAndroidTest --no-daemon --console=plain
+# mode: full connectedDebugAndroidTest (instrumentation) with T025PkCodeProbe.java present
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac FROM-CACHE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugLibraryResources UP-TO-DATE
+> Task :ai:writeDebugAarMetadata UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :ai:extractDeepLinksDebug UP-TO-DATE
+> Task :ai:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :data:extractDeepLinksDebug UP-TO-DATE
+> Task :data:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :data:compileDebugLibraryResources UP-TO-DATE
+> Task :ai:bundleLibCompileToJarDebug
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac UP-TO-DATE
+> Task :data:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :app:processDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:compileDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugAndroidTestResources UP-TO-DATE
+> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :app:processDebugAndroidTestManifest UP-TO-DATE
+> Task :app:processDebugAndroidTestResources UP-TO-DATE
+
+> Task :app:compileDebugAndroidTestJavaWithJavac FAILED
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretBackupConfigInstrumentedTest.java:16: 错误: 程序包com.treelearn.data.secret不存在
+import com.treelearn.data.secret.KeystoreSecretStore;
+                                ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:15: 错误: 程序包com.treelearn.data.secret不存在
+import com.treelearn.data.secret.KeystoreSecretStore;
+                                ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:16: 错误: 程序包com.treelearn.data.secret不存在
+import com.treelearn.data.secret.SecretEnvelope;
+                                ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:17: 错误: 程序包com.treelearn.data.secret不存在
+import com.treelearn.data.secret.SecretStoreError;
+                                ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:18: 错误: 程序包com.treelearn.data.secret不存在
+import com.treelearn.data.secret.SecretStoreException;
+                                ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:63: 错误: 找不到符号
+    private KeystoreSecretStore store;
+            ^
+  符号:   类 KeystoreSecretStore
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:200: 错误: 找不到符号
+    private static void assertDiagnosable(SecretStoreException failure, String secret) {
+                                          ^
+  符号:   类 SecretStoreException
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretBackupConfigInstrumentedTest.java:60: 错误: 找不到符号
+    private static final String SECRET_PREFERENCES_FILE = KeystoreSecretStore.PREFERENCES_NAME + ".xml";
+                                                          ^
+  符号:   变量 KeystoreSecretStore
+  位置: 类 SecretBackupConfigInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretBackupConfigInstrumentedTest.java:92: 错误: 找不到符号
+        List<String[]> legacyRules = excludes(context, R.xml.backup_rules);
+                                                        ^
+  符号:   变量 xml
+  位置: 类 R
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretBackupConfigInstrumentedTest.java:93: 错误: 找不到符号
+        List<String[]> extractionRules = excludes(context, R.xml.data_extraction_rules);
+                                                            ^
+  符号:   变量 xml
+  位置: 类 R
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:68: 错误: 找不到符号
+        store = new KeystoreSecretStore(context);
+                    ^
+  符号:   类 KeystoreSecretStore
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:81: 错误: 找不到符号
+        KeystoreSecretStore afterRestart = new KeystoreSecretStore(context);
+        ^
+  符号:   类 KeystoreSecretStore
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:81: 错误: 找不到符号
+        KeystoreSecretStore afterRestart = new KeystoreSecretStore(context);
+                                               ^
+  符号:   类 KeystoreSecretStore
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:90: 错误: 找不到符号
+        String storedEnvelope = preferences().getString(KeystoreSecretStore.PREFERENCE_KEY_ENVELOPE, null);
+                                                        ^
+  符号:   变量 KeystoreSecretStore
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:109: 错误: 找不到符号
+        String firstEnvelope = preferences().getString(KeystoreSecretStore.PREFERENCE_KEY_ENVELOPE, null);
+                                                       ^
+  符号:   变量 KeystoreSecretStore
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:113: 错误: 找不到符号
+        String secondEnvelope = preferences().getString(KeystoreSecretStore.PREFERENCE_KEY_ENVELOPE, null);
+                                                        ^
+  符号:   变量 KeystoreSecretStore
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:127: 错误: 找不到符号
+        assertFalse(preferences().contains(KeystoreSecretStore.PREFERENCE_KEY_ENVELOPE));
+                                           ^
+  符号:   变量 KeystoreSecretStore
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:129: 错误: 找不到符号
+                androidKeyStore().containsAlias(KeystoreSecretStore.KEY_ALIAS));
+                                                ^
+  符号:   变量 KeystoreSecretStore
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:130: 错误: 找不到符号
+        SecretStoreException failure = assertThrows(SecretStoreException.class, () -> store.read());
+        ^
+  符号:   类 SecretStoreException
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:130: 错误: 找不到符号
+        SecretStoreException failure = assertThrows(SecretStoreException.class, () -> store.read());
+                                                    ^
+  符号:   类 SecretStoreException
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:131: 错误: 找不到符号
+        assertEquals(SecretStoreError.NO_STORED_SECRET, failure.code());
+                     ^
+  符号:   变量 SecretStoreError
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:138: 错误: 找不到符号
+        SecretStoreException failure = assertThrows(SecretStoreException.class, () -> store.read());
+        ^
+  符号:   类 SecretStoreException
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:138: 错误: 找不到符号
+        SecretStoreException failure = assertThrows(SecretStoreException.class, () -> store.read());
+                                                    ^
+  符号:   类 SecretStoreException
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:140: 错误: 找不到符号
+        assertEquals(SecretStoreError.NO_STORED_SECRET, failure.code());
+                     ^
+  符号:   变量 SecretStoreError
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:148: 错误: 找不到符号
+                .putString(KeystoreSecretStore.PREFERENCE_KEY_ENVELOPE, "not-an-envelope")
+                           ^
+  符号:   变量 KeystoreSecretStore
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:151: 错误: 找不到符号
+        SecretStoreException failure = assertThrows(SecretStoreException.class, () -> store.read());
+        ^
+  符号:   类 SecretStoreException
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:151: 错误: 找不到符号
+        SecretStoreException failure = assertThrows(SecretStoreException.class, () -> store.read());
+                                                    ^
+  符号:   类 SecretStoreException
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:153: 错误: 找不到符号
+        assertEquals(SecretStoreError.CORRUPTED_ENVELOPE, failure.code());
+                     ^
+  符号:   变量 SecretStoreError
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:160: 错误: 找不到符号
+        SecretEnvelope envelope = SecretEnvelope.decode(
+        ^
+  符号:   类 SecretEnvelope
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:160: 错误: 找不到符号
+        SecretEnvelope envelope = SecretEnvelope.decode(
+                                  ^
+  符号:   变量 SecretEnvelope
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:161: 错误: 找不到符号
+                preferences().getString(KeystoreSecretStore.PREFERENCE_KEY_ENVELOPE, null));
+                                        ^
+  符号:   变量 KeystoreSecretStore
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:165: 错误: 找不到符号
+                .putString(KeystoreSecretStore.PREFERENCE_KEY_ENVELOPE,
+                           ^
+  符号:   变量 KeystoreSecretStore
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:166: 错误: 找不到符号
+                        SecretEnvelope.of(envelope.schemaVersion(), envelope.initialisationVector(), tampered)
+                        ^
+  符号:   变量 SecretEnvelope
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:170: 错误: 找不到符号
+        SecretStoreException failure = assertThrows(SecretStoreException.class, () -> store.read());
+        ^
+  符号:   类 SecretStoreException
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:170: 错误: 找不到符号
+        SecretStoreException failure = assertThrows(SecretStoreException.class, () -> store.read());
+                                                    ^
+  符号:   类 SecretStoreException
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:173: 错误: 找不到符号
+                SecretStoreError.DECRYPTION_FAILED, failure.code());
+                ^
+  符号:   变量 SecretStoreError
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:180: 错误: 找不到符号
+        androidKeyStore().deleteEntry(KeystoreSecretStore.KEY_ALIAS);
+                                      ^
+  符号:   变量 KeystoreSecretStore
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:184: 错误: 找不到符号
+        SecretStoreException failure = assertThrows(SecretStoreException.class, () -> store.read());
+        ^
+  符号:   类 SecretStoreException
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:184: 错误: 找不到符号
+        SecretStoreException failure = assertThrows(SecretStoreException.class, () -> store.read());
+                                                    ^
+  符号:   类 SecretStoreException
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:186: 错误: 找不到符号
+        assertEquals(SecretStoreError.KEY_ENTRY_MISSING, failure.code());
+                     ^
+  符号:   变量 SecretStoreError
+  位置: 类 SecretStoreInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:191: 错误: 找不到符号
+        return context.getSharedPreferences(KeystoreSecretStore.PREFERENCES_NAME, Context.MODE_PRIVATE);
+                                            ^
+  符号:   变量 KeystoreSecretStore
+  位置: 类 SecretStoreInstrumentedTest
+注: 某些输入文件使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+41 个错误
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugAndroidTestJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:63: 错误: 找不到符号
+      private KeystoreSecretStore store;
+              ^
+    符号:   类 KeystoreSecretStore
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:200: 错误: 找不到符号
+      private static void assertDiagnosable(SecretStoreException failure, String secret) {
+                                            ^
+    符号:   类 SecretStoreException
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretBackupConfigInstrumentedTest.java:60: 错误: 找不到符号
+      private static final String SECRET_PREFERENCES_FILE = KeystoreSecretStore.PREFERENCES_NAME + ".xml";
+                                                            ^
+    符号:   变量 KeystoreSecretStore
+    位置: 类 SecretBackupConfigInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretBackupConfigInstrumentedTest.java:92: 错误: 找不到符号
+          List<String[]> legacyRules = excludes(context, R.xml.backup_rules);
+                                                          ^
+    符号:   变量 xml
+    位置: 类 R
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretBackupConfigInstrumentedTest.java:93: 错误: 找不到符号
+          List<String[]> extractionRules = excludes(context, R.xml.data_extraction_rules);
+                                                              ^
+    符号:   变量 xml
+    位置: 类 R
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:68: 错误: 找不到符号
+          store = new KeystoreSecretStore(context);
+                      ^
+    符号:   类 KeystoreSecretStore
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:81: 错误: 找不到符号
+          KeystoreSecretStore afterRestart = new KeystoreSecretStore(context);
+          ^
+    符号:   类 KeystoreSecretStore
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:81: 错误: 找不到符号
+          KeystoreSecretStore afterRestart = new KeystoreSecretStore(context);
+                                                 ^
+    符号:   类 KeystoreSecretStore
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:90: 错误: 找不到符号
+          String storedEnvelope = preferences().getString(KeystoreSecretStore.PREFERENCE_KEY_ENVELOPE, null);
+                                                          ^
+    符号:   变量 KeystoreSecretStore
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:109: 错误: 找不到符号
+          String firstEnvelope = preferences().getString(KeystoreSecretStore.PREFERENCE_KEY_ENVELOPE, null);
+                                                         ^
+    符号:   变量 KeystoreSecretStore
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:113: 错误: 找不到符号
+          String secondEnvelope = preferences().getString(KeystoreSecretStore.PREFERENCE_KEY_ENVELOPE, null);
+                                                          ^
+    符号:   变量 KeystoreSecretStore
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:127: 错误: 找不到符号
+          assertFalse(preferences().contains(KeystoreSecretStore.PREFERENCE_KEY_ENVELOPE));
+                                             ^
+    符号:   变量 KeystoreSecretStore
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:129: 错误: 找不到符号
+                  androidKeyStore().containsAlias(KeystoreSecretStore.KEY_ALIAS));
+                                                  ^
+    符号:   变量 KeystoreSecretStore
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:130: 错误: 找不到符号
+          SecretStoreException failure = assertThrows(SecretStoreException.class, () -> store.read());
+          ^
+    符号:   类 SecretStoreException
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:130: 错误: 找不到符号
+          SecretStoreException failure = assertThrows(SecretStoreException.class, () -> store.read());
+                                                      ^
+    符号:   类 SecretStoreException
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:131: 错误: 找不到符号
+          assertEquals(SecretStoreError.NO_STORED_SECRET, failure.code());
+                       ^
+    符号:   变量 SecretStoreError
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:138: 错误: 找不到符号
+          SecretStoreException failure = assertThrows(SecretStoreException.class, () -> store.read());
+          ^
+    符号:   类 SecretStoreException
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:138: 错误: 找不到符号
+          SecretStoreException failure = assertThrows(SecretStoreException.class, () -> store.read());
+                                                      ^
+    符号:   类 SecretStoreException
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:140: 错误: 找不到符号
+          assertEquals(SecretStoreError.NO_STORED_SECRET, failure.code());
+                       ^
+    符号:   变量 SecretStoreError
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:148: 错误: 找不到符号
+                  .putString(KeystoreSecretStore.PREFERENCE_KEY_ENVELOPE, "not-an-envelope")
+                             ^
+    符号:   变量 KeystoreSecretStore
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:151: 错误: 找不到符号
+          SecretStoreException failure = assertThrows(SecretStoreException.class, () -> store.read());
+          ^
+    符号:   类 SecretStoreException
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:151: 错误: 找不到符号
+          SecretStoreException failure = assertThrows(SecretStoreException.class, () -> store.read());
+                                                      ^
+    符号:   类 SecretStoreException
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:153: 错误: 找不到符号
+          assertEquals(SecretStoreError.CORRUPTED_ENVELOPE, failure.code());
+                       ^
+    符号:   变量 SecretStoreError
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:160: 错误: 找不到符号
+          SecretEnvelope envelope = SecretEnvelope.decode(
+          ^
+    符号:   类 SecretEnvelope
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:160: 错误: 找不到符号
+          SecretEnvelope envelope = SecretEnvelope.decode(
+                                    ^
+    符号:   变量 SecretEnvelope
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:161: 错误: 找不到符号
+                  preferences().getString(KeystoreSecretStore.PREFERENCE_KEY_ENVELOPE, null));
+                                          ^
+    符号:   变量 KeystoreSecretStore
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:165: 错误: 找不到符号
+                  .putString(KeystoreSecretStore.PREFERENCE_KEY_ENVELOPE,
+                             ^
+    符号:   变量 KeystoreSecretStore
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:166: 错误: 找不到符号
+                          SecretEnvelope.of(envelope.schemaVersion(), envelope.initialisationVector(), tampered)
+                          ^
+    符号:   变量 SecretEnvelope
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:170: 错误: 找不到符号
+          SecretStoreException failure = assertThrows(SecretStoreException.class, () -> store.read());
+          ^
+    符号:   类 SecretStoreException
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:170: 错误: 找不到符号
+          SecretStoreException failure = assertThrows(SecretStoreException.class, () -> store.read());
+                                                      ^
+    符号:   类 SecretStoreException
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:173: 错误: 找不到符号
+                  SecretStoreError.DECRYPTION_FAILED, failure.code());
+                  ^
+    符号:   变量 SecretStoreError
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:180: 错误: 找不到符号
+          androidKeyStore().deleteEntry(KeystoreSecretStore.KEY_ALIAS);
+                                        ^
+    符号:   变量 KeystoreSecretStore
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:184: 错误: 找不到符号
+          SecretStoreException failure = assertThrows(SecretStoreException.class, () -> store.read());
+          ^
+    符号:   类 SecretStoreException
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:184: 错误: 找不到符号
+          SecretStoreException failure = assertThrows(SecretStoreException.class, () -> store.read());
+                                                      ^
+    符号:   类 SecretStoreException
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:186: 错误: 找不到符号
+          assertEquals(SecretStoreError.KEY_ENTRY_MISSING, failure.code());
+                       ^
+    符号:   变量 SecretStoreError
+    位置: 类 SecretStoreInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:191: 错误: 找不到符号
+          return context.getSharedPreferences(KeystoreSecretStore.PREFERENCES_NAME, Context.MODE_PRIVATE);
+                                              ^
+    符号:   变量 KeystoreSecretStore
+    位置: 类 SecretStoreInstrumentedTest
+  注: 某些输入文件使用或覆盖了已过时的 API。
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretBackupConfigInstrumentedTest.java:16: 错误: 程序包com.treelearn.data.secret不存在
+  import com.treelearn.data.secret.KeystoreSecretStore;
+                                  ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:15: 错误: 程序包com.treelearn.data.secret不存在
+  import com.treelearn.data.secret.KeystoreSecretStore;
+                                  ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:16: 错误: 程序包com.treelearn.data.secret不存在
+  import com.treelearn.data.secret.SecretEnvelope;
+                                  ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:17: 错误: 程序包com.treelearn.data.secret不存在
+  import com.treelearn.data.secret.SecretStoreError;
+                                  ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\SecretStoreInstrumentedTest.java:18: 错误: 程序包com.treelearn.data.secret不存在
+  import com.treelearn.data.secret.SecretStoreException;
+                                  ^
+  41 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 21s
+59 actionable tasks: 3 executed, 1 from cache, 55 up-to-date
+EXITCODE=1
+# retry #2 after a concurrent lane's in-flight sources landed
+# captured-at: 2026-09-21T20:13:35.5203009+08:00
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac UP-TO-DATE
+> Task :ai:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugLibraryResources UP-TO-DATE
+> Task :ai:writeDebugAarMetadata UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :ai:extractDeepLinksDebug UP-TO-DATE
+> Task :ai:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :data:extractDeepLinksDebug UP-TO-DATE
+> Task :data:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :data:compileDebugLibraryResources UP-TO-DATE
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac UP-TO-DATE
+> Task :data:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :app:processDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:compileDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugAndroidTestResources UP-TO-DATE
+> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :app:processDebugAndroidTestManifest UP-TO-DATE
+> Task :app:processDebugAndroidTestResources UP-TO-DATE
+
+> Task :app:compileDebugAndroidTestJavaWithJavac FAILED
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:7: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.AiGatewayError;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:8: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.GatewayPorts;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:9: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.ProviderJson;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:24: 错误: 程序包GatewayPorts不存在
+    private final GatewayPorts.DeltaDecoder deltas = new ProviderJson.Deltas();
+                              ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:25: 错误: 程序包GatewayPorts不存在
+    private final GatewayPorts.BalanceDecoder balance = new ProviderJson.Balance();
+                              ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:124: 错误: 程序包GatewayPorts不存在
+    private GatewayPorts.PayloadException refusal(String payload) {
+                        ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:8: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.JsonChatRequestBody;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:8: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.AiGateway;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:9: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.AiGatewayError;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:10: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.GatewayPorts;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:11: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.GenerationSink;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:12: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.ProviderJson;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:13: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.StreamOutcome;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:64: 错误: 程序包GatewayPorts不存在
+    private final GatewayPorts.Log quiet = (name, details) -> {
+                              ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:110: 错误: 找不到符号
+    private AiGateway gateway(String body, int slice) {
+            ^
+  符号:   类 AiGateway
+  位置: 类 DeepSeekStreamInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:128: 错误: 程序包GatewayPorts不存在
+    private static final class SlicedTransport implements GatewayPorts.Transport {
+                                                                      ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:139: 错误: 程序包GatewayPorts不存在
+        public GatewayPorts.Response post(String url, String apiKey, byte[] body) {
+                           ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:144: 错误: 程序包GatewayPorts不存在
+        public GatewayPorts.Response get(String url, String apiKey) {
+                           ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:148: 错误: 程序包GatewayPorts不存在
+        private GatewayPorts.Response response() {
+                            ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:188: 错误: 找不到符号
+    private static final class RecordingSink implements GenerationSink {
+                                                        ^
+  符号:   类 GenerationSink
+  位置: 类 DeepSeekStreamInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:192: 错误: 找不到符号
+        StreamOutcome outcome;
+        ^
+  符号:   类 StreamOutcome
+  位置: 类 RecordingSink
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:207: 错误: 找不到符号
+        public void onTerminal(StreamOutcome result) {
+                               ^
+  符号:   类 StreamOutcome
+  位置: 类 RecordingSink
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:24: 错误: 程序包ProviderJson不存在
+    private final GatewayPorts.DeltaDecoder deltas = new ProviderJson.Deltas();
+                                                                     ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:25: 错误: 程序包ProviderJson不存在
+    private final GatewayPorts.BalanceDecoder balance = new ProviderJson.Balance();
+                                                                        ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:29: 错误: 程序包GatewayPorts不存在
+        GatewayPorts.Delta delta = deltas.decode("{\"choices\":[{\"index\":0,\"delta\":{"
+                    ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:58: 错误: 程序包GatewayPorts不存在
+        GatewayPorts.Delta delta = deltas.decode(payload);
+                    ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:74: 错误: 程序包GatewayPorts不存在
+        GatewayPorts.PayloadException refusal =
+                    ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:77: 错误: 程序包AiGatewayError不存在
+        assertEquals(AiGatewayError.Kind.PARSE_FAILED, refusal.error.kind);
+                                   ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:86: 错误: 程序包AiGatewayError不存在
+            assertEquals("payload <" + payload + ">", AiGatewayError.Kind.PARSE_FAILED,
+                                                                    ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:93: 错误: 程序包GatewayPorts不存在
+        GatewayPorts.PayloadException refusal = refusal(
+                    ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:96: 错误: 程序包AiGatewayError不存在
+        assertEquals(AiGatewayError.Kind.PROVIDER_UNAVAILABLE, refusal.error.kind);
+                                   ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:111: 错误: 程序包GatewayPorts不存在
+            GatewayPorts.PayloadException refused;
+                        ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:115: 错误: 程序包GatewayPorts不存在
+            } catch (GatewayPorts.PayloadException expected) {
+                                 ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:118: 错误: 程序包AiGatewayError不存在
+            assertEquals("payload <" + payload + ">", AiGatewayError.Kind.PARSE_FAILED,
+                                                                    ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:127: 错误: 程序包GatewayPorts不存在
+        } catch (GatewayPorts.PayloadException expected) {
+                             ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:44: 错误: 找不到符号
+        byte[] body = new JsonChatRequestBody().encode(GenerationModel.FLASH, request);
+                          ^
+  符号:   类 JsonChatRequestBody
+  位置: 类 DeepSeekRequestBodyInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:67: 错误: 找不到符号
+                new String(new JsonChatRequestBody().encode(GenerationModel.PRO, request(true)), UTF_8));
+                               ^
+  符号:   类 JsonChatRequestBody
+  位置: 类 DeepSeekRequestBodyInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:69: 错误: 找不到符号
+        assertEquals(JsonChatRequestBody.REASONING_EFFORT,
+                     ^
+  符号:   变量 JsonChatRequestBody
+  位置: 类 DeepSeekRequestBodyInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:74: 错误: 找不到符号
+                new String(new JsonChatRequestBody().encode(GenerationModel.FLASH, request(false)), UTF_8));
+                               ^
+  符号:   类 JsonChatRequestBody
+  位置: 类 DeepSeekRequestBodyInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:82: 错误: 找不到符号
+        byte[] body = new JsonChatRequestBody().encode(GenerationModel.FLASH, request(true));
+                          ^
+  符号:   类 JsonChatRequestBody
+  位置: 类 DeepSeekRequestBodyInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:76: 错误: 程序包StreamOutcome不存在
+            assertEquals("slice " + slice, StreamOutcome.Kind.COMPLETED, sink.outcome.kind);
+                                                        ^
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:90: 错误: 程序包StreamOutcome不存在
+        assertEquals(StreamOutcome.Kind.COMPLETED, sink.outcome.kind);
+                                  ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:102: 错误: 程序包StreamOutcome不存在
+        assertEquals(StreamOutcome.Kind.INTERRUPTED, sink.outcome.kind);
+                                  ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:111: 错误: 找不到符号
+        return new AiGateway(new SlicedTransport(body, slice), (model, request) -> new byte[0],
+                   ^
+  符号:   类 AiGateway
+  位置: 类 DeepSeekStreamInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:112: 错误: 程序包ProviderJson不存在
+                new ProviderJson.Deltas(), new ProviderJson.Balance(), quiet, Runnable::run);
+                                ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:112: 错误: 程序包ProviderJson不存在
+                new ProviderJson.Deltas(), new ProviderJson.Balance(), quiet, Runnable::run);
+                                                           ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:138: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:143: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:149: 错误: 程序包GatewayPorts不存在
+            return new GatewayPorts.Response() {
+                                   ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:150: 错误: 方法不会覆盖或实现超类型的方法
+                @Override
+                ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:155: 错误: 方法不会覆盖或实现超类型的方法
+                @Override
+                ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:180: 错误: 方法不会覆盖或实现超类型的方法
+                @Override
+                ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:195: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:200: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:206: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+注: 某些输入文件使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+55 个错误
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugAndroidTestJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:110: 错误: 找不到符号
+      private AiGateway gateway(String body, int slice) {
+              ^
+    符号:   类 AiGateway
+    位置: 类 DeepSeekStreamInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:188: 错误: 找不到符号
+      private static final class RecordingSink implements GenerationSink {
+                                                          ^
+    符号:   类 GenerationSink
+    位置: 类 DeepSeekStreamInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:192: 错误: 找不到符号
+          StreamOutcome outcome;
+          ^
+    符号:   类 StreamOutcome
+    位置: 类 RecordingSink
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:207: 错误: 找不到符号
+          public void onTerminal(StreamOutcome result) {
+                                 ^
+    符号:   类 StreamOutcome
+    位置: 类 RecordingSink
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:44: 错误: 找不到符号
+          byte[] body = new JsonChatRequestBody().encode(GenerationModel.FLASH, request);
+                            ^
+    符号:   类 JsonChatRequestBody
+    位置: 类 DeepSeekRequestBodyInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:67: 错误: 找不到符号
+                  new String(new JsonChatRequestBody().encode(GenerationModel.PRO, request(true)), UTF_8));
+                                 ^
+    符号:   类 JsonChatRequestBody
+    位置: 类 DeepSeekRequestBodyInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:69: 错误: 找不到符号
+          assertEquals(JsonChatRequestBody.REASONING_EFFORT,
+                       ^
+    符号:   变量 JsonChatRequestBody
+    位置: 类 DeepSeekRequestBodyInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:74: 错误: 找不到符号
+                  new String(new JsonChatRequestBody().encode(GenerationModel.FLASH, request(false)), UTF_8));
+                                 ^
+    符号:   类 JsonChatRequestBody
+    位置: 类 DeepSeekRequestBodyInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:82: 错误: 找不到符号
+          byte[] body = new JsonChatRequestBody().encode(GenerationModel.FLASH, request(true));
+                            ^
+    符号:   类 JsonChatRequestBody
+    位置: 类 DeepSeekRequestBodyInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:111: 错误: 找不到符号
+          return new AiGateway(new SlicedTransport(body, slice), (model, request) -> new byte[0],
+                     ^
+    符号:   类 AiGateway
+    位置: 类 DeepSeekStreamInstrumentedTest
+  注: 某些输入文件使用或覆盖了已过时的 API。
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:138: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:143: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:150: 错误: 方法不会覆盖或实现超类型的方法
+                  @Override
+                  ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:155: 错误: 方法不会覆盖或实现超类型的方法
+                  @Override
+                  ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:180: 错误: 方法不会覆盖或实现超类型的方法
+                  @Override
+                  ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:195: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:200: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:206: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:7: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.AiGatewayError;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:8: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.GatewayPorts;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:9: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.ProviderJson;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:24: 错误: 程序包GatewayPorts不存在
+      private final GatewayPorts.DeltaDecoder deltas = new ProviderJson.Deltas();
+                                ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:25: 错误: 程序包GatewayPorts不存在
+      private final GatewayPorts.BalanceDecoder balance = new ProviderJson.Balance();
+                                ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:124: 错误: 程序包GatewayPorts不存在
+      private GatewayPorts.PayloadException refusal(String payload) {
+                          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:8: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.JsonChatRequestBody;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:8: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.AiGateway;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:9: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.AiGatewayError;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:10: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.GatewayPorts;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:11: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.GenerationSink;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:12: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.ProviderJson;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:13: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.StreamOutcome;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:64: 错误: 程序包GatewayPorts不存在
+      private final GatewayPorts.Log quiet = (name, details) -> {
+                                ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:128: 错误: 程序包GatewayPorts不存在
+      private static final class SlicedTransport implements GatewayPorts.Transport {
+                                                                        ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:139: 错误: 程序包GatewayPorts不存在
+          public GatewayPorts.Response post(String url, String apiKey, byte[] body) {
+                             ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:144: 错误: 程序包GatewayPorts不存在
+          public GatewayPorts.Response get(String url, String apiKey) {
+                             ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:148: 错误: 程序包GatewayPorts不存在
+          private GatewayPorts.Response response() {
+                              ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:24: 错误: 程序包ProviderJson不存在
+      private final GatewayPorts.DeltaDecoder deltas = new ProviderJson.Deltas();
+                                                                       ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:25: 错误: 程序包ProviderJson不存在
+      private final GatewayPorts.BalanceDecoder balance = new ProviderJson.Balance();
+                                                                          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:29: 错误: 程序包GatewayPorts不存在
+          GatewayPorts.Delta delta = deltas.decode("{\"choices\":[{\"index\":0,\"delta\":{"
+                      ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:58: 错误: 程序包GatewayPorts不存在
+          GatewayPorts.Delta delta = deltas.decode(payload);
+                      ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:74: 错误: 程序包GatewayPorts不存在
+          GatewayPorts.PayloadException refusal =
+                      ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:77: 错误: 程序包AiGatewayError不存在
+          assertEquals(AiGatewayError.Kind.PARSE_FAILED, refusal.error.kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:86: 错误: 程序包AiGatewayError不存在
+              assertEquals("payload <" + payload + ">", AiGatewayError.Kind.PARSE_FAILED,
+                                                                      ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:93: 错误: 程序包GatewayPorts不存在
+          GatewayPorts.PayloadException refusal = refusal(
+                      ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:96: 错误: 程序包AiGatewayError不存在
+          assertEquals(AiGatewayError.Kind.PROVIDER_UNAVAILABLE, refusal.error.kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:111: 错误: 程序包GatewayPorts不存在
+              GatewayPorts.PayloadException refused;
+                          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:115: 错误: 程序包GatewayPorts不存在
+              } catch (GatewayPorts.PayloadException expected) {
+                                   ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:118: 错误: 程序包AiGatewayError不存在
+              assertEquals("payload <" + payload + ">", AiGatewayError.Kind.PARSE_FAILED,
+                                                                      ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:127: 错误: 程序包GatewayPorts不存在
+          } catch (GatewayPorts.PayloadException expected) {
+                               ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:76: 错误: 程序包StreamOutcome不存在
+              assertEquals("slice " + slice, StreamOutcome.Kind.COMPLETED, sink.outcome.kind);
+                                                          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:90: 错误: 程序包StreamOutcome不存在
+          assertEquals(StreamOutcome.Kind.COMPLETED, sink.outcome.kind);
+                                    ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:102: 错误: 程序包StreamOutcome不存在
+          assertEquals(StreamOutcome.Kind.INTERRUPTED, sink.outcome.kind);
+                                    ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:112: 错误: 程序包ProviderJson不存在
+                  new ProviderJson.Deltas(), new ProviderJson.Balance(), quiet, Runnable::run);
+                                  ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:112: 错误: 程序包ProviderJson不存在
+                  new ProviderJson.Deltas(), new ProviderJson.Balance(), quiet, Runnable::run);
+                                                             ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:149: 错误: 程序包GatewayPorts不存在
+              return new GatewayPorts.Response() {
+                                     ^
+  55 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+BUILD FAILED in 19s
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+59 actionable tasks: 1 executed, 58 up-to-date
+EXITCODE=1
+# retry #3: androidTest source set compiles
+# captured-at: 2026-09-21T20:16:48.3477552+08:00
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac UP-TO-DATE
+> Task :ai:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugLibraryResources UP-TO-DATE
+> Task :ai:writeDebugAarMetadata UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :ai:extractDeepLinksDebug UP-TO-DATE
+> Task :ai:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :data:extractDeepLinksDebug UP-TO-DATE
+> Task :data:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :data:compileDebugLibraryResources UP-TO-DATE
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac UP-TO-DATE
+> Task :data:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :app:processDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:compileDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugAndroidTestResources UP-TO-DATE
+> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :app:processDebugAndroidTestManifest UP-TO-DATE
+> Task :app:processDebugAndroidTestResources UP-TO-DATE
+> Task :app:compileDebugAndroidTestJavaWithJavac UP-TO-DATE
+> Task :ai:generateDebugAssets UP-TO-DATE
+> Task :ai:mergeDebugAssets UP-TO-DATE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :data:generateDebugAssets UP-TO-DATE
+> Task :data:mergeDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :data:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :ai:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:dexBuilderDebug UP-TO-DATE
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :app:mergeDebugJavaResource UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :data:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :app:mergeProjectDexDebug UP-TO-DATE
+> Task :ai:mergeDebugJniLibFolders UP-TO-DATE
+> Task :ai:mergeDebugNativeLibs NO-SOURCE
+> Task :ai:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :data:mergeDebugJniLibFolders UP-TO-DATE
+> Task :data:mergeDebugNativeLibs NO-SOURCE
+> Task :data:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :ai:bundleLibRuntimeToDirDebug
+> Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :app:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :app:mergeDebugAndroidTestAssets UP-TO-DATE
+> Task :app:compressDebugAndroidTestAssets UP-TO-DATE
+> Task :app:desugarDebugAndroidTestFileDependencies UP-TO-DATE
+> Task :app:dexBuilderDebugAndroidTest UP-TO-DATE
+> Task :app:processDebugAndroidTestJavaRes NO-SOURCE
+> Task :app:mergeDebugAndroidTestJavaResource UP-TO-DATE
+> Task :app:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :app:mergeExtDexDebugAndroidTest UP-TO-DATE
+> Task :app:mergeProjectDexDebugAndroidTest UP-TO-DATE
+> Task :app:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
+> Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :app:validateSigningDebugAndroidTest UP-TO-DATE
+> Task :app:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
+> Task :app:mergeDebugGlobalSynthetics UP-TO-DATE
+> Task :app:mergeDebugAndroidTestGlobalSynthetics UP-TO-DATE
+> Task :app:mergeLibDexDebugAndroidTest UP-TO-DATE
+> Task :app:packageDebugAndroidTest UP-TO-DATE
+> Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
+> Task :app:mergeLibDexDebug
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :app:connectedDebugAndroidTest FAILED
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:connectedDebugAndroidTest'.
+> Cannot access output property 'resultsDir' of task ':app:connectedDebugAndroidTest'. Accessing unreadable inputs or outputs is not supported. Declare the task as untracked by using Task.doNotTrackState(). For more information, please refer to https://docs.gradle.org/8.14.3/userguide/incremental_build.html#sec:disable-state-tracking in the Gradle documentation.
+   > Failed to create MD5 hash for file 'D:\Project\Android\Treelearn\android\app\build\outputs\androidTest-results\connected\debug\Medium_Phone_API_36.1(AVD) - 16\utp.0.log.lck'
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+101 actionable tasks: 4 executed, 97 up-to-date
+BUILD FAILED in 29s
+EXITCODE=1
+# --- MEASURED RESULT ---
+# read back with: Select-String -LiteralPath "android/app/build/outputs/androidTest-results/connected/debug/TEST-Medium_Phone_API_36.1(AVD) - 16-_app-.xml" -Pattern T025_PROBE
+# (the run that executed the probe was a concurrent lane connectedDebugAndroidTest run; all androidTest classes ship in one test APK)
+# topics.id duplicate                 -> UNIQUE constraint failed: topics.id (code 1555 SQLITE_CONSTRAINT_PRIMARYKEY)
+# second insert of the same root branch -> UNIQUE constraint failed: branches.topic_id (code 2067 SQLITE_CONSTRAINT_UNIQUE) [partial index uq_branches_root, not a PK]
+# -> the write path judges a duplicate topic by code 1555 plus the constraint identity, never by wording alone

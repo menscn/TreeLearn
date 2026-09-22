@@ -1,0 +1,23 @@
+# Mutation test — is the 'onUpgrade delegates' assertion falsifiable?
+
+- Generated: 2026-09-21T15:02:23+08:00
+- Command: cd android && ./gradlew :app:connectedDebugAndroidTest --console=plain
+- Mutation: TreeLearnDatabaseHelper.onUpgrade body emptied (no delegation to the registry)
+- Exit code: 1
+
+## Result
+
+<testsuite name="com.treelearn.app.AppLaunchInstrumentedTest" tests="24" failures="1" errors="0" skipped="0"
+
+  <testcase name="onUpgradeDelegatesAndForwardMigrationsFailClosed" classname="com.treelearn.app.SqliteSchemaInstrumentedTest" time="0.065">
+    <failure>java.lang.AssertionError: onUpgrade(1, 2) with no migration registered: the database accepted an operation it must reject
+at org.junit.Assert.fail(Assert.java:89)
+at com.treelearn.app.SqliteSchemaInstrumentedTest.expectedFailure(SqliteSchemaInstrumentedTest.java:1029)
+
+## Why this matters
+
+The previous version of the assertion called helper.onUpgrade(db, 1, 1). With an equal
+version pair applyForwardMigrations loops zero times, so an EMPTY onUpgrade also passed it.
+That mattered because this assertion is the only substitute evidence for the 'upgrade path
+is N/A at V1' note. This run shows the fixed assertion detects the empty implementation:
+exactly one case fails, and it is the right one.

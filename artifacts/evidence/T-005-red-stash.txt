@@ -1,0 +1,27 @@
+RECORD OF A PROCEDURE THAT IS NOW FORBIDDEN - kept as an incident log, not as evidence.
+
+What was done
+-------------
+To manufacture a compile-only RED without a device, the five T-005 production classes were moved
+from the shared repository to %TEMP%\t005-red-stash with Move-Item. This file recorded their
+SHA-256 values so the move could be verified and reversed.
+
+  64916415F6F9  android/data/src/main/java/com/treelearn/data/secret/SecretStoreError.java
+  09C59619B9E2  android/data/src/main/java/com/treelearn/data/secret/SecretStoreException.java
+  8EFEAA218765  android/data/src/main/java/com/treelearn/data/secret/SecretEnvelope.java
+  9503709BAD74  android/data/src/main/java/com/treelearn/data/secret/KeystoreSecretStore.java
+  302F2C5E240D  android/data/src/main/java/com/treelearn/data/settings/SettingsRepository.java
+
+Why it must not be repeated
+---------------------------
+Removing files from the shared working tree made the whole repository unbuildable for every other
+lane: `:app` main (AiGatewayStreams imports com.treelearn.data.secret) and `:data` unit tests both
+failed on missing symbols, and two lanes had to restore the files byte-for-byte
+(T-009-crosslane-stash-recovery.txt, T-008-crosslane-stash-recovery.txt). The correct method is to
+run the RED experiment on a scratch COPY of the module outside the repository.
+
+Verified outcome
+----------------
+The repository is intact: every file above is present and its SHA-256 prefix still matches the
+value listed here, which is the same value the restoring lanes produced. %TEMP%\t005-red-stash
+still holds identical duplicate copies and can be discarded whenever convenient.

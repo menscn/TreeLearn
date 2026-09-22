@@ -1,0 +1,58 @@
+T-040 sizing - two tallies (non-blank, non-comment production lines)
+captured-at: 
+2026-09-22 04:47:03
+ (Asia/Shanghai)
+cwd: D:\Project\Android\Treelearn
+
+WHY THE SHARED-FILE PART IS COUNTED FROM THE PATCH RECORD: this working tree has no usable baseline. 'git diff' on MainActivity.java alone reports 599 changed lines, all but ~90 of them pre-existing uncommitted work, and the whole ui/ package is untracked - so a git-diff tally would count the entire pre-existing delta as if this task had written it. The patches this task applied are copied into artifacts\evidence\T-040-patches and are the primary record of its added lines.
+
+TALLY A part 1 - the 8 production files this task ADDS, whole file:
+command: python -X utf8 .trae/scripts/dev/count_production_lines.py 
+android/app/src/main/java/com/treelearn/app/search/BranchTitles.java android/app/src/main/java/com/treelearn/app/search/SearchPage.java android/app/src/main/java/com/treelearn/app/screen/SearchScreen.java android/app/src/main/java/com/treelearn/app/wiring/SqliteSearchStore.java android/app/src/main/res/layout/screen_search.xml android/app/src/main/res/layout/screen_search_body.xml android/app/src/main/res/layout/item_search_hit.xml android/app/src/main/res/layout-sw600dp/screen_search.xml
+     4  android/app/src/main/java/com/treelearn/app/search/BranchTitles.java
+    69  android/app/src/main/java/com/treelearn/app/search/SearchPage.java
+   111  android/app/src/main/java/com/treelearn/app/screen/SearchScreen.java
+    29  android/app/src/main/java/com/treelearn/app/wiring/SqliteSearchStore.java
+    11  android/app/src/main/res/layout/screen_search.xml
+   117  android/app/src/main/res/layout/screen_search_body.xml
+    38  android/app/src/main/res/layout/item_search_hit.xml
+    16  android/app/src/main/res/layout-sw600dp/screen_search.xml
+   395  TOTAL (non-blank, non-comment, production files only)
+EXITCODE=0
+
+TALLY A part 2 - lines this task ADDED to pre-existing files, counted from the '*** Update File:' sections of artifacts\evidence\T-040-patches\patch*.txt
+command: for each patch, split at '*** Update File:' / '*** Add File:'; keep only Update sections; keep lines starting with one '+' (not '+++'); drop blank, '//', '/*', '*' and '<!--..-->' comment lines; sum. An empty set is refused, not reported.
+     6  added to pre-existing files by patch4.txt
+     0  added to pre-existing files by patch5.txt
+    13  added to pre-existing files by patch6.txt
+    33  added to pre-existing files by patch8.txt
+    70  added to pre-existing files by patch9.txt
+SHARED_ADDED_TOTAL=122
+
+=== RE-RUN on the frozen tree (after the mutation restores) ===
+captured-at: 2026-09-22 04:58:45 (Asia/Shanghai)
+cwd: D:\Project\Android\Treelearn
+command: python -X utf8 .trae/scripts/dev/count_production_lines.py android/app/src/main/java/com/treelearn/app/search/BranchTitles.java android/app/src/main/java/com/treelearn/app/search/SearchPage.java android/app/src/main/java/com/treelearn/app/screen/SearchScreen.java android/app/src/main/java/com/treelearn/app/wiring/SqliteSearchStore.java android/app/src/main/res/layout/screen_search.xml android/app/src/main/res/layout/screen_search_body.xml android/app/src/main/res/layout/item_search_hit.xml android/app/src/main/res/layout-sw600dp/screen_search.xml
+     4  android/app/src/main/java/com/treelearn/app/search/BranchTitles.java
+    69  android/app/src/main/java/com/treelearn/app/search/SearchPage.java
+   111  android/app/src/main/java/com/treelearn/app/screen/SearchScreen.java
+    29  android/app/src/main/java/com/treelearn/app/wiring/SqliteSearchStore.java
+    11  android/app/src/main/res/layout/screen_search.xml
+   117  android/app/src/main/res/layout/screen_search_body.xml
+    38  android/app/src/main/res/layout/item_search_hit.xml
+    16  android/app/src/main/res/layout-sw600dp/screen_search.xml
+   395  TOTAL (non-blank, non-comment, production files only)
+EXITCODE=0
+
+=== FINAL two-caliber summary (physical lines vs non-blank-non-comment) ===
+captured-at: 2026-09-22 05:00:02 (Asia/Shanghai)
+command: sum of (Get-Content).Count over the 8 new files = physical lines in added files; plus the added lines tallied from the patch record above.
+  8 new files, PHYSICAL lines                 = 544
+  8 new files, non-blank-non-comment           = 395   (count_production_lines.py, re-run above)
+  shared files, added PHYSICAL lines           = 204   (patch record)
+  shared files, added non-blank-non-comment    = 122   (patch record, comment predicate as documented above)
+  shared files, added non-blank-non-comment    = 127   (a LOOSER predicate run at 05:01 drops only blank / // / /* / * / <!-- lines; the 5-line spread is the comment predicate, so 122 is the tighter, 127 the looser reading)
+  TOTAL physical                               = 748
+  TOTAL non-blank-non-comment                  = 517 (tight predicate) .. 522 (loose predicate)
+JUDGEMENT: on BOTH calibers, and under BOTH comment predicates, the total exceeds the 500-line hard cap. No user-approved sizing exception exists for this task. The only reading that lands under 500 is one that counts the added files alone (395) and excludes every line this task added to pre-existing files - that exclusion is not what the rule says (existing files are counted by changed lines). Reported as an unresolved deviation, NOT self-approved.
+EXITCODE=0 (observed exit code of the measurement run above)

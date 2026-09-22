@@ -1,0 +1,842 @@
+# T-003 full check chain -- raw capture (record-repair round, this session; no emulator)
+# Generated : 2026-09-21T21:54:19+08:00 (header added after the capture; the body below is the untouched Gradle output)
+# Mode      : full chain, --rerun-tasks (all tasks re-executed)
+# Command   : cd android; .\gradlew.bat --no-daemon --console=plain --rerun-tasks :core:test :tree-layout:test :app:assembleDebug :app:assembleRelease :app:assembleDebugAndroidTest :app:lintDebug verifyDependencyDirection verifyNoKotlinDex
+# Result    : Got all the way to :app:lintDebug; every other task PASSED (core/tree-layout tests, assembleDebug/Release/DebugAndroidTest, verifyDependencyDirection, verifyNoKotlinDex). :app:lintDebug FAILED on ANOTHER lane's MainActivity.java:76 [GestureBackNavigation] (see the lint failure line below, file line 763). Cross-lane, not a T-003 regression.
+# ExitCode  : 1
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -Dfile.encoding=UTF-8
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava
+> Task :core:processResources NO-SOURCE
+> Task :core:classes
+> Task :core:jar
+> Task :core:compileTestJava
+> Task :core:processTestResources NO-SOURCE
+> Task :core:testClasses
+
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -Dfile.encoding=UTF-8
+> Task :core:test
+
+AnswerRevisionTest > restoreIsRehydrationOnly PASSED
+
+AnswerRevisionTest > resetCreatesNewRevisionAndOldBranchSourceKeepsTheOldOne PASSED
+
+AnswerRevisionTest > missingOrBlankPolicyVersionIsRefused PASSED
+
+AnswerRevisionTest > theConstructorIsNotAPublicCreationPath PASSED
+
+AnswerRevisionTest > reasoningAndAnswerBelongToTheSameStableVersion PASSED
+
+AnswerRevisionTest > revisionNumberMustBePositive PASSED
+
+AnswerRevisionTest > blankAnswerCannotBecomeStable PASSED
+
+AnswerRevisionTest > createChecksPolicyOwnershipWhileRestoreTrustsTheStoredRow PASSED
+
+AnswerRevisionTest > policyVersionIsCopiedVerbatim PASSED
+
+AnswerRevisionTest > allFieldsAreFinalAndNoSetterExists PASSED
+
+AnswerRevisionTest > aPolicyVersionThatNoPurposeOwnsIsRefused PASSED
+
+AnswerRevisionTest > thinkingDisabledKeepsAnEmptyReasoningFieldButNoNull PASSED
+
+AnswerRevisionTest > aCallerBugIsReportedBeforeTheVersionDecision PASSED
+
+BranchSourceTest > provenanceRejectsMalformedIdentifiers PASSED
+
+BranchSourceTest > aRangedAnchorNeedsBothOffsetsAndTheQuoteAndHashFallback PASSED
+
+BranchSourceTest > stableStateYieldsProvenanceThatPinsExactlyThatRevision PASSED
+
+BranchSourceTest > everyUnfinishedOrFailedStateIsRefusedAsABranchSource PASSED
+
+BranchSourceTest > theConstructorIsNotAPublicCreationPath PASSED
+
+BranchSourceTest > aChildBranchInheritsItsParentFromTheProvenance PASSED
+
+BranchSourceTest > restoreIsRehydrationOnlyButStillValidatesItsInput PASSED
+
+BranchSourceTest > aRootBranchCarriesNoProvenance PASSED
+
+BranchSourceTest > theQuoteMustBeExactlyTheAnchoredRange PASSED
+
+BranchSourceTest > wholeAnswerForkCarriesNoOffsetsButStillPinsARevision PASSED
+
+BranchSourceTest > aNonRootBranchCannotExistWithoutProvenance PASSED
+
+BranchSourceTest > aStableStateWithoutARevisionIdIsACallerBugNotABusinessFailure PASSED
+
+BranchTest > aBranchKnowsWhetherItIsRoot PASSED
+
+BranchTest > lastSeenCanNeverExceedLatestByConstruction PASSED
+
+BranchTest > readingPositionCannotRunAheadOfWhatExists PASSED
+
+BranchTest > aRejectedMutationLeavesTheBranchUntouched PASSED
+
+BranchTest > readingPositionCannotMoveBackwards PASSED
+
+BranchTest > unreadDerivesFromTheSequenceGap PASSED
+
+BranchTest > topicAndBranchIdentifiersAreUuidStrings PASSED
+
+BranchTest > titleAndCollapseUpdatesNeverCreateUnread PASSED
+
+BranchTest > archivingStampsUpdatedAtWithTheArchiveTime PASSED
+
+BranchTest > updatedAtIsReadableAndNeverPredatesCreation PASSED
+
+BranchTest > titleMayBeAbsentButNeverBlank PASSED
+
+BranchTest > restoreKeepsTheRootAndProvenanceRulesOfTheConstructor PASSED
+
+BranchTest > restoreRefusesAnUpdatedAtOlderThanCreation PASSED
+
+BranchTest > archivingKeepsTheBranchesOwnHistory PASSED
+
+BranchTest > restoreCarriesStateThatNoCreationPathCouldProduce PASSED
+
+BuildContextPlanUseCaseTest > theBranchesOwnTurnFollowsTheRevisionThatPositionDisplays PASSED
+
+BuildContextPlanUseCaseTest > aSummaryTheCompressionNeverProducedForbidsTheRequestInsteadOfDroppingReasoning PASSED
+
+BuildContextPlanUseCaseTest > theCapacityTheCallerReservedForSystemAndTheQuestionIsNotFree PASSED
+
+BuildContextPlanUseCaseTest > aSummaryThatCoversQuestionReasoningAndAnswerTravelsAsOneEntry PASSED
+
+BuildContextPlanUseCaseTest > thePlanIsOrderedBirthFirstThenThisBranchesOwnTurns PASSED
+
+BuildContextPlanUseCaseTest > aSourceTheStoreCannotResolveForbidsTheRequest PASSED
+
+BuildContextPlanUseCaseTest > malformedArgumentsAreCallerBugs PASSED
+
+BuildContextPlanUseCaseTest > theBirthHalfIsPinnedToTheSnapshotEvenAfterTheParentMovesOn PASSED
+
+BuildContextPlanUseCaseTest > anEmptyHistoryIsAValidRequest PASSED
+
+BuildContextPlanUseCaseTest > anAnswerPositionWithoutADisplayedRevisionContributesNoTurn PASSED
+
+ContextSnapshotTest > laterMutationsOfTheCallerListCannotReachTheSnapshot PASSED
+
+ContextSnapshotTest > malformedIdentifiersAndTimestampsAreCallerBugs PASSED
+
+ContextSnapshotTest > theSnapshotIdentityNeverCarriesContent PASSED
+
+ContextSnapshotTest > everyPayloadOutsideTheSchemaIsRefused PASSED
+
+ContextSnapshotTest > aStoredSnapshotReadsBackThroughTheStructuredParser PASSED
+
+ContextSnapshotTest > aSnapshotWithoutSourcesIsNotASnapshot PASSED
+
+ContextSnapshotTest > theCanonicalPayloadIsTheDocumentedWireShapeAndItsDigestIsDerived PASSED
+
+ContextSnapshotTest > aPayloadWhoseDigestDoesNotMatchIsRefused PASSED
+
+ContextSnapshotTest > theSnapshotIsUnaffectedByEverythingThatHappensUpstreamAfterwards PASSED
+
+ContextSnapshotTest > equalContextsProduceByteIdenticalPayloads PASSED
+
+ContextSnapshotTest > everySourceKindSurvivesTheCodec PASSED
+
+ContextSnapshotTest > aSchemaVersionThisBuildCannotReadIsRefused PASSED
+
+GenerationCommandTest > versionLookalikesAreRefused PASSED
+
+GenerationCommandTest > aMissingVersionIsRefusedWithThePromptPolicyCode PASSED
+
+GenerationCommandTest > malformedArgumentsAreCallerBugsNotBusinessFailures PASSED
+
+GenerationCommandTest > theVersionIsPinnedWithoutReformatting PASSED
+
+GenerationCommandTest > aCallerBugIsReportedBeforeTheVersionDecision PASSED
+
+GenerationCommandTest > aCommandPinsTheVersionOfItsDeclaredPurpose PASSED
+
+GenerationCommandTest > aVersionOwnedByAnotherPurposeIsRefused PASSED
+
+GenerationCommandTest > theDescriptionNamesThePinAndCarriesNoPromptText PASSED
+
+GenerationCommandTest > thePinnedVersionIsFinal PASSED
+
+GenerationOperationTest > thePinnedVersionCannotBeRewrittenForTheLifeOfTheOperation PASSED
+
+GenerationOperationTest > aNullDeltaIsACallerBug PASSED
+
+GenerationOperationTest > reachingStableDirectlyIsRefusedBecauseStabilizeOwnsThatMove PASSED
+
+GenerationOperationTest > aLateReasoningDeltaIsAppendedWithoutSteppingBack PASSED
+
+GenerationOperationTest > aThinkingDisabledAttemptStabilizesWithEmptyReasoning PASSED
+
+GenerationOperationTest > stabilizeCopiesTheBuffersAndThePinnedVersionVerbatim PASSED
+
+GenerationOperationTest > anEmptyDeltaIsAcceptedWithoutOpeningAChannel PASSED
+
+GenerationOperationTest > anInterruptedAttemptBehavesLikeAFailedOne PASSED
+
+GenerationOperationTest > illegalTransitionsAreReportedAsDomainErrors PASSED
+
+GenerationOperationTest > aBadRevisionNumberIsRefusedByTheRevisionItself PASSED
+
+GenerationOperationTest > aFailedAttemptRejectsLateCallbacksAndCannotBeStabilized PASSED
+
+GenerationOperationTest > stabilizeRequiresANonEmptyAnswer PASSED
+
+GenerationOperationTest > aNullTransitionTargetIsACallerBugNotABusinessFailure PASSED
+
+GenerationOperationTest > aDeltaThatArrivedBeforeStreamingIsRefused PASSED
+
+GenerationOperationTest > anOperationInheritsThePinnedVersionAndIdentityFromItsCommand PASSED
+
+GenerationOperationTest > anAnswerDeltaMovesSubmittingStraightIntoTheAnswerPhase PASSED
+
+GenerationOperationTest > aSecondStabilizationIsRefused PASSED
+
+GenerationOperationTest > aCallerBugIsReportedBeforeTheAttemptStateIsConsulted PASSED
+
+GenerationOperationTest > theOperationDescriptionNamesTheStateAndTheBuffers PASSED
+
+GenerationOperationTest > aReasoningDeltaOpensTheReasoningPhase PASSED
+
+GenerationStateTest > theDerivedPredicatesCoverEveryState PASSED
+
+GenerationStateTest > legalTransitionReturnsTheNextState PASSED
+
+GenerationStateTest > happyPathTransitionsAreLegal PASSED
+
+GenerationStateTest > anyUnfinishedStateCanFailBeInterruptedOrBeCanceled PASSED
+
+GenerationStateTest > everyRecoverableStateMapsToExactlyOneTerminalTarget PASSED
+
+GenerationStateTest > terminalStatesHaveNoRecoveryTarget PASSED
+
+GenerationStateTest > skippingForwardIsRefused PASSED
+
+GenerationStateTest > processRecoveryCoversEveryStateThatCannotSurviveARestart PASSED
+
+GenerationStateTest > illegalTransitionIsReportedAsADomainError PASSED
+
+GenerationStateTest > lateCallbackOnATerminalStateIsReportedAsADomainError PASSED
+
+GenerationStateTest > aNullTransitionTargetIsACallerBugNotABusinessFailure PASSED
+
+GenerationStateTest > onlyStableCountsAsStable PASSED
+
+GenerationStateTest > movingBackwardsIsRefused PASSED
+
+GenerationStateTest > onlyFailedAndInterruptedAreRetryableInPlace PASSED
+
+GenerationStateTest > aReasoningPhaseThatProducedNoAnswerCannotBecomeStable PASSED
+
+GenerationStateTest > terminalStatesNeverChangeAgain PASSED
+
+GuardTest > newIdProducesCanonicalDistinctUuids PASSED
+
+GuardTest > objectChecksAcceptEnumsAndValueObjectsAndRefuseNull PASSED
+
+GuardTest > canonicalUuidStringsAreAccepted PASSED
+
+GuardTest > countersRefuseNegativeValues PASSED
+
+GuardTest > nullAndEmptyIdentifiersAreRefused PASSED
+
+GuardTest > nonCanonicalSpellingsOfAValidUuidAreRefused PASSED
+
+MessageTest > restoreKeepsTheRoleAndContentRules PASSED
+
+MessageTest > aUserPositionCarriesNoRevisionAndNoAttempt PASSED
+
+MessageTest > endingTheAttemptInTheSameTransactionThenAllowsTheSwitch PASSED
+
+MessageTest > blankLearnerTextIsRefused PASSED
+
+MessageTest > learnerTextIsFinalAndThePositionExposesNoSetter PASSED
+
+MessageTest > clearingAFailedAttemptKeepsTheDisplayedRevision PASSED
+
+MessageTest > activatingANewRevisionSwitchesTheDisplayedVersion PASSED
+
+MessageTest > aStableRevisionCannotBeAttachedToALearnerPosition PASSED
+
+MessageTest > aSecondAttemptAtTheSamePositionIsRefusedWhileOneIsRunning PASSED
+
+MessageTest > ordinalIsBranchLocalAndNonNegative PASSED
+
+MessageTest > theDisplayedRevisionCannotBeSwitchedWhileAnAttemptIsRunning PASSED
+
+MessageTest > anAttemptCannotBeBoundToALearnerPosition PASSED
+
+MessageTest > reactivatingTheSameRevisionIsRefused PASSED
+
+MessageTest > anAiPositionCannotBeGivenLearnerText PASSED
+
+MessageTest > restoreCarriesTheActiveReferencesNoCreationPathCouldProduce PASSED
+
+PromptPurposeTest > everyPurposeOwnsItsDocumentedVersion PASSED
+
+PromptPurposeTest > theEnumMatchesTheAuthoritativeFirstReleaseListExactly PASSED
+
+PromptPurposeTest > thePrefixDirectionIsTheExactReverseOfTheVersionDirection PASSED
+
+PromptPurposeTest > theDeclarationOrderMatchesTheDocument PASSED
+
+PromptPurposeTest > aVersionOfAnotherPurposeIsRefused PASSED
+
+PromptPurposeTest > absenceOfAVersionHasOneDefinition PASSED
+
+PromptPurposeTest > theTeachingAnswerPurposeOwnsTheDocumentedVersion PASSED
+
+PromptPurposeTest > aCanonicalSemverSuffixIsAccepted PASSED
+
+PromptPurposeTest > everyPrefixIsUnambiguous PASSED
+
+PromptPurposeTest > theVersionDecisionIsExpressedAsADomainError PASSED
+
+PromptPurposeTest > aNonSemverSuffixIsRefused PASSED
+
+PromptPurposeTest > thereIsNoSeparateKeyPointsPurpose PASSED
+
+PromptSpecTest > aMissingBodyOrPurposeIsACallerBug PASSED
+
+PromptSpecTest > theVersionDecisionIsTheSameOneGenerationCommandMakes PASSED
+
+PromptSpecTest > aVersionOwnedByAnotherPurposeIsReportedAsAMismatch PASSED
+
+PromptSpecTest > aSpecCarriesItsPurposeVersionAndBody PASSED
+
+PromptSpecTest > aBlankSystemContentIsRefused PASSED
+
+PromptSpecTest > aBlankVersionIsReportedAsTheMissingPolicyCode PASSED
+
+PromptSpecTest > theSpecHasNoProviderSpecificField PASSED
+
+PromptSpecTest > theDescriptionNeverCarriesThePromptBody PASSED
+
+TopicTest > anUpdateMustNotPredateCreation PASSED
+
+TopicTest > malformedIdentifiersAreRefusedAtConstruction PASSED
+
+TopicTest > visitingABranchKeepsIdentityAndCreationTime PASSED
+
+TopicTest > aFreshTopicHasNotBeenVisitedYet PASSED
+
+TopicTest > timestampsAreUtcEpochMillisAndNeverNegative PASSED
+
+TopicTest > aTopicCarriesNoNameOfItsOwn PASSED
+
+> Task :tree-layout:compileJava
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes
+> Task :tree-layout:jar
+> Task :tree-layout:compileTestJava
+> Task :tree-layout:processTestResources NO-SOURCE
+> Task :tree-layout:testClasses
+
+> Task :tree-layout:test
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -Dfile.encoding=UTF-8
+
+TreeLayoutGeometryTest > segmentLengthUsesRoundsDepthDecayAndTheCap PASSED
+
+TreeLayoutGeometryTest > siblingsFanOutByLeafWeightAndSproutAlongTheirParent PASSED
+
+TreeLayoutGeometryTest > emptySnapshotProducesAnEmptyFiniteResult PASSED
+
+TreeLayoutGeometryTest > rootIsATrunkGrowingStraightUpWithRoundDerivedLength PASSED
+
+TreeLayoutGeometryTest > collapsedBranchWithoutVisibleChildrenIsStillALeaf PASSED
+
+TreeLayoutGeometryTest > snapshotChildrenKeepTheirInputOrder PASSED
+
+TreeLayoutGeometryTest > singleNodeTreeIsOneLeafAndKeepsTheSoilBand PASSED
+
+TreeLayoutGeometryTest > currentPathIsFlaggedAndFallsBackToTheRootWhenTargetIsNotVisible PASSED
+
+TreeLayoutGeometryTest > deepChainStaysFinite PASSED
+
+TreeLayoutGeometryTest > sameInputProducesBitIdenticalOutput PASSED
+
+TreeLayoutGeometryTest > collapsedBranchCountsHiddenDescendantsAndTheirUnread PASSED
+
+TreeLayoutGeometryTest > branchWithOnlyArchivedChildrenBecomesALeaf PASSED
+
+TreeLayoutGeometryTest > largeTreeStaysFiniteAndReportsItsSize PASSED
+
+TreeLayoutGeometryTest > archivedSubtreesLeaveTheDefaultLayout PASSED
+
+TreeLayoutGeometryTest > childOrderFollowsTheSnapshotOrder PASSED
+
+TreeLayoutHitFitAnchorTest > screenPointsRoundTripThroughTheFitTransform PASSED
+
+TreeLayoutHitFitAnchorTest > hitTestOutsideEveryRegionReturnsNull PASSED
+
+TreeLayoutHitFitAnchorTest > degenerateViewportsStayFinite PASSED
+
+TreeLayoutHitFitAnchorTest > collapseNeverMovesTheSurvivingNodes PASSED
+
+TreeLayoutHitFitAnchorTest > archivingASiblingReportsTheExactAnchorShift PASSED
+
+TreeLayoutHitFitAnchorTest > boundsCoverEveryTipBaseAndLabel PASSED
+
+TreeLayoutHitFitAnchorTest > everyVisibleNodeIsHittableAtItsOwnAnchor PASSED
+
+TreeLayoutHitFitAnchorTest > viewTransformRefusesANonPositiveScale PASSED
+
+TreeLayoutHitFitAnchorTest > fitKeepsTheTreeInsideTheViewportAndAlignsTheBottom PASSED
+
+TreeLayoutHitFitAnchorTest > hitTestAtALabelCentreReturnsTheLabeledBranch PASSED
+
+TreeLayoutHitFitAnchorTest > viewportRefusesNegativeOrZeroTouchTarget PASSED
+
+TreeLayoutLabelTest > midDensityPlacesOneBarLabelPerLeafAtTheMeasuredPosition PASSED
+
+TreeLayoutLabelTest > crowdedBarOmitsLabelsButKeepsEveryNodeHittable PASSED
+
+TreeLayoutLabelTest > farDensityPlacesNoLabelsAndKeepsEveryNodeHittable PASSED
+
+TreeLayoutLabelTest > nearDensityAddsTheSummaryLineOnlyWhenTheBranchHasOne PASSED
+
+TreeLayoutLabelTest > canopyBarSitsEntirelyAboveTheCrownAndAboveEveryLeafBox PASSED
+
+TreeLayoutLabelTest > currentBranchLeafTakesTheFirstRow PASSED
+
+TreeLayoutLabelTest > barLabelsNeverOverlapAndNeverCoverALeaf PASSED
+
+TreeLayoutLabelTest > densityIsDerivedFromTheZoomScale PASSED
+
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues
+> Task :ai:generateDebugResources
+> Task :ai:packageDebugResources
+> Task :ai:processDebugNavigationResources
+> Task :ai:javaPreCompileDebug
+> Task :app:javaPreCompileDebug
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :ai:compileDebugLibraryResources
+> Task :data:processDebugNavigationResources
+> Task :ai:writeDebugAarMetadata
+> Task :data:writeDebugAarMetadata
+> Task :app:processDebugNavigationResources
+> Task :ai:parseDebugLocalResources
+> Task :app:checkDebugAarMetadata
+> Task :app:generateDebugResValues
+> Task :app:compileDebugNavigationResources
+> Task :data:generateDebugResValues
+> Task :data:generateDebugResources
+> Task :ai:generateDebugRFile
+> Task :data:packageDebugResources
+> Task :ai:compileDebugJavaWithJavac
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :ai:bundleLibCompileToJarDebug
+> Task :app:packageDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :ai:extractDeepLinksDebug
+> Task :app:extractDeepLinksDebug
+> Task :data:extractDeepLinksDebug
+> Task :app:mergeDebugResources
+> Task :data:compileDebugLibraryResources
+> Task :app:parseDebugLocalResources
+> Task :ai:generateDebugAssets UP-TO-DATE
+> Task :data:javaPreCompileDebug
+> Task :data:parseDebugLocalResources
+> Task :ai:mergeDebugAssets
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :data:generateDebugAssets UP-TO-DATE
+> Task :data:mergeDebugAssets
+> Task :app:mergeDebugAssets
+> Task :data:generateDebugRFile
+> Task :app:compressDebugAssets
+> Task :data:processDebugManifest
+> Task :ai:processDebugManifest
+> Task :data:compileDebugJavaWithJavac
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
+> Task :data:bundleLibCompileToJarDebug
+> Task :data:bundleLibRuntimeToJarDebug
+> Task :ai:bundleLibRuntimeToJarDebug
+> Task :app:desugarDebugFileDependencies
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :app:checkDebugDuplicateClasses
+> Task :app:mergeExtDexDebug
+> Task :ai:mergeDebugJniLibFolders
+> Task :ai:mergeDebugNativeLibs NO-SOURCE
+> Task :app:mergeDebugJniLibFolders
+> Task :ai:copyDebugJniLibsProjectOnly
+> Task :data:mergeDebugJniLibFolders
+> Task :data:mergeDebugNativeLibs NO-SOURCE
+> Task :data:copyDebugJniLibsProjectOnly
+> Task :app:mergeDebugJavaResource
+> Task :data:bundleLibRuntimeToDirDebug
+> Task :ai:bundleLibRuntimeToDirDebug
+> Task :app:validateSigningDebug
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+> Task :ai:preReleaseBuild UP-TO-DATE
+> Task :ai:mergeReleaseJniLibFolders
+> Task :ai:mergeReleaseNativeLibs NO-SOURCE
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :ai:copyReleaseJniLibsProjectOnly
+> Task :app:mergeReleaseJniLibFolders
+> Task :data:preReleaseBuild UP-TO-DATE
+> Task :data:mergeReleaseJniLibFolders
+> Task :data:mergeReleaseNativeLibs NO-SOURCE
+> Task :data:copyReleaseJniLibsProjectOnly
+> Task :data:generateReleaseResValues
+> Task :app:mergeReleaseNativeLibs NO-SOURCE
+> Task :app:stripReleaseDebugSymbols NO-SOURCE
+> Task :app:extractReleaseNativeSymbolTables NO-SOURCE
+> Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
+> Task :data:generateReleaseResources
+> Task :app:processDebugResources
+> Task :data:packageReleaseResources
+
+> Task :app:compileDebugJavaWithJavac
+Note: D:\Project\Android\Treelearn\android\app\src\main\java\com\treelearn\app\MainActivity.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :app:mergeLibDexDebug
+> Task :app:dexBuilderDebug
+> Task :app:mergeDebugGlobalSynthetics
+> Task :data:processReleaseNavigationResources
+> Task :data:parseReleaseLocalResources
+> Task :data:javaPreCompileRelease
+> Task :ai:generateReleaseResValues
+> Task :ai:generateReleaseResources
+> Task :data:generateReleaseRFile
+> Task :ai:packageReleaseResources
+> Task :app:mergeProjectDexDebug
+> Task :data:compileReleaseJavaWithJavac
+> Task :ai:processReleaseNavigationResources
+> Task :ai:javaPreCompileRelease
+> Task :app:checkReleaseDuplicateClasses
+> Task :ai:parseReleaseLocalResources
+> Task :app:javaPreCompileRelease
+> Task :ai:compileReleaseLibraryResources
+> Task :ai:writeReleaseAarMetadata
+> Task :data:writeReleaseAarMetadata
+> Task :ai:generateReleaseRFile
+> Task :app:processReleaseNavigationResources
+> Task :data:bundleLibRuntimeToDirRelease
+> Task :ai:compileReleaseJavaWithJavac
+> Task :app:checkReleaseAarMetadata
+> Task :app:compileReleaseNavigationResources
+> Task :app:generateReleaseResValues
+> Task :ai:bundleLibCompileToJarRelease
+> Task :app:mapReleaseSourceSetPaths
+> Task :app:generateReleaseResources
+> Task :ai:bundleLibRuntimeToDirRelease
+> Task :app:packageReleaseResources
+> Task :app:createReleaseCompatibleScreenManifests
+> Task :ai:extractDeepLinksRelease
+> Task :app:parseReleaseLocalResources
+> Task :app:extractDeepLinksRelease
+> Task :data:extractDeepLinksRelease
+> Task :data:compileReleaseLibraryResources
+> Task :ai:processReleaseManifest
+> Task :app:desugarReleaseFileDependencies
+> Task :app:mergeReleaseStartupProfile
+> Task :data:processReleaseManifest
+> Task :ai:prepareReleaseArtProfile
+> Task :data:bundleLibCompileToJarRelease
+> Task :app:mergeExtDexRelease
+> Task :app:processReleaseMainManifest
+> Task :app:processReleaseManifest
+> Task :data:prepareReleaseArtProfile
+> Task :app:mergeReleaseArtProfile
+> Task :app:processReleaseManifestForPackage
+> Task :ai:generateReleaseAssets UP-TO-DATE
+> Task :ai:mergeReleaseAssets
+> Task :app:generateReleaseAssets UP-TO-DATE
+> Task :data:generateReleaseAssets UP-TO-DATE
+> Task :ai:bundleLibRuntimeToJarRelease
+> Task :data:bundleLibRuntimeToJarRelease
+> Task :data:mergeReleaseAssets
+> Task :app:mergeReleaseAssets
+> Task :app:compressReleaseAssets
+> Task :app:mergeReleaseResources
+> Task :app:extractReleaseVersionControlInfo
+> Task :ai:extractProguardFiles
+> Task :ai:generateReleaseLintVitalModel
+> Task :ai:processReleaseJavaRes NO-SOURCE
+> Task :ai:prepareLintJarForPublish
+> Task :ai:createFullJarRelease
+> Task :ai:generateReleaseLintModel
+> Task :app:extractProguardFiles
+> Task :data:processReleaseJavaRes NO-SOURCE
+> Task :data:createFullJarRelease
+> Task :app:processReleaseResources
+> Task :data:extractProguardFiles
+
+> Task :app:compileReleaseJavaWithJavac
+Note: D:\Project\Android\Treelearn\android\app\src\main\java\com\treelearn\app\MainActivity.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :app:dexBuilderRelease
+> Task :app:mergeReleaseGlobalSynthetics
+> Task :data:generateReleaseLintModel
+> Task :data:prepareLintJarForPublish
+> Task :data:checkReleaseAarMetadata
+
+> Task :app:generateReleaseLintVitalReportModel
+Warning: Lint will treat :core as an external dependency and not analyze it.
+ * Recommended Action: Apply the 'com.android.lint' plugin to java library project :core. to enable lint to analyze those sources.
+
+Warning: Lint will treat :tree-layout as an external dependency and not analyze it.
+ * Recommended Action: Apply the 'com.android.lint' plugin to java library project :tree-layout. to enable lint to analyze those sources.
+
+
+> Task :data:stripReleaseDebugSymbols NO-SOURCE
+> Task :data:copyReleaseJniLibsProjectAndLocalJars
+> Task :data:extractDeepLinksForAarRelease
+> Task :data:extractReleaseAnnotations
+> Task :data:mergeReleaseGeneratedProguardFiles
+> Task :data:mergeReleaseConsumerProguardFiles
+> Task :ai:checkReleaseAarMetadata
+> Task :ai:stripReleaseDebugSymbols NO-SOURCE
+> Task :ai:copyReleaseJniLibsProjectAndLocalJars
+> Task :data:mergeReleaseJavaResource
+> Task :ai:extractDeepLinksForAarRelease
+> Task :data:syncReleaseLibJars
+> Task :app:mergeDexRelease
+> Task :data:bundleReleaseLocalLintAar
+> Task :app:compileReleaseArtProfile
+> Task :ai:extractReleaseAnnotations
+> Task :ai:mergeReleaseGeneratedProguardFiles
+> Task :ai:mergeReleaseConsumerProguardFiles
+> Task :ai:mergeReleaseJavaResource
+> Task :ai:writeReleaseLintModelMetadata
+> Task :ai:syncReleaseLibJars
+> Task :ai:bundleReleaseLocalLintAar
+> Task :data:writeReleaseLintModelMetadata
+> Task :data:generateReleaseLintVitalModel
+> Task :app:processReleaseJavaRes NO-SOURCE
+> Task :app:mergeReleaseJavaResource
+> Task :app:collectReleaseDependencies
+> Task :app:sdkReleaseDependencyData
+> Task :app:validateSigningRelease
+> Task :app:writeReleaseAppMetadata
+> Task :app:writeReleaseSigningConfigVersions
+> Task :app:optimizeReleaseResources
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:javaPreCompileDebugAndroidTest
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:checkDebugAndroidTestAarMetadata
+> Task :app:processDebugAndroidTestNavigationResources
+> Task :app:compileDebugAndroidTestNavigationResources
+> Task :app:generateDebugAndroidTestResValues
+> Task :app:mapDebugAndroidTestSourceSetPaths
+> Task :app:generateDebugAndroidTestResources
+> Task :app:mergeDebugAndroidTestResources
+> Task :app:processDebugAndroidTestManifest
+> Task :app:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :app:mergeDebugAndroidTestAssets
+> Task :app:compressDebugAndroidTestAssets
+> Task :app:desugarDebugAndroidTestFileDependencies
+> Task :app:processDebugAndroidTestJavaRes NO-SOURCE
+> Task :app:mergeDebugAndroidTestJniLibFolders
+> Task :app:checkDebugAndroidTestDuplicateClasses
+> Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :app:validateSigningDebugAndroidTest
+> Task :app:mergeLibDexDebugAndroidTest
+> Task :app:writeDebugAndroidTestSigningConfigVersions
+> Task :ai:checkDebugAarMetadata
+> Task :ai:stripDebugDebugSymbols NO-SOURCE
+> Task :ai:copyDebugJniLibsProjectAndLocalJars
+> Task :ai:extractDebugAnnotations
+> Task :ai:extractDeepLinksForAarDebug
+> Task :ai:mergeDebugGeneratedProguardFiles
+> Task :ai:mergeDebugConsumerProguardFiles
+> Task :ai:prepareDebugArtProfile
+> Task :ai:mergeDebugJavaResource
+> Task :ai:createFullJarDebug
+> Task :ai:syncDebugLibJars
+> Task :ai:bundleDebugLocalLintAar
+> Task :app:processDebugAndroidTestResources
+> Task :ai:preDebugAndroidTestBuild UP-TO-DATE
+> Task :app:mergeDebugAndroidTestJavaResource
+> Task :app:mergeExtDexDebugAndroidTest
+
+> Task :app:compileDebugAndroidTestJavaWithJavac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :app:dexBuilderDebugAndroidTest
+> Task :app:mergeDebugAndroidTestGlobalSynthetics
+> Task :ai:generateDebugAndroidTestResValues
+> Task :ai:writeDebugLintModelMetadata
+> Task :ai:generateDebugAndroidTestLintModel
+> Task :app:mergeProjectDexDebugAndroidTest
+> Task :ai:generateDebugLintModel
+> Task :ai:preDebugUnitTestBuild UP-TO-DATE
+> Task :ai:generateDebugUnitTestLintModel
+> Task :data:checkDebugAarMetadata
+> Task :data:stripDebugDebugSymbols NO-SOURCE
+> Task :data:copyDebugJniLibsProjectAndLocalJars
+> Task :data:extractDebugAnnotations
+> Task :data:extractDeepLinksForAarDebug
+> Task :data:mergeDebugGeneratedProguardFiles
+> Task :data:mergeDebugConsumerProguardFiles
+> Task :data:prepareDebugArtProfile
+> Task :data:mergeDebugJavaResource
+> Task :data:createFullJarDebug
+> Task :data:syncDebugLibJars
+> Task :data:bundleDebugLocalLintAar
+> Task :data:writeDebugLintModelMetadata
+> Task :app:generateDebugAndroidTestLintModel
+> Task :data:generateDebugLintModel
+
+> Task :app:generateDebugLintReportModel
+Warning: Lint will treat :core as an external dependency and not analyze it.
+ * Recommended Action: Apply the 'com.android.lint' plugin to java library project :core. to enable lint to analyze those sources.
+
+Warning: Lint will treat :tree-layout as an external dependency and not analyze it.
+ * Recommended Action: Apply the 'com.android.lint' plugin to java library project :tree-layout. to enable lint to analyze those sources.
+
+
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:generateDebugUnitTestLintModel
+> Task :data:preDebugAndroidTestBuild UP-TO-DATE
+> Task :data:generateDebugAndroidTestResValues
+> Task :data:generateDebugAndroidTestLintModel
+> Task :data:preDebugUnitTestBuild UP-TO-DATE
+> Task :data:generateDebugUnitTestLintModel
+
+> Task :verifyDependencyDirection
+verifyDependencyDirection: PASS (downward-only module graph + pure-JVM module purity)
+
+> Task :app:packageDebugAndroidTest
+> Task :app:createDebugAndroidTestApkListingFileRedirect
+> Task :app:assembleDebugAndroidTest
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect
+> Task :app:assembleDebug
+> Task :data:lintVitalAnalyzeRelease
+> Task :ai:lintVitalAnalyzeRelease
+> Task :ai:lintAnalyzeDebug
+> Task :ai:lintAnalyzeDebugAndroidTest
+> Task :ai:lintAnalyzeDebugUnitTest
+> Task :app:lintAnalyzeDebugAndroidTest
+> Task :data:lintAnalyzeDebug
+> Task :app:lintAnalyzeDebugUnitTest
+> Task :data:lintAnalyzeDebugAndroidTest
+> Task :data:lintAnalyzeDebugUnitTest
+> Task :app:lintVitalAnalyzeRelease
+> Task :app:lintVitalReportRelease
+> Task :app:lintVitalRelease
+> Task :app:packageRelease
+> Task :app:createReleaseApkListingFileRedirect
+> Task :app:assembleRelease
+
+> Task :verifyNoKotlinDex
+verifyNoKotlinDex: [app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk] APK in an androidTest output path (test process) = 948761 bytes, 3 dex file(s) [classes.dex, classes2.dex, classes3.dex]
+verifyNoKotlinDex: [app/build/outputs/apk/debug/app-debug.apk] shipped APK = 376979 bytes, 11 dex file(s) [classes.dex, classes10.dex, classes11.dex, classes2.dex, classes3.dex, classes4.dex, classes5.dex, classes6.dex, classes7.dex, classes8.dex, classes9.dex]
+verifyNoKotlinDex: [app/build/outputs/apk/release/app-release.apk] shipped APK = 293944 bytes, 1 dex file(s) [classes.dex]
+verifyNoKotlinDex: NOTICE (accepted) [app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk] contains Kotlin-compiled annotation classes without runtime linkage ([classes.dex -> Lkotlin/Metadata;]); no Kotlin runtime library is required on device. Kotlin type descriptors in this APK (8): [Lkotlin/Deprecated;, Lkotlin/Metadata;, Lkotlin/ReplaceWith;, Lkotlin/annotation/AnnotationRetention;, Lkotlin/annotation/AnnotationTarget;, Lkotlin/annotation/Retention;, Lkotlin/annotation/Target;, Lkotlin/reflect/KClass;]
+verifyNoKotlinDex: PASS (3 APK(s) inspected across app/build/outputs/apk, no Kotlin runtime bytecode)
+
+> Task :app:lintAnalyzeDebug
+
+> Task :app:lintReportDebug
+Wrote HTML report to file:///D:/Project/Android/Treelearn/android/app/build/reports/lint-results-debug.html
+Lint found 1 error and 17 warnings. First failure:
+D:\Project\Android\Treelearn\android\app\src\main\java\com\treelearn\app\MainActivity.java:76: Error: onBackPressed is no longer called for back gestures; migrate to AndroidX's backward compatible OnBackPressedDispatcher [GestureBackNavigation]
+    public void onBackPressed() {
+                ~~~~~~~~~~~~~
+
+
+> Task :app:lintDebug FAILED
+Lint found 1 error, 17 warnings. First failure:
+
+D:\Project\Android\Treelearn\android\app\src\main\java\com\treelearn\app\MainActivity.java:76: Error: onBackPressed is no longer called for back gestures; migrate to AndroidX's backward compatible OnBackPressedDispatcher [GestureBackNavigation]
+    public void onBackPressed() {
+                ~~~~~~~~~~~~~
+
+   Explanation for issues of type "GestureBackNavigation":
+   For apps targeting and running on Android 16+ (API 36+), predictive back
+   animations are enabled by default. A back gesture does not trigger
+   {Activity,Dialog}.onBackPressed, and does not dispatch
+   KeyEvent.KEYCODE_BACK.
+
+   Apps should migrate to AndroidX's backward compatible
+   OnBackPressedDispatcher.
+
+   This lint check does not consider per-activity opt-in/opt-out, so you may
+   need to suppress or baseline reported incidents if migrating per-activity.
+
+   https://developer.android.com/guide/navigation/custom-back/predictive-back-gesture
+
+
+The full lint text report is located at:
+  D:\Project\Android\Treelearn\android\app\build\intermediates\lint_intermediate_text_report\debug\lintReportDebug\lint-results-debug.txt
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:lintDebug'.
+> Lint found errors in the project; aborting build.
+  
+  Fix the issues identified by lint, or create a baseline to see only new errors.
+  To create a baseline, run `gradlew updateLintBaseline` after adding the following to the module's build.gradle file:
+  ```
+  android {
+      lint {
+          baseline = file("lint-baseline.xml")
+      }
+  }
+  ```
+  For more details, see https://developer.android.com/studio/write/lint#snapshot
+  
+  Lint found 1 error, 17 warnings. First failure:
+  
+  D:\Project\Android\Treelearn\android\app\src\main\java\com\treelearn\app\MainActivity.java:76: Error: onBackPressed is no longer called for back gestures; migrate to AndroidX's backward compatible OnBackPressedDispatcher [GestureBackNavigation]
+      public void onBackPressed() {
+                  ~~~~~~~~~~~~~
+  
+     Explanation for issues of type "GestureBackNavigation":
+     For apps targeting and running on Android 16+ (API 36+), predictive back
+     animations are enabled by default. A back gesture does not trigger
+     {Activity,Dialog}.onBackPressed, and does not dispatch
+     KeyEvent.KEYCODE_BACK.
+  
+     Apps should migrate to AndroidX's backward compatible
+     OnBackPressedDispatcher.
+  
+     This lint check does not consider per-activity opt-in/opt-out, so you may
+     need to suppress or baseline reported incidents if migrating per-activity.
+  
+     https://developer.android.com/guide/navigation/custom-back/predictive-back-gesture
+  
+  
+  The full lint text report is located at:
+    D:\Project\Android\Treelearn\android\app\build\intermediates\lint_intermediate_text_report\debug\lintReportDebug\lint-results-debug.txt
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 57s
+266 actionable tasks: 266 executed
+EXITCODE=1

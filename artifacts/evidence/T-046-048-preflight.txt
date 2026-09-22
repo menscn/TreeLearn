@@ -1,0 +1,332 @@
+# Pre-flight for the construction lane: T-046 (derived recommendations) and T-048 (search question arm).
+# captured-at: 2026-09-22T05:12:41.2213236+08:00
+# cwd: D:\Project\Android\Treelearn
+# command: read-only rg/Get-Content per section; each section's EXITCODE follows it.
+# mode: read-only. No Gradle, no production/test edits, no edits inside existing task-file lines.
+
+===== T-046 ---- A. the README line references the task quotes =====
+(-- task says README 495-498 / 491-503 / 496 / 692-694 carry the 'recommendations unwired' statement)
+$ rg -n '推荐|recommendation' android/README.md
+197:| `UnreadRollup` / `ViewportSeen` | 未读序号聚合与「真的看过」判定 | 未读只由稳定回答序号推导，**布尔标记表达不了**这件事；折叠祖先吸收子孙未读，归档分支连同子树离开树且**不泄漏给父级**；只有「最新且带 revision 的 AI 位置」真的进入视口才推进 `lastSeen`，推荐与摘要**不制造未读** |
+379:标题、分支摘要与要点、回答推荐、首页推荐和上下文压缩都是**派生物**，不是权威事实：它们可以重算，
+387:| `ArtifactInputs` | 六种结构化输入的唯一产地，全部由 `JsonText` 渲染 | 输入是 JSON 值树，不是拼接字符串；每种用途只拿到技术方案允许的字段——首页推荐只拿轮廓与上限，**没有能装下对话正文的字段** |
+388:| `TreeOutline` / `Entry` / `Level` | 推荐输入能看到的树轮廓 | 每项只有 `level`/`title`/`source_quote`/`summary` 四个字段，没有消息、回答或推理字段，因此"只提交轮廓"是形状而非约定 |
+398:与请求记录的基线相同才写，不同即 `STALE_DISCARDED` 并保留旧 payload。基线是 revision 的（摘要、回答推荐、
+399:上下文压缩）以 `based_on_revision_id` 为准；输入本身即基线的（根标题、分支标题、首页推荐）以 `input_digest`
+431:| `ui.HomePresenter` | 首页的全部决策 | 草稿只在 accepted 分支清空；推荐点击先写入草稿再走同一条 `onSubmit()`；缺 Key 时只提示并跳设置，**不写任何行** |
+432:| `ui.HomeViewState` | 首页可绘制的全部状态（相位/草稿/Key/模型/思考/列表/推荐/提交中/提示） | 四相位 LOADING/EMPTY/ERROR/READY；`Notice` 是分类不是句子；两个列表不可变 |
+436:| `ui.HomeData` / `ui.RootQuestionSubmitter` / `ui.KeyVault` / `ui.SettingsStore` / `ui.UiThread` | 首页与设置页的端口 | 页面不直接访问 DAO / 网关；`HomeData.recommendations` 失败**返回**兜底条而不是抛错 |
+439:| `screen.RecommendationMarquee` | 首页推荐条 | 每条 chip 画两份、按一份宽度回跳，接缝永不可见；触摸暂停、离手 2.6 s 恢复；离屏/未附加/窄到不可滚动时停滚 |
+497:  1. **按历史派生的首页推荐仍未接线，推荐条恒为启动兜底集合**。原因不是没实现，而是
+499:     历史派生推荐无从产出；`HomeWiring.recommendations(hasTopics)` 的参数因此**刻意不用**，走 PRD
+500:     6.2.17 自己的兜底（「推荐失败就用启动集合」），于是「有主题」与「无主题」目前给出同一条。
+510:  手机竖屏 / 平板横屏无重叠、字体放大可读、44dp 热区实测、推荐条动效，以及 `AppLaunchInstrumentedTest` 本身。
+622:第三个子视图，因此没有第二个 Activity、没有导航库。消息、思考、版本与推荐全部来自 `ChatViewState`，
+628:| `ui.ChatViewState` | 对话页可绘制的全部状态（相位/分支/消息/草稿/引用/Key/模型/思考/**展开集合**/推荐/提示/发送中） | 展开集合按 **messageId** 键，不是列表下标；`withMessages` 只换列表，草稿、引用与展开态原样带走；失败分类**复用** `HomeViewState.Notice` |
+654:- **推荐条只挂「最新且稳定」的那条回答**：读到的 `recommendationsRevisionId` 必须等于最新一行的
+688:  1. **追问推荐条恒为空、且不指向任何 revision**：`ArtifactKind.ANSWER_RECOMMENDATIONS` 与
+690:     `recommendationsRevisionId` 恒 `""`——推荐条因此恒隐藏，而不是「显示了但点不动」。
+EXITCODE=0
+
+===== T-046 ---- B. DerivedOperation / DerivedCaller production-caller counts =====
+$ rg -n --glob '!**/build/**' 'new DerivedOperation|implements DerivedCaller' android
+android\app\src\test\java\com\treelearn\app\artifact\DerivedOperationTest.java:303:        return new DerivedOperation(store, telemetry, caller, request, NOW);
+android\app\src\test\java\com\treelearn\app\artifact\DerivedOperationTest.java:342:    private static final class ScriptedCaller implements DerivedCaller {
+EXITCODE=0
+$ rg -c --glob '!**/build/**' 'new DerivedOperation' android/app/src/main android/app/src/test
+android/app/src/test\java\com\treelearn\app\artifact\DerivedOperationTest.java:1
+EXITCODE=0
+
+===== T-046 ---- C. README section bounds for the two quoted areas =====
+$ Get-Content android/README.md | Select-Object -Skip 488 -First 16  (task cited 491-503)
+  不触碰任何回答或分支。
+
+**已知缺口与记录的偏差（不要读成已解决）：**
+
+- **首页数据路径已接线（T-032，2026-09-22）**：`TopicDao.listOverviews` 新增一条只读查询，一次取回
+  「主题 + 根标题 + 首个问题 + 当前摘要 + 分支数 + 最近使用时间」；`wiring.HomeWiring` 用它画列表，用
+  `FirstTopicCreation` + `GenerationCoordinator.submitFirstTopic` 建首个主题。占位类已整体删除，
+  生产装配里不再有 `NOT_WIRED`。读者要注意的**残留缺口**：
+  1. **按历史派生的首页推荐仍未接线，推荐条恒为启动兜底集合**。原因不是没实现，而是
+     `ArtifactKind.HOME_RECOMMENDATIONS` 在本 build 没有生产调用方（`DerivedOperation` 尚无调用者），
+     历史派生推荐无从产出；`HomeWiring.recommendations(hasTopics)` 的参数因此**刻意不用**，走 PRD
+     6.2.17 自己的兜底（「推荐失败就用启动集合」），于是「有主题」与「无主题」目前给出同一条。
+  2. **列表排序键是 `topics.updated_at`**：`listOverviews` 按 `updated_at DESC, id ASC` 排，相等时用 id
+     兜底成全序；`updated_at` 由会话访问分支时刷新，所以「最近使用」与卡片上的排序是同一个事实。
+  3. **新 SQL 的行级证据是 deferred，不是 PASS**：按用户 2026-09-21 的决定（放弃 emulator/真机轮次、
+     由用户本人装 release APK 实测），`TopicDao.listOverviews` 与 `messages.quoted_text` 的真实 SQLite
+EXITCODE=
+$ Get-Content android/README.md | Select-Object -Skip 684 -First 10  (task cited 692-694)
+  用例（`AnswerVersions` 的 retry/reset/selectRevision、`BranchCreation`、`GenerationCoordinator.submit`），
+  装配层本身不重写任何判定。读者要注意的**残留缺口**（都不是「以后再说」，而是本 build 里确实没有生产者的部分）：
+  1. **追问推荐条恒为空、且不指向任何 revision**：`ArtifactKind.ANSWER_RECOMMENDATIONS` 与
+     `HOME_RECOMMENDATIONS` 一样没有生产调用方，所以 `ChatData.Snapshot.answerRecommendations` 恒空、
+     `recommendationsRevisionId` 恒 `""`——推荐条因此恒隐藏，而不是「显示了但点不动」。
+  2. **已结束但没有稳定版本的尝试读不到半截正文**：这种位置读回为 `FAILED`、正文为空。终态尝试的 partial
+     文本在本 build 没有带调用方的查询能读到，而现造一条就是给同一批行开第二条读路径；`FAILED` 的整个
+     作用正是「不让半截回答被当成回答」。
+  3. **`fork` 不发起生成**：新建分支只建子分支与它的出生快照，子分支的第一问由学习者自己提（父分支的自动生成
+     属 T-039 范围）；并且只允许从「显示着稳定版本」的 AI 位置新建分支，与 `ChatMessage.canFork()` 同条件。
+EXITCODE=
+
+===== T-046 ---- D. the API surface the acceptance criteria name =====
+$ rg -n 'public static DerivedRequest|public static final class DerivedRequest|answerRecommendations|homeRecommendations' android/app/src/main/java/com/treelearn/app/artifact/DerivedRequest.java
+34:public final class DerivedRequest {
+82:    public static DerivedRequest rootTitle(String scopeId, String rootQuestion, GenerationModel model,
+89:    public static DerivedRequest branchTitle(String scopeId, String sourceQuote, String firstQuestion,
+97:    public static DerivedRequest branchSummary(String scopeId, String basedOnRevisionId,
+106:    public static DerivedRequest answerRecommendations(String scopeId, String basedOnRevisionId,
+110:                ArtifactInputs.answerRecommendations(latestAnswer, outline, maxItems), maxItems, 0, true,
+115:    public static DerivedRequest homeRecommendations(String scopeId, List<TreeOutline.Entry> outline,
+118:                ArtifactInputs.homeRecommendations(outline, maxItems), maxItems, 0, true, model, budget);
+122:    public static DerivedRequest contextCompression(String scopeId, String basedOnRevisionId,
+EXITCODE=0
+$ rg -n 'class SqliteDerivedStore|class ArtifactKind|ANSWER_RECOMMENDATIONS|HOME_RECOMMENDATIONS' android/app/src/main --glob '!**/build/**'
+android/app/src/main\java\com\treelearn\app\artifact\ArtifactPayload.java:70:            case ANSWER_RECOMMENDATIONS -> fields.put("items", keyedItems("question"));
+android/app/src/main\java\com\treelearn\app\artifact\ArtifactPayload.java:71:            case HOME_RECOMMENDATIONS -> fields.put("items", keyedItems("topic"));
+android/app/src/main\java\com\treelearn\app\artifact\SqliteDerivedStore.java:28:public final class SqliteDerivedStore implements DerivedStore {
+android/app/src/main\java\com\treelearn\app\artifact\DerivedRequest.java:109:        return new DerivedRequest(ArtifactKind.ANSWER_RECOMMENDATIONS, scopeId, basedOnRevisionId,
+android/app/src/main\java\com\treelearn\app\artifact\DerivedRequest.java:117:        return new DerivedRequest(ArtifactKind.HOME_RECOMMENDATIONS, scopeId, null,
+android/app/src/main\java\com\treelearn\app\wiring\ChatWiring.java:44: * <p><strong>What a read cannot show yet.</strong> T-011's {@code ANSWER_RECOMMENDATIONS} has no
+android/app/src/main\java\com\treelearn\app\artifact\ArtifactKind.java:38:    ANSWER_RECOMMENDATIONS("answer_recommendations", PromptPurpose.ANSWER_RECOMMENDATIONS, Scope.BRANCH,
+android/app/src/main\java\com\treelearn\app\artifact\ArtifactKind.java:42:    HOME_RECOMMENDATIONS("home_recommendations", PromptPurpose.HOME_RECOMMENDATIONS, Scope.TOPIC, false,
+android/app/src/main\java\com\treelearn\app\artifact\ArtifactPayloadCodec.java:71:            case ANSWER_RECOMMENDATIONS -> DerivedResult.usable(
+android/app/src/main\java\com\treelearn\app\artifact\ArtifactPayloadCodec.java:73:            case HOME_RECOMMENDATIONS -> DerivedResult.usable(
+android/app/src/main\java\com\treelearn\app\wiring\HomeWiring.java:90:     * topics, and that set is T-011's {@code HOME_RECOMMENDATIONS} artifact. No production producer
+android/app/src/main\java\com\treelearn\app\ui\ChatData.java:45:        /** T-011's {@code ANSWER_RECOMMENDATIONS} for one version; empty when there is none. */
+EXITCODE=0
+$ rg -n 'class StarterRecommendations|StarterRecommendations\.' android --glob '!**/build/**'
+android\app\src\test\java\com\treelearn\app\ui\TestDoubles.java:123:        List<Recommendation> recommendations = StarterRecommendations.all();
+android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:102:        List<Recommendation> starters = StarterRecommendations.all();
+android\app\src\main\java\com\treelearn\app\ui\StarterRecommendations.java:17:public final class StarterRecommendations {
+android\app\src\main\java\com\treelearn\app\wiring\HomeWiring.java:98:        return Recommendations.starterFallback(StarterRecommendations.all());
+EXITCODE=0
+===== corrected readings (2026-09-22, second pass; supersedes any earlier garbled lines) =====
+$ rg -n "search_scope" android/app/src/main/res/values/strings.xml
+28:    <string name="search_scope">标题 · 锚定原文 · 回答 · 推理</string>
+EXITCODE=0
+$ rg -n "class SearchScreen|class SqliteSearchRepository|class SearchPresenter|class SqliteSearchStore" android --glob "!**/build/**"
+android\app\src\main\java\com\treelearn\app\wiring\SqliteSearchStore.java:25:public final class SqliteSearchStore implements SearchRepository {
+android\app\src\test\java\com\treelearn\app\search\SearchPresenterTest.java:28:public class SearchPresenterTest {
+android\app\src\main\java\com\treelearn\app\search\SqliteSearchRepository.java:27:public final class SqliteSearchRepository implements SearchRepository {
+android\app\src\main\java\com\treelearn\app\screen\SearchScreen.java:33:public final class SearchScreen extends LinearLayout {
+android\app\src\main\java\com\treelearn\app\search\SearchPresenter.java:31:public final class SearchPresenter {
+EXITCODE=0
+$ rg -n "archived_at IS NULL" android/data/src/main/java/com/treelearn/data/db/dao/SearchDao.java
+EXITCODE=1  (no output above: the literal lives in the assembled statement, built from TreeLearnSchema.Branches.ARCHIVED_AT inside arm())
+===== T-046 facts: README drift, producers, factories, dependency status =====
+$ rg -n "推荐仍未接线|追问推荐条恒为空|recommendations\(hasTopics\)|recommendationsRevisionId" android/README.md
+497:  1. **按历史派生的首页推荐仍未接线，推荐条恒为启动兜底集合**。原因不是没实现，而是
+499:     历史派生推荐无从产出；`HomeWiring.recommendations(hasTopics)` 的参数因此**刻意不用**，走 PRD
+653:- **推荐条只挂「最新且稳定」的那条回答**：读到的 `recommendationsRevisionId` 必须等于最新一行的
+687:  1. **追问推荐条恒为空、且不指向任何 revision**：`ArtifactKind.ANSWER_RECOMMENDATIONS` 与
+689:     `recommendationsRevisionId` 恒 `""`——推荐条因此恒隐藏，而不是「显示了但点不动」。
+EXITCODE=0
+$ rg -n -C 1 "推荐条恒为启动兜底集合" android/README.md
+496-  生产装配里不再有 `NOT_WIRED`。读者要注意的**残留缺口**：
+497:  1. **按历史派生的首页推荐仍未接线，推荐条恒为启动兜底集合**。原因不是没实现，而是
+498-     `ArtifactKind.HOME_RECOMMENDATIONS` 在本 build 没有生产调用方（`DerivedOperation` 尚无调用者），
+EXITCODE=0
+$ rg -c "new DerivedOperation" android/app/src/main android/app/src/test
+android/app/src/test\java\com\treelearn\app\artifact\DerivedOperationTest.java:1
+EXITCODE=0  (files with zero matches are not listed; only app/src/test appears)
+$ rg -n "new DerivedOperation|implements DerivedCaller" android --glob "!**/build/**"
+android\app\src\test\java\com\treelearn\app\artifact\DerivedOperationTest.java:303:        return new DerivedOperation(store, telemetry, caller, request, NOW);
+android\app\src\test\java\com\treelearn\app\artifact\DerivedOperationTest.java:342:    private static final class ScriptedCaller implements DerivedCaller {
+EXITCODE=0
+$ rg -n "public static DerivedRequest|recommendations\(boolean|StarterRecommendations.all" android/app/src/main/java/com/treelearn/app/artifact/DerivedRequest.java android/app/src/main/java/com/treelearn/app/wiring/HomeWiring.java
+android/app/src/main/java/com/treelearn/app/wiring/HomeWiring.java:97:    public Recommendations recommendations(boolean hasTopics) {
+android/app/src/main/java/com/treelearn/app/wiring/HomeWiring.java:98:        return Recommendations.starterFallback(StarterRecommendations.all());
+android/app/src/main/java/com/treelearn/app/artifact/DerivedRequest.java:82:    public static DerivedRequest rootTitle(String scopeId, String rootQuestion, GenerationModel model,
+android/app/src/main/java/com/treelearn/app/artifact/DerivedRequest.java:89:    public static DerivedRequest branchTitle(String scopeId, String sourceQuote, String firstQuestion,
+android/app/src/main/java/com/treelearn/app/artifact/DerivedRequest.java:97:    public static DerivedRequest branchSummary(String scopeId, String basedOnRevisionId,
+android/app/src/main/java/com/treelearn/app/artifact/DerivedRequest.java:106:    public static DerivedRequest answerRecommendations(String scopeId, String basedOnRevisionId,
+android/app/src/main/java/com/treelearn/app/artifact/DerivedRequest.java:115:    public static DerivedRequest homeRecommendations(String scopeId, List<TreeOutline.Entry> outline,
+android/app/src/main/java/com/treelearn/app/artifact/DerivedRequest.java:122:    public static DerivedRequest contextCompression(String scopeId, String basedOnRevisionId,
+EXITCODE=0
+$ rg -n "^status: " .trae/tasks/T-2026-09-22-derived-caller-and-titles-045.md
+7:status: ready
+EXITCODE=0
+===== T-046: README gap-2 exact extent (686-695) =====
+Get-Content android/README.md | Select-Object -Skip 685 -First 10  (1-based lines 686-695)
+686:   装配层本身不重写任何判定。读者要注意的**残留缺口**（都不是「以后再说」，而是本 build 里确实没有生产者的部分）：
+687:   1. **追问推荐条恒为空、且不指向任何 revision**：`ArtifactKind.ANSWER_RECOMMENDATIONS` 与
+688:      `HOME_RECOMMENDATIONS` 一样没有生产调用方，所以 `ChatData.Snapshot.answerRecommendations` 恒空、
+689:      `recommendationsRevisionId` 恒 `""`——推荐条因此恒隐藏，而不是「显示了但点不动」。
+690:   2. **已结束但没有稳定版本的尝试读不到半截正文**：这种位置读回为 `FAILED`、正文为空。终态尝试的 partial
+691:      文本在本 build 没有带调用方的查询能读到，而现造一条就是给同一批行开第二条读路径；`FAILED` 的整个
+692:      作用正是「不让半截回答被当成回答」。
+693:   3. **`fork` 不发起生成**：新建分支只建子分支与它的出生快照，子分支的第一问由学习者自己提（父分支的自动生成
+694:      属 T-039 范围）；并且只允许从「显示着稳定版本」的 AI 位置新建分支，与 `ChatMessage.canFork()` 同条件。
+695: - **平台自己的文本工具条可能与应用菜单并存（T-041，无设备，未验证）**：本切片只保证「长按」这一条手势被应用接管
+EXITCODE=
+===== T-046: README gap-1 exact extent (495-503) =====
+Get-Content android/README.md | Select-Object -Skip 494 -First 9  (1-based lines 495-503)
+495:   `FirstTopicCreation` + `GenerationCoordinator.submitFirstTopic` 建首个主题。占位类已整体删除，
+496:   生产装配里不再有 `NOT_WIRED`。读者要注意的**残留缺口**：
+497:   1. **按历史派生的首页推荐仍未接线，推荐条恒为启动兜底集合**。原因不是没实现，而是
+498:      `ArtifactKind.HOME_RECOMMENDATIONS` 在本 build 没有生产调用方（`DerivedOperation` 尚无调用者），
+499:      历史派生推荐无从产出；`HomeWiring.recommendations(hasTopics)` 的参数因此**刻意不用**，走 PRD
+500:      6.2.17 自己的兜底（「推荐失败就用启动集合」），于是「有主题」与「无主题」目前给出同一条。
+501:   2. **列表排序键是 `topics.updated_at`**：`listOverviews` 按 `updated_at DESC, id ASC` 排，相等时用 id
+502:      兜底成全序；`updated_at` 由会话访问分支时刷新，所以「最近使用」与卡片上的排序是同一个事实。
+503:   3. **新 SQL 的行级证据是 deferred，不是 PASS**：按用户 2026-09-21 的决定（放弃 emulator/真机轮次、
+EXITCODE=
+===== T-048 facts: schema columns, arms, tests, dependencies =====
+$ rg -n "ROLE|USER_CONTENT|AI_CONTENT" android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java
+107:        public static final String ROLE = "role";
+109:        public static final String USER_CONTENT = "user_content";
+325:            Messages.ROLE + " TEXT NOT NULL CHECK (" + Messages.ROLE + " IN ('USER','AI'))",
+326:            Messages.USER_CONTENT + " TEXT",
+336:            "CHECK (" + Messages.ROLE + " = 'AI' OR (" + Messages.USER_CONTENT
+337:                    + " IS NOT NULL AND length(" + Messages.USER_CONTENT + ") > 0))",
+338:            "CHECK (" + Messages.ROLE + " = 'USER' OR " + Messages.USER_CONTENT + " IS NULL)",
+473:    public static final String TRIGGER_MESSAGES_USER_CONTENT_IMMUTABLE =
+492:            "NEW." + Messages.QUOTED_TEXT + " IS NOT NULL AND (NEW." + Messages.ROLE
+530:            "CREATE TRIGGER " + TRIGGER_MESSAGES_USER_CONTENT_IMMUTABLE + " BEFORE UPDATE OF "
+531:                    + Messages.USER_CONTENT + " ON " + Messages.TABLE + " WHEN OLD." + Messages.ROLE
+532:                    + " = 'USER' AND NEW." + Messages.USER_CONTENT + " IS NOT OLD."
+533:                    + Messages.USER_CONTENT
+EXITCODE=0
+$ rg -n "role = |CHECK \(role" android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java
+EXITCODE=1
+$ rg -n "^status: " .trae/tasks/T-2026-09-20-search-unread-reading-position-015.md .trae/tasks/T-2026-09-21-search-page-and-home-entry-040.md
+.trae/tasks/T-2026-09-21-search-page-and-home-entry-040.md:7:status: verifying
+.trae/tasks/T-2026-09-20-search-unread-reading-position-015.md:7:status: verifying
+EXITCODE=0
+$ rg --files android | rg "SearchDao|SearchHit|SearchUnread"
+android\core\src\test\java\com\treelearn\core\domain\SearchHitTest.java
+android\core\src\main\java\com\treelearn\core\domain\SearchHit.java
+android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java
+android\app\src\androidTest\java\com\treelearn\app\SearchUnreadReadingInstrumentedTest.java
+android\data\src\main\java\com\treelearn\data\db\dao\SearchDao.java
+EXITCODE=0
+$ rg -n "Messages\.ROLE|Messages\.USER_CONTENT|role" android --glob "!**/build/**" --glob "!**/test/**" --glob "!**/androidTest/**" | rg -v "TreeLearnSchema.java"
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:325:            Messages.ROLE + " TEXT NOT NULL CHECK (" + Messages.ROLE + " IN ('USER','AI'))",
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:326:            Messages.USER_CONTENT + " TEXT",
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:336:            "CHECK (" + Messages.ROLE + " = 'AI' OR (" + Messages.USER_CONTENT
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:337:                    + " IS NOT NULL AND length(" + Messages.USER_CONTENT + ") > 0))",
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:338:            "CHECK (" + Messages.ROLE + " = 'USER' OR " + Messages.USER_CONTENT + " IS NULL)",
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:492:            "NEW." + Messages.QUOTED_TEXT + " IS NOT NULL AND (NEW." + Messages.ROLE
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:531:                    + Messages.USER_CONTENT + " ON " + Messages.TABLE + " WHEN OLD." + Messages.ROLE
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:532:                    + " = 'USER' AND NEW." + Messages.USER_CONTENT + " IS NOT OLD."
+android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java:533:                    + Messages.USER_CONTENT
+android\data\src\main\java\com\treelearn\data\db\dao\TopicDao.java:183:                    + ", (SELECT q." + TreeLearnSchema.Messages.USER_CONTENT + " FROM "
+android\data\src\main\java\com\treelearn\data\db\dao\TopicDao.java:186:                    + " AND q." + TreeLearnSchema.Messages.ROLE + "='" + ROLE_USER + "'"
+android\data\src\main\java\com\treelearn\data\db\dao\MessageDao.java:92:        String role = Rows.string(cursor, TreeLearnSchema.Messages.ROLE);
+android\data\src\main\java\com\treelearn\data\db\dao\MessageDao.java:98:                Rows.string(cursor, TreeLearnSchema.Messages.USER_CONTENT),
+android\data\src\main\java\com\treelearn\data\db\dao\MessageDao.java:128:        values.put(TreeLearnSchema.Messages.ROLE, message.role.name());
+android\data\src\main\java\com\treelearn\data\db\dao\MessageDao.java:132:        values.put(TreeLearnSchema.Messages.USER_CONTENT, message.isUser() ? message.userContent
+EXITCODE=0
+===== T-048: role literal source, sibling user-question reader, field-label switch, ordinal-sensitive tests =====
+$ rg -n "ROLE_USER|ROLE_AI|enum Role|Role\." android --glob "!**/build/**"
+android\data\src\main\java\com\treelearn\data\db\dao\TopicDao.java:164:    private static final String ROLE_USER = MessageRole.USER.name();
+android\data\src\main\java\com\treelearn\data\db\dao\TopicDao.java:186:                    + " AND q." + TreeLearnSchema.Messages.ROLE + "='" + ROLE_USER + "'"
+android\ai\src\main\java\com\treelearn\ai\prompt\DeepSeekMessage.java:16:    public enum Role {
+EXITCODE=0
+Get-Content SearchScreen.java lines 130-152
+130:     }
+131: 
+132:     /** The chip's word for one matched field: the enum is the store's, the words are the screen's. */
+133:     private String fieldLabel(SearchHit.Field field) {
+134:         switch (field) {
+135:             case TITLE:
+136:                 return getContext().getString(R.string.search_field_title);
+137:             case ANCHOR:
+138:                 return getContext().getString(R.string.search_field_anchor);
+139:             case REASONING:
+140:                 return getContext().getString(R.string.search_field_reasoning);
+141:             case PARTIAL_ANSWER:
+142:                 return getContext().getString(R.string.search_field_partial_answer);
+143:             case PARTIAL_REASONING:
+144:                 return getContext().getString(R.string.search_field_partial_reasoning);
+145:             case ANSWER:
+146:             default:
+147:                 return getContext().getString(R.string.search_field_answer);
+148:         }
+149:     }
+150: }
+EXITCODE=0
+$ rg -n "SearchHit.Field|matched_field|Field\." android/app/src/androidTest/java/com/treelearn/app/SearchUnreadReadingInstrumentedTest.java android/app/src/test/java/com/treelearn/app/search/SearchPageTest.java android/app/src/test/java/com/treelearn/app/search/SearchPresenterTest.java android/app/src/test/java/com/treelearn/app/search/SearchJumpTest.java
+android/app/src/test/java/com/treelearn/app/search/SearchPresenterTest.java:90:        fixture.presenter.onHitOpened(SearchHit.of(SearchHit.Field.TITLE, TOPIC, BRANCH, null, -1,
+android/app/src/test/java/com/treelearn/app/search/SearchPresenterTest.java:141:        return SearchHit.of(SearchHit.Field.ANSWER, TOPIC, BRANCH, MESSAGE, 3, REVISION, 2,
+android/app/src/test/java/com/treelearn/app/search/SearchPageTest.java:128:        return SearchHit.of(SearchHit.Field.ANSWER, TOPIC, branchId, MESSAGE, 3, REVISION, 2,
+android/app/src/test/java/com/treelearn/app/search/SearchPageTest.java:133:        return SearchHit.of(SearchHit.Field.TITLE, TOPIC, branchId, null, -1, null, 0,
+android/app/src/test/java/com/treelearn/app/search/SearchJumpTest.java:57:        fixture.repository.hits = Collections.singletonList(SearchHit.of(SearchHit.Field.TITLE, TOPIC,
+android/app/src/test/java/com/treelearn/app/search/SearchJumpTest.java:68:        return SearchHit.of(SearchHit.Field.ANSWER, TOPIC, BRANCH, MESSAGE, 3, REVISION, 2,
+EXITCODE=0
+$ rg -n "SearchDao\.(statement|arguments)\(\)|countOf" android --glob "!**/build/**"
+android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:27:        String statement = SearchDao.statement();
+android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:40:        assertEquals(6, countOf(SearchDao.statement(), "ESCAPE '\\'"));
+android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:66:        assertEquals(2, countOf(SearchDao.statement(), "answer_revisions ar"));
+android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:67:        assertEquals(2, countOf(SearchDao.statement(),
+android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:70:                SearchDao.statement().contains("b.source_revision_id"));
+android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:75:        assertEquals(6, countOf(SearchDao.statement(), "b.archived_at IS NULL"));
+android\data\src\test\java\com\treelearn\data\db\dao\SearchDaoStatementTest.java:82:        String statement = SearchDao.statement();
+EXITCODE=0
+$ rg -n "六臂|六个|6 arms|Six arms|six arms" android/README.md
+244:| `SearchDao` | `branches` + `messages` + `answer_revisions` + `generation_operations`（六臂 `UNION ALL` 跨表） | 本仓唯一读多表的 SQL（技术方案 §6.3）。六个字段各一臂：标题、分叉锚点引文、当前展示 revision 的回答与思考、失败尝试的部分正文。**通配符不内联**——六处全是 `LIKE ? ESCAPE '\'` 加参数绑定；回答/思考臂经 `messages.active_revision_id` 连接，所以「没有位置在展示的过期 revision」在结构上不可达，仍被引用的那条只能经**分叉自己的锚点臂**（`b.source_revision_id`）找到；六臂一律 `b.archived_at IS NULL`。union 列名取自第一臂而三张表都有 `id`，因此 branch/message/revision 键必须别名，否则 `Rows.string(cursor, "id")` 会静默取错键 |
+EXITCODE=0
+===== T-048: other task files referencing the same README / search surfaces (collision check) =====
+$ rg -ln "六臂|SearchDao|SearchHit" .trae/tasks Docs
+Docs\04-ux-design\知芽-TreeLearn-高保真原型-v1.html
+.trae/tasks\T-2026-09-20-search-unread-reading-position-015.md
+.trae/tasks\T-2026-09-21-search-page-and-home-entry-040.md
+.trae/tasks\T-2026-09-22-search-question-arm-048.md
+EXITCODE=0
+$ rg -n "推荐仍未接线|HOME_RECOMMENDATIONS|StarterRecommendations" .trae/tasks --glob "*.md"
+.trae/tasks\T-2026-09-20-derived-ai-artifacts-011.md:79:- [x] ROOT_TITLE、BRANCH_TITLE、BRANCH_SUMMARY、ANSWER_RECOMMENDATIONS、HOME_RECOMMENDATIONS 使用各自 PromptPurpose/版本，均不包含 LEARNING_ANSWER 教学正文；输入由 JsonWriter 等结构化 API 编码并视为不可信数据。
+.trae/tasks\T-2026-09-20-model-immutable-answer-domain-003.md:276:| 1 | **`PromptPurpose` 与权威设计不符（最严重）**：verifier 实际读取 `Docs/05-technical-design/知芽（TreeLearn）DeepSeek自适应学习导师提示词设计_V1.0.md` §3.1 与 §6 版本表，发现权威首版用途为 `LEARNING_ANSWER / ROOT_TITLE / BRANCH_TITLE / BRANCH_SUMMARY / ANSWER_RECOMMENDATIONS / HOME_RECOMMENDATIONS / CONTEXT_COMPRESSION`。我的实现**凭空多出 `KEY_POINTS`**（§10 明确 AI 要点是 `BRANCH_SUMMARY` 同一次结构化响应里的一个 payload 字段），**缺失 `ROOT_TITLE`**，另有 `ANSWER_SUGGESTION`/`HOME_SUGGESTION`/`CONTEXT_COMPACTION` 三个前缀命名与文档不一致（`tl-answer-recommendations` / `tl-home-recommendations` / `tl-context-compression` 无人认领）。 | 按文档 §3.1/§6 逐字重写枚举为 7 个用途与文档前缀；删除 `KEY_POINTS`；新增 `ownerOf`；`ownsVersion` 收紧为「前缀 + `/` + `MAJOR.MINOR.PATCH`」，拒绝 `tl-learning-answer/garbage` 这类非 semver 后缀 | 新增 `PromptPurposeTest` 7 个用例：与 §3.1 名单**集合相等**、不存在 KEY_POINT 命名、§6 每个版本都被认领、两两前缀不歧义、跨用途版本被拒、非 semver 后缀被拒；`:core:test` 63/63 通过 |
+.trae/tasks\T-2026-09-20-home-settings-ui-012.md:170:- Blocker: ① **规模偏差需用户裁定**：实测 1428 非空非注释生产行 + 884 行资源，超 500 行硬上限，无用户批准的例外，实现者不得自行追认（`artifacts/evidence/T-012-sizing.txt`）。② **首页数据路径还是占位**：`wiring.PendingHomeWiring` 只真能满足「无主题时的启动推荐兜底」与「空主题列表」，缺三样——(a) `TopicDao` 没有「按最近使用列出主题」的查询，新增 Android SQL 必须真机/SQLite 验证而本轮不用设备，且那是 `:data` lane 的写路径；(b) 首题提交装配（`GenerationCoordinator.submitFirstTopic` + `FirstTopicCreation.create` 都已在，但把请求组装、版本校验、开连接、accepted 回调写库接起来的装配层没有生产消费者，T-008 记录的同一条缺口，且需要注入 API key）；(c) 按历史派生的首页推荐属 T-011 的 `HOME_RECOMMENDATIONS`，而 T-011 本轮仍在实现中（任务 `status: ready`、RED/GREEN 仍 PENDING）。在此之前 `submit()` 返回可见的 `NOT_WIRED` 拒绝，页面明说「本题已保留，本版本还不能发送」。③ 需要真机才能证明的验收项一律记为 `deferred — emulator not used this round (user instruction 2026-09-21)`，既不算 PASS 也不算失败。
+.trae/tasks\T-2026-09-20-home-settings-ui-012.md:171:- Unblock condition: 用户对规模给裁定（批准例外，或要求把首页数据路径/设置页拆成后续任务）；T-011 落地并提供一个 `HOME_RECOMMENDATIONS` 的生产者后 (c) 消失；`TopicDao` 的主题列表查询在真机上验证后 (a) 消失；装配任务提供首题提交消费者后 (b) 消失；重新允许使用模拟器后手机/平板、字体放大、44dp 与动效四项才能转成 PASS。
+.trae/tasks\T-2026-09-21-real-data-path-wiring-032.md:135:- Gaps: ① `TopicDao.listOverviews` 与 `messages.quoted_text` 的真实 Android SQLite 行级行为未在设备上执行——`RealDataPathWiringInstrumentedTest` 只编译通过，其 10 个用例从未运行（按用户决定记 deferred，见验收标准第 5 条）；② `FirstTopicCreation` 的单事务与「失败整体回滚、不留半份数据」语义由 T-025 的设备侧证据承担，本任务只断言路由经 `FirstTopicCreation` 而非第二条路径；③ `HOME_RECOMMENDATIONS` 仍无生产者、对话推荐条恒空且不指向 revision、终态 partial 答案读不到、`fork` 不发起生成且只允许 AI 位置——这四条已写进 `android/README.md` 的残留缺口；④ 真实 DeepSeek 冒烟与 APK 签名不在本任务范围（后者见 Handoff notes）。
+.trae/tasks\T-2026-09-22-derived-caller-and-titles-045.md:54:- `ANSWER_RECOMMENDATIONS` 与 `HOME_RECOMMENDATIONS`（T-046）。
+.trae/tasks\T-2026-09-22-derived-caller-and-titles-045.md:146:- **行号已漂、必须按内容定位**：规格 Documentation impact record 写的 `android/README.md:491-503`（首页数据路径残留缺口）现为 `:493` 起（该段第 1 条即「按历史派生的首页推荐仍未接线……`DerivedOperation` 尚无调用者」在 `:498`）；写的 `:687-698`（已知缺口）现为 `:758-766`，其中「写入侧 `DerivedOperation` 仍无调用者，所以画布叶子在当前 build 实际读作空」在 `:762-763`。README 另有 `:392`/`:396` 两行描述 `DerivedOperation` 语义，反查时一并看。
+.trae/tasks\T-2026-09-22-derived-recommendations-046.md:22:- Problem/background: 推荐的两个 kind（`ANSWER_RECOMMENDATIONS` 与 `HOME_RECOMMENDATIONS`）与标题/摘要同属无生产调用者的派生流水线（见 T-045 的核实）。当前 `HomeWiring.recommendations(hasTopics)` 的参数被**刻意不用**，走 PRD 6.2.17 自己的兜底，于是「有主题」与「无主题」给出同一条启动集合（`android/README.md:495-498`）；回答级推荐同理恒为静态 starter。
+.trae/tasks\T-2026-09-22-derived-recommendations-046.md:24:- Expected outcome: 回答达稳定后写回 `ANSWER_RECOMMENDATIONS`；首页按主题树轮廓摘要写回 `HOME_RECOMMENDATIONS`，并且首页读取路径在有主题时取到历史派生集合。
+.trae/tasks\T-2026-09-22-derived-recommendations-046.md:48:- 接线 `HOME_RECOMMENDATIONS`：以主题树轮廓摘要为基线，在首页读取发现基线过期时触发派生。
+.trae/tasks\T-2026-09-22-derived-recommendations-046.md:56:- 任何 schema 改动；`StarterRecommendations` 的既有内容。
+.trae/tasks\T-2026-09-22-derived-recommendations-046.md:60:- Intended change and old behavior to preserve: 由「推荐恒为启动集合」变为「有历史时用派生集合」；**保留**无主题时的启动兜底（PRD 6.2.17 自身的降级规则）、保留 `StarterRecommendations` 与其既有断言。
+.trae/tasks\T-2026-09-22-derived-recommendations-046.md:70:- Documentation surfaces checked: `android/README.md:491-503`（含「推荐仍未接线」那条残缺口）、技术方案第 10 节、提示词设计 6.3 与 6.4。
+.trae/tasks\T-2026-09-22-derived-recommendations-046.md:71:- Documentation files updated: 待实现时填写（README 的「推荐仍未接线」表述必须改写为已接线并说明触发时机）。
+.trae/tasks\T-2026-09-22-derived-recommendations-046.md:83:- [ ] 既有 :app 套件全绿（含 `StarterRecommendations` 与首页推荐既有断言）；android-no-kotlin-guard PASS。
+EXITCODE=0
+$ rg -n "currentInput|questionBehind|envelope" android/ai/src/main/java/com/treelearn/ai/prompt/DeepSeekContextEncoder.java  (T-044 neighbour check only)
+24: * citation {@link #currentInput} frames, is {@link #escape escaped}, so a stored answer containing
+30: * sentence of an answer, so {@link #currentInput} wraps that sentence in {@code QUOTE_OPEN} /
+37: * {@link #currentInput}, because the framing literals live here and nowhere else.
+83:    public static String currentInput(String question, String quote) {
+EXITCODE=0
+===== T-048: role literal + Field switch fan-out =====
+$ rg -n "enum MessageRole" -A 8 android/core/src/main/java/com/treelearn/core/domain/
+android/core/src/main/java/com/treelearn/core/domain/MessageRole.java:4:public enum MessageRole {
+android/core/src/main/java/com/treelearn/core/domain/MessageRole.java-5-
+android/core/src/main/java/com/treelearn/core/domain/MessageRole.java-6-    /** Authored by the learner. The content is immutable once created. */
+android/core/src/main/java/com/treelearn/core/domain/MessageRole.java-7-    USER,
+android/core/src/main/java/com/treelearn/core/domain/MessageRole.java-8-
+android/core/src/main/java/com/treelearn/core/domain/MessageRole.java-9-    /** Produced by the model. Only the currently displayed revision and attempt are referenced. */
+android/core/src/main/java/com/treelearn/core/domain/MessageRole.java-10-    AI
+android/core/src/main/java/com/treelearn/core/domain/MessageRole.java-11-}
+EXITCODE=0
+$ rg -n "ROLE_USER|MessageRole" android/data/src/main/java/com/treelearn/data/db/dao/TopicDao.java
+7:import com.treelearn.core.domain.MessageRole;
+164:    private static final String ROLE_USER = MessageRole.USER.name();
+186:                    + " AND q." + TreeLearnSchema.Messages.ROLE + "='" + ROLE_USER + "'"
+EXITCODE=0
+$ rg -n "switch \(.*field|case PARTIAL_|case ANCHOR" android --glob "!**/build/**" -g "!**/SearchScreen.java"
+EXITCODE=1
+===== T-048: ordinal / values() narrow check + presenter purity + README 六 count =====
+$ rg -n "SearchHit\.Field\.values\(\)|Field\.values\(\)|hit\.field\.ordinal\(\)" android --glob "!**/build/**"
+android\core\src\main\java\com\treelearn\core\domain\SearchHit.java:34:            Comparator.comparingInt((SearchHit hit) -> hit.field.ordinal())
+EXITCODE=0  (only SearchHit.java:34 expected)
+$ rg -n "DISPLAY_ORDER" android/app/src/main/java/com/treelearn/app/screen/SearchScreen.java android/app/src/main/java/com/treelearn/app/search/SearchPresenter.java
+EXITCODE=1  (no output = screen/presenter never sort)
+$ rg -n "UNION ALL|LIKE \?|buildStatement" android/app/src/main/java/com/treelearn/app/search/SearchPresenter.java android/app/src/main/java/com/treelearn/app/search/SqliteSearchRepository.java android/app/src/main/java/com/treelearn/app/screen/SearchScreen.java
+EXITCODE=1  (no output = only SearchDao judges)
+$ rg -c "六" android/README.md
+8
+EXITCODE=0
+$ rg -n "六臂|六处|六个字段" android/README.md
+244:| `SearchDao` | `branches` + `messages` + `answer_revisions` + `generation_operations`（六臂 `UNION ALL` 跨表） | 本仓唯一读多表的 SQL（技术方案 §6.3）。六个字段各一臂：标题、分叉锚点引文、当前展示 revision 的回答与思考、失败尝试的部分正文。**通配符不内联**——六处全是 `LIKE ? ESCAPE '\'` 加参数绑定；回答/思考臂经 `messages.active_revision_id` 连接，所以「没有位置在展示的过期 revision」在结构上不可达，仍被引用的那条只能经**分叉自己的锚点臂**（`b.source_revision_id`）找到；六臂一律 `b.archived_at IS NULL`。union 列名取自第一臂而三张表都有 `id`，因此 branch/message/revision 键必须别名，否则 `Rows.string(cursor, "id")` 会静默取错键 |
+553:  `SearchUnreadReadingInstrumentedTest`），它钉住的是本轮两件不能出错的事——查询文本**从不内联**（六处
+EXITCODE=0

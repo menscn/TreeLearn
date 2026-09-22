@@ -1,0 +1,50 @@
+# VERIFY2 cross-lane build-configuration blocker  2026-09-21 20:44:16
+Command: cd android; .\gradlew.bat :core:test --no-daemon --console=plain
+Mode: verifier reproduction of configuration-time failure
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* Where:
+Build file 'D:\Project\Android\Treelearn\android\app\build.gradle' line: 53
+
+* What went wrong:
+A problem occurred evaluating project ':app'.
+> Could not get unknown property 'release' for SigningConfig container of type org.gradle.api.internal.FactoryNamedDomainObjectContainer.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 9s
+EXITCODE=1
+--- verifier #2 action (2026-09-21 20:44, recorded 2026-09-21 21:35:19) ---
+android/keystore.properties is gitignored (android/.gitignore:3) and was created by another lane at 20:41.
+Its presence makes hasReleaseSigning true, so build.gradle:53 throws at CONFIGURATION time and every
+Gradle invocation fails before any task runs -- that is the reproduction captured above.
+To keep the other lanes building during this harness run, verifier #2 MOVED the file to:
+  C:\Users\23745\AppData\Local\Temp\verify2-parked-keystore.properties
+  SHA-256 DF377FB5DE21D9F75D6EFD6008818F2E49D0220BDC4792EAE42AE377E9A9BE45
+  keys: storeFile,storePassword,keyAlias,keyPassword
+RESTORE (owner of :app/build.gradle, AFTER fixing the ordering):
+  Move-Item C:\Users\23745\AppData\Local\Temp\verify2-parked-keystore.properties android\keystore.properties
+FIX: move the signingConfigs { release { ... } } block ABOVE buildTypes in android/app/build.gradle
+     (or read signingConfigs.findByName('release')), so the container entry exists before line 53 uses it.
+WARNING: while the file is absent, assembleRelease silently produces an UNSIGNED APK (build.gradle:13),
+     so any release-signing verification performed in this state is invalid.
+--- parked copy retired 2026-09-21 21:38:38 ---
+Repo copy android/keystore.properties is present and byte-identical (SHA-256 DF377FB5...BE45); the
+Temp copy created when verifier #2 parked the file has been DELETED, so no stale duplicate remains.
+The build.gradle:53 ordering defect is fixed; see artifacts/evidence/build-signing-config-order-2026-09-21.txt
+and the independent re-run in VERIFY3-signing-config-fix.txt.

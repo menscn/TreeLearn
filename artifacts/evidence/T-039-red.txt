@@ -1,0 +1,220 @@
+T-039 RED evidence
+captured-at: 2026-09-22T03:09:13.0145763+08:00
+cwd: D:\Project\Android\Treelearn\android
+command: .\gradlew.bat :app:testDebugUnitTest --tests '*Navigation*' --no-daemon --console=plain --rerun-tasks --no-build-cache
+---- output ----
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava
+> Task :core:processResources NO-SOURCE
+> Task :core:classes
+> Task :core:jar
+> Task :tree-layout:compileJava
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes
+> Task :tree-layout:jar
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues
+> Task :ai:generateDebugResources
+> Task :ai:packageDebugResources
+> Task :ai:processDebugNavigationResources
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :ai:javaPreCompileDebug
+> Task :app:javaPreCompileDebug
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :ai:compileDebugLibraryResources
+> Task :data:processDebugNavigationResources
+> Task :ai:writeDebugAarMetadata
+> Task :data:writeDebugAarMetadata
+> Task :app:processDebugNavigationResources
+> Task :ai:parseDebugLocalResources
+> Task :app:checkDebugAarMetadata
+> Task :app:compileDebugNavigationResources
+> Task :app:generateDebugResValues
+> Task :data:generateDebugResValues
+> Task :data:generateDebugResources
+> Task :data:packageDebugResources
+> Task :ai:generateDebugRFile
+> Task :app:mapDebugSourceSetPaths
+> Task :ai:compileDebugJavaWithJavac
+> Task :app:generateDebugResources
+> Task :ai:bundleLibRuntimeToJarDebug
+> Task :ai:bundleLibCompileToJarDebug
+> Task :app:packageDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :ai:extractDeepLinksDebug
+> Task :app:extractDeepLinksDebug
+> Task :data:extractDeepLinksDebug
+> Task :data:compileDebugLibraryResources
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :data:javaPreCompileDebug
+> Task :data:parseDebugLocalResources
+> Task :app:javaPreCompileDebugUnitTest
+> Task :app:mergeDebugResources
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :app:parseDebugLocalResources
+> Task :app:processDebugUnitTestJavaRes NO-SOURCE
+> Task :data:processDebugManifest
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :ai:processDebugManifest
+> Task :data:generateDebugRFile
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :data:compileDebugJavaWithJavac
+> Task :app:processDebugManifestForPackage
+> Task :data:bundleLibCompileToJarDebug
+> Task :data:bundleLibRuntimeToJarDebug
+> Task :app:processDebugResources
+> Task :app:compileDebugJavaWithJavac
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:bundleDebugClassesToRuntimeJar
+
+> Task :app:compileDebugUnitTestJavaWithJavac FAILED
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java:41: 错误: 找不到符号
+                row(state.visible, ROOT).archivable);
+                                        ^
+  符号:   变量 archivable
+  位置: 类 Row
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java:42: 错误: 找不到符号
+        assertTrue("every other live branch is archivable", row(state.visible, CHILD).archivable);
+                                                                                     ^
+  符号:   变量 archivable
+  位置: 类 Row
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java:43: 错误: 找不到符号
+        assertTrue(row(state.visible, GRANDCHILD).archivable);
+                                                 ^
+  符号:   变量 archivable
+  位置: 类 Row
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java:44: 错误: 找不到符号
+        assertTrue(row(state.visible, LEAF).archivable);
+                                           ^
+  符号:   变量 archivable
+  位置: 类 Row
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java:52: 错误: 找不到符号
+        assertTrue(row(state.archived, GONE).archivable);
+                                            ^
+  符号:   变量 archivable
+  位置: 类 Row
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java:59: 错误: 找不到符号
+        assertEquals("the root's own children line", 2, row(state.visible, ROOT).childCount);
+                                                                                ^
+  符号:   变量 childCount
+  位置: 类 Row
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java:60: 错误: 找不到符号
+        assertEquals(1, row(state.visible, CHILD).childCount);
+                                                 ^
+  符号:   变量 childCount
+  位置: 类 Row
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java:61: 错误: 找不到符号
+        assertEquals(0, row(state.visible, LEAF).childCount);
+                                                ^
+  符号:   变量 childCount
+  位置: 类 Row
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java:63: 错误: 找不到符号
+                0, row(state.archived, GONE).childCount);
+                                            ^
+  符号:   变量 childCount
+  位置: 类 Row
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java:73: 错误: 找不到符号
+                row(folded.visible, ROOT).childCount);
+                                         ^
+  符号:   变量 childCount
+  位置: 类 Row
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java:84: 错误: 找不到符号
+                row(state.visible, CHILD).archivable);
+                                         ^
+  符号:   变量 archivable
+  位置: 类 Row
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java:85: 错误: 找不到符号
+        assertEquals(0, row(state.visible, CHILD).childCount);
+                                                 ^
+  符号:   变量 childCount
+  位置: 类 Row
+12 个错误
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugUnitTestJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java:41: 错误: 找不到符号
+                  row(state.visible, ROOT).archivable);
+                                          ^
+    符号:   变量 archivable
+    位置: 类 Row
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java:42: 错误: 找不到符号
+          assertTrue("every other live branch is archivable", row(state.visible, CHILD).archivable);
+                                                                                       ^
+    符号:   变量 archivable
+    位置: 类 Row
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java:43: 错误: 找不到符号
+          assertTrue(row(state.visible, GRANDCHILD).archivable);
+                                                   ^
+    符号:   变量 archivable
+    位置: 类 Row
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java:44: 错误: 找不到符号
+          assertTrue(row(state.visible, LEAF).archivable);
+                                             ^
+    符号:   变量 archivable
+    位置: 类 Row
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java:52: 错误: 找不到符号
+          assertTrue(row(state.archived, GONE).archivable);
+                                              ^
+    符号:   变量 archivable
+    位置: 类 Row
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java:59: 错误: 找不到符号
+          assertEquals("the root's own children line", 2, row(state.visible, ROOT).childCount);
+                                                                                  ^
+    符号:   变量 childCount
+    位置: 类 Row
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java:60: 错误: 找不到符号
+          assertEquals(1, row(state.visible, CHILD).childCount);
+                                                   ^
+    符号:   变量 childCount
+    位置: 类 Row
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java:61: 错误: 找不到符号
+          assertEquals(0, row(state.visible, LEAF).childCount);
+                                                  ^
+    符号:   变量 childCount
+    位置: 类 Row
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java:63: 错误: 找不到符号
+                  0, row(state.archived, GONE).childCount);
+                                              ^
+    符号:   变量 childCount
+    位置: 类 Row
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java:73: 错误: 找不到符号
+
+                  row(folded.visible, ROOT).childCount);
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+53 actionable tasks: 53 executed
+                                           ^
+    符号:   变量 childCount
+    位置: 类 Row
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java:84: 错误: 找不到符号
+                  row(state.visible, CHILD).archivable);
+                                           ^
+    符号:   变量 archivable
+    位置: 类 Row
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\navigation\NavigationRootGateTest.java:85: 错误: 找不到符号
+          assertEquals(0, row(state.visible, CHILD).childCount);
+                                                   ^
+    符号:   变量 childCount
+    位置: 类 Row
+  12 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+BUILD FAILED in 18s
+EXITCODE=1

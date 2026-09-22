@@ -1,0 +1,849 @@
+﻿# T-007 RED evidence - immutable birth snapshot + later-context encoding (:core / :ai)
+# captured-at: 2026-09-21T20:20:37.4425067+08:00
+# command: cd android; .\gradlew.bat :core:test :ai:testDebugUnitTest --no-daemon --console=plain
+# mode: RED (this suite is written before the production types it names exist)
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+
+> Task :core:compileTestJava FAILED
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:37: 错误: 程序包BuildContextPlanUseCase不存在
+    private static final BuildContextPlanUseCase.Budget GENEROUS =
+                                                ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:49: 错误: 找不到符号
+    private static DomainResult<ContextPlan> build(ContextSnapshot snapshot, List<Message> history,
+                                                   ^
+  符号:   类 ContextSnapshot
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:50: 错误: 程序包BuildContextPlanUseCase不存在
+            BuildContextPlanUseCase.Sources sources, BuildContextPlanUseCase.Budget budget) {
+                                   ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:50: 错误: 程序包BuildContextPlanUseCase不存在
+            BuildContextPlanUseCase.Sources sources, BuildContextPlanUseCase.Budget budget) {
+                                                                            ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:49: 错误: 找不到符号
+    private static DomainResult<ContextPlan> build(ContextSnapshot snapshot, List<Message> history,
+                                ^
+  符号:   类 ContextPlan
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:54: 错误: 找不到符号
+    private static ContextPlan plan(ContextSnapshot snapshot, List<Message> history,
+                                    ^
+  符号:   类 ContextSnapshot
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:55: 错误: 程序包BuildContextPlanUseCase不存在
+            BuildContextPlanUseCase.Sources sources, BuildContextPlanUseCase.Budget budget) {
+                                   ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:55: 错误: 程序包BuildContextPlanUseCase不存在
+            BuildContextPlanUseCase.Sources sources, BuildContextPlanUseCase.Budget budget) {
+                                                                            ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:54: 错误: 找不到符号
+    private static ContextPlan plan(ContextSnapshot snapshot, List<Message> history,
+                   ^
+  符号:   类 ContextPlan
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:61: 错误: 程序包ContextPlan不存在
+    private static String render(List<ContextPlan.Entry> entries) {
+                                                 ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:72: 错误: 程序包BuildContextPlanUseCase不存在
+    private static final class StoredSources implements BuildContextPlanUseCase.Sources {
+                                                                               ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:34: 错误: 程序包ContextSnapshot不存在
+    private static ContextSnapshot snapshot(ContextSnapshot.Source... sources) {
+                                                           ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:34: 错误: 找不到符号
+    private static ContextSnapshot snapshot(ContextSnapshot.Source... sources) {
+                   ^
+  符号:   类 ContextSnapshot
+  位置: 类 ContextSnapshotTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:38: 错误: 程序包ContextSnapshot不存在
+    private static ContextSnapshot.Source user(String id) {
+                                  ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:42: 错误: 程序包ContextSnapshot不存在
+    private static ContextSnapshot.Source revision(String id) {
+                                  ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:38: 错误: 程序包BuildContextPlanUseCase不存在
+            new BuildContextPlanUseCase.Budget(100_000, 1);
+                                       ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:51: 错误: 找不到符号
+        return BuildContextPlanUseCase.build(snapshot, history, sources, budget);
+               ^
+  符号:   变量 BuildContextPlanUseCase
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:56: 错误: 找不到符号
+        DomainResult<ContextPlan> result = build(snapshot, history, sources, budget);
+                     ^
+  符号:   类 ContextPlan
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:63: 错误: 程序包ContextPlan不存在
+        for (ContextPlan.Entry entry : entries) {
+                        ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:94: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:99: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:104: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:112: 错误: 找不到符号
+        ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID, Arrays.asList(
+        ^
+  符号:   类 ContextSnapshot
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:112: 错误: 找不到符号
+        ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID, Arrays.asList(
+                                   ^
+  符号:   变量 ContextSnapshot
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:113: 错误: 程序包ContextSnapshot不存在
+                ContextSnapshot.Source.userMessage(PARENT_QUESTION_ID),
+                               ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:114: 错误: 程序包ContextSnapshot不存在
+                ContextSnapshot.Source.stableRevision(REVISION_1)), T0);
+                               ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:120: 错误: 程序包ContextPlan不存在
+        List<ContextPlan.Entry> before = plan(snapshot, noMessages(), sources, GENEROUS).entries();
+                        ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:132: 错误: 程序包ContextPlan不存在
+        List<ContextPlan.Entry> after = plan(snapshot, noMessages(), sources, GENEROUS).entries();
+                        ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:136: 错误: 程序包ContextPlan不存在
+        assertEquals(ContextPlan.EntryKind.USER_MESSAGE, after.get(0).kind);
+                                ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:138: 错误: 程序包ContextPlan不存在
+        assertEquals(ContextPlan.EntryKind.STABLE_REVISION, after.get(1).kind);
+                                ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:147: 错误: 找不到符号
+        ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID,
+        ^
+  符号:   类 ContextSnapshot
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:147: 错误: 找不到符号
+        ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID,
+                                   ^
+  符号:   变量 ContextSnapshot
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:148: 错误: 程序包ContextSnapshot不存在
+                Arrays.asList(ContextSnapshot.Source.stableRevision(REVISION_1)), T0);
+                                             ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:156: 错误: 找不到符号
+        ContextPlan first = plan(snapshot, history, sources, GENEROUS);
+        ^
+  符号:   类 ContextPlan
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:160: 错误: 找不到符号
+        ContextPlan second = plan(snapshot, history, sources, GENEROUS);
+        ^
+  符号:   类 ContextPlan
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:170: 错误: 找不到符号
+        ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID, Arrays.asList(
+        ^
+  符号:   类 ContextSnapshot
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:170: 错误: 找不到符号
+        ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID, Arrays.asList(
+                                   ^
+  符号:   变量 ContextSnapshot
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:171: 错误: 程序包ContextSnapshot不存在
+                ContextSnapshot.Source.userMessage(PARENT_QUESTION_ID),
+                               ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:172: 错误: 程序包ContextSnapshot不存在
+                ContextSnapshot.Source.stableRevision(REVISION_1)), T0);
+                               ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:180: 错误: 找不到符号
+        ContextPlan plan = plan(snapshot,
+        ^
+  符号:   类 ContextPlan
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:185: 错误: 程序包ContextPlan不存在
+        assertEquals(ContextPlan.EntryKind.USER_MESSAGE, plan.entries().get(0).kind);
+                                ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:186: 错误: 程序包ContextPlan不存在
+        assertEquals(ContextPlan.EntryKind.STABLE_REVISION, plan.entries().get(1).kind);
+                                ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:187: 错误: 程序包ContextPlan不存在
+        assertEquals(ContextPlan.EntryKind.USER_MESSAGE, plan.entries().get(2).kind);
+                                ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:189: 错误: 程序包ContextPlan不存在
+        assertEquals(ContextPlan.EntryKind.STABLE_REVISION, plan.entries().get(3).kind);
+                                ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:195: 错误: 找不到符号
+        ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID, Arrays.asList(
+        ^
+  符号:   类 ContextSnapshot
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:195: 错误: 找不到符号
+        ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID, Arrays.asList(
+                                   ^
+  符号:   变量 ContextSnapshot
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:196: 错误: 程序包ContextSnapshot不存在
+                ContextSnapshot.Source.userMessage(PARENT_QUESTION_ID),
+                               ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:197: 错误: 程序包ContextSnapshot不存在
+                ContextSnapshot.Source.stableRevision(REVISION_1)), T0);
+                               ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:199: 错误: 找不到符号
+        DomainResult<ContextPlan> withoutRevision = build(snapshot, noMessages(),
+                     ^
+  符号:   类 ContextPlan
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:202: 错误: 找不到符号
+        assertEquals(DomainErrorCode.CONTEXT_SOURCE_MISSING, withoutRevision.error().code);
+                                    ^
+  符号:   变量 CONTEXT_SOURCE_MISSING
+  位置: 类 DomainErrorCode
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:206: 错误: 找不到符号
+        DomainResult<ContextPlan> withoutMessage = build(snapshot, noMessages(),
+                     ^
+  符号:   类 ContextPlan
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:209: 错误: 找不到符号
+        assertEquals(DomainErrorCode.CONTEXT_SOURCE_MISSING, withoutMessage.error().code);
+                                    ^
+  符号:   变量 CONTEXT_SOURCE_MISSING
+  位置: 类 DomainErrorCode
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:214: 错误: 找不到符号
+        ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID, Arrays.asList(
+        ^
+  符号:   类 ContextSnapshot
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:214: 错误: 找不到符号
+        ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID, Arrays.asList(
+                                   ^
+  符号:   变量 ContextSnapshot
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:215: 错误: 程序包ContextSnapshot不存在
+                ContextSnapshot.Source.summary(SUMMARY_ID),
+                               ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:216: 错误: 程序包ContextSnapshot不存在
+                ContextSnapshot.Source.stableRevision(REVISION_1)), T0);
+                               ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:218: 错误: 找不到符号
+        DomainResult<ContextPlan> refused = build(snapshot, noMessages(),
+                     ^
+  符号:   类 ContextPlan
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:223: 错误: 找不到符号
+        assertEquals(DomainErrorCode.CONTEXT_SUMMARY_MISSING, refused.error().code);
+                                    ^
+  符号:   变量 CONTEXT_SUMMARY_MISSING
+  位置: 类 DomainErrorCode
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:228: 错误: 找不到符号
+        ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID,
+        ^
+  符号:   类 ContextSnapshot
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:228: 错误: 找不到符号
+        ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID,
+                                   ^
+  符号:   变量 ContextSnapshot
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:229: 错误: 程序包ContextSnapshot不存在
+                Arrays.asList(ContextSnapshot.Source.summary(SUMMARY_ID)), T0);
+                                             ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:233: 错误: 找不到符号
+        ContextPlan plan = plan(snapshot, noMessages(), sources, GENEROUS);
+        ^
+  符号:   类 ContextPlan
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:236: 错误: 程序包ContextPlan不存在
+        assertEquals(ContextPlan.EntryKind.SUMMARY, plan.entries().get(0).kind);
+                                ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:244: 错误: 找不到符号
+        ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID,
+        ^
+  符号:   类 ContextSnapshot
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:244: 错误: 找不到符号
+        ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID,
+                                   ^
+  符号:   变量 ContextSnapshot
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:245: 错误: 程序包ContextSnapshot不存在
+                Arrays.asList(ContextSnapshot.Source.stableRevision(REVISION_1)), T0);
+                                             ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:253: 错误: 程序包BuildContextPlanUseCase不存在
+                        new BuildContextPlanUseCase.Budget(contextChars + 40, 40)).isOk());
+                                                   ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:255: 错误: 找不到符号
+        DomainResult<ContextPlan> refused = build(snapshot, noMessages(), sources,
+                     ^
+  符号:   类 ContextPlan
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:256: 错误: 程序包BuildContextPlanUseCase不存在
+                new BuildContextPlanUseCase.Budget(contextChars + 40, 41));
+                                           ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:259: 错误: 找不到符号
+        assertEquals(DomainErrorCode.CONTEXT_EXCEEDS_BUDGET, refused.error().code);
+                                    ^
+  符号:   变量 CONTEXT_EXCEEDS_BUDGET
+  位置: 类 DomainErrorCode
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:266: 错误: 找不到符号
+        ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID,
+        ^
+  符号:   类 ContextSnapshot
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:266: 错误: 找不到符号
+        ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID,
+                                   ^
+  符号:   变量 ContextSnapshot
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:267: 错误: 程序包ContextSnapshot不存在
+                Arrays.asList(ContextSnapshot.Source.stableRevision(REVISION_1)), T0);
+                                             ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:271: 错误: 找不到符号
+        ContextPlan plan = plan(snapshot,
+        ^
+  符号:   类 ContextPlan
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:276: 错误: 程序包ContextPlan不存在
+        assertEquals(ContextPlan.EntryKind.USER_MESSAGE, plan.entries().get(1).kind);
+                                ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:282: 错误: 找不到符号
+        ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID,
+        ^
+  符号:   类 ContextSnapshot
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:282: 错误: 找不到符号
+        ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID,
+                                   ^
+  符号:   变量 ContextSnapshot
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:283: 错误: 程序包ContextSnapshot不存在
+                Arrays.asList(ContextSnapshot.Source.stableRevision(REVISION_1)), T0);
+                                             ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:285: 错误: 找不到符号
+        ContextPlan plan = plan(snapshot, noMessages(),
+        ^
+  符号:   类 ContextPlan
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:294: 错误: 找不到符号
+        ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID,
+        ^
+  符号:   类 ContextSnapshot
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:294: 错误: 找不到符号
+        ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID,
+                                   ^
+  符号:   变量 ContextSnapshot
+  位置: 类 BuildContextPlanUseCaseTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:295: 错误: 程序包ContextSnapshot不存在
+                Arrays.asList(ContextSnapshot.Source.stableRevision(REVISION_1)), T0);
+                                             ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:309: 错误: 程序包BuildContextPlanUseCase不存在
+        assertThrows(IllegalArgumentException.class, () -> new BuildContextPlanUseCase.Budget(0, 0));
+                                                                                      ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:311: 错误: 程序包BuildContextPlanUseCase不存在
+                () -> new BuildContextPlanUseCase.Budget(10, -1));
+                                                 ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:313: 错误: 程序包BuildContextPlanUseCase不存在
+                () -> new BuildContextPlanUseCase.Budget(10, 10));
+                                                 ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:35: 错误: 找不到符号
+        return ContextSnapshot.create(BRANCH_ID, Arrays.asList(sources), T0);
+               ^
+  符号:   变量 ContextSnapshot
+  位置: 类 ContextSnapshotTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:39: 错误: 程序包ContextSnapshot不存在
+        return ContextSnapshot.Source.userMessage(id);
+                              ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:43: 错误: 程序包ContextSnapshot不存在
+        return ContextSnapshot.Source.stableRevision(id);
+                              ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:48: 错误: 找不到符号
+        ContextSnapshot snapshot = snapshot(user(QUESTION_ID), revision(REVISION_1));
+        ^
+  符号:   类 ContextSnapshot
+  位置: 类 ContextSnapshotTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:55: 错误: 找不到符号
+                ContextSnapshotCodec.digestOf(snapshot.payload), snapshot.digest);
+                ^
+  符号:   变量 ContextSnapshotCodec
+  位置: 类 ContextSnapshotTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:56: 错误: 找不到符号
+        assertEquals(ContextSnapshot.SCHEMA_VERSION, snapshot.schemaVersion);
+                     ^
+  符号:   变量 ContextSnapshot
+  位置: 类 ContextSnapshotTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:58: 错误: 找不到符号
+                snapshot.digest, ContextSnapshotCodec.digestOf(snapshot(user(QUESTION_ID)).payload));
+                                 ^
+  符号:   变量 ContextSnapshotCodec
+  位置: 类 ContextSnapshotTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:69: 错误: 找不到符号
+        ContextSnapshot snapshot = snapshot(user(QUESTION_ID), revision(REVISION_1));
+        ^
+  符号:   类 ContextSnapshot
+  位置: 类 ContextSnapshotTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:72: 错误: 程序包ContextSnapshot不存在
+        List<ContextSnapshot.Source> sources = snapshot.sources;
+                            ^
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:95: 错误: 程序包ContextSnapshot不存在
+        List<ContextSnapshot.Source> caller = new ArrayList<ContextSnapshot.Source>();
+                            ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:95: 错误: 程序包ContextSnapshot不存在
+        List<ContextSnapshot.Source> caller = new ArrayList<ContextSnapshot.Source>();
+                                                                           ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:98: 错误: 找不到符号
+        ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID, caller, T0);
+        ^
+  符号:   类 ContextSnapshot
+  位置: 类 ContextSnapshotTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:98: 错误: 找不到符号
+        ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID, caller, T0);
+                                   ^
+  符号:   变量 ContextSnapshot
+  位置: 类 ContextSnapshotTest
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:101: 错误: 程序包ContextSnapshot不存在
+        caller.set(0, ContextSnapshot.Source.summary(QUESTION_ID));
+                                     ^
+D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:104: 错误: 程序包ContextSnapshot不存在
+        assertEquals(ContextSnapshot.SourceKind.USER_MESSAGE, snapshot.sources.get(0).kind);
+                                    ^
+100 个错误
+System.Management.Automation.RemoteException
+FAILURE: Build failed with an exception.
+System.Management.Automation.RemoteException
+* What went wrong:
+Execution failed for task ':core:compileTestJava'.
+> Compilation failed; see the compiler output below.
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:49: 错误: 找不到符号
+      private static DomainResult<ContextPlan> build(ContextSnapshot snapshot, List<Message> history,
+                                                     ^
+    符号:   类 ContextSnapshot
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:49: 错误: 找不到符号
+      private static DomainResult<ContextPlan> build(ContextSnapshot snapshot, List<Message> history,
+                                  ^
+    符号:   类 ContextPlan
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:54: 错误: 找不到符号
+      private static ContextPlan plan(ContextSnapshot snapshot, List<Message> history,
+                                      ^
+    符号:   类 ContextSnapshot
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:54: 错误: 找不到符号
+      private static ContextPlan plan(ContextSnapshot snapshot, List<Message> history,
+                     ^
+    符号:   类 ContextPlan
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:34: 错误: 找不到符号
+      private static ContextSnapshot snapshot(ContextSnapshot.Source... sources) {
+                     ^
+    符号:   类 ContextSnapshot
+    位置: 类 ContextSnapshotTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:51: 错误: 找不到符号
+          return BuildContextPlanUseCase.build(snapshot, history, sources, budget);
+                 ^
+    符号:   变量 BuildContextPlanUseCase
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:56: 错误: 找不到符号
+          DomainResult<ContextPlan> result = build(snapshot, history, sources, budget);
+                       ^
+    符号:   类 ContextPlan
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:112: 错误: 找不到符号
+          ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID, Arrays.asList(
+          ^
+    符号:   类 ContextSnapshot
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:112: 错误: 找不到符号
+          ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID, Arrays.asList(
+                                     ^
+    符号:   变量 ContextSnapshot
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:147: 错误: 找不到符号
+          ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID,
+          ^
+    符号:   类 ContextSnapshot
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:147: 错误: 找不到符号
+          ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID,
+                                     ^
+    符号:   变量 ContextSnapshot
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:156: 错误: 找不到符号
+          ContextPlan first = plan(snapshot, history, sources, GENEROUS);
+          ^
+    符号:   类 ContextPlan
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:160: 错误: 找不到符号
+          ContextPlan second = plan(snapshot, history, sources, GENEROUS);
+          ^
+    符号:   类 ContextPlan
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:170: 错误: 找不到符号
+          ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID, Arrays.asList(
+          ^
+    符号:   类 ContextSnapshot
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:170: 错误: 找不到符号
+          ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID, Arrays.asList(
+                                     ^
+    符号:   变量 ContextSnapshot
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:180: 错误: 找不到符号
+          ContextPlan plan = plan(snapshot,
+          ^
+    符号:   类 ContextPlan
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:195: 错误: 找不到符号
+          ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID, Arrays.asList(
+          ^
+    符号:   类 ContextSnapshot
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:195: 错误: 找不到符号
+          ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID, Arrays.asList(
+                                     ^
+    符号:   变量 ContextSnapshot
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:199: 错误: 找不到符号
+          DomainResult<ContextPlan> withoutRevision = build(snapshot, noMessages(),
+                       ^
+    符号:   类 ContextPlan
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:202: 错误: 找不到符号
+          assertEquals(DomainErrorCode.CONTEXT_SOURCE_MISSING, withoutRevision.error().code);
+                                      ^
+    符号:   变量 CONTEXT_SOURCE_MISSING
+    位置: 类 DomainErrorCode
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:206: 错误: 找不到符号
+          DomainResult<ContextPlan> withoutMessage = build(snapshot, noMessages(),
+                       ^
+    符号:   类 ContextPlan
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:209: 错误: 找不到符号
+          assertEquals(DomainErrorCode.CONTEXT_SOURCE_MISSING, withoutMessage.error().code);
+                                      ^
+    符号:   变量 CONTEXT_SOURCE_MISSING
+    位置: 类 DomainErrorCode
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:214: 错误: 找不到符号
+          ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID, Arrays.asList(
+          ^
+    符号:   类 ContextSnapshot
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:214: 错误: 找不到符号
+          ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID, Arrays.asList(
+                                     ^
+    符号:   变量 ContextSnapshot
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:218: 错误: 找不到符号
+          DomainResult<ContextPlan> refused = build(snapshot, noMessages(),
+                       ^
+    符号:   类 ContextPlan
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:223: 错误: 找不到符号
+          assertEquals(DomainErrorCode.CONTEXT_SUMMARY_MISSING, refused.error().code);
+                                      ^
+    符号:   变量 CONTEXT_SUMMARY_MISSING
+    位置: 类 DomainErrorCode
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:228: 错误: 找不到符号
+          ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID,
+          ^
+    符号:   类 ContextSnapshot
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:228: 错误: 找不到符号
+          ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID,
+                                     ^
+    符号:   变量 ContextSnapshot
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:233: 错误: 找不到符号
+          ContextPlan plan = plan(snapshot, noMessages(), sources, GENEROUS);
+          ^
+    符号:   类 ContextPlan
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:244: 错误: 找不到符号
+          ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID,
+          ^
+    符号:   类 ContextSnapshot
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:244: 错误: 找不到符号
+          ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID,
+                                     ^
+    符号:   变量 ContextSnapshot
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:255: 错误: 找不到符号
+          DomainResult<ContextPlan> refused = build(snapshot, noMessages(), sources,
+                       ^
+    符号:   类 ContextPlan
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:259: 错误: 找不到符号
+          assertEquals(DomainErrorCode.CONTEXT_EXCEEDS_BUDGET, refused.error().code);
+                                      ^
+    符号:   变量 CONTEXT_EXCEEDS_BUDGET
+    位置: 类 DomainErrorCode
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:266: 错误: 找不到符号
+          ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID,
+          ^
+    符号:   类 ContextSnapshot
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:266: 错误: 找不到符号
+          ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID,
+                                     ^
+    符号:   变量 ContextSnapshot
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:271: 错误: 找不到符号
+          ContextPlan plan = plan(snapshot,
+          ^
+    符号:   类 ContextPlan
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:282: 错误: 找不到符号
+          ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID,
+          ^
+    符号:   类 ContextSnapshot
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:282: 错误: 找不到符号
+          ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID,
+                                     ^
+    符号:   变量 ContextSnapshot
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:285: 错误: 找不到符号
+          ContextPlan plan = plan(snapshot, noMessages(),
+          ^
+    符号:   类 ContextPlan
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:294: 错误: 找不到符号
+          ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID,
+          ^
+    符号:   类 ContextSnapshot
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:294: 错误: 找不到符号
+          ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID,
+                                     ^
+    符号:   变量 ContextSnapshot
+    位置: 类 BuildContextPlanUseCaseTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:35: 错误: 找不到符号
+          return ContextSnapshot.create(BRANCH_ID, Arrays.asList(sources), T0);
+                 ^
+    符号:   变量 ContextSnapshot
+    位置: 类 ContextSnapshotTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:48: 错误: 找不到符号
+          ContextSnapshot snapshot = snapshot(user(QUESTION_ID), revision(REVISION_1));
+          ^
+    符号:   类 ContextSnapshot
+    位置: 类 ContextSnapshotTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:55: 错误: 找不到符号
+                  ContextSnapshotCodec.digestOf(snapshot.payload), snapshot.digest);
+                  ^
+    符号:   变量 ContextSnapshotCodec
+    位置: 类 ContextSnapshotTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:56: 错误: 找不到符号
+          assertEquals(ContextSnapshot.SCHEMA_VERSION, snapshot.schemaVersion);
+                       ^
+    符号:   变量 ContextSnapshot
+    位置: 类 ContextSnapshotTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:58: 错误: 找不到符号
+                  snapshot.digest, ContextSnapshotCodec.digestOf(snapshot(user(QUESTION_ID)).payload));
+                                   ^
+    符号:   变量 ContextSnapshotCodec
+    位置: 类 ContextSnapshotTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:69: 错误: 找不到符号
+          ContextSnapshot snapshot = snapshot(user(QUESTION_ID), revision(REVISION_1));
+          ^
+    符号:   类 ContextSnapshot
+    位置: 类 ContextSnapshotTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:98: 错误: 找不到符号
+          ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID, caller, T0);
+          ^
+    符号:   类 ContextSnapshot
+    位置: 类 ContextSnapshotTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:98: 错误: 找不到符号
+          ContextSnapshot snapshot = ContextSnapshot.create(BRANCH_ID, caller, T0);
+                                     ^
+    符号:   变量 ContextSnapshot
+    位置: 类 ContextSnapshotTest
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:94: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:99: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:104: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:37: 错误: 程序包BuildContextPlanUseCase不存在
+      private static final BuildContextPlanUseCase.Budget GENEROUS =
+                                                  ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:50: 错误: 程序包BuildContextPlanUseCase不存在
+              BuildContextPlanUseCase.Sources sources, BuildContextPlanUseCase.Budget budget) {
+                                     ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:50: 错误: 程序包BuildContextPlanUseCase不存在
+              BuildContextPlanUseCase.Sources sources, BuildContextPlanUseCase.Budget budget) {
+                                                                              ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:55: 错误: 程序包BuildContextPlanUseCase不存在
+              BuildContextPlanUseCase.Sources sources, BuildContextPlanUseCase.Budget budget) {
+                                     ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:55: 错误: 程序包BuildContextPlanUseCase不存在
+              BuildContextPlanUseCase.Sources sources, BuildContextPlanUseCase.Budget budget) {
+                                                                              ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:61: 错误: 程序包ContextPlan不存在
+      private static String render(List<ContextPlan.Entry> entries) {
+                                                   ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:72: 错误: 程序包BuildContextPlanUseCase不存在
+      private static final class StoredSources implements BuildContextPlanUseCase.Sources {
+                                                                                 ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:34: 错误: 程序包ContextSnapshot不存在
+      private static ContextSnapshot snapshot(ContextSnapshot.Source... sources) {
+                                                             ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:38: 错误: 程序包ContextSnapshot不存在
+      private static ContextSnapshot.Source user(String id) {
+                                    ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:42: 错误: 程序包ContextSnapshot不存在
+      private static ContextSnapshot.Source revision(String id) {
+                                    ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:38: 错误: 程序包BuildContextPlanUseCase不存在
+              new BuildContextPlanUseCase.Budget(100_000, 1);
+                                         ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:63: 错误: 程序包ContextPlan不存在
+          for (ContextPlan.Entry entry : entries) {
+                          ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:113: 错误: 程序包ContextSnapshot不存在
+                  ContextSnapshot.Source.userMessage(PARENT_QUESTION_ID),
+                                 ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:114: 错误: 程序包ContextSnapshot不存在
+                  ContextSnapshot.Source.stableRevision(REVISION_1)), T0);
+                                 ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:120: 错误: 程序包ContextPlan不存在
+          List<ContextPlan.Entry> before = plan(snapshot, noMessages(), sources, GENEROUS).entries();
+                          ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:132: 错误: 程序包ContextPlan不存在
+          List<ContextPlan.Entry> after = plan(snapshot, noMessages(), sources, GENEROUS).entries();
+                          ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:136: 错误: 程序包ContextPlan不存在
+          assertEquals(ContextPlan.EntryKind.USER_MESSAGE, after.get(0).kind);
+                                  ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:138: 错误: 程序包ContextPlan不存在
+          assertEquals(ContextPlan.EntryKind.STABLE_REVISION, after.get(1).kind);
+                                  ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:148: 错误: 程序包ContextSnapshot不存在
+                  Arrays.asList(ContextSnapshot.Source.stableRevision(REVISION_1)), T0);
+                                               ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:171: 错误: 程序包ContextSnapshot不存在
+                  ContextSnapshot.Source.userMessage(PARENT_QUESTION_ID),
+                                 ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:172: 错误: 程序包ContextSnapshot不存在
+                  ContextSnapshot.Source.stableRevision(REVISION_1)), T0);
+                                 ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:185: 错误: 程序包ContextPlan不存在
+          assertEquals(ContextPlan.EntryKind.USER_MESSAGE, plan.entries().get(0).kind);
+                                  ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:186: 错误: 程序包ContextPlan不存在
+          assertEquals(ContextPlan.EntryKind.STABLE_REVISION, plan.entries().get(1).kind);
+                                  ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:187: 错误: 程序包ContextPlan不存在
+          assertEquals(ContextPlan.EntryKind.USER_MESSAGE, plan.entries().get(2).kind);
+                                  ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:189: 错误: 程序包ContextPlan不存在
+          assertEquals(ContextPlan.EntryKind.STABLE_REVISION, plan.entries().get(3).kind);
+                                  ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:196: 错误: 程序包ContextSnapshot不存在
+                  ContextSnapshot.Source.userMessage(PARENT_QUESTION_ID),
+                                 ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:197: 错误: 程序包ContextSnapshot不存在
+                  ContextSnapshot.Source.stableRevision(REVISION_1)), T0);
+                                 ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:215: 错误: 程序包ContextSnapshot不存在
+                  ContextSnapshot.Source.summary(SUMMARY_ID),
+                                 ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:216: 错误: 程序包ContextSnapshot不存在
+                  ContextSnapshot.Source.stableRevision(REVISION_1)), T0);
+                                 ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:229: 错误: 程序包ContextSnapshot不存在
+                  Arrays.asList(ContextSnapshot.Source.summary(SUMMARY_ID)), T0);
+                                               ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:236: 错误: 程序包ContextPlan不存在
+          assertEquals(ContextPlan.EntryKind.SUMMARY, plan.entries().get(0).kind);
+                                  ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:245: 错误: 程序包ContextSnapshot不存在
+                  Arrays.asList(ContextSnapshot.Source.stableRevision(REVISION_1)), T0);
+                                               ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:253: 错误: 程序包BuildContextPlanUseCase不存在
+                          new BuildContextPlanUseCase.Budget(contextChars + 40, 40)).isOk());
+                                                     ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:256: 错误: 程序包BuildContextPlanUseCase不存在
+                  new BuildContextPlanUseCase.Budget(contextChars + 40, 41));
+                                             ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:267: 错误: 程序包ContextSnapshot不存在
+                  Arrays.asList(ContextSnapshot.Source.stableRevision(REVISION_1)), T0);
+                                               ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:276: 错误: 程序包ContextPlan不存在
+          assertEquals(ContextPlan.EntryKind.USER_MESSAGE, plan.entries().get(1).kind);
+                                  ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:283: 错误: 程序包ContextSnapshot不存在
+                  Arrays.asList(ContextSnapshot.Source.stableRevision(REVISION_1)), T0);
+                                               ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:295: 错误: 程序包ContextSnapshot不存在
+                  Arrays.asList(ContextSnapshot.Source.stableRevision(REVISION_1)), T0);
+                                               ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:309: 错误: 程序包BuildContextPlanUseCase不存在
+          assertThrows(IllegalArgumentException.class, () -> new BuildContextPlanUseCase.Budget(0, 0));
+                                                                                        ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:311: 错误: 程序包BuildContextPlanUseCase不存在
+                  () -> new BuildContextPlanUseCase.Budget(10, -1));
+                                                   ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\BuildContextPlanUseCaseTest.java:313: 错误: 程序包BuildContextPlanUseCase不存在
+                  () -> new BuildContextPlanUseCase.Budget(10, 10));
+                                                   ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:39: 错误: 程序包ContextSnapshot不存在
+          return ContextSnapshot.Source.userMessage(id);
+                                ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:43: 错误: 程序包ContextSnapshot不存在
+          return ContextSnapshot.Source.stableRevision(id);
+                                ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:72: 错误: 程序包ContextSnapshot不存在
+          List<ContextSnapshot.Source> sources = snapshot.sources;
+                              ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:95: 错误: 程序包ContextSnapshot不存在
+          List<ContextSnapshot.Source> caller = new ArrayList<ContextSnapshot.Source>();
+                              ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:95: 错误: 程序包ContextSnapshot不存在
+          List<ContextSnapshot.Source> caller = new ArrayList<ContextSnapshot.Source>();
+                                                                             ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:101: 错误: 程序包ContextSnapshot不存在
+          caller.set(0, ContextSnapshot.Source.summary(QUESTION_ID));
+                                       ^
+  D:\Project\Android\Treelearn\android\core\src\test\java\com\treelearn\core\domain\ContextSnapshotTest.java:104: 错误: 程序包ContextSnapshot不存在
+          assertEquals(ContextSnapshot.SourceKind.USER_MESSAGE, snapshot.sources.get(0).kind);
+                                      ^
+  100 个错误
+System.Management.Automation.RemoteException
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+System.Management.Automation.RemoteException
+BUILD FAILED in 12s
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+3 actionable tasks: 1 executed, 2 up-to-date
+EXITCODE=1
+
+=== conclusion (derived by this script from the capture above; no number is typed by hand) ===
+javac reported error total        : 100
+top-level diagnostic lines        : 100
+'cannot find symbol'              : 49
+'package ... does not exist'      : 48
+other diagnostics                 : 3
+sum of the four parts             : 100
+failed gradle tasks               : 1
+java files named in diagnostics   : 2
+U+FFFD replacement characters     : 0
+
+commands that reproduce the numbers above:
+  Select-String -Path 'D:\Project\Android\Treelearn\artifacts\evidence\T-007-red.txt' -Pattern '^[A-Z]:[^:]+\.java:\d+: 错误: ' -Encoding UTF8 | Measure-Object
+  Select-String -Path 'D:\Project\Android\Treelearn\artifacts\evidence\T-007-red.txt' -Pattern '(\d+) 个错误' -Encoding UTF8 | Select-Object -First 1
+  Select-String -Path 'D:\Project\Android\Treelearn\artifacts\evidence\T-007-red.txt' -Pattern '^> Task .* FAILED' -Encoding UTF8

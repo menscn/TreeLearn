@@ -1,0 +1,48 @@
+# T-011 sizing, same caliber as the repository fixed on 2026-09-21 (non-empty, non-comment production lines)
+CapturedAt=2026-09-21T21:55:21+08:00
+Round=no-emulator round (user instruction 2026-09-21).
+Caliber=non-empty, non-comment lines (the caliper T-008 and T-024 were measured with), plus physical lines for reference.
+Command (judged lines / physical lines per file, then summed):
+  Get-ChildItem android/app/src/main/java/com/treelearn/app/artifact -Filter *.java | Sort-Object Name | ForEach-Object {
+    $l=[IO.File]::ReadAllLines($_.FullName); $code=0;
+    foreach ($x in $l) { $t=$x.Trim(); if ($t.Length -gt 0 -and -not $t.StartsWith('//') -and -not $t.StartsWith('/*') -and -not $t.StartsWith('*')) { $code++ } }
+    '{0} {1} {2}' -f $code, $l.Count, $_.Name }
+
+--- per file (judged lines / physical lines / file) ---
+115	162	ArtifactInputs.java
+58	119	ArtifactKind.java
+11	40	ArtifactOutcome.java
+57	88	ArtifactPayload.java
+103	143	ArtifactPayloadCodec.java
+6	24	DerivedCaller.java
+74	106	DerivedOperation.java
+126	193	DerivedRequest.java
+25	43	DerivedResult.java
+8	36	DerivedStore.java
+10	30	DerivedTelemetry.java
+63	91	SqliteDerivedStore.java
+38	61	TreeOutline.java
+694	1136	TOTAL of the 13 new production files (task estimate was 200 judged lines)
+
+--- the budget script, same change set ---
+Command: powershell -ExecutionPolicy Bypass -File .trae/skills/line-budget/line-budget.ps1 HEAD android/app/src/main/java/com/treelearn/app/artifact
+Output: [line-budget] 基点: HEAD ; 范围: android/app/src/main/java/com/treelearn/app/artifact
+        业务变更行: 1136 (已跟踪 新增+删除 与 未跟踪 全部行；已排除生成/迁移/文档/证据 0 行；扫描业务文件 13 个，其中未跟踪 13 个)
+        [line-budget] FAIL: 业务变更 >500 行，超出硬预算，须拆 task
+EXITCODE=2
+
+--- the other file this task changed ---
+android/core/src/main/java/com/treelearn/core/domain/JsonText.java is untracked (it arrived with the uncommitted T-007 work),
+so git cannot show this task's delta for it. The added statements are these, by line number in the current file:
+  line 93-95   write(): the Integer/Long branch           -> 3 judged lines
+  line 159-161 read(): the '-' / digit dispatch           -> 3 judged lines
+  line 171-193 number(): the integral-number reader       -> 23 judged lines
+  line 195-197 isDigit(): the single-digit predicate      -> 3 judged lines
+  sum = 3+3+23+3 = 32 judged lines added by this task (the parts sum to the whole)
+Whole file: 241 judged / 312 physical lines (measured with the same PowerShell caliper as above).
+
+--- verdict ---
+expected=200 (estimated_production_lines in the task file)
+measured=694 judged / 1136 physical for the 13 new files, plus 32 judged lines added inside JsonText.java = 726 judged lines in total for T-011
+soft cap=200 -> exceeded; hard cap=500 -> EXCEEDED, so this slice needs a user decision (split, or an approved exception).
+It is recorded as a pending deviation, never as an approved exception.

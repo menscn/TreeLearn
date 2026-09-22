@@ -1,0 +1,66 @@
+# VERIFY2 round-2 independent static reproductions (verifier #2)  2026-09-21 21:34:10
+# Mode: read-only re-verification. Every number below comes from the command named on the same
+# section and was read back off disk in this session. No emulator was used (user instruction
+# 2026-09-21). No prompt body, API key, question, answer or model reasoning is reproduced here.
+
+== A. T-020 prompt-body leak: independent longest-contiguous-run scan ==
+Command: python artifacts/evidence/.verify2/.trae-verify2-bodylcs.py
+Method:  parse the 9 bodies out of android/ai/src/main/java/com/treelearn/ai/prompt/PromptBodiesV1.java
+         (strip Java backslash-newline continuations), build every k-char window of every body, and
+         ask which of the .java-free evidence files under artifacts/evidence/ contains such a window.
+Result:
+  bodies parsed: 9   lengths [979,125,246,126,140,180,224,211,198]
+  evidence files scanned: 166
+  window=60  files with a shared contiguous run: 0
+  window=40  files with a shared contiguous run: 0
+  window=28  files with a shared contiguous run: 0
+  window=20  files with a shared contiguous run: 0
+  window=14  files with a shared run: 2  -> both matched runs are pure whitespace, not text
+Conclusion: no evidence file carries a >=20-character contiguous run of any prompt body; the two
+            14-char 'hits' are a below-floor artefact (Chinese text produces spurious short matches).
+Command: powershell -ExecutionPolicy Bypass -File artifacts/evidence/.verify2/.trae-verify2-leakscan2.ps1
+Result: doc CJK runs>=10: 130 ; distinct 14-char windows: 1661 ;
+        TOTAL evidence files with a 14-char window shared with the prompt-body doc: 0
+Command: rg -n 'CJK snippet of the two mutation-A fixture strings' android artifacts/evidence
+Result: the two strings that mutation A prints through JUnit ComparisonFailure are declared in the
+        PUBLISHED test source DeepSeekRequestAssemblerTest.java lines 22 and 26 as FIRST_QUESTION and
+        CURRENT_INPUT; neither string appears in PromptBodiesV1.java nor in the prompt-design doc.
+Command: python artifacts/evidence/.verify2/.trae-verify2-transcription.py
+Result: matched 9/9  (715/101/186/102/116/156/200/187/174)
+Redaction mechanism read back: android/ai/src/test/java/com/treelearn/ai/prompt/SystemBodyAssertions.java
+        lines 28-34 fail with 'lengths N and M, sha256 A and B' only -> a red assertion cannot print a body.
+EXITCODE=0
+
+== B. Sizing counters re-run (independent read-back) ==
+Command: powershell -ExecutionPolicy Bypass -File artifacts/evidence/.verify2/.trae-verify2-count.ps1 -Root <dir>
+  -Root android/ai/src/main/java/com/treelearn/ai/gateway   -> files=11 nonEmptyNonComment=748 physical=1121
+  -Root android/tree-layout/src/main/java                   -> files=12 nonEmptyNonComment=862 physical=1259
+Both reproduce artifacts/evidence/VERIFY2-sizing.txt exactly (T-006=748, T-016=862).
+Convention note: this counter counts a Java text block as code only on the line that opens it (the
+body lines of a multiline string are not counted), which is why PromptBodiesV1.java reads 23 here
+and 55 under a body-counting convention (task self-report 344 vs 310). Any sizing number is only
+comparable to another number produced by the same convention.
+
+== C. T-023 reported device-test regression: static determination ==
+Production read: android/data/src/main/java/com/treelearn/data/db/dao/GenerationStabilizer.java
+  lines 111-117 refuse ILLEGAL_STATE_TRANSITION when canTransitionTo(STABLE) is false;
+  lines 119-125 refuse OPERATION_NOT_COMPLETABLE when row.partialAnswer.trim().isEmpty().
+Schema read: android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java
+  GENERATION_OPERATIONS_DEFINITIONS: partial_answer TEXT NOT NULL DEFAULT ''  -> an empty string is
+  NOT rejected by any CHECK, so the test's UPDATE ... SET partial_answer='' cannot be refused by SQL.
+Seed read: AnswerRevisionGenerationOperationDaoInstrumentedTest.seedStreamingOperation() issues
+  start -> advanceTo(VALIDATING) -> advanceTo(SUBMITTING) -> appendReasoning -> appendAnswer x2, so the
+  row ends in STREAMING_ANSWER, for which canTransitionTo(STABLE) is true -> control reaches line 119.
+Test read: AnswerRevisionGenerationOperationDaoInstrumentedTest.java lines 478-497 asserts
+  result.isFailure(), code == OPERATION_NOT_COMPLETABLE, 0 rows in answer_revisions, and the operation
+  still in STREAMING_ANSWER.
+=> The assertion and the production code AGREE. A device run of this case should report it as passed.
+Observed 'failure' classified from artifacts/evidence/VERIFY2-device-xml-snapshot.xml:
+  tests="1" failures="1" with an EMPTY <failure></failure> element, and
+  <system-err>Test run failed to complete. Instrumentation run failed due to Process crashed.</system-err>
+  artifacts/evidence/VERIFY2-device-isolated.txt (20:46-20:49) shows the same class dying with
+  'INSTRUMENTATION_RESULT: shortMsg=Process crashed.' after an 'INSTRUMENTATION_FAILED ... AndroidJUnitRunner'
+  runner-start error, while other lanes were installing/uninstalling on the shared device.
+Attribution: the evidence is a crashed instrumentation PROCESS, not a failed assertion, and no T-023
+  logic defect is visible; this is consistent with shared-emulator contention. Whether the crash has a
+  class-local trigger cannot be settled without a device run and is recorded as deferred, not FAIL.

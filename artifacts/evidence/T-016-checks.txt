@@ -1,0 +1,951 @@
+# T-016 supporting checks (purity guard, Javadoc, Java-only guard, size)
+Generated : 2026-09-21T20:12:45+08:00
+Working   : D:\Project\Android\Treelearn
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Task :verifyDependencyDirection
+verifyDependencyDirection: PASS (downward-only module graph + pure-JVM module purity)
+
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+
+> Task :tree-layout:javadoc
+# [cleanup 2026-09-21T20:21+08:00] Lines for the zh-CN javadoc capture that used to sit here were
+# removed: the JDK printed its messages in the local zh-CN code page and they were written as
+# U+FFFD replacement characters, so the block was unreadable and useless for review. The same
+# check was re-run in the English locale and is appended verbatim further down in this file;
+# check was re-run in English and is appended verbatim below (section "javadoc re-capture").
+# Note: this first block has no Command line of its own; both of its checks are re-captured below
+# with the command that produced them, so the missing line does not leave anything unverifiable.
+
+BUILD SUCCESSFUL in 14s
+3 actionable tasks: 2 executed, 1 up-to-date
+EXITCODE=0
+Generated : 2026-09-21T20:13:04+08:00
+Command   : powershell -File android\scripts\no-kotlin-check.ps1
+
+Treelearn Java-only guard
+Android root: D:\Project\Android\Treelearn\android
+
+== Script parse check ==
+OK   2 sibling script(s) parse cleanly (this file excluded: an unparseable guard never reaches this line)
+
+== Kotlin source files ==
+OK   no .kt / .kts / .gradle.kts source files
+
+== Gradle scripts and version catalogs ==
+OK   scanned 11 Gradle script/catalog file(s), comments excluded
+OK   raw-text dependency scan completed (lexer-independent)
+OK   lexer trust check completed (fail-closed on desync)
+
+== Resolved dependency report ==
+OK   no Kotlin coordinates on 53 variant classpath configuration(s) across :app, :core, :data, :ai, :tree-layout (build tooling configurations excluded, 4194 report lines)
+OK   excluded 36 build-tooling configuration(s) (AGP/Gradle are Kotlin themselves; they do not ship in the app)
+
+== Built APK dex tables ==
+
+== Result ==
+FAIL verifyNoKotlinDex failed (exit 1)
+FAIL         ^
+        55 个错误
+        * Try:
+        > Check your code and dependencies to fix the compilation error(s)
+        > Run with --scan to get full insights.
+        BUILD FAILED in 20s
+
+VERDICT: FAIL (2 problem(s))
+EXITCODE=1
+
+# --- Which task failed inside the guard's dex stage (diagnosis only, not a fix) ---
+Generated : 2026-09-21T20:14:23+08:00
+Command   : cd android; .\gradlew.bat verifyNoKotlinDex --no-daemon --console=plain
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac FROM-CACHE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugLibraryResources UP-TO-DATE
+> Task :ai:writeDebugAarMetadata UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :ai:extractDeepLinksDebug UP-TO-DATE
+> Task :ai:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :data:extractDeepLinksDebug UP-TO-DATE
+> Task :data:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :data:compileDebugLibraryResources UP-TO-DATE
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :ai:bundleLibCompileToJarDebug
+> Task :app:processDebugResources UP-TO-DATE
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac UP-TO-DATE
+> Task :data:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :ai:generateDebugAssets UP-TO-DATE
+> Task :ai:mergeDebugAssets UP-TO-DATE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :data:generateDebugAssets UP-TO-DATE
+> Task :data:mergeDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :data:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:dexBuilderDebug UP-TO-DATE
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :app:mergeDebugJavaResource UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :ai:bundleLibRuntimeToJarDebug
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :data:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :app:mergeProjectDexDebug UP-TO-DATE
+> Task :ai:mergeDebugJniLibFolders UP-TO-DATE
+> Task :ai:mergeDebugNativeLibs NO-SOURCE
+> Task :ai:bundleLibRuntimeToDirDebug
+> Task :ai:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :data:mergeDebugJniLibFolders UP-TO-DATE
+> Task :data:mergeDebugNativeLibs NO-SOURCE
+> Task :data:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :app:processDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:compileDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugAndroidTestResources UP-TO-DATE
+> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :app:processDebugAndroidTestManifest UP-TO-DATE
+> Task :app:processDebugAndroidTestResources UP-TO-DATE
+
+> Task :app:compileDebugAndroidTestJavaWithJavac
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:7: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.AiGatewayError;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:8: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.GatewayPorts;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:9: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.ProviderJson;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:24: 错误: 程序包GatewayPorts不存在
+    private final GatewayPorts.DeltaDecoder deltas = new ProviderJson.Deltas();
+                              ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:25: 错误: 程序包GatewayPorts不存在
+    private final GatewayPorts.BalanceDecoder balance = new ProviderJson.Balance();
+                              ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:124: 错误: 程序包GatewayPorts不存在
+    private GatewayPorts.PayloadException refusal(String payload) {
+                        ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:8: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.JsonChatRequestBody;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:8: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.AiGateway;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:9: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.AiGatewayError;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:10: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.GatewayPorts;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:11: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.GenerationSink;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:12: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.ProviderJson;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:13: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.StreamOutcome;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:64: 错误: 程序包GatewayPorts不存在
+    private final GatewayPorts.Log quiet = (name, details) -> {
+                              ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:110: 错误: 找不到符号
+    private AiGateway gateway(String body, int slice) {
+            ^
+  符号:   类 AiGateway
+  位置: 类 DeepSeekStreamInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:128: 错误: 程序包GatewayPorts不存在
+    private static final class SlicedTransport implements GatewayPorts.Transport {
+                                                                      ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:139: 错误: 程序包GatewayPorts不存在
+        public GatewayPorts.Response post(String url, String apiKey, byte[] body) {
+                           ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:144: 错误: 程序包GatewayPorts不存在
+        public GatewayPorts.Response get(String url, String apiKey) {
+                           ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:148: 错误: 程序包GatewayPorts不存在
+        private GatewayPorts.Response response() {
+                            ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:188: 错误: 找不到符号
+    private static final class RecordingSink implements GenerationSink {
+                                                        ^
+  符号:   类 GenerationSink
+  位置: 类 DeepSeekStreamInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:192: 错误: 找不到符号
+        StreamOutcome outcome;
+        ^
+  符号:   类 StreamOutcome
+  位置: 类 RecordingSink
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:207: 错误: 找不到符号
+        public void onTerminal(StreamOutcome result) {
+                               ^
+  符号:   类 StreamOutcome
+  位置: 类 RecordingSink
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:24: 错误: 程序包ProviderJson不存在
+    private final GatewayPorts.DeltaDecoder deltas = new ProviderJson.Deltas();
+                                                                     ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:25: 错误: 程序包ProviderJson不存在
+    private final GatewayPorts.BalanceDecoder balance = new ProviderJson.Balance();
+                                                                        ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:29: 错误: 程序包GatewayPorts不存在
+        GatewayPorts.Delta delta = deltas.decode("{\"choices\":[{\"index\":0,\"delta\":{"
+                    ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:58: 错误: 程序包GatewayPorts不存在
+        GatewayPorts.Delta delta = deltas.decode(payload);
+                    ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:74: 错误: 程序包GatewayPorts不存在
+        GatewayPorts.PayloadException refusal =
+                    ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:77: 错误: 程序包AiGatewayError不存在
+        assertEquals(AiGatewayError.Kind.PARSE_FAILED, refusal.error.kind);
+                                   ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:86: 错误: 程序包AiGatewayError不存在
+            assertEquals("payload <" + payload + ">", AiGatewayError.Kind.PARSE_FAILED,
+                                                                    ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:93: 错误: 程序包GatewayPorts不存在
+        GatewayPorts.PayloadException refusal = refusal(
+                    ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:96: 错误: 程序包AiGatewayError不存在
+        assertEquals(AiGatewayError.Kind.PROVIDER_UNAVAILABLE, refusal.error.kind);
+                                   ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:111: 错误: 程序包GatewayPorts不存在
+            GatewayPorts.PayloadException refused;
+                        ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:115: 错误: 程序包GatewayPorts不存在
+            } catch (GatewayPorts.PayloadException expected) {
+                                 ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:118: 错误: 程序包AiGatewayError不存在
+            assertEquals("payload <" + payload + ">", AiGatewayError.Kind.PARSE_FAILED,
+                                                                    ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:127: 错误: 程序包GatewayPorts不存在
+        } catch (GatewayPorts.PayloadException expected) {
+                             ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:44: 错误: 找不到符号
+        byte[] body = new JsonChatRequestBody().encode(GenerationModel.FLASH, request);
+                          ^
+  符号:   类 JsonChatRequestBody
+  位置: 类 DeepSeekRequestBodyInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:67: 错误: 找不到符号
+                new String(new JsonChatRequestBody().encode(GenerationModel.PRO, request(true)), UTF_8));
+                               ^
+  符号:   类 JsonChatRequestBody
+  位置: 类 DeepSeekRequestBodyInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:69: 错误: 找不到符号
+        assertEquals(JsonChatRequestBody.REASONING_EFFORT,
+                     ^
+  符号:   变量 JsonChatRequestBody
+  位置: 类 DeepSeekRequestBodyInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:74: 错误: 找不到符号
+                new String(new JsonChatRequestBody().encode(GenerationModel.FLASH, request(false)), UTF_8));
+                               ^
+  符号:   类 JsonChatRequestBody
+  位置: 类 DeepSeekRequestBodyInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:82: 错误: 找不到符号
+        byte[] body = new JsonChatRequestBody().encode(GenerationModel.FLASH, request(true));
+                          ^
+  符号:   类 JsonChatRequestBody
+  位置: 类 DeepSeekRequestBodyInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:76: 错误: 程序包StreamOutcome不存在
+            assertEquals("slice " + slice, StreamOutcome.Kind.COMPLETED, sink.outcome.kind);
+                                                        ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:90: 错误: 程序包StreamOutcome不存在
+        assertEquals(StreamOutcome.Kind.COMPLETED, sink.outcome.kind);
+                                  ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:102: 错误: 程序包StreamOutcome不存在
+        assertEquals(StreamOutcome.Kind.INTERRUPTED, sink.outcome.kind);
+                                  ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:111: 错误: 找不到符号
+        return new AiGateway(new SlicedTransport(body, slice), (model, request) -> new byte[0],
+                   ^
+  符号:   类 AiGateway
+  位置: 类 DeepSeekStreamInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:112: 错误: 程序包ProviderJson不存在
+                new ProviderJson.Deltas(), new ProviderJson.Balance(), quiet, Runnable::run);
+                                ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:112: 错误: 程序包ProviderJson不存在
+                new ProviderJson.Deltas(), new ProviderJson.Balance(), quiet, Runnable::run);
+                                                           ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:138: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:143: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:149: 错误: 程序包GatewayPorts不存在
+            return new GatewayPorts.Response() {
+                                   ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:150: 错误: 方法不会覆盖或实现超类型的方法
+                @Override
+                ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:155: 错误: 方法不会覆盖或实现超类型的方法
+                @Override
+                ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:180: 错误: 方法不会覆盖或实现超类型的方法
+                @Override
+                ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:195: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:200: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:206: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+注: 某些输入文件使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+55 个错误
+
+> Task :app:compileDebugAndroidTestJavaWithJavac FAILED
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugAndroidTestJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:110: 错误: 找不到符号
+      private AiGateway gateway(String body, int slice) {
+              ^
+    符号:   类 AiGateway
+    位置: 类 DeepSeekStreamInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:188: 错误: 找不到符号
+      private static final class RecordingSink implements GenerationSink {
+                                                          ^
+    符号:   类 GenerationSink
+    位置: 类 DeepSeekStreamInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:192: 错误: 找不到符号
+          StreamOutcome outcome;
+          ^
+    符号:   类 StreamOutcome
+    位置: 类 RecordingSink
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:207: 错误: 找不到符号
+          public void onTerminal(StreamOutcome result) {
+                                 ^
+    符号:   类 StreamOutcome
+    位置: 类 RecordingSink
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:44: 错误: 找不到符号
+          byte[] body = new JsonChatRequestBody().encode(GenerationModel.FLASH, request);
+                            ^
+    符号:   类 JsonChatRequestBody
+    位置: 类 DeepSeekRequestBodyInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:67: 错误: 找不到符号
+                  new String(new JsonChatRequestBody().encode(GenerationModel.PRO, request(true)), UTF_8));
+                                 ^
+    符号:   类 JsonChatRequestBody
+    位置: 类 DeepSeekRequestBodyInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:69: 错误: 找不到符号
+          assertEquals(JsonChatRequestBody.REASONING_EFFORT,
+                       ^
+    符号:   变量 JsonChatRequestBody
+    位置: 类 DeepSeekRequestBodyInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:74: 错误: 找不到符号
+                  new String(new JsonChatRequestBody().encode(GenerationModel.FLASH, request(false)), UTF_8));
+                                 ^
+    符号:   类 JsonChatRequestBody
+    位置: 类 DeepSeekRequestBodyInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:82: 错误: 找不到符号
+          byte[] body = new JsonChatRequestBody().encode(GenerationModel.FLASH, request(true));
+                            ^
+    符号:   类 JsonChatRequestBody
+    位置: 类 DeepSeekRequestBodyInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:111: 错误: 找不到符号
+          return new AiGateway(new SlicedTransport(body, slice), (model, request) -> new byte[0],
+                     ^
+    符号:   类 AiGateway
+    位置: 类 DeepSeekStreamInstrumentedTest
+  注: 某些输入文件使用或覆盖了已过时的 API。
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:138: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:143: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:150: 错误: 方法不会覆盖或实现超类型的方法
+                  @Override
+                  ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:155: 错误: 方法不会覆盖或实现超类型的方法
+                  @Override
+                  ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:180: 错误: 方法不会覆盖或实现超类型的方法
+                  @Override
+                  ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:195: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:200: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:206: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:7: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.AiGatewayError;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:8: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.GatewayPorts;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:9: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.ProviderJson;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:24: 错误: 程序包GatewayPorts不存在
+      private final GatewayPorts.DeltaDecoder deltas = new ProviderJson.Deltas();
+                                ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:25: 错误: 程序包GatewayPorts不存在
+      private final GatewayPorts.BalanceDecoder balance = new ProviderJson.Balance();
+                                ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:124: 错误: 程序包GatewayPorts不存在
+      private GatewayPorts.PayloadException refusal(String payload) {
+                          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:8: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.JsonChatRequestBody;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:8: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.AiGateway;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:9: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.AiGatewayError;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:10: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.GatewayPorts;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:11: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.GenerationSink;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:12: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.ProviderJson;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:13: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.StreamOutcome;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:64: 错误: 程序包GatewayPorts不存在
+      private final GatewayPorts.Log quiet = (name, details) -> {
+                                ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:128: 错误: 程序包GatewayPorts不存在
+      private static final class SlicedTransport implements GatewayPorts.Transport {
+                                                                        ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:139: 错误: 程序包GatewayPorts不存在
+          public GatewayPorts.Response post(String url, String apiKey, byte[] body) {
+                             ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:144: 错误: 程序包GatewayPorts不存在
+          public GatewayPorts.Response get(String url, String apiKey) {
+                             ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:148: 错误: 程序包GatewayPorts不存在
+          private GatewayPorts.Response response() {
+                              ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:24: 错误: 程序包ProviderJson不存在
+      private final GatewayPorts.DeltaDecoder deltas = new ProviderJson.Deltas();
+                                                                       ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:25: 错误: 程序包ProviderJson不存在
+      private final GatewayPorts.BalanceDecoder balance = new ProviderJson.Balance();
+                                                                          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:29: 错误: 程序包GatewayPorts不存在
+          GatewayPorts.Delta delta = deltas.decode("{\"choices\":[{\"index\":0,\"delta\":{"
+                      ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:58: 错误: 程序包GatewayPorts不存在
+          GatewayPorts.Delta delta = deltas.decode(payload);
+                      ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:74: 错误: 程序包GatewayPorts不存在
+          GatewayPorts.PayloadException refusal =
+                      ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:77: 错误: 程序包AiGatewayError不存在
+          assertEquals(AiGatewayError.Kind.PARSE_FAILED, refusal.error.kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:86: 错误: 程序包AiGatewayError不存在
+              assertEquals("payload <" + payload + ">", AiGatewayError.Kind.PARSE_FAILED,
+                                                                      ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:93: 错误: 程序包GatewayPorts不存在
+          GatewayPorts.PayloadException refusal = refusal(
+                      ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:96: 错误: 程序包AiGatewayError不存在
+          assertEquals(AiGatewayError.Kind.PROVIDER_UNAVAILABLE, refusal.error.kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:111: 错误: 程序包GatewayPorts不存在
+              GatewayPorts.PayloadException refused;
+                          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:115: 错误: 程序包GatewayPorts不存在
+              } catch (GatewayPorts.PayloadException expected) {
+                                   ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:118: 错误: 程序包AiGatewayError不存在
+              assertEquals("payload <" + payload + ">", AiGatewayError.Kind.PARSE_FAILED,
+                                                                      ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:127: 错误: 程序包GatewayPorts不存在
+          } catch (GatewayPorts.PayloadException expected) {
+                               ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:76: 错误: 程序包StreamOutcome不存在
+              assertEquals("slice " + slice, StreamOutcome.Kind.COMPLETED, sink.outcome.kind);
+                                                          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:90: 错误: 程序包StreamOutcome不存在
+          assertEquals(StreamOutcome.Kind.COMPLETED, sink.outcome.kind);
+                                    ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:102: 错误: 程序包StreamOutcome不存在
+          assertEquals(StreamOutcome.Kind.INTERRUPTED, sink.outcome.kind);
+                                    ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:112: 错误: 程序包ProviderJson不存在
+                  new ProviderJson.Deltas(), new ProviderJson.Balance(), quiet, Runnable::run);
+                                  ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:112: 错误: 程序包ProviderJson不存在
+                  new ProviderJson.Deltas(), new ProviderJson.Balance(), quiet, Runnable::run);
+                                                             ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:149: 错误: 程序包GatewayPorts不存在
+              return new GatewayPorts.Response() {
+                                     ^
+  55 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 19s
+81 actionable tasks: 4 executed, 1 from cache, 76 up-to-date
+EXITCODE=1
+# NOTE: the javadoc capture in this file is the English-locale re-capture below. The original
+# zh-CN capture was unreadable (U+FFFD) and was removed; see the note above line 314.
+# The findings are warnings only (missing comments on public members) and BUILD SUCCESSFUL,
+# so javadoc is a supporting check here, not a gate.
+
+# --- javadoc re-capture, English locale + forced UTF-8 stdout (2026-09-21T20:20:52.2609311+08:00) ---
+Command   : $env:JAVA_TOOL_OPTIONS="-Duser.language=en -Duser.country=US -Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8"; .\gradlew.bat :tree-layout:javadoc --rerun-tasks --no-daemon --console=plain
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :tree-layout:compileJava
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes
+
+> Task :tree-layout:javadoc
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\Bounds.java:25: warning: no @return
+    public static Bounds empty() {
+                         ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\Bounds.java:14: warning: no comment
+    public final float maxX;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\Bounds.java:15: warning: no comment
+    public final float maxY;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\Bounds.java:12: warning: no comment
+    public final float minX;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\Bounds.java:13: warning: no comment
+    public final float minY;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\Bounds.java:17: warning: no comment
+    public Bounds(float minX, float minY, float maxX, float maxY) {
+           ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\Bounds.java:41: warning: no comment
+    public boolean contains(float x, float y) {
+                   ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\Bounds.java:33: warning: no comment
+    public float height() {
+                 ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\Bounds.java:37: warning: no comment
+    public boolean isEmpty() {
+                   ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\Bounds.java:29: warning: no comment
+    public float width() {
+                 ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\BranchGeometry.java:75: warning: no @return
+    public Pt anchor() {
+              ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\BranchGeometry.java:89: warning: no @return
+    public int unreadTotal() {
+               ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\BranchGeometry.java:36: warning: no comment
+    public final float baseX;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\BranchGeometry.java:37: warning: no comment
+    public final float baseY;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\BranchGeometry.java:24: warning: no comment
+    public final String branchId;
+                        ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\BranchGeometry.java:25: warning: no comment
+    public final Kind kind;
+                      ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\BranchGeometry.java:44: warning: no comment
+    public final float length;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\BranchGeometry.java:38: warning: no comment
+    public final float tipX;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\BranchGeometry.java:39: warning: no comment
+    public final float tipY;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\Density.java:38: warning: no @param for scale
+    public static Density forScale(float scale) {
+                          ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\Density.java:38: warning: no @return
+    public static Density forScale(float scale) {
+                          ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LayoutResult.java:37: warning: no @return
+    public static LayoutResult empty() {
+                               ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LayoutResult.java:42: warning: no @return
+    public List<BranchGeometry> branches() {
+                                ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LayoutResult.java:51: warning: no @return
+    public List<HitRegion> hits() {
+                           ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LayoutResult.java:60: warning: no @param for branchId
+    public BranchGeometry branch(String branchId) {
+                          ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LayoutResult.java:60: warning: no @return
+    public BranchGeometry branch(String branchId) {
+                          ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LayoutResult.java:65: warning: no @param for branchId
+    public Pt anchorOf(String branchId) {
+              ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LayoutResult.java:65: warning: no @return
+    public Pt anchorOf(String branchId) {
+              ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LayoutResult.java:78: warning: no @param for after
+    public Pt anchorDeltaTo(LayoutResult after, String branchId) {
+              ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LayoutResult.java:78: warning: no @param for branchId
+    public Pt anchorDeltaTo(LayoutResult after, String branchId) {
+              ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LayoutResult.java:78: warning: no @return
+    public Pt anchorDeltaTo(LayoutResult after, String branchId) {
+              ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LayoutResult.java:96: warning: no @param for x
+    public HitRegion hitTest(float x, float y) {
+                     ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LayoutResult.java:96: warning: no @param for y
+    public HitRegion hitTest(float x, float y) {
+                     ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LayoutResult.java:96: warning: no @return
+    public HitRegion hitTest(float x, float y) {
+                     ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LayoutResult.java:122: warning: no @param for viewport
+    public ViewTransform fit(ViewportConstraints viewport) {
+                         ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LayoutResult.java:122: warning: no @return
+    public ViewTransform fit(ViewportConstraints viewport) {
+                         ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\HitRegion.java:14: warning: no comment
+    public enum Source {
+           ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\HitRegion.java:21: warning: no comment
+    public final String branchId;
+                        ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\HitRegion.java:26: warning: no comment
+    public final float height;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\HitRegion.java:22: warning: no comment
+    public final Source source;
+                        ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\HitRegion.java:25: warning: no comment
+    public final float width;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\HitRegion.java:23: warning: no comment
+    public final float x;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\HitRegion.java:24: warning: no comment
+    public final float y;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\HitRegion.java:41: warning: no comment
+    public float centerX() {
+                 ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\HitRegion.java:45: warning: no comment
+    public float centerY() {
+                 ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\HitRegion.java:37: warning: no comment
+    public boolean contains(float pointX, float pointY) {
+                   ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LabelGeometry.java:12: warning: no comment
+    public final String branchId;
+                        ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LabelGeometry.java:16: warning: no comment
+    public final float height;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LabelGeometry.java:21: warning: no comment
+    public final float leaderX;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LabelGeometry.java:22: warning: no comment
+    public final float leaderY;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LabelGeometry.java:15: warning: no comment
+    public final float width;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LabelGeometry.java:13: warning: no comment
+    public final float x;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LabelGeometry.java:14: warning: no comment
+    public final float y;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LayoutNode.java:35: warning: no comment
+    public final boolean archived;
+                         ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LayoutNode.java:34: warning: no comment
+    public final boolean collapsed;
+                         ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LayoutNode.java:37: warning: no comment
+    public LayoutNode(String id, String parentId, String title, String summary, int rounds,
+           ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LayoutResult.java:55: warning: no comment
+    public Bounds bounds() {
+                  ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\LayoutResult.java:46: warning: no comment
+    public List<LabelGeometry> labels() {
+                               ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\Pt.java:12: warning: no comment
+    public final float x;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\Pt.java:13: warning: no comment
+    public final float y;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\Pt.java:15: warning: no comment
+    public Pt(float x, float y) {
+           ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\TreeLayout.java:91: warning: no @return
+    public static LayoutResult compute(TreeSnapshot snapshot, String currentBranchId, Density density,
+                               ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\TreeLayout.java:58: warning: no comment
+    public static final float LABEL_HEIGHT = 24f;
+                              ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\TreeLayout.java:52: warning: no comment
+    public static final float LEAF_WIDTH = 15f;
+                              ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\TreeLayout.java:55: warning: no comment
+    public static final float LIMB_WIDTH_MAX = 14f;
+                              ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\TreeLayout.java:73: warning: no comment
+    public static final float MAX_SCALE = 1.25f;
+                              ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\TreeSnapshot.java:34: warning: no @return
+    public static TreeSnapshot empty() {
+                               ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\TreeSnapshot.java:44: warning: no @param for rootId
+    public static TreeSnapshot of(String rootId, List<LayoutNode> nodes) {
+                               ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\TreeSnapshot.java:44: warning: no @param for nodes
+    public static TreeSnapshot of(String rootId, List<LayoutNode> nodes) {
+                               ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\TreeSnapshot.java:44: warning: no @return
+    public static TreeSnapshot of(String rootId, List<LayoutNode> nodes) {
+                               ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\TreeSnapshot.java:111: warning: no @return
+    public String rootId() {
+                  ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\TreeSnapshot.java:120: warning: no @return
+    public List<LayoutNode> nodes() {
+                            ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\TreeSnapshot.java:125: warning: no @param for id
+    public LayoutNode node(String id) {
+                      ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\TreeSnapshot.java:125: warning: no @return
+    public LayoutNode node(String id) {
+                      ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\TreeSnapshot.java:130: warning: no @param for id
+    public List<LayoutNode> childrenOf(String id) {
+                            ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\TreeSnapshot.java:130: warning: no @return
+    public List<LayoutNode> childrenOf(String id) {
+                            ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\TreeSnapshot.java:115: warning: no comment
+    public boolean isEmpty() {
+                   ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\ViewportConstraints.java:22: warning: no comment
+    public final float height;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\ViewportConstraints.java:23: warning: no comment
+    public final float minTouchTarget;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\ViewportConstraints.java:24: warning: no comment
+    public final float padding;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\ViewportConstraints.java:25: warning: no comment
+    public final float soil;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\ViewportConstraints.java:21: warning: no comment
+    public final float width;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\ViewportConstraints.java:32: warning: no comment
+    public ViewportConstraints(float width, float height, float minTouchTarget, float padding,
+           ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\ViewportConstraints.java:27: warning: no comment
+    public static ViewportConstraints of(float width, float height) {
+                                      ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\ViewTransform.java:17: warning: no main description
+     * @throws IllegalArgumentException if the scale is not finite and positive — {@link #toTree}
+       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\ViewTransform.java:21: warning: no @param for scale
+    public ViewTransform(float scale, float translateX, float translateY) {
+           ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\ViewTransform.java:21: warning: no @param for translateX
+    public ViewTransform(float scale, float translateX, float translateY) {
+           ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\ViewTransform.java:21: warning: no @param for translateY
+    public ViewTransform(float scale, float translateX, float translateY) {
+           ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\ViewTransform.java:35: warning: no @return
+    public static ViewTransform identity() {
+                                ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\ViewTransform.java:44: warning: no @param for screenX
+    public Pt toTree(float screenX, float screenY) {
+              ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\ViewTransform.java:44: warning: no @param for screenY
+    public Pt toTree(float screenX, float screenY) {
+              ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\ViewTransform.java:44: warning: no @return
+    public Pt toTree(float screenX, float screenY) {
+              ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\ViewTransform.java:12: warning: no comment
+    public final float scale;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\ViewTransform.java:13: warning: no comment
+    public final float translateX;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\ViewTransform.java:14: warning: no comment
+    public final float translateY;
+                       ^
+D:\Project\Android\Treelearn\android\tree-layout\src\main\java\com\treelearn\treelayout\ViewTransform.java:39: warning: no comment
+    public Pt toScreen(float treeX, float treeY) {
+              ^
+96 warnings
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 13s
+2 actionable tasks: 2 executed
+EXITCODE=0
+
+# --- purity re-capture with its command recorded (2026-09-21T20:21:19.5987097+08:00) ---
+Command   : cd android; .\gradlew.bat verifyDependencyDirection --rerun-tasks --no-daemon --console=plain
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Task :verifyDependencyDirection
+verifyDependencyDirection: PASS (downward-only module graph + pure-JVM module purity)
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 25s
+1 actionable task: 1 executed
+EXITCODE=0
+
+# --- size measurement, production code (2026-09-21T20:22:56.6007713+08:00) ---
+Command   : powershell -Command "$d='android/tree-layout/src/main/java'; $files=Get-ChildItem $d -Recurse -Filter *.java; ..." (exact body in the block below, appended verbatim)
+$files = Get-ChildItem android/tree-layout/src/main/java -Recurse -Filter *.java
+$phys = 0; $code = 0
+foreach ($f in $files) {
+  $lines = Get-Content $f.FullName -Encoding UTF8
+  $phys += $lines.Count
+  $inBlock = $false
+  foreach ($l in $lines) {
+    $t = $l.Trim()
+    if ($inBlock) { if ($t -match '\*/') { $inBlock = $false }; continue }
+    if ($t -eq '') { continue }
+    if ($t.StartsWith('//')) { continue }
+    if ($t.StartsWith('/*')) { if (-not ($t -match '\*/')) { $inBlock = $true }; continue }
+    $code++
+  }
+  "  $($f.Name) physical=$($lines.Count)"
+}
+"files=$($files.Count) physical=$phys nonEmptyNonComment=$code"
+files=12 physical=1247 nonEmptyNonComment=862
+
+# --- Java-only / pure-JVM mechanical checks on :tree-layout (2026-09-21T20:23:00.9628716+08:00) ---
+Command   : rg --files android/tree-layout | Where-Object { $_ -match "\.(kt|kts)$" } | Measure-Object | Select-Object -ExpandProperty Count
+kt_or_kts_files=0
+Command   : Select-String -Path android/tree-layout/src/**/*.java,android/tree-layout/build.gradle -Pattern "import (android|androidx|kotlin)\.|org\.jetbrains\.kotlin" -SimpleMatch:$false
+kotlin_or_android_import_hits=1
+Command   : Select-String -Path android/tree-layout/build.gradle -Pattern "project\(" 
+project_dependency_lines=0
+Command   : Get-ChildItem android/tree-layout/src/test/java -Recurse -Filter *.java | ForEach-Object { "$($_.Name) $((Get-Content $_.FullName).Count)" }
+test Fixtures.java physical=223
+test TreeLayoutGeometryTest.java physical=320
+test TreeLayoutHitFitAnchorTest.java physical=231
+test TreeLayoutLabelTest.java physical=198
+# The single hit above is PROSE inside a javadoc comment: ViewTransform.java:7 mentions
+# {@code android.graphics.Matrix} while explaining that this module stores a plain scale/translate
+# so the View can rebuild its Matrix. It is not an import and not a type reference.
+Command   : Select-String -Path android/tree-layout/src/**/*.java -Pattern "^import (android|androidx|kotlin)" 
+platform_import_lines=0
+Command   : Select-String -Path android/tree-layout/src/**/*.java -Pattern "^import " | Group-Object { ($_.Line -replace "^import ","").Split(".")[0] }
+import root: java x21
+import root: org x3
+import root: static org x15

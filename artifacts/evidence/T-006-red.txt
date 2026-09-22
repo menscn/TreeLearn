@@ -1,0 +1,1259 @@
+# T-006 RED - DeepSeek HTTPS/SSE gateway unit + instrumentation suites against absent production code
+CapturedAt: 2026-09-21 20:13:00
+Command: cd android; .\gradlew.bat :ai:testDebugUnitTest :app:connectedDebugAndroidTest --no-daemon --console=plain --continue
+Mode: RED (tests first; com.treelearn.ai.gateway does not exist yet)
+--- output ---
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac UP-TO-DATE
+> Task :ai:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :ai:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :ai:preDebugUnitTestBuild UP-TO-DATE
+> Task :ai:generateDebugUnitTestStubRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebugUnitTest UP-TO-DATE
+
+> Task :ai:compileDebugUnitTestJavaWithJavac FAILED
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:132: 错误: 程序包GatewayPorts不存在
+    private static final class FakeTransport implements GatewayPorts.Transport {
+                                                                    ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:27: 错误: 程序包GatewayPorts不存在
+    private final GatewayPorts.Log log = (name, details) -> logLines.add(name + " " + details);
+                              ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:29: 错误: 程序包GatewayPorts不存在
+    private AiGateway gateway(GatewayPorts.BalanceDecoder decoder) {
+                                          ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:29: 错误: 找不到符号
+    private AiGateway gateway(GatewayPorts.BalanceDecoder decoder) {
+            ^
+  符号:   类 AiGateway
+  位置: 类 AiGatewayBalanceTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:141: 错误: 程序包GatewayPorts不存在
+        public GatewayPorts.Response post(String url, String apiKey, byte[] body) throws IOException {
+                           ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:146: 错误: 程序包GatewayPorts不存在
+        public GatewayPorts.Response get(String url, String apiKey) throws IOException {
+                           ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:50: 错误: 程序包GatewayPorts不存在
+    private final GatewayPorts.Log log = (name, details) -> logLines.add(name + " " + details);
+                              ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:378: 错误: 程序包GatewayPorts不存在
+    private static final class FakeTransport implements GatewayPorts.Transport {
+                                                                    ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:346: 错误: 程序包GatewayPorts不存在
+    private static final class ScriptedDecoder implements GatewayPorts.DeltaDecoder {
+                                                                      ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:53: 错误: 程序包GatewayPorts不存在
+    private final GatewayPorts.BalanceDecoder balance = payload -> payload.contains("true");
+                              ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:55: 错误: 找不到符号
+    private AiGateway gateway(Executor executor) {
+            ^
+  符号:   类 AiGateway
+  位置: 类 AiGatewayStreamTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:59: 错误: 程序包GatewayPorts不存在
+    private AiGateway gateway(Executor executor, GatewayPorts.BodyEncoder encoder) {
+                                                             ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:59: 错误: 找不到符号
+    private AiGateway gateway(Executor executor, GatewayPorts.BodyEncoder encoder) {
+            ^
+  符号:   类 AiGateway
+  位置: 类 AiGatewayStreamTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:360: 错误: 程序包GatewayPorts不存在
+        public GatewayPorts.Delta decode(String payload) {
+                           ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:396: 错误: 程序包GatewayPorts不存在
+        public GatewayPorts.Response post(String url, String apiKey, byte[] body) throws IOException {
+                           ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:407: 错误: 程序包GatewayPorts不存在
+        public GatewayPorts.Response get(String url, String apiKey) throws IOException {
+                           ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:411: 错误: 程序包GatewayPorts不存在
+        private final class FakeResponse implements GatewayPorts.Response {
+                                                                ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:485: 错误: 找不到符号
+    private class RecordingSink implements GenerationSink {
+                                           ^
+  符号:   类 GenerationSink
+  位置: 类 AiGatewayStreamTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:491: 错误: 找不到符号
+        StreamOutcome outcome;
+        ^
+  符号:   类 StreamOutcome
+  位置: 类 AiGatewayStreamTest.RecordingSink
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:511: 错误: 找不到符号
+        public void onTerminal(StreamOutcome result) {
+                               ^
+  符号:   类 StreamOutcome
+  位置: 类 AiGatewayStreamTest.RecordingSink
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\SseFrameParserTest.java:29: 错误: 程序包SseFrameParser不存在
+    private final SseFrameParser.EventSink sink = payload -> events.add(payload);
+                                ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:30: 错误: 找不到符号
+        return new AiGateway(transport, (model, request) -> new byte[0],
+                   ^
+  符号:   类 AiGateway
+  位置: 类 AiGatewayBalanceTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:31: 错误: 程序包GatewayPorts不存在
+                payload -> GatewayPorts.Delta.EMPTY, decoder, log, INLINE);
+                                       ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:38: 错误: 程序包AiGateway不存在
+        AiGateway.Balance balance = gateway(payload -> payload.contains("true")).checkBalance("key");
+                 ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:42: 错误: 找不到符号
+        assertEquals(GatewayEndpoints.balanceUrl(), transport.requestedUrl);
+                     ^
+  符号:   变量 GatewayEndpoints
+  位置: 类 AiGatewayBalanceTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:50: 错误: 程序包AiGateway不存在
+        AiGateway.Balance balance = gateway(payload -> payload.contains("true")).checkBalance("key");
+                 ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:61: 错误: 程序包AiGateway不存在
+        AiGateway.Balance balance = gateway(payload -> true).checkBalance("key");
+                 ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:64: 错误: 程序包AiGatewayError不存在
+        assertEquals(AiGatewayError.Kind.BALANCE_UNAVAILABLE, balance.error.kind);
+                                   ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:73: 错误: 程序包AiGateway不存在
+        AiGateway.Balance balance = gateway(payload -> true).checkBalance("key");
+                 ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:75: 错误: 程序包AiGatewayError不存在
+        assertEquals(AiGatewayError.Kind.AUTH_INVALID, balance.error.kind);
+                                   ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:80: 错误: 程序包AiGateway不存在
+        AiGateway.Balance balance = gateway(payload -> true).checkBalance("  ");
+                 ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:83: 错误: 程序包AiGatewayError不存在
+        assertEquals(AiGatewayError.Kind.KEY_MISSING, balance.error.kind);
+                                   ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:91: 错误: 程序包AiGateway不存在
+        AiGateway.Balance balance = gateway(payload -> true).checkBalance("key");
+                 ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:94: 错误: 程序包AiGatewayError不存在
+        assertEquals(AiGatewayError.Kind.NETWORK_INTERRUPTED, balance.error.kind);
+                                   ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:101: 错误: 程序包AiGateway不存在
+        AiGateway.Balance balance = gateway(payload -> {
+                 ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:102: 错误: 程序包GatewayPorts不存在
+            throw new GatewayPorts.PayloadException(AiGatewayError.parseFailed("fixture refusal"),
+                                  ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:102: 错误: 找不到符号
+            throw new GatewayPorts.PayloadException(AiGatewayError.parseFailed("fixture refusal"),
+                                                    ^
+  符号:   变量 AiGatewayError
+  位置: 类 AiGatewayBalanceTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:107: 错误: 程序包AiGatewayError不存在
+        assertEquals(AiGatewayError.Kind.PARSE_FAILED, balance.error.kind);
+                                   ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:112: 错误: 找不到符号
+        transport.body = "x".repeat(AiGateway.MAX_BALANCE_BYTES + 1);
+                                    ^
+  符号:   变量 AiGateway
+  位置: 类 AiGatewayBalanceTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:114: 错误: 程序包AiGateway不存在
+        AiGateway.Balance balance = gateway(payload -> true).checkBalance("key");
+                 ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:117: 错误: 程序包AiGatewayError不存在
+        assertEquals(AiGatewayError.Kind.PARSE_FAILED, balance.error.kind);
+                                   ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:140: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:145: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:152: 错误: 程序包GatewayPorts不存在
+            return new GatewayPorts.Response() {
+                                   ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:153: 错误: 方法不会覆盖或实现超类型的方法
+                @Override
+                ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:158: 错误: 方法不会覆盖或实现超类型的方法
+                @Override
+                ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:163: 错误: 方法不会覆盖或实现超类型的方法
+                @Override
+                ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:60: 错误: 找不到符号
+        return new AiGateway(transport, encoder, decoder, balance, log, executor);
+                   ^
+  符号:   类 AiGateway
+  位置: 类 AiGatewayStreamTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:83: 错误: 程序包StreamOutcome不存在
+        assertEquals(StreamOutcome.Kind.COMPLETED, sink.outcome.kind);
+                                  ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:100: 错误: 程序包StreamOutcome不存在
+        assertEquals(StreamOutcome.Kind.CANCELED, sink.outcome.kind);
+                                  ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:115: 错误: 程序包StreamOutcome不存在
+        assertEquals(StreamOutcome.Kind.COMPLETED, sink.outcome.kind);
+                                  ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:128: 错误: 程序包StreamOutcome不存在
+        assertEquals(StreamOutcome.Kind.INTERRUPTED, sink.outcome.kind);
+                                  ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:142: 错误: 程序包StreamOutcome不存在
+        assertEquals(StreamOutcome.Kind.COMPLETED, sink.outcome.kind);
+                                  ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:154: 错误: 程序包StreamOutcome不存在
+        assertEquals(StreamOutcome.Kind.FAILED, sink.outcome.kind);
+                                  ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:155: 错误: 程序包AiGatewayError不存在
+        assertEquals(AiGatewayError.Kind.NETWORK_INTERRUPTED, sink.outcome.error.kind);
+                                   ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:163: 错误: 程序包AiGatewayError不存在
+        Map<Integer, AiGatewayError.Kind> expected = new LinkedHashMap<>();
+                                   ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:164: 错误: 程序包AiGatewayError不存在
+        expected.put(400, AiGatewayError.Kind.REQUEST_INVALID);
+                                        ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:165: 错误: 程序包AiGatewayError不存在
+        expected.put(401, AiGatewayError.Kind.AUTH_INVALID);
+                                        ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:166: 错误: 程序包AiGatewayError不存在
+        expected.put(402, AiGatewayError.Kind.BALANCE_UNAVAILABLE);
+                                        ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:167: 错误: 程序包AiGatewayError不存在
+        expected.put(403, AiGatewayError.Kind.AUTH_INVALID);
+                                        ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:168: 错误: 程序包AiGatewayError不存在
+        expected.put(422, AiGatewayError.Kind.REQUEST_INVALID);
+                                        ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:169: 错误: 程序包AiGatewayError不存在
+        expected.put(429, AiGatewayError.Kind.RATE_LIMITED);
+                                        ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:170: 错误: 程序包AiGatewayError不存在
+        expected.put(500, AiGatewayError.Kind.PROVIDER_UNAVAILABLE);
+                                        ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:171: 错误: 程序包AiGatewayError不存在
+        expected.put(503, AiGatewayError.Kind.PROVIDER_UNAVAILABLE);
+                                        ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:173: 错误: 程序包AiGatewayError不存在
+        for (Map.Entry<Integer, AiGatewayError.Kind> entry : expected.entrySet()) {
+                                              ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:180: 错误: 程序包StreamOutcome不存在
+            assertEquals("status " + entry.getKey(), StreamOutcome.Kind.FAILED, sink.outcome.kind);
+                                                                  ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:200: 错误: 程序包StreamOutcome不存在
+        assertEquals(StreamOutcome.Kind.FAILED, sink.outcome.kind);
+                                  ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:201: 错误: 程序包AiGatewayError不存在
+        assertEquals(AiGatewayError.Kind.PARSE_FAILED, sink.outcome.error.kind);
+                                   ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:217: 错误: 程序包StreamOutcome不存在
+        assertEquals(StreamOutcome.Kind.FAILED, sink.outcome.kind);
+                                  ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:218: 错误: 程序包AiGatewayError不存在
+        assertEquals(AiGatewayError.Kind.PARSE_FAILED, sink.outcome.error.kind);
+                                   ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:231: 错误: 程序包StreamOutcome不存在
+        assertEquals(StreamOutcome.Kind.COMPLETED, sink.outcome.kind);
+                                  ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:240: 错误: 程序包StreamOutcome不存在
+        assertEquals(StreamOutcome.Kind.FAILED, sink.outcome.kind);
+                                  ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:241: 错误: 程序包AiGatewayError不存在
+        assertEquals(AiGatewayError.Kind.KEY_MISSING, sink.outcome.error.kind);
+                                   ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:250: 错误: 找不到符号
+        AiGateway gateway = gateway(INLINE, (model, request) -> {
+        ^
+  符号:   类 AiGateway
+  位置: 类 AiGatewayStreamTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:256: 错误: 程序包StreamOutcome不存在
+        assertEquals(StreamOutcome.Kind.FAILED, sink.outcome.kind);
+                                  ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:257: 错误: 程序包AiGatewayError不存在
+        assertEquals(AiGatewayError.Kind.REQUEST_INVALID, sink.outcome.error.kind);
+                                   ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:267: 错误: 找不到符号
+        new AiGateway(transport, (model, request) -> body, decoder, balance, log, INLINE)
+            ^
+  符号:   类 AiGateway
+  位置: 类 AiGatewayStreamTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:272: 错误: 找不到符号
+        assertEquals(GatewayEndpoints.chatUrl(), transport.requestedUrl);
+                     ^
+  符号:   变量 GatewayEndpoints
+  位置: 类 AiGatewayStreamTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:496: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:503: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:510: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:325: 错误: 程序包AiGateway不存在
+            AiGateway.Call call =
+                     ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:333: 错误: 程序包StreamOutcome不存在
+            assertEquals(StreamOutcome.Kind.CANCELED, sink.outcome.kind);
+                                      ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:359: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:365: 错误: 程序包GatewayPorts不存在
+                throw new GatewayPorts.PayloadException(AiGatewayError.parseFailed("fixture refusal"),
+                                      ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:365: 错误: 找不到符号
+                throw new GatewayPorts.PayloadException(AiGatewayError.parseFailed("fixture refusal"),
+                                                        ^
+  符号:   变量 AiGatewayError
+  位置: 类 ScriptedDecoder
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:370: 错误: 程序包GatewayPorts不存在
+                return GatewayPorts.Delta.EMPTY;
+                                   ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:372: 错误: 程序包GatewayPorts不存在
+            return new GatewayPorts.Delta(payload.substring(0, separator),
+                                   ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:395: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:406: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:415: 错误: 方法不会覆盖或实现超类型的方法
+            @Override
+            ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:420: 错误: 方法不会覆盖或实现超类型的方法
+            @Override
+            ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:428: 错误: 方法不会覆盖或实现超类型的方法
+            @Override
+            ^
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\GatewayContractTest.java:25: 错误: 找不到符号
+        assertEquals("https://api.deepseek.com", GatewayEndpoints.BASE_URL);
+                                                 ^
+  符号:   变量 GatewayEndpoints
+  位置: 类 GatewayContractTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\GatewayContractTest.java:26: 错误: 找不到符号
+        assertEquals("https://api.deepseek.com/chat/completions", GatewayEndpoints.chatUrl());
+                                                                  ^
+  符号:   变量 GatewayEndpoints
+  位置: 类 GatewayContractTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\GatewayContractTest.java:27: 错误: 找不到符号
+        assertEquals("https://api.deepseek.com/user/balance", GatewayEndpoints.balanceUrl());
+                                                              ^
+  符号:   变量 GatewayEndpoints
+  位置: 类 GatewayContractTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\GatewayContractTest.java:36: 错误: 找不到符号
+                String accepted = GatewayEndpoints.requireHttps(refused);
+                                  ^
+  符号:   变量 GatewayEndpoints
+  位置: 类 GatewayContractTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\GatewayContractTest.java:47: 错误: 找不到符号
+        HttpsTransport transport = new HttpsTransport(1_000, 1_000);
+        ^
+  符号:   类 HttpsTransport
+  位置: 类 GatewayContractTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\GatewayContractTest.java:47: 错误: 找不到符号
+        HttpsTransport transport = new HttpsTransport(1_000, 1_000);
+                                       ^
+  符号:   类 HttpsTransport
+  位置: 类 GatewayContractTest
+D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\GatewayContractTest.java:60: 错误: 找不到符号
+            new HttpsTransport(0, 1_000);
+                ^
+  符号:   类 HttpsTransport
+  位置: 类 GatewayContractTest
+100 个错误
+
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :ai:processDebugUnitTestJavaRes NO-SOURCE
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugLibraryResources UP-TO-DATE
+> Task :ai:writeDebugAarMetadata UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :ai:extractDeepLinksDebug UP-TO-DATE
+> Task :ai:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :data:extractDeepLinksDebug UP-TO-DATE
+> Task :data:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :data:compileDebugLibraryResources UP-TO-DATE
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac UP-TO-DATE
+> Task :data:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :app:processDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:compileDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugAndroidTestResources UP-TO-DATE
+> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :app:processDebugAndroidTestManifest UP-TO-DATE
+> Task :app:processDebugAndroidTestResources UP-TO-DATE
+
+> Task :app:compileDebugAndroidTestJavaWithJavac FAILED
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:7: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.AiGatewayError;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:8: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.GatewayPorts;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:9: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.ProviderJson;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:24: 错误: 程序包GatewayPorts不存在
+    private final GatewayPorts.DeltaDecoder deltas = new ProviderJson.Deltas();
+                              ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:25: 错误: 程序包GatewayPorts不存在
+    private final GatewayPorts.BalanceDecoder balance = new ProviderJson.Balance();
+                              ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:124: 错误: 程序包GatewayPorts不存在
+    private GatewayPorts.PayloadException refusal(String payload) {
+                        ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:8: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.JsonChatRequestBody;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:8: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.AiGateway;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:9: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.AiGatewayError;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:10: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.GatewayPorts;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:11: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.GenerationSink;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:12: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.ProviderJson;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:13: 错误: 程序包com.treelearn.ai.gateway不存在
+import com.treelearn.ai.gateway.StreamOutcome;
+                               ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:64: 错误: 程序包GatewayPorts不存在
+    private final GatewayPorts.Log quiet = (name, details) -> {
+                              ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:110: 错误: 找不到符号
+    private AiGateway gateway(String body, int slice) {
+            ^
+  符号:   类 AiGateway
+  位置: 类 DeepSeekStreamInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:128: 错误: 程序包GatewayPorts不存在
+    private static final class SlicedTransport implements GatewayPorts.Transport {
+                                                                      ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:139: 错误: 程序包GatewayPorts不存在
+        public GatewayPorts.Response post(String url, String apiKey, byte[] body) {
+                           ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:144: 错误: 程序包GatewayPorts不存在
+        public GatewayPorts.Response get(String url, String apiKey) {
+                           ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:148: 错误: 程序包GatewayPorts不存在
+        private GatewayPorts.Response response() {
+                            ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:188: 错误: 找不到符号
+    private static final class RecordingSink implements GenerationSink {
+                                                        ^
+  符号:   类 GenerationSink
+  位置: 类 DeepSeekStreamInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:192: 错误: 找不到符号
+        StreamOutcome outcome;
+        ^
+  符号:   类 StreamOutcome
+  位置: 类 RecordingSink
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:207: 错误: 找不到符号
+        public void onTerminal(StreamOutcome result) {
+                               ^
+  符号:   类 StreamOutcome
+  位置: 类 RecordingSink
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:24: 错误: 程序包ProviderJson不存在
+    private final GatewayPorts.DeltaDecoder deltas = new ProviderJson.Deltas();
+                                                                     ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:25: 错误: 程序包ProviderJson不存在
+    private final GatewayPorts.BalanceDecoder balance = new ProviderJson.Balance();
+                                                                        ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:29: 错误: 程序包GatewayPorts不存在
+        GatewayPorts.Delta delta = deltas.decode("{\"choices\":[{\"index\":0,\"delta\":{"
+                    ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:58: 错误: 程序包GatewayPorts不存在
+        GatewayPorts.Delta delta = deltas.decode(payload);
+                    ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:74: 错误: 程序包GatewayPorts不存在
+        GatewayPorts.PayloadException refusal =
+                    ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:77: 错误: 程序包AiGatewayError不存在
+        assertEquals(AiGatewayError.Kind.PARSE_FAILED, refusal.error.kind);
+                                   ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:86: 错误: 程序包AiGatewayError不存在
+            assertEquals("payload <" + payload + ">", AiGatewayError.Kind.PARSE_FAILED,
+                                                                    ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:93: 错误: 程序包GatewayPorts不存在
+        GatewayPorts.PayloadException refusal = refusal(
+                    ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:96: 错误: 程序包AiGatewayError不存在
+        assertEquals(AiGatewayError.Kind.PROVIDER_UNAVAILABLE, refusal.error.kind);
+                                   ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:111: 错误: 程序包GatewayPorts不存在
+            GatewayPorts.PayloadException refused;
+                        ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:115: 错误: 程序包GatewayPorts不存在
+            } catch (GatewayPorts.PayloadException expected) {
+                                 ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:118: 错误: 程序包AiGatewayError不存在
+            assertEquals("payload <" + payload + ">", AiGatewayError.Kind.PARSE_FAILED,
+                                                                    ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:127: 错误: 程序包GatewayPorts不存在
+        } catch (GatewayPorts.PayloadException expected) {
+                             ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:44: 错误: 找不到符号
+        byte[] body = new JsonChatRequestBody().encode(GenerationModel.FLASH, request);
+                          ^
+  符号:   类 JsonChatRequestBody
+  位置: 类 DeepSeekRequestBodyInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:67: 错误: 找不到符号
+                new String(new JsonChatRequestBody().encode(GenerationModel.PRO, request(true)), UTF_8));
+                               ^
+  符号:   类 JsonChatRequestBody
+  位置: 类 DeepSeekRequestBodyInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:69: 错误: 找不到符号
+        assertEquals(JsonChatRequestBody.REASONING_EFFORT,
+                     ^
+  符号:   变量 JsonChatRequestBody
+  位置: 类 DeepSeekRequestBodyInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:74: 错误: 找不到符号
+                new String(new JsonChatRequestBody().encode(GenerationModel.FLASH, request(false)), UTF_8));
+                               ^
+  符号:   类 JsonChatRequestBody
+  位置: 类 DeepSeekRequestBodyInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:82: 错误: 找不到符号
+        byte[] body = new JsonChatRequestBody().encode(GenerationModel.FLASH, request(true));
+                          ^
+  符号:   类 JsonChatRequestBody
+  位置: 类 DeepSeekRequestBodyInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:76: 错误: 程序包StreamOutcome不存在
+            assertEquals("slice " + slice, StreamOutcome.Kind.COMPLETED, sink.outcome.kind);
+                                                        ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:90: 错误: 程序包StreamOutcome不存在
+        assertEquals(StreamOutcome.Kind.COMPLETED, sink.outcome.kind);
+                                  ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:102: 错误: 程序包StreamOutcome不存在
+        assertEquals(StreamOutcome.Kind.INTERRUPTED, sink.outcome.kind);
+                                  ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:111: 错误: 找不到符号
+        return new AiGateway(new SlicedTransport(body, slice), (model, request) -> new byte[0],
+                   ^
+  符号:   类 AiGateway
+  位置: 类 DeepSeekStreamInstrumentedTest
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:112: 错误: 程序包ProviderJson不存在
+                new ProviderJson.Deltas(), new ProviderJson.Balance(), quiet, Runnable::run);
+                                ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:112: 错误: 程序包ProviderJson不存在
+                new ProviderJson.Deltas(), new ProviderJson.Balance(), quiet, Runnable::run);
+                                                           ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:138: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:143: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:149: 错误: 程序包GatewayPorts不存在
+            return new GatewayPorts.Response() {
+                                   ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:150: 错误: 方法不会覆盖或实现超类型的方法
+                @Override
+                ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:155: 错误: 方法不会覆盖或实现超类型的方法
+                @Override
+                ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:180: 错误: 方法不会覆盖或实现超类型的方法
+                @Override
+                ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:195: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:200: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:206: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+注: 某些输入文件使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+55 个错误
+
+> Task :ai:generateDebugAssets UP-TO-DATE
+> Task :ai:mergeDebugAssets UP-TO-DATE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :data:generateDebugAssets UP-TO-DATE
+> Task :data:mergeDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :data:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:dexBuilderDebug UP-TO-DATE
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :app:mergeDebugJavaResource UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :data:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :ai:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :app:mergeProjectDexDebug UP-TO-DATE
+> Task :ai:mergeDebugJniLibFolders UP-TO-DATE
+> Task :ai:mergeDebugNativeLibs NO-SOURCE
+> Task :ai:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :data:mergeDebugJniLibFolders UP-TO-DATE
+> Task :data:mergeDebugNativeLibs NO-SOURCE
+> Task :data:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :app:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :app:mergeDebugAndroidTestAssets UP-TO-DATE
+> Task :app:compressDebugAndroidTestAssets UP-TO-DATE
+> Task :app:desugarDebugAndroidTestFileDependencies UP-TO-DATE
+> Task :app:processDebugAndroidTestJavaRes NO-SOURCE
+> Task :app:mergeDebugAndroidTestJavaResource UP-TO-DATE
+> Task :app:mergeDebugGlobalSynthetics UP-TO-DATE
+> Task :app:mergeLibDexDebug UP-TO-DATE
+> Task :app:packageDebug UP-TO-DATE
+> Task :app:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :app:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :app:mergeExtDexDebugAndroidTest UP-TO-DATE
+> Task :app:mergeLibDexDebugAndroidTest UP-TO-DATE
+> Task :app:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
+> Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :app:validateSigningDebugAndroidTest UP-TO-DATE
+> Task :app:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+FAILURE: Build completed with 2 failures.
+
+1: Task failed with an exception.
+-----------
+* What went wrong:
+Execution failed for task ':ai:compileDebugUnitTestJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:29: 错误: 找不到符号
+      private AiGateway gateway(GatewayPorts.BalanceDecoder decoder) {
+              ^
+    符号:   类 AiGateway
+    位置: 类 AiGatewayBalanceTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:55: 错误: 找不到符号
+      private AiGateway gateway(Executor executor) {
+              ^
+    符号:   类 AiGateway
+    位置: 类 AiGatewayStreamTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:59: 错误: 找不到符号
+      private AiGateway gateway(Executor executor, GatewayPorts.BodyEncoder encoder) {
+              ^
+    符号:   类 AiGateway
+    位置: 类 AiGatewayStreamTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:485: 错误: 找不到符号
+      private class RecordingSink implements GenerationSink {
+                                             ^
+    符号:   类 GenerationSink
+    位置: 类 AiGatewayStreamTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:491: 错误: 找不到符号
+          StreamOutcome outcome;
+          ^
+    符号:   类 StreamOutcome
+    位置: 类 AiGatewayStreamTest.RecordingSink
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:511: 错误: 找不到符号
+          public void onTerminal(StreamOutcome result) {
+                                 ^
+    符号:   类 StreamOutcome
+    位置: 类 AiGatewayStreamTest.RecordingSink
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:30: 错误: 找不到符号
+          return new AiGateway(transport, (model, request) -> new byte[0],
+                     ^
+    符号:   类 AiGateway
+    位置: 类 AiGatewayBalanceTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:42: 错误: 找不到符号
+          assertEquals(GatewayEndpoints.balanceUrl(), transport.requestedUrl);
+                       ^
+    符号:   变量 GatewayEndpoints
+    位置: 类 AiGatewayBalanceTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:102: 错误: 找不到符号
+              throw new GatewayPorts.PayloadException(AiGatewayError.parseFailed("fixture refusal"),
+                                                      ^
+    符号:   变量 AiGatewayError
+    位置: 类 AiGatewayBalanceTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:112: 错误: 找不到符号
+          transport.body = "x".repeat(AiGateway.MAX_BALANCE_BYTES + 1);
+                                      ^
+    符号:   变量 AiGateway
+    位置: 类 AiGatewayBalanceTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:60: 错误: 找不到符号
+          return new AiGateway(transport, encoder, decoder, balance, log, executor);
+                     ^
+    符号:   类 AiGateway
+    位置: 类 AiGatewayStreamTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:250: 错误: 找不到符号
+          AiGateway gateway = gateway(INLINE, (model, request) -> {
+          ^
+    符号:   类 AiGateway
+    位置: 类 AiGatewayStreamTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:267: 错误: 找不到符号
+          new AiGateway(transport, (model, request) -> body, decoder, balance, log, INLINE)
+              ^
+    符号:   类 AiGateway
+    位置: 类 AiGatewayStreamTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:272: 错误: 找不到符号
+          assertEquals(GatewayEndpoints.chatUrl(), transport.requestedUrl);
+                       ^
+    符号:   变量 GatewayEndpoints
+    位置: 类 AiGatewayStreamTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:365: 错误: 找不到符号
+                  throw new GatewayPorts.PayloadException(AiGatewayError.parseFailed("fixture refusal"),
+                                                          ^
+    符号:   变量 AiGatewayError
+    位置: 类 ScriptedDecoder
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\GatewayContractTest.java:25: 错误: 找不到符号
+          assertEquals("https://api.deepseek.com", GatewayEndpoints.BASE_URL);
+                                                   ^
+    符号:   变量 GatewayEndpoints
+    位置: 类 GatewayContractTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\GatewayContractTest.java:26: 错误: 找不到符号
+          assertEquals("https://api.deepseek.com/chat/completions", GatewayEndpoints.chatUrl());
+                                                                    ^
+    符号:   变量 GatewayEndpoints
+    位置: 类 GatewayContractTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\GatewayContractTest.java:27: 错误: 找不到符号
+          assertEquals("https://api.deepseek.com/user/balance", GatewayEndpoints.balanceUrl());
+                                                                ^
+    符号:   变量 GatewayEndpoints
+    位置: 类 GatewayContractTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\GatewayContractTest.java:36: 错误: 找不到符号
+                  String accepted = GatewayEndpoints.requireHttps(refused);
+                                    ^
+    符号:   变量 GatewayEndpoints
+    位置: 类 GatewayContractTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\GatewayContractTest.java:47: 错误: 找不到符号
+          HttpsTransport transport = new HttpsTransport(1_000, 1_000);
+          ^
+    符号:   类 HttpsTransport
+    位置: 类 GatewayContractTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\GatewayContractTest.java:47: 错误: 找不到符号
+          HttpsTransport transport = new HttpsTransport(1_000, 1_000);
+                                         ^
+    符号:   类 HttpsTransport
+    位置: 类 GatewayContractTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\GatewayContractTest.java:60: 错误: 找不到符号
+              new HttpsTransport(0, 1_000);
+                  ^
+    符号:   类 HttpsTransport
+    位置: 类 GatewayContractTest
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:140: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:145: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:153: 错误: 方法不会覆盖或实现超类型的方法
+                  @Override
+                  ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:158: 错误: 方法不会覆盖或实现超类型的方法
+                  @Override
+                  ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:163: 错误: 方法不会覆盖或实现超类型的方法
+                  @Override
+                  ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:496: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:503: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:510: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:359: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:395: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:406: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:415: 错误: 方法不会覆盖或实现超类型的方法
+              @Override
+              ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:420: 错误: 方法不会覆盖或实现超类型的方法
+              @Override
+              ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:428: 错误: 方法不会覆盖或实现超类型的方法
+              @Override
+              ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:132: 错误: 程序包GatewayPorts不存在
+      private static final class FakeTransport implements GatewayPorts.Transport {
+                                                                      ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:27: 错误: 程序包GatewayPorts不存在
+      private final GatewayPorts.Log log = (name, details) -> logLines.add(name + " " + details);
+                                ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:29: 错误: 程序包GatewayPorts不存在
+      private AiGateway gateway(GatewayPorts.BalanceDecoder decoder) {
+                                            ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:141: 错误: 程序包GatewayPorts不存在
+          public GatewayPorts.Response post(String url, String apiKey, byte[] body) throws IOException {
+                             ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:146: 错误: 程序包GatewayPorts不存在
+          public GatewayPorts.Response get(String url, String apiKey) throws IOException {
+                             ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:50: 错误: 程序包GatewayPorts不存在
+      private final GatewayPorts.Log log = (name, details) -> logLines.add(name + " " + details);
+                                ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:378: 错误: 程序包GatewayPorts不存在
+      private static final class FakeTransport implements GatewayPorts.Transport {
+                                                                      ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:346: 错误: 程序包GatewayPorts不存在
+      private static final class ScriptedDecoder implements GatewayPorts.DeltaDecoder {
+                                                                        ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:53: 错误: 程序包GatewayPorts不存在
+      private final GatewayPorts.BalanceDecoder balance = payload -> payload.contains("true");
+                                ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:59: 错误: 程序包GatewayPorts不存在
+      private AiGateway gateway(Executor executor, GatewayPorts.BodyEncoder encoder) {
+                                                               ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:360: 错误: 程序包GatewayPorts不存在
+          public GatewayPorts.Delta decode(String payload) {
+                             ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:396: 错误: 程序包GatewayPorts不存在
+          public GatewayPorts.Response post(String url, String apiKey, byte[] body) throws IOException {
+                             ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:407: 错误: 程序包GatewayPorts不存在
+          public GatewayPorts.Response get(String url, String apiKey) throws IOException {
+                             ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:411: 错误: 程序包GatewayPorts不存在
+          private final class FakeResponse implements GatewayPorts.Response {
+                                                                  ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\SseFrameParserTest.java:29: 错误: 程序包SseFrameParser不存在
+      private final SseFrameParser.EventSink sink = payload -> events.add(payload);
+                                  ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:31: 错误: 程序包GatewayPorts不存在
+                  payload -> GatewayPorts.Delta.EMPTY, decoder, log, INLINE);
+                                         ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:38: 错误: 程序包AiGateway不存在
+          AiGateway.Balance balance = gateway(payload -> payload.contains("true")).checkBalance("key");
+                   ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:50: 错误: 程序包AiGateway不存在
+          AiGateway.Balance balance = gateway(payload -> payload.contains("true")).checkBalance("key");
+                   ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:61: 错误: 程序包AiGateway不存在
+          AiGateway.Balance balance = gateway(payload -> true).checkBalance("key");
+                   ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:64: 错误: 程序包AiGatewayError不存在
+          assertEquals(AiGatewayError.Kind.BALANCE_UNAVAILABLE, balance.error.kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:73: 错误: 程序包AiGateway不存在
+          AiGateway.Balance balance = gateway(payload -> true).checkBalance("key");
+                   ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:75: 错误: 程序包AiGatewayError不存在
+          assertEquals(AiGatewayError.Kind.AUTH_INVALID, balance.error.kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:80: 错误: 程序包AiGateway不存在
+          AiGateway.Balance balance = gateway(payload -> true).checkBalance("  ");
+                   ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:83: 错误: 程序包AiGatewayError不存在
+          assertEquals(AiGatewayError.Kind.KEY_MISSING, balance.error.kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:91: 错误: 程序包AiGateway不存在
+          AiGateway.Balance balance = gateway(payload -> true).checkBalance("key");
+                   ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:94: 错误: 程序包AiGatewayError不存在
+          assertEquals(AiGatewayError.Kind.NETWORK_INTERRUPTED, balance.error.kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:101: 错误: 程序包AiGateway不存在
+          AiGateway.Balance balance = gateway(payload -> {
+                   ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:102: 错误: 程序包GatewayPorts不存在
+              throw new GatewayPorts.PayloadException(AiGatewayError.parseFailed("fixture refusal"),
+                                    ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:107: 错误: 程序包AiGatewayError不存在
+          assertEquals(AiGatewayError.Kind.PARSE_FAILED, balance.error.kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:114: 错误: 程序包AiGateway不存在
+          AiGateway.Balance balance = gateway(payload -> true).checkBalance("key");
+                   ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:117: 错误: 程序包AiGatewayError不存在
+          assertEquals(AiGatewayError.Kind.PARSE_FAILED, balance.error.kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayBalanceTest.java:152: 错误: 程序包GatewayPorts不存在
+              return new GatewayPorts.Response() {
+                                     ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:83: 错误: 程序包StreamOutcome不存在
+          assertEquals(StreamOutcome.Kind.COMPLETED, sink.outcome.kind);
+                                    ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:100: 错误: 程序包StreamOutcome不存在
+          assertEquals(StreamOutcome.Kind.CANCELED, sink.outcome.kind);
+                                    ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:115: 错误: 程序包StreamOutcome不存在
+          assertEquals(StreamOutcome.Kind.COMPLETED, sink.outcome.kind);
+                                    ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:128: 错误: 程序包StreamOutcome不存在
+          assertEquals(StreamOutcome.Kind.INTERRUPTED, sink.outcome.kind);
+                                    ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:142: 错误: 程序包StreamOutcome不存在
+          assertEquals(StreamOutcome.Kind.COMPLETED, sink.outcome.kind);
+                                    ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:154: 错误: 程序包StreamOutcome不存在
+          assertEquals(StreamOutcome.Kind.FAILED, sink.outcome.kind);
+                                    ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:155: 错误: 程序包AiGatewayError不存在
+          assertEquals(AiGatewayError.Kind.NETWORK_INTERRUPTED, sink.outcome.error.kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:163: 错误: 程序包AiGatewayError不存在
+          Map<Integer, AiGatewayError.Kind> expected = new LinkedHashMap<>();
+                                     ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:164: 错误: 程序包AiGatewayError不存在
+          expected.put(400, AiGatewayError.Kind.REQUEST_INVALID);
+                                          ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:165: 错误: 程序包AiGatewayError不存在
+          expected.put(401, AiGatewayError.Kind.AUTH_INVALID);
+                                          ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:166: 错误: 程序包AiGatewayError不存在
+          expected.put(402, AiGatewayError.Kind.BALANCE_UNAVAILABLE);
+                                          ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:167: 错误: 程序包AiGatewayError不存在
+          expected.put(403, AiGatewayError.Kind.AUTH_INVALID);
+                                          ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:168: 错误: 程序包AiGatewayError不存在
+          expected.put(422, AiGatewayError.Kind.REQUEST_INVALID);
+                                          ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:169: 错误: 程序包AiGatewayError不存在
+          expected.put(429, AiGatewayError.Kind.RATE_LIMITED);
+                                          ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:170: 错误: 程序包AiGatewayError不存在
+          expected.put(500, AiGatewayError.Kind.PROVIDER_UNAVAILABLE);
+                                          ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:171: 错误: 程序包AiGatewayError不存在
+          expected.put(503, AiGatewayError.Kind.PROVIDER_UNAVAILABLE);
+                                          ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:173: 错误: 程序包AiGatewayError不存在
+          for (Map.Entry<Integer, AiGatewayError.Kind> entry : expected.entrySet()) {
+                                                ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:180: 错误: 程序包StreamOutcome不存在
+              assertEquals("status " + entry.getKey(), StreamOutcome.Kind.FAILED, sink.outcome.kind);
+                                                                    ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:200: 错误: 程序包StreamOutcome不存在
+          assertEquals(StreamOutcome.Kind.FAILED, sink.outcome.kind);
+                                    ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:201: 错误: 程序包AiGatewayError不存在
+          assertEquals(AiGatewayError.Kind.PARSE_FAILED, sink.outcome.error.kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:217: 错误: 程序包StreamOutcome不存在
+          assertEquals(StreamOutcome.Kind.FAILED, sink.outcome.kind);
+                                    ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:218: 错误: 程序包AiGatewayError不存在
+          assertEquals(AiGatewayError.Kind.PARSE_FAILED, sink.outcome.error.kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:231: 错误: 程序包StreamOutcome不存在
+          assertEquals(StreamOutcome.Kind.COMPLETED, sink.outcome.kind);
+                                    ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:240: 错误: 程序包StreamOutcome不存在
+          assertEquals(StreamOutcome.Kind.FAILED, sink.outcome.kind);
+                                    ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:241: 错误: 程序包AiGatewayError不存在
+          assertEquals(AiGatewayError.Kind.KEY_MISSING, sink.outcome.error.kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:256: 错误: 程序包StreamOutcome不存在
+          assertEquals(StreamOutcome.Kind.FAILED, sink.outcome.kind);
+                                    ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:257: 错误: 程序包AiGatewayError不存在
+          assertEquals(AiGatewayError.Kind.REQUEST_INVALID, sink.outcome.error.kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:325: 错误: 程序包AiGateway不存在
+              AiGateway.Call call =
+                       ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:333: 错误: 程序包StreamOutcome不存在
+              assertEquals(StreamOutcome.Kind.CANCELED, sink.outcome.kind);
+                                        ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:365: 错误: 程序包GatewayPorts不存在
+                  throw new GatewayPorts.PayloadException(AiGatewayError.parseFailed("fixture refusal"),
+                                        ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:370: 错误: 程序包GatewayPorts不存在
+                  return GatewayPorts.Delta.EMPTY;
+                                     ^
+  D:\Project\Android\Treelearn\android\ai\src\test\java\com\treelearn\ai\gateway\AiGatewayStreamTest.java:372: 错误: 程序包GatewayPorts不存在
+              return new GatewayPorts.Delta(payload.substring(0, separator),
+                                     ^
+  100 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+==============================================================================
+
+2: Task failed with an exception.
+-----------
+* What went wrong:
+Execution failed for task ':app:compileDebugAndroidTestJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:110: 错误: 找不到符号
+      private AiGateway gateway(String body, int slice) {
+              ^
+    符号:   类 AiGateway
+    位置: 类 DeepSeekStreamInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:188: 错误: 找不到符号
+      private static final class RecordingSink implements GenerationSink {
+                                                          ^
+    符号:   类 GenerationSink
+    位置: 类 DeepSeekStreamInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:192: 错误: 找不到符号
+          StreamOutcome outcome;
+          ^
+    符号:   类 StreamOutcome
+    位置: 类 RecordingSink
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:207: 错误: 找不到符号
+          public void onTerminal(StreamOutcome result) {
+                                 ^
+    符号:   类 StreamOutcome
+    位置: 类 RecordingSink
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:44: 错误: 找不到符号
+          byte[] body = new JsonChatRequestBody().encode(GenerationModel.FLASH, request);
+                            ^
+    符号:   类 JsonChatRequestBody
+    位置: 类 DeepSeekRequestBodyInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:67: 错误: 找不到符号
+                  new String(new JsonChatRequestBody().encode(GenerationModel.PRO, request(true)), UTF_8));
+                                 ^
+    符号:   类 JsonChatRequestBody
+    位置: 类 DeepSeekRequestBodyInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:69: 错误: 找不到符号
+          assertEquals(JsonChatRequestBody.REASONING_EFFORT,
+                       ^
+    符号:   变量 JsonChatRequestBody
+    位置: 类 DeepSeekRequestBodyInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:74: 错误: 找不到符号
+                  new String(new JsonChatRequestBody().encode(GenerationModel.FLASH, request(false)), UTF_8));
+                                 ^
+    符号:   类 JsonChatRequestBody
+    位置: 类 DeepSeekRequestBodyInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:82: 错误: 找不到符号
+          byte[] body = new JsonChatRequestBody().encode(GenerationModel.FLASH, request(true));
+                            ^
+    符号:   类 JsonChatRequestBody
+    位置: 类 DeepSeekRequestBodyInstrumentedTest
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:111: 错误: 找不到符号
+          return new AiGateway(new SlicedTransport(body, slice), (model, request) -> new byte[0],
+                     ^
+    符号:   类 AiGateway
+    位置: 类 DeepSeekStreamInstrumentedTest
+  注: 某些输入文件使用或覆盖了已过时的 API。
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:138: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:143: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:150: 错误: 方法不会覆盖或实现超类型的方法
+                  @Override
+                  ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:155: 错误: 方法不会覆盖或实现超类型的方法
+                  @Override
+                  ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:180: 错误: 方法不会覆盖或实现超类型的方法
+                  @Override
+                  ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:195: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:200: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:206: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:7: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.AiGatewayError;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:8: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.GatewayPorts;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:9: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.ProviderJson;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:24: 错误: 程序包GatewayPorts不存在
+      private final GatewayPorts.DeltaDecoder deltas = new ProviderJson.Deltas();
+                                ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:25: 错误: 程序包GatewayPorts不存在
+      private final GatewayPorts.BalanceDecoder balance = new ProviderJson.Balance();
+                                ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:124: 错误: 程序包GatewayPorts不存在
+      private GatewayPorts.PayloadException refusal(String payload) {
+                          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekRequestBodyInstrumentedTest.java:8: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.JsonChatRequestBody;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:8: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.AiGateway;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:9: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.AiGatewayError;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:10: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.GatewayPorts;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:11: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.GenerationSink;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:12: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.ProviderJson;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:13: 错误: 程序包com.treelearn.ai.gateway不存在
+  import com.treelearn.ai.gateway.StreamOutcome;
+                                 ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:64: 错误: 程序包GatewayPorts不存在
+      private final GatewayPorts.Log quiet = (name, details) -> {
+                                ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:128: 错误: 程序包GatewayPorts不存在
+      private static final class SlicedTransport implements GatewayPorts.Transport {
+                                                                        ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:139: 错误: 程序包GatewayPorts不存在
+          public GatewayPorts.Response post(String url, String apiKey, byte[] body) {
+                             ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:144: 错误: 程序包GatewayPorts不存在
+          public GatewayPorts.Response get(String url, String apiKey) {
+                             ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:148: 错误: 程序包GatewayPorts不存在
+          private GatewayPorts.Response response() {
+                              ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:24: 错误: 程序包ProviderJson不存在
+      private final GatewayPorts.DeltaDecoder deltas = new ProviderJson.Deltas();
+                                                                       ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:25: 错误: 程序包ProviderJson不存在
+      private final GatewayPorts.BalanceDecoder balance = new ProviderJson.Balance();
+                                                                          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:29: 错误: 程序包GatewayPorts不存在
+          GatewayPorts.Delta delta = deltas.decode("{\"choices\":[{\"index\":0,\"delta\":{"
+                      ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:58: 错误: 程序包GatewayPorts不存在
+          GatewayPorts.Delta delta = deltas.decode(payload);
+                      ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:74: 错误: 程序包GatewayPorts不存在
+          GatewayPorts.PayloadException refusal =
+                      ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:77: 错误: 程序包AiGatewayError不存在
+          assertEquals(AiGatewayError.Kind.PARSE_FAILED, refusal.error.kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:86: 错误: 程序包AiGatewayError不存在
+              assertEquals("payload <" + payload + ">", AiGatewayError.Kind.PARSE_FAILED,
+                                                                      ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:93: 错误: 程序包GatewayPorts不存在
+          GatewayPorts.PayloadException refusal = refusal(
+                      ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:96: 错误: 程序包AiGatewayError不存在
+          assertEquals(AiGatewayError.Kind.PROVIDER_UNAVAILABLE, refusal.error.kind);
+                                     ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:111: 错误: 程序包GatewayPorts不存在
+              GatewayPorts.PayloadException refused;
+                          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:115: 错误: 程序包GatewayPorts不存在
+              } catch (GatewayPorts.PayloadException expected) {
+                                   ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:118: 错误: 程序包AiGatewayError不存在
+              assertEquals("payload <" + payload + ">", AiGatewayError.Kind.PARSE_FAILED,
+                                                                      ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekPayloadDecoderInstrumentedTest.java:127: 错误: 程序包GatewayPorts不存在
+          } catch (GatewayPorts.PayloadException expected) {
+                               ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:76: 错误: 程序包StreamOutcome不存在
+              assertEquals("slice " + slice, StreamOutcome.Kind.COMPLETED, sink.outcome.kind);
+                                                          ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:90: 错误: 程序包StreamOutcome不存在
+          assertEquals(StreamOutcome.Kind.COMPLETED, sink.outcome.kind);
+                                    ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:102: 错误: 程序包StreamOutcome不存在
+          assertEquals(StreamOutcome.Kind.INTERRUPTED, sink.outcome.kind);
+                                    ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:112: 错误: 程序包ProviderJson不存在
+                  new ProviderJson.Deltas(), new ProviderJson.Balance(), quiet, Runnable::run);
+                                  ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:112: 错误: 程序包ProviderJson不存在
+                  new ProviderJson.Deltas(), new ProviderJson.Balance(), quiet, Runnable::run);
+                                                             ^
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\DeepSeekStreamInstrumentedTest.java:149: 错误: 程序包GatewayPorts不存在
+              return new GatewayPorts.Response() {
+                                     ^
+  55 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+==============================================================================
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 24s
+98 actionable tasks: 2 executed, 96 up-to-date
+--- end of output ---
+EXITCODE=1
+=== unique diagnostic breakdown (the javac error block is printed twice: inline and in the FAILURE summary) ===
+Command: $l=Get-Content T-006-red.txt; $u=$l | Select-String -Pattern "错误: " | ForEach-Object { $_.Line } | Sort-Object -Unique; $u | ForEach-Object { $_ -replace "^.*错误: ","" } | Group-Object | Sort-Object Count -Descending
+  72 x 程序包GatewayPorts不存在
+  62 x 找不到符号
+  50 x 程序包AiGatewayError不存在
+  44 x 方法不会覆盖或实现超类型的方法
+  32 x 程序包StreamOutcome不存在
+  20 x 程序包com.treelearn.ai.gateway不存在
+  18 x 程序包AiGateway不存在
+  6 x 程序包ProviderJson不存在
+  2 x 程序包SseFrameParser不存在
+  unique diagnostic lines total = 306 ; javac summary lines: 100 (:ai) + 55 (:app) = 155
+=== per-compilation-block breakdown (supersedes the "unique diagnostic breakdown" block above; that one used exact-line dedup, which is unreliable because the same diagnostic can be echoed twice with different indentation) ===
+Command A: $l=Get-Content T-006-red.txt; $ai=$l[0..372]; $app=$l[373..619]; ($ai | Where-Object { $_ -match '错误: ' }).Count ; ($app | Where-Object { $_ -match '错误: ' }).Count
+  -> :ai block = 100 error lines, :app block = 55 error lines, matching the javac summaries "100 个错误" (line 373) and "55 个错误" (line 620)
+Command B: $ai | Where-Object { $_ -match '错误: ' } | ForEach-Object { $_ -replace '^.*错误: ', '' } | Group-Object | Sort-Object Count -Descending   (same for $app)
+  :ai (100): 找不到符号 22, 程序包AiGatewayError不存在 21, 程序包GatewayPorts不存在 20, 方法不会覆盖或实现超类型的方法 14, 程序包StreamOutcome不存在 13, 程序包AiGateway不存在 9, 程序包SseFrameParser不存在 1   [22+21+20+14+13+9+1 = 100]
+  :app (55): 程序包GatewayPorts不存在 16, 程序包com.treelearn.ai.gateway不存在 10, 找不到符号 10, 方法不会覆盖或实现超类型的方法 8, 程序包AiGatewayError不存在 4, 程序包ProviderJson不存在 4, 程序包StreamOutcome不存在 3   [16+10+10+8+4+4+3 = 55]
+  combined (155): 程序包GatewayPorts不存在 36, 找不到符号 32, 程序包AiGatewayError不存在 25, 方法不会覆盖或实现超类型的方法 22, 程序包StreamOutcome不存在 16, 程序包com.treelearn.ai.gateway不存在 10, 程序包AiGateway不存在 9, 程序包ProviderJson不存在 4, 程序包SseFrameParser不存在 1
+  Every category is a missing-symbol/missing-package diagnostic for a com.treelearn.ai.gateway type; none comes from the tests' own logic or the build configuration.
