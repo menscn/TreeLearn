@@ -22,8 +22,8 @@
 | 表 | 权威事实（不可与它表重复） | 领域 / 生产者 → 消费者 | 行标识 | 预期基数与增长 | 保留与删除 | 敏感字段 | 关键索引与约束 | 废弃触发条件 |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | `topics` | 主题身份、最后访问分支、创建/更新时间 | `TopicRepository` → 首页、导航 | UUID PK | 每主题 1 行；随用户创建线性增长 | 删除主题时级联整题删除 | 本地标识，无用户内容 | UUID 主键；**不保存独立主题名**（根标题属 `ai_artifacts`） | 主题聚合被替代 |
-| `branches` | 父子关系、标题、归档/折叠、来源版本、未读序号、语义阅读位置 | `BranchRepository` → 聊天、导航、画布 | UUID PK | 每分支 1 行；随主题增长 | 子树删除或主题删除级联 | 标题与锚点 quote 可能含用户内容 | `topic_id + parent_id`、`source_revision_id`、`archived_at` 索引；**每主题仅一个根**；`parentBranchId/sourceMessageId/sourceRevisionId/anchorStart/anchorEnd/anchorQuote/anchorHash/contextSnapshotId` | 树模型被替代 |
-| `messages` | 分支内有序的用户消息与 AI 逻辑位置 | `ConversationRepository` → 聊天、搜索、上下文 | UUID PK | 每轮约 2 行；随对话增长 | 随分支删除 | 用户原文 | `branch_id + ordinal` **唯一**；AI 行持有当前版本/当前操作引用；用户消息正文创建后不可变 | 消息序列模型被替代 |
+| `branches` | 父子关系、标题、归档/折叠、来源版本、未读序号、语义阅读位置 | `BranchRepository` → 聊天、导航、画布 | UUID PK | 每分支 1 行；随主题增长 | 子树删除或主题删除级联 | 标题与锚点 quote 可能含用户内容 | `topic_id + parent_id`、`source_revision_id`、`archived_at` 索引；**每主题仅一个根**；`parentBranchId/sourceMessageId/sourceRevisionId/anchorStart/anchorEnd/anchorQuote/anchorHash/contextSnapshotId`；**锚点四字段同生同灭**——整条回答分叉时四者全空（此时 `anchorQuote`/`anchorHash` 亦为空），ranged 分叉时四者全非空且 `anchorStart < anchorEnd`（见 §4 待确认项） | 树模型被替代 |
+| `messages` | 分支内有序的用户消息与 AI 逻辑位置 | `ConversationRepository` → 聊天、搜索、上下文 | UUID PK | 每轮约 2 行；随对话增长 | 随分支删除 | 用户原文；`quoted_text` 亦为用户内容 | `branch_id + ordinal` **唯一**；AI 行持有当前版本/当前操作引用；用户消息正文创建后不可变；`quoted_text`（V2 新增）承接 §6.2.19 引用追问所选原文，`NULL` 表示无引用，**只允许出现在非空 `USER` 行**——该不变式是触发器（`ALTER TABLE ADD COLUMN` 无法带 CHECK），见 §3 迁移 | 消息序列模型被替代 |
 | `answer_revisions` | 成功稳定回答的**不可变**推理、最终正文与生成策略版本 | `GenerationRepository` → 聊天、来源、上下文、搜索、诊断 | UUID PK | 每次成功生成/重置新增一行；**被引用版本长期保留** | 随消息删除 | 推理与回答正文 | `message_id + revision_no` **唯一**；`prompt_policy_version` 非空；稳定序号单调递增；创建后不可变 | 版本事实迁移到等价不可变存储 |
 | `generation_operations` | 提交/流式/失败/中断状态、部分推理/回答及本次生成策略版本 | `GenerationCoordinator` → 恢复、重试、诊断 | UUID 操作 ID | 活动及当前失败记录；成功后可清理无引用的旧失败尝试 | 随消息删除 | 部分推理/回答、错误分类 | **每分支最多一个活动操作**；每行 `prompt_policy_version` 非空；首次根问题在 2xx accepted 事务内随树原子写入；终态后不可再改写；SSE 按 250ms 或 256 字符批量落盘 | 生成状态由等价持久载体接管 |
 | `context_snapshots` | 子分支**不可变**出生上下文清单 | `CreateBranchUseCase` → `ContextAssembler` | UUID PK | 每非根分支 1 行 | 随分支删除 | 上游内容引用（非正文副本） | `branch_id` **唯一**；`schema_version` 与 `digest`（SHA-256）必填；读取必须走结构化 JSON 解析 | 快照迁移到同等可验证格式 |
@@ -34,7 +34,7 @@
 - **时间**：所有真实时间点存 **UTC epoch millis `INTEGER`**，由应用显式写入；禁用 SQLite `CURRENT_TIMESTAMP` 与设备本地时区（`rules/sql.md`）。
 - **ID**：全部使用应用生成的 **UUID 字符串**，不使用自增 ID；为未来导出/导入保留空间，但**首版不建同步字段、租约或服务端表**。
 - **外键与事务**：所有表启用外键，每次打开显式 `PRAGMA foreign_keys=ON`；跨表写入必须在单个事务内完成。
-- **迁移**：DDL 只允许位于生产 `SQLiteOpenHelper.onCreate/onUpgrade`（或集中版本化 migration runner）；`DATABASE_VERSION` 单调递增，已发布版本的迁移步骤不可改写，禁止运行时散落 DDL。
+- **迁移**：DDL 只允许位于生产 `SQLiteOpenHelper.onCreate/onUpgrade`（或集中版本化 migration runner）；`DATABASE_VERSION` 单调递增，已发布版本的迁移步骤不可改写，禁止运行时散落 DDL。**已知限制（2026-09-21）**：V1 在开发期被修正过两次（`branches` 的锚点 CHECK），而当时 `DATABASE_VERSION` 为 1、前向迁移表为空——因此这些修正**只对新建库生效**。现状（T-037 之后）：`DATABASE_VERSION` 已升为 **2**，前向迁移表注册了一条 **V1→V2**（新增 `messages.quoted_text` 与其不变式触发器，见 §2 `messages`），该步骤**不重建 `branches`**，所以上述锚点限制**仍未被任何迁移覆盖**；任何已用旧 V1 DDL 建过库的设备会永久保留旧约束。首发前仍须处置：清库，或为 `branches` 另写一条前向迁移（SQLite 需重建该表并复制数据）。**承接者：首个发行版的版本切割任务（`T-2026-09-20-security-release-core-hardening-018` 的发布检查项）**；该任务必须在本限制被处置或明确豁免并记录之前，不得宣告可发布。
 - **不入库的敏感数据**：**API Key 不进入任何表**（也不进日志/Bundle/剪贴板），仅以 Android Keystore AES-GCM 密文存 SharedPreferences；模型与思考模式偏好可存普通 SharedPreferences。
 - **提示词存储**：表中只保存稳定的 `prompt_purpose` / `prompt_policy_version`，不保存完整 system 提示词正文。正文由 `:ai` 的版本化注册表维护；主回答成功事务必须把 operation 的版本原样复制到 revision。
 - **可观测性**：变更须记录 `PRAGMA user_version`、`integrity_check`、`foreign_key_check`、关键表/列/索引的直接验证结果（`rules/sql.md`「Android SQLite / SQLiteOpenHelper」段）。
@@ -45,6 +45,7 @@
 - [ ] 七张表的**存在性、分工与不可合并性**已确认（§1、§2）。
 - [ ] 跨表共同约定已确认（§3）。
 - [x] 2026-09-21 新增的提示词用途/版本字段语义已由用户确认；不新增第八张表。
+- [ ] **待用户确认的字段语义修正**（2026-09-21，由 T-004/T-022 实现期发现并已落库，尚未追认）：`branches.anchorHash` 由「非根分支必填」改为「仅 ranged 锚点必填，整条回答分叉时为空」。原约束与领域模型 `BranchAnchor.wholeAnswer()` 直接矛盾——`wholeAnswer()` 按设计产出四字段全空，旧 CHECK 使**每一条整条回答分叉都无法写入**。修正依据 `技术方案 §5.2`：「整条回答分叉时偏移为空，但版本引用仍必填」（原文只把版本引用列为必填）。补偿措施为锚点四字段同生同灭 CHECK，已在真机 API 36 上以「两类合法形态可写 + 六种半截/逆向形态被 `code 275` 拒绝」的用例收口。请确认该语义，或要求改回并另行给出整条回答分叉的写入方案。
 - [ ] 确认人：__________　确认日期：__________
 
 > 确认后本清单即为 T-004（SQLite schema / DAO / 事务）的入场记录权威来源；任何第八张表、字段语义变更或废弃，都须回到本清单重新确认并同步技术方案 §6。

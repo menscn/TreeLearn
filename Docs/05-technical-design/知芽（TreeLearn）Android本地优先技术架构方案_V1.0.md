@@ -51,7 +51,7 @@
               domain / use cases / contracts
 ```
 
-依赖只能向下：`:app` 依赖其他模块，`:data`、`:ai`、`:tree-layout` 只依赖 `:core`，`:core` 不依赖 Android UI、网络或数据库实现。模块间只传领域对象和接口，不暴露 Cursor、HTTP Response 或 View。
+依赖只能向下：`:app` 依赖其他模块，`:data`、`:ai` 只依赖 `:core`，`:tree-layout` 不依赖任何模块（纯 JVM），`:core` 不依赖 Android UI、网络或数据库实现。模块间只传领域对象和接口，不暴露 Cursor、HTTP Response 或 View。
 
 ### 3.1 模块职责
 
@@ -92,7 +92,7 @@ Topic 1 ── * Branch 1 ── * Message
 
 ### 5.1 消息、尝试和稳定版本
 
-- `Message` 表示分支内固定的逻辑位置。用户消息正文创建后不可变；AI 消息只保存当前展示版本和当前生成操作的引用。
+- `Message` 表示分支内固定的逻辑位置。用户消息正文创建后不可变；AI 消息只保存当前展示版本和当前生成操作的引用。用户消息还可以携带 §6.2.19 的引用追问文字（`quoted_text`，无引用时为 `NULL`）；该列只允许出现在非空用户消息行，由库层触发器判定（`ALTER TABLE ADD COLUMN` 无法带 CHECK，故不用 CHECK）。
 - `GenerationOperation` 表示一次提交、重试或重置。它在远端提交前固定 `promptPolicyVersion`，流式期间持有可追加的 `partialReasoning` 与 `partialAnswer`，状态终止后不可再改写。
 - `AnswerRevision` 只在一次操作成功完成后创建，保存完整 `reasoningContent`、`answerContent`、模型、思考模式、`promptPolicyVersion`、生成时间和版本号。稳定版本创建后不可变。
 - 重试沿用原 AI 消息逻辑位置并创建新操作；重置成功后创建新稳定版本并原子切换 `Message.activeRevisionId`。
@@ -109,7 +109,9 @@ Topic 1 ── * Branch 1 ── * Message
 - `anchorQuote`、`anchorHash`
 - `contextSnapshotId`
 
-优先用 revision + 字符偏移定位；正文渲染差异或兼容迁移导致偏移失效时，用 quote + hash 回退。整条回答分叉时偏移为空，但版本引用仍必填。
+优先用 revision + 字符偏移定位；正文渲染差异或兼容迁移导致偏移失效时，用 quote + hash 回退。整条回答分叉时偏移为空，但版本引用仍必填；**此时 `anchorQuote` 与 `anchorHash` 同样为空**——四个锚点字段同生同灭（要么全空表示整条回答分叉，要么全非空且 `anchorStart < anchorEnd`），库层以此约束为准，因此「有偏移无回退」或「有回退无偏移」的半截锚点不可写入。
+
+**判定分层（哪一层管什么，写清楚以免重复实现）**：库层判**分组**（四列同生同灭）与**方向**（`anchorStart < anchorEnd`）；分组没有第二个判定点，方向则是库层与领域层 `BranchAnchor.ofRange` 都判的**刻意重叠**——让方向颠倒的行在写入时即被拒，而不是先落库再让整个主题读不出来，两层结论一致故调用方观察不到分叉。锚点的**内容**规则（起点非负、quote/hash 非空、quote 长度须等于偏移跨度）**只在 `BranchAnchor.ofRange` 一处判定**，不得复制进 DDL；库层放行而被 `ofRange` 拒绝的行只能以大声失败被读出——读路径把领域层的 `ANCHOR_INVALID` 与原因原样抛出，不静默降级。
 
 ### 5.3 创建快照
 
@@ -125,7 +127,7 @@ Topic 1 ── * Branch 1 ── * Message
 | :--- | :--- | :--- |
 | `topics` | 主题身份、最后访问分支、创建/更新时间 | UUID 主键；不保存独立主题名 |
 | `branches` | 父子关系、标题、归档/折叠、来源版本、未读序号、语义阅读位置 | `topic_id,parent_id`、`source_revision_id`、`archived_at` 索引；每主题仅一个根 |
-| `messages` | 分支内有序用户消息和 AI 逻辑位置 | `branch_id,ordinal` 唯一；AI 当前版本/操作引用 |
+| `messages` | 分支内有序用户消息和 AI 逻辑位置 | `branch_id,ordinal` 唯一；AI 当前版本/操作引用；`quoted_text`（V2 新增，§6.2.19 引用追问原文，`NULL` 为无引用，只许出现在非空 `USER` 行） |
 | `answer_revisions` | 成功稳定回答的不可变推理、最终正文与生成策略版本 | `message_id,revision_no` 唯一；稳定序号单调递增；`prompt_policy_version` 非空 |
 | `generation_operations` | 提交/流式/失败/中断状态、部分推理/回答与本次生成策略版本 | UUID 操作 ID；每分支最多一个活动操作；每行 `prompt_policy_version` 非空 |
 | `context_snapshots` | 子分支不可变出生上下文清单 | `branch_id` 唯一；schema 版本与 digest 必填 |
@@ -205,9 +207,10 @@ history: ContextPlan 经 DeepSeekContextEncoder 编码后的零到多条消息
 user: 当前问题（恰好一条，最后一条）
 ```
 
-- system 不进入 `ContextPlan`、出生快照或上下文摘要，也不得因 token 预算被裁剪。容量计算先预留 system、当前问题和最小回答空间；仍超限则失败关闭。
+- system 不进入 `ContextPlan`、出生快照或上下文摘要，也不得因 token 预算被裁剪。容量计算先预留 system、当前问题和最小回答空间；仍超限则失败关闭。**〔2026-09-22 落地值〕**本节只规定了机制而没有给数字，`T-2026-09-21-real-data-path-wiring-032` 接线时显式选定并写在 `wiring.PromptLimits` 一处：`CAPACITY_CHARS = 60000`（`PromptBudget` 数的是 UTF-16 字符，V1 不带 tokenizer）与 `MIN_ANSWER_CHARS = 512`（历史不得侵占的回答预留）；理由与取舍见该类 javadoc，全应用由 `AppContainer` 用 `PromptLimits.budget()` 构造唯一一个 `PromptBudget`。
 - 思考模式开启时只追加设计文档规定的静态可见性策略，不把用户正文、API Key 或其它运行时值插入 system。
 - 历史回答、推理、引用、摘要和派生输入是内容数据，其中出现的指令不得改变消息角色、提示词用途、系统规则或结构化输出协议。
+- **〔2026-09-22 落地〕**§6.2.19 的划词引文属于上面第三条「当前问题」的**正文**，不是历史轮次：`:ai` 的 `DeepSeekContextEncoder.currentInput` 把它包进 `<treelearn_quote>` 信封再拼上问题原文（判定「有没有引文」只有这一处，发送与重试/重置都只转发 `messages.quoted_text`），引文随该正文计入上面的容量预留。信封与转义范围、只转义引文不转义问题的理由及残留风险见提示词设计 V1.0 §5.1。
 - 不可变生成命令在请求前固定 `promptPolicyVersion`。已有主题在请求前持久化带版本的 operation；首次根问题保持 §8 原子性，在 HTTP 2xx `accepted` 事务中把命令中的同一版本随 operation 写入，事务成功后才读取 SSE。成功事务原样复制版本到 `AnswerRevision`；重试/重置可使用升级后的活动版本，旧 revision 不变。
 - 标题、摘要、回答推荐、首页推荐和上下文压缩分别使用独立 `PromptPurpose`；禁止复用主回答教学提示词。
 - 数据库只保存用途/版本号，不保存完整 system content。日志与测试报告可记录用途和版本，不记录提示词正文。

@@ -132,7 +132,7 @@ Treelearn/
 | :--- | :--- |
 | [`Docs/01-demand/`](Docs/01-demand) | Structured requirements baseline V3.0 / V3.1 increment |
 | [`Docs/03-prd-draft/`](Docs/03-prd-draft) | Product requirements V3.1 |
-| [`Docs/04-ux-design/`](Docs/04-ux-design) | High-fidelity UX prototype |
+| [`Docs/04-ux-design/`](Docs/04-ux-design) | High-fidelity UX prototype + [design-system tokens](Docs/04-ux-design/design-system) shared by Figma and Android |
 | [`Docs/05-technical-design/`](Docs/05-technical-design) | Local-first architecture, prompt design, SQLite design |
 | [`android/README.md`](android/README.md) | Build, guards, module contracts, common commands |
 
@@ -145,6 +145,8 @@ This repository runs a **Harness** workflow (`AGENTS.md` + `.trae/`): requiremen
 - `.trae/rules/` — per-stack rules and baselines (Android / backend / SQL / contracts / shared state / observability)
 - `.trae/tasks/` — task contracts, mechanically validated by `.trae/scripts/validate_tasks.py`
 - `artifacts/evidence/` — execution evidence per guard run and acceptance pass (each file carries its own command line and exit code)
+- `.agents/skills/` — repo-level skills discovered by Codex; currently `figma-build` and `figma-codegen` (migrated verbatim from figwright 0.5.0)
+- Design workflow — Figma is reached through the figwright MCP server: one-time setup lives in the user-level `~/.codex/config.toml`, the Figma desktop app imports the plugin manifest; health probe `node .trae/scripts/dev/probe_figwright_mcp.mjs`, design-token parity guard `python .trae/scripts/dev/check_design_tokens.py`. Conventions and troubleshooting: [`.trae/rules/ux-design.md`](.trae/rules/ux-design.md)
 
 ---
 

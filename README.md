@@ -132,7 +132,7 @@ Treelearn/
 | :--- | :--- |
 | [`Docs/01-demand/`](Docs/01-demand) | 结构化需求基准说明书 V3.0 / V3.1 增量 |
 | [`Docs/03-prd-draft/`](Docs/03-prd-draft) | 产品需求文档 V3.1 |
-| [`Docs/04-ux-design/`](Docs/04-ux-design) | 高保真 UX 原型 |
+| [`Docs/04-ux-design/`](Docs/04-ux-design) | 高保真 UX 原型 + [设计系统 token](Docs/04-ux-design/design-system)（Figma 与 Android 共用同一份数值） |
 | [`Docs/05-technical-design/`](Docs/05-technical-design) | 本地优先技术架构、提示词设计、SQLite 方案 |
 | [`android/README.md`](android/README.md) | 构建、守门、模块契约、常用命令 |
 
@@ -145,6 +145,8 @@ Treelearn/
 - `.trae/rules/` —— 按栈划分的规则与底线（Android / 后端 / SQL / 契约 / 共享状态 / 可观测性）
 - `.trae/tasks/` —— 任务契约文件，机械校验器 `.trae/scripts/validate_tasks.py`
 - `artifacts/evidence/` —— 每次守门与验收的执行证据（自带命令行与退出码）
+- `.agents/skills/` —— 仓库级技能，Codex 自动发现；当前含 `figma-build`、`figma-codegen`（从 figwright 0.5.0 原样迁移）
+- 设计协作 —— Figma 通过 figwright MCP 接入：一次性配置写进用户级 `~/.codex/config.toml`，Figma 桌面端导入插件 manifest；连接自检 `node .trae/scripts/dev/probe_figwright_mcp.mjs`，设计 token 三方一致性守门 `python .trae/scripts/dev/check_design_tokens.py`。约定与故障速查见 [`.trae/rules/ux-design.md`](.trae/rules/ux-design.md)
 
 ---
 
