@@ -1,0 +1,30 @@
+== 12.1 唯一助手（静态+运行时两半）==
+171:    private static final String CHECK_MARKER = "CHECK constraint failed: ";
+1383:    private static void assertCheckRefusedOn(SQLiteDatabase db, String table, String declaredCheck,
+1388:                message.contains(CHECK_MARKER));
+1392:                ddl.contains(declaredCheck));
+
+== 12.2 全部调用点（表名 + DDL 期望片段）==
+417:        assertCheckRefusedOn(db, "branches", "last_seen_stable_sequence <= latest_stable_sequence",
+423:        assertCheckRefusedOn(db, "branches", "latest_stable_sequence >= 0",
+628:        assertCheckRefusedOn(db, "messages", "role = 'AI' OR (user_content IS NOT NULL",
+636:        assertCheckRefusedOn(db, "messages", "role = 'USER' OR user_content IS NULL",
+679:        assertCheckRefusedOn(db, "messages", "role IN ('USER','AI')",
+696:        assertCheckRefusedOn(db, "branches", "source_message_id IS NOT NULL",
+717:        assertCheckRefusedOn(db, "branches", "parent_id IS NOT NULL",
+797:        assertCheckRefusedOn(db, "branches", "anchor_start_inclusive IS NOT NULL",
+
+== 12.3 仍以写死 CHECK 文案断言的调用点（应为 0 行）==
+1385:        assertCause(scenario, message, CODE_CHECK, null);
+(以上为空即代表 0)
+
+== 12.4 正控 ==
+428:        assertEquals("a legal advance is accepted", 3,
+639:        // Positive control: both shapes §5.1 allows must be writable. Without it a CHECK that
+649:        assertEquals("both §5.1 shapes must be writable", 2, rowCount(db, "messages"));
+650:        assertEquals("no refused message may have landed", 0, rowCountWhere(db, "messages",
+720:        // Positive controls: the same two tables must accept the legal shapes these CHECKs
+730:        assertEquals("the legal branch shapes these CHECKs describe must be writable", 2,
+732:        assertEquals("the legal message shapes these CHECKs describe must be writable", 2,
+765:        assertEquals("both anchor shapes §5.2 allows must be writable", 3,
+781:        assertEquals("no malformed fork was written", 3, rowCount(db, "branches"));

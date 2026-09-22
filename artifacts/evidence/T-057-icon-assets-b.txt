@@ -1,0 +1,40 @@
+T-057 icon-assets-branch-and-actions — 证据文件
+EXITCODE(RED :app:testDebugUnitTest --tests IconAssetsTest)=1
+EXITCODE(GREEN :app:testDebugUnitTest --tests IconAssetsTest)=0
+EXITCODE(:app:testDebugUnitTest full + assembleDebug)=0
+EXITCODE(no-kotlin-check.ps1)=0（056 轮已跑，本片未改 Java，同口径）
+EXITCODE(adb install)=Success（真机 AWSS013807000356，2026-09-22 22:20）
+
+== RED（同一命令两轮观察）==
+命令: ./gradlew.bat :app:testDebugUnitTest --tests "com.treelearn.app.IconAssetsTest"
+第 1 轮（057 用例加入后）: 9 tests completed, 2 failed —
+  chatIconAssetsFollowTheSharedDraftingConvention FAILED（7 枚资产不存在）
+  chatReplacedActionKeepsItsOriginalIdIconTintAndDescription FAILED（动作位无图标引用）
+  其余 7 例（056 全部 + 词菜单热区 + Java 文案动作）保持通过
+== GREEN（与 RED 同一条命令）==
+BUILD SUCCESSFUL（9/9）
+
+== 新增资产（7 枚，全部 24dp / 1.8 描边 / 圆头 / 中性源色 / 零业务色）==
+ic_action_quote ← ILocate；ic_action_copy ← ICopy；ic_action_fork ← IFork；
+ic_chat_send ← ISend；ic_chat_close ← IClose；ic_chat_gear ← IGear；ic_chat_overview ← IMap
+复用 056 资产（同一原型图形不重复建文件）：
+ic_nav_back ← IBack（chat_back）；ic_nav_tree ← ITree（chat_nav，同 Figma ChatScreen L161）；
+ic_nav_restore ← IRefresh（act_reset，同 Figma ai-actions 的重新生成图标）
+
+== 动作位类型边界（零 Java 改动的依据）==
+- ImageView 替换（Java findViewById 无静态类型）：chat_back/nav/overview/settings/quote_clear
+  （ChatScreen.java L152-159）
+- 保留 Button + 复合 drawable（Java 声明 Button）：chat_send（ChatScreen.java L85）、
+  act_quote/copy/reset/fork（AnswerActionBar.java L45-48）
+- 保留文字（Java setText 驱动）：act_children（AnswerActionBar.java L91）、act_version（L99）、
+  chat_retry（item_chat_message.xml，语义重要 + Figma fail-bar 也是文字条）
+- 词操作菜单 popup_word_action.xml 整体不动：PRD 6.2.19 全宽 44dp 文字行热区约束，
+  Figma 原稿 .bubble-menu 亦为文字行菜单，无图标化收益，测试用例锁定该约束
+
+== 规模实测（count_production_lines.py 非空非注释口径，见任务文件）==
+新增 7 枚资产 ≈ 115 行 + strings 12 行 + 布局净增 ≈ 20 行 ≈ 147 行 < 200 软上限，无例外。
+
+== 验证方式说明 ==
+依用户 2026-09-22 指示跳过仪器测试；回归口径为全量 JVM 单测 + assembleDebug + Java-only 守门。
+对话页图标未人工目检（真机无主题数据，进不去对话页），结构断言与 056 已目检的同机制（设置页返回图标）
+作为替代证据；待有主题数据后由用户随手核验。

@@ -1,0 +1,527 @@
+T-050 设计基座同步（新稿配色 / 度量 / 字体回退栈三处对齐）· 证据文件
+task: T-2026-09-22-050
+generated_by: android-dev；下列每段的命令输出与退出码由脚本当场捕获，不是手抄
+cwd: D:/Project/Android/Treelearn
+shell: Git Bash on Windows；python -X utf8（3.13.12）
+
+改动文件（7 个）：
+  - Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html
+  - Docs/04-ux-design/design-system/tokens.json
+  - android/app/src/main/res/values/colors.xml
+  - android/app/src/main/res/values/dimens.xml
+  - android/app/src/main/res/values/themes.xml
+  - android/README.md
+  - Docs/04-ux-design/design-system/README.md
+
+== TOKEN 语义映射表（新稿 token -> 仓库 token -> 本片采用值）==
+仓库是本仓的事实源与 Android 副本，新稿只提供值；两边命名体系相同，全部 1:1 对应，
+没有「新稿有、仓库没有」或「仓库有、新稿没有」的悬空项。带 # 的是按硬约束保持仓库值的项。
+
+新稿名            仓库名                        本片采用值                                  依据
+bg             bg                         #F4F1EB                                新稿值
+surface        surface                    #FCFBF8                                新稿值
+ink            ink                        #16241C                                新稿值
+ink2           ink2                       #435449                                新稿值
+ink3           ink3                       #627067                                修正值；新稿是 #75867B
+line           line                       #E2DFD6                                新稿值
+hairline       hairline                   rgba(26,40,32,.07)                     新稿值
+green          green                      #2B6E45                                新稿值
+green-deep     green-deep                 #164027                                新稿值
+green-soft     green-soft                 #E3F0E7                                # 新稿为 rgba；colors.xml 只收不透明 hex，保持原值
+green-faint    green-faint                #F0F7F1                                # 同上
+blue           blue                       #2563EB                                新稿值；顺带修好旧值 4.16 的欠账
+amber          amber                      #B05108                                修正值；新稿是 #B45309
+amber-soft     amber-soft                 #FBF3E2                                # 同上；它是 ink3/amber 的承载背景，压平即破验收线
+red            red                        #C0392B                                新稿值与仓库相同
+red-soft       red-soft                   #FBEAE7                                # 同上
+s1..s8 / gutter s1..s8 / gutter            4/8/12/16/24/32 / 20px                 新稿与仓库同值
+r-sm / r-md / r-lg r-sm / r-md / r-lg         8px / 14px / 18px                      新稿值
+r-full         r-full                     99px                                   新稿与仓库同值
+fs-display/h1/h2/body fs-display/h1/h2/body      26 / 20 / 16 / 15px                    新稿值
+fs-sm / fs-cap fs-sm / fs-cap             13px / 11px                            新稿与仓库同值
+sh-1           sh-1                       0 1px 2px rgba(22,36,28,.04)           新稿值
+sh-2           sh-2                       0 4px 12px rgba(22,36,28,.06)          新稿值
+sans           sans                       'Noto Sans SC',-apple-system,sans-serif 新稿值；Android 上解析为系统 sans-serif
+serif          serif                      'Noto Serif SC','Songti SC',Georgia,serif 新稿值；品牌衬线回退栈
+lh-read        lh-read                    28px                                   新稿值
+（无）            kai                        'LXGW WenKai',...                      # 新稿无对应项；按只改值不改名保留
+（无）            brush                      'Ma Shan Zheng',...                    # 新稿无对应项；保留
+（无）            paper-rule / paper-write   rgba(30,43,35,.028) / rgba(46,125,79,.075) # 新稿无对应项；保留
+
+映射结论：无歧义项——每个新稿 token 都能在仓库找到同名 token，反之除 kai/brush/paper-rule/
+paper-write 四个「新稿没有」的遗留项外也全部一一对应；那四项按「绝不改名、不退役」保持原值。
+唯一的值域差异是四个柔色 token：新稿写 rgba，仓库要落 Android 的不透明 hex，理由见 G3 的 D 段。
+
+------------------------------------------------------------------------------
+G0 · RED（先只改原型 :root 值，不同步 tokens.json 与 colors.xml）
+------------------------------------------------------------------------------
+$ python -X utf8 <tmp>/.trae/scripts/dev/check_design_tokens.py   # 临时镜像树重放 RED 状态
+OK   file exists: Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html
+OK   file exists: Docs/04-ux-design/design-system/tokens.json
+OK   file exists: android/app/src/main/res/values/colors.xml
+OK   tokens.json token 名唯一 — measured_dupes=[]
+OK   原型 :root 解析出 >= 40 个 token — measured=42
+OK   tokens.json 解析出 >= 40 个 token — measured=42
+OK   colors.xml 解析出 >= 1 个资源 — measured=15
+FAIL 三方一致 — 原型与 tokens.json 数值不一致：['amber: 原型=#B05108 tokens.json=#B7791F', 'bg: 原型=#F4F1EB tokens.json=#F7F6F0', 'blue: 原型=#2563EB tokens.json=#2F6BFF', 'fs-body: 原型=15px tokens.json=16px', 'fs-display: 原型=26px tokens.json=30px', 'fs-h1: 原型=20px tokens.json=22px', 'fs-h2: 原型=16px tokens.json=17px', 'green: 原型=#2B6E45 tokens.json=#2E7D4F', 'green-deep: 原型=#164027 tokens.json=#1F5C38', 'hairline: 原型=rgba(26,40,32,.07) tokens.json=rgba(30,43,35,.075)', 'ink: 原型=#16241C tokens.json=#1E2B23', 'ink2: 原型=#435449 tokens.json=#5A6B60', 'ink3: 原型=#627067 tokens.json=#636F66', 'lh-read: 原型=28px tokens.json=32px', 'line: 原型=#E2DFD6 tokens.json=#E6E3D6', 'r-lg: 原型=18px tokens.json=24px', 'r-md: 原型=14px tokens.json=16px', 'r-sm: 原型=8px tokens.json=10px', "sans: 原型='Noto Sans SC',-apple-system,sans-serif tokens.json='Noto Sans SC',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif", "serif: 原型='Noto Serif SC','Songti SC',Georgia,serif tokens.json='LXGW WenKai','Noto Serif SC','Songti SC',serif", 'sh-1: 原型=0 1px 2px rgba(22,36,28,.04) tokens.json=0 1px 2px rgba(30,43,35,.04)', 'sh-2: 原型=0 4px 12px rgba(22,36,28,.06) tokens.json=0 10px 30px -12px rgba(30,43,35,.18)', 'surface: 原型=#FCFBF8 tokens.json=#FFFFFF']
+
+check_design_tokens: 1 check(s) failed
+EXITCODE=1
+NOTE 执行当时在原地跑的就是 python -X utf8 .trae/scripts/dev/check_design_tokens.py，同样 EXITCODE=1、同一条 FAIL 三方一致；此处用临时镜像树把「原型=新值、下游=HEAD 旧值」这一瞬时状态重放，便于复核者复跑，且不动工作区。
+EXITCODE=1
+
+------------------------------------------------------------------------------
+G1 · GREEN（三方同步后，跑同一条命令）
+------------------------------------------------------------------------------
+$ python -X utf8 .trae/scripts/dev/check_design_tokens.py
+OK   file exists: Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html
+OK   file exists: Docs/04-ux-design/design-system/tokens.json
+OK   file exists: android/app/src/main/res/values/colors.xml
+OK   tokens.json token 名唯一 — measured_dupes=[]
+OK   原型 :root 解析出 >= 40 个 token — measured=42
+OK   tokens.json 解析出 >= 40 个 token — measured=42
+OK   colors.xml 解析出 >= 1 个资源 — measured=15
+OK   三方一致（原型 :root ↔ tokens.json ↔ colors.xml） — measured_tokens=42 measured_resources=15
+
+check_design_tokens: 0 check(s) failed
+EXITCODE=0
+NOTE 原型解析 42 个 token、colors.xml 解析 15 个资源、三方逐值一致 = 0 failure。
+EXITCODE=0
+
+------------------------------------------------------------------------------
+G2 · 守门脚本正反双向自检（证明判据不是死代码）
+------------------------------------------------------------------------------
+$ python -X utf8 .trae/scripts/dev/check_design_tokens.py --selftest
+OK   selftest: 三方一致必须 PASS
+OK   selftest: token 值漂移必须 FAIL
+OK   selftest: 缺少 token 必须 FAIL
+OK   selftest: 凭空多出 token 必须 FAIL
+OK   selftest: colors.xml 少资源必须 FAIL
+OK   selftest: colors.xml 多资源必须 FAIL
+OK   selftest: colors.xml 数值漂移必须 FAIL
+OK   selftest: 全无色值（解析退化）必须 FAIL
+OK   selftest: :root 缺失必须 FAIL
+OK   selftest: 解析器能读同一行多条声明
+
+check_design_tokens --selftest: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+
+------------------------------------------------------------------------------
+G3 · 对比度复算（WCAG 相对亮度公式；脚本源码 + 当场输出）
+------------------------------------------------------------------------------
+$ python -X utf8 - <<'PY'   # 下面整段就是被执行的脚本源码，原样落盘
+# -*- coding: utf-8 -*-
+"""T-050 对比度复算（WCAG 2.x 相对亮度公式）。不照抄任务注释，全部现算。"""
+import sys
+
+def _lin(c):
+    c = c / 255.0
+    return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+
+def luminance(hexv):
+    h = hexv.lstrip('#')
+    r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+    return 0.2126 * _lin(r) + 0.7152 * _lin(g) + 0.0722 * _lin(b)
+
+def contrast(a, b):
+    la, lb = luminance(a), luminance(b)
+    hi, lo = max(la, lb), min(la, lb)
+    return (hi + 0.05) / (lo + 0.05)
+
+def flatten(fg_rgba, bg_hex):
+    r, g, b, a = fg_rgba
+    br, bg, bb = int(bg_hex[1:3], 16), int(bg_hex[3:5], 16), int(bg_hex[5:7], 16)
+    out = [max(0, min(255, round(a * f + (1 - a) * k))) for f, k in ((r, br), (g, bg), (b, bb))]
+    return '#%02X%02X%02X' % tuple(out)
+
+BG, SURFACE = '#F4F1EB', '#FCFBF8'
+GREEN_SOFT, GREEN_FAINT = '#E3F0E7', '#F0F7F1'
+AMBER_SOFT, RED_SOFT = '#FBF3E2', '#FBEAE7'
+fails = []
+
+print("A. 两处对比度回退复算（新稿值 vs 修正值）")
+print("%-22s %8s %10s %12s" % ("前景色", "on bg", "on surface", "on amber_soft"))
+for label, v in (("ink3  新稿 #75867B", "#75867B"), ("ink3  修正 #627067", "#627067"),
+                 ("amber 新稿 #B45309", "#B45309"), ("amber 修正 #B05108", "#B05108")):
+    print("%-22s %8.2f %10.2f %12.2f" % (label, contrast(v, BG), contrast(v, SURFACE), contrast(v, AMBER_SOFT)))
+for v in ("#627067", "#B05108"):
+    m = min(contrast(v, BG), contrast(v, SURFACE), contrast(v, AMBER_SOFT))
+    print("  修正值 %s 三背景最小值 %.2f" % (v, m))
+    if m < 4.5:
+        fails.append("修正值 %s 三背景最小值 %.2f < 4.5" % (v, m))
+
+print()
+print("B. 全量文字色 x 承载背景矩阵")
+texts = [("ink", "#16241C"), ("ink2", "#435449"), ("ink3", "#627067"), ("green", "#2B6E45"),
+         ("green-deep", "#164027"), ("blue", "#2563EB"), ("amber", "#B05108"), ("red", "#C0392B")]
+bgs = [("bg", BG), ("surface", SURFACE), ("green_soft", GREEN_SOFT),
+       ("green_faint", GREEN_FAINT), ("amber_soft", AMBER_SOFT), ("red_soft", RED_SOFT)]
+print("%-12s" % "text" + "".join("%-13s" % n for n, _ in bgs))
+for tn, tv in texts:
+    print("%-12s" % tn + "".join("%-13.2f" % contrast(tv, bv) for _, bv in bgs))
+for tn, tv in texts:
+    for bn, bv in (("bg", BG), ("surface", SURFACE)):
+        if contrast(tv, bv) < 4.5:
+            fails.append("%s on %s %.2f < 4.5" % (tn, bn, contrast(tv, bv)))
+
+print()
+print("C. 布局里实际出现的「文字色 on 承载背景」配对")
+pairs = [
+    ("tl_ink3 on tl_amber_soft", "#627067", AMBER_SOFT, "item_chat_message.xml chat_retry_hint"),
+    ("tl_amber on tl_amber_soft", "#B05108", AMBER_SOFT, "item_chat_message.xml chat_failure_text"),
+    ("tl_green_deep on tl_green_soft", "#164027", GREEN_SOFT, "chat_quote_chip / rec_tag 等"),
+    ("tl_green_deep on tl_green_faint", "#164027", GREEN_FAINT, "screen_chat_body.xml chat_quote_row"),
+    ("tl_red on tl_red_soft", "#C0392B", RED_SOFT, "screen_settings_body.xml settings_key_delete"),
+    ("tl_ink2 on tl_green_faint", "#435449", GREEN_FAINT, "screen_chat_body.xml chat_quote_clear"),
+    ("tl_ink on tl_bg", "#16241C", BG, "全屏正文"),
+    ("white on tl_green", "#FFFFFF", "#2B6E45", "主色按钮"),
+    ("white on tl_green_deep", "#FFFFFF", "#164027", "深绿按钮"),
+]
+for label, fg, bg, where in pairs:
+    v = contrast(fg, bg)
+    ok = v >= 4.5
+    if not ok:
+        fails.append("%s %.2f < 4.5" % (label, v))
+    print("%-34s %6.2f  %s  [%s]" % (label, v, "OK" if ok else "FAIL", where))
+
+print()
+print("D. 为什么不把新稿 rgba 柔色压平成不透明 hex")
+for name, rgba in (("green-soft", (42, 125, 79, .10)), ("green-faint", (42, 125, 79, .05)),
+                   ("amber-soft", (180, 83, 9, .10)), ("red-soft", (192, 57, 43, .08))):
+    print("%-11s 压平 over bg=%s  over surface=%s" % (name, flatten(rgba, BG), flatten(rgba, SURFACE)))
+for tag, bgv in (("over bg", flatten((180, 83, 9, .10), BG)),
+                 ("over surface", flatten((180, 83, 9, .10), SURFACE))):
+    print("  amber-soft %s %s -> ink3=%.2f amber=%.2f"
+          % (tag, bgv, contrast("#627067", bgv), contrast("#B05108", bgv)))
+print("  保持 %s -> ink3=%.2f amber=%.2f"
+      % (AMBER_SOFT, contrast("#627067", AMBER_SOFT), contrast("#B05108", AMBER_SOFT)))
+print("  => 压平会把验收项「ink3 与 amber 在 amber_soft 上 >= 4.5」打到 4.06/4.40，")
+print("     而 colors.xml 的 15 个资源名与数量本片不许变、又只收不透明 hex，")
+print("     所以四个柔色 token 保持仓库的不透明值。")
+
+print()
+if fails:
+    print("CONTRAST ASSERTION FAILED (%d)" % len(fails))
+    for f in fails:
+        print("  FAIL " + f)
+    sys.exit(1)
+print("CONTRAST ASSERTION PASSED: 被验收项与被使用的配对全部 >= 4.5:1")
+sys.exit(0)
+PY
+$ python -X utf8 contrast_recompute.py
+A. 两处对比度回退复算（新稿值 vs 修正值）
+前景色                       on bg on surface on amber_soft
+ink3  新稿 #75867B           3.42       3.72         3.49
+ink3  修正 #627067           4.62       5.03         4.72
+amber 新稿 #B45309           4.45       4.85         4.55
+amber 修正 #B05108           4.63       5.04         4.72
+  修正值 #627067 三背景最小值 4.62
+  修正值 #B05108 三背景最小值 4.63
+
+B. 全量文字色 x 承载背景矩阵
+text        bg           surface      green_soft   green_faint  amber_soft   red_soft     
+ink         14.29        15.57        13.72        14.79        14.59        13.83        
+ink2        7.16         7.80         6.87         7.41         7.31         6.92         
+ink3        4.62         5.03         4.43         4.78         4.72         4.47         
+green       5.45         5.94         5.23         5.64         5.56         5.27         
+green-deep  10.37        11.29        9.95         10.73        10.59        10.03        
+blue        4.58         4.99         4.40         4.75         4.68         4.44         
+amber       4.63         5.04         4.44         4.79         4.72         4.48         
+red         4.82         5.26         4.63         4.99         4.93         4.67         
+
+C. 布局里实际出现的「文字色 on 承载背景」配对
+tl_ink3 on tl_amber_soft             4.72  OK  [item_chat_message.xml chat_retry_hint]
+tl_amber on tl_amber_soft            4.72  OK  [item_chat_message.xml chat_failure_text]
+tl_green_deep on tl_green_soft       9.95  OK  [chat_quote_chip / rec_tag 等]
+tl_green_deep on tl_green_faint     10.73  OK  [screen_chat_body.xml chat_quote_row]
+tl_red on tl_red_soft                4.67  OK  [screen_settings_body.xml settings_key_delete]
+tl_ink2 on tl_green_faint            7.41  OK  [screen_chat_body.xml chat_quote_clear]
+tl_ink on tl_bg                     14.29  OK  [全屏正文]
+white on tl_green                    6.14  OK  [主色按钮]
+white on tl_green_deep              11.69  OK  [深绿按钮]
+
+D. 为什么不把新稿 rgba 柔色压平成不透明 hex
+green-soft  压平 over bg=#E0E5DB  over surface=#E7EEE7
+green-faint 压平 over bg=#EAEBE3  over surface=#F1F5F0
+amber-soft  压平 over bg=#EEE1D4  over surface=#F5EAE0
+red-soft    压平 over bg=#F0E2DC  over surface=#F7EBE8
+  amber-soft over bg #EEE1D4 -> ink3=4.06 amber=4.06
+  amber-soft over surface #F5EAE0 -> ink3=4.40 amber=4.40
+  保持 #FBF3E2 -> ink3=4.72 amber=4.72
+  => 压平会把验收项「ink3 与 amber 在 amber_soft 上 >= 4.5」打到 4.06/4.40，
+     而 colors.xml 的 15 个资源名与数量本片不许变、又只收不透明 hex，
+     所以四个柔色 token 保持仓库的不透明值。
+
+CONTRAST ASSERTION PASSED: 被验收项与被使用的配对全部 >= 4.5:1
+EXITCODE=0
+
+------------------------------------------------------------------------------
+G4 · dimens.xml 逐行核对（守门脚本完全不校验度量，只能靠 diff 人工核对）
+------------------------------------------------------------------------------
+$ git diff android/app/src/main/res/values/dimens.xml
+diff --git a/android/app/src/main/res/values/dimens.xml b/android/app/src/main/res/values/dimens.xml
+index e8f0d8c..6db5f0f 100644
+--- a/android/app/src/main/res/values/dimens.xml
++++ b/android/app/src/main/res/values/dimens.xml
+@@ -14,16 +14,16 @@
+     <dimen name="space_s8">32dp</dimen>
+     <dimen name="page_gutter">20dp</dimen>
+ 
+-    <dimen name="radius_sm">10dp</dimen>
+-    <dimen name="radius_md">16dp</dimen>
+-    <dimen name="radius_lg">24dp</dimen>
++    <dimen name="radius_sm">8dp</dimen>
++    <dimen name="radius_md">14dp</dimen>
++    <dimen name="radius_lg">18dp</dimen>
+     <dimen name="radius_full">99dp</dimen>
+     <dimen name="card_elevation">1dp</dimen>
+ 
+-    <dimen name="text_display">30sp</dimen>
+-    <dimen name="text_h1">22sp</dimen>
+-    <dimen name="text_h2">17sp</dimen>
+-    <dimen name="text_body">16sp</dimen>
++    <dimen name="text_display">26sp</dimen>
++    <dimen name="text_h1">20sp</dimen>
++    <dimen name="text_h2">16sp</dimen>
++    <dimen name="text_body">15sp</dimen>
+     <dimen name="text_sm">13sp</dimen>
+     <dimen name="text_cap">11sp</dimen>
+ 
+warning: in the working copy of 'android/app/src/main/res/values/dimens.xml', LF will be replaced by CRLF the next time Git touches it
+条目名计数：23 个 -> 23 个（<dimen name= 出现次数）
+判定：diff 只有 7 行值变更（radius_sm/md/lg + text_display/h1/h2/body），
+      新增 0 行、删除 0 行，条目名一个未动。
+EXITCODE=0
+
+------------------------------------------------------------------------------
+G5 · 改动范围
+------------------------------------------------------------------------------
+$ git diff --numstat ; git diff --stat
+4	3	Docs/04-ux-design/design-system/README.md
+40	37	Docs/04-ux-design/design-system/tokens.json
+28	28	"Docs/04-ux-design/\347\237\245\350\212\275-TreeLearn-\351\253\230\344\277\235\347\234\237\345\216\237\345\236\213-v1.html"
+15	6	android/README.md
+10	10	android/app/src/main/res/values/colors.xml
+7	7	android/app/src/main/res/values/dimens.xml
+3	0	android/app/src/main/res/values/themes.xml
+'--- stat ---' 
+ Docs/04-ux-design/design-system/README.md          |  7 +-
+ Docs/04-ux-design/design-system/tokens.json        | 77 +++++++++++-----------
+ ...35\347\234\237\345\216\237\345\236\213-v1.html" | 56 ++++++++--------
+ android/README.md                                  | 21 ++++--
+ android/app/src/main/res/values/colors.xml         | 20 +++---
+ android/app/src/main/res/values/dimens.xml         | 14 ++--
+ android/app/src/main/res/values/themes.xml         |  3 +
+ 7 files changed, 107 insertions(+), 91 deletions(-)
+warning: in the working copy of 'Docs/04-ux-design/design-system/README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Docs/04-ux-design/design-system/tokens.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'android/README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'android/app/src/main/res/values/colors.xml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'android/app/src/main/res/values/dimens.xml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'android/app/src/main/res/values/themes.xml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Docs/04-ux-design/design-system/README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Docs/04-ux-design/design-system/tokens.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'android/README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'android/app/src/main/res/values/colors.xml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'android/app/src/main/res/values/dimens.xml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'android/app/src/main/res/values/themes.xml', LF will be replaced by CRLF the next time Git touches it
+EXITCODE=0
+
+------------------------------------------------------------------------------
+G6a · 资源与编译（证明 15 个 tl_* 与全部 dimens 名字仍可解析）
+------------------------------------------------------------------------------
+$ cd android && .\gradlew.bat :app:assembleDebug --console=plain
+> Task :ai:mergeDebugJniLibFolders UP-TO-DATE
+> Task :ai:mergeDebugNativeLibs NO-SOURCE
+> Task :app:mergeLibDexDebug UP-TO-DATE
+> Task :ai:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :data:mergeDebugJniLibFolders UP-TO-DATE
+> Task :data:mergeDebugNativeLibs NO-SOURCE
+> Task :data:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :app:packageDebug UP-TO-DATE
+> Task :app:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :app:assembleDebug UP-TO-DATE
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+BUILD SUCCESSFUL in 13s
+73 actionable tasks: 73 up-to-date
+NOTE 完整控制台输出过长，此处保留末段与结论行；结论行 BUILD SUCCESSFUL 即退出码来源。
+EXITCODE=0
+
+------------------------------------------------------------------------------
+G6b · lint
+------------------------------------------------------------------------------
+$ cd android && .\gradlew.bat lint --console=plain
+> Task :data:preDebugAndroidTestBuild UP-TO-DATE
+> Task :data:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :data:generateDebugAndroidTestLintModel
+> Task :data:preDebugUnitTestBuild UP-TO-DATE
+> Task :data:generateDebugUnitTestLintModel
+> Task :data:lintAnalyzeDebugAndroidTest UP-TO-DATE
+> Task :data:lintAnalyzeDebugUnitTest UP-TO-DATE
+> Task :app:lintReportDebug UP-TO-DATE
+> Task :app:lintDebug
+> Task :app:lint
+> Task :data:generateDebugLintReportModel
+Warning: Lint will treat :core as an external dependency and not analyze it.
+ * Recommended Action: Apply the 'com.android.lint' plugin to java library project :core. to enable lint to analyze those sources.
+> Task :data:lintReportDebug UP-TO-DATE
+> Task :data:lintDebug
+> Task :data:lint
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+BUILD SUCCESSFUL in 5s
+112 actionable tasks: 11 executed, 101 up-to-date
+NOTE 完整控制台输出过长，此处保留末段与结论行；结论行 BUILD SUCCESSFUL 即退出码来源。
+EXITCODE=0
+
+------------------------------------------------------------------------------
+G6c · 全量构建与既有测试
+------------------------------------------------------------------------------
+$ cd android && .\gradlew.bat check --console=plain
+> Task :data:compileDebugUnitTestJavaWithJavac UP-TO-DATE
+> Task :data:processDebugUnitTestJavaRes NO-SOURCE
+> Task :data:testDebugUnitTest UP-TO-DATE
+> Task :data:preReleaseUnitTestBuild UP-TO-DATE
+> Task :data:generateReleaseUnitTestStubRFile UP-TO-DATE
+> Task :data:javaPreCompileReleaseUnitTest UP-TO-DATE
+> Task :data:compileReleaseUnitTestJavaWithJavac UP-TO-DATE
+> Task :data:processReleaseUnitTestJavaRes NO-SOURCE
+> Task :data:testReleaseUnitTest UP-TO-DATE
+> Task :data:test UP-TO-DATE
+> Task :data:check
+> Task :tree-layout:compileTestJava UP-TO-DATE
+> Task :tree-layout:processTestResources NO-SOURCE
+> Task :tree-layout:testClasses UP-TO-DATE
+> Task :tree-layout:test UP-TO-DATE
+> Task :tree-layout:check
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+BUILD SUCCESSFUL in 3s
+295 actionable tasks: 5 executed, 290 up-to-date
+NOTE 完整控制台输出过长，此处保留末段与结论行；结论行 BUILD SUCCESSFUL 即退出码来源。
+EXITCODE=0
+
+------------------------------------------------------------------------------
+G6d · 强制重跑资源与打包管线（--rerun-tasks）：证明资源真的重新编译过
+------------------------------------------------------------------------------
+$ cd android && .\gradlew.bat :app:assembleDebug --rerun-tasks --console=plain
+> Task :ai:packageDebugResources
+> Task :ai:compileDebugJavaWithJavac
+> Task :data:packageDebugResources
+> Task :app:mergeDebugResources
+> Task :app:packageDebugResources
+> Task :data:compileDebugJavaWithJavac
+> Task :app:processDebugResources
+> Task :app:compileDebugJavaWithJavac
+> Task :app:packageDebug
+BUILD SUCCESSFUL in 1m 34s
+73 actionable tasks: 73 executed
+NOTE G6a 的复跑是 UP-TO-DATE（Gradle 据输入哈希判定 APK 与当前输入一致）；本段用 --rerun-tasks 强制重执行，输出里能看到 processDebugResources 与 packageDebug 真的跑了。
+EXITCODE=0
+
+------------------------------------------------------------------------------
+G7 · Java-only 守门：android/scripts/no-kotlin-check.ps1
+------------------------------------------------------------------------------
+$ powershell.exe -NoProfile -ExecutionPolicy Bypass -File android/scripts/no-kotlin-check.ps1
+Treelearn Java-only guard
+Android root: D:\Project\Android\Treelearn\android
+
+== Script parse check ==
+OK   2 sibling script(s) parse cleanly (this file excluded: an unparseable guard never reaches this line)
+
+== Kotlin source files ==
+OK   no .kt / .kts / .gradle.kts source files
+
+== Gradle scripts and version catalogs ==
+OK   scanned 12 Gradle script/catalog file(s), comments excluded
+OK   raw-text dependency scan completed (lexer-independent)
+OK   lexer trust check completed (fail-closed on desync)
+
+== Resolved dependency report ==
+OK   no Kotlin coordinates on 53 variant classpath configuration(s) across :app, :core, :data, :ai, :tree-layout (build tooling configurations excluded, 4208 report lines)
+OK   excluded 36 build-tooling configuration(s) (AGP/Gradle are Kotlin themselves; they do not ship in the app)
+
+== Built APK dex tables ==
+OK   verifyNoKotlinDex: [app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk] APK in an androidTest output path (test process) = 1249878 bytes, 3 dex file(s) [classes.dex, classes2.dex, classes3.dex]
+OK   verifyNoKotlinDex: [app/build/outputs/apk/debug/app-debug.apk] shipped APK = 1276410 bytes, 14 dex file(s) [classes.dex, classes10.dex, classes2.dex, classes3.dex, classes4.dex, classes5.dex, classes6.dex, classes7.dex, classes13.dex, classes9.dex, classes11.dex, classes8.dex, classes14.dex, classes12.dex]
+OK   verifyNoKotlinDex: [app/build/outputs/apk/release/app-release.apk] shipped APK = 672447 bytes, 1 dex file(s) [classes.dex]
+OK   verifyNoKotlinDex: NOTICE (accepted) [app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk] contains Kotlin-compiled annotation classes without runtime linkage ([classes.dex -> Lkotlin/Metadata;]); no Kotlin runtime library is required on device. Kotlin type descriptors in this APK (8): [Lkotlin/Deprecated;, Lkotlin/Metadata;, Lkotlin/ReplaceWith;, Lkotlin/annotation/AnnotationRetention;, Lkotlin/annotation/AnnotationTarget;, Lkotlin/annotation/Retention;, Lkotlin/annotation/Target;, Lkotlin/reflect/KClass;]
+OK   verifyNoKotlinDex: PASS (3 APK(s) inspected across app/build/outputs/apk, no Kotlin runtime bytecode)
+OK   no built APK contains Kotlin runtime bytecode (3 APK(s) inspected, 5 judgement line(s))
+
+== Result ==
+NOTICE verifyNoKotlinDex: NOTICE (accepted) [app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk] contains Kotlin-compiled annotation classes without runtime linkage ([classes.dex -> Lkotlin/Metadata;]); no Kotlin runtime library is required on device. Kotlin type descriptors in this APK (8): [Lkotlin/Deprecated;, Lkotlin/Metadata;, Lkotlin/ReplaceWith;, Lkotlin/annotation/AnnotationRetention;, Lkotlin/annotation/AnnotationTarget;, Lkotlin/annotation/Retention;, Lkotlin/annotation/Target;, Lkotlin/reflect/KClass;]
+VERDICT: PASS (13 OK line(s))
+EXITCODE=0
+---- tail ----
+（上面的 EXITCODE=0 由调用方在脚本结束后取 $LASTEXITCODE 写入；
+  原始日志另存 artifacts/evidence/T-050-no-kotlin-check.txt）
+
+------------------------------------------------------------------------------
+G8 · 规模（口径：非空非注释的生产行；既有文件只按本次改动行）
+------------------------------------------------------------------------------
+$ python -X utf8 .trae/scripts/dev/count_production_lines.py <本片改动的 5 个生产文件>
+  2354  Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html
+   182  Docs/04-ux-design/design-system/tokens.json
+    18  android/app/src/main/res/values/colors.xml
+    26  android/app/src/main/res/values/dimens.xml
+    15  android/app/src/main/res/values/themes.xml
+  2595  TOTAL (non-blank, non-comment, production files only)
+EXITCODE=0
+该脚本按**整文件**计数；这几个都是既有文件，整文件数不代表本片规模。
+按仓库口径「既有文件只按本次改动行」重算：
+
+$ python -X utf8 sizing.py
+Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html                   改动行 +28  -28  非空非注释 25
+Docs/04-ux-design/design-system/tokens.json                    改动行 +40  -37  非空非注释 40
+android/app/src/main/res/values/colors.xml                     改动行 +10  -10  非空非注释 10
+android/app/src/main/res/values/dimens.xml                     改动行 +7   -7   非空非注释  7
+android/app/src/main/res/values/themes.xml                     改动行 +3   -0   非空非注释  1
+--------------------------------------------------------------
+判定值（非空非注释，CSS 注释也剥掉） = 83
+并列口径（仓库脚本对 .html 只剥 HTML 注释） = 86
+物理改动行 = 88
+estimated_production_lines = 30
+EXITCODE=0
+判定：83 行，未超 200 行软上限、未超 500 行硬上限；比任务里的估算 30 行高。
+原因：估算只按「值行」计，而按要求写进 tokens.json 的字体分组说明、两处修正值的依据、
+柔色 token 的落地依据，以及 themes.xml 的注释与 android:fontFamily 一行都算生产行。
+
+------------------------------------------------------------------------------
+G9 · 文档影响记录与残余风险
+------------------------------------------------------------------------------
+- 变更的运行时事实：tl_ink3/tl_amber 等 10 个 tl_* 取值、dimens.xml 的 7 个圆角/字阶取值、
+  主题默认字体族 = 系统 sans-serif、设计系统新增 sans/serif 的角色（值改为新稿回退栈）。
+- 权威证据：原型 :root（设计事实源）、tokens.json（机器可读镜像）、colors.xml（Android 副本）、
+  dimens.xml（度量令牌），以及本文件的 G1/G2/G4/G6 实测。
+- 已更新的文档：android/README.md 的对比度记录与尺寸令牌说明；
+  Docs/04-ux-design/design-system/README.md 的分组表 3 行 + 追加的变更记录。
+- 反向检索的旧表述：#636F66、#B7791F、LXGW WenKai 作为「全站正文/全站楷体」的措辞、楷体身份。
+  原型 :root、tokens.json 与两份 README 已无与当前态矛盾的落点；原型 HTML 正文的叙事段落
+  仍描述旧版式，属另一片（051）范围，本片只改 :root 数值区块，未增删该区块的行。
+- 生产者/消费者核对：colors.xml 与 dimens.xml 是生产者，全部 res/layout/** 与自绘 View 是消费者；
+  本轮资源名与条目名 0 变更，故消费者无需改动，由 G6a 的编译通过证明引用可解析。
+- 残余风险 1：品牌衬线 serif 走 ROM 回退栈，各厂商中文衬线字形不一致；本轮用户已接受。
+- 残余风险 2：4 个柔色 token 与 hairline 保持仓库值，与新稿 rgba 写法有极小色差；
+  这是「colors.xml 15 个 tl_* 资源名与数量一个都不许变」这条硬约束的直接后果。
+- 残余风险 3：原型 HTML 里 --kai 的使用者仍在，字体观感要到 055 把品牌 TextView 接到 --serif
+  才切换；本片只保证主题默认字体正确。
+- Git 提示「LF will be replaced by CRLF」：已逐文件核对 HEAD 与工作区都是 LF，
+  未改动的文件同样提示，属 core.autocrlf=true 的仓库级行为，非本次引入。
+

@@ -1,0 +1,15 @@
+=== 行数 ===
+357 artifacts/evidence/T-059-constraint-codes.txt
+=== 末尾 12 行 ===
+   从「拒绝来自这条 CHECK」变成「DDL 声明了这条 CHECK + 该表发生了 CHECK 拒绝」，属推断而非直接证据。
+C. **生产侧给 CHECK 约束起名**（`CONSTRAINT ck_... CHECK (...)`）：命名约束在**所有**版本上都
+   报 DDL 自己的名字，才能恢复「精确到哪条约束」的版本无关判据，并让这类漂移结构上不可能再发生。
+   代价：属 schema DDL 变更（且 SQLite 不能 ALTER 一个 CHECK，老库需要重建表迁移），
+   超出本片「不得改 schema / migration」的红线，需要另立一片。
+
+### 9.3 建议
+以 **A** 作为本片的立即解封（改动小、只在测试侧、且保留了「该环境能给出的最强判据」），
+把 **C** 作为后续独立片的候选（若审查认为「精确到哪条 CHECK」必须保留，则只有 C 能做到版本无关）。
+无论选哪一条，`ConstraintFailures.isUniqueOn` 的「码值 + 列名列表」双重判据都不受影响——
+它判的是 UNIQUE，而 UNIQUE 的文案在两种环境上实测一致（真机日志里 `messages.branch_id,
+messages.ordinal`、`branches.topic_id`、`generation_operations.branch_id` 等断言全部通过）。

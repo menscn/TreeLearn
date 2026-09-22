@@ -1,0 +1,323 @@
+# Treelearn evidence — T-2026-09-22-052 底部标签栏外壳与学习库屏（主题列表）
+# captured-at : 2026-09-22T18:49:42+08:00
+# cwd         : D:\Project\Android\Treelearn
+# device      : AWSS013807000356 (ALP-AN00 - 13)，真机，非模拟器
+# ambient     : 每条命令前先 export PATH="/usr/bin:/bin:/c/Windows/System32:$PATH"（本机 Bash PATH 被破坏）；
+#               JAVA_HOME='D:\Environment\Jdk\jdk21'（Windows 风格，POSIX 风格的 /d/... 会被 Gradle 判为无效目录）
+# 说明        : 本文件是自证型证据——每条命令都带自己的命令行与紧随其后的 EXITCODE 行。
+#               报告中引用的每个数字都能在本文件里找到它出自哪条命令。
+# ===========================================================================
+
+## 1. RED — 先写失败的仪器测试
+
+# command:
+#   cd android
+#   ./gradlew.bat :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.BottomTabShellInstrumentedTest
+# 完整日志：artifacts/evidence/.t052-red.log
+---- 日志关键行 ----
+> Task :app:compileDebugAndroidTestJavaWithJavac FAILED
+BottomTabShellInstrumentedTest.java:106: 错误: 找不到符号
+...
+BUILD FAILED in 14s
+59 actionable tasks: 1 executed, 58 up-to-date
+EXITCODE=1
+
+# 计数口径（对 .t052-red.log 实测，命令与结果）：
+#   grep -o "错误: 找不到符号" .t052-red.log | wc -l                        -> 78   （同一批报错被打印多轮）
+#   grep -oE "BottomTabShellInstrumentedTest\.java:[0-9]+: 错误:" ... | sort -u | wc -l -> 37 （去重后的唯一代码位置）
+#   grep -o "变量 [a-z_]*" .t052-red.log | sort -u | wc -l                  -> 15   （去重后的唯一缺失资源 id）
+#   重复度实测（grep ... | sort | uniq -c | awk '{print $1}' | sort | uniq -c）：
+#     36 个位置各出现 2 次，1 个位置（:357）出现 6 次 -> 36*2 + 6 = 78。
+#   即「78」是打印轮数，「37」是真实出错位置数——作业单原先记的 39 与 16 是这两个口径读错的结果，已更正。
+# 15 个缺失 id：tab_bar tab_home tab_library tab_settings tab_icon tab_label
+#              library_root library_rows library_state library_empty library_empty_guide
+#              library_topic_title library_topic_meta library_topic_unread library_topic_accent
+EXITCODE=0   # 上面 3 条 grep 全部成功执行
+
+## 2. GREEN — 最小实现后的同一条命令
+
+# command: 与 RED 逐字符相同
+#   ./gradlew.bat :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.BottomTabShellInstrumentedTest
+# 完整日志：artifacts/evidence/.t052-green.log
+---- 日志关键行 ----
+> Task :app:connectedDebugAndroidTest
+Starting 5 tests on ALP-AN00 - 13
+Finished 5 tests on ALP-AN00 - 13
+BUILD SUCCESSFUL in 34s
+EXITCODE=0
+
+# 同一轮 Gradle 写出的 JUnit 报告（不是我摘出来的数字）：
+#   android/app/build/outputs/androidTest-results/connected/debug/TEST-ALP-AN00 - 13-_app-.xml
+#   <testsuite name="com.treelearn.app.BottomTabShellInstrumentedTest" tests="5" failures="0" errors="0" skipped="0" time="6.454">
+#   5 个用例逐个 PASS（每个 <testcase> 无 <failure> 子元素）：
+#     theThreeTabsAreAllReachableAndEachOneHighlightsWhatItShows                  （三标签可达 + 高亮逐 tab 比对 label 与 icon tint）
+#     aConversationOpenedFromHomeHidesTheBarAndBackLandsOnHome                    （主页 → 对话 → 返回落主页）
+#     aConversationOpenedFromTheLibraryHidesTheBarAndNavigationLandsBackOnTheLibrary （学习库 → 对话 → 分支导航 → 逐层返回落学习库）
+#     theLibraryListsTheStoredTopicsWithTheirOwnFields                           （学习库列出真实行：标题/分支数/未读/强调条）
+#     anEmptyLibraryShowsTheGuidanceInsteadOfABlankList                           （空表空态文案）
+EXITCODE=0
+
+## 3. 全量检查
+
+# command: cd android && ./gradlew.bat check
+# 完整日志：artifacts/evidence/.t052-check.log
+---- 日志关键行 ----
+BUILD SUCCESSFUL in 1m 11s
+295 actionable tasks: 27 executed, 1 from cache, 267 up-to-date
+EXITCODE=0
+
+# lint 口径（本轮 check 里的 :app:lintDebug；abortOnError = true，所以退出码 0 即 0 error）：
+#   android/app/build/intermediates/lint_intermediate_text_report/debug/lintReportDebug/lint-results-debug.txt
+#     grep -c "Error:"    -> 0
+#     grep -c "Warning:"  -> 46
+#   本片新增文件只留下 Overdraw 一条告警（该告警在既有 10 个布局里同样存在，属既有基线）：
+#     layout/item_library_topic.xml:10   layout/screen_tab_bar.xml:18   layout-sw600dp/screen_tab_bar.xml:11
+#   中途曾因一次真实缺陷失败过一回（记在这里，不藏）：
+#     app/src/main/res/layout/screen_tab_bar.xml:42  Error: Duplicate id @+id/tab_icon ... [DuplicateIds]
+#     app/src/main/res/layout-sw600dp/screen_tab_bar.xml:38 同款；8 errors / BUILD FAILED
+#     -> 三个标签项各写了一遍 tab_icon/tab_label，同一布局内重复 id，lint 当场 abort。
+#        修法：每个标签各自命名 *_icon / *_label（声明式、图标与文案仍留在 XML 里），
+#        代价是 label 由 3 处重复定义；改成「一个 item 布局 include 三次」会失去按次覆写 android:src 的能力。
+
+## 4. Java-only 守门
+
+# command: cd android && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/no-kotlin-check.ps1
+# 完整日志：artifacts/evidence/.t052-nokotlin.log
+---- 日志关键行 ----
+OK   no .kt / .kts / .gradle.kts source files
+OK   no Kotlin coordinates on 53 variant classpath configuration(s) across :app, :core, :data, :ai, :tree-layout
+OK   verifyNoKotlinDex: PASS (3 APK(s) inspected across app/build/outputs/apk, no Kotlin runtime bytecode)
+VERDICT: PASS (13 OK line(s))
+EXITCODE=0
+
+## 5. 真机仪器测试的设备前置条件（不是环境受限，是设备当时在睡）
+
+# command: adb shell dumpsys power | grep -i mWakefulness=
+#   （首轮设备执行前）  mWakefulness=Dozing      + isKeyguardShowing=true + mCurrentFocus=AOD
+#   -> 没有合成帧就没有 layout 遍历，awaitLaidOut 等 10s 后报「the library's first row was never laid out」。
+#      这不是产品缺陷，是测量条件：屏幕熄灭时行高恒为 0。
+# command:
+#   adb shell input keyevent KEYCODE_WAKEUP
+#   adb shell wm dismiss-keyguard
+#   adb shell svc power stayon true
+#   adb shell settings put system screen_off_timeout 1800000
+#   adb shell dumpsys power | grep -i mWakefulness=
+---- 唤醒后 ----
+  mWakefulness=Awake
+      mIsKeyguardShowing=false
+EXITCODE=0
+
+## 6. 单测回归计数
+
+# command: python -X utf8 .trae/scripts/dev/count_jvm_tests.py
+# 完整日志：artifacts/evidence/.t052-jvmtests.log
+---- 输出 ----
+app          testDebugUnitTest      suites= 37 tests= 364 failures=0 errors=0 skipped=0
+app          testReleaseUnitTest    suites= 37 tests= 364 failures=0 errors=0 skipped=0
+core         test                   suites= 19 tests= 198 failures=0 errors=0 skipped=0
+ai           testDebugUnitTest      suites=  7 tests=  76 failures=0 errors=0 skipped=0
+ai           testReleaseUnitTest    suites=  7 tests=  76 failures=0 errors=0 skipped=0
+data         testDebugUnitTest      suites=  4 tests=  27 failures=0 errors=0 skipped=0
+data         testReleaseUnitTest    suites=  4 tests=  27 failures=0 errors=0 skipped=0
+tree-layout  test                   suites=  3 tests=  34 failures=0 errors=0 skipped=0
+reading A - one variant per module: app=364, core=198, ai=76, data=27, tree-layout=34 -> total 699
+reading B - every variant counted: suites=118 tests=1166 failures=0 errors=0 skipped=0
+VERDICT: OK - 118 suite(s) counted
+EXITCODE=0
+
+# 基线对比（同一口径，app 的 testDebugUnitTest 读法）：
+#   本片之前最近一次有记录的口径 = artifacts/evidence/T-039-jvmtests.txt（2026-09-22T03:29:02）
+#                                 app suites= 32 tests= 334 failures=0
+#   本次实测                     = app suites= 37 tests= 364 failures=0
+#   其中本片自己贡献的那一套（其 JUnit 报告头，非推算）：
+#     android/app/build/test-results/testDebugUnitTest/TEST-com.treelearn.app.library.LibraryPresenterTest.xml
+#     <testsuite name="com.treelearn.app.library.LibraryPresenterTest" ... tests="5" skipped="0" failures="0" errors="0">
+#   -> 本片贡献 1 suite / 5 tests / 0 failures；余下 +4 suites / +25 tests 不是本片的产物
+#      （T-040/T-041/T-042 都在 03:29 那条基线之后落地），本报告不为它们背书。
+#   -> 排除本片自身后：app 36 suites / 359 tests / 0 failures，相对 T-039 基线无失败、无减少。
+
+## 7. 数据来源只读
+
+# command: git status --porcelain -- android/data
+---- 输出（空）----
+EXITCODE=0
+#   android/data 整个模块零改动，因此新的 store 不可能改到 schema、migration 或写路径。
+#   旁证：data 模块下不存在 migration 包（find android/data/src -iname "*migration*" 无输出），
+#        TreeLearnSchema.DATABASE_VERSION 仍为 2（android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:55）。
+#   android/app/src/main/java/com/treelearn/app/wiring/SqliteLibraryStore.java 只有 topics() 一个方法，
+#   内部只有 TopicDao.listOverviews(...)，全文没有 INSERT / UPDATE / DELETE。
+EXITCODE=0
+
+## 8. 规模（口径：非空非注释；新增文件按全文、改动文件按净新增行）
+
+# command: python -X utf8 .trae/scripts/dev/count_production_lines.py <本片 16 个新增生产文件>
+---- 输出 ----
+    46  android/app/src/main/java/com/treelearn/app/library/LibraryViewState.java
+     5  android/app/src/main/java/com/treelearn/app/library/LibraryData.java
+     5  android/app/src/main/java/com/treelearn/app/library/LibrarySink.java
+    51  android/app/src/main/java/com/treelearn/app/library/LibraryPresenter.java
+    66  android/app/src/main/java/com/treelearn/app/screen/LibraryScreen.java
+    24  android/app/src/main/java/com/treelearn/app/wiring/LibraryWiring.java
+    18  android/app/src/main/java/com/treelearn/app/wiring/SqliteLibraryStore.java
+     8  android/app/src/main/res/drawable/ic_tab_home.xml
+     8  android/app/src/main/res/drawable/ic_tab_library.xml
+    11  android/app/src/main/res/drawable/ic_tab_settings.xml
+    50  android/app/src/main/res/layout/screen_tab_bar.xml
+    51  android/app/src/main/res/layout-sw600dp/screen_tab_bar.xml
+    11  android/app/src/main/res/layout/screen_library.xml
+    16  android/app/src/main/res/layout-sw600dp/screen_library.xml
+    43  android/app/src/main/res/layout/screen_library_body.xml
+    26  android/app/src/main/res/layout/item_library_topic.xml
+   439  TOTAL (non-blank, non-comment, production files only)
+EXITCODE=0
+
+# command: git diff -U0 -- <4 个改动的生产文件> 后按「非空、且不以 // /* * <!-- --> 起首」过滤新增行
+---- 输出 ----
+   117  android/app/src/main/java/com/treelearn/app/MainActivity.java
+     8  android/app/src/main/java/com/treelearn/app/AppContainer.java
+    13  android/app/src/main/res/layout/activity_main.xml
+    15  android/app/src/main/res/values/strings.xml
+   153  TOTAL (added, non-blank, non-comment, modified production files)
+EXITCODE=0
+
+# 合计 439 + 153 = 592 非空非注释生产行。
+# estimated_production_lines = 340（作业单第 14 行）-> 实测超出 252 行（约 74%）。
+# 也超 200 软上限，且**超 500 硬上限**。
+# 本片不申请、也不声称任何规模例外：作业单第 105 行原写「未超 500 硬上限」是按估算写的，
+# 实测已推翻它；第 109 行预登记的判据是「若实测超 500，则本片判定失败并按上条理由重新切分」。
+# 该判定属 verifier / 用户，不由实现者自行裁量——本文件只如实记录测量，请见报告里的「停下回报」一节。
+EXITCODE=0
+
+## 9. 工作区改动清单（本片产物）
+
+# command: git status --porcelain
+---- 属于本片的条目 ----
+ M android/app/src/main/java/com/treelearn/app/AppContainer.java          （+libraryWiring / libraryData()）
+ M android/app/src/main/java/com/treelearn/app/MainActivity.java          （Tab / showTab / swap 显隐 / showLibrary / LibrarySink）
+ M android/app/src/main/res/layout/activity_main.xml                      （FrameLayout 单宿主 -> 内容容器 + tab_bar）
+ M android/app/src/main/res/values/strings.xml                            （只追加 tab_* / library_*）
+?? android/app/src/androidTest/java/com/treelearn/app/BottomTabShellInstrumentedTest.java
+?? android/app/src/test/java/com/treelearn/app/library/                   （LibraryPresenterTest）
+?? android/app/src/main/java/com/treelearn/app/library/                   （LibraryData/LibrarySink/LibraryViewState/LibraryPresenter）
+?? android/app/src/main/java/com/treelearn/app/screen/LibraryScreen.java
+?? android/app/src/main/java/com/treelearn/app/wiring/LibraryWiring.java
+?? android/app/src/main/java/com/treelearn/app/wiring/SqliteLibraryStore.java
+?? android/app/src/main/res/drawable/ic_tab_home.xml
+?? android/app/src/main/res/drawable/ic_tab_library.xml
+?? android/app/src/main/res/drawable/ic_tab_settings.xml
+?? android/app/src/main/res/layout/screen_tab_bar.xml
+?? android/app/src/main/res/layout-sw600dp/screen_tab_bar.xml
+?? android/app/src/main/res/layout/screen_library.xml
+?? android/app/src/main/res/layout-sw600dp/screen_library.xml
+?? android/app/src/main/res/layout/screen_library_body.xml
+?? android/app/src/main/res/layout/item_library_topic.xml
+# 不属本片、但同处工作区的他人改动（050/051 的产物，本片未触碰）：
+#   android/README.md（050 的令牌章节 + 本片的 T-052 章节）、values/colors.xml、values/dimens.xml、values/themes.xml
+EXITCODE=0
+
+## 10. GREEN 期间的两处中途修正（诚实记录，都不改断言）
+
+1. 测试驱动自身的缺陷：assertHighlighted -> labelColor/iconTint 里把 view(id)（内含 runOnMainSync）
+   写进了另一个 runOnMainSync 里，平台直接抛
+   `RuntimeException: This method can not be called from the main application thread`，
+   3 个用例在断言前就崩。改为在已经处于主线程的 lambda 里直接 activity.findViewById。
+   -> 这是测试代码的缺陷，不是产品行为，且 RED 阶段从未执行到这一行（RED 停在编译期）。
+2. 产品侧的真实缺陷（由本片这条新验收路径第一次走出来的）：
+   MainActivity.render(ChatViewState) 原先无守卫，showChat 之后被二级屏接管时 chatScreen 已置空，
+   而对话屏的读（以及生成中的轮询）仍会晚到 -> NPE on null，
+   `at com.treelearn.app.MainActivity.render(MainActivity.java:295)`，
+   进程崩溃并让本轮 5 个用例只跑到 3 个。
+   修法：render(ChatViewState) 与 renderPosition(ReadingPosition) 加与既有导航页同款的 null 守卫
+   （只加不删、不改语义、屏幕为空时只是丢弃这一帧），并把导航页那段「只有它会晚到」的注释同步为事实。
+   -> 这是既有缺陷被新流程暴露，不是本片引入的回归。
+3. 设备在睡（见第 5 节）与一次 `dexBuilderDebug ... graph.bin (拒绝访问)` 的 Windows 文件锁抖动（重跑即过）。
+
+## 11. 全量真机仪器测试：发现 7 个套件 26 个**既有**失败（与本片无关，未修，另行回报）
+
+# command: cd android && ./gradlew.bat :app:connectedDebugAndroidTest
+# 日志：artifacts/evidence/.t052-full-androidtest.log
+---- 输出 ----
+Starting 178 tests on ALP-AN00 - 13
+Finished 178 tests on ALP-AN00 - 13
+ALP-AN00 - 13 Tests 80/178 completed. (0 skipped) (10 failed)   <- 中途快照行
+BUILD FAILED in ...
+EXITCODE=1
+
+# 同一轮的报告头（Gradle 自己写的）：
+#   android/app/build/outputs/androidTest-results/connected/debug/TEST-ALP-AN00 - 13-_app-.xml
+#   <testsuite ... tests="178" failures="26" errors="0" skipped="0">
+# 按套件拆分（脚本见下）：
+#   FAIL AnswerRevisionGenerationOperationDaoInstrumentedTest     5/12
+#   FAIL ContextSnapshotAiArtifactDaoInstrumentedTest            4/12
+#   FAIL FirstTopicCreationInstrumentedTest                      1/9
+#   FAIL NavigationStoreInstrumentedTest                         1/6
+#   FAIL SqliteSchemaInstrumentedTest                           10/25
+#   FAIL TopicBranchMessageDaoInstrumentedTest                   3/15
+#   FAIL TreeCanvasStoreInstrumentedTest                         2/8
+#   PASS AppLaunchInstrumentedTest                               1   <- 本片要保留行为的那一条
+#   PASS BottomTabShellInstrumentedTest                          5   <- 本片
+#   PASS AnswerVersions / BranchCreation / DeepSeekPayloadDecoder / DeepSeekRequestBody /
+#        DeepSeekStream / GenerationCoordinator / MarkdownRenderer / RealDataPathWiring /
+#        SearchUnreadReading / SecretBackupConfig / SecretStore
+
+# 判定「不是本片造成的」的依据 A —— 单独跑其中一个失败套件（本片用例完全不在这一轮里）：
+# command: ./gradlew.bat :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.SqliteSchemaInstrumentedTest
+# 日志：artifacts/evidence/.t052-isolate-schema.log
+---- 输出 ----
+Starting 25 tests on ALP-AN00 - 13
+Tests on ALP-AN00 - 13 failed: There was 10 failure(s).
+Finished 25 tests on ALP-AN00 - 13
+报告头 tests="25" failures="10"  <- 与全量轮里的 10/25 逐个相同
+EXITCODE=1
+
+# 判定「不是本片造成的」的依据 B —— 失败的性质是**断言比对平台异常文案**，与数据无关：
+#   全量轮与隔离轮里 26 个失败全部落在同一个断言辅助上，例如
+#     SqliteSchemaInstrumentedTest.java:1285 的 assertCause(...)
+#       assertTrue(scenario + ": expected " + expectedCode + " but the store reported " + message,
+#                  message.contains(expectedCode));
+#   期望串写死在 SqliteSchemaInstrumentedTest.java:145-149：
+#     CODE_NOT_NULL = "(code 1299"  CODE_CHECK = "(code 275"  CODE_UNIQUE = "(code 2067"
+#     CODE_FOREIGN_KEY = "(code 787"  CODE_TRIGGER = "(code 1811"
+#   而本机（ALP-AN00 / Android 13）真实的异常文案是
+#     "... UNIQUE constraint failed: branches.topic_id (Sqlite code 2067 SQLITE_CONSTRAINT_UNIQUE), (OS error - 2:No such file or directory)"
+#   ——含 "Sqlite code 2067"，不含子串 "(code 2067"。即：约束**按设计生效了**（SQLite code 是期望的那个），
+#   失败的只是「文案前缀」，是给旧版 AOSP 的 `(code NNNN)` 格式写的期望串。
+#   同类写法在 AnswerRevisionGenerationOperationDaoInstrumentedTest.java:627-634 也有一份。
+#   -> 结论：这是 7 个既有套件在「第一次真机上跑」时暴露出来的**既有**缺陷（旧轮次对这些套件只做过编译验证），
+#      不属 T-052 的范围，本片不改它们（改 7 个既有套件是另一片的工作），只如实记录并回报。
+EXITCODE=0
+
+## 12. 自查抓到并补齐的两处硬约束缺口（都是「只加不删」的补齐）
+
+# 交付前用 grep 逐条核对作业单的硬约束，抓到两处**测试抓不到、但约束明文要求**的缺口，已补齐：
+
+# (a) 作业单要求「新增 showLibrary() 必须在**全部既有** showX() 里清空
+#     libraryScreen/libraryPresenter」。检查时 showChat 漏了（其余 5 个都在）——
+#     即从学习库点一行进对话后，学习库的屏与 presenter 仍被引用着，
+#     正是作业单点名的那种「屏已离开但引用还在，异步回调往里画」的旧缺陷。
+#     补法：showChat(String, ReadingAnchor) 里加两行置空。
+# (b) LibraryPresenter.onResumed() 在生产代码里是**死代码**（只有 JVM 用例调用它）：
+#     onResume() 没有学习库分支，学习库在前台时被 resume 会去刷新首页。
+#     补法：onResume() 的 searchScreen 分支之后加 libraryScreen 分支。
+
+# command: 逐方法核对 MainActivity 的每个开屏方法是否清空学习库引用
+---- 输出 ----
+showHome         line  468  clears libraryScreen=True libraryPresenter=True
+showSettings     line  490  clears libraryScreen=True libraryPresenter=True
+showChat         line  537  clears libraryScreen=False libraryPresenter=False   <- 这是 1 行委托给下面那个重载，无需清空
+showChat         line  551  clears libraryScreen=True libraryPresenter=True
+showTree         line  591  clears libraryScreen=True libraryPresenter=True
+enterNavigation  line  645  clears libraryScreen=True libraryPresenter=True
+showSearch       line  687  clears libraryScreen=True libraryPresenter=True
+EXITCODE=0
+
+# 补齐后重跑（本节之后的数字都是补齐后的最终值）：
+#   gradlew check                        -> BUILD SUCCESSFUL in 1m 11s，lint 0 error / 46 warning，EXITCODE=0
+#   gradlew :app:connectedDebugAndroidTest -P...BottomTabShellInstrumentedTest
+#                                        -> Starting/Finished 5 tests，tests="5" failures="0"，EXITCODE=0
+#   scripts/no-kotlin-check.ps1          -> VERDICT: PASS (13 OK line(s))，EXITCODE=0
+#   count_jvm_tests.py                   -> app suites=37 tests=364 failures=0，EXITCODE=0
+# 规模因此从 586 变为 592（MainActivity 净新增 111 -> 117）。
+EXITCODE=0
+
+

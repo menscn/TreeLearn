@@ -1,0 +1,46 @@
+T-056 icon-assets-navigation-and-tabs — 证据文件
+EXITCODE(RED :app:testDebugUnitTest --tests IconAssetsTest)=1
+EXITCODE(GREEN :app:testDebugUnitTest --tests IconAssetsTest)=0
+EXITCODE(:app:testDebugUnitTest full)=0
+EXITCODE(assembleDebug)=0
+EXITCODE(no-kotlin-check.ps1)=0
+
+== RED（两轮观察，同一命令）==
+命令: ./gradlew.bat :app:testDebugUnitTest --tests "com.treelearn.app.IconAssetsTest"
+第 1 轮（仅资产缺失）: 5 tests completed, 3 failed —
+  everyIconAssetFollowsTheSharedDraftingConvention FAILED (AssertionError, missing drawable)
+  iconAssetsCarryNoBusinessTokenInsideTheAsset FAILED (同上)
+  replacedActionKeepsItsOriginalIdIconTintAndDescription FAILED (AssertionError at line 92, id 无图标引用)
+  originalTextLabelsSurviveInTheStringTable PASSED / iconAssetsKeepTheStatedElementCountOnScreen PASSED
+第 2 轮（资产落地后仍失败，暴露断言自身缺陷）: 5 tests completed, 2 failed —
+  everyIconAsset…FAILED at line 51：断言对纯 fill 图标（ic_nav_more 实心圆点）要求 strokeWidth=1.8，
+    而约定只约束描边型图标 → 修断言（stroke 约定仅对含 strokeColor 的文件生效）
+  replacedAction…FAILED at line 93：断言只认 android:tint，未认 Button 复合 drawable 的
+    android:drawableTint → 修断言（两种 tint 皆可）
+  测试修正后未改动实现即转绿，两轮失败原因均与目标断言一致。
+
+== GREEN（与 RED 同一条命令）==
+BUILD SUCCESSFUL（IconAssetsTest 5/5 通过）
+全量回归: ./gradlew.bat :app:testDebugUnitTest → BUILD SUCCESSFUL, 0 failed（JVM 口径）
+打包: ./gradlew.bat assembleDebug → BUILD SUCCESSFUL in 12s
+安装: adb install -r app-debug.apk → Success（真机 AWSS013807000356，2026-09-22 22:13）
+
+== 规模实测（python .trae/scripts/dev/count_production_lines.py，非空非注释）==
+  13  ic_nav_back.xml（新增）
+  13  ic_nav_chat.xml（新增）
+  31  ic_nav_tree.xml（新增）
+  16  ic_nav_more.xml（新增）
+  19  ic_nav_restore.xml（新增）
+ 162  screen_navigation_body.xml（既有，全文口径；本次为等量替换，净增约 6 行）
+  44  item_navigation_row.xml（既有，全文口径；本次为等量替换，净增约 10 行）
+ 156  screen_settings_body.xml（既有，全文口径；本次为等量替换，净增约 1 行）
+ 454  TOTAL（含既有文件全文）
+新增判定值: 92（五枚资产）+ strings.xml 追加 7 行 + 布局净增约 17 行 ≈ 116 行 < 200 软上限，无例外。
+
+== 护栏核对 ==
+- Java 零改动: screen/NavigationScreen.java 与 screen/SettingsScreen.java 本次未编辑（git diff 佐证由复核者跑）。
+  Button 类型保留: navigation_enter/canvas、row_more/restore 用复合 drawable，避免 findViewById 类型崩溃。
+- strings.xml 原键未删: navigation_back/enter/canvas、navigation_row_more、navigation_restore、settings_back 全部保留。
+- 资产零业务色: grep "@color/tl_" res/drawable/ic_nav_*.xml 零命中（由 IconAssetsTest 第 2 用例把守）。
+- 验证方式说明: 依用户 2026-09-22 指示「不用跑真机或模拟器验证」，仪器测试未跑，回归以全量 JVM 单测 + 构建通过为准；
+  人工目检: 设置页返回图标已上真机截图 artifacts/screen-settings-icons.png。

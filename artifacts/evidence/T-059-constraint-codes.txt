@@ -1,0 +1,530 @@
+# Treelearn evidence — T-2026-09-22-060 修复真机上的约束错误分类并清掉 26 个既有仪器测试红灯
+# captured-at : 2026-09-22T20:05+08:00
+# cwd         : D:\Project\Android\Treelearn
+# devices     : AWSS013807000356 (ALP-AN00 / Android 13) 真机
+#               emulator-5554 (Medium_Phone_API_36.1 / API 36) 模拟器，本轮现启动
+# ambient     : 每条命令前先 export PATH="/usr/bin:/bin:/c/Windows/System32:$PATH"（本机 Bash PATH 被破坏）；
+#               JAVA_HOME='D:\Environment\Jdk\jdk21'（Windows 风格；POSIX 风格的 /d/... 会被 Gradle 判为无效目录）
+# 说明        : 自证型证据——每条命令都带自己的命令行与紧随其后的 EXITCODE 行。
+#               报告中引用的每个数字都能在本文件里找到它出自哪条命令。
+# ===========================================================================
+
+## 0. 结论摘要（第五种成因已于 2026-09-22 裁定并落地，两环境全绿）
+
+**裁定后状态**（裁定记录见第 9 节；落地运行见第 10–14 节）：
+  * 真机 `ALP-AN00` / Android 13 ：`Starting 178 tests` → `Finished 178 tests`、**0 failures**、
+    `EXITCODE=0`、JUnit `tests="178" failures="0" errors="0" skipped="0"`（第 10 节）。
+  * 模拟器 `Medium_Phone_API_36.1` / API 36：同样 **178 tests / 0 failures / EXITCODE=0**（第 11 节）。
+  * 26 个既有红灯全部清完。
+
+26 个失败的最终归因（五类，逐类有证据；裁定前为四类 + 一个未决项）：
+      成因                        数量  性质与归属                      证据
+      生产取码缺陷                  2    生产侧，真机用户可见            第 3 节（原失败）／第 1、2 节（修复）
+      测试写死的期望串             17    测试侧期望串                    第 3 节
+      测试急切求值 .error()         2    测试侧自身写错                  第 3 节
+      夹具缺分支标题                1    测试侧夹具漂移                  第 3 节
+      第五种：CHECK 标识文案随版本变化  4    测试侧断言的形状问题（方法级）    第 3 节（暴露）／第 9 节（裁定）／第 12 节（落地）
+      合计                         26
+
+本片达成的部分：
+  * 生产侧取码缺陷已修：`ConstraintFailures` 的取码判定收敛到**唯一一处**新公开点
+    `com.treelearn.data.db.ConstraintExtendedCode`，正则由 `\(code ([0-9]+)` 改为只认稳定片段
+    `code ([0-9]+)`（不枚举前缀）。真机「重复主题 id 报 STORAGE_REFUSED」与「裸
+    SQLiteConstraintException 穿透」两条用户可见后果（原 26 个失败中的 2 个）已在真机上消失。
+  * 前四类共 22 个在裁定前即已清掉（真机从 `26 failures` 降到 `4 failures`）；
+    剩下的 4 个（方法级，受影响断言 13 条）是第五种成因。
+  * 模拟器在裁定前即全绿（第 4 节），裁定后仍全绿（第 11 节）——证明取码修复是「两种文案都认」
+    而不是「把期望改成真机那一份」。
+  * 守门：`gradlew check`、Java-only 守门、全量 JVM 单测（`app suites=37 tests=364`，与基线持平）
+    裁定前全绿（第 5 节），裁定后复跑仍全绿（第 13 节）。
+
+**第五种成因（已裁定）**：真机上剩下的 4 个失败**不是**作业单列出的四类之一，而是
+**CHECK 约束的「标识文案」本身随 SQLite/Android 版本变化**，而旧 `assertCause` 的第二半
+（`requiredText`）恰好断言的就是这段文案：
+  | 环境 | 同一次 CHECK 拒绝的文案 |
+  | :--- | :--- |
+  | API 36 模拟器 | `CHECK constraint failed: role IN ('USER','AI')`（**表达式**） |
+  | Android 13 真机 | `CHECK constraint failed: messages` / `CHECK constraint failed: branches`（**表名**） |
+两种文案**没有任何共同片段**。裁定采用**两段式证明（三角证明）**：运行时断言「码 = 275 且拒绝
+来自该表」、静态断言「`sqlite_master` 的 DDL 声明了该约束的期望片段」、同一测试内补**正控**
+（合法行必须被接受）；否决「按已知拼写二选一」，延后「给 CHECK 约束起名」（越过本片红线）。
+残余损失如实登记：运行时文案不再能证明「是该表上的哪一条 CHECK 拒绝的」。
+裁定全文与 A/B/C 分析见第 9 节，落地证据见第 12 节。
+
+## 1. RED — 先写失败的断言
+
+# command:
+#   cd android
+#   ./gradlew.bat :data:testDebugUnitTest --tests "com.treelearn.data.db.ConstraintExtendedCodeTest" --console=plain
+# 说明：为让断言能对着「现有的取码规则」运行（而不是先报编译错误），本步把 `ConstraintFailures`
+#       里既有的正则 `\(code ([0-9]+)` **逐字搬移**进新公开类 `ConstraintExtendedCode`（行为不变），
+#       然后新增断言「两种实测文案取到同一个码」，期望值由测试独立写成字面量。
+---- 控制台摘录 ----
+> Task :data:testDebugUnitTest
+ConstraintExtendedCodeTest > everyMeasuredCodeSurvivesTheAndroid13Spelling FAILED
+    java.lang.AssertionError at ConstraintExtendedCodeTest.java:61
+ConstraintExtendedCodeTest > theSameRefusalReadsTheSameCodeInBothSpellings FAILED
+    java.lang.AssertionError at ConstraintExtendedCodeTest.java:52
+3 tests completed, 2 failed
+> Task :data:testDebugUnitTest FAILED
+BUILD FAILED in 17s
+---- 断言原文（android/data/build/test-results/testDebugUnitTest/TEST-com.treelearn.data.db.ConstraintExtendedCodeTest.xml，该文件已被随后的 GREEN 运行覆盖）----
+java.lang.AssertionError: the Android 13 spelling expected:<2067> but was:<0>
+java.lang.AssertionError: Android 13 expected:<1299> but was:<0>
+---- 失败归因 ----
+同一套 3 个用例里，读 API 36 文案的断言语「无码文案读成 NONE」的那条**都通过**，
+只有要求 `(code ` 前缀的真机文案断言失败；且 JVM、Android 依赖在同一次运行里工作正常。
+即失败来自「取码规则不认真机文案」这一缺失行为，不是环境阻碍、也不是判据退化。
+EXITCODE=1
+
+## 2. GREEN — 最小实现
+
+# command: 与 RED 逐字符相同
+#   cd android
+#   ./gradlew.bat :data:testDebugUnitTest --tests "com.treelearn.data.db.ConstraintExtendedCodeTest" --console=plain
+# 实现：`ConstraintExtendedCode` 的正则改为 `code ([0-9]+)`；`ConstraintFailures.extendedCode` 委托它。
+---- 控制台摘录 ----
+> Task :data:testDebugUnitTest
+BUILD SUCCESSFUL in 15s
+EXITCODE=0
+
+# 同一轮 Gradle 写出的 JUnit 报告（不是我摘出来的数字）：
+#   android/data/build/test-results/testDebugUnitTest/TEST-com.treelearn.data.db.ConstraintExtendedCodeTest.xml
+#   <testsuite name="com.treelearn.data.db.ConstraintExtendedCodeTest" tests="3" skipped="0" failures="0" errors="0" ...>
+# 命令与结果：
+#   head -2 android/data/build/test-results/testDebugUnitTest/TEST-com.treelearn.data.db.ConstraintExtendedCodeTest.xml
+#   -> tests="3" skipped="0" failures="0" errors="0"
+EXITCODE=0
+
+## 3. 真机全量仪器测试（ALP-AN00 / Android 13）—— 裁定前的 4 个失败（即第二段 TDD 的 RED）
+
+# 本节记录的是**裁定前**的运行：作业单四类已修完、第五种成因（CHECK 标识文案）刚暴露。
+# 裁定后的真机运行（全绿）见第 10 节。
+
+# command:
+#   adb -s AWSS013807000356 shell input keyevent KEYCODE_WAKEUP
+#   adb -s AWSS013807000356 shell wm dismiss-keyguard
+#   cd android
+#   ANDROID_SERIAL=AWSS013807000356 ./gradlew.bat :app:connectedDebugAndroidTest --console=plain
+# 完整日志：artifacts/evidence/.t059-real-device.log
+---- 日志关键行 ----
+Starting 178 tests on ALP-AN00 - 13
+Tests on ALP-AN00 - 13 failed: There was 4 failure(s).
+Finished 178 tests on ALP-AN00 - 13
+BUILD FAILED in 59s
+EXITCODE=1
+
+---- 4 个失败的原文（.t059-real-device.log:137-151）----
+com.treelearn.app.SqliteSchemaInstrumentedTest > foreignKeysAreEnforcedNotMerelyDeclared FAILED
+    java.lang.AssertionError: the role CHECK must be what rejects an unknown role: the failure must name role but was CHECK constraint failed: messages (Sqlite code 275 SQLITE_CONSTRAINT_CHECK), (OS error - 2:No such file or directory)
+com.treelearn.app.SqliteSchemaInstrumentedTest > forkAnchorColumnsAreAllOrNothing FAILED
+    java.lang.AssertionError: an offset without its fallback must be refused by the anchor CHECK: the failure must name anchor_start_inclusive but was CHECK constraint failed: branches (Sqlite code 275 SQLITE_CONSTRAINT_CHECK), (OS error - 2:No such file or directory)
+com.treelearn.app.SqliteSchemaInstrumentedTest > unreadHasASingleRepresentationInTheSequencePair FAILED
+    java.lang.AssertionError: seen must never run ahead of latest: the failure must name last_seen_stable_sequence but was CHECK constraint failed: branches (Sqlite code 275 SQLITE_CONSTRAINT_CHECK), (OS error - 2:No such file or directory)
+com.treelearn.app.SqliteSchemaInstrumentedTest > messageContentIsConstrainedByRole FAILED
+    java.lang.AssertionError: a USER row is content and must carry it: the failure must name role = 'AI' but was CHECK constraint failed: messages (Sqlite code 275 SQLITE_CONSTRAINT_CHECK), (OS error - 2:No such file or directory)
+
+# 每条都是「码值那半已通过、文案那半不通过」：错误消息里 `expected code 275` 那半不再出现，
+# 出现的是 `the failure must name <X> but was CHECK constraint failed: <表名>`。
+# 即：本片的取码修复生效了（否则仍是原来的 `expected (code 275 but the store reported ...`）。
+
+# JUnit 在方法内第一个失败断言处中止，所以「4 个失败方法」不等于「4 条断言」。
+# 静态枚举受影响断言（命令与结果）：
+#   grep -n -A2 "CODE_CHECK" android/app/src/androidTest/java/com/treelearn/app/SqliteSchemaInstrumentedTest.java
+#   -> 8 个 CODE_CHECK 调用点；其中 1 个在 assertForkRejected 内被调用 6 次。
+# 受影响断言共 13 条，分布在 4 个测试方法：
+#   messageContentIsConstrainedByRole                 2 条（role = 'AI' / role = 'USER'）
+#   unreadHasASingleRepresentationInTheSequencePair   2 条（last_seen_stable_sequence / latest_stable_sequence）
+#   foreignKeysAreEnforcedNotMerelyDeclared           3 条（role / source_message_id IS NOT NULL / source_message_id IS NULL）
+#   forkAnchorColumnsAreAllOrNothing                  6 条（anchor_start_inclusive ×6，经 assertForkRejected）
+# 其余 174 个用例在真机上逐个通过（含全部 UNIQUE / NOT NULL / TRIGGER / FK 文案断言：
+# 真机对这三类的拼写与 API 36 一致，见第一、二节的实测文案与真机日志里 absence of failures）。
+EXITCODE=1
+
+## 4. 模拟器全量仪器测试（Medium_Phone_API_36.1 / API 36）——「两种文案都认」的正面证据
+
+# AVD 启动（本轮现启动；命令与自检结果）：
+#   /d/Environment/Android/SDK/emulator/emulator.exe -avd Medium_Phone_API_36.1 -no-boot-anim -no-snapshot-load
+#   /d/Environment/Android/SDK/emulator/emulator.exe -list-avds
+#   -> Medium_Phone_API_36.1
+#   adb devices                                  -> emulator-5554	device   （与真机同时在线）
+#   adb -s emulator-5554 shell getprop sys.boot_completed  -> 1
+#   adb -s emulator-5554 shell getprop ro.build.version.sdk -> 36
+#   adb -s emulator-5554 shell input keyevent KEYCODE_WAKEUP && adb -s emulator-5554 shell wm dismiss-keyguard
+#   adb -s emulator-5554 shell dumpsys power | grep -i "mWakefulness="  -> mWakefulness=Awake
+EXITCODE=0
+
+# command:
+#   cd android
+#   ANDROID_SERIAL=emulator-5554 ./gradlew.bat :app:connectedDebugAndroidTest --console=plain
+# 完整日志：artifacts/evidence/.t059-emulator.log
+---- 日志关键行 ----
+Starting 178 tests on Medium_Phone_API_36.1(AVD) - 16
+Finished 178 tests on Medium_Phone_API_36.1(AVD) - 16
+BUILD SUCCESSFUL in 1m 37s
+EXITCODE=0
+
+# JUnit 报告（同一轮 Gradle 写出）：
+#   android/app/build/outputs/androidTest-results/connected/debug/TEST-Medium_Phone_API_36.1(AVD) - 16-_app-.xml
+#   head -2 <上面的 xml> -> tests="178" failures="0" errors="0" skipped="0"
+EXITCODE=0
+
+# 结论：同一套 178 个用例、同一份测试 APK、同一份生产代码，
+#       模拟器全绿、真机 4 红——差异只能来自运行环境对 CHECK 文案的构造方式。
+#       这同时证明本片的取码修复对**两种**前缀都成立（模拟器上原来未红的断言现在仍然全绿）。
+
+## 5. 其余自验（裁定前；裁定后的复跑见第 13 节）
+
+# 5.1 全量检查
+# command: cd android && ./gradlew.bat check --console=plain
+# 日志：artifacts/evidence/.t059-check.log
+BUILD SUCCESSFUL in 1m 34s
+295 actionable tasks: 45 executed, 5 from cache, 245 up-to-date
+EXITCODE=0
+
+# 5.2 Java-only 守门（完整模式，含 Gradle 依赖报告与 APK dex 扫描）
+# command: cd android && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/no-kotlin-check.ps1
+# 日志：artifacts/evidence/.t059-nokotlin.log
+VERDICT: PASS (13 OK line(s))
+EXITCODE=0
+
+# 5.3 全量 JVM 单测
+# command: cd android && ./gradlew.bat :core:test :tree-layout:test :ai:test :data:testDebugUnitTest :app:testDebugUnitTest --console=plain
+# 日志：artifacts/evidence/.t059-jvm.log
+BUILD SUCCESSFUL in 12s
+EXITCODE=0
+# 计数（对上面那轮 Gradle 写出的 android/*/build/test-results/*/TEST-*.xml 求和，非手抄）：
+core         suites= 19 tests= 198 failures=0 errors=0
+tree-layout  suites=  3 tests=  34 failures=0 errors=0
+ai           suites=  7 tests=  76 failures=0 errors=0
+data         suites=  5 tests=  30 failures=0 errors=0   （本片新增 ConstraintExtendedCodeTest；原 4 套 / 27 例）
+app          suites= 37 tests= 364 failures=0 errors=0   （验收基线：不低于 suites=37 tests=364 —— 持平）
+TOTAL        suites= 71 tests= 702 failures=0 errors=0
+# 其中 `FirstTopicCreationRulesTest`（JVM 侧同名规则的消费者）在 app 的 364 里，本轮 0 失败。
+EXITCODE=0
+
+# 5.4 任务契约机械校验
+# command: python .trae/scripts/validate_tasks.py
+SUMMARY files=60 errors=0 warnings=19
+EXITCODE=0
+
+## 6. 取码判定只剩一处 —— grep 证据
+
+# 6.1 作业单原样命令（注意：该模式在 GNU grep 的 BRE 下非法，`\(` 是分组起始符）
+# command: grep -rn "\(code \|Sqlite code" android/
+grep: Unmatched ( or \(
+EXITCODE=2
+
+# 6.2 修正后的等价 ERE（同一意图，语法合法）
+# command: grep -rnE "\(code |Sqlite code" android/
+# 结果分类（命中行全部落在下列三类，**没有任何一处是判定逻辑**）：
+#   a) 文档/注释里记录两种实测拼写：
+#        android/data/src/main/java/com/treelearn/data/db/ConstraintExtendedCode.java:22,23,27   （新的唯一判定点，注释）
+#        android/data/src/main/java/com/treelearn/data/db/dao/ConstraintFailures.java:27,28      （委托方，注释）
+#        android/data/src/main/java/com/treelearn/data/db/dao/FirstTopicCreation.java:82,97       （既有实测记录）
+#        android/app/src/androidTest/... 四个套件各 1–2 行 javadoc（记录两种拼写，非匹配逻辑）
+#        android/README.md:243,919,956,969                                                        （文档）
+#   b) 测试作为**输入**的实测样例串（本来就是被测数据，不是匹配规则）：
+#        android/data/src/test/java/com/treelearn/data/db/ConstraintExtendedCodeTest.java:30,35,41,46
+#        android/app/src/test/java/com/treelearn/data/db/dao/FirstTopicCreationRulesTest.java:42,46,105,114,119
+#   c) 无关命中：android/core/.../DomainError.java:12 `code == null`、JsonText.java:287 `code = (code << 4)`
+# 关键判据（唯一判定点）：全仓只有一个「取码正则」
+# command: grep -rn "Pattern.compile" android/ --include=*.java
+android/core/src/main/java/com/treelearn/core/domain/PromptPurpose.java:50:    private static final Pattern SEMVER = Pattern.compile(
+android/data/src/main/java/com/treelearn/data/db/ConstraintExtendedCode.java:41:    private static final Pattern EXTENDED_CODE = Pattern.compile("code ([0-9]+)");
+# -> 取码模式只有一处，且它**不含任何前缀字面量**（这正是「不依赖前缀」的体现：
+#    所以本节的 grep 在判定点上也找不到 `(code `，判定点本身不再拼写任何前缀）。
+# 四个 androidTest 套件里的 `(code `/`Sqlite code` 只剩 javadoc 说明，代码层 0 命中。
+# 注：build/ 与 .gradle/ 下的二进制命中（classes.dex、.class、APK）是编译产物，不是源码。
+EXITCODE=0
+
+## 7. 规模实测（口径：非空非注释；判定值）
+
+# command: python -X utf8 .trae/scripts/dev/count_production_lines.py \
+#            android/data/src/main/java/com/treelearn/data/db/ConstraintExtendedCode.java \
+#            android/data/src/main/java/com/treelearn/data/db/dao/ConstraintFailures.java
+    16  android/data/src/main/java/com/treelearn/data/db/ConstraintExtendedCode.java
+    35  android/data/src/main/java/com/treelearn/data/db/dao/ConstraintFailures.java
+    51  TOTAL (non-blank, non-comment, production files only)
+EXITCODE=0
+# 注意口径：`ConstraintFailures.java` 的 35 是**整个文件**的口径；本片只改了它两行代码。
+# 按口径「新增文件按全部非空非注释行 + 既有文件只按本次改动行」重算（对 git diff 的 added 行做同样剥离，命令与输出）：
+#   python -X utf8 -c "<对 git diff -U0 的 + 行做 strip_java 后计数>"
+   2 changed-code lines  android/data/src/main/java/com/treelearn/data/db/dao/ConstraintFailures.java
+        |import com.treelearn.data.db.ConstraintExtendedCode;
+        |        return ConstraintExtendedCode.of(message(failure));
+EXITCODE=0
+# 判定值 = 16（新增） + 2（改动） = 18 行  <  estimated_production_lines: 40
+# 物理行（仅参考，不作判定）：ConstraintExtendedCode.java 59；测试文件并列——ConstraintExtendedCodeTest 71、
+#   SqliteSchemaInstrumentedTest 1423、AnswerRevisionGenerationOperationDaoInstrumentedTest 699、
+#   ContextSnapshotAiArtifactDaoInstrumentedTest 491、TopicBranchMessageDaoInstrumentedTest 720、
+#   TreeCanvasStoreInstrumentedTest 476、NavigationStoreInstrumentedTest 253。
+# 测试文件不计入规模，上列仅作参考。
+
+## 8. 越界证明
+
+# 8.1 开工前/后 git 状态差集（本片真正新增或改动的路径，命令与输出）
+#   git status --porcelain > /tmp/pretask-status.txt      （开工前，2026-09-22T19:39）
+#   git status --porcelain > artifacts/evidence/.t059-posttask-status.txt   （现在）
+#   python -X utf8 -c "<对两份快照取差集>"   -> 16 条，其中代码 9 条、证据文件 7 条：
+ M android/app/src/androidTest/java/com/treelearn/app/AnswerRevisionGenerationOperationDaoInstrumentedTest.java
+ M android/app/src/androidTest/java/com/treelearn/app/ContextSnapshotAiArtifactDaoInstrumentedTest.java
+ M android/app/src/androidTest/java/com/treelearn/app/NavigationStoreInstrumentedTest.java
+ M android/app/src/androidTest/java/com/treelearn/app/SqliteSchemaInstrumentedTest.java
+ M android/app/src/androidTest/java/com/treelearn/app/TopicBranchMessageDaoInstrumentedTest.java
+ M android/app/src/androidTest/java/com/treelearn/app/TreeCanvasStoreInstrumentedTest.java
+ M android/data/src/main/java/com/treelearn/data/db/dao/ConstraintFailures.java
+?? android/data/src/main/java/com/treelearn/data/db/ConstraintExtendedCode.java
+?? android/data/src/test/java/com/treelearn/data/db/ConstraintExtendedCodeTest.java
+（其余 7 条是本证据目录下的 .t059-*.log/.txt/.t059-*-status.txt）
+EXITCODE=0
+# 差集里没有出现迁移批次（049 的子任务 050–058）的任何领地文件：
+#   无 library/*、无 screen/LibraryScreen.java、无 screen_library*.xml、无 screen_tab_bar.xml、
+#   无 activity_main.xml、无 MainActivity、无 res/drawable/ic_*、无 res/values/*；
+#   也没有 schema / migration 文件（android/data/.../TreeLearnSchema.java 未出现在差集里）。
+# 说明：这些文件在开工前**已经**是 M（迁移批次尚未提交的工作区改动），所以它们既不出现在差集里，
+#   也不能用「未出现在 diff」证明——真正的证明是本片的差集里没有它们。
+
+# 8.2 README 的特殊说明（共享文件，开工前已被迁移批次改动）
+# command: git diff -U0 android/README.md | grep -n "^@@"
+# 相对于 HEAD 的 hunk 里既有迁移批次的段落（~424/436/466/481/727/828 行附近），也有本片新增的三处：
+#   @@ -242,0 +243 @@                -> 持久化入口索引新增 `ConstraintExtendedCode` 表行
+#   @@ -846,0 +917,15 @@            -> 「常用命令」里把 T-052 记下的「目前不是绿的」改为跑测约定
+#   @@ -861,0 +947,27 @@            -> 新增「## 约束错误码与跑测环境」一节
+# 本片只改这三处；README 的其余改动属于迁移批次，未触碰。
+EXITCODE=0
+
+# 8.3 Android 模块启动检查（startup guard）
+# 两个环境都真正启动并渲染：178 个仪器用例里包含 Activity 启动与视图几何断言
+# （AppLaunchInstrumentedTest / BottomTabShellInstrumentedTest 等）并在真机与模拟器上全部通过；
+# 模拟器本轮由本片现场启动（见 4 节），证据捕获后已关闭。
+EXITCODE=0
+
+## 9. CHECK 约束的标识文案（2026-09-22 已裁定：采用两段式证明）
+
+# 裁定记录（正文以任务文件为准）：
+#   .trae/tasks/T-2026-09-22-constraint-codes-and-red-suites-060.md
+#     「## Implementation notes」→「### CHECK 标识文案的裁定（2026-09-22，leader 裁定…）」
+#   裁定要点：
+#     * 运行时 —— 断言「扩展码 = 275 且 拒绝来自该表（messages / branches）」；
+#     * 静态   —— 断言 sqlite_master 的 DDL 声明了该约束的期望片段；
+#     * 正控   —— 同一测试内必须断言合法行被接受；
+#     * 三段合起来是「声明存在 → 该表发生 CHECK 拒绝 → 合法行通过」的三角证明。
+#     * 否决 A（按已知拼写二选一，表达式 或 表名）：那是 || 条件的并集，判别力更弱，
+#       而且把版本差异写进断言，下一轮 Android 再改文案时还会漂。
+#     * 延后 C（给 CHECK 约束起名 CONSTRAINT ck_...）：唯一能恢复「精确到该约束」且
+#       版本无关的结构解，但改 CREATE TABLE DDL、既有库还需重建表，越过本片红线，
+#       记为独立片候选，须由用户另行授权；本片不做。
+#   残余损失（必须如实登记，不得写成「精确到该约束」）：运行时文案不再能证明
+#   「是该表上的哪一条 CHECK 拒绝的」，这部分由上述三角证明承担，不由文案承担。
+#   三角证明三段的落地证据见第 10、11、12 节。
+#
+# 以下 A/B/C 三选项与事实枚举是本片裁定前的原始分析，保留作为这次裁定的依据。
+
+### 9.1 事实（裁定前记录）
+* 真机 4 个失败全部是 `assertCause` 的第二半（`requiredText`）不满足，而不是码值那半：
+  `the failure must name <表达式片段> but was CHECK constraint failed: <表名>`。
+* 同一次失败在 API 36 上文案是**表达式**（`role IN ('USER','AI')`，见
+  artifacts/evidence/T-004-constraint-code-probe.txt 的实测行），在 Android 13 上是**表名**
+  （`messages` / `branches`，见第 3 节真机日志）。
+* 两种文案**无共同片段**：`anchor_start_inclusive` / `last_seen_stable_sequence` / `role = 'AI'` /
+  `source_message_id IS NOT NULL` 都只出现在 API 36 那一侧；`branches` / `messages` 只出现在
+  Android 13 那一侧（API 36 的文案里不含表名）。
+* 受影响的断言共 13 条、分布在 4 个测试方法（第 3 节枚举）。这些断言在作业单的 26 个失败里
+  只贡献了 4 个「方法级」失败，且当时**卡在更早的码值断言上**，所以这段文案依赖从未被看见——
+  本片修好码值那半后它才露出来。
+* CHECK 的这两半都不能靠现有信息替代：对 `messages` 的未知 role 插入，role CHECK 与两条内容
+  CHECK 会**同时**违反（`role='ROBOT'` 无论 content 是否为 NULL，都至少违反两条），所以
+  「哪条 CHECK 拒绝的」在 Android 13 上**无法从文案判定**；`branches` 上同理（锚点 CHECK 与
+  来源 CHECK 都可能命中）。这也是为什么原套件坚持用文案而不是靠 DDL 声明顺序。
+
+### 9.2 三个选项（都需要作者裁定，因为它们都改变断言的形状）
+A. **测试侧接受「两种实测拼写之一」**：`assertCause` 对 CHECK 类允许「命名了表达式片段」**或**
+   「命名了该表」。代价：具体到哪条 CHECK 的判定退化为「该表上的 CHECK」。
+B. **测试侧改为断言 DDL 声明了该约束**：保留「码值 275 + 该表」，把「具体是哪条约束」改为断言
+   `sqlite_master` 的 DDL 里含期望片段（套件已有 `tableDdl/schemaObjectDdl` 读法）。代价：断言
+   从「拒绝来自这条 CHECK」变成「DDL 声明了这条 CHECK + 该表发生了 CHECK 拒绝」，属推断而非直接证据。
+C. **生产侧给 CHECK 约束起名**（`CONSTRAINT ck_... CHECK (...)`）：命名约束在**所有**版本上都
+   报 DDL 自己的名字，才能恢复「精确到哪条约束」的版本无关判据，并让这类漂移结构上不可能再发生。
+   代价：属 schema DDL 变更（且 SQLite 不能 ALTER 一个 CHECK，老库需要重建表迁移），
+   超出本片「不得改 schema / migration」的红线，需要另立一片。
+
+### 9.3 建议
+以 **A** 作为本片的立即解封（改动小、只在测试侧、且保留了「该环境能给出的最强判据」），
+把 **C** 作为后续独立片的候选（若审查认为「精确到哪条 CHECK」必须保留，则只有 C 能做到版本无关）。
+无论选哪一条，`ConstraintFailures.isUniqueOn` 的「码值 + 列名列表」双重判据都不受影响——
+它判的是 UNIQUE，而 UNIQUE 的文案在两种环境上实测一致（真机日志里 `messages.branch_id,
+messages.ordinal`、`branches.topic_id`、`generation_operations.branch_id` 等断言全部通过）。
+
+## 10. 裁定后：真机全量仪器测试（ALP-AN00 / Android 13）—— 第二段 TDD 的 GREEN
+
+# command:
+#   adb -s AWSS013807000356 shell input keyevent KEYCODE_WAKEUP
+#   adb -s AWSS013807000356 shell wm dismiss-keyguard
+#   cd android
+#   ANDROID_SERIAL=AWSS013807000356 ./gradlew.bat :app:connectedDebugAndroidTest --console=plain
+# 完整日志：artifacts/evidence/.t059-real-device-after.log
+---- 日志关键行（行号为日志内的行号）----
+129:Starting 178 tests on ALP-AN00 - 13
+132:Finished 178 tests on ALP-AN00 - 13
+142:BUILD SUCCESSFUL in 1m 8s
+144:EXITCODE=0
+# 失败检查：grep -nE "FAILED" .t059-real-device-after.log  -> 0 行
+# 日志里也没有 "Tests on ... failed" 行（裁定前的那一轮有 "There was 4 failure(s)"）。
+EXITCODE=0
+
+# JUnit 报告（同一轮 Gradle 写出，不是我摘出来的数字）：
+#   android/app/build/outputs/androidTest-results/connected/debug/TEST-ALP-AN00 - 13-_app-.xml
+#   head -2 <上面的 xml>
+#   -> <testsuite name="com.treelearn.app.AnswerRevisionGenerationOperationDaoInstrumentedTest"
+#        tests="178" failures="0" errors="0" skipped="0" time="13.764" ...>
+EXITCODE=0
+
+# 对照：同一条命令在裁定前是 4 failures / EXITCODE=1（第 3 节）。
+# 两次运行之间只改了 androidTest 的断言形状（第 12 节），生产代码与 schema 一字未动（第 14 节）。
+
+## 11. 裁定后：模拟器全量仪器测试（Medium_Phone_API_36.1 / API 36）
+
+# AVD 启动（本轮现启动；命令与自检结果）：
+#   /d/Environment/Android/SDK/emulator/emulator.exe -avd Medium_Phone_API_36.1 -no-boot-anim -no-snapshot-load
+#   adb devices                              -> AWSS013807000356 device 与 emulator-5554 device 同时在线
+#   adb -s emulator-5554 shell getprop sys.boot_completed  -> 1（等待日志 .t059-emulator-wait.log）
+#   adb -s emulator-5554 shell input keyevent KEYCODE_WAKEUP && adb -s emulator-5554 shell wm dismiss-keyguard
+# 说明：两台设备同时在线，因此两次运行都必须用 ANDROID_SERIAL 定向，否则
+#       connectedDebugAndroidTest 会在两台设备上各跑一遍。
+EXITCODE=0
+
+# command:
+#   cd android
+#   ANDROID_SERIAL=emulator-5554 ./gradlew.bat :app:connectedDebugAndroidTest --console=plain
+# 完整日志：artifacts/evidence/.t059-emulator-after.log
+---- 日志关键行 ----
+129:Starting 178 tests on Medium_Phone_API_36.1(AVD) - 16
+133:Finished 178 tests on Medium_Phone_API_36.1(AVD) - 16
+143:BUILD SUCCESSFUL in 1m 15s
+145:EXITCODE=0
+# 失败检查：grep -nE "FAILED" .t059-emulator-after.log  -> 0 行
+EXITCODE=0
+
+# JUnit 报告（同一轮 Gradle 写出）：
+#   android/app/build/outputs/androidTest-results/connected/debug/TEST-Medium_Phone_API_36.1(AVD) - 16-_app-.xml
+#   head -2 <上面的 xml> -> tests="178" failures="0" errors="0" skipped="0"
+EXITCODE=0
+
+# 收尾：证据捕获后已关闭模拟器（adb -s emulator-5554 emu kill -> OK: killing emulator, bye bye）。
+# 两环境同时全绿，且同一份测试 APK、同一份生产代码：这正是「三角证明在三段上都成立」的运行时证据——
+# 若静态那半在某个环境上取不到片段，或正控在某环境上被拒，对应方法就会变红。
+
+## 12. 三角证明三段的落地证据（测试侧，唯一的代码改动是 SqliteSchemaInstrumentedTest.java）
+
+# 文件：android/app/src/androidTest/java/com/treelearn/app/SqliteSchemaInstrumentedTest.java
+# 助手与常量（唯一判定点）：
+#   command: grep -n "CHECK_MARKER = \|message.contains(CHECK_MARKER)\|ddl.contains(declaredCheck)\|private static void assertCheckRefusedOn" <F>
+171:    private static final String CHECK_MARKER = "CHECK constraint failed: ";
+1383:    private static void assertCheckRefusedOn(SQLiteDatabase db, String table, String declaredCheck,
+1388:                message.contains(CHECK_MARKER));
+1392:                ddl.contains(declaredCheck));
+# 三段：
+#   段 1 运行时 —— assertCause(..., CODE_CHECK, null)（码 = 275）＋ 文案含 CHECK_MARKER
+#                    （两环境唯一共享片段）；表名由「本场景刚发出的那条写语句」与「DDL 按该表取」共同固定。
+#   段 2 静态   —— tableDdl(db, table)。contains(declaredCheck)，读的是 sqlite_master 里存的
+#                    CREATE TABLE 原文（TreeLearnSchema.createTable 逐字拼接后建表，故原文即声明）。
+#   段 3 正控   —— 见下方 12.4，由各测试方法自己持有。
+
+# 12.2 全部 8 个调用点（表 + DDL 期望片段）：
+#   command: grep -n "assertCheckRefusedOn(db" <F>
+ 417:        assertCheckRefusedOn(db, "branches", "last_seen_stable_sequence <= latest_stable_sequence",   # unreadHasASingleRepresentationInTheSequencePair
+ 423:        assertCheckRefusedOn(db, "branches", "latest_stable_sequence >= 0",                           #   ”
+ 628:        assertCheckRefusedOn(db, "messages", "role = 'AI' OR (user_content IS NOT NULL",              # messageContentIsConstrainedByRole
+ 636:        assertCheckRefusedOn(db, "messages", "role = 'USER' OR user_content IS NULL",                 #   ”
+ 679:        assertCheckRefusedOn(db, "messages", "role IN ('USER','AI')",                                 # foreignKeysAreEnforcedNotMerelyDeclared
+ 696:        assertCheckRefusedOn(db, "branches", "source_message_id IS NOT NULL",                         #   ”
+ 717:        assertCheckRefusedOn(db, "branches", "parent_id IS NOT NULL",                                 #   ”
+ 797:        assertCheckRefusedOn(db, "branches", "anchor_start_inclusive IS NOT NULL",                    # forkAnchorColumnsAreAllOrNothing（经 assertForkRejected，6 次调用）
+# 8 个调用点 × 覆盖的断言 = 13 条（与第 3 节枚举一致）。
+
+# 12.3 写死的 CHECK 文案断言 —— 全仓 0 处：
+#   command: grep -nE "assertCause\([^;]*CODE_CHECK" <F>
+1385:        assertCause(scenario, message, CODE_CHECK, null);
+#   唯一命中是助手自身那半（requiredText 传 null，不比对任何文案）。
+#   四个方法的 8 个调用点全部经 assertCheckRefusedOn；套件里已无任何 CHECK 文案常量。
+
+# 12.4 正控（四个方法逐个）：
+#   command: grep -n "Positive control\|must be writable\|a legal advance is accepted\|both anchor shapes\|no malformed fork was written\|no refused message may have landed" <F>
+ 428:        assertEquals("a legal advance is accepted", 3, ...)                        # 方法 1 原有，保留
+ 639/649:      // Positive control: ... / assertEquals("both §5.1 shapes must be writable", 2, rowCount(db, "messages"));
+ 650:        assertEquals("no refused message may have landed", 0, rowCountWhere(db, "messages", ...));   # 方法 2 本次补齐
+ 720/730/732:  // Positive controls ... / assertEquals("the legal branch shapes ... must be writable", 2, ...)
+               / assertEquals("the legal message shapes ... must be writable", 2, ...)                # 方法 3 本次补齐
+ 765/781:      assertEquals("both anchor shapes §5.2 allows must be writable", 3, ...)
+               / assertEquals("no malformed fork was written", 3, ...)                            # 方法 4 原有，保留
+
+# 12.5 残余损失（如实登记，不得读成「精确到该约束」）：
+#   运行时文案不再能证明「是该表上的**哪一条** CHECK 拒绝的」。branches 上有 6 条 CHECK、
+#   messages 上有 3 条；这部分由「DDL 已声明该约束」＋「该表确实发生了 CHECK 拒绝」＋
+#   「合法行被接受」三者合起来承担，不由失败文案承担。
+
+## 13. 裁定后：回归与守门复跑
+
+# 13.1 全量检查
+# command: cd android && ./gradlew.bat check --console=plain
+# 日志：artifacts/evidence/.t059-check-after.log
+BUILD SUCCESSFUL in 26s
+295 actionable tasks: 7 executed, 288 up-to-date
+EXITCODE=0
+# lint 任务确实执行（非跳过）：49 行 lint 相关任务行，其中
+#   > Task :data:lint   （日志 362 行）
+#   > Task :app:lint    （日志 384 行）
+
+# 13.2 Java-only 守门（完整模式，含 Gradle 依赖报告与 APK dex 扫描）
+# command: cd android && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/no-kotlin-check.ps1
+# 日志：artifacts/evidence/.t059-nokotlin-after.log
+VERDICT: PASS (13 OK line(s))
+EXITCODE=0
+
+# 13.3 全量 JVM 单测（check 那轮覆盖到；任务均为 UP-TO-DATE，源码未变故未重编）
+# command: cd android && ./gradlew.bat check --console=plain
+# 日志：artifacts/evidence/.t059-check-after.log（单测任务行 303–379）
+#   > Task :app:testDebugUnitTest UP-TO-DATE   等 13 个单测任务行
+# 计数（对 android/*/build/test-results/*/TEST-*.xml 求和，非手抄；脚本见 .t059-jvm-dirs.txt）：
+core         test   suites= 19 tests= 198 failures=0 errors=0
+tree-layout  test   suites=  3 tests=  34 failures=0 errors=0
+ai           testDebugUnitTest / testReleaseUnitTest  各 suites=  7 tests=  76 failures=0 errors=0
+data         testDebugUnitTest / testReleaseUnitTest  各 suites=  5 tests=  30 failures=0 errors=0
+app          testDebugUnitTest / testReleaseUnitTest  各 suites= 37 tests= 364 failures=0 errors=0
+# 与验收基线一致：app testDebugUnitTest = suites=37 tests=364 failures=0（不低于基线）。
+# debug 变体合计 = 19+3+7+5+37 = 71 suites / 198+34+76+30+364 = 702 tests / 0 failures。
+
+# 13.4 任务契约机械校验
+# command: python .trae/scripts/validate_tasks.py
+SUMMARY files=60 errors=0 warnings=19
+EXITCODE=0
+
+## 14. 裁定后：改动面与越界证明
+
+# 14.1 本轮唯一的代码改动：
+#   command: git diff --stat -- android/app/src/androidTest/java/com/treelearn/app/SqliteSchemaInstrumentedTest.java
+ .../app/SqliteSchemaInstrumentedTest.java          | 170 ++++++++++++++++-----
+ 1 file changed, 136 insertions(+), 34 deletions(-)
+# （相对 HEAD 的累计值，含上一轮的 CODE_* 改造；本轮新增的是助手 + 8 个调用点 + 两组正控 + javadoc。）
+
+# 14.2 生产侧与 schema 未动：
+#   command: git status --porcelain -- <TreeLearnSchema.java> <ConstraintExtendedCode.java> <dao/>
+ M android/data/src/main/java/com/treelearn/data/db/dao/ConstraintFailures.java
+?? android/data/src/main/java/com/treelearn/data/db/ConstraintExtendedCode.java
+#   TreeLearnSchema.java 未出现在输出里 -> DDL 与 migration 一字未改（红线守住）；
+#   列出的两条属上一轮的取码修复，本轮没有再次改动（本轮差集里不含它们）。
+
+# 14.3 上一轮交付快照 vs 本轮（差集 = 本轮真正改动的路径）：
+#   command: diff artifacts/evidence/.t059-posttask-status.txt artifacts/evidence/.t059-post-ruling-status.txt
+#   差集里出现的**代码**路径：0 条（SqliteSchemaInstrumentedTest.java 在上一轮快照里已是 M，
+#   因此它不出现在差集里，只能由 14.1 的 diff --stat 证明它仍是本片改动的文件）；
+#   其余全部是本证据目录下的 .t059-*.log/.txt 与本轮生成的汇总文件。
+#   另：差集里出现 8 个 .trae/* 与 AGENTS.md 的改动（68 insertions / 28 deletions，
+#   内容为 communication.md / harness-clarification.md / agents 定义等**规则文档**）——
+#   这些是主会话（leader）在两次交付之间更新的，不在 android 实现者的领地内，本片未触碰；
+#   如实登记以免与「越界」混淆。
+
+# 14.4 临时文件清理：
+#   探测 shell 输出时误建的 .shelltest.txt 已删除（ls: cannot access '.shelltest.txt'）。
+EXITCODE=0
