@@ -4,7 +4,7 @@ id: T-2026-09-22-066
 title: 思考过程 DeepSeek 式披露：流式半折叠、自动折叠、次级样式
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-22-chat-defects-ime-reasoning-fork-062.md
 requirements_confirmed: true
 generated_by: leader
@@ -127,15 +127,15 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Verification report
 
-- Verdict: PARTIAL（verifier 独立复核 2026-09-23：代码与 JVM 层全部通过；流式真机观感待用户自测，上限 PARTIAL）
-- Evidence: verifier 核对——`ChatViewState` 四条展开推导语义用例断言真实（含流式刷新不弹回、完成后保持）；`view_reasoning.xml`:68 ScrollView 限高、:27–30 `tl_line` 左侧竖线、正文 text_sm+tl_ink2 未变；`dimens.xml`:40–41 登记 `reasoning_rule`=2dp、`reasoning_max_height`=320dp；PRD §6.2.19 F18 注记（第 780 行）落地且未改条款。证据 `.t066-red(1)/green(0)/fullregression(0)/assemble(0).log` 全部含 EXITCODE=。verifier 独立重跑全量单测与 assembleDebug 均 EXITCODE=0。
+- Verdict: **PASS**（2026-09-24 复核 #3 收口：代码与 JVM 层此前已由 verifier 独立重跑确认（全量单测与 assembleDebug 均 EXITCODE=0）；唯一悬项「流式真机观感」由用户 2026-09-24 确认自测通过，与 063/065 同批）
+- Evidence: verifier 核对——`ChatViewState` 四条展开推导语义用例断言真实（含流式刷新不弹回、完成后保持）；`view_reasoning.xml`:68 ScrollView 限高、:27–30 `tl_line` 左侧竖线、正文 text_sm+tl_ink2 未变；`dimens.xml`:40–41 登记 `reasoning_rule`=2dp、`reasoning_max_height`=320dp；PRD §6.2.19 F18 注记（第 780 行）落地且未改条款。证据 `.t066-red(1)/green(0)/fullregression(0)/assemble(0).log` 全部含 EXITCODE=。verifier 独立重跑全量单测与 assembleDebug 均 EXITCODE=0；2026-09-24 全量 check 复跑 EXITCODE=0（`P3-B4-gates-2026-09-24.txt`）。
 - Changed/deleted assertion rationale and equivalent behavior coverage: 未删除既有用例；`ReasoningDisclosure` 两参重载经全库核对确认无调用方后删除，等价行为覆盖不变（verifier 核对）。
-- Gaps: 流式观感只能由用户真机自测提供（豁免仪器测试）。
+- Gaps: 已消除——流式观感由用户真机自测提供并确认通过（2026-09-24）。
 - Risks: 轮询刷新（750ms）下展开态重算的渲染成本——行重建是既有的记录内性能风险，本片不扩大它。
 
 ## Handoff notes
 
-- Completed: 待实现。
+- Completed: 思考披露三段式已实现并验证（2026-09-22 落地；本行原为「待实现」，与 TDD 记录/verifier 复核矛盾，2026-09-24 更正）：`ChatViewState.isReasoningEffectivelyExpanded` 状态推导（显式意图 > forming 默认）、`ReasoningDisclosure` 限高滚动 + 左侧竖线、两参重载删除、dimens 双 token 登记、PRD F18 注记。verifier 独立重跑全量单测与 assembleDebug 均 EXITCODE=0。余项仅流式真机观感（用户自测）。
 - In progress: 无。
 - Blocker: 无技术阻塞；执行排在 065 之后（共享 ChatScreen/ChatPresenter 的写冲突）。
 - Unblock condition: 065 verified。

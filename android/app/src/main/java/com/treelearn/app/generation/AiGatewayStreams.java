@@ -41,16 +41,21 @@ public final class AiGatewayStreams implements GenerationGateway {
 
     private final AiGateway gateway;
     private final KeystoreSecretStore secrets;
+    private final String keyProviderId;
 
-    public AiGatewayStreams(AiGateway gateway, KeystoreSecretStore secrets) {
+    public AiGatewayStreams(AiGateway gateway, KeystoreSecretStore secrets, String keyProviderId) {
         if (gateway == null) {
             throw new IllegalArgumentException("gateway must not be null");
         }
         if (secrets == null) {
             throw new IllegalArgumentException("secrets must not be null");
         }
+        if (keyProviderId == null || keyProviderId.trim().isEmpty()) {
+            throw new IllegalArgumentException("keyProviderId must not be blank");
+        }
         this.gateway = gateway;
         this.secrets = secrets;
+        this.keyProviderId = keyProviderId;
     }
 
     @Override
@@ -58,7 +63,8 @@ public final class AiGatewayStreams implements GenerationGateway {
             GenerationSink sink) {
         char[] secret;
         try {
-            secret = secrets.read();
+            secrets.migrateLegacySecret(keyProviderId);
+            secret = secrets.read(keyProviderId);
         } catch (SecretStoreException unreadable) {
             sink.onTerminal(new StreamOutcome(StreamOutcome.Kind.FAILED, AiGatewayError.keyMissing(),
                     0, 0, 0));

@@ -1,0 +1,29 @@
+T-107 + T-108 切片合并门禁复跑证据 — 2026-09-24
+cwd: D:/Project/Android/Treelearn
+
+[RUN] 全量 check（含 :app 单测 / lint / verifyNoKotlinDex / 依赖方向）
+  证据: artifacts/evidence/P3-B4-gates-2026-09-24.txt
+  结果: BUILD SUCCESSFUL，EXITCODE=0（本日新鲜证据；工作树自该次运行后仅改 .md/Docs，
+        生产代码无变更，证据仍绑定当前树）
+
+[RUN] Java-only guard
+  证据: artifacts/evidence/P3-B3-no-kotlin-2026-09-24.txt
+  结果: VERDICT: PASS，EXITCODE=0
+
+[RUN] 设计 token 守门（T-107 验收项 3 组成门）
+  证据: artifacts/evidence/T-048-verify3-2026-09-24.txt [RUN] 节（本日复跑）
+  结果: check_design_tokens: 0 check(s) failed，EXITCODE=0
+
+[SCAN] T-108 wiring 原文扫描（本日实跑，命令与读数如下）
+  new NavigationScreen → MainActivity.java:858
+  NavigationPresenter 构造 → MainActivity.java:859-860（container.navigationData() 注入）
+  SqliteNavigationStore 构造 → AppContainer.java:225；暴露点 AppContainer.java:293 navigationData()
+  三条入口（findViewById 命中）:
+    ChatScreen.java:214        R.id.chat_nav
+    HomeScreen.java:69         R.id.home_archived
+    TreeCanvasScreen.java:71/78 R.id.tree_nav_host / R.id.tree_nav
+  布局 id 落点: screen_chat_body.xml:52、screen_home_body.xml:45、screen_tree_body.xml:53、
+    layout-sw600dp/screen_tree.xml:18
+
+[REF] 任务校验
+  validate_tasks.py: files=108 errors=0（2026-09-24）

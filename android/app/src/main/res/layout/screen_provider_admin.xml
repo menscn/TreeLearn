@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The provider management page (T-087, SPEC-2026-09-23 界面方案): the list mode and the editor
+  mode are two children of one column — the shell swaps the presenter's state, not the page.
+  Every dimension is a token name; no dp value is spelled inline.
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/providers_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/space_s8">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/page_gutter"
+            android:paddingTop="@dimen/space_s4"
+            android:paddingEnd="@dimen/page_gutter">
+
+            <ImageView
+                android:id="@+id/providers_back"
+                android:layout_width="@dimen/touch_min"
+                android:layout_height="@dimen/touch_min"
+                android:layout_marginStart="-8dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/cd_providers_back"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_nav_back"
+                android:tint="@color/tl_green_deep" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_s2"
+                android:layout_weight="1"
+                android:text="@string/providers_title"
+                android:textColor="@color/tl_ink"
+                android:textSize="@dimen/text_h1"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/providers_new"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/touch_min"
+                android:background="@drawable/bg_button_primary"
+                android:minWidth="@dimen/touch_min"
+                android:text="@string/providers_new"
+                android:textColor="@color/tl_surface"
+                android:textSize="@dimen/text_sm" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/providers_empty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="@dimen/space_s6">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/providers_empty"
+                android:textColor="@color/tl_ink2"
+                android:textSize="@dimen/text_body" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/touch_min"
+                android:gravity="center"
+                android:text="@string/providers_empty_guide"
+                android:textColor="@color/tl_green_deep"
+                android:textSize="@dimen/text_sm" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/providers_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/page_gutter"
+            android:paddingTop="@dimen/space_s2"
+            android:paddingEnd="@dimen/page_gutter" />
+
+        <LinearLayout
+            android:id="@+id/provider_editor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_gutter"
+            android:layout_marginTop="@dimen/space_s2"
+            android:layout_marginEnd="@dimen/page_gutter"
+            android:background="@drawable/bg_card"
+            android:elevation="@dimen/card_elevation"
+            android:orientation="vertical"
+            android:padding="@dimen/space_s4"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/providers_editor_section"
+                android:textColor="@color/tl_ink3"
+                android:textSize="@dimen/text_cap" />
+
+            <EditText
+                android:id="@+id/provider_name_input"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/touch_min"
+                android:layout_marginTop="@dimen/space_s2"
+                android:background="@drawable/bg_field"
+                android:hint="@string/editor_name_hint"
+                android:imeOptions="actionNext"
+                android:inputType="text"
+                android:maxLines="1"
+                android:paddingStart="@dimen/space_s3"
+                android:paddingEnd="@dimen/space_s3"
+                android:textColor="@color/tl_ink"
+                android:textColorHint="@color/tl_ink3"
+                android:textSize="@dimen/text_sm" />
+
+            <EditText
+                android:id="@+id/provider_base_input"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/touch_min"
+                android:layout_marginTop="@dimen/space_s2"
+                android:background="@drawable/bg_field"
+                android:hint="@string/editor_base_hint"
+                android:imeOptions="actionNext"
+                android:inputType="textUri"
+                android:maxLines="1"
+                android:paddingStart="@dimen/space_s3"
+                android:paddingEnd="@dimen/space_s3"
+                android:textColor="@color/tl_ink"
+                android:textColorHint="@color/tl_ink3"
+                android:textSize="@dimen/text_sm" />
+
+            <TextView
+                android:id="@+id/provider_key_mask"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_s3"
+                android:textColor="@color/tl_ink"
+                android:textSize="@dimen/text_body" />
+
+            <EditText
+                android:id="@+id/provider_key_input"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/touch_min"
+                android:layout_marginTop="@dimen/space_s2"
+                android:background="@drawable/bg_field"
+                android:hint="@string/editor_key_input_hint"
+                android:imeOptions="actionDone"
+                android:importantForAutofill="no"
+                android:inputType="textPassword"
+                android:maxLines="1"
+                android:paddingStart="@dimen/space_s3"
+                android:paddingEnd="@dimen/space_s3"
+                android:textColor="@color/tl_ink"
+                android:textColorHint="@color/tl_ink3"
+                android:textSize="@dimen/text_sm" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_s3"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/provider_key_save"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/touch_min"
+                    android:background="@drawable/bg_button_primary"
+                    android:minWidth="@dimen/touch_min"
+                    android:text="@string/editor_key_save"
+                    android:textColor="@color/tl_surface"
+                    android:textSize="@dimen/text_sm" />
+
+                <Button
+                    android:id="@+id/provider_key_delete"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/touch_min"
+                    android:layout_marginStart="@dimen/space_s2"
+                    android:background="@drawable/bg_button_danger"
+                    android:minWidth="@dimen/touch_min"
+                    android:text="@string/editor_key_delete"
+                    android:textColor="@color/tl_red"
+                    android:textSize="@dimen/text_sm" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/provider_fetch"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/touch_min"
+                android:layout_marginTop="@dimen/space_s2"
+                android:background="@drawable/bg_button_ghost"
+                android:minWidth="@dimen/touch_min"
+                android:text="@string/editor_fetch"
+                android:textColor="@color/tl_green_deep"
+                android:textSize="@dimen/text_sm" />
+
+            <TextView
+                android:id="@+id/provider_fetch_notice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_s2"
+                android:textColor="@color/tl_amber"
+                android:textSize="@dimen/text_sm"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/provider_notice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_s2"
+                android:textColor="@color/tl_red"
+                android:textSize="@dimen/text_sm"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/provider_save"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/touch_min"
+                android:layout_marginTop="@dimen/space_s3"
+                android:background="@drawable/bg_button_primary"
+                android:minWidth="@dimen/touch_min"
+                android:text="@string/editor_save"
+                android:textColor="@color/tl_surface"
+                android:textSize="@dimen/text_sm" />
+
+            <Button
+                android:id="@+id/provider_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/touch_min"
+                android:layout_marginTop="@dimen/space_s2"
+                android:background="@drawable/bg_button_danger"
+                android:minWidth="@dimen/touch_min"
+                android:text="@string/editor_delete"
+                android:textColor="@color/tl_red"
+                android:textSize="@dimen/text_sm" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

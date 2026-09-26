@@ -4,7 +4,7 @@ id: T-2026-09-20-009
 title: 实现主题与分支生命周期
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -172,6 +172,12 @@ android/data/src/main/java/com/treelearn/data/db/dao/BranchCreation.java
 - anchor offsets 以稳定 answer 字符序列定义，并保存 quote/hash 回退。
 
 ## Verification report
+
+### verifier #3 批量复核（2026-09-24，独立于本任务实现者）
+
+- Verdict: **PASS（设备项 deferred）**。109 行在预算内；前轮 verifier 已核「唯一原子写入口」等判定，本轮无新事实推翻。
+- Fresh evidence（2026-09-24 批次 2）: `artifacts/evidence/P3-B1-gates-2026-09-24.txt`（全模块 JVM 套件 + lint + androidTest 编译，BUILD SUCCESSFUL / EXITCODE=0；全库 188 套件 1725 tests / 0 失败）、`P3-B1-no-kotlin-2026-09-24.txt`（EXITCODE=0）。
+- Gaps（不变，均 deferred）: 设备上的 BranchCreation 行级证据 —— `deferred — 本轮不使用模拟器（用户指令 2026-09-21）`。
 
 > 独立 verifier 复核（verifier #2，2026-09-21 第三轮），只读：未修改任何生产代码、测试或他人证据。
 > 本轮按用户 2026-09-21 指令**不使用模拟器**；需要真机的验收项一律记为

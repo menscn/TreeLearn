@@ -77,7 +77,9 @@ public final class DeepSeekRequestAssembler {
             throw new PromptBuildException(PromptBuildException.Reason.BLANK_CURRENT_INPUT, purpose,
                     "the current user input must not be blank");
         }
-        if (purpose != PromptPurpose.LEARNING_ANSWER && !JsonObjectText.isObject(currentInput)) {
+        if (purpose != PromptPurpose.LEARNING_ANSWER
+                && purpose != PromptPurpose.MESSAGE_TRANSLATION
+                && !JsonObjectText.isObject(currentInput)) {
             throw new PromptBuildException(PromptBuildException.Reason.DERIVED_INPUT_NOT_JSON, purpose,
                     "a derived purpose takes one JSON object built from its structured input, not "
                             + "free text");

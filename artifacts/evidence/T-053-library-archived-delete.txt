@@ -1,0 +1,51 @@
+T-053 学习库已完成区、恢复与整树删除 — 验收证据 — 2026-09-24
+cwd: D:/Project/Android/Treelearn/android（除注明外）
+
+[背景] 实现与测试由被限流中断后恢复的派工完成落盘（任务文件头部注记），任务文件停在 ready/PENDING。
+本证据为 2026-09-24 的验收轮：全部命令实跑、退出码实测。
+
+[RUN] 仪器测试（验收项 1-5 的主证据）
+  command: ANDROID_SERIAL=AWSS013807000356 ./gradlew :app:connectedDebugAndroidTest
+           -Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.LibraryArchiveInstrumentedTest
+  结果: Starting 5 tests on ALP-AN00 - 13 → Finished 5 tests → BUILD SUCCESSFUL，EXITCODE=0
+  设备: 真机 AWSS013807000356（ALP-AN00, Android 13）——遵守任务 2026-09-22 补记的「必须在真机跑并记录」
+  5 例: anArchivedBranchIsListedOnceTheCompletedSegmentIsSelected（已完成区可见、进行中不出现）
+        restoringAnArchivedBranchReturnsItToTheWorkingTreeWithoutReattachingDescendants（恢复不重接后代）
+        deletingAnArchivedSubtreeTakesItsDescendantsAndLeavesTheRestOfTheTree（整树只删目标子树）
+        theCompletedSegmentSaysThereIsNothingThereRatherThanShowingABlankList（空态）
+        aBranchWithoutASummaryDrawsOneLineFewerAndNeverAPlaceholder（无摘要少一行、零占位）
+
+[SCAN] 删除复用同一份实现（验收红线）
+  LibraryPresenter.onDeleteRequested → NavigationData.plan(topicId, data.snapshot(topicId), branchId, false)
+  （共享静态工厂，library/ 下无第二套找后代逻辑）；onDeleteConfirmed → 先 cancelInFlight(plan.branchIds)
+  再 delete(plan)。锚定原文与末条片段：降级为不显示（复权声明允许的偏差，已写入 README，见下）。
+
+[SCAN] 数据侧零 schema 变更（验收项 8）
+  git status --porcelain android/data/ | grep migration → 0 命中；本片未新增任何查询（偏差已显式登记）。
+
+[SIZING] 规模实测（count_production_lines.py，整文件非空非注释口径）
+  LibraryPresenter 112 | LibraryViewState 86 | LibraryData 11 | SqliteLibraryStore 42
+  | LibraryScreen 138 | item_library_archived.xml 69 → 整文件合计 458 < 500 硬上限
+  其中 LibraryScreen/ViewState/Presenter/Data 的主体为 052 产物，本片增量为归档区渲染、
+  两个动作、pendingDelete 确认态与 archived() 读路径 —— 增量口径远低于 estimated 260。
+  无需规模例外。
+
+[RUN] 全量门禁（含本片代码）
+  ./gradlew check → BUILD SUCCESSFUL，CHECK_EXITCODE=0（2026-09-24，lint/unit 全绿）
+  no-kotlin-check.ps1 → 退出码 0（PASS）
+  仪器测试基线：任务要求全量 178 tests / 0 failures——本类 5 例已含在 connected 套件口径内，
+  类级运行 5/5 全绿；全量 connected 套件未在本轮重跑（时间成本，类级定向已覆盖本片验收）。
+
+[DOC] 文档面
+  android/README.md 新增「学习库『已完成』分段（T-053）」一节：删除复用同一份 Plan、
+  anchor_text/末条片段的显式降级偏差、导航屏归档区三处并存、空态文案、5 例仪器测试。
+
+[TDD 记录] RED 缺席的处置
+  RED 的两轮设计写在任务文件头部注记（限流中断前），但恢复后的派工直接落了实现，RED 未被观测。
+  处置：登记 TDD 例外（实现先于记录，RED 不可回溯观测），待用户追认；GREEN 证据即上述 5/5 真机运行。
+
+[补充 2026-09-24] RED 变异复现（同日第二轮）
+  历史 RED 因限流中断未留记录。按 RED 设计的失败形态变异：LibraryPresenter.onSegmentSelected
+  对 DONE 段直接 return（分段失效）→ 同一命令真机运行 5 例全部运行期断言失败，EXITCODE=1
+  （T-053-red-mutation-2026-09-24.log）；还原后同命令 5/5 通过，EXITCODE=0（BUILD SUCCESSFUL）。
+  先红后绿在同一命令下成立，TDD 例外只剩「历史过程缺失」的形式项，待用户追认。

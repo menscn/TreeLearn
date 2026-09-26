@@ -1,0 +1,587 @@
+diff --git a/android/app/src/main/java/com/treelearn/app/AppContainer.java b/android/app/src/main/java/com/treelearn/app/AppContainer.java
+index 8506240..342af62 100644
+--- a/android/app/src/main/java/com/treelearn/app/AppContainer.java
++++ b/android/app/src/main/java/com/treelearn/app/AppContainer.java
+@@ -6,0 +7 @@ import android.os.Looper;
++import com.treelearn.ai.gateway.AiGateway;
+@@ -9,0 +11,2 @@ import com.treelearn.app.generation.AiGatewayStreams;
++import com.treelearn.app.generation.MessageTranslator;
++import com.treelearn.app.generation.QuickModelGateway;
+@@ -44,0 +48,4 @@ import com.treelearn.app.wiring.SqliteLibraryStore;
++import com.treelearn.app.wiring.SqliteModelSettingsStore;
++import com.treelearn.app.wiring.SqliteQuickModelRoutes;
++import com.treelearn.app.wiring.SqliteTranslationRoutes;
++import com.treelearn.app.wiring.SqliteProviderAdminStore;
+@@ -50,0 +58 @@ import com.treelearn.data.db.TreeLearnDatabaseHelper;
++import com.treelearn.data.db.TreeLearnSchema;
+@@ -51,0 +60 @@ import com.treelearn.data.secret.KeystoreSecretStore;
++import com.treelearn.data.settings.SettingsRepository;
+@@ -112,0 +122,9 @@ public final class AppContainer {
++    /** T-087: the provider management screens' single port over the DAOs, keystore and gateway. */
++    private final SqliteProviderAdminStore providerAdminStore;
++
++    /** T-088: the model settings port over the DAOs and the preference file. */
++    private final SqliteModelSettingsStore modelSettingsStore;
++
++    /** T-090: the message-level translation's route point over the same stores and gateway. */
++    private final MessageTranslator messageTranslator;
++
+@@ -126 +144,3 @@ public final class AppContainer {
+-        Clock clock = Clock.systemUTC();
++        // The zone matters for the stats day-cut (T-2026-09-23-102): the learner's own calendar
++        // decides "which day is this". millis() is the same instant either way.
++        Clock clock = Clock.systemDefaultZone();
+@@ -129,2 +149,5 @@ public final class AppContainer {
+-        GenerationGateway gateway = new AiGatewayStreams(DeepSeekGatewayFactory.create(),
+-                new KeystoreSecretStore(applicationContext));
++        // One gateway and one keystore instance also serve the provider admin screen (T-087).
++        AiGateway adminGateway = DeepSeekGatewayFactory.create();
++        KeystoreSecretStore adminSecrets = new KeystoreSecretStore(applicationContext);
++        GenerationGateway gateway = new AiGatewayStreams(adminGateway, adminSecrets,
++                TreeLearnSchema.BUILTIN_DEEPSEEK_PROVIDER_ID);
+@@ -136 +159,32 @@ public final class AppContainer {
+-        this.derivedService = new DerivedService(helper, transactions, gateway, budget, clock);
++        // T-088: the model settings port over the DAOs and the preference file, built before the
++        // derived service so the fast-model route below can read it.
++        this.modelSettingsStore = new SqliteModelSettingsStore(helper,
++                new SettingsRepository(applicationContext));
++        // T-089: the derived chain's single fast-model route point. The read is 088's shared
++        // fallback judgment (read(Role.FAST)); a null route 鈥?nothing configured, or the provider
++        // row gone 鈥?keeps the legacy path above, so an unconfigured fast model changes nothing.
++        // The legacy builtin provider keeps its lazy key migration here too; a user provider's key
++        // must never receive the legacy entry, so the migration stays guarded by the builtin id.
++        SqliteQuickModelRoutes quickModelRoutes =
++                new SqliteQuickModelRoutes(helper, modelSettingsStore);
++        GenerationGateway derivedGateway = new QuickModelGateway(quickModelRoutes,
++                providerId -> {
++                    if (TreeLearnSchema.BUILTIN_DEEPSEEK_PROVIDER_ID.equals(providerId)) {
++                        adminSecrets.migrateLegacySecret(providerId);
++                    }
++                    return adminSecrets.read(providerId);
++                }, adminGateway::streamChat, gateway);
++        this.derivedService = new DerivedService(helper, transactions, derivedGateway, budget,
++                clock);
++        // T-090: the message-level translation's single route point. The read is 088's shared
++        // fallback judgment (read(Role.TRANSLATION)); a null route - or a key that cannot be read -
++        // keeps the legacy chat gateway above (鏈厤缈昏瘧妯″瀷鍥炶惤鑱婂ぉ妯″瀷), and a routed call that
++        // fails reports failure to the learner instead of a hidden second spend.
++        this.messageTranslator = new MessageTranslator(
++                new SqliteTranslationRoutes(helper, modelSettingsStore),
++                providerId -> {
++                    if (TreeLearnSchema.BUILTIN_DEEPSEEK_PROVIDER_ID.equals(providerId)) {
++                        adminSecrets.migrateLegacySecret(providerId);
++                    }
++                    return adminSecrets.read(providerId);
++                }, adminGateway::streamChat, gateway, budget);
+@@ -139,0 +194,2 @@ public final class AppContainer {
++        // T-088: the answer-suggestions switch gates only ANSWER_RECOMMENDATIONS (079 鎷嶆澘 鈶?;
++        // the supplier is read per derived run so a flip takes effect on the next read.
+@@ -141 +197 @@ public final class AppContainer {
+-                derivedService);
++                derivedService, modelSettingsStore::readSuggestions);
+@@ -152,0 +209,4 @@ public final class AppContainer {
++        // T-087: the provider management screen's single port, holding the same transaction
++        // boundary and keystore the rest of the app writes through.
++        this.providerAdminStore = new SqliteProviderAdminStore(helper, transactions,
++                adminSecrets, adminGateway, clock);
+@@ -240,0 +301,15 @@ public final class AppContainer {
++    /** The provider management port: provider/model rows, per-provider keys and the model fetch. */
++    public SqliteProviderAdminStore providerAdminStore() {
++        return providerAdminStore;
++    }
++
++    /** The model settings port (T-088): the three roles, the budget tier, the suggestions switch. */
++    public SqliteModelSettingsStore modelSettingsStore() {
++        return modelSettingsStore;
++    }
++
++    /** The message translation port (T-090): the translation-role route over the same gateway. */
++    public MessageTranslator messageTranslator() {
++        return messageTranslator;
++    }
++
+diff --git a/android/app/src/main/java/com/treelearn/app/MainActivity.java b/android/app/src/main/java/com/treelearn/app/MainActivity.java
+index 5d8a7cc..460a334 100644
+--- a/android/app/src/main/java/com/treelearn/app/MainActivity.java
++++ b/android/app/src/main/java/com/treelearn/app/MainActivity.java
+@@ -24,0 +25 @@ import com.treelearn.app.screen.LibraryScreen;
++import com.treelearn.app.screen.ModelSettingsScreen;
+@@ -25,0 +27 @@ import com.treelearn.app.screen.NavigationScreen;
++import com.treelearn.app.screen.ProviderAdminScreen;
+@@ -43,0 +46,2 @@ import com.treelearn.app.ui.HomeViewState;
++import com.treelearn.app.ui.ModelSettingsPresenter;
++import com.treelearn.app.ui.ProviderAdminPresenter;
+@@ -50,0 +55 @@ import com.treelearn.core.domain.AnswerRevision;
++import com.treelearn.core.domain.GenerationModel;
+@@ -131,0 +137,11 @@ public final class MainActivity extends Activity
++    /**
++     * The provider management page (T-087) and its decisions; null while the page is not on screen.
++     * Built per visit like every other second-level screen, always on top of the settings page.
++     */
++    private ProviderAdminScreen providerAdminScreen;
++    private ProviderAdminPresenter providerAdminPresenter;
++
++    /** The model settings page (T-088); built per visit, always on top of the settings page. */
++    private ModelSettingsScreen modelSettingsScreen;
++    private ModelSettingsPresenter modelSettingsPresenter;
++
+@@ -157,0 +174,2 @@ public final class MainActivity extends Activity
++        settingsScreen.setOnProvidersPressed(this::showProviders);
++        settingsScreen.setOnModelsPressed(this::showModels);
+@@ -240,0 +259,7 @@ public final class MainActivity extends Activity
++        // T-087/T-088: the provider and model pages are a second level of the settings page, so
++        // back steps up one level first 鈥?the settings page (and whichever tab it stands on) stays
++        // underneath.
++        if (providerAdminScreen != null || modelSettingsScreen != null) {
++            showSettings();
++            return;
++        }
+@@ -261,0 +287,5 @@ public final class MainActivity extends Activity
++            // T-077: an open fullscreen editor consumes back first - back closes it, saving the
++            // draft, and never leaves the branch under the learner (073 搂5.1).
++            if (chatScreen != null && chatScreen.onSystemBack()) {
++                return;
++            }
+@@ -512,0 +543,4 @@ public final class MainActivity extends Activity
++        providerAdminScreen = null;
++        providerAdminPresenter = null;
++        modelSettingsScreen = null;
++        modelSettingsPresenter = null;
+@@ -514,0 +549,79 @@ public final class MainActivity extends Activity
++        refreshProvidersSubtitle();
++        refreshModelsSubtitle();
++    }
++
++    /**
++     * Opens the provider management page (T-087) from the settings entry. Built here and dropped
++     * when the settings page is shown again, so the list is read fresh on each visit; the back
++     * move lands on the settings page, which the subtitle refresh keeps current.
++     */
++    private void showProviders() {
++        providerAdminScreen = new ProviderAdminScreen(this);
++        providerAdminPresenter = new ProviderAdminPresenter(providerAdminScreen,
++                container.uiThread(), container.background(), container.providerAdminStore());
++        providerAdminScreen.setActions(providerAdminPresenter);
++        providerAdminScreen.setOnBackPressed(this::onBackRequested);
++        swap(providerAdminScreen);
++        providerAdminPresenter.start();
++    }
++
++    /** The settings entry's 銆屽凡鍚敤 N 瀹躲€?subtitle, read off the UI thread like every other read. */
++    private void refreshProvidersSubtitle() {
++        container.background().execute(() -> {
++            int enabled = 0;
++            for (ProviderAdminPresenter.Row row : container.providerAdminStore().list()) {
++                if (row.enabled) {
++                    enabled++;
++                }
++            }
++            final int count = enabled;
++            container.uiThread().post(() -> {
++                if (providerAdminScreen == null) {
++                    settingsScreen.setProvidersSubtitle(
++                            getString(R.string.providers_entry_enabled_count, count));
++                }
++            });
++        });
++    }
++
++    /**
++     * Opens the model settings page (T-088). Built here and dropped when the settings page is
++     * shown again, so the roles are read fresh on each visit; the back move lands on settings.
++     */
++    private void showModels() {
++        modelSettingsScreen = new ModelSettingsScreen(this);
++        modelSettingsPresenter = new ModelSettingsPresenter(modelSettingsScreen,
++                container.uiThread(), container.background(), container.modelSettingsStore());
++        modelSettingsScreen.setActions(modelSettingsPresenter);
++        modelSettingsScreen.setOnBackPressed(this::onBackRequested);
++        swap(modelSettingsScreen);
++        modelSettingsPresenter.start();
++    }
++
++    /**
++     * T-090: the conversation presenter's translation port over the container's route point. The
++     * adapter is the whole bridge between the two contracts - the presenter stays free of the
++     * generation package, and the route point stays free of view-state concerns.
++     */
++    private ChatPresenter.Translator translationPort() {
++        return new ChatPresenter.Translator() {
++            @Override
++            public void translate(GenerationModel fallbackModel, String sourceText,
++                    ChatPresenter.Translator.Callback callback) {
++                container.messageTranslator().translate(fallbackModel, sourceText,
++                        callback::onFinished);
++            }
++        };
++    }
++
++    /** The model settings entry's subtitle: the chat role's current model (spec 鐣岄潰鏂规). */
++    private void refreshModelsSubtitle() {
++        container.background().execute(() -> {
++            final String label =
++                    container.modelSettingsStore().read(ModelSettingsPresenter.Role.CHAT).label;
++            container.uiThread().post(() -> {
++                if (modelSettingsScreen == null && !label.isEmpty()) {
++                    settingsScreen.setModelsSubtitle(label);
++                }
++            });
++        });
+@@ -585 +698 @@ public final class MainActivity extends Activity
+-                container.chatDraftStore());
++                container.chatDraftStore(), translationPort());
+diff --git a/android/app/src/main/java/com/treelearn/app/screen/AnswerActionBar.java b/android/app/src/main/java/com/treelearn/app/screen/AnswerActionBar.java
+index 3610b55..678d35e 100644
+--- a/android/app/src/main/java/com/treelearn/app/screen/AnswerActionBar.java
++++ b/android/app/src/main/java/com/treelearn/app/screen/AnswerActionBar.java
+@@ -29 +29 @@ public final class AnswerActionBar extends LinearLayout {
+-    /** The six gestures the row can report. */
++    /** The seven gestures the row can report. */
+@@ -42,0 +43,3 @@ public final class AnswerActionBar extends LinearLayout {
++
++        /** T-090: the translate entry; the presenter decides whether a run may start. */
++        void onTranslatePressed(String messageId);
+@@ -49,0 +53 @@ public final class AnswerActionBar extends LinearLayout {
++    private final Button translate;
+@@ -64,0 +69 @@ public final class AnswerActionBar extends LinearLayout {
++        translate = findViewById(R.id.act_translate);
+@@ -68,0 +74 @@ public final class AnswerActionBar extends LinearLayout {
++        translate.setContentDescription(getContext().getString(R.string.cd_act_translate));
+@@ -74,0 +81 @@ public final class AnswerActionBar extends LinearLayout {
++        translate.setOnClickListener(view -> fire(target -> target.onTranslatePressed(messageId)));
+@@ -87,0 +95 @@ public final class AnswerActionBar extends LinearLayout {
++        translate.setEnabled(message.canTranslate());
+diff --git a/android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java b/android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java
+index 517e201..3d012c2 100644
+--- a/android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java
++++ b/android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java
+@@ -16,0 +17 @@ import android.widget.EditText;
++import android.widget.ImageView;
+@@ -95,0 +97,5 @@ public final class ChatScreen extends LinearLayout {
++    /** T-077: the fullscreen editor (073 搂5.1) - the entry key and the overlay it opens. */
++    private final ImageView fullscreenEntry;
++    private final View fullscreen;
++    private final TextView fullscreenQuote;
++    private final EditText fullscreenDraft;
+@@ -107,0 +114,5 @@ public final class ChatScreen extends LinearLayout {
++    /** T-077: what the last render said about the overlay, so a sentence and a focus fire once. */
++    private boolean renderedFullscreen;
++    private boolean fullscreenEntryAvailable;
++    /** Why the entry is grey: an archived branch or a missing key, named on a grey tap. */
++    private int fullscreenEntryHint;
+@@ -147,0 +159,4 @@ public final class ChatScreen extends LinearLayout {
++        fullscreenEntry = findViewById(R.id.chat_expand);
++        fullscreen = findViewById(R.id.chat_fullscreen);
++        fullscreenQuote = findViewById(R.id.chat_fullscreen_quote);
++        fullscreenDraft = findViewById(R.id.chat_fullscreen_draft);
+@@ -149,14 +164 @@ public final class ChatScreen extends LinearLayout {
+-        draft.addTextChangedListener(new TextWatcher() {
+-            @Override
+-            public void beforeTextChanged(CharSequence text, int start, int count, int after) {
+-            }
+-
+-            @Override
+-            public void onTextChanged(CharSequence text, int start, int before, int count) {
+-            }
+-
+-            @Override
+-            public void afterTextChanged(Editable text) {
+-                fire(actions -> actions.onDraftChanged(text.toString()));
+-            }
+-        });
++        draft.addTextChangedListener(draftForwarder());
+@@ -181,0 +184,15 @@ public final class ChatScreen extends LinearLayout {
++        // T-077: the entry key opens the overlay only when the state allows it; a grey tap names
++        // the blocked reason instead (archived, or no key), which is the feedback 073 搂5.1 asks for.
++        fullscreenEntry.setOnClickListener(view -> fire(actions -> {
++            if (fullscreenEntryAvailable) {
++                actions.onFullscreenEditOpened();
++            } else if (fullscreenEntryHint != 0) {
++                Toast.makeText(getContext(), fullscreenEntryHint, Toast.LENGTH_SHORT).show();
++            }
++        }));
++        fullscreenDraft.addTextChangedListener(draftForwarder());
++        // Done, cancel, close and the system back all save-and-close: one action for the four.
++        for (int id : new int[]{R.id.chat_fullscreen_close, R.id.chat_fullscreen_cancel,
++                R.id.chat_fullscreen_done}) {
++            findViewById(id).setOnClickListener(v -> fire(a -> a.onFullscreenEditClosed()));
++        }
+@@ -258,0 +276 @@ public final class ChatScreen extends LinearLayout {
++            renderFullscreen(state);
+@@ -445,0 +464,48 @@ public final class ChatScreen extends LinearLayout {
++    /**
++     * T-077: the fullscreen editor (073 搂5.1). The overlay covers the conversation without moving
++     * a hit box underneath it; the entry key reads its availability from the state, and the open
++     * and close transitions each announce once - to TalkBack regardless of the low-motion switch
++     * (搂7), which is also why there is no transition to mute.
++     */
++    private void renderFullscreen(ChatViewState state) {
++        fullscreenEntryAvailable = state.fullscreenEditEntryAvailable();
++        fullscreenEntryHint = state.archived ? R.string.chat_draft_hint_archived
++                : !state.keyConfigured ? R.string.chat_draft_hint_no_key : 0;
++        fullscreenEntry.setColorFilter(getContext().getColor(fullscreenEntryAvailable
++                ? R.color.tl_green_deep : R.color.tl_ink3));
++        fullscreen.setVisibility(state.fullscreenEditing ? VISIBLE : GONE);
++        if (state.fullscreenEditing) {
++            boolean quoted = !state.quote.isEmpty();
++            fullscreenQuote.setVisibility(quoted ? VISIBLE : GONE);
++            fullscreenQuote.setText(quoted
++                    ? getContext().getString(R.string.chat_quoted, state.quote) : "");
++            if (!state.draft.contentEquals(fullscreenDraft.getText())) {
++                fullscreenDraft.setText(state.draft);
++                fullscreenDraft.setSelection(fullscreenDraft.getText().length());
++            }
++            if (!renderedFullscreen) {
++                fullscreenDraft.requestFocus();
++                announceForAccessibility(getContext().getString(R.string.chat_fullscreen_entered));
++            }
++        } else if (renderedFullscreen) {
++            announceForAccessibility(getContext().getString(R.string.chat_fullscreen_exited));
++            draft.requestFocus();
++            draft.setSelection(draft.getText().length());
++        }
++        renderedFullscreen = state.fullscreenEditing;
++    }
++
++    /**
++     * T-077: the host asks before it navigates away, and an open overlay consumes the back gesture
++     * first - back is a save-and-close, never a leave-the-branch (073 搂5.1).
++     *
++     * @return whether the fullscreen editor was open and has now been closed
++     */
++    public boolean onSystemBack() {
++        if (!renderedFullscreen) {
++            return false;
++        }
++        fire(actions -> actions.onFullscreenEditClosed());
++        return true;
++    }
++
+@@ -449,2 +515 @@ public final class ChatScreen extends LinearLayout {
+-     */
+-    private void renderFollow(ChatViewState state) {
++     */    private void renderFollow(ChatViewState state) {
+@@ -517,0 +583,22 @@ public final class ChatScreen extends LinearLayout {
++    /**
++     * The composer's box and the fullscreen editor's box forward every keystroke through the same
++     * {@code onDraftChanged} - the one write path 076 built, so the store always holds the whole
++     * composer, from whichever box the learner is typing into (073 搂5.1).
++     */
++    private TextWatcher draftForwarder() {
++        return new TextWatcher() {
++            @Override
++            public void beforeTextChanged(CharSequence text, int start, int count, int after) {
++            }
++
++            @Override
++            public void onTextChanged(CharSequence text, int start, int before, int count) {
++            }
++
++            @Override
++            public void afterTextChanged(Editable text) {
++                fire(actions -> actions.onDraftChanged(text.toString()));
++            }
++        };
++    }
++
+@@ -577,0 +665,4 @@ public final class ChatScreen extends LinearLayout {
++        /** T-090: the translation display and its two parts. */
++        private final View translation;
++        private final TextView translationHeader;
++        private final TextView translationText;
+@@ -580,0 +672 @@ public final class ChatScreen extends LinearLayout {
++        private ChatViewState lastState;
+@@ -600,0 +693,3 @@ public final class ChatScreen extends LinearLayout {
++            translation = root.findViewById(R.id.chat_translation);
++            translationHeader = root.findViewById(R.id.chat_translation_header);
++            translationText = root.findViewById(R.id.chat_translation_text);
+@@ -603,0 +699,9 @@ public final class ChatScreen extends LinearLayout {
++            // T-090: the header's gesture depends on the state it draws - a failed run's header is
++            // the retry (鍙噸璇?, a finished one's is the fold toggle. The presenter re-judges both.
++            translationHeader.setOnClickListener(view -> fire(actions -> {
++                if (lastState != null && lastState.translationFailed(messageId)) {
++                    actions.onTranslatePressed(messageId);
++                } else {
++                    actions.onTranslationToggled(messageId);
++                }
++            }));
+@@ -636,0 +741 @@ public final class ChatScreen extends LinearLayout {
++            renderTranslation(state, message);
+@@ -665,0 +771,26 @@ public final class ChatScreen extends LinearLayout {
++        /** T-090: the璇戞枃鍖? drawn from the state alone - run, failure, or finished text. */
++        private void renderTranslation(ChatViewState state, ChatMessage message) {
++            boolean visible = state.translationVisible(message.messageId);
++            translation.setVisibility(visible ? VISIBLE : GONE);
++            if (!visible) {
++                translationHeader.setText("");
++                translationText.setText("");
++                return;
++            }
++            if (state.isTranslating(message.messageId)) {
++                translationHeader.setText(R.string.chat_translation_running);
++                translationText.setVisibility(GONE);
++                return;
++            }
++            if (state.translationFailed(message.messageId)) {
++                translationHeader.setText(R.string.chat_translation_failed);
++                translationText.setVisibility(GONE);
++                return;
++            }
++            boolean expanded = state.translationExpanded(message.messageId);
++            translationHeader.setText(getContext().getString(expanded
++                    ? R.string.chat_translation_collapse : R.string.chat_translation_expand));
++            translationText.setVisibility(expanded ? VISIBLE : GONE);
++            translationText.setText(state.translationText(message.messageId));
++        }
++
+@@ -756,0 +888,5 @@ public final class ChatScreen extends LinearLayout {
++        @Override
++        public void onTranslatePressed(String id) {
++            fire(actions -> actions.onTranslatePressed(id));
++        }
++
+diff --git a/android/app/src/main/res/layout/item_chat_message.xml b/android/app/src/main/res/layout/item_chat_message.xml
+index a539be9..5929323 100644
+--- a/android/app/src/main/res/layout/item_chat_message.xml
++++ b/android/app/src/main/res/layout/item_chat_message.xml
+@@ -187,0 +188,33 @@
++        <!-- T-090: the translation display. A derived presentation below the answer, never a
++             replacement for it: the header folds and unfolds (44dp), and the body only shows a
++             finished translation. -->
++        <LinearLayout
++            android:id="@+id/chat_translation"
++            android:layout_width="match_parent"
++            android:layout_height="wrap_content"
++            android:layout_marginTop="@dimen/space_s3"
++            android:background="@drawable/bg_card"
++            android:backgroundTint="@color/tl_green_faint"
++            android:orientation="vertical"
++            android:paddingStart="@dimen/space_s3"
++            android:paddingEnd="@dimen/space_s3"
++            android:paddingTop="@dimen/space_s1"
++            android:paddingBottom="@dimen/space_s3"
++            android:visibility="gone">
++
++            <TextView
++                android:id="@+id/chat_translation_header"
++                android:layout_width="match_parent"
++                android:layout_height="@dimen/touch_min"
++                android:gravity="center_vertical"
++                android:textColor="@color/tl_green_deep"
++                android:textSize="@dimen/text_cap" />
++
++            <TextView
++                android:id="@+id/chat_translation_text"
++                android:layout_width="match_parent"
++                android:layout_height="wrap_content"
++                android:textColor="@color/tl_ink2"
++                android:textSize="@dimen/text_sm" />
++        </LinearLayout>
++
+diff --git a/android/app/src/main/res/layout/view_answer_actions.xml b/android/app/src/main/res/layout/view_answer_actions.xml
+index d155f92..32e3266 100644
+--- a/android/app/src/main/res/layout/view_answer_actions.xml
++++ b/android/app/src/main/res/layout/view_answer_actions.xml
+@@ -97,0 +98,17 @@
++    <Button
++        android:id="@+id/act_translate"
++        android:layout_width="wrap_content"
++        android:layout_height="@dimen/touch_min"
++        android:layout_marginStart="@dimen/space_s2"
++        android:background="?android:attr/selectableItemBackgroundBorderless"
++        android:contentDescription="@string/cd_act_translate"
++        android:drawableStart="@drawable/ic_action_translate"
++        android:drawableTint="@color/tl_ink3"
++        android:drawablePadding="0dp"
++        android:minWidth="@dimen/touch_min"
++        android:paddingStart="10dp"
++        android:paddingEnd="10dp"
++        android:text=""
++        android:textColor="@color/tl_ink3"
++        android:textSize="@dimen/text_cap" />
++
+diff --git a/android/app/src/main/res/values/strings.xml b/android/app/src/main/res/values/strings.xml
+index 72acc0a..8ecd294 100644
+--- a/android/app/src/main/res/values/strings.xml
++++ b/android/app/src/main/res/values/strings.xml
+@@ -69,0 +70,4 @@
++    <string name="home_heat_streak">杩炵画瀛︿範 %1$d 澶?/string>
++    <string name="home_heat_empty">杩樻病鏈夊涔犺褰曪紝浠庣涓€涓棶棰樺紑濮嬪惂</string>
++    <string name="home_heat_cd">鏈€杩?14 澶╁涔犵儹搴︼紝鐐规寜鏌ョ湅缁熻</string>
++    <string name="home_heat_cells_cd">鏈€杩?14 澶╁涔犵儹搴︽牸鍥?/string>
+@@ -111,0 +116,60 @@
++    <!--
++      Provider management (T-087, SPEC-2026-09-23 鐣岄潰鏂规). One sentence per failure category;
++      no string here ever carries a key 鈥?the editor shows the presenter's mask only.
++    -->
++    <string name="providers_title">鎻愪緵鍟嗙鐞?/string>
++    <string name="providers_new">鏂板缓</string>
++    <string name="providers_empty">杩樻病鏈夋彁渚涘晢</string>
++    <string name="providers_empty_guide">鐐瑰彸涓婅銆屾柊寤恒€嶆帴鍏ョ涓€涓ā鍨嬫湇鍔?鈫?/string>
++    <string name="providers_entry_title">鎻愪緵鍟嗙鐞?/string>
++    <string name="providers_entry_sub">绠＄悊澶氭彁渚涘晢涓?API Key</string>
++    <string name="providers_entry_enabled_count">宸插惎鐢?%1$d 瀹?/string>
++    <string name="providers_row_models">%1$d 涓ā鍨?/string>
++    <string name="providers_row_nokey">鏈厤 Key</string>
++    <string name="providers_editor_section">OPENAI 鍏煎妯℃澘</string>
++    <string name="editor_name_hint">鍚嶇О锛屼緥濡?DeepSeek</string>
++    <string name="editor_base_hint">鍩哄潃锛屼緥濡?https://api.deepseek.com</string>
++    <string name="editor_key_none">鏈厤缃?Key</string>
++    <string name="editor_key_input_hint">绮樿创鏂扮殑 API Key</string>
++    <string name="editor_key_save">淇濆瓨 Key</string>
++    <string name="editor_key_delete">鍒犻櫎 Key</string>
++    <string name="editor_fetch">鎷夊彇妯″瀷</string>
++    <string name="editor_fetching">姝ｅ湪鎷夊彇鈥?/string>
++    <string name="editor_fetch_added">鎷夊彇鎴愬姛锛屽凡鏂板 %1$d 涓ā鍨嬨€?/string>
++    <string name="editor_fetch_failed">鎷夊彇澶辫触锛屾鏌ュ熀鍧€涓?Key 鍚庡彲閲嶈瘯锛涘凡淇濆瓨鐨勬ā鍨嬩笉鍙楀奖鍝嶃€?/string>
++    <string name="editor_save">淇濆瓨</string>
++    <string name="editor_delete">鍒犻櫎鎻愪緵鍟?/string>
++    <string name="editor_notice_name_required">璇峰厛杈撳叆鍚嶇О銆?/string>
++    <string name="editor_notice_name_taken">鍚嶇О涓庣幇鏈夋彁渚涘晢閲嶅浜嗐€?/string>
++    <string name="editor_notice_base_required">鍩哄潃蹇呴』鏄?https:// 寮€澶寸殑瀹屾暣鍦板潃銆?/string>
++    <string name="editor_notice_key_required">璇峰厛杈撳叆 Key銆?/string>
++    <string name="editor_notice_key_save_failed">淇濆瓨澶辫触锛氭湰鏈哄瘑閽ュ簱鎷掔粷浜嗗啓鍏ワ紝璇烽噸璇曘€?/string>
++    <string name="providers_delete_title">鍒犻櫎鎻愪緵鍟嗭紵</string>
++    <string name="providers_delete_body">灏嗗垹闄ゃ€?1$s銆嶅強鍏跺叏閮ㄦā鍨嬶紝鍒犻櫎鍚庝笉鍙仮澶嶃€?/string>
++    <string name="providers_delete_last">鍒犻櫎鍚庡皢娌℃湁鍚敤涓殑鎻愪緵鍟嗭紝鍙戦€佷細琚樆姝€?/string>
++    <string name="providers_delete_ok">鍒犻櫎</string>
++    <string name="cd_providers_back">杩斿洖</string>
++    <string name="cd_providers_new">鏂板缓鎻愪緵鍟?/string>
++    <string name="cd_providers_switch">鍚敤鎴栧仠鐢ㄨ鎻愪緵鍟?/string>
++
++    <!-- Model settings (T-088, SPEC-2026-09-23 鐣岄潰鏂规) -->
++    <string name="models_entry_title">妯″瀷璁剧疆</string>
++    <string name="models_entry_sub">鑱婂ぉ / 蹇€?/ 缈昏瘧鍒嗗伐涓庢€濊€冮绠?/string>
++    <string name="models_title">妯″瀷璁剧疆</string>
++    <string name="models_role_chat">鑱婂ぉ妯″瀷</string>
++    <string name="models_role_fast">蹇€熸ā鍨?/string>
++    <string name="models_role_translation">缈昏瘧妯″瀷</string>
++    <string name="models_budget_label">鎬濊€冮绠?/string>
++    <string name="models_budget_off">鍏?/string>
++    <string name="models_budget_auto">鑷姩</string>
++    <string name="models_budget_low">浣?/string>
++    <string name="models_budget_mid">涓?/string>
++    <string name="models_budget_high">楂?/string>
++    <string name="models_suggestions">鑱婂ぉ寤鸿</string>
++    <string name="models_suggestions_sub">鍥炵瓟涓嬫柟鐢熸垚鎺ㄨ崘闂锛涢椤垫帹鑽愪笉鍙楁寮€鍏虫帶鍒躲€?/string>
++    <string name="models_unselected">鏈€夋嫨</string>
++    <string name="models_notice_none">娌℃湁鍙敤妯″瀷锛岃鍏堝湪銆屾彁渚涘晢绠＄悊銆嶆柊寤烘彁渚涘晢骞舵媺鍙栨ā鍨嬨€?/string>
++    <string name="models_notice_fallback">鎵€閫夋ā鍨嬪凡涓嶅彲鐢紝宸插洖钀藉埌鍙敤妯″瀷锛涜閲嶆柊閫夋嫨銆?/string>
++    <string name="cd_models_back">杩斿洖</string>
++    <string name="cd_models_switch">寮€鍏宠亰澶╁缓璁?/string>
++
+@@ -167,0 +232,8 @@
++    <!-- T-077: the fullscreen editor (073 搂5.1) - title, actions, entry key and announcements. -->
++    <string name="chat_fullscreen_title">缂栬緫鎻愰棶</string>
++    <string name="chat_fullscreen_cancel">鍙栨秷</string>
++    <string name="chat_fullscreen_done">瀹屾垚</string>
++    <string name="cd_chat_fullscreen_edit">鍏ㄥ睆缂栬緫</string>
++    <string name="cd_chat_fullscreen_close">鍏抽棴鍏ㄥ睆缂栬緫</string>
++    <string name="chat_fullscreen_entered">宸茶繘鍏ュ叏灞忕紪杈?/string>
++    <string name="chat_fullscreen_exited">宸茶繑鍥炲璇?/string>
+@@ -235,0 +308,5 @@
++    <string name="cd_act_translate">缈昏瘧涓轰腑鏂?/string>
++    <string name="chat_translation_expand">灞曞紑璇戞枃</string>
++    <string name="chat_translation_collapse">鏀惰捣璇戞枃</string>
++    <string name="chat_translation_running">缈昏瘧涓€?/string>
++    <string name="chat_translation_failed">缈昏瘧澶辫触锛岀偣鍑婚噸璇?/string>

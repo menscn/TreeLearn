@@ -1,0 +1,38 @@
+T-2026-09-23-085 RED evidence (2026-09-23)
+
+Command:
+  cd android && ./gradlew :ai:testDebugUnitTest --tests 'com.treelearn.ai.gateway.*'
+Exit code: 1
+
+RED capture method (honest note):
+  The working tree already carried this task's :ai main changeset from the same
+  task session. To capture the failing-first run faithfully, the T-085 main
+  changeset was temporarily reverted (AiGateway.java, GatewayEndpoints.java,
+  GatewayPorts.java, JsonChatRequestBody.java checked out at HEAD;
+  ProviderEndpoint.java moved aside), leaving ONLY the new test file
+  ProviderEndpointGatewayTest.java in place. The exact command above was then
+  run; afterwards the changeset was restored and verified byte-identical
+  (diff -q against backup copies, plus git diff --stat match). No other task's
+  uncommitted work was touched.
+
+Observed failure:
+  > Task :ai:compileDebugUnitTestJavaWithJavac FAILED
+  BUILD FAILED in 1s
+  8 javac errors, all confined to the new test file:
+    ProviderEndpointGatewayTest.java:41  错误: 不兼容的类型: GenerationModel无法转换为String
+                                         (BodyEncoder still took the GenerationModel enum,
+                                          the test contracts a String model wire id)
+    ProviderEndpointGatewayTest.java:58  错误: 找不到符号  (ProviderEndpoint.of)
+    ProviderEndpointGatewayTest.java:72  错误: 找不到符号  (ProviderEndpoint.deepSeek)
+    ProviderEndpointGatewayTest.java:98  错误: 找不到符号  (ProviderEndpoint.of)
+    ProviderEndpointGatewayTest.java:111 错误: 找不到符号  (ProviderEndpoint.of)
+    ProviderEndpointGatewayTest.java:122 错误: 找不到符号  (streamChat(..., ProviderEndpoint, ...))
+  共 8 个错误
+
+Failure reason validated:
+  The failures are exactly the contracted provider-parameter injection points
+  missing from the pre-T-085 gateway: the ProviderEndpoint value object
+  (base URL / wire id, fail-fast validation), the ProviderEndpoint-aware
+  streamChat entry point, and the wire-id-based BodyEncoder signature. Nothing
+  else in the module failed to compile, so the RED is attributable to the new
+  API and not to unrelated breakage.

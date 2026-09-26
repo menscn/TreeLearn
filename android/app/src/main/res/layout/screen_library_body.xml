@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The library column (T-052, PRD 6.2.16 point 4): the title, the search box's place, the two segments
-  and the list. Shared by the phone page and the tablet page, so the two cannot drift - both
+  The library column (T-052, PRD 6.2.16 point 4): the title, the search box, the two segments and
+  the list. Shared by the phone page and the tablet page, so the two cannot drift - both
   `layout/screen_library.xml` and `layout-sw600dp/screen_library.xml` include this one column.
 
-  The list container `library_rows` is the two segments' shared container: the 「进行中」 segment fills
-  it with topic rows and the 「已完成」 segment (053) with archived branch rows, so a row is always
-  found in the same place whichever segment is selected.
+  The list container `library_rows` is the three contents' shared container: the 「进行中」 segment
+  fills it with topic rows, the 「已完成」 segment (053) with archived branch rows, and the search
+  box (054) with hit rows while a query is live - so a row is always found in the same place.
 
-  One region is deliberately inert in this slice: `library_search_input` only holds its place and its
-  id. The search box is wired by 054, which is why it carries no listener here - the reader must not
-  mistake a place-holder for a working control. The two segment pills, by contrast, are real controls:
-  both are focusable and are wired by `LibraryScreen`.
+  `library_search_input` is a real control since 054: its text goes to `LibraryPresenter` (and on
+  to the search stack), and the results replace the list in place. The two segment pills are also
+  real controls, wired by `LibraryScreen`; tapping one leaves the search state.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -26,9 +25,11 @@
     <EditText android:id="@+id/library_search_input" android:layout_width="match_parent"
         android:layout_height="@dimen/touch_min" android:layout_marginStart="@dimen/page_gutter"
         android:layout_marginTop="@dimen/space_s4" android:layout_marginEnd="@dimen/page_gutter"
-        android:background="@drawable/bg_field" android:cursorVisible="false"
-        android:focusable="false" android:hint="@string/library_search_hint"
-        android:importantForAutofill="no" android:inputType="text"
+        android:background="@drawable/bg_field" android:cursorVisible="true"
+        android:focusable="true" android:focusableInTouchMode="true"
+        android:hint="@string/library_search_hint"
+        android:imeOptions="actionSearch" android:importantForAutofill="no"
+        android:inputType="text" android:maxLines="1"
         android:paddingStart="@dimen/space_s4" android:paddingEnd="@dimen/space_s4"
         android:textColorHint="@color/tl_ink3" android:textSize="@dimen/text_sm" />
 

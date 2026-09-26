@@ -4,7 +4,9 @@ import com.treelearn.ai.prompt.DeepSeekContextEncoder;
 import com.treelearn.ai.prompt.DeepSeekRequestAssembler;
 import com.treelearn.ai.prompt.PromptBudget;
 import com.treelearn.app.artifact.DerivedService;
+import com.treelearn.app.files.AttachmentTextExtractor;
 import com.treelearn.app.generation.GenerationCoordinator;
+import com.treelearn.app.search.web.ChatSearchStep;
 import com.treelearn.app.ui.ChatCommandResult;
 import com.treelearn.app.ui.ChatCommands;
 import com.treelearn.app.ui.ChatData;
@@ -37,6 +39,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.BooleanSupplier;
 
 /**
  * The conversation's real data path: what the chat screen reads, and the five commands it can run.
@@ -68,6 +71,10 @@ public final class ChatWiring implements ChatData, ChatCommands {
     private final Clock clock;
     private final PromptBudget budget;
     private final DerivedService derived;
+    private final BooleanSupplier answerSuggestions;
+    private final ChatSearchStep search;
+    /** The attachment store (T-096): read for the cached text, written for the reference row. */
+    private final com.treelearn.app.files.AttachmentStore attachments;
     private final Set<String> derivedInFlight = ConcurrentHashMap.newKeySet();
     private final ConcurrentHashMap<String, CopyOnWriteArrayList<Runnable>> generationListeners =
             new ConcurrentHashMap<String, CopyOnWriteArrayList<Runnable>>();
@@ -82,17 +89,32 @@ public final class ChatWiring implements ChatData, ChatCommands {
 
     public ChatWiring(ChatStore store, GenerationPort generation, KeyVault keyVault, Clock clock,
             PromptBudget budget) {
-        this(store, generation, keyVault, clock, budget, null);
+        this(store, generation, keyVault, clock, budget, null, () -> true);
     }
 
     public ChatWiring(ChatStore store, GenerationPort generation, KeyVault keyVault, Clock clock,
-            PromptBudget budget, DerivedService derived) {
+            PromptBudget budget, DerivedService derived, BooleanSupplier answerSuggestions) {
+        this(store, generation, keyVault, clock, budget, derived, answerSuggestions, null);
+    }
+
+    public ChatWiring(ChatStore store, GenerationPort generation, KeyVault keyVault, Clock clock,
+            PromptBudget budget, DerivedService derived, BooleanSupplier answerSuggestions,
+            ChatSearchStep search) {
+        this(store, generation, keyVault, clock, budget, derived, answerSuggestions, search, null);
+    }
+
+    public ChatWiring(ChatStore store, GenerationPort generation, KeyVault keyVault, Clock clock,
+            PromptBudget budget, DerivedService derived, BooleanSupplier answerSuggestions,
+            ChatSearchStep search, com.treelearn.app.files.AttachmentStore attachments) {
         this.store = require(store, "store");
         this.generation = require(generation, "generation");
         this.keyVault = require(keyVault, "keyVault");
         this.clock = require(clock, "clock");
         this.budget = require(budget, "budget");
         this.derived = derived;
+        this.answerSuggestions = require(answerSuggestions, "answerSuggestions");
+        this.search = search;
+        this.attachments = attachments;
         this.generation.addObserver(generationObserver);
     }
 
@@ -119,7 +141,8 @@ public final class ChatWiring implements ChatData, ChatCommands {
             final ChatStore.Conversation captured = conversation;
             Thread worker = new Thread(() -> {
                 try {
-                    derived.ensureConversationArtifacts(captured, GenerationModel.FLASH);
+                    derived.ensureConversationArtifacts(captured, GenerationModel.FLASH,
+                            this.answerSuggestions.getAsBoolean());
                 } finally {
                     derivedInFlight.remove(branchId);
                 }
@@ -212,14 +235,34 @@ public final class ChatWiring implements ChatData, ChatCommands {
     }
 
     @Override
-    public ChatCommandResult send(String branchId, String text, String quote, GenerationModel model,
-            boolean thinkingEnabled) {
+    public ChatCommandResult send(String branchId, String text, String quote, String attachmentId,
+            GenerationModel model, boolean thinkingEnabled) {
+        ChatSearchStep.Result grounding;
         Guard.id(branchId, "branchId");
         Guard.nonBlank(text, "text");
         Guard.object(model, "model");
         HomeViewState.Notice missing = missingKey();
         if (missing != null) {
             return ChatCommandResult.refused(missing);
+        }
+        // T-097: the attachment's cached text rides the current input, ceiling-checked here once.
+        // Over the ceiling the send is refused before anything is written — no turn, no reference
+        // row — and the notice tells the learner to remove the attachment or pick a smaller file.
+        String attachmentText = null;
+        if (attachmentId != null && !attachmentId.isEmpty()) {
+            if (attachments == null) {
+                throw new IllegalStateException("a send with an attachment arrived but no"
+                        + " attachment store was wired");
+            }
+            attachmentText = attachments.textOf(attachmentId);
+            if (attachmentText == null
+                    || AttachmentTextExtractor.injectable(attachmentText) == null) {
+                return ChatCommandResult.refused(HomeViewState.Notice.ATTACHMENT_TOO_LARGE);
+            }
+        }
+        grounding = search == null ? ChatSearchStep.Result.off() : search.run(text.trim());
+        if (grounding.status() == ChatSearchStep.Status.NOKEY) {
+            return ChatCommandResult.refused(HomeViewState.Notice.SEARCH_KEY_MISSING);
         }
         long now = clock.millis();
         int questionOrdinal = store.nextOrdinal(branchId);
@@ -232,10 +275,32 @@ public final class ChatWiring implements ChatData, ChatCommands {
         // question with an answer position that reads back as FAILED - visible, and retryable - and
         // never a question that silently vanished with its refusal.
         store.appendTurn(userMessage, aiMessage);
+        if (attachmentId != null && !attachmentId.isEmpty()) {
+            attachments.link(userMessage.id, attachmentId, now);
+        }
         // The citation is forwarded from the row that was just written, never judged here: whether a
         // turn has one is the adapter's decision (DeepSeekContextEncoder.currentInput), and it is
         // the same value the screen draws.
-        return submit(command, questionOrdinal, userMessage.userContent, userMessage.quotedText());
+        ChatCommandResult submitted = submit(command, questionOrdinal, userMessage.userContent,
+                userMessage.quotedText(), grounding.block(), attachmentText);
+        if (!submitted.isAccepted()) {
+            return submitted;
+        }
+        // A degraded search (failed/empty) is still a successful turn; the notice travels with it
+        // so the presenter can surface what the answer was not grounded on.
+        HomeViewState.Notice degradation = degradeOf(grounding.status());
+        return degradation == null ? submitted
+                : ChatCommandResult.ranWithNotice(submitted.operationId(), degradation);
+    }
+
+    private static HomeViewState.Notice degradeOf(ChatSearchStep.Status status) {
+        switch (status) {
+            case FAILED:
+                return HomeViewState.Notice.SEARCH_FAILED;
+            case EMPTY:
+                return HomeViewState.Notice.SEARCH_EMPTY;
+        }
+        return null;
     }
 
     @Override
@@ -389,8 +454,14 @@ public final class ChatWiring implements ChatData, ChatCommands {
      */
     private ChatCommandResult submit(GenerationCommand command, int questionOrdinal,
             final String input, final String quote) {
+        return submit(command, questionOrdinal, input, quote, "", null);
+    }
+
+    private ChatCommandResult submit(GenerationCommand command, int questionOrdinal,
+            final String input, final String quote, final String groundingBlock,
+            final String attachmentText) {
         final String branchId = command.branchId;
-        final ContextPlan requestHistory;
+        RequestHistory requestHistory;
         try {
             requestHistory = historyForRequest(branchId, questionOrdinal, command.model);
         } catch (ChatStore.SnapshotUnreadable broken) {
@@ -401,17 +472,22 @@ public final class ChatWiring implements ChatData, ChatCommands {
         }
         GenerationCoordinator.Assembler assembler = forCommand -> DeepSeekRequestAssembler.assemble(
                 forCommand.purpose, forCommand.thinkingEnabled,
-                DeepSeekContextEncoder.encode(requestHistory),
-                DeepSeekContextEncoder.currentInput(input, quote), budget);
+                DeepSeekContextEncoder.encode(requestHistory.plan),
+                groundingBlock.isEmpty() ? DeepSeekContextEncoder.currentInput(input, quote,
+                        attachmentText)
+                        : groundingBlock + "\n" + DeepSeekContextEncoder.currentInput(input, quote,
+                        attachmentText),
+                budget);
         GenerationCoordinator.SubmitOutcome outcome = generation.submit(command, assembler);
         if (outcome.isAccepted()) {
             return ChatCommandResult.ran(outcome.operationId);
         }
-        return ChatCommandResult.refused(RefusalNotices.of(outcome.refusal));
+        return ChatCommandResult.refused(RefusalNotices.of(outcome.refusal, outcome.promptReason,
+                requestHistory.compressionApplied));
     }
 
     /** Keeps the latest ten complete rounds and replaces older rounds with one derived summary. */
-    private ContextPlan historyForRequest(String branchId, int questionOrdinal,
+    private RequestHistory historyForRequest(String branchId, int questionOrdinal,
             GenerationModel model) {
         List<ContextPlan.Entry> all = store.history(branchId, questionOrdinal);
         int stableCount = 0;
@@ -421,7 +497,7 @@ public final class ChatWiring implements ChatData, ChatCommands {
             }
         }
         if (stableCount <= 10 || derived == null || !keyVault.isConfigured()) {
-            return new ContextPlan(all);
+            return new RequestHistory(new ContextPlan(all), false);
         }
         int split = all.size();
         int rounds = 0;
@@ -435,7 +511,7 @@ public final class ChatWiring implements ChatData, ChatCommands {
             }
         }
         if (split <= 0 || split >= all.size()) {
-            return new ContextPlan(all);
+            return new RequestHistory(new ContextPlan(all), false);
         }
         if (split > 0 && all.get(split).kind == ContextPlan.EntryKind.STABLE_REVISION
                 && all.get(split - 1).kind == ContextPlan.EntryKind.USER_MESSAGE) {
@@ -451,7 +527,8 @@ public final class ChatWiring implements ChatData, ChatCommands {
         List<ContextPlan.Entry> older = new ArrayList<ContextPlan.Entry>(all.subList(0, split));
         List<ContextPlan.Entry> recent = new ArrayList<ContextPlan.Entry>(all.subList(split, all.size()));
         ContextPlan compressed = derived.compressHistory(branchId, latestRevision, older, recent, model);
-        return compressed == null ? new ContextPlan(all) : compressed;
+        return compressed == null ? new RequestHistory(new ContextPlan(all), false)
+                : new RequestHistory(compressed, true);
     }
 
     /** Pins the one usage and the one version a conversation position runs under. */
@@ -577,6 +654,17 @@ public final class ChatWiring implements ChatData, ChatCommands {
             this.text = text;
             this.ordinal = ordinal;
             this.quote = quote;
+        }
+    }
+
+    /** A request's history together with whether the derived service compressed it. */
+    private static final class RequestHistory {
+        final ContextPlan plan;
+        final boolean compressionApplied;
+
+        RequestHistory(ContextPlan plan, boolean compressionApplied) {
+            this.plan = plan;
+            this.compressionApplied = compressionApplied;
         }
     }
 }

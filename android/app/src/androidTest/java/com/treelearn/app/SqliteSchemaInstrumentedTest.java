@@ -90,10 +90,11 @@ public final class SqliteSchemaInstrumentedTest {
      */
     private static final int V1_SCHEMA_VERSION = 1;
 
-    /** Confirmed permanent tables (checklist §2). */
+    /** Confirmed permanent tables (checklist §2 + §5, incl. the T-096 attachment pair). */
     private static final Set<String> EXPECTED_TABLES = new LinkedHashSet<>(Arrays.asList(
             "topics", "branches", "messages", "answer_revisions",
-            "generation_operations", "context_snapshots", "ai_artifacts"));
+            "generation_operations", "context_snapshots", "ai_artifacts",
+            "providers", "models", "attachments", "message_attachments"));
 
     /**
      * Confirmed columns per table, as {@code name:TYPE} or {@code name:TYPE:1} where {@code :1}
@@ -108,18 +109,20 @@ public final class SqliteSchemaInstrumentedTest {
      */
     private static final Map<String, String> EXPECTED_COLUMN_SPEC = expectedColumnSpec();
 
-    /** Unique indexes the schema must provide (checklist §2 "关键索引与约束"). */
+    /** Unique indexes the schema must provide (checklist §2 "关键索引与约束", + T-083/T-096). */
     private static final Set<String> EXPECTED_UNIQUE_INDEXES = new LinkedHashSet<>(Arrays.asList(
             "uq_branches_root", "uq_messages_branch_ordinal",
             "uq_answer_revisions_message_no", "uq_context_snapshots_branch",
-            "uq_generation_operations_active"));
+            "uq_generation_operations_active", "uq_models_provider_model",
+            "uq_attachments_content_hash"));
 
     private static final Set<String> EXPECTED_PARTIAL_INDEXES = new LinkedHashSet<>(Arrays.asList(
             "uq_branches_root", "uq_generation_operations_active"));
 
     private static final Set<String> EXPECTED_PLAIN_INDEXES = new LinkedHashSet<>(Arrays.asList(
             "idx_branches_topic_parent", "idx_branches_source_revision",
-            "idx_branches_archived", "idx_ai_artifacts_kind_scope"));
+            "idx_branches_archived", "idx_ai_artifacts_kind_scope",
+            "idx_message_attachments_message", "idx_message_attachments_attachment"));
 
     /**
      * The declared trigger names, read from {@link TreeLearnSchema} rather than restated.
@@ -279,6 +282,38 @@ public final class SqliteSchemaInstrumentedTest {
                 "input_digest:TEXT:1",
                 "created_at:INTEGER:1",
                 "updated_at:INTEGER:1"));
+        // SPEC-2026-09-23 数据结构: configuration only — no column of either table may hold a key.
+        spec.put("providers", String.join(", ",
+                "id:TEXT:1",
+                "name:TEXT:1",
+                "base_url:TEXT:1",
+                "enabled:INTEGER:1",
+                "is_builtin:INTEGER:1",
+                "created_at:INTEGER:1",
+                "updated_at:INTEGER:1"));
+        spec.put("models", String.join(", ",
+                "id:TEXT:1",
+                "provider_id:TEXT:1",
+                "model_id:TEXT:1",
+                "display_name:TEXT:1",
+                "created_at:INTEGER:1"));
+        // T-096 admission record (checklist §5.2): one physical record per file; the reference
+        // rows are message-scoped and cascade with their message.
+        spec.put("attachments", String.join(", ",
+                "id:TEXT:1",
+                "content_hash:TEXT:1",
+                "display_name:TEXT:1",
+                "mime_type:TEXT:1",
+                "size_bytes:INTEGER:1",
+                "extracted_text:TEXT:0",
+                "parse_state:TEXT:1",
+                "created_at:INTEGER:1",
+                "updated_at:INTEGER:1"));
+        spec.put("message_attachments", String.join(", ",
+                "id:TEXT:1",
+                "message_id:TEXT:1",
+                "attachment_id:TEXT:1",
+                "created_at:INTEGER:1"));
         return spec;
     }
 
@@ -308,7 +343,7 @@ public final class SqliteSchemaInstrumentedTest {
     // ------------------------------------------------------------------
 
     @Test
-    public void newInstallCreatesExactlySevenTablesThroughProductionOnCreate() {
+    public void newInstallCreatesTheConfirmedPermanentTablesThroughProductionOnCreate() {
         SQLiteDatabase db = helper.getWritableDatabase();
 
         assertEquals("schema version after a fresh install", TreeLearnSchema.DATABASE_VERSION,
@@ -817,6 +852,13 @@ public final class SqliteSchemaInstrumentedTest {
             if ("ai_artifacts".equals(table)) {
                 continue;
             }
+            if ("providers".equals(table) || "models".equals(table)) {
+                // Provider/model configuration is independent of topics: deleting a topic must not
+                // touch it, and the builtin DeepSeek seed rows legitimately remain (T-083).
+                assertEquals(table + " must keep exactly the builtin seed row", 1,
+                        rowCount(db, table));
+                continue;
+            }
             assertEquals(table + " must be empty after the topic is deleted",
                     0, rowCount(db, table));
         }
@@ -1193,9 +1235,25 @@ public final class SqliteSchemaInstrumentedTest {
     private static List<String> versionOneCreateStatements() {
         List<String> statements = new ArrayList<>();
         for (String statement : TreeLearnSchema.CREATE_TABLE_STATEMENTS) {
+            // A genuine V1 database has neither the V3 provider/model tables, the T-096 attachment
+            // tables, nor the §6.2.19 column; the filter must carry them all forward as the schema
+            // grows.
+            if (statement.startsWith("CREATE TABLE " + TreeLearnSchema.Providers.TABLE)
+                    || statement.startsWith("CREATE TABLE " + TreeLearnSchema.Models.TABLE)
+                    || statement.startsWith("CREATE TABLE " + TreeLearnSchema.Attachments.TABLE)
+                    || statement.startsWith("CREATE TABLE "
+                            + TreeLearnSchema.MessageAttachments.TABLE)) {
+                continue;
+            }
             statements.add(withoutV2MessagesColumn(statement));
         }
-        statements.addAll(TreeLearnSchema.CREATE_INDEX_STATEMENTS);
+        for (String statement : TreeLearnSchema.CREATE_INDEX_STATEMENTS) {
+            if (!statement.contains(TreeLearnSchema.INDEX_MODELS_PROVIDER_MODEL)
+                    && !statement.contains(TreeLearnSchema.Attachments.TABLE)
+                    && !statement.contains(TreeLearnSchema.MessageAttachments.TABLE)) {
+                statements.add(statement);
+            }
+        }
         for (String trigger : TreeLearnSchema.CREATE_TRIGGER_STATEMENTS) {
             if (!TreeLearnSchema.MESSAGES_QUOTE_INVARIANT_STATEMENTS.contains(trigger)) {
                 statements.add(trigger);

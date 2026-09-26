@@ -1,0 +1,232 @@
+﻿ M .trae/context/project-brief.md
+ M .trae/tasks/T-2026-09-23-composer-fullscreen-editor-077.md
+ M AGENTS.md
+ M android/README.md
+ M android/ai/src/main/java/com/treelearn/ai/gateway/AiGateway.java
+ M android/ai/src/main/java/com/treelearn/ai/gateway/DeepSeekGatewayFactory.java
+ M android/ai/src/main/java/com/treelearn/ai/gateway/GatewayEndpoints.java
+ M android/ai/src/main/java/com/treelearn/ai/gateway/GatewayPorts.java
+ M android/ai/src/main/java/com/treelearn/ai/gateway/JsonChatRequestBody.java
+ M android/ai/src/main/java/com/treelearn/ai/gateway/ProviderJson.java
+ M android/ai/src/test/java/com/treelearn/ai/gateway/AiGatewayBalanceTest.java
+ M android/ai/src/test/java/com/treelearn/ai/gateway/AiGatewayStreamTest.java
+ M android/app/src/androidTest/java/com/treelearn/app/DeepSeekStreamInstrumentedTest.java
+ M android/app/src/androidTest/java/com/treelearn/app/SqliteSchemaInstrumentedTest.java
+ M android/app/src/main/java/com/treelearn/app/AppContainer.java
+ M android/app/src/main/java/com/treelearn/app/MainActivity.java
+ M android/app/src/main/java/com/treelearn/app/artifact/DerivedService.java
+ M android/app/src/main/java/com/treelearn/app/generation/AiGatewayStreams.java
+ M android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java
+ M android/app/src/main/java/com/treelearn/app/screen/HomeScreen.java
+ M android/app/src/main/java/com/treelearn/app/screen/SettingsScreen.java
+ M android/app/src/main/java/com/treelearn/app/ui/ChatActions.java
+ M android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java
+ M android/app/src/main/java/com/treelearn/app/ui/ChatViewState.java
+ M android/app/src/main/java/com/treelearn/app/ui/HomeActions.java
+ M android/app/src/main/java/com/treelearn/app/ui/HomeData.java
+ M android/app/src/main/java/com/treelearn/app/ui/HomePresenter.java
+ M android/app/src/main/java/com/treelearn/app/ui/HomeViewState.java
+ M android/app/src/main/java/com/treelearn/app/ui/KeyVault.java
+ M android/app/src/main/java/com/treelearn/app/wiring/AndroidSettingsStore.java
+ M android/app/src/main/java/com/treelearn/app/wiring/ChatWiring.java
+ M android/app/src/main/java/com/treelearn/app/wiring/HomeStore.java
+ M android/app/src/main/java/com/treelearn/app/wiring/HomeWiring.java
+ M android/app/src/main/java/com/treelearn/app/wiring/SqliteHomeStore.java
+ M android/app/src/main/res/layout-sw600dp/screen_chat.xml
+ M android/app/src/main/res/layout/screen_chat.xml
+ M android/app/src/main/res/layout/screen_chat_body.xml
+ M android/app/src/main/res/layout/screen_home_body.xml
+ M android/app/src/main/res/layout/screen_settings_body.xml
+ M android/app/src/main/res/values/strings.xml
+ M android/app/src/test/java/com/treelearn/app/ui/HomePresenterTest.java
+ M android/app/src/test/java/com/treelearn/app/ui/TestDoubles.java
+ M android/app/src/test/java/com/treelearn/app/wiring/HomeWiringTest.java
+ M android/app/src/test/java/com/treelearn/app/wiring/WiringDoubles.java
+ M android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java
+ M android/data/src/main/java/com/treelearn/data/secret/KeystoreSecretStore.java
+ M android/data/src/main/java/com/treelearn/data/settings/SettingsRepository.java
+ M android/data/src/test/java/com/treelearn/data/db/TreeLearnSchemaQuoteInvariantTest.java
+?? .trae/scripts/dev/figwright_batch.mjs
+?? .trae/tasks/T-2026-09-23-ai-gateway-provider-abstraction-085.md
+?? .trae/tasks/T-2026-09-23-attachment-orphan-cleanup-098.md
+?? .trae/tasks/T-2026-09-23-attachment-picking-parsing-097.md
+?? .trae/tasks/T-2026-09-23-attachment-storage-file-manager-096.md
+?? .trae/tasks/T-2026-09-23-chat-search-grounding-092.md
+?? .trae/tasks/T-2026-09-23-file-management-spec-082.md
+?? .trae/tasks/T-2026-09-23-heatmap-custom-view-101.md
+?? .trae/tasks/T-2026-09-23-home-drawer-container-103.md
+?? .trae/tasks/T-2026-09-23-home-drawer-stats-heatmap-099.md
+?? .trae/tasks/T-2026-09-23-home-mini-heat-strip-102.md
+?? .trae/tasks/T-2026-09-23-ia-boundary-doc-backfill-105.md
+?? .trae/tasks/T-2026-09-23-keystore-multi-provider-keys-084.md
+?? .trae/tasks/T-2026-09-23-message-read-aloud-094.md
+?? .trae/tasks/T-2026-09-23-message-translation-090.md
+?? .trae/tasks/T-2026-09-23-model-list-fetching-086.md
+?? .trae/tasks/T-2026-09-23-model-role-settings-screen-088.md
+?? .trae/tasks/T-2026-09-23-provider-settings-screen-087.md
+?? .trae/tasks/T-2026-09-23-providers-models-spec-079.md
+?? .trae/tasks/T-2026-09-23-quick-model-derived-tasks-089.md
+?? .trae/tasks/T-2026-09-23-rikkahub-settings-capabilities-078.md
+?? .trae/tasks/T-2026-09-23-search-service-settings-091.md
+?? .trae/tasks/T-2026-09-23-search-service-spec-080.md
+?? .trae/tasks/T-2026-09-23-speech-input-095.md
+?? .trae/tasks/T-2026-09-23-sqlite-provider-model-schema-083.md
+?? .trae/tasks/T-2026-09-23-stats-daily-aggregation-100.md
+?? .trae/tasks/T-2026-09-23-stats-detail-screen-104.md
+?? .trae/tasks/T-2026-09-23-system-tts-settings-093.md
+?? .trae/tasks/T-2026-09-23-voice-tts-stt-spec-081.md
+?? "Docs/01-demand/\347\273\223\346\236\204\345\214\226\351\234\200\346\261\202\345\237\272\345\207\206\350\257\264\346\230\216\344\271\246_\347\237\245\350\212\275\357\274\210TreeLearn\357\274\211_V3.3\345\242\236\351\207\217.md"
+?? "Docs/03-prd-draft/V3.3-\347\237\245\350\212\275\357\274\210TreeLearn\357\274\211\344\272\247\345\223\201\351\234\200\346\261\202\346\226\207\346\241\243\357\274\210PRD\357\274\211\345\244\232Provider\345\242\236\351\207\217.md"
+?? Docs/intent/INTENT-2026-09-23-home-drawer-stats-heatmap.md
+?? Docs/intent/INTENT-2026-09-23-my-forest.md
+?? Docs/intent/INTENT-2026-09-23-rikkahub-settings-center-absorption.md
+?? Docs/spec/SPEC-2026-09-23-file-management.md
+?? Docs/spec/SPEC-2026-09-23-providers-and-models.md
+?? Docs/spec/SPEC-2026-09-23-search-service.md
+?? Docs/spec/SPEC-2026-09-23-voice-tts-stt.md
+?? _nokotlin_summary.txt
+?? _red_code.txt
+?? _red_out.txt
+?? _red_out_utf8.txt
+?? _regression_code.txt
+?? _regression_out.txt
+?? _regression_summary.txt
+?? _t087_attempts.txt
+?? _t087_attempts2.txt
+?? _t087_check_raw.txt
+?? _t087_check_view.txt
+?? _t087_check_view2.txt
+?? _t087_green_raw.txt
+?? _t087_green_view.txt
+?? _t087_lines.txt
+?? _t087_lines2.txt
+?? _t087_ncd.txt
+?? _t087_nokotlin_raw.txt
+?? _t087_nokotlin_view.txt
+?? _t087_probe.txt
+?? _t087_probe2.txt
+?? _t087_probe3.txt
+?? _t087_procs.txt
+?? _t087_r.txt
+?? _t087_r2.txt
+?? _t087_r3.txt
+?? _t087_r4.txt
+?? _t087_r5.txt
+?? _t087_r8.txt
+?? _t087_r9.txt
+?? _t087_tests.txt
+?? _t087_watch.txt
+?? _testcount.txt
+?? android/ai/src/main/java/com/treelearn/ai/gateway/ProviderEndpoint.java
+?? android/ai/src/test/java/com/treelearn/ai/gateway/AiGatewayModelListTest.java
+?? android/ai/src/test/java/com/treelearn/ai/gateway/ProviderEndpointGatewayTest.java
+?? android/app/src/androidTest/java/com/treelearn/app/ModelListMergeInstrumentedTest.java
+?? android/app/src/androidTest/java/com/treelearn/app/ProviderModelDaoInstrumentedTest.java
+?? android/app/src/androidTest/java/com/treelearn/app/ProviderSecretStoreInstrumentedTest.java
+?? android/app/src/main/java/com/treelearn/app/screen/ModelSettingsScreen.java
+?? android/app/src/main/java/com/treelearn/app/screen/ProviderAdminScreen.java
+?? android/app/src/main/java/com/treelearn/app/ui/HeatmapLayout.java
+?? android/app/src/main/java/com/treelearn/app/ui/HeatmapView.java
+?? android/app/src/main/java/com/treelearn/app/ui/HomeStats.java
+?? android/app/src/main/java/com/treelearn/app/ui/ModelSettingsPresenter.java
+?? android/app/src/main/java/com/treelearn/app/ui/ProviderAdminPresenter.java
+?? android/app/src/main/java/com/treelearn/app/wiring/SqliteModelSettingsStore.java
+?? android/app/src/main/java/com/treelearn/app/wiring/SqliteProviderAdminStore.java
+?? android/app/src/main/res/drawable/ic_chat_expand.xml
+?? android/app/src/main/res/layout/home_heat_strip.xml
+?? android/app/src/main/res/layout/overlay_fullscreen_editor.xml
+?? android/app/src/main/res/layout/screen_model_settings.xml
+?? android/app/src/main/res/layout/screen_provider_admin.xml
+?? android/app/src/main/res/values/attrs.xml
+?? android/app/src/test/java/com/treelearn/app/ui/ChatFullscreenEditorTest.java
+?? android/app/src/test/java/com/treelearn/app/ui/HeatmapLayoutTest.java
+?? android/app/src/test/java/com/treelearn/app/ui/HomeStatsTest.java
+?? android/app/src/test/java/com/treelearn/app/ui/ModelSettingsPresenterTest.java
+?? android/app/src/test/java/com/treelearn/app/ui/ProviderAdminPresenterTest.java
+?? android/data/src/main/java/com/treelearn/data/db/dao/ModelDao.java
+?? android/data/src/main/java/com/treelearn/data/db/dao/ProviderDao.java
+?? android/data/src/main/java/com/treelearn/data/db/dao/StatsDao.java
+?? android/data/src/main/java/com/treelearn/data/secret/ProviderKeyNamespace.java
+?? android/data/src/main/java/com/treelearn/data/stats/
+?? android/data/src/test/java/com/treelearn/data/db/ProviderModelSchemaTest.java
+?? android/data/src/test/java/com/treelearn/data/db/dao/ModelDaoMergeTest.java
+?? android/data/src/test/java/com/treelearn/data/db/dao/StatsDaoStatementTest.java
+?? android/data/src/test/java/com/treelearn/data/secret/ProviderKeyNamespaceTest.java
+?? android/data/src/test/java/com/treelearn/data/stats/
+?? artifacts/evidence/.t077-check.log
+?? artifacts/evidence/.t077-green.log
+?? artifacts/evidence/.t077-linecount.log
+?? artifacts/evidence/.t077-red.log
+?? artifacts/evidence/.t083-linecount.txt
+?? artifacts/evidence/.t084-linecount.txt
+?? artifacts/evidence/.t085-linecount.txt
+?? artifacts/evidence/.t100-green-code.log
+?? artifacts/evidence/.t100-green.log
+?? artifacts/evidence/.t100-linecount.log
+?? artifacts/evidence/.t100-lint-code.log
+?? artifacts/evidence/.t100-lint-rerun-code.log
+?? artifacts/evidence/.t100-lint-rerun.log
+?? artifacts/evidence/.t100-lint.log
+?? artifacts/evidence/.t100-nokotlin-code.log
+?? artifacts/evidence/.t100-nokotlin.log
+?? artifacts/evidence/.t100-red-code.log
+?? artifacts/evidence/.t100-red.log
+?? artifacts/evidence/.t100-regression-code.log
+?? artifacts/evidence/.t100-regression.log
+?? artifacts/evidence/.t100-testcount.log
+?? artifacts/evidence/.t101-green.log
+?? artifacts/evidence/.t101-lint.log
+?? artifacts/evidence/.t101-nokotlin-code.txt
+?? artifacts/evidence/.t101-nokotlin.log
+?? artifacts/evidence/.t101-red.log
+?? artifacts/evidence/.t101-regression-app.log
+?? artifacts/evidence/.t101-regression.log
+?? artifacts/evidence/T-083-assemble.txt
+?? artifacts/evidence/T-083-check.txt
+?? artifacts/evidence/T-083-connected-full.txt
+?? artifacts/evidence/T-083-connected-full2.txt
+?? artifacts/evidence/T-083-connected-full3.txt
+?? artifacts/evidence/T-083-coordinator-isolated.txt
+?? artifacts/evidence/T-083-green.txt
+?? artifacts/evidence/T-083-no-kotlin.txt
+?? artifacts/evidence/T-083-red.txt
+?? artifacts/evidence/T-084-check-full.txt
+?? artifacts/evidence/T-084-green-instrumented.txt
+?? artifacts/evidence/T-084-green-jvm.txt
+?? artifacts/evidence/T-084-no-kotlin-guard.txt
+?? artifacts/evidence/T-084-red.txt
+?? artifacts/evidence/T-084-source-checks.txt
+?? artifacts/evidence/T-085-check.txt
+?? artifacts/evidence/T-085-green.txt
+?? artifacts/evidence/T-085-linecount.txt
+?? artifacts/evidence/T-085-no-kotlin.txt
+?? artifacts/evidence/T-085-red.txt
+?? artifacts/evidence/T-086-check.txt
+?? artifacts/evidence/T-086-green.txt
+?? artifacts/evidence/T-086-linecount.txt
+?? artifacts/evidence/T-086-no-kotlin.txt
+?? artifacts/evidence/T-086-red.txt
+?? artifacts/evidence/T-087-check.txt
+?? artifacts/evidence/T-087-green.txt
+?? artifacts/evidence/T-087-linecount.txt
+?? artifacts/evidence/T-087-no-kotlin.txt
+?? artifacts/evidence/T-087-red.txt
+?? artifacts/evidence/T-088-compile-errs.txt
+?? artifacts/evidence/T-088-files.txt
+?? artifacts/evidence/T-088-green-counts.txt
+?? artifacts/evidence/T-088-green-raw.txt
+?? artifacts/evidence/T-088-green-tail.txt
+?? artifacts/evidence/T-088-red-exit.txt
+?? artifacts/evidence/T-088-red-raw.txt
+?? artifacts/evidence/T-088-red-tail.txt
+?? artifacts/evidence/T-088-red.txt
+?? artifacts/evidence/T-088-test-fails.txt
+?? artifacts/evidence/T-102-design-tokens.log
+?? artifacts/evidence/T-102-green.log
+?? artifacts/evidence/T-102-linecount.txt
+?? artifacts/evidence/T-102-lint.log
+?? artifacts/evidence/T-102-no-kotlin.log
+?? artifacts/evidence/T-102-red.log
+?? artifacts/evidence/figwright-forest/
+?? artifacts/figwright/
+?? gitstatus.tmp.txt

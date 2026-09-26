@@ -34,7 +34,7 @@ public interface ChatSink {
      * <p>The branches are read before this is called and handed over with it, so the popup never reads
      * the store on the UI thread; they are exactly the branches PRD 6.2.20 point 7 lists.
      */
-    void openChildren(String branchId, String messageId, List<ChildBranch> children);
+    void openChildren(String messageId, List<ChildBranch> children);
 
     /** Shows the versions of one position and reports back through {@link ChatActions}. */
     void openVersions(String messageId, List<AnswerRevision> versions);

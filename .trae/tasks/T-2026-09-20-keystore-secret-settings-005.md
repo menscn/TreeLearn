@@ -4,7 +4,7 @@ id: T-2026-09-20-005
 title: 实现 Keystore 密钥与本地设置
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -164,6 +164,13 @@ Follow [code-document alignment](../rules/documentation.md).
 - 规模（用户 2026-09-21 裁定的「非空非注释」口径）：新增生产 Java 5 文件 **271 行**（物理 406；`SecretEnvelope` 80 / `KeystoreSecretStore` 128 / `SettingsRepository` 38 / `SecretStoreException` 16 / `SecretStoreError` 9），配置另有 Manifest ±14 行与两个新 XML 共 26 行。未超 500 硬上限，超 200 软上限属 verifier 警告级，本任务不申请规模例外。
 
 ## Verification report
+
+### verifier #3 批量复核（2026-09-24，独立于本任务实现者）
+
+- Verdict: **PASS（设备项 deferred）**。verifier 前轮已确认 271 行在预算内、源码扫描与变异测试证据齐备；本轮未发现新事实推翻。
+- Fresh evidence（2026-09-24 批次 2）: `artifacts/evidence/P3-B1-gates-2026-09-24.txt`（全模块 JVM 套件 + lint + androidTest 编译，BUILD SUCCESSFUL / EXITCODE=0；全库 188 套件 1725 tests / 0 失败）、`P3-B1-no-kotlin-2026-09-24.txt`（EXITCODE=0）。
+- 判定依据: 凭据不落日志/不强导出/备份规则排除三项静态证据由 VERIFY3-T005-source-scans.txt 载明且本轮无代码变更推翻（该模块 2026-09-21 后无 diff 归因于本任务的新改动）。
+- Gaps（不变，均 deferred）: 设备上的 KeyStore 实际行为 —— `deferred — 本轮不使用模拟器（用户指令 2026-09-21）`。
 
 > 独立 verifier 复核（verifier #2，2026-09-21 第三轮），只读：未修改任何生产代码、测试或他人证据。
 > 本轮按用户 2026-09-21 指令**不使用模拟器**；需要真机的验收项一律记为

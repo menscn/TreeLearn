@@ -45,6 +45,8 @@ public final class HomeViewState {
         BALANCE_UNAVAILABLE,
         /** The provider rejected the request itself. */
         REQUEST_REJECTED,
+        /** History was compressed before this request could be built (history exceeded budget). */
+        HISTORY_COMPRESSED,
         /** The provider throttled the call. */
         RATE_LIMITED,
         /** The provider failed to serve the call. */
@@ -61,7 +63,30 @@ public final class HomeViewState {
          * did not land, and that refusal is told here instead of being thrown at the background
          * thread. Nothing already on screen is lost; only what the next visit restores is.
          */
-        READING_POSITION;
+        READING_POSITION,
+        /** The search feature needs a credential that is not configured. */
+        SEARCH_KEY_MISSING,
+        /** A search call failed to complete. */
+        SEARCH_FAILED,
+        /** A search returned no results. */
+        SEARCH_EMPTY,
+        /**
+         * The attached document's parsed text exceeds the injection ceiling, so the send was
+         * refused before anything was written (T-097; SPEC-082 错误语义: intercept and say so,
+         * never truncate silently).
+         */
+        ATTACHMENT_TOO_LARGE,
+        /**
+         * The chat-role model assignment fell back to the builtin default (or earliest) because the
+         * chosen model is gone or unavailable (T-103). Told once per conversation entry, never on
+         * every render.
+         */
+        CHAT_MODEL_FALLBACK,
+        /**
+         * The chat role has no usable model at all (T-103): the chip shows a placeholder and the
+         * notice guides the learner to the model settings instead of failing a send.
+         */
+        NO_MODELS;
 
         /** The single mapping from the provider/network classification to what the home shows. */
         public static Notice from(AiGatewayError.Kind kind) {
@@ -111,10 +136,12 @@ public final class HomeViewState {
     public final boolean submitting;
     /** Null when there is nothing to report. */
     public final Notice notice;
+    /** The learning-heat strip to draw, or a hidden placeholder when stats are unavailable. */
+    public final HeatStrip heatStrip;
 
     private HomeViewState(Phase phase, String draft, boolean keyConfigured, GenerationModel model,
             boolean thinkingEnabled, List<TopicCard> topics, List<Recommendation> recommendations,
-            boolean submitting, Notice notice) {
+            boolean submitting, Notice notice, HeatStrip heatStrip) {
         this.phase = phase;
         this.draft = draft == null ? "" : draft;
         this.keyConfigured = keyConfigured;
@@ -125,6 +152,7 @@ public final class HomeViewState {
                 recommendations));
         this.submitting = submitting;
         this.notice = notice;
+        this.heatStrip = heatStrip;
     }
 
     /** The state before the first read: loading, nothing known about the store, composer ready. */
@@ -132,7 +160,7 @@ public final class HomeViewState {
             boolean keyConfigured) {
         return new HomeViewState(Phase.LOADING, "", keyConfigured, model, thinkingEnabled,
                 Collections.<TopicCard>emptyList(), Collections.<Recommendation>emptyList(), false,
-                null);
+                null, HeatStrip.hidden());
     }
 
     /** True when the send control may be pressed: something to send, and no attempt in flight. */
@@ -140,48 +168,103 @@ public final class HomeViewState {
         return !draft.trim().isEmpty() && !submitting;
     }
 
+    /**
+     * The continue-learning row (055): the topic the learner used last, or null when there is no
+     * history. The list was ordered newest first, so the first card is the one they left off on -
+     * and a null is the state's way of saying the row must not appear at all, not that it appears
+     * empty.
+     */
+    public TopicCard continueTopic() {
+        return topics.isEmpty() ? null : topics.get(0);
+    }
+
     public HomeViewState withPhase(Phase value) {
         return new HomeViewState(value, draft, keyConfigured, model, thinkingEnabled, topics,
-                recommendations, submitting, notice);
+                recommendations, submitting, notice, this.heatStrip);
     }
 
     public HomeViewState withDraft(String value) {
         return new HomeViewState(phase, value, keyConfigured, model, thinkingEnabled, topics,
-                recommendations, submitting, notice);
+                recommendations, submitting, notice, this.heatStrip);
     }
 
     public HomeViewState withKeyConfigured(boolean value) {
         return new HomeViewState(phase, draft, value, model, thinkingEnabled, topics,
-                recommendations, submitting, notice);
+                recommendations, submitting, notice, this.heatStrip);
     }
 
     public HomeViewState withModel(GenerationModel value) {
         return new HomeViewState(phase, draft, keyConfigured, value, thinkingEnabled, topics,
-                recommendations, submitting, notice);
+                recommendations, submitting, notice, this.heatStrip);
     }
 
     public HomeViewState withThinkingEnabled(boolean value) {
         return new HomeViewState(phase, draft, keyConfigured, model, value, topics,
-                recommendations, submitting, notice);
+                recommendations, submitting, notice, this.heatStrip);
     }
 
     public HomeViewState withTopics(List<TopicCard> value) {
         return new HomeViewState(phase, draft, keyConfigured, model, thinkingEnabled, value,
-                recommendations, submitting, notice);
+                recommendations, submitting, notice, this.heatStrip);
     }
 
     public HomeViewState withRecommendations(List<Recommendation> value) {
         return new HomeViewState(phase, draft, keyConfigured, model, thinkingEnabled, topics, value,
-                submitting, notice);
+                submitting, notice, this.heatStrip);
     }
 
     public HomeViewState withSubmitting(boolean value) {
         return new HomeViewState(phase, draft, keyConfigured, model, thinkingEnabled, topics,
-                recommendations, value, notice);
+                recommendations, value, notice, this.heatStrip);
     }
 
     public HomeViewState withNotice(Notice value) {
         return new HomeViewState(phase, draft, keyConfigured, model, thinkingEnabled, topics,
-                recommendations, submitting, value);
+                recommendations, submitting, value, this.heatStrip);
+    }
+
+    public HomeViewState withHeatStrip(HeatStrip value) {
+        return new HomeViewState(phase, draft, keyConfigured, model, thinkingEnabled, topics,
+                recommendations, submitting, notice, value);
+    }
+
+    /**
+     * The learning-heat strip the home screen draws.
+     *
+     * <p>One value carries both the visibility decision and the payload, so the screen never asks
+     * the store twice and never draws a half-populated strip.
+     */
+    public static final class HeatStrip {
+
+        public enum Status {
+            /** Nothing to show; the card is removed from the layout. */
+            HIDDEN,
+            /** Stats exist but are empty; the "no record yet" line is shown. */
+            EMPTY,
+            /** Stats exist and have activity; the heatmap and streak are shown. */
+            VISIBLE
+        }
+
+        public final Status status;
+        public final float[] intensities;
+        public final int streakDays;
+
+        private HeatStrip(Status status, float[] intensities, int streakDays) {
+            this.status = status;
+            this.intensities = intensities;
+            this.streakDays = streakDays;
+        }
+
+        public static HeatStrip hidden() {
+            return new HeatStrip(Status.HIDDEN, new float[0], 0);
+        }
+
+        public static HeatStrip empty() {
+            return new HeatStrip(Status.EMPTY, new float[0], 0);
+        }
+
+        public static HeatStrip visible(float[] intensities, int streakDays) {
+            return new HeatStrip(Status.VISIBLE, intensities, streakDays);
+        }
     }
 }

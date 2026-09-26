@@ -28,7 +28,8 @@ public class AiGatewayBalanceTest {
 
     private AiGateway gateway(GatewayPorts.BalanceDecoder decoder) {
         return new AiGateway(transport, (model, request) -> new byte[0],
-                payload -> GatewayPorts.Delta.EMPTY, decoder, log, INLINE);
+                payload -> GatewayPorts.Delta.EMPTY, decoder, new ProviderJson.ModelList(),
+                log, INLINE);
     }
 
     @Test

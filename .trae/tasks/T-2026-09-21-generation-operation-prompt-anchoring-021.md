@@ -4,7 +4,7 @@ id: T-2026-09-21-021
 title: 生成操作状态机与提示词策略锚定
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -280,11 +280,13 @@ Follow [code-document alignment](../rules/documentation.md).
   即上一条 GREEN 证据。
 
 ### TDD or sizing exception — only with prior user approval
-- Exception type: sizing + TDD 缺口（两者在此登记，与 R2-7 对齐；原著只声明 sizing）
-  - TDD 缺口（**未获用户批准**）：第 2 轮 ②`GenerationCommandTest.aCallerBugIsReportedBeforeTheVersionDecision`
-    与 ③`PromptSpec.of` 的改动**当轮没有 RED**（②当轮即通过；③当轮无失败运行）。按 `harness-tasks.md`「事后
-    批准无效」，此处记为**未获批准的 TDD 缺口**，不声称已闭环；替代验证见 R2-7 与「TDD 缺口与替代验证」。
-    ①`GenerationOperation.stabilize` 的检查顺序有真实当轮 RED。
+- Exception type: TDD 例外（②③ 两例，**2026-09-24 用户批准登记**）+ sizing（见下）
+  - TDD 例外（2026-09-24 用户在对话中裁定「登记为例外」）：第 2 轮 ②`GenerationCommandTest.aCallerBugIsReportedBeforeTheVersionDecision`
+    与 ③`PromptSpec.of` 的通道统一改动**当轮没有 RED**（②当轮即通过；③当轮无失败运行）。事后补 RED 无效，
+    按用户裁定在正式例外段登记：理由是通道统一属重构性质、无法先行失败；替代验证为跨入口一致性回归锁
+    `theVersionDecisionIsTheSameOneGenerationCommandMakes`（直接比对两个入口对同一组输入的结论）已存在且变绿。
+    ①`GenerationOperation.stabilize` 的检查顺序有真实当轮 RED，不属例外。
+    本段登记替代先前的「未获批准的 TDD 缺口」表述；正文 R2-7 处的历史描述保留为日期化记录，不改写。
   - sizing（见下）：
 - Exception type: sizing（超出 200 行软预算，**未超 500 行硬上限**——按 2026-09-21 用户裁定的「非空非注释」口径，实测 230 行）
 - Reason: 实测**生产代码 230 行**（新增 227 + 改动 3），高于本任务 `estimated_production_lines: 210`
@@ -310,7 +312,7 @@ Follow [code-document alignment](../rules/documentation.md).
   实测命令与逐文件结果落盘在 `artifacts/evidence/T-021-sizing.txt`（口径用 T-003 的未改动文件
   `DomainErrorCode.java` 校准：复算得 12/26/10/48，与第 1 轮 verifier 的独立复算逐格相同）。
 - User approval: **已裁定，本任务不属于需要例外的情况**（2026-09-21 用户一次裁定口径并批准例外，覆盖 T-003/T-021/T-004/T-022）。口径为**非空非注释的生产代码行**，据此本任务 **230 < 500 行硬上限 → 未越线，无需例外**；超出 200 行软上限属 verifier **警告**级。裁定与实测复算见 `.trae/rules/harness-tasks.md` 的 Task sizing 节例外表与 `artifacts/evidence/sizing-adjudication-2026-09-21.txt`（其中三个新文件今日复测 **227**，与本文件逐文件表的 139+62+26 逐字相同）。
-- Alternative verification: 不适用（TDD 已真实执行，非以例外替代验证）。
+- Alternative verification: ②③ 两例的 TDD 例外替代验证 = 跨入口一致性回归锁 `theVersionDecisionIsTheSameOneGenerationCommandMakes`（已存在且变绿，见上）；sizing 无需替代验证。
 
 ## Implementation notes
 
@@ -480,6 +482,14 @@ Follow [code-document alignment](../rules/documentation.md).
   - 规模：`estimated_production_lines: 210`；按用户裁定口径实测 **230 < 500 硬上限**（227 新增 + 3 改动），故**不在未获批越线清单内**，仅高于 200 软上限（verifier 警告级）。
 - 基线漂移：本文件第 225 行引用的 lint「0 error / 11 warning」已过期（本轮实测 **0 error / 18 warning**，`VERIFY4-T002-assemble-lint.txt`）；`MainActivity.java:76` 的 lint 错误已由 T-012 lane 修复。
 - 设备：本任务**无**设备侧验收条件；本轮未使用模拟器。
+
+### 收尾复核（verifier #3，2026-09-24）
+
+- Verdict: PASS。第九轮独立复核确认 7 条验收条件实质全部为真、本轮亲自复现的证据逐项核实；其唯一未闭环项是「TDD 例外登记不自洽」。
+- 闭环处置：2026-09-24 用户裁定在正式「TDD or sizing exception」段**登记 ②③ 两例 TDD 例外**（理由与替代验证见该段），正文 R2-7 的历史表述保留为日期化记录。两处现已自洽。
+- lint 警告漂移（0 error / 11 → 18 warning）属全仓基线漂移，非本任务缺陷；`MainActivity` 的 lint 错误已由 T-012 lane 修复。
+- 门禁（本轮实测）：`./gradlew --no-daemon --console=plain check` EXITCODE=0（`artifacts/evidence/P3-B3-gates-2026-09-24.txt`）；Java-only guard `VERDICT: PASS (13 OK line(s))`（`artifacts/evidence/P3-B3-no-kotlin-2026-09-24.txt`）。
+- 规模 230 行 < 500 硬上限（2026-09-21 用户裁定口径），不属越线清单。
 
 ## Handoff notes
 

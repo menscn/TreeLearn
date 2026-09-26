@@ -4,6 +4,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * The provider's JSON read boundary (technical design 9.3): the only place a DeepSeek field name
  * appears outside the request writer, using the platform's {@code org.json}.
@@ -25,6 +28,8 @@ public final class ProviderJson {
     private static final String CONTENT = "content";
     private static final String ERROR = "error";
     private static final String IS_AVAILABLE = "is_available";
+    private static final String DATA = "data";
+    private static final String ID = "id";
 
     private ProviderJson() {
     }
@@ -63,6 +68,36 @@ public final class ProviderJson {
             }
             return (Boolean) available;
         }
+    }
+
+    /** Reads the model wire ids out of a {@code /models} response (T-086, the F7 mechanism). */
+    public static final class ModelList implements GatewayPorts.ModelListDecoder {
+
+        @Override
+        public List<String> decode(String payload) {
+            JSONObject root = parse(payload, "model list response");
+            JSONArray data = dataArray(root);
+            List<String> ids = new ArrayList<>();
+            for (int i = 0; i < data.length(); i++) {
+                Object entry = data.opt(i);
+                Object id = entry instanceof JSONObject ? ((JSONObject) entry).opt(ID) : null;
+                if (!(id instanceof String) || ((String) id).trim().isEmpty()) {
+                    throw refuse(AiGatewayError.parseFailed("the model list response carries an "
+                            + "entry without a string " + ID), "a model list entry has no string " + ID);
+                }
+                ids.add((String) id);
+            }
+            return ids;
+        }
+    }
+
+    private static JSONArray dataArray(JSONObject root) {
+        Object data = root.opt(DATA);
+        if (!(data instanceof JSONArray)) {
+            throw refuse(AiGatewayError.parseFailed("a model list response carries no " + DATA
+                    + " array, so its contents cannot be trusted"), "the payload has no " + DATA);
+        }
+        return (JSONArray) data;
     }
 
     private static JSONObject parse(String payload, String what) {

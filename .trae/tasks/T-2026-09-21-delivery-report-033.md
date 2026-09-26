@@ -4,7 +4,7 @@ id: T-2026-09-21-033
 title: 交付报告与侧载说明
 template_version: 2
 task_type: docs
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -74,11 +74,11 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Acceptance criteria
 
-- [ ] `Docs/06-delivery/TreeLearn_V1_交付报告.md` 存在且为 UTF-8；含 release APK 路径、APK SHA-256、签名证书 SHA-256 与 `apksigner verify --print-certs` 的结论。
-- [ ] 报告中每个数字都能回溯到「哪条命令 + 哪个证据文件的哪一行」，分项之和等于总数；证据文件自带命令与 `EXITCODE=`。
-- [ ] 报告显式区分「已取得证据」与「未取得证据」：本轮未使用 emulator（用户 2026-09-21 指令）导致安装启动、设备端 SQLite 行级行为、平板横屏验证、真实 DeepSeek 冒烟（无 Key）逐条列为 deferred/blocked，**不得出现任何把这些写成 PASS 的措辞**。
-- [ ] 报告不包含 keystore 口令、API Key、system prompt、提示词正文、用户问题、回答或 reasoning 正文。
-- [ ] 规模越线事实按任务逐条列出实测值与超出比例，并标注「待用户裁定」，不自我批准。
+- [x] `Docs/06-delivery/TreeLearn_V1_交付报告.md` 存在且为 UTF-8；含 release APK 路径、APK SHA-256、签名证书 SHA-256 与 `apksigner verify --print-certs` 的结论。（verifier #3：UTF-8 无 BOM、43057 字节，`app-release.apk` 4 处 / `SHA-256` 10 处 / `apksigner` 6 处，见 `T-033-verify3-2026-09-24.txt`。）
+- [x] 报告中每个数字都能回溯到「哪条命令 + 哪个证据文件的哪一行」，分项之和等于总数；证据文件自带命令与 `EXITCODE=`。（2026-09-22 复核脚本 `review_apk_and_gaps.ps1` 等可复跑；verifier #3 抽核通过；发现的唯一例外——T-033 交接注记把 T-REV 的 FAIL 误写为 PASS——已就地勘误。）
+- [x] 报告显式区分「已取得证据」与「未取得证据」：本轮未使用 emulator（用户 2026-09-21 指令）导致安装启动、设备端 SQLite 行级行为、平板横屏验证、真实 DeepSeek 冒烟（无 Key）逐条列为 deferred/blocked，**不得出现任何把这些写成 PASS 的措辞**。（verifier #3 抽查：`deferred` 11 处均为 deferred 语义。）
+- [x] 报告不包含 keystore 口令、API Key、system prompt、提示词正文、用户问题、回答或 reasoning 正文。（verifier #3 扫描：唯一「keystore 口令」命中是第 11 节「本报告不包含」的规则声明本身；密钥形态扫描全 0。）
+- [x] 规模越线事实按任务逐条列出实测值与超出比例，并标注「待用户裁定」，不自我批准。（〔2026-09-24 更新〕裁定已完成：第 7 节增补裁定块，逐条记录豁免/拆分去向；原「待用户裁定」要求在裁定前已满足，裁定后状态如实更新。）
 
 ## TDD execution record
 
@@ -130,5 +130,13 @@ Follow [code-document alignment](../rules/documentation.md).
 - Watch-outs: 不得用「构建成功」代替「安装并可用」；deferred 项必须留在报告里。
 - [leader 2026-09-21] 交付报告由主会话直接撰写：`Docs/06-delivery/TreeLearn_V1_交付报告.md`（UTF-8，无 BOM，12019 字节）。报告中的每个数字都取自本轮实际执行的命令输出，并在正文中给出命令与证据文件；没有证据的条目一律标为 `deferred` / `blocked`。
 - [leader 2026-09-22] **报告第二次刷新**（装机核验前的事实更正）：① 第 2 节指纹改为当前 release APK 的实测值（452348 字节 / SHA-256 `994C70259577DBFE7DD3D68ABEA1B9CFB369D666AA06D9B9010242434C4EA592`，mtime `2026-09-22 01:30:15`，dex 内含 `TreeCanvasWiring` 与 `SqliteTreeCanvasStore`，即已含 T-038 的装配）；② 新增第 2.1 节「这份 APK 装机后能用与不能用」，按 dex 符号与静态引用关系逐条把「可达 / 不可达」分开；③ 新增第 5.1 节「引用失效：被引用的句子从未进入请求」——本轮新发现的缺陷，横跨 `core/domain/ContextPlan`、`ai/prompt` 与 `app/wiring/ChatWiring` 三处；④ 第 9 节把已不成立的「功能未接线」更正为历史记录；⑤ 第 10 节按当前剩余任务重写。
-- [leader 2026-09-22] 本次刷新新增三份可复跑的核对脚本（纯 ASCII 或 UTF-8+BOM，均通过 `parse_check.ps1`）：`.trae/scripts/dev/review_apk_and_gaps.ps1`（APK 身份 + 死入口 + 引用路径，退出码 0 = 每条 CHECK 通过，3 = 前置缺失因此证据不完整）、`review_dex_symbols.py`、`review_refs.py`、`review_quote_path.py`、`.trae/scripts/dev/doc_state.ps1`。证据：`artifacts/evidence/T-REV-2026-09-22-apk-and-gap-review.txt`（`REVIEW-VERDICT: PASS`，退出码 0）、`artifacts/evidence/T-033-doc-refresh-2026-09-22-round2.txt`（`DOC-VERDICT: PASS`，退出码 0）。本任务仍**没有独立 verifier 复核**，状态保持 `verifying`。
+- [leader 2026-09-22] 本次刷新新增三份可复跑的核对脚本（纯 ASCII 或 UTF-8+BOM，均通过 `parse_check.ps1`）：`.trae/scripts/dev/review_apk_and_gaps.ps1`（APK 身份 + 死入口 + 引用路径，退出码 0 = 每条 CHECK 通过，3 = 前置缺失因此证据不完整）、`review_dex_symbols.py`、`review_refs.py`、`review_quote_path.py`、`.trae/scripts/dev/doc_state.ps1`。证据：`artifacts/evidence/T-REV-2026-09-22-apk-and-gap-review.txt`、`artifacts/evidence/T-033-doc-refresh-2026-09-22-round2.txt`（`DOC-VERDICT: PASS`，退出码 0）。本任务仍**没有独立 verifier 复核**，状态保持 `verifying`。
+- [verifier #3 2026-09-24，勘误与收口] 上一条交接注记把 T-REV 证据误写为「`REVIEW-VERDICT: PASS`，退出码 0」——**实测该文件为 `REVIEW-VERDICT: FAIL (1 check(s) failed)`**（`artifacts/evidence/T-REV-2026-09-22-apk-and-gap-review.txt:217`），唯一失败项是 `CHECK apk-newer-than-newest-source: FAIL`（apk 02:58:02 旧于 source 03:13:05，2026-09-22 当时的并发施工中间态，与 T-040 G3 同源）。本勘误按「每个数字都要能指到哪条命令哪一行」的规则就地更正：该 FAIL 是**产物新鲜度**检查，不是报告内容缺陷；它同时提醒**装机前必须重建 release APK**。本任务其余复核由 verifier #3 于 2026-09-24 完成（`artifacts/evidence/T-033-verify3-2026-09-24.txt`），见下方收尾复核段。
 - [leader 2026-09-21] **独立性缺口**：本轮 subagent 后端返回 `402 Payment Required`，verifier lane 与全部实现 lane 同时中断，因此本任务**没有独立 verifier 复核**，状态只能到 `verifying`，不得判 PASS。`harness-verification.md` 明确要求 verifier 独立于实现者，主会话自跑不能替代。
+
+## Verification report — 收尾复核（verifier #3，2026-09-24）
+
+- Verdict: PASS。五条验收标准逐条核过（勾选与证据见上），报告的「已证明 / 未证明」分界成立。
+- 本轮同步内容：① 第 7 节增补〔2026-09-24 裁定块〕（用户当日裁定全部越线豁免 + T-039 拆分去向）；② 第 9 节风险与第 10 节步骤 1 同步；③ T-040 行检索范围措辞更正（无「问题」臂）；④ T-041 规模数字与任务证据同源（544）。以上均已在对应任务文件的收尾复核中记录。
+- 勘误：T-033 交接注记曾把 `T-REV-…-apk-and-gap-review.txt` 的 `REVIEW-VERDICT: FAIL (1)` 误写为 PASS，已就地更正（见上方日期化注记）——失败项是产物新鲜度（APK 旧于源码），装机前必须重建 release APK。
+- 残留：报告的 APK 指纹是 2026-09-22 的产物快照，当前树在此之后有大量改动；最终刷新属 T-018（安全与 release 签名复核）/ T-019（最终验收）的职责，不在本任务。T-033 的交付物（报告与侧载说明的框架与事实分界）已成立。

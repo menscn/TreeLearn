@@ -1,0 +1,30 @@
+T-2026-09-23-091 GREEN evidence (2026-09-24)
+
+Command (RED 与 GREEN 逐字相同):
+  cd android && ./gradlew --no-watch-fs :app:testDebugUnitTest --tests "com.treelearn.app.ui.SearchSettingsPresenterTest"
+
+Exit code: 0
+
+Passing evidence:
+  BUILD SUCCESSFUL in 23s (54 actionable tasks: 2 executed, 52 up-to-date)
+  测试统计（build/test-results/testDebugUnitTest/TEST-…SearchSettingsPresenterTest.xml）:
+    tests="11" skipped="0" failures="0" errors="0"
+  完整输出见 T-091-green-raw.txt，统计见 T-091-green-counts.txt。
+
+Implementation (minimum implementation, 纯新增 + 接线):
+  NEW android/app/src/main/java/com/treelearn/app/ui/SearchSettingsPresenter.java
+      — 决策层：Engine（智谱/Tavily/博查，080 拍板 2）、Tier（3/5/10，默认 10）、
+        Notice（NONE/KEY_REQUIRED/KEY_SAVE_FAILED/NOKEY）、State（开关/引擎/档位/三行卡/掩码/标注）、
+        Store 端口；Key 缓冲区在 save 的成功/拒写/异常三路 finally 清零，视图状态永不携带明文。
+  NEW android/app/src/main/java/com/treelearn/app/wiring/PreferenceSearchSettingsStore.java
+      — 持久层：SettingsRepository（SharedPreferences，开关/引擎/档位，不进 SQLite、零迁移）
+        + KeystoreSecretStore 命名空间（别名 search_<engine>，与提供商 Key 槽位隔离）。
+  NEW android/app/src/main/java/com/treelearn/app/screen/SearchServiceSettingsScreen.java
+      — 视图层：全代码构建（对齐 088 模式），主开关卡、三引擎卡（Key 状态 pill + 选中勾）、
+        选中引擎内联 Key 面板（掩码/密码输入/保存/删除）、结果数档位 popup；44dp 触达下限、token 配色。
+  MODIFIED SettingsRepository.java（search_enabled 键 + 布尔读写，默认 false）
+  MODIFIED screen_settings_body.xml / SettingsScreen.java / MainActivity.java / AppContainer.java
+      — 设置中心「搜索服务」入口卡 + 二级页导航（back 落回设置页，与 087/088 同层级）+ 容器装配。
+
+Regression evidence:
+  全量 ./gradlew check 与 no-kotlin 守门见 T-091-check.txt / T-091-no-kotlin.txt（构建后回填）。

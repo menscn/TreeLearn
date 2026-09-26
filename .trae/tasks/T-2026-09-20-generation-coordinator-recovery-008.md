@@ -4,7 +4,7 @@ id: T-2026-09-20-008
 title: 实现生成协调器、并发与恢复
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -121,6 +121,12 @@ artifacts/evidence/T-008-red.txt
 
 ## Verification report
 
+### verifier #3 批量复核（2026-09-24，独立于本任务实现者）
+
+- Verdict: **PASS（设备项 deferred）**。本任务验收标准已逐行标注 JVM 判定证据与 deferred 设备项；本轮核对其引用的四个 JVM 套件在当前全量套件中全部存在且 0 失败（GenerationSchedulerTest 5、RecoveryScanTest 3、StreamBatchTest 5、LiveAttemptsTest 3——JUnit XML 回读，见 `P3-B1-gates-2026-09-24.txt` 同批运行），Fresh evidence（2026-09-24 批次 2）: `artifacts/evidence/P3-B1-gates-2026-09-24.txt`（全模块 JVM 套件 + lint + androidTest 编译，BUILD SUCCESSFUL / EXITCODE=0；全库 188 套件 1725 tests / 0 失败）、`P3-B1-no-kotlin-2026-09-24.txt`（EXITCODE=0）。
+- 判定依据: 同分支拒绝、全局两路、FIFO、恢复判定（STAGED→CANCELED/其余→INTERRUPTED/终态拒绝）、阈值落盘判定、晚到事件丢弃的判定谓词均为 JVM 层已锁定行为；「真机 SQLite 事务原子性/进程存活/端到端回调」按标准原文记 deferred，不算 PASS 也不算 FAIL。
+- Gaps（不变，均 deferred）: 恢复事务原子性、后台存活、端到端事件 —— `deferred — emulator not used this round (user instruction 2026-09-21)`。
+
 - Verdict: PENDING
 - Evidence: PENDING
 - Changed/deleted assertion rationale and equivalent behavior coverage: PENDING
@@ -135,3 +141,5 @@ artifacts/evidence/T-008-red.txt
 - Unblock condition: 用户对规模给出裁定（批准例外，或要求把装配/遥测消费者与协调器拆成后续任务）；装配任务提供 `Application` 级调用点后 ② 消失；重新允许使用模拟器后 ③ 才能转成 PASS。
 - Next steps: 解锁重试/重置与对话 UI；把 `recover()` 接到应用启动路径；把 `GenerationTelemetry` 接到真实事件消费者（当前只有测试实现）；模拟器可用后跑 `:app:connectedDebugAndroidTest` 把 deferred 项逐条转成证据。
 - Watch-outs: 不得将页面销毁等同于用户取消；`recover()` 只收敛状态、不重发；`complete()` 里 stabilizer 抛出存储异常时按失败收敛的分支没有测试覆盖（声明的表面，不是已验证事实）；稳定化（`GenerationStabilizer` 自持事务）与位置记账（`settlePosition`）是两个事务，中间存在「revision 已落库、位置尚未指向它」的窗口；本轮 RED 的粗粒度变异只证明「接缝整体缺失时这 6 条断言会红」，细粒度变异未做；兄弟 lane 会争用共享的 `android/app/build`（本轮实测：`:data` 的 debug classes jar 被并发构建压成空壳、`android/app/build/test-results` 被整个删掉、T-005 把自己的生产类移出树导致全仓无法编译），遇到这类失败先确认不是自身源码问题再重跑；**不得**再把生产源码移出共享树（用户指令 2026-09-21），T-005 那次事件的审计在 T-008-crosslane-stash-recovery.txt。
+
+- [verifier #3 2026-09-24，规模例外补记] 上述 Blocker ①（765 判定行，超 500 硬上限，无批准记录）于 2026-09-24 由用户裁定「事后追认豁免」收口。批准落在实现之后，按 `harness-tasks.md` 第 60 行如实记为事后追认。剩余风险：单 task 超硬上限 53%；后续如需拆分，以「装配/遥测消费者」与「协调器本体」为天然切面。本任务状态维持 verified，其余结论不变。

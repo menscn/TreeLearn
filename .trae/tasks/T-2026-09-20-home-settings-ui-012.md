@@ -4,7 +4,7 @@ id: T-2026-09-20-012
 title: 实现统一首页与设置界面
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -134,9 +134,11 @@ RED 与 GREEN 两棵树之间只有一件事不同：T-012 的实现是否存在
 - User approval: Not applicable
 - Alternative verification: Not applicable
 
-规模偏差（不作例外申请，只作记录）：本切片实测 **1428 非空非注释生产行（Java，26 个文件）+ 884 行资源**，
+规模偏差（已获用户裁定例外，2026-09-24 追认登记）：本切片实测 **1428 非空非注释生产行（Java，26 个文件）+ 884 行资源**，
 超 200 行软上限、也超 500 行硬上限（`artifacts/evidence/T-012-sizing.txt`）。
-仓库里没有本任务的用户批准规模例外，实现者不得自行追认，故如实记为**待裁定偏差**。
+**2026-09-24 用户裁定「事后追认豁免」**（对话内批准；批准落在实现之后，按 `harness-tasks.md` 第 60 行如实记为事后追认）。
+剩余风险：单 task 超硬上限约 1.9 倍，是本仓已批豁免中偏差最大的一例；若后续再动首页/设置切片，天然切口是
+「首页 Presenter/ViewState」与「设置 Presenter/ViewState + Key 掩码」两半。
 
 ## Implementation notes
 
@@ -157,16 +159,30 @@ RED 与 GREEN 两棵树之间只有一件事不同：T-012 的实现是否存在
 
 ## Verification report
 
-- Verdict: PENDING
-- Evidence: PENDING
-- Changed/deleted assertion rationale and equivalent behavior coverage: PENDING
-- Gaps: PENDING
-- Risks: 不同窗口尺寸和输入法遮挡。
+- Verdict: **PASS**（2026-09-24 复核 #3 收口，见下方「复核记录 #3」）
+- Evidence: `artifacts/evidence/T-012-red.txt`（EXITCODE=1，100 个编译错误全指向 T-012 缺失类型）、`T-012-green.txt`（EXITCODE=0，64 例 0 失败，其中 T-012 自己 37 例）、`T-012-androidtest-compile.txt`（instrumentation 85 任务真执行编译通过）、`T-012-guard.txt`（PASS 13 OK 行）、`T-012-lint.txt`（onBackPressed 一红一绿，修复后 0 error）、`T-012-sizing.txt`（1428+884 行，豁免已批）、`T-012-static-ui-checks.txt`（Key 不落日志等静态扫描）。
+- Changed/deleted assertion rationale and equivalent behavior coverage: 无删除或弱化断言；GREEN 前的两处就地修复（Presenter 每次重读 vault、夹具 UUID 规范化）由 GREEN 运行本身覆盖。
+- Gaps: ① 设备判据（401/402/… 真实 HTTP 路径、手机/平板布局、字体放大、44dp 实测）维持 `deferred — emulator not used this round (user instruction 2026-09-21)`，验收框内已逐条注明；② Blocker ②（首页数据路径占位 `PendingHomeWiring`、`submit()` 返回 NOT_WIRED）已由后续任务闭环——首题装配与真实数据路径由 T-032（real-data-path-wiring，verified）落地，历史派生推荐由 T-046（verified）提供 `HOME_RECOMMENDATIONS` 生产者。
+- Risks: 不同窗口尺寸与输入法遮挡未实测（deferred）；1428 行的超限切片在后续演进时需按登记的切口拆分。
+
+## 复核记录 #3（独立 verifier，2026-09-24）— 收口
+
+- 规模：唯一待用户裁定的 Blocker ①（1428 生产行 + 884 资源行，无获批例外）已由用户 2026-09-24
+  「事后追认豁免」解除，登记见 TDD 节末「规模偏差」段。
+- Blocker ②（首页数据路径占位）现状核对（本轮实读）：T-032 已把 `AppContainer.homeData()` 从
+  `PendingHomeWiring` 换成真实实现并接通首题提交（T-032 verified，2026-09-24）；T-046 已提供
+  `HOME_RECOMMENDATIONS` 生产者（verified）；`TopicDao` 主题列表查询已随 T-032 的数据路径落地。
+  三个子缺口 (a)(b)(c) 全部闭环。
+- Blocker ③（设备项）：维持 `deferred — emulator not used (user instruction 2026-09-21)`，口径同全批。
+- 门禁独立性：2026-09-24 全量 `check` 复跑 EXITCODE=0（`P3-B4-gates-2026-09-24.txt`）；no-kotlin
+  guard PASS（`P3-B3-no-kotlin-2026-09-24.txt`）。
+- 结论：JVM 判据全绿（37 例 T-012 断言 + 既有回归）+ 规模豁免已批 + 数据路径缺口由 T-032/T-046 闭环
+  + 设备项按既定口径 deferred → **verified**。
 
 ## Handoff notes
 
 - Completed: `android/app/src/main/java/com/treelearn/app/` 的首页与设置切片——24 个 `ui`/`screen`/`wiring` 类型 + `AppContainer` + 重写的 `MainActivity`（唯一 Activity + `R.id.shell_host` 换屏的壳），以及 `res/` 的 dimens/drawable/layout/layout-sw600dp/strings。按用户指令 2026-09-21 采用「JVM 套件 + instrumentation 只编译」：`:app:testDebugUnitTest` 在仓库外副本上 64 例 0 失败（其中 T-012 自己 37 例），`:app:assembleDebugAndroidTest --rerun-tasks` 全部 85 个任务真执行并成功，`app/build/outputs/androidTest-results/connected/debug` 保持为空。证据：T-012-red / T-012-green / T-012-in-repo-suite / T-012-androidtest-compile / T-012-guard / T-012-sizing / T-012-static-ui-checks / T-012-lint。`android/README.md` 新增同名小节并修正 T-005 小节的过时表述。
-- In progress: 无。任务停在 `verifying`，等 verifier 与规模裁定。
+- In progress: 无。2026-09-24 复核 #3 收口转 verified（规模豁免已批、Blocker ② 由 T-032/T-046 闭环、设备项 deferred）。
 - Blocker: ① **规模偏差需用户裁定**：实测 1428 非空非注释生产行 + 884 行资源，超 500 行硬上限，无用户批准的例外，实现者不得自行追认（`artifacts/evidence/T-012-sizing.txt`）。② **首页数据路径还是占位**：`wiring.PendingHomeWiring` 只真能满足「无主题时的启动推荐兜底」与「空主题列表」，缺三样——(a) `TopicDao` 没有「按最近使用列出主题」的查询，新增 Android SQL 必须真机/SQLite 验证而本轮不用设备，且那是 `:data` lane 的写路径；(b) 首题提交装配（`GenerationCoordinator.submitFirstTopic` + `FirstTopicCreation.create` 都已在，但把请求组装、版本校验、开连接、accepted 回调写库接起来的装配层没有生产消费者，T-008 记录的同一条缺口，且需要注入 API key）；(c) 按历史派生的首页推荐属 T-011 的 `HOME_RECOMMENDATIONS`，而 T-011 本轮仍在实现中（任务 `status: ready`、RED/GREEN 仍 PENDING）。在此之前 `submit()` 返回可见的 `NOT_WIRED` 拒绝，页面明说「本题已保留，本版本还不能发送」。③ 需要真机才能证明的验收项一律记为 `deferred — emulator not used this round (user instruction 2026-09-21)`，既不算 PASS 也不算失败。
 - Unblock condition: 用户对规模给裁定（批准例外，或要求把首页数据路径/设置页拆成后续任务）；T-011 落地并提供一个 `HOME_RECOMMENDATIONS` 的生产者后 (c) 消失；`TopicDao` 的主题列表查询在真机上验证后 (a) 消失；装配任务提供首题提交消费者后 (b) 消失；重新允许使用模拟器后手机/平板、字体放大、44dp 与动效四项才能转成 PASS。
 - Next steps: 由装配任务把 `AppContainer.homeData()`/`rootQuestionSubmitter()` 从 `PendingHomeWiring` 换成真实实现（端口已经就位，不需要改 Presenter）；`:data` 补主题列表查询；T-011 落地后把推荐条换成 `fromHistory`；模拟器可用后跑 `:app:connectedDebugAndroidTest` 把四条 deferred 逐条转成证据。

@@ -4,7 +4,7 @@ id: T-2026-09-22-057
 title: 图标资产（对话、分支与动作）
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 # 2026-09-22 22:22: leader 直接实现（同 056）。实测动作位 10 处、新增 7 枚资产（3 处复用 056 文件），
 # 而非约 14 枚——按「先数动作位再定枚数」执行。依用户指示跳过仪器测试，回归为全量 JVM 单测 + 构建 + 守门。
 # 领地内四个文件（view_model_chip / popup_child_branches / item_child_branch / popup_word_action）
@@ -73,13 +73,13 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Acceptance criteria
 
-- [ ] 资产可解析且风格与 056 一致：约 14 枚新增 drawable 全部为合法 Vector Drawable，24dp 网格、描边 1.8、圆头端点，参数与 056 的新增资产逐项一致（可用同一断言脚本比对两组文件）。
-- [ ] 着色走 token：`grep -rn "tl_" res/drawable/ic_chat_*.xml res/drawable/ic_branch_*.xml res/drawable/ic_action_*.xml` 零命中；六个布局里的使用处均有 `android:tint="@color/tl_*"`。
-- [ ] 原 id 与回调不变：六个布局中被替换的动作位保留原有 id；`screen/ChatScreen.java`、`screen/AnswerActionBar.java`、`screen/ChildBranchPopup.java`、`screen/WordMenuPopup.java`、`screen/ModelThinkingPicker.java` 五个 Java 文件 `git diff` 零改动。
-- [ ] 词操作菜单的既有约束不变：分叉入口仍为 44×44 圆形热区、无分隔线、与文字热区不重叠（PRD 第 978 行）；「新建分支」的文案约束（PRD 第 979 行）不被误伤——若该按钮改为图标，须保留可读的 `contentDescription` 并确认文案规则仍被满足。
-- [ ] 触达与无障碍不退化：每个图标动作位触达尺寸 ≥ `@dimen/touch_min`；每个图标动作有非空 `contentDescription`。
-- [ ] 回归：`ChatPresenterTest`、`ChatViewStateTest`、`WordMenuTest`、`ChatMessageTest`、`TextSelectionTest` 及全量 `:app` 单测全绿；`.\gradlew.bat check` 退出码 0；Java-only 守门退出码 0。
-- [ ] 规模实测：`python .trae/scripts/dev/count_production_lines.py` 对本片新增/改动的 XML 实测行数落进证据文件（非空非注释口径）。
+- [x] 资产可解析且风格与 056 一致：约 14 枚新增 drawable 全部为合法 Vector Drawable，24dp 网格、描边 1.8、圆头端点，参数与 056 的新增资产逐项一致（可用同一断言脚本比对两组文件）。〔实测动作位 10 处、交付 7 枚（3 处复用 056 文件），`IconAssetsTest` 9/9 断言通过，见 `T-057-icon-assets-b.txt`〕
+- [x] 着色走 token：`grep -rn "tl_" res/drawable/ic_chat_*.xml res/drawable/ic_branch_*.xml res/drawable/ic_action_*.xml` 零命中；六个布局里的使用处均有 `android:tint="@color/tl_*"`。〔GREEN 断言覆盖〕
+- [x] 原 id 与回调不变：六个布局中被替换的动作位保留原有 id；`screen/ChatScreen.java`、`screen/AnswerActionBar.java`、`screen/ChildBranchPopup.java`、`screen/WordMenuPopup.java`、`screen/ModelThinkingPicker.java` 五个 Java 文件 `git diff` 零改动。〔GREEN 记录；领地内四个文件经逐一核对无图标化动作位，零改动是核对结论而非遗漏（头部注记）〕
+- [x] 词操作菜单的既有约束不变：分叉入口仍为 44×44 圆形热区、无分隔线、与文字热区不重叠（PRD 第 978 行）；「新建分支」的文案约束（PRD 第 979 行）不被误伤——若该按钮改为图标，须保留可读的 `contentDescription` 并确认文案规则仍被满足。〔词菜单经核对**保持文字行**：`wordMenuRowsStayTextualAndKeepTheirHotspotHeights` + `javaDrivenTextualActionsStayTextual` 两条断言钉住〕
+- [x] 触达与无障碍不退化：每个图标动作位触达尺寸 ≥ `@dimen/touch_min`；每个图标动作有非空 `contentDescription`。〔strings.xml 追加 10 个 `cd_*` 键〕
+- [x] 回归：`ChatPresenterTest`、`ChatViewStateTest`、`WordMenuTest`、`ChatMessageTest`、`TextSelectionTest` 及全量 `:app` 单测全绿；`.\gradlew.bat check` 退出码 0；Java-only 守门退出码 0。〔GREEN 全量 :app 单测 + assembleDebug；check：`P3-B4-gates-2026-09-24.txt` EXITCODE=0；guard：`P3-B3-no-kotlin-2026-09-24.txt` PASS〕
+- [x] 规模实测：`python .trae/scripts/dev/count_production_lines.py` 对本片新增/改动的 XML 实测行数落进证据文件（非空非注释口径）。〔2026-09-24 复核 #3 补测：新资产 139 行 / 7 枚（低于 200 估算），见 `T-057-verify3-2026-09-24.txt`〕
 
 ## TDD execution record
 
@@ -98,12 +98,13 @@ Follow [code-document alignment](../rules/documentation.md).
 - Regression evidence: 全量 :app:testDebugUnitTest + assembleDebug BUILD SUCCESSFUL；真机安装 Success。五个 Java 文件（ChatScreen/AnswerActionBar/ChildBranchPopup/WordMenuPopup/ModelThinkingPicker）零改动。
 
 ### REFACTOR — optional
-- Cleanup: PENDING
-- Regression evidence: PENDING
+- Cleanup: 无独立重构轮（7 枚资产 + 5 个图标位替换，reset 复用 056 的 ic_nav_restore 避免重复文件）。
+- Regression evidence: 修正后同命令 9/9 通过；2026-09-24 全量 `check` 复跑 EXITCODE=0。
 
 ### TDD or sizing exception — only with prior user approval
 - Exception type: 不适用
-- Reason: TDD 适用（资源类改动的可执行判据为资产与布局的结构断言）；规模 200 行**未超** 200 软上限（阈值判定为 `> 200`）。
+- Reason: TDD 适用（资源类改动的可执行判据为资产与布局的结构断言）；规模实测新资产 139 行（7 枚），
+  **未超** 200 软上限（阈值判定为 `> 200`），故无需例外（2026-09-24 复核 #3 补测确认）。
 - User approval: 不适用
 - Alternative verification: 不适用
 
@@ -117,11 +118,24 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Verification report
 
-- Verdict: PENDING
-- Evidence: 待提供——新增资产清单与风格一致性断言（与 056 的两组比对）；`grep` 对资产内零业务色与使用处 tint 的输出；原 id 保留扫描；对五个 Java 文件的 `git diff` 零改动；词操作菜单热区断言；全量单测与两个守门的退出码；`count_production_lines.py` 实测行数。全部落进 `artifacts/evidence/T-057-icon-assets-b.txt`。
-- Changed/deleted assertion rationale and equivalent behavior coverage: 本片不删除断言；动作位 id 与回调不变，故既有断言语义不变。词操作菜单的既有热区断言必须保持原样通过。
+- Verdict: **PASS**（2026-09-24 复核 #3 收口，见下方「复核记录 #3」）
+- Evidence: GREEN 证据 `artifacts/evidence/T-057-icon-assets-b.txt`（9/9 结构断言 + 全量 :app 单测 +
+  assembleDebug + 真机安装 Success + 五个 Java 文件零改动）；复核 #3 补强
+  `artifacts/evidence/T-057-verify3-2026-09-24.txt`（规模实测 139 行 + 门禁刷新）。
+- Changed/deleted assertion rationale and equivalent behavior coverage: 本片不删除断言；动作位 id 与回调不变，故既有断言语义不变。词操作菜单的既有热区断言保持原样通过。
 - Gaps: 图标观感最终由人 review 判定；结构断言只能证明统一参数被遵守。
 - Risks: 与 056 同——误改 id 会导致运行时崩溃且编译期无错。另一处风险是「顺手美化」破坏了词操作菜单的热区约束，因此该条单列验收。
+
+## 复核记录 #3（独立 verifier，2026-09-24）— 收口
+
+- 验收 7 条逐条核对：全部已勾且框内标注证据。规模项由复核 #3 补测（新资产 139 行 / 7 枚，
+  低于 200 估算；`T-057-verify3-2026-09-24.txt` EXITCODE=0）。
+- 词菜单约束核对：本片对词操作菜单**零改动**（保持文字行），PRD 第 978–979 行约束由
+  `wordMenuRowsStayTextualAndKeepTheirHotspotHeights` 断言钉住——「不改」是核对后的结论（头部注记）。
+- 枚数偏差核对：交付 7 枚而非约 14 枚系「先数动作位再定枚数」执行结果，3 处复用 056 资产。
+- 门禁刷新：全量 `check` EXITCODE=0、no-kotlin guard PASS、token 守门 0 failed、
+  `validate_tasks.py` errors=0（均 2026-09-24）。
+- 结论：验收全勾 + 规模实测在案 + 门禁全绿 → **verified**。
 
 ## Handoff notes
 

@@ -4,7 +4,7 @@ id: T-2026-09-20-015
 title: 实现搜索、未读序号与阅读位置
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -75,14 +75,14 @@ Follow [code-document alignment](../rules/documentation.md).
 - [x] 同一 SQLite/Presenter 测试命令先 RED 后 GREEN，中文、空格、大小写及 `%/_` 输入均参数化且结果确定。
   - JVM 半边已证：SearchQueryTest（7 例）+ SearchDaoStatementTest（7 例）——归一化、大小写折叠、`%`/`_`/`\` 转义、六处 `LIKE ? ESCAPE '\'` 参数绑定、语句里不含查询串。
   - deferred — emulator not used this round (user instruction 2026-09-21)：真机 SQLite 上「中文子串命中 / `%` 是字符」的行级结果，由未执行的 `SearchUnreadReadingInstrumentedTest` 覆盖。
-- [ ] 可搜索当前 stable reasoning/answer、当前失败 partial、标题和 anchor；不重复返回无引用过期 revision。
+- [x] 可搜索当前 stable reasoning/answer、当前失败 partial、标题和 anchor；不重复返回无引用过期 revision。
   - JVM 半边已证：SearchDaoStatementTest 断言六个字段各一臂、回答与思考只经 `messages.active_revision_id` 连接、六臂都带 `b.archived_at IS NULL`、被分叉引用的 revision 仍可经 `b.source_revision_id` 找到。
-  - deferred — emulator not used this round (user instruction 2026-09-21)：真机上的行级结果集与「过期 revision 不重复返回」，由未执行的 instrumented 用例覆盖。
+  - deferred — emulator not used this round (user instruction 2026-09-21)：真机上的行级结果集与「过期 revision 不重复返回」，由未执行的 instrumented 用例覆盖。勾选只表示 JVM 半边成立；设备半边按用户 2026-09-21 决定保持 deferred，不判 FAIL（复核 #3 收口口径，与验收项 1/3 相同）。
 - [x] stable 完成才递增 latestStableSequence；仅目标回答进入视口才推进 lastSeen，推荐/摘要不制造未读。
   - 全 JVM 覆盖：UnreadRollupTest（6 例）+ ViewportSeenTest（6 例）。`latestStableSequence` 自身的递增在 `:core` 的 `Branch` 里（T-009 已落地），本切片只消费它。
-- [ ] 字体、版本或窗口变化后优先用 message/revision + item offset + viewport offset 恢复；失效时回退最近合法位置。
+- [x] 字体、版本或窗口变化后优先用 message/revision + item offset + viewport offset 恢复；失效时回退最近合法位置。
   - JVM 半边已证：ReadingAnchorTest（7 例）+ ReadingSessionTest（7 例）——解析、偏移夹取、失效回退到活动末端并标记 `atLiveEnd`。
-  - deferred — emulator not used this round (user instruction 2026-09-21)：四个 `reading_*` 列在真机 SQLite 上的往返与 `ON DELETE SET NULL` 行为，由未执行的 instrumented 用例覆盖。
+  - deferred — emulator not used this round (user instruction 2026-09-21)：四个 `reading_*` 列在真机 SQLite 上的往返与 `ON DELETE SET NULL` 行为，由未执行的 instrumented 用例覆盖。勾选只表示 JVM 半边成立（复核 #3 收口口径）。
 
 ## TDD execution record
 
@@ -169,7 +169,7 @@ androidTest：SearchUnreadReadingInstrumentedTest 有 10 个 `@Test`（实测 `^
 ## Verification report
 > **最新结论：见本段末尾「第九轮独立复核结论」（verifier #2，2026-09-21 第四轮）。下方第一个 - Verdict: 是历史轮次的记录，不是当前判定。**
 
-- Verdict: PENDING（本轮只把任务推进到 `verifying`；verdict 由 verifier 给出）
+- Verdict: **PASS**（2026-09-24 复核 #3 收口，见下方「复核记录 #3」；verifier #2 判「规模裁定前不得 PASS」的唯一失败级项已由用户裁定解除）
 - Evidence: T-015-red.txt（EXITCODE=1）、T-015-green.txt（EXITCODE=0）、T-015-green-rerun.txt（60/60 executed，EXITCODE=0）、T-015-tests.txt（398 例，0 失败）、T-015-guard.txt（VERDICT: PASS，13 OK 行，EXITCODE=0）、T-015-sizing.txt（807 判定行）、T-015-doc-reverse-search.txt（反查 0 命中）。
 - Changed/deleted assertion rationale and equivalent behavior coverage: 没有删除或弱化任何断言。GREEN 期间按实测行为改正过三条期望（见 REFACTOR），改正后用同一命令重跑，覆盖没有降低。
 - Gaps: ① `SearchPresenter` 与 `ReadingSession` 目前**没有 Activity 消费者**，全仓检索确认它们的引用只出现在自己的包与验收套件里——Phase 2 接线属外壳 lane，本任务记为缺口而不是已完成；② 全部 androidTest 用例只编译未执行（用户指令 2026-09-21 不用模拟器），行级 SQL 行为未经真机验证；③ 规模 807 判定行，超 500 硬上限，**没有用户批准的规模例外**，属待裁定偏差；④ 检索与阅读位置的**目标引擎判定为 Android SQLite**（生产路径是 `android.database.sqlite.SQLiteDatabase`，本仓不存在 `backend/**`），按 rules/sql.md 必须在 API 28+ 真机 SQLite 上执行验证；本轮无模拟器与真机，因此这两条 SQL 路径的**行级行为是 unverified**；本轮**没有**为它们搭 MySQL / JDBC-SQLite / Robolectric 替代验证（规则明确禁止用另一个引擎宣称等价，失败的也不是"另找一台数据库跑通"）。verifier 若按 rules/sql.md 判定，这一半应记 unverified，不能因为 JVM 套件全绿就当成已验证。
@@ -199,3 +199,18 @@ androidTest：SearchUnreadReadingInstrumentedTest 有 10 个 `@Test`（实测 `^
 - Unblock condition: T-013 落进共享树后即可开始接线。
 - Next steps: ① Phase 2：把搜索屏与阅读恢复接进外壳（只做**增补**，不重写别的 lane 的文件）；② T-017 画布消费 `UnreadRollup`；③ verifier 复核本任务。
 - Watch-outs: 搜索 snippet 不得把 reasoning 与 answer 混成错误来源——六个字段各有独立的臂与 `matched_field` 标签；接线时不要为了「顺手多返回一条」而绕过 `SqliteSearchRepository.isStillReachable` 的剔除；规模 807 行已超硬上限，若 verifier 要求拆分，切口是 `:app` 的 presenter 层与 `:data` 的 DAO 层。
+- [verifier #3 2026-09-24，规模例外登记] 上述未获批偏差（807 判定行，超 500 硬上限 307 行，verifier 判「规模裁定前不得 PASS」的唯一项）于 2026-09-24 由用户裁定「事后追认豁免」收口。批准落在实现之后，按 `harness-tasks.md` 第 60 行如实记为事后追认。剩余风险：单 task 超硬上限 61%；若需拆分，天然切面为「`:app` presenter 层 / `:data` DAO 层」（verifier 已给出）。设备侧 SQL 行级验证仍按用户 2026-09-21 决定保持 deferred，与规模裁定互不影响。
+
+## 复核记录 #3（独立 verifier，2026-09-24）— 收口
+
+- 规模：verifier #2 的唯一失败级项（807 判定行无获批例外）已由用户 2026-09-24「事后追认豁免」解除
+  （登记见上方 verifier #3 规模例外登记段）。
+- Phase 2 缺口（SearchPresenter/ReadingSession 无 Activity 消费者）的现状核对（本轮实读）：搜索屏已由
+  T-040（search-page-and-home-entry，2026-09-24 verified）接线，阅读位置已由 T-042（reading-position-wiring，
+  verified）接线——verifier #2 当年「缺口而非已完成」的判定针对的是实现当时的事实，该缺口现已由后续
+  任务闭环，不再阻塞本任务收口。
+- 门禁独立性：2026-09-24 全量 `check` 复跑 EXITCODE=0（`artifacts/evidence/P3-B4-gates-2026-09-24.txt`），
+  此时工作树含本任务全部代码与后续增量；no-kotlin guard PASS（`P3-B3-no-kotlin-2026-09-24.txt`）。
+- 设备判据：验收项 1/2/3/4 的真机半边全部维持 `deferred — emulator not used (user instruction 2026-09-21)`，
+  勾选框内已注明「只表示 JVM 半边成立」；按既定口径不判 FAIL、不影响收口。
+- 结论：JVM 判据全绿 + 规模例外已批 + Phase 2 缺口由 T-040/T-042 闭环 → **verified**。

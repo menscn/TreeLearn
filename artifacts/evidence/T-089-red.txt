@@ -1,0 +1,24 @@
+T-2026-09-23-089 RED evidence (2026-09-24)
+
+Test/scenario: QuickModelGatewayTest（T-089 分工路由六断言）——
+  ①已配置快速分工 → 以 Route 的 provider baseUrl+modelWireId 构造 ProviderEndpoint 打开端点流，
+    Key 按 providerId 解析，request/sink 原样透传，回落网关不被触碰；
+  ②未配置（Routes 返回 null）→ 走既有聊天模型路径（回落 GenerationGateway），端点流零调用（未配置时行为不变回归）；
+  ③Key 不可读（SecretStoreException）→ 回落聊天模型路径；
+  ④快速模型流失败（terminal FAILED）→ 不经聊天模型重试（派生失败语义保持，无二次生成）；
+  ⑤Key 缓冲区在调用打开后即被擦除；
+  ⑥cancel 委托端点 Call。
+
+Command:
+  cd android && ./gradlew.bat --no-watch-fs --no-daemon --console=plain :app:testDebugUnitTest --tests "com.treelearn.app.generation.QuickModelGatewayTest"
+
+Exit code: 1
+
+Observed failure: BUILD FAILED in 12s（52 actionable tasks）。:app:compileDebugJavaWithJavac
+  失败，20 个编译错误全部为「程序包 QuickModelGateway 不存在 / 找不到符号
+  QuickModelGateway / QuickModelGateway.Route / QuickModelGateway.EndpointStreams」，
+  均指向 QuickModelGatewayTest.java 对被测类 API 的引用。原始输出见 T-089-red-raw.txt，
+  退出码见 T-089-red-exit.txt。
+
+Failure reason validated: 失败原因确为被测类尚不存在（T-089 生产代码未实现），
+  而非测试自身语法或既有回归问题——同一模块其余任务均 up-to-date 通过编译。

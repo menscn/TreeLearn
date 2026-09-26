@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The home column itself. The phone layout and the tablet layout both include it, so the two
-  configurations cannot drift; only the width that surrounds it differs.
+  The home column itself (055: brand, composer, continue-learning, recommendations). The phone layout
+  and the tablet layout both include it, so the two configurations cannot drift; only the width that
+  surrounds it differs.
+
+  055 slimmed this column: the header's search / archived / settings entries and the history topic
+  list are gone - their homes are the library tab (search box, topic rows, archived segment) and the
+  settings tab. What stays is the four blocks the new IA names: brand, composer, the continue-learning
+  row (which exists only while there is history) and the recommendation marquee, whose form the user
+  ruled to keep (scrolling marquee, not the mock's card + list).
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/home_content"
@@ -10,7 +17,9 @@
         android:orientation="vertical"
         android:paddingBottom="@dimen/space_s8">
 
-        <!-- Brand bar: 搜索 / 归档 / 设置 live here (PRD 6.2.16 point 1). -->
+        <!-- Brand: the mark, the Chinese name and the English small line, all in the brand serif.
+             No entries live here any more: settings is a tab, search and archived live in the
+             library. -->
         <LinearLayout
             android:id="@+id/home_appbar"
             android:layout_width="match_parent"
@@ -21,45 +30,49 @@
             android:paddingTop="@dimen/space_s4"
             android:paddingEnd="@dimen/page_gutter">
 
-            <TextView
-                android:id="@+id/home_brand"
-                android:layout_width="0dp"
+            <ImageView
+                android:id="@+id/home_drawer_button"
+                android:layout_width="@dimen/touch_min"
+                android:layout_height="@dimen/touch_min"
+                android:layout_marginStart="-8dp"
+                android:contentDescription="@string/cd_home_drawer"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_nav_menu"
+                android:tint="@color/tl_ink2" />
+
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginStart="@dimen/space_s1"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_launcher_foreground" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/app_name"
-                android:textColor="@color/tl_ink"
-                android:textSize="@dimen/text_h1"
-                android:textStyle="bold" />
+                android:layout_marginStart="@dimen/space_s2"
+                android:orientation="vertical">
 
-            <Button
-                android:id="@+id/home_search"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/touch_min"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:minWidth="@dimen/touch_min"
-                android:text="@string/action_search"
-                android:textColor="@color/tl_ink3"
-                android:textSize="@dimen/text_sm" />
+                <TextView
+                    android:id="@+id/home_brand"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="serif"
+                    android:text="@string/app_name"
+                    android:textColor="@color/tl_ink"
+                    android:textSize="@dimen/text_h1"
+                    android:textStyle="bold" />
 
-            <Button
-                android:id="@+id/home_archived"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/touch_min"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:minWidth="@dimen/touch_min"
-                android:text="@string/action_archived"
-                android:textColor="@color/tl_ink3"
-                android:textSize="@dimen/text_sm" />
-
-            <Button
-                android:id="@+id/home_settings"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/touch_min"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:minWidth="@dimen/touch_min"
-                android:text="@string/action_settings"
-                android:textColor="@color/tl_green_deep"
-                android:textSize="@dimen/text_sm" />
+                <TextView
+                    android:id="@+id/home_brand_english"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="serif"
+                    android:importantForAccessibility="no"
+                    android:text="@string/home_brand_english"
+                    android:textColor="@color/tl_ink3"
+                    android:textSize="@dimen/text_cap" />
+            </LinearLayout>
         </LinearLayout>
 
         <!-- Hero copy: only while there is no topic yet (PRD 6.2.16 example 1). -->
@@ -91,6 +104,14 @@
                 android:textColor="@color/tl_ink2"
                 android:textSize="@dimen/text_sm" />
         </LinearLayout>
+
+        <!-- Mini heat strip (T-2026-09-23-102): sits below the greeting area. No android:id here
+             on purpose: an id on <include> overrides the included root's own
+             home_heat_strip_card id, which is what HomeScreen binds. -->
+        <include
+            layout="@layout/home_heat_strip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
         <!-- Root-question composer: always present, draft survives every failure. -->
         <LinearLayout
@@ -129,6 +150,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
+                <!-- A passive hint, not a button (055): the tab bar owns settings now, and the
+                     missing-key guard still opens settings the moment a send is attempted. -->
                 <TextView
                     android:id="@+id/home_key_hint"
                     android:layout_width="wrap_content"
@@ -136,8 +159,6 @@
                     android:layout_marginStart="@dimen/space_s2"
                     android:background="@drawable/bg_pill"
                     android:backgroundTint="@color/tl_amber_soft"
-                    android:clickable="true"
-                    android:focusable="true"
                     android:paddingStart="@dimen/space_s3"
                     android:paddingTop="@dimen/space_s1"
                     android:paddingEnd="@dimen/space_s3"
@@ -175,99 +196,59 @@
             android:textSize="@dimen/text_sm"
             android:visibility="gone" />
 
+        <!-- Continue learning (055): the most recent topic as one tappable row, drawn only while
+             there is history - with none, the state carries a null and nothing is rendered here. -->
+        <LinearLayout
+            android:id="@+id/home_continue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_gutter"
+            android:layout_marginTop="@dimen/space_s4"
+            android:layout_marginEnd="@dimen/page_gutter"
+            android:background="@drawable/bg_card"
+            android:clickable="true"
+            android:elevation="@dimen/card_elevation"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:minHeight="@dimen/touch_min"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/space_s4"
+            android:paddingTop="@dimen/space_s2"
+            android:paddingEnd="@dimen/space_s4"
+            android:paddingBottom="@dimen/space_s2"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/home_continue_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_pill"
+                android:backgroundTint="@color/tl_green_soft"
+                android:importantForAccessibility="no"
+                android:paddingStart="@dimen/space_s2"
+                android:paddingTop="@dimen/space_s1"
+                android:paddingEnd="@dimen/space_s2"
+                android:paddingBottom="@dimen/space_s1"
+                android:text="@string/home_continue_label"
+                android:textColor="@color/tl_green_deep"
+                android:textSize="@dimen/text_cap" />
+
+            <TextView
+                android:id="@+id/home_continue_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_s3"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/tl_ink"
+                android:textSize="@dimen/text_body" />
+        </LinearLayout>
+
         <com.treelearn.app.screen.RecommendationMarquee
             android:id="@+id/home_recommendations"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_s4"
             android:visibility="gone" />
-
-        <LinearLayout
-            android:id="@+id/home_section"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="@dimen/page_gutter"
-            android:paddingTop="@dimen/space_s6"
-            android:paddingEnd="@dimen/page_gutter"
-            android:paddingBottom="@dimen/space_s3">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/home_section_topics"
-                android:textColor="@color/tl_ink"
-                android:textSize="@dimen/text_sm"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/home_section_count"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/space_s2"
-                android:textColor="@color/tl_ink3"
-                android:textSize="@dimen/text_cap" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/home_topics"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingStart="@dimen/page_gutter"
-            android:paddingEnd="@dimen/page_gutter" />
-
-        <TextView
-            android:id="@+id/home_loading"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingStart="@dimen/page_gutter"
-            android:paddingTop="@dimen/space_s3"
-            android:paddingEnd="@dimen/page_gutter"
-            android:text="@string/home_loading"
-            android:textColor="@color/tl_ink3"
-            android:textSize="@dimen/text_sm"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/home_error"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingStart="@dimen/page_gutter"
-            android:paddingTop="@dimen/space_s3"
-            android:paddingEnd="@dimen/page_gutter"
-            android:text="@string/home_error"
-            android:textColor="@color/tl_red"
-            android:textSize="@dimen/text_sm"
-            android:visibility="gone" />
-
-        <LinearLayout
-            android:id="@+id/home_empty"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:paddingStart="@dimen/page_gutter"
-            android:paddingEnd="@dimen/page_gutter"
-            android:paddingBottom="@dimen/space_s4">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/home_empty_topics"
-                android:textColor="@color/tl_ink3"
-                android:textSize="@dimen/text_sm" />
-
-            <Button
-                android:id="@+id/home_empty_guide"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/touch_min"
-                android:layout_marginTop="@dimen/space_s1"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:minWidth="@dimen/touch_min"
-                android:text="@string/home_empty_guide"
-                android:textColor="@color/tl_green_deep"
-                android:textSize="@dimen/text_sm" />
-        </LinearLayout>
     </LinearLayout>

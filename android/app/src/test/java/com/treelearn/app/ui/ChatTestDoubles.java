@@ -125,6 +125,7 @@ final class ChatTestDoubles {
         String lastMessageId = "";
         String lastRevisionId = "";
         String lastQuestion = "";
+        String lastAttachmentId;
         int lastForkStart;
         int lastForkEnd;
         GenerationModel lastModel;
@@ -132,11 +133,12 @@ final class ChatTestDoubles {
         long lastNow;
 
         @Override
-        public ChatCommandResult send(String branchId, String text, String quote, GenerationModel model,
-                boolean thinkingEnabled) {
+        public ChatCommandResult send(String branchId, String text, String quote,
+                String attachmentId, GenerationModel model, boolean thinkingEnabled) {
             calls.add("send");
             lastText = text;
             lastQuote = quote;
+            lastAttachmentId = attachmentId;
             lastModel = model;
             lastThinking = thinkingEnabled;
             return sendResult;
@@ -280,8 +282,8 @@ final class ChatTestDoubles {
         }
 
         @Override
-        public void openChildren(String branchId, String messageId, List<ChildBranch> children) {
-            childrenOpened.add(branchId + "/" + messageId);
+        public void openChildren(String messageId, List<ChildBranch> children) {
+            childrenOpened.add(messageId);
             childrenListed.add(children);
         }
 

@@ -16,21 +16,4 @@ public interface HomeSink {
 
     /** Enters a branch: the resume branch of a tapped topic, or the root branch just created. */
     void openBranch(String branchId);
-
-    /**
-     * Opens the branch list of one topic, entering on the branch it was given.
-     *
-     * <p>The home page holds no tree of its own, so the branch is the topic's resume branch: the page
-     * then lists the topic the learner last used, which is the one whose rows are on screen behind it.
-     */
-    void openArchived(String branchId);
-
-    /**
-     * Opens the search page.
-     *
-     * <p>Search spans every branch, so - unlike {@link #openArchived(String)} - this entry needs no
-     * topic to have been created first: an empty home is exactly where a learner has something to look
-     * for and nothing to browse.
-     */
-    void openSearch();
 }

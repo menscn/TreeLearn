@@ -3,6 +3,7 @@ package com.treelearn.app.artifact;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.treelearn.core.domain.Guard;
+import com.treelearn.core.domain.Branch;
 import com.treelearn.core.domain.Message;
 import com.treelearn.data.db.DatabaseTransactionRunner;
 import com.treelearn.data.db.dao.AiArtifactDao;
@@ -89,13 +90,31 @@ public final class SqliteDerivedStore implements DerivedStore {
         Guard.object(row, "row");
         if (AiArtifactDao.findByKindAndScope(database, row.kind, row.scopeId) == null) {
             AiArtifactDao.insert(database, row);
+        } else {
+            if (ArtifactKind.fromWireId(row.kind).revisionBound()
+                    && AiArtifactDao.applyIfBaselineMatches(database, row) == AiArtifactDao.Writeback.APPLIED) {
+                return;
+            }
+            AiArtifactDao.deleteByScope(database, row.kind, row.scopeId);
+            AiArtifactDao.insert(database, row);
+        }
+        nameBranchRow(row);
+    }
+
+    /**
+     * Writes a derived title back onto the branch row itself, so every reader of the branch sees
+     * one name instead of two - the artifact is the source, the branch column is its echo.
+     */
+    private void nameBranchRow(AiArtifactDao.Row row) {
+        String title = TitleArtifactApplier.titleOf(ArtifactKind.fromWireId(row.kind), row.payload);
+        if (title == null) {
             return;
         }
-        if (ArtifactKind.fromWireId(row.kind).revisionBound()
-                && AiArtifactDao.applyIfBaselineMatches(database, row) == AiArtifactDao.Writeback.APPLIED) {
+        Branch branch = BranchDao.findById(database, row.scopeId);
+        if (branch == null) {
             return;
         }
-        AiArtifactDao.deleteByScope(database, row.kind, row.scopeId);
-        AiArtifactDao.insert(database, row);
+        branch.setTitle(title, row.createdAt);
+        BranchDao.update(database, branch);
     }
 }

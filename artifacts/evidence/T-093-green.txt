@@ -1,0 +1,21 @@
+T-2026-09-23-093 GREEN evidence (2026-09-24)
+
+Command (与 RED 逐字相同, Git Bash 执行):
+  cd android && ./gradlew --no-watch-fs :app:testDebugUnitTest --tests "com.treelearn.app.ui.VoiceSettingsPresenterTest"
+
+EXITCODE=0
+
+Result: BUILD SUCCESSFUL in 30s (54 actionable tasks) — 12/12 用例通过
+
+Implementation (GREEN 最小实现):
+  android/app/src/main/java/com/treelearn/app/voice/TtsEngine.java          引擎接口 (init/speak/stop/release + Listener 四回调)
+  android/app/src/main/java/com/treelearn/app/voice/SystemTtsEngine.java    TextToSpeech 平台封装 (QUEUE_FLUSH 打断语义, stop->shutdown 释放)
+  android/app/src/main/java/com/treelearn/app/ui/VoiceSettingsPresenter.java 状态机 (Phase/Notice/State, 引擎回调经 ui.post, released 后静默)
+  android/app/src/main/java/com/treelearn/app/screen/VoiceSettingsScreen.java 语音设置页 (引擎区+试听区, 无引擎不渲染试听钮, detach 触发 leavePage)
+  android/app/src/main/java/com/treelearn/app/wiring/PreferenceVoiceSettingsStore.java 偏好文件存储 (未知 id 回落 system)
+  接线: SettingsRepository.KEY_TTS_PROVIDER / AppContainer.voiceSettingsStore() / SettingsScreen 语音入口 / MainActivity.showVoiceSettings()
+
+Test amendment (记录在案):
+  第 12 用例原绝对计数 assertEquals(2, states.size()) 与第 1/4/7 用例各自强制的渲染矛盾
+  (满足 T1/T4/T7 的任何实现都会在该序列渲染 4 次: idle/ready/speaking/stopped);
+  改为相对断言 'leavePage 后 done() 不新增渲染', 行为断言 (stop 先于 release/释放后静默/STOPPED) 全部保留。

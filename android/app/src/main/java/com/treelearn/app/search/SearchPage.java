@@ -62,6 +62,7 @@ public final class SearchPage {
             return new SearchPage(pane, Collections.<Row>emptyList());
         }
         Map<String, String> named = new HashMap<String, String>();
+        Map<String, BranchTitles.Badge> sited = new HashMap<String, BranchTitles.Badge>();
         List<Row> rows = new ArrayList<Row>(state.hits.size());
         for (SearchHit hit : state.hits) {
             String title = named.get(hit.branchId);
@@ -70,7 +71,12 @@ public final class SearchPage {
                 title = found == null ? "" : found;
                 named.put(hit.branchId, title);
             }
-            rows.add(new Row(hit, title));
+            BranchTitles.Badge badge = sited.get(hit.branchId);
+            if (badge == null && !sited.containsKey(hit.branchId)) {
+                badge = titles.badgeOf(hit.branchId);
+                sited.put(hit.branchId, badge);
+            }
+            rows.add(new Row(hit, title, badge));
         }
         return new SearchPage(pane, rows);
     }
@@ -90,16 +96,22 @@ public final class SearchPage {
         }
     }
 
-    /** One listed hit, with the name of the branch it came from. */
+    /** One listed hit, with the name of the branch it came from and where that branch sits. */
     public static final class Row {
 
         public final SearchHit hit;
         /** Never null; empty when no branch row carries the id. */
         public final String branchTitle;
+        /** The branch's ancestor path, or empty when it cannot be named (T-054). */
+        public final String sourcePath;
+        /** Whether the branch the hit came from is currently archived (T-054). */
+        public final boolean archived;
 
-        Row(SearchHit hit, String branchTitle) {
+        Row(SearchHit hit, String branchTitle, BranchTitles.Badge badge) {
             this.hit = hit;
             this.branchTitle = branchTitle;
+            this.sourcePath = badge == null ? "" : badge.path;
+            this.archived = badge != null && badge.archived;
         }
     }
 

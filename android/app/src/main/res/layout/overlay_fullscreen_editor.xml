@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- T-077: the fullscreen editor (073 §5.1). It covers the conversation without moving any hit box
+     underneath; the root is clickable so a touch that misses a control goes nowhere. Attributes are
+     packed per line to keep this slice inside its line budget. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/chat_fullscreen" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:background="@color/tl_bg"
+    android:clickable="true" android:focusable="true" android:orientation="vertical"
+    android:visibility="gone">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:gravity="center_vertical" android:orientation="horizontal"
+        android:paddingStart="@dimen/page_gutter" android:paddingTop="@dimen/space_s3"
+        android:paddingEnd="@dimen/space_s2">
+
+        <TextView android:id="@+id/chat_fullscreen_title" android:layout_width="0dp"
+            android:layout_height="wrap_content" android:layout_weight="1"
+            android:paddingStart="@dimen/space_s2" android:text="@string/chat_fullscreen_title"
+            android:textColor="@color/tl_ink" android:textSize="@dimen/text_h2"
+            android:textStyle="bold" />
+
+        <ImageView android:id="@+id/chat_fullscreen_close" android:layout_width="@dimen/touch_min"
+            android:layout_height="@dimen/touch_min"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/cd_chat_fullscreen_close"
+            android:scaleType="centerInside" android:src="@drawable/ic_chat_close"
+            android:tint="@color/tl_ink2" />
+    </LinearLayout>
+
+    <TextView android:id="@+id/chat_fullscreen_quote" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_marginStart="@dimen/page_gutter"
+        android:layout_marginTop="@dimen/space_s2" android:layout_marginEnd="@dimen/page_gutter"
+        android:background="@color/tl_green_faint" android:padding="@dimen/space_s2"
+        android:textColor="@color/tl_ink2" android:textSize="@dimen/text_sm"
+        android:visibility="gone" />
+
+    <EditText android:id="@+id/chat_fullscreen_draft" android:layout_width="match_parent"
+        android:layout_height="0dp" android:layout_marginStart="@dimen/page_gutter"
+        android:layout_marginTop="@dimen/space_s3" android:layout_marginEnd="@dimen/page_gutter"
+        android:layout_weight="1" android:background="@drawable/bg_field"
+        android:gravity="top|start" android:hint="@string/chat_draft_hint"
+        android:inputType="textCapSentences|textMultiLine" android:padding="@dimen/space_s3"
+        android:textColor="@color/tl_ink" android:textColorHint="@color/tl_ink3"
+        android:textSize="@dimen/text_body" />
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:gravity="center_vertical" android:orientation="horizontal"
+        android:paddingStart="@dimen/page_gutter" android:paddingTop="@dimen/space_s2"
+        android:paddingEnd="@dimen/page_gutter" android:paddingBottom="@dimen/space_s3">
+
+        <Button android:id="@+id/chat_fullscreen_cancel" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:minHeight="@dimen/touch_min"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:paddingStart="@dimen/space_s3" android:paddingEnd="@dimen/space_s3"
+            android:text="@string/chat_fullscreen_cancel" android:textColor="@color/tl_ink2" />
+
+        <Space android:layout_width="0dp" android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <Button android:id="@+id/chat_fullscreen_done" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:minHeight="@dimen/touch_min"
+            android:background="@drawable/bg_button_primary"
+            android:paddingStart="@dimen/space_s6" android:paddingEnd="@dimen/space_s6"
+            android:text="@string/chat_fullscreen_done" android:textColor="@color/tl_surface" />
+    </LinearLayout>
+</LinearLayout>

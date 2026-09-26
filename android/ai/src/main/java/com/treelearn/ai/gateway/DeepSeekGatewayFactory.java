@@ -25,7 +25,7 @@ public final class DeepSeekGatewayFactory {
     public static AiGateway create() {
         return new AiGateway(new HttpsTransport(CONNECT_TIMEOUT_MILLIS, READ_TIMEOUT_MILLIS),
                 new JsonChatRequestBody(), new ProviderJson.Deltas(), new ProviderJson.Balance(),
-                new AndroidLog(), newStreamExecutor());
+                new ProviderJson.ModelList(), new AndroidLog(), newStreamExecutor());
     }
 
     /** One thread per in-flight call; the pool is bounded by the coordinator, not by itself. */

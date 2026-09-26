@@ -1,0 +1,51 @@
+T-103（对话页模型 chip 与全局分工分界）汇总证据
+生成方式：本脚本实时执行命令并回填真实输出（UTF-8），命令与退出码内嵌自证。
+
+CMD-1  RED：JVM 编译失败（构造器尚不存在）
+命令与日志: artifacts\evidence\T-103-red-2026-09-25.log（完整输出见该文件）
+  EXITCODE=1
+  匹配 错误: |错误:: D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatModelChipTest.java:89: 错误: 对于ChatPresenter(RecordingChatSink,InlineUi,InlineExecutor,FakeKeyVault,FakeChatData,FakeChatCommands,FakeSettingsStore,CopyLabels,String,NoPositionStore,()->assignment), 找不到合适的构造器
+
+CMD-2  GREEN：ChatModelChipTest 4/4（线程修复后重跑）
+命令与日志: artifacts\evidence\T-103-green-2026-09-25.log（完整输出见该文件）
+  EXITCODE=0
+  匹配 BUILD SUCCESSFUL|BUILD FAILED: BUILD SUCCESSFUL in 24s
+
+CMD-3  全量 JVM 单测（含本片 4 例与既有断言语义更新 1 例）
+命令与日志: artifacts\evidence\T-103-full-unittest-2026-09-25.log（完整输出见该文件）
+  EXITCODE=0
+  匹配 BUILD SUCCESSFUL|BUILD FAILED: BUILD SUCCESSFUL in 19s
+
+CMD-4  真机回归：BottomTabShell 5/5（CalledFromWrongThread 修复后）
+命令与日志: artifacts\evidence\T-103-regression-instrumented-2026-09-25.log（完整输出见该文件）
+  EXITCODE=0
+  匹配 Starting \d+ tests|Finished \d+ tests: Starting 5 tests on ALP-AN00 - 13
+
+CMD-5  check 门禁
+命令与日志: artifacts\evidence\T-103-check-2026-09-25.log（完整输出见该文件）
+  EXITCODE=0
+  匹配 BUILD SUCCESSFUL|BUILD FAILED: BUILD SUCCESSFUL in 1m 12s
+
+CMD-6  Java-only guard
+  VERDICT: PASS (13 OK line(s))
+
+CMD-7  app 全量单测计数（test-results XML 汇总，与本脚本同进程计算）
+命令口径: 遍历 android/app/build/test-results/testDebugUnitTest/*.xml 汇总 suite 属性
+  files=72 tests=629 skipped=0 failures=0 errors=0
+EXITCODE=0
+
+CMD-8  归属增量（M 文件按 T-103 独有标记筛选 git diff HEAD；新文件整文件计数）
+命令: git diff HEAD -- <文件> 配合独有标记筛选；wc -l 新测试文件
+  android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java  +12（标记行）
+  android/app/src/main/java/com/treelearn/app/ui/HomeViewState.java  +2（标记行）
+  android/app/src/main/java/com/treelearn/app/screen/NoticeText.java  +2（标记行）
+  android/app/src/main/java/com/treelearn/app/MainActivity.java  +0（标记行）
+  android/app/src/main/res/values/strings.xml  +0（标记行）
+  新测试文件 ChatModelChipTest.java  104 android/app/src/test/java/com/treelearn/app/ui/ChatModelChipTest.java
+  归属增量合计（标记行）: +16
+EXITCODE=0
+
+CMD-9  README 模型小节新增 T-103 分界条目（grep 实时执行）
+命令: grep -n "对话页 chip 与全局分工的分界（T-103" android/README.md
+  504:- **对话页 chip 与全局分工的分界（T-103，2026-09-25）**：进入对话页时 `ChatPresenter` 经
+EXITCODE=0

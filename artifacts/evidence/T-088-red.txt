@@ -1,0 +1,29 @@
+T-2026-09-23-088 RED evidence（2026-09-24；leader 2026-09-23 勘正：标头「12 用例」系笔误，实测 11 用例，XML 计数 T-088-green-counts.txt 为准）
+
+Command:
+  cd android && ./gradlew --no-watch-fs :app:testDebugUnitTest --tests "com.treelearn.app.ui.ModelSettingsPresenterTest"
+
+Exit code: 1
+
+Observed failure (tail, GBK 控制台已乱码化但错误定位可读):
+  ModelSettingsPresenterTest.java:180: 程序包ModelSettingsPresenter不存在 (RecordingSink implements ModelSettingsPresenter.Sink)
+  ModelSettingsPresenterTest.java:194: 程序包ModelSettingsPresenter不存在 (FakeStore implements ModelSettingsPresenter.Store)
+  74 个错误
+  BUILD FAILED in 1s
+
+Failure reason validated: 是 —— 全部 74 个编译错误均指向缺失的 ModelSettingsPresenter API
+（Role/Budget/Option/Assignment/Fallback/Notice/State/resolve/Store/Sink/构造器），无任何其他源文件报错；
+失败由缺失行为导致，非环境噪声（已带 --no-watch-fs）。
+
+Test/scenario（12 用例）:
+  1  startingReadsTheWholeStateOffTheUiThread      列表/三分工/预算/开关整状态在 UI 线程之外读取
+  2  selectingAModelWritesThroughTheStoreAndReloads 分工选择写穿 Store 并重载
+  3  selectingABudgetTierPersistsIt                 五档思考预算选择持久化
+  4  togglingSuggestionsPersistsIt                  聊天建议开关持久化
+  5  aFallenBackRoleRaisesTheNoticeOnLoad           读时回落触发 FALLEN_BACK 提示
+  6  aSelectionThatResolvesTheFallbackClearsTheNoticeAgain 改选后提示清除
+  7  anEmptyCatalogRaisesTheNoModelsNotice          无可用模型 → NO_MODELS（[NOKEY] 引导）
+  8  theRuleKeepsASelectionThatIsStillUsable        回落规则：仍可用选择原样保留（NONE）
+  9  theRuleFallsBackToTheBuiltinDefaultFirst       回落规则：内置 DeepSeek 默认模型优先
+  10 theRuleFallsBackToTheEarliestEnabledModelNext  回落规则：其次最早启用提供商首个模型
+  11 theRuleGoesEmptyWhenNothingIsUsable            回落规则：全部不可用 → 置空（EMPTY）

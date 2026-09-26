@@ -2,6 +2,8 @@ package com.treelearn.data.db;
 
 import android.database.sqlite.SQLiteDatabase;
 
+import com.treelearn.core.domain.GenerationModel;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,9 +14,11 @@ import java.util.List;
  *
  * <p>Authority: 《知芽（TreeLearn）Android SQLite 建表入场确认清单 V1.0》§2/§3,
  * 技术方案 V1.0 §5.1 (message / attempt / stable revision), §5.2 (fork source and anchor),
- * §6 (tables), §11 (unread, reading position, rounds), and the field surface of the
- * {@code :core} entities those sections describe. The seven permanent tables are exactly the
- * confirmed set; a future eighth table requires a new user confirmation before it may appear here.
+ * §6 (tables), §11 (unread, reading position, rounds), the field surface of the
+ * {@code :core} entities those sections describe, and — for the provider/model pair —
+ * SPEC-2026-09-23-providers-and-models 数据结构 (user-confirmed, T-2026-09-23-083). The permanent
+ * tables are exactly the confirmed set; any further table requires a new user confirmation before
+ * it may appear here.
  *
  * <p>Every DDL statement below is assembled from the column constants in the same file, so a
  * renamed constant cannot drift away from the statements that use it. DAO code must reference
@@ -52,7 +56,7 @@ import java.util.List;
 public final class TreeLearnSchema {
 
     /** Bumped only together with a new forward migration. */
-    public static final int DATABASE_VERSION = 2;
+    public static final int DATABASE_VERSION = 4;
 
     private TreeLearnSchema() {
     }
@@ -183,6 +187,52 @@ public final class TreeLearnSchema {
         public static final String UPDATED_AT = "updated_at";
     }
 
+    /**
+     * Provider configuration (SPEC-2026-09-23 数据结构, T-083). Configuration only: no column of
+     * this table may hold an API key or any other secret — keys live in the Keystore (T-084).
+     */
+    public static final class Providers {
+        public static final String TABLE = "providers", ID = "id", NAME = "name",
+                BASE_URL = "base_url", ENABLED = "enabled", IS_BUILTIN = "is_builtin",
+                CREATED_AT = "created_at", UPDATED_AT = "updated_at";
+    }
+
+    /** Model configuration, one row per provider-side wire id (SPEC-2026-09-23 数据结构). */
+    public static final class Models {
+        public static final String TABLE = "models", ID = "id", PROVIDER_ID = "provider_id",
+                MODEL_ID = "model_id", DISPLAY_NAME = "display_name", CREATED_AT = "created_at";
+    }
+
+    /**
+     * One stored attachment file (T-096, SPEC-2026-09-23 file management): the row is the record,
+     * the private-directory file named by the content hash is the body. {@code content_hash} is the
+     * idempotent dedup key, so one physical copy serves every reference to the same bytes.
+     */
+    public static final class Attachments {
+        public static final String TABLE = "attachments", ID = "id", CONTENT_HASH = "content_hash",
+                DISPLAY_NAME = "display_name", MIME_TYPE = "mime_type",
+                SIZE_BYTES = "size_bytes", EXTRACTED_TEXT = "extracted_text",
+                PARSE_STATE = "parse_state", CREATED_AT = "created_at",
+                UPDATED_AT = "updated_at";
+
+        /** The three states the {@code parse_state} CHECK admits; java-side twin of the DDL. */
+        public static final java.util.List<String> PARSE_STATES = java.util.Collections
+                .unmodifiableList(java.util.Arrays.asList("pending", "parsed", "parse_failed"));
+    }
+
+    /**
+     * One message's reference to one attachment (T-096). {@code message_id} is an enforced FK that
+     * cascades with its message; {@code attachment_id} is deliberately a semantic reference with no
+     * enforced FK — a reference row must outlive a deleted attachment for the missing-annotation
+     * rule (deleting a referenced file keeps the message text and marks the attachment missing),
+     * which an enforced FK would reject (建表入场确认清单 §5.2, user-confirmed 2026-09-24).
+     */
+    public static final class MessageAttachments {
+        public static final String TABLE = "message_attachments", ID = "id",
+                MESSAGE_ID = "message_id", ATTACHMENT_ID = "attachment_id",
+                CREATED_AT = "created_at";
+    }
+
     /** The confirmed permanent tables, in creation order. */
     public static final String[] TABLE_NAMES = {
             Topics.TABLE,
@@ -192,6 +242,10 @@ public final class TreeLearnSchema {
             GenerationOperations.TABLE,
             ContextSnapshots.TABLE,
             AiArtifacts.TABLE,
+            Providers.TABLE,
+            Models.TABLE,
+            Attachments.TABLE,
+            MessageAttachments.TABLE,
     };
 
     // ------------------------------------------------------------------
@@ -409,6 +463,54 @@ public final class TreeLearnSchema {
             AiArtifacts.UPDATED_AT + " INTEGER NOT NULL",
     };
 
+    private static final String[] PROVIDERS_DEFINITIONS = {
+            Providers.ID + " TEXT NOT NULL PRIMARY KEY",
+            // [DUP]: one row per name. SQLite's BINARY collation compares exact text; the
+            // trim-then-compare part of the rule belongs to the form layer.
+            Providers.NAME + " TEXT NOT NULL UNIQUE",
+            Providers.BASE_URL + " TEXT NOT NULL",
+            Providers.ENABLED + " INTEGER NOT NULL CHECK (" + Providers.ENABLED + " IN (0,1))",
+            Providers.IS_BUILTIN + " INTEGER NOT NULL CHECK (" + Providers.IS_BUILTIN + " IN (0,1))",
+            Providers.CREATED_AT + " INTEGER NOT NULL", Providers.UPDATED_AT + " INTEGER NOT NULL",
+    };
+
+    private static final String[] MODELS_DEFINITIONS = {
+            Models.ID + " TEXT NOT NULL PRIMARY KEY",
+            Models.PROVIDER_ID + " TEXT NOT NULL REFERENCES " + Providers.TABLE + "("
+                    + Providers.ID + ") ON DELETE CASCADE",
+            Models.MODEL_ID + " TEXT NOT NULL", Models.DISPLAY_NAME + " TEXT NOT NULL",
+            Models.CREATED_AT + " INTEGER NOT NULL",
+    };
+
+    private static final String[] ATTACHMENTS_DEFINITIONS = {
+            Attachments.ID + " TEXT NOT NULL PRIMARY KEY",
+            // The idempotent dedup key: registering the same bytes again resolves to this row.
+            Attachments.CONTENT_HASH + " TEXT NOT NULL UNIQUE",
+            Attachments.DISPLAY_NAME + " TEXT NOT NULL",
+            Attachments.MIME_TYPE + " TEXT NOT NULL",
+            Attachments.SIZE_BYTES + " INTEGER NOT NULL CHECK (" + Attachments.SIZE_BYTES
+                    + " >= 0)",
+            // The parsed-text cache (097); null until a parse has succeeded. Nullable by design:
+            // a file is recordable before any parse exists.
+            Attachments.EXTRACTED_TEXT + " TEXT",
+            Attachments.PARSE_STATE + " TEXT NOT NULL CHECK (" + Attachments.PARSE_STATE
+                    + " IN ('pending','parsed','parse_failed'))",
+            Attachments.CREATED_AT + " INTEGER NOT NULL",
+            Attachments.UPDATED_AT + " INTEGER NOT NULL",
+    };
+
+    private static final String[] MESSAGE_ATTACHMENTS_DEFINITIONS = {
+            MessageAttachments.ID + " TEXT NOT NULL PRIMARY KEY",
+            // Enforced and cascading: a reference row is meaningless without its message, and the
+            // message-delete path must not learn about this table (053's delete stays untouched).
+            MessageAttachments.MESSAGE_ID + " TEXT NOT NULL REFERENCES " + Messages.TABLE + "("
+                    + Messages.ID + ") ON DELETE CASCADE",
+            // Semantic reference, deliberately not an enforced FK: the row must survive the
+            // attachment it points at (see the class javadoc and checklist §5.2).
+            MessageAttachments.ATTACHMENT_ID + " TEXT NOT NULL",
+            MessageAttachments.CREATED_AT + " INTEGER NOT NULL",
+    };
+
     /** Index names, exposed so DBAs and guards can assert them without string literals. */
     public static final String INDEX_BRANCHES_TOPIC_PARENT = "idx_branches_topic_parent";
     public static final String INDEX_BRANCHES_SOURCE_REVISION = "idx_branches_source_revision";
@@ -419,6 +521,11 @@ public final class TreeLearnSchema {
     public static final String INDEX_SNAPSHOTS_BRANCH = "uq_context_snapshots_branch";
     public static final String INDEX_ARTIFACTS_KIND_SCOPE = "idx_ai_artifacts_kind_scope";
     public static final String INDEX_OPERATIONS_ACTIVE = "uq_generation_operations_active";
+    public static final String INDEX_MODELS_PROVIDER_MODEL = "uq_models_provider_model";
+    public static final String INDEX_ATTACHMENTS_CONTENT_HASH = "uq_attachments_content_hash";
+    public static final String INDEX_MESSAGE_ATTACHMENTS_MESSAGE = "idx_message_attachments_message";
+    public static final String INDEX_MESSAGE_ATTACHMENTS_ATTACHMENT =
+            "idx_message_attachments_attachment";
 
     /** The only states that count as an in-flight generation (技术方案 §7). */
     private static final String ACTIVE_STATES =
@@ -450,7 +557,23 @@ public final class TreeLearnSchema {
             "CREATE UNIQUE INDEX " + INDEX_OPERATIONS_ACTIVE + " ON "
                     + GenerationOperations.TABLE + "(" + GenerationOperations.BRANCH_ID + ")"
                     + " WHERE " + GenerationOperations.STATE + " IN (" + ACTIVE_STATES + ")",
+            modelsUniqueIndexStatement(),
+            "CREATE UNIQUE INDEX " + INDEX_ATTACHMENTS_CONTENT_HASH + " ON "
+                    + Attachments.TABLE + "(" + Attachments.CONTENT_HASH + ")",
+            "CREATE INDEX " + INDEX_MESSAGE_ATTACHMENTS_MESSAGE + " ON "
+                    + MessageAttachments.TABLE + "(" + MessageAttachments.MESSAGE_ID + ")",
+            "CREATE INDEX " + INDEX_MESSAGE_ATTACHMENTS_ATTACHMENT + " ON "
+                    + MessageAttachments.TABLE + "(" + MessageAttachments.ATTACHMENT_ID + ")",
     };
+
+    /**
+     * The case-exact dedup of model ids within a provider (SPEC-2026-09-23, F8 口径): SQLite's
+     * default BINARY collation compares exact text, and no NOCASE may ever be added to this index.
+     */
+    private static String modelsUniqueIndexStatement() {
+        return "CREATE UNIQUE INDEX " + INDEX_MODELS_PROVIDER_MODEL + " ON " + Models.TABLE + "("
+                + Models.PROVIDER_ID + ", " + Models.MODEL_ID + ")";
+    }
 
     /**
      * Trigger names, exposed for reviewers and tests.
@@ -543,7 +666,46 @@ public final class TreeLearnSchema {
                 + " message'); END";
     }
 
-    /** The seven {@code CREATE TABLE} statements, in creation order. */
+    // ------------------------------------------------------------------
+    // The builtin DeepSeek provider (SPEC-2026-09-23 迁移: the pre-multi-provider single-key
+    // configuration becomes one builtin provider row plus its default model row). Both install
+    // paths seed through these same statements; OR IGNORE keeps a rerun a no-op.
+    // ------------------------------------------------------------------
+
+    /** Fixed synthetic UUIDs, so T-084's Keystore alias {@code tl.provider.<uuid>} is stable. */
+    public static final String BUILTIN_DEEPSEEK_PROVIDER_ID =
+            "00000000-0000-0000-0000-000000000001";
+    public static final String BUILTIN_DEEPSEEK_DEFAULT_MODEL_ID =
+            "00000000-0000-0000-0000-000000000002";
+    public static final String BUILTIN_DEEPSEEK_NAME = "DeepSeek";
+    /** Mirrors {@code GatewayEndpoints.BASE_URL}; :data cannot see the :ai module. */
+    public static final String BUILTIN_DEEPSEEK_BASE_URL = "https://api.deepseek.com";
+    /**
+     * The seed's timestamps are a fixed release constant (2026-09-23T00:00:00Z), not a clock read:
+     * application-written UTC epoch millis (rules/sql.md) that keep the migration deterministic and
+     * the builtin record oldest in creation order.
+     */
+    public static final long BUILTIN_SEED_EPOCH_MILLIS = 1_790_121_600_000L;
+
+    /** The builtin rows, executed by both a fresh install and the V2 -> V3 upgrade. */
+    public static final List<String> SEED_STATEMENTS =
+            Collections.unmodifiableList(Arrays.asList(
+                    "INSERT OR IGNORE INTO " + Providers.TABLE + "(" + Providers.ID + ", "
+                            + Providers.NAME + ", " + Providers.BASE_URL + ", " + Providers.ENABLED
+                            + ", " + Providers.IS_BUILTIN + ", " + Providers.CREATED_AT + ", "
+                            + Providers.UPDATED_AT + ") VALUES ('" + BUILTIN_DEEPSEEK_PROVIDER_ID
+                            + "', '" + BUILTIN_DEEPSEEK_NAME + "', '" + BUILTIN_DEEPSEEK_BASE_URL
+                            + "', 1, 1, " + BUILTIN_SEED_EPOCH_MILLIS + ", "
+                            + BUILTIN_SEED_EPOCH_MILLIS + ")",
+                    "INSERT OR IGNORE INTO " + Models.TABLE + "(" + Models.ID + ", "
+                            + Models.PROVIDER_ID + ", " + Models.MODEL_ID + ", "
+                            + Models.DISPLAY_NAME + ", " + Models.CREATED_AT + ") VALUES ('"
+                            + BUILTIN_DEEPSEEK_DEFAULT_MODEL_ID + "', '"
+                            + BUILTIN_DEEPSEEK_PROVIDER_ID + "', '" + GenerationModel.FLASH.wireId
+                            + "', '" + GenerationModel.FLASH.wireId + "', "
+                            + BUILTIN_SEED_EPOCH_MILLIS + ")"));
+
+    /** The eleven {@code CREATE TABLE} statements, in creation order. */
     public static final List<String> CREATE_TABLE_STATEMENTS =
             Collections.unmodifiableList(Arrays.asList(
                     createTable(Topics.TABLE, TOPICS_DEFINITIONS),
@@ -552,7 +714,11 @@ public final class TreeLearnSchema {
                     createTable(AnswerRevisions.TABLE, ANSWER_REVISIONS_DEFINITIONS),
                     createTable(GenerationOperations.TABLE, GENERATION_OPERATIONS_DEFINITIONS),
                     createTable(ContextSnapshots.TABLE, CONTEXT_SNAPSHOTS_DEFINITIONS),
-                    createTable(AiArtifacts.TABLE, AI_ARTIFACTS_DEFINITIONS)));
+                    createTable(AiArtifacts.TABLE, AI_ARTIFACTS_DEFINITIONS),
+                    createTable(Providers.TABLE, PROVIDERS_DEFINITIONS),
+                    createTable(Models.TABLE, MODELS_DEFINITIONS),
+                    createTable(Attachments.TABLE, ATTACHMENTS_DEFINITIONS),
+                    createTable(MessageAttachments.TABLE, MESSAGE_ATTACHMENTS_DEFINITIONS)));
 
     /** Index DDL for a fresh install, exposed for reviewers and tests. */
     public static final List<String> CREATE_INDEX_STATEMENTS =
@@ -573,6 +739,7 @@ public final class TreeLearnSchema {
         List<String> statements = new ArrayList<>(CREATE_TABLE_STATEMENTS);
         statements.addAll(CREATE_INDEX_STATEMENTS);
         statements.addAll(CREATE_TRIGGER_STATEMENTS);
+        statements.addAll(SEED_STATEMENTS);
         return Collections.unmodifiableList(statements);
     }
 
@@ -618,7 +785,8 @@ public final class TreeLearnSchema {
      * current.
      */
     public static final List<Migration> FORWARD_MIGRATIONS =
-            Collections.unmodifiableList(Arrays.asList(new MigrationV1ToV2()));
+            Collections.unmodifiableList(Arrays.asList(new MigrationV1ToV2(), new MigrationV2ToV3(),
+                    new MigrationV3ToV4()));
 
     /** The single V1 -> V2 step: executes {@link #MIGRATION_V1_TO_V2_STATEMENTS} in order. */
     private static final class MigrationV1ToV2 implements Migration {
@@ -641,6 +809,97 @@ public final class TreeLearnSchema {
         }
     }
 
+    /**
+     * V2 -> V3: the provider/model configuration tables (SPEC-2026-09-23 数据结构) and the builtin
+     * DeepSeek seed.
+     *
+     * <p>The two {@code CREATE TABLE} statements and the unique index are <em>the same strings</em>
+     * a fresh install executes, so neither the column shapes nor the case-exact dedup rule can
+     * drift between the two install paths; the seed is {@link #SEED_STATEMENTS} verbatim, and its
+     * {@code OR IGNORE} keeps a rerun a no-op. No statement here touches the existing seven tables:
+     * the upgrade only adds objects and inserts the two builtin rows.
+     *
+     * <p>Published steps are never rewritten: a released version's migration is part of the
+     * contract with the databases already on devices (rules/sql.md).
+     */
+    public static final List<String> MIGRATION_V2_TO_V3_STATEMENTS = migrationV2ToV3Statements();
+
+    private static List<String> migrationV2ToV3Statements() {
+        List<String> statements = new ArrayList<>(Arrays.asList(
+                createTable(Providers.TABLE, PROVIDERS_DEFINITIONS),
+                createTable(Models.TABLE, MODELS_DEFINITIONS),
+                modelsUniqueIndexStatement()));
+        statements.addAll(SEED_STATEMENTS);
+        return Collections.unmodifiableList(statements);
+    }
+
+    /** The single V2 -> V3 step: executes {@link #MIGRATION_V2_TO_V3_STATEMENTS} in order. */
+    private static final class MigrationV2ToV3 implements Migration {
+
+        @Override
+        public int fromVersion() {
+            return 2;
+        }
+
+        @Override
+        public int toVersion() {
+            return 3;
+        }
+
+        @Override
+        public void apply(SQLiteDatabase database) {
+            for (String statement : MIGRATION_V2_TO_V3_STATEMENTS) {
+                database.execSQL(statement);
+            }
+        }
+    }
+
+    /**
+     * V3 -> V4: the attachment storage and message-attachment reference tables (T-096, checklist
+     * §5.2, user-confirmed 2026-09-24).
+     *
+     * <p>The two {@code CREATE TABLE} statements and the three index statements are <em>the same
+     * strings</em> a fresh install executes, so neither the column shapes nor the dedup rule can
+     * drift between the two install paths. No statement here touches the existing ten tables: the
+     * upgrade only adds objects, so existing rows cannot be affected.
+     *
+     * <p>Published steps are never rewritten: a released version's migration is part of the
+     * contract with the databases already on devices (rules/sql.md).
+     */
+    public static final List<String> MIGRATION_V3_TO_V4_STATEMENTS = migrationV3ToV4Statements();
+
+    private static List<String> migrationV3ToV4Statements() {
+        return Collections.unmodifiableList(Arrays.asList(
+                createTable(Attachments.TABLE, ATTACHMENTS_DEFINITIONS),
+                createTable(MessageAttachments.TABLE, MESSAGE_ATTACHMENTS_DEFINITIONS),
+                "CREATE UNIQUE INDEX " + INDEX_ATTACHMENTS_CONTENT_HASH + " ON "
+                        + Attachments.TABLE + "(" + Attachments.CONTENT_HASH + ")",
+                "CREATE INDEX " + INDEX_MESSAGE_ATTACHMENTS_MESSAGE + " ON "
+                        + MessageAttachments.TABLE + "(" + MessageAttachments.MESSAGE_ID + ")",
+                "CREATE INDEX " + INDEX_MESSAGE_ATTACHMENTS_ATTACHMENT + " ON "
+                        + MessageAttachments.TABLE + "(" + MessageAttachments.ATTACHMENT_ID + ")"));
+    }
+
+    /** The single V3 -> V4 step: executes {@link #MIGRATION_V3_TO_V4_STATEMENTS} in order. */
+    private static final class MigrationV3ToV4 implements Migration {
+
+        @Override
+        public int fromVersion() {
+            return 3;
+        }
+
+        @Override
+        public int toVersion() {
+            return 4;
+        }
+
+        @Override
+        public void apply(SQLiteDatabase database) {
+            for (String statement : MIGRATION_V3_TO_V4_STATEMENTS) {
+                database.execSQL(statement);
+            }
+        }
+    }
     /**
      * Applies every registered step that lies inside {@code (oldVersion, newVersion]}.
      *

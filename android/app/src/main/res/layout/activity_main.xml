@@ -9,8 +9,15 @@
   show it, second-level screens hide it. No screen draws a copy of its own.
 
   `main_root` is kept from the T-002 skeleton because the launch test finds it by that id.
+  T-106 wraps it in a FrameLayout so the home drawer (a programmatic overlay) can cover the whole
+  shell - bar included - without becoming a child the next swap() would wipe.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_drawer_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+<LinearLayout
     android:id="@+id/main_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -26,3 +33,5 @@
     <include layout="@layout/screen_tab_bar" />
 
 </LinearLayout>
+
+</FrameLayout>

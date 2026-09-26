@@ -1,0 +1,8 @@
+# T-042 Fix round 2 / F1 RED（2026-09-24）
+探针: MainActivity.java 中 saveAnchor 的 try/catch 兜底计数
+760:            container.background().execute(() -> reading.saveAnchor(branchId, explicitAnchor));
+catch 计数（预期 0，异常可逃逸后台线程）:
+0
+EXITCODE=0（探针本身成功；计数 0 即 RED 事实）
+GREEN 探针: catch 计数（预期 1）:
+2

@@ -1,0 +1,341 @@
+﻿diff --git a/android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java b/android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java
+index 517e201..aa84923 100644
+--- a/android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java
++++ b/android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java
+@@ -14,6 +14,7 @@ import android.view.View;
+ import android.view.inputmethod.EditorInfo;
+ import android.widget.Button;
+ import android.widget.EditText;
++import android.widget.ImageView;
+ import android.widget.LinearLayout;
+ import android.widget.PopupMenu;
+ import android.widget.ScrollView;
+@@ -90,9 +91,16 @@ public final class ChatScreen extends LinearLayout {
+     private final TextView quoteText;
+     private final EditText draft;
+     private final ModelThinkingPicker modelChip;
++    /** T-092: the grounding switch's chip; the panel it opens draws from the rendered state. */
++    private final TextView searchChip;
+     private final Button send;
+     /** T-075: the follow-latest pill (073 搂6); hidden while the view follows on its own. */
+     private final Button followLatest;
++    /** T-077: the fullscreen editor (073 搂5.1) - the entry key and the overlay it opens. */
++    private final ImageView fullscreenEntry;
++    private final View fullscreen;
++    private final TextView fullscreenQuote;
++    private final EditText fullscreenDraft;
+ 
+     /** The rows of the last render, by message id, so a selection can be read back. */
+     private final Map<String, Row> rows = new LinkedHashMap<String, Row>();
+@@ -105,8 +113,15 @@ public final class ChatScreen extends LinearLayout {
+     private boolean rendering;
+     /** T-076: the send key's face as the last render drew it, so a click stops or sends, not both. */
+     private ChatViewState.SendState sendState = ChatViewState.SendState.DISABLED;
++    /** T-077: what the last render said about the overlay, so a sentence and a focus fire once. */
++    private boolean renderedFullscreen;
++    private boolean fullscreenEntryAvailable;
++    /** Why the entry is grey: an archived branch or a missing key, named on a grey tap. */
++    private int fullscreenEntryHint;
+     /** Rows are reported to the presenter once per visit, after the first layout that has one. */
+     private boolean rowsReported;
++    /** T-092: the state the last render carried, so the search panel draws what the chip shows. */
++    private ChatViewState lastRenderedState;
+     /** The position the presenter resolved; applied once, after which the view belongs to the learner. */
+     private ReadingPosition pendingPosition;
+     /** The last message id of the last ready render, so only a new turn scrolls to the bottom. */
+@@ -143,23 +158,15 @@ public final class ChatScreen extends LinearLayout {
+         quoteText = findViewById(R.id.chat_quote_text);
+         draft = findViewById(R.id.chat_draft);
+         modelChip = findViewById(R.id.chat_model_chip);
++        searchChip = findViewById(R.id.chat_search_chip);
+         send = findViewById(R.id.chat_send);
+         followLatest = findViewById(R.id.chat_follow);
++        fullscreenEntry = findViewById(R.id.chat_expand);
++        fullscreen = findViewById(R.id.chat_fullscreen);
++        fullscreenQuote = findViewById(R.id.chat_fullscreen_quote);
++        fullscreenDraft = findViewById(R.id.chat_fullscreen_draft);
+ 
+-        draft.addTextChangedListener(new TextWatcher() {
+-            @Override
+-            public void beforeTextChanged(CharSequence text, int start, int count, int after) {
+-            }
+-
+-            @Override
+-            public void onTextChanged(CharSequence text, int start, int before, int count) {
+-            }
+-
+-            @Override
+-            public void afterTextChanged(Editable text) {
+-                fire(actions -> actions.onDraftChanged(text.toString()));
+-            }
+-        });
++        draft.addTextChangedListener(draftForwarder());
+         draft.setOnEditorActionListener((view, actionId, event) -> {
+             if (actionId == EditorInfo.IME_ACTION_SEND
+                     || (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
+@@ -179,6 +186,23 @@ public final class ChatScreen extends LinearLayout {
+             }
+         }));
+         followLatest.setOnClickListener(view -> fire(actions -> actions.onFollowLatestPressed()));
++        // T-092: the chip opens the bottom panel; the toggle itself is a panel row, per 鎷嶆澘 4.
++        searchChip.setOnClickListener(view -> showSearchPanel());
++        // T-077: the entry key opens the overlay only when the state allows it; a grey tap names
++        // the blocked reason instead (archived, or no key), which is the feedback 073 搂5.1 asks for.
++        fullscreenEntry.setOnClickListener(view -> fire(actions -> {
++            if (fullscreenEntryAvailable) {
++                actions.onFullscreenEditOpened();
++            } else if (fullscreenEntryHint != 0) {
++                Toast.makeText(getContext(), fullscreenEntryHint, Toast.LENGTH_SHORT).show();
++            }
++        }));
++        fullscreenDraft.addTextChangedListener(draftForwarder());
++        // Done, cancel, close and the system back all save-and-close: one action for the four.
++        for (int id : new int[]{R.id.chat_fullscreen_close, R.id.chat_fullscreen_cancel,
++                R.id.chat_fullscreen_done}) {
++            findViewById(id).setOnClickListener(v -> fire(a -> a.onFullscreenEditClosed()));
++        }
+         findViewById(R.id.chat_back).setOnClickListener(view -> fire(actions -> actions.onBackPressed()));
+         findViewById(R.id.chat_overview)
+                 .setOnClickListener(view -> fire(actions -> actions.onOverviewPressed()));
+@@ -256,6 +280,8 @@ public final class ChatScreen extends LinearLayout {
+                 draft.setSelection(draft.getText().length());
+             }
+             renderComposer(state);
++            renderFullscreen(state);
++            renderSearchChip(state);
+             modelChip.render(state.model, state.thinkingEnabled);
+             if (state.phase == ChatViewState.Phase.READY) {
+                 settle(state);
+@@ -361,6 +387,52 @@ public final class ChatScreen extends LinearLayout {
+         return visible;
+     }
+ 
++    /**
++     * T-092: the grounding chip's face 鈥?green while the switch is on, grey while off. The panel is
++     * drawn from the last rendered state, so it can never disagree with what the chip shows.
++     */
++    private void renderSearchChip(ChatViewState state) {
++        lastRenderedState = state;
++        searchChip.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
++                getResources().getColor(state.searchEnabled
++                        ? R.color.tl_green_soft : R.color.tl_surface)));
++        searchChip.setTextColor(getResources().getColor(state.searchEnabled
++                ? R.color.tl_green_deep : R.color.tl_ink3));
++    }
++
++    /**
++     * T-092: the bottom panel (SPEC-2026-09-23 鎷嶆澘 4) 鈥?the switch, the selected engine and the
++     * jump to the search service page. It decides nothing: each row forwards one gesture.
++     */
++    private void showSearchPanel() {
++        ChatViewState state = lastRenderedState;
++        if (state == null) {
++            return;
++        }
++        android.app.Dialog dialog = new android.app.Dialog(getContext());
++        View content = LayoutInflater.from(getContext())
++                .inflate(R.layout.panel_search_picker, this, false);
++        TextView toggle = content.findViewById(R.id.search_panel_toggle);
++        toggle.setText(state.searchEnabled ? R.string.search_panel_toggle_on
++                : R.string.search_panel_toggle_off);
++        toggle.setOnClickListener(view -> fire(actions -> actions.onSearchToggled(
++                !state.searchEnabled)));
++        ((TextView) content.findViewById(R.id.search_panel_engine)).setText(
++                getContext().getString(R.string.search_panel_engine, state.searchEngineLabel));
++        content.findViewById(R.id.search_panel_settings).setOnClickListener(view -> {
++            fire(actions -> actions.onSearchOpenSettings());
++            dialog.dismiss();
++        });
++        dialog.setContentView(content);
++        android.view.Window window = dialog.getWindow();
++        if (window != null) {
++            window.setLayout(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
++            window.setGravity(android.view.Gravity.BOTTOM);
++            window.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0));
++        }
++        dialog.show();
++    }
++
+     /** Draws the failure the presenter reported, or hides the line when there is none. */
+     private void renderNotice(HomeViewState.Notice value) {
+         if (value == null) {
+@@ -443,11 +515,58 @@ public final class ChatScreen extends LinearLayout {
+         send.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null);
+     }
+ 
++    /**
++     * T-077: the fullscreen editor (073 搂5.1). The overlay covers the conversation without moving
++     * a hit box underneath it; the entry key reads its availability from the state, and the open
++     * and close transitions each announce once - to TalkBack regardless of the low-motion switch
++     * (搂7), which is also why there is no transition to mute.
++     */
++    private void renderFullscreen(ChatViewState state) {
++        fullscreenEntryAvailable = state.fullscreenEditEntryAvailable();
++        fullscreenEntryHint = state.archived ? R.string.chat_draft_hint_archived
++                : !state.keyConfigured ? R.string.chat_draft_hint_no_key : 0;
++        fullscreenEntry.setColorFilter(getContext().getColor(fullscreenEntryAvailable
++                ? R.color.tl_green_deep : R.color.tl_ink3));
++        fullscreen.setVisibility(state.fullscreenEditing ? VISIBLE : GONE);
++        if (state.fullscreenEditing) {
++            boolean quoted = !state.quote.isEmpty();
++            fullscreenQuote.setVisibility(quoted ? VISIBLE : GONE);
++            fullscreenQuote.setText(quoted
++                    ? getContext().getString(R.string.chat_quoted, state.quote) : "");
++            if (!state.draft.contentEquals(fullscreenDraft.getText())) {
++                fullscreenDraft.setText(state.draft);
++                fullscreenDraft.setSelection(fullscreenDraft.getText().length());
++            }
++            if (!renderedFullscreen) {
++                fullscreenDraft.requestFocus();
++                announceForAccessibility(getContext().getString(R.string.chat_fullscreen_entered));
++            }
++        } else if (renderedFullscreen) {
++            announceForAccessibility(getContext().getString(R.string.chat_fullscreen_exited));
++            draft.requestFocus();
++            draft.setSelection(draft.getText().length());
++        }
++        renderedFullscreen = state.fullscreenEditing;
++    }
++
++    /**
++     * T-077: the host asks before it navigates away, and an open overlay consumes the back gesture
++     * first - back is a save-and-close, never a leave-the-branch (073 搂5.1).
++     *
++     * @return whether the fullscreen editor was open and has now been closed
++     */
++    public boolean onSystemBack() {
++        if (!renderedFullscreen) {
++            return false;
++        }
++        fire(actions -> actions.onFullscreenEditClosed());
++        return true;
++    }
++
+     /**
+      * T-075: the follow-latest pill (073 搂6). Visible only while the learner is detached, and only
+      * on a ready screen; while it counts missed growths the count rides the label.
+-     */
+-    private void renderFollow(ChatViewState state) {
++     */    private void renderFollow(ChatViewState state) {
+         boolean detached = state.phase == ChatViewState.Phase.READY && !state.followLatest;
+         followLatest.setVisibility(detached ? VISIBLE : GONE);
+         followLatest.setText(detached && state.missedCount > 0
+@@ -515,6 +634,28 @@ public final class ChatScreen extends LinearLayout {
+         }
+     }
+ 
++    /**
++     * The composer's box and the fullscreen editor's box forward every keystroke through the same
++     * {@code onDraftChanged} - the one write path 076 built, so the store always holds the whole
++     * composer, from whichever box the learner is typing into (073 搂5.1).
++     */
++    private TextWatcher draftForwarder() {
++        return new TextWatcher() {
++            @Override
++            public void beforeTextChanged(CharSequence text, int start, int count, int after) {
++            }
++
++            @Override
++            public void onTextChanged(CharSequence text, int start, int before, int count) {
++            }
++
++            @Override
++            public void afterTextChanged(Editable text) {
++                fire(actions -> actions.onDraftChanged(text.toString()));
++            }
++        };
++    }
++
+     /**
+      * Opens the child-branch list of one answer under the row that asked for it. The branches were read
+      * before this is called, so nothing is looked up here; a tapped row is reported to the host, which
+@@ -575,9 +716,14 @@ public final class ChatScreen extends LinearLayout {
+         private final ReasoningDisclosure disclosure;
+         private final AnswerActionBar actionBar;
+         private final LinearLayout suggestions;
++        /** T-090: the translation display and its two parts. */
++        private final View translation;
++        private final TextView translationHeader;
++        private final TextView translationText;
+ 
+         private String messageId = "";
+         private ChatMessage message;
++        private ChatViewState lastState;
+         private float pressX;
+         private float pressY;
+ 
+@@ -598,9 +744,21 @@ public final class ChatScreen extends LinearLayout {
+             disclosure = root.findViewById(R.id.chat_reasoning);
+             actionBar = root.findViewById(R.id.chat_actions);
+             suggestions = root.findViewById(R.id.chat_suggestions);
++            translation = root.findViewById(R.id.chat_translation);
++            translationHeader = root.findViewById(R.id.chat_translation_header);
++            translationText = root.findViewById(R.id.chat_translation_text);
+             disclosure.setListener(this);
+             actionBar.setListener(this);
+             retry.setOnClickListener(view -> fire(actions -> actions.onRetryPressed(messageId)));
++            // T-090: the header's gesture depends on the state it draws - a failed run's header is
++            // the retry (鍙噸璇?, a finished one's is the fold toggle. The presenter re-judges both.
++            translationHeader.setOnClickListener(view -> fire(actions -> {
++                if (lastState != null && lastState.translationFailed(messageId)) {
++                    actions.onTranslatePressed(messageId);
++                } else {
++                    actions.onTranslationToggled(messageId);
++                }
++            }));
+             answer.setOnTouchListener((view, event) -> {
+                 if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                     pressX = event.getX();
+@@ -634,6 +792,7 @@ public final class ChatScreen extends LinearLayout {
+                     code -> fire(actions -> actions.onSelectionCopyPressed(code))),
+                     TextView.BufferType.SPANNABLE);
+             renderGenerationSlots(state, message, newestRow);
++            renderTranslation(state, message);
+             retry.setEnabled(message.canRetry());
+             actionBar.setVisibility(message.isStable() ? VISIBLE : GONE);
+             actionBar.render(message);
+@@ -663,6 +822,32 @@ public final class ChatScreen extends LinearLayout {
+             canceled.setVisibility(stopped && message.isFailed() ? VISIBLE : GONE);
+         }
+ 
++        /** T-090: the璇戞枃鍖? drawn from the state alone - run, failure, or finished text. */
++        private void renderTranslation(ChatViewState state, ChatMessage message) {
++            boolean visible = state.translationVisible(message.messageId);
++            translation.setVisibility(visible ? VISIBLE : GONE);
++            if (!visible) {
++                translationHeader.setText("");
++                translationText.setText("");
++                return;
++            }
++            if (state.isTranslating(message.messageId)) {
++                translationHeader.setText(R.string.chat_translation_running);
++                translationText.setVisibility(GONE);
++                return;
++            }
++            if (state.translationFailed(message.messageId)) {
++                translationHeader.setText(R.string.chat_translation_failed);
++                translationText.setVisibility(GONE);
++                return;
++            }
++            boolean expanded = state.translationExpanded(message.messageId);
++            translationHeader.setText(getContext().getString(expanded
++                    ? R.string.chat_translation_collapse : R.string.chat_translation_expand));
++            translationText.setVisibility(expanded ? VISIBLE : GONE);
++            translationText.setText(state.translationText(message.messageId));
++        }
++
+         /** The one-shot entry fade a stage transition asked for; static under low motion. */
+         void enterStage(boolean stopped) { fade(stopped ? canceled : actionBar, ChatMotion.QUICK_MS); }
+ 
+@@ -754,6 +939,11 @@ public final class ChatScreen extends LinearLayout {
+             fire(actions -> actions.onResetPressed(id));
+         }
+ 
++        @Override
++        public void onTranslatePressed(String id) {
++            fire(actions -> actions.onTranslatePressed(id));
++        }
++
+         @Override
+         public void onForkPressed(String id) {
+             // The bottom action bar forks without a selection: the whole answer stays the anchor.

@@ -201,8 +201,8 @@ public final class NavigationStoreInstrumentedTest {
         Branch root = Branch.root(TOPIC, T0);
         BranchDao.insert(database, root);
         // The title arrives after creation, through the same mutable-field write the product uses
-        // (SqliteHomeStore.renameTopic): the root-title artifact is generated for an existing branch,
-        // so a freshly inserted root really does carry no title until this write.
+        // (the root-title artifact deriver): the root-title artifact is generated for an existing
+        // branch, so a freshly inserted root really does carry no title until this write.
         root.setTitle(TITLE_TEXT, T0 + 1L);
         BranchDao.update(database, root);
         rootBranchId = root.id;

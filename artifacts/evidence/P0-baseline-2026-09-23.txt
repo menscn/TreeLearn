@@ -1,0 +1,24 @@
+# P0 基线重建证据 — 2026-09-23 22:07-22:12 (GMT+8)
+# 目的：T-087 verified 后首次确认当前工作区可构建、可测、可 lint（T-102 Gap ① 的前置条件）
+# 工作区快照：git master @ 79a33ac613fb47a473b71aaf1ffc9a7fa5377f28；64 modified + 364 untracked，无暂存项
+# 未执行 git clean / reset / stash，未触碰设备数据
+
+[1] 命令: ./gradlew :app:assembleDebug --console=plain   (cwd D:\Project\Android\Treelearn\android)
+    结果: BUILD SUCCESSFUL in 44s ; 73 actionable tasks: 73 up-to-date
+    EXITCODE=0
+
+[2] 命令: ./gradlew :app:testDebugUnitTest :app:lintDebug --console=plain   (cwd D:\Project\Android\Treelearn\android)
+    结果: BUILD SUCCESSFUL in 13s ; 110 actionable tasks: 1 executed, 109 up-to-date
+    EXITCODE=0
+
+[3] 单测清点（从 app/build/test-results/testDebugUnitTest/*.xml 机械回读）:
+    tests=593 failures=0 errors=0 skipped=0
+
+[4] 任务台账校验: python .trae/scripts/validate_tasks.py
+    结果: files=106 errors=0 warnings=20
+    EXITCODE=0
+    （T-103 重号已处理：T-2026-09-23-home-drawer-container-103.md → -106.md，
+      front matter id 同步改为 T-2026-09-23-106，T-105 depends_on 引用已同步）
+
+# 结论：087 在制中间态造成的 :app 编译阻断已不存在，当前工作区可构建、全量单测与 lint 全绿。
+# 本文件由命令当场捕获输出生成，非手抄。

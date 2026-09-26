@@ -1,0 +1,620 @@
+﻿T-2026-09-23-087 RED evidence (2026-09-23)
+
+Command:
+  cd android && ./gradlew --no-watch-fs :app:testDebugUnitTest --tests "com.treelearn.app.ui.ProviderAdminPresenterTest"
+
+Note: the daemon's file watcher had missed concurrently created files (T-102 WIP), so this RED was rerun with --no-watch-fs; every compile error below points at the missing ProviderAdminPresenter API, none at any other source.
+
+--- captured output ---
+> Task :core:compileJava UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues UP-TO-DATE
+> Task :ai:generateDebugResources UP-TO-DATE
+> Task :ai:packageDebugResources UP-TO-DATE
+> Task :ai:processDebugNavigationResources UP-TO-DATE
+> Task :ai:parseDebugLocalResources UP-TO-DATE
+> Task :ai:generateDebugRFile UP-TO-DATE
+> Task :ai:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugJavaWithJavac UP-TO-DATE
+> Task :ai:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :ai:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :ai:compileDebugLibraryResources UP-TO-DATE
+> Task :ai:writeDebugAarMetadata UP-TO-DATE
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :data:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResValues UP-TO-DATE
+> Task :data:generateDebugResources UP-TO-DATE
+> Task :data:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :ai:extractDeepLinksDebug UP-TO-DATE
+> Task :ai:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :data:extractDeepLinksDebug UP-TO-DATE
+> Task :data:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :data:compileDebugLibraryResources UP-TO-DATE
+> Task :data:parseDebugLocalResources UP-TO-DATE
+> Task :data:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :data:javaPreCompileDebug UP-TO-DATE
+> Task :data:compileDebugJavaWithJavac UP-TO-DATE
+> Task :data:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:bundleDebugClassesToRuntimeJar UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+
+> Task :app:compileDebugUnitTestJavaWithJavac FAILED
+./gradlew : D:\Project\Android\Treelearn\android\app\src\test\java\com\treelear
+n\app\ui\ProviderAdminPresenterTest.java:9: 閿欒: 绋嬪簭鍖卌om.treelearn.app.ui.Provi
+derAdminPresenter涓嶅瓨鍦?import com.treelearn.app.ui.ProviderAdminPresenter.Editor
+;
+所在位置 行:445 字符: 49
++ ... oid; $out = ./gradlew --no-watch-fs :app:testDebugUnitTest --tests "c ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (D:\Project\Andr...esenter.Editor; 
+   :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+                                                  ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:10: 閿欒: 绋嬪簭鍖卌om.treelearn.app.ui.ProviderAdminPre
+senter涓嶅瓨鍦?import com.treelearn.app.ui.ProviderAdminPresenter.Fetch;
+                                                  ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:11: 閿欒: 绋嬪簭鍖卌om.treelearn.app.ui.ProviderAdminPre
+senter涓嶅瓨鍦?import com.treelearn.app.ui.ProviderAdminPresenter.Notice;
+                                                  ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:12: 閿欒: 绋嬪簭鍖卌om.treelearn.app.ui.ProviderAdminPre
+senter涓嶅瓨鍦?import com.treelearn.app.ui.ProviderAdminPresenter.Row;
+                                                  ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:13: 閿欒: 绋嬪簭鍖卌om.treelearn.app.ui.ProviderAdminPre
+senter涓嶅瓨鍦?import com.treelearn.app.ui.ProviderAdminPresenter.State;
+                                                  ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:268: 閿欒: 绋嬪簭鍖匬roviderAdminPresenter涓嶅瓨鍦?    priva
+te static final class RecordingSink implements ProviderAdminPresenter.Sink {
+                                                                              ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:282: 閿欒: 绋嬪簭鍖匬roviderAdminPresenter涓嶅瓨鍦?    priva
+te static final class FakeStore implements ProviderAdminPresenter.Store {
+                                                                          ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:33: 閿欒: 鎵句笉鍒扮鍙?    private ProviderAdminPresente
+r presenter;
+            ^
+  绗﹀彿:   绫?ProviderAdminPresenter
+  浣嶇疆: 绫?ProviderAdminPresenterTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:263: 閿欒: 鎵句笉鍒扮鍙?    private static Row row(Strin
+g id, String name, boolean enabled, int modelCount,
+                   ^
+  绗﹀彿:   绫?Row
+  浣嶇疆: 绫?ProviderAdminPresenterTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:284: 閿欒: 鎵句笉鍒扮鍙?        final List<Row> rows = n
+ew ArrayList<Row>();
+                   ^
+  绗﹀彿:   绫?Row
+  浣嶇疆: 绫?FakeStore
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:289: 閿欒: 鎵句笉鍒扮鍙?        Fetch nextFetch = new Fe
+tch(false, 0);
+        ^
+  绗﹀彿:   绫?Fetch
+  浣嶇疆: 绫?FakeStore
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:294: 閿欒: 鎵句笉鍒扮鍙?        public List<Row> list() 
+{
+                    ^
+  绗﹀彿:   绫?Row
+  浣嶇疆: 绫?FakeStore
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:304: 閿欒: 鎵句笉鍒扮鍙?        public Row create(String
+ name, String baseUrl) {
+               ^
+  绗﹀彿:   绫?Row
+  浣嶇疆: 绫?FakeStore
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:335: 閿欒: 绋嬪簭鍖匬roviderAdminPresenter涓嶅瓨鍦?         
+       throws ProviderAdminPresenter.KeyRefused {
+                                             ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:351: 閿欒: 鎵句笉鍒扮鍙?        public Fetch fetch(Strin
+g providerId) {
+               ^
+  绗﹀彿:   绫?Fetch
+  浣嶇疆: 绫?FakeStore
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:270: 閿欒: 鎵句笉鍒扮鍙?        final List<State> states
+ = new ArrayList<State>();
+                   ^
+  绗﹀彿:   绫?State
+  浣嶇疆: 绫?RecordingSink
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:272: 閿欒: 鎵句笉鍒扮鍙?        State last() {
+        ^
+  绗﹀彿:   绫?State
+  浣嶇疆: 绫?RecordingSink
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:277: 閿欒: 鎵句笉鍒扮鍙?        public void render(State
+ state) {
+                           ^
+  绗﹀彿:   绫?State
+  浣嶇疆: 绫?RecordingSink
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:40: 閿欒: 鎵句笉鍒扮鍙?        presenter = new ProviderA
+dminPresenter(sink, new InlineUi(), background, store);
+                        ^
+  绗﹀彿:   绫?ProviderAdminPresenter
+  浣嶇疆: 绫?ProviderAdminPresenterTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:50: 閿欒: 绋嬪簭鍖匰tate涓嶅瓨鍦?        assertEquals(State.
+Mode.LIST, sink.last().mode);
+                          ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:65: 閿欒: 绋嬪簭鍖匰tate涓嶅瓨鍦?        assertEquals(State.
+Mode.LIST, sink.last().mode);
+                          ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:72: 閿欒: 绋嬪簭鍖匰tate涓嶅瓨鍦?        assertEquals(State.
+Mode.EDITOR, sink.last().mode);
+                          ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:87: 閿欒: 鎵句笉鍒扮鍙?        assertEquals(Notice.NAME_
+TAKEN, sink.last().editor.notice);
+                     ^
+  绗﹀彿:   鍙橀噺 Notice
+  浣嶇疆: 绫?ProviderAdminPresenterTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:97: 閿欒: 鎵句笉鍒扮鍙?        assertEquals(Notice.NAME_
+REQUIRED, sink.last().editor.notice);
+                     ^
+  绗﹀彿:   鍙橀噺 Notice
+  浣嶇疆: 绫?ProviderAdminPresenterTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:111: 閿欒: 绋嬪簭鍖匰tate涓嶅瓨鍦?        assertEquals(State
+.Mode.LIST, sink.last().mode);
+                          ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:122: 閿欒: 绋嬪簭鍖匰tate涓嶅瓨鍦?        assertEquals(State
+.Mode.EDITOR, sink.last().mode);
+                          ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:145: 閿欒: 鎵句笉鍒扮鍙?        assertEquals(Notice.KEY_
+REQUIRED, null == sink.last().editor.notice
+                     ^
+  绗﹀彿:   鍙橀噺 Notice
+  浣嶇疆: 绫?ProviderAdminPresenterTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:157: 閿欒: 鎵句笉鍒扮鍙?        assertEquals(Notice.KEY_
+REQUIRED, sink.last().editor.notice);
+                     ^
+  绗﹀彿:   鍙橀噺 Notice
+  浣嶇疆: 绫?ProviderAdminPresenterTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:171: 閿欒: 鎵句笉鍒扮鍙?        assertEquals(Notice.KEY_
+SAVE_FAILED, sink.last().editor.notice);
+                     ^
+  绗﹀彿:   鍙橀噺 Notice
+  浣嶇疆: 绫?ProviderAdminPresenterTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:192: 閿欒: 鎵句笉鍒扮鍙?        store.nextFetch = new Fe
+tch(true, 0);
+                              ^
+  绗﹀彿:   绫?Fetch
+  浣嶇疆: 绫?ProviderAdminPresenterTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:196: 閿欒: 绋嬪簭鍖匰tate涓嶅瓨鍦?        assertEquals(State
+.Mode.EDITOR, sink.last().mode);
+                          ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:206: 閿欒: 鎵句笉鍒扮鍙?        store.nextFetch = new Fe
+tch(false, 5);
+                              ^
+  绗﹀彿:   绫?Fetch
+  浣嶇疆: 绫?ProviderAdminPresenterTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:247: 閿欒: 绋嬪簭鍖匰tate涓嶅瓨鍦?        assertEquals(State
+.Mode.LIST, sink.last().mode);
+                          ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:259: 閿欒: 绋嬪簭鍖匰tate涓嶅瓨鍦?        assertEquals(State
+.Mode.LIST, sink.last().mode);
+                          ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:265: 閿欒: 鎵句笉鍒扮鍙?        return new Row(id, name,
+ "https://api.deepseek.com", enabled, modelCount, hasKey);
+                   ^
+  绗﹀彿:   绫?Row
+  浣嶇疆: 绫?ProviderAdminPresenterTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:270: 閿欒: 鎵句笉鍒扮鍙?        final List<State> states
+ = new ArrayList<State>();
+                                                 ^
+  绗﹀彿:   绫?State
+  浣嶇疆: 绫?RecordingSink
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:276: 閿欒: 鏂规硶涓嶄細瑕嗙洊鎴栧疄鐜拌秴绫诲瀷鐨勬柟娉?        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:284: 閿欒: 鎵句笉鍒扮鍙?        final List<Row> rows = n
+ew ArrayList<Row>();
+                                             ^
+  绗﹀彿:   绫?Row
+  浣嶇疆: 绫?FakeStore
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:289: 閿欒: 鎵句笉鍒扮鍙?        Fetch nextFetch = new Fe
+tch(false, 0);
+                              ^
+  绗﹀彿:   绫?Fetch
+  浣嶇疆: 绫?FakeStore
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:293: 閿欒: 鏂规硶涓嶄細瑕嗙洊鎴栧疄鐜拌秴绫诲瀷鐨勬柟娉?        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:298: 閿欒: 鏂规硶涓嶄細瑕嗙洊鎴栧疄鐜拌秴绫诲瀷鐨勬柟娉?        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:303: 閿欒: 鏂规硶涓嶄細瑕嗙洊鎴栧疄鐜拌秴绫诲瀷鐨勬柟娉?        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:308: 閿欒: 鎵句笉鍒扮鍙?            return new Row("new"
+, name, baseUrl, true, 0, false);
+                       ^
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+  绗﹀彿:   绫?Row
+  浣嶇疆: 绫?FakeStore
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:311: 閿欒: 鏂规硶涓嶄細瑕嗙洊鎴栧疄鐜拌秴绫诲瀷鐨勬柟娉?        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:316: 閿欒: 鏂规硶涓嶄細瑕嗙洊鎴栧疄鐜拌秴绫诲瀷鐨勬柟娉?        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:322: 閿欒: 鏂规硶涓嶄細瑕嗙洊鎴栧疄鐜拌秴绫诲瀷鐨勬柟娉?        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:328: 閿欒: 鏂规硶涓嶄細瑕嗙洊鎴栧疄鐜拌秴绫诲瀷鐨勬柟娉?        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:333: 閿欒: 鏂规硶涓嶄細瑕嗙洊鎴栧疄鐜拌秴绫诲瀷鐨勬柟娉?        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:338: 閿欒: 绋嬪簭鍖匬roviderAdminPresenter涓嶅瓨鍦?         
+       throw new ProviderAdminPresenter.KeyRefused("refused");
+                                                ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:344: 閿欒: 鏂规硶涓嶄細瑕嗙洊鎴栧疄鐜拌秴绫诲瀷鐨勬柟娉?        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\Pro
+viderAdminPresenterTest.java:350: 閿欒: 鏂规硶涓嶄細瑕嗙洊鎴栧疄鐜拌秴绫诲瀷鐨勬柟娉?        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\wiring
+\HomeWiringTest.java:48: 閿欒: 鎵句笉鍒扮鍙?                Collections.singletonList
+(WiringDoubles.NOW), 1, 2);
+                ^
+  绗﹀彿:   鍙橀噺 Collections
+  浣嶇疆: 绫?HomeWiringTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\wiring
+\HomeWiringTest.java:61: 閿欒: 鎵句笉鍒扮鍙?        store.statsRaw = new HomeStore.St
+atsRaw(Collections.<Long>emptyList(), 0, 0);
+                                                ^
+  绗﹀彿:   鍙橀噺 Collections
+  浣嶇疆: 绫?HomeWiringTest
+53 涓敊璇?
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugUnitTestJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:33: 閿欒: 鎵句笉鍒扮鍙?      private ProviderAdminPres
+enter presenter;
+              ^
+    绗﹀彿:   绫?ProviderAdminPresenter
+    浣嶇疆: 绫?ProviderAdminPresenterTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:263: 閿欒: 鎵句笉鍒扮鍙?      private static Row row(S
+tring id, String name, boolean enabled, int modelCount,
+                     ^
+    绗﹀彿:   绫?Row
+    浣嶇疆: 绫?ProviderAdminPresenterTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:284: 閿欒: 鎵句笉鍒扮鍙?          final List<Row> rows
+ = new ArrayList<Row>();
+                     ^
+    绗﹀彿:   绫?Row
+    浣嶇疆: 绫?FakeStore
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:289: 閿欒: 鎵句笉鍒扮鍙?          Fetch nextFetch = ne
+w Fetch(false, 0);
+          ^
+    绗﹀彿:   绫?Fetch
+    浣嶇疆: 绫?FakeStore
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:294: 閿欒: 鎵句笉鍒扮鍙?          public List<Row> lis
+t() {
+                      ^
+    绗﹀彿:   绫?Row
+    浣嶇疆: 绫?FakeStore
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:304: 閿欒: 鎵句笉鍒扮鍙?          public Row create(St
+ring name, String baseUrl) {
+                 ^
+    绗﹀彿:   绫?Row
+    浣嶇疆: 绫?FakeStore
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:351: 閿欒: 鎵句笉鍒扮鍙?          public Fetch fetch(S
+tring providerId) {
+                 ^
+    绗﹀彿:   绫?Fetch
+    浣嶇疆: 绫?FakeStore
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:270: 閿欒: 鎵句笉鍒扮鍙?          final List<State> st
+ates = new ArrayList<State>();
+                     ^
+    绗﹀彿:   绫?State
+    浣嶇疆: 绫?RecordingSink
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:272: 閿欒: 鎵句笉鍒扮鍙?          State last() {
+          ^
+    绗﹀彿:   绫?State
+    浣嶇疆: 绫?RecordingSink
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:277: 閿欒: 鎵句笉鍒扮鍙?          public void render(S
+tate state) {
+                             ^
+    绗﹀彿:   绫?State
+    浣嶇疆: 绫?RecordingSink
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:40: 閿欒: 鎵句笉鍒扮鍙?          presenter = new Provi
+derAdminPresenter(sink, new InlineUi(), background, store);
+                          ^
+    绗﹀彿:   绫?ProviderAdminPresenter
+    浣嶇疆: 绫?ProviderAdminPresenterTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:87: 閿欒: 鎵句笉鍒扮鍙?          assertEquals(Notice.N
+AME_TAKEN, sink.last().editor.notice);
+                       ^
+    绗﹀彿:   鍙橀噺 Notice
+    浣嶇疆: 绫?ProviderAdminPresenterTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:97: 閿欒: 鎵句笉鍒扮鍙?          assertEquals(Notice.N
+AME_REQUIRED, sink.last().editor.notice);
+                       ^
+    绗﹀彿:   鍙橀噺 Notice
+    浣嶇疆: 绫?ProviderAdminPresenterTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:145: 閿欒: 鎵句笉鍒扮鍙?          assertEquals(Notice.
+KEY_REQUIRED, null == sink.last().editor.notice
+                       ^
+    绗﹀彿:   鍙橀噺 Notice
+    浣嶇疆: 绫?ProviderAdminPresenterTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:157: 閿欒: 鎵句笉鍒扮鍙?          assertEquals(Notice.
+KEY_REQUIRED, sink.last().editor.notice);
+                       ^
+    绗﹀彿:   鍙橀噺 Notice
+    浣嶇疆: 绫?ProviderAdminPresenterTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:171: 閿欒: 鎵句笉鍒扮鍙?          assertEquals(Notice.
+KEY_SAVE_FAILED, sink.last().editor.notice);
+                       ^
+    绗﹀彿:   鍙橀噺 Notice
+    浣嶇疆: 绫?ProviderAdminPresenterTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:192: 閿欒: 鎵句笉鍒扮鍙?          store.nextFetch = ne
+w Fetch(true, 0);
+                                ^
+    绗﹀彿:   绫?Fetch
+    浣嶇疆: 绫?ProviderAdminPresenterTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:206: 閿欒: 鎵句笉鍒扮鍙?          store.nextFetch = ne
+w Fetch(false, 5);
+                                ^
+    绗﹀彿:   绫?Fetch
+    浣嶇疆: 绫?ProviderAdminPresenterTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:265: 閿欒: 鎵句笉鍒扮鍙?          return new Row(id, n
+ame, "https://api.deepseek.com", enabled, modelCount, hasKey);
+                     ^
+    绗﹀彿:   绫?Row
+    浣嶇疆: 绫?ProviderAdminPresenterTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:270: 閿欒: 鎵句笉鍒扮鍙?          final List<State> st
+ates = new ArrayList<State>();
+                                                   ^
+    绗﹀彿:   绫?State
+    浣嶇疆: 绫?RecordingSink
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:284: 閿欒: 鎵句笉鍒扮鍙?          final List<Row> rows
+ = new ArrayList<Row>();
+                                               ^
+    绗﹀彿:   绫?Row
+    浣嶇疆: 绫?FakeStore
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:289: 閿欒: 鎵句笉鍒扮鍙?          Fetch nextFetch = ne
+w Fetch(false, 0);
+                                ^
+    绗﹀彿:   绫?Fetch
+    浣嶇疆: 绫?FakeStore
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:308: 閿欒: 鎵句笉鍒扮鍙?              return new Row("
+new", name, baseUrl, true, 0, false);
+                         ^
+    绗﹀彿:   绫?Row
+    浣嶇疆: 绫?FakeStore
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\wiri
+ng\HomeWiringTest.java:48: 閿欒: 鎵句笉鍒扮鍙?                  Collections.singleton
+List(WiringDoubles.NOW), 1, 2);
+                  ^
+    绗﹀彿:   鍙橀噺 Collections
+    浣嶇疆: 绫?HomeWiringTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\wiri
+ng\HomeWiringTest.java:61: 閿欒: 鎵句笉鍒扮鍙?          store.statsRaw = new HomeStor
+e.StatsRaw(Collections.<Long>emptyList(), 0, 0);
+                                                  ^
+    绗﹀彿:   鍙橀噺 Collections
+    浣嶇疆: 绫?HomeWiringTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:276: 閿欒: 鏂规硶涓嶄細瑕嗙洊鎴栧疄鐜拌秴绫诲瀷鐨勬柟娉?          @Over
+ride
+          ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:293: 閿欒: 鏂规硶涓嶄細瑕嗙洊鎴栧疄鐜拌秴绫诲瀷鐨勬柟娉?          @Over
+ride
+          ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:298: 閿欒: 鏂规硶涓嶄細瑕嗙洊鎴栧疄鐜拌秴绫诲瀷鐨勬柟娉?          @Over
+ride
+          ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:303: 閿欒: 鏂规硶涓嶄細瑕嗙洊鎴栧疄鐜拌秴绫诲瀷鐨勬柟娉?          @Over
+ride
+          ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:311: 閿欒: 鏂规硶涓嶄細瑕嗙洊鎴栧疄鐜拌秴绫诲瀷鐨勬柟娉?          @Over
+ride
+          ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:316: 閿欒: 鏂规硶涓嶄細瑕嗙洊鎴栧疄鐜拌秴绫诲瀷鐨勬柟娉?          @Over
+ride
+          ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:322: 閿欒: 鏂规硶涓嶄細瑕嗙洊鎴栧疄鐜拌秴绫诲瀷鐨勬柟娉?          @Over
+ride
+          ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:328: 閿欒: 鏂规硶涓嶄細瑕嗙洊鎴栧疄鐜拌秴绫诲瀷鐨勬柟娉?          @Over
+ride
+          ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:333: 閿欒: 鏂规硶涓嶄細瑕嗙洊鎴栧疄鐜拌秴绫诲瀷鐨勬柟娉?          @Over
+ride
+          ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:344: 閿欒: 鏂规硶涓嶄細瑕嗙洊鎴栧疄鐜拌秴绫诲瀷鐨勬柟娉?          @Over
+ride
+          ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:350: 閿欒: 鏂规硶涓嶄細瑕嗙洊鎴栧疄鐜拌秴绫诲瀷鐨勬柟娉?          @Over
+ride
+          ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:9: 閿欒: 绋嬪簭鍖卌om.treelearn.app.ui.ProviderAdminPr
+esenter涓嶅瓨鍦?  import com.treelearn.app.ui.ProviderAdminPresenter.Editor;
+                                                    ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:10: 閿欒: 绋嬪簭鍖卌om.treelearn.app.ui.ProviderAdminP
+resenter涓嶅瓨鍦?  import com.treelearn.app.ui.ProviderAdminPresenter.Fetch;
+                                                    ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:11: 閿欒: 绋嬪簭鍖卌om.treelearn.app.ui.ProviderAdminP
+resenter涓嶅瓨鍦?  import com.treelearn.app.ui.ProviderAdminPresenter.Notice;
+                                                    ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:12: 閿欒: 绋嬪簭鍖卌om.treelearn.app.ui.ProviderAdminP
+resenter涓嶅瓨鍦?  import com.treelearn.app.ui.ProviderAdminPresenter.Row;
+                                                    ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:13: 閿欒: 绋嬪簭鍖卌om.treelearn.app.ui.ProviderAdminP
+resenter涓嶅瓨鍦?  import com.treelearn.app.ui.ProviderAdminPresenter.State;
+                                                    ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:268: 閿欒: 绋嬪簭鍖匬roviderAdminPresenter涓嶅瓨鍦?      p
+rivate static final class RecordingSink implements ProviderAdminPresenter.Sink 
+{
+                                                                               
+ ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:282: 閿欒: 绋嬪簭鍖匬roviderAdminPresenter涓嶅瓨鍦?      p
+rivate static final class FakeStore implements ProviderAdminPresenter.Store {
+                                                                            ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:335: 閿欒: 绋嬪簭鍖匬roviderAdminPresenter涓嶅瓨鍦?       
+           throws ProviderAdminPresenter.KeyRefused {
+                                               ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:50: 閿欒: 绋嬪簭鍖匰tate涓嶅瓨鍦?          assertEquals(St
+ate.Mode.LIST, sink.last().mode);
+                            ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:65: 閿欒: 绋嬪簭鍖匰tate涓嶅瓨鍦?          assertEquals(St
+ate.Mode.LIST, sink.last().mode);
+                            ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:72: 閿欒: 绋嬪簭鍖匰tate涓嶅瓨鍦?          assertEquals(St
+ate.Mode.EDITOR, sink.last().mode);
+                            ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:111: 閿欒: 绋嬪簭鍖匰tate涓嶅瓨鍦?          assertEquals(S
+tate.Mode.LIST, sink.last().mode);
+                            ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:122: 閿欒: 绋嬪簭鍖匰tate涓嶅瓨鍦?          assertEquals(S
+tate.Mode.EDITOR, sink.last().mode);
+                            ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:196: 閿欒: 绋嬪簭鍖匰tate涓嶅瓨鍦?          assertEquals(S
+tate.Mode.EDITOR, sink.last().mode);
+                            ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:247: 閿欒: 绋嬪簭鍖匰tate涓嶅瓨鍦?          assertEquals(S
+tate.Mode.LIST, sink.last().mode);
+                            ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:259: 閿欒: 绋嬪簭鍖匰tate涓嶅瓨鍦?          assertEquals(S
+tate.Mode.LIST, sink.last().mode);
+                            ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\P
+roviderAdminPresenterTest.java:338: 閿欒: 绋嬪簭鍖匬roviderAdminPresenter涓嶅瓨鍦?       
+           throw new ProviderAdminPresenter.KeyRefused("refused");
+                                                  ^
+  53 涓敊璇?
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 1s
+52 actionable tasks: 1 executed, 51 up-to-date
+
+
+EXIT CODE: 1

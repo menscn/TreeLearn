@@ -20,9 +20,19 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import android.app.Dialog;
+import android.content.res.ColorStateList;
+import android.graphics.drawable.ColorDrawable;
+import android.view.Gravity;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.ImageView;
+
 import com.treelearn.app.R;
+import com.treelearn.app.ui.SpeechInputPolicy;
 import com.treelearn.app.ui.ChatActions;
 import com.treelearn.app.ui.ChatMessage;
+import com.treelearn.app.ui.ChatSpeaker;
 import com.treelearn.app.ui.ChatViewState;
 import com.treelearn.app.ui.ChatViewState.Stage;
 import com.treelearn.app.ui.ChildBranch;
@@ -69,7 +79,7 @@ import java.util.function.Consumer;
  *       clear, are the reading session's answers, and nothing here reads or writes a database.
  * </ul>
  */
-public final class ChatScreen extends LinearLayout {
+public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
 
     /** Scroll events arrive in bursts; the view is read once they stop. */
     private static final long SCROLL_SETTLE_MS = 150L;
@@ -88,11 +98,26 @@ public final class ChatScreen extends LinearLayout {
     private final LinearLayout sourceHistory;
     private final View quoteRow;
     private final TextView quoteText;
+    private final View attachRow;
+    private final TextView attachText;
+    private View attachEntry;
+    private Runnable onAttachPressed;
     private final EditText draft;
+    private final android.widget.ImageView voiceKey;
+    private SpeechInputPolicy speechPolicy = new SpeechInputPolicy();
+    private boolean listening;
+    private Runnable onVoicePressed;
+    private Runnable onVoiceReleased;
+    private Runnable onVoiceGuidance;
     private final ModelThinkingPicker modelChip;
+    private final TextView searchChip;
     private final Button send;
     /** T-075: the follow-latest pill (073 §6); hidden while the view follows on its own. */
     private final Button followLatest;
+    private final ImageView fullscreenEntry;
+    private final View fullscreen;
+    private final TextView fullscreenQuote;
+    private final EditText fullscreenDraft;
 
     /** The rows of the last render, by message id, so a selection can be read back. */
     private final Map<String, Row> rows = new LinkedHashMap<String, Row>();
@@ -105,8 +130,14 @@ public final class ChatScreen extends LinearLayout {
     private boolean rendering;
     /** T-076: the send key's face as the last render drew it, so a click stops or sends, not both. */
     private ChatViewState.SendState sendState = ChatViewState.SendState.DISABLED;
+    private ChatSpeaker speaker;
+    private ChatSpeaker.State speakState = ChatSpeaker.State.initial();
     /** Rows are reported to the presenter once per visit, after the first layout that has one. */
     private boolean rowsReported;
+    private boolean renderedFullscreen;
+    private boolean fullscreenEntryAvailable;
+    private int fullscreenEntryHint;
+    private ChatViewState lastRenderedState;
     /** The position the presenter resolved; applied once, after which the view belongs to the learner. */
     private ReadingPosition pendingPosition;
     /** The last message id of the last ready render, so only a new turn scrolls to the bottom. */
@@ -141,25 +172,54 @@ public final class ChatScreen extends LinearLayout {
         sourceHistory = findViewById(R.id.chat_source_history);
         quoteRow = findViewById(R.id.chat_quote_row);
         quoteText = findViewById(R.id.chat_quote_text);
+        attachRow = findViewById(R.id.chat_attach_row);
+        attachText = findViewById(R.id.chat_attach_text);
+        attachEntry = findViewById(R.id.chat_attach);
+        attachEntry.setOnClickListener(view -> {
+            if (onAttachPressed != null) {
+                onAttachPressed.run();
+            }
+        });
+        findViewById(R.id.chat_attach_clear)
+                .setOnClickListener(view -> fire(actions -> actions.onAttachmentCleared()));
+        voiceKey = findViewById(R.id.chat_voice);
+        voiceKey.setOnTouchListener((view, event) -> {
+            switch (event.getActionMasked()) {
+                case android.view.MotionEvent.ACTION_DOWN:
+                    if (!speechPolicy.enabled()) {
+                        if (onVoiceGuidance != null && speechPolicy.guidanceOnTap()) {
+                            onVoiceGuidance.run();
+                        }
+                        return true;
+                    }
+                    if (onVoicePressed != null) {
+                        onVoicePressed.run();
+                    }
+                    return true;
+                case android.view.MotionEvent.ACTION_UP:
+                case android.view.MotionEvent.ACTION_CANCEL:
+                    // The touch itself is authoritative about the finger: fire even when
+                    // listening never started (e.g. while the permission dialog was up),
+                    // so the host can cancel a pending press-held speech start.
+                    if (onVoiceReleased != null) {
+                        onVoiceReleased.run();
+                    }
+                    return true;
+                default:
+                    return true;
+            }
+        });
         draft = findViewById(R.id.chat_draft);
         modelChip = findViewById(R.id.chat_model_chip);
+        searchChip = findViewById(R.id.chat_search_chip);
         send = findViewById(R.id.chat_send);
         followLatest = findViewById(R.id.chat_follow);
 
-        draft.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence text, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence text, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable text) {
-                fire(actions -> actions.onDraftChanged(text.toString()));
-            }
-        });
+        fullscreenEntry = findViewById(R.id.chat_expand);
+        fullscreen = findViewById(R.id.chat_fullscreen);
+        fullscreenQuote = findViewById(R.id.chat_fullscreen_quote);
+        fullscreenDraft = findViewById(R.id.chat_fullscreen_draft);
+        draft.addTextChangedListener(draftForwarder());
         draft.setOnEditorActionListener((view, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEND
                     || (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
@@ -179,6 +239,18 @@ public final class ChatScreen extends LinearLayout {
             }
         }));
         followLatest.setOnClickListener(view -> fire(actions -> actions.onFollowLatestPressed()));
+        searchChip.setOnClickListener(view -> showSearchPanel());
+        fullscreenEntry.setOnClickListener(view -> fire(actions -> {
+            if (fullscreenEntryAvailable) {
+                actions.onFullscreenEditOpened();
+            } else if (fullscreenEntryHint != 0) {
+                Toast.makeText(getContext(), fullscreenEntryHint, Toast.LENGTH_SHORT).show();
+            }
+        }));
+        fullscreenDraft.addTextChangedListener(draftForwarder());
+        for (int id : new int[]{R.id.chat_fullscreen_close, R.id.chat_fullscreen_cancel, R.id.chat_fullscreen_done}) {
+            findViewById(id).setOnClickListener(v -> fire(a -> a.onFullscreenEditClosed()));
+        }
         findViewById(R.id.chat_back).setOnClickListener(view -> fire(actions -> actions.onBackPressed()));
         findViewById(R.id.chat_overview)
                 .setOnClickListener(view -> fire(actions -> actions.onOverviewPressed()));
@@ -216,6 +288,31 @@ public final class ChatScreen extends LinearLayout {
         });
     }
 
+    public void setSpeaker(ChatSpeaker speaker) {
+        this.speaker = speaker;
+    }
+
+    @Override
+    public void render(ChatSpeaker.State state) {
+        ChatSpeaker.State previous = this.speakState;
+        this.speakState = state;
+        this.refreshSpeak(previous.speakingMessageId);
+        this.refreshSpeak(state.speakingMessageId);
+        if (state.phase == ChatSpeaker.Phase.ERROR && previous.phase != ChatSpeaker.Phase.ERROR) {
+            Toast.makeText(getContext(), R.string.voice_notice_playback_error, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void refreshSpeak(String messageId) {
+        if (messageId == null || messageId.isEmpty()) {
+            return;
+        }
+        Row row = this.rows.get(messageId);
+        if (row != null) {
+            row.renderSpeakFace();
+        }
+    }
+
     /** Offers the versions of one position; the pick is reported through {@link ChatActions}. */
     public void showVersions(final String messageId, List<AnswerRevision> versions) {
         if (versions.isEmpty()) {
@@ -250,12 +347,15 @@ public final class ChatScreen extends LinearLayout {
             renderNotice(state.notice);
             renderSourceCard(state);
             renderQuote(state.quote);
+            renderAttachment(state.composerAttachment);
             renderFollow(state);
             if (!state.draft.contentEquals(draft.getText())) {
                 draft.setText(state.draft);
                 draft.setSelection(draft.getText().length());
             }
             renderComposer(state);
+            renderFullscreen(state);
+            renderSearchChip(state);
             modelChip.render(state.model, state.thinkingEnabled);
             if (state.phase == ChatViewState.Phase.READY) {
                 settle(state);
@@ -361,6 +461,40 @@ public final class ChatScreen extends LinearLayout {
         return visible;
     }
 
+    private void renderSearchChip(ChatViewState state) {
+        lastRenderedState = state;
+        searchChip.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(
+                state.searchEnabled ? R.color.tl_green_soft : R.color.tl_surface)));
+        searchChip.setTextColor(getResources().getColor(
+                state.searchEnabled ? R.color.tl_green_deep : R.color.tl_ink3));
+    }
+
+    private void showSearchPanel() {
+        ChatViewState state = lastRenderedState;
+        if (state == null) {
+            return;
+        }
+        Dialog dialog = new Dialog(getContext());
+        View content = LayoutInflater.from(getContext()).inflate(R.layout.panel_search_picker, this, false);
+        TextView toggle = (TextView) content.findViewById(R.id.search_panel_toggle);
+        toggle.setText(state.searchEnabled ? R.string.search_panel_toggle_on : R.string.search_panel_toggle_off);
+        toggle.setOnClickListener(view -> fire(actions -> actions.onSearchToggled(!state.searchEnabled)));
+        ((TextView) content.findViewById(R.id.search_panel_engine)).setText(
+                getContext().getString(R.string.search_panel_engine, state.searchEngineLabel));
+        content.findViewById(R.id.search_panel_settings).setOnClickListener(view -> {
+            fire(actions -> actions.onSearchOpenSettings());
+            dialog.dismiss();
+        });
+        dialog.setContentView(content);
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            window.setGravity(Gravity.BOTTOM);
+            window.setBackgroundDrawable(new ColorDrawable(0));
+        }
+        dialog.show();
+    }
+
     /** Draws the failure the presenter reported, or hides the line when there is none. */
     private void renderNotice(HomeViewState.Notice value) {
         if (value == null) {
@@ -413,10 +547,83 @@ public final class ChatScreen extends LinearLayout {
         }
     }
 
+    /** T-097: the host owns the SAF picker; the screen only reports the attach key. */
+    public void setOnAttachPressed(Runnable onAttachPressed) {
+        this.onAttachPressed = onAttachPressed;
+    }
+
+    /**
+     * T-095: the host owns the speech policy (permission decisions are host-side); the screen
+     * only reads it in the key's touch handler and draws what it says.
+     */
+    public void setSpeechPolicy(SpeechInputPolicy policy) {
+        this.speechPolicy = policy == null ? new SpeechInputPolicy() : policy;
+        voiceKey.setAlpha(speechPolicy.enabled() ? 1f : 0.4f);
+    }
+
+    /** SPEC-081: no recognition service, no key - hidden, not greyed, not a placeholder. */
+    public void setVoiceAvailable(boolean available) {
+        voiceKey.setVisibility(available ? VISIBLE : GONE);
+        if (!available) {
+            setListening(false);
+        }
+    }
+
+    /** The recording indicator: tint and the accessibility label swap while listening. */
+    public void setListening(boolean listening) {
+        this.listening = listening;
+        voiceKey.setImageTintList(android.content.res.ColorStateList.valueOf(getContext()
+                .getColor(listening ? R.color.tl_green_deep : R.color.tl_ink2)));
+        voiceKey.setContentDescription(getContext().getString(listening
+                ? R.string.cd_chat_voice_listening : R.string.cd_chat_voice));
+        voiceKey.setAlpha(speechPolicy.enabled() ? 1f : 0.4f);
+    }
+
+    /** Press-and-hold: the host checks permission and starts the recognizer session. */
+    public void setOnVoicePressed(Runnable onVoicePressed) {
+        this.onVoicePressed = onVoicePressed;
+    }
+
+    /** Release: the host stops the session; the final text lands via the presenter action. */
+    public void setOnVoiceReleased(Runnable onVoiceReleased) {
+        this.onVoiceReleased = onVoiceReleased;
+    }
+
+    /** The one-time guidance after a denied permission (SPEC-081: 首次点按给开启引导). */
+    public void setOnVoiceGuidance(Runnable onVoiceGuidance) {
+        this.onVoiceGuidance = onVoiceGuidance;
+    }
+
     private void renderQuote(String quote) {
         boolean quoted = !quote.isEmpty();
         quoteRow.setVisibility(quoted ? VISIBLE : GONE);
         quoteText.setText(quoted ? getContext().getString(R.string.chat_quoted, quote) : "");
+    }
+
+    /** T-097: the composer's attachment chip, or nothing while the composer carries none. */
+    private void renderAttachment(ChatViewState.ComposerAttachment attachment) {
+        if (attachment == null) {
+            attachRow.setVisibility(GONE);
+            return;
+        }
+        attachRow.setVisibility(VISIBLE);
+        switch (attachment.state) {
+            case PARSING:
+                attachText.setText(R.string.chat_attachment_parsing);
+                attachText.setTextColor(getContext().getColor(R.color.tl_ink3));
+                break;
+            case FAILED:
+                attachText.setText(R.string.chat_attachment_failed);
+                attachText.setTextColor(getContext().getColor(R.color.tl_amber));
+                break;
+            case READY:
+            default:
+                attachText.setText(getContext().getString(R.string.chat_attached,
+                        attachment.displayName,
+                        android.text.format.Formatter.formatShortFileSize(getContext(),
+                                attachment.sizeBytes)));
+                attachText.setTextColor(getContext().getColor(R.color.tl_ink2));
+        }
     }
 
     /**
@@ -443,6 +650,43 @@ public final class ChatScreen extends LinearLayout {
         send.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null);
     }
 
+    private void renderFullscreen(ChatViewState state) {
+        fullscreenEntryAvailable = state.fullscreenEditEntryAvailable();
+        fullscreenEntryHint = state.archived ? R.string.chat_draft_hint_archived
+                : !state.keyConfigured ? R.string.chat_draft_hint_no_key : 0;
+        fullscreenEntry.setColorFilter(getContext().getColor(
+                fullscreenEntryAvailable ? R.color.tl_green_deep : R.color.tl_ink3));
+        fullscreen.setVisibility(state.fullscreenEditing ? VISIBLE : GONE);
+        if (state.fullscreenEditing) {
+            boolean quoted = !state.quote.isEmpty();
+            fullscreenQuote.setVisibility(quoted ? VISIBLE : GONE);
+            fullscreenQuote.setText(quoted
+                    ? getContext().getString(R.string.chat_quoted, state.quote) : "");
+            if (!state.draft.contentEquals(fullscreenDraft.getText())) {
+                fullscreenDraft.setText(state.draft);
+                fullscreenDraft.setSelection(fullscreenDraft.getText().length());
+            }
+            if (!renderedFullscreen) {
+                fullscreenDraft.requestFocus();
+                announceForAccessibility(getContext().getString(R.string.chat_fullscreen_entered));
+            }
+        } else if (renderedFullscreen) {
+            announceForAccessibility(getContext().getString(R.string.chat_fullscreen_exited));
+            draft.requestFocus();
+            draft.setSelection(draft.getText().length());
+        }
+        renderedFullscreen = state.fullscreenEditing;
+    }
+
+    /** Returns true if it closed the fullscreen editor, so the host can skip its own back handling. */
+    public boolean onSystemBack() {
+        if (!renderedFullscreen) {
+            return false;
+        }
+        fire(actions -> actions.onFullscreenEditClosed());
+        return true;
+    }
+
     /**
      * T-075: the follow-latest pill (073 §6). Visible only while the learner is detached, and only
      * on a ready screen; while it counts missed growths the count rides the label.
@@ -453,6 +697,23 @@ public final class ChatScreen extends LinearLayout {
         followLatest.setText(detached && state.missedCount > 0
                 ? getContext().getString(R.string.chat_back_to_latest_count, state.missedCount)
                 : getContext().getString(R.string.chat_back_to_latest));
+    }
+
+    private TextWatcher draftForwarder() {
+        return new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence text, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence text, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable text) {
+                fire(actions -> actions.onDraftChanged(text.toString()));
+            }
+        };
     }
 
     /**
@@ -549,8 +810,11 @@ public final class ChatScreen extends LinearLayout {
     protected void onDetachedFromWindow() {
         dismissPopups();
         scroll.removeCallbacks(scrollSettled);
-        ReadingAnchor anchor = settledAnchor;
-        if (anchor != null) {
+        ReadingAnchor anchor;
+        if (speaker != null) {
+            speaker.leavePage();
+        }
+        if ((anchor = settledAnchor) != null) {
             fire(actions -> actions.onLeaving(anchor));
         }
         super.onDetachedFromWindow();
@@ -575,9 +839,13 @@ public final class ChatScreen extends LinearLayout {
         private final ReasoningDisclosure disclosure;
         private final AnswerActionBar actionBar;
         private final LinearLayout suggestions;
+        private final View translation;
+        private final TextView translationHeader;
+        private final TextView translationText;
 
         private String messageId = "";
         private ChatMessage message;
+        private ChatViewState lastState;
         private float pressX;
         private float pressY;
 
@@ -598,8 +866,18 @@ public final class ChatScreen extends LinearLayout {
             disclosure = root.findViewById(R.id.chat_reasoning);
             actionBar = root.findViewById(R.id.chat_actions);
             suggestions = root.findViewById(R.id.chat_suggestions);
+            translation = root.findViewById(R.id.chat_translation);
+            translationHeader = (TextView) root.findViewById(R.id.chat_translation_header);
+            translationText = (TextView) root.findViewById(R.id.chat_translation_text);
             disclosure.setListener(this);
             actionBar.setListener(this);
+            translationHeader.setOnClickListener(view -> ChatScreen.this.fire(actions -> {
+                if (lastState != null && lastState.translationFailed(messageId)) {
+                    actions.onTranslatePressed(messageId);
+                } else {
+                    actions.onTranslationToggled(messageId);
+                }
+            }));
             retry.setOnClickListener(view -> fire(actions -> actions.onRetryPressed(messageId)));
             answer.setOnTouchListener((view, event) -> {
                 if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
@@ -634,9 +912,11 @@ public final class ChatScreen extends LinearLayout {
                     code -> fire(actions -> actions.onSelectionCopyPressed(code))),
                     TextView.BufferType.SPANNABLE);
             renderGenerationSlots(state, message, newestRow);
+            renderTranslation(state, message);
             retry.setEnabled(message.canRetry());
             actionBar.setVisibility(message.isStable() ? VISIBLE : GONE);
-            actionBar.render(message);
+            actionBar.render(message, ChatScreen.this.speakState.engineReady,
+                    ChatScreen.this.speakState.speaking(message.messageId));
             renderSuggestions(state, message);
         }
 
@@ -661,6 +941,31 @@ public final class ChatScreen extends LinearLayout {
             boolean stopped = newestRow && state.stage == Stage.CANCELED;
             failure.setVisibility(message.isFailed() && !stopped ? VISIBLE : GONE);
             canceled.setVisibility(stopped && message.isFailed() ? VISIBLE : GONE);
+        }
+
+        private void renderTranslation(ChatViewState state, ChatMessage message) {
+            boolean visible = state.translationVisible(message.messageId);
+            translation.setVisibility(visible ? VISIBLE : GONE);
+            if (!visible) {
+                translationHeader.setText("");
+                translationText.setText("");
+                return;
+            }
+            if (state.isTranslating(message.messageId)) {
+                translationHeader.setText(R.string.chat_translation_running);
+                translationText.setVisibility(GONE);
+                return;
+            }
+            if (state.translationFailed(message.messageId)) {
+                translationHeader.setText(R.string.chat_translation_failed);
+                translationText.setVisibility(GONE);
+                return;
+            }
+            boolean expanded = state.translationExpanded(message.messageId);
+            translationHeader.setText(getContext().getString(
+                    expanded ? R.string.chat_translation_collapse : R.string.chat_translation_expand));
+            translationText.setVisibility(expanded ? VISIBLE : GONE);
+            translationText.setText(state.translationText(message.messageId));
         }
 
         /** The one-shot entry fade a stage transition asked for; static under low motion. */
@@ -752,6 +1057,21 @@ public final class ChatScreen extends LinearLayout {
         @Override
         public void onResetPressed(String id) {
             fire(actions -> actions.onResetPressed(id));
+        }
+
+        @Override
+        public void onTranslatePressed(String id) {
+            fire(actions -> actions.onTranslatePressed(id));
+        }
+
+        @Override
+        public void onSpeakPressed(String id) {
+            fire(actions -> actions.onSpeakPressed(id));
+        }
+
+        void renderSpeakFace() {
+            actionBar.renderSpeakFace(ChatScreen.this.speakState.engineReady,
+                    ChatScreen.this.speakState.speaking(messageId));
         }
 
         @Override

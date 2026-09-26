@@ -4,7 +4,7 @@ id: T-2026-09-21-042
 title: 阅读位置保存与恢复接线
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -201,3 +201,11 @@ Follow [code-document alignment](../rules/documentation.md).
 - D1 lock: 把 `ChatPresenter.remember` 还原成裸 `session.remember` 调用（缺陷形态）——`tests=11 failures=1`，**只有** `aRefusedStoredPositionBecomesANoticeInsteadOfKillingTheBackgroundThread` 转红，其余十例不受影响；`sha256 restored: 3ABAEE25…D609` 与变异前相等，`restored-identical=TRUE`。证据 `artifacts/evidence/T-042-fix1-mutation-d1.txt`。
 - D2 lock: 把首帧上报的可见集换成 `Collections.<String>emptySet()`（缺陷形态）——`tests=11 failures=1`，**只有** `aConversationThatFitsOnOneScreenClearsUnreadOnItsFirstFrame` 转红，其余十例不受影响；`restored-identical=TRUE`。证据 `artifacts/evidence/T-042-fix1-mutation-d2.txt`。
 - Restoration green: 两次变异均按 SHA-256 还原后重跑同一命令，`EXITCODE=0`、`tests=11 failures=0 errors=0`（`artifacts/evidence/T-042-fix1-revert-green.txt`）。
+
+## Verification report — Fix round 2 复验（verifier #3，2026-09-24）
+
+- Verdict: PASS（独立复核，针对 2026-09-22 verifier 报告残留的 F1/F2；只判不实现）。
+- F1（`MainActivity` 显式锚点写路径无兜底，进程可崩）→ 闭合。`MainActivity` 的 `reading.saveAnchor` 已包 try/catch，失败经 `ChatPresenter.notifyReadingPositionRefused()` 渲染阅读位置 notice（复用 `notice_reading_position`，不新造第二份文案）。RED 探针 catch 计数 0 → GREEN 计数 2。证据 `artifacts/evidence/T-042-fix2-red-2026-09-24.txt`。
+- F2（交付报告行号漂移）→ 闭合。交付报告已改为不带行号的签名引用（`showChat(String, ReadingAnchor)`）；本轮 grep 实测 `MainActivity.java:383` / `:445` 在报告中零命中。
+- 门禁（本轮实测，非回读旧证据）：`./gradlew --no-daemon --console=plain check` EXITCODE=0（`artifacts/evidence/P3-B3-gates-2026-09-24.txt`）；Java-only guard `VERDICT: PASS (13 OK line(s))`、EXITCODE=0（`artifacts/evidence/P3-B3-no-kotlin-2026-09-24.txt`）。
+- 设备侧仍 `deferred — 用户自行装机验证（user decision 2026-09-21）`，不计 PASS/FAIL。

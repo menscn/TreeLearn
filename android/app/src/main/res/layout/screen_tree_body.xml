@@ -61,6 +61,9 @@
             android:textSize="@dimen/text_sm" />
     </LinearLayout>
 
+    <!-- The control bar (058): the same three actions in the same order, their carrier switched from
+         text to the shared line-icon convention. The fold control's icon and description follow the
+         selected branch's state, set by TreeCanvasScreen.render(). -->
     <LinearLayout
         android:id="@+id/tree_controls"
         android:layout_width="match_parent"
@@ -70,38 +73,40 @@
         android:paddingEnd="@dimen/space_s3"
         android:paddingBottom="@dimen/space_s2">
 
-        <Button
+        <ImageButton
             android:id="@+id/tree_fold"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/touch_min"
             android:layout_weight="1"
             android:background="@drawable/bg_button_ghost"
+            android:contentDescription="@string/cd_tree_fold"
             android:minHeight="@dimen/touch_min"
-            android:text="@string/tree_fold"
-            android:textColor="@color/tl_ink2"
-            android:textSize="@dimen/text_sm" />
+            android:src="@drawable/ic_tree_fold"
+            android:tint="@color/tl_ink2" />
 
-        <Button
+        <ImageButton
             android:id="@+id/tree_open"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/touch_min"
+            android:layout_marginStart="@dimen/space_s2"
             android:layout_weight="1"
             android:background="@drawable/bg_button_primary"
+            android:contentDescription="@string/cd_tree_open"
             android:minHeight="@dimen/touch_min"
-            android:text="@string/tree_open"
-            android:textColor="@color/tl_surface"
-            android:textSize="@dimen/text_sm" />
+            android:src="@drawable/ic_tree_open"
+            android:tint="@color/tl_surface" />
 
-        <Button
+        <ImageButton
             android:id="@+id/tree_fit"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/touch_min"
+            android:layout_marginStart="@dimen/space_s2"
             android:layout_weight="1"
             android:background="@drawable/bg_button_ghost"
+            android:contentDescription="@string/cd_tree_fit"
             android:minHeight="@dimen/touch_min"
-            android:text="@string/tree_fit"
-            android:textColor="@color/tl_ink2"
-            android:textSize="@dimen/text_sm" />
+            android:src="@drawable/ic_tree_fit"
+            android:tint="@color/tl_ink2" />
     </LinearLayout>
 
     <FrameLayout
@@ -109,6 +114,13 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
+
+        <!-- The dotted-grid backdrop (058): a pure decoration deliberately FIRST in the stage, so the
+             canvas draws over it and every hit still lands on the canvas. -->
+        <com.treelearn.app.screen.GridBackdrop
+            android:id="@+id/canvas_backdrop"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
         <com.treelearn.app.screen.TreeCanvasView
             android:id="@+id/tree_canvas"

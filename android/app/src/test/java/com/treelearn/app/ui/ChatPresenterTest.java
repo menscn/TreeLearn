@@ -432,7 +432,8 @@ public final class ChatPresenterTest {
         presenter.start();
         presenter.onChildrenPressed(ChatTestDoubles.M_ANSWER);
 
-        assertEquals(Collections.singletonList(ChatTestDoubles.BRANCH + "/" + ChatTestDoubles.M_ANSWER),
+        // T-041 D2: the sink no longer takes the branchId (no consumer), so the recording is by message.
+        assertEquals(Collections.singletonList(ChatTestDoubles.M_ANSWER),
                 sink.childrenOpened);
     }
 
@@ -462,7 +463,8 @@ public final class ChatPresenterTest {
         presenter.start();
         presenter.onChildrenPressed(ChatTestDoubles.M_ANSWER);
 
-        assertEquals(Collections.singletonList(ChatTestDoubles.BRANCH + "/" + ChatTestDoubles.M_ANSWER),
+        // T-041 D2: the sink no longer takes the branchId (no consumer), so the recording is by message.
+        assertEquals(Collections.singletonList(ChatTestDoubles.M_ANSWER),
                 sink.childrenOpened);
         assertEquals(1, sink.childrenListed.size());
         assertEquals(ChatTestDoubles.CHILD_BRANCH, sink.childrenListed.get(0).get(0).branchId);
@@ -588,7 +590,10 @@ public final class ChatPresenterTest {
         presenter.onModelSelected(GenerationModel.PRO);
         presenter.onThinkingToggled(true);
 
-        assertEquals(GenerationModel.PRO, settings.model);
+        // T-103: the chip's model choice is a session override and never writes through — the
+        // durable chat-role choice belongs to the settings screen. The thinking switch stays a
+        // global preference, exactly as before.
+        assertEquals(GenerationModel.FLASH, settings.model);
         assertTrue(settings.thinking);
         assertEquals(GenerationModel.PRO, sink.last().model);
         assertTrue(sink.last().thinkingEnabled);

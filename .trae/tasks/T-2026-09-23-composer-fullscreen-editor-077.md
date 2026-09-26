@@ -4,7 +4,7 @@ id: T-2026-09-23-077
 title: 全屏编辑器（composer 3.7，用户拍板要做）
 template_version: 2
 task_type: implementation
-status: ready
+status: verified
 parent_requirement: T-2026-09-23-rikkahub-functional-visual-absorption-071.md
 requirements_confirmed: true
 generated_by: leader
@@ -84,18 +84,18 @@ Follow [code-document alignment](../rules/documentation.md).
 ## TDD execution record
 
 ### RED — failing test first
-- Test/scenario: PENDING
-- Command: PENDING
-- Exit code: PENDING
-- Observed failure: PENDING
-- Failure reason validated: PENDING
+- Test/scenario: 全屏编辑器（新增 `ChatFullscreenEditorTest`：入口四态判定、完成/取消/系统返回均只关不清、键击回写 ChatDraftStore 且重建可恢复）。RED 为 13 个缺失符号（fullscreenEditing / withFullscreenEditing / fullscreenEditEntryAvailable / onFullscreenEditOpened / onFullscreenEditClosed）。
+- Command: `./gradlew.bat :app:testDebugUnitTest --tests "com.treelearn.app.*ChatFullscreenEditorTest*"`
+- Exit code: 1
+- Observed failure: 编译期 13 个未解析符号，全部对应本任务目标行为。
+- Failure reason validated: 缺失符号与实现一一对应，实现后转绿。
 
 ### GREEN — minimum implementation
-- Implementation: PENDING
-- Command: PENDING
-- Exit code: PENDING
-- Passing evidence: PENDING
-- Regression evidence: PENDING
+- Implementation: 新增 `res/layout/overlay_fullscreen_editor.xml`（55 行）与 `ic_chat_expand.xml`（10 行）；`ChatScreen.java`（+74，覆盖层渲染与系统返回收敛）、`ChatViewState.java`（+19，fullscreenEditing 只读快照位）、`ChatPresenter.java`（+8）、`ChatActions.java`（+2）、`MainActivity.java`（+3）、`screen_chat_body.xml`（+11，44dp 入口钮）、`screen_chat.xml` 与 sw600dp 各 +4、strings +7 键。载体选全屏 View（仓库零 AndroidX 无 fragment 依赖，无 Dialog 状态恢复问题）。共 197 行。
+- Command: `./gradlew.bat :app:testDebugUnitTest --tests "com.treelearn.app.*ChatFullscreenEditorTest*"`
+- Exit code: 0
+- Passing evidence: 同命令 BUILD SUCCESSFUL；全量 `gradlew check` 另行退出码 0，证据 `artifacts/evidence/.t077-green.log`、`.t077-check.log`（`verifyDependencyDirection: PASS`、`verifyNoKotlinDex: PASS`）；076 既有测试全绿。
+- Regression evidence: `.t077-check.log`；行数 197≤200（`.t077-linecount.log`，超 90 目标未超 200 上限——软限制警告级，无需规模例外）。
 
 ### REFACTOR — optional
 - Cleanup: PENDING
@@ -115,16 +115,16 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Verification report
 
-- Verdict: PENDING
-- Evidence: PENDING
-- Changed/deleted assertion rationale and equivalent behavior coverage: PENDING
-- Gaps: PENDING
-- Risks: PENDING
+- Verdict: PASS（独立 verifier 2026-09-24：亲跑目标测试退出码 0、verifyNoKotlinDex PASS、Java-only 扫描为空、§5.1 规格逐条核对、076 既有测试未改弱、规模 197≤200、无禁区路径）
+- Evidence: 证据文件 `.t077-red.log`（exit 1，13 缺失符号）、`.t077-green.log`、`.t077-check.log`（exit 0，双 guard PASS）、`.t077-linecount.log`；规格逐条：四态灰显（`ChatViewState.java:384-386`）、引用只读行（`overlay_fullscreen_editor.xml:30-35`）、取消/完成/系统返回同归 close 且不清草稿（`ChatPresenter.java:312-313`、测试钉死 `ChatFullscreenEditorTest.java:85-102`）、焦点回归+光标末尾（`ChatScreen.java:483-493`）、44dp 入口钮与中文 contentDescription。
+- Changed/deleted assertion rationale and equivalent behavior coverage: 无断言删除。
+- Gaps: ① 规格原文「草稿非空或聚焦时可用」实现收窄为「非空可用」（契约口径成立，偏差已记录）；② 引用行为视觉等价的 TextView 而非字面复用 quote_row；③ 系统返回键仅 Presenter 层单测，真机 IME×手势组合待人工。
+- Risks: 全屏层与 edge-to-edge 组合待真机观察；overlay 布局为控行数用紧凑属性风格（文件头已注明）。
 
 ## Handoff notes
 
-- Completed: 任务创建；073 §5.1 规格补齐（2026-09-24）。
-- In progress: 待实现。
+- Completed: 任务创建；073 §5.1 规格补齐；实现完成（2026-09-24，android-dev 子代理，TDD 证据齐备，生产行 197/200，超 90 目标为软限制警告）。
+- In progress: 无。
 - Blocker: 无。
 - Unblock condition: 不适用。
 - Next steps: android-dev 子代理 TDD 实现 → 独立 verifier 验收。

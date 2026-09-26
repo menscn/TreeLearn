@@ -1,0 +1,29 @@
+T-046 verifier #3 补强证据 — 2026-09-24
+cwd: D:/Project/Android/Treelearn/android
+
+[ADD] 补测试（覆盖缺口封堵，行为已存在，非新功能轮）
+  文件: android/app/src/test/java/com/treelearn/app/wiring/HomeWiringTest.java
+  新增 2 例:
+    recommendationsComeFromHistoryWhenTheDerivedSetIsNonEmpty
+      （key.configured=true + 1 行主题 + 派生端口返回 2 条 → 断言 fromHistory=true、
+        items.size()==2、首条 question 与 kind==FOLLOW_UP）
+    recommendationsFallBackToStarterWhenTheDerivedSetComesBackEmpty
+      （同配置但派生返回空 → 断言 fromHistory=false、回退 4 条启动集）
+  动机: 验收项 2 要求「有主题取派生 / 无主题仍启动集合，两态各一条断言」，
+  复核 #2/#3 盘点时发现全测试集无 fromHistory=true 断言（grep 证据：
+  既有推荐测试仅 HomeWiringTest:282/:290 两条 fromHistory=false）。
+
+[SCAN] 既有覆盖盘点（rg，验收项 1/3 的操作层与 schema 层证据）
+  - 基线过期重派生: DerivedOperationTest.java:100-114（homeRecommendations，
+    outline("旧主题") vs outline("新主题") → 旧产物过期 → 重派生写回）
+  - 回答级条数上限: ArtifactSchemaTest.java:166 aRecommendationArrayMustNotExceedTheDeclaredCeiling
+  - 回答级载荷形状: ArtifactSchemaTest.java:150-162 / :187
+  - 回答级触发点: DerivedService.java:89（ensureConversationArtifacts 构造
+    answerRecommendations 请求），由 ChatWiring.java:150 读取路径调用；
+    接线级空态断言 ChatWiringTest.java:98-99
+  - 无 Key 门: HomeWiring.java:112（keyVault.isConfigured()）
+
+[RUN] 定向确认
+  command: ./gradlew :app:testDebugUnitTest --tests '*HomeWiringTest*' --console=plain
+  结果: BUILD SUCCESSFUL in 39s; 54 actionable tasks: 5 executed, 49 up-to-date
+  EXITCODE=0

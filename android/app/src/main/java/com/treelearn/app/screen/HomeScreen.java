@@ -1,11 +1,9 @@
 package com.treelearn.app.screen;
 
 import android.content.Context;
-import android.app.AlertDialog;
 import android.content.res.ColorStateList;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.text.format.DateUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,43 +12,53 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.treelearn.app.R;
 import com.treelearn.app.ui.HomeActions;
+import com.treelearn.app.ui.HeatmapView;
 import com.treelearn.app.ui.HomeViewState;
 import com.treelearn.app.ui.Recommendation;
 import com.treelearn.app.ui.TopicCard;
 
 import java.util.Collections;
-import java.util.List;
 
 /**
- * The single home page as a view (PRD 6.2.16).
+ * The home page as a view (PRD 6.2.16, slimmed by 055): brand, composer, continue-learning,
+ * recommendations.
  *
  * <p>It owns no decisions: every gesture is forwarded to {@link HomeActions} and every pixel is
  * painted from a {@link HomeViewState}. The one piece of local state is the "echo" guard - the screen
  * does not push text back into the composer while the composer is the one that just changed it, so a
  * keystroke never moves the cursor.
+ *
+ * <p>The history list the page used to draw lives in the library now (052); the page keeps only the
+ * continue-learning row, which is the state's own pick of the most recent topic and disappears
+ * entirely when there is no history. Browsing everything is the library's job.
  */
 public final class HomeScreen extends LinearLayout {
 
     private final EditText draft;
     private final Button send;
-    private final Button search;
-    private final Button archived;
     private final TextView keyHint;
     private final TextView notice;
-    private final TextView sectionCount;
     private final View hero;
-    private final LinearLayout topics;
-    private final View loading;
-    private final View error;
-    private final View empty;
+    private final View continueRow;
+    private final TextView continueTitle;
     private final ModelThinkingPicker modelChip;
     private final RecommendationMarquee recommendations;
+    private final View heatStripCard;
+    private final TextView heatStreak;
+    private final TextView heatEmpty;
+    private final HeatmapView heatCells;
 
     private HomeActions actions;
+    /** The drawer button (T-106); the host owns the drawer, the screen only reports the press. */
+    private Runnable onDrawerPressed;
+
+    /** The drawer button's press lands on the host, which owns the drawer's lifecycle. */
+    public void setOnDrawerPressed(Runnable onDrawerPressed) {
+        this.onDrawerPressed = onDrawerPressed;
+    }
     private boolean rendering;
 
     public HomeScreen(Context context) {
@@ -60,18 +68,17 @@ public final class HomeScreen extends LinearLayout {
 
         draft = findViewById(R.id.home_draft);
         send = findViewById(R.id.home_send);
-        search = findViewById(R.id.home_search);
-        archived = findViewById(R.id.home_archived);
         keyHint = findViewById(R.id.home_key_hint);
         notice = findViewById(R.id.home_notice);
-        sectionCount = findViewById(R.id.home_section_count);
         hero = findViewById(R.id.home_hero);
-        topics = findViewById(R.id.home_topics);
-        loading = findViewById(R.id.home_loading);
-        error = findViewById(R.id.home_error);
-        empty = findViewById(R.id.home_empty);
+        continueRow = findViewById(R.id.home_continue);
+        continueTitle = findViewById(R.id.home_continue_title);
         modelChip = findViewById(R.id.home_model_chip);
         recommendations = findViewById(R.id.home_recommendations);
+        heatStripCard = findViewById(R.id.home_heat_strip_card);
+        heatStreak = findViewById(R.id.home_heat_streak);
+        heatEmpty = findViewById(R.id.home_heat_empty);
+        heatCells = findViewById(R.id.home_heat_cells);
 
         draft.addTextChangedListener(new TextWatcher() {
             @Override
@@ -105,34 +112,25 @@ public final class HomeScreen extends LinearLayout {
                 actions.onSubmit();
             }
         });
-        keyHint.setOnClickListener(view -> {
-            if (actions != null) {
-                actions.onSettingsPressed();
+        continueRow.setOnClickListener(view -> {
+            if (actions != null && continueRow.getTag() instanceof TopicCard) {
+                actions.onTopicTapped((TopicCard) continueRow.getTag());
             }
         });
-        findViewById(R.id.home_settings).setOnClickListener(view -> {
+        heatStripCard.setOnClickListener(view -> {
             if (actions != null) {
-                actions.onSettingsPressed();
+                actions.onHeatStripTapped();
             }
-        });
-        archived.setOnClickListener(view -> {
-            if (actions != null) {
-                actions.onArchivedPressed();
-            }
-        });
-        search.setOnClickListener(view -> {
-            if (actions != null) {
-                actions.onSearchPressed();
-            }
-        });
-        findViewById(R.id.home_empty_guide).setOnClickListener(view -> {
-            draft.requestFocus();
-            draft.setSelection(draft.getText().length());
         });
     }
 
     public void setActions(HomeActions actions) {
         this.actions = actions;
+        findViewById(R.id.home_drawer_button).setOnClickListener(view -> {
+            if (onDrawerPressed != null) {
+                onDrawerPressed.run();
+            }
+        });
         modelChip.setListener(new ModelThinkingPicker.Listener() {
             @Override
             public void onModelSelected(com.treelearn.core.domain.GenerationModel model) {
@@ -161,28 +159,45 @@ public final class HomeScreen extends LinearLayout {
             }
             modelChip.render(state.model, state.thinkingEnabled);
             send.setEnabled(state.canSubmit());
-            archived.setEnabled(!state.topics.isEmpty());
             renderKeyHint(state.keyConfigured);
             renderNotice(state.notice);
-            renderPhase(state);
-            renderTopics(state.topics);
-            sectionCount.setText(state.phase == HomeViewState.Phase.READY
-                    ? getContext().getString(R.string.home_section_count, state.topics.size())
-                    : "");
+            hero.setVisibility(state.phase == HomeViewState.Phase.READY ? GONE : VISIBLE);
+            renderContinue(state.continueTopic());
             boolean stripUsable = state.phase == HomeViewState.Phase.READY
                     || state.phase == HomeViewState.Phase.EMPTY;
             recommendations.render(stripUsable ? state.recommendations : Collections.emptyList());
+            renderHeatStrip(state.heatStrip);
         } finally {
             rendering = false;
         }
     }
 
-    private void renderPhase(HomeViewState state) {
-        hero.setVisibility(state.phase == HomeViewState.Phase.READY ? GONE : VISIBLE);
-        loading.setVisibility(state.phase == HomeViewState.Phase.LOADING ? VISIBLE : GONE);
-        error.setVisibility(state.phase == HomeViewState.Phase.ERROR ? VISIBLE : GONE);
-        empty.setVisibility(state.phase == HomeViewState.Phase.EMPTY ? VISIBLE : GONE);
-        topics.setVisibility(state.phase == HomeViewState.Phase.READY ? VISIBLE : GONE);
+    /**
+     * The continue-learning row is the state's decision, drawn without judgment: a card to resume,
+     * or nothing at all - never an empty placeholder where the row would be.
+     */
+    private void renderContinue(TopicCard card) {
+        if (card == null) {
+            continueRow.setVisibility(GONE);
+            continueRow.setTag(null);
+            continueTitle.setText("");
+            return;
+        }
+        continueRow.setTag(card);
+        continueTitle.setText(card.title);
+        continueRow.setVisibility(VISIBLE);
+    }
+
+    private void renderHeatStrip(HomeViewState.HeatStrip strip) {
+        boolean visible = strip.status == HomeViewState.HeatStrip.Status.VISIBLE;
+        heatStripCard.setVisibility(strip.status == HomeViewState.HeatStrip.Status.HIDDEN ? GONE : VISIBLE);
+        heatStreak.setVisibility(visible ? VISIBLE : GONE);
+        heatEmpty.setVisibility(strip.status == HomeViewState.HeatStrip.Status.EMPTY ? VISIBLE : GONE);
+        heatCells.setVisibility(visible ? VISIBLE : GONE);
+        if (visible) {
+            heatCells.setIntensities(strip.intensities);
+            heatStreak.setText(getContext().getString(R.string.home_heat_streak, strip.streakDays));
+        }
     }
 
     /** Ready reads as a calm note, a missing key reads as the warning the prototype draws. */
@@ -203,58 +218,4 @@ public final class HomeScreen extends LinearLayout {
         notice.setText(getContext().getString(NoticeText.of(value)));
         notice.setVisibility(VISIBLE);
     }
-
-    private void renderTopics(List<TopicCard> cards) {
-        topics.removeAllViews();
-        LayoutInflater inflater = LayoutInflater.from(getContext());
-        for (final TopicCard card : cards) {
-            View row = inflater.inflate(R.layout.item_topic, topics, false);
-            ((TextView) row.findViewById(R.id.topic_title)).setText(card.title);
-            TextView summary = row.findViewById(R.id.topic_summary);
-            summary.setText(card.summary);
-            summary.setVisibility(card.summary.isEmpty() ? GONE : VISIBLE);
-            ((TextView) row.findViewById(R.id.topic_meta)).setText(meta(card));
-            row.findViewById(R.id.topic_rename).setOnClickListener(view -> rename(card));
-            row.findViewById(R.id.topic_delete).setOnClickListener(view -> delete(card));
-            row.setOnClickListener(view -> {
-                if (actions != null) {
-                    actions.onTopicTapped(card);
-                }
-            });
-            topics.addView(row);
-        }
-    }
-
-    /** The last use is formatted by the platform, so it follows the device's own zone and locale. */
-    private CharSequence meta(TopicCard card) {
-        CharSequence when = DateUtils.getRelativeTimeSpanString(card.lastUsedAt,
-                System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS);
-        CharSequence base = getContext().getString(R.string.home_topic_meta, card.branchCount, when);
-        return card.unreadCount == 0 ? base : base + " · "
-                + getContext().getString(R.string.home_topic_unread, card.unreadCount);
-    }
-
-    private void rename(TopicCard card) {
-        EditText input = new EditText(getContext());
-        input.setSingleLine(true);
-        input.setText(card.title);
-        input.setSelection(input.length());
-        new AlertDialog.Builder(getContext()).setTitle(R.string.home_topic_rename_title)
-                .setView(input)
-                .setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton(android.R.string.ok,
-                        (dialog, which) -> actions.onRenameTopic(card, input.getText().toString()))
-                .show();
-    }
-
-    private void delete(TopicCard card) {
-        new AlertDialog.Builder(getContext()).setTitle(R.string.home_topic_delete_title)
-                .setMessage(getContext().getString(R.string.home_topic_delete_message,
-                        card.branchCount))
-                .setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton(R.string.home_topic_delete,
-                        (dialog, which) -> actions.onDeleteTopic(card))
-                .show();
-    }
-
 }

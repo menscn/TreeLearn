@@ -4,7 +4,7 @@ id: T-2026-09-21-023
 title: answer_revisions / generation_operations 两表 DAO 与 stabilize 落盘入口
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -127,6 +127,13 @@ Follow [code-document alignment](../rules/documentation.md).
 - 约束冲突翻译只做一处（共享 helper），不得在每个 DAO 里各写一份「按消息文本猜约束名」的翻译。
 
 ## Verification report
+
+### verifier #3 批量复核（2026-09-24，独立于本任务实现者）
+
+- Verdict: **PASS（设备项 deferred）**。verifier #2 的 PARTIAL 除设备项外已无遗留；本轮新鲜门禁与再水合探针全绿。
+- Fresh evidence（2026-09-24）: `artifacts/evidence/P3-B1-gates-2026-09-24.txt`（同批次，EXITCODE=0，全库 1725 tests / 0 失败）；`P3-B1-no-kotlin-2026-09-24.txt`（EXITCODE=0）；`P3-B1-rehydration-probes-2026-09-24.txt` —— R2（`AnswerRevision.restore` 在两 DAO 之外零命中）+ R4（正向：唯一生产调用点 `AnswerRevisionDao.java:112` 只读映射内）+ R5（`GenerationOperation.java` 内 "restore" 零命中，未新增 restore）+ R6（DAO 层 `systemContent`/`systemPrompt` 零命中，不落正文签名约束成立）。
+- 判定依据: 版本复制、稳定化全败回滚、偏索引/触发器约束均为前轮 verifier #2 已核对的机械+instrumentation 证据，本轮无新事实推翻；规模 454 < 500 维持。
+- Gaps（不变，均 deferred）: instrumentation 执行项（真实 SQLite 拒绝/回滚/级联/重开逐字段相等）—— `deferred — 本轮不使用模拟器（用户指令 2026-09-21）`，用例已编译。
 
 > 独立 verifier 复核（verifier #2，2026-09-21），只读：未修改任何生产代码、测试或他人证据。
 > 本轮按用户 2026-09-21 指令**不使用模拟器**；凡严格需要真机的验收项一律记为

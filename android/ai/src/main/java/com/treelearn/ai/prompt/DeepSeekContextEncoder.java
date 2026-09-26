@@ -44,10 +44,12 @@ public final class DeepSeekContextEncoder {
     public static final String ANSWER_CLOSE = "</treelearn_answer>";
     public static final String QUOTE_OPEN = "<treelearn_quote>";
     public static final String QUOTE_CLOSE = "</treelearn_quote>";
+    public static final String ATTACH_OPEN = "<treelearn_attachment>";
+    public static final String ATTACH_CLOSE = "</treelearn_attachment>";
 
     /** Every literal {@link #escape} neutralises, in one place so the framing cannot drift apart. */
     public static final String[] TAGS = {REASONING_OPEN, REASONING_CLOSE, ANSWER_OPEN, ANSWER_CLOSE,
-            QUOTE_OPEN, QUOTE_CLOSE};
+            QUOTE_OPEN, QUOTE_CLOSE, ATTACH_OPEN, ATTACH_CLOSE};
 
     private DeepSeekContextEncoder() {
     }
@@ -81,12 +83,49 @@ public final class DeepSeekContextEncoder {
      * @throws IllegalArgumentException when {@code question} is null: a caller bug
      */
     public static String currentInput(String question, String quote) {
+        return currentInput(question, quote, null);
+    }
+
+    /**
+     * The same turn with its attachment text (T-097): the attachment block rides between the
+     * citation block and the question, as the sibling mechanism SPEC-082 names. The attachment
+     * text is application-written envelope content, so it is escaped like the citation; the
+     * null/blank decision is made here, once, so the send path and the rebuilt history cannot
+     * disagree about the same attachment.
+     *
+     * @param question the learner's question, sent verbatim; must not be null
+     * @param quote the stored citation, or {@code null}/blank for "this turn cites nothing"
+     * @param attachmentText the parsed attachment text, or {@code null}/blank for "this turn
+     *                       carries no attachment"
+     * @return the framed citation, then the framed attachment, then the question
+     * @throws IllegalArgumentException when {@code question} is null: a caller bug
+     */
+    public static String currentInput(String question, String quote, String attachmentText) {
         String asked = Guard.text(question, "question");
         String cited = quote == null ? "" : quote.trim();
-        if (cited.isEmpty()) {
-            return asked;
+        String attached = attachmentText == null ? "" : attachmentText.trim();
+        String head = cited.isEmpty() ? "" : QUOTE_OPEN + "\n" + escape(cited) + "\n"
+                + QUOTE_CLOSE + "\n";
+        if (!attached.isEmpty()) {
+            head = head + ATTACH_OPEN + "\n" + escape(attached) + "\n" + ATTACH_CLOSE + "\n";
         }
-        return QUOTE_OPEN + "\n" + escape(cited) + "\n" + QUOTE_CLOSE + "\n" + asked;
+        return head.isEmpty() ? asked : head + asked;
+    }
+
+    /**
+     * The block one attachment contributes to a rebuilt history turn (T-097): the same framing
+     * {@link #currentInput} writes on the send path, so a forked branch's replayed question and
+     * the original turn read identically to the model. Null/blank yields the empty string —
+     * a turn without attachments rebuilds exactly as it always has.
+     *
+     * @param text the cached {@code extracted_text}, already ceiling-checked by the caller
+     */
+    public static String attachmentBlock(String text) {
+        String attached = text == null ? "" : text.trim();
+        if (attached.isEmpty()) {
+            return "";
+        }
+        return ATTACH_OPEN + "\n" + escape(attached) + "\n" + ATTACH_CLOSE;
     }
 
     /**

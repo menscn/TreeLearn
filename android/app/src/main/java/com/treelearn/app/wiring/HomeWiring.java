@@ -4,12 +4,13 @@ import com.treelearn.ai.prompt.DeepSeekContextEncoder;
 import com.treelearn.ai.prompt.DeepSeekRequestAssembler;
 import com.treelearn.ai.prompt.PromptBudget;
 import com.treelearn.app.artifact.ArtifactKind;
-import com.treelearn.app.artifact.DerivedService;
+import com.treelearn.app.artifact.HomeDerivedPort;
 import com.treelearn.app.artifact.ArtifactPayload;
 import com.treelearn.app.artifact.ArtifactPayloadCodec;
 import com.treelearn.app.artifact.DerivedResult;
 import com.treelearn.app.generation.GenerationCoordinator;
 import com.treelearn.app.ui.HomeData;
+import com.treelearn.app.ui.HomeStats;
 import com.treelearn.app.ui.HomeViewState;
 import com.treelearn.app.ui.KeyVault;
 import com.treelearn.app.ui.RootQuestionSubmitter;
@@ -27,10 +28,13 @@ import com.treelearn.core.domain.Message;
 import com.treelearn.core.domain.Topic;
 
 import java.time.Clock;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import com.treelearn.app.artifact.TreeOutline;
+import com.treelearn.data.stats.StatsAggregator;
 
 /**
  * The home screen's real data path: the stored topics, and the first topic the learner creates.
@@ -65,7 +69,7 @@ public final class HomeWiring implements HomeData, RootQuestionSubmitter {
     private final KeyVault keyVault;
     private final Clock clock;
     private final PromptBudget budget;
-    private final DerivedService derived;
+    private final HomeDerivedPort derived;
 
     public HomeWiring(HomeStore store, GenerationPort generation, KeyVault keyVault, Clock clock,
             PromptBudget budget) {
@@ -73,7 +77,7 @@ public final class HomeWiring implements HomeData, RootQuestionSubmitter {
     }
 
     public HomeWiring(HomeStore store, GenerationPort generation, KeyVault keyVault, Clock clock,
-            PromptBudget budget, DerivedService derived) {
+            PromptBudget budget, HomeDerivedPort derived) {
         this.store = require(store, "store");
         this.generation = require(generation, "generation");
         this.keyVault = require(keyVault, "keyVault");
@@ -126,14 +130,21 @@ public final class HomeWiring implements HomeData, RootQuestionSubmitter {
         return Recommendations.starterFallback(StarterRecommendations.all());
     }
 
+    /**
+     * Aggregates the raw store counts into the home heat-strip facts.
+     *
+     * <p>The calendar math lives in {@code StatsAggregator}; this method only reads the raw counts
+     * and converts them. A store with no rows returns {@link HomeStats#empty()}, which the screen
+     * draws as the "no record yet" line rather than a broken "0 天".
+     */
     @Override
-    public void renameTopic(String topicId, String title, long now) {
-        store.renameTopic(Guard.id(topicId, "topicId"), Guard.nonBlank(title, "title"), now);
-    }
-
-    @Override
-    public void deleteTopic(String topicId) {
-        store.deleteTopic(Guard.id(topicId, "topicId"));
+    public HomeStats stats() {
+        HomeStore.StatsRaw raw = store.statsRaw();
+        LocalDate today = LocalDate.now(clock);
+        StatsAggregator.StatsResult result = StatsAggregator.aggregate(raw.answerTimestamps,
+                raw.totalQuestions, raw.totalMessages, clock.getZone(), today);
+        return result.isEmpty() ? HomeStats.empty()
+                : HomeStats.of(result.activeDays(), today, result.currentStreak());
     }
 
     @Override
@@ -174,7 +185,11 @@ public final class HomeWiring implements HomeData, RootQuestionSubmitter {
 
         if (outcome.isAccepted()) {
             if (derived != null) {
-                derived.rootTitle(rootBranch, question, model);
+                Thread titleWorker = new Thread(
+                        () -> derived.rootTitle(rootBranch, question, model),
+                        "treelearn-derived-root-title");
+                titleWorker.setDaemon(true);
+                titleWorker.start();
             }
             return SubmitResult.accepted(rootBranch.id);
         }

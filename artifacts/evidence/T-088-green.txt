@@ -1,0 +1,15 @@
+T-2026-09-23-088 GREEN evidence (2026-09-24)
+
+Command:
+  cd android && ./gradlew --no-watch-fs :app:testDebugUnitTest --tests "com.treelearn.app.ui.ModelSettingsPresenterTest"
+
+Exit code: 0
+Passing evidence: BUILD SUCCESSFUL；TEST-com.treelearn.app.ui.ModelSettingsPresenterTest.xml
+  tests=11 skipped=0 failures=0 errors=0（T-088-green-counts.txt）
+
+说明:
+- 首次 GREEN 运行遭遇 gradle daemon 陈旧 VFS（T-087 同款）：编译器读到本任务编辑中途的文件快照，
+  报 17 个错位错误；--stop daemon + :app:clean 后消除。此外本会话曾对同一文件并行发起多个
+  Edit 调用导致后写覆盖先写（部分编辑丢失），已逐一串行重放修复——此为会话操作失误，与代码无关。
+- 中途为满足 500 行硬上限做过一轮等价压缩（Screen 去 XML 全代码化、switch 改查找表、
+  Option/Assignment 去冗余字段），压缩前后测试均 11/11 通过。

@@ -27,6 +27,9 @@ import java.util.Arrays;
  */
 public final class AndroidSettingsStore implements SettingsStore, KeyVault {
 
+    /** The built-in provider slot every legacy single-key read and write is migrated into. */
+    private static final String BUILTIN_DEEPSEEK_ID = "00000000-0000-0000-0000-000000000001";
+
     private final SettingsRepository preferences;
     private final KeystoreSecretStore secrets;
 
@@ -56,18 +59,35 @@ public final class AndroidSettingsStore implements SettingsStore, KeyVault {
     }
 
     @Override
+    public boolean searchEnabled() {
+        return preferences.searchEnabled();
+    }
+
+    @Override
+    public void setSearchEnabled(boolean enabled) {
+        preferences.setSearchEnabled(enabled);
+    }
+
+    @Override
     public boolean isConfigured() {
-        return secrets.hasSecret();
+        return isConfigured(BUILTIN_DEEPSEEK_ID);
+    }
+
+    @Override
+    public boolean isConfigured(String providerId) {
+        secrets.migrateLegacySecret(BUILTIN_DEEPSEEK_ID);
+        return secrets.hasSecret(providerId);
     }
 
     @Override
     public KeySnapshot readKey() {
-        if (!secrets.hasSecret()) {
+        secrets.migrateLegacySecret(BUILTIN_DEEPSEEK_ID);
+        if (!secrets.hasSecret(BUILTIN_DEEPSEEK_ID)) {
             return KeySnapshot.missing();
         }
         char[] secret = null;
         try {
-            secret = secrets.read();
+            secret = secrets.read(BUILTIN_DEEPSEEK_ID);
             return KeySnapshot.ofStoredKey(secret);
         } catch (SecretStoreException unreadable) {
             return KeySnapshot.unreadable();
@@ -81,7 +101,7 @@ public final class AndroidSettingsStore implements SettingsStore, KeyVault {
     @Override
     public void saveKey(char[] secret) throws SecretStoreRefused {
         try {
-            secrets.save(secret);
+            secrets.save(BUILTIN_DEEPSEEK_ID, secret);
         } catch (SecretStoreException refused) {
             // Category and exception name only: a keystore failure message is never key material,
             // but nothing here is allowed to become a place a secret could travel through.
@@ -92,6 +112,7 @@ public final class AndroidSettingsStore implements SettingsStore, KeyVault {
 
     @Override
     public void deleteKey() {
+        secrets.delete(BUILTIN_DEEPSEEK_ID);
         secrets.delete();
     }
 }

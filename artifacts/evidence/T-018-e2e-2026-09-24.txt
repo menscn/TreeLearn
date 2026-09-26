@@ -1,0 +1,33 @@
+T-018 端到端目标测试证据 — 2026-09-24
+cwd: D:/Project/Android/Treelearn/android
+
+[NEW] 测试: app/src/test/java/com/treelearn/app/wiring/CoreFlowE2eTest.java（单方法叙事）
+  8 步全链路，前步产出的真实 id 被后步消费（不用常量顶替）：
+  1 创建   HomeWiring.submit → 原子建题（createCalls=1、root isRoot、user ordinal 0 / ai 1、
+           request=system+2 messages、rootBranchId 与结果一致）
+  2 追问   ChatWiring.send → appendCalls=1、ordinal 2/3、submitCalls=1、branchId 正确
+  3 思考展开 ChatWiring.read → stable 回答带 reasoning、canExpandReasoning/canFork
+  4 分叉   ChatWiring.fork → createBranchCalls=1、child.parentBranchId=root、快照绑定、
+           不发起请求（submitCalls 仍 1、operationId 空）
+  5 重置   ChatWiring.reset → 同一路由 submitCalls=2、替换请求 historyChars=0
+  6 搜索   SearchRepository 决策面（测试内最小仓储，对齐 SQL 两条规则：question 命中 +
+           归档不可达）→ 原句命中 QUESTION 臂；SQL 级行为引用 T-048 真机 12 例证据
+  7 归档   NavigationWiring.setArchived → 列表读取 root.archived=true、child 不受牵连、
+           归档后命中不可达
+  8 画布   TreeCanvasWiring.load → 2 行（归档包含）、setCollapsed 落回存储
+
+[TDD 记录] 验证性夹具、无自然 RED —— 以变异验证补实（T-041 先例）：
+  变异: ChatWiring.java:266 `Message.ai(branchId, questionOrdinal + 1, now)` → `+ 2`
+        （破坏「AI 轮 = 问题轮 + 1」的序号推进）
+  变异下运行: ./gradlew :app:testDebugUnitTest --tests '*CoreFlowE2eTest*'
+        → FAILED at CoreFlowE2eTest.java:107（assertEquals(3, chats.appendedAi.ordinal)），EXITCODE=1
+        证据: artifacts/evidence/T-018-e2e-mutation-2026-09-24.log
+  还原后: 同命令 BUILD SUCCESSFUL，EXITCODE=0（本文件 [RUN]）；MUTATION-TEMP 标记 grep 零命中
+  另: 首次运行曾因测试自身 import 笔误（SearchHit 包路径）编译失败一次，非有效 RED，如实记录。
+
+[RUN] 全量回归
+  command: ./gradlew :app:testDebugUnitTest --console=plain
+  结果: BUILD SUCCESSFUL，EXITCODE=0（变异还原后复跑）
+
+[REF] 同任务另一 TDD 循环（release TelemetrySink no-op）
+  RED/GREEN/回归: artifacts/evidence/T-018-scan-2026-09-24.txt 与 T-018-telemetry-red-2026-09-24.log

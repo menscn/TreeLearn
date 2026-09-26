@@ -4,7 +4,7 @@ id: T-2026-09-20-013
 title: 实现对话、思考披露与回答操作
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -171,6 +171,13 @@ RED 与 GREEN 两棵副本树之间只有一件事不同：那 15 个 T-013 生�
 
 ## Verification report
 
+### verifier #3 批量复核（2026-09-24，独立于本任务实现者）
+
+- Verdict: **PASS（设备项 deferred）**。验收标准已按「[x]=有非设备证据 / [ ]=本轮产生不了证据」口径逐行标注（含对比度实测 5.67:1/5.23:1、messageId 键控展开集合、折叠出厂态），TDD 闭环在其 TDD 节（RED exit 1 → GREEN exit 0，自有四套件 57 例）。
+- Fresh evidence（2026-09-24 批次 2）: `artifacts/evidence/P3-B1-gates-2026-09-24.txt`（全模块 JVM 套件 + lint + androidTest 编译，BUILD SUCCESSFUL / EXITCODE=0；全库 188 套件 1725 tests / 0 失败）、`P3-B1-no-kotlin-2026-09-24.txt`（EXITCODE=0）。
+- 补充核验: 本任务交付的 Presenter/ViewState/Wiring 套件在当前全量套件中 0 失败（ChatPresenterTest 43、ChatViewStateTest 14、ChatWiringTest 28——套件历经后续任务扩展，计数大于历史读数属正常演进，JUnit XML 回读）。
+- Gaps（不变，均 deferred）: 真机渲染、字体放大、无障碍实际行为 —— `deferred — emulator not used this round (user instruction 2026-09-21)`。
+
 - Verdict: PENDING
 - Evidence: PENDING
 - Changed/deleted assertion rationale and equivalent behavior coverage: PENDING
@@ -185,3 +192,4 @@ RED 与 GREEN 两棵副本树之间只有一件事不同：那 15 个 T-013 生�
 - Unblock condition: 用户对规模给裁定；装配任务把 `AppContainer` 的对话端口从 `PendingChatWiring` 换成真实实现（端口、Presenter 与 ViewState 都不需要改）；设计 owner 对 `tl_ink3` 给裁定；重新允许使用模拟器后，旋转/切分支/回到页面、真机展开交互、字体放大、平板横屏无重叠与 44dp 实测才能逐条转成 PASS。
 - Next steps: 装配任务按 `PendingChatWiring` javadoc 点名的六条接真实实现（其中切版只需一个数据库句柄即可落地）；设计 owner 裁定 `tl_ink3`；`HomeViewState.Notice` → `FailureNotice` 的行为无关重命名（连同对话页偏窄的 `Notice.NOT_WIRED` 文案）；模拟器可用后跑 `:app:connectedDebugAndroidTest` 把 deferred 逐条转成证据。
 - Watch-outs: 展开态只能按 messageId 记，任何按 adapter position 记的写法都会在列表重建时串到别的回答上；复制文本含回答与推理正文，**不得**打印、落库或写进任何日志、证据或任务文件；重试与重置只能走 T-010 的用例，UI 层任何直接改 `messages.active_revision_id` 的写法都越界；`ChatViewState.notice` 复用 `HomeViewState.Notice`，新增错误类别要同时补 strings 与那处映射；后续 UI 任务（T-014/T-017）请沿用同一个 `MainActivity` + `R.id.shell_host` 外壳，不要新开 Activity；兄弟 lane 会争用共享的 `android/app/build` 与 `.trae/tasks/**`，遇到不是自己源码造成的失败先等 60–120 s 再重跑，**不得**把生产源码移出共享树。
+- [verifier #3 2026-09-24，规模例外补记] 上述「未获批例外」（实测 1584 判定行，超 500 硬上限 217%）于 2026-09-24 由用户裁定「事后追认豁免」收口。批准落在实现之后，按 `harness-tasks.md` 第 60 行如实记为事后追认。剩余风险如实记录：本任务是全仓最大越线（+217%），对话 UI 切片的体量集中在单 task；后续如需拆分，以「推理流渲染」与「回答动作条」为天然切面。本任务状态维持 verified，其余结论不变。

@@ -1,0 +1,2353 @@
+===== com/treelearn/app/AppContainer.java  (+70 -6) =====
+--- HEAD/com/treelearn/app/AppContainer.java
++++ PRELOSS/com/treelearn/app/AppContainer.java
+@@ -3,12 +3,15 @@
+ import android.content.Context;
+ import android.os.Handler;
+ import android.os.Looper;
++import com.treelearn.ai.gateway.AiGateway;
+ import com.treelearn.ai.gateway.DeepSeekGatewayFactory;
+ import com.treelearn.ai.prompt.PromptBudget;
+ import com.treelearn.app.R;
+ import com.treelearn.app.artifact.DerivedService;
+ import com.treelearn.app.generation.AiGatewayStreams;
+ import com.treelearn.app.generation.GenerationCoordinator;
++import com.treelearn.app.generation.MessageTranslator;
++import com.treelearn.app.generation.QuickModelGateway;
+ import com.treelearn.app.library.LibraryData;
+ import com.treelearn.app.navigation.NavigationData;
+ import com.treelearn.app.navigation.SqliteNavigationStore;
+@@ -16,6 +19,9 @@
+ import com.treelearn.app.reading.SqliteReadingStore;
+ import com.treelearn.app.search.BranchTitles;
+ import com.treelearn.app.search.SearchRepository;
++import com.treelearn.app.search.web.ChatSearchStep;
++import com.treelearn.app.search.web.HttpWebSearchGateway;
++import com.treelearn.app.search.web.KeystoreSearchCredentials;
+ import com.treelearn.app.ui.ChatCommands;
+ import com.treelearn.app.ui.ChatData;
+ import com.treelearn.app.ui.ChatDraftStore;
+@@ -33,20 +39,27 @@
+ import com.treelearn.app.wiring.CoordinatorGenerationPort;
+ import com.treelearn.app.wiring.HomeWiring;
+ import com.treelearn.app.wiring.LibraryWiring;
+-import com.treelearn.app.wiring.LogcatTelemetry;
+ import com.treelearn.app.wiring.NavigationWiring;
++import com.treelearn.app.wiring.PreferenceSearchSettingsStore;
++import com.treelearn.app.wiring.PreferenceVoiceSettingsStore;
+ import com.treelearn.app.wiring.PromptLimits;
+ import com.treelearn.app.wiring.SharedPreferencesChatDraftStore;
+ import com.treelearn.app.wiring.SqliteChatStore;
+ import com.treelearn.app.wiring.SqliteHomeStore;
+ import com.treelearn.app.wiring.SqliteLibraryStore;
++import com.treelearn.app.wiring.SqliteModelSettingsStore;
++import com.treelearn.app.wiring.SqliteProviderAdminStore;
++import com.treelearn.app.wiring.SqliteQuickModelRoutes;
+ import com.treelearn.app.wiring.SqliteSearchStore;
++import com.treelearn.app.wiring.SqliteTranslationRoutes;
+ import com.treelearn.app.wiring.SqliteTreeCanvasStore;
++import com.treelearn.app.wiring.TelemetrySink;
+ import com.treelearn.app.wiring.TreeCanvasWiring;
+ import com.treelearn.core.domain.Branch;
+ import com.treelearn.data.db.DatabaseTransactionRunner;
+ import com.treelearn.data.db.TreeLearnDatabaseHelper;
+ import com.treelearn.data.secret.KeystoreSecretStore;
++import com.treelearn.data.settings.SettingsRepository;
+ import java.time.Clock;
+ import java.util.concurrent.Executor;
+ import java.util.concurrent.Executors;
+@@ -69,6 +82,12 @@
+     private final ReadingStore readingStore;
+     private final ChatDraftStore chatDraftStore;
+     private final SearchRepository searchRepository;
++    private final SqliteProviderAdminStore providerAdminStore;
++    private final SqliteModelSettingsStore modelSettingsStore;
++    private final PreferenceSearchSettingsStore searchSettingsStore;
++    private final PreferenceVoiceSettingsStore voiceSettingsStore;
++    private final ChatSearchStep chatSearchStep;
++    private final MessageTranslator messageTranslator;
+     private final ChatStore chatStore;
+     private final Context context;
+ 
+@@ -77,21 +96,42 @@
+         this.settingsStore = new AndroidSettingsStore(applicationContext);
+         TreeLearnDatabaseHelper helper = new TreeLearnDatabaseHelper(applicationContext);
+         DatabaseTransactionRunner transactions = new DatabaseTransactionRunner();
+-        Clock clock = Clock.systemUTC();
+-        AiGatewayStreams gateway = new AiGatewayStreams(DeepSeekGatewayFactory.create(), new KeystoreSecretStore(applicationContext));
+-        GenerationCoordinator coordinator = new GenerationCoordinator(helper, transactions, gateway, clock, new LogcatTelemetry());
++        Clock clock = Clock.systemDefaultZone();
++        AiGateway adminGateway = DeepSeekGatewayFactory.create();
++        KeystoreSecretStore adminSecrets = new KeystoreSecretStore(applicationContext);
++        AiGatewayStreams gateway = new AiGatewayStreams(adminGateway, adminSecrets, "00000000-0000-0000-0000-000000000001");
++        boolean release = (applicationContext.getApplicationInfo().flags & 2) == 0;
++        GenerationCoordinator coordinator = new GenerationCoordinator(helper, transactions, gateway, clock, TelemetrySink.forVariant(release));
+         CoordinatorGenerationPort generation = new CoordinatorGenerationPort(coordinator);
+         PromptBudget budget = PromptLimits.budget();
+-        this.derivedService = new DerivedService(helper, transactions, gateway, budget, clock);
++        this.modelSettingsStore = new SqliteModelSettingsStore(helper, new SettingsRepository(applicationContext));
++        SqliteQuickModelRoutes quickModelRoutes = new SqliteQuickModelRoutes(helper, this.modelSettingsStore);
++        QuickModelGateway derivedGateway = new QuickModelGateway(quickModelRoutes, providerId -> {
++            if ("00000000-0000-0000-0000-000000000001".equals(providerId)) {
++                adminSecrets.migrateLegacySecret(providerId);
++            }
++            return adminSecrets.read(providerId);
++        }, (arg_0, arg_1, arg_2, arg_3) -> ((AiGateway)adminGateway).streamChat(arg_0, arg_1, arg_2, arg_3), gateway);
++        this.derivedService = new DerivedService(helper, transactions, derivedGateway, budget, clock);
++        this.messageTranslator = new MessageTranslator(new SqliteTranslationRoutes(helper, this.modelSettingsStore), providerId -> {
++            if ("00000000-0000-0000-0000-000000000001".equals(providerId)) {
++                adminSecrets.migrateLegacySecret(providerId);
++            }
++            return adminSecrets.read(providerId);
++        }, (arg_0, arg_1, arg_2, arg_3) -> ((AiGateway)adminGateway).streamChat(arg_0, arg_1, arg_2, arg_3), gateway, budget);
+         this.homeWiring = new HomeWiring(new SqliteHomeStore(helper, transactions), generation, this.settingsStore, clock, budget, this.derivedService);
+         this.chatStore = new SqliteChatStore(helper, transactions);
+-        this.chatWiring = new ChatWiring(this.chatStore, generation, this.settingsStore, clock, budget, this.derivedService);
++        this.searchSettingsStore = new PreferenceSearchSettingsStore(new SettingsRepository(applicationContext), adminSecrets);
++        this.voiceSettingsStore = new PreferenceVoiceSettingsStore(new SettingsRepository(applicationContext));
++        this.chatSearchStep = new ChatSearchStep(this.searchSettingsStore, new KeystoreSearchCredentials(adminSecrets), new HttpWebSearchGateway());
++        this.chatWiring = new ChatWiring(this.chatStore, generation, this.settingsStore, clock, budget, this.derivedService, this.modelSettingsStore::readSuggestions, this.chatSearchStep);
+         this.treeCanvasWiring = new TreeCanvasWiring(new SqliteTreeCanvasStore(helper, transactions));
+         this.navigationWiring = new NavigationWiring(new SqliteNavigationStore(helper, transactions, coordinator));
+         this.libraryWiring = new LibraryWiring(new SqliteLibraryStore(helper), this.navigationWiring);
+         this.readingStore = new SqliteReadingStore(helper);
+         this.searchRepository = new SqliteSearchStore(helper);
+         this.chatDraftStore = new SharedPreferencesChatDraftStore(applicationContext);
++        this.providerAdminStore = new SqliteProviderAdminStore(helper, transactions, adminSecrets, adminGateway, clock);
+     }
+ 
+     public static synchronized AppContainer get(Context context) {
+@@ -149,6 +189,30 @@
+         return this.chatDraftStore;
+     }
+ 
++    public SqliteProviderAdminStore providerAdminStore() {
++        return this.providerAdminStore;
++    }
++
++    public SqliteModelSettingsStore modelSettingsStore() {
++        return this.modelSettingsStore;
++    }
++
++    public PreferenceSearchSettingsStore searchSettingsStore() {
++        return this.searchSettingsStore;
++    }
++
++    public PreferenceVoiceSettingsStore voiceSettingsStore() {
++        return this.voiceSettingsStore;
++    }
++
++    public ChatSearchStep chatSearchStep() {
++        return this.chatSearchStep;
++    }
++
++    public MessageTranslator messageTranslator() {
++        return this.messageTranslator;
++    }
++
+     public SearchRepository searchRepository() {
+         return this.searchRepository;
+     }
+
+===== com/treelearn/app/MainActivity.java  (+130 -3) =====
+--- HEAD/com/treelearn/app/MainActivity.java
++++ PRELOSS/com/treelearn/app/MainActivity.java
+@@ -27,28 +27,39 @@
+ import com.treelearn.app.screen.ChatScreen;
+ import com.treelearn.app.screen.HomeScreen;
+ import com.treelearn.app.screen.LibraryScreen;
++import com.treelearn.app.screen.ModelSettingsScreen;
+ import com.treelearn.app.screen.NavigationScreen;
++import com.treelearn.app.screen.ProviderAdminScreen;
+ import com.treelearn.app.screen.SearchScreen;
++import com.treelearn.app.screen.SearchServiceSettingsScreen;
+ import com.treelearn.app.screen.SettingsScreen;
+ import com.treelearn.app.screen.TreeCanvasScreen;
++import com.treelearn.app.screen.VoiceSettingsScreen;
+ import com.treelearn.app.search.BranchTitles;
+ import com.treelearn.app.search.SearchPage;
+ import com.treelearn.app.search.SearchPresenter;
+ import com.treelearn.app.search.SearchViewState;
+ import com.treelearn.app.ui.ChatPresenter;
+ import com.treelearn.app.ui.ChatSink;
++import com.treelearn.app.ui.ChatSpeaker;
+ import com.treelearn.app.ui.ChatViewState;
+ import com.treelearn.app.ui.ChildBranch;
+ import com.treelearn.app.ui.HomePresenter;
+ import com.treelearn.app.ui.HomeSink;
+ import com.treelearn.app.ui.HomeViewState;
++import com.treelearn.app.ui.ModelSettingsPresenter;
++import com.treelearn.app.ui.ProviderAdminPresenter;
++import com.treelearn.app.ui.SearchSettingsPresenter;
+ import com.treelearn.app.ui.SettingsPresenter;
+ import com.treelearn.app.ui.SettingsSink;
+ import com.treelearn.app.ui.SettingsViewState;
+ import com.treelearn.app.ui.TreeCanvasPresenter;
+ import com.treelearn.app.ui.TreeCanvasSink;
+ import com.treelearn.app.ui.TreeCanvasViewState;
++import com.treelearn.app.ui.VoiceSettingsPresenter;
++import com.treelearn.app.voice.SystemTtsEngine;
+ import com.treelearn.core.domain.AnswerRevision;
++import com.treelearn.core.domain.GenerationModel;
+ import com.treelearn.core.domain.ReadingAnchor;
+ import com.treelearn.core.domain.ReadingPosition;
+ import com.treelearn.treelayout.ViewportConstraints;
+@@ -88,6 +99,14 @@
+     private SearchPresenter searchPresenter;
+     private LibraryScreen libraryScreen;
+     private LibraryPresenter libraryPresenter;
++    private ProviderAdminScreen providerAdminScreen;
++    private ProviderAdminPresenter providerAdminPresenter;
++    private ModelSettingsScreen modelSettingsScreen;
++    private ModelSettingsPresenter modelSettingsPresenter;
++    private SearchServiceSettingsScreen searchSettingsScreen;
++    private SearchSettingsPresenter searchSettingsPresenter;
++    private VoiceSettingsScreen voiceSettingsScreen;
++    private VoiceSettingsPresenter voiceSettingsPresenter;
+     private boolean showingSettings;
+     private boolean homeStarted;
+ 
+@@ -108,6 +127,10 @@
+         this.homeScreen.setActions(this.homePresenter);
+         this.settingsScreen.setActions(this.settingsPresenter);
+         this.settingsScreen.setOnBackPressed(this::onBackRequested);
++        this.settingsScreen.setOnProvidersPressed(this::showProviders);
++        this.settingsScreen.setOnModelsPressed(this::showModels);
++        this.settingsScreen.setOnSearchPressed(this::showSearchSettings);
++        this.settingsScreen.setOnVoicePressed(this::showVoiceSettings);
+         this.tabHome.setOnClickListener(view -> this.showHome());
+         this.tabLibrary.setOnClickListener(view -> this.showLibrary());
+         this.tabSettings.setOnClickListener(view -> this.showSettings());
+@@ -162,6 +185,10 @@
+     }
+ 
+     private void onBackRequested() {
++        if (this.providerAdminScreen != null || this.modelSettingsScreen != null || this.searchSettingsScreen != null || this.voiceSettingsScreen != null) {
++            this.showSettings();
++            return;
++        }
+         if (this.showingSettings) {
+             if (this.chatBranchId == null) {
+                 this.showHome();
+@@ -183,6 +210,9 @@
+             return;
+         }
+         if (this.chatBranchId != null) {
++            if (this.chatScreen != null && this.chatScreen.onSystemBack()) {
++                return;
++            }
+             this.showTab(this.currentTab);
+             return;
+         }
+@@ -307,7 +337,7 @@
+     }
+ 
+     @Override
+-    public void openChildren(String branchId, String messageId, List<ChildBranch> children) {
++    public void openChildren(String messageId, List<ChildBranch> children) {
+         this.chatScreen.showChildren(messageId, children, this::openBranch);
+     }
+ 
+@@ -350,8 +380,91 @@
+         this.showingSettings = true;
+         this.libraryScreen = null;
+         this.libraryPresenter = null;
++        this.providerAdminScreen = null;
++        this.providerAdminPresenter = null;
++        this.modelSettingsScreen = null;
++        this.modelSettingsPresenter = null;
++        this.searchSettingsScreen = null;
++        this.searchSettingsPresenter = null;
++        this.voiceSettingsScreen = null;
++        this.voiceSettingsPresenter = null;
+         this.swap((View)this.settingsScreen);
+         this.settingsPresenter.start();
++        this.refreshProvidersSubtitle();
++        this.refreshModelsSubtitle();
++    }
++
++    private void showProviders() {
++        this.providerAdminScreen = new ProviderAdminScreen((Context)this);
++        this.providerAdminPresenter = new ProviderAdminPresenter(this.providerAdminScreen, this.container.uiThread(), this.container.background(), this.container.providerAdminStore());
++        this.providerAdminScreen.setActions(this.providerAdminPresenter);
++        this.providerAdminScreen.setOnBackPressed(this::onBackRequested);
++        this.swap((View)this.providerAdminScreen);
++        this.providerAdminPresenter.start();
++    }
++
++    private void refreshProvidersSubtitle() {
++        this.container.background().execute(() -> {
++            int enabled = 0;
++            for (ProviderAdminPresenter.Row row : this.container.providerAdminStore().list()) {
++                if (!row.enabled) continue;
++                ++enabled;
++            }
++            int count = enabled;
++            this.container.uiThread().post(() -> {
++                if (this.providerAdminScreen == null) {
++                    this.settingsScreen.setProvidersSubtitle(this.getString(R.string.providers_entry_enabled_count, new Object[]{count}));
++                }
++            });
++        });
++    }
++
++    private void showModels() {
++        this.modelSettingsScreen = new ModelSettingsScreen((Context)this);
++        this.modelSettingsPresenter = new ModelSettingsPresenter(this.modelSettingsScreen, this.container.uiThread(), this.container.background(), this.container.modelSettingsStore());
++        this.modelSettingsScreen.setActions(this.modelSettingsPresenter);
++        this.modelSettingsScreen.setOnBackPressed(this::onBackRequested);
++        this.swap((View)this.modelSettingsScreen);
++        this.modelSettingsPresenter.start();
++    }
++
++    private void showSearchSettings() {
++        this.searchSettingsScreen = new SearchServiceSettingsScreen((Context)this);
++        this.searchSettingsPresenter = new SearchSettingsPresenter(this.searchSettingsScreen, this.container.uiThread(), this.container.background(), this.container.searchSettingsStore());
++        this.searchSettingsScreen.setActions(this.searchSettingsPresenter);
++        this.searchSettingsScreen.setOnBackPressed(this::onBackRequested);
++        this.swap((View)this.searchSettingsScreen);
++        this.searchSettingsPresenter.start();
++    }
++
++    private void showVoiceSettings() {
++        this.voiceSettingsScreen = new VoiceSettingsScreen((Context)this);
++        this.voiceSettingsPresenter = new VoiceSettingsPresenter(this.voiceSettingsScreen, this.container.uiThread(), this.container.background(), this.container.voiceSettingsStore(), new SystemTtsEngine((Context)this), this.getString(R.string.voice_audition_text));
++        this.voiceSettingsScreen.setActions(this.voiceSettingsPresenter);
++        this.voiceSettingsScreen.setOnBackPressed(this::onBackRequested);
++        this.swap((View)this.voiceSettingsScreen);
++        this.voiceSettingsPresenter.start();
++    }
++
++    private ChatPresenter.Translator translationPort() {
++        return new ChatPresenter.Translator(){
++
++            @Override
++            public void translate(GenerationModel fallbackModel, String sourceText, ChatPresenter.Translator.Callback callback) {
++                MainActivity.this.container.messageTranslator().translate(fallbackModel, sourceText, callback::onFinished);
++            }
++        };
++    }
++
++    private void refreshModelsSubtitle() {
++        this.container.background().execute(() -> {
++            String label = this.container.modelSettingsStore().read((ModelSettingsPresenter.Role)ModelSettingsPresenter.Role.CHAT).label;
++            this.container.uiThread().post(() -> {
++                if (this.modelSettingsScreen == null && !label.isEmpty()) {
++                    this.settingsScreen.setModelsSubtitle(label);
++                }
++            });
++        });
+     }
+ 
+     private void showLibrary() {
+@@ -397,13 +510,27 @@
+         this.libraryPresenter = null;
+         ReadingStore reading = this.container.readingStore();
+         this.chatScreen = new ChatScreen((Context)this);
+-        this.chatPresenter = new ChatPresenter(this, this.container.uiThread(), this.container.background(), this.container.keyVault(), this.container.chatData(), this.container.chatCommands(), this.container.settingsStore(), this.container.chatCopyLabels(), branchId, reading, this.container.chatDraftStore());
++        ChatSpeaker chatSpeaker = new ChatSpeaker(this.chatScreen, this.container.uiThread(), new SystemTtsEngine((Context)this));
++        this.chatScreen.setSpeaker(chatSpeaker);
++        this.chatPresenter = new ChatPresenter(this, this.container.uiThread(), this.container.background(), this.container.keyVault(), this.container.chatData(), this.container.chatCommands(), this.container.settingsStore(), this.container.chatCopyLabels(), branchId, reading, this.container.chatDraftStore(), this.translationPort(), this.container.chatSearchStep(), chatSpeaker);
+         this.chatScreen.setActions(this.chatPresenter);
+         this.swap((View)this.chatScreen);
+         if (explicitAnchor != null) {
+-            this.container.background().execute(() -> reading.saveAnchor(branchId, explicitAnchor));
++            ChatPresenter presenter = this.chatPresenter;
++            this.container.background().execute(() -> {
++                block2: {
++                    try {
++                        reading.saveAnchor(branchId, explicitAnchor);
++                    }
++                    catch (RuntimeException refused) {
++                        if (presenter == null) break block2;
++                        presenter.notifyReadingPositionRefused();
++                    }
++                }
++            });
+         }
+         this.chatPresenter.start();
++        chatSpeaker.start();
+     }
+ 
+     private void showTree(String branchId) {
+
+===== com/treelearn/app/artifact/DerivedService.java  (+33 -2) =====
+--- HEAD/com/treelearn/app/artifact/DerivedService.java
++++ PRELOSS/com/treelearn/app/artifact/DerivedService.java
+@@ -10,6 +10,7 @@
+ import com.treelearn.app.artifact.DerivedRequest;
+ import com.treelearn.app.artifact.DerivedResult;
+ import com.treelearn.app.artifact.DerivedTelemetry;
++import com.treelearn.app.artifact.HomeDerivedPort;
+ import com.treelearn.app.artifact.SqliteDerivedStore;
+ import com.treelearn.app.artifact.TreeOutline;
+ import com.treelearn.app.generation.GenerationGateway;
+@@ -28,7 +29,8 @@
+ import java.util.List;
+ import java.util.Objects;
+ 
+-public final class DerivedService {
++public final class DerivedService
++implements HomeDerivedPort {
+     private final TreeLearnDatabaseHelper helper;
+     private final DatabaseTransactionRunner transactions;
+     private final GenerationGateway callerGateway;
+@@ -43,6 +45,7 @@
+         this.clock = (Clock)Guard.object((Object)clock, (String)"clock");
+     }
+ 
++    @Override
+     public ArtifactOutcome rootTitle(Branch root, String question, GenerationModel model) {
+         Guard.object((Object)root, (String)"root");
+         Guard.nonBlank((String)question, (String)"question");
+@@ -51,7 +54,7 @@
+         return this.run(request, root.topicId);
+     }
+ 
+-    public void ensureConversationArtifacts(ChatStore.Conversation conversation, GenerationModel model) {
++    public void ensureConversationArtifacts(ChatStore.Conversation conversation, GenerationModel model, boolean answerSuggestions) {
+         if (conversation == null || conversation.branch == null || model == null) {
+             return;
+         }
+@@ -72,8 +75,15 @@
+         if (revisionId == null || latestAnswer == null) {
+             return;
+         }
++        DerivedRequest title = DerivedService.branchTitleRequest(conversation, model, this.budget);
++        if (title != null) {
++            this.runIfMissing(title, conversation.branch.topicId);
++        }
+         DerivedRequest summary = DerivedRequest.branchSummary(conversation.branch.id, revisionId, Collections.emptyList(), entries, model, this.budget);
+         this.runIfMissing(summary, conversation.branch.topicId);
++        if (!answerSuggestions) {
++            return;
++        }
+         DerivedRequest recommendations = DerivedRequest.answerRecommendations(conversation.branch.id, revisionId, latestAnswer, Collections.emptyList(), 3, model, this.budget);
+         this.runIfMissing(recommendations, conversation.branch.topicId);
+     }
+@@ -99,6 +109,7 @@
+         return new ContextPlan(replacement);
+     }
+ 
++    @Override
+     public List<String> homeRecommendations(String topicId, List<TreeOutline.Entry> outline, GenerationModel model) {
+         DerivedRequest request = DerivedRequest.homeRecommendations(topicId, outline, 4, model, this.budget);
+         this.runIfMissing(request, topicId);
+@@ -109,6 +120,26 @@
+         }
+         DerivedResult parsed = ArtifactPayloadCodec.parse(request.kind(), row.payload, 4);
+         return parsed.isUsable() ? parsed.payload().items : Collections.emptyList();
++    }
++
++    static DerivedRequest branchTitleRequest(ChatStore.Conversation conversation, GenerationModel model, PromptBudget budget) {
++        if (conversation == null || conversation.branch == null || conversation.branch.isRoot() || conversation.branch.source == null || conversation.branch.source.anchor == null) {
++            return null;
++        }
++        String quote = conversation.branch.source.anchor.quote;
++        if (quote == null || quote.trim().isEmpty()) {
++            return null;
++        }
++        String firstQuestion = null;
++        for (ChatStore.Position position : conversation.positions) {
++            if (!position.message.isUser()) continue;
++            firstQuestion = position.message.userContent;
++            break;
++        }
++        if (firstQuestion == null || firstQuestion.trim().isEmpty()) {
++            return null;
++        }
++        return DerivedRequest.branchTitle(conversation.branch.id, quote, firstQuestion, model, budget);
+     }
+ 
+     private ArtifactOutcome run(DerivedRequest request, String topicId) {
+
+===== com/treelearn/app/artifact/SqliteDerivedStore.java  (+19 -3) =====
+--- HEAD/com/treelearn/app/artifact/SqliteDerivedStore.java
++++ PRELOSS/com/treelearn/app/artifact/SqliteDerivedStore.java
+@@ -4,6 +4,8 @@
+ import com.treelearn.app.artifact.ArtifactInputs;
+ import com.treelearn.app.artifact.ArtifactKind;
+ import com.treelearn.app.artifact.DerivedStore;
++import com.treelearn.app.artifact.TitleArtifactApplier;
++import com.treelearn.core.domain.Branch;
+ import com.treelearn.core.domain.ContextSnapshotCodec;
+ import com.treelearn.core.domain.Guard;
+ import com.treelearn.core.domain.Message;
+@@ -64,13 +66,27 @@
+         Guard.object((Object)row, (String)"row");
+         if (AiArtifactDao.findByKindAndScope((SQLiteDatabase)this.database, (String)row.kind, (String)row.scopeId) == null) {
+             AiArtifactDao.insert((SQLiteDatabase)this.database, (AiArtifactDao.Row)row);
++        } else {
++            if (ArtifactKind.fromWireId(row.kind).revisionBound() && AiArtifactDao.applyIfBaselineMatches((SQLiteDatabase)this.database, (AiArtifactDao.Row)row) == AiArtifactDao.Writeback.APPLIED) {
++                return;
++            }
++            AiArtifactDao.deleteByScope((SQLiteDatabase)this.database, (String)row.kind, (String)row.scopeId);
++            AiArtifactDao.insert((SQLiteDatabase)this.database, (AiArtifactDao.Row)row);
++        }
++        this.nameBranchRow(row);
++    }
++
++    private void nameBranchRow(AiArtifactDao.Row row) {
++        String title = TitleArtifactApplier.titleOf(ArtifactKind.fromWireId(row.kind), row.payload);
++        if (title == null) {
+             return;
+         }
+-        if (ArtifactKind.fromWireId(row.kind).revisionBound() && AiArtifactDao.applyIfBaselineMatches((SQLiteDatabase)this.database, (AiArtifactDao.Row)row) == AiArtifactDao.Writeback.APPLIED) {
++        Branch branch = BranchDao.findById((SQLiteDatabase)this.database, (String)row.scopeId);
++        if (branch == null) {
+             return;
+         }
+-        AiArtifactDao.deleteByScope((SQLiteDatabase)this.database, (String)row.kind, (String)row.scopeId);
+-        AiArtifactDao.insert((SQLiteDatabase)this.database, (AiArtifactDao.Row)row);
++        branch.setTitle(title, row.createdAt);
++        BranchDao.update((SQLiteDatabase)this.database, (Branch)branch);
+     }
+ 
+     public static interface OutlineDigest {
+
+===== com/treelearn/app/generation/AiGatewayStreams.java  (+8 -2) =====
+--- HEAD/com/treelearn/app/generation/AiGatewayStreams.java
++++ PRELOSS/com/treelearn/app/generation/AiGatewayStreams.java
+@@ -26,16 +26,21 @@
+     };
+     private final AiGateway gateway;
+     private final KeystoreSecretStore secrets;
++    private final String keyProviderId;
+ 
+-    public AiGatewayStreams(AiGateway gateway, KeystoreSecretStore secrets) {
++    public AiGatewayStreams(AiGateway gateway, KeystoreSecretStore secrets, String keyProviderId) {
+         if (gateway == null) {
+             throw new IllegalArgumentException("gateway must not be null");
+         }
+         if (secrets == null) {
+             throw new IllegalArgumentException("secrets must not be null");
+         }
++        if (keyProviderId == null || keyProviderId.trim().isEmpty()) {
++            throw new IllegalArgumentException("keyProviderId must not be blank");
++        }
+         this.gateway = gateway;
+         this.secrets = secrets;
++        this.keyProviderId = keyProviderId;
+     }
+ 
+     /*
+@@ -45,7 +50,8 @@
+     public GenerationGateway.Stream open(GenerationModel model, DeepSeekRequest request, GenerationSink sink) {
+         char[] secret;
+         try {
+-            secret = this.secrets.read();
++            this.secrets.migrateLegacySecret(this.keyProviderId);
++            secret = this.secrets.read(this.keyProviderId);
+         }
+         catch (SecretStoreException unreadable) {
+             sink.onTerminal(new StreamOutcome(StreamOutcome.Kind.FAILED, AiGatewayError.keyMissing(), 0, 0, 0));
+
+===== com/treelearn/app/screen/AnswerActionBar.java  (+23 -1) =====
+--- HEAD/com/treelearn/app/screen/AnswerActionBar.java
++++ PRELOSS/com/treelearn/app/screen/AnswerActionBar.java
+@@ -1,6 +1,7 @@
+ package com.treelearn.app.screen;
+ 
+ import android.content.Context;
++import android.graphics.drawable.Drawable;
+ import android.util.AttributeSet;
+ import android.view.LayoutInflater;
+ import android.view.ViewGroup;
+@@ -18,6 +19,8 @@
+     private final Button reset;
+     private final Button fork;
+     private final Button children;
++    private final Button translate;
++    private final Button speak;
+     private final TextView version;
+     private String messageId = "";
+     private Listener listener;
+@@ -32,28 +35,35 @@
+         this.fork = (Button)this.findViewById(R.id.act_fork);
+         this.children = (Button)this.findViewById(R.id.act_children);
+         this.version = (TextView)this.findViewById(R.id.act_version);
++        this.translate = (Button)this.findViewById(R.id.act_translate);
++        this.speak = (Button)this.findViewById(R.id.act_speak);
+         this.quote.setContentDescription((CharSequence)this.getContext().getString(R.string.chat_quote_title));
+         this.copy.setContentDescription((CharSequence)this.getContext().getString(R.string.chat_copy_title));
+         this.reset.setContentDescription((CharSequence)this.getContext().getString(R.string.chat_reset_title));
+         this.fork.setContentDescription((CharSequence)this.getContext().getString(R.string.chat_fork_title));
++        this.translate.setContentDescription((CharSequence)this.getContext().getString(R.string.cd_act_translate));
+         this.quote.setOnClickListener(view -> this.fire(target -> target.onQuotePressed(this.messageId)));
+         this.copy.setOnClickListener(view -> this.fire(target -> target.onCopyPressed(this.messageId)));
+         this.reset.setOnClickListener(view -> this.fire(target -> target.onResetPressed(this.messageId)));
+         this.fork.setOnClickListener(view -> this.fire(target -> target.onForkPressed(this.messageId)));
+         this.children.setOnClickListener(view -> this.fire(target -> target.onChildrenPressed(this.messageId)));
+         this.version.setOnClickListener(view -> this.fire(target -> target.onVersionPressed(this.messageId)));
++        this.translate.setOnClickListener(view -> this.fire(target -> target.onTranslatePressed(this.messageId)));
+     }
+ 
+     public void setListener(Listener listener) {
+         this.listener = listener;
+     }
+ 
+-    public void render(ChatMessage message) {
++    public void render(ChatMessage message, boolean speechAvailable, boolean speaking) {
+         this.messageId = message.messageId;
+         this.quote.setEnabled(message.canQuote());
+         this.copy.setEnabled(message.canCopy());
+         this.reset.setEnabled(message.canReset());
+         this.fork.setEnabled(message.canFork());
++        this.translate.setEnabled(message.canTranslate());
++        this.renderSpeakFace(speechAvailable, speaking);
++        this.speak.setEnabled(message.canSpeak());
+         boolean hasChildren = message.hasChildren();
+         this.children.setVisibility(hasChildren ? 0 : 8);
+         this.children.setEnabled(hasChildren);
+@@ -67,6 +77,14 @@
+ 
+     public String messageId() {
+         return this.messageId;
++    }
++
++    public void renderSpeakFace(boolean speechAvailable, boolean speaking) {
++        this.speak.setVisibility(speechAvailable ? 0 : 8);
++        this.speak.setContentDescription((CharSequence)this.getContext().getString(speaking ? R.string.cd_act_speak_stop : R.string.cd_act_speak));
++        Drawable icon = this.getResources().getDrawable(speaking ? R.drawable.ic_chat_stop : R.drawable.ic_action_speak, this.getContext().getTheme());
++        icon.setTint(this.getContext().getColor(R.color.tl_ink3));
++        this.speak.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
+     }
+ 
+     private void fire(Consumer<Listener> call) {
+@@ -87,6 +105,10 @@
+         public void onChildrenPressed(String var1);
+ 
+         public void onVersionPressed(String var1);
++
++        public void onTranslatePressed(String var1);
++
++        public void onSpeakPressed(String var1);
+     }
+ }
+ 
+
+===== com/treelearn/app/screen/ChatScreen.java  (+202 -16) =====
+--- HEAD/com/treelearn/app/screen/ChatScreen.java
++++ PRELOSS/com/treelearn/app/screen/ChatScreen.java
+@@ -1,6 +1,9 @@
+ package com.treelearn.app.screen;
+ 
++import android.app.Dialog;
+ import android.content.Context;
++import android.content.res.ColorStateList;
++import android.graphics.drawable.ColorDrawable;
+ import android.graphics.drawable.Drawable;
+ import android.text.Editable;
+ import android.text.TextWatcher;
+@@ -10,8 +13,10 @@
+ import android.view.LayoutInflater;
+ import android.view.View;
+ import android.view.ViewGroup;
++import android.view.Window;
+ import android.widget.Button;
+ import android.widget.EditText;
++import android.widget.ImageView;
+ import android.widget.LinearLayout;
+ import android.widget.PopupMenu;
+ import android.widget.ScrollView;
+@@ -28,6 +33,7 @@
+ import com.treelearn.app.screen.WordMenuPopup;
+ import com.treelearn.app.ui.ChatActions;
+ import com.treelearn.app.ui.ChatMessage;
++import com.treelearn.app.ui.ChatSpeaker;
+ import com.treelearn.app.ui.ChatViewState;
+ import com.treelearn.app.ui.ChildBranch;
+ import com.treelearn.app.ui.HomeViewState;
+@@ -48,7 +54,8 @@
+ import java.util.function.Consumer;
+ 
+ public final class ChatScreen
+-extends LinearLayout {
++extends LinearLayout
++implements ChatSpeaker.Sink {
+     private static final long SCROLL_SETTLE_MS = 150L;
+     private final TextView title;
+     private final ScrollView scroll;
+@@ -64,15 +71,26 @@
+     private final TextView quoteText;
+     private final EditText draft;
+     private final ModelThinkingPicker modelChip;
++    private final TextView searchChip;
+     private final Button send;
+     private final Button followLatest;
++    private final ImageView fullscreenEntry;
++    private final View fullscreen;
++    private final TextView fullscreenQuote;
++    private final EditText fullscreenDraft;
+     private final Map<String, Row> rows = new LinkedHashMap<String, Row>();
+     private WordMenuPopup wordMenu;
+     private ChildBranchPopup childrenPopup;
+     private ChatActions actions;
+     private boolean rendering;
++    private ChatSpeaker speaker;
++    private ChatSpeaker.State speakState = ChatSpeaker.State.initial();
+     private ChatViewState.SendState sendState = ChatViewState.SendState.DISABLED;
++    private boolean renderedFullscreen;
++    private boolean fullscreenEntryAvailable;
++    private int fullscreenEntryHint;
+     private boolean rowsReported;
++    private ChatViewState lastRenderedState;
+     private ReadingPosition pendingPosition;
+     private String renderedTail = "";
+     private boolean renderedFollowing = true;
+@@ -103,20 +121,14 @@
+         this.quoteText = (TextView)this.findViewById(R.id.chat_quote_text);
+         this.draft = (EditText)this.findViewById(R.id.chat_draft);
+         this.modelChip = (ModelThinkingPicker)this.findViewById(R.id.chat_model_chip);
++        this.searchChip = (TextView)this.findViewById(R.id.chat_search_chip);
+         this.send = (Button)this.findViewById(R.id.chat_send);
+         this.followLatest = (Button)this.findViewById(R.id.chat_follow);
+-        this.draft.addTextChangedListener(new TextWatcher(){
+-
+-            public void beforeTextChanged(CharSequence text, int start, int count, int after) {
+-            }
+-
+-            public void onTextChanged(CharSequence text, int start, int before, int count) {
+-            }
+-
+-            public void afterTextChanged(Editable text) {
+-                ChatScreen.this.fire(actions -> actions.onDraftChanged(text.toString()));
+-            }
+-        });
++        this.fullscreenEntry = (ImageView)this.findViewById(R.id.chat_expand);
++        this.fullscreen = this.findViewById(R.id.chat_fullscreen);
++        this.fullscreenQuote = (TextView)this.findViewById(R.id.chat_fullscreen_quote);
++        this.fullscreenDraft = (EditText)this.findViewById(R.id.chat_fullscreen_draft);
++        this.draft.addTextChangedListener(this.draftForwarder());
+         this.draft.setOnEditorActionListener((view, actionId, event) -> {
+             if (actionId == 4 || event != null && event.getKeyCode() == 66 && event.getAction() == 0) {
+                 this.fire(actions -> actions.onSend());
+@@ -132,6 +144,18 @@
+             }
+         }));
+         this.followLatest.setOnClickListener(view -> this.fire(actions -> actions.onFollowLatestPressed()));
++        this.searchChip.setOnClickListener(view -> this.showSearchPanel());
++        this.fullscreenEntry.setOnClickListener(view -> this.fire(actions -> {
++            if (this.fullscreenEntryAvailable) {
++                actions.onFullscreenEditOpened();
++            } else if (this.fullscreenEntryHint != 0) {
++                Toast.makeText((Context)this.getContext(), (int)this.fullscreenEntryHint, (int)0).show();
++            }
++        }));
++        this.fullscreenDraft.addTextChangedListener(this.draftForwarder());
++        for (int id2 : new int[]{R.id.chat_fullscreen_close, R.id.chat_fullscreen_cancel, R.id.chat_fullscreen_done}) {
++            this.findViewById(id2).setOnClickListener(v -> this.fire(a -> a.onFullscreenEditClosed()));
++        }
+         this.findViewById(R.id.chat_back).setOnClickListener(view -> this.fire(actions -> actions.onBackPressed()));
+         this.findViewById(R.id.chat_overview).setOnClickListener(view -> this.fire(actions -> actions.onOverviewPressed()));
+         this.findViewById(R.id.chat_nav).setOnClickListener(view -> this.fire(actions -> actions.onNavigationPressed()));
+@@ -159,6 +183,31 @@
+                 actions.onThinkingToggled(enabled);
+             }
+         });
++    }
++
++    public void setSpeaker(ChatSpeaker speaker) {
++        this.speaker = speaker;
++    }
++
++    @Override
++    public void render(ChatSpeaker.State state) {
++        ChatSpeaker.State previous = this.speakState;
++        this.speakState = state;
++        this.refreshSpeak(previous.speakingMessageId);
++        this.refreshSpeak(state.speakingMessageId);
++        if (state.phase == ChatSpeaker.Phase.ERROR && previous.phase != ChatSpeaker.Phase.ERROR) {
++            Toast.makeText((Context)this.getContext(), (int)R.string.voice_notice_playback_error, (int)0).show();
++        }
++    }
++
++    private void refreshSpeak(String messageId) {
++        if (messageId == null || messageId.isEmpty()) {
++            return;
++        }
++        Row row = this.rows.get(messageId);
++        if (row != null) {
++            row.renderSpeakFace();
++        }
+     }
+ 
+     public void showVersions(String messageId, List<AnswerRevision> versions) {
+@@ -199,6 +248,8 @@
+                 this.draft.setSelection(this.draft.getText().length());
+             }
+             this.renderComposer(state);
++            this.renderFullscreen(state);
++            this.renderSearchChip(state);
+             this.modelChip.render(state.model, state.thinkingEnabled);
+             if (state.phase == ChatViewState.Phase.READY) {
+                 this.settle(state);
+@@ -272,6 +323,37 @@
+         return visible;
+     }
+ 
++    private void renderSearchChip(ChatViewState state) {
++        this.lastRenderedState = state;
++        this.searchChip.setBackgroundTintList(ColorStateList.valueOf((int)this.getResources().getColor(state.searchEnabled ? R.color.tl_green_soft : R.color.tl_surface)));
++        this.searchChip.setTextColor(this.getResources().getColor(state.searchEnabled ? R.color.tl_green_deep : R.color.tl_ink3));
++    }
++
++    private void showSearchPanel() {
++        ChatViewState state = this.lastRenderedState;
++        if (state == null) {
++            return;
++        }
++        Dialog dialog = new Dialog(this.getContext());
++        View content = LayoutInflater.from((Context)this.getContext()).inflate(R.layout.panel_search_picker, (ViewGroup)this, false);
++        TextView toggle = (TextView)content.findViewById(R.id.search_panel_toggle);
++        toggle.setText(state.searchEnabled ? R.string.search_panel_toggle_on : R.string.search_panel_toggle_off);
++        toggle.setOnClickListener(view -> this.fire(actions -> actions.onSearchToggled(!state.searchEnabled)));
++        ((TextView)content.findViewById(R.id.search_panel_engine)).setText((CharSequence)this.getContext().getString(R.string.search_panel_engine, new Object[]{state.searchEngineLabel}));
++        content.findViewById(R.id.search_panel_settings).setOnClickListener(view -> {
++            this.fire(actions -> actions.onSearchOpenSettings());
++            dialog.dismiss();
++        });
++        dialog.setContentView(content);
++        Window window = dialog.getWindow();
++        if (window != null) {
++            window.setLayout(-1, -2);
++            window.setGravity(80);
++            window.setBackgroundDrawable((Drawable)new ColorDrawable(0));
++        }
++        dialog.show();
++    }
++
+     private void renderNotice(HomeViewState.Notice value) {
+         if (value == null) {
+             this.notice.setVisibility(8);
+@@ -331,6 +413,39 @@
+         this.send.setCompoundDrawablesWithIntrinsicBounds(drawable2, null, null, null);
+     }
+ 
++    private void renderFullscreen(ChatViewState state) {
++        this.fullscreenEntryAvailable = state.fullscreenEditEntryAvailable();
++        this.fullscreenEntryHint = state.archived ? R.string.chat_draft_hint_archived : (!state.keyConfigured ? R.string.chat_draft_hint_no_key : 0);
++        this.fullscreenEntry.setColorFilter(this.getContext().getColor(this.fullscreenEntryAvailable ? R.color.tl_green_deep : R.color.tl_ink3));
++        this.fullscreen.setVisibility(state.fullscreenEditing ? 0 : 8);
++        if (state.fullscreenEditing) {
++            boolean quoted = !state.quote.isEmpty();
++            this.fullscreenQuote.setVisibility(quoted ? 0 : 8);
++            this.fullscreenQuote.setText((CharSequence)(quoted ? this.getContext().getString(R.string.chat_quoted, new Object[]{state.quote}) : ""));
++            if (!state.draft.contentEquals((CharSequence)this.fullscreenDraft.getText())) {
++                this.fullscreenDraft.setText((CharSequence)state.draft);
++                this.fullscreenDraft.setSelection(this.fullscreenDraft.getText().length());
++            }
++            if (!this.renderedFullscreen) {
++                this.fullscreenDraft.requestFocus();
++                this.announceForAccessibility(this.getContext().getString(R.string.chat_fullscreen_entered));
++            }
++        } else if (this.renderedFullscreen) {
++            this.announceForAccessibility(this.getContext().getString(R.string.chat_fullscreen_exited));
++            this.draft.requestFocus();
++            this.draft.setSelection(this.draft.getText().length());
++        }
++        this.renderedFullscreen = state.fullscreenEditing;
++    }
++
++    public boolean onSystemBack() {
++        if (!this.renderedFullscreen) {
++            return false;
++        }
++        this.fire(actions -> actions.onFullscreenEditClosed());
++        return true;
++    }
++
+     private void renderFollow(ChatViewState state) {
+         boolean detached = state.phase == ChatViewState.Phase.READY && !state.followLatest;
+         this.followLatest.setVisibility(detached ? 0 : 8);
+@@ -389,6 +504,21 @@
+         }
+     }
+ 
++    private TextWatcher draftForwarder() {
++        return new TextWatcher(){
++
++            public void beforeTextChanged(CharSequence text, int start, int count, int after) {
++            }
++
++            public void onTextChanged(CharSequence text, int start, int before, int count) {
++            }
++
++            public void afterTextChanged(Editable text) {
++                ChatScreen.this.fire(actions -> actions.onDraftChanged(text.toString()));
++            }
++        };
++    }
++
+     public void showChildren(String messageId, List<ChildBranch> children, ChildBranchPopup.Listener listener) {
+         this.dismissPopups();
+         Row row = this.rows.get(messageId);
+@@ -410,10 +540,13 @@
+     }
+ 
+     protected void onDetachedFromWindow() {
++        ReadingAnchor anchor;
+         this.dismissPopups();
+         this.scroll.removeCallbacks(this.scrollSettled);
+-        ReadingAnchor anchor = this.settledAnchor;
+-        if (anchor != null) {
++        if (this.speaker != null) {
++            this.speaker.leavePage();
++        }
++        if ((anchor = this.settledAnchor) != null) {
+             this.fire(actions -> actions.onLeaving(anchor));
+         }
+         super.onDetachedFromWindow();
+@@ -438,8 +571,12 @@
+         private final ReasoningDisclosure disclosure;
+         private final AnswerActionBar actionBar;
+         private final LinearLayout suggestions;
++        private final View translation;
++        private final TextView translationHeader;
++        private final TextView translationText;
+         private String messageId = "";
+         private ChatMessage message;
++        private ChatViewState lastState;
+         private float pressX;
+         private float pressY;
+ 
+@@ -460,9 +597,19 @@
+             this.disclosure = (ReasoningDisclosure)this.root.findViewById(R.id.chat_reasoning);
+             this.actionBar = (AnswerActionBar)this.root.findViewById(R.id.chat_actions);
+             this.suggestions = (LinearLayout)this.root.findViewById(R.id.chat_suggestions);
++            this.translation = this.root.findViewById(R.id.chat_translation);
++            this.translationHeader = (TextView)this.root.findViewById(R.id.chat_translation_header);
++            this.translationText = (TextView)this.root.findViewById(R.id.chat_translation_text);
+             this.disclosure.setListener(this);
+             this.actionBar.setListener(this);
+             this.retry.setOnClickListener(view -> ChatScreen.this.fire(actions -> actions.onRetryPressed(this.messageId)));
++            this.translationHeader.setOnClickListener(view -> ChatScreen.this.fire(actions -> {
++                if (this.lastState != null && this.lastState.translationFailed(this.messageId)) {
++                    actions.onTranslatePressed(this.messageId);
++                } else {
++                    actions.onTranslationToggled(this.messageId);
++                }
++            }));
+             this.answer.setOnTouchListener((view, event) -> {
+                 if (event.getActionMasked() == 0) {
+                     this.pressX = event.getX();
+@@ -489,9 +636,10 @@
+             this.disclosure.render(message, state.isReasoningEffectivelyExpanded(message.messageId), state.thinkingEnabled);
+             this.answer.setText(MarkdownRenderer.render(message.text, code -> ChatScreen.this.fire(actions -> actions.onSelectionCopyPressed(code))), TextView.BufferType.SPANNABLE);
+             this.renderGenerationSlots(state, message, newestRow);
++            this.renderTranslation(state, message);
+             this.retry.setEnabled(message.canRetry());
+             this.actionBar.setVisibility(message.isStable() ? 0 : 8);
+-            this.actionBar.render(message);
++            this.actionBar.render(message, ChatScreen.this.speakState.engineReady, ChatScreen.this.speakState.speaking(message.messageId));
+             this.renderSuggestions(state, message);
+         }
+ 
+@@ -511,6 +659,30 @@
+             this.canceled.setVisibility(stopped && message.isFailed() ? 0 : 8);
+         }
+ 
++        private void renderTranslation(ChatViewState state, ChatMessage message) {
++            boolean visible = state.translationVisible(message.messageId);
++            this.translation.setVisibility(visible ? 0 : 8);
++            if (!visible) {
++                this.translationHeader.setText((CharSequence)"");
++                this.translationText.setText((CharSequence)"");
++                return;
++            }
++            if (state.isTranslating(message.messageId)) {
++                this.translationHeader.setText(R.string.chat_translation_running);
++                this.translationText.setVisibility(8);
++                return;
++            }
++            if (state.translationFailed(message.messageId)) {
++                this.translationHeader.setText(R.string.chat_translation_failed);
++                this.translationText.setVisibility(8);
++                return;
++            }
++            boolean expanded = state.translationExpanded(message.messageId);
++            this.translationHeader.setText((CharSequence)ChatScreen.this.getContext().getString(expanded ? R.string.chat_translation_collapse : R.string.chat_translation_expand));
++            this.translationText.setVisibility(expanded ? 0 : 8);
++            this.translationText.setText((CharSequence)state.translationText(message.messageId));
++        }
++
+         void enterStage(boolean stopped) {
+             this.fade((View)(stopped ? this.canceled : this.actionBar), 150L);
+         }
+@@ -601,6 +773,20 @@
+         }
+ 
+         @Override
++        public void onTranslatePressed(String id2) {
++            ChatScreen.this.fire(actions -> actions.onTranslatePressed(id2));
++        }
++
++        @Override
++        public void onSpeakPressed(String id2) {
++            ChatScreen.this.fire(actions -> actions.onSpeakPressed(id2));
++        }
++
++        void renderSpeakFace() {
++            this.actionBar.renderSpeakFace(ChatScreen.this.speakState.engineReady, ChatScreen.this.speakState.speaking(this.messageId));
++        }
++
++        @Override
+         public void onForkPressed(String id2) {
+             ChatScreen.this.fire(actions -> actions.onForkPressed(id2, "", 0, 0));
+         }
+
+===== com/treelearn/app/screen/ChildBranchPopup.java  (+3 -0) =====
+--- HEAD/com/treelearn/app/screen/ChildBranchPopup.java
++++ PRELOSS/com/treelearn/app/screen/ChildBranchPopup.java
+@@ -28,6 +28,9 @@
+         PopupWindow popup = new PopupWindow((View)content, -2, -2, true);
+         popup.setBackgroundDrawable((Drawable)new ColorDrawable(0));
+         popup.setOutsideTouchable(true);
++        content.measure(0, 0);
++        int maxPx = context.getResources().getDimensionPixelSize(R.dimen.popup_max_height);
++        popup.setHeight(Math.min(content.getMeasuredHeight(), maxPx));
+         popup.setElevation(context.getResources().getDimension(R.dimen.card_elevation));
+         ChildBranchPopup shown = new ChildBranchPopup(popup);
+         LayoutInflater inflater = LayoutInflater.from((Context)context);
+
+===== com/treelearn/app/screen/HomeScreen.java  (+27 -0) =====
+--- HEAD/com/treelearn/app/screen/HomeScreen.java
++++ PRELOSS/com/treelearn/app/screen/HomeScreen.java
+@@ -17,6 +17,7 @@
+ import com.treelearn.app.screen.ModelThinkingPicker;
+ import com.treelearn.app.screen.NoticeText;
+ import com.treelearn.app.screen.RecommendationMarquee;
++import com.treelearn.app.ui.HeatmapView;
+ import com.treelearn.app.ui.HomeActions;
+ import com.treelearn.app.ui.HomeViewState;
+ import com.treelearn.app.ui.Recommendation;
+@@ -41,6 +42,10 @@
+     private final View empty;
+     private final ModelThinkingPicker modelChip;
+     private final RecommendationMarquee recommendations;
++    private final View heatStripCard;
++    private final TextView heatStreak;
++    private final TextView heatEmpty;
++    private final HeatmapView heatCells;
+     private HomeActions actions;
+     private boolean rendering;
+ 
+@@ -62,6 +67,10 @@
+         this.empty = this.findViewById(R.id.home_empty);
+         this.modelChip = (ModelThinkingPicker)this.findViewById(R.id.home_model_chip);
+         this.recommendations = (RecommendationMarquee)this.findViewById(R.id.home_recommendations);
++        this.heatStripCard = this.findViewById(R.id.home_heat_strip_card);
++        this.heatStreak = (TextView)this.findViewById(R.id.home_heat_streak);
++        this.heatEmpty = (TextView)this.findViewById(R.id.home_heat_empty);
++        this.heatCells = (HeatmapView)this.findViewById(R.id.home_heat_cells);
+         this.draft.addTextChangedListener(new TextWatcher(){
+ 
+             public void beforeTextChanged(CharSequence text, int start, int count, int after) {
+@@ -113,6 +122,11 @@
+         this.findViewById(R.id.home_empty_guide).setOnClickListener(view -> {
+             this.draft.requestFocus();
+             this.draft.setSelection(this.draft.getText().length());
++        });
++        this.heatStripCard.setOnClickListener(view -> {
++            if (this.actions != null) {
++                this.actions.onHeatStripTapped();
++            }
+         });
+     }
+ 
+@@ -156,9 +170,22 @@
+             this.sectionCount.setText((CharSequence)(state.phase == HomeViewState.Phase.READY ? this.getContext().getString(R.string.home_section_count, new Object[]{state.topics.size()}) : ""));
+             boolean stripUsable = state.phase == HomeViewState.Phase.READY || state.phase == HomeViewState.Phase.EMPTY;
+             this.recommendations.render(stripUsable ? state.recommendations : Collections.emptyList());
++            this.renderHeatStrip(state.heatStrip);
+         }
+         finally {
+             this.rendering = false;
++        }
++    }
++
++    private void renderHeatStrip(HomeViewState.HeatStrip strip) {
++        boolean visible = strip.status == HomeViewState.HeatStrip.Status.VISIBLE;
++        this.heatStripCard.setVisibility(strip.status == HomeViewState.HeatStrip.Status.HIDDEN ? 8 : 0);
++        this.heatStreak.setVisibility(visible ? 0 : 8);
++        this.heatEmpty.setVisibility(strip.status == HomeViewState.HeatStrip.Status.EMPTY ? 0 : 8);
++        this.heatCells.setVisibility(visible ? 0 : 8);
++        if (visible) {
++            this.heatCells.setIntensities(strip.intensities);
++            this.heatStreak.setText((CharSequence)this.getContext().getString(R.string.home_heat_streak, new Object[]{strip.streakDays}));
+         }
+     }
+ 
+
+===== com/treelearn/app/screen/NoticeText.java  (+12 -0) =====
+--- HEAD/com/treelearn/app/screen/NoticeText.java
++++ PRELOSS/com/treelearn/app/screen/NoticeText.java
+@@ -21,6 +21,9 @@
+             case REQUEST_REJECTED: {
+                 return R.string.notice_request_rejected;
+             }
++            case HISTORY_COMPRESSED: {
++                return R.string.notice_history_compressed;
++            }
+             case RATE_LIMITED: {
+                 return R.string.notice_rate_limited;
+             }
+@@ -36,6 +39,15 @@
+             case READING_POSITION: {
+                 return R.string.notice_reading_position;
+             }
++            case SEARCH_KEY_MISSING: {
++                return R.string.notice_search_key_missing;
++            }
++            case SEARCH_FAILED: {
++                return R.string.notice_search_failed;
++            }
++            case SEARCH_EMPTY: {
++                return R.string.notice_search_empty;
++            }
+         }
+         throw new IllegalArgumentException("unmapped notice: " + (Object)((Object)value));
+     }
+
+===== com/treelearn/app/screen/SettingsScreen.java  (+42 -0) =====
+--- HEAD/com/treelearn/app/screen/SettingsScreen.java
++++ PRELOSS/com/treelearn/app/screen/SettingsScreen.java
+@@ -23,6 +23,7 @@
+     private final TextView notice;
+     private SettingsActions actions;
+     private Runnable onBack;
++    private Runnable onProvidersPressed;
+ 
+     public SettingsScreen(Context context) {
+         super(context);
+@@ -53,6 +54,47 @@
+ 
+     public void setOnBackPressed(Runnable onBack) {
+         this.onBack = onBack;
++    }
++
++    public void setOnProvidersPressed(Runnable onProvidersPressed) {
++        this.onProvidersPressed = onProvidersPressed;
++        this.findViewById(R.id.settings_providers_entry).setOnClickListener(view -> {
++            if (onProvidersPressed != null) {
++                onProvidersPressed.run();
++            }
++        });
++    }
++
++    public void setOnModelsPressed(Runnable onModelsPressed) {
++        this.findViewById(R.id.settings_models_entry).setOnClickListener(view -> {
++            if (onModelsPressed != null) {
++                onModelsPressed.run();
++            }
++        });
++    }
++
++    public void setOnSearchPressed(Runnable onSearchPressed) {
++        this.findViewById(R.id.settings_search_entry).setOnClickListener(view -> {
++            if (onSearchPressed != null) {
++                onSearchPressed.run();
++            }
++        });
++    }
++
++    public void setOnVoicePressed(Runnable onVoicePressed) {
++        this.findViewById(R.id.settings_voice_entry).setOnClickListener(view -> {
++            if (onVoicePressed != null) {
++                onVoicePressed.run();
++            }
++        });
++    }
++
++    public void setModelsSubtitle(String text) {
++        ((TextView)this.findViewById(R.id.settings_models_sub)).setText((CharSequence)text);
++    }
++
++    public void setProvidersSubtitle(String text) {
++        ((TextView)this.findViewById(R.id.settings_providers_sub)).setText((CharSequence)text);
+     }
+ 
+     public void render(SettingsViewState state) {
+
+===== com/treelearn/app/ui/ChatActions.java  (+14 -0) =====
+--- HEAD/com/treelearn/app/ui/ChatActions.java
++++ PRELOSS/com/treelearn/app/ui/ChatActions.java
+@@ -27,6 +27,12 @@
+ 
+     public void onResetPressed(String var1);
+ 
++    public void onTranslatePressed(String var1);
++
++    public void onTranslationToggled(String var1);
++
++    public void onSpeakPressed(String var1);
++
+     public void onForkPressed(String var1, String var2, int var3, int var4);
+ 
+     public void onSourceCardToggled();
+@@ -51,6 +57,10 @@
+ 
+     public void onThinkingToggled(boolean var1);
+ 
++    public void onSearchToggled(boolean var1);
++
++    public void onSearchOpenSettings();
++
+     public void onBackPressed();
+ 
+     public void onRowsLaidOut(int var1, Set<String> var2);
+@@ -58,5 +68,9 @@
+     public void onLeaving(ReadingAnchor var1);
+ 
+     public void onViewportChanged(Set<String> var1);
++
++    public void onFullscreenEditOpened();
++
++    public void onFullscreenEditClosed();
+ }
+ 
+
+===== com/treelearn/app/ui/ChatCommandResult.java  (+14 -0) =====
+--- HEAD/com/treelearn/app/ui/ChatCommandResult.java
++++ PRELOSS/com/treelearn/app/ui/ChatCommandResult.java
+@@ -7,15 +7,25 @@
+     private final String operationId;
+     private final String branchId;
+     private final HomeViewState.Notice notice;
++    private final HomeViewState.Notice postNotice;
+ 
+     private ChatCommandResult(String operationId, String branchId, HomeViewState.Notice notice) {
++        this(operationId, branchId, notice, null);
++    }
++
++    private ChatCommandResult(String operationId, String branchId, HomeViewState.Notice notice, HomeViewState.Notice postNotice) {
+         this.operationId = operationId;
+         this.branchId = branchId;
+         this.notice = notice;
++        this.postNotice = postNotice;
+     }
+ 
+     public static ChatCommandResult ran(String operationId) {
+         return new ChatCommandResult(Guard.id((String)operationId, (String)"operationId"), "", null);
++    }
++
++    public static ChatCommandResult ranWithNotice(String operationId, HomeViewState.Notice degradation) {
++        return new ChatCommandResult(Guard.id((String)operationId, (String)"operationId"), "", null, (HomeViewState.Notice)((Object)Guard.object((Object)((Object)degradation), (String)"degradation")));
+     }
+ 
+     public static ChatCommandResult succeeded() {
+@@ -45,5 +55,9 @@
+     public HomeViewState.Notice notice() {
+         return this.notice;
+     }
++
++    public HomeViewState.Notice postNotice() {
++        return this.postNotice;
++    }
+ }
+ 
+
+===== com/treelearn/app/ui/ChatMessage.java  (+8 -0) =====
+--- HEAD/com/treelearn/app/ui/ChatMessage.java
++++ PRELOSS/com/treelearn/app/ui/ChatMessage.java
+@@ -98,6 +98,14 @@
+         return this.ai && !this.attemptRunning;
+     }
+ 
++    public boolean canTranslate() {
++        return this.isStable();
++    }
++
++    public boolean canSpeak() {
++        return this.isStable();
++    }
++
+     public boolean canReset() {
+         return this.canRetry() && !this.activeRevisionId.isEmpty();
+     }
+
+===== com/treelearn/app/ui/ChatPresenter.java  (+101 -4) =====
+--- HEAD/com/treelearn/app/ui/ChatPresenter.java
++++ PRELOSS/com/treelearn/app/ui/ChatPresenter.java
+@@ -2,6 +2,7 @@
+ 
+ import com.treelearn.app.reading.ReadingSession;
+ import com.treelearn.app.reading.ReadingStore;
++import com.treelearn.app.search.web.ChatSearchStep;
+ import com.treelearn.app.ui.ChatActions;
+ import com.treelearn.app.ui.ChatCommandResult;
+ import com.treelearn.app.ui.ChatCommands;
+@@ -9,6 +10,7 @@
+ import com.treelearn.app.ui.ChatDraftStore;
+ import com.treelearn.app.ui.ChatMessage;
+ import com.treelearn.app.ui.ChatSink;
++import com.treelearn.app.ui.ChatSpeaker;
+ import com.treelearn.app.ui.ChatViewState;
+ import com.treelearn.app.ui.ChildBranch;
+ import com.treelearn.app.ui.CopyLabels;
+@@ -42,6 +44,9 @@
+     private final String branchId;
+     private final ReadingSession session;
+     private final ChatDraftStore drafts;
++    private final Translator translator;
++    private final ChatSearchStep search;
++    private final ChatSpeaker speaker;
+     private ChatViewState state;
+     private Branch readingBranch;
+     private boolean anchorQuotePrefilled;
+@@ -53,10 +58,26 @@
+     private String tailFingerprint = "";
+ 
+     public ChatPresenter(ChatSink sink, UiThread ui, Executor background, KeyVault key, ChatData data, ChatCommands commands, SettingsStore settings, CopyLabels labels, String branchId, ReadingStore reading) {
+-        this(sink, ui, background, key, data, commands, settings, labels, branchId, reading, ChatDraftStore.NOOP);
++        this(sink, ui, background, key, data, commands, settings, labels, branchId, reading, ChatDraftStore.NOOP, null);
+     }
+ 
+     public ChatPresenter(ChatSink sink, UiThread ui, Executor background, KeyVault key, ChatData data, ChatCommands commands, SettingsStore settings, CopyLabels labels, String branchId, ReadingStore reading, ChatDraftStore drafts) {
++        this(sink, ui, background, key, data, commands, settings, labels, branchId, reading, drafts, null);
++    }
++
++    public ChatPresenter(ChatSink sink, UiThread ui, Executor background, KeyVault key, ChatData data, ChatCommands commands, SettingsStore settings, CopyLabels labels, String branchId, ReadingStore reading, Translator translator) {
++        this(sink, ui, background, key, data, commands, settings, labels, branchId, reading, ChatDraftStore.NOOP, translator);
++    }
++
++    public ChatPresenter(ChatSink sink, UiThread ui, Executor background, KeyVault key, ChatData data, ChatCommands commands, SettingsStore settings, CopyLabels labels, String branchId, ReadingStore reading, ChatDraftStore drafts, Translator translator) {
++        this(sink, ui, background, key, data, commands, settings, labels, branchId, reading, drafts, translator, null);
++    }
++
++    public ChatPresenter(ChatSink sink, UiThread ui, Executor background, KeyVault key, ChatData data, ChatCommands commands, SettingsStore settings, CopyLabels labels, String branchId, ReadingStore reading, ChatDraftStore drafts, Translator translator, ChatSearchStep search) {
++        this(sink, ui, background, key, data, commands, settings, labels, branchId, reading, drafts, translator, search, null);
++    }
++
++    public ChatPresenter(ChatSink sink, UiThread ui, Executor background, KeyVault key, ChatData data, ChatCommands commands, SettingsStore settings, CopyLabels labels, String branchId, ReadingStore reading, ChatDraftStore drafts, Translator translator, ChatSearchStep search, ChatSpeaker speaker) {
+         this.sink = ChatPresenter.require(sink, "sink");
+         this.ui = ChatPresenter.require(ui, "ui");
+         this.background = ChatPresenter.require(background, "background");
+@@ -67,9 +88,16 @@
+         this.labels = ChatPresenter.require(labels, "labels");
+         this.branchId = Guard.id((String)branchId, (String)"branchId");
+         this.drafts = drafts == null ? ChatDraftStore.NOOP : drafts;
++        this.translator = translator;
++        this.search = search;
++        this.speaker = speaker;
+         this.session = new ReadingSession(ChatPresenter.require(reading, "reading"));
+-        this.state = ChatViewState.initial(this.branchId, settings.model(), settings.thinkingEnabled(), key.isConfigured());
++        this.state = ChatViewState.initial(this.branchId, settings.model(), settings.thinkingEnabled(), key.isConfigured()).withSearchEnabled(settings.searchEnabled(), this.searchLabel());
+         data.addGenerationListener(this.branchId, this.generationChanged);
++    }
++
++    private String searchLabel() {
++        return this.search == null ? "" : this.search.engineLabel();
+     }
+ 
+     public ChatViewState state() {
+@@ -201,6 +229,16 @@
+     }
+ 
+     @Override
++    public void onFullscreenEditOpened() {
++        this.render(this.state.withFullscreenEditing(true));
++    }
++
++    @Override
++    public void onFullscreenEditClosed() {
++        this.render(this.state.withFullscreenEditing(false));
++    }
++
++    @Override
+     public void onStopRequested() {
+         this.stopRequested = true;
+     }
+@@ -262,6 +300,9 @@
+         boolean thinking = this.state.thinkingEnabled;
+         String quote = this.state.quote;
+         this.stopRequested = false;
++        if (this.speaker != null) {
++            this.speaker.interrupt();
++        }
+         this.render(this.state.withSending(true).withStage(ChatViewState.Stage.SENDING).withFollow(true, 0));
+         this.background.execute(() -> this.publish(this.commands.send(this.branchId, text, quote, model, thinking), false, true));
+     }
+@@ -274,6 +315,34 @@
+     @Override
+     public void onResetPressed(String messageId) {
+         this.position(messageId, false);
++    }
++
++    @Override
++    public void onTranslatePressed(String messageId) {
++        ChatMessage message = this.state.message(messageId);
++        if (this.translator == null || message == null || !message.canTranslate() || this.state.isTranslating(messageId)) {
++            return;
++        }
++        GenerationModel model = this.state.model;
++        this.render(this.state.withTranslationStarted(messageId));
++        this.background.execute(() -> this.translator.translate(model, message.text, (ok, translation) -> this.ui.post(() -> this.render(this.state.withTranslationFinished(messageId, ok ? translation : "")))));
++    }
++
++    @Override
++    public void onTranslationToggled(String messageId) {
++        if (!this.state.translationVisible(messageId)) {
++            return;
++        }
++        this.render(this.state.withTranslationToggled(messageId));
++    }
++
++    @Override
++    public void onSpeakPressed(String messageId) {
++        ChatMessage message = this.state.message(messageId);
++        if (this.speaker == null || message == null || !message.canSpeak()) {
++            return;
++        }
++        this.speaker.onSpeakPressed(messageId, message.text);
+     }
+ 
+     private void position(String messageId, boolean retry) {
+@@ -321,7 +390,7 @@
+         }
+         this.background.execute(() -> {
+             List<ChildBranch> children = this.data.children(this.branchId, messageId);
+-            this.ui.post(() -> this.sink.openChildren(this.branchId, messageId, children));
++            this.ui.post(() -> this.sink.openChildren(messageId, children));
+         });
+     }
+ 
+@@ -382,6 +451,22 @@
+     public void onThinkingToggled(boolean enabled) {
+         this.settings.setThinkingEnabled(enabled);
+         this.render(this.state.withThinkingEnabled(enabled));
++    }
++
++    @Override
++    public void onSearchToggled(boolean enabled) {
++        if (enabled && this.search != null && !this.search.hasCredential()) {
++            this.render(this.state.withNotice(HomeViewState.Notice.SEARCH_KEY_MISSING));
++            this.sink.openSettings();
++            return;
++        }
++        this.settings.setSearchEnabled(enabled);
++        this.render(this.state.withSearchEnabled(enabled, this.searchLabel()));
++    }
++
++    @Override
++    public void onSearchOpenSettings() {
++        this.sink.openSettings();
+     }
+ 
+     @Override
+@@ -468,6 +553,10 @@
+         this.ui.post(() -> this.render(this.state.withNotice(HomeViewState.Notice.READING_POSITION)));
+     }
+ 
++    public void notifyReadingPositionRefused() {
++        this.noticeReadingFailure();
++    }
++
+     private void fork(String messageId, String question, String quote, int startInclusive, int endExclusive) {
+         this.background.execute(() -> this.publish(this.commands.fork(messageId, question, quote, startInclusive, endExclusive), true, false));
+     }
+@@ -475,7 +564,7 @@
+     private void publish(ChatCommandResult result, boolean mayOpenBranch, boolean clearDraft) {
+         this.ui.post(() -> {
+             if (result.isAccepted()) {
+-                ChatViewState next = this.state.withSending(false).withNotice(null);
++                ChatViewState next = this.state.withSending(false).withNotice(result.postNotice());
+                 this.render(clearDraft ? next.withDraft("").withQuote("") : next);
+                 if (mayOpenBranch && !result.branchId().isEmpty()) {
+                     this.sink.openBranch(result.branchId());
+@@ -529,5 +618,13 @@
+         }
+         return value;
+     }
++
++    public static interface Translator {
++        public void translate(GenerationModel var1, String var2, Callback var3);
++
++        public static interface Callback {
++            public void onFinished(boolean var1, String var2);
++        }
++    }
+ }
+ 
+
+===== com/treelearn/app/ui/ChatSink.java  (+1 -1) =====
+--- HEAD/com/treelearn/app/ui/ChatSink.java
++++ PRELOSS/com/treelearn/app/ui/ChatSink.java
+@@ -13,7 +13,7 @@
+ 
+     public void openBranch(String var1);
+ 
+-    public void openChildren(String var1, String var2, List<ChildBranch> var3);
++    public void openChildren(String var1, List<ChildBranch> var2);
+ 
+     public void openVersions(String var1, List<AnswerRevision> var2);
+ 
+
+===== com/treelearn/app/ui/ChatViewState.java  (+136 -9) =====
+--- HEAD/com/treelearn/app/ui/ChatViewState.java
++++ PRELOSS/com/treelearn/app/ui/ChatViewState.java
+@@ -8,8 +8,10 @@
+ import com.treelearn.core.domain.Guard;
+ import java.util.ArrayList;
+ import java.util.Collections;
++import java.util.LinkedHashMap;
+ import java.util.LinkedHashSet;
+ import java.util.List;
++import java.util.Map;
+ import java.util.Set;
+ 
+ public final class ChatViewState {
+@@ -34,8 +36,12 @@
+     public final boolean followLatest;
+     public final int missedCount;
+     public final boolean archived;
+-
+-    private ChatViewState(Phase phase, String branchId, String branchTitle, List<ChatMessage> messages, String draft, String quote, boolean keyConfigured, GenerationModel model, boolean thinkingEnabled, Set<String> expandedReasoning, Set<String> collapsedReasoning, List<Recommendation> recommendations, String recommendationsMessageId, HomeViewState.Notice notice, boolean sending, SourceCard sourceCard, boolean sourceCardExpanded, Stage stage, boolean followLatest, int missedCount, boolean archived) {
++    public final boolean fullscreenEditing;
++    public final Translations translations;
++    public final boolean searchEnabled;
++    public final String searchEngineLabel;
++
++    private ChatViewState(Phase phase, String branchId, String branchTitle, List<ChatMessage> messages, String draft, String quote, boolean keyConfigured, GenerationModel model, boolean thinkingEnabled, Set<String> expandedReasoning, Set<String> collapsedReasoning, List<Recommendation> recommendations, String recommendationsMessageId, HomeViewState.Notice notice, boolean sending, SourceCard sourceCard, boolean sourceCardExpanded, Stage stage, boolean followLatest, int missedCount, boolean archived, boolean fullscreenEditing, Translations translations, boolean searchEnabled, String searchEngineLabel) {
+         this.phase = (Phase)((Object)Guard.object((Object)((Object)phase), (String)"phase"));
+         this.branchId = Guard.id((String)branchId, (String)"branchId");
+         this.branchTitle = branchTitle == null ? "" : branchTitle;
+@@ -57,10 +63,14 @@
+         this.followLatest = followLatest;
+         this.missedCount = Math.max(0, missedCount);
+         this.archived = archived;
++        this.fullscreenEditing = fullscreenEditing;
++        this.translations = translations == null ? Translations.EMPTY : translations;
++        this.searchEnabled = searchEnabled;
++        this.searchEngineLabel = searchEngineLabel == null ? "" : searchEngineLabel;
+     }
+ 
+     public static ChatViewState initial(String branchId, GenerationModel model, boolean thinkingEnabled, boolean keyConfigured) {
+-        return new ChatViewState(Phase.LOADING, branchId, "", Collections.emptyList(), "", "", keyConfigured, model, thinkingEnabled, Collections.emptySet(), Collections.emptySet(), Collections.emptyList(), "", null, false, null, false, Stage.IDLE, true, 0, false);
++        return new ChatViewState(Phase.LOADING, branchId, "", Collections.emptyList(), "", "", keyConfigured, model, thinkingEnabled, Collections.emptySet(), Collections.emptySet(), Collections.emptyList(), "", null, false, null, false, Stage.IDLE, true, 0, false, false, Translations.EMPTY, false, "");
+     }
+ 
+     public ChatMessage message(String messageId) {
+@@ -167,27 +177,71 @@
+     }
+ 
+     private ChatViewState copy(Phase nextPhase, String nextBranchTitle, List<ChatMessage> nextMessages, String nextDraft, String nextQuote, boolean nextKeyConfigured, GenerationModel nextModel, boolean nextThinkingEnabled, Set<String> nextExpanded, Set<String> nextCollapsed, List<Recommendation> nextRecommendations, String nextRecommendationsMessageId, HomeViewState.Notice nextNotice, boolean nextSending) {
+-        return new ChatViewState(nextPhase, this.branchId, nextBranchTitle, nextMessages, nextDraft, nextQuote, nextKeyConfigured, nextModel, nextThinkingEnabled, nextExpanded, nextCollapsed, nextRecommendations, nextRecommendationsMessageId, nextNotice, nextSending, this.sourceCard, this.sourceCardExpanded, this.stage, this.followLatest, this.missedCount, this.archived);
++        return new ChatViewState(nextPhase, this.branchId, nextBranchTitle, nextMessages, nextDraft, nextQuote, nextKeyConfigured, nextModel, nextThinkingEnabled, nextExpanded, nextCollapsed, nextRecommendations, nextRecommendationsMessageId, nextNotice, nextSending, this.sourceCard, this.sourceCardExpanded, this.stage, this.followLatest, this.missedCount, this.archived, this.fullscreenEditing, this.translations, this.searchEnabled, this.searchEngineLabel);
+     }
+ 
+     public ChatViewState withSourceCard(SourceCard value) {
+-        return new ChatViewState(this.phase, this.branchId, this.branchTitle, this.messages, this.draft, this.quote, this.keyConfigured, this.model, this.thinkingEnabled, this.expandedReasoning, this.collapsedReasoning, this.recommendations, this.recommendationsMessageId, this.notice, this.sending, value, this.sourceCardExpanded, this.stage, this.followLatest, this.missedCount, this.archived);
++        return new ChatViewState(this.phase, this.branchId, this.branchTitle, this.messages, this.draft, this.quote, this.keyConfigured, this.model, this.thinkingEnabled, this.expandedReasoning, this.collapsedReasoning, this.recommendations, this.recommendationsMessageId, this.notice, this.sending, value, this.sourceCardExpanded, this.stage, this.followLatest, this.missedCount, this.archived, this.fullscreenEditing, this.translations, this.searchEnabled, this.searchEngineLabel);
+     }
+ 
+     public ChatViewState withSourceCardExpanded(boolean value) {
+-        return new ChatViewState(this.phase, this.branchId, this.branchTitle, this.messages, this.draft, this.quote, this.keyConfigured, this.model, this.thinkingEnabled, this.expandedReasoning, this.collapsedReasoning, this.recommendations, this.recommendationsMessageId, this.notice, this.sending, this.sourceCard, value, this.stage, this.followLatest, this.missedCount, this.archived);
++        return new ChatViewState(this.phase, this.branchId, this.branchTitle, this.messages, this.draft, this.quote, this.keyConfigured, this.model, this.thinkingEnabled, this.expandedReasoning, this.collapsedReasoning, this.recommendations, this.recommendationsMessageId, this.notice, this.sending, this.sourceCard, value, this.stage, this.followLatest, this.missedCount, this.archived, this.fullscreenEditing, this.translations, this.searchEnabled, this.searchEngineLabel);
+     }
+ 
+     public ChatViewState withStage(Stage value) {
+-        return new ChatViewState(this.phase, this.branchId, this.branchTitle, this.messages, this.draft, this.quote, this.keyConfigured, this.model, this.thinkingEnabled, this.expandedReasoning, this.collapsedReasoning, this.recommendations, this.recommendationsMessageId, this.notice, this.sending, this.sourceCard, this.sourceCardExpanded, value == null ? Stage.IDLE : value, this.followLatest, this.missedCount, this.archived);
++        return new ChatViewState(this.phase, this.branchId, this.branchTitle, this.messages, this.draft, this.quote, this.keyConfigured, this.model, this.thinkingEnabled, this.expandedReasoning, this.collapsedReasoning, this.recommendations, this.recommendationsMessageId, this.notice, this.sending, this.sourceCard, this.sourceCardExpanded, value == null ? Stage.IDLE : value, this.followLatest, this.missedCount, this.archived, this.fullscreenEditing, this.translations, this.searchEnabled, this.searchEngineLabel);
+     }
+ 
+     public ChatViewState withFollow(boolean following, int missedSoFar) {
+-        return new ChatViewState(this.phase, this.branchId, this.branchTitle, this.messages, this.draft, this.quote, this.keyConfigured, this.model, this.thinkingEnabled, this.expandedReasoning, this.collapsedReasoning, this.recommendations, this.recommendationsMessageId, this.notice, this.sending, this.sourceCard, this.sourceCardExpanded, this.stage, following, missedSoFar, this.archived);
++        return new ChatViewState(this.phase, this.branchId, this.branchTitle, this.messages, this.draft, this.quote, this.keyConfigured, this.model, this.thinkingEnabled, this.expandedReasoning, this.collapsedReasoning, this.recommendations, this.recommendationsMessageId, this.notice, this.sending, this.sourceCard, this.sourceCardExpanded, this.stage, following, missedSoFar, this.archived, this.fullscreenEditing, this.translations, this.searchEnabled, this.searchEngineLabel);
+     }
+ 
+     public ChatViewState withArchived(boolean value) {
+-        return new ChatViewState(this.phase, this.branchId, this.branchTitle, this.messages, this.draft, this.quote, this.keyConfigured, this.model, this.thinkingEnabled, this.expandedReasoning, this.collapsedReasoning, this.recommendations, this.recommendationsMessageId, this.notice, this.sending, this.sourceCard, this.sourceCardExpanded, this.stage, this.followLatest, this.missedCount, value);
++        return new ChatViewState(this.phase, this.branchId, this.branchTitle, this.messages, this.draft, this.quote, this.keyConfigured, this.model, this.thinkingEnabled, this.expandedReasoning, this.collapsedReasoning, this.recommendations, this.recommendationsMessageId, this.notice, this.sending, this.sourceCard, this.sourceCardExpanded, this.stage, this.followLatest, this.missedCount, value, this.fullscreenEditing, this.translations, this.searchEnabled, this.searchEngineLabel);
++    }
++
++    public ChatViewState withFullscreenEditing(boolean value) {
++        return new ChatViewState(this.phase, this.branchId, this.branchTitle, this.messages, this.draft, this.quote, this.keyConfigured, this.model, this.thinkingEnabled, this.expandedReasoning, this.collapsedReasoning, this.recommendations, this.recommendationsMessageId, this.notice, this.sending, this.sourceCard, this.sourceCardExpanded, this.stage, this.followLatest, this.missedCount, this.archived, value, this.translations, this.searchEnabled, this.searchEngineLabel);
++    }
++
++    public boolean fullscreenEditEntryAvailable() {
++        return !this.archived && this.keyConfigured && !this.draft.trim().isEmpty();
++    }
++
++    public ChatViewState withTranslationStarted(String messageId) {
++        return new ChatViewState(this.phase, this.branchId, this.branchTitle, this.messages, this.draft, this.quote, this.keyConfigured, this.model, this.thinkingEnabled, this.expandedReasoning, this.collapsedReasoning, this.recommendations, this.recommendationsMessageId, this.notice, this.sending, this.sourceCard, this.sourceCardExpanded, this.stage, this.followLatest, this.missedCount, this.archived, this.fullscreenEditing, this.translations.started(messageId), this.searchEnabled, this.searchEngineLabel);
++    }
++
++    public ChatViewState withTranslationFinished(String messageId, String translation) {
++        return new ChatViewState(this.phase, this.branchId, this.branchTitle, this.messages, this.draft, this.quote, this.keyConfigured, this.model, this.thinkingEnabled, this.expandedReasoning, this.collapsedReasoning, this.recommendations, this.recommendationsMessageId, this.notice, this.sending, this.sourceCard, this.sourceCardExpanded, this.stage, this.followLatest, this.missedCount, this.archived, this.fullscreenEditing, this.translations.finished(messageId, translation), this.searchEnabled, this.searchEngineLabel);
++    }
++
++    public ChatViewState withTranslationToggled(String messageId) {
++        return new ChatViewState(this.phase, this.branchId, this.branchTitle, this.messages, this.draft, this.quote, this.keyConfigured, this.model, this.thinkingEnabled, this.expandedReasoning, this.collapsedReasoning, this.recommendations, this.recommendationsMessageId, this.notice, this.sending, this.sourceCard, this.sourceCardExpanded, this.stage, this.followLatest, this.missedCount, this.archived, this.fullscreenEditing, this.translations.toggled(messageId), this.searchEnabled, this.searchEngineLabel);
++    }
++
++    public ChatViewState withSearchEnabled(boolean value, String engineLabel) {
++        return new ChatViewState(this.phase, this.branchId, this.branchTitle, this.messages, this.draft, this.quote, this.keyConfigured, this.model, this.thinkingEnabled, this.expandedReasoning, this.collapsedReasoning, this.recommendations, this.recommendationsMessageId, this.notice, this.sending, this.sourceCard, this.sourceCardExpanded, this.stage, this.followLatest, this.missedCount, this.archived, this.fullscreenEditing, this.translations, value, engineLabel);
++    }
++
++    public boolean isTranslating(String messageId) {
++        return this.translations.isRunning(messageId);
++    }
++
++    public boolean translationFailed(String messageId) {
++        return this.translations.isFailed(messageId);
++    }
++
++    public String translationText(String messageId) {
++        return this.translations.textOf(messageId);
++    }
++
++    public boolean translationExpanded(String messageId) {
++        return this.translations.isExpanded(messageId);
++    }
++
++    public boolean translationVisible(String messageId) {
++        return this.translations.isVisible(messageId);
+     }
+ 
+     public static enum Phase {
+@@ -208,6 +262,79 @@
+ 
+     }
+ 
++    public static final class Translations {
++        public static final Translations EMPTY = new Translations(Collections.emptyMap(), Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
++        private final Map<String, String> texts;
++        private final Set<String> failed;
++        private final Set<String> running;
++        private final Set<String> collapsed;
++
++        private Translations(Map<String, String> texts, Set<String> failed, Set<String> running, Set<String> collapsed) {
++            this.texts = Collections.unmodifiableMap(new LinkedHashMap<String, String>(texts));
++            this.failed = Collections.unmodifiableSet(new LinkedHashSet<String>(failed));
++            this.running = Collections.unmodifiableSet(new LinkedHashSet<String>(running));
++            this.collapsed = Collections.unmodifiableSet(new LinkedHashSet<String>(collapsed));
++        }
++
++        public boolean isRunning(String messageId) {
++            return this.running.contains(messageId);
++        }
++
++        public boolean isFailed(String messageId) {
++            return this.failed.contains(messageId);
++        }
++
++        public String textOf(String messageId) {
++            return this.texts.get(messageId);
++        }
++
++        public boolean isExpanded(String messageId) {
++            return this.texts.containsKey(messageId) && !this.collapsed.contains(messageId);
++        }
++
++        public boolean isVisible(String messageId) {
++            return this.isRunning(messageId) || this.isFailed(messageId) || this.texts.containsKey(messageId);
++        }
++
++        public Translations started(String messageId) {
++            LinkedHashMap<String, String> nextTexts = new LinkedHashMap<String, String>(this.texts);
++            nextTexts.remove(messageId);
++            LinkedHashSet<String> nextFailed = new LinkedHashSet<String>(this.failed);
++            nextFailed.remove(messageId);
++            LinkedHashSet<String> nextCollapsed = new LinkedHashSet<String>(this.collapsed);
++            nextCollapsed.remove(messageId);
++            LinkedHashSet<String> nextRunning = new LinkedHashSet<String>(this.running);
++            nextRunning.add(messageId);
++            return new Translations(nextTexts, nextFailed, nextRunning, nextCollapsed);
++        }
++
++        public Translations finished(String messageId, String translation) {
++            LinkedHashSet<String> nextRunning = new LinkedHashSet<String>(this.running);
++            nextRunning.remove(messageId);
++            if (translation == null || translation.trim().isEmpty()) {
++                LinkedHashSet<String> nextFailed = new LinkedHashSet<String>(this.failed);
++                nextFailed.add(messageId);
++                return new Translations(this.texts, nextFailed, nextRunning, this.collapsed);
++            }
++            LinkedHashMap<String, String> nextTexts = new LinkedHashMap<String, String>(this.texts);
++            nextTexts.put(messageId, translation);
++            return new Translations(nextTexts, this.failed, nextRunning, this.collapsed);
++        }
++
++        public Translations toggled(String messageId) {
++            if (!this.texts.containsKey(messageId)) {
++                return this;
++            }
++            LinkedHashSet<String> nextCollapsed = new LinkedHashSet<String>(this.collapsed);
++            if (nextCollapsed.contains(messageId)) {
++                nextCollapsed.remove(messageId);
++            } else {
++                nextCollapsed.add(messageId);
++            }
++            return new Translations(this.texts, this.failed, this.running, nextCollapsed);
++        }
++    }
++
+     public static enum SendState {
+         DISABLED,
+         SEND,
+
+===== com/treelearn/app/ui/HomeActions.java  (+2 -0) =====
+--- HEAD/com/treelearn/app/ui/HomeActions.java
++++ PRELOSS/com/treelearn/app/ui/HomeActions.java
+@@ -23,6 +23,8 @@
+ 
+     public void onSearchPressed();
+ 
++    public void onHeatStripTapped();
++
+     public void onModelSelected(GenerationModel var1);
+ 
+     public void onThinkingToggled(boolean var1);
+
+===== com/treelearn/app/ui/HomeData.java  (+5 -0) =====
+--- HEAD/com/treelearn/app/ui/HomeData.java
++++ PRELOSS/com/treelearn/app/ui/HomeData.java
+@@ -1,5 +1,6 @@
+ package com.treelearn.app.ui;
+ 
++import com.treelearn.app.ui.HomeStats;
+ import com.treelearn.app.ui.Recommendation;
+ import com.treelearn.app.ui.TopicCard;
+ import java.util.ArrayList;
+@@ -18,6 +19,10 @@
+     public List<TopicCard> recentTopics();
+ 
+     public Recommendations recommendations(boolean var1);
++
++    default public HomeStats stats() {
++        throw new UnsupportedOperationException("stats is not implemented by this data port");
++    }
+ 
+     public static final class Recommendations {
+         public final List<Recommendation> items;
+
+===== com/treelearn/app/ui/HomePresenter.java  (+17 -1) =====
+--- HEAD/com/treelearn/app/ui/HomePresenter.java
++++ PRELOSS/com/treelearn/app/ui/HomePresenter.java
+@@ -3,6 +3,7 @@
+ import com.treelearn.app.ui.HomeActions;
+ import com.treelearn.app.ui.HomeData;
+ import com.treelearn.app.ui.HomeSink;
++import com.treelearn.app.ui.HomeStats;
+ import com.treelearn.app.ui.HomeViewState;
+ import com.treelearn.app.ui.KeyVault;
+ import com.treelearn.app.ui.Recommendation;
+@@ -159,6 +160,10 @@
+         this.sink.openSearch();
+     }
+ 
++    @Override
++    public void onHeatStripTapped() {
++    }
++
+     private void submit(String question, GenerationModel model, boolean thinking) {
+         SubmitResult result;
+         try {
+@@ -196,7 +201,18 @@
+         }
+         List recommendations = loadedStrip;
+         boolean hasTopics = !topics.isEmpty();
+-        this.post(current -> current.withTopics(topics).withRecommendations(recommendations).withPhase(hasTopics ? HomeViewState.Phase.READY : HomeViewState.Phase.EMPTY).withNotice(null));
++        HomeViewState.HeatStrip heatStrip = this.loadHeatStrip();
++        this.post(current -> current.withTopics(topics).withRecommendations(recommendations).withPhase(hasTopics ? HomeViewState.Phase.READY : HomeViewState.Phase.EMPTY).withNotice(null).withHeatStrip(heatStrip));
++    }
++
++    private HomeViewState.HeatStrip loadHeatStrip() {
++        try {
++            HomeStats stats = this.data.stats();
++            return stats.empty ? HomeViewState.HeatStrip.empty() : HomeViewState.HeatStrip.visible(stats.intensities, stats.streakDays);
++        }
++        catch (RuntimeException statsUnavailable) {
++            return HomeViewState.HeatStrip.hidden();
++        }
+     }
+ 
+     private void post(UnaryOperator<HomeViewState> transition) {
+
+===== com/treelearn/app/ui/HomeViewState.java  (+53 -12) =====
+--- HEAD/com/treelearn/app/ui/HomeViewState.java
++++ PRELOSS/com/treelearn/app/ui/HomeViewState.java
+@@ -19,8 +19,9 @@
+     public final List<Recommendation> recommendations;
+     public final boolean submitting;
+     public final Notice notice;
++    public final HeatStrip heatStrip;
+ 
+-    private HomeViewState(Phase phase, String draft, boolean keyConfigured, GenerationModel model, boolean thinkingEnabled, List<TopicCard> topics, List<Recommendation> recommendations, boolean submitting, Notice notice) {
++    private HomeViewState(Phase phase, String draft, boolean keyConfigured, GenerationModel model, boolean thinkingEnabled, List<TopicCard> topics, List<Recommendation> recommendations, boolean submitting, Notice notice, HeatStrip heatStrip) {
+         this.phase = phase;
+         this.draft = draft == null ? "" : draft;
+         this.keyConfigured = keyConfigured;
+@@ -30,10 +31,11 @@
+         this.recommendations = Collections.unmodifiableList(new ArrayList<Recommendation>(recommendations));
+         this.submitting = submitting;
+         this.notice = notice;
++        this.heatStrip = heatStrip;
+     }
+ 
+     public static HomeViewState initial(GenerationModel model, boolean thinkingEnabled, boolean keyConfigured) {
+-        return new HomeViewState(Phase.LOADING, "", keyConfigured, model, thinkingEnabled, Collections.emptyList(), Collections.emptyList(), false, null);
++        return new HomeViewState(Phase.LOADING, "", keyConfigured, model, thinkingEnabled, Collections.emptyList(), Collections.emptyList(), false, null, HeatStrip.hidden());
+     }
+ 
+     public boolean canSubmit() {
+@@ -41,39 +43,43 @@
+     }
+ 
+     public HomeViewState withPhase(Phase value) {
+-        return new HomeViewState(value, this.draft, this.keyConfigured, this.model, this.thinkingEnabled, this.topics, this.recommendations, this.submitting, this.notice);
++        return new HomeViewState(value, this.draft, this.keyConfigured, this.model, this.thinkingEnabled, this.topics, this.recommendations, this.submitting, this.notice, this.heatStrip);
+     }
+ 
+     public HomeViewState withDraft(String value) {
+-        return new HomeViewState(this.phase, value, this.keyConfigured, this.model, this.thinkingEnabled, this.topics, this.recommendations, this.submitting, this.notice);
++        return new HomeViewState(this.phase, value, this.keyConfigured, this.model, this.thinkingEnabled, this.topics, this.recommendations, this.submitting, this.notice, this.heatStrip);
+     }
+ 
+     public HomeViewState withKeyConfigured(boolean value) {
+-        return new HomeViewState(this.phase, this.draft, value, this.model, this.thinkingEnabled, this.topics, this.recommendations, this.submitting, this.notice);
++        return new HomeViewState(this.phase, this.draft, value, this.model, this.thinkingEnabled, this.topics, this.recommendations, this.submitting, this.notice, this.heatStrip);
+     }
+ 
+     public HomeViewState withModel(GenerationModel value) {
+-        return new HomeViewState(this.phase, this.draft, this.keyConfigured, value, this.thinkingEnabled, this.topics, this.recommendations, this.submitting, this.notice);
++        return new HomeViewState(this.phase, this.draft, this.keyConfigured, value, this.thinkingEnabled, this.topics, this.recommendations, this.submitting, this.notice, this.heatStrip);
+     }
+ 
+     public HomeViewState withThinkingEnabled(boolean value) {
+-        return new HomeViewState(this.phase, this.draft, this.keyConfigured, this.model, value, this.topics, this.recommendations, this.submitting, this.notice);
++        return new HomeViewState(this.phase, this.draft, this.keyConfigured, this.model, value, this.topics, this.recommendations, this.submitting, this.notice, this.heatStrip);
+     }
+ 
+     public HomeViewState withTopics(List<TopicCard> value) {
+-        return new HomeViewState(this.phase, this.draft, this.keyConfigured, this.model, this.thinkingEnabled, value, this.recommendations, this.submitting, this.notice);
++        return new HomeViewState(this.phase, this.draft, this.keyConfigured, this.model, this.thinkingEnabled, value, this.recommendations, this.submitting, this.notice, this.heatStrip);
+     }
+ 
+     public HomeViewState withRecommendations(List<Recommendation> value) {
+-        return new HomeViewState(this.phase, this.draft, this.keyConfigured, this.model, this.thinkingEnabled, this.topics, value, this.submitting, this.notice);
++        return new HomeViewState(this.phase, this.draft, this.keyConfigured, this.model, this.thinkingEnabled, this.topics, value, this.submitting, this.notice, this.heatStrip);
+     }
+ 
+     public HomeViewState withSubmitting(boolean value) {
+-        return new HomeViewState(this.phase, this.draft, this.keyConfigured, this.model, this.thinkingEnabled, this.topics, this.recommendations, value, this.notice);
++        return new HomeViewState(this.phase, this.draft, this.keyConfigured, this.model, this.thinkingEnabled, this.topics, this.recommendations, value, this.notice, this.heatStrip);
+     }
+ 
+     public HomeViewState withNotice(Notice value) {
+-        return new HomeViewState(this.phase, this.draft, this.keyConfigured, this.model, this.thinkingEnabled, this.topics, this.recommendations, this.submitting, value);
++        return new HomeViewState(this.phase, this.draft, this.keyConfigured, this.model, this.thinkingEnabled, this.topics, this.recommendations, this.submitting, value, this.heatStrip);
++    }
++
++    public HomeViewState withHeatStrip(HeatStrip value) {
++        return new HomeViewState(this.phase, this.draft, this.keyConfigured, this.model, this.thinkingEnabled, this.topics, this.recommendations, this.submitting, this.notice, value);
+     }
+ 
+     public static enum Phase {
+@@ -89,11 +95,15 @@
+         KEY_REJECTED,
+         BALANCE_UNAVAILABLE,
+         REQUEST_REJECTED,
++        HISTORY_COMPRESSED,
+         RATE_LIMITED,
+         PROVIDER_UNAVAILABLE,
+         NETWORK_INTERRUPTED,
+         STORAGE,
+-        READING_POSITION;
++        READING_POSITION,
++        SEARCH_KEY_MISSING,
++        SEARCH_FAILED,
++        SEARCH_EMPTY;
+ 
+ 
+         public static Notice from(AiGatewayError.Kind kind) {
+@@ -137,5 +147,36 @@
+             throw new IllegalArgumentException("unmapped first-topic refusal: " + refusal);
+         }
+     }
++
++    public static final class HeatStrip {
++        public final Status status;
++        public final float[] intensities;
++        public final int streakDays;
++
++        private HeatStrip(Status status, float[] intensities, int streakDays) {
++            this.status = status;
++            this.intensities = intensities;
++            this.streakDays = streakDays;
++        }
++
++        public static HeatStrip hidden() {
++            return new HeatStrip(Status.HIDDEN, new float[0], 0);
++        }
++
++        public static HeatStrip empty() {
++            return new HeatStrip(Status.EMPTY, new float[0], 0);
++        }
++
++        public static HeatStrip visible(float[] intensities, int streakDays) {
++            return new HeatStrip(Status.VISIBLE, intensities, streakDays);
++        }
++
++        public static enum Status {
++            HIDDEN,
++            EMPTY,
++            VISIBLE;
++
++        }
++    }
+ }
+ 
+
+===== com/treelearn/app/ui/KeyVault.java  (+2 -0) =====
+--- HEAD/com/treelearn/app/ui/KeyVault.java
++++ PRELOSS/com/treelearn/app/ui/KeyVault.java
+@@ -2,5 +2,7 @@
+ 
+ public interface KeyVault {
+     public boolean isConfigured();
++
++    public boolean isConfigured(String var1);
+ }
+ 
+
+===== com/treelearn/app/ui/SettingsStore.java  (+4 -0) =====
+--- HEAD/com/treelearn/app/ui/SettingsStore.java
++++ PRELOSS/com/treelearn/app/ui/SettingsStore.java
+@@ -11,6 +11,10 @@
+     public boolean thinkingEnabled();
+ 
+     public void setThinkingEnabled(boolean var1);
++
++    public boolean searchEnabled();
++
++    public void setSearchEnabled(boolean var1);
+ 
+     public KeySnapshot readKey();
+ 
+
+===== com/treelearn/app/wiring/AndroidSettingsStore.java  (+23 -4) =====
+--- HEAD/com/treelearn/app/wiring/AndroidSettingsStore.java
++++ PRELOSS/com/treelearn/app/wiring/AndroidSettingsStore.java
+@@ -13,6 +13,7 @@
+ public final class AndroidSettingsStore
+ implements SettingsStore,
+ KeyVault {
++    private static final String BUILTIN_DEEPSEEK_ID = "00000000-0000-0000-0000-000000000001";
+     private final SettingsRepository preferences;
+     private final KeystoreSecretStore secrets;
+ 
+@@ -42,8 +43,24 @@
+     }
+ 
+     @Override
++    public boolean searchEnabled() {
++        return this.preferences.searchEnabled();
++    }
++
++    @Override
++    public void setSearchEnabled(boolean enabled) {
++        this.preferences.setSearchEnabled(enabled);
++    }
++
++    @Override
+     public boolean isConfigured() {
+-        return this.secrets.hasSecret();
++        return this.isConfigured(BUILTIN_DEEPSEEK_ID);
++    }
++
++    @Override
++    public boolean isConfigured(String providerId) {
++        this.secrets.migrateLegacySecret(BUILTIN_DEEPSEEK_ID);
++        return this.secrets.hasSecret(providerId);
+     }
+ 
+     /*
+@@ -51,12 +68,13 @@
+      */
+     @Override
+     public KeySnapshot readKey() {
+-        if (!this.secrets.hasSecret()) {
++        this.secrets.migrateLegacySecret(BUILTIN_DEEPSEEK_ID);
++        if (!this.secrets.hasSecret(BUILTIN_DEEPSEEK_ID)) {
+             return KeySnapshot.missing();
+         }
+         char[] secret = null;
+         try {
+-            secret = this.secrets.read();
++            secret = this.secrets.read(BUILTIN_DEEPSEEK_ID);
+             KeySnapshot keySnapshot = KeySnapshot.ofStoredKey(secret);
+             return keySnapshot;
+         }
+@@ -74,7 +92,7 @@
+     @Override
+     public void saveKey(char[] secret) throws SettingsStore.SecretStoreRefused {
+         try {
+-            this.secrets.save(secret);
++            this.secrets.save(BUILTIN_DEEPSEEK_ID, secret);
+         }
+         catch (SecretStoreException refused) {
+             throw new SettingsStore.SecretStoreRefused("the keystore refused the write: " + ((Object)((Object)refused)).getClass().getSimpleName());
+@@ -83,6 +101,7 @@
+ 
+     @Override
+     public void deleteKey() {
++        this.secrets.delete(BUILTIN_DEEPSEEK_ID);
+         this.secrets.delete();
+     }
+ }
+
+===== com/treelearn/app/wiring/ChatWiring.java  (+61 -11) =====
+--- HEAD/com/treelearn/app/wiring/ChatWiring.java
++++ PRELOSS/com/treelearn/app/wiring/ChatWiring.java
+@@ -5,6 +5,7 @@
+ import com.treelearn.ai.prompt.PromptBudget;
+ import com.treelearn.app.artifact.DerivedService;
+ import com.treelearn.app.generation.GenerationCoordinator;
++import com.treelearn.app.search.web.ChatSearchStep;
+ import com.treelearn.app.ui.ChatCommandResult;
+ import com.treelearn.app.ui.ChatCommands;
+ import com.treelearn.app.ui.ChatData;
+@@ -40,6 +41,7 @@
+ import java.util.Set;
+ import java.util.concurrent.ConcurrentHashMap;
+ import java.util.concurrent.CopyOnWriteArrayList;
++import java.util.function.BooleanSupplier;
+ 
+ public final class ChatWiring
+ implements ChatData,
+@@ -51,6 +53,8 @@
+     private final Clock clock;
+     private final PromptBudget budget;
+     private final DerivedService derived;
++    private final BooleanSupplier answerSuggestions;
++    private final ChatSearchStep search;
+     private final Set<String> derivedInFlight = ConcurrentHashMap.newKeySet();
+     private final ConcurrentHashMap<String, CopyOnWriteArrayList<Runnable>> generationListeners = new ConcurrentHashMap();
+     private final GenerationCoordinator.Observer generationObserver = (operationId, branchId, state) -> {
+@@ -67,12 +71,22 @@
+     }
+ 
+     public ChatWiring(ChatStore store, GenerationPort generation, KeyVault keyVault, Clock clock, PromptBudget budget, DerivedService derived) {
++        this(store, generation, keyVault, clock, budget, derived, () -> true);
++    }
++
++    public ChatWiring(ChatStore store, GenerationPort generation, KeyVault keyVault, Clock clock, PromptBudget budget, DerivedService derived, BooleanSupplier answerSuggestions) {
++        this(store, generation, keyVault, clock, budget, derived, answerSuggestions, null);
++    }
++
++    public ChatWiring(ChatStore store, GenerationPort generation, KeyVault keyVault, Clock clock, PromptBudget budget, DerivedService derived, BooleanSupplier answerSuggestions, ChatSearchStep search) {
+         this.store = ChatWiring.require(store, "store");
+         this.generation = ChatWiring.require(generation, "generation");
+         this.keyVault = ChatWiring.require(keyVault, "keyVault");
+         this.clock = ChatWiring.require(clock, "clock");
+         this.budget = ChatWiring.require(budget, "budget");
+         this.derived = derived;
++        this.answerSuggestions = ChatWiring.require(answerSuggestions, "answerSuggestions");
++        this.search = search;
+         this.generation.addObserver(this.generationObserver);
+     }
+ 
+@@ -97,7 +111,7 @@
+             ChatStore.Conversation captured = conversation;
+             Thread worker = new Thread(() -> {
+                 try {
+-                    this.derived.ensureConversationArtifacts(captured, GenerationModel.FLASH);
++                    this.derived.ensureConversationArtifacts(captured, GenerationModel.FLASH, this.answerSuggestions.getAsBoolean());
+                 }
+                 finally {
+                     this.derivedInFlight.remove(branchId);
+@@ -176,6 +190,7 @@
+ 
+     @Override
+     public ChatCommandResult send(String branchId, String text, String quote, GenerationModel model, boolean thinkingEnabled) {
++        ChatSearchStep.Result grounding;
+         Guard.id((String)branchId, (String)"branchId");
+         Guard.nonBlank((String)text, (String)"text");
+         Guard.object((Object)model, (String)"model");
+@@ -183,13 +198,34 @@
+         if (missing != null) {
+             return ChatCommandResult.refused(missing);
+         }
++        ChatSearchStep.Result result = grounding = this.search == null ? ChatSearchStep.Result.off() : this.search.run(text.trim());
++        if (grounding.status() == ChatSearchStep.Status.NOKEY) {
++            return ChatCommandResult.refused(HomeViewState.Notice.SEARCH_KEY_MISSING);
++        }
+         long now = this.clock.millis();
+         int questionOrdinal = this.store.nextOrdinal(branchId);
+         Message userMessage = Message.user((String)branchId, (int)questionOrdinal, (String)text.trim(), (String)(quote == null ? "" : quote.trim()), (long)now);
+         Message aiMessage = Message.ai((String)branchId, (int)(questionOrdinal + 1), (long)now);
+         GenerationCommand command = ChatWiring.pin(branchId, aiMessage.id, model, thinkingEnabled, now);
+         this.store.appendTurn(userMessage, aiMessage);
+-        return this.submit(command, questionOrdinal, userMessage.userContent, userMessage.quotedText());
++        ChatCommandResult result2 = this.submit(command, questionOrdinal, userMessage.userContent, userMessage.quotedText(), grounding.block());
++        if (!result2.isAccepted()) {
++            return result2;
++        }
++        HomeViewState.Notice degradation = ChatWiring.degradeOf(grounding.status());
++        return degradation == null ? result2 : ChatCommandResult.ranWithNotice(result2.operationId(), degradation);
++    }
++
++    private static HomeViewState.Notice degradeOf(ChatSearchStep.Status status) {
++        switch (status) {
++            case FAILED: {
++                return HomeViewState.Notice.SEARCH_FAILED;
++            }
++            case EMPTY: {
++                return HomeViewState.Notice.SEARCH_EMPTY;
++            }
++        }
++        return null;
+     }
+ 
+     @Override
+@@ -291,7 +327,11 @@
+     }
+ 
+     private ChatCommandResult submit(GenerationCommand command, int questionOrdinal, String input, String quote) {
+-        ContextPlan requestHistory;
++        return this.submit(command, questionOrdinal, input, quote, "");
++    }
++
++    private ChatCommandResult submit(GenerationCommand command, int questionOrdinal, String input, String quote, String groundingBlock) {
++        RequestHistory requestHistory;
+         String branchId = command.branchId;
+         try {
+             requestHistory = this.historyForRequest(branchId, questionOrdinal, command.model);
+@@ -299,15 +339,15 @@
+         catch (ChatStore.SnapshotUnreadable broken) {
+             return ChatCommandResult.refused(HomeViewState.Notice.STORAGE);
+         }
+-        GenerationCoordinator.Assembler assembler = forCommand -> DeepSeekRequestAssembler.assemble((PromptPurpose)forCommand.purpose, (boolean)forCommand.thinkingEnabled, (List)DeepSeekContextEncoder.encode((ContextPlan)requestHistory), (String)DeepSeekContextEncoder.currentInput((String)input, (String)quote), (PromptBudget)this.budget);
++        GenerationCoordinator.Assembler assembler = forCommand -> DeepSeekRequestAssembler.assemble((PromptPurpose)forCommand.purpose, (boolean)forCommand.thinkingEnabled, (List)DeepSeekContextEncoder.encode((ContextPlan)requestHistory.plan), (String)(groundingBlock.isEmpty() ? DeepSeekContextEncoder.currentInput((String)input, (String)quote) : groundingBlock + "\n" + DeepSeekContextEncoder.currentInput((String)input, (String)quote)), (PromptBudget)this.budget);
+         GenerationCoordinator.SubmitOutcome outcome = this.generation.submit(command, assembler);
+         if (outcome.isAccepted()) {
+             return ChatCommandResult.ran(outcome.operationId);
+         }
+-        return ChatCommandResult.refused(RefusalNotices.of(outcome.refusal));
+-    }
+-
+-    private ContextPlan historyForRequest(String branchId, int questionOrdinal, GenerationModel model) {
++        return ChatCommandResult.refused(RefusalNotices.of(outcome.refusal, outcome.promptReason, requestHistory.compressionApplied));
++    }
++
++    private RequestHistory historyForRequest(String branchId, int questionOrdinal, GenerationModel model) {
+         ArrayList<ContextPlan.Entry> recent;
+         ArrayList<ContextPlan.Entry> older;
+         ContextPlan compressed;
+@@ -318,7 +358,7 @@
+             ++stableCount;
+         }
+         if (stableCount <= 10 || this.derived == null || !this.keyVault.isConfigured()) {
+-            return new ContextPlan(all);
++            return new RequestHistory(new ContextPlan(all), false);
+         }
+         int split = all.size();
+         int rounds = 0;
+@@ -328,7 +368,7 @@
+             break;
+         }
+         if (split <= 0 || split >= all.size()) {
+-            return new ContextPlan(all);
++            return new RequestHistory(new ContextPlan(all), false);
+         }
+         if (split > 0 && all.get((int)split).kind == ContextPlan.EntryKind.STABLE_REVISION && all.get((int)(split - 1)).kind == ContextPlan.EntryKind.USER_MESSAGE) {
+             --split;
+@@ -339,7 +379,7 @@
+             latestRevision = all.get((int)i).refId;
+             break;
+         }
+-        return (compressed = this.derived.compressHistory(branchId, latestRevision, older = new ArrayList<ContextPlan.Entry>(all.subList(0, split)), recent = new ArrayList<ContextPlan.Entry>(all.subList(split, all.size())), model)) == null ? new ContextPlan(all) : compressed;
++        return (compressed = this.derived.compressHistory(branchId, latestRevision, older = new ArrayList<ContextPlan.Entry>(all.subList(0, split)), recent = new ArrayList<ContextPlan.Entry>(all.subList(split, all.size())), model)) == null ? new RequestHistory(new ContextPlan(all), false) : new RequestHistory(compressed, true);
+     }
+ 
+     private static GenerationCommand pin(String branchId, String messageId, GenerationModel model, boolean thinkingEnabled, long now) {
+@@ -420,5 +460,15 @@
+             this.quote = quote;
+         }
+     }
++
++    private static final class RequestHistory {
++        final ContextPlan plan;
++        final boolean compressionApplied;
++
++        RequestHistory(ContextPlan plan, boolean compressionApplied) {
++            this.plan = plan;
++            this.compressionApplied = compressionApplied;
++        }
++    }
+ }
+ 
+
+===== com/treelearn/app/wiring/HomeStore.java  (+16 -0) =====
+--- HEAD/com/treelearn/app/wiring/HomeStore.java
++++ PRELOSS/com/treelearn/app/wiring/HomeStore.java
+@@ -19,6 +19,10 @@
+     }
+ 
+     public FirstTopicCreation.Outcome createFirstTopic(Topic var1, Branch var2, Message var3, Message var4, GenerationOperation var5);
++
++    default public StatsRaw statsRaw() {
++        throw new UnsupportedOperationException("statsRaw is not implemented by this store");
++    }
+ 
+     public static final class Row {
+         public final String topicId;
+@@ -45,5 +49,17 @@
+             this.lastUsedAt = lastUsedAt;
+         }
+     }
++
++    public static final class StatsRaw {
++        public final List<Long> answerTimestamps;
++        public final long totalQuestions;
++        public final long totalMessages;
++
++        public StatsRaw(List<Long> answerTimestamps, long totalQuestions, long totalMessages) {
++            this.answerTimestamps = answerTimestamps;
++            this.totalQuestions = totalQuestions;
++            this.totalMessages = totalMessages;
++        }
++    }
+ }
+ 
+
+===== com/treelearn/app/wiring/HomeWiring.java  (+18 -4) =====
+--- HEAD/com/treelearn/app/wiring/HomeWiring.java
++++ PRELOSS/com/treelearn/app/wiring/HomeWiring.java
+@@ -8,10 +8,11 @@
+ import com.treelearn.app.artifact.ArtifactPayload;
+ import com.treelearn.app.artifact.ArtifactPayloadCodec;
+ import com.treelearn.app.artifact.DerivedResult;
+-import com.treelearn.app.artifact.DerivedService;
++import com.treelearn.app.artifact.HomeDerivedPort;
+ import com.treelearn.app.artifact.TreeOutline;
+ import com.treelearn.app.generation.GenerationCoordinator;
+ import com.treelearn.app.ui.HomeData;
++import com.treelearn.app.ui.HomeStats;
+ import com.treelearn.app.ui.HomeViewState;
+ import com.treelearn.app.ui.KeyVault;
+ import com.treelearn.app.ui.Recommendation;
+@@ -33,7 +34,10 @@
+ import com.treelearn.core.domain.Message;
+ import com.treelearn.core.domain.PromptPurpose;
+ import com.treelearn.core.domain.Topic;
++import com.treelearn.data.stats.StatsAggregator;
+ import java.time.Clock;
++import java.time.LocalDate;
++import java.time.ZoneId;
+ import java.util.ArrayList;
+ import java.util.Collections;
+ import java.util.List;
+@@ -47,13 +51,13 @@
+     private final KeyVault keyVault;
+     private final Clock clock;
+     private final PromptBudget budget;
+-    private final DerivedService derived;
++    private final HomeDerivedPort derived;
+ 
+     public HomeWiring(HomeStore store, GenerationPort generation, KeyVault keyVault, Clock clock, PromptBudget budget) {
+         this(store, generation, keyVault, clock, budget, null);
+     }
+ 
+-    public HomeWiring(HomeStore store, GenerationPort generation, KeyVault keyVault, Clock clock, PromptBudget budget, DerivedService derived) {
++    public HomeWiring(HomeStore store, GenerationPort generation, KeyVault keyVault, Clock clock, PromptBudget budget, HomeDerivedPort derived) {
+         this.store = HomeWiring.require(store, "store");
+         this.generation = HomeWiring.require(generation, "generation");
+         this.keyVault = HomeWiring.require(keyVault, "keyVault");
+@@ -102,6 +106,14 @@
+     }
+ 
+     @Override
++    public HomeStats stats() {
++        HomeStore.StatsRaw raw = this.store.statsRaw();
++        LocalDate today = LocalDate.now(this.clock);
++        StatsAggregator.StatsResult result = StatsAggregator.aggregate(raw.answerTimestamps, (long)raw.totalQuestions, (long)raw.totalMessages, (ZoneId)this.clock.getZone(), (LocalDate)today);
++        return result.isEmpty() ? HomeStats.empty() : HomeStats.of(result.activeDays(), today, result.currentStreak());
++    }
++
++    @Override
+     public SubmitResult submit(String question, GenerationModel model, boolean thinkingEnabled) {
+         String currentInput;
+         GenerationCoordinator.Assembler assembler;
+@@ -123,7 +135,9 @@
+         GenerationCoordinator.SubmitOutcome outcome = this.generation.submitFirstTopic(command, assembler = arg_0 -> this.lambda$submit$0(currentInput = question, arg_0), (operation, acceptedAt) -> this.store.createFirstTopic(topic, rootBranch, userMessage, aiMessage, operation).isCreated());
+         if (outcome.isAccepted()) {
+             if (this.derived != null) {
+-                this.derived.rootTitle(rootBranch, question, model);
++                Thread titleWorker = new Thread(() -> this.derived.rootTitle(rootBranch, question, model), "treelearn-derived-root-title");
++                titleWorker.setDaemon(true);
++                titleWorker.start();
+             }
+             return SubmitResult.accepted(rootBranch.id);
+         }
+
+===== com/treelearn/app/wiring/PromptLimits.java  (+6 -0) =====
+--- HEAD/com/treelearn/app/wiring/PromptLimits.java
++++ PRELOSS/com/treelearn/app/wiring/PromptLimits.java
+@@ -5,6 +5,12 @@
+ public final class PromptLimits {
+     public static final int CAPACITY_CHARS = 60000;
+     public static final int MIN_ANSWER_CHARS = 512;
++    public static final int SEARCH_SNIPPET_CHARS = 200;
++    public static final int SEARCH_TITLE_CHARS = 80;
++    public static final int SEARCH_QUERY_CHARS = 100;
++    public static final int SEARCH_INJECTION_LIMIT_CHARS = 4000;
++    public static final int SEARCH_CONNECT_TIMEOUT_MS = 5000;
++    public static final int SEARCH_READ_TIMEOUT_MS = 10000;
+ 
+     private PromptLimits() {
+     }
+
+===== com/treelearn/app/wiring/RefusalNotices.java  (+8 -0) =====
+--- HEAD/com/treelearn/app/wiring/RefusalNotices.java
++++ PRELOSS/com/treelearn/app/wiring/RefusalNotices.java
+@@ -1,5 +1,6 @@
+ package com.treelearn.app.wiring;
+ 
++import com.treelearn.ai.prompt.PromptBuildException;
+ import com.treelearn.app.generation.GenerationCoordinator;
+ import com.treelearn.app.ui.HomeViewState;
+ 
+@@ -8,8 +9,15 @@
+     }
+ 
+     static HomeViewState.Notice of(GenerationCoordinator.Refusal refusal) {
++        return RefusalNotices.of(refusal, null, false);
++    }
++
++    static HomeViewState.Notice of(GenerationCoordinator.Refusal refusal, PromptBuildException.Reason promptReason, boolean historyCompressionApplied) {
+         switch (refusal) {
+             case PROMPT_BUILD: {
++                if (historyCompressionApplied && promptReason == PromptBuildException.Reason.HISTORY_EXCEEDS_BUDGET) {
++                    return HomeViewState.Notice.HISTORY_COMPRESSED;
++                }
+                 return HomeViewState.Notice.REQUEST_REJECTED;
+             }
+             case BRANCH_BUSY: 
+
+===== com/treelearn/app/wiring/SqliteHomeStore.java  (+7 -0) =====
+--- HEAD/com/treelearn/app/wiring/SqliteHomeStore.java
++++ PRELOSS/com/treelearn/app/wiring/SqliteHomeStore.java
+@@ -11,6 +11,7 @@
+ import com.treelearn.data.db.TreeLearnDatabaseHelper;
+ import com.treelearn.data.db.dao.BranchDao;
+ import com.treelearn.data.db.dao.FirstTopicCreation;
++import com.treelearn.data.db.dao.StatsDao;
+ import com.treelearn.data.db.dao.TopicDao;
+ import java.util.ArrayList;
+ import java.util.Collections;
+@@ -62,5 +63,11 @@
+     public void deleteTopic(String topicId) {
+         TopicDao.delete((SQLiteDatabase)this.helper.getWritableDatabase(), (String)topicId);
+     }
++
++    @Override
++    public HomeStore.StatsRaw statsRaw() {
++        SQLiteDatabase database = this.helper.getWritableDatabase();
++        return new HomeStore.StatsRaw(StatsDao.answerTimestamps((SQLiteDatabase)database), StatsDao.questionCount((SQLiteDatabase)database), StatsDao.messageCount((SQLiteDatabase)database));
++    }
+ }
+ 
+

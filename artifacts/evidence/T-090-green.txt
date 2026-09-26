@@ -1,0 +1,8 @@
+T-090 GREEN 证据（消息翻译）
+=========================================
+Command: cd android && ./gradlew.bat --no-watch-fs --no-daemon --console=plain :app:testDebugUnitTest --tests "com.treelearn.app.generation.MessageTranslatorTest" --tests "com.treelearn.app.ui.ChatPresenterTranslationTest"
+Exit code: 0
+com.treelearn.app.generation.MessageTranslatorTest: tests=6 failures=0 errors=0 skipped=0
+com.treelearn.app.ui.ChatPresenterTranslationTest: tests=9 failures=0 errors=0 skipped=0
+Passing evidence: BUILD SUCCESSFUL（原始日志 T-090-green-raw.txt）
+Regression evidence: MessageTranslatorTest 6/6 + ChatPresenterTranslationTest 9/9 全过；含稳定回答不可变回归（translatePressed 不触任何 store 命令、finish 后 message.text 逐字不变、译文跨 store 重读存续）

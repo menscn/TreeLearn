@@ -20,9 +20,17 @@
         android:textColor="@color/tl_ink"
         android:textSize="@dimen/text_h2" />
 
-    <LinearLayout
-        android:id="@+id/child_branches_list"
+    <!-- T-041 D1: the scroll container the navigation page's list already has - a popup clips at
+         the window edge, so rows past one screen were unreachable without it. -->
+    <ScrollView
+        android:id="@+id/child_branches_scroll"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical" />
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@+id/child_branches_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </ScrollView>
 </LinearLayout>

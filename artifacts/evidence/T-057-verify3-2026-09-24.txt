@@ -1,0 +1,22 @@
+T-057 verifier #3 补强证据 — 2026-09-24
+cwd: D:/Project/Android/Treelearn
+
+[SIZING] 规模实测（验收项 7；count_production_lines.py，非空非注释口径）
+  command: python -X utf8 .trae/scripts/dev/count_production_lines.py <本片 7 枚新资产 + 2 个改动布局>
+  新增资产（本片产物）:
+    25 ic_action_quote.xml | 19 ic_action_copy.xml | 31 ic_action_fork.xml
+    | 13 ic_chat_send.xml | 13 ic_chat_close.xml | 19 ic_chat_gear.xml | 19 ic_chat_overview.xml
+    → 小计 139 行
+  改动布局（既有文件的本片增量，整文件读数含历史行）:
+    278 screen_chat_body.xml | 128 view_answer_actions.xml
+  对比 estimated_production_lines: 200 → 新资产口径 139 行低于估算；布局主体为既有代码。
+  结论：无需规模例外。
+  EXITCODE=0
+
+[REF] 门禁刷新（工作树含 T-057 全部产物 + 后续增量）
+  全量 check: artifacts/evidence/P3-B4-gates-2026-09-24.txt（EXITCODE=0）
+  no-kotlin guard: artifacts/evidence/P3-B3-no-kotlin-2026-09-24.txt（PASS）
+  设计 token 守门: 0 check(s) failed（2026-09-24 复跑）
+  validate_tasks.py: files=108 errors=0
+  GREEN 原始证据: artifacts/evidence/T-057-icon-assets-b.txt（9/9 断言通过 + 全量 :app 单测 +
+    assembleDebug + 真机安装 Success；五个 Java 文件零改动）

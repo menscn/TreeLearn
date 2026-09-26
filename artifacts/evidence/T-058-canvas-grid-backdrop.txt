@@ -1,0 +1,130 @@
+T-058 画布点阵网格背景叠加 — 汇总证据
+生成时间: 2026-09-24（脚本实时执行下列命令，输出与退出码为当场捕获）
+任务文件: .trae/tasks/T-2026-09-22-canvas-grid-backdrop-overlay-058.md (status: verified)
+计数口径: 生产行数为非空非注释行（.trae/scripts/dev/count_production_lines.py）；
+          单测计数为 Gradle test-results XML 的 tests=/failures=/errors= 属性汇总。
+
+CMD-1  RED — 目标测试命令（androidTest 编译失败，5 个「找不到符号」）
+(full log: artifacts/evidence/T-058-red-2026-09-24.log)
+EXITCODE=1
+73: D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\CanvasBackdropInstrumentedTest.java:16: 错误: 找不到符号
+78: D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\CanvasBackdropInstrumentedTest.java:39: 错误: 找不到符号
+83: D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\CanvasBackdropInstrumentedTest.java:43: 错误: 找不到符号
+88: D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\CanvasBackdropInstrumentedTest.java:58: 错误: 找不到符号
+93: D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\CanvasBackdropInstrumentedTest.java:58: 错误: 找不到符号
+100: 5 个错误
+111: D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\CanvasBackdropInstrumentedTest.java:16: 错误: 找不到符号
+116: D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\CanvasBackdropInstrumentedTest.java:39: 错误: 找不到符号
+121: D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\CanvasBackdropInstrumentedTest.java:43: 错误: 找不到符号
+126: D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\CanvasBackdropInstrumentedTest.java:58: 错误: 找不到符号
+131: D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\CanvasBackdropInstrumentedTest.java:58: 错误: 找不到符号
+136: 5 个错误
+148: BUILD FAILED in 13s
+150: EXITCODE=1
+
+CMD-2  GREEN — 与 RED 同一条命令，真机 3/3
+(full log: artifacts/evidence/T-058-green-2026-09-24.log)
+EXITCODE=0
+133: Starting 3 tests on ALP-AN00 - 13
+135: Finished 3 tests on ALP-AN00 - 13
+145: BUILD SUCCESSFUL in 28s
+147: EXITCODE=0
+
+CMD-3  全仓守门 check（首跑 dexBuilderRelease AccessDeniedException 为 Windows 瞬时文件锁，原样重跑通过）
+(full log: artifacts/evidence/T-058-check-2026-09-24.log)
+EXITCODE=0
+398: BUILD SUCCESSFUL in 52s
+400: EXITCODE=0
+
+CMD-4  tree-layout 模块测试结果（XML 属性汇总，目录 android/tree-layout/build/test-results/test/）
+$ python -X utf8 .trae/scripts/dev/collect_test_totals.py（口径同 CMD-9 的汇总方式）
+EXITCODE=0
+XML 文件数=3  tests=34 skipped=0 failures=0 errors=0
+
+CMD-5  真机 TreeCanvasStoreInstrumentedTest（画布既有回归）
+(full log: artifacts/evidence/T-058-store-instrumented-2026-09-24.log)
+EXITCODE=0
+129: Starting 8 tests on ALP-AN00 - 13
+131: Finished 8 tests on ALP-AN00 - 13
+141: BUILD SUCCESSFUL in 29s
+143: EXITCODE=0
+
+CMD-6  Java-only 守门（android/scripts/no-kotlin-check.ps1）
+（全文见 artifacts/evidence/T-058-nokotlin-2026-09-24.txt）
+EXITCODE=0
+VERDICT: PASS (13 OK line(s))
+
+CMD-7  生产行数实测（5 个新建文件，预估 120 行）
+$ python -X utf8 .trae/scripts/dev/count_production_lines.py GridBackdrop.java ic_tree_{fold,unfold,open,fit}.xml
+EXITCODE=0
+44  android/app/src/main/java/com/treelearn/app/screen/GridBackdrop.java
+    13  android/app/src/main/res/drawable/ic_tree_fold.xml
+    13  android/app/src/main/res/drawable/ic_tree_unfold.xml
+    13  android/app/src/main/res/drawable/ic_tree_open.xml
+    13  android/app/src/main/res/drawable/ic_tree_fit.xml
+    96  TOTAL (non-blank, non-comment, production files only)
+
+CMD-8  全量 :app 单测（./gradlew.bat :app:testDebugUnitTest，日志 T-058-full-unittest-2026-09-24.log，BUILD SUCCESSFUL，EXITCODE=0）
+$ python -X utf8 .trae/scripts/dev/collect_test_totals.py（XML 属性汇总，目录 android/app/build/test-results/testDebugUnitTest/）
+EXITCODE=0
+XML 文件数=69  tests=615 skipped=0 failures=0 errors=0
+
+CMD-9  开工前基线对账：T-058 未增删任何 JVM 单测（本片测试全部为 androidTest），
+615 与 T-055 收口数字一致（T-055 任务文件 GREEN 回归证据同值），对账吻合。
+
+CMD-10  本片触碰文件总览（diff --stat）
+$ git diff --stat -- android/app/src/main/res/layout/screen_tree_body.xml android/app/src/main/res/values/strings.xml android/app/src/main/java/com/treelearn/app/screen/TreeCanvasScreen.java
+EXITCODE=0
+.../com/treelearn/app/screen/TreeCanvasScreen.java |  25 ++-
+ .../app/src/main/res/layout/screen_tree_body.xml   |  42 +++--
+ android/app/src/main/res/values/strings.xml        | 174 ++++++++++++++++++---
+ 3 files changed, 198 insertions(+), 43 deletions(-)
+
+CMD-11  TreeCanvasView.java 零改动（画布自绘/命中/标签边界）
+$ git diff -- android/app/src/main/java/com/treelearn/app/screen/TreeCanvasView.java
+EXITCODE=0
+(empty output)
+
+CMD-12  tree-layout 模块零改动（已验收纯 Java 布局算法）
+$ git diff -- android/tree-layout/
+EXITCODE=0
+(empty output)
+
+CMD-13  res/values 度量文件：colors/themes 零改动；dimens.xml 仅 T-041 遗留 popup_max_height（与本片无关）
+$ git diff -- android/app/src/main/res/values/colors.xml android/app/src/main/res/values/dimens.xml android/app/src/main/res/values/themes.xml
+EXITCODE=0
+diff --git a/android/app/src/main/res/values/dimens.xml b/android/app/src/main/res/values/dimens.xml
+index 0dd30ef..a11b053 100644
+--- a/android/app/src/main/res/values/dimens.xml
++++ b/android/app/src/main/res/values/dimens.xml
+@@ -31,6 +31,9 @@
+          the prototype's own hit areas are built to it. -->
+     <dimen name="touch_min">44dp</dimen>
+     <dimen name="hairline">1dp</dimen>
++    <!-- T-041 D1: the child-branch popup caps its height so rows beyond one screen stay reachable
++         through the ScrollView that wraps its list (same intent as the navigation page's list). -->
++    <dimen name="popup_max_height">320dp</dimen>
+     <dimen name="rec_text_max">260dp</dimen>
+     <dimen name="picker_min_width">240dp</dimen>
+
+CMD-14  两套平台共用同一 body（无 sw600dp body 副本、无漂移面）+ 控制条触达 touch_min
+$ python 逐行扫描 layout/screen_tree.xml、layout-sw600dp/screen_tree.xml、layout/screen_tree_body.xml
+（筛选 screen_tree_body / cannot drift apart / touch_min / canvas_backdrop）
+EXITCODE=0
+android\app\src\main\res\layout\screen_tree.xml:4: lives in screen_tree_body.xml so the phone and the tablet cannot drift apart.
+android\app\src\main\res\layout\screen_tree.xml:12: layout="@layout/screen_tree_body"
+android\app\src\main\res\layout-sw600dp\screen_tree.xml:30: layout="@layout/screen_tree_body"
+android\app\src\main\res\layout\screen_tree_body.xml:32: android:minHeight="@dimen/touch_min"
+android\app\src\main\res\layout\screen_tree_body.xml:33: android:minWidth="@dimen/touch_min"
+android\app\src\main\res\layout\screen_tree_body.xml:57: android:minHeight="@dimen/touch_min"
+android\app\src\main\res\layout\screen_tree_body.xml:58: android:minWidth="@dimen/touch_min"
+android\app\src\main\res\layout\screen_tree_body.xml:79: android:layout_height="@dimen/touch_min"
+android\app\src\main\res\layout\screen_tree_body.xml:83: android:minHeight="@dimen/touch_min"
+android\app\src\main\res\layout\screen_tree_body.xml:90: android:layout_height="@dimen/touch_min"
+android\app\src\main\res\layout\screen_tree_body.xml:95: android:minHeight="@dimen/touch_min"
+android\app\src\main\res\layout\screen_tree_body.xml:102: android:layout_height="@dimen/touch_min"
+android\app\src\main\res\layout\screen_tree_body.xml:107: android:minHeight="@dimen/touch_min"
+android\app\src\main\res\layout\screen_tree_body.xml:121: android:id="@+id/canvas_backdrop"
+
+说明：CMD-10 的 strings.xml 174 行累计含 055–058 四个任务未提交改动（strings 为四片共写文件），
+非 T-058 单片规模；T-058 单片新增仅 cd_tree_fold/unfold/open/fit 四键。

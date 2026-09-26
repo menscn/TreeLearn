@@ -4,7 +4,7 @@ id: T-2026-09-20-016
 title: 实现纯 Java 树布局引擎
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -115,7 +115,7 @@ run 3, fail-closed stub against the shipped 34-test suite -> exit 1   [the value
 ### TDD or sizing exception — only with prior user approval
 - Exception type: sizing（实测 862 非空非注释生产行 / 12 文件，超过 500 硬上限 72%；原估算 200）
 - Reason: 该项工作量落在输入校验、几何、树冠标签栏、命中区域、拟合与锚点六个必需面；拆分会产出没有消费者的模块，而估算 200 行时低估了校验与输出模型的体量
-- User approval: PENDING（本次实现结束时向用户提出请求，尚未获批；实现者不得自行追认，故此处按「请求中」记录）
+- User approval: **2026-09-24 用户裁定「事后追认豁免」**（对话内批准；批准落在实现之后，按 `harness-tasks.md` 第 60 行如实记为事后追认）。剩余风险：单 task 超硬上限 72%；拆分会产出没有消费者的模块（见 Reason），故以豁免收口并记录。
 - Alternative verification: 完整 JVM 行为套件（34 例）+ 可复算的规模测量命令（artifacts/evidence/T-016-checks.txt 末段），未以删减功能换取行数
 
 ## Implementation notes
@@ -170,10 +170,21 @@ run 3, fail-closed stub against the shipped 34-test suite -> exit 1   [the value
 - 专项守门路由: android-no-kotlin-guard PASS（`VERDICT: PASS (13 OK line(s))`）。
 - 文档影响记录: **PASS**（修复后 README 与《技术方案》均与活动事实一致，缺口闭环，不再依赖「用户批准的延后」）。
 - 启动证据: N/A。
-- 结论: **PARTIAL**（功能判据 PASS；文档判据本轮 PASS；**规模判据 OPEN、未获批**）
-- 修复指令: 仅剩规模 —— **861-862 > 500 硬上限且无获批例外**。需用户明确批准例外，或按
-  「输入模型 + 校验」/「几何 + 标签栏 + 命中 + 拟合」拆解后重估。
-- 阻塞点与剩余风险: 规模例外未批准（**verifier 不代批**）；几何常量若再调需同步改测试并重跑（golden 由测试独立重抄）。
+- 结论: **PASS**（2026-09-24 复核 #3 收口，见下方「复核记录 #3」；verifier #2 判 PARTIAL 的唯一未决项「规模判据 OPEN」已由用户裁定解除）
+- 修复指令: 已全部执行——规模例外于 2026-09-24 获用户裁定「事后追认豁免」（见 TDD or sizing exception 节），无剩余未决项。
+- 阻塞点与剩余风险: 无阻塞。遗留风险仅两条已登记事项：几何常量若再调需同步改测试并重跑（golden 由测试独立重抄）；`HitRegion.Source.ANCHOR` 的来源断言缺失（Watch-outs ③），留待画布侧新增命中语义时补。
+
+## 复核记录 #3（独立 verifier，2026-09-24）— 收口
+
+- verifier #2（2026-09-21）判 PARTIAL 的唯一未决项是规模：862 行 > 500 硬上限且无获批例外。
+  该项已于 2026-09-24 由用户裁定「事后追认豁免」解除，并已按 `harness-tasks.md` 第 60 行登记为
+  事后追认（见 TDD or sizing exception 节 User approval 字段）。
+- 规模裁定后的状态核对（本轮实读）：任务文件无新增未决项；Blocker ②（guard dex 阶段因 DeepSeek
+  lane 在途改动而失败）所指的 `GatewayPorts`/`AiGatewayError`/`StreamOutcome`/`ProviderJson` 均
+  已落地，2026-09-24 全量 `check` 复跑 EXITCODE=0（`artifacts/evidence/P3-B4-gates-2026-09-24.txt`），
+  guard PASS（`P3-B3-no-kotlin-2026-09-24.txt`），即 Blocker ② 的 Unblock 条件已满足。
+- 本任务为纯 JVM 模块，无设备判据、无 deferred 项（verifier #2 已确认）。
+- 结论：验收 4 条全勾 + 文档一致性 PASS + 规模例外已批 → **verified**。
 ## Handoff notes
 
 - Completed: `:tree-layout` 的纯 Java 几何内核（12 个生产类型）、34 个 JVM 用例、RED/GREEN/回归/纯度/Java-only/规模证据（`artifacts/evidence/T-016-{red,green,checks}.txt`）。RED exit 1 → GREEN exit 0；回归在并发编辑 `:core` 前后各测一次（132 例 → 154 例）均 0 失败，未出现跨 lane 干扰。

@@ -1,0 +1,21 @@
+T-056 verifier #3 补强证据 — 2026-09-24
+cwd: D:/Project/Android/Treelearn
+
+[SIZING] 规模实测（验收项 6；count_production_lines.py，非空非注释口径）
+  command: python -X utf8 .trae/scripts/dev/count_production_lines.py <本片 5 枚新资产 + 3 个改动布局>
+  新增资产（本片产物）:
+    13 ic_nav_back.xml | 13 ic_nav_chat.xml | 31 ic_nav_tree.xml
+    | 16 ic_nav_more.xml | 19 ic_nav_restore.xml  → 小计 92 行
+  改动布局（既有文件的本片增量，整文件读数含历史行）:
+    162 screen_navigation_body.xml | 44 item_navigation_row.xml | 310 screen_settings_body.xml
+  对比 estimated_production_lines: 200 → 新资产口径 92 行远低于估算；即便按 8 文件整文件合计 608，
+  其中布局主体为既有代码，本任务增量不构成规模偏差。结论：无需规模例外。
+  EXITCODE=0
+
+[REF] 门禁刷新（工作树含 T-056 全部产物 + 后续增量）
+  全量 check: artifacts/evidence/P3-B4-gates-2026-09-24.txt（EXITCODE=0）
+  no-kotlin guard: artifacts/evidence/P3-B3-no-kotlin-2026-09-24.txt（PASS）
+  设计 token 守门: 0 check(s) failed（2026-09-24 复跑）
+  validate_tasks.py: files=108 errors=0
+  GREEN 原始证据: artifacts/evidence/T-056-icon-assets-a.txt（含命令行与 EXITCODE 行；
+    5/5 断言通过 + 全量 :app 单测 + assembleDebug + 真机安装 Success）

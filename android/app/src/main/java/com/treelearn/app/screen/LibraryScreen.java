@@ -2,15 +2,21 @@ package com.treelearn.app.screen;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.treelearn.app.R;
 import com.treelearn.app.library.LibraryPresenter;
 import com.treelearn.app.library.LibraryViewState;
+import com.treelearn.app.search.SearchPage;
+import com.treelearn.app.search.SearchViewState;
+import com.treelearn.core.domain.SearchHit;
 
 import java.util.function.Consumer;
 
@@ -27,9 +33,10 @@ import java.util.function.Consumer;
  * <p>The two segments share one container, {@code library_rows}, so a row sits in the same place
  * whichever segment is on screen, and the screen never keeps a list of its own to swap.
  *
- * <p>One region of this page is another slice's and is drawn as a place rather than a control: the
- * search box (054). It is not wired here, so a tap on it does nothing yet - which is honest, and is
- * what keeps this slice from claiming behaviour it did not build.
+ * <p>Since 054 the search box at the top is a real control and the results replace the list in
+ * place. What a query means, when it runs, what an empty answer is and which rows survive a tap are
+ * all the search stack's decisions arriving in one {@link SearchPage}; this view paints them and
+ * forwards taps, and re-decides nothing - least of all the order the store returned.
  */
 public final class LibraryScreen extends LinearLayout {
 
@@ -37,8 +44,10 @@ public final class LibraryScreen extends LinearLayout {
     private final TextView state;
     private final TextView segmentInProgress;
     private final TextView segmentDone;
+    private final EditText searchInput;
 
     private LibraryPresenter actions;
+    private boolean rendering;
 
     public LibraryScreen(Context context) {
         super(context);
@@ -49,8 +58,25 @@ public final class LibraryScreen extends LinearLayout {
         state = findViewById(R.id.library_state);
         segmentInProgress = findViewById(R.id.library_segment_in_progress);
         segmentDone = findViewById(R.id.library_segment_done);
+        searchInput = findViewById(R.id.library_search_input);
         segmentInProgress.setOnClickListener(view -> onSegment(LibraryViewState.Segment.IN_PROGRESS));
         segmentDone.setOnClickListener(view -> onSegment(LibraryViewState.Segment.DONE));
+        searchInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence text, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence text, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable text) {
+                if (!rendering && actions != null) {
+                    actions.onSearchQueryChanged(text.toString());
+                }
+            }
+        });
     }
 
     public void setActions(LibraryPresenter value) {
@@ -58,20 +84,120 @@ public final class LibraryScreen extends LinearLayout {
     }
 
     public void render(LibraryViewState next) {
-        boolean done = next.segment == LibraryViewState.Segment.DONE;
-        drawSegments(done);
-        boolean listed = next.phase == LibraryViewState.Phase.READY
-                && !(done ? next.archived.isEmpty() : next.rows.isEmpty());
-        rows.setVisibility(listed ? VISIBLE : GONE);
-        state.setVisibility(listed ? GONE : VISIBLE);
-        if (!listed) {
-            state.setText(idleText(next, done));
+        rendering = true;
+        try {
+            boolean done = next.segment == LibraryViewState.Segment.DONE;
+            drawSegments(done);
+            boolean listed = next.phase == LibraryViewState.Phase.READY
+                    && !(done ? next.archived.isEmpty() : next.rows.isEmpty());
+            rows.setVisibility(listed ? VISIBLE : GONE);
+            state.setVisibility(listed ? GONE : VISIBLE);
+            if (!listed) {
+                state.setText(idleText(next, done));
+            }
+            rows.removeAllViews();
+            if (done) {
+                renderArchived(next);
+            } else {
+                renderTopics(next);
+            }
+        } finally {
+            rendering = false;
         }
-        rows.removeAllViews();
-        if (done) {
-            renderArchived(next);
-        } else {
-            renderTopics(next);
+    }
+
+    /**
+     * Draws one search page in place of the library's own list (T-054).
+     *
+     * <p>The state is here for one thing only: the empty state echoes the query that found nothing.
+     * Which pane is on screen, what each row says and in what order the rows come were all decided
+     * before this was called. The two segment pills stay put - tapping one is how the learner walks
+     * out of the search state and back to the library's own lists.
+     */
+    public void showSearch(SearchViewState searchState, SearchPage page) {
+        rendering = true;
+        try {
+            rows.removeAllViews();
+            boolean listed = page.pane == SearchPage.Pane.LIST;
+            rows.setVisibility(listed ? VISIBLE : GONE);
+            state.setVisibility(listed ? GONE : VISIBLE);
+            if (!listed) {
+                state.setText(searchStateText(searchState, page.pane));
+            }
+            if (listed) {
+                renderHits(page);
+            }
+        } finally {
+            rendering = false;
+        }
+    }
+
+    /** Leaving the search state clears the box, so the library comes back without a stale query. */
+    public void leaveSearch() {
+        searchInput.setText("");
+    }
+
+    private CharSequence searchStateText(SearchViewState searchState, SearchPage.Pane pane) {
+        Context context = getContext();
+        switch (pane) {
+            case SEARCHING:
+                return context.getString(R.string.search_searching);
+            case EMPTY:
+                return context.getString(R.string.search_empty, searchState.draft);
+            case ERROR:
+                return context.getString(R.string.search_error);
+            case LIST:
+            case GUIDE:
+            default:
+                return context.getString(R.string.search_guide);
+        }
+    }
+
+    /** The one result-row layout, extended in place - never a second set of rows (T-054). */
+    private void renderHits(SearchPage page) {
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        for (final SearchPage.Row row : page.rows) {
+            View view = inflater.inflate(R.layout.item_search_hit, rows, false);
+            TextView title = view.findViewById(R.id.hit_branch_title);
+            title.setText(row.branchTitle);
+            title.setVisibility(row.branchTitle.isEmpty() ? GONE : VISIBLE);
+            ((TextView) view.findViewById(R.id.hit_field)).setText(fieldLabel(row.hit.field));
+            ((TextView) view.findViewById(R.id.hit_source_path)).setText(row.sourcePath);
+            view.findViewById(R.id.hit_source_path)
+                    .setVisibility(row.sourcePath.isEmpty() ? GONE : VISIBLE);
+            TextView mark = view.findViewById(R.id.hit_archived_mark);
+            mark.setVisibility(row.archived ? VISIBLE : GONE);
+            if (row.archived) {
+                mark.setText(R.string.done_archived_mark);
+            }
+            ((TextView) view.findViewById(R.id.hit_snippet)).setText(row.hit.snippet);
+            view.setOnClickListener(tapped -> {
+                if (actions != null) {
+                    actions.onSearchHitOpened(row.hit);
+                }
+            });
+            rows.addView(view);
+        }
+    }
+
+    /** The chip's word for one matched field: the enum is the store's, the words are the screen's. */
+    private String fieldLabel(SearchHit.Field field) {
+        switch (field) {
+            case TITLE:
+                return getContext().getString(R.string.search_field_title);
+            case QUESTION:
+                return getContext().getString(R.string.search_field_question);
+            case ANCHOR:
+                return getContext().getString(R.string.search_field_anchor);
+            case REASONING:
+                return getContext().getString(R.string.search_field_reasoning);
+            case PARTIAL_ANSWER:
+                return getContext().getString(R.string.search_field_partial_answer);
+            case PARTIAL_REASONING:
+                return getContext().getString(R.string.search_field_partial_reasoning);
+            case ANSWER:
+            default:
+                return getContext().getString(R.string.search_field_answer);
         }
     }
 
@@ -93,6 +219,14 @@ public final class LibraryScreen extends LinearLayout {
         for (final LibraryViewState.Row row : next.rows) {
             View view = inflater.inflate(R.layout.item_library_topic, rows, false);
             ((TextView) view.findViewById(R.id.library_topic_title)).setText(row.title);
+            // The summary draws only when the topic has one: absent means one line fewer, never a
+            // placeholder (the same rule the completed segment's rows follow).
+            boolean summarised = row.summary != null && !row.summary.trim().isEmpty();
+            TextView summary = view.findViewById(R.id.library_topic_summary);
+            summary.setVisibility(summarised ? VISIBLE : GONE);
+            if (summarised) {
+                summary.setText(row.summary);
+            }
             ((TextView) view.findViewById(R.id.library_topic_meta)).setText(meta(row));
             view.findViewById(R.id.library_topic_unread)
                     .setVisibility(row.unreadCount > 0 ? VISIBLE : GONE);

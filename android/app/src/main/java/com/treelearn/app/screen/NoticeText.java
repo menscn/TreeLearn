@@ -28,6 +28,8 @@ final class NoticeText {
                 return R.string.notice_balance_unavailable;
             case REQUEST_REJECTED:
                 return R.string.notice_request_rejected;
+            case HISTORY_COMPRESSED:
+                return R.string.notice_history_compressed;
             case RATE_LIMITED:
                 return R.string.notice_rate_limited;
             case PROVIDER_UNAVAILABLE:
@@ -38,6 +40,18 @@ final class NoticeText {
                 return R.string.notice_storage;
             case READING_POSITION:
                 return R.string.notice_reading_position;
+            case SEARCH_KEY_MISSING:
+                return R.string.notice_search_key_missing;
+            case SEARCH_FAILED:
+                return R.string.notice_search_failed;
+            case SEARCH_EMPTY:
+                return R.string.notice_search_empty;
+            case ATTACHMENT_TOO_LARGE:
+                return R.string.notice_attachment_too_large;
+            case CHAT_MODEL_FALLBACK:
+                return R.string.notice_chat_model_fallback;
+            case NO_MODELS:
+                return R.string.notice_no_models;
             default:
                 throw new IllegalArgumentException("unmapped notice: " + value);
         }

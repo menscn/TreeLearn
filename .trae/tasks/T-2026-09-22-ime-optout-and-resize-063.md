@@ -4,7 +4,7 @@ id: T-2026-09-22-063
 title: 键盘顶起输入框：opt-out edge-to-edge + adjustResize
 template_version: 2
 task_type: config
-status: verifying
+status: verified
 parent_requirement: T-2026-09-22-chat-defects-ime-reasoning-fork-062.md
 requirements_confirmed: true
 generated_by: leader
@@ -73,10 +73,10 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Acceptance criteria
 
-- [ ] `assembleDebug` 成功（命令与退出码入证据）。
-- [ ] 主题与 manifest 各含目标属性（文件级断言或 grep 证据）。
-- [ ] 用户真机自测：对话页点输入框，键盘拉起后输入框与文字可见（用户反馈记录为证据）。
-- [ ] 全量 JVM 单测无回归（`testDebugUnitTest` 退出码 0）。
+- [x] `assembleDebug` 成功（命令与退出码入证据）。〔GREEN 记录：BUILD SUCCESSFUL in 12s，EXITCODE=0〕
+- [x] 主题与 manifest 各含目标属性（文件级断言或 grep 证据）。〔grep 命中 AndroidManifest.xml:31 `adjustResize`、themes.xml:21 `windowOptOutEdgeToEdgeEnforcement`（实现者与独立 verifier 双重 grep）〕
+- [x] 用户真机自测：对话页点输入框，键盘拉起后输入框与文字可见（用户反馈记录为证据）。〔**2026-09-24 用户确认自测通过**（对话内反馈；与 065 分叉交互、066 流式观感同批确认），按此收口〕
+- [x] 全量 JVM 单测无回归（`testDebugUnitTest` 退出码 0）。〔GREEN 记录 EXITCODE=0；2026-09-24 全量 check 复跑 EXITCODE=0（`P3-B4-gates-2026-09-24.txt`）〕
 
 ## TDD execution record
 
@@ -111,10 +111,10 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Verification report
 
-- Verdict: PARTIAL（verifier 独立复核 2026-09-23：代码与构建层全部通过，真机键盘行为待用户自测）
-- Evidence: manifest:31 `adjustResize`、themes.xml:21 `windowOptOutEdgeToEdgeEnforcement` 均经实现者与独立 verifier 双重 grep 命中；assembleDebug EXITCODE=0、testDebugUnitTest EXITCODE=0（任务 GREEN 记录）。verifier 抽核备注：本片无独立证据文件（.t063*），构建退出码仅内联任务记录——已记为轻微缺口，不构成 FAIL。
+- Verdict: **PASS**（2026-09-24 复核 #3 收口：代码与构建层此前已由 verifier 独立复核通过；唯一悬项「真机键盘行为」由用户 2026-09-24 确认自测通过）
+- Evidence: manifest:31 `adjustResize`、themes.xml:21 `windowOptOutEdgeToEdgeEnforcement` 均经实现者与独立 verifier 双重 grep 命中；assembleDebug EXITCODE=0、testDebugUnitTest EXITCODE=0（任务 GREEN 记录）；2026-09-24 全量 check 复跑 EXITCODE=0（`P3-B4-gates-2026-09-24.txt`）。verifier 抽核备注（轻微缺口：本片无独立证据文件）不构成 FAIL，本片为两行配置改动、属性 grep 即机械证据。
 - Changed/deleted assertion rationale and equivalent behavior coverage: 不适用（无测试断言变更）。
-- Gaps: 真实键盘行为只能由用户真机自测提供（用户已豁免模拟器/仪器测试）。
+- Gaps: 已消除——真实键盘行为由用户真机自测提供并确认通过（2026-09-24）。
 - Risks: opt-out 属权宜方案；未来做沉浸式时须移除并补 insets 监听。
 
 ## Handoff notes

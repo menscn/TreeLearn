@@ -49,17 +49,24 @@ public final class LibraryViewState {
         /** Where a tap resumes: the branch the learner last opened, or the root branch if none. */
         public final String resumeBranchId;
         public final String title;
+        /**
+         * The topic's root summary, or null while it has none. <strong>An absent summary is one line
+         * fewer, never a placeholder</strong> - the same rule {@link ArchiveRow} follows, and the one
+         * PRD item 7 names for every summary surface.
+         */
+        public final String summary;
         public final int branchCount;
         /** Sum of each branch's derived unread gap; zero is a real, already-read state. */
         public final long unreadCount;
         /** Epoch millis of the last use; the screen formats it in the device's own zone. */
         public final long lastUsedAt;
 
-        public Row(String topicId, String resumeBranchId, String title, int branchCount,
-                long unreadCount, long lastUsedAt) {
+        public Row(String topicId, String resumeBranchId, String title, String summary,
+                int branchCount, long unreadCount, long lastUsedAt) {
             this.topicId = Guard.id(topicId, "topicId");
             this.resumeBranchId = Guard.id(resumeBranchId, "resumeBranchId");
             this.title = Guard.text(title, "title");
+            this.summary = summary;
             this.branchCount = Guard.atLeast(branchCount, 0, "branchCount");
             this.unreadCount = Guard.nonNegative(unreadCount, "unreadCount");
             this.lastUsedAt = Guard.epochMillis(lastUsedAt, "lastUsedAt");

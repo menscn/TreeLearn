@@ -4,7 +4,7 @@ id: T-2026-09-21-039
 title: 分支导航页（列表、AI 总结、归档与删除确认）
 template_version: 2
 task_type: implementation
-status: blocked
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -117,11 +117,11 @@ GREEN 原始读数（从证据文件回读，不凭记忆）：
 - Regression evidence: 无重构步骤，故无「重构后再跑」的独立证据；实现冻结后的同一份回归证据即 GREEN 的 `Regression evidence`
 
 ### TDD or sizing exception — only with prior user approval
-- Exception type: 规模（超 500 行硬上限）——**待裁定，尚未批准**
+- Exception type: 规模（超 500 行硬上限）——**2026-09-23 用户裁定：不批准整体例外，改为拆分**
 - Reason: 接完线后的**实测**规模是 **646 非空非注释生产行**（新增 6 个文件 531 行 + 改动 19 个既有文件 115 行；口径工具 `.trae/scripts/dev/count_production_lines.py`，证据 `artifacts/evidence/T-039-sizing-final.txt`），超 500 行硬上限 **146 行（29.2%）**。单是新增的 6 个文件 531 行就已越线，其中 `screen/NavigationScreen.java`(285) 与 `res/layout/screen_navigation_body.xml`(150) 两个文件占 435。前置估算 430 只有新增屏幕与布局的一半左右：当时的估算按「无接线的 UI 切片」下笔，漏算了 `MainActivity` 宿主与三条入口（这一层是协调方 2026-09-22 追加施工的）。
-- User approval: **未取得**。用户 2026-09-22 的指令是「完整弄完、用 harness 跑下去」——那是对**继续施工**的授权，不等于对**行数**的批准。本条在用户以一句话明确确认前不得记为已批准；若确认发生在实现完成之后，按 `rules/harness-tasks.md` 记为「事后追认」。
-- Alternative verification: 无替代验证可免除规模规则；规则给出的另一条路是拆分返工（拆成 UI 切片 + 装配切片），但两块对同一批文件与同一份 `NavigationViewState` 强耦合，拆开后 UI 切片单独无法编译（屏幕要 inflate 尚未存在的布局）。
-- Metadata note: front-matter 的 `estimated_production_lines: 430` 是**动工前的估算值**，此处刻意不改写成 646——校验器对 >500 且无已批准例外者直接判 ERROR，把估算值抬到 646 等于用一次字段编辑把未批准的越线伪装成合规。真实规模以本节的 646 与 `artifacts/evidence/T-039-sizing-final.txt` 为准。
+- User approval: **整体例外未批准**。用户 2026-09-22 的指令是「完整弄完、用 harness 跑下去」——那是对**继续施工**的授权，不等于对**行数**的批准。〔2026-09-23 裁定〕用户在结构化选项中拍板「T-039 拆分为两个子任务」（同轮明确否决了「申请行数豁免直接验收」选项）。据此本任务回溯拆分为 **T-2026-09-23-107（UI 切片，496 行）** 与 **T-2026-09-23-108（装配切片，150 行）**，规模按两个切片分别判定：496 ≤ 500（>200 软上限警告）、150 ≤ 200，均无需例外。本文件保留为拆分记录与原始证据索引，646 的联合口径只作历史记录，不再作为单一判定值。
+- Alternative verification: 无替代验证可免除规模规则；用户已选择拆分路径。拆分按文件粒度回溯归属（新增文件归 107、既有文件改动归 108），不产生新生产代码，不重写 RED/GREEN（子任务共享父任务证据文件）。
+- Metadata note: front-matter 的 `estimated_production_lines: 430` 是**动工前的估算值**，此处刻意不改写成 646——校验器对 >500 且无已批准例外者直接判 ERROR，把估算值抬到 646 等于用一次字段编辑把未批准的越线伪装成合规。真实规模以本节的 646 与 `artifacts/evidence/T-039-sizing-final.txt` 为准；拆分后的判定值见 107/108 两个任务文件。
 
 ## Implementation notes
 
@@ -157,8 +157,21 @@ GREEN 原始读数（从证据文件回读，不凭记忆）：
 - Completed: 本任务 In scope 的全部五条——① `screen/NavigationScreen.java`(285 判定行)、② `res/layout/screen_navigation.xml`(11) / `screen_navigation_body.xml`(150) / `item_navigation_row.xml`(34) + `res/layout-sw600dp/screen_navigation.xml`(16)、③ `wiring/NavigationWiring.java`(35) 实现 `NavigationData` + `AppContainer.navigationData()` + `MainActivity` 的 `NavigationSink` 宿主与 `onBackRequested`/`onResume` 优先序、④ 三条入口（对话页 `chat_nav` / 画布 `tree_nav` / 首页 `home_archived`，首页按钮的 `android:enabled="false"` 已去掉）与 `strings.xml` 文案（含 `navigation_delete_body` 的 `%2$d` 分支数占位）、⑤ 删除确认显示 `plan.branchCount()` 且确认前不写库。另：`NavigationViewState.Row` 增 `archivable` / `childCount` 与 `liveChildren()`。
 - Evidence: GREEN 26 例 0 失败（`artifacts/evidence/T-039-green.txt`）；门禁四份——`T-039-check.txt`(EXITCODE=0) / `T-039-nokotlin.txt`(VERDICT: PASS) / `T-039-designtokens.txt`(0 check(s) failed) / `T-039-jvmtests.txt`(VERDICT: OK)；接线替代证据 `T-039-wiring.txt`；规模 `T-039-sizing-final.txt`。
 - In progress: 无，实现者已停手。
-- Blocker: **独立 verifier 已于 2026-09-22 03:46 判 FAIL**，唯一理由是规模门——实测 **646** 行（新增 531 + 改动 115），超 500 硬上限 **146** 行（29.2%），且不存在用户批准记录（见「TDD or sizing exception」节）。本任务自有的五条验收标准**全部 PASS**、六道门禁在冻结快照里复跑**全绿**、三条入口的调用链逐跳走到存储 → **没有任何代码缺陷需要修**。卡住的是**用户的一句话**，不是实现者或协调方的动作：`rules/harness-tasks.md` 规定例外必须由用户明确批准、实现者自行追认无效；verifier 亦无追认权。
-- Unblock condition: 用户在任务文件里明确批准规模例外（按 `rules/harness-tasks.md` 的规模条款记为「事后追认」，并补齐批准日期 / 批准人 / 任务 ID / 判定口径下的实测行数与超出比例 / 剩余风险五项），或指定拆分返工方案。原文引用的规则冲突（`harness-verification.md:9` 与任务契约规模条款互斥）已于 2026-09-22 修掉：该文件不再复述例外口径，只指向任务契约。
+- Blocker: **独立 verifier 已于 2026-09-22 03:46 判 FAIL**，唯一理由是规模门——实测 **646** 行（新增 531 + 改动 115），超 500 硬上限 **146** 行（29.2%），且不存在用户批准记录（见「TDD or sizing exception」节）。本任务自有的五条验收标准**全部 PASS**、六道门禁在冻结快照里复跑**全绿**、三条入口的调用链逐跳走到存储 → **没有任何代码缺陷需要修**。〔2026-09-23 更新〕阻塞已由用户裁定解除：拆分为 T-2026-09-23-107 / T-2026-09-23-108，规模按切片判定；本文件不再作为单一规模判定单元。
+- Unblock condition: ~~用户批准规模例外或指定拆分方案~~ → **已解除**：用户 2026-09-23 经结构化选项裁定拆分。剩余动作：107/108 两个切片在 P3 批量验收中复跑门禁全绿并转 verified 后，本任务按拆分口径转 `verifying` 复核归档。原文引用的规则冲突（`harness-verification.md:9` 与任务契约规模条款互斥）已于 2026-09-22 修掉：该文件不再复述例外口径，只指向任务契约。
+- Next steps: ~~独立 verifier 复核四份门禁证据 + 接线替代证据 + 规模口径~~（已完成，见 Verification report）→ P3 与 107/108 同批复跑 `check` + Java-only guard + 设计 token 守门，以新鲜证据回填切片任务；随后两条交叉回归——① 与画布比「可见分支集合一致」；② 首页 `home_archived` 与列表首位主题的对应关系。
 - Next steps: 独立 verifier 复核四份门禁证据 + 接线替代证据 + 规模口径；随后可做两条交叉回归——① 与画布比「可见分支集合一致」；② 首页 `home_archived` 与列表首位主题的对应关系。
 - Watch-outs: ① 归档/删除后 `MainActivity` 的 `navigationBranchId` 必须随屏幕一起清空，`showHome`/`showChat`/`showTree` 三处都已清，将来新增屏幕时不要漏；② `NavigationScreen.renderDelete` 按 `targetBranchId + branchCount` 去重，只在计划变化时重建对话框，改这段时不要退化成每次 render 都弹；③ 设备侧观感一律 `deferred — 用户自行装机验证（user decision 2026-09-21）`，不得读成 PASS；④ 仓库里现有的 `app-release.apk` 早于本次源码且不含导航页，需 leader 重跑 release 构建。
 - Deferred (not verified): 真机/模拟器上的列表滚动、删除对话框换行、`layout-sw600dp/screen_navigation.xml` 的横屏排布；接线路径的端到端执行（只有「编译通过 + 源码原文扫描」的替代证据）；归档 / 恢复 / 删除在**真实 SQLite** 上的一次执行（JVM 用例只驱动 fake store）。〔2026-09-22 更正〕原文末尾的 `NavigationModification` 是幻影标识符（全仓无此类 / 无此文件 / 无此文档，独立 verifier 复核确认），已删除。
+
+## 归档记录（2026-09-24，按拆分口径收口）
+
+- 拆分判定闭环：T-2026-09-23-107（UI 切片，496 行）与 T-2026-09-23-108（装配切片，150 行）已于
+  2026-09-24 双双 verified（合并门禁复跑证据 `artifacts/evidence/T-107-T108-gates-2026-09-24.txt`：
+  check EXITCODE=0、no-kotlin guard PASS、token 守门 0 failed、wiring 原文扫描命中全部锚点）。
+  本任务 646 行的联合口径按 2026-09-23 用户拆分裁定不再作为单一判定值；两个切片各自合规、无需例外。
+- 原任务的工程结论不变：五条验收标准全部 PASS、六道门禁在冻结快照复跑全绿、三条入口调用链逐跳
+  走到存储、verifier 的 FAIL 是且仅是规模门（已由拆分解除）。本文件保留为拆分记录与原始证据索引。
+- 交叉回归两项（与画布可见性集合一致、`home_archived` 与列表首位主题对应）仍属后续任务范围，
+  不在本归档判定内；真实 SQLite 路径与真机观感维持 deferred — user decision 2026-09-21。
+- 状态：blocked → **verified（拆分归档）**。

@@ -2,6 +2,7 @@ package com.treelearn.app.wiring;
 
 import android.database.sqlite.SQLiteDatabase;
 
+import com.treelearn.ai.prompt.DeepSeekContextEncoder;
 import com.treelearn.app.generation.AnswerVersions;
 import com.treelearn.app.ui.ChildBranch;
 import com.treelearn.core.domain.AnswerRevision;
@@ -17,6 +18,7 @@ import com.treelearn.core.domain.Topic;
 import com.treelearn.data.db.DatabaseTransactionRunner;
 import com.treelearn.data.db.TreeLearnDatabaseHelper;
 import com.treelearn.data.db.dao.AnswerRevisionDao;
+import com.treelearn.data.db.dao.AttachmentDao;
 import com.treelearn.data.db.dao.BranchCreation;
 import com.treelearn.data.db.dao.BranchDao;
 import com.treelearn.data.db.dao.ContextSnapshotDao;
@@ -142,7 +144,8 @@ public final class SqliteChatStore implements ChatStore {
                 break;
             }
             if (row.isUser()) {
-                entries.add(ContextPlan.Entry.userMessage(row.id, row.userContent));
+                entries.add(ContextPlan.Entry.userMessage(row.id,
+                        row.userContent + attachmentSuffix(database, row.id)));
                 continue;
             }
             String displayed = row.activeRevisionId();
@@ -235,6 +238,28 @@ public final class SqliteChatStore implements ChatStore {
 
     private SQLiteDatabase database() {
         return helper.getWritableDatabase();
+    }
+
+    /**
+     * The rebuilt attachment block of one user turn (T-097): the cached {@code extracted_text}
+     * framed exactly as the send path frames it, so a forked branch's replay and the original
+     * request read identically. Empty for a turn without attachments, or whose attachment's text
+     * is genuinely blank — the cached text was ceiling-checked when the send was admitted, so the
+     * rebuild never re-parses and never re-checks (SPEC-082 数据结构: the parse happens once).
+     */
+    private static String attachmentSuffix(android.database.sqlite.SQLiteDatabase database,
+            String messageId) {
+        for (AttachmentDao.ResolvedReference reference
+                : AttachmentDao.referencesOfMessage(database, messageId)) {
+            if (reference.record != null && reference.record.extractedText != null) {
+                String block = DeepSeekContextEncoder.attachmentBlock(
+                        reference.record.extractedText);
+                if (!block.isEmpty()) {
+                    return "\n" + block;
+                }
+            }
+        }
+        return "";
     }
 
     private Position position(SQLiteDatabase database, Message row, Map<String, Integer> forks,

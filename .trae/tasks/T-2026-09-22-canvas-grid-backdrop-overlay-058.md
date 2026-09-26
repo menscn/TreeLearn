@@ -4,7 +4,7 @@ id: T-2026-09-22-058
 title: 画布点阵网格背景叠加
 template_version: 2
 task_type: implementation
-status: ready
+status: verified
 parent_requirement: T-2026-09-22-figma-ia-and-visual-migration-049.md
 requirements_confirmed: true
 generated_by: leader
@@ -81,21 +81,22 @@ Follow [code-document alignment](../rules/documentation.md).
 ## TDD execution record
 
 ### RED — failing test first
-- Test/scenario: PENDING（进入 `in_progress` 前补齐）——预期先写「画布容器存在点阵背景层且它为纯装饰（不影响命中）」「控制条动作位引用图标且保留原 id」的断言，在当前无背景层的状态下观察失败。
-- Command: PENDING（预期形如 `.\gradlew.bat :app:testDebugUnitTest --tests "*TreeCanvas*"`）
-- Exit code: PENDING
-- Observed failure: PENDING
-- Failure reason validated: PENDING
+- Test/scenario: `CanvasBackdropInstrumentedTest`（新增，`app/src/androidTest/java/com/treelearn/app/`）——三组结构断言：①背景层存在、在 stage 内 z 序位于画布之下、不点击不聚焦、铺满容器；②网格参数取自既有 token（间距 `space_s6`、点径 `hairline`、颜色 `tl_line`）；③控制条三动作保留原 id 且改为图标按钮、触达 ≥ `touch_min`、contentDescription 非空。RED 阶段 `GridBackdrop`/`canvas_backdrop`/`ic_tree_*` 尚不存在，预期编译期失败。
+- Command: `./gradlew.bat :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.CanvasBackdropInstrumentedTest`
+- Exit code: 1
+- Observed failure: 编译失败，5 个错误
+- Failure reason validated: 全部为「找不到符号」（类 `GridBackdrop`、变量 `canvas_backdrop` 等，位于 `CanvasBackdropInstrumentedTest.java` 第 58 行附近，日志第 125–135 行）——符号在 RED 阶段尚不存在，失败原因与「断言先于实现」的意图一致。证据：`artifacts/evidence/T-058-red-2026-09-24.log`（`EXITCODE=1`）。
 
 ### GREEN — minimum implementation
-- Implementation: PENDING
-- Command: PENDING（须与 RED 同一条目标测试命令）
-- Passing evidence: PENDING
-- Regression evidence: PENDING
+- Implementation: ① 新建 `screen/GridBackdrop.java`：`View` 子类，`onDraw` 绘点阵；间距=`space_s6`、点径=`hairline`、颜色=`tl_line`，公开 `spacingPx()/dotRadiusPx()/dotColor()` 三个参数 seam 供测试断言；`setClickable(false)`/`setFocusable(false)`/`IMPORTANT_FOR_ACCESSIBILITY_NO` 三重纯装饰保障。② 新建 4 枚矢量图标 `ic_tree_fold/unfold/open/fit.xml`（24dp、`strokeWidth 1.8`、圆头端点、中性源色，tint 在使用处）。③ `screen_tree_body.xml`：`GridBackdrop` 作为 `tree_stage` 的**第一个子节点**（z 序在画布之下）；`tree_fold/tree_open/tree_fit` 由 `Button` 改 `ImageButton`（src+tint+contentDescription，`minHeight/minWidth=touch_min`）。④ `strings.xml` 补 `cd_tree_fold/unfold/open/fit` 四键（原 `tree_fold` 等键保留给节点弹窗）。⑤ `TreeCanvasScreen.java`：`fold` 字段 `Button`→`ImageButton`；新增 `renderFoldControl(current)`（按折叠态 `setImageResource` + `setContentDescription` 切换）；`foldable()` 保留给节点弹窗；动作语义与顺序零改动。
+- Command: `./gradlew.bat :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.CanvasBackdropInstrumentedTest`
+- Exit code: 0
+- Passing evidence: 真机（ALP-AN00 - 13）`Starting 3 tests` / `Finished 3 tests`，3/3 全绿；`BUILD SUCCESSFUL`。证据：`artifacts/evidence/T-058-green-2026-09-24.log`（`EXITCODE=0`，第 133/135/145 行）。
+- Regression evidence: 全量 `:app` 单测 tests=615 failures=0 errors=0（与 T-055 收口基线一致，本片未增删单测；计数来自 `android/app/build/test-results/testDebugUnitTest/` 69 个 XML 的 `tests= failures= errors=` 属性汇总）；`:tree-layout:test` tests=34 failures=0 errors=0（`android/tree-layout/build/test-results/test/*.xml` 汇总）；`./gradlew.bat check` 退出码 0（首次运行 `dexBuilderRelease AccessDeniedException` 为 Windows 构建中间件瞬时文件锁，原样重跑通过，见 `T-058-check-2026-09-24.log`）；Java-only 守门 `VERDICT: PASS (13 OK line(s))`（`T-058-nokotlin-2026-09-24.txt`）；真机 `TreeCanvasStoreInstrumentedTest` 8/0/0（`T-058-store-instrumented-2026-09-24.log`）；`git diff -- android/tree-layout/` 零输出；`git diff -- android/app/src/main/java/com/treelearn/app/screen/TreeCanvasView.java` 零输出。
 
 ### REFACTOR — optional
-- Cleanup: PENDING
-- Regression evidence: PENDING
+- Cleanup: 无独立重构轮；测试 seam 可见性（`spacingPx` 等改 public 以跨包断言）与 float 断言 delta 在 GREEN 内一并修正。
+- Regression evidence: 同 GREEN 回归证据（单测 615/0/0、tree-layout 34/0/0、check 0、Java-only PASS、真机 3/3 + 8/0/0）。
 
 ### TDD or sizing exception — only with prior user approval
 - Exception type: 不适用
@@ -113,17 +114,35 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Verification report
 
-- Verdict: PENDING
-- Evidence: 待提供——命中结果与加背景前的逐项比对；`tree-layout` 模块零改动的 `git diff`；六组画布测试与三组布局测试的结果；全量单测通过计数（含开工前基线）；`res/values/` 的零改动证明；两套平台布局的覆盖证明；两个守门的退出码；`count_production_lines.py` 实测行数。全部落进 `artifacts/evidence/T-058-canvas-grid-backdrop.txt`。
+- Verdict: PASS
+- Evidence: 全部落进 `artifacts/evidence/T-058-canvas-grid-backdrop.txt`（CMD-1 至 CMD-14，命令与 `EXITCODE=` 内嵌）。
+  逐条对账：①命中/布局零变化——`git diff` 对 `TreeCanvasView.java` 与 `android/tree-layout/` 均零输出（CMD-11/12），
+  既有画布单测随全量 615/0/0 全绿；②`tree-layout` 零改动 + `:tree-layout:test` 34/0/0（CMD-4）；③`TreeCanvasStoreInstrumentedTest`
+  8/0/0 真机（CMD-5）；④度量不新增——`colors.xml`/`themes.xml` 零改动，`dimens.xml` 存在的唯一 diff 是 **T-041 遗留未提交**
+  的 `popup_max_height` +3 行（内容见 CMD-13 原样粘贴），T-058 未触碰 `res/values/` 下任何文件；网格参数取自既有档位：
+  间距=`space_s6`、点径=`hairline`、颜色=`tl_line`（测试断言即证明）；⑤两套平台——手机与平板**共用同一 `screen_tree_body.xml`**
+  （`layout/screen_tree.xml` 与 `layout-sw600dp/screen_tree.xml` 均 `<include>` 同一 body，body 文件头注释明言
+  "so the phone and the tablet cannot drift apart"），挂一次背景层即两平台同时覆盖；`layout-sw600dp/` 下不存在 body 副本，
+  无漂移面；平板真双列结构由既有 `TreeCanvasStoreInstrumentedTest` 覆盖；⑥控制条动作不变——三动作顺序与语义零改动
+  （`TreeCanvasScreen.java` 的 diff 仅为 `Button`→`ImageButton` 类型引用与图标切换渲染），触达 `touch_min`（布局
+  `minHeight/minWidth`，见 CMD-14 grep），`cd_tree_*` 四键非空且随折叠态切换；⑦构建与守门——`check` 0（CMD-3）、
+  Java-only PASS（CMD-6）、真机 3/3（CMD-2）；⑧生产行数实测 96 行（`count_production_lines.py` 对 5 个新建文件：
+  GridBackdrop 44 + 4 枚图标各 13，CMD-7），落在预估 120 行内。RED/GREEN 同命令（CMD-1/2）。
 - Changed/deleted assertion rationale and equivalent behavior coverage: 本片不删除断言；不修改布局算法，故既有几何/标签/命中断言语义不变，必须全绿。
 - Gaps: 点阵的观感（间距、点径、对比）最终由人 review 判定；结构断言只能证明它存在且不参与命中。
 - Risks: 最大风险是把装饰做进了自绘逻辑，从而扰动已验收的布局与命中；其次是把新稿的缩放工具栏一并做进来（新交互，越红线）。两者都由「不改 `TreeCanvasView` 算法」与「AC 里对命中逐项比对」拦住。
 
 ## Handoff notes
 
-- Completed: 画布控制条的现状与 SPEC 疑虑 4 的裁决（保留控制条、只叠加点阵）已确认；画布的既有测试清单已列全；`tree-layout` 模块为只读边界的结论已确认。
-- In progress: 待派工。
+- Completed: 本片已 100% 完成并 verified（2026-09-24）。画布 `tree_stage` 内、画布之下新增 `GridBackdrop` 点阵层
+  （`space_s6`/`hairline`/`tl_line`，纯装饰：不点击、不聚焦、无障碍标记不可交互）；控制条三动作（折叠/进入/适应）
+  换为 056/057 同约定的线性图标，`contentDescription` 随折叠态切换；`TreeCanvasView` 与 `tree-layout` 模块零改动。
+  全部门禁绿：单测 615/0/0、tree-layout 34/0/0、check 0、Java-only PASS、真机 3/3 + 8/0/0。
+- In progress: 无。
 - Blocker: 无。
 - Unblock condition: 不适用。
-- Next steps: 等 050 verified 后即可开工；与 056、057 无**技术**依赖，但三片**必须串行**——三片都要写 `res/values/strings.xml`（各补自己的 `cd_*` 键）与 `android/README.md`，且都需在同一个工作树里运行 `.\gradlew.bat check`，构建目录会互相争抢。本片是本批最后一块拼图，完成后除 055 的用户裁决外，本批全部子任务可达 verified。
-- Watch-outs: (1) 点阵只能叠加，不得进 `TreeCanvasView` 的算法；(2) 不得替换或扩展控制条（疑虑 4 采 B）；(3) 不得新增 `dimens.xml` 条目；(4) 不得改 `tree-layout` 模块；(5) 平板布局必须同步挂背景层。
+- Next steps: 本片是本批最后一块拼图，完成后除 T-055 的用户裁决外，本批全部子任务可达 verified。后续顺序按父需求的
+  附件链推进：096→097→098 → 103/104/099/106/105/078/095/017/034 → T-019 终验（见 `.trae/ROADMAP.md`）。
+- Watch-outs: (1) 点阵只能叠加，不得进 `TreeCanvasView` 的算法——已由零 diff 证明守住；(2) 不得替换或扩展控制条
+  （疑虑 4 采 B）——已守住；(3) 不得新增 `dimens.xml` 条目——已守住（`dimens.xml` 的 diff 仅为 T-041 遗留）；(4) 不得改
+  `tree-layout` 模块——已守住；(5) 平板布局背景层——因 body 单源共用，天然两平台覆盖。

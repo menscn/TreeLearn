@@ -1,0 +1,4 @@
+# T-041 D4 变异测试证据（2026-09-24，主会话补做）
+M1: BranchChildren.isChild 去掉 !isArchived() → BranchChildrenTest 2 例 + theRootBranchIsNeverAnybodysChild + ChatPresenterTest 弹层成员 2 例共转红（EXITCODE=1），还原后绿
+M2: WordMenu.entriesFor 去掉 canFork() 门 → aHalfFinishedAnswerIsNotOfferedANewBranchAtAll 精准转红（EXITCODE=1），还原后绿
+两 mutations 均由命令当场捕获；原始命令: ./gradlew :app:testDebugUnitTest --tests '*<Suite>' --console=plain

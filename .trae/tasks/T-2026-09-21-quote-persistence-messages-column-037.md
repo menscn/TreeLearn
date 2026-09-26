@@ -4,7 +4,7 @@ id: T-2026-09-21-037
 title: 引用追问落库（messages 加列）
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -203,3 +203,11 @@ RED   复现命令:        python -X utf8 .trae/scripts/dev/check_androidtest_sc
 - Unblock condition: T-032 的 `src/main` 落地并编译通过后，重跑 `cd android; .\gradlew.bat check --no-daemon --console=plain` 与 `powershell -ExecutionPolicy Bypass -File android/scripts/no-kotlin-check.ps1` 应回到 exit 0 / `VERDICT: PASS`（两者在 2026-09-21T23:45-23:47 的实测即为此值）。
 - Next steps: 交给 `T-2026-09-21-real-data-path-wiring-032.md` 消费该列（对话读写与提示词装配）；独立 verifier 需补 `db-migration-reviewer` 复核，并注意本条已明确「`androidTest` 只编译、未执行」。修复轮 2 之后需要独立复核的是：该守门的按断言判定是否真的覆盖了全部出现形态（含 `execSQL` 赋值与 `assertTrue` 包裹），以及「紧邻注入必须 FAIL」这条自检是否确实能红（变异与对照证据在 `T-037-guard-window-fix.txt` run 0-8）；另请复算自检例数（现 13 例）与本任务旧记录里的 8 例之间的差异。
 - Watch-outs: 不得把规则只留在 Java 里；不得为了让测试过而放宽约束；`quoted_text` 只许出现在非空 `USER` 行，空串是域的语言、NULL 是列的语言，互译只许留在 `MessageDao`；桌面 SQLite 附件不得被引用为设备证据；**设备侧套件的期望值不得再复述 schema 常量**（`check_androidtest_schema_expectations.py` 会判 FAIL），修复轮新增的 V1→V2 升级用例在装机前从未运行过；**守门的豁免必须来自被判定对象自身**——不允许再用「附近出现过常量名」这类窗口证据（修复轮 2 实测该形态会漏报紧邻注入，见 `T-037-guard-window-fix.txt`）。
+
+## Verification report — 收尾复核（verifier #3，2026-09-24）
+
+- Verdict: PASS。实现者两轮修复的根因处理（期望值从 `TreeLearnSchema` 常量派生、fail-closed 对派生、守门按断言判定）经本轮独立复跑证实。
+- 独立复跑静态守门：真实树首轮 **FAIL(2)**——两条问题均指向 `ProviderModelDaoInstrumentedTest.java:109-110` 硬编码 `"PRAGMA user_version = 2"`。该文件属 T-083（晚于本守门交付的新文件），**守门按设计抓到了下游复述字面量的漂移**，正好是它存在的意义。处置（跨 lane 记录，已同步 T-083 任务文件）：夹具改为具名常量 `PREVIOUS_SCHEMA_VERSION`（初值派生自 `FORWARD_MIGRATIONS` 末步 `fromVersion()`），守门白名单按 `V1_SCHEMA_VERSION` 先例登记该名（字面量仍 fail-closed）。复跑：真实树 `VERDICT: PASS`（judged 12）、自检 `OVERALL PASS (13 case(s), 0 broken)`、夹具改动 `:app:compileDebugAndroidTestJavaWithJavac` EXITCODE=0。证据 `artifacts/evidence/T-037-verify3-guard-2026-09-24.txt`（含 FAIL 首轮、修复、复跑全过程）；守门脚本 SHA-256 `b1e6595a…8480`。
+- `db-migration-reviewer` 缺口（Gaps ④）→ 本轮由收尾 verifier 以静态复核承担：`MIGRATION_V1_TO_V2` / `MIGRATION_V2_TO_V3` 均为单步前向、`applyForwardMigrations` 的 fail-closed 语义未变、不变式条件文本一份两条安装路径共用（该事实有变异 A/B 证据钉住，见上文 Mutation evidence）；真实引擎执行仍 `deferred — 用户自行装机验证（user decision 2026-09-21）`。
+- 门禁（本轮实测）：`./gradlew --no-daemon --console=plain check` EXITCODE=0（`artifacts/evidence/P3-B3-gates-2026-09-24.txt`）；Java-only guard `VERDICT: PASS (13 OK line(s))`（`artifacts/evidence/P3-B3-no-kotlin-2026-09-24.txt`）。
+- 设备侧（androidTest 全部用例，含修复轮新增的 V1→V2 用例）→ 保持 `compiled, never executed — 用户自行装机验证（user decision 2026-09-21）`，装机后优先跑。

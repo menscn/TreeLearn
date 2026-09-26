@@ -4,7 +4,7 @@ id: T-2026-09-22-055
 title: 首页瘦身与继续学习
 template_version: 2
 task_type: implementation
-status: ready
+status: verified
 parent_requirement: T-2026-09-22-figma-ia-and-visual-migration-049.md
 requirements_confirmed: true
 generated_by: leader
@@ -89,22 +89,22 @@ Follow [code-document alignment](../rules/documentation.md).
 ## TDD execution record
 
 ### RED — failing test first
-- Test/scenario: PENDING（进入 `in_progress` 前补齐）——预期先写「首页不含历史主题列表」「首页不含头部三入口」「继续学习有/无历史两种状态」「推荐区形态未变（滚动参数与三类标签保留）」四组断言，在当前首页结构下观察失败。
-- Command: PENDING（预期形如 `.\gradlew.bat :app:testDebugUnitTest --tests "*Home*"`）
-- Exit code: PENDING
-- Observed failure: PENDING
-- Failure reason validated: PENDING
+- Test/scenario: `HomeContinueLearningTest`（新增，`app/src/test/java/com/treelearn/app/ui/`）——「有历史时继续学习行取最近一个主题的标题与 resumeBranchId」「无历史时 continueTopic 为 null（不出现占位）」两组断言；RED 阶段 `HomeViewState.continueTopic()` 尚不存在，预期编译期缺符号失败。
+- Command: `./gradlew.bat :app:testDebugUnitTest --tests "*HomeContinue*"`
+- Exit code: 1
+- Observed failure: `BUILD FAILED in 14s`，3 条编译期「找不到符号: continueTopic()」（HomeViewState 尚无该方法）。完整日志 `artifacts/evidence/T-055-red-2026-09-24.log`。
+- Failure reason validated: 失败确由缺失行为导致——RED 阶段唯一改动是新增 `HomeContinueLearningTest`（引用尚不存在的 `HomeViewState.continueTopic()`），生产代码零改动；3 条错误全部指向该测试对 `continueTopic()` 的两处调用。
 
 ### GREEN — minimum implementation
-- Implementation: PENDING
-- Command: PENDING（须与 RED 同一条目标测试命令）
-- Exit code: PENDING
-- Passing evidence: PENDING
-- Regression evidence: PENDING
+- Implementation: ① `HomeViewState.continueTopic()`（最近主题，空历史为 null）；② `HomeActions`/`HomeSink` 收敛（移除 `onSearchPressed`/`onArchivedPressed`/`onSettingsPressed`/`onRenameTopic`/`onDeleteTopic` 与 `openArchived`/`openSearch`）；③ `HomePresenter` 同步收敛；④ `HomeData`/`HomeStore`/`HomeWiring`/`SqliteHomeStore` 移除随之死掉的 renameTopic/deleteTopic；⑤ `HomeScreen` 重写（品牌区/输入区/继续学习行/推荐区渲染，移除列表与三入口绑定、key hint 改被动提示）；⑥ `screen_home_body.xml` 重建（三入口删除、品牌区改图形标识+衬线中英文、列表整块删除、新增 `home_continue` 行、`home_key_hint` 去掉 clickable）；⑦ `MainActivity` 移除 `openArchived`/`openSearch`；⑧ `strings.xml` 增 `home_brand_english`/`home_continue_label`、删 17 个只服务已删区块的键（删前零引用扫描）；⑨ 删除 `HomeSearchEntryTest.java` 与 `item_topic.xml`；⑩ `TestDoubles`/`HomePresenterTest` 同步收敛计数；⑪ `BottomTabShellInstrumentedTest` 的首页行点击迁移到 `home_continue`；⑫ `NavigationStoreInstrumentedTest` 过时注释更新。
+- Command: `./gradlew.bat :app:testDebugUnitTest --tests "*HomeContinue*"`
+- Exit code: 0
+- Passing evidence: `BUILD SUCCESSFUL in 40s`，`HomeContinueLearningTest` 2 例全绿（命令与 RED 逐字一致）。日志 `artifacts/evidence/T-055-green-2026-09-24.log`。
+- Regression evidence: 全量 `:app` 单测 tests=615 failures=0 errors=0（616 − 3 删除 + 2 新增，对账吻合；开工前基线 593，见 `P0-baseline-2026-09-23.txt`）；`./gradlew.bat check` 退出码 0（lint + androidTest 编译）；Java-only 守门退出码 0；真机（ALP-AN00 - 13）`BottomTabShellInstrumentedTest` + `AppLaunchInstrumentedTest` 6/6 全绿（含迁移后的 `home_continue` 导航用例与 `home_draft` 启动断言）。全部命令与退出码内嵌于 `artifacts/evidence/T-055-home-slimming.txt`（CMD-1 至 CMD-12）。
 
 ### REFACTOR — optional
-- Cleanup: PENDING
-- Regression evidence: PENDING
+- Cleanup: 无独立重构轮；strings 删键与死端口清理已并入 GREEN（见实现第 ④⑧ 步）。
+- Regression evidence: 同 GREEN 回归证据（全量单测 615/0/0、check、Java-only、真机 6/6）。
 
 ### TDD or sizing exception — only with prior user approval
 - Exception type: 规模（超 200 软上限，未超 500 硬上限，故不申请规模例外）
@@ -124,17 +124,36 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Verification report
 
-- Verdict: PENDING
-- Evidence: 待提供——两条 id/动作扫描命令的输出；「继续学习」两态断言；推荐区形态未变与三类可达的断言；无 Key 守卫与草稿保留的断言；`AppLaunchInstrumentedTest` 结果；全量单测计数（含删除用例的说明）；`gradlew check` 与 Java-only 守门退出码。全部落进 `artifacts/evidence/T-055-home-slimming.txt`。
-- Changed/deleted assertion rationale and equivalent behavior coverage: 删除 `HomeSearchEntryTest` 的三条断言，其核心性质（搜索入口无条件可达）由 054 新增的 `LibrarySearchEntryTest` 覆盖；另两条断言的对象（首页归档入口守卫）随首页入口一起被移除，覆盖等价物是 053 的「已完成区列出归档分支」断言。两处引用都须写进证据文件，不得只写「已删除」。
-- Gaps: 新稿的「一张重点卡 + 三条列表项」推荐形态不在本批（用户裁决保留弹幕），已登记为偏差与 deferred；真机像素与输入法行为仍由用户自行装机验证。
-- Risks: 最大风险是**在替代落点不可用时提前摘掉入口**——这正是 dependencies 写三条的原因，任何一条未 verified 时本片不得进入 `in_progress`。次风险是换皮时顺手改了弹幕的滚动或命中逻辑（PRD 第 96 行的约束），因此该条单列验收。
+- Verdict: PASS
+- Evidence: `artifacts/evidence/T-055-home-slimming.txt`（12 道门禁，命令与退出码内嵌、可自证）：
+  CMD-1/2/3 三条 id 与键扫描零命中（历史主题列表、头部三入口、已删 strings 键）；CMD-4 两个删除目标缺席、
+  CMD-5 八个保留文件在位（两套外壳、heat strip、检索栈、`item_recommendation.xml`、`LibrarySearchEntryTest`）；
+  CMD-6/7 RED→GREEN 同命令；CMD-8 全量单测 615/0/0（基线 593，计数对账见文件内说明）；
+  CMD-9 `check` 退出码 0；CMD-10 Java-only 守门 0；CMD-11 真机 6/6（`home_continue` 迁移用例 +
+  `home_draft` 启动断言）；CMD-12 `item_recommendation.xml` 与 `RecommendationMarquee.java` git diff 为空
+  （推荐区形态与滚动参数零改动，三类 Kind 与一次点击建题路径未动）。「继续学习」两态断言 =
+  `HomeContinueLearningTest` 两例；无 Key 守卫与草稿保留 = `HomePresenterTest` 既有断言全绿。
+- Changed/deleted assertion rationale and equivalent behavior coverage: 删除 `HomeSearchEntryTest` 三条断言——
+  「搜索入口无条件可达」由 054 新增 `LibrarySearchEntryTest.theLibrarySearchEntryIsReachableWithNoTopicsAtAll`
+  继承；「归档入口需有主题 / 搜索不得放宽归档守卫」的断言对象（首页入口）随入口移除，等价覆盖为 053
+  `LibraryArchiveInstrumentedTest` 的已完成区断言（真机 5 例全绿）。两处落点已在证据文件登记，非静默删除。
+  另外：`HomePresenterTest.aHeatStripTapIsANoOpUntilTheDrawerShips` 中 `sink.searches` 断言随
+  `HomeSink.openSearch` 的移除失去断言对象（该方法已不存在，编译期即保证不可达），保留 branchesOpened 与
+  settingsOpened 两条断言。列表改名/删除动作（`onRenameTopic`/`onDeleteTopic`）随列表 UI 消失，数据链上的
+  `HomeData`/`HomeStore`/`HomeWiring`/`SqliteHomeStore` 对应方法一并移除（全仓零引用扫描见 CMD-1~3 同口径）；
+  PRD 未将主题改名/删除列为能力条目，能力损失已登记至 Gaps。
+- Gaps: ① 推荐区「换皮」零执行——056/057 的新图标与 050 之后的 token 无可引用差量，在没有新资产时改配色/间距
+  属无依据扰动，记为 deferred（形态与滚动参数因此零风险，验收第 4 条以 diff 为空满足）；② 主题级改名/删除
+  自 055 起在全应用无入口（PRD 无此能力条目；如需恢复应立新任务落在学习库行内，本片不越界实现）；
+  ③ 新稿品牌图形标识暂用 `ic_launcher_foreground` 充当，专属品牌图标随 056/057 落地后替换；
+  ④ 真机像素与输入法行为仍由用户自行装机验证（deferred — user decision 2026-09-21）。
+- Risks: 已收敛——替代落点（052/053/054）开工前均 verified，未出现功能空窗；弹幕滚动/命中逻辑零触碰。
 
 ## Handoff notes
 
-- Completed: 首页现行结构已核清（三入口在 `screen_home_body.xml` 第 13–63 行；列表与三态在 185–272 行；两套外壳共用同一个 body）；启动测试的两个 id 依赖已记录；`Recommendation.Kind` 存在、弹幕实现在 `screen/RecommendationMarquee.java`；**推荐区形态已由用户裁决为保留弹幕**。
-- In progress: 待派工。
-- Blocker: 无。原待裁决的「发现话题」形态已于 2026-09-22 由用户裁决为**保留弹幕**，本片据此收敛为「只换皮」。
-- Unblock condition: 不适用（只需等 052、053、054 三者 verified）。
-- Next steps: 052 → 053 → 054 依次完成并 verified 后开工。完成后本批的 IA 链条收口，剩余可并行的只有 056/057（图标）与 058（画布）。
-- Watch-outs: (1) 三条依赖任一未 verified 时不得开工——否则出现功能空窗；(2) 不得把推荐区改成「一张重点卡 + 三条列表项」（用户已裁决保留弹幕）；(3) 不得改动弹幕的滚动节奏、暂停规则与命中判定；(4) 不得移除 `home_draft` 与无 Key 守卫；(5) 不得顺手删 `strings.xml` 中仍被引用的键；(6) 删除测试必须写明等价覆盖的落点。
+- Completed: 首页瘦身已 100% 完成并 verified（2026-09-24）。首页只剩品牌区、输入区（含草稿/Key 提示/模型档位/发送）、继续学习行、发现话题（弹幕形态不变）四块；三入口与历史主题列表消失，替代落点为标签栏与学习库。全部门禁绿：单测 615/0/0、check 0、Java-only 0、真机 6/6。
+- In progress: 无。
+- Blocker: 无。
+- Unblock condition: 不适用。
+- Next steps: 本片 verified 后 049 族的 IA 链条（052→053→054→055）收口。剩余可并行为 056/057（图标）与 058（画布）；056/057 落地时应一并处理本片 Gaps ③（品牌图形标识替换）与推荐区换皮（Gaps ①）。
+- Watch-outs: (1) `home_continue` 行依赖 `HomeViewState.continueTopic()`，改动 continue 语义时先改该判定点；(2) `home_key_hint` 现为被动提示——若要恢复点击进设置，须先在 `HomeActions` 重新立动作并过 PRD 6.2.13 口径；(3) 主题级改名/删除当前全应用无入口（Gaps ②），用户提出需求时立新任务，勿在首页复活列表；(4) `item_recommendation.xml`/`RecommendationMarquee.java` 零改动是有意决策，换皮须等图标资产并重新过 PRD 第 96 行验收。

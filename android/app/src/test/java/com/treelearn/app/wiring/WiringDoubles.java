@@ -61,12 +61,19 @@ final class WiringDoubles {
         public boolean isConfigured() {
             return configured;
         }
+
+        @Override
+        public boolean isConfigured(String providerId) {
+            return configured;
+        }
     }
 
     /** The home path's rows: the list it was given, and the write it was asked to make. */
     static final class Homes implements HomeStore {
 
         final List<Row> rows = new ArrayList<Row>();
+        HomeStore.StatsRaw statsRaw;
+        int statsRawCalls;
         FirstTopicCreation.Refusal refusal;
         int createCalls;
         Topic createdTopic;
@@ -78,6 +85,12 @@ final class WiringDoubles {
         @Override
         public List<Row> recentTopics() {
             return rows;
+        }
+
+        @Override
+        public StatsRaw statsRaw() {
+            statsRawCalls++;
+            return statsRaw;
         }
 
         @Override

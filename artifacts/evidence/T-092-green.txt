@@ -1,0 +1,33 @@
+T-2026-09-23-092 GREEN evidence (2026-09-24)
+
+Implementation (minimum):
+  新增 app/search/web: WebSearchGateway(端口+Item/Outcome), SearchCredentials,
+  HttpWebSearchGateway(智谱/Tavily/博查真实 HTTPS+org.json, 非法输入一律 FAILED 值而非异常),
+  KeystoreSearchCredentials(keystore search_<engine> 命名空间, 缺失/不可读=null),
+  ChatSearchStep([OFF]/[NOKEY]/OK/FAILED/[PART] 编排, Key 缓冲 finally 清零),
+  SearchInjection(注入块: 引用标注指令+条目序号/标题/域名/摘要, 摘要/标题/回显问题分别裁剪,
+  超限丢最低排名条目); PromptLimits 六常量同批定值。
+  集成: ChatWiring.send 检索串行于写入/准入之前, [NOKEY] 拒绝零写入; 注入块前置于 currentInput
+  (随 assembler 预算口径计入, 不进行何持久化行/快照); 降级经 ChatCommandResult.ranWithNotice 上屏;
+  ChatViewState/ChatPresenter/ChatActions/ChatScreen(输入栏 chip+底部面板)+SettingsStore(ui 口径)
+  +AppContainer/MainActivity 装配; HomeViewState.Notice+SEARCH_* 三态; NoticeText 中文文案;
+  另修复 T-087 死入口: SettingsScreen.setOnProvidersPressed 补 settings_providers_entry 点击绑定。
+
+Command (与 RED 逐字相同):
+  cd android && ./gradlew --no-watch-fs :app:testDebugUnitTest --tests "com.treelearn.app.search.web.*" --tests "com.treelearn.app.wiring.ChatWiringSearchTest" --tests "com.treelearn.app.ui.ChatPresenterSearchTest" --tests "com.treelearn.app.screen.SettingsProvidersBindingTest"
+  (本机实际执行为 PowerShell 等价形式, 2>&1)
+
+Exit code: 0
+
+Passing evidence: BUILD SUCCESSFUL in 21s; 30 tests, 0 failed (完整输出 T-092-green-raw.txt)。
+
+Regression evidence:
+  既有 ChatWiringTest/ChatPresenterTest/ChatViewStateTest 等未改动, 由随后的全量 `./gradlew check`
+  覆盖(T-092-check.txt); 开关关闭路径的「行为不变」在本套件内以
+  sendWithTheSearchOffIsExactlyTheOldPath / retryNeverRunsASearch 断言。
+
+GREEN 期间对测试的一处前提修正(行为不变, 不变量保留):
+  anOversizedFrameAloneYieldsTheEmptyBlock → aRunawayQuestionEchoIsTrimmedAndTheBlockStaysInsideTheLimit
+  原测试假设回显问题可使注入帧超过 SEARCH_INJECTION_LIMIT_CHARS, 但回显受 SEARCH_QUERY_CHARS
+  先行裁剪, 帧超限在该常量组下不可达; 改为断言回显裁剪与块长 ≤ 上限(「块不超限」不变量仍被
+  overflowDropsTheLowestRankedEntries 用例覆盖)。

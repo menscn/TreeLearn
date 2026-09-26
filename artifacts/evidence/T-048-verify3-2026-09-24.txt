@@ -1,0 +1,18 @@
+T-048 verifier #3 补强证据 — 2026-09-24
+cwd: D:/Project/Android/Treelearn
+
+[RUN] 设计 token 守门（验收项 5 的组成门之一，刷新证据）
+  command: python .trae/scripts/dev/check_design_tokens.py
+  结果: OK colors.xml 解析出 >= 1 个资源 — measured=15
+        OK 三方一致（原型 :root ↔ tokens.json ↔ colors.xml） — measured_tokens=42 measured_resources=15
+        check_design_tokens: 0 check(s) failed
+  EXITCODE=0
+
+[REF] 全量 check 与 no-kotlin guard（工作树含 T-048 全部代码 + 后续增量）
+  全量 check: artifacts/evidence/P3-B4-gates-2026-09-24.txt（EXITCODE=0）
+  no-kotlin guard: artifacts/evidence/P3-B3-no-kotlin-2026-09-24.txt（PASS）
+  任务校验: validate_tasks.py files=108 errors=0（2026-09-24）
+
+[SCAN] 真机 SQLite 证据（GREEN 记录引用，非本轮重跑）
+  SearchUnreadReadingInstrumentedTest 于真机 AWSS013807000356：12 tests, 0 failures，
+  含 question 命中、归档问题排除、通配符转义与既有搜索行为（见任务文件 GREEN 回归证据）。

@@ -57,7 +57,8 @@ public class AiGatewayStreamTest {
     }
 
     private AiGateway gateway(Executor executor, GatewayPorts.BodyEncoder encoder) {
-        return new AiGateway(transport, encoder, decoder, balance, log, executor);
+        return new AiGateway(transport, encoder, decoder, balance, new ProviderJson.ModelList(),
+                log, executor);
     }
 
     private static DeepSeekRequest request(boolean thinking) {
@@ -264,7 +265,8 @@ public class AiGatewayStreamTest {
         byte[] body = "{\"model\":\"deepseek-flash\",\"stream\":true}".getBytes(UTF_8);
         RecordingSink sink = new RecordingSink();
 
-        new AiGateway(transport, (model, request) -> body, decoder, balance, log, INLINE)
+        new AiGateway(transport, (model, request) -> body, decoder, balance,
+                new ProviderJson.ModelList(), log, INLINE)
                 .streamChat("secret-key", GenerationModel.FLASH, request(true), sink);
 
         assertArrayEquals(body, transport.requestedBody);

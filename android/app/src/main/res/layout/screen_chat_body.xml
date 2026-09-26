@@ -252,6 +252,42 @@
             android:tint="@color/tl_ink2" />
     </LinearLayout>
 
+    <!-- The attachment the next question will carry (T-097); mutually exclusive with the quote
+         row, which is the presenter's decision, so at most one of the two rows shows at a time. -->
+    <LinearLayout
+        android:id="@+id/chat_attach_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/tl_green_faint"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/page_gutter"
+        android:paddingEnd="@dimen/space_s2"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/chat_attach_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:paddingTop="@dimen/space_s2"
+            android:paddingBottom="@dimen/space_s2"
+            android:textColor="@color/tl_ink2"
+            android:textSize="@dimen/text_sm" />
+
+        <ImageView
+            android:id="@+id/chat_attach_clear"
+            android:layout_width="@dimen/touch_min"
+            android:layout_height="@dimen/touch_min"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/cd_chat_attachment_remove"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_chat_close"
+            android:tint="@color/tl_ink2" />
+    </LinearLayout>
+
     <!-- Composer: the draft, the model/thinking chip and send (PRD 6.2.18 point 2). -->
     <LinearLayout
         android:id="@+id/chat_composer"
@@ -264,6 +300,18 @@
         android:paddingTop="@dimen/space_s2"
         android:paddingEnd="@dimen/page_gutter"
         android:paddingBottom="@dimen/space_s2">
+
+        <!-- T-077: the fullscreen editor's entry key (073 §5.1); greyed from the state when the
+             draft is empty, the branch is archived or the key is missing. -->
+        <ImageView
+            android:id="@+id/chat_expand"
+            android:layout_width="@dimen/touch_min"
+            android:layout_height="@dimen/touch_min"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/cd_chat_fullscreen_edit"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_chat_expand"
+            android:tint="@color/tl_ink3" />
 
         <EditText
             android:id="@+id/chat_draft"
@@ -279,11 +327,49 @@
             android:textColorHint="@color/tl_ink3"
             android:textSize="@dimen/text_body" />
 
+        <TextView
+            android:id="@+id/chat_search_chip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_s2"
+            android:background="@drawable/bg_pill"
+            android:backgroundTint="@color/tl_surface"
+            android:contentDescription="@string/cd_chat_search_chip"
+            android:gravity="center"
+            android:minHeight="@dimen/touch_min"
+            android:paddingStart="@dimen/space_s3"
+            android:paddingEnd="@dimen/space_s3"
+            android:text="@string/chat_search_chip"
+            android:textColor="@color/tl_ink3"
+            android:textSize="@dimen/text_sm" />
+
+        <ImageButton
+            android:id="@+id/chat_attach"
+            android:layout_width="@dimen/touch_min"
+            android:layout_height="@dimen/touch_min"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/cd_chat_attach"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_nav_more"
+            android:tint="@color/tl_ink3" />
+
         <com.treelearn.app.screen.ModelThinkingPicker
             android:id="@+id/chat_model_chip"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/space_s2" />
+
+        <ImageButton
+            android:id="@+id/chat_voice"
+            android:layout_width="@dimen/touch_min"
+            android:layout_height="@dimen/touch_min"
+            android:layout_marginStart="@dimen/space_s2"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/cd_chat_voice"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_chat_voice"
+            android:tint="@color/tl_ink2"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/chat_send"

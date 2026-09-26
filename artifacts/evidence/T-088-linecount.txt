@@ -1,0 +1,16 @@
+T-2026-09-23-088 line count evidence (2026-09-24)
+口径: 非空非注释 (harness-tasks.md 判定口径), count_production_lines.py
+
+NEW production files (full count):
+   150  android/app/src/main/java/com/treelearn/app/ui/ModelSettingsPresenter.java
+   109  android/app/src/main/java/com/treelearn/app/wiring/SqliteModelSettingsStore.java
+   278  android/app/src/main/java/com/treelearn/app/screen/ModelSettingsScreen.java
+   537  TOTAL (new files, non-blank, non-comment)
+
+MODIFIED production files - changed (added) lines only, counted by diff inspection:
+  ~37 screen_settings_body.xml (模型设置入口卡) | ~27 MainActivity.java (showModels/返回层级/入口接线/副标题刷新) | ~20 strings.xml (20 个新键) | ~17 SettingsRepository.java (3 分工键 + 预算键 + 建议开关键 + 通用 preference 读写) | ~10 SettingsScreen.java (入口回调与副标题) | ~6 AppContainer.java (modelSettingsStore 装配与建议开关注入) | ~5 ChatWiring.java (BooleanSupplier 建议7参构造) | ~4 DerivedService.java (answerSuggestions 门控)
+
+TOTAL (new 537 + modified ~126) ~= 663 (non-blank, non-comment)
+VERDICT-BASIS: 超出战役 500 硬上限约 33%；已按 T-087 先例如实记录于任务 TDD exception 节，提请用户裁定。
+NOTE: 中途已做两轮等价压缩（Screen 去 XML 全代码化 -58；查找表/去冗余字段 -21），压缩后测试仍 11/11。
+      修改文件行数为新增块人工盘点（工作树含多任务未提交改动，无法 git diff 隔离），与 T-087 同口径。

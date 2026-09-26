@@ -17,16 +17,33 @@ public final class ChatCommandResult {
     private final String operationId;
     private final String branchId;
     private final HomeViewState.Notice notice;
+    private final HomeViewState.Notice postNotice;
 
     private ChatCommandResult(String operationId, String branchId, HomeViewState.Notice notice) {
+        this(operationId, branchId, notice, null);
+    }
+
+    private ChatCommandResult(String operationId, String branchId, HomeViewState.Notice notice,
+            HomeViewState.Notice postNotice) {
         this.operationId = operationId;
         this.branchId = branchId;
         this.notice = notice;
+        this.postNotice = postNotice;
     }
 
     /** An attempt was admitted for the position the learner is reading. */
     public static ChatCommandResult ran(String operationId) {
         return new ChatCommandResult(Guard.id(operationId, "operationId"), "", null);
+    }
+
+    /**
+     * An attempt was admitted and, once it lands, a follow-up notice is shown (for example a search
+     * notice the attempt produced). The notice travels with the accepted result rather than being
+     * rendered now, so it appears after the rows arrive.
+     */
+    public static ChatCommandResult ranWithNotice(String operationId, HomeViewState.Notice degradation) {
+        return new ChatCommandResult(Guard.id(operationId, "operationId"), "", null,
+                Guard.object(degradation, "degradation"));
     }
 
     /**
@@ -69,5 +86,10 @@ public final class ChatCommandResult {
     /** What to tell the learner; only meaningful when refused. */
     public HomeViewState.Notice notice() {
         return notice;
+    }
+
+    /** A notice to show once an accepted command lands; only meaningful when accepted. */
+    public HomeViewState.Notice postNotice() {
+        return postNotice;
     }
 }

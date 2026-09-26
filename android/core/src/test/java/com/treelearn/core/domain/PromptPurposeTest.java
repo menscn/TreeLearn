@@ -35,6 +35,15 @@ public class PromptPurposeTest {
             "CONTEXT_COMPRESSION",
     };
 
+    /**
+     * Spec-driven extension (SPEC-2026-09-23-providers-and-models, 079 拍板；矩阵 1.8「消息级翻译」
+     * 部分推翻记录): the translation-model role delivers message-level translation, which owns its
+     * own version namespace by the §3.2 isolation rule.
+     */
+    private static final String[] SPEC_EXTENSION_NAMES = {
+            "MESSAGE_TRANSLATION",
+    };
+
     /** §6 version table. */
     private static final String[] AUTHORITATIVE_POLICY_VERSIONS = {
             "tl-learning-answer/1.0.0",
@@ -44,6 +53,7 @@ public class PromptPurposeTest {
             "tl-answer-recommendations/1.0.0",
             "tl-home-recommendations/1.0.0",
             "tl-context-compression/1.0.0",
+            "tl-message-translation/1.0.0",
     };
 
     @Test
@@ -53,8 +63,11 @@ public class PromptPurposeTest {
             declared.add(purpose.name());
         }
         Set<String> expected = new HashSet<String>(Arrays.asList(AUTHORITATIVE_NAMES));
-        assertEquals("PromptPurpose must match prompt design V1.0 §3.1 exactly", expected, declared);
-        assertEquals(AUTHORITATIVE_NAMES.length, PromptPurpose.values().length);
+        expected.addAll(Arrays.asList(SPEC_EXTENSION_NAMES));
+        assertEquals("PromptPurpose must match the §3.1 list plus the recorded spec extensions",
+                expected, declared);
+        assertEquals(AUTHORITATIVE_NAMES.length + SPEC_EXTENSION_NAMES.length,
+                PromptPurpose.values().length);
     }
 
     /**

@@ -1,0 +1,17 @@
+﻿T-077 行数统计（生产代码 = 非空非注释行；新增文件按全量，既有文件按本次改动行）
+新增文件（脚本统计）：
+  res/drawable/ic_chat_expand.xml : 10
+  res/layout/overlay_fullscreen_editor.xml : 55
+测试（不计生产）：
+  test/.../ui/ChatFullscreenEditorTest.java : 89
+既有文件改动行（人工计数，javadoc/XML 注释不计）：
+  ui/ChatViewState.java : 19（fullscreenEditing 字段+构造参数+传递×8处、withFullscreenEditing、fullscreenEditEntryAvailable）
+  ui/ChatActions.java : 2（onFullscreenEditOpened/Closed）
+  ui/ChatPresenter.java : 8（两个回调实现）
+  screen/ChatScreen.java : 74（入口钮+覆盖层渲染 renderFullscreen、draftForwarder 抽取、onSystemBack）
+  MainActivity.java : 3（onBackRequested 对话分支先问覆盖层）
+  res/layout/screen_chat_body.xml : 11（chat_expand 入口钮）
+  res/layout/screen_chat.xml : 4（include overlay）
+  res/layout-sw600dp/screen_chat.xml : 4（include overlay，全屏自适应无专用变体）
+  res/values/strings.xml : 7（chat_fullscreen_title/cancel/done、cd_chat_fullscreen_edit/close、chat_fullscreen_entered/exited）
+合计：Java 106 + XML 91 = 197（≤ 200 上限；目标 90 未达，布局 XML 与 renderFullscreen 是主要超耗，原因见报告）

@@ -1,0 +1,139 @@
+﻿diff --git a/android/app/src/main/java/com/treelearn/app/wiring/ChatWiring.java b/android/app/src/main/java/com/treelearn/app/wiring/ChatWiring.java
+index 92aff57..9beca63 100644
+--- a/android/app/src/main/java/com/treelearn/app/wiring/ChatWiring.java
++++ b/android/app/src/main/java/com/treelearn/app/wiring/ChatWiring.java
+@@ -68,6 +68,13 @@ public final class ChatWiring implements ChatData, ChatCommands {
+     private final Clock clock;
+     private final PromptBudget budget;
+     private final DerivedService derived;
++    private final java.util.function.BooleanSupplier answerSuggestions;
++    /**
++     * T-092: the send-path grounding step. Null means "not wired" 鈥?the pre-T-092 path, where a
++     * send never retrieves. When wired, a send runs one blocking retrieval on the calling
++     * (background) executor before the request is assembled.
++     */
++    private final com.treelearn.app.search.web.ChatSearchStep search;
+     private final Set<String> derivedInFlight = ConcurrentHashMap.newKeySet();
+     private final ConcurrentHashMap<String, CopyOnWriteArrayList<Runnable>> generationListeners =
+             new ConcurrentHashMap<String, CopyOnWriteArrayList<Runnable>>();
+@@ -87,12 +94,33 @@ public final class ChatWiring implements ChatData, ChatCommands {
+ 
+     public ChatWiring(ChatStore store, GenerationPort generation, KeyVault keyVault, Clock clock,
+             PromptBudget budget, DerivedService derived) {
++        this(store, generation, keyVault, clock, budget, derived, () -> true);
++    }
++
++    /**
++     * @param answerSuggestions read per derived run (T-088, 079 鎷嶆澘 鈶?: the settings switch gates
++     *                          only {@code ANSWER_RECOMMENDATIONS}, never the summary or the home
++     *                          recommendations.
++     */
++    public ChatWiring(ChatStore store, GenerationPort generation, KeyVault keyVault, Clock clock,
++            PromptBudget budget, DerivedService derived,
++            java.util.function.BooleanSupplier answerSuggestions) {
++        this(store, generation, keyVault, clock, budget, derived, answerSuggestions, null);
++    }
++
++    /** T-092: the full form, with the grounding step wired by the container. */
++    public ChatWiring(ChatStore store, GenerationPort generation, KeyVault keyVault, Clock clock,
++            PromptBudget budget, DerivedService derived,
++            java.util.function.BooleanSupplier answerSuggestions,
++            com.treelearn.app.search.web.ChatSearchStep search) {
+         this.store = require(store, "store");
+         this.generation = require(generation, "generation");
+         this.keyVault = require(keyVault, "keyVault");
+         this.clock = require(clock, "clock");
+         this.budget = require(budget, "budget");
+         this.derived = derived;
++        this.answerSuggestions = require(answerSuggestions, "answerSuggestions");
++        this.search = search;
+         this.generation.addObserver(generationObserver);
+     }
+ 
+@@ -119,7 +147,8 @@ public final class ChatWiring implements ChatData, ChatCommands {
+             final ChatStore.Conversation captured = conversation;
+             Thread worker = new Thread(() -> {
+                 try {
+-                    derived.ensureConversationArtifacts(captured, GenerationModel.FLASH);
++                    derived.ensureConversationArtifacts(captured, GenerationModel.FLASH,
++                            answerSuggestions.getAsBoolean());
+                 } finally {
+                     derivedInFlight.remove(branchId);
+                 }
+@@ -221,6 +250,15 @@ public final class ChatWiring implements ChatData, ChatCommands {
+         if (missing != null) {
+             return ChatCommandResult.refused(missing);
+         }
++        // T-092: the grounding step, serial on this background executor before anything is written
++        // or admitted. A [NOKEY] intercept refuses before any row exists; a failed or empty
++        // retrieval degrades to the no-grounding path and only tells.
++        com.treelearn.app.search.web.ChatSearchStep.Result grounding = search == null
++                ? com.treelearn.app.search.web.ChatSearchStep.Result.off()
++                : search.run(text.trim());
++        if (grounding.status() == com.treelearn.app.search.web.ChatSearchStep.Status.NOKEY) {
++            return ChatCommandResult.refused(HomeViewState.Notice.SEARCH_KEY_MISSING);
++        }
+         long now = clock.millis();
+         int questionOrdinal = store.nextOrdinal(branchId);
+         Message userMessage = Message.user(branchId, questionOrdinal, text.trim(),
+@@ -235,7 +273,29 @@ public final class ChatWiring implements ChatData, ChatCommands {
+         // The citation is forwarded from the row that was just written, never judged here: whether a
+         // turn has one is the adapter's decision (DeepSeekContextEncoder.currentInput), and it is
+         // the same value the screen draws.
+-        return submit(command, questionOrdinal, userMessage.userContent, userMessage.quotedText());
++        ChatCommandResult result = submit(command, questionOrdinal, userMessage.userContent,
++                userMessage.quotedText(), grounding.block());
++        if (!result.isAccepted()) {
++            return result;
++        }
++        // T-092: the degrade notices ride the acceptance ([OFF]/[PART]); an OFF verdict (or no
++        // grounding step at all) reports nothing, and the pre-T-092 answer stands.
++        HomeViewState.Notice degradation = degradeOf(grounding.status());
++        return degradation == null ? result
++                : ChatCommandResult.ranWithNotice(result.operationId(), degradation);
++    }
++
++    /** The inline sentence a degrade state becomes; null when the send was an ordinary one. */
++    private static HomeViewState.Notice degradeOf(
++            com.treelearn.app.search.web.ChatSearchStep.Status status) {
++        switch (status) {
++            case FAILED:
++                return HomeViewState.Notice.SEARCH_FAILED;
++            case EMPTY:
++                return HomeViewState.Notice.SEARCH_EMPTY;
++            default:
++                return null;
++        }
+     }
+ 
+     @Override
+@@ -389,6 +449,18 @@ public final class ChatWiring implements ChatData, ChatCommands {
+      */
+     private ChatCommandResult submit(GenerationCommand command, int questionOrdinal,
+             final String input, final String quote) {
++        return submit(command, questionOrdinal, input, quote, "");
++    }
++
++    /**
++     * Assembles and admits one attempt; {@code groundingBlock} is T-092's retrieval injection,
++     * prepended ahead of the current input and thereby counted inside the reservation the
++     * assembler already computes for it (the block's own cap keeps it far inside the budget).
++     * Retry and reset pass the empty block: a replacement's context stays identical to the
++     * attempt it replaces.
++     */
++    private ChatCommandResult submit(GenerationCommand command, int questionOrdinal,
++            final String input, final String quote, final String groundingBlock) {
+         final String branchId = command.branchId;
+         final ContextPlan requestHistory;
+         try {
+@@ -402,7 +474,9 @@ public final class ChatWiring implements ChatData, ChatCommands {
+         GenerationCoordinator.Assembler assembler = forCommand -> DeepSeekRequestAssembler.assemble(
+                 forCommand.purpose, forCommand.thinkingEnabled,
+                 DeepSeekContextEncoder.encode(requestHistory),
+-                DeepSeekContextEncoder.currentInput(input, quote), budget);
++                groundingBlock.isEmpty() ? DeepSeekContextEncoder.currentInput(input, quote)
++                        : groundingBlock + "\n" + DeepSeekContextEncoder.currentInput(input, quote),
++                budget);
+         GenerationCoordinator.SubmitOutcome outcome = generation.submit(command, assembler);
+         if (outcome.isAccepted()) {
+             return ChatCommandResult.ran(outcome.operationId);

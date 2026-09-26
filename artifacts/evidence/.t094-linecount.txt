@@ -1,0 +1,16 @@
+Command: cd android/app/src/main/java/com/treelearn/app && grep -vE '^\s*(//|/\*|\*|\*/)?\s*$' <file> | wc -l (逐文件, 口径=非空非注释行)
+Exit code: 0
+
+-- 新增文件 --
+ui/ChatSpeaker.java: 198
+-- 修改文件(整文件口径, 供参考; 任务行数按 T-093 先例只计新增文件) --
+ui/ChatMessage.java: 181
+ui/ChatActions.java: 115
+ui/ChatPresenter.java: 767
+screen/AnswerActionBar.java: 126
+screen/ChatScreen.java: 965
+MainActivity.java: 859
+-- 新增资源 --
+res/drawable/ic_action_speak.xml / res/layout view_answer_actions.xml 增行 / res/values strings.xml 增行: 见 git diff
+
+新增生产代码合计: 198

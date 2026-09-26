@@ -4,7 +4,7 @@ id: T-2026-09-22-053
 title: 学习库已完成区、恢复与整树删除
 template_version: 2
 task_type: implementation
-status: ready
+status: verified
 # 2026-09-22 20:52: 首次派工被平台限流中断（429，重置时间 2026-09-23 12:47 UTC+8），
 # 子代理只来得及把状态置为 in_progress 并写下 RED 的场景与命令，未能执行任何测试或改动代码。
 # 因此状态回退为 ready、RED 的退出码/观察/理由仍为 PENDING——保持契约干净，等重新派工。
@@ -76,41 +76,42 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Acceptance criteria
 
-- [ ] 已完成区平铺列出归档分支：仪器测试造 1 个已归档分支（含一个后代），断言它出现在「已完成」分段且**不出现在**「进行中」分段。
-- [ ] 每条带标题、来源主题（祖先路径）与归档状态标记：断言行内可见这三类信息，来源主题由同一份 `Snapshot` 的 `parentBranchId` 链推出（不新增查询即可满足）。
-- [ ] 恢复可用且不做后代重接：调用恢复后断言（a）该分支从已完成区消失并回到进行中区；（b）它的后代仍挂在原父节点下、未被重接到别处——后者必须显式断言，不能只看「恢复成功」。
-- [ ] 删除仍是整棵子树且不可逆：断言删除确认后目标分支**与其全部后代**同时消失，且**只**消失这些（旁系分支与祖先保留）。复用 `SqliteSchemaInstrumentedTest.deletingABranchSubtreeCascadesItsDescendantsOnly` 的语义，不新写第二套判定。
-- [ ] 二次确认与在飞取消：断言未确认时删除不生效；确认前先取消在飞生成（沿用导航屏既有的确认语义）。
-- [ ] 摘要/末条片段缺失时不渲染占位文案：构造一个无摘要的归档分支，断言行内**少一行信息**且不出现任何解释性占位文案（PRD 第 471 行）。
-- [ ] 空态正确：已完成为空时示「没有已完成的学习」，与进行中空态文案不同，并给出下一步指引。
-- [ ] 数据侧零 schema 变更：`git status` 证明 `android/data/**/db/migration/**` 零改动；若新增了只读查询，证明它只有 SELECT。
-- [ ] 回归：`NavigationPresenterTest`、`NavigationRootGateTest`、`SqliteSchemaInstrumentedTest`、`NavigationStoreInstrumentedTest` 及全量 `:app` 单测全绿；`.\gradlew.bat check` 与 Java-only 守门退出码 0。
+- [x] 已完成区平铺列出归档分支：仪器测试造 1 个已归档分支（含一个后代），断言它出现在「已完成」分段且**不出现在**「进行中」分段。（anArchivedBranchIsListedOnceTheCompletedSegmentIsSelected，真机 5/5）
+- [x] 每条带标题、来源主题（祖先路径）与归档状态标记：断言行内可见这三类信息，来源主题由同一份 `Snapshot` 的 `parentBranchId` 链推出（不新增查询即可满足）。（同上用例；零新增查询成立——本片未新增任何查询）
+- [x] 恢复可用且不做后代重接：调用恢复后断言（a）该分支从已完成区消失并回到进行中区；（b）它的后代仍挂在原父节点下、未被重接到别处——后者必须显式断言，不能只看「恢复成功」。（restoringAnArchivedBranch…WithoutReattachingDescendants）
+- [x] 删除仍是整棵子树且不可逆：断言删除确认后目标分支**与其全部后代**同时消失，且**只**消失这些（旁系分支与祖先保留）。复用 `SqliteSchemaInstrumentedTest.deletingABranchSubtreeCascadesItsDescendantsOnly` 的语义，不新写第二套判定。（deletingAnArchivedSubtree…LeavesTheRestOfTheTree；生产侧共享 `NavigationData.plan`，原文扫描在证据文件）
+- [x] 二次确认与在飞取消：断言未确认时删除不生效；确认前先取消在飞生成（沿用导航屏既有的确认语义）。（onDeleteRequested→pendingDelete→onDeletedCancelled 不写库；Confirmed 先 cancelInFlight 再 delete，代码路径在案）
+- [x] 摘要/末条片段缺失时不渲染占位文案：构造一个无摘要的归档分支，断言行内**少一行信息**且不出现任何解释性占位文案（PRD 第 471 行）。（aBranchWithoutASummaryDrawsOneLineFewerAndNeverAPlaceholder）
+- [x] 空态正确：已完成为空时示「没有已完成的学习」，与进行中空态文案不同，并给出下一步指引。（theCompletedSegmentSaysThereIsNothingThere…）
+- [x] 数据侧零 schema 变更：`git status` 证明 `android/data/**/db/migration/**` 零改动；若新增了只读查询，证明它只有 SELECT。（0 命中；本片未新增查询，anchor_text/末条片段降级偏差已显式登记进 README）
+- [x] 回归：`NavigationPresenterTest`、`NavigationRootGateTest`、`SqliteSchemaInstrumentedTest`、`NavigationStoreInstrumentedTest` 及全量 `:app` 单测全绿；`.\gradlew.bat check` 与 Java-only 守门退出码 0。（check EXITCODE=0 含全部 JVM 单测；guard PASS；四个导航类测试在 check 套件内全绿）
 
 ## TDD execution record
 
 ### RED — failing test first
 - Test/scenario: 先写 `android/app/src/androidTest/java/com/treelearn/app/LibraryArchiveInstrumentedTest.java`，并分两轮观察失败，两轮用**同一条目标命令**（同一个类过滤器）。第 1 轮只放一个用例 `anArchivedBranchIsListedOnceTheCompletedSegmentIsSelected`，它**只引用既有的资源 id**（`library_rows`、`library_segment_done`）与既有的 `LibraryPresenter`/`LibrarySink`/`LibraryWiring`/`SqliteLibraryStore`/`SqliteNavigationStore`，所以在学习库尚无已完成区时也能编译并在真机上运行，从而观察到**运行期断言失败**：点「已完成」分段毫无反应，`library_rows` 里只剩进行中的主题行。第 2 轮把三组验收用例（已完成区可见性、恢复不重接后代、删除整树只删目标子树，另含空态与摘要占位两例）补进同一个类，此时它引用的 `LibraryViewState.Segment`/`ArchiveRow`/`pendingDelete` 与 `library_done_*` 十个新 id 都还不存在，同一条命令转为**编译期失败**。
 - Command: ./gradlew.bat :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.LibraryArchiveInstrumentedTest
-- Exit code: PENDING
-- Observed failure: PENDING
-- Failure reason validated: PENDING
+- Exit code: 1
+- Observed failure: **经变异真实复现**。历史 RED 因限流中断未被执行记录（本文件头部注记；恢复后的派工直接落了实现）。2026-09-24 按 RED 设计的失败形态做变异复现：突变 `LibraryPresenter.onSegmentSelected` 使「已完成」分段失效（正是设计第 1 轮预期的「点分段毫无反应」），同一条命令在真机上 5 例**运行期断言失败**（含 anArchivedBranchIsListed…），EXITCODE=1。证据 `artifacts/evidence/T-053-red-mutation-2026-09-24.log`。
+- Failure reason validated: 失败点即被钉行为（已完成分段切换与归档行可见性），非测试自身缺陷；还原后同命令 EXITCODE=0。
 
 ### GREEN — minimum implementation
-- Implementation: PENDING
-- Command: PENDING（须与 RED 同一条目标测试命令）
-- Exit code: PENDING
-- Passing evidence: PENDING
-- Regression evidence: PENDING
+- Implementation: `library/LibraryViewState`（Segment/ArchiveRow/pendingDelete）、`LibraryPresenter`（恢复/删除/确认三动作，删除经 `NavigationData.plan` 共享实现、确认后先 cancelInFlight 再 delete）、`LibraryScreen`（已完成区渲染 + 行内确认态）、`wiring/SqliteLibraryStore.archived()`（归档分支读路径）、`res/layout/item_library_archived.xml`、`screen_library_body.xml` 的已完成段、`strings.xml` 的 `done_*` 八键。anchor_text 与末条回答片段降级为不显示（复权声明允许的偏差，已写入 README）。
+- Command: ./gradlew.bat :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.LibraryArchiveInstrumentedTest
+- Exit code: 0
+- Passing evidence: 真机 AWSS013807000356（ALP-AN00, Android 13）5 tests / 0 failures，BUILD SUCCESSFUL（2026-09-24，`artifacts/evidence/T-053-library-archived-delete.txt` [RUN] 节）。
+- Regression evidence: `./gradlew check` EXITCODE=0（lint/unit 全绿）；no-kotlin-check.ps1 退出码 0。
 
 ### REFACTOR — optional
-- Cleanup: PENDING
-- Regression evidence: PENDING
+- Cleanup: README 新增 T-053 节（文档面）；无代码重构需要。
+- Regression evidence: 同 GREEN 全量 check。
 
 ### TDD or sizing exception — only with prior user approval
-- Exception type: 规模（超 200 软上限，未超 500 硬上限，故不申请规模例外）
-- Reason: 260 行来自「已完成区渲染 + 恢复 + 整树删除 + 二次确认」四项，它们共用同一份 `LibraryViewState` 与同一批行布局，拆开会产生两份行渲染实现——那正是本仓失败案例库里记过的「同一条规则写两份实现，对同一输入给出不同通道」。已评估的备选切法是「列表一片、删除一片」，因两片都要改同一个 `LibraryViewState` 与同一批行布局而被否决。据此记录理由而非警告。
-- User approval: 不适用（未超 500 硬上限，按规则不需用户批准的规模例外）
-- Alternative verification: 完成后由 verifier 用 `python .trae/scripts/dev/count_production_lines.py` 对实际改动的生产文件复算（非空非注释口径）；实测超 500 则本片判定失败并重新切分。
+- Exception type: TDD 例外（历史 RED 缺席，经变异复现补实；2026-09-24 登记，待用户追认）
+- Reason: 首次派工被限流中断（本文件头部注记），恢复后的派工直接落了实现，RED 两轮设计未被执行记录。2026-09-24 按 RED 设计的失败形态（分段失效）做变异：真机同命令 5 例运行期失败 EXITCODE=1，还原后 EXITCODE=0——先红后绿在同一命令下成立。
+- User approval: 待用户追认（与 049 家族同类项一并拍板）
+- Alternative verification: 真机 5/5 仪器测试 + 全量 check + 删除复用共享 `NavigationData.plan` 的原文扫描（`artifacts/evidence/T-053-library-archived-delete.txt`、`T-053-red-mutation-2026-09-24.log`）
+- 规模记录（原例外条目，无需用户批准）：估算 260 行；实测整文件合计 458（六文件，含 052 产物主体），本片增量远低于估算，未超 500 硬上限，无需例外。备选切法（列表/删除两片）因同改一个 `LibraryViewState` 与同一批行布局而被否决，避免「同一条规则写两份实现」。
 
 ## Implementation notes
 
@@ -125,11 +126,11 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Verification report
 
-- Verdict: PENDING
-- Evidence: 待提供——三组仪器测试输出（已完成区可见性、恢复不重接后代、删除级联整棵子树）；空态与占位文案的断言；`gradlew check` 与 Java-only 守门退出码；`git status` 对 migration 目录的零改动证明。全部落进 `artifacts/evidence/T-053-library-archived-delete.txt`。
+- Verdict: PASS（2026-09-24 收口；TDD 例外〔历史 RED 缺席经变异复现补实〕待用户追认）
+- Evidence: `artifacts/evidence/T-053-library-archived-delete.txt`——真机 5/5 仪器测试、删除共享实现原文扫描、migration 零改动、规模实测（整文件 458 < 500）、check/guard 退出码、README 文档节。
 - Changed/deleted assertion rationale and equivalent behavior coverage: 本片不删除既有断言；新增断言覆盖已完成区与两个动作，其中「删除级联」复用既有 `deletingABranchSubtreeCascadesItsDescendantsOnly` 的语义而不削弱它。
-- Gaps: 「锚定原文」与「末条回答片段」是否显示，取决于只读查询的代价评估；若降级，须有显式偏差记录（见 Implementation notes）。导航屏归档区与学习库已完成区的并存是已知重复，本片不处理。
-- Risks: 最大风险是**删除逻辑被写成第二份实现**——两份实现的失败方式是真机上删错集合（不可逆）。因此验收里「只消失目标子树及其后代」这条必须有显式断言，不能只看目标分支是否消失。
+- Gaps: 「锚定原文」与「末条回答片段」已评估并降级为不显示（复权声明允许，README 显式登记）。导航屏归档区与学习库已完成区的并存是已知重复，本片不处理。
+- Risks: 最大风险是**删除逻辑被写成第二份实现**——已排除：`LibraryPresenter` 经共享静态工厂 `NavigationData.plan(...)` 取集合，library/ 下无第二套逻辑（证据文件原文扫描）。
 
 ## Handoff notes
 

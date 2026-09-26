@@ -133,8 +133,9 @@ public final class BottomTabShellInstrumentedTest {
         seedTopic(TOPIC_A, TITLE_A, T0, 0);
         activity = launch();
 
-        clickRow(awaitChildren(R.id.home_topics));
-        assertNotNull("a tapped home row opens the conversation on its branch",
+        awaitVisible(R.id.home_continue);
+        click(R.id.home_continue);
+        assertNotNull("a tapped continue-learning row opens the conversation on its branch",
                 waitFor(R.id.chat_root));
         assertBarHidden("a conversation is a second-level screen");
 
@@ -341,6 +342,29 @@ public final class BottomTabShellInstrumentedTest {
             SystemClock.sleep(50L);
         }
         throw new AssertionError("the library never settled on a state sentence");
+    }
+
+    /**
+     * Waits for a view the state decides to show. The continue-learning row (055) exists in the
+     * layout but is drawn only while there is history, so a tap must wait for the visibility rather
+     * than for the view to exist.
+     */
+    private View awaitVisible(int id) {
+        long deadline = SystemClock.uptimeMillis() + WAIT_MS;
+        while (SystemClock.uptimeMillis() < deadline) {
+            View[] found = new View[1];
+            instrumentation.runOnMainSync(() -> {
+                View target = activity.findViewById(id);
+                if (target != null && target.getVisibility() == View.VISIBLE) {
+                    found[0] = target;
+                }
+            });
+            if (found[0] != null) {
+                return found[0];
+            }
+            SystemClock.sleep(50L);
+        }
+        throw new AssertionError("view " + id + " never became visible within " + WAIT_MS + "ms");
     }
 
     private View waitFor(int id) {

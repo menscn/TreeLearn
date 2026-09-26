@@ -1,0 +1,19 @@
+T-018 新鲜 release APK 签名与哈希证据 — 2026-09-24
+cwd: D:/Project/Android/Treelearn/android
+
+[RUN] assembleRelease（含 T-032 起的全部生产代码 + 本日 QuietTelemetry/TelemetrySink）
+  command: ./gradlew :app:assembleRelease --console=plain
+  结果: BUILD SUCCESSFUL，EXITCODE=0
+  产物: app/build/outputs/apk/release/app-release.apk（917 135 字节，2026-09-24 16:35）
+  取代 2026-09-21 的旧 APK（429 964 字节，接线前骨架）——freshness 恢复。
+
+[VERIFY] apksigner（build-tools 36.1.0）
+  command: apksigner.bat verify --print-certs app-release.apk
+  结果: EXITCODE=0
+  Signer #1: CN=Treelearn Personal Sideload, OU=Personal, O=Treelearn
+  证书 SHA-256: d8670c863d692a90e21b7a895cf0f717bc8a1cc4ba82a48ff771f09a8780c561
+  （与 2026-09-21 首验一致 —— 同一仓库外个人侧载 keystore；口令未出现在本文件）
+  APK SHA-256: 0ed7813adbfc45da6404b3e965b69b98cc5921fa85e6592a6c36c5f0c76819b7
+
+[DEFERRED] 设备安装启动（API 36 手机竖屏 + 平板横屏）—— user 2026-09-21/2026-09-24 决定，
+  不得读作 PASS；APK 已就绪，用户自行侧载验证。

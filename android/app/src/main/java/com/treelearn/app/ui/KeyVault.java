@@ -10,4 +10,7 @@ package com.treelearn.app.ui;
 public interface KeyVault {
 
     boolean isConfigured();
+
+    /** The same question for one provider slot, not the legacy single key. */
+    boolean isConfigured(String providerId);
 }

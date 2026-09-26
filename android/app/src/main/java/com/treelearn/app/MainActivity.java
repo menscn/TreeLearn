@@ -20,12 +20,18 @@ import com.treelearn.app.library.LibraryPresenter;
 import com.treelearn.app.library.LibrarySink;
 import com.treelearn.app.library.LibraryViewState;
 import com.treelearn.app.screen.ChatScreen;
+import com.treelearn.app.screen.FileManagerScreen;
+import com.treelearn.app.screen.HomeDrawerScreen;
 import com.treelearn.app.screen.HomeScreen;
 import com.treelearn.app.screen.LibraryScreen;
+import com.treelearn.app.screen.ModelSettingsScreen;
 import com.treelearn.app.screen.NavigationScreen;
-import com.treelearn.app.screen.SearchScreen;
+import com.treelearn.app.screen.ProviderAdminScreen;
+import com.treelearn.app.screen.SearchServiceSettingsScreen;
+import com.treelearn.app.screen.StatsDetailScreen;
 import com.treelearn.app.screen.SettingsScreen;
 import com.treelearn.app.screen.TreeCanvasScreen;
+import com.treelearn.app.screen.VoiceSettingsScreen;
 import com.treelearn.app.navigation.NavigationPresenter;
 import com.treelearn.app.navigation.NavigationSink;
 import com.treelearn.app.navigation.NavigationViewState;
@@ -34,20 +40,31 @@ import com.treelearn.app.search.BranchTitles;
 import com.treelearn.app.search.SearchPage;
 import com.treelearn.app.search.SearchPresenter;
 import com.treelearn.app.search.SearchViewState;
+import com.treelearn.app.ui.SpeechInputPolicy;
 import com.treelearn.app.ui.ChatPresenter;
+import com.treelearn.app.ui.ChatSpeaker;
 import com.treelearn.app.ui.ChatSink;
 import com.treelearn.app.ui.ChatViewState;
 import com.treelearn.app.ui.ChildBranch;
+import com.treelearn.app.ui.FileManagerPresenter;
+import com.treelearn.app.ui.HomeDrawerPresenter;
 import com.treelearn.app.ui.HomePresenter;
 import com.treelearn.app.ui.HomeSink;
 import com.treelearn.app.ui.HomeViewState;
+import com.treelearn.app.ui.ModelSettingsPresenter;
+import com.treelearn.app.ui.StatsDetailPresenter;
+import com.treelearn.app.ui.ProviderAdminPresenter;
+import com.treelearn.app.ui.SearchSettingsPresenter;
 import com.treelearn.app.ui.SettingsPresenter;
 import com.treelearn.app.ui.SettingsSink;
 import com.treelearn.app.ui.SettingsViewState;
 import com.treelearn.app.ui.TreeCanvasPresenter;
 import com.treelearn.app.ui.TreeCanvasSink;
 import com.treelearn.app.ui.TreeCanvasViewState;
+import com.treelearn.app.ui.VoiceSettingsPresenter;
 import com.treelearn.core.domain.AnswerRevision;
+import com.treelearn.app.voice.SystemTtsEngine;
+import com.treelearn.core.domain.GenerationModel;
 import com.treelearn.core.domain.ReadingAnchor;
 import com.treelearn.core.domain.ReadingPosition;
 import com.treelearn.treelayout.ViewportConstraints;
@@ -121,13 +138,31 @@ public final class MainActivity extends Activity
     /** The branch one pending entry is resolving a topic for; null when no entry is in flight. */
     private String navigatingTo;
 
-    /** The search page and its decisions; null while the page is not on screen. */
-    private SearchScreen searchScreen;
+    /**
+     * The search stack behind the library's search box (054). The independent search screen is
+     * retired; the presenter and the repository it reads are exactly the ones T-040 shipped.
+     */
     private SearchPresenter searchPresenter;
 
     /** The library page and its decisions; null while the page is not on screen. */
     private LibraryScreen libraryScreen;
     private LibraryPresenter libraryPresenter;
+
+    /** The four sub-settings rooms and their decisions; null while the room is not on screen. */
+    private ProviderAdminScreen providerAdminScreen;
+    private ProviderAdminPresenter providerAdminPresenter;
+    private ModelSettingsScreen modelSettingsScreen;
+    private ModelSettingsPresenter modelSettingsPresenter;
+    private SearchServiceSettingsScreen searchSettingsScreen;
+    private SearchSettingsPresenter searchSettingsPresenter;
+    private VoiceSettingsScreen voiceSettingsScreen;
+    private VoiceSettingsPresenter voiceSettingsPresenter;
+    private FileManagerScreen fileManagerScreen;
+    private FileManagerPresenter fileManagerPresenter;
+    private StatsDetailScreen statsDetailScreen;
+    private StatsDetailPresenter statsDetailPresenter;
+    private HomeDrawerScreen homeDrawerScreen;
+    private HomeDrawerPresenter homeDrawerPresenter;
 
     private boolean showingSettings;
     private boolean homeStarted;
@@ -156,6 +191,47 @@ public final class MainActivity extends Activity
         settingsScreen.setActions(settingsPresenter);
         settingsScreen.setOnBackPressed(this::onBackRequested);
 
+        // The home drawer (T-106): an overlay on main_drawer_root, outside swap()'s reach. Its
+        // navigation hands off to the very same room methods the home screen itself uses, and its
+        // quick list reads the library store's own query — one query, one text.
+        homeDrawerScreen = new HomeDrawerScreen(this);
+        homeDrawerPresenter = new HomeDrawerPresenter(new HomeDrawerPresenter.Sink() {
+            @Override
+            public void render(HomeDrawerPresenter.State next) {
+                homeDrawerScreen.render(next);
+            }
+
+            @Override
+            public void openBranch(String branchId) {
+                showChat(branchId);
+            }
+
+            @Override
+            public void openSettings() {
+                showSettings();
+            }
+
+            @Override
+            public void openStats() {
+                showStatsDetail();
+            }
+        }, container.libraryData()::topics, container.uiThread(), container.background());
+        homeDrawerScreen.setActions(homeDrawerPresenter);
+        ((FrameLayout) findViewById(R.id.main_drawer_root)).addView(homeDrawerScreen,
+                new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
+                        FrameLayout.LayoutParams.MATCH_PARENT));
+        homeScreen.setOnDrawerPressed(homeDrawerPresenter::onDrawerToggled);
+        // The five sub-settings entries. This wiring was missing for every predecessor room
+        // (087/088/091/093): the screens existed, their setters bound clicks, but no caller ever
+        // invoked the setters, so the entries were dead in the production shell. Same one-line
+        // pattern for all five; the file manager (T-096) needs its own entry to be alive, and the
+        // four predecessors are repaired by the same stroke rather than left dead.
+        settingsScreen.setOnProvidersPressed(this::showProviders);
+        settingsScreen.setOnModelsPressed(this::showModels);
+        settingsScreen.setOnSearchPressed(this::showSearchSettings);
+        settingsScreen.setOnVoicePressed(this::showVoiceSettings);
+        settingsScreen.setOnFilesPressed(this::showFileManager);
+
         tabHome.setOnClickListener(view -> showHome());
         tabLibrary.setOnClickListener(view -> showLibrary());
         tabSettings.setOnClickListener(view -> showSettings());
@@ -166,6 +242,10 @@ public final class MainActivity extends Activity
     @Override
     protected void onResume() {
         super.onResume();
+        if (fileManagerScreen != null) {
+            fileManagerPresenter.onResumed();
+            return;
+        }
         if (showingSettings) {
             return;
         }
@@ -181,12 +261,11 @@ public final class MainActivity extends Activity
             chatPresenter.onResumed();
             return;
         }
-        if (searchScreen != null) {
-            searchPresenter.onResumed();
-            return;
-        }
         if (libraryScreen != null) {
             libraryPresenter.onResumed();
+            if (searchPresenter != null && !searchPresenter.state().draft.isEmpty()) {
+                searchPresenter.onResumed();
+            }
             return;
         }
         if (homeStarted) {
@@ -238,16 +317,27 @@ public final class MainActivity extends Activity
      * than to the home page: the tab the learner left from is the tab they come back to.
      */
     private void onBackRequested() {
+        if (homeDrawerScreen != null
+                && homeDrawerScreen.getVisibility() == View.VISIBLE) {
+            homeDrawerPresenter.onDrawerToggled();
+            return;
+        }
+        if (statsDetailScreen != null) {
+            showHome();
+            return;
+        }
+        if (providerAdminScreen != null || modelSettingsScreen != null
+                || searchSettingsScreen != null || voiceSettingsScreen != null
+                || fileManagerScreen != null) {
+            showSettings();
+            return;
+        }
         if (showingSettings) {
             if (chatBranchId == null) {
                 showHome();
             } else {
                 showChat(chatBranchId);
             }
-            return;
-        }
-        if (searchScreen != null) {
-            showTab(currentTab);
             return;
         }
         if (navigationBranchId != null) {
@@ -259,6 +349,9 @@ public final class MainActivity extends Activity
             return;
         }
         if (chatBranchId != null) {
+            if (chatScreen != null && chatScreen.onSystemBack()) {
+                return;
+            }
             showTab(currentTab);
             return;
         }
@@ -347,20 +440,25 @@ public final class MainActivity extends Activity
     }
 
     /**
-     * The search page's state. The page object is built off the UI thread, because naming a row's
-     * branch is a store read like any other; only the finished page comes back to be drawn, and a page
-     * whose screen has been left in the meantime is dropped rather than drawn into.
+     * The search state, drawn inside the library (054). The page object is built off the UI thread,
+     * because naming a row's branch is a store read like any other; only the finished page comes back
+     * to be drawn, and a page whose screen has been left in the meantime is dropped rather than drawn
+     * into.
      */
     @Override
     public void render(SearchViewState state) {
-        final SearchScreen screen = searchScreen;
+        final LibraryScreen screen = libraryScreen;
         if (screen == null) {
             return;
         }
         final BranchTitles titles = container.branchTitles();
         container.background().execute(() -> {
             final SearchPage page = SearchPage.of(state, titles);
-            container.uiThread().post(() -> drawSearch(screen, state, page));
+            container.uiThread().post(() -> {
+                if (libraryScreen == screen) {
+                    screen.showSearch(state, page);
+                }
+            });
         });
     }
 
@@ -417,26 +515,6 @@ public final class MainActivity extends Activity
     }
 
     /**
-     * The home page's "archived" entry. The page shows one topic's tree and the home list is ordered
-     * newest first, so the entry opens the tree of the most recently used topic - the one whose rows the
-     * learner is looking at.
-     */
-    @Override
-    public void openArchived(String branchId) {
-        showNavigation(branchId);
-    }
-
-    /**
-     * The home page's search entry. It opens a page of its own rather than a branch screen, so it reads
-     * no branch and resolves no topic: search spans every branch, including the ones the learner has
-     * never opened.
-     */
-    @Override
-    public void openSearch() {
-        showSearch();
-    }
-
-    /**
      * The clipboard is the one place an answer leaves the app, so the clip is marked sensitive on the
      * versions that support it: the system then keeps it out of the clipboard preview instead of
      * showing a reasoning excerpt on the lock screen.
@@ -463,7 +541,7 @@ public final class MainActivity extends Activity
      * branch is opened, and leaving the list without choosing one opens nothing.
      */
     @Override
-    public void openChildren(String branchId, String messageId, List<ChildBranch> children) {
+    public void openChildren(String messageId, List<ChildBranch> children) {
         chatScreen.showChildren(messageId, children, this::openBranch);
     }
 
@@ -483,18 +561,19 @@ public final class MainActivity extends Activity
         navigationScreen = null;
         navigationPresenter = null;
         chatBranchId = null;
+        stopSpeechSession();
         chatScreen = null;
         chatPresenter = null;
         treeBranchId = null;
         treeCanvasScreen = null;
         treeCanvasPresenter = null;
         showingSettings = false;
-        searchScreen = null;
         searchPresenter = null;
         libraryScreen = null;
         libraryPresenter = null;
         selectTab(Tab.HOME);
         swap(homeScreen);
+        homeDrawerPresenter.start();
         if (homeStarted) {
             homePresenter.onResumed();
         }
@@ -510,8 +589,309 @@ public final class MainActivity extends Activity
         showingSettings = true;
         libraryScreen = null;
         libraryPresenter = null;
+        providerAdminScreen = null;
+        providerAdminPresenter = null;
+        modelSettingsScreen = null;
+        modelSettingsPresenter = null;
+        searchSettingsScreen = null;
+        searchSettingsPresenter = null;
+        voiceSettingsScreen = null;
+        voiceSettingsPresenter = null;
+        fileManagerScreen = null;
+        fileManagerPresenter = null;
+        statsDetailScreen = null;
+        statsDetailPresenter = null;
         swap(settingsScreen);
         settingsPresenter.start();
+        refreshProvidersSubtitle();
+        refreshModelsSubtitle();
+    }
+
+    private void showProviders() {
+        providerAdminScreen = new ProviderAdminScreen(this);
+        providerAdminPresenter = new ProviderAdminPresenter(providerAdminScreen,
+                container.uiThread(), container.background(), container.providerAdminStore());
+        providerAdminScreen.setActions(providerAdminPresenter);
+        providerAdminScreen.setOnBackPressed(this::onBackRequested);
+        swap(providerAdminScreen);
+        providerAdminPresenter.start();
+    }
+
+    private void refreshProvidersSubtitle() {
+        container.background().execute(() -> {
+            int enabled = 0;
+            for (ProviderAdminPresenter.Row row : container.providerAdminStore().list()) {
+                if (!row.enabled) {
+                    continue;
+                }
+                enabled++;
+            }
+            int count = enabled;
+            container.uiThread().post(() -> {
+                if (providerAdminScreen == null) {
+                    settingsScreen.setProvidersSubtitle(getString(R.string.providers_entry_enabled_count,
+                            count));
+                }
+            });
+        });
+    }
+
+    private void showModels() {
+        modelSettingsScreen = new ModelSettingsScreen(this);
+        modelSettingsPresenter = new ModelSettingsPresenter(modelSettingsScreen,
+                container.uiThread(), container.background(), container.modelSettingsStore());
+        modelSettingsScreen.setActions(modelSettingsPresenter);
+        modelSettingsScreen.setOnBackPressed(this::onBackRequested);
+        swap(modelSettingsScreen);
+        modelSettingsPresenter.start();
+    }
+
+    private void showSearchSettings() {
+        searchSettingsScreen = new SearchServiceSettingsScreen(this);
+        searchSettingsPresenter = new SearchSettingsPresenter(searchSettingsScreen,
+                container.uiThread(), container.background(), container.searchSettingsStore());
+        searchSettingsScreen.setActions(searchSettingsPresenter);
+        searchSettingsScreen.setOnBackPressed(this::onBackRequested);
+        swap(searchSettingsScreen);
+        searchSettingsPresenter.start();
+    }
+
+    private void showVoiceSettings() {
+        voiceSettingsScreen = new VoiceSettingsScreen(this);
+        voiceSettingsPresenter = new VoiceSettingsPresenter(voiceSettingsScreen,
+                container.uiThread(), container.background(), container.voiceSettingsStore(),
+                new SystemTtsEngine(this), getString(R.string.voice_audition_text));
+        voiceSettingsScreen.setActions(voiceSettingsPresenter);
+        voiceSettingsScreen.setOnBackPressed(this::onBackRequested);
+        swap(voiceSettingsScreen);
+        voiceSettingsPresenter.start();
+    }
+
+    /** Opens the file manager (T-096): built here and dropped on leave, like every other screen. */
+    private void showFileManager() {
+        fileManagerScreen = new FileManagerScreen(this);
+        fileManagerPresenter = new FileManagerPresenter(fileManagerScreen,
+                container.uiThread(), container.background(), container.fileManagerStore());
+        fileManagerScreen.setActions(fileManagerPresenter);
+        fileManagerScreen.setOnBackPressed(this::onBackRequested);
+        swap(fileManagerScreen);
+        fileManagerPresenter.start();
+    }
+
+    /**
+     * T-104: the statistics detail room. The drawer (T-106) is the production entry; this method is
+     * the navigation target it calls, exactly like every other room's show method.
+     */
+    private void showStatsDetail() {
+        statsDetailScreen = new StatsDetailScreen(this);
+        statsDetailPresenter = new StatsDetailPresenter(statsDetailScreen,
+                container.uiThread(), container.background(),
+                container.homeStore()::statsRaw, container.clock());
+        statsDetailScreen.setOnBackPressed(this::onBackRequested);
+        swap(statsDetailScreen);
+        statsDetailPresenter.start();
+    }
+
+    /** The SAF picker's request code; T-097 owns this one host-side flow. */
+    private static final int REQUEST_ATTACH = 0x7A6;
+
+    /** The microphone permission request code; T-095 owns this one host-side flow. */
+    private static final int REQUEST_MICROPHONE = 0x7A7;
+
+    private SpeechInputPolicy speechPolicy = new SpeechInputPolicy();
+    private com.treelearn.app.speech.SpeechInputGateway speechGateway;
+    private String speechPartial = "";
+    /** True only while the finger that asked for the mic permission is still holding the key. */
+    private boolean speechPressActive;
+
+    /** T-097: the attach key opens the SAF picker; cancellation lands back here untouched. */
+    private void onAttachPressed() {
+        android.content.Intent picker = new android.content.Intent(
+                android.content.Intent.ACTION_GET_CONTENT);
+        picker.addCategory(android.content.Intent.CATEGORY_OPENABLE);
+        picker.setType("*/*");
+        picker.putExtra(android.content.Intent.EXTRA_MIME_TYPES, new String[]{
+                "text/plain", "text/markdown", "application/pdf"});
+        try {
+            startActivityForResult(
+                    android.content.Intent.createChooser(picker, getString(R.string.cd_chat_attach)),
+                    REQUEST_ATTACH);
+        } catch (android.content.ActivityNotFoundException noPicker) {
+            // No documents provider on this device: the entry reports and changes nothing, the
+            // same no-side-effect rule the SAF cancel path follows.
+        }
+    }
+
+    /**
+     * T-095 press-and-hold start: the permission is asked here and only here (SPEC-081), never at
+     * launch. Granted - the session starts; denied - the key greys out and the session never starts.
+     */
+    private void onVoicePressed() {
+        if (checkSelfPermission("android.permission.RECORD_AUDIO")
+                == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            startSpeechSession();
+            return;
+        }
+        // The grant callback starts the session only if this press is still held: releasing
+        // inside the system dialog must not leave a mic session running with no finger down.
+        speechPressActive = true;
+        requestPermissions(new String[]{"android.permission.RECORD_AUDIO"}, REQUEST_MICROPHONE);
+    }
+
+    private void onVoiceReleased() {
+        speechPressActive = false;
+        stopSpeechSession();
+    }
+
+    /** Ends any live recognizer session; safe to call from anywhere, any number of times. */
+    private void stopSpeechSession() {
+        speechPressActive = false;
+        if (speechGateway != null) {
+            speechGateway.stop();
+        }
+        speechPartial = "";
+        if (chatScreen != null) {
+            chatScreen.setListening(false);
+        }
+    }
+
+    private void startSpeechSession() {
+        if (speechGateway == null || !speechGateway.isAvailable()) {
+            return;
+        }
+        speechPartial = "";
+        chatScreen.setListening(true);
+        speechGateway.start(new com.treelearn.app.speech.SpeechInputGateway.Listener() {
+
+            @Override
+            public void onPartial(String text) {
+                // [OFF] insurance: keep the platform partial so an error can still spend it.
+                speechPartial = text == null ? "" : text;
+            }
+
+            @Override
+            public void onFinal(String text) {
+                chatScreen.setListening(false);
+                speechPartial = "";
+                if (chatPresenter != null) {
+                    chatPresenter.onSpeechRecognized(text);
+                }
+            }
+
+            @Override
+            public void onError(int code) {
+                chatScreen.setListening(false);
+                // [OFF] (SPEC-081): keep what the platform already heard, then fall back quietly.
+                if (chatPresenter != null && !speechPartial.trim().isEmpty()) {
+                    chatPresenter.onSpeechRecognized(speechPartial);
+                }
+                speechPartial = "";
+            }
+        });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode != REQUEST_MICROPHONE) {
+            return;
+        }
+        if (grantResults.length > 0
+                && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            speechPolicy.markPermissionGranted();
+            chatScreen.setSpeechPolicy(speechPolicy);
+            // Start only for a press still held (released inside the dialog => no session).
+            if (speechPressActive) {
+                startSpeechSession();
+            }
+            return;
+        }
+        speechPolicy.markPermissionDenied();
+        chatScreen.setSpeechPolicy(speechPolicy);
+        // Denied now: the key greys out and the user is told on the spot (SPEC-081 [PERM]).
+        android.widget.Toast.makeText(this, R.string.chat_voice_denied,
+                android.widget.Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, android.content.Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode != REQUEST_ATTACH || resultCode != RESULT_OK || data == null
+                || data.getData() == null) {
+            return;
+        }
+        final android.net.Uri uri = data.getData();
+        final ChatPresenter presenter = chatPresenter;
+        if (presenter == null) {
+            return;
+        }
+        container.background().execute(() -> {
+            try {
+                String name = queryDisplayName(uri);
+                String mime = resolveMime(uri);
+                byte[] bytes = readCapped(uri);
+                container.uiThread().post(
+                        () -> presenter.onAttachmentPicked(name, mime, bytes));
+            } catch (java.io.IOException | RuntimeException unreadable) {
+                // An unreadable pick changes nothing: no record, no chip, no draft damage.
+            }
+        });
+    }
+
+    private String queryDisplayName(android.net.Uri uri) {
+        try (android.database.Cursor cursor = getContentResolver().query(uri, null, null, null,
+                null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                int index = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME);
+                if (index >= 0 && cursor.getString(index) != null) {
+                    return cursor.getString(index);
+                }
+            }
+        }
+        return "SYNTHETIC-ATTACHMENT";
+    }
+
+    private String resolveMime(android.net.Uri uri) {
+        String resolved = getContentResolver().getType(uri);
+        return resolved == null ? "application/octet-stream" : resolved;
+    }
+
+    /** Reads the pick fully; the extractor's own ceiling refuses anything over 20 MB. */
+    private byte[] readCapped(android.net.Uri uri) throws java.io.IOException {
+        java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+        try (java.io.InputStream in = getContentResolver().openInputStream(uri)) {
+            if (in == null) {
+                throw new java.io.IOException("no stream for " + uri);
+            }
+            byte[] chunk = new byte[16384];
+            int n;
+            while ((n = in.read(chunk)) > 0) {
+                out.write(chunk, 0, n);
+            }
+        }
+        return out.toByteArray();
+    }
+
+    private ChatPresenter.Translator translationPort() {
+        return new ChatPresenter.Translator() {
+            @Override
+            public void translate(GenerationModel fallbackModel, String sourceText,
+                    ChatPresenter.Translator.Callback callback) {
+                container.messageTranslator().translate(fallbackModel, sourceText, callback::onFinished);
+            }
+        };
+    }
+
+    private void refreshModelsSubtitle() {
+        container.background().execute(() -> {
+            String label = container.modelSettingsStore().read(ModelSettingsPresenter.Role.CHAT).label;
+            container.uiThread().post(() -> {
+                if (modelSettingsScreen == null && !label.isEmpty()) {
+                    settingsScreen.setModelsSubtitle(label);
+                }
+            });
+        });
     }
 
     /**
@@ -526,17 +906,18 @@ public final class MainActivity extends Activity
         navigationScreen = null;
         navigationPresenter = null;
         chatBranchId = null;
+        stopSpeechSession();
         chatScreen = null;
         chatPresenter = null;
         treeBranchId = null;
         treeCanvasScreen = null;
         treeCanvasPresenter = null;
         showingSettings = false;
-        searchScreen = null;
-        searchPresenter = null;
+        searchPresenter = new SearchPresenter(this, container.uiThread(), container.background(),
+                container.searchRepository());
         libraryScreen = new LibraryScreen(this);
         libraryPresenter = new LibraryPresenter(this, container.uiThread(), container.background(),
-                container.libraryData());
+                container.libraryData(), searchPresenter);
         libraryScreen.setActions(libraryPresenter);
         selectTab(Tab.LIBRARY);
         swap(libraryScreen);
@@ -573,22 +954,51 @@ public final class MainActivity extends Activity
         treeCanvasScreen = null;
         treeCanvasPresenter = null;
         showingSettings = false;
-        searchScreen = null;
         searchPresenter = null;
         libraryScreen = null;
         libraryPresenter = null;
         ReadingStore reading = container.readingStore();
         chatScreen = new ChatScreen(this);
+        ChatSpeaker chatSpeaker = new ChatSpeaker(chatScreen, container.uiThread(),
+                new SystemTtsEngine(this));
+        chatScreen.setSpeaker(chatSpeaker);
         chatPresenter = new ChatPresenter(this, container.uiThread(), container.background(),
                 container.keyVault(), container.chatData(), container.chatCommands(),
                 container.settingsStore(), container.chatCopyLabels(), branchId, reading,
-                container.chatDraftStore());
+                container.chatDraftStore(), translationPort(), container.chatSearchStep(),
+                chatSpeaker, container.attachmentStore(),
+                () -> container.modelSettingsStore()
+                        .read(ModelSettingsPresenter.Role.CHAT));
         chatScreen.setActions(chatPresenter);
+
+        // The speech key (T-095, SPEC-081): the host owns the recognizer, the permission flow and
+        // the policy; the screen only draws. No recognition service on this device means the key
+        // never renders at all - the no-fake-entry rule.
+        com.treelearn.app.speech.SpeechInputGateway gateway =
+                new com.treelearn.app.speech.PlatformSpeechInput(this);
+        speechGateway = gateway;
+        chatScreen.setSpeechPolicy(speechPolicy);
+        chatScreen.setVoiceAvailable(gateway.isAvailable());
+        chatScreen.setOnVoicePressed(this::onVoicePressed);
+        chatScreen.setOnVoiceReleased(this::onVoiceReleased);
+        chatScreen.setOnVoiceGuidance(() -> android.widget.Toast.makeText(this,
+                R.string.chat_voice_denied, android.widget.Toast.LENGTH_SHORT).show());
+        chatScreen.setOnAttachPressed(this::onAttachPressed);
         swap(chatScreen);
         if (explicitAnchor != null) {
-            container.background().execute(() -> reading.saveAnchor(branchId, explicitAnchor));
+            ChatPresenter presenter = chatPresenter;
+            container.background().execute(() -> {
+                try {
+                    reading.saveAnchor(branchId, explicitAnchor);
+                } catch (RuntimeException refused) {
+                    if (presenter != null) {
+                        presenter.notifyReadingPositionRefused();
+                    }
+                }
+            });
         }
         chatPresenter.start();
+        chatSpeaker.start();
     }
 
     /**
@@ -611,10 +1021,10 @@ public final class MainActivity extends Activity
         navigationPresenter = null;
         treeBranchId = branchId;
         chatBranchId = null;
+        stopSpeechSession();
         chatScreen = null;
         chatPresenter = null;
         showingSettings = false;
-        searchScreen = null;
         searchPresenter = null;
         libraryScreen = null;
         libraryPresenter = null;
@@ -661,10 +1071,10 @@ public final class MainActivity extends Activity
         treeCanvasScreen = null;
         treeCanvasPresenter = null;
         chatBranchId = null;
+        stopSpeechSession();
         chatScreen = null;
         chatPresenter = null;
         showingSettings = false;
-        searchScreen = null;
         searchPresenter = null;
         libraryScreen = null;
         libraryPresenter = null;
@@ -691,40 +1101,6 @@ public final class MainActivity extends Activity
         });
         swap(navigationScreen);
         navigationPresenter.start();
-    }
-
-    /**
-     * Opens the search page. Built here and dropped when it is left, like every other screen, so the
-     * query lives for exactly one visit: no draft is left behind to surprise the learner the next time
-     * the entry is tapped.
-     */
-    private void showSearch() {
-        navigationBranchId = null;
-        navigationScreen = null;
-        navigationPresenter = null;
-        treeBranchId = null;
-        treeCanvasScreen = null;
-        treeCanvasPresenter = null;
-        chatBranchId = null;
-        chatScreen = null;
-        chatPresenter = null;
-        showingSettings = false;
-        libraryScreen = null;
-        libraryPresenter = null;
-        searchScreen = new SearchScreen(this);
-        searchPresenter = new SearchPresenter(this, container.uiThread(), container.background(),
-                container.searchRepository());
-        searchScreen.setActions(searchPresenter);
-        searchScreen.setHost(this::onBackRequested);
-        swap(searchScreen);
-        searchPresenter.start();
-    }
-
-    /** A page whose screen has been left is dropped rather than drawn into. */
-    private void drawSearch(SearchScreen screen, SearchViewState state, SearchPage page) {
-        if (searchScreen == screen) {
-            screen.show(state, page);
-        }
     }
 
     /**

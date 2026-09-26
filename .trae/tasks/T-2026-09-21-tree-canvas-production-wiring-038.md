@@ -4,7 +4,7 @@ id: T-2026-09-21-038
 title: 树画布生产装配与入口
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -154,3 +154,12 @@ GREEN 首轮并不干净：4 条用例失败，原因是测试夹具用 Branch.r
 - Unblock condition: 不适用。
 - Next steps: ① 交独立 verifier 复核第 1 轮：javadoc 是否已与实现逐字对应（请核 `ChatWiring.java:93-103` 与 `SqliteChatStore.appendTurn` 的写序——verifier 上一轮的「该状态不可达」推断与这两处不符）；以及「instrumentation 用例只编译不执行」这条是否可接受为 deferred，还是要设备侧运行证据；② 用户按 2026-09-21 决定自行装机验证设备项（触控节奏、未读芽观感、`layout-sw600dp/screen_tree.xml` 横屏排布）；③ 与导航页入口任务（T-039）合并做一次「画布与导航页对可见枝干同口径」的入口回归。
 - Watch-outs: 不要把 `TreeCanvasPresenter` 的规则复制进屏幕（折叠的落库判定只许在 `SqliteTreeCanvasStore.setCollapsed` 一处）；不要让画布与导航页对「哪些枝干可见」给出不同答案；`load` 只许一次读全量（分批读会让画面在补数据时跳动，这是有意取舍而非遗漏）；设备项在拿到真机证据前一律保持 deferred。新增的 instrumentation 套件只在编译层面被证明，不要在任何地方把它描述成「SQL 已验证」——它能否在设备上通过都还不知道。
+## Verification report — 收尾复核（verifier #3，2026-09-24）
+
+- Verdict: PASS（针对 Next steps ①② 的收尾复核）。
+- ①（javadoc 与实现逐字对应）→ 本轮亲自复核写序：`ChatWiring` 的 `store.appendTurn(userMessage, aiMessage)`（现 :272）先于 `submit(...)`（现 :276），`SqliteChatStore.appendTurn`（:203，javadoc :42）在一个事务里写问答两行并同事务盖 topic 时间戳——第 1 轮重写的 `committedRounds` javadoc 与实现相符，verifier 上一轮「该状态不可达」的推断确实不成立。行号较第 1 轮漂移（并行 lane 增加了构造器），按内容定位。
+- ②（instrumentation 只编译不执行）→ 按用户 2026-09-21 决定接受为 `deferred — 用户自行装机验证（user decision 2026-09-21）`；`TreeCanvasStoreInstrumentedTest` 8 例装机后优先跑。
+- ③（画布与导航页同口径回归）→ 归 T-039 拆分任务（107/108），不阻塞本任务。
+- 门禁（本轮实测，覆盖第 1 轮 G1 的复跑要求）：`./gradlew --no-daemon --console=plain check` EXITCODE=0（`artifacts/evidence/P3-B3-gates-2026-09-24.txt`）；Java-only guard `VERDICT: PASS (13 OK line(s))`（`artifacts/evidence/P3-B3-no-kotlin-2026-09-24.txt`）。
+- 规模：三个新文件 137 非空非注释行 < 500 硬上限，不属越线清单。
+- 叶子摘要读作空、布局耗时未量化两条缺口维持原判（声明的缺口，非隐藏缺陷）。

@@ -1,0 +1,11 @@
+T-2026-09-23-086 full regression evidence (2026-09-23)
+
+Command:
+  cd android && ./gradlew check assembleDebug
+Exit code: 0
+  BUILD SUCCESSFUL in 9s — 297 actionable tasks: 16 executed, 3 from cache, 278 up-to-date.
+  No FAILED tasks. JVM suites (:ai :data :app :core :tree-layout), lint, and assembleDebug all pass.
+
+Also on device (this task's instrumented half):
+  cd android && ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.ModelListMergeInstrumentedTest
+  Exit code: 0 — 5/5 tests on ALP-AN00 - 13.

@@ -39,7 +39,10 @@ public enum PromptPurpose {
     HOME_RECOMMENDATIONS("tl-home-recommendations"),
 
     /** Context compression over older revisions, covering reasoning and answer together. */
-    CONTEXT_COMPRESSION("tl-context-compression");
+    CONTEXT_COMPRESSION("tl-context-compression"),
+
+    /** T-090: the message-level translation of one answer (derived display, never a tutor reply). */
+    MESSAGE_TRANSLATION("tl-message-translation");
 
     /**
      * Canonical {@code MAJOR.MINOR.PATCH}. The version rule (§3.2) forbids app versions and

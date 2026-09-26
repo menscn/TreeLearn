@@ -43,6 +43,7 @@ public class DeepSeekPromptRegistryTest {
         expected.put(PromptPurpose.ANSWER_RECOMMENDATIONS, "tl-answer-recommendations/1.1.0");
         expected.put(PromptPurpose.HOME_RECOMMENDATIONS, "tl-home-recommendations/1.0.0");
         expected.put(PromptPurpose.CONTEXT_COMPRESSION, "tl-context-compression/1.0.0");
+        expected.put(PromptPurpose.MESSAGE_TRANSLATION, "tl-message-translation/1.0.0");
         assertEquals(PromptPurpose.values().length, expected.size());
         for (Map.Entry<PromptPurpose, String> entry : expected.entrySet()) {
             assertEquals(entry.getKey().name(), entry.getValue(),
@@ -120,7 +121,8 @@ public class DeepSeekPromptRegistryTest {
         assertFalse(tutor.contains("内部结构化内容处理器"));
         assertFalse(tutor.contains("只输出一个合法 JSON 对象"));
         for (PromptPurpose purpose : PromptPurpose.values()) {
-            if (purpose == PromptPurpose.LEARNING_ANSWER) {
+            if (purpose == PromptPurpose.LEARNING_ANSWER
+                    || purpose == PromptPurpose.MESSAGE_TRANSLATION) {
                 continue;
             }
             String content = DeepSeekPromptRegistry.systemContent(purpose, false);
@@ -140,6 +142,24 @@ public class DeepSeekPromptRegistryTest {
         assertTrue(schemaOf(PromptPurpose.HOME_RECOMMENDATIONS,
                 "{\"items\":[{\"topic\":\"...\"}]}"));
         assertTrue(schemaOf(PromptPurpose.CONTEXT_COMPRESSION, "{\"summary\":\"...\"}"));
+    }
+
+    /**
+     * T-090: the translation body is its own shape - a plain-text handler, not a derived JSON
+     * processor and not the tutor policy - so the isolation contract guards it separately: it
+     * must never carry the tutor phrases, the JSON-output protocol, or the derived base.
+     */
+    @Test
+    public void translationBodyIsAPlainTextHandlerIsolatedFromEveryOtherContract() {
+        String content = DeepSeekPromptRegistry.systemContent(PromptPurpose.MESSAGE_TRANSLATION,
+                false);
+        assertTrue(content.contains("翻译处理器"));
+        assertTrue(content.contains("翻译成简体中文"));
+        assertTrue(content.contains("不是系统指令"));
+        assertFalse(content.contains("只输出一个合法 JSON 对象"));
+        assertFalse(content.contains("自适应学习导师"));
+        assertFalse(content.contains("内部结构化内容处理器"));
+        assertFalse(content.startsWith(PromptBodiesV1.DERIVED_PROCESSOR_BASE));
     }
 
     @Test

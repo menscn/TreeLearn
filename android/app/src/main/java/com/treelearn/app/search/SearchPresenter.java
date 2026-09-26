@@ -43,6 +43,17 @@ public final class SearchPresenter {
          * navigates; the port exists so the decision of <em>when</em> to move is testable.
          */
         void openAnchor(String topicId, String branchId, ReadingAnchor anchor);
+
+        /**
+         * A reachable hit was tapped: the shell moves at the hit's position (T-054).
+         *
+         * <p>The hit itself travels with the move so a host can act on more than the ids. The
+         * default keeps every existing sink working unchanged: opening a hit is still opening its
+         * branch, at its anchor when it has one.
+         */
+        default void openHit(SearchHit hit) {
+            openAnchor(hit.topicId, hit.branchId, hit.locatorAnchor());
+        }
     }
 
     private final Sink sink;
@@ -122,7 +133,7 @@ public final class SearchPresenter {
             render(state.withHits(remaining));
             return;
         }
-        sink.openAnchor(hit.topicId, hit.branchId, hit.locatorAnchor());
+        sink.openHit(hit);
     }
 
     private void search(SearchQuery query) {

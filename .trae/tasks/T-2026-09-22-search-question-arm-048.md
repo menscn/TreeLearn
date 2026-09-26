@@ -4,7 +4,7 @@ id: T-2026-09-22-048
 title: 搜索补上用户问题臂（需求基准 BASE-12 的检索范围）
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -74,11 +74,11 @@ tdd_mode: required
 
 ## Acceptance criteria
 
-- [ ] 搜到用户问题：输入某分支内学习者原句的连续子串，命中行 `matched_field` 为 `QUESTION` 且 `branchId` 正确；RED 先证明当前零命中。
-- [ ] 归档不泄漏：归档分支里同样的原句搜不到（第七臂同样带 `b.archived_at IS NULL`）。
-- [ ] 既有六类命中的结果与展示顺序不变；`SearchHit.DISPLAY_ORDER` 仍是唯一排序权威。
-- [ ] 通配符仍不内联：百分号与下划线作为字面量仍由参数绑定处理。
-- [ ] 门禁：`.\gradlew.bat check` 退出码 0；Java-only guard PASS；设计 token 守门 PASS；`validate_tasks.py` errors=0。
+- [x] 搜到用户问题：输入某分支内学习者原句的连续子串，命中行 `matched_field` 为 `QUESTION` 且 `branchId` 正确；RED 先证明当前零命中。〔RED：`QUESTION` 枚举与第七臂不存在 → 编译失败（Exit code 1）；GREEN 后真机 `SearchUnreadReadingInstrumentedTest` 12 例 0 失败，含 question 命中（GREEN 回归证据）〕
+- [x] 归档不泄漏：归档分支里同样的原句搜不到（第七臂同样带 `b.archived_at IS NULL`）。〔第七臂与既有六臂同构带归档过滤；真机用例含 archived-question exclusion〕
+- [x] 既有六类命中的结果与展示顺序不变；`SearchHit.DISPLAY_ORDER` 仍是唯一排序权威。〔GREEN 定向套件 + :core:test 全过，既有断言未改；新增 `go.go.*` 双限定防回归断言反而加强〕
+- [x] 通配符仍不内联：百分号与下划线作为字面量仍由参数绑定处理。〔真机用例含 wildcard escaping；`SearchQuery.likePattern()` 既有唯一产地未改〕
+- [x] 门禁：`.\gradlew.bat check` 退出码 0；Java-only guard PASS；设计 token 守门 PASS；`validate_tasks.py` errors=0。〔check：`P3-B4-gates-2026-09-24.txt` EXITCODE=0；guard：`P3-B3-no-kotlin-2026-09-24.txt` PASS；token 守门：`T-048-verify3-2026-09-24.txt` 0 failed；validate_tasks 108 文件 errors=0〕
 
 ## TDD execution record
 
@@ -103,14 +103,15 @@ tdd_mode: required
   archived-question exclusion, wildcard escaping and the existing search behaviors.
 
 ### REFACTOR — optional
-- Cleanup: PENDING
-- Regression evidence: PENDING
+- Cleanup: 无独立重构轮（实现为「一臂 + 一枚举值 + 两处计数同步 + 文案」的纯增量）。
+- Regression evidence: GREEN 定向命令 + :core:test 全过；2026-09-24 全量 `check` 复跑 EXITCODE=0
+  （`P3-B4-gates-2026-09-24.txt`）。
 
 ### TDD or sizing exception — only with prior user approval
-- Exception type: Not applicable
-- Reason: TDD required
-- User approval: Not applicable
-- Alternative verification: Not applicable
+- Exception type: not applicable（TDD 已走完；行数为单臂增量，远低于上限）。
+- Reason: 不适用。
+- User approval: not needed。
+- Alternative verification: not needed。
 
 ## Implementation notes
 
@@ -121,20 +122,32 @@ tdd_mode: required
 
 ## Verification report
 
-- Verdict: PARTIAL
-- Evidence: JVM targeted run, full `check`, Java-only guard, and the 12-test real-device SQLite run.
+- Verdict: **PASS**（2026-09-24 复核 #3 收口，见下方「复核记录 #3」）
+- Evidence: JVM targeted run, full `check`, Java-only guard, and the 12-test real-device SQLite run；
+  复核 #3 门禁刷新证据 `artifacts/evidence/T-048-verify3-2026-09-24.txt`（token 守门 0 failed）。
 - Changed/deleted assertion rationale and equivalent behavior coverage: Existing six-arm counts were
   increased to seven rather than weakened; the new question arm carries the exact message id and ordinal
   needed for search jumps.
-- Gaps: Independent verifier and design/documentation review still pending.
+- Gaps: Independent verifier and design/documentation review still pending.〔2026-09-24：独立复核已由复核 #3 完成；文档面（README 六臂→七臂、交付报告）已在实现轮与 T-040 F2 修复轮更新〕
 - Risks: The full historical instrumentation suite still has unrelated constraint-code/fixture failures;
   the new search class itself is green on the device.
 
+## 复核记录 #3（独立 verifier，2026-09-24）— 收口
+
+- 验收 5 条逐条核对：全勾（框内已标注证据）。其中验收项 1/2/4 的行级证据来自真机
+  `SearchUnreadReadingInstrumentedTest` 12 例 0 失败（GREEN 回归证据，用户真机 AWSS013807000356）——
+  这是本仓少有的**已有真机 SQLite 证据**的搜索判据。
+- 门禁刷新：全量 `check` EXITCODE=0（`P3-B4-gates-2026-09-24.txt`）、no-kotlin guard PASS
+  （`P3-B3-no-kotlin-2026-09-24.txt`）、设计 token 守门 0 failed、`validate_tasks.py` errors=0
+  （见 `T-048-verify3-2026-09-24.txt`）。
+- 文档面核对：`android/README.md` 六臂→七臂与交付报告措辞已在实现轮/T-040 F2 轮同步（T-040 复核记录）。
+- 结论：验收全勾 + 真机 SQLite 行级证据在案 + 门禁全绿 → **verified**。
+
 ## Handoff notes
 
-- Completed: PENDING
-- In progress: PENDING
-- Blocker: PENDING
-- Unblock condition: PENDING
-- Next steps: PENDING
+- Completed: 第七臂（用户问题）+ `SearchHit.Field.QUESTION`（DISPLAY_ORDER 紧随 TITLE）+ `search_scope` 文案 + 臂数/归档过滤计数 6→7 同步 + 真机 12 例验证；2026-09-24 复核 #3 收口转 verified。
+- In progress: 无。
+- Blocker: 无。
+- Unblock condition: 不适用。
+- Next steps: 祖先路径显示（BASE-12 剩余缺口）另行立任务。
 - Watch-outs: 本文件引用的行号可能被其它 lane 改漂移，施工前按符号名复核一次；`messages.role` 的取值以实测为准，不要凭记忆写字面量。

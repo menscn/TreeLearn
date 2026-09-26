@@ -4,7 +4,7 @@ id: T-2026-09-22-062
 title: 对话页实测缺陷修复：键盘、思考区、分支上下文（父需求）
 template_version: 2
 task_type: requirement
-status: verifying
+status: verified
 parent_requirement: null
 requirements_confirmed: true
 generated_by: leader
@@ -78,11 +78,11 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Acceptance criteria
 
-- [ ] 四个子任务全部 verified，且各自验收标准逐条有真实命令证据。
-- [ ] 三个缺陷在用户真机自测中确认消失（键盘可见、思考区分明、分支携带上下文且来源可感知）。
-- [ ] PRD §6.2.5 口径注记已落地并被 `check_spec_author_agent.py`/文档检查接受。
-- [ ] 全量 JVM 单测与 assembleDebug 在最后一片完成后全绿。
-- [ ] 验证缺口（豁免真机/模拟器的部分）逐片如实记录，无虚报 PASS。
+- [x] 四个子任务全部 verified，且各自验收标准逐条有真实命令证据。〔063/064/065/066 已于 2026-09-24 全部 verified（063/065/066 由用户真机自测确认 + verifier 独立复核；064 由用户 2026-09-22「代码测试」指令覆盖 SQLite 缺口）〕
+- [x] 三个缺陷在用户真机自测中确认消失（键盘可见、思考区分明、分支携带上下文且来源可感知）。〔**2026-09-24 用户确认自测通过**（对话内反馈，键盘顶起 / 划词分叉来源卡 / 流式思考观感同批确认）〕
+- [x] PRD §6.2.5 口径注记已落地并被 `check_spec_author_agent.py`/文档检查接受。〔065 落地于 V3.2 PRD 第 386 行，任务文件有记录；validate_tasks.py errors=0〕
+- [x] 全量 JVM 单测与 assembleDebug 在最后一片完成后全绿。〔066 的 verifier 独立重跑 EXITCODE=0；2026-09-24 全量 check 复跑 EXITCODE=0（`P3-B4-gates-2026-09-24.txt`）〕
+- [x] 验证缺口（豁免真机/模拟器的部分）逐片如实记录，无虚报 PASS。〔064 的 SQLite 缺口、063/065/066 的真机项均在各任务 Verification report 的 Gaps 登记，且以用户指令/确认收口〕
 
 ## TDD execution record
 
@@ -118,11 +118,22 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Verification report
 
-- Verdict: PENDING
-- Evidence: 待四个子任务 verified 后汇总。
-- Changed/deleted assertion rationale and equivalent behavior coverage: 待子任务给出。
-- Gaps: SQLite 真实引擎验证被用户豁免（2026-09-22 指示），已在 064 登记为残留缺口。
-- Risks: 见协作记录 Risks。
+- Verdict: **PASS**（2026-09-24 复核 #3 收口，见下方「复核记录 #3」）
+- Evidence: 四个子任务任务文件的 TDD/Verification 记录（063 属性 grep + 构建/单测 EXITCODE=0；064 `.t064-*` 四份日志 + verifier 独立重跑；065 `.t065-*` 四份日志 + 全量 495 例 0 失败；066 `.t066-*` 四份日志 + verifier 独立重跑）；2026-09-24 全量 `check` 复跑 EXITCODE=0（`P3-B4-gates-2026-09-24.txt`）；用户 2026-09-24 真机自测确认。
+- Changed/deleted assertion rationale and equivalent behavior coverage: 各子任务无断言削弱（verifier 逐片核对：064 既有 fork 用例仅补 Key 前置；065 既有用例仅迁移签名并加强断言；066 两参重载删除经全库核对无调用方）。
+- Gaps: SQLite 真实引擎验证被用户豁免（2026-09-22 指示），已在 064 登记为残留缺口；063/065/066 真机项由用户 2026-09-24 自测确认通过。
+- Risks: 见协作记录 Risks（063 的 opt-out 属权宜方案，沉浸式改造时须回看）。
+
+## 复核记录 #3（独立 verifier，2026-09-24）— 收口
+
+- 聚合核对：四个子任务 063/064/065/066 已于 2026-09-24 全部 verified；本父需求的 5 条验收逐条
+  有据（框内已标注），其中验收 ② 的「三缺陷真机确认消失」由用户 2026-09-24 自测确认（键盘顶起 /
+  划词分叉来源卡 / 流式思考观感同批确认）。
+- 串行纪律核对：063 → 064 → 065 → 066 按序执行（各任务 Handoff 与 TDD 记录一致），共享文件
+  （ChatWiring/ChatScreen/ChatPresenter）无并行写冲突（065 REFACTOR 段的并行编辑丢失已就地修复
+  并以同命令复跑覆盖）。
+- 门禁：2026-09-24 全量 `check` EXITCODE=0；`validate_tasks.py` files=108 errors=0。
+- 结论：四子任务全 verified + 用户自测确认 + 门禁全绿 → **verified**。
 
 ## Handoff notes
 

@@ -52,9 +52,30 @@ public interface ChatActions {
 
     void onQuoteCleared();
 
+    /** T-097: the composer's attachment chip received a picked file's bytes. */
+    void onAttachmentPicked(String displayName, String mimeType, byte[] bytes);
+
+    /** T-097: the learner removed the attachment chip. */
+    void onAttachmentCleared();
+
+    /**
+     * T-095: the recognizer finished and produced text (SPEC-081). The presenter appends it to
+     * the draft - never sends it, never overwrites what the learner already typed.
+     */
+    void onSpeechRecognized(String text);
+
     void onRetryPressed(String messageId);
 
     void onResetPressed(String messageId);
+
+    /** Asks the presenter to translate one finished answer into the learner's language. */
+    void onTranslatePressed(String messageId);
+
+    /** Shows or hides the translation fetched for one answer. */
+    void onTranslationToggled(String messageId);
+
+    /** Reads one finished answer aloud (text-to-speech). */
+    void onSpeakPressed(String messageId);
 
     /**
      * Opens a branch from this answer (T-065).
@@ -98,6 +119,12 @@ public interface ChatActions {
 
     void onThinkingToggled(boolean enabled);
 
+    /** Turns web search on or off for this conversation. */
+    void onSearchToggled(boolean enabled);
+
+    /** Opens settings from the search toggle's missing-key state. */
+    void onSearchOpenSettings();
+
     void onBackPressed();
 
     /**
@@ -131,4 +158,10 @@ public interface ChatActions {
      * is not taken here: the screen reports what is visible, the presenter asks the session.
      */
     void onViewportChanged(Set<String> visibleMessageIds);
+
+    /** The fullscreen composer was opened. */
+    void onFullscreenEditOpened();
+
+    /** The fullscreen composer was closed. */
+    void onFullscreenEditClosed();
 }

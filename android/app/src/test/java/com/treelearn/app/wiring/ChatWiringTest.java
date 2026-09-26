@@ -153,7 +153,7 @@ public class ChatWiringTest {
         store.nextOrdinal = 2;
 
         ChatCommandResult result = wiring().send(WiringDoubles.BRANCH_ID, "  a follow-up  ",
-                WiringDoubles.QUOTED_LINE, WiringDoubles.MODEL, true);
+                WiringDoubles.QUOTED_LINE, null, WiringDoubles.MODEL, true);
 
         assertEquals(1, store.appendCalls);
         assertEquals(2, store.appendedUser.ordinal);
@@ -180,8 +180,7 @@ public class ChatWiringTest {
     public void sendRefusesWithoutPersistingWhenNoKeyIsStored() {
         key.configured = false;
 
-        ChatCommandResult result = wiring().send(WiringDoubles.BRANCH_ID, "a follow-up", "",
-                WiringDoubles.MODEL, false);
+        ChatCommandResult result = wiring().send(WiringDoubles.BRANCH_ID, "a follow-up", "", null, WiringDoubles.MODEL, false);
 
         assertFalse(result.isAccepted());
         assertEquals(HomeViewState.Notice.KEY_MISSING, result.notice());
@@ -378,8 +377,7 @@ public class ChatWiringTest {
         store.historyFailure = new ChatStore.SnapshotUnreadable(
                 "the stored snapshot payload does not hash to its stored digest");
 
-        ChatCommandResult result = wiring().send(WiringDoubles.BRANCH_ID, "a follow-up", "",
-                WiringDoubles.MODEL, false);
+        ChatCommandResult result = wiring().send(WiringDoubles.BRANCH_ID, "a follow-up", "", null, WiringDoubles.MODEL, false);
 
         assertFalse(result.isAccepted());
         assertEquals(HomeViewState.Notice.STORAGE, result.notice());
@@ -543,8 +541,7 @@ public class ChatWiringTest {
         generation.submitOutcome = GenerationCoordinator.SubmitOutcome.refused(
                 GenerationCoordinator.Refusal.BRANCH_BUSY, null);
 
-        ChatCommandResult result = wiring().send(WiringDoubles.BRANCH_ID, "a follow-up", "",
-                WiringDoubles.MODEL, false);
+        ChatCommandResult result = wiring().send(WiringDoubles.BRANCH_ID, "a follow-up", "", null, WiringDoubles.MODEL, false);
 
         assertFalse(result.isAccepted());
         assertEquals(HomeViewState.Notice.STORAGE, result.notice());
@@ -559,8 +556,7 @@ public class ChatWiringTest {
         generation.submitOutcome = GenerationCoordinator.SubmitOutcome.refused(
                 GenerationCoordinator.Refusal.PROMPT_BUILD, null);
 
-        ChatCommandResult result = wiring().send(WiringDoubles.BRANCH_ID, "a follow-up", "",
-                WiringDoubles.MODEL, false);
+        ChatCommandResult result = wiring().send(WiringDoubles.BRANCH_ID, "a follow-up", "", null, WiringDoubles.MODEL, false);
 
         assertEquals(HomeViewState.Notice.REQUEST_REJECTED, result.notice());
     }
@@ -573,8 +569,7 @@ public class ChatWiringTest {
         entries.add(ContextPlan.Entry.userMessage(WiringDoubles.QUESTION_ID, WiringDoubles.FIRST_QUESTION));
         store.history = entries;
 
-        ChatCommandResult result = wiring().send(WiringDoubles.BRANCH_ID, "a follow-up", "",
-                WiringDoubles.MODEL, false);
+        ChatCommandResult result = wiring().send(WiringDoubles.BRANCH_ID, "a follow-up", "", null, WiringDoubles.MODEL, false);
 
         assertTrue(result.isAccepted());
         assertEquals(2, store.historyOrdinal);
@@ -592,7 +587,7 @@ public class ChatWiringTest {
         store.nextOrdinal = 2;
 
         ChatCommandResult result = wiring().send(WiringDoubles.BRANCH_ID, "  a follow-up  ",
-                WiringDoubles.QUOTED_LINE, WiringDoubles.MODEL, false);
+                WiringDoubles.QUOTED_LINE, null, WiringDoubles.MODEL, false);
 
         assertTrue(result.isAccepted());
         // The screen drew the citation, so the request has to carry it too: one framed block, then
@@ -609,8 +604,7 @@ public class ChatWiringTest {
         key.configured = true;
         store.nextOrdinal = 2;
 
-        ChatCommandResult result = wiring().send(WiringDoubles.BRANCH_ID, "a follow-up", "",
-                WiringDoubles.MODEL, false);
+        ChatCommandResult result = wiring().send(WiringDoubles.BRANCH_ID, "a follow-up", "", null, WiringDoubles.MODEL, false);
 
         assertTrue(result.isAccepted());
         String latest = lastMessage(generation.lastRequest);
@@ -629,7 +623,7 @@ public class ChatWiringTest {
         key.configured = true;
         store.nextOrdinal = 2;
         assertTrue(wiring().send(WiringDoubles.BRANCH_ID, WiringDoubles.FIRST_QUESTION,
-                WiringDoubles.QUOTED_LINE, WiringDoubles.MODEL, false).isAccepted());
+                WiringDoubles.QUOTED_LINE, null, WiringDoubles.MODEL, false).isAccepted());
         String fromSend = lastMessage(generation.lastRequest);
 
         store.positions.put(WiringDoubles.ANSWER_ID, Message.restore(WiringDoubles.ANSWER_ID,

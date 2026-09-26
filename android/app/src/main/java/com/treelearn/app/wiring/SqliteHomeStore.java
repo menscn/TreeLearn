@@ -8,6 +8,7 @@ import com.treelearn.core.domain.Topic;
 import com.treelearn.data.db.DatabaseTransactionRunner;
 import com.treelearn.data.db.TreeLearnDatabaseHelper;
 import com.treelearn.data.db.dao.FirstTopicCreation;
+import com.treelearn.data.db.dao.StatsDao;
 import com.treelearn.data.db.dao.TopicDao;
 import com.treelearn.data.db.dao.BranchDao;
 
@@ -64,18 +65,9 @@ public final class SqliteHomeStore implements HomeStore {
     }
 
     @Override
-    public void renameTopic(String topicId, String title, long now) {
+    public HomeStore.StatsRaw statsRaw() {
         android.database.sqlite.SQLiteDatabase database = helper.getWritableDatabase();
-        com.treelearn.core.domain.Branch root = BranchDao.findRootOfTopic(database, topicId);
-        if (root == null) {
-            throw new IllegalStateException("topic has no root branch: " + topicId);
-        }
-        root.setTitle(title, now);
-        BranchDao.update(database, root);
-    }
-
-    @Override
-    public void deleteTopic(String topicId) {
-        TopicDao.delete(helper.getWritableDatabase(), topicId);
+        return new HomeStore.StatsRaw(StatsDao.answerTimestamps(database),
+                StatsDao.questionCount(database), StatsDao.messageCount(database));
     }
 }

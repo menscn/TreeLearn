@@ -19,6 +19,11 @@ public interface SettingsStore {
 
     void setThinkingEnabled(boolean enabled);
 
+    /** Whether the web-search step is allowed to run inside the conversation flow. */
+    boolean searchEnabled();
+
+    void setSearchEnabled(boolean enabled);
+
     /**
      * The stored credential, masked.
      *

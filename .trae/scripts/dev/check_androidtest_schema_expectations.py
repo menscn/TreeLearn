@@ -104,7 +104,16 @@ def check_inputs_exist() -> bool:
 
 
 JUDGED_CALLS = ("assertEquals", "execSQL")
-ALLOWED_USER_VERSION_EXPRESSIONS = ("TreeLearnSchema.DATABASE_VERSION", "V1_SCHEMA_VERSION")
+# Whitelist of exact expected-expression texts accepted for a PRAGMA user_version judgement.
+# "TreeLearnSchema.DATABASE_VERSION" is the current-version constant. "V1_SCHEMA_VERSION" and
+# "PREVIOUS_SCHEMA_VERSION" are test-local named constants whose initializers derive the
+# historical version from the schema itself (a fixture simulating a past version cannot use the
+# current-version constant); a bare literal is still rejected (fail-closed).
+ALLOWED_USER_VERSION_EXPRESSIONS = (
+    "TreeLearnSchema.DATABASE_VERSION",
+    "V1_SCHEMA_VERSION",
+    "PREVIOUS_SCHEMA_VERSION",
+)
 
 
 def _literal_mask(flat: str) -> list:

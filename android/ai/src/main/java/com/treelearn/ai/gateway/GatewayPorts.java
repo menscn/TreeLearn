@@ -19,9 +19,17 @@ public final class GatewayPorts {
     private GatewayPorts() {
     }
 
-    /** Encodes one assembled request into the exact bytes that are sent. */
+    /**
+     * Encodes one assembled request into the exact bytes that are sent. The model is named by the
+     * selected provider model record's wire id, so a provider is not limited to the built-in tiers;
+     * the {@link GenerationModel} overload bridges callers still holding the enum.
+     */
     public interface BodyEncoder {
-        byte[] encode(GenerationModel model, DeepSeekRequest request);
+        byte[] encode(String modelWireId, DeepSeekRequest request);
+
+        default byte[] encode(GenerationModel model, DeepSeekRequest request) {
+            return encode(Guard.object(model, "model").wireId, request);
+        }
     }
 
     /**
@@ -75,6 +83,11 @@ public final class GatewayPorts {
     /** Reads the availability flag of the balance response. */
     public interface BalanceDecoder {
         boolean isAvailable(String payload);
+    }
+
+    /** Reads the model wire ids out of a {@code /models} response payload. */
+    public interface ModelListDecoder {
+        java.util.List<String> decode(String payload);
     }
 
     /**

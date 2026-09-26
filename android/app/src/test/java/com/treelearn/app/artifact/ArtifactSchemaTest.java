@@ -37,12 +37,23 @@ public final class ArtifactSchemaTest {
                 }
                 continue;
             }
+            if (purpose == PromptPurpose.MESSAGE_TRANSLATION) {
+                // T-090: the translation is a derived display, never a stored artifact - the
+                // stable-answer-immutability contract forbids a write path for it.
+                try {
+                    ArtifactKind.ofPurpose(purpose);
+                    fail("the translation purpose must never be reachable as a derived artifact kind");
+                } catch (IllegalArgumentException expected) {
+                    assertTrue(expected.getMessage().contains("MESSAGE_TRANSLATION"));
+                }
+                continue;
+            }
             ArtifactKind kind = ArtifactKind.ofPurpose(purpose);
             assertEquals(purpose, kind.purpose);
             assertTrue("wire ids must be unique", wireIds.add(kind.wireId));
             assertEquals(kind, ArtifactKind.fromWireId(kind.wireId));
         }
-        assertEquals(PromptPurpose.values().length - 1, wireIds.size());
+        assertEquals(PromptPurpose.values().length - 2, wireIds.size());
     }
 
     @Test

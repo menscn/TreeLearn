@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  One search result: which part of the branch matched, the branch's own name, and the snippet. The
-  ancestor path the prototype also draws needs a tree walk this task did not take on, and is recorded
-  as a gap rather than faked from one branch row.
+  One search result: which part of the branch matched, the branch's own name, where it sits (the
+  ancestor path, T-054), whether that branch is archived (the library shows archived and working
+  content side by side, so a hit must say which half it came from), and the snippet.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/hit_row"
@@ -33,6 +33,26 @@
         android:textColor="@color/tl_ink"
         android:textSize="@dimen/text_h2"
         android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/hit_source_path"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_s1"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/tl_ink3"
+        android:textSize="@dimen/text_cap" />
+
+    <TextView
+        android:id="@+id/hit_archived_mark"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_s1"
+        android:text="@string/done_archived_mark"
+        android:textColor="@color/tl_ink3"
+        android:textSize="@dimen/text_cap"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/hit_snippet"

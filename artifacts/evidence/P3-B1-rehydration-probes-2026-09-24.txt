@@ -1,0 +1,22 @@
+=== R1: BranchSource.restore 仅限 BranchDao（T-022 再水合契约）
+data/src/main/java/com/treelearn/data/db/dao/BranchDao.java:19: * <p>This class holds the <em>only</em> permitted use of {@link BranchSource#restore} in
+data/src/main/java/com/treelearn/data/db/dao/BranchDao.java:165:     * id. It used to fall through to {@link BranchSource#restore},
+data/src/main/java/com/treelearn/data/db/dao/BranchDao.java:228:        // Checked here rather than left to BranchSource.restore, which rejects a null id with a
+data/src/main/java/com/treelearn/data/db/dao/BranchDao.java:239:        return BranchSource.restore(
+core/src/main/java/com/treelearn/core/domain/AnswerRevision.java:112:     * {@link BranchSource#restore}.
+rc=0
+=== R2: AnswerRevision.restore 仅限 AnswerRevisionDao（T-023）
+data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:374:            // be rehydrated through AnswerRevision.restore without consulting the operation
+rc=0
+=== R3: 不新增 GenerationOperation.restore（T-023）
+rc=1
+=== R4: AnswerRevisionDao 内存在 restore 映射（正向）
+22: * and refuses a version no purpose owns. The single {@link AnswerRevision#restore} call in the
+102:     * The read mapping, and the only production {@link AnswerRevision#restore} call site.
+105:     * {@code AnswerRevision.restore} states: on reload the row is the authority. Shape checks still
+112:        return AnswerRevision.restore(
+=== R5: GenerationOperation 类内无 restore 定义（负向，T-023）
+0
+rc=1
+=== R6: DAO 公开签名无 systemContent/systemPrompt（T-023/024）
+rc=1

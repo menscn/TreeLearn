@@ -1,5 +1,6 @@
 package com.treelearn.app.wiring;
 
+import com.treelearn.ai.prompt.PromptBuildException;
 import com.treelearn.app.generation.GenerationCoordinator;
 import com.treelearn.app.ui.HomeViewState;
 
@@ -22,8 +23,22 @@ final class RefusalNotices {
     }
 
     static HomeViewState.Notice of(GenerationCoordinator.Refusal refusal) {
+        return of(refusal, null, false);
+    }
+
+    /**
+     * The one judgement, with the prompt-build context attached: a refusal that arrived after the
+     * history was already compressed once reports the honest outcome - the conversation is longer
+     * than one compression can carry - instead of a generic rejection.
+     */
+    static HomeViewState.Notice of(GenerationCoordinator.Refusal refusal,
+            PromptBuildException.Reason promptReason, boolean historyCompressionApplied) {
         switch (refusal) {
             case PROMPT_BUILD:
+                if (historyCompressionApplied
+                        && promptReason == PromptBuildException.Reason.HISTORY_EXCEEDS_BUDGET) {
+                    return HomeViewState.Notice.HISTORY_COMPRESSED;
+                }
                 return HomeViewState.Notice.REQUEST_REJECTED;
             case BRANCH_BUSY:
             case VERSION_MISMATCH:

@@ -221,7 +221,7 @@ androidTest APK 的 `classes.dex` 含 Kotlin 描述符（无 `kotlin/jvm/interna
 
 | 类型 | 职责 | 关键不变量 |
 | :--- | :--- | :--- |
-| `TreeLearnSchema` | 七张永久表的唯一 DDL 常量源：表名/列名常量、`CREATE_STATEMENTS`、索引、触发器、前向迁移注册表 | DDL 由列常量拼出（改名不会漂移）；时间列一律 `INTEGER` UTC epoch millis，禁用 SQLite 时钟；`DATABASE_VERSION` 与迁移链一致 |
+| `TreeLearnSchema` | 十一张永久表的唯一 DDL 常量源：表名/列名常量、`CREATE_STATEMENTS`、索引、触发器、前向迁移注册表 | DDL 由列常量拼出（改名不会漂移）；时间列一律 `INTEGER` UTC epoch millis，禁用 SQLite 时钟；`DATABASE_VERSION` 与迁移链一致；T-096 起含附件双表（`attachments` 一文件一物理记录、`content_hash` UNIQUE 幂等去重；`message_attachments` 引用挂消息 ID、`message_id` ON DELETE CASCADE，`attachment_id` 为非强制 FK 的语义引用——附件记录不随任何消息删除，删除由 098 双确认链路负责） |
 | `TreeLearnDatabaseHelper` | 唯一可建库/升级的入口：`onCreate` 执行 `CREATE_STATEMENTS`，`onUpgrade` 走前向迁移，`onConfigure` 开启外键 | 每次打开都**回读** `PRAGMA foreign_keys` 并要求为 `1`，否则 fail closed；拒绝降级（`onDowngrade` 抛异常而不是带着半懂的 schema 跑） |
 | `DatabaseTransactionRunner` | 唯一的显式事务边界 | 嵌套开启被拒绝（`IllegalStateException`），不静默并入外层事务；失败整体回滚并原样向上抛；**工作体若自行结束事务，runner 事后抛错——但那次提交已经生效**（检测而非阻止，见下） |
 
@@ -424,8 +424,8 @@ runner **阻止不了**，只能在事后检测到并抛 `IllegalStateException`
 
 首屏是**一个页面**（PRD 6.2.16 取消了「空态页 + 新建主题页」的拆分），因此 `MainActivity` 是唯一
 Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话页（T-013）、树画布（T-038）与导航页（T-039）
-都用同一种方式接上（各见对应小节）；搜索页的入口仍由搜索 lane
-继续加进来（T-040，已于 2026-09-22 落地，见「搜索页与首页搜索入口（T-040）」）。
+都用同一种方式接上（各见对应小节）；检索入口现位于学习库顶部搜索框
+（T-040 接线、T-054 迁入，见「检索栈与搜索入口（T-040 → T-054）」）。
 
 **但一级目的地自 T-052 起多了一件外壳：常驻底部标签栏。** PRD V3.2 6.2.16 把 主页 / 学习库 / 设置
 并列为三个对等入口，`activity_main.xml` 因此从「一个 `shell_host`」变成「`shell_host` + 常驻
@@ -436,8 +436,8 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
 | :--- | :--- | :--- |
 | `AppContainer` | 依赖装配：真实 `SettingsRepository` + `KeystoreSecretStore`、单后台线程、主 Looper 的 `UiThread` | 只持 application context，不持 Activity；所有 store 调用串行在一条线程上 |
 | `MainActivity` | 应用外壳：在 `R.id.shell_host` 里换屏 + 常驻 `R.id.tab_bar` 的显隐与高亮，实现 `HomeSink` + `SettingsSink` + `ChatSink` + `TreeCanvasSink` + `NavigationSink` + `SearchPresenter.Sink` + `LibrarySink` | 自己不持草稿、不持状态、不做决策；每个屏幕的系统返回由它统一接管（见「系统返回」）；一级 / 二级的分别只由 `swap()` 与 `showTab()` 两处判定（T-052） |
-| `ui.HomePresenter` | 首页的全部决策 | 草稿只在 accepted 分支清空；推荐点击先写入草稿再走同一条 `onSubmit()`；缺 Key 时只提示并跳设置，**不写任何行** |
-| `ui.HomeViewState` | 首页可绘制的全部状态（相位/草稿/Key/模型/思考/列表/推荐/提交中/提示） | 四相位 LOADING/EMPTY/ERROR/READY；`Notice` 是分类不是句子；两个列表不可变 |
+| `ui.HomePresenter` | 首页的全部决策 | 草稿只在 accepted 分支清空；推荐点击先写入草稿再走同一条 `onSubmit()`；缺 Key 时只提示并跳设置，**不写任何行**；055 起不再承载搜索/归档/设置导航与列表改名删除动作（落点：标签栏与学习库） |
+| `ui.HomeViewState` | 首页可绘制的全部状态（相位/草稿/Key/模型/思考/继续学习/推荐/提交中/提示） | 四相位 LOADING/EMPTY/ERROR/READY；`continueTopic()` 是「继续学习」行的唯一来源（最近主题，无历史为 null，行不出现）；`Notice` 是分类不是句子；两个列表不可变 |
 | `ui.SettingsPresenter` | 设置页决策：读 Key 状态、保存/替换、删除 | Key 文本从不进入任何 ViewState；缓冲区归它所有并 `finally` 擦除，成功失败都擦 |
 | `ui.SettingsViewState` | 设置页可绘制状态（`keyLine`/`keyMask`/`notice`） | **没有模型与思考字段**——见下「交互事实」 |
 | `ui.KeySnapshot` | Key 的三态（无 / 不可读 / 可读）+ 掩码 | 掩码是唯一能离开本类的形式；短于 12 字符的 Key 全掩，不部分泄露 |
@@ -448,6 +448,9 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
 | `wiring.AndroidSettingsStore` | 真实存储：`SettingsRepository` + `KeystoreSecretStore` | app 层唯一接触密钥材料的地方，且只为生成掩码；`read()` 的缓冲在 `finally` 擦除 |
 | `wiring.HomeWiring` | 首页的**真实**数据路径（T-032）：主题列表 + 首题提交，实现 `HomeData` 与 `RootQuestionSubmitter` | 列表是 `TopicDao.listOverviews` 的一条只读 SQL；首题经 `FirstTopicCreation` 单事务写入、经 `GenerationCoordinator.submitFirstTopic` 受理；缺 Key 时返回可见的 `KEY_MISSING` 且**一行都不写** |
 | `wiring.HomeStore` / `wiring.SqliteHomeStore` | 首页的端口与它的 SQLite 实现 | 端口只做存取、不重写判定；`recentTopics()` 不兜底、不造行，空库就是空列表 |
+| `ui.HomeStats` / `ui.HeatmapView` / `ui.HeatmapLayout` | 学习热度的三个层次（T-100/101/102）：聚合结果、自绘 View、纯 Java 布局数学 | 活跃判定在 `data.stats.StatsAggregator` 一处（`HAS_ANY_ANSWER`：当天有过回答修订）；`HeatmapView` 以 XML attrs 支持 strip（14 天单行）与 grid（详情页 7×70）两种形态，颜色全走 `R.color` token |
+| `ui.StatsDetailPresenter` / `screen.StatsDetailScreen` | 统计详情页（T-104）：近 10 周全量热力图 + 累计提问/消息/连续天数三卡 | 读**同一**聚合入口（`HomeStore.statsRaw()` → `StatsAggregator`），与首页热力条共享判定、不可能出现两套口径；页面只把 `activeDays` 映射到 70 格窗口，totals/streak 原样透传不二次计算；查询失败降级为可见占位（failed 态），空库显示空态而非假「0 天」；入口由抽屉（T-106）接线 |
+| `ui.HomeDrawerPresenter` / `screen.HomeDrawerScreen` | 首页抽屉（T-106）：自绘覆盖层（无 DrawerLayout 依赖）+ 快捷主题列表（最近 10 条）+ 设置/统计入口 + 扩展位骨架 | 快捷列表走 `LibraryData.topics()`（学习库的**同一**查询，`grep OVERVIEW_SELECT` 全仓仅定义一次使用一次）；点击主题与首页行走同一 `openBranch` 目标；开合是 CLOSED/OPEN 两态机，导航后强制收拢；无搜索、无助手切换、无第二份全量列表——学习库保持正典；返回键先收抽屉再走房间返回（`onBackRequested` 首分支）；`activity_main.xml` 外层包 `FrameLayout`（`main_drawer_root`）让抽屉盖住 tab bar 且不被 `swap()` 清除 |
 | `wiring.BranchHeading` | 卡片标题与对话标题的**唯一**判定点（存了标题用标题，否则用根问题） | 首页与对话读同一个方法，一个主题不可能两处叫两个名字 |
 
 **请求预算（T-032 的一次决定）：**
@@ -480,10 +483,10 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
 **系统返回（不要在 `MainActivity` 里重写 `onBackPressed`）：**
 
 - API 33+ 走框架的 `getOnBackInvokedDispatcher().registerOnBackInvokedCallback(...)`；API 28–32 走
-  `dispatchKeyEvent(KEYCODE_BACK)` 回落；两条路都收敛到同一个 `onBackRequested()`（设置页 → 搜索页 →
+  `dispatchKeyEvent(KEYCODE_BACK)` 回落；两条路都收敛到同一个 `onBackRequested()`（设置页 →
   导航页 → 画布 → 对话页 → 学习库 → 退出应用，见「导航页与归档 / 恢复 / 永久删除（T-039）」与
-  「底部标签栏与学习库（T-052）」）。
-- **二级屏的返回落点是发起它的那个标签，不是首页**（T-052）：对话页与搜索页的返回走 `showTab(currentTab)`，
+  「底部标签栏与学习库（T-052）」；学习库搜索态的返回由 `LibraryScreen` 回到列表态，不经宿主）。
+- **二级屏的返回落点是发起它的那个标签，不是首页**（T-052）：对话页的返回走 `showTab(currentTab)`，
   因此从学习库进对话再返回落回学习库；`currentTab` 只被标签点击与一级屏自身改写。
 - **不能用 AndroidX 的 `getOnBackPressedDispatcher()`**：lint 的 `GestureBackNavigation` 会这么建议，但
   `:app` 主代码的编译类路径解析出来是**零 AndroidX 坐标**（只有四个 project 依赖，见
@@ -501,6 +504,23 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
   设置页只负责凭据与数据边界说明。
 - 切换只影响之后的新生成；已生成回答不被追溯改写。本层的写法就是「写偏好 + 改 ViewState」，
   不触碰任何回答或分支。
+- **对话页 chip 与全局分工的分界（T-103，2026-09-25）**：进入对话页时 `ChatPresenter` 经
+  `ChatRoleSource` 读 088 的 `Role.CHAT` 分工解析结果——`modelId` 能映射回内置 tier 则静默换 chip；
+  回落到内置/最早或分工为空则给一次性 `CHAT_MODEL_FALLBACK` / `NO_MODELS` 通知（每次进入对话最多一条，
+  不随每次渲染重复）。chip 上的选择是**会话内覆盖**（只改 ViewState，随 presenter 消亡），
+  不再写穿 `SettingsStore`——持久的选择只属于设置子页（088），双写正是两个表面漂移的根源。
+  角色解析的 render 一律 `ui.post` 回主线程（真机 `CalledFromWrongThreadException` 实测教训）。
+- **设置子页入口接线（T-096 补齐）**：供应商/模型/搜索/语音/文件管理五个子页的入口回调此前
+  在 `MainActivity` 从未接线（各任务只孤立验证了自己的屏，入口在生产构建里是死的）；T-096
+  按 087 的「预存损坏修复」先例把五个入口一并接上。文件管理子页（`FileManagerScreen`，代码
+  构建无 XML）列出全部附件记录（名称/类型/大小/解析态/引用数/物理缺失标注）与总占用，
+  删除确认先行——只删文件与记录、引用行转为缺失标注，绝不触碰消息文本。
+  **孤儿清理（T-098，2026-09-25）**：进入页面时扫描，判定在 `AttachmentDao.orphanIds` **一处**——
+  FK ON + `message_id` CASCADE 保证引用表每行都指向活消息，所以「不在引用表」即等价于任务书的
+  「引用表零引用 + 消息表无记录」双确认，一次 SQL 表达而不是两次。孤儿行挂「可清理」徽标，
+  「一键清理」确认先行；清理幂等（重复清/并发删均为静默 no-op），失败保留标记可重试；
+  清理只作用于孤儿——被任何消息引用的文件在扫描里被显式排除，兄弟分支的附件不被误删
+  （真机用例覆盖「删除子树后兄弟分支附件仍在」）。扫描时机是进入页面，不做定时后台服务。
 
 **已知缺口与记录的偏差（不要读成已解决）：**
 
@@ -548,10 +568,12 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
 
 **已知缺口与记录的偏差（不要读成已解决）：**
 
-- **搜索页的 UI 已接线（2026-09-22，T-040）**：`SearchPresenter` 不再只被验收套件引用——宿主 `MainActivity`
-  实现了 `SearchPresenter.Sink`，`render` 交给新屏幕 `screen.SearchScreen`，`openAnchor` 复用 T-042 已接线的
-  `MainActivity.showChat(branchId, explicitAnchor)`（见下条），**没有第二套定位路径**；首页搜索按钮也不再是
-  死按钮。见「搜索页与首页搜索入口（T-040）」，原文扫描 `artifacts/evidence/T-040-source-scan.txt`。
+- **搜索 UI 已接线并迁入学习库（T-040 → T-054）**：`SearchPresenter` 不再只被验收套件引用——T-040 先由
+  宿主 `MainActivity` 接上独立搜索屏；T-054 把入口迁到学习库顶部搜索框（`LibraryPresenter` 纯转发、
+  `LibraryScreen` 搜索态渲染），`openAnchor` 复用 T-042 已接线的
+  `MainActivity.showChat(branchId, explicitAnchor)`（见下条），**没有第二套定位路径**；独立搜索屏的视图层
+  已退役，检索栈与领域类型完整保留。见「检索栈与搜索入口（T-040 → T-054）」，
+  证据 `artifacts/evidence/T-054-library-search-retire.txt`（历史扫描 `artifacts/evidence/T-040-source-scan.txt` 不改写）。
 - **阅读位置恢复与「看过即清未读」已接线（2026-09-22，T-042）**：`ReadingStore` / `ReadingSession` 不再只被
   测试引用——宿主 `MainActivity.showChat(String, ReadingAnchor)` 在打开分支时经 `AppContainer.readingStore()`
   恢复位置、离开时保存；`screen/ChatScreen` 只上报滚动事实（`onRowsLaidOut` / `onViewportChanged` /
@@ -569,24 +591,35 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
 - 规模：本切片 **807 判定行 / 1411 物理行**（15 个新文件，`artifacts/evidence/T-015-sizing.txt`），
   超 200 行软上限、也超 500 行硬上限；**没有用户批准的规模例外**，属待裁定偏差，不得当成已批准例外引用。
 
-## 应用层入口索引（`:app`）—— 搜索页与首页搜索入口（T-040）
+## 应用层入口索引（`:app`）—— 检索栈与搜索入口（T-040 → T-054）
 
-搜索页给 T-015 已有的检索端口接上一个真实屏幕与入口（PRD 6.2.8）。屏幕**不做判定**：能不能搜到、命中是
-哪几条、按什么顺序，全由仓储与页面对象回答；屏幕只画它拿到的东西。
+T-040（2026-09-22）给 T-015 已有的检索端口接上独立搜索屏；**T-054（2026-09-24）把检索入口迁到学习库
+顶部搜索框，独立搜索屏的视图层退役**（本批唯一一次删代码，范围严格限定）。检索能力一项不减：六类字段
+（标题、问题、锚定原文、回答、思考、失败尝试的半成品内容）的全局检索、四态迁移、空查询不触库、迟到响应
+丢弃、失败保留草稿、锚定跳转，全部沿用 `SearchPresenter` 既有实现，迁移未改其语义。
 
 | 类型 | 职责 | 关键不变量 |
 | :--- | :--- | :--- |
-| `screen.SearchScreen` | 搜索页视图（输入、状态窗格、命中行） | 只画 `SearchPage` 给的窗格与行；**不重新过滤、不重新排序**；每次输入经 `afterTextChanged` 转发给 presenter |
-| `search.SearchPage` | 搜索页的纯 JVM 页面对象（`Pane` / `Row`） | 五个窗格（引导/搜索中/列表/空/失败）互斥；每个分支标题只向 `BranchTitles` 问一次；标题查不到给空串而不是把行丢掉 |
-| `search.BranchTitles` | 「这个分支叫什么」的唯一端口 | 页面不直接依赖对话存储；命中行不因此多一个数据源 |
+| `search.SearchPage` | 搜索结果的纯 JVM 页面对象（`Pane` / `Row`） | 五个窗格（引导/搜索中/列表/空/失败）互斥；每个分支标题只向 `BranchTitles` 问一次；`Row` 携带命中字段名、祖先路径（`BranchTitles.badgeOf`，T-054 新增 `Badge`）、归档状态与片段 |
+| `search.BranchTitles` | 「这个分支叫什么 + 祖先路径 + 是否归档」的唯一端口 | 页面不直接依赖对话存储；命中行不因此多一个数据源 |
+| `screen.LibraryScreen`（搜索态） | 学习库顶部搜索框的宿主：输入转发、结果态替换列表区、离开恢复列表态 | 屏**不做判定**、不重新过滤、不重新排序；结果行只有 `item_search_hit.xml` 一套（在原布局上扩展，无第二套）；文案复用 T-040 的 `search_*` 键与 `done_archived_mark` |
+| `library.LibraryPresenter`（转发层） | 把库屏的搜索输入与结果点击转交给 `SearchPresenter` | 纯转发（`onSearchQueryChanged` / `onSearchHitOpened`），**不做第二状态机** |
 | `wiring.SqliteSearchStore` | 搜索库的惰性持有者 | 容器构造期**不开库**；第一次真正提问时才开，调用方都是后台线程 |
 
-- **首页搜索入口不再是死按钮（2026-09-22，T-040）**：`screen_home_body.xml` 的 `home_search` 不再带
-  `android:enabled="false"`，`HomeScreen` 为它挂了监听器并走 `HomeActions.onSearchPressed()`。原文扫描见
-  `artifacts/evidence/T-040-source-scan.txt`，其中带**正控**——同一个提取器仍能看见 `home_send` 上真实存在的
-  `android:enabled`，所以「`home_search` 上没有 disabled」不是提取器看不见造成的假通过。
-- **跳转复用 T-042 的同一道门**：`MainActivity.openAnchor` 调 `showChat(branchId, anchor)`，不另造第二套定位。
-- **宽屏镜像**：`res/layout-sw600dp/screen_search.xml`。
+- **入口唯一**：检索的唯一入口是学习库顶部 `library_search_input`；`screen/SearchScreen.java` 与 3 个
+  `screen_search*` 布局已删除，全仓 `grep -rn SearchScreen`（app/data/core/ai 的 src）零命中；
+  `LibrarySearchEntryTest` 断言在**没有任何主题**时也能进入检索态。证据：
+  `artifacts/evidence/T-054-library-search-retire.txt`（命令与退出码内嵌）。
+- **跳转复用 T-042 的同一道门**：`MainActivity.openAnchor` 调 `showChat(branchId, anchor)`，不另造第二套
+  定位（`SearchJumpTest` 盯这条路径）。
+- **首页搜索入口已随 055 退役**：T-040 曾把 `screen_home_body.xml` 的 `home_search` 去掉
+  `android:enabled="false"` 并接上 `HomeActions.onSearchPressed()`（原文扫描
+  `artifacts/evidence/T-040-source-scan.txt`，历史证据不改写）；055 删除该入口与整个首页头部按钮区
+  （搜索/归档/设置三键一起摘除），「搜索入口无条件可达」的性质由
+  `LibrarySearchEntryTest.theLibrarySearchEntryIsReachableWithNoTopicsAtAll` 提供等价覆盖
+  （055 证据：`artifacts/evidence/T-055-home-slimming.txt`，命令与退出码内嵌）。
+- **宽屏镜像**：`screen_search.xml` 的 sw600dp 镜像已随屏退役；学习库的搜索态由 `screen_library*` 的
+  `layout/` 与 `layout-sw600dp/` 两套覆盖。
 - 真机输入法下的即时搜索体验与像素证据仍为 `deferred — 用户自行装机验证（user decision 2026-09-21）`。
 
 ## 应用层入口索引（`:app`）—— 重试、重置与版本切换（T-010）
@@ -675,12 +708,33 @@ View 自己不持内容。
 - **引用真正进请求（T-044，2026-09-22）**：`messages.quoted_text` 里的那句话会随请求发给模型——它编进
   **当前问题**的正文（`<treelearn_quote>` 信封、换行、转义后的引文、换行、`</treelearn_quote>`、换行、问题原文），
   而不是作为第二条 user 消息进历史：提示词设计 §5 把「当前问题」定为恰好一条且最后一条，引用是对这句话的限定，
-  放进历史既破坏该不变式、又要求 `:core` 的 `ContextPlan.Entry` 认识模型协议。判定「有没有引用」（null/空白归一化）
-  **只有一处**——`DeepSeekContextEncoder.currentInput`；发送与重试/重置两条入口都只转发存行里的原文，
+  放进历史既破坏该不变式、又要求 `:core` 的 `ContextPlan.Entry` 认识模型协议。判定「有没有引用」
+  **只有一处**——`DeepSeekContextEncoder.currentInput`（null/空白的归一化表达式本身在此之外还以
+  幂等形式出现于 `ChatMessage` 与 `ChatWiring` 各一次：判定唯一、归一化不唯一，三处对同一输入
+  结论相同）；发送与重试/重置两条入口都只转发存行里的原文，
   所以「重新生成」不会把引用丢掉（两个入口逐字符一致的断言见 `ChatWiringTest`）。引用随 `currentInput` 一起
   计入既有字符预算（`PromptLimits.CAPACITY_CHARS`），过长时按 `RESERVE_EXCEEDS_BUDGET` 失败关闭，不截断、
   不静默丢弃。**只转义引用、不转义问题**：问题要同时落库与界面原样展示；代价是问题自身若含信封字面量会原样
   发给 provider——该残留风险与理由写在提示词设计 V1.0 §5.1（引文的线格式）。
+- **附件文本进请求（T-097，2026-09-25）**：输入栏的附件键（SAF 选择 txt/md/pdf，≤20MB）登记到
+  `attachments` 表后由 `AttachmentTextExtractor` 落库 `extracted_text`（纯文本直读；PDF 的
+  FlateDecode 流解压后按括号串/Tj 文本操作符提取；解不出文本→`parse_state=FAILED`，可照常发送、
+  只是不带附件块）；chip 与引用行**互斥**（拍板 4：带附件发送时引用让位），判定在
+  `ChatPresenter.onAttachmentPicked` 一处。发送时 `ChatWiring.send` 读取记录文本，编码为
+  `<treelearn_attachment>` 框追加在当前问题之前（`DeepSeekContextEncoder.currentInput` 重载）；
+  **重建不走这条路**——`SqliteChatStore.history` 重放的是**落库消息里的附件块**（发送时随
+  `user_content` 一起写死），所以「重新生成」不依赖文件还在（记录在、`extracted_text` 在，重试就能逐字符还原；
+  文件被 098 清掉后重试失去附件块是**有意为之**的降级，不是 bug）。注入上限 20000 字符
+  （`AttachmentTextExtractor.INJECTABLE_CHARS`，≈1/3 容量预算）：超限→ `ATTACHMENT_TOO_LARGE`
+  拒绝，不截断、不静默丢弃——与引用超限的失败关闭同一姿态。
+- **语音输入键（T-095，2026-09-25，SPEC-081）**：输入栏发送键旁新增长按说话键（`ImageButton`，
+  44dp，项目图标惯例）。零依赖——直接封装平台 `SpeechRecognizer`（`speech/PlatformSpeechInput`，
+  `SpeechInputGateway` 端口隔离）；识别文本**追加进草稿、不直接发送**（走 `onDraftChanged` 同一条
+  保存-渲染链，持久化/通知清理/草稿恢复一处不少）；无识别服务→键**不渲染**（无假入口）；麦克风
+  权限只在对话页首次长按时询问（manifest 声明 `RECORD_AUDIO`），拒绝→键置灰 + 现场一次 Toast 引导
+  （`SpeechInputPolicy` 承载三态判定），再次授予自动恢复；识别出错→保留平台已产出的 partial 文本
+  （[OFF] 保险），静默无匹配则草稿不动。宿主拥有识别会话与权限流（`MainActivity`），离开聊天房间
+  一律 `stopSpeechSession()`；判定三态在 `SpeechInputPolicy` 一处，屏只画。
 - **长按划词弹的是应用自己的菜单（T-041）**：`item_chat_message.xml` 的 `textIsSelectable` 仍在，但长按由
   `ChatScreen.Row` 的 `OnLongClickListener` 接管——回调返回 `true`，平台因此不再启动它自己的文本工具条；
   它把按下坐标换算成字符偏移、取该字符所在的**整句**，交给 `WordMenuPopup`。菜单分「AI 操作」（追问 / 新建分支）
@@ -695,6 +749,12 @@ View 自己不持内容。
 - **按钮叫「新建分支」，数据仍叫「分叉」**：`chat_act_fork` 与相关 `contentDescription` 统一为「新建分支」
   （PRD 6.2.19 第 4 条），`app/src/main` 下已无「分叉」二字；本节在描述 `anchor_quote` / `source_revision_id` /
   级联这类**数据概念**时仍写「分叉」，因为那是 schema 与既有文档里的名词，不是按钮文案。
+- **全屏编辑器（T-077，073 §5.1）**：composer 控件行左侧的展开入口钮（`chat_expand`，44dp）打开全屏覆盖层
+  `overlay_fullscreen_editor.xml`；覆盖层是 `ChatViewState.fullscreenEditing` 这一个只读快照位驱动的 View，
+  不是新状态机。入口在空草稿 / 归档 / 无 Key 三态灰显（归档与无 Key 的灰显点击给对应提示），编辑经
+  `onDraftChanged` 走 076 的同一条持久化链路，「完成」「取消」「关闭」与系统返回（`ChatScreen.onSystemBack`，
+  由 `MainActivity.onBackRequested` 先问对话页）都落在同一个 `onFullscreenEditClosed`——只关不清，草稿永不因
+  关闭而丢。低动效下开合直接切换；进入与关闭各有 TalkBack 播报。
 
 **已知缺口与记录的偏差（不要读成已解决）：**
 
@@ -772,6 +832,12 @@ View 自己不持内容。
   presenter，presenter 只决定「这一次是折叠还是展开」，落库与 0/1 语义在 `SqliteTreeCanvasStore.setCollapsed` 一处。
   屏幕里没有 SQL、没有 DAO、没有 `DatabaseTransactionRunner`。
 - **画布与导航页对「哪些枝干可见」同口径**：两边都是「该主题的非归档枝干」，归档行在画布上不出现。
+- **画布背景点阵为纯装饰层（T-058）**：`screen/GridBackdrop.java` 以 `space_s6` 间距、`hairline` 点径、
+  `tl_line` 颜色在画布之下（`tree_stage` 内 z 序更低）铺一层点阵；不点击、不聚焦、无障碍标记为不可交互，
+  不参与任何命中与布局计算——画布的命中、几何与标签结果一字未动。
+- **控制条动作位为线性图标（T-058）**：折叠 / 进入 / 适应三动作的顺序与语义不变，视觉载体由文字改为
+  `ic_tree_fold / ic_tree_unfold / ic_tree_open / ic_tree_fit` 图标（约定同 056/057），`contentDescription`
+  随折叠态在 `cd_tree_fold` / `cd_tree_unfold` 之间切换。
 - **首帧视野用宿主真实尺寸做种子**：`showTree` 用 `host.getWidth()/getHeight()` 构造首帧 viewport，
   画布视图随后用 `onViewportChanged` 报告自己的真实盒子。**刻意不用 0×0 种子**——先返回的读取会把树拟合进空盒子，
   而后来那一次 resize 按设计只记录新尺寸、不重新拟合，树会被画在屏幕外。
@@ -781,9 +847,15 @@ View 自己不持内容。
 - **真机触控、像素观感与平板横屏仍是 deferred**：按用户 2026-09-21 的决定，本轮不跑 emulator/真机，
   画布的真实手势节奏、未读芽的观感、`layout-sw600dp/screen_tree.xml` 的横屏排布一律记为
   `deferred — 用户自行装机验证（user decision 2026-09-21）`，不得读成 PASS。
-- **叶子上的摘要依赖派生产物，而派生在本 build 没有生产调用方**：读取侧（`ArtifactPayloadCodec` 的
-  `BRANCH_SUMMARY`）已接上，但写入侧 `DerivedOperation` 仍无调用者，所以画布叶子在当前 build 实际读作空——
-  这是**声明的缺口**，不是「已实现但没生效」。
+- **叶子摘要与标题的派生已接线，但真实 provider 冒烟与设备证据仍缺**：写入侧已有生产调用者——
+  根标题在建主题接受后异步派生（`HomeWiring.submit` 的后台线程，经 `DerivedService.rootTitle`），
+  分支标题与摘要在对话读取发现稳定回答时后台派生（`ChatWiring.read` → `DerivedService.ensureConversationArtifacts`，
+  其中分支标题先于摘要、且经 `runIfMissing` 每分支至多一次）。标题类 artifact（`ROOT_TITLE`/`BRANCH_TITLE`）
+  在 `SqliteDerivedStore.write` 落库的同事务里经 `TitleArtifactApplier` 写回 `Branches.TITLE`，
+  既有读取路径（首页卡 `TopicDao.listOverviews`、对话标题 `BranchHeading.of`）因此能取到派生标题；
+  画布叶子摘要仍由 `TreeCanvasWiring` 读 `BRANCH_SUMMARY` artifact。**残留缺口**：真实 DeepSeek 的
+  派生输出稳定性只能靠 codec 拒绝非法输出保证（无 Key，未联网冒烟）；派生在无 Key 时整体静默跳过，
+  标题/摘要回落到既有兜底（首问、空摘要）——这是设计内行为，不是缺陷。
 - **大主题的一次性布局耗时未在真机测过**：`load(topicId)` 一次读全部枝干、一次算完整几何，这是有意的取舍
   （分批读会让画面在补数据时跳动），耗时风险记为未验证。
 - **规模与验证证据**：见 `.trae/tasks/T-2026-09-21-tree-canvas-production-wiring-038.md` 的 TDD 执行记录与
@@ -793,8 +865,8 @@ View 自己不持内容。
 
 导航页（PRD 6.2.6 逐层导航与 6.2.10 非根子树归档 / 永久删除）此前**只有 presenter 与 SQLite 存储，没有屏幕、
 没有布局、也没有任何入口**：`navigation/NavigationPresenter` 在 `src/main` 内只被它自己和 `NavigationActions`
-引用，构造点只在测试里；首页的「归档」按钮在 `res/layout/screen_home_body.xml` 里写死 `android:enabled="false"`。
-本节记录它现在由谁驱动、从哪里进入。
+引用，构造点只在测试里。本节记录它现在由谁驱动、从哪里进入（首页的「归档」按钮已于 055 随首页瘦身移除，
+`screen_home_body.xml` 里不再有任何归档入口）。
 
 | 类型 | 职责 | 关键不变量 |
 | :--- | :--- | :--- |
@@ -802,13 +874,13 @@ View 自己不持内容。
 | `wiring.NavigationWiring` | 导航页的**真实**数据路径：持有单例 `SqliteNavigationStore`，把 `NavigationData` 的方法原样委托 | 本层**不重写判定**，也**不实现** `NavigationActions`（那是 presenter 的手势契约，宿主每次进入时构造）——第二份「什么可见」正是列表与画布漂移的来源 |
 | `AppContainer.navigationData()` | 组合根暴露的端口 | 装配只发生一次，页面拿到的是全应用同一条连接 |
 | `screen.NavigationScreen` + `res/layout/screen_navigation*.xml`（含 `layout-sw600dp/` 镜像） | 导航页视图：非归档 / 已归档两个分组、当前选中、分支级 AI 总结（可折叠）、行内菜单（折叠 / 归档 / 永久删除） | 归档与删除两个菜单项**只在 `row.archivable` 为真时出现**，因此根分支没有归档；屏幕里没有 SQL、没有 DAO |
-| `MainActivity.showNavigation` / `enterNavigation` / `render` / `leaveNavigation` / `openNavigation` / `openArchived` | 导航页宿主：进入、宿主渲染、离开与两条出口 | 页面按分支构造、离开即丢（与对话页、画布同一条规则）；`openNavigation` 与 `openArchived` 是同一条 `showNavigation` 的两个出口 |
+| `MainActivity.showNavigation` / `enterNavigation` / `render` / `leaveNavigation` / `openNavigation` | 导航页宿主：进入、宿主渲染、离开与出口 | 页面按分支构造、离开即丢（与对话页、画布同一条规则）；`openNavigation` 是 `showNavigation` 的唯一宿主出口（首页的 `openArchived` 随 055 退役） |
 
 **这一层的交互事实：**
 
-- **三条入口**：对话页顶栏的 `chat_nav`、画布顶栏的 `tree_nav`、首页的 `home_archived` 都进入导航页。
-  前两条回**进来时那段对话**；首页那条把列表首位的主题按其 `resumeBranchId` 打开。首页按钮的
-  `android:enabled="false"` 已去掉，改由 `HomePresenter` 在**还没有主题**时禁用（有主题才可点）。
+- **两条入口**：对话页顶栏的 `chat_nav`、画布顶栏的 `tree_nav` 都进入导航页，都回**进来时那段对话**。
+  首页的第三条（`home_archived`）已随 055 首页瘦身删除——浏览历史与归档内容由学习库承担，
+  「继续学习」行承担最近主题的快捷回访。
 - **永久删除必须先经确认，且确认前不写库**：行的「永久删除」只发 `onDeleteRequested(branchId, SUBTREE)`，
   由 presenter 数出这次删除覆盖的分支数并给出 `pendingDelete` 计划；屏幕据此弹**一次**系统对话框，
   文案用 `navigation_delete_body` 的 `%2$d` 写出受影响子树的分支数量（含目标自身）；
@@ -844,15 +916,15 @@ V3.2 PRD 6.2.16 把 主页 / 学习库 / 设置 并列为一级入口，并给�
 | `library.LibraryData` / `LibrarySink` / `LibraryViewState` / `LibraryPresenter` | 学习库的读端口、出口、可绘制状态与全部判定 | 屏幕**不做任何判定**：能否列出、在哪个相位、每行说什么，全部来自一个不可变 `LibraryViewState`；相位 LOADING / READY / EMPTY / ERROR，空表是 EMPTY 而不是错误 |
 | `wiring.SqliteLibraryStore` | 学习库的真实数据路径：把连接交给 `TopicDao.listOverviews` | **只读**：本切片不加表、不加列、不加 migration、没有写方法可误用，所以它连事务执行器都不需要——那样的构造只可能为了一次裸写 |
 | `wiring.LibraryWiring` | `TopicDao.Overview` → `LibraryViewState.Row` 的映射 | 树名只由 `BranchHeading.of(存下来的标题, 首个用户问题)` 给出，与首页卡片、对话标题**同一个实现**，所以一个主题不可能在库里叫另一个名字 |
-| `screen.LibraryScreen` + `res/layout/screen_library*.xml` / `screen_library_body.xml` / `item_library_topic.xml` | 学习库视图：标题、搜索框位、两个分段位、行列表与状态句 | 行 = 强调条 + 标题 + 「分支数 · 最近使用（· 未读数）」；未读点没读就 `gone`；屏幕里没有 SQL、没有 DAO、没有排序 |
+| `screen.LibraryScreen` + `res/layout/screen_library*.xml` / `screen_library_body.xml` / `item_library_topic.xml` | 学习库视图：标题、搜索框（T-054 接管为检索入口）、两个分段位（T-053 接管已完成位）、行列表与状态句 | 行 = 强调条 + 标题 + 「分支数 · 最近使用（· 未读数）」；未读点没读就 `gone`；屏幕里没有 SQL、没有 DAO、没有排序 |
 | `AppContainer.libraryData()` | 组合根暴露的端口 | 装配只发生一次，学习库与首页读的是同一条连接、同一条语句 |
 | `android/app/src/androidTest/java/com/treelearn/app/BottomTabShellInstrumentedTest.java` | 本片验收：标签可达与高亮、两条返回落点、学习库真实行、空表空态 | 每个动作都走产品真的画出来的控件（标签项、库行、对话的返回与导航按钮、导航页的返回），不调私有方法、不模拟系统返回手势 |
 
 **这一层的交互事实：**
 
 - **标签栏显隐只有一条规则**：一级目的地（主页 / 学习库 / 作为一级的设置）显示，二级屏（对话、画布、导航页、
-  搜索页、作为旁路的设置）隐藏；判定集中在 `swap()`，屏幕不参与。
-- **二级屏返回落回发起它的标签**：对话页与搜索页的返回走 `showTab(currentTab)`，画布与导航页各自回到打开它的
+  作为旁路的设置）隐藏；判定集中在 `swap()`，屏幕不参与。
+- **二级屏返回落回发起它的标签**：对话页的返回走 `showTab(currentTab)`，画布与导航页各自回到打开它的
   那段对话。从主页进对话返回落主页、从学习库进对话（再到导航页）逐层返回落学习库，两条路都各有真机用例。
 - **学习库的行点击复用同一条开门路径**：行 → `LibraryPresenter.onTopicTapped` → `ChatSink.openBranch(resumeBranchId)`
   → `MainActivity.showChat(branchId)`，与首页列表项点开的是同一个方法，不是第二份「怎么打开一段对话」。
@@ -860,6 +932,9 @@ V3.2 PRD 6.2.16 把 主页 / 学习库 / 设置 并列为一级入口，并给�
   列表里，而不是下次启动才在。
 - **`TopicDao.listOverviews` 是首页与学习库共用的那一条只读语句**（`ORDER BY t.updated_at DESC, t.id ASC`）；
   未读数是 `latest_stable_sequence - last_seen_stable_sequence` 的求和，与首页卡片同源。
+- **列表项显示根标题、摘要、分支数量与最近使用时间（T-061，PRD 6.2.16 功能规格 4）**：摘要由
+  `LibraryWiring.summaryTextOf` 从 overview 行已携带的 `BRANCH_SUMMARY` 载荷解码（与首页卡片同一条解码
+  约定）；摘要缺失或解码拒绝时该行**不渲染、不留占位文案**——「少一行信息」的规则与归档行（053）同源。
 - **晚到的对话状态被丢弃而不是画进已离开的屏**：`showChat` 被二级屏接管时会置空 `chatScreen`，而对话的读
   （以及生成中的轮询）仍可能在飞，因此 `render(ChatViewState)` 与 `renderPosition(...)` 现在与导航页同样有
   空守卫。这是本片**新验收路径第一次走出来的既有崩溃**（修复前进程直接 NPE 退出），不是新增行为。
@@ -869,8 +944,9 @@ V3.2 PRD 6.2.16 把 主页 / 学习库 / 设置 并列为一级入口，并给�
 
 **已知缺口与记录的偏差（不要读成已解决）：**
 
-- **两处占位不是控制**：`library_search_input`（054 接管）与 `library_segment_done`（053 接管）只有位置和 id，
-  `focusable="false"` 且没有监听器，点它们什么都不发生。
+- **两处占位均已被接管（现状见对应小节）**：`library_search_input` 由 054 接管为学习库检索入口
+  （见「检索栈与搜索入口（T-040 → T-054）」），`library_segment_done` 由 053 接管为「已完成」分段
+  （见下节）；本条保留为 052 交付时的历史状态记录。
 - **「已完成」分段与已归档主题不在本片**：本片只画「进行中」一个分段并列出全部主题；`archived_at` 分段与非根
   子树删除由 053 在本片产物上补。
 - **`strings.xml` 只追加了 `tab_*` 与 `library_*` 前缀键**，没有重排、没有改动其他切片的键。
@@ -883,6 +959,25 @@ V3.2 PRD 6.2.16 把 主页 / 学习库 / 设置 并列为一级入口，并给�
   （另有两个非判定口径的数字曾出现过：实现者手搓过滤的 592 与逐行剥注释的 676；三者同向、均超 500，判定值取 575。）
 - **`layout-sw600dp/` 只由构建与 id 可达性证明**：本轮没有像素或观感证据（沿用 2026-09-21 的既有决定）。
 
+## 学习库「已完成」分段（T-053）
+
+052 的两个占位之一已被本片接管：`library_segment_done` 现在是真实分段，`item_library_archived.xml` 是归档行的行布局。
+
+- **已完成区列出全部归档分支**，每行 = 标题 + 来源主题（由同一份 `Snapshot` 的 `parentBranchId` 链推出，
+  零新增查询）+ 「已归档」标记 + 摘要行（**分支没有摘要就少一行，绝不渲染解释性占位文案**，PRD 第 471 行）。
+- **恢复与整树删除复用同一份实现**：`LibraryPresenter` 经 `NavigationData.plan(topicId, snapshot, branchId, false)`
+  取得删除集合，确认后先 `cancelInFlight` 再 `delete(plan)`——`library/` 下没有第二份「找后代」逻辑。
+  恢复走 `LibraryData.restore`（内部翻 `archived_at` 归档位，不做任何后代重接）。
+- **删除不可逆、必须二次确认**：行内确认态（`pendingDelete`）命名将被删除的分支数；取消则什么也不写。
+- **`anchor_text` 与「末条回答片段」未显示（记录的偏差）**：既有快照不含这两项，053 的复权声明允许新增
+  只读查询，但评估后降级为不显示——代价高于收益。该偏差在此显式登记，非静默省略。`android/data/` 零改动
+  （`git status` 对 migration 目录零命中，本片未新增任何查询）。
+- **导航屏的归档区保持原样**：归档内容现有两个可见位置（导航屏归档区、学习库已完成区；首页的
+  「已归档」入口已随 055 移除），并存是刻意的，收敛留待后续单独评估。
+- 空态文案 `done_empty`（「没有已完成的学习」）与进行中空态不同，带下一步指引。
+- 仪器测试 `LibraryArchiveInstrumentedTest`（真机 `AWSS013807000356`，5 例）覆盖：已完成区可见性、
+  恢复不重接后代、删除整树只删目标子树、空态、无摘要行不渲染占位。
+
 ## 图标资产约定（T-056 / T-057 建立）
 
 来源为 Figma 新稿 `src/icons.tsx`（25 枚线性图标）。工程按领地分片登记：
@@ -892,8 +987,12 @@ V3.2 PRD 6.2.16 把 主页 / 学习库 / 设置 并列为一级入口，并给�
   用于 `screen_navigation_body`、`item_navigation_row`、`screen_settings_body`。
 - **057（对话与动作）**：`ic_action_quote / ic_action_copy / ic_action_fork`、
   `ic_chat_send / ic_chat_close / ic_chat_gear / ic_chat_overview`，用于 `screen_chat_body`、`view_answer_actions`。
-- **058（画布控制条）**：待建。
-- **055（首页）**：首页顶栏「搜索 / 归档 / 设置」随首页瘦身整块删除，不建图标。
+- **058（画布控制条）**：`ic_tree_fold / ic_tree_unfold / ic_tree_fit / ic_tree_open`，用于
+  `screen_tree_body` 控制条；折叠与展开是同一控件的两个状态位，由 `TreeCanvasScreen.render()` 按所选
+  分支切换（图标与 `cd_tree_*` 描述同步）。同屏新增 `screen/GridBackdrop.java` 点阵背景层
+  （间距 `space_s6`、点径 `hairline`、颜色 `tl_line`，纯装饰、不参与命中与布局，z 序在画布之下）。
+- **055（首页）**：首页顶栏「搜索 / 归档 / 设置」随首页瘦身整块删除，不建图标；品牌区沿用
+  `ic_launcher_foreground` 作为图形标识 + 衬线中英文名（新稿品牌图标资产落地前不做第二份）。
 
 绘图约定（两组资产逐项一致，由 `IconAssetsTest` 把守）：
 

@@ -36,6 +36,24 @@ public final class PromptLimits {
     /** The characters reserved for the answer so history cannot consume the whole context. */
     public static final int MIN_ANSWER_CHARS = 512;
 
+    /** The snippet of one web-search result that may enter the prompt. */
+    public static final int SEARCH_SNIPPET_CHARS = 200;
+
+    /** The title of one web-search result that may enter the prompt. */
+    public static final int SEARCH_TITLE_CHARS = 80;
+
+    /** The user question forwarded to the search engine, in characters. */
+    public static final int SEARCH_QUERY_CHARS = 100;
+
+    /** The total budget the search step may add to the assembled prompt. */
+    public static final int SEARCH_INJECTION_LIMIT_CHARS = 4000;
+
+    /** The connect timeout of one web-search call, in milliseconds. */
+    public static final int SEARCH_CONNECT_TIMEOUT_MS = 5000;
+
+    /** The read timeout of one web-search call, in milliseconds. */
+    public static final int SEARCH_READ_TIMEOUT_MS = 10000;
+
     private PromptLimits() {
     }
 

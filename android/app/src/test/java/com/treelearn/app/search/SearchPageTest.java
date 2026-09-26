@@ -106,6 +106,9 @@ public final class SearchPageTest {
 
         assertEquals(2, page.rows.size());
         assertEquals("a repeated branch is one question to the store", 1, titles.lookups);
+        assertEquals("a repeated branch is one siting question too (T-054)", 1, titles.badgeLookups);
+        assertEquals("root \u203a parent", page.rows.get(0).sourcePath);
+        assertTrue(page.rows.get(0).archived);
     }
 
     @Test
@@ -138,6 +141,7 @@ public final class SearchPageTest {
     private static final class CountingTitles implements BranchTitles {
 
         int lookups;
+        int badgeLookups;
 
         private final Map<String, String> byId = new HashMap<String, String>();
 
@@ -150,6 +154,14 @@ public final class SearchPageTest {
         public String titleOf(String branchId) {
             lookups++;
             return byId.get(branchId);
+        }
+
+        @Override
+        public BranchTitles.Badge badgeOf(String branchId) {
+            badgeLookups++;
+            return byId.containsKey(branchId)
+                    ? new BranchTitles.Badge("root \u203a parent", true)
+                    : new BranchTitles.Badge("", false);
         }
     }
 }

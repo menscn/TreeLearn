@@ -1,0 +1,294 @@
+﻿diff --git a/android/app/src/main/java/com/treelearn/app/ui/ChatViewState.java b/android/app/src/main/java/com/treelearn/app/ui/ChatViewState.java
+index 1773566..fab7cb6 100644
+--- a/android/app/src/main/java/com/treelearn/app/ui/ChatViewState.java
++++ b/android/app/src/main/java/com/treelearn/app/ui/ChatViewState.java
+@@ -5,8 +5,10 @@ import com.treelearn.core.domain.Guard;
+ 
+ import java.util.ArrayList;
+ import java.util.Collections;
++import java.util.LinkedHashMap;
+ import java.util.LinkedHashSet;
+ import java.util.List;
++import java.util.Map;
+ import java.util.Set;
+ 
+ /**
+@@ -127,6 +129,26 @@ public final class ChatViewState {
+      * disabled, and the draft and quote the learner already had are kept, never cleared.
+      */
+     public final boolean archived;
++    /**
++     * T-077: whether the fullscreen editor (073 搂5.1) is showing. A read-only snapshot, not a
++     * phase: the overlay draws from this flag alone, the draft and quote travel underneath it
++     * unchanged, and a process rebuild finds the flag false with the draft back in the composer.
++     */
++    public final boolean fullscreenEditing;
++    /**
++     * T-090: the per-message translation state. A page-session presentation fact like the
++     * reasoning disclosures - keyed by message id, never persisted - so the stable answer's own
++     * text (the store's immutable content) is never touched by a translation.
++     */
++    public final Translations translations;
++    /**
++     * T-092: the conversation's grounding switch, as stored 鈥?the same fact the search settings
++     * page writes, rendered by the input-bar chip. A read travels it unchanged like every composer
++     * fact, so a load can never silently turn the chip off.
++     */
++    public final boolean searchEnabled;
++    /** T-092: the selected engine's Chinese label, for the chip's panel; empty until known. */
++    public final String searchEngineLabel;
+ 
+     private ChatViewState(Phase phase, String branchId, String branchTitle, List<ChatMessage> messages,
+             String draft, String quote, boolean keyConfigured, GenerationModel model,
+@@ -134,7 +156,8 @@ public final class ChatViewState {
+             List<Recommendation> recommendations,
+             String recommendationsMessageId, HomeViewState.Notice notice, boolean sending,
+             SourceCard sourceCard, boolean sourceCardExpanded, Stage stage, boolean followLatest,
+-            int missedCount, boolean archived) {
++            int missedCount, boolean archived, boolean fullscreenEditing,
++            Translations translations, boolean searchEnabled, String searchEngineLabel) {
+         this.phase = Guard.object(phase, "phase");
+         this.branchId = Guard.id(branchId, "branchId");
+         this.branchTitle = branchTitle == null ? "" : branchTitle;
+@@ -157,6 +180,10 @@ public final class ChatViewState {
+         this.followLatest = followLatest;
+         this.missedCount = Math.max(0, missedCount);
+         this.archived = archived;
++        this.fullscreenEditing = fullscreenEditing;
++        this.translations = translations == null ? Translations.EMPTY : translations;
++        this.searchEnabled = searchEnabled;
++        this.searchEngineLabel = searchEngineLabel == null ? "" : searchEngineLabel;
+     }
+ 
+     public static ChatViewState initial(String branchId, GenerationModel model,
+@@ -165,7 +192,7 @@ public final class ChatViewState {
+                 "", keyConfigured, model, thinkingEnabled, Collections.<String>emptySet(),
+                 Collections.<String>emptySet(),
+                 Collections.<Recommendation>emptyList(), "", null, false, null, false,
+-                Stage.IDLE, true, 0, false);
++                Stage.IDLE, true, 0, false, false, Translations.EMPTY, false, "");
+     }
+ 
+     /** @return the row with this id, or null when the conversation does not contain it */
+@@ -314,7 +341,7 @@ public final class ChatViewState {
+                 nextQuote, nextKeyConfigured, nextModel, nextThinkingEnabled, nextExpanded,
+                 nextCollapsed, nextRecommendations, nextRecommendationsMessageId, nextNotice,
+                 nextSending, sourceCard, sourceCardExpanded, stage, followLatest, missedCount,
+-                archived);
++                archived, fullscreenEditing, translations, searchEnabled, searchEngineLabel);
+     }
+ 
+     /** Replaces the source card with a read's answer; the expansion state travels unchanged. */
+@@ -323,7 +350,8 @@ public final class ChatViewState {
+                 keyConfigured, model, thinkingEnabled, expandedReasoning, collapsedReasoning,
+                 recommendations,
+                 recommendationsMessageId, notice, sending, value, sourceCardExpanded, stage,
+-                followLatest, missedCount, archived);
++                followLatest, missedCount, archived, fullscreenEditing, translations,
++                searchEnabled, searchEngineLabel);
+     }
+ 
+     public ChatViewState withSourceCardExpanded(boolean value) {
+@@ -331,7 +359,8 @@ public final class ChatViewState {
+                 keyConfigured, model, thinkingEnabled, expandedReasoning, collapsedReasoning,
+                 recommendations,
+                 recommendationsMessageId, notice, sending, sourceCard, value, stage,
+-                followLatest, missedCount, archived);
++                followLatest, missedCount, archived, fullscreenEditing, translations,
++                searchEnabled, searchEngineLabel);
+     }
+ 
+     /** T-075: sets the generation stage; the rest of the state travels unchanged. */
+@@ -339,7 +368,8 @@ public final class ChatViewState {
+         return new ChatViewState(phase, branchId, branchTitle, messages, draft, quote, keyConfigured,
+                 model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
+                 recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
+-                value == null ? Stage.IDLE : value, followLatest, missedCount, archived);
++                value == null ? Stage.IDLE : value, followLatest, missedCount, archived,
++                fullscreenEditing, translations, searchEnabled, searchEngineLabel);
+     }
+ 
+     /** T-075: sets the scroll-follow state; the rest of the state travels unchanged. */
+@@ -347,7 +377,8 @@ public final class ChatViewState {
+         return new ChatViewState(phase, branchId, branchTitle, messages, draft, quote, keyConfigured,
+                 model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
+                 recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
+-                stage, following, missedSoFar, archived);
++                stage, following, missedSoFar, archived, fullscreenEditing, translations,
++                searchEnabled, searchEngineLabel);
+     }
+ 
+     /**
+@@ -358,6 +389,170 @@ public final class ChatViewState {
+         return new ChatViewState(phase, branchId, branchTitle, messages, draft, quote, keyConfigured,
+                 model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
+                 recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
+-                stage, followLatest, missedCount, value);
++                stage, followLatest, missedCount, value, fullscreenEditing, translations,
++                searchEnabled, searchEngineLabel);
++    }
++
++    /** T-077: sets the fullscreen-editor flag; the rest of the state travels unchanged. */
++    public ChatViewState withFullscreenEditing(boolean value) {
++        return new ChatViewState(phase, branchId, branchTitle, messages, draft, quote, keyConfigured,
++                model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
++                recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
++                stage, followLatest, missedCount, archived, value, translations,
++                searchEnabled, searchEngineLabel);
++    }
++
++    /**
++     * T-077: whether the fullscreen editor's entry key may open the overlay (073 搂5.1) - the
++     * learner's words, a configured key and a live branch, all three; anything else reads grey.
++     */
++    public boolean fullscreenEditEntryAvailable() {
++        return !archived && keyConfigured && !draft.trim().isEmpty();
++    }
++
++    /** T-090: starts a translation run for one answer; a previous text or failure is replaced. */
++    public ChatViewState withTranslationStarted(String messageId) {
++        return new ChatViewState(phase, branchId, branchTitle, messages, draft, quote, keyConfigured,
++                model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
++                recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
++                stage, followLatest, missedCount, archived, fullscreenEditing,
++                translations.started(messageId), searchEnabled, searchEngineLabel);
++    }
++
++    /** T-090: finishes the run; a blank text records a retryable failure, never an answer. */
++    public ChatViewState withTranslationFinished(String messageId, String translation) {
++        return new ChatViewState(phase, branchId, branchTitle, messages, draft, quote, keyConfigured,
++                model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
++                recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
++                stage, followLatest, missedCount, archived, fullscreenEditing,
++                translations.finished(messageId, translation), searchEnabled, searchEngineLabel);
++    }
++
++    /** T-090: the璇戞枃鍖?s fold toggle; only an answer with text can fold. */
++    public ChatViewState withTranslationToggled(String messageId) {
++        return new ChatViewState(phase, branchId, branchTitle, messages, draft, quote, keyConfigured,
++                model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
++                recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
++                stage, followLatest, missedCount, archived, fullscreenEditing,
++                translations.toggled(messageId), searchEnabled, searchEngineLabel);
++    }
++
++    /**
++     * T-092: sets the grounding switch and the selected engine's label together 鈥?they are one
++     * settings fact read at once, so the chip and its panel can never describe two engines.
++     */
++    public ChatViewState withSearchEnabled(boolean value, String engineLabel) {
++        return new ChatViewState(phase, branchId, branchTitle, messages, draft, quote, keyConfigured,
++                model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
++                recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
++                stage, followLatest, missedCount, archived, fullscreenEditing, translations,
++                value, engineLabel);
++    }
++
++    public boolean isTranslating(String messageId) {
++        return translations.isRunning(messageId);
++    }
++
++    public boolean translationFailed(String messageId) {
++        return translations.isFailed(messageId);
++    }
++
++    /** @return the finished translation, or null when none (failed or never asked) */
++    public String translationText(String messageId) {
++        return translations.textOf(messageId);
++    }
++
++    public boolean translationExpanded(String messageId) {
++        return translations.isExpanded(messageId);
++    }
++
++    /** Whether the璇戞枃鍖?is drawn at all: a run, a failure or a finished text. */
++    public boolean translationVisible(String messageId) {
++        return translations.isVisible(messageId);
++    }
++
++    /**
++     * T-090: one conversation's translations as one immutable value. Keyed by message id like the
++     * reasoning disclosures, never persisted, and never written into a message row - the stable
++     * answer's content is the store's, and a translation is a derived display the session drops.
++     */
++    public static final class Translations {
++
++        public static final Translations EMPTY = new Translations(
++                Collections.<String, String>emptyMap(), Collections.<String>emptySet(),
++                Collections.<String>emptySet(), Collections.<String>emptySet());
++
++        private final Map<String, String> texts;
++        private final Set<String> failed;
++        private final Set<String> running;
++        private final Set<String> collapsed;
++
++        private Translations(Map<String, String> texts, Set<String> failed, Set<String> running,
++                Set<String> collapsed) {
++            this.texts = Collections.unmodifiableMap(new LinkedHashMap<String, String>(texts));
++            this.failed = Collections.unmodifiableSet(new LinkedHashSet<String>(failed));
++            this.running = Collections.unmodifiableSet(new LinkedHashSet<String>(running));
++            this.collapsed = Collections.unmodifiableSet(new LinkedHashSet<String>(collapsed));
++        }
++
++        public boolean isRunning(String messageId) {
++            return running.contains(messageId);
++        }
++
++        public boolean isFailed(String messageId) {
++            return failed.contains(messageId);
++        }
++
++        /** @return the finished translation, or null when none */
++        public String textOf(String messageId) {
++            return texts.get(messageId);
++        }
++
++        /** A finished translation shows expanded by default; the learner's fold is the override. */
++        public boolean isExpanded(String messageId) {
++            return texts.containsKey(messageId) && !collapsed.contains(messageId);
++        }
++
++        public boolean isVisible(String messageId) {
++            return isRunning(messageId) || isFailed(messageId) || texts.containsKey(messageId);
++        }
++
++        public Translations started(String messageId) {
++            Map<String, String> nextTexts = new LinkedHashMap<String, String>(texts);
++            nextTexts.remove(messageId);
++            Set<String> nextFailed = new LinkedHashSet<String>(failed);
++            nextFailed.remove(messageId);
++            Set<String> nextCollapsed = new LinkedHashSet<String>(collapsed);
++            nextCollapsed.remove(messageId);
++            Set<String> nextRunning = new LinkedHashSet<String>(running);
++            nextRunning.add(messageId);
++            return new Translations(nextTexts, nextFailed, nextRunning, nextCollapsed);
++        }
++
++        public Translations finished(String messageId, String translation) {
++            Set<String> nextRunning = new LinkedHashSet<String>(running);
++            nextRunning.remove(messageId);
++            if (translation == null || translation.trim().isEmpty()) {
++                Set<String> nextFailed = new LinkedHashSet<String>(failed);
++                nextFailed.add(messageId);
++                return new Translations(texts, nextFailed, nextRunning, collapsed);
++            }
++            Map<String, String> nextTexts = new LinkedHashMap<String, String>(texts);
++            nextTexts.put(messageId, translation);
++            return new Translations(nextTexts, failed, nextRunning, collapsed);
++        }
++
++        public Translations toggled(String messageId) {
++            if (!texts.containsKey(messageId)) {
++                return this;
++            }
++            Set<String> nextCollapsed = new LinkedHashSet<String>(collapsed);
++            if (nextCollapsed.contains(messageId)) {
++                nextCollapsed.remove(messageId);
++            } else {
++                nextCollapsed.add(messageId);
++            }
++            return new Translations(texts, failed, running, nextCollapsed);
++        }
+     }
+ }
+\ No newline at end of file

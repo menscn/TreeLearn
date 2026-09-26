@@ -1,0 +1,18 @@
+T-2026-09-23-085 line count, non-empty non-comment (2026-09-23)
+Sizing口径: 新增文件按全文件，既有文件按 git diff -U0 新增行（非空非注释）。
+
+Production code added by this task:
+   28  android/ai/src/main/java/com/treelearn/ai/gateway/ProviderEndpoint.java (new file, whole file)
+   21  android/ai/src/main/java/com/treelearn/ai/gateway/AiGateway.java (diff added lines)
+    9  android/ai/src/main/java/com/treelearn/ai/gateway/GatewayPorts.java (diff added lines)
+    3  android/ai/src/main/java/com/treelearn/ai/gateway/JsonChatRequestBody.java (diff added lines)
+    1  android/ai/src/main/java/com/treelearn/ai/gateway/GatewayEndpoints.java (diff added lines)
+   62  TOTAL production
+
+Budget: goal 190, hard cap 200 — UNDER budget (62). The task stayed small
+because the abstraction is a parameter-injection point only (no protocol
+registry, per the task's AI-autonomous decision), and the legacy
+GenerationModel overload let all existing callers compile unchanged.
+
+Test code (not production, reference only):
+  140  android/ai/src/test/java/com/treelearn/ai/gateway/ProviderEndpointGatewayTest.java (new file)

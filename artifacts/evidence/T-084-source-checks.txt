@@ -1,0 +1,24 @@
+Generated: 2026-09-23T09:31:31+08:00
+Mode: T-005-style source-level checks extended to T-084's new code (secret package + touched app files). Note: rg unavailable in this shell; grep -rnE used with identical patterns, exit 1 = no match.
+
+== no logging in the secret package ==
+EXITCODE=1 (1=no match)
+
+== no SQLite / ContentValues / raw SQL in the secret package ==
+EXITCODE=1 (1=no match)
+
+== no Bundle / Intent / clipboard in the secret package ==
+EXITCODE=1 (1=no match)
+
+== no Log in touched app files ==
+EXITCODE=1 (1=no match)
+
+== provider alias prefix appears only as the namespace rule ==
+android/app/src/androidTest/java/com/treelearn/app/ProviderSecretStoreInstrumentedTest.java:34: * <p>One provider, one alias ({@code tl.provider.<provider-uuid>}); a legacy single-key entry
+android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:604:    /** Fixed synthetic UUIDs, so T-084's Keystore alias {@code tl.provider.<uuid>} is stable. */
+android/data/src/main/java/com/treelearn/data/secret/ProviderKeyNamespace.java:5: * {@code tl.provider.<provider-uuid>}. The alias names both the Keystore AES key and the Preferences
+android/data/src/main/java/com/treelearn/data/secret/ProviderKeyNamespace.java:14:    public static final String ALIAS_PREFIX = "tl.provider.";
+android/data/src/test/java/com/treelearn/data/secret/ProviderKeyNamespaceTest.java:11: * one alias, {@code tl.provider.<provider-uuid>}. The builtin DeepSeek id is pinned by
+android/data/src/test/java/com/treelearn/data/secret/ProviderKeyNamespaceTest.java:18:        assertEquals("tl.provider.00000000-0000-0000-0000-000000000001",
+android/data/src/test/java/com/treelearn/data/secret/ProviderKeyNamespaceTest.java:27:        assertTrue(first.startsWith("tl.provider."));
+android/data/src/test/java/com/treelearn/data/secret/ProviderKeyNamespaceTest.java:28:        assertTrue(second.startsWith("tl.provider."));

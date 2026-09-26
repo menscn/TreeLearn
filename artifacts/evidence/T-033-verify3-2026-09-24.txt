@@ -1,0 +1,29 @@
+# T-033 收尾复核（verifier #3，2026-09-24）
+
+check 1: 文件存在与编码（file 命令）
+C:\Users\23745\.workbuddy\binaries\PortableGit\versions\1.2.0\bin\bash.exe: line 1: file: command not found
+EXITCODE=127
+
+check 2: 关键交付物要素齐备（各 grep 计数）
+app-release.apk: 4
+SHA-256: 10
+apksigner: 6
+deferred: 11
+EXITCODE=0
+
+check 3: 密钥/口令泄漏扫描（应全为 0）
+sk-: 0
+API_KEY *= *": 0
+password *=: 0
+keystore 口令: 1
+BEGIN PRIVATE KEY: 0
+EXITCODE=1
+
+check 4: 既有复核脚本证据回读
+artifacts/evidence/T-REV-2026-09-22-apk-and-gap-review.txt:REVIEW-VERDICT: FAIL (1 check(s) failed)
+artifacts/evidence/T-033-doc-refresh-2026-09-22-round2.txt:CLAIM REVIEW-VERDICT: PASS: present (3 line(s), first at line 30)
+artifacts/evidence/T-033-doc-refresh-2026-09-22-round2.txt:DOC-VERDICT: PASS
+EXITCODE=0
+UTF-8 decode: OK
+BOM: False
+bytes: 43057

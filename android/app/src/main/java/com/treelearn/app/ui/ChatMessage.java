@@ -171,6 +171,16 @@ public final class ChatMessage {
         return ai && !attemptRunning;
     }
 
+    /** Only a finished answer may be translated. */
+    public boolean canTranslate() {
+        return isStable();
+    }
+
+    /** Only a finished answer may be read aloud. */
+    public boolean canSpeak() {
+        return isStable();
+    }
+
     /** {@link #canRetry} plus a displayed version, which is what a reset regenerates. */
     public boolean canReset() {
         return canRetry() && !activeRevisionId.isEmpty();

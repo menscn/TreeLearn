@@ -4,7 +4,7 @@ id: T-2026-09-21-040
 title: 搜索页与首页搜索入口
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -101,14 +101,14 @@ Follow [code-document alignment](../rules/documentation.md).
 - Regression evidence: 全量 :app 单测 36 suites / 354 tests / 0 failures（artifacts/evidence/T-040-regression.txt，并另从 android/app/build/test-results/testDebugUnitTest 的 XML 聚合复核）；.\gradlew.bat --no-daemon --console=plain check 退出码 0（artifacts/evidence/T-040-check.txt）；Java-only guard VERDICT: PASS (13 OK line(s)) 与设计 token 守门 0 check(s) failed（artifacts/evidence/T-040-guards.txt）；release APK 重建后 dex 里同时含 T-040 与 T-039/T-041/T-042/T-044 的符号、五个测试类均为 0（artifacts/evidence/T-040-apk-contains-search.txt）
 
 ### REFACTOR — optional
-- Cleanup: PENDING
-- Regression evidence: PENDING
+- Cleanup: 未做独立重构轮；实现一次成形。`SearchPresenter.isStillReachable` 由 UI 线程移到 background 执行属实现期语义变更（方向正确、有单测覆盖），见 Handoff 与 verifier 记录 F3。
+- Regression evidence: 与 GREEN 同一命令全绿；`.\gradlew.bat check` EXITCODE=0（`T-040-check.txt`）。
 
 ### TDD or sizing exception — only with prior user approval
-- Exception type: Not applicable
-- Reason: TDD required
-- User approval: Not applicable
-- Alternative verification: Not applicable
+- Exception type: 规模例外（**事后追认**，2026-09-24 用户批准）
+- Reason: verifier 独立复算：新增 8 文件 = 395 行；共享文件新增行（按 patch 记录）= 122（紧）..189（松）→ 合计 **517..584**，在任何严格读法下都超过 500 硬上限。明细与取数命令见 `T-040-verify-scan.txt` 与 `T-040-sizing.txt`。
+- User approval: 2026-09-24 用户在对话中裁定「事后追认豁免」。批准落在实现之后，按 `harness-tasks.md` 第 60 行如实记为事后追认。剩余风险：单 task 超硬上限 3%~17%（口径区间）；若需拆分，以「搜索页 UI 切片」与「首页入口接线」为天然切面。
+- Alternative verification: 不适用（本项是规模例外；TDD 按 required 执行，见上，含三份变异证据）。
 
 ## Implementation notes
 
@@ -166,3 +166,14 @@ RED/GREEN 的原始输出、命令行与退出码逐条落在 `artifacts/evidenc
 - Watch-outs: 不要把「能不能搜到」的判断复制进屏幕；不要把定位判定复制进屏幕。本任务自报的两处缺口见下方 Gaps。
 - Gaps: ①命中行的祖先路径未实现（原型 `renderSearch` 有，但需要一次树遍历，不在本任务 In scope 内，已在 `T-040-plan.txt` 的 DECISION 1 记为缺口）；②`search_scope` 引导文案只写「标题·锚定原文·回答·推理」，**刻意不写「问题」**——T-015 的检索语句没有用户问题臂，写了就是承诺搜不到的东西。
 - Ordering reason: 验收项「点一条跳进对应分支并定位到命中位置」需要对话页存在阅读位置的读取与恢复路径，而那条路径属 T-042。若先做本任务，命中点只能打开分支并停在顶部，「定位」这一项无实现可依、也无法验收。因此 `depends_on` 补上 T-042，执行顺序为 T-042 → 本任务。
+
+## Verification report — 收尾复核（verifier #3，2026-09-24）
+
+- Verdict: PASS（针对 2026-09-22 verifier 报告残留项的收尾复核）。
+- F1（规模 517..584 超 500 硬上限）→ 2026-09-24 用户**事后追认豁免**，例外登记见「TDD or sizing exception」小节。
+- F2（交付报告 `:115` 「跨主题搜问题 / 回答 / 引用」措辞越界）→ 已修：改为「标题 / 锚定原文 / 回答 / 推理」四项并注明与 `search_scope` 一致、无「问题」臂。本轮 grep 确认旧措辞零命中。
+- F3（`SearchPresenter.isStillReachable` 从 UI 线程移到 background 的语义变更未记录）→ 已补记于 REFACTOR 段；行为有单测覆盖、方向正确（不在 UI 线程做可达性 IO）。
+- G1（需一次 Gradle 复跑）→ 已由本轮门禁满足：`./gradlew --no-daemon --console=plain check` EXITCODE=0（`artifacts/evidence/P3-B3-gates-2026-09-24.txt`）；Java-only guard `VERDICT: PASS (13 OK line(s))`（`artifacts/evidence/P3-B3-no-kotlin-2026-09-24.txt`）。
+- D1（搜索无「用户问题」臂）→ 需求范围缺口，非本任务缺陷，已按 verifier 原判保留（工头单开任务的记录不变）。
+- 设备侧 → 保持 `deferred — 用户自行装机验证（user decision 2026-09-21）`；`SearchUnreadReadingInstrumentedTest` 10 例 `blocked — 缺少设备`。
+- G3（APK 旧于源码的中间态）→ 装机前须重建 release APK，该提醒保持有效。

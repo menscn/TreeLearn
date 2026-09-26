@@ -26,20 +26,16 @@ public interface HomeStore {
     /** Recently used topics, newest first. Never null; empty means "no topic yet". */
     List<Row> recentTopics();
 
-    default void renameTopic(String topicId, String title, long now) {
-        throw new UnsupportedOperationException("renameTopic is not implemented by this store");
-    }
-
-    default void deleteTopic(String topicId) {
-        throw new UnsupportedOperationException("deleteTopic is not implemented by this store");
-    }
-
     /**
      * The first topic's five row groups in one transaction, or a classified refusal that leaves no
      * row of that topic behind.
      */
     FirstTopicCreation.Outcome createFirstTopic(Topic topic, Branch rootBranch, Message userMessage,
             Message aiMessage, GenerationOperation operation);
+
+    default StatsRaw statsRaw() {
+        throw new UnsupportedOperationException("statsRaw is not implemented by this store");
+    }
 
     /**
      * One topic as the home card needs it.
@@ -86,6 +82,26 @@ public interface HomeStore {
             this.branchCount = branchCount;
             this.unreadCount = unreadCount;
             this.lastUsedAt = lastUsedAt;
+        }
+    }
+
+    /**
+     * The three raw counts the statistics entry point aggregates.
+     *
+     * <p>Unaggregated on purpose: the streak and active-day math lives in
+     * {@code com.treelearn.data.stats.StatsAggregator}, not here, so this port only carries the
+     * facts the store already has.
+     */
+    final class StatsRaw {
+
+        public final List<Long> answerTimestamps;
+        public final long totalQuestions;
+        public final long totalMessages;
+
+        public StatsRaw(List<Long> answerTimestamps, long totalQuestions, long totalMessages) {
+            this.answerTimestamps = answerTimestamps;
+            this.totalQuestions = totalQuestions;
+            this.totalMessages = totalMessages;
         }
     }
 }

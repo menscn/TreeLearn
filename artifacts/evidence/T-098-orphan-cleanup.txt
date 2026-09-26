@@ -1,0 +1,74 @@
+T-098 附件孤儿清理与生命周期 —— 汇总证据
+生成器: .trae/scripts/dev/make_t098_evidence.py（实时执行命令、UTF-8、命令+退出码自证）
+日期: 2026-09-25
+
+CMD-1  RED：AttachmentOrphanCleanupInstrumentedTest 引用未实现方法，编译失败（来源 artifacts/evidence/T-098-red-2026-09-25.log）
+命令: 见任务文件 TDD 记录（RED/GREEN 同一条目标测试命令）
+EXITCODE=1
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\AttachmentOrphanCleanupInstrumentedTest.java:80: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\AttachmentOrphanCleanupInstrumentedTest.java:98: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\AttachmentOrphanCleanupInstrumentedTest.java:113: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\AttachmentOrphanCleanupInstrumentedTest.java:120: 错误: 找不到符号
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\AttachmentOrphanCleanupInstrumentedTest.java:80: 错误: 找不到符号
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\AttachmentOrphanCleanupInstrumentedTest.java:98: 错误: 找不到符号
+  符号:   方法 orphans()
+  符号:   方法 orphans()
+    符号:   方法 orphans()
+    符号:   方法 orphans()
+  符号:   方法 cleanupOrphans(Set<String>)
+  符号:   方法 cleanupOrphans(Set<String>)
+
+CMD-2  GREEN：同一条目标测试命令，真机 3/3（孤儿标记/子树删除联动兄弟幸存/幂等清理）（来源 artifacts/evidence/T-098-green-2026-09-25.log）
+命令: 见任务文件 TDD 记录（RED/GREEN 同一条目标测试命令）
+EXITCODE=0
+Starting 3 tests on ALP-AN00 - 13
+Finished 3 tests on ALP-AN00 - 13
+BUILD SUCCESSFUL in 28s
+
+CMD-3  app 全量 JVM 单测（./gradlew.bat :app:testDebugUnitTest → T-098-full-unittest-2026-09-25.log）（来源 artifacts/evidence/T-098-full-unittest-2026-09-25.log）
+命令: 见任务文件 TDD 记录（RED/GREEN 同一条目标测试命令）
+EXITCODE=0
+BUILD SUCCESSFUL in 28s
+
+CMD-4  单测计数（XML 属性汇总，目录 android/app/build/test-results/testDebugUnitTest/）
+命令: python 汇总 71 个 XML（同 T-055/T-061/T-096/T-097 口径）
+EXITCODE=0
+files=71 tests=625 skipped=0 failures=0 errors=0
+
+CMD-5  check 门禁（./gradlew.bat check → T-098-check-2026-09-25.log）（来源 artifacts/evidence/T-098-check-2026-09-25.log）
+命令: 见任务文件 TDD 记录（RED/GREEN 同一条目标测试命令）
+EXITCODE=0
+BUILD SUCCESSFUL in 12s
+295 actionable tasks: 7 executed, 288 up-to-date
+
+CMD-6  Java-only guard（scripts/no-kotlin-check.ps1 → T-098-nokotlin-2026-09-25.txt）（来源 artifacts/evidence/T-098-nokotlin-2026-09-25.txt）
+命令: 见任务文件 TDD 记录（RED/GREEN 同一条目标测试命令）
+EXITCODE=0
+VERDICT: PASS (13 OK line(s))
+
+CMD-7  附件链+外壳回归真机 31/31（BottomTabShell+LibraryArchive+Navigation+AttachmentStorage+ParseInject+OrphanCleanup+FileManagerScreen）（来源 artifacts/evidence/T-098-regression-instrumented-2026-09-25.log）
+命令: 见任务文件 TDD 记录（RED/GREEN 同一条目标测试命令）
+EXITCODE=0
+Starting 31 tests on ALP-AN00 - 13
+Finished 31 tests on ALP-AN00 - 13
+BUILD SUCCESSFUL in 39s
+
+CMD-8  归属增量（049/附件族多任务同树未提交：T-096/097 新建文件仍是 ?? 未跟踪，git 无法隔离；
+        归属证明 = 未跟踪文件 grep 本轮新增方法名的行数 + M 状态文件按独有标记筛选 diff）
+命令: grep -n <本轮方法名> <未跟踪文件>；git diff HEAD -- <M 文件> 配合标记筛选
+  android/data/src/main/java/com/treelearn/data/db/dao/AttachmentDao.java（?? 未跟踪）  3 行命中本轮新增方法名
+  android/app/src/main/java/com/treelearn/app/files/AttachmentStore.java（?? 未跟踪）  2 行命中本轮新增方法名
+  android/app/src/main/java/com/treelearn/app/ui/FileManagerPresenter.java（?? 未跟踪）  21 行命中本轮新增方法名
+  android/app/src/main/java/com/treelearn/app/wiring/SqliteFileManagerStore.java（?? 未跟踪）  3 行命中本轮新增方法名
+  android/app/src/main/java/com/treelearn/app/screen/FileManagerScreen.java（?? 未跟踪）  28 行命中本轮新增方法名
+  android/app/src/main/res/values/strings.xml（M）  +7（标记行）
+  android/app/src/main/res/values/ids.xml（M）  +0（标记行）
+  android/app/src/androidTest/java/com/treelearn/app/AttachmentStorageInstrumentedTest.java（M）  +0（标记行）
+  android/app/src/androidTest/java/com/treelearn/app/AttachmentParseInjectInstrumentedTest.java（M）  +0（标记行）
+  归属增量合计: 约 64 行（不含新测试文件 2 个：AttachmentOrphanCleanupInstrumentedTest、FileManagerCleanupTest）
+
+CMD-9  本片零迁移证明（T-098 不动 schema 版本、不加表）
+命令: git diff HEAD -- TreeLearnSchema.java | findstr DATABASE_VERSION
+EXITCODE=0（findstr 无命中时为 1，符合预期）
+-    public static final int DATABASE_VERSION = 2;
++    public static final int DATABASE_VERSION = 4;

@@ -1,0 +1,155 @@
+﻿diff --git a/android/app/src/main/java/com/treelearn/app/ui/HomeViewState.java b/android/app/src/main/java/com/treelearn/app/ui/HomeViewState.java
+index 8c534b0..acc7a5d 100644
+--- a/android/app/src/main/java/com/treelearn/app/ui/HomeViewState.java
++++ b/android/app/src/main/java/com/treelearn/app/ui/HomeViewState.java
+@@ -61,7 +61,19 @@ public final class HomeViewState {
+          * did not land, and that refusal is told here instead of being thrown at the background
+          * thread. Nothing already on screen is lost; only what the next visit restores is.
+          */
+-        READING_POSITION;
++        READING_POSITION,
++        /**
++         * T-092 [NOKEY]: the search switch was turned on (or a send was grounded) with no key stored
++         * for the selected engine. The action is intercepted before any network work.
++         */
++        SEARCH_KEY_MISSING,
++        /**
++         * T-092 [OFF] degrade: the retrieval failed or timed out, so the answer was generated
++         * without grounding 鈥?the send itself was never blocked.
++         */
++        SEARCH_FAILED,
++        /** T-092 [PART] degrade: the retrieval succeeded but returned nothing relevant. */
++        SEARCH_EMPTY;
+ 
+         /** The single mapping from the provider/network classification to what the home shows. */
+         public static Notice from(AiGatewayError.Kind kind) {
+@@ -111,10 +123,12 @@ public final class HomeViewState {
+     public final boolean submitting;
+     /** Null when there is nothing to report. */
+     public final Notice notice;
++    /** The mini heat strip card's state (T-2026-09-23-102); hidden until the first read lands. */
++    public final HeatStrip heatStrip;
+ 
+     private HomeViewState(Phase phase, String draft, boolean keyConfigured, GenerationModel model,
+             boolean thinkingEnabled, List<TopicCard> topics, List<Recommendation> recommendations,
+-            boolean submitting, Notice notice) {
++            boolean submitting, Notice notice, HeatStrip heatStrip) {
+         this.phase = phase;
+         this.draft = draft == null ? "" : draft;
+         this.keyConfigured = keyConfigured;
+@@ -125,6 +139,7 @@ public final class HomeViewState {
+                 recommendations));
+         this.submitting = submitting;
+         this.notice = notice;
++        this.heatStrip = heatStrip;
+     }
+ 
+     /** The state before the first read: loading, nothing known about the store, composer ready. */
+@@ -132,7 +147,7 @@ public final class HomeViewState {
+             boolean keyConfigured) {
+         return new HomeViewState(Phase.LOADING, "", keyConfigured, model, thinkingEnabled,
+                 Collections.<TopicCard>emptyList(), Collections.<Recommendation>emptyList(), false,
+-                null);
++                null, HeatStrip.hidden());
+     }
+ 
+     /** True when the send control may be pressed: something to send, and no attempt in flight. */
+@@ -142,46 +157,89 @@ public final class HomeViewState {
+ 
+     public HomeViewState withPhase(Phase value) {
+         return new HomeViewState(value, draft, keyConfigured, model, thinkingEnabled, topics,
+-                recommendations, submitting, notice);
++                recommendations, submitting, notice, heatStrip);
+     }
+ 
+     public HomeViewState withDraft(String value) {
+         return new HomeViewState(phase, value, keyConfigured, model, thinkingEnabled, topics,
+-                recommendations, submitting, notice);
++                recommendations, submitting, notice, heatStrip);
+     }
+ 
+     public HomeViewState withKeyConfigured(boolean value) {
+         return new HomeViewState(phase, draft, value, model, thinkingEnabled, topics,
+-                recommendations, submitting, notice);
++                recommendations, submitting, notice, heatStrip);
+     }
+ 
+     public HomeViewState withModel(GenerationModel value) {
+         return new HomeViewState(phase, draft, keyConfigured, value, thinkingEnabled, topics,
+-                recommendations, submitting, notice);
++                recommendations, submitting, notice, heatStrip);
+     }
+ 
+     public HomeViewState withThinkingEnabled(boolean value) {
+         return new HomeViewState(phase, draft, keyConfigured, model, value, topics,
+-                recommendations, submitting, notice);
++                recommendations, submitting, notice, heatStrip);
+     }
+ 
+     public HomeViewState withTopics(List<TopicCard> value) {
+         return new HomeViewState(phase, draft, keyConfigured, model, thinkingEnabled, value,
+-                recommendations, submitting, notice);
++                recommendations, submitting, notice, heatStrip);
+     }
+ 
+     public HomeViewState withRecommendations(List<Recommendation> value) {
+         return new HomeViewState(phase, draft, keyConfigured, model, thinkingEnabled, topics, value,
+-                submitting, notice);
++                submitting, notice, heatStrip);
+     }
+ 
+     public HomeViewState withSubmitting(boolean value) {
+         return new HomeViewState(phase, draft, keyConfigured, model, thinkingEnabled, topics,
+-                recommendations, value, notice);
++                recommendations, value, notice, heatStrip);
+     }
+ 
+     public HomeViewState withNotice(Notice value) {
+         return new HomeViewState(phase, draft, keyConfigured, model, thinkingEnabled, topics,
+-                recommendations, submitting, value);
++                recommendations, submitting, value, heatStrip);
++    }
++
++    public HomeViewState withHeatStrip(HeatStrip value) {
++        return new HomeViewState(phase, draft, keyConfigured, model, thinkingEnabled, topics,
++                recommendations, submitting, notice, value);
++    }
++
++    /**
++     * The mini heat strip card's three states (T-2026-09-23-102): hidden when the stats query
++     * failed or has not landed (the card disappears, the page stays usable), empty when the store
++     * holds no rows at all (an honest empty-state copy, never "0 澶?), visible with the 14-day
++     * intensities and the aggregated streak.
++     */
++    public static final class HeatStrip {
++
++        public enum Status {
++            /** Query failed or not landed: the card is not drawn at all. */
++            HIDDEN,
++            /** No rows in the store: the empty-state copy is drawn, no misleading zero. */
++            EMPTY,
++            /** Data exists: 14 cells plus the streak line. */
++            VISIBLE
++        }
++
++        public final Status status;
++        /** VISIBLE only: one intensity per day, oldest first. */
++        public final float[] intensities;
++        /** VISIBLE only: the streak as aggregated by T-100. */
++        public final int streakDays;
++
++        private HeatStrip(Status status, float[] intensities, int streakDays) {
++            this.status = status;
++            this.intensities = intensities;
++            this.streakDays = streakDays;
++        }
++
++        public static HeatStrip hidden() { return new HeatStrip(Status.HIDDEN, new float[0], 0); }
++
++        public static HeatStrip empty() { return new HeatStrip(Status.EMPTY, new float[0], 0); }
++
++        public static HeatStrip visible(float[] intensities, int streakDays) {
++            return new HeatStrip(Status.VISIBLE, intensities, streakDays);
++        }
+     }
+ }

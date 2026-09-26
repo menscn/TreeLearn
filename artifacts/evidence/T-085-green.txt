@@ -1,0 +1,42 @@
+T-2026-09-23-085 GREEN evidence (2026-09-23)
+
+Command:
+  cd android && ./gradlew :ai:testDebugUnitTest --tests 'com.treelearn.ai.gateway.*'
+Exit code: 0
+  BUILD SUCCESSFUL (see also full regression: artifacts/evidence/T-085-check.txt)
+
+Implementation (minimum, matching the RED):
+  - ProviderEndpoint.java (new): pure-Java value object carrying base URL +
+    model wire id; fail-fast via GatewayEndpoints.requireHttps (https rule kept
+    for every base URL) and blank-wire-id refusal; deepSeek(...) default
+    instance pins GatewayEndpoints.BASE_URL; chatUrl() = base + /chat/completions.
+  - AiGateway: streamChat(apiKey, ProviderEndpoint, request, sink) opens the
+    exchange at endpoint.chatUrl() and encodes the body with
+    endpoint.modelWireId(); the legacy streamChat(apiKey, GenerationModel, ...)
+    overload bridges to ProviderEndpoint.deepSeek(model), so every pre-existing
+    caller keeps its entry point. SSE parsing (SseFrameParser, DONE sentinel,
+    delta decode, outcome kinds) untouched.
+  - GatewayPorts.BodyEncoder: abstract method now takes the model wire id
+    (String); a default overload keeps encode(GenerationModel, ...) working.
+  - JsonChatRequestBody: writes "model" from the wire id parameter; the
+    explicit thinking switch and reasoning_effort are byte-identical to before.
+  - GatewayEndpoints: requireHttps message wording generalized to
+    "a provider endpoint"; BASE_URL/CHAT_PATH/BALANCE_PATH constants unchanged.
+
+Passing evidence (ai/build/test-results/testDebugUnitTest, 0 failures 0 errors):
+    9  AiGatewayBalanceTest
+   16  AiGatewayStreamTest      (SSE contract, T-069 boundary — untouched)
+    8  GatewayContractTest
+    6  ProviderEndpointGatewayTest  (new: injection, DeepSeek default,
+                                        refusal of cleartext/blank/null inputs)
+   12  SseFrameParserTest       (T-069 boundary — untouched)
+   51  TOTAL, all green
+
+Regression evidence:
+  Existing DeepSeek chain assertions green in the same run:
+  - ProviderEndpointGatewayTest.theDeepSeekDefaultInstanceKeepsTheDocumentedEndpointAndWireId
+    (BASE_URL + chatUrl + {"model":"deepseek-v4-pro"} byte-for-byte)
+  - ProviderEndpointGatewayTest.theLegacyModelOverloadStillTargetsTheDeepSeekEndpointWithTheModelWireId
+  - AiGatewayStreamTest (16) + SseFrameParserTest (12): SSE semantics unchanged
+  Full-suite regression and dependency-direction guard:
+  artifacts/evidence/T-085-check.txt (exit 0, verifyDependencyDirection PASS)

@@ -1,6 +1,7 @@
 package com.treelearn.app.screen;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,7 +27,7 @@ import com.treelearn.app.ui.ChatMessage;
  */
 public final class AnswerActionBar extends LinearLayout {
 
-    /** The six gestures the row can report. */
+    /** The gestures the row can report. */
     public interface Listener {
 
         void onQuotePressed(String messageId);
@@ -40,6 +41,10 @@ public final class AnswerActionBar extends LinearLayout {
         void onChildrenPressed(String messageId);
 
         void onVersionPressed(String messageId);
+
+        void onTranslatePressed(String messageId);
+
+        void onSpeakPressed(String messageId);
     }
 
     private final Button quote;
@@ -47,6 +52,8 @@ public final class AnswerActionBar extends LinearLayout {
     private final Button reset;
     private final Button fork;
     private final Button children;
+    private final Button translate;
+    private final Button speak;
     private final TextView version;
 
     private String messageId = "";
@@ -61,11 +68,14 @@ public final class AnswerActionBar extends LinearLayout {
         reset = findViewById(R.id.act_reset);
         fork = findViewById(R.id.act_fork);
         children = findViewById(R.id.act_children);
+        translate = findViewById(R.id.act_translate);
+        speak = findViewById(R.id.act_speak);
         version = findViewById(R.id.act_version);
         quote.setContentDescription(getContext().getString(R.string.chat_quote_title));
         copy.setContentDescription(getContext().getString(R.string.chat_copy_title));
         reset.setContentDescription(getContext().getString(R.string.chat_reset_title));
         fork.setContentDescription(getContext().getString(R.string.chat_fork_title));
+        translate.setContentDescription(getContext().getString(R.string.cd_act_translate));
         quote.setOnClickListener(view -> fire(target -> target.onQuotePressed(messageId)));
         copy.setOnClickListener(view -> fire(target -> target.onCopyPressed(messageId)));
         reset.setOnClickListener(view -> fire(target -> target.onResetPressed(messageId)));
@@ -79,12 +89,15 @@ public final class AnswerActionBar extends LinearLayout {
     }
 
     /** Draws the row for one answer. A non-answer row is hidden by the caller. */
-    public void render(ChatMessage message) {
+    public void render(ChatMessage message, boolean speechAvailable, boolean speaking) {
         messageId = message.messageId;
         quote.setEnabled(message.canQuote());
         copy.setEnabled(message.canCopy());
         reset.setEnabled(message.canReset());
         fork.setEnabled(message.canFork());
+        translate.setEnabled(message.canTranslate());
+        renderSpeakFace(speechAvailable, speaking);
+        speak.setEnabled(message.canSpeak());
         boolean hasChildren = message.hasChildren();
         children.setVisibility(hasChildren ? VISIBLE : GONE);
         children.setEnabled(hasChildren);
@@ -106,6 +119,18 @@ public final class AnswerActionBar extends LinearLayout {
     /** The answer the row currently draws; the screen needs it to read a selection. */
     public String messageId() {
         return messageId;
+    }
+
+    /** Paints the speak button's face (icon + label) for the current speech state. */
+    public void renderSpeakFace(boolean speechAvailable, boolean speaking) {
+        speak.setVisibility(speechAvailable ? VISIBLE : GONE);
+        speak.setContentDescription(getContext().getString(
+                speaking ? R.string.cd_act_speak_stop : R.string.cd_act_speak));
+        Drawable icon = getResources().getDrawable(
+                speaking ? R.drawable.ic_chat_stop : R.drawable.ic_action_speak,
+                getContext().getTheme());
+        icon.setTint(getContext().getColor(R.color.tl_ink3));
+        speak.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
     }
 
     private void fire(java.util.function.Consumer<Listener> call) {

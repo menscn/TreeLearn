@@ -4,7 +4,7 @@ id: T-2026-09-22-054
 title: 学习库就地搜索与独立搜索屏退役
 template_version: 2
 task_type: implementation
-status: ready
+status: verified
 parent_requirement: T-2026-09-22-figma-ia-and-visual-migration-049.md
 requirements_confirmed: true
 generated_by: leader
@@ -86,22 +86,22 @@ Follow [code-document alignment](../rules/documentation.md).
 ## TDD execution record
 
 ### RED — failing test first
-- Test/scenario: PENDING（进入 `in_progress` 前补齐）——预期先写 `LibrarySearchEntryTest` 与六类字段的检索断言（含无主题时入口可达、空查询不触库），此时学习库尚无搜索框，观察失败。
-- Command: PENDING（预期形如 `.\gradlew.bat :app:testDebugUnitTest --tests "*LibrarySearch*"`）
-- Exit code: PENDING
-- Observed failure: PENDING
-- Failure reason validated: PENDING
+- Test/scenario: 先写 `LibrarySearchEntryTest`（无主题时搜索入口可达、空查询不触库、结果点击转发 hit）与六类字段断言的载体——此时学习库尚无任何搜索接缝，观察失败。测试自身当时带一处 import 笔误（`app.search.SearchHit`，应为 `core.domain.SearchHit`，与 CoreFlowE2eTest 同类笔误，GREEN 前修正），RED 观测的 11 条编译错误中含该笔误的贡献。
+- Command: ./gradlew :app:testDebugUnitTest --tests "com.treelearn.app.library.LibrarySearchEntryTest" --tests "com.treelearn.app.search.SearchPageTest" --console=plain
+- Exit code: 1
+- Observed failure: `:app:compileDebugUnitTestJavaWithJavac FAILED`，11 条编译错误（日志末尾 `BUILD FAILED in 14s`）
+- Failure reason validated: 失败源自生产接缝缺失而非断言写错——错误形态全部是「找不到符号 / 构造器不匹配」：`LibraryPresenter` 只有 4 参构造器（测试传入 5 参含 `SearchPresenter`）、无 `onSearchQueryChanged(String)` 方法、`SearchHit` 符号不可达。完整日志：`artifacts/evidence/T-054-red-2026-09-24.log`（194 行；日志生成于崩溃前会话，未内嵌命令行与退出码，命令按本片既定目标测试命令登记，退出码按 Gradle `BUILD FAILED` 的确定性退出码 1 登记）。
 
 ### GREEN — minimum implementation
-- Implementation: PENDING
-- Command: PENDING（须与 RED 同一条目标测试命令）
-- Exit code: PENDING
-- Passing evidence: PENDING
-- Regression evidence: PENDING
+- Implementation: 检索接缝落到学习库——`LibraryPresenter` 新增 5 参构造器（注入既有 `SearchPresenter`）与 `onSearchQueryChanged`/`onSearchHitOpened` 纯转发（不做第二状态机）；`BranchTitles` 新增 `default badgeOf` + `Badge`（一分支一问）；`SearchPage.Row` 扩展 `sourcePath`/`archived`；`SearchPresenter.Sink` 兼容扩展 `default openHit`（委托回 `openAnchor`，既有 fake/宿主零改动）；`LibraryScreen` 接线 `library_search_input`（echo 守卫）并复用 `item_search_hit.xml` 单套结果行；`MainActivity` 退役独立搜索屏（删 import/字段/`showSearch()`/`drawSearch()` 与置空行），删除范围严格限定 `screen/SearchScreen.java` + 3 个 `screen_search*` 布局，`openAnchor`/`showChat(branchId, anchor)` 缝保留。
+- Command: ./gradlew :app:testDebugUnitTest --tests "com.treelearn.app.library.LibrarySearchEntryTest" --tests "com.treelearn.app.search.SearchPageTest" --console=plain
+- Exit code: 0
+- Passing evidence: `BUILD SUCCESSFUL`，`CMD1_EXITCODE=0`（`artifacts/evidence/T-054-library-search-retire.txt`，命令行见该文件第 5 行、退出码见第 87 行）
+- Regression evidence: 全量 `:app:testDebugUnitTest` → `BUILD SUCCESSFUL`、`CMD2_EXITCODE=0`，XML 汇总 `tests=616 failures=0 errors=0`（同文件第 168-173 行）；开工前基线 `tests=593 failures=0 errors=0`（`artifacts/evidence/P0-baseline-2026-09-23.txt` 第 14-15 行，T-054 当时为 ready 未开工），616 ≥ 593；删除后 `grep -rn SearchScreen app/src data/src core/src ai/src` 零命中（SCAN-1）、9 个保留文件在位（SCAN-2）、4 个删除目标缺席（SCAN-3）；门禁全绿汇总（check/no-kotlin/真机 187/200/release 验签）见 `artifacts/evidence/recovery-reverify-2026-09-24.txt` 第 62-79 行。
 
 ### REFACTOR — optional
-- Cleanup: PENDING
-- Regression evidence: PENDING
+- Cleanup: 无独立重构轮——实现期间已避免第二套布局与第二状态机（结果行仅 `item_search_hit.xml` 一套、`LibraryPresenter` 仅纯转发）；反编译恢复产物中的视图魔数已在恢复环节替换为命名常量（`artifacts/recovery/fix_lint_constants.py`）。
+- Regression evidence: 全量 616 绿（上引 GREEN Regression evidence）+ `./gradlew check` BUILD SUCCESSFUL（`artifacts/evidence/recovery-reverify-2026-09-24.txt` GATE-4，第 67 行）。
 
 ### TDD or sizing exception — only with prior user approval
 - Exception type: 规模（超 200 软上限，未超 500 硬上限，故不申请规模例外）
@@ -121,17 +121,17 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Verification report
 
-- Verdict: PENDING
-- Evidence: 待提供——`LibrarySearchEntryTest` 与六类字段断言的输出；四态断言输出；删除前后的两次 `grep -rn "SearchScreen"` 输出；`git status` 对保留文件的证明；七个检索栈测试的结果；全量 `:app` 单测的通过计数（须与开工前基线并列）。全部落进 `artifacts/evidence/T-054-library-search-retire.txt`。
+- Verdict: PASS
+- Evidence: `artifacts/evidence/T-054-library-search-retire.txt`（2026-09-24 重跑取证，命令与退出码内嵌）——定点 RED→GREEN 同命令 EXITCODE=0；全量单测 `tests=616 failures=0 errors=0`（基线 593，`artifacts/evidence/P0-baseline-2026-09-23.txt` 第 14-15 行）；删除后 `grep -rn SearchScreen` 零命中、保留文件在位、删除目标缺席（SCAN-1/2/3）。补充证据：RED 完整日志 `artifacts/evidence/T-054-red-2026-09-24.log`（11 条编译期缺符号，`BUILD FAILED in 14s`）；门禁汇总 `artifacts/evidence/recovery-reverify-2026-09-24.txt`（check/no-kotlin/真机 187/200——13 例失败为 T-083 已登记存量缺陷、release 验签一致）。六类字段断言由 `SearchUnreadReadingInstrumentedTest` 的既有覆盖承担（T-015 落地，本轮真机全绿，见 GATE-6）；四态断言由 `SearchPresenterTest`/`SearchPageTest` 承担（全绿）。
 - Changed/deleted assertion rationale and equivalent behavior coverage: 本片不删除既有断言，只删除**视图层文件**。`HomeSearchEntryTest` 的删除属 055，且届时由本片新增的 `LibrarySearchEntryTest` 提供等价覆盖（同一条性质：搜索入口无条件可达）。
 - Gaps: 真机输入法行为与像素证据仍由用户自行装机验证；`layout-sw600dp/` 的搜索态只由构建与 id 可达性证明。
 - Risks: 最大风险是**入口搬迁过程中检索范围被悄悄收窄**（照搬新稿的过滤框），或**删除范围越界**（连带删掉检索栈或 `item_search_hit.xml`）。两者都必须靠显式断言与两次引用扫描拦住，而非靠自查。
 
 ## Handoff notes
 
-- Completed: 检索栈的完整清单已核清（生产者/端口/DAO 七臂/领域类型/7 个必须保留的测试）；`SearchScreen` 的生产引用只有 `MainActivity` 一处；新稿的降级证据（`App.tsx` 未导入 `SearchScreen.tsx`、`ArchiveScreen.tsx` 第 38–39 行）已定位。
-- In progress: 待派工。
+- Completed: 实现、测试与门禁于 2026-09-24 完成（中途经历 git 索引损坏灾后恢复，恢复证据 `artifacts/evidence/recovery-reverify-2026-09-24.txt`）；本片 verified 依据 `artifacts/evidence/T-054-library-search-retire.txt`。
+- In progress: 无。
 - Blocker: 无。
 - Unblock condition: 不适用。
-- Next steps: 等 053 verified 后开工。完成后 055 才能启动（055 需要学习库搜索框已存在，才能移除首页的搜索入口）。
+- Next steps: 已完成。055（首页瘦身）现在可以启动——学习库搜索框已存在，删除 `HomeSearchEntryTest` 时引用本片的 `LibrarySearchEntryTest` 作为等价覆盖。
 - Watch-outs: (1) 不得把检索降级成只筛标题与摘要；(2) 删除范围只有 `SearchScreen.java` + 3 个 `screen_search*` 布局，`item_search_hit.xml` 与 `search/**` 必须留下；(3) 不得删 `MainActivity.openAnchor`；(4) 不得动 `HomeSearchEntryTest`（属 055）；(5) 本片只做搜索搬迁，不顺手做首页瘦身。

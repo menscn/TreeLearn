@@ -1,0 +1,44 @@
+# T-037 收尾复核（verifier #3，2026-09-24）静态守门独立复跑
+command: python -X utf8 .trae/scripts/dev/check_androidtest_schema_expectations.py
+OK   judged 12 PRAGMA user_version expectation(s) in androidTest
+OK   schema declares 8 trigger constant(s); suite references 8
+VERDICT: FAIL (2 problem(s))
+  - android\app\src\androidTest\java\com\treelearn\app\ProviderModelDaoInstrumentedTest.java: a PRAGMA user_version expectation does not name a constant (expected expression: "PRAGMA user_version = 2")
+  - android\app\src\androidTest\java\com\treelearn\app\ProviderModelDaoInstrumentedTest.java: a PRAGMA user_version expectation does not name a constant (expected expression: 2)
+EXITCODE=1
+
+command: python -X utf8 .trae/scripts/dev/check_androidtest_schema_expectations.py --selftest
+CASE baseline (unmodified tree) must PASS                 expected=0 actual=0  Ok
+CASE hardcoded user_version literal must FAIL             expected=1 actual=1  Ok
+CASE a SECOND hardcoded user_version expectation adjacent to a legitimate one must FAIL expected=1 actual=1  Ok
+CASE a SECOND derived user_version expectation adjacent to a legitimate one must PASS expected=0 actual=0  Ok
+CASE an execSQL user_version assignment by literal must FAIL expected=1 actual=1  Ok
+CASE a user_version expectation outside any judged call must FAIL expected=1 actual=1  Ok
+CASE a user_version expectation whose assertion arity cannot be judged must FAIL expected=1 actual=1  Ok
+CASE restated trigger name literal must FAIL              expected=1 actual=1  Ok
+CASE restated quote column literal must FAIL              expected=1 actual=1  Ok
+CASE unreferenced schema trigger constant must FAIL       expected=1 actual=1  Ok
+CASE inline EXPECTED_TRIGGERS literal must FAIL           expected=1 actual=1  Ok
+CASE hardcoded migration pair must FAIL                   expected=1 actual=1  Ok
+CASE missing androidTest tree must be INCONCLUSIVE        expected=2 actual=2  Ok
+OVERALL PASS (13 case(s), 0 broken)
+EXITCODE=0
+
+=== 修复轮（同日） ===
+首轮真实树 FAIL(2) 的两条问题均指向 ProviderModelDaoInstrumentedTest.java:109-110 硬编码
+"PRAGMA user_version = 2"（T-083 的升级夹具，晚于本任务守门交付的新文件）——守门按设计抓到了
+下游复述字面量的漂移形态。处置：
+1) 夹具改为具名常量 PREVIOUS_SCHEMA_VERSION，初值派生自
+   TreeLearnSchema.FORWARD_MIGRATIONS 末步的 fromVersion()（版本 bump 自动跟随）；
+2) 守门白名单按 V1_SCHEMA_VERSION 同一先例登记 "PREVIOUS_SCHEMA_VERSION"（精确名、
+   字面量仍 fail-closed），guard 脚本 sha256 变更记录于本轮；
+3) 复跑结果：
+command: python -X utf8 .trae/scripts/dev/check_androidtest_schema_expectations.py
+VERDICT: PASS（judged 12 PRAGMA user_version expectation(s)）
+EXITCODE=0
+command: python -X utf8 .trae/scripts/dev/check_androidtest_schema_expectations.py --selftest
+OVERALL PASS (13 case(s), 0 broken)
+EXITCODE=0
+command: ./gradlew --no-daemon --console=plain :app:compileDebugAndroidTestJavaWithJavac
+BUILD SUCCESSFUL in 14s（夹具改动编译通过）
+EXITCODE=0

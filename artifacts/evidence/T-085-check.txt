@@ -1,0 +1,20 @@
+T-2026-09-23-085 full regression evidence (2026-09-23)
+
+Command:
+  cd android && ./gradlew check assembleDebug
+Exit code: 0
+  BUILD SUCCESSFUL in 2s — 297 actionable tasks: 19 executed, 5 from cache,
+  273 up-to-date. No FAILED tasks in the run.
+
+Dependency direction guard:
+  > Task :verifyDependencyDirection
+  verifyDependencyDirection: PASS (downward-only module graph + pure-JVM module purity)
+
+Java-only guard (separate run, script android/scripts/no-kotlin-check.ps1):
+  exit code 0, VERDICT: PASS (13 OK line(s)) — see artifacts/evidence/T-085-no-kotlin.txt
+
+Notes:
+  - The run covers :ai, :app, :core, :data, :tree-layout unit tests plus lint.
+  - Instrumented (device) tests are not part of `check`; no device was required
+    by this task. T-083/T-084 already ran the connected suites for the schema /
+    Keystore groundwork, which this task consumes but does not modify.

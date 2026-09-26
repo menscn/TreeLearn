@@ -58,7 +58,7 @@
 | 需要知道还剩哪些阶段没做、下一批做什么、怎么开工 | [遗留路线](.trae/ROADMAP.md) | 新会话选题，或用户问「接下来做什么」时 |
 
 ## 工具与参考
-- Figma 工具链：MCP `figwright`（用户级 `~/.codex/config.toml`，与 Figma 端插件同版本）+ 仓库技能 `.agents/skills/figma-build`、`.agents/skills/figma-codegen`；连接自检 `node .trae/scripts/dev/probe_figwright_mcp.mjs`，设计 token 守门 `python .trae/scripts/dev/check_design_tokens.py`。使用约定见 [UX 设计](.trae/rules/ux-design.md)。
+- Figma 工具链：MCP `figwright`（用户级 `~/.codex/config.toml`，与 Figma 端插件同版本）+ 仓库技能 `.agents/skills/figma-build`、`.agents/skills/figma-codegen`；连接自检 `node .trae/scripts/dev/probe_figwright_mcp.mjs`，设计 token 守门 `python .trae/scripts/dev/check_design_tokens.py`；画布批量构建 `node .trae/scripts/dev/figwright_batch.mjs <commands.json>`（会话内未挂载 figwright MCP 工具时的直驱通道：自行握手 MCP、顺序执行命令，`$ref:N` 引用第 N 步返回的节点 id）。使用约定见 [UX 设计](.trae/rules/ux-design.md)。
 - 项目 agent（派 subagent 时的角色提示词）：`.trae/agents/*.md`；项目技能：`.trae/skills/*/SKILL.md`。仅加载实际使用的角色或技能。
 - 任务文件机械校验：`.trae/scripts/validate_tasks.py`（Task v2 契约校验，verifier 与提交前可跑）。
 - [遗留路线](.trae/ROADMAP.md)：Stage 2–6 未交付事项的清单，每条含目标、可写路径、依赖、验收方式、已核实的开源来源，以及可直接粘贴给新会话的执行提示词。

@@ -1,0 +1,16 @@
+T-102 RED 证据（2026-09-23，android-dev 会话捕获；原件因并发批次清理 app/build 丢失，本文件为当时实际读取的输出转录）
+
+命令: gradlew :app:testDebugUnitTest --tests com.treelearn.app.ui.HomePresenterTest --tests com.treelearn.app.ui.HomeStatsTest
+退出码: 1
+
+> Task :app:compileDebugUnitTestJavaWithJavac FAILED
+FAILURE: Build failed with an exception.
+* What went wrong: Execution failed for task ':app:compileDebugUnitTestJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+> Check your code and dependencies to fix the compilation error(s)
+BUILD FAILED
+
+javac 错误摘录（找不到符号，均指向尚未实现的类型/方法，符合测试先行预期）:
+- HomePresenterTest.java: HomeStats、HomeViewState.HeatStrip、HomeData.stats() 相关符号
+- HomeStatsTest.java: 类 com.treelearn.app.ui.HomeStats 不存在
+- TestDoubles.java: FakeHomeData.stats() @Override 无处覆盖

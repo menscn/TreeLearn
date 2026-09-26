@@ -106,52 +106,6 @@ public final class HomePresenter implements HomeActions {
     }
 
     @Override
-    public void onRenameTopic(TopicCard card, String title) {
-        final TopicCard target = require(card, "card");
-        final String next = title == null ? "" : title.trim();
-        if (next.isEmpty()) {
-            render(state.withNotice(HomeViewState.Notice.STORAGE));
-            return;
-        }
-        background.execute(() -> {
-            try {
-                data.renameTopic(target.topicId, next, System.currentTimeMillis());
-                load();
-            } catch (RuntimeException failed) {
-                post(current -> current.withNotice(HomeViewState.Notice.STORAGE));
-            }
-        });
-    }
-
-    @Override
-    public void onDeleteTopic(TopicCard card) {
-        final TopicCard target = require(card, "card");
-        background.execute(() -> {
-            try {
-                data.deleteTopic(target.topicId);
-                load();
-            } catch (RuntimeException failed) {
-                post(current -> current.withNotice(HomeViewState.Notice.STORAGE));
-            }
-        });
-    }
-
-    /**
-     * The archive entry. The page lists one topic's tree and the home list is ordered newest first, so
-     * the entry opens the most recently used topic - the one whose rows the learner is looking at. With
-     * no topic yet there is no tree to browse, and the screen keeps the button disabled rather than
-     * promising a page it cannot open.
-     */
-    @Override
-    public void onArchivedPressed() {
-        List<TopicCard> topics = state.topics;
-        if (topics.isEmpty()) {
-            return;
-        }
-        sink.openArchived(topics.get(0).resumeBranchId);
-    }
-
-    @Override
     public void onModelSelected(GenerationModel model) {
         settings.setModel(require(model, "model"));
         render(state.withModel(model));
@@ -184,21 +138,12 @@ public final class HomePresenter implements HomeActions {
         background.execute(() -> submit(question, model, thinking));
     }
 
-    /** Tapping the key hint is navigation only: the presenter owns every route off this screen. */
-    @Override
-    public void onSettingsPressed() {
-        sink.openSettings();
-    }
-
     /**
-     * The search entry. Navigation only, and deliberately ungated: the archive entry needs a topic
-     * because it browses one topic's tree, while search spans every branch and is most useful before
-     * the first topic exists. Gating it on the topic list would be the same dead button under a new
-     * name, so the guard that lives on {@link #onArchivedPressed()} is not copied here.
+     * The heat strip. Navigation only; no destination screen is wired in this build, so the tap is
+     * accepted and currently does nothing - the strip is informational.
      */
     @Override
-    public void onSearchPressed() {
-        sink.openSearch();
+    public void onHeatStripTapped() {
     }
 
     private void submit(String question, GenerationModel model, boolean thinking) {
@@ -237,9 +182,20 @@ public final class HomePresenter implements HomeActions {
         }
         final List<Recommendation> recommendations = loadedStrip;
         final boolean hasTopics = !topics.isEmpty();
+        HomeViewState.HeatStrip heatStrip = loadHeatStrip();
         post(current -> current.withTopics(topics).withRecommendations(recommendations)
                 .withPhase(hasTopics ? HomeViewState.Phase.READY : HomeViewState.Phase.EMPTY)
-                .withNotice(null));
+                .withNotice(null).withHeatStrip(heatStrip));
+    }
+
+    private HomeViewState.HeatStrip loadHeatStrip() {
+        try {
+            HomeStats stats = data.stats();
+            return stats.empty ? HomeViewState.HeatStrip.empty()
+                    : HomeViewState.HeatStrip.visible(stats.intensities, stats.streakDays);
+        } catch (RuntimeException statsUnavailable) {
+            return HomeViewState.HeatStrip.hidden();
+        }
     }
 
     private void post(UnaryOperator<HomeViewState> transition) {

@@ -1,0 +1,182 @@
+﻿diff --git a/android/app/src/main/java/com/treelearn/app/AppContainer.java b/android/app/src/main/java/com/treelearn/app/AppContainer.java
+index 8506240..c7babc0 100644
+--- a/android/app/src/main/java/com/treelearn/app/AppContainer.java
++++ b/android/app/src/main/java/com/treelearn/app/AppContainer.java
+@@ -4,9 +4,12 @@ import android.content.Context;
+ import android.os.Handler;
+ import android.os.Looper;
+ 
++import com.treelearn.ai.gateway.AiGateway;
+ import com.treelearn.ai.gateway.DeepSeekGatewayFactory;
+ import com.treelearn.ai.prompt.PromptBudget;
+ import com.treelearn.app.generation.AiGatewayStreams;
++import com.treelearn.app.generation.MessageTranslator;
++import com.treelearn.app.generation.QuickModelGateway;
+ import com.treelearn.app.generation.GenerationCoordinator;
+ import com.treelearn.app.generation.GenerationGateway;
+ import com.treelearn.app.artifact.DerivedService;
+@@ -38,17 +41,24 @@ import com.treelearn.app.wiring.LibraryWiring;
+ import com.treelearn.app.wiring.LogcatTelemetry;
+ import com.treelearn.app.wiring.NavigationWiring;
+ import com.treelearn.app.wiring.PromptLimits;
++import com.treelearn.app.wiring.PreferenceSearchSettingsStore;
+ import com.treelearn.app.wiring.SharedPreferencesChatDraftStore;
+ import com.treelearn.app.wiring.SqliteChatStore;
+ import com.treelearn.app.wiring.SqliteHomeStore;
+ import com.treelearn.app.wiring.SqliteLibraryStore;
++import com.treelearn.app.wiring.SqliteModelSettingsStore;
++import com.treelearn.app.wiring.SqliteQuickModelRoutes;
++import com.treelearn.app.wiring.SqliteTranslationRoutes;
++import com.treelearn.app.wiring.SqliteProviderAdminStore;
+ import com.treelearn.app.wiring.SqliteSearchStore;
+ import com.treelearn.app.wiring.SqliteTreeCanvasStore;
+ import com.treelearn.app.wiring.TreeCanvasWiring;
+ import com.treelearn.core.domain.Branch;
+ import com.treelearn.data.db.DatabaseTransactionRunner;
+ import com.treelearn.data.db.TreeLearnDatabaseHelper;
++import com.treelearn.data.db.TreeLearnSchema;
+ import com.treelearn.data.secret.KeystoreSecretStore;
++import com.treelearn.data.settings.SettingsRepository;
+ 
+ import java.time.Clock;
+ import java.util.concurrent.Executor;
+@@ -110,6 +120,21 @@ public final class AppContainer {
+     /** The search port: the statement runner, with its connection opened on first use. */
+     private final SearchRepository searchRepository;
+ 
++    /** T-087: the provider management screens' single port over the DAOs, keystore and gateway. */
++    private final SqliteProviderAdminStore providerAdminStore;
++
++    /** T-088: the model settings port over the DAOs and the preference file. */
++    private final SqliteModelSettingsStore modelSettingsStore;
++
++    /** T-091: the search settings port over the preference file and the keystore namespace. */
++    private final PreferenceSearchSettingsStore searchSettingsStore;
++
++    /** T-092: the conversation send-path's grounding step, shared by the wiring and the screen. */
++    private final com.treelearn.app.search.web.ChatSearchStep chatSearchStep;
++
++    /** T-090: the message-level translation's route point over the same stores and gateway. */
++    private final MessageTranslator messageTranslator;
++
+     /** The branch rows the search page names its results from - the conversation store, not a copy. */
+     private final ChatStore chatStore;
+ 
+@@ -123,22 +148,69 @@ public final class AppContainer {
+         // database am I on" and "what time is it" have a single answer for the whole application.
+         TreeLearnDatabaseHelper helper = new TreeLearnDatabaseHelper(applicationContext);
+         DatabaseTransactionRunner transactions = new DatabaseTransactionRunner();
+-        Clock clock = Clock.systemUTC();
++        // The zone matters for the stats day-cut (T-2026-09-23-102): the learner's own calendar
++        // decides "which day is this". millis() is the same instant either way.
++        Clock clock = Clock.systemDefaultZone();
+ 
+         // The gateway reads the credential per call; the coordinator owns admission and recovery.
+-        GenerationGateway gateway = new AiGatewayStreams(DeepSeekGatewayFactory.create(),
+-                new KeystoreSecretStore(applicationContext));
++        // One gateway and one keystore instance also serve the provider admin screen (T-087).
++        AiGateway adminGateway = DeepSeekGatewayFactory.create();
++        KeystoreSecretStore adminSecrets = new KeystoreSecretStore(applicationContext);
++        GenerationGateway gateway = new AiGatewayStreams(adminGateway, adminSecrets,
++                TreeLearnSchema.BUILTIN_DEEPSEEK_PROVIDER_ID);
+         GenerationCoordinator coordinator = new GenerationCoordinator(helper, transactions,
+                 gateway, clock, new LogcatTelemetry());
+         GenerationPort generation = new CoordinatorGenerationPort(coordinator);
+         PromptBudget budget = PromptLimits.budget();
+ 
+-        this.derivedService = new DerivedService(helper, transactions, gateway, budget, clock);
++        // T-088: the model settings port over the DAOs and the preference file, built before the
++        // derived service so the fast-model route below can read it.
++        this.modelSettingsStore = new SqliteModelSettingsStore(helper,
++                new SettingsRepository(applicationContext));
++        // T-089: the derived chain's single fast-model route point. The read is 088's shared
++        // fallback judgment (read(Role.FAST)); a null route 鈥?nothing configured, or the provider
++        // row gone 鈥?keeps the legacy path above, so an unconfigured fast model changes nothing.
++        // The legacy builtin provider keeps its lazy key migration here too; a user provider's key
++        // must never receive the legacy entry, so the migration stays guarded by the builtin id.
++        SqliteQuickModelRoutes quickModelRoutes =
++                new SqliteQuickModelRoutes(helper, modelSettingsStore);
++        GenerationGateway derivedGateway = new QuickModelGateway(quickModelRoutes,
++                providerId -> {
++                    if (TreeLearnSchema.BUILTIN_DEEPSEEK_PROVIDER_ID.equals(providerId)) {
++                        adminSecrets.migrateLegacySecret(providerId);
++                    }
++                    return adminSecrets.read(providerId);
++                }, adminGateway::streamChat, gateway);
++        this.derivedService = new DerivedService(helper, transactions, derivedGateway, budget,
++                clock);
++        // T-090: the message-level translation's single route point. The read is 088's shared
++        // fallback judgment (read(Role.TRANSLATION)); a null route - or a key that cannot be read -
++        // keeps the legacy chat gateway above (鏈厤缈昏瘧妯″瀷鍥炶惤鑱婂ぉ妯″瀷), and a routed call that
++        // fails reports failure to the learner instead of a hidden second spend.
++        this.messageTranslator = new MessageTranslator(
++                new SqliteTranslationRoutes(helper, modelSettingsStore),
++                providerId -> {
++                    if (TreeLearnSchema.BUILTIN_DEEPSEEK_PROVIDER_ID.equals(providerId)) {
++                        adminSecrets.migrateLegacySecret(providerId);
++                    }
++                    return adminSecrets.read(providerId);
++                }, adminGateway::streamChat, gateway, budget);
+         this.homeWiring = new HomeWiring(new SqliteHomeStore(helper, transactions), generation,
+                 settingsStore, clock, budget, derivedService);
+         this.chatStore = new SqliteChatStore(helper, transactions);
++        // T-091: the search settings port 鈥?non-sensitive facts in the preference file, the
++        // per-engine keys in the keystore's search namespace (aliases search_<engine>).
++        this.searchSettingsStore = new PreferenceSearchSettingsStore(
++                new SettingsRepository(applicationContext), adminSecrets);
++        // T-088: the answer-suggestions switch gates only ANSWER_RECOMMENDATIONS (079 鎷嶆澘 鈶?;
++        // the supplier is read per derived run so a flip takes effect on the next read.
++        // T-092: the grounding step rides the conversation path 鈥?the real HTTPS engines, the
++        // keystore's search namespace for the keys, the T-091 store for the switch/engine/tier.
++        this.chatSearchStep = new com.treelearn.app.search.web.ChatSearchStep(searchSettingsStore,
++                new com.treelearn.app.search.web.KeystoreSearchCredentials(adminSecrets),
++                new com.treelearn.app.search.web.HttpWebSearchGateway());
+         this.chatWiring = new ChatWiring(chatStore, generation, settingsStore, clock, budget,
+-                derivedService);
++                derivedService, modelSettingsStore::readSuggestions, chatSearchStep);
+         this.treeCanvasWiring = new TreeCanvasWiring(
+                 new SqliteTreeCanvasStore(helper, transactions));
+         this.navigationWiring = new NavigationWiring(
+@@ -150,6 +222,10 @@ public final class AppContainer {
+         this.readingStore = new SqliteReadingStore(helper);
+         this.searchRepository = new SqliteSearchStore(helper);
+         this.chatDraftStore = new SharedPreferencesChatDraftStore(applicationContext);
++        // T-087: the provider management screen's single port, holding the same transaction
++        // boundary and keystore the rest of the app writes through.
++        this.providerAdminStore = new SqliteProviderAdminStore(helper, transactions,
++                adminSecrets, adminGateway, clock);
+     }
+ 
+     public static synchronized AppContainer get(Context context) {
+@@ -238,6 +314,31 @@ public final class AppContainer {
+         return chatDraftStore;
+     }
+ 
++    /** The provider management port: provider/model rows, per-provider keys and the model fetch. */
++    public SqliteProviderAdminStore providerAdminStore() {
++        return providerAdminStore;
++    }
++
++    /** The model settings port (T-088): the three roles, the budget tier, the suggestions switch. */
++    public SqliteModelSettingsStore modelSettingsStore() {
++        return modelSettingsStore;
++    }
++
++    /** The search settings port (T-091): the master switch, engine, tier and per-engine keys. */
++    public PreferenceSearchSettingsStore searchSettingsStore() {
++        return searchSettingsStore;
++    }
++
++    /** T-092: the grounding step the conversation screen's switch and panel read. */
++    public com.treelearn.app.search.web.ChatSearchStep chatSearchStep() {
++        return chatSearchStep;
++    }
++
++    /** The message translation port (T-090): the translation-role route over the same gateway. */
++    public MessageTranslator messageTranslator() {
++        return messageTranslator;
++    }
++
+     /**
+      * One query's hits, read from the local database.
+      *

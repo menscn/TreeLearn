@@ -4,7 +4,7 @@ id: T-2026-09-21-024
 title: context_snapshots / ai_artifacts 两表 DAO（行 + 原始 JSON 载荷）
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -126,6 +126,13 @@ Follow [code-document alignment](../rules/documentation.md).
 - **实现期新增的两个决定（供 verifier 复核）**：① `AiArtifactDao.insert` 写成带 `WHERE NOT EXISTS` 的单条 `INSERT … SELECT`，并用 `SELECT changes()` 读受影响行数——不加这条，CAS 的「受影响行数 = 1」就没有意义（同一个 (kind, scope) 可能出现两行，写回时「当前载荷」不存在）；它是单条语句，因此不存在被禁止的「先查后写」。② 空 digest/payload/purpose/version 由构造器抛 `IllegalArgumentException` 而不是返回领域码：按 `:core` 的 error-channel 规则，形状错误是调用方 bug；库层对 `NULL` 的 NOT NULL 拒绝仍单独有用例（用原始 SQL 绕过构造器触发，断言 code 1299）。快照的唯一冲突同样**不**翻译成领域码——`:core` 没有对应业务码，按 `ConstraintFailures` 的既有约定「无法命名的拒绝必须原样重抛」。
 
 ## Verification report
+
+### verifier #3 批量复核（2026-09-24，独立于本任务实现者）
+
+- Verdict: **PASS（设备项 deferred）**。verifier #2 的 PARTIAL 除设备项外已无遗留；本轮新鲜门禁全绿。
+- Fresh evidence（2026-09-24）: `artifacts/evidence/P3-B1-gates-2026-09-24.txt`（同批次，EXITCODE=0，全库 1725 tests / 0 失败）；`P3-B1-no-kotlin-2026-09-24.txt`（EXITCODE=0）；`P3-B1-rehydration-probes-2026-09-24.txt` R6（DAO 层 `systemContent`/`systemPrompt` 零命中）。补充探针：T-045 收尾（2026-09-23）为 `AiArtifactDao` 新增了消费侧读取（`DerivedService`/`SqliteDerivedStore`），其 CAS/写回语义沿用本任务交付的 `applyIfBaselineMatches`，无 API 改动——消费侧落地反而补上了本任务「写入侧无调用者」的长期背景缺口。
+- 判定依据: 唯一约束/触发器/CAS/清理入口均为 verifier #2 已核对证据，本轮无新事实推翻；规模 205 < 500 维持。
+- Gaps（不变，均 deferred）: instrumentation 执行项（真实 SQLite 拒绝/CAS 覆盖/多态 scope 清理不误删）—— `deferred — 本轮不使用模拟器（用户指令 2026-09-21）`，用例已编译。
 
 > 独立 verifier 复核（verifier #2，2026-09-21），只读：未修改任何生产代码、测试或他人证据。
 > 本轮按用户 2026-09-21 指令**不使用模拟器**；凡严格需要真机的验收项一律记为

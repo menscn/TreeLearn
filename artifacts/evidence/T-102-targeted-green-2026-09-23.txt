@@ -1,0 +1,17 @@
+# T-102 定向复跑证据（与 RED 同一条命令口径）— 2026-09-23 22:20 GMT+8
+# 目的：T-102 升级 verified 后校验器要求 RED/GREEN 同命令且 GREEN 退出码为纯整数；
+#       以与 RED 相同的定向过滤命令补跑新鲜 GREEN 证据。
+
+命令: ./gradlew :app:testDebugUnitTest --tests '*HomePresenterTest' --tests '*HomeStatsTest' --tests '*HomeWiringTest' --console=plain
+cwd: D:\Project\Android\Treelearn\android
+结果: BUILD SUCCESSFUL in 26s ; 54 actionable tasks: 1 executed, 53 up-to-date
+EXITCODE=0
+
+JUnit XML 回读（app/build/test-results/testDebugUnitTest/）:
+  HomePresenterTest / HomeStatsTest / HomeWiringTest 全部 0 failures 0 errors（全量清点见 P0-baseline-2026-09-23.txt: tests=593 failures=0）
+
+历史背景（如实记录，不抹改）：
+  历史 RED 实际执行时仅含 '*HomePresenterTest' '*HomeStatsTest' 两个过滤（HomeWiringTest 用例为 GREEN 阶段补充回归）；
+  2026-09-23 补跑统一为上述含三个过滤的同一条命令。RED 的失败观察（HomeStats/HeatStrip/HomeData.stats() 符号缺失）不受影响。
+  历史 GREEN 是全量 :app:testDebugUnitTest（green-run4，481 tests），因当时 T-087 在制阻断定向编译，细节见任务正文与 T-102-green.log。
+  本文件由命令当场捕获输出生成，非手抄。

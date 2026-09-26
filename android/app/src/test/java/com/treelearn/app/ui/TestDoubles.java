@@ -52,10 +52,7 @@ final class TestDoubles {
 
         final List<HomeViewState> states = new ArrayList<HomeViewState>();
         int settingsOpened;
-        int archivedRequested;
-        int searches;
         final List<String> branchesOpened = new ArrayList<String>();
-        final List<String> archivedOpened = new ArrayList<String>();
 
         @Override
         public void render(HomeViewState state) {
@@ -70,16 +67,6 @@ final class TestDoubles {
         @Override
         public void openBranch(String branchId) {
             branchesOpened.add(branchId);
-        }
-
-        @Override
-        public void openArchived(String branchId) {
-            archivedOpened.add(branchId);
-        }
-
-        @Override
-        public void openSearch() {
-            searches++;
         }
 
         HomeViewState last() {
@@ -113,6 +100,11 @@ final class TestDoubles {
         public boolean isConfigured() {
             return configured;
         }
+
+        @Override
+        public boolean isConfigured(String providerId) {
+            return configured;
+        }
     }
 
     /** Topics and the strip, with a switch to make the strip fail like a store-side error would. */
@@ -122,6 +114,16 @@ final class TestDoubles {
         boolean topicsThrow;
         List<Recommendation> recommendations = StarterRecommendations.all();
         boolean recommendationsThrow;
+        HomeStats stats = HomeStats.empty();
+        boolean statsThrow;
+
+        @Override
+        public HomeStats stats() {
+            if (statsThrow) {
+                throw new IllegalStateException("the stats read could not be served");
+            }
+            return stats;
+        }
 
         @Override
         public List<TopicCard> recentTopics() {
@@ -167,6 +169,7 @@ final class TestDoubles {
 
         GenerationModel model = GenerationModel.FLASH;
         boolean thinking;
+        boolean searchEnabled;
         KeySnapshot key = KeySnapshot.missing();
         boolean refuseSave;
         char[] lastSaved;
@@ -190,6 +193,16 @@ final class TestDoubles {
         @Override
         public void setThinkingEnabled(boolean enabled) {
             this.thinking = enabled;
+        }
+
+        @Override
+        public boolean searchEnabled() {
+            return searchEnabled;
+        }
+
+        @Override
+        public void setSearchEnabled(boolean enabled) {
+            this.searchEnabled = enabled;
         }
 
         @Override

@@ -1,5 +1,9 @@
 package com.treelearn.app.wiring;
 
+import com.treelearn.app.artifact.ArtifactKind;
+import com.treelearn.app.artifact.ArtifactPayload;
+import com.treelearn.app.artifact.ArtifactPayloadCodec;
+import com.treelearn.app.artifact.DerivedResult;
 import com.treelearn.app.library.LibraryData;
 import com.treelearn.app.library.LibraryViewState;
 import com.treelearn.app.navigation.NavigationData;
@@ -50,8 +54,8 @@ public final class LibraryWiring implements LibraryData {
         List<LibraryViewState.Row> rows = new ArrayList<LibraryViewState.Row>(read.size());
         for (TopicDao.Overview row : read) {
             rows.add(new LibraryViewState.Row(row.topicId, row.resumeBranchId,
-                    BranchHeading.of(row.rootTitle, row.rootQuestion), row.branchCount,
-                    row.unreadCount, row.lastUsedAt));
+                    BranchHeading.of(row.rootTitle, row.rootQuestion), summaryTextOf(row),
+                    row.branchCount, row.unreadCount, row.lastUsedAt));
         }
         return rows;
     }
@@ -127,5 +131,35 @@ public final class LibraryWiring implements LibraryData {
     private String summaryOf(String branchId) {
         NavigationData.Summary summary = navigation.summary(branchId);
         return summary == null ? null : summary.text;
+    }
+
+    /**
+     * The same ceiling {@code HomeWiring} hands the codec for a summary read; the ceiling only bites
+     * recommendation arrays, which a {@code BRANCH_SUMMARY} payload has none of, so the two wirings
+     * read the same artifact the same way by convention rather than by a second copy of the rule.
+     */
+    private static final int SUMMARY_ITEM_CEILING = 8;
+
+    /**
+     * The topic's root summary, read from the stored {@code BRANCH_SUMMARY} artifact the overview
+     * row already carries.
+     *
+     * <p>Null is an ordinary answer, not a failure: a topic is readable before any artifact exists,
+     * and the row drops its summary line rather than standing an explanation in its place (the same
+     * rule {@code HomeWiring.summaryOf} applies to the home card, and PRD 6.2.8 point 7 names for
+     * every summary surface). A payload the codec refuses reads as null for the same reason - the
+     * screen has no way to show a half-parsed envelope, and inventing one is what the codec exists
+     * to prevent.
+     *
+     * @return the summary text, or null while the topic has none the codec would accept
+     */
+    private static String summaryTextOf(TopicDao.Overview row) {
+        if (row.summaryPayload == null || row.summaryPayload.isEmpty()) {
+            return null;
+        }
+        DerivedResult parsed = ArtifactPayloadCodec.parse(ArtifactKind.BRANCH_SUMMARY,
+                row.summaryPayload, SUMMARY_ITEM_CEILING);
+        ArtifactPayload payload = parsed.payload();
+        return payload == null || payload.summary == null ? null : payload.summary;
     }
 }

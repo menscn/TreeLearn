@@ -19,7 +19,8 @@ import java.util.Collections;
 import java.util.List;
 
 /** Production owner for derived artifact admission and write-back. */
-public final class DerivedService {
+public final class DerivedService
+implements HomeDerivedPort {
 
     private final TreeLearnDatabaseHelper helper;
     private final DatabaseTransactionRunner transactions;
@@ -37,6 +38,7 @@ public final class DerivedService {
     }
 
     /** Derives the root title once the first topic transaction has created its branch. */
+    @Override
     public ArtifactOutcome rootTitle(Branch root, String question, GenerationModel model) {
         Guard.object(root, "root");
         Guard.nonBlank(question, "question");
@@ -47,7 +49,7 @@ public final class DerivedService {
 
     /** Ensures the current stable branch revision has a summary and follow-up questions. */
     public void ensureConversationArtifacts(ChatStore.Conversation conversation,
-            GenerationModel model) {
+            GenerationModel model, boolean answerSuggestions) {
         if (conversation == null || conversation.branch == null || model == null) {
             return;
         }
@@ -69,9 +71,16 @@ public final class DerivedService {
         if (revisionId == null || latestAnswer == null) {
             return;
         }
+        DerivedRequest title = branchTitleRequest(conversation, model, budget);
+        if (title != null) {
+            runIfMissing(title, conversation.branch.topicId);
+        }
         DerivedRequest summary = DerivedRequest.branchSummary(conversation.branch.id, revisionId,
                 Collections.<ContextPlan.Entry>emptyList(), entries, model, budget);
         runIfMissing(summary, conversation.branch.topicId);
+        if (!answerSuggestions) {
+            return;
+        }
         DerivedRequest recommendations = DerivedRequest.answerRecommendations(conversation.branch.id,
                 revisionId, latestAnswer, Collections.emptyList(), 3, model, budget);
         runIfMissing(recommendations, conversation.branch.topicId);
@@ -108,6 +117,7 @@ public final class DerivedService {
     }
 
     /** Derives topic-level recommendations from the outline only. */
+    @Override
     public List<String> homeRecommendations(String topicId, List<TreeOutline.Entry> outline,
             GenerationModel model) {
         DerivedRequest request = DerivedRequest.homeRecommendations(topicId, outline, 4, model, budget);
@@ -121,6 +131,36 @@ public final class DerivedService {
         }
         DerivedResult parsed = ArtifactPayloadCodec.parse(request.kind(), row.payload, 4);
         return parsed.isUsable() ? parsed.payload().items : Collections.emptyList();
+    }
+
+    /**
+     * Builds the branch-title request from the anchor quote plus the first user question, or null
+     * when the branch carries no quotable origin - a title is only derived, never invented.
+     */
+    static DerivedRequest branchTitleRequest(ChatStore.Conversation conversation,
+            GenerationModel model, PromptBudget budget) {
+        if (conversation == null || conversation.branch == null || conversation.branch.isRoot()
+                || conversation.branch.source == null
+                || conversation.branch.source.anchor == null) {
+            return null;
+        }
+        String quote = conversation.branch.source.anchor.quote;
+        if (quote == null || quote.trim().isEmpty()) {
+            return null;
+        }
+        String firstQuestion = null;
+        for (ChatStore.Position position : conversation.positions) {
+            if (!position.message.isUser()) {
+                continue;
+            }
+            firstQuestion = position.message.userContent;
+            break;
+        }
+        if (firstQuestion == null || firstQuestion.trim().isEmpty()) {
+            return null;
+        }
+        return DerivedRequest.branchTitle(conversation.branch.id, quote, firstQuestion, model,
+                budget);
     }
 
     private ArtifactOutcome run(DerivedRequest request, String topicId) {

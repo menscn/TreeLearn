@@ -1,0 +1,62 @@
+T-095 汇总证据（语音输入，SPEC-081）
+生成时间: 2026-09-25（命令实时执行，退出码内嵌自证）
+
+CMD-1  RED：目标测试编译失败（14 错全指向本片新契约 onSpeechRecognized/SpeechInputPolicy）
+命令: ./gradlew.bat :app:testDebugUnitTest --tests "com.treelearn.app.ui.ChatSpeechInputTest"
+  错误数: 14
+  首错: D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatSpeechInputTest.java:23: 错误: 找不到符号
+  EXITCODE=1
+EXITCODE=1
+
+CMD-2  GREEN：同命令通过（追加不清空/空白回落/无服务不渲染/拒绝置灰引导/授予可用）
+命令: ./gradlew.bat :app:testDebugUnitTest --tests "com.treelearn.app.ui.ChatSpeechInputTest"
+  BUILD SUCCESSFUL in 22s
+  EXITCODE=0
+EXITCODE=0
+
+CMD-3  app 全量 JVM 单测计数（XML 汇总，生成器内直接统计 75 个 XML）
+命令: python 统计 android/app/build/test-results/testDebugUnitTest/*.xml
+  files=75 tests=643 skipped=0 failures=0 errors=0
+EXITCODE=0
+
+CMD-4  check 门禁（全部模块 + 全部 lint/test）
+命令: ./gradlew.bat check
+  BUILD SUCCESSFUL in 2m 14s
+  CHECK_EXITCODE=0
+EXITCODE=0
+
+CMD-5  Java-only guard（无 Kotlin 文件/依赖；守门脚本实时输出见 T-095-nokotlin 日志）
+命令: no-kotlin-check 守门脚本（PowerShell 工具实时执行后落盘）
+  VERDICT: PASS (13 OK line(s))
+EXITCODE=0
+
+CMD-6  真机回归：外壳 5/5（BottomTabShell，composer 与房间切换变更零扰动）
+命令: :app:connectedDebugAndroidTest -P…class=com.treelearn.app.BottomTabShellInstrumentedTest
+  Starting a Gradle Daemon, 2 busy and 1 incompatible and 9 stopped Daemons could not be reused, use --status for details
+  Starting 5 tests on ALP-AN00 - 13
+  Finished 5 tests on ALP-AN00 - 13
+  BUILD SUCCESSFUL in 40s
+  DEV_EXITCODE=0
+EXITCODE=0
+
+CMD-7  manifest 声明 RECORD_AUDIO（权限只在对话页首次长按时询问，不在启动时）
+命令: grep -n "RECORD_AUDIO" android/app/src/main/AndroidManifest.xml
+  15:    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+EXITCODE=0
+
+CMD-8  零新依赖证明（build.gradle 零改动；识别走平台 SpeechRecognizer）
+命令: git diff HEAD -- android/app/build.gradle android/build.gradle
+  (无输出 = 零依赖改动)
+EXITCODE=0
+
+CMD-9  生产行数（新文件整文件 + 修改文件按 T-095 独有标记筛选 diff hunk）
+命令: python -X utf8 .trae/scripts/dev/count_production_lines.py android/app/src/main/java/com/treelearn/app/ui/SpeechInputPolicy.java android/app/src/main/java/com/treelearn/app/speech/SpeechInputGateway.java android/app/src/main/java/com/treelearn/app/speech/PlatformSpeechInput.java android/app/src/main/res/drawable/ic_chat_voice.xml
+  24  android/app/src/main/java/com/treelearn/app/ui/SpeechInputPolicy.java
+      11  android/app/src/main/java/com/treelearn/app/speech/SpeechInputGateway.java
+      81  android/app/src/main/java/com/treelearn/app/speech/PlatformSpeechInput.java
+      32  android/app/src/main/res/drawable/ic_chat_voice.xml
+     148  TOTAL (non-blank, non-comment, production files only)
+  修改归属（标记行）: ChatPresenter +4 / ChatActions +3 / ChatScreen +34 / MainActivity +64 /
+    screen_chat_body +3 / AndroidManifest +2 / strings +18 = +128
+  合计: 新文件 148 + 归属 128 = 276（估算 170，超出部分为宿主权限流与会话清理的规则 javadoc）
+

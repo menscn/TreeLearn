@@ -1,0 +1,199 @@
+﻿diff --git a/android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java b/android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java
+index e8bfef1..594ce68 100644
+--- a/android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java
++++ b/android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java
+@@ -57,6 +57,22 @@ import java.util.concurrent.Executor;
+  */
+ public final class ChatPresenter implements ChatActions {
+ 
++    /**
++     * T-090: the translation port. The presenter decides when a translation may run; the port
++     * decides how it reaches a model (the generation package's translation-route point), so no
++     * view-state code reads role settings or keys.
++     */
++    public interface Translator {
++
++        /** The verdict of one translation run; a failed call carries no text. */
++        interface Callback {
++
++            void onFinished(boolean ok, String translation);
++        }
++
++        void translate(GenerationModel fallbackModel, String sourceText, Callback callback);
++    }
++
+     private final ChatSink sink;
+     private final UiThread ui;
+     private final Executor background;
+@@ -69,6 +85,14 @@ public final class ChatPresenter implements ChatActions {
+     private final ReadingSession session;
+     /** T-076: where the composer's work waits out a process rebuild (073 搂5). */
+     private final ChatDraftStore drafts;
++    /** T-090: the translation run's port; no-op when the host supplies none. */
++    private final Translator translator;
++    /**
++     * T-092: the grounding step's two faces the presenter asks for 鈥?the [NOKEY] check of an
++     * enable, the selected engine's label for the panel. The retrieval itself runs inside the
++     * send command, so no search decision is made here.
++     */
++    private final com.treelearn.app.search.web.ChatSearchStep search;
+ 
+     private ChatViewState state;
+     /** The branch the last read carried, or null when it carried none. */
+@@ -93,12 +117,35 @@ public final class ChatPresenter implements ChatActions {
+             ChatCommands commands, SettingsStore settings, CopyLabels labels, String branchId,
+             ReadingStore reading) {
+         this(sink, ui, background, key, data, commands, settings, labels, branchId, reading,
+-                ChatDraftStore.NOOP);
++                ChatDraftStore.NOOP, null);
+     }
+ 
+     public ChatPresenter(ChatSink sink, UiThread ui, Executor background, KeyVault key, ChatData data,
+             ChatCommands commands, SettingsStore settings, CopyLabels labels, String branchId,
+             ReadingStore reading, ChatDraftStore drafts) {
++        this(sink, ui, background, key, data, commands, settings, labels, branchId, reading,
++                drafts, null);
++    }
++
++    public ChatPresenter(ChatSink sink, UiThread ui, Executor background, KeyVault key, ChatData data,
++            ChatCommands commands, SettingsStore settings, CopyLabels labels, String branchId,
++            ReadingStore reading, Translator translator) {
++        this(sink, ui, background, key, data, commands, settings, labels, branchId, reading,
++                ChatDraftStore.NOOP, translator);
++    }
++
++    public ChatPresenter(ChatSink sink, UiThread ui, Executor background, KeyVault key, ChatData data,
++            ChatCommands commands, SettingsStore settings, CopyLabels labels, String branchId,
++            ReadingStore reading, ChatDraftStore drafts, Translator translator) {
++        this(sink, ui, background, key, data, commands, settings, labels, branchId, reading,
++                drafts, translator, null);
++    }
++
++    /** T-092: the full form, with the grounding step wired by the host. */
++    public ChatPresenter(ChatSink sink, UiThread ui, Executor background, KeyVault key, ChatData data,
++            ChatCommands commands, SettingsStore settings, CopyLabels labels, String branchId,
++            ReadingStore reading, ChatDraftStore drafts, Translator translator,
++            com.treelearn.app.search.web.ChatSearchStep search) {
+         this.sink = require(sink, "sink");
+         this.ui = require(ui, "ui");
+         this.background = require(background, "background");
+@@ -109,12 +156,20 @@ public final class ChatPresenter implements ChatActions {
+         this.labels = require(labels, "labels");
+         this.branchId = Guard.id(branchId, "branchId");
+         this.drafts = drafts == null ? ChatDraftStore.NOOP : drafts;
++        this.translator = translator;
++        this.search = search;
+         this.session = new ReadingSession(require(reading, "reading"));
+         this.state = ChatViewState.initial(this.branchId, settings.model(), settings.thinkingEnabled(),
+-                key.isConfigured());
++                key.isConfigured())
++                .withSearchEnabled(settings.searchEnabled(), searchLabel());
+         data.addGenerationListener(this.branchId, generationChanged);
+     }
+ 
++    /** The selected engine's label, or empty when no grounding step was wired. */
++    private String searchLabel() {
++        return search == null ? "" : search.engineLabel();
++    }
++
+     /** The last state handed to the sink; the tests read it, the screen does not. */
+     public ChatViewState state() {
+         return state;
+@@ -297,6 +352,22 @@ public final class ChatPresenter implements ChatActions {
+         render(state.notice == null ? next : next.withNotice(null));
+     }
+ 
++    /** T-077: the fullscreen editor opened; the flag is the overlay's whole state (073 搂5.1). */
++    @Override
++    public void onFullscreenEditOpened() {
++        render(state.withFullscreenEditing(true));
++    }
++
++    /**
++     * T-077: the fullscreen editor is left - by done, by cancel and by the system back alike.
++     * Nothing is written and nothing is cleared: the keystrokes already saved the draft through
++     * {@link #onDraftChanged}, so a close is a pure visual close.
++     */
++    @Override
++    public void onFullscreenEditClosed() {
++        render(state.withFullscreenEditing(false));
++    }
++
+     /**
+      * T-075: the learner wants the running attempt stopped. The command itself is the composer
+      * slice's; here the intent is recorded so the terminal read reports canceled instead of failed -
+@@ -384,6 +455,34 @@ public final class ChatPresenter implements ChatActions {
+         position(messageId, false);
+     }
+ 
++    /**
++     * T-090: the translate entry. A stable answer is the only offer (a partial answer would read as
++     * "the answer"), a run is never doubled, and the request rides the translation port on the
++     * background executor. Nothing here writes the store: the answer text travels to the port and
++     * the verdict lands in the view state, so the stable answer cannot move.
++     */
++    @Override
++    public void onTranslatePressed(String messageId) {
++        ChatMessage message = state.message(messageId);
++        if (translator == null || message == null || !message.canTranslate()
++                || state.isTranslating(messageId)) {
++            return;
++        }
++        final GenerationModel model = state.model;
++        render(state.withTranslationStarted(messageId));
++        background.execute(() -> translator.translate(model, message.text,
++                (ok, translation) -> ui.post(() -> render(
++                        state.withTranslationFinished(messageId, ok ? translation : "")))));
++    }
++
++    @Override
++    public void onTranslationToggled(String messageId) {
++        if (!state.translationVisible(messageId)) {
++            return;
++        }
++        render(state.withTranslationToggled(messageId));
++    }
++
+     /**
+      * Retry and reset share one route: both replace the attempt at the same position, which is exactly
+      * why T-010 gives them one shared judgement plus one extra condition each. The legacy inputs are
+@@ -515,6 +614,28 @@ public final class ChatPresenter implements ChatActions {
+         render(state.withThinkingEnabled(enabled));
+     }
+ 
++    /**
++     * T-092: the panel's grounding toggle. Enabling asks the [NOKEY] question first and, when the
++     * selected engine has no key, intercepts with the notice and jumps straight to settings 鈥?the
++     * switch is not persisted, so the chip and the stored fact stay one. Disabling needs no key.
++     */
++    @Override
++    public void onSearchToggled(boolean enabled) {
++        if (enabled && search != null && !search.hasCredential()) {
++            render(state.withNotice(HomeViewState.Notice.SEARCH_KEY_MISSING));
++            sink.openSettings();
++            return;
++        }
++        settings.setSearchEnabled(enabled);
++        render(state.withSearchEnabled(enabled, searchLabel()));
++    }
++
++    /** T-092: the panel's 銆屽幓璁剧疆銆?entry 鈥?the same door the notice's deep link takes. */
++    @Override
++    public void onSearchOpenSettings() {
++        sink.openSettings();
++    }
++
+     @Override
+     public void onBackPressed() {
+         sink.close();
+@@ -665,7 +786,9 @@ public final class ChatPresenter implements ChatActions {
+             final boolean clearDraft) {
+         ui.post(() -> {
+             if (result.isAccepted()) {
+-                ChatViewState next = state.withSending(false).withNotice(null);
++                // T-092: an accepted send may carry a degrade notice ([OFF]/[PART]); a null post
++                // notice is the ordinary acceptance, which clears whatever was showing.
++                ChatViewState next = state.withSending(false).withNotice(result.postNotice());
+                 render(clearDraft ? next.withDraft("").withQuote("") : next);
+                 if (mayOpenBranch && !result.branchId().isEmpty()) {
+                     sink.openBranch(result.branchId());

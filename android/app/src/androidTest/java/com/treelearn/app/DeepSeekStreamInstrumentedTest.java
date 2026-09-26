@@ -109,7 +109,8 @@ public class DeepSeekStreamInstrumentedTest {
 
     private AiGateway gateway(String body, int slice) {
         return new AiGateway(new SlicedTransport(body, slice), (model, request) -> new byte[0],
-                new ProviderJson.Deltas(), new ProviderJson.Balance(), quiet, Runnable::run);
+                new ProviderJson.Deltas(), new ProviderJson.Balance(),
+                new ProviderJson.ModelList(), quiet, Runnable::run);
     }
 
     private static DeepSeekRequest request() {

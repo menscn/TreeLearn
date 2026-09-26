@@ -4,7 +4,7 @@ id: T-2026-09-21-025
 title: 首题原子创建事务（五类行同事务 + 全败回滚）
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -231,3 +231,11 @@ Follow [code-document alignment](../rules/documentation.md).
   - 本任务**不写快照**：首题是根分支，无父分支来源，`context_snapshot_id` 与 `source_*` 必须为 NULL。分叉的两步写（branch → 快照行 → setContextSnapshot）属 T-009/T-024，不要为「让写入看起来完整」在这里补一行快照。
   - sourceRefusal 的 javadoc 写明调用方义务：必须在**同一事务内**调用。签名无法强制这一点，只有调用点（create 与将来的 T-009）能保证。
   - **相对指令的一处偏差**：用户本轮要求跑 `:data:testDebugUnitTest`，但该源集里另一任务的 `SecretEnvelopeTest.java`（其生产类整棵树都不存在）会让整个 :data 单测编译失败；T-025 的 JVM 证明因此落在 `:app` 的单测源集（同包 `com.treelearn.data.db.dao`）。同期曾把该用例文件放进 `:data/src/test` 并被卡住，最终**移出**——注意：只移动了本任务自己的测试文件，没有移动任何生产源码。
+
+## Verification report — 收尾复核（verifier #3，2026-09-24）
+
+- Verdict: PASS（针对 verifier #2 第 3 轮的两条翻转条件的收尾复核；只判不实现）。
+- ①（RED 分项 6+8）→ 已闭合。本文件 RED 段代码块现写「decideSourceRefusal 6 处 + classifyStorageRefusal 8 处 = 14」，与证据复算一致（`T-025-red.txt` 内 12 行 / 2 = 6、16 行 / 2 = 8）。
+- ②（设备执行）→ 按用户 2026-09-21 决定保持 `deferred — 用户自行装机验证（user decision 2026-09-21）`，不计 PASS/FAIL。Unblock condition（`connectedDebugAndroidTest`）保留，装机后执行即可把 deferred 逐条转为实测结论。
+- 功能判据：第 3 轮已确认 7 条验收条件实质满足（五类行同事务静态核对、根分支 DDL 强制无快照、跨主题 source 唯一判定点、1555 + 小写文本分类、instrumentation 编译通过）。
+- 门禁（本轮实测）：`./gradlew --no-daemon --console=plain check` EXITCODE=0（`artifacts/evidence/P3-B3-gates-2026-09-24.txt`）；Java-only guard `VERDICT: PASS (13 OK line(s))`（`artifacts/evidence/P3-B3-no-kotlin-2026-09-24.txt`）。

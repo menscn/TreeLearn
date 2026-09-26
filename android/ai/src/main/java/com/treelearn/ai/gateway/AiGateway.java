@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
@@ -29,6 +30,9 @@ public final class AiGateway {
 
     /** Cap for the balance response, so a broken endpoint cannot stream without bound. */
     public static final int MAX_BALANCE_BYTES = 16 * 1024;
+
+    /** Cap for the model list response, so a malicious or broken endpoint cannot exhaust memory. */
+    public static final int MAX_MODELS_BYTES = 256 * 1024;
 
     private static final String DONE_SENTINEL = "[DONE]";
     private static final int READ_BUFFER_BYTES = 8 * 1024;
@@ -60,20 +64,50 @@ public final class AiGateway {
         }
     }
 
+    /**
+     * The result of one model list fetch: the provider's {@code data[].id} list on success, and a
+     * classified failure with an empty list otherwise — a caller that merges on success only can
+     * never half-write the local model table.
+     */
+    public static final class Models {
+
+        /** The wire ids in the provider's order; empty, never null, on a failure. */
+        public final List<String> ids;
+        /** Non-null when the fetch failed. */
+        public final AiGatewayError error;
+
+        public Models(List<String> ids, AiGatewayError error) {
+            this.ids = Guard.object(ids, "ids");
+            this.error = error;
+        }
+
+        public boolean ok() {
+            return error == null;
+        }
+
+        @Override
+        public String toString() {
+            return "Models[count=" + ids.size() + (error == null ? "" : " " + error) + "]";
+        }
+    }
+
     private final GatewayPorts.Transport transport;
     private final GatewayPorts.BodyEncoder bodyEncoder;
     private final GatewayPorts.DeltaDecoder deltaDecoder;
     private final GatewayPorts.BalanceDecoder balanceDecoder;
+    private final GatewayPorts.ModelListDecoder modelListDecoder;
     private final GatewayPorts.Log log;
     private final Executor executor;
 
     public AiGateway(GatewayPorts.Transport transport, GatewayPorts.BodyEncoder bodyEncoder,
             GatewayPorts.DeltaDecoder deltaDecoder, GatewayPorts.BalanceDecoder balanceDecoder,
-            GatewayPorts.Log log, Executor executor) {
+            GatewayPorts.ModelListDecoder modelListDecoder, GatewayPorts.Log log,
+            Executor executor) {
         this.transport = Guard.object(transport, "transport");
         this.bodyEncoder = Guard.object(bodyEncoder, "bodyEncoder");
         this.deltaDecoder = Guard.object(deltaDecoder, "deltaDecoder");
         this.balanceDecoder = Guard.object(balanceDecoder, "balanceDecoder");
+        this.modelListDecoder = Guard.object(modelListDecoder, "modelListDecoder");
         this.log = Guard.object(log, "log");
         this.executor = Guard.object(executor, "executor");
     }
@@ -82,14 +116,26 @@ public final class AiGateway {
      * Starts one streaming call on the injected executor and returns its cancel handle immediately.
      *
      * <p>A missing key never reaches the network: the call fails with {@code KEY_MISSING} before a
-     * request body is built.
+     * request body is built. The provider parameters (base URL, model wire id) come from the
+     * {@link ProviderEndpoint}; the credential is handed to the transport per call and held by
+     * nothing.
      */
-    public Call streamChat(String apiKey, GenerationModel model, DeepSeekRequest request,
+    public Call streamChat(String apiKey, ProviderEndpoint endpoint, DeepSeekRequest request,
             GenerationSink sink) {
-        StreamCall call = new StreamCall(apiKey, Guard.object(model, "model"),
+        StreamCall call = new StreamCall(apiKey, Guard.object(endpoint, "endpoint"),
                 Guard.object(request, "request"), Guard.object(sink, "sink"));
         executor.execute(call);
         return call;
+    }
+
+    /**
+     * The DeepSeek default instance: the built-in model tiers, the documented base URL, the same
+     * SSE semantics. Every pre-existing caller keeps this entry point unchanged.
+     */
+    public Call streamChat(String apiKey, GenerationModel model, DeepSeekRequest request,
+            GenerationSink sink) {
+        return streamChat(apiKey, ProviderEndpoint.deepSeek(Guard.object(model, "model")),
+                request, sink);
     }
 
     /**
@@ -107,7 +153,8 @@ public final class AiGateway {
                 return reportBalance(false, AiGatewayError.forHttpStatus(status), status, startedNanos);
             }
             boolean available = balanceDecoder.isAvailable(
-                    new String(readAllBytes(response.body()), StandardCharsets.UTF_8));
+                    new String(readAllBytes(response.body(), MAX_BALANCE_BYTES),
+                            StandardCharsets.UTF_8));
             return reportBalance(available, null, status, startedNanos);
         } catch (IOException transportFailure) {
             return reportBalance(false, AiGatewayError.networkInterrupted(
@@ -125,11 +172,49 @@ public final class AiGateway {
         return new Balance(available, failure);
     }
 
+    /**
+     * Fetches the provider's model list from {@code {base}/models} (SPEC-2026-09-23 技术规格, the F7
+     * mechanism): one GET with the Bearer credential, the {@code data[].id} list on success.
+     * Synchronous: it is called from a settings screen on a worker thread, never from the stream
+     * scheduler. On any failure the result carries no ids, so the caller's merge — and therefore the
+     * model table — stays untouched.
+     */
+    public Models listModels(String apiKey, ProviderEndpoint endpoint) {
+        if (isAbsent(apiKey)) {
+            return reportModels(null, AiGatewayError.keyMissing(), 0, System.nanoTime());
+        }
+        long startedNanos = System.nanoTime();
+        try (GatewayPorts.Response response =
+                transport.get(Guard.object(endpoint, "endpoint").modelsUrl(), apiKey)) {
+            int status = response.status();
+            if (status / 100 != 2) {
+                // The failed response body is never read: it can echo the credential context.
+                return reportModels(null, AiGatewayError.forHttpStatus(status), status, startedNanos);
+            }
+            List<String> ids = modelListDecoder.decode(new String(
+                    readAllBytes(response.body(), MAX_MODELS_BYTES), StandardCharsets.UTF_8));
+            return reportModels(ids, null, status, startedNanos);
+        } catch (IOException transportFailure) {
+            return reportModels(null, AiGatewayError.networkInterrupted(
+                    transportFailure.getClass().getSimpleName()), 0, startedNanos);
+        } catch (GatewayPorts.PayloadException refused) {
+            return reportModels(null, refused.error, 0, startedNanos);
+        }
+    }
+
+    private Models reportModels(List<String> ids, AiGatewayError failure, int status,
+            long startedNanos) {
+        log.event("models_fetched", "status=" + status + " count=" + (ids == null ? 0 : ids.size())
+                + " durationMs=" + millisSince(startedNanos)
+                + (failure == null ? "" : " error=" + failure.kind));
+        return new Models(ids == null ? List.of() : ids, failure);
+    }
+
     /** One streaming call: the whole lifecycle runs on the reader thread. */
     private final class StreamCall implements Call, Runnable {
 
         private final String apiKey;
-        private final GenerationModel model;
+        private final ProviderEndpoint endpoint;
         private final DeepSeekRequest request;
         private final GenerationSink sink;
 
@@ -143,9 +228,10 @@ public final class AiGateway {
         private boolean refusedAccepted;
         private AiGatewayError failure;
 
-        StreamCall(String apiKey, GenerationModel model, DeepSeekRequest request, GenerationSink sink) {
+        StreamCall(String apiKey, ProviderEndpoint endpoint, DeepSeekRequest request,
+                GenerationSink sink) {
             this.apiKey = apiKey;
-            this.model = model;
+            this.endpoint = endpoint;
             this.request = request;
             this.sink = sink;
         }
@@ -185,7 +271,7 @@ public final class AiGateway {
             }
             byte[] body;
             try {
-                body = bodyEncoder.encode(model, request);
+                body = bodyEncoder.encode(endpoint.modelWireId(), request);
             } catch (RuntimeException notEncodable) {
                 failure = AiGatewayError.of(AiGatewayError.Kind.REQUEST_INVALID, 0,
                         "the request body could not be encoded: "
@@ -194,7 +280,7 @@ public final class AiGateway {
                 return;
             }
             try {
-                active = transport.post(GatewayEndpoints.chatUrl(), apiKey, body);
+                active = transport.post(endpoint.chatUrl(), apiKey, body);
                 httpStatus = active.status();
             } catch (IOException transportFailure) {
                 failure = AiGatewayError.networkInterrupted(
@@ -297,20 +383,20 @@ public final class AiGateway {
         }
 
         private String describe() {
-            return "purpose=" + request.purpose + " model=" + model.name()
+            return "purpose=" + request.purpose + " model=" + endpoint.modelWireId()
                     + " thinking=" + request.thinkingEnabled + " policy=" + request.policyVersion;
         }
     }
 
     /** Reads a bounded body; the cap is a refusal, never a silent truncation. */
-    private static byte[] readAllBytes(InputStream stream) throws IOException {
+    private static byte[] readAllBytes(InputStream stream, int maxBytes) throws IOException {
         ByteArrayOutputStream collected = new ByteArrayOutputStream();
         byte[] buffer = new byte[BALANCE_BUFFER_BYTES];
         int read;
         while ((read = stream.read(buffer)) != -1) {
-            if (collected.size() + read > MAX_BALANCE_BYTES) {
+            if (collected.size() + read > maxBytes) {
                 throw new GatewayPorts.PayloadException(
-                        AiGatewayError.parseFailed("the response exceeded " + MAX_BALANCE_BYTES
+                        AiGatewayError.parseFailed("the response exceeded " + maxBytes
                                 + " bytes, so it was refused rather than truncated"),
                         "oversized response");
             }

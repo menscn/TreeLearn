@@ -5,8 +5,10 @@ import com.treelearn.core.domain.Guard;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -127,6 +129,36 @@ public final class ChatViewState {
      * disabled, and the draft and quote the learner already had are kept, never cleared.
      */
     public final boolean archived;
+    /** Whether the composer is in fullscreen edit mode. */
+    public final boolean fullscreenEditing;
+    /** Per-message translation state; never null, defaults to {@link Translations#EMPTY}. */
+    public final Translations translations;
+    /** Whether web search is on for this conversation. */
+    public final boolean searchEnabled;
+    /** The search engine's human label, or empty when search is off. */
+    public final String searchEngineLabel;
+
+    /** The one attachment the composer carries (T-097); null while the composer carries none. */
+    public final ComposerAttachment composerAttachment;
+
+    /** The composer's attachment chip: what it is, how big, and where its parse stands (T-097). */
+    public static final class ComposerAttachment {
+
+        public enum ParseState { PARSING, READY, FAILED }
+
+        public final String attachmentId;
+        public final String displayName;
+        public final long sizeBytes;
+        public final ParseState state;
+
+        public ComposerAttachment(String attachmentId, String displayName, long sizeBytes,
+                ParseState state) {
+            this.attachmentId = com.treelearn.core.domain.Guard.id(attachmentId, "attachmentId");
+            this.displayName = com.treelearn.core.domain.Guard.text(displayName, "displayName");
+            this.sizeBytes = com.treelearn.core.domain.Guard.nonNegative(sizeBytes, "sizeBytes");
+            this.state = state == null ? ParseState.PARSING : state;
+        }
+    }
 
     private ChatViewState(Phase phase, String branchId, String branchTitle, List<ChatMessage> messages,
             String draft, String quote, boolean keyConfigured, GenerationModel model,
@@ -134,7 +166,8 @@ public final class ChatViewState {
             List<Recommendation> recommendations,
             String recommendationsMessageId, HomeViewState.Notice notice, boolean sending,
             SourceCard sourceCard, boolean sourceCardExpanded, Stage stage, boolean followLatest,
-            int missedCount, boolean archived) {
+            int missedCount, boolean archived, boolean fullscreenEditing, Translations translations,
+            boolean searchEnabled, String searchEngineLabel, ComposerAttachment composerAttachment) {
         this.phase = Guard.object(phase, "phase");
         this.branchId = Guard.id(branchId, "branchId");
         this.branchTitle = branchTitle == null ? "" : branchTitle;
@@ -157,6 +190,11 @@ public final class ChatViewState {
         this.followLatest = followLatest;
         this.missedCount = Math.max(0, missedCount);
         this.archived = archived;
+        this.fullscreenEditing = fullscreenEditing;
+        this.translations = translations == null ? Translations.EMPTY : translations;
+        this.searchEnabled = searchEnabled;
+        this.searchEngineLabel = searchEngineLabel == null ? "" : searchEngineLabel;
+        this.composerAttachment = composerAttachment;
     }
 
     public static ChatViewState initial(String branchId, GenerationModel model,
@@ -165,7 +203,7 @@ public final class ChatViewState {
                 "", keyConfigured, model, thinkingEnabled, Collections.<String>emptySet(),
                 Collections.<String>emptySet(),
                 Collections.<Recommendation>emptyList(), "", null, false, null, false,
-                Stage.IDLE, true, 0, false);
+                Stage.IDLE, true, 0, false, false, Translations.EMPTY, false, "", null);
     }
 
     /** @return the row with this id, or null when the conversation does not contain it */
@@ -255,6 +293,18 @@ public final class ChatViewState {
                 recommendationsMessageId, notice, sending);
     }
 
+    /**
+     * Swaps the composer's attachment chip (T-097). Null clears it; the mutual exclusion with the
+     * quote is the presenter's decision and is applied before this builder is reached.
+     */
+    public ChatViewState withComposerAttachment(ComposerAttachment value) {
+        return new ChatViewState(phase, branchId, branchTitle, messages, draft, quote,
+                keyConfigured, model, thinkingEnabled, expandedReasoning, collapsedReasoning,
+                recommendations, recommendationsMessageId, notice, sending, sourceCard,
+                sourceCardExpanded, stage, followLatest, missedCount, archived, fullscreenEditing,
+                translations, searchEnabled, searchEngineLabel, value);
+    }
+
     public ChatViewState withKeyConfigured(boolean value) {
         return copy(phase, branchTitle, messages, draft, quote, value, model, thinkingEnabled,
                 expandedReasoning, collapsedReasoning, recommendations, recommendationsMessageId, notice, sending);
@@ -314,7 +364,7 @@ public final class ChatViewState {
                 nextQuote, nextKeyConfigured, nextModel, nextThinkingEnabled, nextExpanded,
                 nextCollapsed, nextRecommendations, nextRecommendationsMessageId, nextNotice,
                 nextSending, sourceCard, sourceCardExpanded, stage, followLatest, missedCount,
-                archived);
+                archived, fullscreenEditing, translations, searchEnabled, searchEngineLabel, composerAttachment);
     }
 
     /** Replaces the source card with a read's answer; the expansion state travels unchanged. */
@@ -323,7 +373,8 @@ public final class ChatViewState {
                 keyConfigured, model, thinkingEnabled, expandedReasoning, collapsedReasoning,
                 recommendations,
                 recommendationsMessageId, notice, sending, value, sourceCardExpanded, stage,
-                followLatest, missedCount, archived);
+                followLatest, missedCount, archived, fullscreenEditing, translations, searchEnabled,
+                searchEngineLabel, composerAttachment);
     }
 
     public ChatViewState withSourceCardExpanded(boolean value) {
@@ -331,7 +382,8 @@ public final class ChatViewState {
                 keyConfigured, model, thinkingEnabled, expandedReasoning, collapsedReasoning,
                 recommendations,
                 recommendationsMessageId, notice, sending, sourceCard, value, stage,
-                followLatest, missedCount, archived);
+                followLatest, missedCount, archived, fullscreenEditing, translations, searchEnabled,
+                searchEngineLabel, composerAttachment);
     }
 
     /** T-075: sets the generation stage; the rest of the state travels unchanged. */
@@ -339,7 +391,8 @@ public final class ChatViewState {
         return new ChatViewState(phase, branchId, branchTitle, messages, draft, quote, keyConfigured,
                 model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
                 recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
-                value == null ? Stage.IDLE : value, followLatest, missedCount, archived);
+                value == null ? Stage.IDLE : value, followLatest, missedCount, archived,
+                fullscreenEditing, translations, searchEnabled, searchEngineLabel, composerAttachment);
     }
 
     /** T-075: sets the scroll-follow state; the rest of the state travels unchanged. */
@@ -347,7 +400,8 @@ public final class ChatViewState {
         return new ChatViewState(phase, branchId, branchTitle, messages, draft, quote, keyConfigured,
                 model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
                 recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
-                stage, following, missedSoFar, archived);
+                stage, following, missedSoFar, archived, fullscreenEditing, translations,
+                searchEnabled, searchEngineLabel, composerAttachment);
     }
 
     /**
@@ -358,6 +412,159 @@ public final class ChatViewState {
         return new ChatViewState(phase, branchId, branchTitle, messages, draft, quote, keyConfigured,
                 model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
                 recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
-                stage, followLatest, missedCount, value);
+                stage, followLatest, missedCount, value, fullscreenEditing, translations,
+                searchEnabled, searchEngineLabel, composerAttachment);
+    }
+
+    /** Enters or leaves fullscreen edit mode; the rest of the state travels unchanged. */
+    public ChatViewState withFullscreenEditing(boolean value) {
+        return new ChatViewState(phase, branchId, branchTitle, messages, draft, quote, keyConfigured,
+                model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
+                recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
+                stage, followLatest, missedCount, archived, value, translations, searchEnabled,
+                searchEngineLabel, composerAttachment);
+    }
+
+    /**
+     * Whether the fullscreen edit entry may show: the branch is not archived, the key is configured,
+     * and there is a draft to edit.
+     */
+    public boolean fullscreenEditEntryAvailable() {
+        return !archived && keyConfigured && !draft.trim().isEmpty();
+    }
+
+    public ChatViewState withTranslationStarted(String messageId) {
+        return new ChatViewState(phase, branchId, branchTitle, messages, draft, quote, keyConfigured,
+                model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
+                recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
+                stage, followLatest, missedCount, archived, fullscreenEditing,
+                translations.started(messageId), searchEnabled, searchEngineLabel, composerAttachment);
+    }
+
+    public ChatViewState withTranslationFinished(String messageId, String translation) {
+        return new ChatViewState(phase, branchId, branchTitle, messages, draft, quote, keyConfigured,
+                model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
+                recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
+                stage, followLatest, missedCount, archived, fullscreenEditing,
+                translations.finished(messageId, translation), searchEnabled, searchEngineLabel, composerAttachment);
+    }
+
+    public ChatViewState withTranslationToggled(String messageId) {
+        return new ChatViewState(phase, branchId, branchTitle, messages, draft, quote, keyConfigured,
+                model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
+                recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
+                stage, followLatest, missedCount, archived, fullscreenEditing,
+                translations.toggled(messageId), searchEnabled, searchEngineLabel, composerAttachment);
+    }
+
+    public ChatViewState withSearchEnabled(boolean value, String engineLabel) {
+        return new ChatViewState(phase, branchId, branchTitle, messages, draft, quote, keyConfigured,
+                model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
+                recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
+                stage, followLatest, missedCount, archived, fullscreenEditing, translations,
+                value, engineLabel, composerAttachment);
+    }
+
+    public boolean isTranslating(String messageId) {
+        return translations.isRunning(messageId);
+    }
+
+    public boolean translationFailed(String messageId) {
+        return translations.isFailed(messageId);
+    }
+
+    public String translationText(String messageId) {
+        return translations.textOf(messageId);
+    }
+
+    public boolean translationExpanded(String messageId) {
+        return translations.isExpanded(messageId);
+    }
+
+    public boolean translationVisible(String messageId) {
+        return translations.isVisible(messageId);
+    }
+
+    /**
+     * Per-message translation state, kept as one immutable value so a read that lands while a
+     * translation is running cannot discard it (the same rule as the rest of the view state). A
+     * translation is either in flight, failed, or shown - and "shown" is the presence of its text,
+     * which is what lets the row decide between a spinner, an error and the translated passage.
+     */
+    public static final class Translations {
+        public static final Translations EMPTY = new Translations(Collections.<String, String>emptyMap(),
+                Collections.<String>emptySet(), Collections.<String>emptySet(),
+                Collections.<String>emptySet());
+
+        private final Map<String, String> texts;
+        private final Set<String> failed;
+        private final Set<String> running;
+        private final Set<String> collapsed;
+
+        private Translations(Map<String, String> texts, Set<String> failed, Set<String> running,
+                Set<String> collapsed) {
+            this.texts = Collections.unmodifiableMap(new LinkedHashMap<String, String>(texts));
+            this.failed = Collections.unmodifiableSet(new LinkedHashSet<String>(failed));
+            this.running = Collections.unmodifiableSet(new LinkedHashSet<String>(running));
+            this.collapsed = Collections.unmodifiableSet(new LinkedHashSet<String>(collapsed));
+        }
+
+        public boolean isRunning(String messageId) {
+            return running.contains(messageId);
+        }
+
+        public boolean isFailed(String messageId) {
+            return failed.contains(messageId);
+        }
+
+        public String textOf(String messageId) {
+            return texts.get(messageId);
+        }
+
+        public boolean isExpanded(String messageId) {
+            return texts.containsKey(messageId) && !collapsed.contains(messageId);
+        }
+
+        public boolean isVisible(String messageId) {
+            return isRunning(messageId) || isFailed(messageId) || texts.containsKey(messageId);
+        }
+
+        public Translations started(String messageId) {
+            LinkedHashMap<String, String> nextTexts = new LinkedHashMap<String, String>(texts);
+            nextTexts.remove(messageId);
+            LinkedHashSet<String> nextFailed = new LinkedHashSet<String>(failed);
+            nextFailed.remove(messageId);
+            LinkedHashSet<String> nextCollapsed = new LinkedHashSet<String>(collapsed);
+            nextCollapsed.remove(messageId);
+            LinkedHashSet<String> nextRunning = new LinkedHashSet<String>(running);
+            nextRunning.add(messageId);
+            return new Translations(nextTexts, nextFailed, nextRunning, nextCollapsed);
+        }
+
+        public Translations finished(String messageId, String translation) {
+            LinkedHashSet<String> nextRunning = new LinkedHashSet<String>(running);
+            nextRunning.remove(messageId);
+            if (translation == null || translation.trim().isEmpty()) {
+                LinkedHashSet<String> nextFailed = new LinkedHashSet<String>(failed);
+                nextFailed.add(messageId);
+                return new Translations(texts, nextFailed, nextRunning, collapsed);
+            }
+            LinkedHashMap<String, String> nextTexts = new LinkedHashMap<String, String>(texts);
+            nextTexts.put(messageId, translation);
+            return new Translations(nextTexts, failed, nextRunning, collapsed);
+        }
+
+        public Translations toggled(String messageId) {
+            if (!texts.containsKey(messageId)) {
+                return this;
+            }
+            LinkedHashSet<String> nextCollapsed = new LinkedHashSet<String>(collapsed);
+            if (nextCollapsed.contains(messageId)) {
+                nextCollapsed.remove(messageId);
+            } else {
+                nextCollapsed.add(messageId);
+            }
+            return new Translations(texts, failed, running, nextCollapsed);
+        }
     }
 }

@@ -4,11 +4,17 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.treelearn.ai.gateway.AiGateway;
+
+import java.io.File;
 import com.treelearn.ai.gateway.DeepSeekGatewayFactory;
 import com.treelearn.ai.prompt.PromptBudget;
+import com.treelearn.app.files.AttachmentStore;
 import com.treelearn.app.generation.AiGatewayStreams;
 import com.treelearn.app.generation.GenerationCoordinator;
 import com.treelearn.app.generation.GenerationGateway;
+import com.treelearn.app.generation.MessageTranslator;
+import com.treelearn.app.generation.QuickModelGateway;
 import com.treelearn.app.artifact.DerivedService;
 import com.treelearn.app.library.LibraryData;
 import com.treelearn.app.navigation.NavigationData;
@@ -17,6 +23,9 @@ import com.treelearn.app.reading.ReadingStore;
 import com.treelearn.app.reading.SqliteReadingStore;
 import com.treelearn.app.search.BranchTitles;
 import com.treelearn.app.search.SearchRepository;
+import com.treelearn.app.search.web.ChatSearchStep;
+import com.treelearn.app.search.web.HttpWebSearchGateway;
+import com.treelearn.app.search.web.KeystoreSearchCredentials;
 import com.treelearn.app.ui.ChatCommands;
 import com.treelearn.app.ui.ChatData;
 import com.treelearn.app.ui.ChatDraftStore;
@@ -35,20 +44,29 @@ import com.treelearn.app.wiring.CoordinatorGenerationPort;
 import com.treelearn.app.wiring.GenerationPort;
 import com.treelearn.app.wiring.HomeWiring;
 import com.treelearn.app.wiring.LibraryWiring;
-import com.treelearn.app.wiring.LogcatTelemetry;
 import com.treelearn.app.wiring.NavigationWiring;
+import com.treelearn.app.wiring.PreferenceSearchSettingsStore;
+import com.treelearn.app.wiring.PreferenceVoiceSettingsStore;
 import com.treelearn.app.wiring.PromptLimits;
 import com.treelearn.app.wiring.SharedPreferencesChatDraftStore;
 import com.treelearn.app.wiring.SqliteChatStore;
+import com.treelearn.app.wiring.HomeStore;
 import com.treelearn.app.wiring.SqliteHomeStore;
+import com.treelearn.app.wiring.SqliteFileManagerStore;
 import com.treelearn.app.wiring.SqliteLibraryStore;
+import com.treelearn.app.wiring.SqliteModelSettingsStore;
+import com.treelearn.app.wiring.SqliteProviderAdminStore;
+import com.treelearn.app.wiring.SqliteQuickModelRoutes;
 import com.treelearn.app.wiring.SqliteSearchStore;
+import com.treelearn.app.wiring.SqliteTranslationRoutes;
 import com.treelearn.app.wiring.SqliteTreeCanvasStore;
+import com.treelearn.app.wiring.TelemetrySink;
 import com.treelearn.app.wiring.TreeCanvasWiring;
 import com.treelearn.core.domain.Branch;
 import com.treelearn.data.db.DatabaseTransactionRunner;
 import com.treelearn.data.db.TreeLearnDatabaseHelper;
 import com.treelearn.data.secret.KeystoreSecretStore;
+import com.treelearn.data.settings.SettingsRepository;
 
 import java.time.Clock;
 import java.util.concurrent.Executor;
@@ -110,8 +128,23 @@ public final class AppContainer {
     /** The search port: the statement runner, with its connection opened on first use. */
     private final SearchRepository searchRepository;
 
+    private final SqliteProviderAdminStore providerAdminStore;
+    private final SqliteModelSettingsStore modelSettingsStore;
+    private final PreferenceSearchSettingsStore searchSettingsStore;
+    private final PreferenceVoiceSettingsStore voiceSettingsStore;
+    private final AttachmentStore attachmentStore;
+    private final SqliteFileManagerStore fileManagerStore;
+    private final ChatSearchStep chatSearchStep;
+    private final MessageTranslator messageTranslator;
+
     /** The branch rows the search page names its results from - the conversation store, not a copy. */
     private final ChatStore chatStore;
+    /** The library store; the T-106 drawer reuses its topics() read through it. */
+    private final SqliteLibraryStore libraryStore;
+    /** The home store; T-104's stats detail reads the same statsRaw entry through it. */
+    private final HomeStore homeStore;
+    /** The one clock: "what time is it" has a single answer for the whole application. */
+    private final java.time.Clock clock;
 
     private final Context context;
 
@@ -123,22 +156,54 @@ public final class AppContainer {
         // database am I on" and "what time is it" have a single answer for the whole application.
         TreeLearnDatabaseHelper helper = new TreeLearnDatabaseHelper(applicationContext);
         DatabaseTransactionRunner transactions = new DatabaseTransactionRunner();
-        Clock clock = Clock.systemUTC();
+        Clock clock = Clock.systemDefaultZone();
 
         // The gateway reads the credential per call; the coordinator owns admission and recovery.
-        GenerationGateway gateway = new AiGatewayStreams(DeepSeekGatewayFactory.create(),
-                new KeystoreSecretStore(applicationContext));
+        AiGateway adminGateway = DeepSeekGatewayFactory.create();
+        KeystoreSecretStore adminSecrets = new KeystoreSecretStore(applicationContext);
+        AiGatewayStreams gateway = new AiGatewayStreams(adminGateway, adminSecrets,
+                "00000000-0000-0000-0000-000000000001");
+        boolean release = (applicationContext.getApplicationInfo().flags & 2) == 0;
         GenerationCoordinator coordinator = new GenerationCoordinator(helper, transactions,
-                gateway, clock, new LogcatTelemetry());
+                gateway, clock, TelemetrySink.forVariant(release));
         GenerationPort generation = new CoordinatorGenerationPort(coordinator);
         PromptBudget budget = PromptLimits.budget();
 
-        this.derivedService = new DerivedService(helper, transactions, gateway, budget, clock);
-        this.homeWiring = new HomeWiring(new SqliteHomeStore(helper, transactions), generation,
+        this.modelSettingsStore = new SqliteModelSettingsStore(helper,
+                new SettingsRepository(applicationContext));
+        this.attachmentStore = new AttachmentStore(helper,
+                new File(applicationContext.getFilesDir(), "attachments"));
+        this.fileManagerStore = new SqliteFileManagerStore(this.attachmentStore);
+        SqliteQuickModelRoutes quickModelRoutes = new SqliteQuickModelRoutes(helper,
+                this.modelSettingsStore);
+        QuickModelGateway derivedGateway = new QuickModelGateway(quickModelRoutes, providerId -> {
+            if ("00000000-0000-0000-0000-000000000001".equals(providerId)) {
+                adminSecrets.migrateLegacySecret(providerId);
+            }
+            return adminSecrets.read(providerId);
+        }, adminGateway::streamChat, gateway);
+        this.derivedService = new DerivedService(helper, transactions, derivedGateway, budget, clock);
+        this.messageTranslator = new MessageTranslator(new SqliteTranslationRoutes(helper,
+                this.modelSettingsStore), providerId -> {
+            if ("00000000-0000-0000-0000-000000000001".equals(providerId)) {
+                adminSecrets.migrateLegacySecret(providerId);
+            }
+            return adminSecrets.read(providerId);
+        }, adminGateway::streamChat, gateway, budget);
+        this.homeStore = new SqliteHomeStore(helper, transactions);
+        this.clock = clock;
+        this.homeWiring = new HomeWiring(homeStore, generation,
                 settingsStore, clock, budget, derivedService);
         this.chatStore = new SqliteChatStore(helper, transactions);
+        this.searchSettingsStore = new PreferenceSearchSettingsStore(
+                new SettingsRepository(applicationContext), adminSecrets);
+        this.voiceSettingsStore = new PreferenceVoiceSettingsStore(
+                new SettingsRepository(applicationContext));
+        this.chatSearchStep = new ChatSearchStep(this.searchSettingsStore,
+                new KeystoreSearchCredentials(adminSecrets), new HttpWebSearchGateway());
         this.chatWiring = new ChatWiring(chatStore, generation, settingsStore, clock, budget,
-                derivedService);
+                derivedService, this.modelSettingsStore::readSuggestions, this.chatSearchStep,
+                this.attachmentStore);
         this.treeCanvasWiring = new TreeCanvasWiring(
                 new SqliteTreeCanvasStore(helper, transactions));
         this.navigationWiring = new NavigationWiring(
@@ -146,10 +211,13 @@ public final class AppContainer {
         // The completed segment restores and deletes archived branches, and both are the navigation
         // store's own acts: handing the library that port is what keeps one subtree-deletion
         // implementation rather than a second one that could answer with a different set.
-        this.libraryWiring = new LibraryWiring(new SqliteLibraryStore(helper), navigationWiring);
+        this.libraryStore = new SqliteLibraryStore(helper);
+        this.libraryWiring = new LibraryWiring(libraryStore, navigationWiring);
         this.readingStore = new SqliteReadingStore(helper);
         this.searchRepository = new SqliteSearchStore(helper);
         this.chatDraftStore = new SharedPreferencesChatDraftStore(applicationContext);
+        this.providerAdminStore = new SqliteProviderAdminStore(helper, transactions, adminSecrets,
+                adminGateway, clock);
     }
 
     public static synchronized AppContainer get(Context context) {
@@ -166,6 +234,21 @@ public final class AppContainer {
 
     public KeyVault keyVault() {
         return settingsStore;
+    }
+
+    /** The drawer's quick-list source: the library store itself (T-106, one query, one text). */
+    public SqliteLibraryStore libraryStore() {
+        return libraryStore;
+    }
+
+    /** The stats detail page's raw source: the same store the home strip reads (T-104). */
+    public HomeStore homeStore() {
+        return homeStore;
+    }
+
+    /** The application clock: one owner, one answer (T-104's stats read rides it). */
+    public java.time.Clock clock() {
+        return clock;
     }
 
     /** The stored topics, read from the local database. */
@@ -249,17 +332,82 @@ public final class AppContainer {
         return searchRepository;
     }
 
+    /** The provider admin room's store: providers, their endpoints and their keys. */
+    public SqliteProviderAdminStore providerAdminStore() {
+        return providerAdminStore;
+    }
+
+    /** The per-role model choices the quick-model routes resolve against. */
+    public SqliteModelSettingsStore modelSettingsStore() {
+        return modelSettingsStore;
+    }
+
+    /** The web-search switch and engine choice the conversation's search step reads. */
+    public PreferenceSearchSettingsStore searchSettingsStore() {
+        return searchSettingsStore;
+    }
+
+    /** The voice settings the read-aloud feature reads. */
+    public PreferenceVoiceSettingsStore voiceSettingsStore() {
+        return voiceSettingsStore;
+    }
+
+    /** The attachment store: the one writer of the attachments directory (T-096). */
+    public AttachmentStore attachmentStore() {
+        return attachmentStore;
+    }
+
+    /** The file manager's read/delete port over the attachment store (T-096). */
+    public SqliteFileManagerStore fileManagerStore() {
+        return fileManagerStore;
+    }
+
+    /** The conversation's one web-search step, shared by every chat like the other ports. */
+    public ChatSearchStep chatSearchStep() {
+        return chatSearchStep;
+    }
+
+    /** The translation port: one translator, routed by the stored per-role models. */
+    public MessageTranslator messageTranslator() {
+        return messageTranslator;
+    }
+
     /**
      * The one owner of "what is this branch called": the conversation store's own branch rows.
      *
      * <p>Asked instead of joining a title into the search statement, because a second copy of the
      * branch-title read is a second answer to the same question - and a search row and the
-     * conversation it opens must never name two different branches.
+     * conversation it opens must never name two different branches. Since 054 it also answers where
+     * a branch sits (the ancestor path, walked from the same rows) and whether it is archived, so a
+     * result row shown in the library tells the truth about the branch it opens.
      */
     public BranchTitles branchTitles() {
-        return branchId -> {
-            Branch branch = chatStore.branch(branchId);
-            return branch == null ? null : branch.title();
+        return new BranchTitles() {
+            @Override
+            public String titleOf(String branchId) {
+                Branch branch = chatStore.branch(branchId);
+                return branch == null ? null : branch.title();
+            }
+
+            @Override
+            public BranchTitles.Badge badgeOf(String branchId) {
+                Branch branch = chatStore.branch(branchId);
+                if (branch == null) {
+                    return null;
+                }
+                // Ancestors only, nearest first: the row already carries the branch's own title.
+                java.util.Deque<String> names = new java.util.ArrayDeque<>();
+                String cursor = branch.parentBranchId;
+                while (cursor != null) {
+                    Branch parent = chatStore.branch(cursor);
+                    if (parent == null) {
+                        break;
+                    }
+                    names.addFirst(parent.title());
+                    cursor = parent.parentBranchId;
+                }
+                return new BranchTitles.Badge(String.join(" \u203a ", names), branch.isArchived());
+            }
         };
     }
 

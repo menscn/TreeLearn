@@ -4,7 +4,7 @@ id: T-2026-09-20-010
 title: 实现重试、重置与版本切换
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -130,6 +130,13 @@ Follow [code-document alignment](../rules/documentation.md).
 - 规模：生产代码 212 行（非空非注释口径，87 + 125），超 200 软上限、未超 500 硬上限；本任务不申请规模例外，按 verifier 警告级处理。
 
 ## Verification report
+
+### verifier #3 批量复核（2026-09-24，独立于本任务实现者）
+
+- Verdict: **PASS（设备项 deferred）**。TDD 闭环完整（RED exit 1 / GREEN exit 0 同命令、仓库外副本 GREEN、变异测试 4/22 精准转红、guard/lint/源码扫描全过），「本轮验证状态」表逐项如实标注；唯一缺失的是本报告段的判定本身。212 行超 200 软上限、未超 500，按警告级处理。
+- Fresh evidence（2026-09-24 批次 2）: `artifacts/evidence/P3-B1-gates-2026-09-24.txt`（全模块 JVM 套件 + lint + androidTest 编译，BUILD SUCCESSFUL / EXITCODE=0；全库 188 套件 1725 tests / 0 失败）、`P3-B1-no-kotlin-2026-09-24.txt`（EXITCODE=0）。
+- 补充核验: `PositionCommandsTest` 22 例在当前全量套件中 0 失败（JUnit XML 回读），与 T-010-green.txt 的历史读数一致；`AnswerVersionsInstrumentedTest` 8 例随 androidTest 编译通过（`P3-B1-gates-2026-09-24.txt`），执行仍 deferred。
+- Gaps（不变，均 deferred）: 设备执行项 —— `deferred — emulator not used this round (user instruction 2026-09-21)`。
 
 - Verdict: PENDING
 - Evidence: PENDING

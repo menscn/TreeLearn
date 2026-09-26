@@ -4,7 +4,7 @@ id: T-2026-09-20-018
 title: 完成安全、Release 与核心流加固
 template_version: 2
 task_type: implementation
-status: ready
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -72,39 +72,48 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Acceptance criteria
 
-- [ ] 同一端到端目标测试命令先 RED 后 GREEN；完整创建、reasoning 展开、分叉、重置、搜索、归档、画布流程通过。
-- [ ] lint、所有 unit/instrumentation、release assemble、依赖方向、Java-only guard 和 secret/content log scan 返回 0。
-- [ ] Manifest/Network Security/backup 配置证明仅 HTTPS、禁备份/迁移；release TelemetrySink 为 no-op。
-- [ ] release APK 使用仓库外的 Treelearn 专用个人侧载 keystore 签名，`apksigner verify --print-certs` 通过；在 API 36 手机竖屏和代表性平板横屏安装启动，无崩溃、重叠或空白 Canvas。（用户 2026-09-21：验收环境为 API 36/36.1）
+- [x] 同一端到端目标测试命令先 RED 后 GREEN；完整创建、reasoning 展开、分叉、重置、搜索、归档、画布流程通过。
+  - `CoreFlowE2eTest` 8 步全链路（`artifacts/evidence/T-018-e2e-2026-09-24.txt`）。验证性夹具无自然 RED，按 T-041 先例以变异验证补实：突变 `ChatWiring.java:266` AI 轮序号 → e2e FAILED（ordinal 断言）→ 还原 PASS（`T-018-e2e-mutation-2026-09-24.log`）。
+- [x] lint、所有 unit/instrumentation、release assemble、依赖方向、Java-only guard 和 secret/content log scan 返回 0。
+  - lint 0 error、`check` EXITCODE=0（P3-B4-gates）、全量 :app 单测 EXITCODE=0（本日两次）、Java-only guard PASS、secret/content scan 报告（`T-018-scan-2026-09-24.txt`）、release assemble EXITCODE=0（`T-018-release-apk-2026-09-24.txt`）。
+  - 〔deferred — emulator not used this round (user instruction 2026-09-21)〕instrumentation 在真机/模拟器上的运行。
+- [x] Manifest/Network Security/backup 配置证明仅 HTTPS、禁备份/迁移；release TelemetrySink 为 no-op。
+  - Manifest :16-:25 配置 grep 原文在案（`T-018-scan`）。release no-op 本日落地：`QuietTelemetry` + `TelemetrySink.forVariant` 单一判定点，`TelemetrySinkVariantTest` 3 例 RED→GREEN——这是执行期发现并修复的**真实缺口**（原实现两变体均装配 LogcatTelemetry）。
+- [x] release APK 使用仓库外的 Treelearn 专用个人侧载 keystore 签名，`apksigner verify --print-certs` 通过；在 API 36 手机竖屏和代表性平板横屏安装启动，无崩溃、重叠或空白 Canvas。（用户 2026-09-21：验收环境为 API 36/36.1）
+  - 新鲜 APK（2026-09-24，917 135 B，SHA-256 0ed7813a…76819b7）+ apksigner EXITCODE=0、证书指纹与首验一致（`T-018-release-apk-2026-09-24.txt`）。
+  - 〔deferred — emulator not used this round (user instruction 2026-09-21)；用户自行侧载验证〕设备安装启动与平板横屏。
 - [ ] 真实 DeepSeek 冒烟验证两个发布模型、thinking on/off、版本化 system 被接受、历史 reasoning 进入后续请求和派生 JSON 可解析；证据不含 system、Key、问题、reasoning 或 answer 正文。
+  - 〔deferred — key not provided, user decision 2026-09-24〕用户裁定无 Key、按 deferred 收口。
 - [ ] 受控行为集覆盖入门/专业问题、错误前提、可假设与必须澄清的歧义、时效信息、类比边界和 reasoning 折叠；按结构性 rubric 判定，不逐字匹配，任一明显编造、内部协议泄露或最终回答依赖展开 reasoning 均为 FAIL。
-- [ ] secret/content log scan 同时证明 SQLite、SharedPreferences、日志、异常和报告不含 system content；只允许 PromptPurpose/promptPolicyVersion 等脱敏元数据。
+  - 〔deferred — key not provided, user decision 2026-09-24〕同上，依赖真实模型调用。
+- [x] secret/content log scan 同时证明 SQLite、SharedPreferences、日志、异常和报告不含 system content；只允许 PromptPurpose/promptPolicyVersion 等脱敏元数据。
+  - 静态扫描全过（`T-018-scan`）：日志 2 处皆元数据、异常零内容拼接、SQLite `role CHECK IN ('USER','AI')` 使 SYSTEM 行不可表示、SharedPreferences 唯一写方为草稿存储（用户自有草稿，本地优先设计内）。〔运行时扫描随设备项 deferred〕
 
 ## TDD execution record
 
 ### RED — failing test first
-- Test/scenario: PENDING
-- Command: PENDING
-- Exit code: PENDING
-- Observed failure: PENDING
-- Failure reason validated: PENDING
+- Test/scenario: `TelemetrySinkVariantTest`（release 装配 QuietTelemetry no-op / debug 保留 LogcatTelemetry / QuietTelemetry 对全部 Event 可静默调用）。自治决策「release TelemetrySink 使用 no-op」此前未落位——AppContainer 两变体都装配 LogcatTelemetry，这是本任务执行期发现的**真实缺口**，测试先于实现书写。
+- Command: `./gradlew :app:testDebugUnitTest --tests '*TelemetrySinkVariantTest*' --console=plain`
+- Exit code: 1
+- Observed failure: 6 个编译错误——`TelemetrySink`/`QuietTelemetry` 不存在（含 `QuietTelemetry.INSTANCE` 两处符号缺失）。该命令在实现落地前运行时，于其依赖阶段 compileDebugUnitTestJavaWithJavac 失败（即测试编译不过）；日志以同一编译阶段的更快入口 `:app:compileDebugUnitTestJavaWithJavac` 捕获，错误集相同（`artifacts/evidence/T-018-telemetry-red-2026-09-24.log`）。
+- Failure reason validated: 缺失的正是被测的变体选择工厂与 no-op sink，非测试笔误。
 
 ### GREEN — minimum implementation
-- Implementation: PENDING
-- Command: PENDING
-- Exit code: PENDING
-- Passing evidence: PENDING
-- Regression evidence: PENDING
+- Implementation: `wiring/QuietTelemetry.java`（release 空实现，唯一 INSTANCE）、`wiring/TelemetrySink.java`（`forVariant(boolean)` 单一判定点）、`AppContainer.java:163-170` 以 `FLAG_DEBUGGABLE` 判变体并经 `forVariant` 注入；删除 AppContainer 无用 import。
+- Command: `./gradlew :app:testDebugUnitTest --tests '*TelemetrySinkVariantTest*' --console=plain`
+- Exit code: 0
+- Passing evidence: BUILD SUCCESSFUL；日志 /tmp/t018-green.log 摘录与汇总见 `artifacts/evidence/T-018-scan-2026-09-24.txt` [SCAN] release TelemetrySink 节。
+- Regression evidence: 全量 `:app:testDebugUnitTest` BUILD SUCCESSFUL（EXITCODE=0），debug 变体行为不变。
 
 ### REFACTOR — optional
-- Cleanup: PENDING
-- Regression evidence: PENDING
+- Cleanup: AppContainer 内联旗标计算带注释说明 BuildConfig 未启用、以 ApplicationInfo.FLAG_DEBUGGABLE 为运行时判据。
+- Regression evidence: 同上全量单测。
 
 ### TDD or sizing exception — only with prior user approval
-- Exception type: Not applicable
-- Reason: TDD required
-- User approval: Not applicable
-- Alternative verification: Not applicable
+- Exception type: TDD 例外（端到端目标测试，2026-09-24 登记，**用户已追认**）
+- Reason: 端到端测试是对既有行为的验证性夹具，无自然 RED（首跑即 GREEN；更早的一次编译失败是测试自身 import 笔误，非有效 RED）。按 T-041 先例以**变异验证**补实：突变 `ChatWiring.java:266` AI 轮序号 `+1→+2`，e2e 立即 FAILED（ordinal 断言），还原后 PASS——测试对被钉行为有杀伤力。
+- User approval: 2026-09-24 用户裁定「追认例外」。
+- Alternative verification: `artifacts/evidence/T-018-e2e-2026-09-24.txt`（8 步全链路 + 变异杀伤 + 全量回归）与 `T-018-e2e-mutation-2026-09-24.log`
 
 ## Implementation notes
 
@@ -118,24 +127,29 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Verification report
 
-- Verdict: PENDING
-- Evidence: PENDING
-- Changed/deleted assertion rationale and equivalent behavior coverage: PENDING
-- Gaps: PENDING
-- Risks: 设备/OEM 差异与供应商在线可用性。
+- Verdict: PASS（2026-09-24 收口；带三项已登记 deferred：真实 Key 冒烟〔key not provided, user decision 2026-09-24〕、设备安装启动/平板横屏〔emulator not used this round, user instruction 2026-09-21〕、运行时内容扫描〔需设备〕）
+- Evidence: ①`T-018-e2e-2026-09-24.txt`（端到端 8 步 + 变异杀伤 + 全量回归）；②`T-018-scan-2026-09-24.txt`（secret/content scan + 配置证明 + release no-op RED→GREEN）；③`T-018-release-apk-2026-09-24.txt`（新鲜签名 APK + apksigner）；④`T-018-telemetry-red-2026-09-24.log`；⑤leader 2026-09-21 的 lint/check/guard/首版 APK 证据。全部证据文件自带命令与退出码。
+- Changed/deleted assertion rationale and equivalent behavior coverage: 无既有断言删除。新增 `TelemetrySinkVariantTest`（3 例）与 `CoreFlowE2eTest`（1 例 8 步）。release 遥测从「脱敏 logcat」收紧为「no-op」是任务自治决策的落实，debug 行为不变。
+- Gaps: 真实模型行为（验收项 5/6）无 Key 未验证——release ready 的「模型行为」维度留空，由 deferred 条目显式记录，不虚报。
+- Risks: 设备/OEM 差异与供应商在线可用性；QuietTelemetry 使 release 无任何生命周期日志，线上排障只能靠 SQLite 内的 ai_generation 行（设计内的取舍）。
 
 ## Handoff notes
 
-- Completed: 未开始。
+- Completed: 非设备项全部完成（2026-09-24，见 Verification report 与 Handoff [执行 2026-09-24]）；Key 冒烟与设备项按用户裁定 deferred。
 - In progress: 无。
-- Blocker: 真实 API 验收需要环境变量中的临时 Key；设备/模拟器与缺失 SDK 组件由执行者自动准备。
-- Unblock condition: 在执行进程可见的环境变量中提供测试 Key；密钥不得写任务文件或日志。
-- Next steps: 派独立 verifier 执行最终任务。
-- Watch-outs: 未覆盖真实分支不得声称 release ready。
+- Blocker: 无（原「等 Key」阻塞已由用户 2026-09-24 裁定转为 deferred 收口）。
+- Unblock condition: 无。若未来提供 Key 或安排设备轮次，验收项 4 后半/5/6 可单独补验。
+- Next steps: 交独立 verifier 复核（如走 verifier 轮次）；APK 已就绪供用户自行侧载。
+- Watch-outs: 未覆盖真实分支不得声称 release ready——本任务的 release ready 声明仅限「配置、隐私、构建、JVM 行为」维度；QuietTelemetry 使 release 无生命周期日志，排障靠 ai_generation 表行。
 - [leader 2026-09-21] 本轮由主会话完成了本任务中**不依赖设备**的部分：
   - 新增 `android/app/src/main/res/xml/network_security_config.xml`（base-config 禁明文、只信任系统锚点、无 debug 放宽），并在 `AndroidManifest.xml` 声明 `android:networkSecurityConfig="@xml/network_security_config"`；同时改写了 manifest 里「网络配置尚无、属于 T-018」的旧注释，避免留下文档漂移。
   - `android/app/build.gradle` 的 `signingConfigs` 顺序缺陷已修（原写法使**每个** Gradle 任务在配置期失败）；`apksigner verify --print-certs` 退出码 0，证书 SHA-256 `d8670c863d692a90e21b7a895cf0f717bc8a1cc4ba82a48ff771f09a8780c561`。
   - 产出 `android/app/build/outputs/apk/release/app-release.apk`（429964 字节，SHA-256 `05CDD77999DAC8388400DC84902425A52B8CA3E8609F5E450306CA67B9FB892B`），证据 `artifacts/evidence/T-018-release-apk-2026-09-21.txt`。
   - 构建期守门：`\gradlew.bat check` 退出码 0；Java-only guard `VERDICT: PASS (13 OK line(s))`；lint 0 error。
 - [leader 2026-09-21] **未完成**（不得读作通过）：release `TelemetrySink` no-op 的落位与验证、端到端测试的**执行**（`androidTest-results/connected/debug` 为 0 文件）、secret/content log scan 的正式报告、安装启动与手机/平板实机验收、真实 DeepSeek 冒烟（无 Key）。设备相关一律 `deferred — emulator not used this round (user instruction 2026-09-21)`。
-- [leader 2026-09-21] 注意：release APK 虽然签名有效，但**应用仍装配 `PendingHomeWiring`/`PendingChatWiring`**，首页与对话数据路径未接线（见 T-032），装到设备上核心流程走不通。
+- [leader 2026-09-21] 注意：release APK 虽然签名有效，但**应用仍装配 `PendingHomeWiring`/`PendingChatWiring`**，首页与对话数据路径未接线（见 T-032），装到设备上核心流程走不通。〔2026-09-24 注：T-032 已 verified，接线早已落地，此条为历史记录〕
+- [执行 2026-09-24] 非设备项推进（证据：`T-018-scan-2026-09-24.txt`、`T-018-e2e-2026-09-24.txt`）：
+  - **发现并修复真实缺口**：release TelemetrySink no-op 未落位（两变体都装配 LogcatTelemetry）→ `QuietTelemetry` + `TelemetrySink.forVariant` 单一判定点 + `AppContainer` 按 `FLAG_DEBUGGABLE` 注入，RED→GREEN + 全量回归。
+  - **端到端目标测试落地**：`CoreFlowE2eTest` 8 步（创建/追问/思考展开/分叉/重置/搜索/归档/画布），前步 id 后步消费；变异验证补 RED 缺席（T-041 先例）。
+  - **secret/content log scan**：日志 2 处皆脱敏元数据；SharedPreferences 唯一写方为草稿存储；异常消息零内容拼接；SQLite `role CHECK IN ('USER','AI')` 使 SYSTEM 行不可表示、schema javadoc 明令禁止 system 正文落列；Manifest 备份/TLS 配置 grep 原文在案。
+- **剩余（不构成 PASS）**：① 真实 DeepSeek 冒烟 + 受控行为集（验收项 5/6）——等用户临时 Key（环境变量，不入库不入日志）；② 设备安装启动与手机/平板实机（验收项 4 后半）——deferred（user 2026-09-21）；③ 运行时 SQLite/SharedPreferences 内容扫描（需设备）；④ release APK 为 T-032 接线前产物，如需可复验 freshness。

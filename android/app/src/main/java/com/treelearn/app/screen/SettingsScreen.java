@@ -38,6 +38,7 @@ public final class SettingsScreen extends LinearLayout {
 
     private SettingsActions actions;
     private Runnable onBack;
+    private Runnable onProvidersPressed;
 
     public SettingsScreen(Context context) {
         super(context);
@@ -70,6 +71,61 @@ public final class SettingsScreen extends LinearLayout {
 
     public void setOnBackPressed(Runnable onBack) {
         this.onBack = onBack;
+    }
+
+    /** Wires the four sub-settings entries; {@code onProvidersPressed} is kept for its subtitle. */
+    public void setOnProvidersPressed(Runnable onProvidersPressed) {
+        this.onProvidersPressed = onProvidersPressed;
+        findViewById(R.id.settings_providers_entry).setOnClickListener(
+                view -> {
+                    if (onProvidersPressed != null) {
+                        onProvidersPressed.run();
+                    }
+                });
+    }
+
+    public void setOnModelsPressed(Runnable onModelsPressed) {
+        findViewById(R.id.settings_models_entry).setOnClickListener(
+                view -> {
+                    if (onModelsPressed != null) {
+                        onModelsPressed.run();
+                    }
+                });
+    }
+
+    public void setOnSearchPressed(Runnable onSearchPressed) {
+        findViewById(R.id.settings_search_entry).setOnClickListener(
+                view -> {
+                    if (onSearchPressed != null) {
+                        onSearchPressed.run();
+                    }
+                });
+    }
+
+    public void setOnVoicePressed(Runnable onVoicePressed) {
+        findViewById(R.id.settings_voice_entry).setOnClickListener(
+                view -> {
+                    if (onVoicePressed != null) {
+                        onVoicePressed.run();
+                    }
+                });
+    }
+
+    public void setOnFilesPressed(Runnable onFilesPressed) {
+        findViewById(R.id.settings_files_entry).setOnClickListener(
+                view -> {
+                    if (onFilesPressed != null) {
+                        onFilesPressed.run();
+                    }
+                });
+    }
+
+    public void setModelsSubtitle(String text) {
+        ((TextView) findViewById(R.id.settings_models_sub)).setText(text);
+    }
+
+    public void setProvidersSubtitle(String text) {
+        ((TextView) findViewById(R.id.settings_providers_sub)).setText(text);
     }
 
     public void render(SettingsViewState state) {

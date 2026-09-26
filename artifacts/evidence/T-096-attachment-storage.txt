@@ -1,0 +1,107 @@
+T-096 附件存储与文件管理 —— 汇总证据
+
+生成方式：本文件由 .trae/scripts/dev/make_t096_evidence.py 实时执行命令/摘录运行日志生成（UTF-8）。
+每个 CMD 自带命令全文与 EXITCODE，可独立复核。
+
+CMD-1  RED：目标测试编译失败（新契约符号缺失）
+来源: artifacts/evidence/T-096-red-2026-09-24.log （EXITCODE=1，命令见该日志头部）
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\AttachmentStorageInstrumentedTest.java:15: 错误: 程序包com.treelearn.app.files不存在
+  D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\AttachmentStorageInstrumentedTest.java:15: 错误: 程序包com.treelearn.app.files不存在
+EXITCODE=1
+
+CMD-2  GREEN：存储/DAO 5 例 + 文件管理页 2 例，真机 7/7
+来源: artifacts/evidence/T-096-green-2026-09-24.log （EXITCODE=0，命令见该日志头部）
+Starting 7 tests on ALP-AN00 - 13
+Finished 7 tests on ALP-AN00 - 13
+BUILD SUCCESSFUL in 51s
+EXITCODE=0
+
+CMD-3  既有 schema 守卫测试真机 25/25（含 11 表列 census、索引集、V1→V4 升级）
+来源: artifacts/evidence/T-096-schema-instrumented-2026-09-24.log （EXITCODE=0，命令见该日志头部）
+Starting 25 tests on ALP-AN00 - 13
+Finished 25 tests on ALP-AN00 - 13
+BUILD SUCCESSFUL in 36s
+EXITCODE=0
+
+CMD-4  app 全量 JVM 单测计数（test-results XML 汇总，与运行日志同口径）
+命令: ./gradlew.bat :app:testDebugUnitTest → artifacts/evidence/T-096-full-unittest-2026-09-24.log （EXITCODE=0）
+EXITCODE=0
+files=69 tests=615 skipped=0 failures=0 errors=0
+
+CMD-5  check 门禁（含 data 模块 58 例与 lint）
+来源: artifacts/evidence/T-096-check-2026-09-24.log （EXITCODE=0，命令见该日志头部）
+BUILD SUCCESSFUL in 30s
+EXITCODE=0
+
+CMD-6  Java-only 守门（无 Kotlin 文件/依赖）
+来源: artifacts/evidence/T-096-nokotlin-2026-09-24.txt （EXITCODE=0，命令见该日志头部）
+﻿EXITCODE=0
+VERDICT: PASS (13 OK line(s))
+
+CMD-7  数据层真机回归 31/31（外壳/归档/导航/画布存储/ProviderModel 升级）
+来源: artifacts/evidence/T-096-regression-instrumented-2026-09-24.log （EXITCODE=0，命令见该日志头部）
+Starting 31 tests on ALP-AN00 - 13
+Finished 31 tests on ALP-AN00 - 13
+BUILD SUCCESSFUL in 43s
+EXITCODE=0
+
+CMD-8  V3→V4 迁移语句源（与 onCreate 共用 createTable()+同一 DDL 数组）
+命令: 摘录自 android\data\src\main\java\com\treelearn\data\db\TreeLearnSchema.java 的 migrationV3ToV4Statements()（另见真机升级用例：
+ProviderModelDaoInstrumentedTest.aVersionTwoDatabase… 与 SqliteSchemaInstrumentedTest
+aVersionOneDatabase… 均在本轮 31/31、25/25 中全绿）
+EXITCODE=0
+共用同一 DDL 数组: 一致
+
+private static List<String> migrationV3ToV4Statements() {
+        return Collections.unmodifiableList(Arrays.asList(
+                createTable(Attachments.TABLE, ATTACHMENTS_DEFINITIONS),
+                createTable(MessageAttachments.TABLE, MESSAGE_ATTACHMENTS_DEFINITIONS),
+                "CREATE UNIQUE INDEX " + INDEX_ATTACHMENTS_CONTENT_HASH + " ON "
+                        + Attachments.TABLE + "(" + Attachments.CONTENT_HASH + ")",
+                "CREATE INDEX " + INDEX_MESSAGE_ATTACHMENTS_MESSAGE + " ON "
+                        + MessageAttachments.TABLE + "(" + MessageAttachments.MESSAGE_ID + ")",
+                "CREATE INDEX " + INDEX_MESSAGE_ATTACHMENTS_ATTACHMENT + " ON "
+                        + MessageAttachments.TABLE + "(" + MessageAttachments.ATTACHMENT_ID + ")"));
+
+CMD-9  建表入场记录 §5.2（用户已确认：双表 + message_id CASCADE + attachment_id 语义引用）
+命令: cmd /c "findstr /n /c:5.2 /c:attachments /c:CASCADE "Docs\05-technical-design\知芽（TreeLearn）Android SQLite 建表入场确认清单_V1.0.md""
+EXITCODE=0
+48:- [ ] **待用户确认的字段语义修正**（2026-09-21，由 T-004/T-022 实现期发现并已落库，尚未追认）：`branches.anchorHash` 由「非根分支必填」改为「仅 ranged 锚点必填，整条回答分叉时为空」。原约束与领域模型 `BranchAnchor.wholeAnswer()` 直接矛盾——`wholeAnswer()` 按设计产出四字段全空，旧 CHECK 使**每一条整条回答分叉都无法写入**。修正依据 `技术方案 §5.2`：「整条回答分叉时偏移为空，但版本引用仍必填」（原文只把版本引用列为必填）。补偿措施为锚点四字段同生同灭 CHECK，已在真机 API 36 上以「两类合法形态可写 + 六种半截/逆向形态被 `code 275` 拒绝」的用例收口。请确认该语义，或要求改回并另行给出整条回答分叉的写入方案。
+55:> 本节回填 083 的文档欠账，并落 096 的两张新表入场记录。**§5.2 为待用户确认草案——确认前不得实现迁移。** 确认通过后，§头表数量更新为 11。
+66:### 5.2 新增：`attachments` / `message_attachments`（T-096，已确认）
+68:> **2026-09-24 用户确认：双表 + `message_id` ON DELETE CASCADE 偏离方案通过**（会话内拍板，T-096 据此开工）。
+74:| `attachments` | 一份已复制入私有目录的文件：内容哈希、显示名、mime、大小、解析状态与解析文本缓存 | 附件存储层（096）/ 选择解析（097）→ 文件管理页（096）、消息注入（097）、孤儿清理（098） | UUID PK（对齐 §3「全部 UUID」约定，偏离 SPEC 草案的「自增」——草案自述最终以实现+reviewer 为准） | 每唯一文件 1 行；随使用线性增长；哈希去重压缩重复 | 仅经文件管理页显式删除或 098 孤儿双确认清理；**不随消息/分支/主题删除级联** | `display_name`、`extracted_text` 含用户文档内容（本地库，不上传） | `content_hash` **UNIQUE**（幂等去重键）；`created_at`/`updated_at` 为 UTC epoch millis | 云备份接管本地存储（082 Deferred），或附件能力移除 |
+75:| `message_attachments` | 一条消息对一份附件的引用（1 引用 1 行） | 发送路径（097）→ 消息附件标注、098 孤儿判定 | UUID PK | 每消息每附件 1 行；随对话增长 | 见 ⚠ 级联语义 | 无正文（纯引用） | `message_id` 索引、`attachment_id` 索引；均 FK 语义指向 `messages.id` / `attachments.id` | 同上 |
+77:**⚠ 与 SPEC-082 草案字面的一处偏离（请一并确认）**：SPEC 写「`message_id` 不级联删除——删除消息时引用行由清理链路处理」。落库后若**不**级联，删除带引用的消息会因 `foreign_keys=ON` 直接失败，破坏既有消息删除主路径（053 已验收行为）。本记录改为：`message_id` **ON DELETE CASCADE**（引用行随消息消失），`attachment_id` **不级联**（文件记录永不随消息删除）——消息删除后附件自动成为「零引用」候选，仍由 098 的「引用表零引用 + 消息表无记录」**双确认**判定与用户确认后清理，文件绝不静默消失。该语义使 SPEC 的三条硬约束（不改消息主表、引用挂消息 ID、一文件一物理记录）全部保持成立。
+
+CMD-10  生产行数与归属增量（049/082 族多任务同树未提交，单一 diff 无法隔离单片，
+        归属证明 = 新文件整文件 + 修改文件按 T-096 独有标记的 diff 筛选）
+命令: git diff HEAD -- <各修改文件> 配合独有标记筛选；新文件 wc 非空行
+注: ProviderModelDaoInstrumentedTest / ProviderModelSchemaTest / TreeLearnSchemaQuoteInvariantTest
+   为 T-083 的未跟踪新文件（git ??），本轮对它们的 fixture 重塑/版本字面更新无法用 git 隔离，
+   以本轮门禁（schema 25/25、回归 31/31、check 0）作为改动正确性证据。
+  新文件 android/data/src/main/java/com/treelearn/data/db/dao/AttachmentDao.java : 224 非空行
+  新文件 android/app/src/main/java/com/treelearn/app/files/AttachmentStore.java : 222 非空行
+  新文件 android/app/src/main/java/com/treelearn/app/ui/FileManagerPresenter.java : 130 非空行
+  新文件 android/app/src/main/java/com/treelearn/app/wiring/SqliteFileManagerStore.java : 37 非空行
+  新文件 android/app/src/main/java/com/treelearn/app/screen/FileManagerScreen.java : 183 非空行
+  新文件 android/app/src/androidTest/java/com/treelearn/app/AttachmentStorageInstrumentedTest.java : 257 非空行
+  新文件 android/app/src/androidTest/java/com/treelearn/app/FileManagerScreenInstrumentedTest.java : 129 非空行
+  新文件 android/app/src/main/res/values/ids.xml : 7 非空行
+  android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java : +49/-0（T-096 独有标记筛选）
+  android/app/src/main/java/com/treelearn/app/MainActivity.java : +8/-0（T-096 独有标记筛选）
+  android/app/src/main/java/com/treelearn/app/screen/SettingsScreen.java : +1/-0（T-096 独有标记筛选）
+  android/app/src/main/res/layout/screen_settings_body.xml : +4/-0（T-096 独有标记筛选）
+  android/app/src/main/res/values/strings.xml : +15/-0（T-096 独有标记筛选）
+  android/app/src/androidTest/java/com/treelearn/app/SqliteSchemaInstrumentedTest.java : +9/-0（T-096 独有标记筛选）
+  android/app/src/androidTest/java/com/treelearn/app/ProviderModelDaoInstrumentedTest.java : +0/-0（T-096 独有标记筛选）
+  android/data/src/test/java/com/treelearn/data/db/ProviderModelSchemaTest.java : +0/-0（T-096 独有标记筛选）
+  android/data/src/test/java/com/treelearn/data/db/TreeLearnSchemaQuoteInvariantTest.java : +0/-0（T-096 独有标记筛选）
+  合计：新文件 1189 非空行 + 修改文件归属增量 +86/-0
+
+CMD-11  db-migration-reviewer 复核结论（子代理按 .trae/agents/db-migration-reviewer.md 执行，只读）
+结论: PASS —— 迁移与 onCreate 共用 createTable()+同一 DDL 数组（逐字一致，无 drift）；
+迁移纯增量（2×CREATE TABLE + 3×CREATE INDEX，无 ALTER/DROP，Android SQLite 原生支持）；
+message_id 强制 FK + ON DELETE CASCADE、attachment_id 语义引用、content_hash UNIQUE
+幂等去重均与入场记录 §5.2 一致；DAO 列下标与 SELECT 列序完全对应。
+Non-blocking 建议 3 条（引用行唯一约束 / 多选列微调 / 无种子无触发器符合设计）已记入任务 Handoff。

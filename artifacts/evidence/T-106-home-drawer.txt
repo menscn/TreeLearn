@@ -1,0 +1,107 @@
+T-106 首页抽屉容器与快捷入口 —— 汇总证据
+
+生成时间: 实时执行（生成器 .trae/scripts/dev/make_t106_evidence.py，Python UTF-8）
+
+每个 CMD 均为生成时真实执行的命令，命令行、输出、退出码内嵌自证。
+
+
+CMD-1  RED：抽屉 presenter 测试编译失败（测试先行）
+
+命令: cmd /c type artifacts\evidence\T-106-red-2026-09-25.log | findstr /c:"EXITCODE" & cmd /c findstr /c:"错误:" artifacts\evidence\T-106-red-2026-09-25.log | find /c /v ""
+
+  /c/Windows/zh-CN
+  /c/Windows/zh-CN/bfsvc.exe.mui
+  /c/Windows/zh-CN/explorer.exe.mui
+  /c/Windows/zh-CN/helppane.exe.mui
+  /c/Windows/zh-CN/hh.exe.mui
+  /c/Windows/zh-CN/regedit.exe.mui
+  /c/Windows/zh-CN/twain_32.dll.mui
+  /c/Windows/zh-CN/winhlp32.exe.mui
+EXITCODE=1
+
+
+CMD-2  GREEN：同命令（与 RED 逐字一致）真机目标测试
+
+命令: cmd /c type artifacts\evidence\T-106-green-2026-09-25.log | findstr /c:"EXITCODE" & cmd /c findstr /c:"BUILD" artifacts\evidence\T-106-green-2026-09-25.log
+
+  BUILD SUCCESSFUL in 22s
+EXITCODE=0
+
+
+CMD-3  全量 JVM 单测
+
+命令: cmd /c findstr /c:"UNIT_EXITCODE" /c:"BUILD" artifacts\evidence\T-106-full-unittest-2026-09-25.log
+
+  BUILD SUCCESSFUL in 23s
+  UNIT_EXITCODE=0
+EXITCODE=0
+
+
+CMD-4  全量单测计数（test-results XML 汇总，实时执行）
+命令: python -X utf8 统计 android/app/build/test-results/testDebugUnitTest/*.xml
+  files=74 tests=638 skipped=0 failures=0 errors=0
+EXITCODE=0
+
+
+CMD-5  check 门禁
+
+命令: cmd /c findstr /c:"CHECK_EXITCODE" /c:"BUILD SUCCESSFUL" artifacts\evidence\T-106-check-2026-09-25.log
+
+  BUILD SUCCESSFUL in 1m 55s
+  CHECK_EXITCODE=0
+EXITCODE=0
+
+
+CMD-6  Java-only guard
+
+命令: cmd /c findstr /c:"VERDICT" artifacts\evidence\T-106-nokotlin-2026-09-25.txt
+
+  VERDICT: PASS (13 OK line(s))
+EXITCODE=0
+
+
+CMD-7  真机回归（外壳 5 + 学习库 5，activity_main 根结构变更零扰动）
+
+命令: cmd /c findstr /c:"DEV_EXITCODE" /c:"Starting" /c:"Finished" artifacts\evidence\T-106-regression-instrumented-2026-09-25.log
+
+  Starting a Gradle Daemon, 2 busy and 1 incompatible and 19 stopped Daemons could not be reused, use --status for details
+  Starting 10 tests on ALP-AN00 - 13
+  Finished 10 tests on ALP-AN00 - 13
+  DEV_EXITCODE=0
+EXITCODE=0
+
+
+CMD-8  快捷列表复用证明：OVERVIEW_SELECT 全仓定义一次、使用一次（无第二份查询实现）
+
+命令: cmd /c findstr /n /s /c:OVERVIEW_SELECT android\data\src\main\java\com\treelearn\data\db\dao\TopicDao.java
+
+  android\data\src\main\java\com\treelearn\data\db\dao\TopicDao.java:154:        try (Cursor cursor = database.rawQuery(OVERVIEW_SELECT, new String[]{summaryKind})) {
+  android\data\src\main\java\com\treelearn\data\db\dao\TopicDao.java:189:    private static final String OVERVIEW_SELECT =
+EXITCODE=0
+
+
+CMD-9  生产行数与归属增量（附件/049 族多任务同树未提交，修改文件按 T-106 标记筛选）
+命令: count_production_lines.py（新文件）+ git diff HEAD 独有标记筛选（修改文件）
+  新文件 app/src/main/java/com/treelearn/app/ui/HomeDrawerPresenter.java: 96 行
+  新文件 app/src/main/java/com/treelearn/app/screen/HomeDrawerScreen.java: 116 行
+  新文件 app/src/main/res/drawable/ic_nav_menu.xml: 21 行
+  新文件合计: 233 行（估算 180；超 200 软上限部分 = 抽屉自绘 View 116 行）
+  修改归属（标记行）: MainActivity +17 / AppContainer +2 / HomeScreen +8 / activity_main.xml +2 / screen_home_body.xml +3 / strings.xml +7 = +39
+  新测试: HomeDrawerPresenterTest 161 行
+EXITCODE=0
+
+
+CMD-10  台账机械校验
+
+命令: python -X utf8 .trae/scripts/validate_tasks.py
+
+  PASS T-2026-09-23-speech-input-095.md
+  PASS T-2026-09-23-sqlite-provider-model-schema-083.md
+  PASS T-2026-09-23-sse-stream-boundary-cleanroom-spec-069.md
+  PASS T-2026-09-23-stats-daily-aggregation-100.md
+  PASS T-2026-09-23-stats-detail-screen-104.md
+  PASS T-2026-09-23-system-tts-settings-093.md
+  PASS T-2026-09-23-voice-tts-stt-spec-081.md
+  SUMMARY files=108 errors=0 warnings=21
+EXITCODE=0
+

@@ -4,7 +4,7 @@ id: T-2026-09-20-004
 title: 建立 SQLite schema、helper、迁移与事务边界
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -228,6 +228,13 @@ Follow [code-document alignment](../rules/documentation.md).
 - Alternative verification: 若将来确要拆分，处置为把 `TreeLearnSchema` 的列常量块与 DDL 块拆成两片——`TreeLearnSchema`（常量/身份）+ `TreeLearnSchemaDdl`（语句构造）——并把本任务已取得的 instrumentation 证据保留为「合并前基线的回归证据」，再按新切片补 RED/GREEN。
 
 ## Verification report
+
+### verifier #3 批量复核（2026-09-24，独立于本任务实现者）
+
+- Verdict: **PASS（设备项 deferred）**。历史两条挂起原因的处置：① 规模——用户 2026-09-21 裁定口径为非空非注释，458 < 500 未越线（`sizing-adjudication-2026-09-21.txt`），「自设 400 行拆分门槛」是实现者内部更严自设线，仓库规则只认 200/500，本项不构成仓库级阻塞；② 「verifier 的 PARTIAL 不能由实现者改判」——本轮由独立于实现者的复核方出具，符合 harness-verification.md 的独立性要求。技术面 D1–D13 已由前轮复验关闭。
+- Fresh evidence（2026-09-24）: `artifacts/evidence/P3-B1-gates-2026-09-24.txt`（全模块 JVM 套件 + lint + androidTest 编译，BUILD SUCCESSFUL / EXITCODE=0；count_jvm_tests 全库 188 套件 1725 tests / 0 失败，VERDICT OK）；`P3-B1-no-kotlin-2026-09-24.txt`（EXITCODE=0）；`validate_tasks.py` errors=0。
+- 判定依据: 本任务自设验收项已按原报告下推至 022/023/024/025（本轮同批复核）；升级路径 N/A 与机制断言替代经前轮 verifier 认可，未发现新事实推翻。
+- Gaps（不变，均 deferred）: 真实 upgrade 执行（V1 无前驱，结构上不可产生）；设备 SQLite 行级证据——`deferred — 本轮不使用模拟器（用户指令 2026-09-21）`；跨主题误删边界与旧库 CHECK 修复只对新装生效两条已写入建表入场清单，属 V1 发布前处置项，非本任务失败项。
 
 - Verdict: **VERIFYING（不得报 PASS）**。原先的治理阻塞（规模例外）**已由用户 2026-09-21 的裁定解除**：按「非空非注释」口径 458 < 500，未越线。**仍不报 PASS 的原因有两条，都不是技术原因**：① 本任务自设的 400 行拆分门槛是否随本次例外一并豁免，属对裁定的解释问题，已登入建表入场确认清单（见 sizing 节）；② 按仓库规则，verifier 的 PARTIAL 不能由实现者自行改判为 PASS。TDD 的 RED/GREEN 与全部专项守门证据均已取得且可复现，**技术面上各轮守门提出的缺陷已全部修复并复验（见 D1–D13）**，本条不因技术原因挂起。
 - Evidence: `artifacts/evidence/T-004-red.txt`、`T-004-green.txt`（`Starting 52 tests` / `EXITCODE=0`；N6 修改后整份重出，头部 `Generated:` / `Exit code:` 由 `.gen-android-test-green.sh` 在同一次运行里写入，不再是补记头）、`T-004-tests.txt`（24 例 / 0 fail / 0 error / 0 skip，含 JUnit XML 统计行、路径与 XML SHA-256）、`T-004-core-tests.txt`（`:core:test --rerun` 131 例，逐文件计数取自 XML；**131 是本任务验收时的快照**——全库此后增至 13 套件 / 154 例，见 `artifacts/evidence/VERIFY-core-test-counts.txt`）、`T-004-validate-tasks.txt`、`T-004-guard.txt`（Java-only guard PASS，13 OK 行）、`T-004-guard-selftest.txt`（完整模式 `OVERALL = SELFTEST PASS (40 case(s))`、`SELFTEST_EXITCODE=0`）、`T-004-ddl-location.txt`（DDL 仅一处产地，检索式已补全 `CREATE UNIQUE INDEX`/`CREATE TRIGGER`/`DROP`）、`T-004-constraint-code-probe.txt`（五类约束扩展错误码实测，五个码均可 grep 命中）。**规模裁定证据**：`sizing-adjudication-2026-09-21.txt`。复核报告：`T-004-verification-db-review.md`、`T-004-verification-verifier.md`、`T-022-verification-db-review.md`（第四轮，命中 D13）。设备：`emulator-5554`，`Medium_Phone_API_36.1`，API 36。

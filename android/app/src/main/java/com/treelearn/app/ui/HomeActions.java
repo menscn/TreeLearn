@@ -16,20 +16,11 @@ public interface HomeActions {
 
     void onRecommendationTapped(Recommendation recommendation);
 
+    /** Tapping the continue-learning row: resume the topic's last branch, no decision to make. */
     void onTopicTapped(TopicCard card);
 
-    void onRenameTopic(TopicCard card, String title);
-
-    void onDeleteTopic(TopicCard card);
-
-    /** Tapping the key hint: navigate, no decision to make. */
-    void onSettingsPressed();
-
-    /** Tapping the archive entry: navigate, no decision to make. */
-    void onArchivedPressed();
-
-    /** Tapping the search entry: navigate, no decision to make. */
-    void onSearchPressed();
+    /** Tapping the heat strip: navigate to stats, no decision to make. */
+    void onHeatStripTapped();
 
     void onModelSelected(GenerationModel model);
 

@@ -4,7 +4,7 @@ id: T-2026-09-20-011
 title: 实现 AI 派生产物与过期保护
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -149,6 +149,21 @@ generation/PositionCommandsTest.java; evidence artifacts/evidence/T-011-shared-t
 - 端口未接线：SqliteDerivedStore 只经编译验证（:app:compileDebugJavaWithJavac BUILD SUCCESSFUL），本轮未接到任何界面或导航调用方；接线由 T-012 及后续 UI 任务负责。
 
 ## Verification report
+
+### 规模例外——事后追认（用户批准，2026-09-24）
+
+- Exception type: 规模（超 500 行硬上限）——**用户 2026-09-24 事后追认豁免**
+- Reason: 实测 **726** 非空非注释行 / 500 硬上限，超 **45.2%**（前轮 verifier 独立复算，口径与 `sizing-adjudication-2026-09-21.txt` 一致）。派生产物机制 13 文件（DerivedRequest/DerivedOperation/codec/store/telemetry 共用同一契约面）；用户同日裁定不做回溯拆分（与 T-039 的拆分路径区别对待，理由：无自然切缝，硬拆产生的切片无法独立编译，属治理表演）。
+- User approval: **用户 2026-09-24 经结构化选项明确批准本任务豁免**（同轮批准 T-006/T-007/T-011 三项，明确否决「同 T-039 拆分」与「维持现状」选项）。本批准发生在实现完成之后，按 `rules/harness-tasks.md` 规模条款**如实记为事后追认**，不写成事先批准。
+- 实测行数与超出比例: 726 行 / 超 45.2%（判定口径：非空非注释；物理行并列记录于前轮 verifier 证据）。
+- 剩余风险: ① 500 行硬上限的威慑力被本次追认软化，后续任务可能以「先写后要豁免」效仿——缓解：本例已如实标注事后属性，失败案例库可追加此模式监控；② 三模块的规模按整体判定，未来向其追加代码不再受本例外保护，增量仍按 200/500 评估。
+
+### verifier #3 批量复核（2026-09-24，独立于本任务实现者）
+
+- Verdict: **PASS（设备项 deferred；规模例外已由用户 2026-09-24 事后追认）**。前轮 verifier 的技术判定（TDD 闭环、guard/lint、静态扫描、JVM 套件）全部维持；唯一 OPEN 的规模判据随用户批准关闭。
+- Fresh evidence（2026-09-24 批次 2）: `artifacts/evidence/P3-B1-gates-2026-09-24.txt`（全模块 JVM 套件 + lint + androidTest 编译，BUILD SUCCESSFUL / EXITCODE=0；全库 188 套件 1725 tests / 0 失败）、`P3-B1-no-kotlin-2026-09-24.txt`（EXITCODE=0）。
+- 判定依据: 前轮 verifier #2 复核结论无新事实推翻；本任务交付面（网关/快照/派生机制）在 2026-09-23 至 09-24 的后续任务（T-045/T-046/T-047 等）生产消费中被持续复用且全量套件持续全绿，构成追加的行为证据。
+- Gaps（不变，均 deferred）: 设备执行项 —— `deferred — 本轮不使用模拟器（用户指令 2026-09-21）`；真实 provider 冒烟（无 Key）。
 > **最新结论：见本段末尾「第九轮补充」（verifier #2，2026-09-21 第四轮）。下方第一个 - Verdict: 是历史轮次的记录，不是当前判定。**
 
 > 独立 verifier 复核（verifier #2，2026-09-21 第四轮），只读：未修改任何生产代码、测试或他人证据。

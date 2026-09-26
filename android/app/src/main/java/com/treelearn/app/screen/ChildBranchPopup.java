@@ -56,6 +56,9 @@ public final class ChildBranchPopup {
                 LinearLayout.LayoutParams.WRAP_CONTENT, true);
         popup.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         popup.setOutsideTouchable(true);
+        content.measure(0, 0);
+        int maxPx = context.getResources().getDimensionPixelSize(R.dimen.popup_max_height);
+        popup.setHeight(Math.min(content.getMeasuredHeight(), maxPx));
         popup.setElevation(context.getResources().getDimension(R.dimen.card_elevation));
         ChildBranchPopup shown = new ChildBranchPopup(popup);
         LayoutInflater inflater = LayoutInflater.from(context);

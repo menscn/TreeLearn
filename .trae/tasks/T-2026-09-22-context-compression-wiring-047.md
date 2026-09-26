@@ -4,7 +4,7 @@ id: T-2026-09-22-047
 title: 派生接线（上下文压缩，超预算前用摘要替代旧轮次）
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -68,20 +68,21 @@ Follow [code-document alignment](../rules/documentation.md).
 - Changed runtime facts: 长对话的正文可含摘要条目；压缩不再是「无调用者的机制」。
 - Authoritative code/config/migration evidence: 本任务新增的触发与替换点、`ContextPlan.Entry.summary` 既有工厂、`DeepSeekContextEncoder` 对 SUMMARY 的既有权分支。
 - Documentation surfaces checked: 提示词设计第 5 节（请求组装顺序与预算）、第 6.4 节（上下文压缩）、技术方案第 9.2/10 节、`android/README.md` 的请求预算与已知缺口两处。
-- Documentation files updated: 待实现时填写（README 的「DerivedOperation 无调用者」表述必须随 T-045/T-046/T-047 一起收口）。
-- Producer/consumer/sibling/compatibility paths checked: 待实现时填写。
-- Superseded phrases/examples reverse-searched: 待实现时填写（反查「历史永不摘要化」等既有措辞在压缩路径上的新语境）。
+- Documentation files updated: 2026-09-24 收口——`android/README.md` 的「DerivedOperation 无调用者」表述已随 T-045/T-046 接线改写；提示词设计第 5 节措辞修正为「判定唯一、归一化不唯一」（见 T-044 F2 记录）；新增用户可见文案 `notice_history_compressed`（strings.xml）。
+- Producer/consumer/sibling/compatibility paths checked: `ChatWiring.submit` → `historyForRequest`（压缩触发与替换，唯一判定点）→ `RefusalNotices.of(refusal, promptReason, compressionApplied)`（拒绝→文案映射唯一判定点）→ `NoticeText` switch（fail-loud 默认分支）→ 首页/对话页共用。
+- Superseded phrases/examples reverse-searched: 「历史永不静默截断或摘要化」措辞已限定到**未压缩**路径；压缩路径的替换行为由本任务验收项 1-3 显式覆盖。
 - `documentation impact: none` reason and evidence, if applicable: 不适用。
 - Historical/PRD handling: PRD 不改；提示词设计第 5 节的「原文或摘要二选一」由此获得实现。
 
 ## Acceptance criteria
 
-- [ ] 历史超预算时产出 `CONTEXT_COMPRESSION` 并写回 ai_artifacts；正文中被覆盖的旧轮次以 `SUMMARY` 条目出现（用例断言 `ContextPlan` 的条目种类序列）。
-- [ ] 压缩产物存在后，同长度对话的组装不再以 `HISTORY_EXCEEDS_BUDGET` 失败（用例：压缩前拒绝、压缩后通过，同一输入）。
-- [ ] 压缩不可用（输入缺 reasoning、结果未缩小、调用返回空）时**仍失败关闭**，且历史条目一个都没被丢弃或截断（逐条断言）。
-- [ ] 含摘要的正文仍恰好一条 system 且在位置 0；压缩不改变消息角色序列（用例）。
-- [ ] 既有的 §5 不变式在**未压缩**路径上逐字未变（同输入同输出的既有断言不改语义）。
-- [ ] 既有 :app 与 :ai 套件全绿；android-no-kotlin-guard PASS。
+- [x] 历史超预算时产出 `CONTEXT_COMPRESSION` 并写回 ai_artifacts；正文中被覆盖的旧轮次以 `SUMMARY` 条目出现（用例断言 `ContextPlan` 的条目种类序列）。〔GREEN 记录 + `DerivedRequestTest` 压缩信封断言〕
+- [x] 压缩产物存在后，同长度对话的组装不再以 `HISTORY_EXCEEDS_BUDGET` 失败（用例：压缩前拒绝、压缩后通过，同一输入）。〔GREEN 记录〕
+- [x] 压缩不可用（输入缺 reasoning、结果未缩小、调用返回空）时**仍失败关闭**，且历史条目一个都没被丢弃或截断（逐条断言）。〔GREEN 记录；压缩拒绝路径保留全量历史〕
+- [x] 含摘要的正文仍恰好一条 system 且在位置 0；压缩不改变消息角色序列（用例）。〔GREEN 记录〕
+- [x] 既有的 §5 不变式在**未压缩**路径上逐字未变（同输入同输出的既有断言不改语义）。〔`P3-B4-gates-2026-09-24.txt` 全量 check EXITCODE=0，既有套件未改〕
+- [x] 既有 :app 与 :ai 套件全绿；android-no-kotlin-guard PASS。〔`P3-B4-gates-2026-09-24.txt`；guard PASS〕
+- [x] （2026-09-22 工头裁定新增）`promptReason` 获得唯一消费者：`HISTORY_EXCEEDS_BUDGET` + 压缩成功 → 新文案 `notice_history_compressed`「这段历史已压缩，再发一次即可继续…」；压缩未产出 → 保留失败关闭文案。〔`RefusalNotices.of` 新重载为唯一判定点；`ChatPromptReasonNoticeTest` 5 例 RED→GREEN，含首页/对话页跨入口一致性断言；证据 `T-047-fix-red-2026-09-24.txt`（5 编译错误）、`T-047-fix-green-2026-09-24.txt`（BUILD SUCCESSFUL）〕
 
 ## TDD execution record
 
@@ -105,14 +106,18 @@ Follow [code-document alignment](../rules/documentation.md).
 - Regression evidence: Full `check` passed on the post-change build; Java-only guard remained PASS.
 
 ### REFACTOR — optional
-- Cleanup: PENDING
-- Regression evidence: PENDING
+- Cleanup: 2026-09-24 实施工头裁定项时把 `ChatWiring.historyForRequest` 的返回值从裸 `ContextPlan`
+  重构为私有静态类 `RequestHistory { ContextPlan plan; boolean compressionApplied; }`，
+  使「压缩是否成功」与「压缩计划」从同一判定点一并产出，供 `RefusalNotices.of` 新重载消费；
+  `submit` 只读结果，不再重复判定。
+- Regression evidence: `artifacts/evidence/T-047-fix-green-2026-09-24.txt`（:app:testDebugUnitTest BUILD SUCCESSFUL）；
+  全量 `check` 见 `artifacts/evidence/P3-B4-gates-2026-09-24.txt`（EXITCODE=0）。
 
 ### TDD or sizing exception — only with prior user approval
-- Exception type: PENDING
-- Reason: PENDING
-- User approval: PENDING
-- Alternative verification: PENDING
+- Exception type: 无（未超行数预算，未跳过 RED）。
+- Reason: 不适用。
+- User approval: 不适用。
+- Alternative verification: 不适用。
 
 ## Implementation notes
 
@@ -123,24 +128,35 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Verification report
 
-- Verdict: PARTIAL
-- Evidence: JVM/build/guard evidence above.
-- Changed/deleted assertion rationale and equivalent behavior coverage: No existing assembler refusal
-  was weakened; the new path is additive and only replaces older history after a successful derived
-  summary write-back.
-- Gaps: No real provider Key was available to execute an end-to-end compression request; device
-  verification therefore covers build/startup, not the networked summary response.
-- Risks: Compression currently runs from the background submit path and may wait for the provider timeout;
-  this is acceptable for correctness but should move to an explicit queued worker before final release.
+- Verdict: PASS
+- Evidence: TDD 记录（RED 失败、GREEN 通过）、工头裁定项 RED→GREEN
+  （`artifacts/evidence/T-047-fix-red-2026-09-24.txt`：5 编译错误，缺失 `HISTORY_COMPRESSED` 与新重载；
+  `artifacts/evidence/T-047-fix-green-2026-09-24.txt`：BUILD SUCCESSFUL）；
+  全量 `check` `artifacts/evidence/P3-B4-gates-2026-09-24.txt`（EXITCODE=0）；Java-only guard PASS。
+- Changed/deleted assertion rationale and equivalent behavior coverage: 未削弱任何既有组装拒绝断言；
+  新路径为附加行为，仅在压缩写回成功后替换较旧历史；`RequestHistory` 重构未改判定，跨入口一致性有断言。
+- Gaps: 无真实 provider Key，端到端联网压缩请求未执行（既有 Deferred 项）；设备侧行级证据归 T-024 设备套件。
+- Risks: 压缩仍从后台 submit 路径同步执行，可能等待 provider 超时；正确性可接受，发布前宜迁移到显式队列 Worker。
+
+### 复核记录（独立 verifier #3，2026-09-24）
+
+- 复核范围：工头裁定项（promptReason 消费者）落地质量 + 全量门禁。
+- 判定点唯一性：拒绝→文案映射收敛在 `RefusalNotices.of(refusal, promptReason, compressionApplied)` 单一重载内；
+  `ChatWiring` 不再各自判定；`NoticeText` switch 默认分支 fail-loud。
+- 跨入口一致性：`ChatPromptReasonNoticeTest` 含首页/对话页对同一输入同 notice 的断言（5 例全过）。
+- 失败关闭保留：`HISTORY_EXCEEDS_BUDGET` 且压缩未产出 → 仍 `REQUEST_REJECTED`（既有文案），有专例覆盖。
+- 门禁：`P3-B4-gates-2026-09-24.txt` 全量 check EXITCODE=0；`P3-B3-no-kotlin-2026-09-24.txt` guard PASS。
+- 结论：验收项全勾，裁定项 1-4 全部满足，无新增缺口 → verified。
 
 ## Handoff notes
 
-- Completed: 任务已立案（leader，2026-09-22），依赖 T-045 的接缝与 T-044 的 submit 改动，尚未实现。
+- Completed: 压缩接线（historyForRequest 策略 + DerivedService.compressHistory + 写回）与
+  工头裁定项（promptReason 消费者：HISTORY_COMPRESSED 文案）均已实现并测试，2026-09-24 verified。
 - In progress: 无。
-- Blocker: 无（等 T-044 与 T-045 落地）。
-- Unblock condition: T-044 与 T-045 完成。
-- Next steps: 由 android-dev 在 T-044/T-045 之后执行；完成后交独立 verifier，并按提示词设计第 9 节同步文档。
-- Watch-outs: ① 最容易犯的错是把「压缩不可用」退化成「截断历史」来让请求通过；② 摘要进入正文后仍要过既有预算校验，不得绕过 `reserveFor`。
+- Blocker: 无。
+- Unblock condition: 不适用。
+- Next steps: 发布前可将压缩执行迁出 submit 主路径（见 Risks）；设备侧行级证据由 T-024 设备套件承担。
+- Watch-outs: ① 「压缩不可用」永远回退到拒绝而非截断——改这块时先读 `ChatPromptReasonNoticeTest` 的三条失败关闭断言；② 拒绝→文案映射只有 `RefusalNotices.of` 一处，不要在屏幕层再加分支。
 
 ## Pre-flight 更正与工头裁定（2026-09-22）
 

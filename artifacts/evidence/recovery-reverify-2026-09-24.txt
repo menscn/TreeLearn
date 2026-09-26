@@ -1,0 +1,88 @@
+Treelearn 灾后恢复 + 复验证据
+日期: 2026-09-24
+会话: 灾后重建（git 索引损坏 → main/java 恢复至 pre-loss 状态）+ T-054 收尾
+
+====================================================================
+1. 事故与恢复范围
+====================================================================
+事故: 中断的 `git rm`（T-054 的 SearchScreen 退役）损坏 .git/index.lock；
+随后 `git checkout -- android/app/src/main/java` 从索引恢复。索引同时持有
+部分 pre-loss 暂存快照，导致 main/java 恢复为「HEAD + 中途快照」混合态。
+丢失范围（class 级精确比对，preloss 17:01 构建 vs HEAD 编译）:
+- 丢失新文件 32 个: voice/{TtsEngine,SystemTtsEngine}, search/web/*(7),
+  wiring/{QuietTelemetry,TelemetrySink,PreferenceSearchSettingsStore,
+  PreferenceVoiceSettingsStore,SqliteModelSettingsStore,SqliteProviderAdminStore,
+  SqliteQuickModelRoutes,SqliteTranslationRoutes},
+  ui/{ChatSpeaker,HeatmapLayout,HeatmapView,HomeStats,ModelSettingsPresenter,
+  ProviderAdminPresenter,SearchSettingsPresenter,VoiceSettingsPresenter},
+  screen/{ModelSettingsScreen,ProviderAdminScreen,SearchServiceSettingsScreen,
+  VoiceSettingsScreen}, generation/{MessageTranslator,QuickModelGateway},
+  artifact/{HomeDerivedPort,TitleArtifactApplier}
+- 丢失既有文件编辑 30 个（清单: artifacts/recovery/diff-report.txt）
+
+恢复手段: CFR 0.152 反编译 artifacts/recovery/classes-preloss-debug(348 class)
+→ artifacts/recovery/decompiled/；「既有文件」以反编译 preloss vs 反编译 HEAD
+同格式 diff 为事实来源移植；新文件以反编译产物为基底清理。
+关键脚本: artifacts/recovery/{diff_classes.py,restore_added.py,gen_changed_diffs.py,fix_lint_constants.py}
+残余状态: 索引快照为中途态的 AppContainer/MainActivity 缺 import/字段/构造，
+均按 preloss 反编译版补齐；res 树从未受损，T-053/T-054/T-018 的 res 修改全部幸存。
+
+====================================================================
+2. T-054 收尾（崩溃时进行中的任务）
+====================================================================
+按幸存测试（LibrarySearchEntryTest/SearchPageTest = 行为规约）补齐生产代码:
+- BranchTitles: 新增 Badge(path,archived) + default badgeOf（一分支一问）
+- SearchPage.Row: 扩展 sourcePath/archived；of() 对 badgeOf 按 branchId 缓存
+- SearchPresenter.Sink: 兼容扩展 default openHit(hit)（委托回 openAnchor，
+  既有 fake/宿主零改动）；applyTap 改走 openHit
+- LibraryPresenter: 新增 5 参构造器(…,SearchPresenter) + onSearchQueryChanged/
+  onSearchHitOpened（纯转发，不做第二状态机，遵守任务文件红线）
+- LibraryScreen: library_search_input 真实接线（echo 守卫）；showSearch/
+  renderHits/fieldLabel；四态文案复用 T-040 search_* 字符串；归档标复用
+  done_archived_mark；结果行仅 item_search_hit.xml 一套（在原布局上扩展，
+  无第二套结果行）
+- MainActivity: SearchScreen 退役——删除 import/字段/showSearch()/drawSearch()/
+  4 处 searchScreen=null；render(SearchViewState) 改绘入库屏（后台建页+离开防回绘）；
+  openSearch() → showLibrary()；showLibrary 构造 searchPresenter 并注入 LibraryPresenter；
+  onResume 仅当草稿非空时 re-ask（保 onResumed 语义）
+- 删除（任务授权的唯一删代码处）: screen/SearchScreen.java、res/layout/screen_search.xml、
+  res/layout/screen_search_body.xml、res/layout-sw600dp/screen_search.xml
+  （item_search_hit.xml/panel_search_picker.xml/search 全栈/SearchDao/SearchHit/
+   SearchQuery 全部保留）
+- 全仓 `grep -rn "SearchScreen" app/src data/src core/src ai/src` 零命中（本文件生成时复验）
+- 测试修正 2 处笔误: LibrarySearchEntryTest import（app.search→core.domain.SearchHit，
+  与 CoreFlowE2eTest 同类修正）+ RecordingSearchSink 增加 openHit 覆写以捕获 hit
+  （其注释「the presenter forwards the hit」的意图兑现）
+- README T-040 小节改写为「检索栈保留、入口迁至学习库」
+- androidTest 真机暴露 T-102 潜伏 bug: screen_home_body.xml 的 <include> 带
+  android:id 覆盖了被 include 根的 home_heat_strip_card → HomeScreen NPE。
+  修复: 去掉 include 上的 id 覆盖（root 保留 home_heat_strip_card）。
+
+====================================================================
+3. 门禁证据（恢复 + T-054 完成后）
+====================================================================
+[GATE-1] 编译: ./gradlew :app:compileDebugJavaWithJavac :app:compileDebugUnitTestJavaWithJavac :app:compileDebugAndroidTestJavaWithJavac → BUILD SUCCESSFUL
+[GATE-2] JVM 全量单测: ./gradlew :app:testDebugUnitTest → BUILD SUCCESSFUL；XML 汇总 tests=616 failures+errors=0
+[GATE-3] 定点(RED→GREEN 同命令): ./gradlew :app:testDebugUnitTest --tests "com.treelearn.app.library.LibrarySearchEntryTest" --tests "com.treelearn.app.search.SearchPageTest" --console=plain → EXITCODE=0（RED 记录见 T-054 任务文件，编译期缺符号 17 条）
+[GATE-4] 全量 check: ./gradlew check → BUILD SUCCESSFUL in 1m 24s（295 tasks；lintDebug 由 51 error 清零后通过；verifyDependencyDirection: PASS；verifyNoKotlinDex: PASS）
+[GATE-5] Java-only guard: powershell scripts/no-kotlin-check.ps1 → VERDICT: PASS (13 OK line(s))，输出 artifacts/recovery/nokotlin-rerun.txt
+[GATE-6] 真机 connectedDebugAndroidTest（ALP-AN00 / Android 13）: 200 例中 187 绿；
+  13 例失败全部位于 GenerationCoordinatorInstrumentedTest，与本轮恢复无关——
+  T-083 任务文件 Handoff notes 已登记为「已提交基线的存量测试缺陷」
+  （fixture 钉 POLICY_VERSION=1.0.0，DeepSeekPromptRegistry 已升 1.1.0，另立任务修复）；
+  同类失败在 artifacts/evidence/T-083-connected-full.txt（恢复前基线）逐条可对照；
+  恢复前同报告的 SqliteSchemaInstrumentedTest 3 例失败本轮已绿。
+  首轮曾暴露 HomeScreen NPE（T-102 潜伏 bug，见第 2 节），修复后消除。
+[GATE-7] release APK: ./gradlew :app:assembleRelease → BUILD SUCCESSFUL；
+  app-release.apk = 912,466 bytes；SHA-256 = 8b7c7adb38312c24218d6f9b662521bb241bc140e85a215e58d16cba5a75a9bf；
+  apksigner verify EXITCODE=0；Signer cert SHA-256 = d8670c863d692a90e21b7a895cf0f717bc8a1cc4ba82a48ff771f09a8780c561
+  （与 T-018 2026-09-21/24 登记的 keystore 证书一致）
+
+====================================================================
+4. 结论
+====================================================================
+- T-047 / T-077 / T-018 / T-053 的 verified 状态重新被在盘代码与全绿门禁坐实
+  （此前的 verified 因代码丢失曾为 provisional）。
+- T-054 生产实现完成并通过全部门禁，具备收口条件（verifier 复核）。
+- 遗留（非本会话引入）: GenerationCoordinatorInstrumentedTest 13 例 fixture
+  版本漂移缺陷（T-083 已登记，另立任务）。

@@ -4,7 +4,7 @@ id: T-2026-09-20-014
 title: 实现导航、归档与删除
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -134,9 +134,9 @@ JUnit XML 回读口径（从盘上重算，不用控制台回显）：
 - Regression evidence: 清理后以同一条 GREEN 命令串重跑，仍 `EXITCODE=0`（`artifacts/evidence/T-014-green.txt` 即清理后的那一轮）；回归门（`T-014-regression.txt`）与变异测试（`T-014-mutation.txt`）也在清理后的源码上重跑过，读数同上，本轮未再重跑。
 
 ### TDD or sizing exception — only with prior user approval
-- Exception type: 未申请例外（TDD 已按要求执行，没有申请 TDD 例外）
-- Reason: TDD 按要求执行；规模实测 570 判定行（6 个新生产文件）/ 836 物理行，超过 200 软上限并超过 500 硬上限 70 行（14%）。这是**未获用户批准**的偏差，必须由用户裁定（拆分，或补一份用户批准的例外），本任务不自批。
-- User approval: 无
+- Exception type: sizing（实测 570 判定行（6 个新生产文件）/ 836 物理行，超过 200 软上限与 500 硬上限 70 行/14%；原估算 200）
+- Reason: 导航回退、归档/恢复、删除确认与范围计划、代际 token、级联删除与顶部摘要六个必需面落在同一条用户流程上；拆分会把「删除确认」与其唯一消费者（Presenter 的调用顺序断言）分到两个任务
+- User approval: **2026-09-24 用户裁定「事后追认豁免」**（对话内批准；批准落在实现之后，按 `harness-tasks.md` 第 60 行如实记为事后追认）。剩余风险：单 task 超硬上限 14%，为已批豁免中最轻的一例。
 - Alternative verification: 规模偏差的实测口径、命令与分项见 `artifacts/evidence/T-014-sizing.txt`；TDD 的替代验证就是 RED/GREEN 命令串完全相同（两条证据第 2 行一致）。
 
 ## 本轮验证状态（用户 2026-09-21 指令：本轮不使用模拟器）
@@ -171,11 +171,23 @@ JUnit XML 回读口径（从盘上重算，不用控制台回显）：
 
 ## Verification report
 
-- Verdict: PENDING
-- Evidence: PENDING
-- Changed/deleted assertion rationale and equivalent behavior coverage: PENDING
-- Gaps: PENDING
-- Risks: 取消与数据库删除竞态；本轮无设备，DAO 级级联删除与「归档不取消生成」只在 compile-only 的 6 例 instrumentation 里，真实 Android SQLite 行为 unverified；`delete` 走「逐分支 `BranchDao.delete` + 依赖 `parent_id ON DELETE CASCADE`」而不是一句递归删除，两者对深层子树的等价性只在 compile-only 的 instrumentation 例子里，未上设备实跑。规模超硬上限，待用户裁定。
+- Verdict: **PASS**（2026-09-24 复核 #3 收口，见下方「复核记录 #3」）
+- Evidence: `artifacts/evidence/T-014-red.txt`（EXITCODE=1，122 条诊断全部指向 NavigationPresenterTest）、`T-014-green.txt`（EXITCODE=0，216 例 0 失败，含 NavigationPresenterTest 18 例；leader 补齐折叠成员后 21 例）、`T-014-regression.txt`（522 例 0 失败）、`T-014-guard.txt`（PASS）、`T-014-source-checks.txt`（6/6 OK）、`T-014-mutation.txt`（3 次变异每次恰好 1 例转红）、`T-014-sizing.txt`（570 判定行，豁免已批）。
+- Changed/deleted assertion rationale and equivalent behavior coverage: 无删除或弱化断言；REFACTOR 删掉的是 `NavigationViewState.Notice` 里**无生产路径**的枚举取值与含混的「本分支」文案（改为按分支数计数、不可计算时 fail closed），均有同命令重跑覆盖。
+- Gaps: ① 设备判据（级联删除/归档不取消生成的真实 SQLite 行为、onSaveInstanceState 重建、晚到 stabilization 拒写）维持 `deferred — emulator not used this round (user instruction 2026-09-21)`，验收框内已逐条注明，不判 FAIL；② 外壳接线缺口已由 T-032（real-data-path-wiring，verified）闭环——`SqliteNavigationStore` 与 `NavigationPresenter` 的构造参数清单即 T-014 交给 T-032 的装配清单；③ leader 补齐的折叠成员（`collapsed`/`onGroupToggled` 等）修复轮已验证（21 例通过）。
+- Risks: 取消与数据库删除的竞态在设备上的真实时序未验证（deferred）；规模超硬上限 14%（豁免已批，Watch-outs 已建议后续导航改动另开任务）。
+
+## 复核记录 #3（独立 verifier，2026-09-24）— 收口
+
+- 规模：verifier 轮遗留的唯一待裁定项（570 判定行 / 836 物理行，超 500 硬上限 14%）已由用户
+  2026-09-24「事后追认豁免」解除，登记见 TDD or sizing exception 节。
+- 外壳接线（当年 Next steps ②）：T-032 已把导航接线进组合根与壳（T-032 于 2026-09-24 verified），
+  缺口闭环；onSaveInstanceState 的 UUID 恢复仍在设备 deferred 范围内。
+- 验收 5 条：全部已勾且框内注明 JVM 实测 + 设备 deferred 的口径；变异测试（3/3 单点转红）证明
+  代际 token 守卫、cancel-before-delete 顺序、范围 fail-closed 三条关键判据都真实钉住。
+- 门禁独立性：2026-09-24 全量 `check` 复跑 EXITCODE=0（`P3-B4-gates-2026-09-24.txt`）；no-kotlin
+  guard PASS（`P3-B3-no-kotlin-2026-09-24.txt`）。
+- 结论：JVM 判据全绿 + 变异测试钉住关键守卫 + 规模豁免已批 + 外壳缺口闭环 → **verified**。
 
 ## Handoff notes
 

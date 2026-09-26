@@ -86,6 +86,7 @@ public final class DeepSeekPromptRegistry {
             case ANSWER_RECOMMENDATIONS -> "tl-answer-recommendations/1.1.0";
             case HOME_RECOMMENDATIONS -> "tl-home-recommendations/1.0.0";
             case CONTEXT_COMPRESSION -> "tl-context-compression/1.0.0";
+            case MESSAGE_TRANSLATION -> "tl-message-translation/1.0.0";
         };
     }
 
@@ -99,6 +100,7 @@ public final class DeepSeekPromptRegistry {
             case ANSWER_RECOMMENDATIONS -> derivedBody(PromptBodiesV1.ANSWER_RECOMMENDATIONS_SUFFIX);
             case HOME_RECOMMENDATIONS -> derivedBody(PromptBodiesV1.HOME_RECOMMENDATIONS_SUFFIX);
             case CONTEXT_COMPRESSION -> derivedBody(PromptBodiesV1.CONTEXT_COMPRESSION_SUFFIX);
+            case MESSAGE_TRANSLATION -> PromptBodiesV1.MESSAGE_TRANSLATION;
         };
     }
 

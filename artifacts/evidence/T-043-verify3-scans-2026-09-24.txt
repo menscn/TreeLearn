@@ -1,0 +1,16 @@
+# T-043 收尾复核扫描（verifier #3，2026-09-24）
+
+scan 1: home_entry_pending 零生产者与零引用（android/ 排除 build/，含 *.java 与 *.xml）
+command: grep -rn home_entry_pending android --include=*.java --include=*.xml | grep -v /build/ | wc -l
+0
+EXITCODE=0
+
+scan 2: 无第二套递归删除（deleteBranch/recursiveDelete/deleteChildren/deleteDescendants 在 app+data 的 src/main 命中数）
+command: grep -rn 'deleteBranch|recursiveDelete|deleteChildren|deleteDescendants' app/data src/main
+0
+EXITCODE=0
+
+scan 3: 主题删除唯一走 TopicDao.delete（级联复用）
+android/app/src/main/java/com/treelearn/app/navigation/SqliteNavigationStore.java:130:                TopicDao.delete(open, plan.topicId);
+android/app/src/main/java/com/treelearn/app/wiring/SqliteHomeStore.java:80:        TopicDao.delete(helper.getWritableDatabase(), topicId);
+EXITCODE=0

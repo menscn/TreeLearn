@@ -1,0 +1,6 @@
+T-090 RED 证据（消息翻译）
+=========================================
+Command: cd android && ./gradlew.bat --no-watch-fs --no-daemon --console=plain :app:testDebugUnitTest --tests "com.treelearn.app.generation.MessageTranslatorTest" --tests "com.treelearn.app.ui.ChatPresenterTranslationTest"
+Exit code: 1
+Observed failure: BUILD FAILED — :app:compileDebugUnitTestJavaWithJavac 编译错误 60+ 处，全部为「程序包 MessageTranslator 不存在 / 找不到符号 MessageTranslator(.Outcome/.EndpointStreams)」「找不到符号 ChatPresenter.Translator」「找不到符号 withTranslationStarted/translationText/translationVisible 等呈现态 API」「找不到符号 PromptPurpose.MESSAGE_TRANSLATION」；其余任务 up-to-date（原始日志 T-090-red-raw.txt，stderr T-090-red-err.txt）
+Failure reason validated: 失败确为被测生产类/呈现态 API 尚不存在（T-090 代码未实现），非测试语法或既有回归问题；既有 ChatPresenterTest 等套件未编译改动即通过编译阶段（:app:compileDebugJavaWithJavac UP-TO-DATE）

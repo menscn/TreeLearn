@@ -2,6 +2,7 @@ package com.treelearn.app.ui;
 
 import com.treelearn.app.reading.ReadingSession;
 import com.treelearn.app.reading.ReadingStore;
+import com.treelearn.app.search.web.ChatSearchStep;
 import com.treelearn.core.domain.AnswerRevision;
 import com.treelearn.core.domain.Branch;
 import com.treelearn.core.domain.GenerationModel;
@@ -9,6 +10,7 @@ import com.treelearn.core.domain.Guard;
 import com.treelearn.core.domain.Message;
 import com.treelearn.core.domain.ReadingAnchor;
 import com.treelearn.core.domain.ReadingPosition;
+import com.treelearn.app.ui.ChatSpeaker;
 import com.treelearn.app.ui.ChatViewState.Stage;
 
 import java.util.Collections;
@@ -66,9 +68,19 @@ public final class ChatPresenter implements ChatActions {
     private final SettingsStore settings;
     private final CopyLabels labels;
     private final String branchId;
+    /** The attachment store (T-097); null in tests that do not exercise attachments. */
+    private final com.treelearn.app.files.AttachmentStore attachments;
+    /** The chat-role assignment source (T-103); null keeps the legacy global-tier behaviour. */
+    private final ChatRoleSource chatRoleSource;
     private final ReadingSession session;
     /** T-076: where the composer's work waits out a process rebuild (073 §5). */
     private final ChatDraftStore drafts;
+    /** Translates finished answers into the learner's language; null when the feature is not wired. */
+    private final Translator translator;
+    /** The web-search step; null when search is not wired for this conversation. */
+    private final ChatSearchStep search;
+    /** Reads answers aloud; null when text-to-speech is not wired. */
+    private final ChatSpeaker speaker;
 
     private ChatViewState state;
     /** The branch the last read carried, or null when it carried none. */
@@ -93,12 +105,72 @@ public final class ChatPresenter implements ChatActions {
             ChatCommands commands, SettingsStore settings, CopyLabels labels, String branchId,
             ReadingStore reading) {
         this(sink, ui, background, key, data, commands, settings, labels, branchId, reading,
-                ChatDraftStore.NOOP);
+                ChatDraftStore.NOOP, null);
     }
 
     public ChatPresenter(ChatSink sink, UiThread ui, Executor background, KeyVault key, ChatData data,
             ChatCommands commands, SettingsStore settings, CopyLabels labels, String branchId,
             ReadingStore reading, ChatDraftStore drafts) {
+        this(sink, ui, background, key, data, commands, settings, labels, branchId, reading, drafts,
+                null);
+    }
+
+    public ChatPresenter(ChatSink sink, UiThread ui, Executor background, KeyVault key, ChatData data,
+            ChatCommands commands, SettingsStore settings, CopyLabels labels, String branchId,
+            ReadingStore reading, Translator translator) {
+        this(sink, ui, background, key, data, commands, settings, labels, branchId, reading,
+                ChatDraftStore.NOOP, translator);
+    }
+
+    public ChatPresenter(ChatSink sink, UiThread ui, Executor background, KeyVault key, ChatData data,
+            ChatCommands commands, SettingsStore settings, CopyLabels labels, String branchId,
+            ReadingStore reading, ChatDraftStore drafts, Translator translator) {
+        this(sink, ui, background, key, data, commands, settings, labels, branchId, reading, drafts,
+                translator, null);
+    }
+
+    /** Where the chat-role assignment comes from (T-103); null keeps the legacy tier path. */
+    public interface ChatRoleSource {
+
+        ModelSettingsPresenter.Assignment read();
+    }
+
+    public ChatPresenter(ChatSink sink, UiThread ui, Executor background, KeyVault key, ChatData data,
+            ChatCommands commands, SettingsStore settings, CopyLabels labels, String branchId,
+            ReadingStore reading, ChatRoleSource chatRoleSource) {
+        this(sink, ui, background, key, data, commands, settings, labels, branchId, reading, null,
+                null, null, null, null, chatRoleSource);
+    }
+
+    public ChatPresenter(ChatSink sink, UiThread ui, Executor background, KeyVault key, ChatData data,
+            ChatCommands commands, SettingsStore settings, CopyLabels labels, String branchId,
+            ReadingStore reading, ChatDraftStore drafts, Translator translator,
+            ChatSearchStep search) {
+        this(sink, ui, background, key, data, commands, settings, labels, branchId, reading, drafts,
+                translator, search, null, null);
+    }
+
+    public ChatPresenter(ChatSink sink, UiThread ui, Executor background, KeyVault key, ChatData data,
+            ChatCommands commands, SettingsStore settings, CopyLabels labels, String branchId,
+            ReadingStore reading, ChatDraftStore drafts, Translator translator, ChatSearchStep search,
+            ChatSpeaker speaker) {
+        this(sink, ui, background, key, data, commands, settings, labels, branchId, reading, drafts,
+                translator, search, speaker, null);
+    }
+
+    public ChatPresenter(ChatSink sink, UiThread ui, Executor background, KeyVault key, ChatData data,
+            ChatCommands commands, SettingsStore settings, CopyLabels labels, String branchId,
+            ReadingStore reading, ChatDraftStore drafts, Translator translator, ChatSearchStep search,
+            ChatSpeaker speaker, com.treelearn.app.files.AttachmentStore attachments) {
+        this(sink, ui, background, key, data, commands, settings, labels, branchId, reading, drafts,
+                translator, search, speaker, attachments, null);
+    }
+
+    public ChatPresenter(ChatSink sink, UiThread ui, Executor background, KeyVault key, ChatData data,
+            ChatCommands commands, SettingsStore settings, CopyLabels labels, String branchId,
+            ReadingStore reading, ChatDraftStore drafts, Translator translator, ChatSearchStep search,
+            ChatSpeaker speaker, com.treelearn.app.files.AttachmentStore attachments,
+            ChatRoleSource chatRoleSource) {
         this.sink = require(sink, "sink");
         this.ui = require(ui, "ui");
         this.background = require(background, "background");
@@ -109,10 +181,19 @@ public final class ChatPresenter implements ChatActions {
         this.labels = require(labels, "labels");
         this.branchId = Guard.id(branchId, "branchId");
         this.drafts = drafts == null ? ChatDraftStore.NOOP : drafts;
+        this.translator = translator;
+        this.search = search;
+        this.speaker = speaker;
+        this.attachments = attachments;
+        this.chatRoleSource = chatRoleSource;
         this.session = new ReadingSession(require(reading, "reading"));
         this.state = ChatViewState.initial(this.branchId, settings.model(), settings.thinkingEnabled(),
-                key.isConfigured());
+                key.isConfigured()).withSearchEnabled(settings.searchEnabled(), searchLabel());
         data.addGenerationListener(this.branchId, generationChanged);
+    }
+
+    private String searchLabel() {
+        return search == null ? "" : search.engineLabel();
     }
 
     /** The last state handed to the sink; the tests read it, the screen does not. */
@@ -127,7 +208,63 @@ public final class ChatPresenter implements ChatActions {
     /** First load: the reading phase is shown while the branch is read. */
     public void start() {
         render(restored().withPhase(ChatViewState.Phase.LOADING));
-        background.execute(this::read);
+        background.execute(() -> {
+            read();
+            resolveChatRole();
+        });
+    }
+
+    /**
+     * T-103: the chip's model comes from the chat-role assignment, told once per entry. A fallback
+     * (builtin/earliest) or an empty assignment lands as the one-time notice; a clean resolution
+     * swaps the tier silently. The source is null in the legacy path, which then behaves exactly as
+     * before — the settings tier stays and no notice is ever raised.
+     */
+    private void resolveChatRole() {
+        if (chatRoleSource == null) {
+            return;
+        }
+        ModelSettingsPresenter.Assignment assignment;
+        try {
+            assignment = chatRoleSource.read();
+        } catch (RuntimeException unreadable) {
+            return;
+        }
+        if (assignment == null) {
+            return;
+        }
+        HomeViewState.Notice notice = null;
+        if (assignment.fallback == ModelSettingsPresenter.Fallback.EMPTY) {
+            notice = HomeViewState.Notice.NO_MODELS;
+        } else if (assignment.fallback == ModelSettingsPresenter.Fallback.BUILTIN
+                || assignment.fallback == ModelSettingsPresenter.Fallback.EARLIEST) {
+            notice = HomeViewState.Notice.CHAT_MODEL_FALLBACK;
+        }
+        final GenerationModel resolved = modelOf(assignment.modelId);
+        final HomeViewState.Notice roleNotice = notice;
+        ui.post(() -> {
+            ChatViewState next = state;
+            if (resolved != null) {
+                next = next.withModel(resolved);
+            }
+            if (roleNotice != null) {
+                next = next.withNotice(roleNotice);
+            }
+            if (next != state) {
+                render(next);
+            }
+        });
+    }
+
+    private static GenerationModel modelOf(String modelId) {
+        if (modelId == null) {
+            return null;
+        }
+        try {
+            return GenerationModel.fromWireId(modelId);
+        } catch (IllegalArgumentException unknown) {
+            return null;
+        }
     }
 
     /**
@@ -298,11 +435,35 @@ public final class ChatPresenter implements ChatActions {
     }
 
     /**
+     * T-095: the recognizer's final text joins the draft (SPEC-081: 追加进草稿、不直接发送).
+     * The append rides the same save-render path as a keystroke (onDraftChanged), so persistence,
+     * notice clearing and the composer record stay in exactly one place. A blank recognition -
+     * the [OFF] complete-silence case - changes nothing.
+     */
+    @Override
+    public void onSpeechRecognized(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return;
+        }
+        onDraftChanged(state.draft + text);
+    }
+
+    /**
      * T-075: the learner wants the running attempt stopped. The command itself is the composer
      * slice's; here the intent is recorded so the terminal read reports canceled instead of failed -
      * cancel and failure are different sentences (069 E3), and the intent is consumed by the
      * terminal it explains, so a stale stop can never label a later failure as canceled.
      */
+    @Override
+    public void onFullscreenEditOpened() {
+        render(state.withFullscreenEditing(true));
+    }
+
+    @Override
+    public void onFullscreenEditClosed() {
+        render(state.withFullscreenEditing(false));
+    }
+
     @Override
     public void onStopRequested() {
         stopRequested = true;
@@ -367,11 +528,74 @@ public final class ChatPresenter implements ChatActions {
         final GenerationModel model = state.model;
         final boolean thinking = state.thinkingEnabled;
         final String quote = state.quote;
+        // T-097: the attachment rides only once its parse has finished; a parsing chip keeps the
+        // composer's send disabled by falling through to nothing (SPEC-082 状态流: 解析中禁止发送).
+        ChatViewState.ComposerAttachment attachment = state.composerAttachment;
+        final String attachmentId;
+        if (attachment != null
+                && attachment.state == ChatViewState.ComposerAttachment.ParseState.READY) {
+            attachmentId = attachment.attachmentId;
+        } else if (attachment != null
+                && attachment.state == ChatViewState.ComposerAttachment.ParseState.PARSING) {
+            return;
+        } else {
+            attachmentId = null;
+        }
         // T-075: a new turn re-attaches the follow - the learner asked, so they want to see.
         stopRequested = false;
+        if (speaker != null) {
+            speaker.interrupt();
+        }
         render(state.withSending(true).withStage(Stage.SENDING).withFollow(true, 0));
         background.execute(
-                () -> publish(commands.send(branchId, text, quote, model, thinking), false, true));
+                () -> publish(commands.send(branchId, text, quote, attachmentId, model, thinking),
+                        false, true));
+    }
+
+    /**
+     * T-097: one picked file enters the composer. The mutual exclusion with the quote is decided
+     * here, once (SPEC-082 拍板 4): attaching clears a pending quote, so a quote the learner set
+     * on screen goes with it. Registration and the parse run on the background thread; the chip
+     * shows "parsing" until they land.
+     */
+    @Override
+    public void onAttachmentPicked(String displayName, String mimeType, byte[] bytes) {
+        if (attachments == null || displayName == null || bytes == null || bytes.length == 0) {
+            return;
+        }
+        render(state.withQuote("")
+                .withComposerAttachment(new ChatViewState.ComposerAttachment(
+                        Guard.newId(), displayName, bytes.length,
+                        ChatViewState.ComposerAttachment.ParseState.PARSING)));
+        background.execute(() -> {
+            try {
+                String id = attachments.register(displayName, mimeType, bytes,
+                        System.currentTimeMillis());
+                attachments.finalizeParse(id, System.currentTimeMillis());
+                com.treelearn.app.files.AttachmentStore.Parsed parsed = attachments.parseOutcome(id);
+                boolean ok = com.treelearn.app.files.AttachmentStore.PARSE_STATE_PARSED.equals(
+                        parsed.state);
+                ui.post(() -> {
+                    if (state.composerAttachment == null) {
+                        return;
+                    }
+                    render(state.withComposerAttachment(
+                            new ChatViewState.ComposerAttachment(id, displayName, bytes.length,
+                                    ok ? ChatViewState.ComposerAttachment.ParseState.READY
+                                            : ChatViewState.ComposerAttachment.ParseState.FAILED)));
+                });
+            } catch (RuntimeException failed) {
+                ui.post(() -> render(state.withComposerAttachment(
+                        new ChatViewState.ComposerAttachment(Guard.newId(), displayName,
+                                bytes.length, ChatViewState.ComposerAttachment.ParseState.FAILED))));
+            }
+        });
+    }
+
+    /** T-097: removing the chip removes nothing stored — the record survives as unreferenced. */
+    @Override
+    public void onAttachmentCleared() {
+        render(state.withComposerAttachment(null));
     }
 
     @Override
@@ -382,6 +606,37 @@ public final class ChatPresenter implements ChatActions {
     @Override
     public void onResetPressed(String messageId) {
         position(messageId, false);
+    }
+
+    @Override
+    public void onTranslatePressed(String messageId) {
+        ChatMessage message = state.message(messageId);
+        if (translator == null || message == null || !message.canTranslate()
+                || state.isTranslating(messageId)) {
+            return;
+        }
+        GenerationModel model = state.model;
+        render(state.withTranslationStarted(messageId));
+        background.execute(() -> translator.translate(model, message.text,
+                (ok, translation) -> ui.post(() -> render(
+                        state.withTranslationFinished(messageId, ok ? translation : "")))));
+    }
+
+    @Override
+    public void onTranslationToggled(String messageId) {
+        if (!state.translationVisible(messageId)) {
+            return;
+        }
+        render(state.withTranslationToggled(messageId));
+    }
+
+    @Override
+    public void onSpeakPressed(String messageId) {
+        ChatMessage message = state.message(messageId);
+        if (speaker == null || message == null || !message.canSpeak()) {
+            return;
+        }
+        speaker.onSpeakPressed(messageId, message.text);
     }
 
     /**
@@ -439,7 +694,7 @@ public final class ChatPresenter implements ChatActions {
         }
         background.execute(() -> {
             final List<ChildBranch> children = data.children(branchId, messageId);
-            ui.post(() -> sink.openChildren(branchId, messageId, children));
+            ui.post(() -> sink.openChildren(messageId, children));
         });
     }
 
@@ -505,14 +760,32 @@ public final class ChatPresenter implements ChatActions {
 
     @Override
     public void onModelSelected(GenerationModel model) {
-        settings.setModel(require(model, "model"));
-        render(state.withModel(model));
+        // T-103: the chip's choice is a session override — it lives in the view state and dies with
+        // the presenter. The durable chat-role choice belongs to the settings screen (088), and a
+        // second writer of the same fact is exactly how the two surfaces would drift apart.
+        render(state.withModel(require(model, "model")));
     }
 
     @Override
     public void onThinkingToggled(boolean enabled) {
         settings.setThinkingEnabled(enabled);
         render(state.withThinkingEnabled(enabled));
+    }
+
+    @Override
+    public void onSearchToggled(boolean enabled) {
+        if (enabled && search != null && !search.hasCredential()) {
+            render(state.withNotice(HomeViewState.Notice.SEARCH_KEY_MISSING));
+            sink.openSettings();
+            return;
+        }
+        settings.setSearchEnabled(enabled);
+        render(state.withSearchEnabled(enabled, searchLabel()));
+    }
+
+    @Override
+    public void onSearchOpenSettings() {
+        sink.openSettings();
     }
 
     @Override
@@ -645,6 +918,14 @@ public final class ChatPresenter implements ChatActions {
         ui.post(() -> render(state.withNotice(HomeViewState.Notice.READING_POSITION)));
     }
 
+    /**
+     * A refused reading write reported by another layer (for example the screen resolving a stored
+     * position). Forwarded here so the one sentence the brief promises is the only path.
+     */
+    public void notifyReadingPositionRefused() {
+        noticeReadingFailure();
+    }
+
     private void fork(final String messageId, final String question, final String quote,
             final int startInclusive, final int endExclusive) {
         background.execute(() -> publish(
@@ -665,8 +946,10 @@ public final class ChatPresenter implements ChatActions {
             final boolean clearDraft) {
         ui.post(() -> {
             if (result.isAccepted()) {
-                ChatViewState next = state.withSending(false).withNotice(null);
-                render(clearDraft ? next.withDraft("").withQuote("") : next);
+                ChatViewState next = state.withSending(false).withNotice(result.postNotice());
+                render(clearDraft
+                        ? next.withDraft("").withQuote("").withComposerAttachment(null)
+                        : next);
                 if (mayOpenBranch && !result.branchId().isEmpty()) {
                     sink.openBranch(result.branchId());
                 }
@@ -719,5 +1002,19 @@ public final class ChatPresenter implements ChatActions {
             throw new IllegalArgumentException(name + " must not be null");
         }
         return value;
+    }
+
+    /**
+     * Translates a finished answer into the learner's language. Implemented by the wiring layer so the
+     * presenter stays free of any model or network type; the callback reports success and the translated
+     * text (or empty on failure) on the background thread it was given.
+     */
+    public interface Translator {
+        void translate(GenerationModel model, String text, Callback done);
+
+        /** The answer to one {@link #translate}: {@code ok} is false when no translation came back. */
+        interface Callback {
+            void onFinished(boolean ok, String translation);
+        }
     }
 }

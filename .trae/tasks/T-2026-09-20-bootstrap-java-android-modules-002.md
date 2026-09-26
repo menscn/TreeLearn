@@ -4,7 +4,7 @@ id: T-2026-09-20-002
 title: 搭建 Java-only Android 模块骨架
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -81,7 +81,7 @@ Follow [code-document alignment](../rules/documentation.md).
 
 - [x] `cd android; ./gradlew :app:assembleDebug :app:lintDebug` 返回 0。
 - [x] `powershell -NoProfile -File android\scripts\no-kotlin-check.ps1` 返回 0，依赖报告无 `org.jetbrains.kotlin`/`-ktx`。
-- [x] 启动初始 Activity，首屏正常渲染且无启动崩溃。（环境由 API 28 模拟器改为 API 36 模拟器，见上文执行期需求变更）**deferred — emulator not used this round (user instruction 2026-09-21)**：记录修复轮不使用模拟器，该条在本轮**既不判 PASS 也不判 FAIL**；勾选只表示 T-002 阶段成立，见下条证据范围注记。
+- [x] 启动初始 Activity，首屏正常渲染且无启动崩溃。（环境由 API 28 模拟器改为 API 36 模拟器，见上文执行期需求变更）**deferred — emulator not used this round (user instruction 2026-09-21)**：记录修复轮不使用模拟器，该条在本轮**既不判 PASS 也不判 FAIL**；勾选只表示 T-002 阶段成立，见下条证据范围注记。〔**2026-09-24 用户裁定「事后追认豁免」**：该设备判据按用户决定豁免收口，设备表现由用户装机时自行验证；豁免登记见文末「复核记录 #3」〕
   - **证据范围注记（不得读作当前产物已通过设备验证）**：该项证据对应 T-002 阶段的 **15 KB / 2 dex 骨架 APK** 与 `artifacts/evidence/T-002-device-evidence.txt`（截图 `T-002-phone-first-screen.png`）。其后 `:core` 等模块已填入代码（`find android/core/src -type f -newermt "2026-09-21 01:01" | wc -l` → 28），当前产物为 **70 966 B / 3 dex**，**未做**设备验证——用户 2026-09-21 决定暂停模拟/设备侧验证并自行安装实测。勾选仅表示 T-002 阶段成立。
 - [x] 机械化依赖检查证明 `:core` 不反向依赖 app/data/ai/tree-layout。
 
@@ -362,6 +362,18 @@ VERDICT: FAIL (2 problem(s))
 - 规模：`estimated_production_lines: 160`。记录中的 **606 行是 Gradle 构建配置（开发脚手架，非生产代码）**，不计入行数预算，故本任务**不在规模越线清单内**。
 - RED/GREEN 键卫生：RED `Exit code: 1`、GREEN `Exit code: 0`，两条 `Command` 逐字节相同（`powershell -NoProfile -ExecutionPolicy Bypass -File android\scripts\no-kotlin-check.ps1`），符合契约。
 - 残留（不阻塞，如实记录）：① 第 125 行与 `T-002-runtime-classpath*.txt` 的产物字节数（15 140 B / 2 dex）对应 T-002 阶段旧骨架产物，当前产物更大（本文件第 85 行自述为 70 966 B / 3 dex），引用时不得当作当前值；② 第 318 行（第七轮小节）仍写 599，属历史记录，第 336/344 行已更正为 606。
+
+## 复核记录 #3（独立 verifier，2026-09-24）— 收口
+
+- 唯一未决项的处置：第九轮复核（verifier #2）明确「要让本任务闭合，用户须显式豁免验收条件 3，
+  或另开一次设备轮次」。**2026-09-24 用户裁定「事后追认豁免」**：验收条件 3（启动初始 Activity、
+  首屏渲染无崩溃）作为设备判据豁免收口，设备表现由用户装机时自行验证。登记按
+  `harness-tasks.md` 第 60 行如实记为事后追认。
+- 工程实体层结论沿用第九轮复核：字节码级 Java-only、五模块、构建/lint/测试 exit 0、守门 PASS、
+  自检 40/40 PASS 均经独立复现、未发现回归；第九轮之后本仓多轮全量 `check`（最新
+  `artifacts/evidence/P3-B4-gates-2026-09-24.txt` EXITCODE=0）与 no-kotlin guard PASS
+  （`P3-B3-no-kotlin-2026-09-24.txt`）持续覆盖该骨架，无回归。
+- 结论：记录层四项处置经第九轮逐条复核为真 + 唯一未决项经用户豁免 → **verified**。
 
 ## Handoff notes
 

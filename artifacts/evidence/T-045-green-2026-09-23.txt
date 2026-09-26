@@ -1,0 +1,44 @@
+# T-045 收尾 GREEN 证据 — 2026-09-23 22:15-22:50 GMT+8
+# 范围：分支标题生命周期接线 + 根标题派生移出提交关键路径 + 标题 artifact 落到 Branches.TITLE
+
+[RED-1] 命令: ./gradlew :app:testDebugUnitTest --tests '*DerivedServiceBranchTitleTest' --tests '*HomeWiringTest' --console=plain
+    观察: 8 处「找不到符号」（branchTitleRequest ×4 / HomeDerivedPort ×4）+ BUILD FAILED
+    EXITCODE=1   证据: artifacts/evidence/T-045-red-2026-09-23.txt
+
+[RED-2] 命令: ./gradlew :app:testDebugUnitTest --tests '*TitleArtifactApplierTest' --console=plain
+    观察: 「找不到符号 TitleArtifactApplier」+ BUILD FAILED
+    EXITCODE=1（追加于 T-045-red-2026-09-23.txt 末尾）
+
+[GREEN-1] 命令: ./gradlew :app:testDebugUnitTest --tests '*DerivedServiceBranchTitleTest' --tests '*HomeWiringTest' --console=plain
+    结果: BUILD SUCCESSFUL in 18s
+    EXITCODE=0
+    JUnit XML: DerivedServiceBranchTitleTest tests=4 failures=0；HomeWiringTest tests=16 failures=0（含新增 submitReturnsBeforeRootTitleDerivationFinishes）
+
+[GREEN-2] 命令: ./gradlew :app:testDebugUnitTest --tests '*TitleArtifactApplierTest' --tests '*DerivedOperationTest' --tests '*DerivedServiceBranchTitleTest' --tests '*HomeWiringTest' --console=plain
+    结果: BUILD SUCCESSFUL in 28s
+    EXITCODE=0
+
+[REGRESSION] 命令: ./gradlew :app:testDebugUnitTest :app:lintDebug --console=plain
+    结果: BUILD SUCCESSFUL in 46s ; 110 actionable tasks: 8 executed, 102 up-to-date
+    EXITCODE=0
+[REGRESSION] 命令: ./gradlew :app:testDebugUnitTest :ai:test :data:test :core:test :tree-layout:test --console=plain
+    结果: BUILD SUCCESSFUL in 26s
+    EXITCODE=0
+[REGRESSION] 全量清点（JUnit XML 回读）: app tests=602 failures=0 errors=0（新增 5 例：BranchTitle 4 + 异步提交 1）
+
+[GUARD] powershell scripts/no-kotlin-check.ps1
+    结果: VERDICT: PASS (13 OK line(s))
+    EXITCODE=0   证据: artifacts/evidence/T-045-no-kotlin-2026-09-23.txt
+
+[SCAN] 生产侧原文扫描（grep -rn "new DerivedOperation(\|implements DerivedCaller\|implements HomeDerivedPort" app/src/main）:
+    BlockingDerivedCaller.java:17 implements DerivedCaller
+    DerivedService.java:22 implements HomeDerivedPort
+    DerivedService.java:180 new DerivedOperation(...)
+    EXITCODE=0
+
+[SIZING] python .trae/scripts/dev/count_production_lines.py <2 new files>
+    HomeDerivedPort.java 9 + TitleArtifactApplier.java 16 = 25（判定口径）
+    既有 3 文件 git diff 上界 +106（DerivedService 53 / SqliteDerivedStore 30 / HomeWiring 33，含本任务早前在制改动）
+    联合上界 131 < 200 软上限；硬上限无争议
+
+# 本文件由命令当场捕获输出生成，非手抄。

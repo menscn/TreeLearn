@@ -15,6 +15,7 @@ public final class GatewayEndpoints {
     public static final String BASE_URL = "https://api.deepseek.com";
     public static final String CHAT_PATH = "/chat/completions";
     public static final String BALANCE_PATH = "/user/balance";
+    public static final String MODELS_PATH = "/models";
 
     private GatewayEndpoints() {
     }
@@ -34,7 +35,7 @@ public final class GatewayEndpoints {
      */
     public static String requireHttps(String url) {
         if (url == null || !url.startsWith("https://")) {
-            throw new IllegalArgumentException("a DeepSeek endpoint must be an absolute https URL "
+            throw new IllegalArgumentException("a provider endpoint must be an absolute https URL "
                     + "(cleartext traffic is never sent), but was: <" + url + ">");
         }
         return url;

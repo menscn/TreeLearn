@@ -1,0 +1,36 @@
+T-2026-09-23-089 GREEN evidence (2026-09-24)
+
+Implementation: 三个生产文件——
+  NEW android/app/src/main/java/com/treelearn/app/generation/QuickModelGateway.java
+      （派生链路唯一快速模型路由点：Routes/Keys/EndpointStreams 三端口 + Route 值对象；
+      Route==null 或 Key 不可读 → 委托回落 GenerationGateway；路由流失败只上报 terminal
+      不经聊天模型重试；Key 缓冲在流打开后立即擦除）
+  NEW android/app/src/main/java/com/treelearn/app/wiring/SqliteQuickModelRoutes.java
+      （经 SqliteModelSettingsStore.read(Role.FAST) 读分工——088 共享回落判定，
+      不另写第二份；仅补查 ProviderDao 的 base_url；解析为空或 provider 行已删 → null）
+  MOD android/app/src/main/java/com/treelearn/app/AppContainer.java
+      （modelSettingsStore 上移至 derivedService 之前；装配 SqliteQuickModelRoutes +
+      QuickModelGateway（Keys 适配 KeystoreSecretStore，仅内置 provider 才做旧键迁移，
+      EndpointStreams = adminGateway::streamChat），DerivedService 换用 derivedGateway；
+      主对话 coordinator 网关不变）
+
+DerivedService/ChatWiring/HomeWiring 调用面零改动；思考开关语义零改动
+（派生请求仍 DerivedRequest.assemble 的 thinkingEnabled=false）。
+
+Command:
+  cd android && ./gradlew.bat --no-watch-fs --no-daemon --console=plain :app:testDebugUnitTest --tests "com.treelearn.app.generation.QuickModelGatewayTest"
+
+Exit code: 0
+
+Passing evidence: BUILD SUCCESSFUL in 15s（54 actionable tasks）。
+  QuickModelGatewayTest 6/6 通过：
+  aConfiguredFastAssignmentOpensTheEndpointWithItsProviderKey /
+  anUnconfiguredFastAssignmentKeepsTheLegacyChatModelPath /
+  anUnreadableProviderKeyFallsBackToTheChatModelPath /
+  aFailedFastStreamDoesNotRetryThroughTheChatModel /
+  theProviderKeyBufferIsWipedAfterTheCallIsOpened /
+  cancelDelegatesToTheEndpointCall。原始输出 T-089-green-raw.txt，退出码 T-089-green-exit.txt。
+
+Regression evidence: 全量 `./gradlew.bat --no-watch-fs --no-daemon --console=plain
+  check assembleDebug` exit 0（含全模块 JVM 测试与 lint），见 T-089-check.txt。
+  未配置回落断言（测试②）证明未配置时行为与既有路径逐参一致（同 model/request/sink 实例透传）。

@@ -20,14 +20,6 @@ import java.util.List;
  */
 public interface HomeData {
 
-    default void renameTopic(String topicId, String title, long now) {
-        throw new UnsupportedOperationException("renameTopic is not implemented by this data port");
-    }
-
-    default void deleteTopic(String topicId) {
-        throw new UnsupportedOperationException("deleteTopic is not implemented by this data port");
-    }
-
     /** Recently used topics, newest first. Never null; empty means "no topic yet". */
     List<TopicCard> recentTopics();
 
@@ -38,6 +30,10 @@ public interface HomeData {
      *        history-derived set over the starter set (PRD 6.2.17 point 3).
      */
     Recommendations recommendations(boolean hasTopics);
+
+    default HomeStats stats() {
+        throw new UnsupportedOperationException("stats is not implemented by this data port");
+    }
 
     /**
      * A non-empty strip plus the fact the screen uses to pick its heading.

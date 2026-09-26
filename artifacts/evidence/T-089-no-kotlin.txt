@@ -1,0 +1,10 @@
+T-2026-09-23-089 no-kotlin guard evidence (2026-09-24)
+
+Command:
+  powershell -NoProfile -ExecutionPolicy Bypass -File android\scripts\no-kotlin-check.ps1 -AndroidRoot android
+
+Exit code: 0
+Verdict: PASS (13 OK line(s))——源码/Gradle 脚本/toml 扫描、依赖报告断言、
+  3 个 APK dex 字符串表检查（debug 14 dex / release 1 dex / androidTest 3 dex）全部 OK，
+  仅既有已登记例外 NOTICE（androidTest APK 的 Lkotlin/Metadata; 等 8 个注解描述符，
+  无 Kotlin 运行时链接）。原始输出 T-089-no-kotlin-raw.txt，退出码 T-089-no-kotlin-exit.txt。

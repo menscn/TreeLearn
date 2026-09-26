@@ -1,0 +1,47 @@
+T-092 实测生产行数（口径：非空、非注释行；harness-tasks.md）
+工作树含 T-083~T-102 多任务未提交改动，git diff 无法按任务隔离；
+modified 文件逐 diff hunk 人工甄别，仅计 T-092 引入的行；
+一行被多任务共同改写时计入本任务（就高口径）。
+
+== 新增生产文件（全量） ==
+ChatSearchStep.java              96
+HttpWebSearchGateway.java       158
+KeystoreSearchCredentials.java   25
+SearchCredentials.java            5
+SearchInjection.java             39
+WebSearchGateway.java            49
+panel_search_picker.xml          49
+小计                            421
+
+== modified 生产文件（T-092 净增，人工盘点） ==
+PromptLimits.java                 6   （+6 检索常量）
+HomeViewState.java                4   （+3 Notice 枚举臂；HeatStrip 属 T-102 不计）
+ChatCommandResult.java           14   （postNotice 机制，全部 T-092）
+NoticeText.java                   6   （+3 映射臂）
+ChatViewState.java               18   （+2 字段、withSearchEnabled、构造/with* 尾参；Translations 等属 T-090/T-077 不计）
+ChatActions.java                  6   （+2 动作）
+ChatPresenter.java               26   （search 字段、13 参构造链尾、searchLabel、onSearchToggled/onSearchOpenSettings、publish 降级；Translator/翻译属 T-090 不计）
+SettingsStore.java                2
+AndroidSettingsStore.java         6   （searchEnabled/setSearchEnabled；其余属 T-088/T-090 不计）
+ChatWiring.java                  35   （search 字段、8 参构造尾、send 接地块、degradeOf、submit 5 参重载、assembler 注入；answerSuggestions 属 T-088 不计）
+PreferenceSearchSettingsStore.java 4 （aliasOf；文件本体属 T-091 未跟踪）
+AppContainer.java                 8   （chatSearchStep 字段/构造/accessor；providerAdmin、quickModel 等属 T-087~T-091 不计）
+MainActivity.java                 1   （ChatPresenter 构造尾参 chatSearchStep()；与 T-090 共行，就高计 1）
+SettingsScreen.java               3   （T-087 死入口修复：settings_providers_entry 绑定）
+ChatScreen.java                  39   （searchChip 字段/绑定/renderSearchChip/showSearchPanel；fullscreen 属 T-077、translation 属 T-090 不计）
+screen_chat_body.xml              6   （chat_search_chip；fullscreen/translation 布局属 T-077/T-090 不计）
+strings.xml                      10   （notice_search_* 3 + chat_search_chip/search_panel_* 7；providers/models/search 页文案属 T-087/T-088/T-091 不计）
+小计                            194
+
+== 合计 ==
+新增 421 + modified 净增 194 = 615 行   [超过 500 行上限]
+
+== 例外节（按用户 2026-09-24 预授权追认） ==
+超限 115 行。两轮等价压缩评估：
+1) 构造器重载链（ChatPresenter 5 级 / ChatWiring 3 级）：删除中间重载需同步改他任务
+   （T-090/T-076/T-077）的调用与测试，属跨任务耦合重构。
+2) ChatViewState with* 直构样板与 ChatScreen 面板：压缩只能靠合并语句行，损害
+   既有风格且触及共享未提交代码；HttpWebSearchGateway 158 行为三引擎协议/解析
+   的不可再减实现。
+结论：压缩收益低且需重跑全部 TDD 证据、波及 T-083~T-102 未提交改动，
+按预授权记例外，不再执行压缩。

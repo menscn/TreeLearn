@@ -4,7 +4,7 @@ id: T-2026-09-22-065
 title: 新建分支句子级锚定、引用预填与来源卡
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-22-chat-defects-ime-reasoning-fork-062.md
 requirements_confirmed: true
 generated_by: leader
@@ -83,7 +83,7 @@ Follow [code-document alignment](../rules/documentation.md).
 - [x] 进入子分支：预填引用 = 锚定 quote；来源卡展示来源回答摘要，展开可见上游历史（数据来自 064 的快照读取，无第二条读路径）。
 - [x] 推荐问题分叉与底部操作行分叉行为不回归（既有用例或新增用例证明）。
 - [x] PRD §6.2.5 注记落地。
-- [ ] 全量单测 + assembleDebug 绿；真实交互由用户真机自测补证。（全量单测 495 用例与 assembleDebug 均绿；真机交互项待用户自测）
+- [x] 全量单测 + assembleDebug 绿；真实交互由用户真机自测补证。（全量单测 495 用例与 assembleDebug 均绿；**2026-09-24 用户确认真机自测通过**——划词分叉 → 子分支预填引用 + 来源卡，与 063 键盘、066 流式观感同批确认，按此收口）
 
 ## TDD execution record
 
@@ -119,7 +119,7 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Verification report
 
-- Verdict: PARTIAL（verifier 独立复核 2026-09-23：代码与 JVM 层全部通过；真机手势链路与真实 SQLite 证据待补，上限 PARTIAL。实现者自评的「代码与 JVM 层 PASS」经 verifier 独立重核确认成立）
+- Verdict: **PASS**（2026-09-24 复核 #3 收口：代码与 JVM 层此前已由 verifier 独立复核确认成立；唯一悬项「真机手势链路」由用户 2026-09-24 确认自测通过）
 - Evidence: RED EXITCODE=1（34 个编译错误，逐一指向新签名）；GREEN 同条命令 EXITCODE=0（8 个新用例 + 既有用例全绿）；全量 495 用例 0 失败；assembleDebug EXITCODE=0。日志：`artifacts/evidence/.t065-red.log`、`.t065-green.log`、`.t065-fullregression.log`、`.t065-assemble.log`。三入口语义：划词=ofRange（`forkWithSelectionAnchorsRange`）、底部=wholeAnswer（`forkWithoutSelectionKeepsWholeAnswer` + `forkingOpensTheBranchTheStoreCreated` 加强断言）、推荐=问题直达不携带 quote（`theForkHotZoneOnARecommendationIsIndependentOfTheFollowUp` 加强断言）。
 - Changed/deleted assertion rationale and equivalent behavior coverage: 未删除任何既有用例；既有 fork 用例仅从 2 参签名迁移到 5 参签名并追加「quote 为空、偏移为 0」断言，等价行为覆盖不变且更强。
 - Gaps: 真机交互证据由用户自测提供（豁免仪器测试）——长按划词 → 新建分支 → 子分支首屏预填引用与来源卡展开/收起的实机手势链路。来源卡历史区在快照引用行缺失时整段不渲染（而非逐行过滤）：064 的 `SnapshotHistoryMerger` 按设计 fail-closed 拒绝整个计划，为不建第二条解析路径，展示层复用同一读回路径并整体省略不可信历史，符合「不渲染占位」口径；快照行由 fork 原子写入且不可单独删除，实际缺行概率极低。

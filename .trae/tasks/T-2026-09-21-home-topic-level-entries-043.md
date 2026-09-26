@@ -4,7 +4,7 @@ id: T-2026-09-21-043
 title: 首页与主题级收口（示例主题、主题删除、根标题改名、未读标识）
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -78,11 +78,11 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Acceptance criteria
 
-- [ ] 同一 JVM 测试命令先 RED 后 GREEN：断言空状态引导产生创建路径、改名落库并可读回、删除确认前库未变、确认后主题与其全部分支消失、未读读取失败时不显示 0 而隐藏徽标。
-- [ ] 原文扫描证明 `home_entry_pending` 在 `strings.xml` 与生产代码中都不再有生产者与引用。
-- [ ] 删除不写第二套递归逻辑：原文扫描证明主题删除依赖既有级联（无新增按分支逐个删除的循环）。
-- [ ] `:app:testDebugUnitTest`、`.\gradlew.bat check`、Java-only guard、设计 token 守门、文档影响记录齐全且退出码 0。
-- [ ] 真机观感与像素证据记为 `deferred — 用户自行装机验证（user decision 2026-09-21）`，不得写成 PASS。
+- [x] 同一 JVM 测试命令先 RED 后 GREEN：断言空状态引导产生创建路径、改名落库并可读回、删除确认前库未变、确认后主题与其全部分支消失、未读读取失败时不显示 0 而隐藏徽标。
+- [x] 原文扫描证明 `home_entry_pending` 在 `strings.xml` 与生产代码中都不再有生产者与引用。（verifier #3 复扫 `artifacts/evidence/T-043-verify3-scans-2026-09-24.txt`：0 命中。）
+- [x] 删除不写第二套递归逻辑：原文扫描证明主题删除依赖既有级联（无新增按分支逐个删除的循环）。（verifier #3 复扫同文件：递归形态 0 命中；删除唯一走 `TopicDao.delete`，`SqliteHomeStore:80` 与 `SqliteNavigationStore:130` 复用同一 DAO + 级联。）
+- [x] `:app:testDebugUnitTest`、`.\gradlew.bat check`、Java-only guard、设计 token 守门、文档影响记录齐全且退出码 0。（verifier #3 本轮实测：`check` EXITCODE=0 `P3-B3-gates-2026-09-24.txt`；Java-only guard PASS `P3-B3-no-kotlin-2026-09-24.txt`。）
+- [x] 真机观感与像素证据记为 `deferred — 用户自行装机验证（user decision 2026-09-21）`，不得写成 PASS。
 
 ## TDD execution record
 
@@ -145,3 +145,12 @@ Follow [code-document alignment](../rules/documentation.md).
 - Unblock condition: T-039 与 T-040 进入 verifying。
 - Next steps: 实现后交独立 verifier；随后由发布任务重建签名 APK。
 - Watch-outs: 不要新增第二份未读计算；不要保留占位文案。
+
+## Verification report — 收尾复核（verifier #3，2026-09-24）
+
+- Verdict: PASS。实现者自检 PARTIAL 的残留项（独立 verifier 未复核）由本轮补上。
+- 验收扫描（独立复跑，`artifacts/evidence/T-043-verify3-scans-2026-09-24.txt`）：`home_entry_pending` 在源码与资源 0 命中；递归删除形态（deleteBranch/recursiveDelete/deleteChildren/deleteDescendants）0 命中；主题删除唯一走 `TopicDao.delete`（`SqliteHomeStore:80`、`SqliteNavigationStore:130` 复用同一 DAO + 级联），无第二套判定。
+- RED→GREEN：同一命令 `:app:testDebugUnitTest --rerun-tasks --no-build-cache` 先 1 后 0（任务正文记录），GREEN 358 例 0 失败；本轮门禁 `check` EXITCODE=0（`P3-B3-gates-2026-09-24.txt`）、Java-only guard PASS（`P3-B3-no-kotlin-2026-09-24.txt`）。
+- 设备项（对话框/徽标观感、像素）：`deferred — 用户自行装机验证（user decision 2026-09-21）`；实现者记录的真机启动（adb 设备 `AWSS013807000356`）是补充观察，不替代脚本化验收。
+- 规模：超 200 软上限（实现者 Risks 自述），未超 500 硬上限的记录存在；共享文件（MainActivity/HomeScreen）归属增量无法与并行 lane 分离，按「无越线证据 + 软上限警告」处理。
+- 未读计算与导航页同源（`UnreadRollup`，不在屏幕自算）：实现记录与扫描一致，维持 PASS。

@@ -1,7 +1,9 @@
 package com.treelearn.app.library;
 
 import com.treelearn.app.navigation.NavigationData;
+import com.treelearn.app.search.SearchPresenter;
 import com.treelearn.app.ui.UiThread;
+import com.treelearn.core.domain.SearchHit;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -38,16 +40,24 @@ public final class LibraryPresenter {
     private final UiThread ui;
     private final Executor background;
     private final LibraryData data;
+    /** The search stack, inherited whole: this presenter forwards and owns no second state machine. */
+    private final SearchPresenter search;
 
     private LibraryViewState state;
     /** Bumped by every mutation. A background answer carrying an older value is dropped. */
     private long generation;
 
     public LibraryPresenter(LibrarySink sink, UiThread ui, Executor background, LibraryData data) {
+        this(sink, ui, background, data, null);
+    }
+
+    public LibraryPresenter(LibrarySink sink, UiThread ui, Executor background, LibraryData data,
+            SearchPresenter search) {
         this.sink = require(sink, "sink");
         this.ui = require(ui, "ui");
         this.background = require(background, "background");
         this.data = require(data, "data");
+        this.search = search;
         this.state = LibraryViewState.initial();
     }
 
@@ -75,6 +85,24 @@ public final class LibraryPresenter {
     /** A tapped segment. Both lists were read together, so switching between them re-reads nothing. */
     public void onSegmentSelected(LibraryViewState.Segment segment) {
         render(state.withSegment(require(segment, "segment")));
+    }
+
+    /**
+     * A keystroke in the library's search box (T-054). Forwarded whole to the search presenter: the
+     * four-state machine, the empty-query guard and the stale-answer drop are its decisions, and a
+     * second copy of any of them here is a second answer to the same question.
+     */
+    public void onSearchQueryChanged(String text) {
+        if (search != null) {
+            search.onQueryChanged(text);
+        }
+    }
+
+    /** A tapped result row. The hit travels to the search stack, reachability and all. */
+    public void onSearchHitOpened(SearchHit hit) {
+        if (search != null) {
+            search.onHitOpened(hit);
+        }
     }
 
     /** Puts an archived branch back: one flag, and no descendant is moved anywhere. */

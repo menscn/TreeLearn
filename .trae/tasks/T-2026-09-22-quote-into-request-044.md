@@ -4,7 +4,7 @@ id: T-2026-09-22-044
 title: 引用进请求（划词追问的引用文本真正发给模型）
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -109,7 +109,7 @@ Follow [code-document alignment](../rules/documentation.md).
 ```
 
 ### GREEN — minimum implementation
-- Implementation: `DeepSeekContextEncoder` 新增 `QUOTE_OPEN` / `QUOTE_CLOSE` 并入 `TAGS`，新增 `currentInput(question, quote)` 作为「有没有引用」的唯一判定点（null/空白归一化在此一处）；`ChatWiring.submit` 增加 `quote` 参数并改调 `DeepSeekContextEncoder.currentInput`，`send` 转发 `userMessage.quotedText()`，`replace` 经 `Asked.quote` 转发存行引文。生产代码净增 22 行（非空非注释口径），无新文件、无 schema 改动、无新依赖。
+- Implementation: `DeepSeekContextEncoder` 新增 `QUOTE_OPEN` / `QUOTE_CLOSE` 并入 `TAGS`，新增 `currentInput(question, quote)` 作为「有没有引用」的唯一判定点（null/空白归一化的**判定**唯一在此；同一幂等归一化表达式在 `ChatMessage` 与 `ChatWiring` 亦各出现一次，三处对同一输入结论相同——〔2026-09-24 verifier #2 F2 处置〕原表述「在此一处」高估了唯一性，已按「判定唯一、归一化不唯一」更正本行与提示词设计 §5.1、android/README.md 两处表述）；`ChatWiring.submit` 增加 `quote` 参数并改调 `DeepSeekContextEncoder.currentInput`，`send` 转发 `userMessage.quotedText()`，`replace` 经 `Asked.quote` 转发存行引文。生产代码净增 22 行（非空非注释口径），无新文件、无 schema 改动、无新依赖。
 - Command: cd android; .\gradlew.bat --no-daemon --console=plain :app:testDebugUnitTest --tests '*ChatWiringTest*' --rerun-tasks --no-build-cache
 - Exit code: 0
 - Passing evidence: 与 RED 逐字同一条定向命令（代码冻结后重跑）：`BUILD SUCCESSFUL in 19s`、`54 actionable tasks: 54 executed`、`app/testDebugUnitTest` 1 suite 22 tests 0 failures —— 与 RED 是同一批 22 例（RED 时 4 条失败，现 0 条）；另跑全量 `test --rerun-tasks --no-build-cache`（代码冻结后重跑）：`BUILD SUCCESSFUL in 31s`、`124 actionable tasks: 124 executed`，全部 `TEST-*.xml` 回读 **1093 例 0 失败 0 错误**（口径见代码块）。
@@ -165,7 +165,7 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Verification report
 
-- Verdict: PARTIAL
+- Verdict: PASS（2026-09-24 复核 #3 收口，见文末「复核记录 #3」；复核 #2 判 PARTIAL 的未结项 F1/F2/F5 已修复、F3/F4 已处置）
 - Evidence: artifacts/evidence/T-044-verify-callchain.txt（判据 1/2：调用链与唯一判定点，EXITCODE=0）、artifacts/evidence/T-044-verify-doc-and-assertions.txt（判据 3/4/5/6/7：文档对码、改写断言、证据自证审计，EXITCODE=0）、artifacts/evidence/T-044-verify-verdict.txt（跨入口比对断言、验收点名用例存在性、声明文档面，EXITCODE=0）
 - Changed/deleted assertion rationale and equivalent behavior coverage: 两处既有断言（ChatWiringTest 的 send 与 retry 两条用例，任务书原引 :163/:204）由「currentInputChars 等于问题长度」改写为「等于信封+问题的完整正文长度」，并新增逐字节 assertEquals(cited(...), latest)。改写是加强而非放松：原意图分别由 assertFalse(latest, latest.contains("  a follow-up  "))（当前输入是去空白后的问题）与 assertEquals(0, store.historyOrdinal)（重试取该位置背后的问题）保住；旧行为「引用被丢弃」现被断言为假。期望值由测试内写死信封字面量的 cited() 构造（源码注释明说不引用适配器常量以免自证），不构成自证。方向与等价覆盖经独立复现，见判据 7。
 - Gaps: ① 设备侧与真实 DeepSeek 联网作答未验证，deferred — 用户自行装机验证（user decision 2026-09-21）。② 本轮 Gradle 门禁读数（1093 例 0 失败、check 退出码 0、Java-only guard PASS）取自实现者证据文件，verifier 未独立重跑（另一 lane 占用构建缓存），只核对到「含命令、cwd 与 EXITCODE=」，未复现。③ artifacts/evidence/T-044-contract-guardian.txt 的产出方无法确认（自述，见 F4）。④ T-044-sizing.txt 无 command: 头行。
@@ -204,6 +204,19 @@ Follow [code-document alignment](../rules/documentation.md).
 - 向后兼容（无 schema/migration/DTO 改动；无引文时字节不变）：PASS
 - 文档同步：PARTIAL（§5.1、技术方案 §9.2、android/README.md 已同步；交付报告 :160 残留一句，但该文件不在本任务声明的文档面内）
 - 契约轴整体：PARTIAL
+
+## 复核记录 #3（独立 verifier，2026-09-24）— 收口
+
+对复核 #2 遗留 Findings 的逐条处置，全部以当前工作树实读为据：
+
+- F1（交付报告 :160 残留「线格式未定义」现在时断言）→ **已修复**。复核命令 `rg -n "线格式未定义" Docs/06-delivery/TreeLearn_V1_交付报告.md` 当前 0 命中；该 item 已改写为指向 §5.1 与 `DeepSeekContextEncoder.currentInput` 的当前态（2026-09-24 刷新轮）。
+- F2（归一化「只有一处」表述高估唯一性）→ **已修复**。按 F4/contract-guardian 建议的选项 ②：三处表述改为「判定唯一、归一化不唯一」并说明理由。落盘证据：`rg -n "判定唯一、归一化不唯一"` 命中提示词设计 §5.1（:136）、android/README.md（:680）与本任务 TDD 记录 GREEN-Implementation 行（2026-09-24 更正）。
+- F3（Facts 行对 `Message.user` 归一化的描述与代码不符）→ **接受现状，不改历史规格**。Facts 是立项时的规格快照，按惯例不回写；准确结论已由复核 #2 判据 2 与「工头更正（2026-09-22）」节记录在案（3 trim + 1 不 trim，共 4 个归一化点，判定唯一）。后果为零（幂等），维持漂移风险登记。
+- F4（contract-guardian 证据产出方无法确认）→ **由复核 #2 的 contract 轴结论替代其验收职能**（F4 给出的两条出路之一）。复核 #2 已独立复现其全部实质结论（§5.1 线格式 PASS、判定点唯一、失败关闭、不变式成立）；其唯一的 contract 轴 FAIL 项（归一化唯一性）已按 F2 处置为「判定唯一、归一化不唯一」的准确表述，与代码事实对齐 → contract 轴改判 **PASS**。
+- F5（交付报告不在声明文档面内）→ **已路由并修复**。交付报告在 2026-09-24 交付报告刷新轮中统一更新（§7 裁定块、§9/§10 当前态），F1 即其一部分。
+- 门禁独立性补强：复核 #2 的 Gap ②（未独立重跑 Gradle）已在本轮消除——2026-09-24 全量 `check` 独立重跑通过（`artifacts/evidence/P3-B4-gates-2026-09-24.txt`，EXITCODE=0），此时工作树含 T-044 全部代码与后续 T-045/046/047 增量，即 T-044 行为在最新树上无回归。
+- 设备侧与真实 DeepSeek 联网作答：维持 deferred — 用户自行装机验证（user decision 2026-09-21），不记 PASS、不因此判 FAIL。
+- 结论：验收 7 条全勾且证据自洽，复核 #2 遗留项全部处置完毕 → **verified**。
 
 ## Handoff notes
 

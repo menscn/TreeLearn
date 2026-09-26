@@ -124,7 +124,8 @@ public final class TreeLearnSchemaQuoteInvariantTest {
 
     @Test
     public void everyVersionBelowTheCurrentOneHasExactlyOneForwardStep() {
-        assertEquals(2, TreeLearnSchema.DATABASE_VERSION);
+        // V4 (T-096) is the current version; the literal is the one version this suite pins.
+        assertEquals(4, TreeLearnSchema.DATABASE_VERSION);
 
         for (int version = 1; version < TreeLearnSchema.DATABASE_VERSION; version++) {
             int steps = 0;

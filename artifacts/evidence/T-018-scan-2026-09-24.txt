@@ -1,0 +1,46 @@
+T-018 secret/content log scan 与配置证明 — 2026-09-24
+cwd: D:/Project/Android/Treelearn/android（除注明外）
+
+[SCAN] 日志调用点（command: grep -rn "Log\.(d|i|w|e|v)(" --include=*.java app/src/main/java）
+  命中 2 处，全部只输出脱敏元数据：
+  1. wiring/LogcatTelemetry.java:24 — event + operationId + branchId + chars + errorKind。
+     GenerationTelemetry 接口签名即脱敏策略：无任何可承载问题/回答/思考/提示词正文/凭据的参数。
+  2. artifact/DerivedService.java:178 — event + kind.wireId + digestPrefix（摘要前缀，非正文）。
+
+[SCAN] release TelemetrySink no-op（T-018 自治决策：release 用 no-op，debug 只允许脱敏元数据）
+  RED→GREEN 已完成（本日）：
+    RED: artifacts/evidence/T-018-telemetry-red-2026-09-24.log（6 编译错误，EXITCODE=1）
+    GREEN: TelemetrySink.forVariant 单一判定点 + QuietTelemetry（release 空实现）；
+           app/src/test/.../TelemetrySinkVariantTest.java 3 例，定向运行 BUILD SUCCESSFUL（EXITCODE=0）
+    装配: AppContainer.java:163-170 以 FLAG_DEBUGGABLE 判变体，经 forVariant 注入 coordinator
+    回归: 全量 :app 单测 BUILD SUCCESSFUL（EXITCODE=0，/tmp/t018-full.log 同记录于 T-018-gates）
+  debug 变体行为不变（仍 LogcatTelemetry）。
+
+[SCAN] SharedPreferences 写入点（command: grep -rn "putString\|putBoolean\|putInt" --include=*.java app/src/main/java）
+  唯一写方: wiring/SharedPreferencesChatDraftStore.java（T-076 草稿，"treelearn_chat_drafts"）。
+  内容 = 用户自己的输入草稿（text/quote/model 名），本地优先设计内；无 system 提示词正文。
+  MainActivity:500 的 EXTRA_IS_SENSITIVE 是剪贴板敏感性标记，非存储。
+
+[SCAN] 异常消息（command: grep -rn "throw new .*(" ... | grep -E "\+ *(text|body|content|question|answer|reasoning|draft|message)\b"）
+  命中 0 —— 无异常消息拼接内容变量。
+
+[SCAN] SQLite 无 system 落库（data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java）
+  :53 javadoc 明令 "No column may hold the system prompt body"。
+  :347 role CHECK 约束 role IN ('USER','AI') —— SYSTEM 行在 schema 层不可表示。
+  提示词正文只存在于内存组装（prompt builder），从不持久化。
+
+[CFG] Manifest / 网络 / 备份（app/src/main/AndroidManifest.xml）
+  :16 allowBackup="false"；:17 dataExtractionRules；:18 fullBackupContent（禁备份/迁移）
+  :21 networkSecurityConfig=@xml/network_security_config（base-config 禁明文、仅系统信任锚、
+      无 debug 放宽）；:25 usesCleartextTraffic="false"
+  即：仅 HTTPS、禁备份/设备迁移，证据为本日 grep 原文。
+
+[REF] 门禁与校验
+  全量 check: artifacts/evidence/P3-B4-gates-2026-09-24.txt（EXITCODE=0，本日，工作树随后仅增
+    本任务两生产文件/一测试文件与 .md，已由全量单测复跑覆盖）
+  Java-only guard: artifacts/evidence/P3-B3-no-kotlin-2026-09-24.txt（PASS）
+  validate_tasks.py: files=108 errors=0
+
+[DEFERRED]（不得读作 PASS）
+  SQLite/SharedPreferences 的运行时内容扫描需真机/模拟器 —— deferred — emulator not used
+  this round (user instruction 2026-09-21)。真实 DeepSeek 冒烟与受控行为集 —— 等用户临时 Key。

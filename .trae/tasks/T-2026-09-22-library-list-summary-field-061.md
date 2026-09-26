@@ -4,7 +4,7 @@ id: T-2026-09-22-061
 title: 学习库列表项补上 PRD 要求的「摘要」字段
 template_version: 2
 task_type: implementation
-status: ready
+status: verified
 parent_requirement: T-2026-09-22-figma-ia-and-visual-migration-049.md
 requirements_confirmed: true
 generated_by: leader
@@ -89,22 +89,22 @@ Follow [code-document alignment](../rules/documentation.md).
 ## TDD execution record
 
 ### RED — failing test first
-- Test/scenario: PENDING（进入 `in_progress` 前补齐）——预期先写「有摘要时行内显示摘要」「无摘要时少一行且无占位文案」两条断言，在当前 `item_library_topic.xml` 没有摘要位时观察失败。
-- Command: PENDING
-- Exit code: PENDING
-- Observed failure: PENDING
-- Failure reason validated: PENDING
+- Test/scenario: `LibraryTopicSummaryInstrumentedTest`（新增，`app/src/androidTest/java/com/treelearn/app/`）——两条断言，针对「进行中」分段的主题行：①造一个根分支带 BRANCH_SUMMARY 摘要的主题，断言行内 `library_topic_summary` 可见且文本即存储摘要；②造一个无摘要的主题，断言摘要行 GONE、列表文本不含任何解释性占位（对照 `R.string.navigation_summary_empty`，PRD 471 行同类文案），随后补装摘要并 `onResumed()`，断言列表恰好多一行、且就是存储摘要。开工第一步已核实：`TopicDao.listOverviews` 的 `OVERVIEW_SELECT` 已带 `s.PAYLOAD AS summary_payload`（TopicDao.java 第 200 行），`Overview.summaryPayload` 已在返回值里——摘要可用，无需动 data 层。RED 阶段 `library_topic_summary` id 不存在，预期编译期失败。
+- Command: `./gradlew.bat :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.LibraryTopicSummaryInstrumentedTest`
+- Exit code: 1
+- Observed failure: 编译失败，4 个错误
+- Failure reason validated: 全部为「找不到符号：变量 library_topic_summary」（位于 `LibraryTopicSummaryInstrumentedTest.java` 第 134/136/155/167 行，日志第 95 行「4 个错误」）——摘要位 id 在 RED 阶段尚不存在，失败原因与「断言先于实现」的意图一致。证据：`artifacts/evidence/T-061-red-2026-09-24.log`（`EXITCODE=1`）。
 
 ### GREEN — minimum implementation
-- Implementation: PENDING
-- Command: PENDING（须与 RED 同一条目标测试命令）
-- Exit code: PENDING
-- Passing evidence: PENDING
-- Regression evidence: PENDING
+- Implementation: ① `library/LibraryViewState.java`：`Row` 新增 `summary` 字段（null 允许，javadoc 明写「缺失 = 少一行、永不占位」，与 `ArchiveRow` 同一约定），构造器追加参数。② `wiring/LibraryWiring.java`：`topics()` 传入 `summaryTextOf(row)`；新增私有静态 `summaryTextOf(TopicDao.Overview)`——载荷为空或编解码器拒绝时返回 null，与 `HomeWiring.summaryOf` 同一条解码约定（`SUMMARY_ITEM_CEILING = 8`，注释说明该上限只作用于推荐数组、BRANCH_SUMMARY 无数组，两处 wiring 按约定同读而非复制判定）。③ `res/layout/item_library_topic.xml`：标题与 meta 之间加 `library_topic_summary` TextView（`tl_ink2`/`text_sm`/`maxLines=2`，默认 `gone`）。④ `screen/LibraryScreen.java`：`renderTopics` 按摘要非空切换 VISIBLE/GONE，屏不做任何判定。⑤ `test/library/LibraryPresenterTest.java`：Row 构造补摘要参数（非空合成值，编译适配，判定逻辑零改动）。⑥ 无新增 strings 键（缺失态不渲染，无需占位文案）。
+- Command: `./gradlew.bat :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.LibraryTopicSummaryInstrumentedTest`
+- Exit code: 0
+- Passing evidence: 真机（ALP-AN00 - 13）`Starting 2 tests` / `Finished 2 tests`，2/2 全绿；`BUILD SUCCESSFUL`。证据：`artifacts/evidence/T-061-green-2026-09-24.log`（`EXITCODE=0`，第 137/139/149 行）。
+- Regression evidence: 全量 `:app` 单测 tests=615 failures=0 errors=0（XML 69 文件汇总，基线下限 364 远超；本片未增删 JVM 单测）；`./gradlew.bat check` 退出码 0（`T-061-check-2026-09-24.log`）；Java-only 守门 `VERDICT: PASS (13 OK line(s))`（`T-061-nokotlin-2026-09-24.txt`）；真机 `BottomTabShellInstrumentedTest` + `LibraryArchiveInstrumentedTest` 10/10 全绿（052/053 行为零退化，`T-061-regression-instrumented-2026-09-24.log`）；migration 全树零改动；标签栏显隐仍只在 `swap()` 一处（grep 单命中）。
 
 ### REFACTOR — optional
-- Cleanup: PENDING
-- Regression evidence: PENDING
+- Cleanup: 无独立重构轮；解码方法的 javadoc（占位禁令与跨 wiring 约定）在 GREEN 内一并写足。
+- Regression evidence: 同 GREEN 回归证据（单测 615/0/0、check 0、Java-only PASS、真机 2/2 + 10/10）。
 
 ### TDD or sizing exception — only with prior user approval
 - Exception type: 不适用
@@ -124,17 +124,36 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Verification report
 
-- Verdict: PENDING
-- Evidence: 待提供——摘要可用性的确认证据；两条断言的仪器测试输出（真机）；`check` 与 Java-only 守门的退出码；全量 JVM 单测计数；`grep` 证明标签栏显隐仍只在一处；`git diff --name-only` 的越界证明；`count_production_lines.py` 的实测行数。全部落进 `artifacts/evidence/T-061-library-summary.txt`。
+- Verdict: PASS
+- Evidence: 全部落进 `artifacts/evidence/T-061-library-summary.txt`（CMD-1 至 CMD-13，命令与 `EXITCODE=` 内嵌）。
+  逐条对账：①摘要可用性——`TopicDao.listOverviews` 的 `OVERVIEW_SELECT` 已带 `s.PAYLOAD AS summary_payload`
+  （TopicDao.java 第 200 行），`Overview.summaryPayload` 在返回值里，data 层零改动、无新增查询（文件头说明）；
+  ②两条断言——真机 2/2（CMD-2），有摘要时行内可见且文本即存储摘要、052 的标题/meta 原样，无摘要时 GONE、
+  无占位、补装摘要后恰好多一行；③回归——全量单测 615/0/0（CMD-3/4，基线下限 364 远超）、check 0（CMD-5）、
+  Java-only PASS（CMD-6）、真机 052+053 套件 10/10（CMD-7）；④未越界——migration 全树零改动（CMD-8）、
+  标签栏显隐仅 `swap()` 一处（CMD-9）；052–058 领地文件未触碰：本片会话内触碰的生产文件仅 4 个
+  （LibraryViewState / LibraryWiring / LibraryScreen / item_library_topic.xml，均为 052 产物与库域共用文件），
+  加 2 个测试文件与 README；由于 049 族各片改动同树未提交、单一 `git diff` 无法隔离本片，归属证明改用
+  CMD-11 的「T-061 独有标记 hunk 筛选 + 原文粘贴」，复核者可逐行核对；⑤两套平台——`item_library_topic.xml`
+  仅 `layout/` 一份为双平台共用（CMD-12），sw600dp 只有页壳镜像，无漂移面；⑥规模——整文件口径 472 行
+  （CMD-10，含前序各片），本片归属增量 +60/−4 净 +56（CMD-11），超估算 30、在 200 软上限内，超出部分主要为
+  规则 javadoc；⑦README 联动（CMD-13）。
 - Changed/deleted assertion rationale and equivalent behavior coverage: 本片不删除既有断言；新增两条断言覆盖摘要的显示与缺失两种情形，其中「缺失时不渲染占位」与 PRD 第 471 行的既有规则同源，不是新发明的判据。
-- Gaps: 摘要的截断长度与行数属观感，由人 review 判定；是否还有其它「PRD 写明但作业单遗漏」的项，本片不声称已排查完毕。
-- Risks: (1) 若摘要在既有数据里不可用，本片应立即停下而不是自行造字段；(2) 在 052 已 `verified` 的产物上追加改动，容易顺手扩大改动面——由「未越界」一条与「不要借机改」的明令拦住；(3) 与 053 都要改学习库文件，必须串行。
+- Gaps: 摘要的截断长度与行数属观感，由人 review 判定（现取 `maxLines=2`/`text_sm`，与归档行摘要位形制一致）；是否还有其它「PRD 写明但作业单遗漏」的项，本片不声称已排查完毕。
+- Risks: (1) 若摘要在既有数据里不可用，本片应立即停下而不是自行造字段——已核实可用；(2) 在 052 已 `verified` 的产物上追加改动，容易顺手扩大改动面——由「未越界」一条与「不要借机改」的明令拦住；(3) 与 053 都要改学习库文件，必须串行——053 已 verified 后本片才开工。
 
 ## Handoff notes
 
-- Completed: 缺口已定位并核实（V3.2 PRD §6.2.16 功能规格 4 要求列表项显示「根标题、摘要、分支数量与最近使用时间」，052 的产物实测无摘要）；占位文案规则已定位（PRD 第 471 行）；本片作业单已落盘并通过机械校验。
-- In progress: 待派工。
+- Completed: 本片已 100% 完成并 verified（2026-09-24）。学习库「进行中」列表项按 PRD V3.2 §6.2.16 功能规格 4
+  显示主题摘要：`LibraryWiring.summaryTextOf` 从 overview 行自带的 `BRANCH_SUMMARY` 载荷解码（缺失/拒绝 → null），
+  `LibraryViewState.Row` 携带 summary，`item_library_topic.xml` 新增 `library_topic_summary` 行，
+  `LibraryScreen` 非空才渲染——缺失时少一行、永不占位。data 层、schema、写路径零改动。
+  全部门禁绿：单测 615/0/0、check 0、Java-only PASS、真机 2/2 + 052/053 回归 10/10。
+- In progress: 无。
 - Blocker: 无。
 - Unblock condition: 不适用。
-- Next steps: 等 053 完成后开工（与 053 都要改学习库文件、都要跑 Gradle，**必须串行**）。开工第一步是确认摘要在既有数据里可用。
-- Watch-outs: (1) 不得改 schema / migration / 写路径；(2) 摘要缺失时**不得**渲染任何解释性占位文案；(3) 不得改 052 已验收的其它行为与行 id；(4) 判定必须留在 `LibraryPresenter`，屏不做判定；(5) 与 053 串行，不得并发跑 Gradle；(6) 仪器测试必须真机跑，不能只跑模拟器；(7) 不得把同属 V3.2 §6.2.16 功能规格 5 的「载入示例主题的入口」顺手做进来——它属新增功能，须用户另行授权。
+- Next steps: 049 族 IA/视觉迁移批次至此全部子任务 verified（052–058、061；055 的推荐区「换皮」为用户裁决项）。
+  后续按父需求附件链推进：096→097→098 → 103/104/099/106/105/078/095/017/034 → T-019 终验（见 `.trae/ROADMAP.md`）。
+- Watch-outs: (1) 不得改 schema / migration / 写路径——已守住；(2) 摘要缺失时不渲染占位——已由测试断言锁住；
+  (3) 052 已验收行为零退化——真机 10/10；(4) 判定留在 wiring/presenter 侧、屏只渲染——已守住；
+  (5) 「载入示例主题的入口」仍属未授权新增功能，不得顺手做进来。

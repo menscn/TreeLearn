@@ -17,6 +17,7 @@ import org.junit.Test;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -40,6 +41,30 @@ public class HomeWiringTest {
         return new HomeWiring(store, generation, key,
                 Clock.fixed(Instant.ofEpochMilli(WiringDoubles.NOW), ZoneOffset.UTC),
                 PromptLimits.budget());
+    }
+
+    @Test
+    public void statsFoldsTheRawReadsIntoTheFourteenDayWindow() {
+        store.statsRaw = new HomeStore.StatsRaw(
+                Collections.singletonList(WiringDoubles.NOW), 1, 2);
+
+        com.treelearn.app.ui.HomeStats stats = wiring().stats();
+
+        assertFalse("a store with rows is not the empty state", stats.empty);
+        assertEquals(14, stats.intensities.length);
+        assertEquals("today's answer lights today's cell", 1f, stats.intensities[13], 0f);
+        assertEquals(1, stats.streakDays);
+        assertEquals(1, store.statsRawCalls);
+    }
+
+    @Test
+    public void statsWithNoRowsAtAllIsTheEmptyState() {
+        store.statsRaw = new HomeStore.StatsRaw(Collections.<Long>emptyList(), 0, 0);
+
+        com.treelearn.app.ui.HomeStats stats = wiring().stats();
+
+        assertTrue(stats.empty);
+        assertEquals(0, stats.streakDays);
     }
 
     // ---------------------------------------------------------------- reads
@@ -133,6 +158,62 @@ public class HomeWiringTest {
         assertEquals(store.createdBranch.id, result.rootBranchId());
     }
 
+    @Test(timeout = 10000)
+    public void submitReturnsBeforeRootTitleDerivationFinishes() throws Exception {
+        key.configured = true;
+        java.util.concurrent.CountDownLatch started =
+                new java.util.concurrent.CountDownLatch(1);
+        java.util.concurrent.CountDownLatch release =
+                new java.util.concurrent.CountDownLatch(1);
+        java.util.List<String> derivedBranchIds =
+                java.util.Collections.synchronizedList(new java.util.ArrayList<String>());
+        java.util.List<String> derivedQuestions =
+                java.util.Collections.synchronizedList(new java.util.ArrayList<String>());
+
+        // The deriver blocks until the test releases it: a synchronous call inside submit would
+        // keep submit from ever returning, which is exactly the provider-timeout risk this pins.
+        com.treelearn.app.artifact.HomeDerivedPort deriver =
+                new com.treelearn.app.artifact.HomeDerivedPort() {
+                    @Override
+                    public com.treelearn.app.artifact.ArtifactOutcome rootTitle(
+                            com.treelearn.core.domain.Branch root, String question,
+                            com.treelearn.core.domain.GenerationModel model) {
+                        derivedBranchIds.add(root.id);
+                        derivedQuestions.add(question);
+                        started.countDown();
+                        try {
+                            release.await(5, java.util.concurrent.TimeUnit.SECONDS);
+                        } catch (InterruptedException ignored) {
+                            Thread.currentThread().interrupt();
+                        }
+                        return com.treelearn.app.artifact.ArtifactOutcome.APPLIED;
+                    }
+
+                    @Override
+                    public java.util.List<String> homeRecommendations(String topicId,
+                            java.util.List<com.treelearn.app.artifact.TreeOutline.Entry> outline,
+                            com.treelearn.core.domain.GenerationModel model) {
+                        return java.util.Collections.emptyList();
+                    }
+                };
+
+        HomeWiring wiring = new HomeWiring(store, generation, key,
+                Clock.fixed(Instant.ofEpochMilli(WiringDoubles.NOW), ZoneOffset.UTC),
+                PromptLimits.budget(), deriver);
+
+        SubmitResult result = wiring.submit(QUESTION, WiringDoubles.MODEL, true);
+
+        assertTrue("submit must return accepted without waiting for the derivation",
+                result.isAccepted());
+        assertTrue("the derivation must still start", started.await(5,
+                java.util.concurrent.TimeUnit.SECONDS));
+        release.countDown();
+        assertEquals("the derivation carries the created root branch",
+                store.createdBranch.id, derivedBranchIds.get(0));
+        assertEquals("the derivation carries the original question",
+                QUESTION, derivedQuestions.get(0));
+    }
+
     // ------------------------------------------------------- visible refusals
 
     @Test
@@ -210,6 +291,76 @@ public class HomeWiringTest {
         HomeData.Recommendations strip = wiring().recommendations(true);
 
         assertFalse(strip.fromHistory);
+        assertEquals(4, strip.items.size());
+    }
+
+    @Test
+    public void recommendationsComeFromHistoryWhenTheDerivedSetIsNonEmpty() {
+        key.configured = true;
+        store.rows.add(new HomeStore.Row(WiringDoubles.TOPIC_ID, WiringDoubles.RESUME_BRANCH_ID,
+                "a derived title", FALLBACK_QUESTION, null, 1, WiringDoubles.NOW));
+        com.treelearn.app.artifact.HomeDerivedPort deriver =
+                new com.treelearn.app.artifact.HomeDerivedPort() {
+                    @Override
+                    public com.treelearn.app.artifact.ArtifactOutcome rootTitle(
+                            com.treelearn.core.domain.Branch root, String question,
+                            com.treelearn.core.domain.GenerationModel model) {
+                        return com.treelearn.app.artifact.ArtifactOutcome.APPLIED;
+                    }
+
+                    @Override
+                    public java.util.List<String> homeRecommendations(String topicId,
+                            java.util.List<com.treelearn.app.artifact.TreeOutline.Entry> outline,
+                            com.treelearn.core.domain.GenerationModel model) {
+                        return java.util.Arrays.asList("derived follow-up one",
+                                "derived follow-up two");
+                    }
+                };
+
+        HomeWiring wiring = new HomeWiring(store, generation, key,
+                Clock.fixed(Instant.ofEpochMilli(WiringDoubles.NOW), ZoneOffset.UTC),
+                PromptLimits.budget(), deriver);
+
+        HomeData.Recommendations strip = wiring.recommendations(true);
+
+        assertTrue("a non-empty derived set must be served from history",
+                strip.fromHistory);
+        assertEquals(2, strip.items.size());
+        assertEquals("derived follow-up one", strip.items.get(0).question);
+        assertEquals(com.treelearn.app.ui.Recommendation.Kind.FOLLOW_UP,
+                strip.items.get(0).kind);
+    }
+
+    @Test
+    public void recommendationsFallBackToStarterWhenTheDerivedSetComesBackEmpty() {
+        key.configured = true;
+        store.rows.add(new HomeStore.Row(WiringDoubles.TOPIC_ID, WiringDoubles.RESUME_BRANCH_ID,
+                "a derived title", FALLBACK_QUESTION, null, 1, WiringDoubles.NOW));
+        com.treelearn.app.artifact.HomeDerivedPort deriver =
+                new com.treelearn.app.artifact.HomeDerivedPort() {
+                    @Override
+                    public com.treelearn.app.artifact.ArtifactOutcome rootTitle(
+                            com.treelearn.core.domain.Branch root, String question,
+                            com.treelearn.core.domain.GenerationModel model) {
+                        return com.treelearn.app.artifact.ArtifactOutcome.APPLIED;
+                    }
+
+                    @Override
+                    public java.util.List<String> homeRecommendations(String topicId,
+                            java.util.List<com.treelearn.app.artifact.TreeOutline.Entry> outline,
+                            com.treelearn.core.domain.GenerationModel model) {
+                        return java.util.Collections.emptyList();
+                    }
+                };
+
+        HomeWiring wiring = new HomeWiring(store, generation, key,
+                Clock.fixed(Instant.ofEpochMilli(WiringDoubles.NOW), ZoneOffset.UTC),
+                PromptLimits.budget(), deriver);
+
+        HomeData.Recommendations strip = wiring.recommendations(true);
+
+        assertFalse("an empty derived set must not blank the strip",
+                strip.fromHistory);
         assertEquals(4, strip.items.size());
     }
 }

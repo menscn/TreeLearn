@@ -4,7 +4,7 @@ id: T-2026-09-20-017
 title: 实现树 Canvas 与平板适配
 template_version: 2
 task_type: implementation
-status: ready
+status: in_progress
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -81,7 +81,7 @@ Follow [code-document alignment](../rules/documentation.md).
 ## TDD execution record
 
 ### RED — failing test first
-- Test/scenario: PENDING
+- Test/scenario: `TreeCanvasDeviceInstrumentedTest`（新增，真机）——①平板双栏：以注入 sw600dp 配置的 Context inflate `screen_tree.xml`，断言 `tree_nav_host` 与 `tree_divider` 存在，而手机配置下不存在（无第二份 Java 实现，纯资源差异）；②手势管道：`TreeCanvasView` render READY 帧（public API 构造 state）后合成真实 MotionEvent 流（单击 / 单指拖动 / 双指缩放），recording actions 收到 `onTap`/`onPan`/`onZoom`；③弹窗 seam：宿主 Activity 内挂 `TreeCanvasScreen`，render 带 popup 的帧后 screen 处于弹窗显示态、render 无 popup 帧后收回——断言走 `isPopupShowing()` seam，RED 阶段该方法尚不存在，预期编译失败。
 - Command: PENDING
 - Exit code: PENDING
 - Observed failure: PENDING

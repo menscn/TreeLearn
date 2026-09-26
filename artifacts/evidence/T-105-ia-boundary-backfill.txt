@@ -1,0 +1,49 @@
+T-105 汇总证据（V3.2 PRD 快捷/正典边界回写）
+生成时间: 2026-09-25（命令实时执行，退出码内嵌自证）
+
+CMD-1  PRD diff 统计（纯增量 +15/-1，唯一修改行为 §7.2 核对表行）
+命令: git diff --stat HEAD -- Docs/03-prd-draft/…（PRD）.md
+  ...46\226\207\346\241\243\357\274\210PRD\357\274\211.md" | 16 +++++++++++++++-
+   1 file changed, 15 insertions(+), 1 deletion(-)
+EXITCODE=0
+
+CMD-2  增量段落存在于 6.2.16（F16 详细规格尾部、6.2.17 之前）
+命令: grep -n "V3.2 增量：首页抽屉的" …（PRD）.md
+  726:#### V3.2 增量：首页抽屉的「快捷 vs 正典」边界（2026-09-23 用户拍板）
+EXITCODE=0
+
+CMD-3  版本修改记录表新增 V3.2 行
+命令: grep -n "^| V3.2 | 2026-09-23" …
+  1038:| V3.2 | 2026-09-23 | 边界外新增（用户拍板，INTENT-2026-09-23） | 首页新增抽屉（对话快捷列表最近 10 条 + 设置/统计快捷入口 + 扩展位骨架）与统计热力图吸收（首页热力条、统计详情页）：§6.2.16 新增「快捷 vs 正典」边界增量（抽屉不复制学习库列表、无搜索/助手切换，学习库与标签栏保持正典唯一），§7.2 核对表同步；未修改任何既有冻结规则 | 待评审 |
+EXITCODE=0
+
+CMD-4  一条边界一个正文（a）：边界标题正文存在于 PRD 与 intent（意图/记录层，均为文档面）
+命令: grep -rn "快捷 vs 正典" Docs
+  Docs/03-prd-draft/V3.2-知芽（TreeLearn）产品需求文档（PRD）.md:726:#### V3.2 增量：首页抽屉的「快捷 vs 正典」边界（2026-09-23 用户拍板）
+  Docs/03-prd-draft/V3.2-知芽（TreeLearn）产品需求文档（PRD）.md:1038:| V3.2 | 2026-09-23 | 边界外新增（用户拍板，INTENT-2026-09-23） | 首页新增抽屉（对话快捷列表最近 10 条 + 设置/统计快捷入口 + 扩展位骨架）与统计热力图吸收（首页热力条、统计详情页）：§6.2.16 新增「快捷 vs 正典」边界增量（抽屉不复制学习库列表、无搜索/助手切换，学习库与标签栏保持正典唯一），§7.2 核对表同步；未修改任何既有冻结规则 | 待评审 |
+  Docs/intent/INTENT-2026-09-23-home-drawer-stats-heatmap.md:94:  - **IA 边界**：抽屉的对话列表与设置入口与 V3.2 F16（一级入口由标签栏承载、消除双主页）存在张力。缓解口径已写入约束：抽屉内为快捷入口，学习库与底部标签栏保持正典唯一；交付后按 documentation.md 回写 V3.2 PRD 时须显式补这条「快捷 vs 正典」边界。
+  Docs/intent/INTENT-2026-09-23-my-forest.md:39:  - 抽屉内的森林入口是「快捷入口」：不改变学习库/主题列表的正典地位，与抽屉 intent 的「快捷 vs 正典」缓解口径一致。
+EXITCODE=0
+
+CMD-5  一条边界一个正文（b）：生产代码中该边界标题零出现（无复制正文）
+命令: grep -rn "快捷 vs 正典" android/app/src/main/java
+  (无输出 = 代码零复制)
+  注: grep 无命中时退出码 1 是「0 命中」的正确语义，即本守门想要的通过结果
+EXITCODE=1
+
+CMD-6  代码侧指向注释（指向 §6.2.16 增量，不复制正文）
+命令: grep -n "6.2.16" …/HomeDrawerScreen.java
+  28: * §6.2.16 "V3.2 增量" section. This comment points at it and does not restate it.
+EXITCODE=0
+
+CMD-7  快捷入口事实的证据引用（增量段第 2 条）：一条 SQL 定义一次、使用一次
+命令: grep -rn "OVERVIEW_SELECT" android/ --include="*.java"
+  android/data/src/main/java/com/treelearn/data/db/dao/TopicDao.java:154:        try (Cursor cursor = database.rawQuery(OVERVIEW_SELECT, new String[]{summaryKind})) {
+  android/data/src/main/java/com/treelearn/data/db/dao/TopicDao.java:189:    private static final String OVERVIEW_SELECT =
+EXITCODE=0
+
+CMD-8  指针注释加入后生产代码编译通过
+命令: gradlew.bat :app:compileDebugJavaWithJavac（cwd=android/）
+  BUILD SUCCESSFUL in 12s
+EXITCODE=0
+

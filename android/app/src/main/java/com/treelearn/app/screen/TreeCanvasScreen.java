@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -41,8 +42,9 @@ public final class TreeCanvasScreen extends FrameLayout {
     private final View loading;
     private final View empty;
     private final View error;
-    private final Button fold;
-    private final Button open;
+    /** The fold control as an icon (058); its image and description follow the selected branch. */
+    private final ImageButton fold;
+    private final View open;
     private final View navHost;
 
     private TreeCanvasActions actions;
@@ -89,6 +91,15 @@ public final class TreeCanvasScreen extends FrameLayout {
         return navHost;
     }
 
+    /**
+     * T-017 device-test seam: whether the node popup card is currently on screen. The screen does
+     * not decide anything here — the field's own lifecycle (render places it, render takes it
+     * down) is the single source of truth this method reads back.
+     */
+    public boolean isPopupShowing() {
+        return popup != null && popup.isShowing();
+    }
+
     public void render(TreeCanvasViewState next) {
         this.state = next;
         boolean ready = next.phase == TreeCanvasViewState.Phase.READY;
@@ -101,13 +112,28 @@ public final class TreeCanvasScreen extends FrameLayout {
         }
         BranchGeometry current = next.layout.branch(next.currentBranchId);
         fold.setEnabled(ready && current != null);
-        fold.setText(foldable(current));
+        renderFoldControl(current);
         open.setEnabled(ready && next.currentBranchId != null);
         canvas.render(next);
         placePopup(next);
     }
 
-    /** What the fold control says for the branch that is selected: a bud unfolds, everything else folds. */
+    /**
+     * The fold control's icon follows the branch's state: a bud unfolds, everything else folds - the
+     * same rule the control's text used to spell out, now carried by the icon pair and spoken by the
+     * content description instead.
+     */
+    private void renderFoldControl(BranchGeometry branch) {
+        boolean unfold = branch != null && branch.kind == BranchGeometry.Kind.BUD;
+        fold.setImageResource(unfold ? R.drawable.ic_tree_unfold : R.drawable.ic_tree_fold);
+        fold.setContentDescription(getContext().getString(
+                unfold ? R.string.cd_tree_unfold : R.string.cd_tree_fold));
+    }
+
+    /**
+     * What the node card's fold control says for its branch (the card keeps its text carrier; only
+     * the bar switched to icons): a bud unfolds, everything else folds.
+     */
     private int foldable(BranchGeometry branch) {
         return branch != null && branch.kind == BranchGeometry.Kind.BUD ? R.string.tree_unfold
                 : R.string.tree_fold;

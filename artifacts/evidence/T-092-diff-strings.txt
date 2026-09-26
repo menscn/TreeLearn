@@ -1,0 +1,154 @@
+﻿diff --git a/android/app/src/main/res/values/strings.xml b/android/app/src/main/res/values/strings.xml
+index 72acc0a..ee98bf4 100644
+--- a/android/app/src/main/res/values/strings.xml
++++ b/android/app/src/main/res/values/strings.xml
+@@ -67,6 +67,10 @@
+     <string name="home_loading">姝ｅ湪璇诲彇鏈満涓婚鈥?/string>
+     <string name="home_error">鏈満涓婚鏆傛椂璇讳笉鍑烘潵锛岀◢鍚庨噸璇曞嵆鍙€?/string>
+     <string name="home_topic_meta">%1$d 涓垎鏀?路 %2$s</string>
++    <string name="home_heat_streak">杩炵画瀛︿範 %1$d 澶?/string>
++    <string name="home_heat_empty">杩樻病鏈夊涔犺褰曪紝浠庣涓€涓棶棰樺紑濮嬪惂</string>
++    <string name="home_heat_cd">鏈€杩?14 澶╁涔犵儹搴︼紝鐐规寜鏌ョ湅缁熻</string>
++    <string name="home_heat_cells_cd">鏈€杩?14 澶╁涔犵儹搴︽牸鍥?/string>
+     <!-- Tree canvas (T-017): the drawable, its bar, its read phases and the node card. -->
+     <string name="tree_title">瀛︿範鏍?/string>
+     <string name="tree_back">杩斿洖</string>
+@@ -92,6 +96,19 @@
+     <string name="notice_network_interrupted">缃戠粶涓柇浜嗭紝妫€鏌ョ綉缁滃悗閲嶈瘯銆?/string>
+     <string name="notice_storage">鏈満鍐欏叆澶辫触锛岃緭鍏ュ凡淇濈暀锛屽彲浠ョ洿鎺ラ噸璇曘€?/string>
+     <string name="notice_reading_position">闃呰杩涘害娌¤兘淇濆瓨锛屼笅娆℃墦寮€鐨勪綅缃笌鏈鍙兘涓嶅噯銆?/string>
++    <!-- T-092: 瀵硅瘽鑱旂綉鎼滅储锛圫PEC-2026-09-23 鐘舵€佷笌寮傚父锛夈€俒NOKEY] 鎷︽埅 / [OFF] 闄嶇骇 / [PART] 绌虹粨鏋溿€?-->
++    <string name="notice_search_key_missing">鎼滅储鏈嶅姟鏈厤缃?Key锛岃鍏堝埌璁剧疆閲岄厤缃€?/string>
++    <string name="notice_search_failed">鑱旂綉妫€绱㈠け璐ワ紝鏈鍥炵瓟鏈仈缃戙€?/string>
++    <string name="notice_search_empty">鏈绱㈠埌鐩稿叧缁撴灉锛屾湰娆″洖绛旀湭鑱旂綉銆?/string>
++
++    <!-- T-092: 杈撳叆鏍忔悳绱㈠紑鍏充笌搴曢儴闈㈡澘銆?-->
++    <string name="chat_search_chip">鑱旂綉</string>
++    <string name="cd_chat_search_chip">鑱旂綉鎼滅储寮€鍏?/string>
++    <string name="search_panel_title">鑱旂綉鎼滅储</string>
++    <string name="search_panel_engine">褰撳墠寮曟搸锛?1$s</string>
++    <string name="search_panel_toggle_on">寮€鍚腑锛岀偣鎸夊叧闂?/string>
++    <string name="search_panel_toggle_off">宸插叧闂紝鐐规寜寮€鍚?/string>
++    <string name="search_panel_go_settings">鍘昏缃悳绱㈡湇鍔?/string>
+ 
+     <!-- Settings -->
+     <string name="settings_title">璁剧疆</string>
+@@ -109,6 +126,91 @@
+     <string name="settings_boundary_title">鏁版嵁杈圭晫</string>
+     <string name="settings_boundary_body">涓婚銆佸垎鏀€佹€濊€冨唴瀹逛笌 Key 浠呭瓨鏈満锛屾棤浜戝悓姝ヤ笌澶囦唤锛屽嵏杞藉悗涓嶅彲鎭㈠銆俓n鐢熸垚鏃剁浉鍏冲唴瀹逛細浜ょ敱澶栭儴 DeepSeek 鏈嶅姟澶勭悊锛涘巻鍙叉€濊€冨唴瀹逛細鎸変笂涓嬫枃绛栫暐鍐嶆鎻愪氦銆?/string>
+ 
++    <!--
++      Provider management (T-087, SPEC-2026-09-23 鐣岄潰鏂规). One sentence per failure category;
++      no string here ever carries a key 鈥?the editor shows the presenter's mask only.
++    -->
++    <string name="providers_title">鎻愪緵鍟嗙鐞?/string>
++    <string name="providers_new">鏂板缓</string>
++    <string name="providers_empty">杩樻病鏈夋彁渚涘晢</string>
++    <string name="providers_empty_guide">鐐瑰彸涓婅銆屾柊寤恒€嶆帴鍏ョ涓€涓ā鍨嬫湇鍔?鈫?/string>
++    <string name="providers_entry_title">鎻愪緵鍟嗙鐞?/string>
++    <string name="providers_entry_sub">绠＄悊澶氭彁渚涘晢涓?API Key</string>
++    <string name="providers_entry_enabled_count">宸插惎鐢?%1$d 瀹?/string>
++    <string name="providers_row_models">%1$d 涓ā鍨?/string>
++    <string name="providers_row_nokey">鏈厤 Key</string>
++    <string name="providers_editor_section">OPENAI 鍏煎妯℃澘</string>
++    <string name="editor_name_hint">鍚嶇О锛屼緥濡?DeepSeek</string>
++    <string name="editor_base_hint">鍩哄潃锛屼緥濡?https://api.deepseek.com</string>
++    <string name="editor_key_none">鏈厤缃?Key</string>
++    <string name="editor_key_input_hint">绮樿创鏂扮殑 API Key</string>
++    <string name="editor_key_save">淇濆瓨 Key</string>
++    <string name="editor_key_delete">鍒犻櫎 Key</string>
++    <string name="editor_fetch">鎷夊彇妯″瀷</string>
++    <string name="editor_fetching">姝ｅ湪鎷夊彇鈥?/string>
++    <string name="editor_fetch_added">鎷夊彇鎴愬姛锛屽凡鏂板 %1$d 涓ā鍨嬨€?/string>
++    <string name="editor_fetch_failed">鎷夊彇澶辫触锛屾鏌ュ熀鍧€涓?Key 鍚庡彲閲嶈瘯锛涘凡淇濆瓨鐨勬ā鍨嬩笉鍙楀奖鍝嶃€?/string>
++    <string name="editor_save">淇濆瓨</string>
++    <string name="editor_delete">鍒犻櫎鎻愪緵鍟?/string>
++    <string name="editor_notice_name_required">璇峰厛杈撳叆鍚嶇О銆?/string>
++    <string name="editor_notice_name_taken">鍚嶇О涓庣幇鏈夋彁渚涘晢閲嶅浜嗐€?/string>
++    <string name="editor_notice_base_required">鍩哄潃蹇呴』鏄?https:// 寮€澶寸殑瀹屾暣鍦板潃銆?/string>
++    <string name="editor_notice_key_required">璇峰厛杈撳叆 Key銆?/string>
++    <string name="editor_notice_key_save_failed">淇濆瓨澶辫触锛氭湰鏈哄瘑閽ュ簱鎷掔粷浜嗗啓鍏ワ紝璇烽噸璇曘€?/string>
++    <string name="providers_delete_title">鍒犻櫎鎻愪緵鍟嗭紵</string>
++    <string name="providers_delete_body">灏嗗垹闄ゃ€?1$s銆嶅強鍏跺叏閮ㄦā鍨嬶紝鍒犻櫎鍚庝笉鍙仮澶嶃€?/string>
++    <string name="providers_delete_last">鍒犻櫎鍚庡皢娌℃湁鍚敤涓殑鎻愪緵鍟嗭紝鍙戦€佷細琚樆姝€?/string>
++    <string name="providers_delete_ok">鍒犻櫎</string>
++    <string name="cd_providers_back">杩斿洖</string>
++    <string name="cd_providers_new">鏂板缓鎻愪緵鍟?/string>
++    <string name="cd_providers_switch">鍚敤鎴栧仠鐢ㄨ鎻愪緵鍟?/string>
++
++    <!-- Model settings (T-088, SPEC-2026-09-23 鐣岄潰鏂规) -->
++    <string name="models_entry_title">妯″瀷璁剧疆</string>
++    <string name="models_entry_sub">鑱婂ぉ / 蹇€?/ 缈昏瘧鍒嗗伐涓庢€濊€冮绠?/string>
++    <string name="models_title">妯″瀷璁剧疆</string>
++    <string name="models_role_chat">鑱婂ぉ妯″瀷</string>
++    <string name="models_role_fast">蹇€熸ā鍨?/string>
++    <string name="models_role_translation">缈昏瘧妯″瀷</string>
++    <string name="models_budget_label">鎬濊€冮绠?/string>
++    <string name="models_budget_off">鍏?/string>
++    <string name="models_budget_auto">鑷姩</string>
++    <string name="models_budget_low">浣?/string>
++    <string name="models_budget_mid">涓?/string>
++    <string name="models_budget_high">楂?/string>
++    <string name="models_suggestions">鑱婂ぉ寤鸿</string>
++    <string name="models_suggestions_sub">鍥炵瓟涓嬫柟鐢熸垚鎺ㄨ崘闂锛涢椤垫帹鑽愪笉鍙楁寮€鍏虫帶鍒躲€?/string>
++    <string name="models_unselected">鏈€夋嫨</string>
++    <string name="models_notice_none">娌℃湁鍙敤妯″瀷锛岃鍏堝湪銆屾彁渚涘晢绠＄悊銆嶆柊寤烘彁渚涘晢骞舵媺鍙栨ā鍨嬨€?/string>
++    <string name="models_notice_fallback">鎵€閫夋ā鍨嬪凡涓嶅彲鐢紝宸插洖钀藉埌鍙敤妯″瀷锛涜閲嶆柊閫夋嫨銆?/string>
++    <string name="cd_models_back">杩斿洖</string>
++    <string name="cd_models_switch">寮€鍏宠亰澶╁缓璁?/string>
++
++    <!-- Search service settings (T-091, SPEC-2026-09-23 鎷嶆澘) -->
++    <string name="search_entry_title">鎼滅储鏈嶅姟</string>
++    <string name="search_entry_sub">鑱旂綉鎼滅储銆佸紩鎿庝笌 API Key</string>
++    <string name="search_title">鎼滅储鏈嶅姟</string>
++    <string name="search_master">鑱旂綉鎼滅储</string>
++    <string name="search_master_sub">寮€鍚悗瀵硅瘽鍙仈缃戞绱紱榛樿鍏抽棴銆?/string>
++    <string name="search_engine_zhipu">鏅鸿氨</string>
++    <string name="search_engine_tavily">Tavily</string>
++    <string name="search_engine_bocha">鍗氭煡</string>
++    <string name="search_key_configured">宸查厤缃?Key</string>
++    <string name="search_key_missing">鏈厤缃?Key</string>
++    <string name="search_key_none">鏈繚瀛?Key</string>
++    <string name="search_key_input_hint">杈撳叆璇ュ紩鎿庣殑 API Key</string>
++    <string name="search_key_save">淇濆瓨 Key</string>
++    <string name="search_key_delete">鍒犻櫎 Key</string>
++    <string name="search_tier_label">妫€绱㈢粨鏋滄暟</string>
++    <string name="search_tier_three">姣忔妫€绱?3 鏉?/string>
++    <string name="search_tier_five">姣忔妫€绱?5 鏉?/string>
++    <string name="search_tier_ten">姣忔妫€绱?10 鏉?/string>
++    <string name="search_notice_nokey">鎵€閫夊紩鎿庢湭閰嶇疆 Key锛屽璇濊仈缃戞绱笉鍙敤銆?/string>
++    <string name="search_notice_key_required">璇峰厛杈撳叆 Key銆?/string>
++    <string name="search_notice_key_save_failed">淇濆瓨澶辫触锛氭湰鏈哄瘑閽ュ簱鎷掔粷浜嗗啓鍏ワ紝璇烽噸璇曘€?/string>
++    <string name="cd_search_back">杩斿洖</string>
++    <string name="cd_search_switch">寮€鍏宠仈缃戞悳绱?/string>
++
+     <!-- Composer model picker (PRD 6.2.18) -->
+     <string name="model_flash_short">V4.1 Flash</string>
+     <string name="model_flash_full">DeepSeek V4.1 Flash</string>
+@@ -165,6 +267,14 @@
+     <string name="chat_draft_hint_no_key">閰嶇疆 DeepSeek Key 鍚庡彲缁х画鎻愰棶锛岀偣姝ゅ墠寰€璁剧疆</string>
+     <string name="chat_draft_hint_archived">鍒嗘敮宸插綊妗ｏ紝鍙栨秷褰掓。鍚庡彲缁х画鎻愰棶</string>
+     <string name="chat_send">鍙戦€?/string>
++    <!-- T-077: the fullscreen editor (073 搂5.1) - title, actions, entry key and announcements. -->
++    <string name="chat_fullscreen_title">缂栬緫鎻愰棶</string>
++    <string name="chat_fullscreen_cancel">鍙栨秷</string>
++    <string name="chat_fullscreen_done">瀹屾垚</string>
++    <string name="cd_chat_fullscreen_edit">鍏ㄥ睆缂栬緫</string>
++    <string name="cd_chat_fullscreen_close">鍏抽棴鍏ㄥ睆缂栬緫</string>
++    <string name="chat_fullscreen_entered">宸茶繘鍏ュ叏灞忕紪杈?/string>
++    <string name="chat_fullscreen_exited">宸茶繑鍥炲璇?/string>
+     <string name="chat_loading">姝ｅ湪璇诲彇杩欐瀵硅瘽鈥?/string>
+     <string name="chat_error">杩欐瀵硅瘽鏆傛椂璇讳笉鍑烘潵锛岀◢鍚庨噸璇曞嵆鍙€?/string>
+     <string name="chat_copy_reasoning">鎬濊€冭繃绋?/string>
+@@ -233,6 +343,11 @@
+     <string name="cd_act_copy">澶嶅埗鍥炵瓟</string>
+     <string name="cd_act_reset">閲嶆柊鐢熸垚</string>
+     <string name="cd_act_fork">鏂板缓鍒嗘敮</string>
++    <string name="cd_act_translate">缈昏瘧涓轰腑鏂?/string>
++    <string name="chat_translation_expand">灞曞紑璇戞枃</string>
++    <string name="chat_translation_collapse">鏀惰捣璇戞枃</string>
++    <string name="chat_translation_running">缈昏瘧涓€?/string>
++    <string name="chat_translation_failed">缈昏瘧澶辫触锛岀偣鍑婚噸璇?/string>
+     <string name="navigation_row_children">%1$d 瀛愬垎鏀?/string>
+     <string name="navigation_row_current">褰撳墠 路 %1$d 瀛愬垎鏀?/string>
+     <string name="navigation_fold">鎶樺彔</string>

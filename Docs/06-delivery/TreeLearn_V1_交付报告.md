@@ -112,10 +112,10 @@ adb install -r android/app/build/outputs/apk/release/app-release.apk
 
 | 缺失 | 现状（均为可复核的静态事实） |
 | :--- | :--- |
-| 搜索页（跨主题搜问题 / 回答 / 引用）〔2026-09-22 已接线，T-040〕 | 本行原记「无 `SearchScreen`、无布局；首页搜索是 `enabled="false"` 的死按钮；`SearchPresenter` 没有任何生产调用点」，**该状态已作废**：新增 `screen.SearchScreen` + `search.SearchPage`（纯 JVM 页面对象）+ `search.BranchTitles` + `wiring.SqliteSearchStore` 与四个布局（含 `layout-sw600dp/` 镜像）；`MainActivity` 实现 `SearchPresenter.Sink`，`openAnchor` 复用 T-042 的 `MainActivity.showChat(branchId, explicitAnchor)`；`HomeScreen` 给 `home_search` 挂了监听器（原文扫描 `artifacts/evidence/T-040-source-scan.txt`）。设备侧输入法与像素证据仍 `deferred — 用户自行装机验证（user decision 2026-09-21）` |
+| 搜索页（跨主题搜标题 / 锚定原文 / 回答 / 推理）〔2026-09-22 已接线，T-040〕 | 本行原记「无 `SearchScreen`、无布局；首页搜索是 `enabled="false"` 的死按钮；`SearchPresenter` 没有任何生产调用点」，**该状态已作废**：新增 `screen.SearchScreen` + `search.SearchPage`（纯 JVM 页面对象）+ `search.BranchTitles` + `wiring.SqliteSearchStore` 与四个布局（含 `layout-sw600dp/` 镜像）；`MainActivity` 实现 `SearchPresenter.Sink`，`openAnchor` 复用 T-042 的 `MainActivity.showChat(branchId, explicitAnchor)`；`HomeScreen` 给 `home_search` 挂了监听器（原文扫描 `artifacts/evidence/T-040-source-scan.txt`）。检索范围与 `search_scope` 引导文案一致（四项，**无「用户问题」臂**——T-015 的检索语句没有该臂，2026-09-24 更正，原「问题」措辞有误）。设备侧输入法与像素证据仍 `deferred — 用户自行装机验证（user decision 2026-09-21）` |
 | 首页空态引导、主题永久删除、根标题改名、未读徽标〔T-043〕 | **已实现，待独立 verifier**：空态入口聚焦问题输入；主题卡提供改名/删除确认；删除复用 `TopicDao` 的级联；未读总数由序列差值汇总。真机启动已验证，完整点击路径仍待设备脚本化验收 |
 | 主题与分支标题、分支摘要（派生 AI 产物）〔T-045〕 | **部分实现**：`BlockingDerivedCaller` / `DerivedService` 已接入真实流式网关，首题成功后会尝试生成根标题并走 `DerivedOperation` CAS 写回；分支摘要及其它派生种类仍无完整生命周期调用者，待继续施工与独立 verifier |
-| 两类推荐（回答级「接下来问」/ 首页级推荐）〔T-046〕 | **部分接线**：回答级推荐在聊天读回时通过 `DerivedService` 按当前 revision 幂等触发；首页级推荐仍未接入，且无 Key/ provider 失败时继续使用 starter/空集合 |
+| 两类推荐（回答级「接下来问」/ 首页级推荐）〔T-046〕 | **已接线（2026-09-24 verified）**：回答级推荐在聊天读回时通过 `DerivedService` 按当前 revision 幂等触发；首页级推荐在有主题且配置 Key 时经 `HomeWiring.recommendations` → `derived.homeRecommendations` 取历史派生集合（`fromHistory=true` 有测试钉住），无主题/派生为空/无 Key 时回退启动兜底。真实 provider 载荷验收仍 deferred（无 Key） |
 | 长会话继续追问（超预算上下文压缩）〔T-047〕 | **已接入压缩路径，待真实 provider 验收**：`ChatWiring.historyForRequest` 保留最近 10 个完整问答轮次；更早轮次通过 `CONTEXT_COMPRESSION` 派生为一个 `SUMMARY` artifact，只有成功写回后才替换历史，失败仍按原 `HISTORY_EXCEEDS_BUDGET` 失败关闭。 |
 
 侧载提醒：release APK 的签名证书是 `CN=Treelearn Personal Sideload`（见第 2 节）。若手机上已装的是用另一把钥匙
@@ -203,19 +203,19 @@ adb install -r android/app/build/outputs/apk/release/app-release.apk
 | T-003 不可变回答领域模型 / T-020 版本化提示词策略 | `verified` | 早前轮次已由独立 verifier 判 PASS |
 | T-002/004/005/006/007/008/009/010/011/012/013/014/015/016/017/021/022/023/024/025 | `verifying` | 实现已落盘，**未取得独立 verifier 判定**；其中多数含设备相关验收项（见第 4 节） |
 | T-038 树画布生产装配 | `verifying` | 〔2026-09-22 更新〕实现已落盘（`wiring/TreeCanvasStore` / `SqliteTreeCanvasStore` / `TreeCanvasWiring` + `AppContainer` 两端口 + 对话页「总览」入口），实现者自检判 PARTIAL、独立 verifier 的第 1 轮定点修复已复现；**验收结论尚未落盘**，故仍为 `verifying`。设备项 `deferred` |
-| T-041 划词四项菜单 + 子分支弹层 | `verifying` | 〔2026-09-22 更新〕实现已落盘且**已进入产物**（第 2 节 dex 核对 `WordMenuPopup` / `ChildBranchPopup` / `BranchChildren`）；实测规模 534~549 行（两口径）**超 500 硬上限，待用户裁定**，故未收口 |
+| T-041 划词四项菜单 + 子分支弹层 | `verifying` | 〔2026-09-22 更新〕实现已落盘且**已进入产物**（第 2 节 dex 核对 `WordMenuPopup` / `ChildBranchPopup` / `BranchChildren`）；实测规模 544 行（9 新文件 502 + 改动 42，口径 `T-041-sizing.txt`；〔2026-09-24 更正〕初稿的 534~549 两口径数字与任务证据不同源，已废弃）**超 500 硬上限** |
 | T-044 引用进请求 | `verifying` | 〔2026-09-22 更新〕实现已落盘并进入产物（dex 内含 `<treelearn_quote>`）；contract-guardian 复核 6 问中 4 PASS / 1 PARTIAL / 1 FAIL，**唯一 FAIL 是文档面**（本报告与 `android/README.md` 滞后）。**〔2026-09-22 修正〕该文档面已同步**：本报告 §5.1 已加历史快照标记并指向当前权威、本节原先的尾句已修、本行已修；`android/README.md:666` 的残留风险出处已写作 §5.1、无需另改。**文档面同步不等于验收通过**——T-044 仍为 `verifying`，独立 verifier 已判 **PARTIAL**（残留项含归一化非唯一，见 `artifacts/evidence/T-044-verify-*.txt`），本条不记作已通过 |
 | T-039 导航页 | `blocked` | 〔2026-09-22 03:49 更新〕屏幕、布局、装配、宿主与三条入口**全部落盘**并进入产物；RED→GREEN 同一条命令 26 例 0 失败（`NavigationPresenterTest` 21 + `NavigationRootGateTest` 5）。**独立 verifier 已判 `FAIL`**（`artifacts/evidence/T-039-independent-verification.txt`，1143 行）：任务自有的五条验收标准全 PASS、六道门禁在冻结快照里复跑全绿，**唯一未达标项是规模门**——实测 **646 行**，超 500 硬上限 146 行 / 29.2%，且不存在用户批准记录。所以状态置 `blocked`：卡住的是用户的一句话，不是代码。见第 7 节与第 10 节第 1 条 |
 | T-040 搜索页 | `verifying` | 〔2026-09-22 更新〕实现已落盘：`screen/SearchScreen`（配 `search/SearchPage` 纯 JVM 页面对象与 `search/BranchTitles` 端口）+ `layout/screen_search*.xml` + `layout-sw600dp` 镜像；首页 `home_search` 不再是死按钮（`HomeScreen` 挂监听器走 `HomeActions.onSearchPressed()`）；`MainActivity.openAnchor` → `showChat(branchId, anchor)`，**该缝由此获得第一个真实生产消费者**。新测 13 例 RED→GREEN 0 失败、全量 `:app` 单测 354 例 0 失败、`.\gradlew.bat check` 与 Java-only guard 退出码 0。**待独立 verifier 判定**；真机输入法与像素证据 `deferred — 用户自行装机验证（user decision 2026-09-21）` |
 | T-042 阅读位置保存与恢复接线 | `verifying` | 〔2026-09-22 修复轮更新〕实现已落盘：唯一接缝 `MainActivity.showChat(String, ReadingAnchor)`（`MainActivity.java:459`，以 `artifacts/evidence/T-042-fix1-source-scan.txt` 为准）在 `chatPresenter.start()` 之前经同一 port 保存显式锚点；`screen/ChatScreen` 只上报滚动事实（`onRowsLaidOut` / `onViewportChanged` / `onLeaving`）；`AppContainer` 装配 `SqliteReadingStore`。`ChatReadingTest` 7 例 RED→GREEN 0 失败；**Fix round 1（D1–D5，2026-09-22）已落盘**：写失败只出可见 notice `notice_reading_position`（DAO 未弱化）、首帧可见集上报（同一条命令 11 例 0 失败、全量 `:app` 单测 358 例 0 失败、两处变异各自只打红目标用例）、正文措辞与行号引用刷新、删掉 4 参 `Snapshot.of` 重载；证据 `artifacts/evidence/T-042-fix1-*.txt`。`:app` 单测 341 例与 `.\gradlew.bat check` 均退出码 0，Java-only guard PASS。**待独立 verifier 复验**；真机滚动与像素证据 `deferred — 用户自行装机验证（user decision 2026-09-21）` |
 | T-043 首页与主题级收口 | `ready` | 未开工；对应第 2.1 节「不能用」表中「首页空态引导、主题删除、根标题改名、未读徽标」一行。与 T-039 / T-040 共用 `MainActivity` 宿主，须串行 |
-| T-045 / T-046 / T-047 派生 AI 接线 | `verifying / verifying / verifying` | T-045 已接入根标题、分支摘要与回答推荐；T-046 首页推荐已按主题 outline 接入；T-047 已接入「最近 10 轮 + 更早摘要」压缩路径。三项都仍缺真实 provider Key 的网络验收 |
+| T-045 / T-046 / T-047 派生 AI 接线 | `verified / verified / verified`（2026-09-24 复核收口） | T-045 已接入根标题、分支标题与分支摘要（含 `TitleArtifactApplier` 写回 `Branches.TITLE`）；T-046 两类推荐均已接入（首页级有 `fromHistory` 正/负态断言）；T-047 已接入「最近 10 轮 + 更早摘要」压缩路径，且拒绝理由字段获得消费者（压缩成功 → `HISTORY_COMPRESSED` 可操作文案）。三项共同残留：真实 provider Key 的网络验收 deferred |
 | T-032 真实数据路径接线 | `verifying` | 〔2026-09-22 更新〕已实现并落盘：占位类删除、`AppContainer` 接真实装配、`TopicDao.listOverviews` 新增只读查询；**待独立 verifier 判定**。规模（793 行，超 500 行硬预算）待用户裁定 |
 | T-018 安全/Release/核心流加固 | `ready` → 部分完成 | 本轮完成：网络安全配置、release 签名与 APK、lint/守门证据；**未完成**：Telemetry no-op 落位、端到端测试执行 |
 | T-033 交付报告（本文件） | `verifying` | 见第 8 节关于独立性的说明 |
 | T-019 独立最终验收 | `ready` | 见第 8 节 |
 
-## 7. 规模越线事实（**待用户裁定，实现者未自我批准**）
+## 7. 规模越线事实（〔2026-09-24 更新〕裁定已收口，逐条见文末裁定块）
 
 以下任务的实测规模（口径：**非空非注释的生产代码行**）超过 500 行硬上限，需要用户明确批准例外或拆分返工：
 
@@ -229,10 +229,10 @@ adb install -r android/app/build/outputs/apk/release/app-release.apk
 | T-2026-09-20-chat-reasoning-answer-actions-013 | 1584 | +217% |
 | T-2026-09-20-immutable-context-snapshots-007 | 671 | +34% |
 | T-2026-09-22-real-data-path-wiring-032 〔2026-09-22 新增〕 | 793 | +59% |
-| T-2026-09-21-word-menu-and-child-branches-041 〔2026-09-22 新增〕 | 534 ~ 549 | +7% ~ +10% |
+| T-2026-09-21-word-menu-and-child-branches-041 〔2026-09-22 新增〕〔2026-09-24 数字更正〕 | 544 | +8.8% |
 | T-2026-09-21-navigation-page-archive-delete-039 〔2026-09-22 新增，**实测值**〕 | 646（新增 6 文件 531 + 改动 19 文件 115） | +29.2% |
 
-T-041 的两口径：实现者给的 496（新增 5 文件）+ 38（改动行）= **534**；交付复核者按同一规则重数得 511 + 38 = **549**。
+T-041 的口径（〔2026-09-24 更正〕唯一判定值，来源 `T-041-sizing.txt` 与 verifier 独立复算）：9 个新文件 502 + 改动 42 = **544**。初稿的「496+38=534 / 511+38=549」两套读数与任务证据不同源（文件数 5 vs 9 亦不符），按 harness-tasks.md「同一任务不得两套口径」废弃。
 差异来自 XML 注释行的剥离方式，两种口径都超 500 硬上限，故按区间记录，不取单点。
 T-039 已写完；独立 verifier 判定 **`FAIL`**（唯一原因就是本表这一行），任务随之置为 `blocked` 而不是 `verifying`——它的五条验收标准与六道门禁全过，没有代码缺陷可修。`646` 是实现者用 `.trae/scripts/dev/count_production_lines.py` 实测的两项之和
 （新增 6 文件 531 + 改动 19 文件 115 = 646，见 `artifacts/evidence/T-039-sizing-final.txt`）；此前的 `≈695` 是开工前的预估，已作废。判定全文见 `artifacts/evidence/T-039-independent-verification.txt`。
@@ -240,6 +240,9 @@ T-039 已写完；独立 verifier 判定 **`FAIL`**（唯一原因就是本表�
 
 另：T-2026-09-20-sqlite-schema-dao-transactions-004 自设了 400 行阈值，需要用户确认该阈值是否继续有效。
 `harness-tasks.md` 中已结清的四个任务（T-003 741 已批准、T-004 458、T-021 230、T-022 386）不在此列。
+
+**〔2026-09-24 裁定块〕** 用户于 2026-09-24 在对话中逐批裁定，上表越线任务**全部按「事后追认豁免」收口**（批准落在实现之后，各任务文件已按 `harness-tasks.md` 第 60 行如实登记，剩余风险逐条留档）：
+T-016（862，+72%）、T-015（807，+61%）、T-013（1584，+217%）、T-008（765，+53%）、T-011（726）、T-007（671）、T-006（749）、T-041（544，+8.8%）、T-032（793，+59%）、T-040（517..584 区间， verifier 复算）。T-039（646）不经豁免——已按用户更早的裁定**拆分为 T-107（UI 切片 496 行）与 T-108（装配切片 150 行）**，T-039 在两者 verified 后归档。T-004 的 400 行自设阈值问题仍待用户表态（非硬上限，不阻塞）。本节标题的「待用户裁定」状态自此解除。
 
 ## 8. 流程事件与独立性缺口（必须如实说明）
 
@@ -270,12 +273,11 @@ T-039 已写完；独立 verifier 判定 **`FAIL`**（唯一原因就是本表�
   （第 5 节末尾保留了「进请求之前」的历史结论，勿混读）。contract-guardian 判 PARTIAL，理由只在文档同步，
   代码面 PASS；独立 verifier 尚未判定。
 - **lint warning 由 18 涨到 29**（`:app` 28 + `:data` 1，0 error）：新增 UI 资源带来的警告尚未逐条归因。
-- 规模越线任务未经裁定，其验收结论在流程上仍未闭合。
+- 〔2026-09-24 更新〕规模越线任务已全部裁定（第 7 节裁定块）：除 T-039 走拆分路线外，其余均获「事后追认豁免」，验收结论的流程缺口已闭合；各任务文件留有剩余风险记录。
 
 ## 10. 后续步骤（建议顺序，2026-09-22 重写）
 
-1. **用户裁定规模例外**：第 7 节列出的越线任务（含 T-032 的 793 行、T-041 的 534~549、**T-039 的 646**）
-   需要明确批准例外或拆分返工。T-039 的代码已落盘但例外未获批，实现者未自行追认。
+1. **〔2026-09-24 已完成〕用户裁定规模例外**：第 7 节列出的越线任务已全部裁定——T-032/T-041/T-040 及其余越线项获「事后追认豁免」，**T-039 走拆分路线**（拆为 T-107 UI 切片 + T-108 装配切片，二者 verified 后 T-039 归档）。
 2. **按依赖顺序把剩余能力做完**，一次只跑一个——`MainActivity.java` 与 `AppContainer.java` 是全部屏幕任务的
    共享冲突点，同目录并发跑 Gradle 会让 `--rerun-tasks` 证据不可信，故只能串行：
   **T-042（阅读位置保存与恢复，已实现、待独立 verifier 判定）→ T-040（搜索页 + 首页搜索入口，**已实现、待独立

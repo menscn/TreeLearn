@@ -3,7 +3,6 @@ package com.treelearn.ai.gateway;
 import android.util.JsonWriter;
 import com.treelearn.ai.prompt.DeepSeekMessage;
 import com.treelearn.ai.prompt.DeepSeekRequest;
-import com.treelearn.core.domain.GenerationModel;
 import com.treelearn.core.domain.Guard;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -31,14 +30,14 @@ public final class JsonChatRequestBody implements GatewayPorts.BodyEncoder {
     public static final String REASONING_EFFORT = "high";
 
     @Override
-    public byte[] encode(GenerationModel model, DeepSeekRequest request) {
-        Guard.object(model, "model");
+    public byte[] encode(String modelWireId, DeepSeekRequest request) {
+        Guard.nonBlank(modelWireId, "model wire id");
         Guard.object(request, "request");
         StringWriter body = new StringWriter();
         JsonWriter writer = new JsonWriter(body);
         try {
             writer.beginObject();
-            writer.name("model").value(model.wireId);
+            writer.name("model").value(modelWireId);
             writer.name("stream").value(true);
             writer.name("thinking").beginObject();
             writer.name("type").value(request.thinkingEnabled ? THINKING_ENABLED : THINKING_DISABLED);

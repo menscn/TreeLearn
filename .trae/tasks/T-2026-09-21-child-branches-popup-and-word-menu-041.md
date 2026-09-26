@@ -4,7 +4,7 @@ id: T-2026-09-21-041
 title: 子分支列表与长按划词操作菜单
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -86,7 +86,7 @@ Follow [code-document alignment](../rules/documentation.md).
 - [x] 资格判定只有一个来源：原文扫描证明屏幕未自行判断能否新建分支，而是复用 `ChatMessage.canFork()`。证据同文件 scan 3：`canFork` 在 `app/src/main` 下 7 处命中，定义恰好 1 处（`ui/ChatMessage.java:146`），其余是读取 / `{@link}` / 注释；`screen/WordMenuPopup.java` 0 处命中（弹层不参与判定）。
 - [x] `:app:testDebugUnitTest`、`.\gradlew.bat check`、Java-only guard、设计 token 守门、文档影响记录齐全且退出码 0。证据：`T-041-green-counts.txt`（31 测试类 / 326 例 / 0 failures / 0 errors）、`T-041-check.txt`（`BUILD SUCCESSFUL`）、`T-041-no-kotlin.txt`（`VERDICT: PASS (13 OK line(s))`）、`T-041-design-tokens.txt`（0 checks failed）、`T-041-design-tokens-selftest.txt`。
 - [x] 真机观感与像素证据记为 `deferred — 用户自行装机验证（user decision 2026-09-21）`，不得写成 PASS。README 与交付报告两处均如此记录。
-- [ ] 规模：实测 544 非空非注释生产行，超 500 硬上限 9% 且**未获用户批准**；按 `.trae/rules/harness-tasks.md` 第 45 行这是失败项，需用户裁定（拆 task 或记录例外），实现者不自行追认。明细见 `artifacts/evidence/T-041-sizing.txt` 与「TDD or sizing exception」小节。
+- [x] 规模：实测 544 非空非注释生产行，超 500 硬上限 9%；2026-09-24 用户**事后追认豁免**（对话内裁定），例外记录见「TDD or sizing exception」小节；明细见 `artifacts/evidence/T-041-sizing.txt`。
 
 ## TDD execution record
 
@@ -120,9 +120,9 @@ tail    BUILD FAILED in 12s / 52 actionable tasks: 1 executed, 51 up-to-date / E
 - Regression evidence: 每次收尾后重跑同一条 `:app:test`；最后一次为无缓存复跑，见 `artifacts/evidence/T-041-green-uncached.txt`（EXITCODE=0）。
 
 ### TDD or sizing exception — only with prior user approval
-- Exception type: 规模例外（未获批）：判定的 544 非空非注释生产行超 500 硬上限
+- Exception type: 规模例外（**事后追认**，2026-09-24 用户批准）
 - Reason: 本任务把两个独立交付项装进一个 task——长按划词菜单约 400 行、子分支列表弹层约 175 行，各自都在 500 以内，合起来越线 9%。口径按 `.trae/rules/harness-tasks.md` 第 45 行「新增文件按全部非空非注释行，既有文件只按本次改动行」，判定值 544（新增 9 文件 502 + 既有文件改动 42），物理行 727 只作参考；逐文件明细与命令见 `artifacts/evidence/T-041-sizing.txt`。
-- User approval: 未获得。实现者不得自行追认，因此本项按规则记为失败，等待用户裁定「拆成两个 task」或「记录规模例外」。
+- User approval: 2026-09-24 用户在对话中裁定「事后追认豁免」。批准落在实现之后，按 `harness-tasks.md` 第 60 行如实记为事后追认。剩余风险：单 task 越线 9%；后续如需拆分，以「划词菜单 / 子分支弹层」为天然切面。
 - Alternative verification: 不适用（本项是规模例外，不是 TDD 例外；TDD 按 required 执行，见上）。
 
 ## Implementation notes
@@ -185,3 +185,14 @@ tail    BUILD FAILED in 12s / 52 actionable tasks: 1 executed, 51 up-to-date / E
 - 遥测决定与理由: 本切片**不发射任何遥测**。划词菜单与子分支弹层是纯 UI 手势与只读列出，既不改状态也不产生外部调用；本仓遥测出口 `wiring.LogcatTelemetry` 只记生成状态与计数、明确不记正文，而这里没有任何新的状态迁移可记。新增日志只会把「用户选了哪句话」这类正文风险引进来，收益为零。
 - 流程观察（如实记录，不算偏差）: 本任务文件交到我手上时 front matter 是 `status: ready`，而任务简报说它已是 `in_progress`。以文件为准（`ready`），本轮从 `ready` 直接推进到 `verifying`，期间没有第二个写者。
 - 偏差（已记录，见下）: PRD 6.2.19 没有定义「词」，长按落地为**整句**选择；PRD 同条第 8 项的「44×44 圆形热区」在移动原型里没有对应物，落地为 44dp 高的整宽行。
+
+## Verification report — Fix round 2 复验（verifier #3，2026-09-24）
+
+- Verdict: PASS（独立复核，针对 2026-09-22 verifier 报告的 D1–D4 与规模项的修复轮）。
+- D1（子分支弹层超一屏不可达）→ 闭合。`popup_child_branches.xml` 的 `child_branches_list` 已包进 `ScrollView`；`dimens.xml` 新增 `popup_max_height`（320dp）；`ChildBranchPopup` 用 `content.measure(...)` + `popup.setHeight(Math.min(content.getMeasuredHeight(), maxPx))` 限高。超一屏的行可滚动到达。
+- D2（`ChatSink.openChildren` 的死参数 `branchId`）→ 闭合。签名改为 `(String messageId, List<ChildBranch> children)`，`ChatPresenter` / `MainActivity` / `ChatTestDoubles` 同步；`ChatPresenterTest` 两条断言改为 messageId 形态。
+- D3（交付报告 T-041 规模数字与任务证据不一致）→ 闭合。报告数字已改为与 `T-041-sizing.txt` 同源的 544（超 9%）。
+- D4（行为锁定断言无变异证据）→ 闭合。M1（`BranchChildren.isChild` 去掉 `!isArchived()` → 弹层成员相关用例转红，EXITCODE=1）与 M2（`WordMenu.entriesFor` 去掉 `canFork()` 门 → `aHalfFinishedAnswerIsNotOfferedANewBranchAtAll` 精准转红，EXITCODE=1）各自只打红目标用例，还原后绿。证据 `artifacts/evidence/T-041-mutation-2026-09-24.txt`。
+- 规模项 → 2026-09-24 用户**事后追认豁免**（见「TDD or sizing exception」小节）。
+- 门禁（本轮实测，非回读旧证据）：`./gradlew --no-daemon --console=plain check` EXITCODE=0（`artifacts/evidence/P3-B3-gates-2026-09-24.txt`）；Java-only guard `VERDICT: PASS (13 OK line(s))`、EXITCODE=0（`artifacts/evidence/P3-B3-no-kotlin-2026-09-24.txt`）。
+- 设备侧仍 `deferred — 用户自行装机验证（user decision 2026-09-21）`，不计 PASS/FAIL。

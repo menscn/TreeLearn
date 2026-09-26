@@ -1,0 +1,33 @@
+T-2026-09-23-091 RED evidence (2026-09-24)
+
+Command (RED 与 GREEN 逐字相同):
+  cd android && ./gradlew --no-watch-fs :app:testDebugUnitTest --tests "com.treelearn.app.ui.SearchSettingsPresenterTest"
+  (本机实际执行为 PowerShell 等价形式:
+   cd d:\Project\Android\Treelearn\android; .\gradlew.bat --no-watch-fs :app:testDebugUnitTest --tests "com.treelearn.app.ui.SearchSettingsPresenterTest" 2>&1)
+
+Exit code: 1
+
+Observed failure (tail, GBK 控制台乱码化但错误定位可读; 完整输出见 T-091-red-raw.txt / T-091-red-tail.txt):
+  SearchSettingsPresenterTest.java:7:  程序包com.treelearn.app.ui.SearchSettingsPresenter不存在
+    import com.treelearn.app.ui.SearchSettingsPresenter.Engine;
+  SearchSettingsPresenterTest.java:177: 程序包SearchSettingsPresenter不存在 (RecordingSink implements SearchSettingsPresenter.Sink)
+  SearchSettingsPresenterTest.java:192: 程序包SearchSettingsPresenter不存在 (FakeStore implements SearchSettingsPresenter.Store)
+  64 个错误
+  BUILD FAILED in 13s
+
+Failure reason validated: 是 —— 全部 64 个编译错误均指向缺失的 SearchSettingsPresenter API
+（Engine/Tier/Notice/Row/State/Sink/Store/构造器），无任何其他源文件报错；
+失败由缺失行为导致，非环境噪声（已带 --no-watch-fs）。
+
+Test/scenario（11 用例）:
+  1  startingReadsTheWholeStateOffTheUiThread      整状态（开关/引擎/档位/Key 存在性）在 UI 线程之外读取
+  2  theDefaultStateIsOffWithZhipuAndTenResults    默认关闭断言 + 默认引擎智谱 + 默认 10 条（SPEC-080）
+  3  togglingSearchPersistsIt                      联网搜索主开关写穿 Store 并重载
+  4  selectingAnEnginePersistsItAndReloads         引擎单选写穿 Store 并重载
+  5  selectingAResultTierPersistsIt                结果数档位（3/5/10）选择持久化
+  6  aSelectedEngineWithoutAKeyRaisesTheNokeyNotice  [NOKEY]：联网已开且所选引擎无 Key → NOKEY 标注
+  7  configuringTheKeyClearsTheNokeyNotice         配置 Key 后 NOKEY 标注清除
+  8  aBlankKeyIsRefusedBeforeAnyStoreWork          空 Key 拦截（KEY_REQUIRED），不触碰 Store，缓冲区清零
+  9  aRefusedKeySaveKeepsTheOldNoticeAndWipesTheBuffer  Keystore 拒写 → KEY_SAVE_FAILED，缓冲区清零
+  10 theKeyBufferIsWipedEvenOnASuccessfulSave       保存成功路径候选缓冲区同样清零
+  11 deletingTheKeyRaisesTheNokeyNoticeAgain        删除 Key 后 [NOKEY] 重新标注

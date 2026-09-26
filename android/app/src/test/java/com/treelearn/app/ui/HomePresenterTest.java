@@ -11,6 +11,7 @@ import com.treelearn.core.domain.GenerationModel;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -263,5 +264,59 @@ public final class HomePresenterTest {
         presenter.onResumed();
 
         assertTrue(sink.last().keyConfigured);
+    }
+
+    @Test
+    public void theHeatStripCarriesFourteenCellsAndTheStreakWhenDataExists() {
+        data.topics = Collections.singletonList(TestDoubles.topic(TestDoubles.TOPIC_1, "已有"));
+        LocalDate today = LocalDate.of(2026, 9, 23);
+        data.stats = HomeStats.of(Arrays.asList(today, today.minusDays(1)), today, 2);
+
+        presenter.start();
+
+        assertEquals(HomeViewState.Phase.READY, sink.last().phase);
+        assertEquals(HomeViewState.HeatStrip.Status.VISIBLE, sink.last().heatStrip.status);
+        assertEquals("连续天数数字必须来自 100 的聚合结果", 2, sink.last().heatStrip.streakDays);
+        assertEquals(14, sink.last().heatStrip.intensities.length);
+        assertEquals(1f, sink.last().heatStrip.intensities[12], 0f);
+        assertEquals(1f, sink.last().heatStrip.intensities[13], 0f);
+        assertEquals(0f, sink.last().heatStrip.intensities[11], 0f);
+    }
+
+    @Test
+    public void anEmptyStatsHistoryShowsTheEmptyStateAndNeverAZeroStreak() {
+        data.topics = Collections.singletonList(TestDoubles.topic(TestDoubles.TOPIC_1, "已有"));
+        data.stats = HomeStats.empty();
+
+        presenter.start();
+
+        assertEquals(HomeViewState.Phase.READY, sink.last().phase);
+        assertEquals("空历史是空态，不是「0 天」",
+                HomeViewState.HeatStrip.Status.EMPTY, sink.last().heatStrip.status);
+    }
+
+    @Test
+    public void aFailedStatsQueryHidesTheCardAndKeepsThePageUsable() {
+        data.topics = Collections.singletonList(TestDoubles.topic(TestDoubles.TOPIC_1, "已有"));
+        data.statsThrow = true;
+
+        presenter.start();
+
+        assertEquals("统计失败不得阻塞首页其余内容",
+                HomeViewState.Phase.READY, sink.last().phase);
+        assertEquals(1, sink.last().topics.size());
+        assertNull(sink.last().notice);
+        assertEquals(HomeViewState.HeatStrip.Status.HIDDEN, sink.last().heatStrip.status);
+    }
+
+    @Test
+    public void aHeatStripTapIsANoOpUntilTheDrawerShips() {
+        data.topics = Collections.singletonList(TestDoubles.topic(TestDoubles.TOPIC_1, "已有"));
+
+        presenter.start();
+        presenter.onHeatStripTapped();
+
+        assertTrue("点击目标未拍板前不得做死跳转", sink.branchesOpened.isEmpty());
+        assertEquals(0, sink.settingsOpened);
     }
 }

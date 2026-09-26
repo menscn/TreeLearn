@@ -1,0 +1,211 @@
+﻿diff --git a/android/app/src/main/java/com/treelearn/app/MainActivity.java b/android/app/src/main/java/com/treelearn/app/MainActivity.java
+index 5d8a7cc..eaa63f6 100644
+--- a/android/app/src/main/java/com/treelearn/app/MainActivity.java
++++ b/android/app/src/main/java/com/treelearn/app/MainActivity.java
+@@ -22,8 +22,11 @@ import com.treelearn.app.library.LibraryViewState;
+ import com.treelearn.app.screen.ChatScreen;
+ import com.treelearn.app.screen.HomeScreen;
+ import com.treelearn.app.screen.LibraryScreen;
++import com.treelearn.app.screen.ModelSettingsScreen;
+ import com.treelearn.app.screen.NavigationScreen;
++import com.treelearn.app.screen.ProviderAdminScreen;
+ import com.treelearn.app.screen.SearchScreen;
++import com.treelearn.app.screen.SearchServiceSettingsScreen;
+ import com.treelearn.app.screen.SettingsScreen;
+ import com.treelearn.app.screen.TreeCanvasScreen;
+ import com.treelearn.app.navigation.NavigationPresenter;
+@@ -41,6 +44,9 @@ import com.treelearn.app.ui.ChildBranch;
+ import com.treelearn.app.ui.HomePresenter;
+ import com.treelearn.app.ui.HomeSink;
+ import com.treelearn.app.ui.HomeViewState;
++import com.treelearn.app.ui.ModelSettingsPresenter;
++import com.treelearn.app.ui.ProviderAdminPresenter;
++import com.treelearn.app.ui.SearchSettingsPresenter;
+ import com.treelearn.app.ui.SettingsPresenter;
+ import com.treelearn.app.ui.SettingsSink;
+ import com.treelearn.app.ui.SettingsViewState;
+@@ -48,6 +54,7 @@ import com.treelearn.app.ui.TreeCanvasPresenter;
+ import com.treelearn.app.ui.TreeCanvasSink;
+ import com.treelearn.app.ui.TreeCanvasViewState;
+ import com.treelearn.core.domain.AnswerRevision;
++import com.treelearn.core.domain.GenerationModel;
+ import com.treelearn.core.domain.ReadingAnchor;
+ import com.treelearn.core.domain.ReadingPosition;
+ import com.treelearn.treelayout.ViewportConstraints;
+@@ -129,6 +136,21 @@ public final class MainActivity extends Activity
+     private LibraryScreen libraryScreen;
+     private LibraryPresenter libraryPresenter;
+ 
++    /**
++     * The provider management page (T-087) and its decisions; null while the page is not on screen.
++     * Built per visit like every other second-level screen, always on top of the settings page.
++     */
++    private ProviderAdminScreen providerAdminScreen;
++    private ProviderAdminPresenter providerAdminPresenter;
++
++    /** The model settings page (T-088); built per visit, always on top of the settings page. */
++    private ModelSettingsScreen modelSettingsScreen;
++    private ModelSettingsPresenter modelSettingsPresenter;
++
++    /** The search service settings page (T-091); built per visit, on top of the settings page. */
++    private SearchServiceSettingsScreen searchSettingsScreen;
++    private SearchSettingsPresenter searchSettingsPresenter;
++
+     private boolean showingSettings;
+     private boolean homeStarted;
+ 
+@@ -155,6 +177,9 @@ public final class MainActivity extends Activity
+         homeScreen.setActions(homePresenter);
+         settingsScreen.setActions(settingsPresenter);
+         settingsScreen.setOnBackPressed(this::onBackRequested);
++        settingsScreen.setOnProvidersPressed(this::showProviders);
++        settingsScreen.setOnModelsPressed(this::showModels);
++        settingsScreen.setOnSearchPressed(this::showSearchSettings);
+ 
+         tabHome.setOnClickListener(view -> showHome());
+         tabLibrary.setOnClickListener(view -> showLibrary());
+@@ -238,6 +263,14 @@ public final class MainActivity extends Activity
+      * than to the home page: the tab the learner left from is the tab they come back to.
+      */
+     private void onBackRequested() {
++        // T-087/T-088: the provider and model pages are a second level of the settings page, so
++        // back steps up one level first 鈥?the settings page (and whichever tab it stands on) stays
++        // underneath.
++        if (providerAdminScreen != null || modelSettingsScreen != null
++                || searchSettingsScreen != null) {
++            showSettings();
++            return;
++        }
+         if (showingSettings) {
+             if (chatBranchId == null) {
+                 showHome();
+@@ -259,6 +292,11 @@ public final class MainActivity extends Activity
+             return;
+         }
+         if (chatBranchId != null) {
++            // T-077: an open fullscreen editor consumes back first - back closes it, saving the
++            // draft, and never leaves the branch under the learner (073 搂5.1).
++            if (chatScreen != null && chatScreen.onSystemBack()) {
++                return;
++            }
+             showTab(currentTab);
+             return;
+         }
+@@ -510,8 +548,108 @@ public final class MainActivity extends Activity
+         showingSettings = true;
+         libraryScreen = null;
+         libraryPresenter = null;
++        providerAdminScreen = null;
++        providerAdminPresenter = null;
++        modelSettingsScreen = null;
++        modelSettingsPresenter = null;
++        searchSettingsScreen = null;
++        searchSettingsPresenter = null;
+         swap(settingsScreen);
+         settingsPresenter.start();
++        refreshProvidersSubtitle();
++        refreshModelsSubtitle();
++    }
++
++    /**
++     * Opens the provider management page (T-087) from the settings entry. Built here and dropped
++     * when the settings page is shown again, so the list is read fresh on each visit; the back
++     * move lands on the settings page, which the subtitle refresh keeps current.
++     */
++    private void showProviders() {
++        providerAdminScreen = new ProviderAdminScreen(this);
++        providerAdminPresenter = new ProviderAdminPresenter(providerAdminScreen,
++                container.uiThread(), container.background(), container.providerAdminStore());
++        providerAdminScreen.setActions(providerAdminPresenter);
++        providerAdminScreen.setOnBackPressed(this::onBackRequested);
++        swap(providerAdminScreen);
++        providerAdminPresenter.start();
++    }
++
++    /** The settings entry's 銆屽凡鍚敤 N 瀹躲€?subtitle, read off the UI thread like every other read. */
++    private void refreshProvidersSubtitle() {
++        container.background().execute(() -> {
++            int enabled = 0;
++            for (ProviderAdminPresenter.Row row : container.providerAdminStore().list()) {
++                if (row.enabled) {
++                    enabled++;
++                }
++            }
++            final int count = enabled;
++            container.uiThread().post(() -> {
++                if (providerAdminScreen == null) {
++                    settingsScreen.setProvidersSubtitle(
++                            getString(R.string.providers_entry_enabled_count, count));
++                }
++            });
++        });
++    }
++
++    /**
++     * Opens the model settings page (T-088). Built here and dropped when the settings page is
++     * shown again, so the roles are read fresh on each visit; the back move lands on settings.
++     */
++    private void showModels() {
++        modelSettingsScreen = new ModelSettingsScreen(this);
++        modelSettingsPresenter = new ModelSettingsPresenter(modelSettingsScreen,
++                container.uiThread(), container.background(), container.modelSettingsStore());
++        modelSettingsScreen.setActions(modelSettingsPresenter);
++        modelSettingsScreen.setOnBackPressed(this::onBackRequested);
++        swap(modelSettingsScreen);
++        modelSettingsPresenter.start();
++    }
++
++    /**
++     * Opens the search service settings page (T-091). Built here and dropped when the settings
++     * page is shown again, so the facts are read fresh on each visit; the back move lands on
++     * settings, exactly like the provider and model pages.
++     */
++    private void showSearchSettings() {
++        searchSettingsScreen = new SearchServiceSettingsScreen(this);
++        searchSettingsPresenter = new SearchSettingsPresenter(searchSettingsScreen,
++                container.uiThread(), container.background(), container.searchSettingsStore());
++        searchSettingsScreen.setActions(searchSettingsPresenter);
++        searchSettingsScreen.setOnBackPressed(this::onBackRequested);
++        swap(searchSettingsScreen);
++        searchSettingsPresenter.start();
++    }
++
++    /**
++     * T-090: the conversation presenter's translation port over the container's route point. The
++     * adapter is the whole bridge between the two contracts - the presenter stays free of the
++     * generation package, and the route point stays free of view-state concerns.
++     */
++    private ChatPresenter.Translator translationPort() {
++        return new ChatPresenter.Translator() {
++            @Override
++            public void translate(GenerationModel fallbackModel, String sourceText,
++                    ChatPresenter.Translator.Callback callback) {
++                container.messageTranslator().translate(fallbackModel, sourceText,
++                        callback::onFinished);
++            }
++        };
++    }
++
++    /** The model settings entry's subtitle: the chat role's current model (spec 鐣岄潰鏂规). */
++    private void refreshModelsSubtitle() {
++        container.background().execute(() -> {
++            final String label =
++                    container.modelSettingsStore().read(ModelSettingsPresenter.Role.CHAT).label;
++            container.uiThread().post(() -> {
++                if (modelSettingsScreen == null && !label.isEmpty()) {
++                    settingsScreen.setModelsSubtitle(label);
++                }
++            });
++        });
+     }
+ 
+     /**
+@@ -582,7 +720,7 @@ public final class MainActivity extends Activity
+         chatPresenter = new ChatPresenter(this, container.uiThread(), container.background(),
+                 container.keyVault(), container.chatData(), container.chatCommands(),
+                 container.settingsStore(), container.chatCopyLabels(), branchId, reading,
+-                container.chatDraftStore());
++                container.chatDraftStore(), translationPort(), container.chatSearchStep());
+         chatScreen.setActions(chatPresenter);
+         swap(chatScreen);
+         if (explicitAnchor != null) {

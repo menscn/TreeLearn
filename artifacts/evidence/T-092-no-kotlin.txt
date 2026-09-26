@@ -1,0 +1,12 @@
+﻿T-2026-09-23-092 no-kotlin evidence (2026-09-24)
+Command (check 已依赖 verifyNoKotlinDex, 逐字同 T-092-check 命令):
+  cd android && ./gradlew --no-watch-fs check
+
+
+> Task :verifyNoKotlinDex
+verifyNoKotlinDex: [app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk] APK in an androidTest output path (test process) = 1057273 bytes, 3 dex file(s) [classes.dex, classes2.dex, classes3.dex]
+verifyNoKotlinDex: [app/build/outputs/apk/debug/app-debug.apk] shipped APK = 1284101 bytes, 14 dex file(s) [classes.dex, classes10.dex, classes11.dex, classes3.dex, classes4.dex, classes5.dex, classes2.dex, classes6.dex, classes12.dex, classes13.dex, classes14.dex, classes7.dex, classes8.dex, classes9.dex]
+verifyNoKotlinDex: [app/build/outputs/apk/release/app-release.apk] shipped APK = 888723 bytes, 1 dex file(s) [classes.dex]
+verifyNoKotlinDex: NOTICE (accepted) [app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk] contains Kotlin-compiled annotation classes without runtime linkage ([classes.dex -> Lkotlin/Metadata;]); no Kotlin runtime library is required on device. Kotlin type descriptors in this APK (8): [Lkotlin/Deprecated;, Lkotlin/Metadata;, Lkotlin/ReplaceWith;, Lkotlin/annotation/AnnotationRetention;, Lkotlin/annotation/AnnotationTarget;, Lkotlin/annotation/Retention;, Lkotlin/annotation/Target;, Lkotlin/reflect/KClass;]
+verifyNoKotlinDex: PASS (3 APK(s) inspected across app/build/outputs/apk, no Kotlin runtime bytecode)
+

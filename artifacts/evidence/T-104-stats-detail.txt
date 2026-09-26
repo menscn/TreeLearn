@@ -1,0 +1,56 @@
+T-104（统计详情页）汇总证据
+生成方式：本脚本实时执行命令并回填真实输出（UTF-8），命令与退出码内嵌自证。
+
+CMD-1  RED：JVM 编译失败（StatsDetailPresenter 尚不存在）
+命令与日志: artifacts\evidence\T-104-red-2026-09-25.log（完整输出见该文件）
+  EXITCODE=1
+  匹配 错误:|错误:: D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\StatsDetailPresenterTest.java:115: 错误: 程序包StatsDetailPresenter不存在
+
+CMD-2  GREEN：StatsDetailPresenterTest 4/4
+命令与日志: artifacts\evidence\T-104-green-2026-09-25.log（完整输出见该文件）
+  EXITCODE=0
+  匹配 BUILD SUCCESSFUL|BUILD FAILED: BUILD SUCCESSFUL in 16s
+
+CMD-3  全量 JVM 单测（含本片 4 例）
+命令与日志: artifacts\evidence\T-104-full-unittest-2026-09-25.log（完整输出见该文件）
+  EXITCODE=0
+  匹配 BUILD SUCCESSFUL|BUILD FAILED: BUILD SUCCESSFUL in 26s
+
+CMD-4  check 门禁
+命令与日志: artifacts\evidence\T-104-check-2026-09-25.log（完整输出见该文件）
+  EXITCODE=0
+  匹配 BUILD SUCCESSFUL|BUILD FAILED: BUILD SUCCESSFUL in 1m 48s
+
+CMD-5  Java-only guard
+  VERDICT: PASS (13 OK line(s))
+
+CMD-6  设计 token 守门（实时执行）
+命令: python -X utf8 .trae/scripts/dev/check_design_tokens.py
+  check_design_tokens: 0 check(s) failed
+  EXITCODE=0
+EXITCODE=0
+
+CMD-7  「无 token 指标占位」验收 grep（实时执行；0 命中即通过）
+命令: grep -rn -i token <本片三个新生产文件>
+  命中行数: 0
+  （grep 无命中时退出码为 1——此处 0 命中即验收通过，EXITCODE=1 是预期值）
+EXITCODE=1
+
+CMD-8  app 全量单测计数（test-results XML 汇总，与本脚本同进程计算）
+  files=73 tests=633 skipped=0 failures=0 errors=0
+EXITCODE=0
+
+CMD-9  生产行数实测（非空非注释口径）
+命令: count_production_lines.py <本片三个新生产文件>
+  84  android/app/src/main/java/com/treelearn/app/ui/StatsDetailPresenter.java
+      57  android/app/src/main/java/com/treelearn/app/screen/StatsDetailScreen.java
+      87  android/app/src/main/res/layout/screen_stats_detail.xml
+     228  TOTAL (non-blank, non-comment, production files only)
+  AppContainer 归属增量（homeStore/clock 标记行）: +15
+  新测试文件 StatsDetailPresenterTest.java: 147 物理行（不计入生产口径）
+EXITCODE=0
+
+CMD-10  README 首页小节新增统计详情页条目（grep 实时执行）
+命令: grep -n "StatsDetailPresenter" android/README.md
+  452:| `ui.StatsDetailPresenter` / `screen.StatsDetailScreen` | 统计详情页（T-104）：近 10 周全量热力图 + 累计提问/消息/连续天数三卡 | 读**同一**聚合入口（`
+EXITCODE=0

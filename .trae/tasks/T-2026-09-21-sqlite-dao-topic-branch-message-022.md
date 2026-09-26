@@ -4,7 +4,7 @@ id: T-2026-09-21-022
 title: topics / branches / messages 三表 DAO 与只读映射
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -239,6 +239,13 @@ Follow [code-document alignment](../rules/documentation.md).
 本轮另修一处**归档忠实度**问题：第二轮报告文件（`T-022-verification-db-review-round2.md`）的 `§2` 处置文字是归档时补写的，其中 N1/N2/N3 标着「已修」，但那些修复到**第三轮**才成立，`§2 N2` 的样本替换也被写成「本轮修复」。已在文件页首加「归档时序说明（阅读前必读）」，三处标签改为「已修（第三轮复核判 CLOSED）」，`§3` 末条明说该样本的真机用例是第三轮才补的。——「归档时把后来的状态写进当时的报告」会让后来者把治理时序读错，比数字错更难发现。
 
 ## Verification report
+
+### verifier #3 批量复核（2026-09-24，独立于本任务实现者）
+
+- Verdict: **PASS（设备项 deferred）**。verifier #2 的静态判定全部维持；本轮新鲜门禁复跑全绿。
+- Fresh evidence（2026-09-24）: `artifacts/evidence/P3-B1-gates-2026-09-24.txt`（全模块 JVM 套件 + lint + `:app:assembleDebugAndroidTest` 编译，BUILD SUCCESSFUL / EXITCODE=0；全库 188 套件 1725 tests / 0 失败）；`P3-B1-no-kotlin-2026-09-24.txt`（EXITCODE=0）；再水合探针 `P3-B1-rehydration-probes-2026-09-24.txt` R1——`BranchSource.restore` 的生产调用点唯一命中 `BranchDao.java:239`（只读映射内），其余命中均为注释/javadoc，机械检索 EXITCODE=0。
+- 判定依据: 验收项 1-8 中凡不需要设备的项已由前两轮独立复核关闭且本轮无新事实推翻； instrumentation 项（真实 SQLite 拒绝/级联/逐字段重读）编译级通过、执行留待设备。
+- Gaps（不变，均 deferred）: 全部 instrumentation 执行项 —— `deferred — 本轮不使用模拟器（用户指令 2026-09-21）`，用例已编译（androidTest BUILD SUCCESSFUL）。
 > **最新结论：见本段末尾「第九轮独立复核结论」（verifier #2，2026-09-21 第四轮）。下方第一个 - Verdict: 是历史轮次的记录，不是当前判定。**
 
 - Verdict: **VERIFYING（不得报 PASS）**。八条验收条件**全部满足且证据可核**；两个独立方均已复核并各自在其职责轴内判定：独立 `verifier` 判「技术面成立」（F1–F4 与跨任务发现均已修），`db-migration-reviewer` 第二/第三轮判「**数据库轴可以判 PASS**」。

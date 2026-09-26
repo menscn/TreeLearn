@@ -115,7 +115,8 @@ public final class LibraryPresenterTest {
     }
 
     private static LibraryViewState.Row row(String topicId, String resumeBranchId) {
-        return new LibraryViewState.Row(topicId, resumeBranchId, "SYNTHETIC-TITLE", 1, 0L, 1_756_000_000_000L);
+        return new LibraryViewState.Row(topicId, resumeBranchId, "SYNTHETIC-TITLE",
+                "SYNTHETIC-ROW-SUMMARY", 1, 0L, 1_756_000_000_000L);
     }
 
     private static final class FakeData implements LibraryData {

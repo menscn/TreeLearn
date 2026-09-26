@@ -1,0 +1,220 @@
+T-061 学习库列表项补上 PRD 要求的「摘要」字段 — 汇总证据
+生成时间: 2026-09-24（脚本实时执行下列命令，输出与退出码为当场捕获）
+任务文件: .trae/tasks/T-2026-09-22-library-list-summary-field-061.md
+开工第一步（摘要可用性）: TopicDao.listOverviews 的 OVERVIEW_SELECT 已带
+  `s.PAYLOAD AS summary_payload`（data/src/main/java/com/treelearn/data/db/dao/TopicDao.java
+  第 200 行，ALIAS_SUMMARY_PAYLOAD 第 184 行），Overview.summaryPayload 已在返回值里；
+  data 层零改动，无新增查询、无 schema 变更。
+
+CMD-1  RED — 目标测试命令（androidTest 编译失败，4 个「找不到符号 library_topic_summary」）
+(full log: artifacts/evidence/T-061-red-2026-09-24.log)
+EXITCODE=1
+73: D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\LibraryTopicSummaryInstrumentedTest.java:134: 错误: 找不到符号
+78: D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\LibraryTopicSummaryInstrumentedTest.java:136: 错误: 找不到符号
+83: D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\LibraryTopicSummaryInstrumentedTest.java:155: 错误: 找不到符号
+88: D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\LibraryTopicSummaryInstrumentedTest.java:167: 错误: 找不到符号
+95: 4 个错误
+106: D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\LibraryTopicSummaryInstrumentedTest.java:134: 错误: 找不到符号
+111: D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\LibraryTopicSummaryInstrumentedTest.java:136: 错误: 找不到符号
+116: D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\LibraryTopicSummaryInstrumentedTest.java:155: 错误: 找不到符号
+121: D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\LibraryTopicSummaryInstrumentedTest.java:167: 错误: 找不到符号
+126: 4 个错误
+138: BUILD FAILED in 14s
+140: EXITCODE=1
+
+CMD-2  GREEN — 与 RED 同一条命令，真机 ALP-AN00 - 13 上 2/2
+(full log: artifacts/evidence/T-061-green-2026-09-24.log)
+EXITCODE=0
+137: Starting 2 tests on ALP-AN00 - 13
+139: Finished 2 tests on ALP-AN00 - 13
+149: BUILD SUCCESSFUL in 43s
+151: EXITCODE=0
+
+CMD-3  全量 :app JVM 单测（BUILD SUCCESSFUL）
+(full log: artifacts/evidence/T-061-full-unittest-2026-09-24.log)
+EXITCODE=0
+80: BUILD SUCCESSFUL in 30s
+82: EXITCODE=0
+
+CMD-4  全量单测计数（XML 属性汇总，目录 android/app/build/test-results/testDebugUnitTest/）
+EXITCODE=0
+XML 文件数=69  tests=615 skipped=0 failures=0 errors=0
+（AC 基线为 app suites=37 tests=364，现值 615 >= 364，远超基线；615 与 T-058 收口一致，
+ 本片未增删 JVM 单测，新测试为 androidTest 两条）
+
+CMD-5  全仓守门 check
+(full log: artifacts/evidence/T-061-check-2026-09-24.log)
+EXITCODE=0
+414: BUILD SUCCESSFUL in 1m 26s
+416: EXITCODE=0
+
+CMD-6  Java-only 守门（android/scripts/no-kotlin-check.ps1）
+（全文见 artifacts/evidence/T-061-nokotlin-2026-09-24.txt）
+EXITCODE=0
+VERDICT: PASS (13 OK line(s))
+
+CMD-7  真机回归：BottomTabShellInstrumentedTest + LibraryArchiveInstrumentedTest（052/053 行为零退化）
+(full log: artifacts/evidence/T-061-regression-instrumented-2026-09-24.log)
+EXITCODE=0
+129: Starting 10 tests on ALP-AN00 - 13
+131: Finished 10 tests on ALP-AN00 - 13
+141: BUILD SUCCESSFUL in 35s
+143: EXITCODE=0
+
+CMD-8  未越界之一：migration 零改动
+$ git status --porcelain | grep -ci "migration"
+EXITCODE=1
+命中数=0（0 = 全工作树无任何 migration 文件改动）
+
+CMD-9  未越界之二：标签栏显隐仍只在 swap() 一处
+$ grep -n "tabBar.setVisibility" android/app/src/main/java/com/treelearn/app/MainActivity.java
+EXITCODE=0
+830:        tabBar.setVisibility(screen == homeScreen || screen == libraryScreen
+
+CMD-10  规模实测之一：4 个改动生产文件的整文件非空非注释行（仓库脚本口径）
+$ python -X utf8 .trae/scripts/dev/count_production_lines.py LibraryViewState.java LibraryWiring.java LibraryScreen.java item_library_topic.xml
+EXITCODE=0
+88  android/app/src/main/java/com/treelearn/app/library/LibraryViewState.java
+   103  android/app/src/main/java/com/treelearn/app/wiring/LibraryWiring.java
+   251  android/app/src/main/java/com/treelearn/app/screen/LibraryScreen.java
+    30  android/app/src/main/res/layout/item_library_topic.xml
+   472  TOTAL (non-blank, non-comment, production files only)
+（整文件口径含 052-058 各片未提交改动；本片自身归属增量见 CMD-11）
+
+CMD-11  规模实测之二：T-061 归属增量（按 T-061 独有标记筛选 diff hunk，原文如下）
+$ git diff -- <4 个生产文件>，仅保留含 T-061 独有标记的 hunk
+标记: library_topic_summary / summaryTextOf / SUMMARY_ITEM_CEILING /
+      The summary draws only when / topic's root summary / String title, String summary, / T-061
+EXITCODE=0
+归属增量: +60 行 / -4 行（净 +56），对比 estimated_production_lines: 30 —— 超估算、
+在 200 行软上限内；超出部分主要为规则 javadoc（缺失摘要的占位禁令、与 HomeWiring 的解码约定），
+属本片唯一易错点的显式记录，非逻辑膨胀
+
+--- android/app/src/main/java/com/treelearn/app/library/LibraryViewState.java ---
+@@ -49,17 +49,24 @@ public final class LibraryViewState {
+         /** Where a tap resumes: the branch the learner last opened, or the root branch if none. */
+         public final String resumeBranchId;
+         public final String title;
++        /**
++         * The topic's root summary, or null while it has none. <strong>An absent summary is one line
++         * fewer, never a placeholder</strong> - the same rule {@link ArchiveRow} follows, and the one
++         * PRD item 7 names for every summary surface.
++         */
++        public final String summary;
+         public final int branchCount;
+         /** Sum of each branch's derived unread gap; zero is a real, already-read state. */
+         public final long unreadCount;
+         /** Epoch millis of the last use; the screen formats it in the device's own zone. */
+         public final long lastUsedAt;
+ 
+-        public Row(String topicId, String resumeBranchId, String title, int branchCount,
+-                long unreadCount, long lastUsedAt) {
++        public Row(String topicId, String resumeBranchId, String title, String summary,
++                int branchCount, long unreadCount, long lastUsedAt) {
+             this.topicId = Guard.id(topicId, "topicId");
+             this.resumeBranchId = Guard.id(resumeBranchId, "resumeBranchId");
+             this.title = Guard.text(title, "title");
++            this.summary = summary;
+             this.branchCount = Guard.atLeast(branchCount, 0, "branchCount");
+             this.unreadCount = Guard.nonNegative(unreadCount, "unreadCount");
+             this.lastUsedAt = Guard.epochMillis(lastUsedAt, "lastUsedAt");
+--- android/app/src/main/java/com/treelearn/app/wiring/LibraryWiring.java ---
+@@ -1,5 +1,9 @@
+ package com.treelearn.app.wiring;
+ 
++import com.treelearn.app.artifact.ArtifactKind;
++import com.treelearn.app.artifact.ArtifactPayload;
++import com.treelearn.app.artifact.ArtifactPayloadCodec;
++import com.treelearn.app.artifact.DerivedResult;
+ import com.treelearn.app.library.LibraryData;
+ import com.treelearn.app.library.LibraryViewState;
+ import com.treelearn.app.navigation.NavigationData;
+--- android/app/src/main/java/com/treelearn/app/wiring/LibraryWiring.java ---
+@@ -50,8 +54,8 @@ public final class LibraryWiring implements LibraryData {
+         List<LibraryViewState.Row> rows = new ArrayList<LibraryViewState.Row>(read.size());
+         for (TopicDao.Overview row : read) {
+             rows.add(new LibraryViewState.Row(row.topicId, row.resumeBranchId,
+-                    BranchHeading.of(row.rootTitle, row.rootQuestion), row.branchCount,
+-                    row.unreadCount, row.lastUsedAt));
++                    BranchHeading.of(row.rootTitle, row.rootQuestion), summaryTextOf(row),
++                    row.branchCount, row.unreadCount, row.lastUsedAt));
+         }
+         return rows;
+     }
+--- android/app/src/main/java/com/treelearn/app/wiring/LibraryWiring.java ---
+@@ -128,4 +132,34 @@ public final class LibraryWiring implements LibraryData {
+         NavigationData.Summary summary = navigation.summary(branchId);
+         return summary == null ? null : summary.text;
+     }
++
++    /**
++     * The same ceiling {@code HomeWiring} hands the codec for a summary read; the ceiling only bites
++     * recommendation arrays, which a {@code BRANCH_SUMMARY} payload has none of, so the two wirings
++     * read the same artifact the same way by convention rather than by a second copy of the rule.
++     */
++    private static final int SUMMARY_ITEM_CEILING = 8;
++
++    /**
++     * The topic's root summary, read from the stored {@code BRANCH_SUMMARY} artifact the overview
++     * row already carries.
++     *
++     * <p>Null is an ordinary answer, not a failure: a topic is readable before any artifact exists,
++     * and the row drops its summary line rather than standing an explanation in its place (the same
++     * rule {@code HomeWiring.summaryOf} applies to the home card, and PRD 6.2.8 point 7 names for
++     * every summary surface). A payload the codec refuses reads as null for the same reason - the
++     * screen has no way to show a half-parsed envelope, and inventing one is what the codec exists
++     * to prevent.
++     *
++     * @return the summary text, or null while the topic has none the codec would accept
++     */
++    private static String summaryTextOf(TopicDao.Overview row) {
++        if (row.summaryPayload == null || row.summaryPayload.isEmpty()) {
++            return null;
++        }
++        DerivedResult parsed = ArtifactPayloadCodec.parse(ArtifactKind.BRANCH_SUMMARY,
++                row.summaryPayload, SUMMARY_ITEM_CEILING);
++        ArtifactPayload payload = parsed.payload();
++        return payload == null || payload.summary == null ? null : payload.summary;
++    }
+ }
+--- android/app/src/main/java/com/treelearn/app/screen/LibraryScreen.java ---
+@@ -93,6 +219,14 @@ public final class LibraryScreen extends LinearLayout {
+         for (final LibraryViewState.Row row : next.rows) {
+             View view = inflater.inflate(R.layout.item_library_topic, rows, false);
+             ((TextView) view.findViewById(R.id.library_topic_title)).setText(row.title);
++            // The summary draws only when the topic has one: absent means one line fewer, never a
++            // placeholder (the same rule the completed segment's rows follow).
++            boolean summarised = row.summary != null && !row.summary.trim().isEmpty();
++            TextView summary = view.findViewById(R.id.library_topic_summary);
++            summary.setVisibility(summarised ? VISIBLE : GONE);
++            if (summarised) {
++                summary.setText(row.summary);
++            }
+             ((TextView) view.findViewById(R.id.library_topic_meta)).setText(meta(row));
+             view.findViewById(R.id.library_topic_unread)
+                     .setVisibility(row.unreadCount > 0 ? VISIBLE : GONE);
+--- android/app/src/main/res/layout/item_library_topic.xml ---
+@@ -24,6 +24,13 @@
+             android:layout_height="wrap_content" android:ellipsize="end" android:maxLines="1"
+             android:textColor="@color/tl_ink" android:textSize="@dimen/text_h2" />
+ 
++        <!-- The topic's root summary (T-061, PRD 6.2.16 point 4). Gone when the topic has none:
++             one line fewer, never an explanatory placeholder standing in for it. -->
++        <TextView android:id="@+id/library_topic_summary" android:layout_width="match_parent"
++            android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_s1"
++            android:ellipsize="end" android:maxLines="2" android:textColor="@color/tl_ink2"
++            android:textSize="@dimen/text_sm" android:visibility="gone" />
++
+         <TextView android:id="@+id/library_topic_meta" android:layout_width="match_parent"
+             android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_s1"
+             android:ellipsize="end" android:maxLines="1" android:textColor="@color/tl_ink3"
+
+CMD-12  两套平台覆盖：item_library_topic.xml 仅 layout/ 一份，为手机与平板共用
+$ ls android/app/src/main/res/layout-sw600dp/ | grep -i library
+EXITCODE=0
+sw600dp 下只有 screen_library.xml（页壳镜像），列表项布局单源共用，无漂移面
+
+CMD-13  README 文档联动
+$ grep -n "T-061，PRD 6.2.16 功能规格 4" android/README.md
+EXITCODE=0
+896:- **列表项显示根标题、摘要、分支数量与最近使用时间（T-061，PRD 6.2.16 功能规格 4）**：摘要由

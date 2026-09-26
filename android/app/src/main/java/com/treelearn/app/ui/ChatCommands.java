@@ -20,9 +20,13 @@ import java.util.List;
  */
 public interface ChatCommands {
 
-    /** Asks a follow-up in this branch. {@code quote} is the sentence it was asked from, or empty. */
-    ChatCommandResult send(String branchId, String text, String quote, GenerationModel model,
-            boolean thinkingEnabled);
+    /**
+     * Asks a follow-up in this branch. {@code quote} is the sentence it was asked from, or empty;
+     * {@code attachmentId} is the composer's parsed attachment (T-097), or null for "this turn
+     * carries no attachment".
+     */
+    ChatCommandResult send(String branchId, String text, String quote, String attachmentId,
+            GenerationModel model, boolean thinkingEnabled);
 
     /** Replaces a failed attempt at this position (T-010 {@code AnswerVersions.retry}). */
     ChatCommandResult retry(String messageId, GenerationModel model, boolean thinkingEnabled, long now);

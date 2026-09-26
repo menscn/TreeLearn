@@ -1,0 +1,39 @@
+T-090 production line count (2026-09-24)
+Rule: non-blank, non-comment lines. New files = full count; modified files = git diff -U0
+added lines attributed to T-090 only. NOTE: working tree carries uncommitted changes from
+T-077/T-087/T-088 in the same files, so raw git diff was inspected hunk-by-hunk and lines
+belonging to other tasks (fullscreen editor, provider admin, model settings screens) were
+excluded. Same approach as T-087/T-088/T-089 ("diff inspection"). Test files excluded.
+
+NEW production files (full count, non-blank non-comment):
+    92  android/app/src/main/java/com/treelearn/app/generation/MessageTranslator.java
+    32  android/app/src/main/java/com/treelearn/app/wiring/SqliteTranslationRoutes.java
+    19  android/app/src/main/res/drawable/ic_action_translate.xml
+   143  subtotal
+
+MODIFIED production files (T-090 attributed added lines, non-blank non-comment):
+     5  PromptBodiesV1.java        (MESSAGE_TRANSLATION body: decl + 3 text lines + """)
+     2  PromptPurpose.java         (MESSAGE_TRANSLATION enum entry + separator line)
+     2  DeepSeekPromptRegistry.java(versionOf + bodyOf switch cases)
+     3  DeepSeekRequestAssembler.java (validateCurrentInput 1 line -> 3 lines)
+     2  ChatActions.java           (2 action method declarations; T-077 hunk excluded)
+     3  ChatMessage.java           (canTranslate)
+   118  ChatViewState.java         (Translations class 68 + withers/queries 38 + constructor
+                                    threading 12; T-077 fullscreenEditing lines excluded)
+    42  ChatPresenter.java         (Translator port 6 + field/delegation 3 + 2 constructors 13
+                                    + onTranslatePressed/onTranslationToggled 20; T-077 excluded)
+    14  AppContainer.java          (2 imports + field + 8-line assembly + accessor; T-087/T-088
+                                    assembly lines excluded)
+    11  MainActivity.java          (import GenerationModel + translationPort() 9 + showChat arg 1;
+                                    T-087/T-088 screen wiring excluded)
+     6  AnswerActionBar.java       (listener + field + find/cd/click/enable)
+    42  ChatScreen.java            (Row fields 3 + lastState 1 + findViewById 3 + header click 6
+                                    + render call 1 + renderTranslation 24 + forwarding 4)
+    28  item_chat_message.xml      (chat_translation block; 3 comment lines excluded)
+    16  view_answer_actions.xml    (act_translate Button)
+     5  strings.xml                (cd_act_translate + 4 chat_translation_* strings; T-077/T-087/
+                                    T-088 string hunks excluded)
+    299  subtotal
+
+TOTAL: 143 + 299 = 442 (non-blank, non-comment)
+LIMIT: 500 -> 442 <= 500, within the campaign hard cap. No size exception needed.

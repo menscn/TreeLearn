@@ -1,0 +1,28 @@
+T-2026-09-23-092 RED evidence (2026-09-24)
+
+Command (RED 与 GREEN 逐字相同):
+  cd android && ./gradlew --no-watch-fs :app:testDebugUnitTest --tests "com.treelearn.app.search.web.*" --tests "com.treelearn.app.wiring.ChatWiringSearchTest" --tests "com.treelearn.app.ui.ChatPresenterSearchTest" --tests "com.treelearn.app.screen.SettingsProvidersBindingTest"
+  (本机实际执行为 PowerShell 等价形式:
+   cd d:\Project\Android\Treelearn\android; .\gradlew.bat --no-watch-fs :app:testDebugUnitTest --tests "com.treelearn.app.search.web.*" --tests "com.treelearn.app.wiring.ChatWiringSearchTest" --tests "com.treelearn.app.ui.ChatPresenterSearchTest" --tests "com.treelearn.app.screen.SettingsProvidersBindingTest" 2>&1)
+
+Exit code: 1
+
+Observed failure (完整输出见 T-092-red-raw-u8.txt; 控制台 GBK 乱码但符号定位可读):
+  Task :app:compileDebugUnitTestJavaWithJavac FAILED — 88 个编译错误, 全部指向缺失的 T-092 API:
+    程序包 com.treelearn.app.search.web 不存在 / 符号 ChatSearchStep, WebSearchGateway(+Outcome/Item/Status),
+    SearchCredentials, SearchInjection, PromptLimits.SEARCH_* 六常量;
+    HomeViewState.Notice 缺 SEARCH_KEY_MISSING / SEARCH_FAILED / SEARCH_EMPTY;
+    ChatCommandResult 缺 postNotice()/ranWithNotice; ChatViewState 缺 searchEnabled/searchEngineLabel;
+    ChatPresenter 缺 onSearchToggled(boolean); SettingsStore/FakeSettingsStore 缺 searchEnabled;
+    ChatPresenter 构造器缺 ChatSearchStep 形参。另含 3 处测试文件自身笔误(RED 阶段已修正, 修正后
+    失败集纯指向缺失 API)。
+
+Failure reason validated: 是 —— 失败由缺失行为(检索执行/注入/降级/开关/死入口绑定)导致, 非环境噪声(--no-watch-fs 已带)。
+
+Test/scenario（6 文件 30 用例）:
+  SearchInjectionTest(7)        注入块框架/引用标注指令/条目序序/摘要与标题裁剪/超限丢尾/空块
+  ChatSearchStepTest(10)        [OFF]/[NOKEY](无Key与Key不可读)/OK(引擎·档位条数·块)/FAILED降级/异常降级/[PART]/Key缓冲清零/中文引擎名
+  ChatWiringSearchTest(6)       [NOKEY]发送拒绝且零写入/注入仅进请求不进行行/失败降级继续生成并提示/空结果降级/开关关=旧路径/retry不检索
+  ChatPresenterSearchTest(7)    开关状态来自存储/[NOKEY]拦截+去设置/开启持久化/关闭不需Key/降级行内提示且清草稿/普通发送无提示/读不重置开关
+  SettingsProvidersBindingTest(1) T-087 死入口: setOnProvidersPressed 必须绑定 settings_providers_entry 点击
+  (SearchTestDoubles            共享替身, 非用例)

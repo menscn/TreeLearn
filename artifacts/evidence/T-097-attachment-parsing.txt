@@ -1,0 +1,79 @@
+T-097 附件选择/解析/注入链路 —— 汇总证据
+生成器: .trae/scripts/dev/make_t097_evidence.py（实时执行命令、UTF-8、命令+退出码自证）
+日期: 2026-09-25
+
+CMD-1  RED：AttachmentParseInjectInstrumentedTest 引用未实现类，编译失败（来源 artifacts/evidence/T-097-red-2026-09-25.log）
+命令: 见日志头部（T-097 RED/GREEN 使用同一条目标测试命令）
+EXITCODE=1
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\AttachmentParseInjectInstrumentedTest.java:13: 错误: 找不到符号
+  符号:   类 AttachmentTextExtractor
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\AttachmentParseInjectInstrumentedTest.java:14: 错误: 找不到符号
+  符号:   类 DatabaseTransactionRunner
+D:\Project\Android\Treelearn\android\app\src\androidTest\java\com\treelearn\app\AttachmentParseInjectInstrumentedTest.java:19: 错误: 找不到符号
+  符号:   类 ContextPlan
+
+CMD-2  GREEN：同一条目标测试命令，真机 5/5（解析落库/引用/history 重建含附件块/注入框/超限拒绝）（来源 artifacts/evidence/T-097-green-2026-09-25.log）
+命令: 见日志头部（T-097 RED/GREEN 使用同一条目标测试命令）
+EXITCODE=0
+Starting 5 tests on ALP-AN00 - 13
+Finished 5 tests on ALP-AN00 - 13
+BUILD SUCCESSFUL in 43s
+
+CMD-3  app 全量 JVM 单测（./gradlew.bat :app:testDebugUnitTest → T-097-full-unittest-2026-09-25.log）（来源 artifacts/evidence/T-097-full-unittest-2026-09-25.log）
+命令: 见日志头部（T-097 RED/GREEN 使用同一条目标测试命令）
+EXITCODE=0
+BUILD SUCCESSFUL in 26s
+
+CMD-4  单测计数（XML 属性汇总，目录 android/app/build/test-results/testDebugUnitTest/）
+命令: python 汇总 70 个 XML（同 T-055/T-061/T-096 口径）
+EXITCODE=0
+files=70 tests=623 skipped=0 failures=0 errors=0
+
+CMD-5  check 门禁（./gradlew.bat check → T-097-check-2026-09-25.log）（来源 artifacts/evidence/T-097-check-2026-09-25.log）
+命令: 见日志头部（T-097 RED/GREEN 使用同一条目标测试命令）
+EXITCODE=0
+BUILD SUCCESSFUL in 2m 13s
+295 actionable tasks: 69 executed, 9 from cache, 217 up-to-date
+
+CMD-6  Java-only guard（scripts/no-kotlin-check.ps1 → T-097-nokotlin-2026-09-25.txt）（来源 artifacts/evidence/T-097-nokotlin-2026-09-25.txt）
+命令: 见日志头部（T-097 RED/GREEN 使用同一条目标测试命令）
+EXITCODE=0
+VERDICT: PASS (13 OK line(s))
+
+CMD-7  数据层/聊天回归真机套件 54/54（BottomTabShell+LibraryArchive+Navigation+TreeCanvas+AttachmentStorage+SqliteSchema）（来源 artifacts/evidence/T-097-regression-instrumented-2026-09-25.log）
+命令: 见日志头部（T-097 RED/GREEN 使用同一条目标测试命令）
+EXITCODE=0
+Starting 54 tests on ALP-AN00 - 13
+Finished 54 tests on ALP-AN00 - 13
+BUILD SUCCESSFUL in 39s
+
+CMD-8  新文件生产行数（count_production_lines.py）
+命令: python -X utf8 .trae/scripts/dev/count_production_lines.py android/app/src/main/java/com/treelearn/app/files/AttachmentTextExtractor.java
+EXITCODE=0
+199  android/app/src/main/java/com/treelearn/app/files/AttachmentTextExtractor.java
+   199  TOTAL (non-blank, non-comment, production files only)
+
+CMD-9  归属增量（049/附件族多任务同树未提交，单一 diff 无法隔离单片；
+        归属证明 = 修改文件按 T-097 独有标记筛选 diff hunk + 新文件整文件）
+命令: git diff HEAD -- <各修改文件> 配合独有标记筛选；新文件 count_production_lines.py
+  android/ai/src/main/java/com/treelearn/ai/prompt/DeepSeekContextEncoder.java  +2（标记行）
+  android/app/src/main/java/com/treelearn/app/wiring/ChatWiring.java  +2（标记行）
+  android/app/src/main/java/com/treelearn/app/wiring/SqliteChatStore.java  +0（标记行）
+  android/app/src/main/java/com/treelearn/app/ui/ChatViewState.java  +5（标记行）
+  android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java  +19（标记行）
+  android/app/src/main/java/com/treelearn/app/ui/ChatActions.java  +2（标记行）
+  android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java  +9（标记行）
+  android/app/src/main/java/com/treelearn/app/MainActivity.java  +5（标记行）
+  android/app/src/main/java/com/treelearn/app/AppContainer.java  +0（标记行）
+  android/app/src/main/res/layout/screen_chat_body.xml  +6（标记行）
+  android/app/src/main/res/values/strings.xml  +5（标记行）
+  android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java  +0（标记行）
+  android/data/src/main/java/com/treelearn/data/db/dao/AttachmentDao.java  +0（标记行）
+  新文件 AttachmentTextExtractor.java 199 行（CMD-8）；AttachmentDao.java 为 T-096 文件本轮增补 finalizeParse/parseOutcome
+  归属增量合计（标记行）: +55，另新文件 199 —— 与估算同量级，详单如上
+
+CMD-10  本片零迁移证明（T-097 不动 schema 版本、不加表；DATABASE_VERSION 无 diff 输出即为证）
+命令: git diff HEAD -- TreeLearnSchema.java | findstr DATABASE_VERSION
+EXITCODE=0（findstr 无命中时为 1，符合预期：版本常量本轮零改动）
+-    public static final int DATABASE_VERSION = 2;
++    public static final int DATABASE_VERSION = 4;

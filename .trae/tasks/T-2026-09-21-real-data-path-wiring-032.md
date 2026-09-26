@@ -4,7 +4,7 @@ id: T-2026-09-21-032
 title: 接线真实数据路径（首页与对话）
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-20-treelearn-v1-android-local-first-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -108,10 +108,10 @@ RED 细节（非键值）：`BUILD FAILED in 12s`，`54 actionable tasks: 4 exec
 - Regression evidence: 同一 GREEN 命令 EXITCODE=0；原文扫描（排除 artifacts/** 与 .trae/tasks/**）仅剩文档历史引用且均已标注过期（artifacts/evidence/T-032-orphan-scan.txt）。
 
 ### TDD or sizing exception — only with prior user approval
-- Exception type: Not applicable
-- Reason: TDD required
-- User approval: Not applicable
-- Alternative verification: Not applicable
+- Exception type: 规模例外（**事后追认**，2026-09-24 用户批准）
+- Reason: 垂直切片把「首页 → 创建 → 对话 → 重开读回 → 重试/重置/切版本/分叉」接成真实路径，缺口集中在同一装配点，拆分会人为切断调用链。口径按「非空非注释」，实测 **793 行**（`wiring/` 13 个本任务文件，已扣除 T-012 的 `AndroidSettingsStore.java` 68 行；`T-032-sizing.txt` EXITCODE=0），超 500 硬上限 59%；`line-budget.ps1` 物理行口径另报 1361 行，两口径都记在 `T-032-sizing.txt`。
+- User approval: 2026-09-24 用户在对话中裁定「事后追认豁免」。批准落在实现之后，按 `harness-tasks.md` 第 60 行如实记为事后追认。剩余风险：单 task 超硬上限 59%，为全仓最大越线；后续若需拆分，以 HomeWiring / ChatWiring 两块为天然切面。
+- Alternative verification: 不适用（本项是规模例外；TDD 按 required 执行，见上）。
 
 ## Implementation notes
 
@@ -154,3 +154,11 @@ RED 细节（非键值）：`BUILD FAILED in 12s`，`54 actionable tasks: 4 exec
 - [leader 2026-09-21] 因此本任务保持 `ready`；`AppContainer` 仍装配 `PendingHomeWiring` / `PendingChatWiring`，应用在设备上依旧会显示「尚未接入本版本」。
 - [android-dev 2026-09-22] 本轮接线完成并交 verifier。三条需要复核者注意的事实：① **`app-release.apk` 可直接侧载**——`android/app/build/outputs/apk/release/app-release.apk`（448376 字节，2026-09-22 00:25）已含 `wiring/ChatWiring` / `wiring/HomeWiring`、不含两个占位类，经 `apksigner verify` 判定 **APK Signature Scheme v2 验证通过**（签名者 `CN=Treelearn Personal Sideload`，RSA 4096），其 mtime 晚于 `android/` 下每一个源文件，dex 内含 `wiring/ChatWiring`（3 处）与 `wiring/HomeWiring`（3 处）、不含两个占位类与 `NOT_WIRED`（均 0 处），证据 `T-032-apk-signature.txt`（EXITCODE=0）。**勘误**：此前交接块据「`META-INF/` 里没有 `.RSA`/`.SF`」推断该 APK 未签名，该推断错误——v2/v3 签名在 APK Signing Block 而非 META-INF；字节数与交付报告记录的 429964 不同只因此后代码已变（真实接线使 dex 变大），不表示产物被替换。故用户可按计划自行侧载实测；签名与 release 工程的正式复核仍属 T-018。② 本任务规模实测 793 行 > 500 行硬预算，属待裁定偏差，证据 `T-032-sizing.txt`。③ 设备侧套件 `RealDataPathWiringInstrumentedTest` 从未运行，装机后应优先看它。
 - [android-dev 2026-09-22] leader 交接 5 条事实的落点：第 1 条 → `TopicDao.listOverviews`（新增，仅只读）；第 2 条 → `ChatStore` / `SqliteChatStore` 提供读回入口并读 `active_revision_id`；第 3 条 → **已由 T-037 解决**，本任务只消费 `messages.quoted_text` 往返；第 4 条 → 请求装配按 `GenerationCoordinatorInstrumentedTest` 第 344-410 行的形状照抄；第 5 条 → `wiring.PromptLimits`（60000 / 512），见 Implementation notes 的决定。上述 leader 文字中「本任务保持 ready」「第 3 条待补 schema」是 2026-09-21 的历史陈述，现状以本块为准。
+
+## Verification report — 收尾复核（verifier #3，2026-09-24）
+
+- Verdict: PASS（独立复核；针对「待独立 verifier 复核」自检与规模待裁定项的收尾）。
+- 规模项 → 2026-09-24 用户**事后追认豁免**（793 行 / 超 59%），例外记录见「TDD or sizing exception」小节与 `T-032-sizing.txt`。
+- 功能判据复核：RED→GREEN（32 例 wiring 套件，fork id 钉法缺陷被 RED 命中并修复）、`gradlew check` EXITCODE=0（98 类 / 1011 例，`T-032-checks.txt`）、占位类删除后零残留引用（`T-032-orphan-scan.txt`）、变异测试命中 6 例（`T-032-mutation-round.txt`）、release APK v2 签名核查（`T-032-apk-signature.txt`）均有命令与退出码支撑。
+- 设备侧 SQL 行级证据 → 保持 `deferred — 用户自行装机验证（user decision 2026-09-21）`；`RealDataPathWiringInstrumentedTest`（10 例）只编译未执行，装机后优先跑它。
+- 门禁（本轮实测，非回读旧证据）：`./gradlew --no-daemon --console=plain check` EXITCODE=0（`artifacts/evidence/P3-B3-gates-2026-09-24.txt`）；Java-only guard `VERDICT: PASS (13 OK line(s))`、EXITCODE=0（`artifacts/evidence/P3-B3-no-kotlin-2026-09-24.txt`）。
