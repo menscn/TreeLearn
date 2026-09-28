@@ -1,0 +1,46 @@
+visual evidence - homepage slogan loses its full stop (2026-09-28)
+=================================================================
+
+WHY
+---
+User request: "首页把slogan的句号给删除 / 把复杂问题，学成自己的知识树".
+
+CHANGE
+------
+res/values/strings.xml:39
+  before: <string name="home_hero_title">把复杂问题，学成自己的知识树。</string>
+  after:  <string name="home_hero_title">把复杂问题，学成自己的知识树</string>
+
+This ALIGNS Android with the design truth rather than deviating from it: the authoritative
+prototype already carries the slogan without a full stop.
+  Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.1.html:2296
+    <div className="hh-sub">把复杂问题，学成自己的知识树</div>
+So the full stop was the implementation's own divergence, and removing it closes that gap.
+
+Strings only - no layout, no Java, no token. No test asserted the literal text, and no README
+quotes it, so nothing else needed syncing.
+
+COMMANDS AND RESULTS
+--------------------
+$ ./gradlew --no-daemon --console=plain :app:testDebugUnitTest :app:assembleDebug verifyNoKotlinDex
+BUILD SUCCESSFUL
+verifyNoKotlinDex: PASS (3 APK(s) inspected across app/build/outputs/apk, no Kotlin runtime bytecode)
+JVM unit tests: tests=683 failures=0 errors=0 skipped=0
+
+DEVICE RUN - AWSS013807000356 (1200x2652 @ 520dpi)
+--------------------------------------------------
+$ adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+Success
+$ adb shell pm clear com.treelearn
+Success          (the slogan only draws with no topics, so the store had to be emptied:
+                  HomeScreen draws it as state.hasTopics() ? GONE : VISIBLE)
+$ adb shell am force-stop com.treelearn && adb shell am start -n com.treelearn/com.treelearn.app.MainActivity
+-> 01-home-slogan-no-period.png
+   The hero reads "把复杂问题，学成自己的知识树" - no trailing "。" - above the composer, in the
+   empty-topic state where the slogan is drawn.
+
+CONCLUSION
+----------
+The homepage slogan now reads "把复杂问题，学成自己的知识树", matching the prototype exactly.
+Gates are green. The screenshot is raw screencap output, archived under
+artifacts/evidence/visual-2026-09-28-slogan/.
