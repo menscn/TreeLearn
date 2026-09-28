@@ -71,7 +71,9 @@
 
 ## 5. 输入栏规格（`screen_chat_body.xml` composer）
 
-结构自上而下：引用行（`chat_quote_row`，仅引用时显示）→ 多行草稿框（`chat_draft`，`r-lg`、`surface` 底、`line` 描边、内边距 `s3`，最多 5 行后内滚）→ 控件行（模型/思考入口 `chat_model_chip` + 发送键 `chat_send`）。
+结构自上而下：引用行（`chat_quote_row`，仅引用时显示）→ 多行草稿框（`chat_draft`，`r-lg`、`surface` 底、`line` 描边、内边距 `s3`，最多 5 行后内滚）→ 控件行（附件入口 `chat_attach` + 模型/思考入口 `chat_model_chip` + 发送键 `chat_send`）。
+
+**2026-09-28 用户裁决（动作行与附件批注）**：① 回答底部动作行收敛为**复制 / 重新生成 / 新建分支 / 分支列表** + 右侧**生成时间**，引用 / 翻译 / 朗读 / 版本切换四个控件连同其图标与描述一并移除（引用改由**选词菜单**提供，见 `popup_word_action.xml`）；② 四个按钮的 `layout_width` 统一 `@dimen/touch_min`(44dp)、`paddingStart/End` 归零、无 `marginStart`，既收掉「隔得太开」的多余间距又保住 44dp 热区；③ `chat_attach` 图标由 **24dp 降到 15dp**，与同排 `model_chip_effort` 同档（此前两个控件图标差一档，是「只有附件显大」的根因），`paddingEnd` 由 `s3` 收到 `s2` 与 `paddingStart` 对称；④ 输入框上方灰带**保持不动**。详见 `知芽-对话页动作行与附件批注处理方案-V1.0.md` §0.0。
 
 - **发送键三态**：禁用（`ink3` 图标于 `bg` 底，草稿空或不可发）/ 发送（`green` 图标）/ 停止（`red` 方块图标，`attemptRunning` 时）。三态共用同一控件位（`chat_send`），不新增控件——布局稳定性由单控件换态保证。
 - **IME**：沿用 T-063 既有 `windowSoftInputMode` 行为；输入栏随 IME 顶缘移动，消息列表底 padding 同步加到输入栏顶缘，保证最后一条消息在键盘上方可见。

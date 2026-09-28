@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>知芽 · 对话页「文本高亮 + 批注」交互 Demo V1.1</title>
+<!--
+  ============================================================================
+  知芽（TreeLearn）对话页「文本高亮 + 批注」交互 Demo · V1.1（2026-09-28）
+  ============================================================================
+  配套设计文档：Docs/04-ux-design/知芽-TreeLearn-对话页文本高亮与批注方案-V1.0.md（内文 V1.1）
+  由 huashu-design 技能辅助产出：单文件 inline React，双击即开（file:// 无需 server）。
+
+  【Junior Designer 假设与边界 —— 先读这里】
+  1. 鼠标拖选 ≈ 手机长按拖动手柄：本 Demo 用浏览器原生选区驱动同一套菜单逻辑；
+     Android 侧由 ActionMode + 自绘菜单承接（见设计文档 §1）。
+  2. 「取消高亮」是图标态切换（记号笔 → 带斜杠记号笔），不是文字按钮 —— 用户约束：
+     菜单格一律图标 + contentDescription，语义由图标与顺序承载。
+  3. 「横线椭圆」列表以胶囊卡片近似（r-full 端 + 发丝线分隔），Android 侧为
+     popup_note_list.xml；此处表达的是交互而非最终像素。
+  4. 批注编辑用底部弹层（Android AlertDialog/BottomSheet 的 web 近似）；
+     弹层内「取消/保存」为对话框动作钮，不受「菜单禁文字钮」约束。
+  5. 「模拟重新生成」按钮演示拍板①：回答一变，高亮与批注全部清除（digest 失配）。
+  6. 黄色三档可切换（#FFF3B0 默认 / #FFE58F / #FCEFA1），对应拍板项 D 的候选；
+     记号笔图标提供 A/B 两个备选字形，落 Android 前请定一个。
+  7. 所有色值取自本仓 tokens.json（生长绿系统），唯一新增即黄色高亮本身。
+  ============================================================================
+-->
+<!-- React + Babel pinned（与仓库高保真原型同一组 SRI，已在真机环境验证可加载） -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============ 设计系统 · 知芽「生长绿」（抄录自高保真原型 :root / tokens.json） ============ */
+:root{
+  --bg:#F4F1EB; --surface:#FCFBF8; --ink:#16241C;
+  --ink2:#435449; --ink3:#627067; --line:#E2DFD6;
+  --hairline:rgba(26,40,32,.07);
+  --green:#2B6E45; --green-deep:#164027; --green-soft:#E3F0E7; --green-faint:#F0F7F1;
+  --green-bubble:#3F6C49;
+  --amber:#B05108; --amber-soft:#FBF3E2; --red:#C0392B;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s6:24px; --s8:32px; --gutter:20px;
+  --r-sm:8px; --r-md:14px; --r-lg:18px; --r-full:99px;
+  --fs-body:15px; --fs-sm:13px; --fs-cap:11px;
+  --sh-1:0 1px 2px rgba(22,36,28,.04); --sh-2:0 4px 12px rgba(22,36,28,.06);
+  --serif:'Noto Serif SC','Songti SC',Georgia,serif;
+  --sans:'Noto Sans SC',-apple-system,sans-serif;
+  --paper-rule:rgba(30,43,35,.028);
+  --lh-read:28px;
+  /* 拍板项 D · 黄色高亮候选，默认档可由右侧面板切换 */
+  --yellow-hl:#FFF3B0;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+h1,h2,h3,.serif{text-wrap:balance;}
+p,li,span,div{text-wrap:pretty;}
+body{
+  font-family:var(--sans);color:var(--ink);background:#ECEAE0;
+  background-image:radial-gradient(#d8d5c6 1px,transparent 1px);
+  background-size:22px 22px;
+}
+button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit;}
+textarea,input{font-family:inherit;color:inherit;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:#C9C6B6;border-radius:4px;}
+
+/* ============ 舞台（手机外） ============ */
+.stage{min-height:100vh;display:flex;align-items:flex-start;justify-content:center;gap:56px;padding:40px 24px;flex-wrap:wrap;}
+.guide{width:300px;flex-shrink:0;position:sticky;top:40px;}
+.guide-brand{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.guide-name{font-family:var(--serif);font-size:26px;font-weight:700;color:var(--ink);}
+.guide-sub{font-size:12px;color:var(--ink2);margin-bottom:20px;letter-spacing:.04em;}
+.guide h3{font-size:12px;color:var(--green-deep);letter-spacing:.18em;margin:18px 0 10px;font-weight:700;}
+.guide-steps{counter-reset:step;list-style:none;}
+.guide-steps li{counter-increment:step;font-size:12.5px;color:var(--ink2);line-height:1.65;padding:7px 0 7px 30px;position:relative;border-bottom:1px dashed var(--line);}
+.guide-steps li::before{content:counter(step);position:absolute;left:0;top:8px;width:20px;height:20px;border-radius:50%;background:var(--green-soft);color:var(--green-deep);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.guide-steps li b{color:var(--ink);font-weight:500;}
+.guide-note{font-size:12px;color:var(--ink3);line-height:1.8;margin-top:14px;padding:10px 12px;background:rgba(30,43,35,.045);border-radius:var(--r-sm);}
+.tweak{margin:10px 0 0;}
+.tweak-label{font-size:11px;color:var(--ink3);letter-spacing:.08em;margin-bottom:6px;}
+.tweak-row{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{font-size:12px;color:var(--ink2);border:1px solid var(--line);border-radius:var(--r-full);padding:5px 12px;background:var(--surface);transition:all .15s;}
+.chip:hover{border-color:var(--green);}
+.chip.on{background:var(--green-deep);border-color:var(--green-deep);color:#fff;}
+.chip .sw{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px;border:1px solid rgba(26,40,32,.15);}
+.chip.on .sw{border-color:rgba(255,255,255,.6);}
+.btn-line{display:inline-block;font-size:12.5px;color:var(--green-deep);background:var(--green-soft);border-radius:var(--r-sm);padding:7px 14px;font-weight:500;transition:background .15s;}
+.btn-line:hover{background:#d7e8dd;}
+
+/* ============ 手机内 · 对话页（复用原型 .screen 语义） ============ */
+.screen{height:100%;display:flex;flex-direction:column;position:relative;font-family:var(--sans);
+  background-color:var(--bg);
+  background-image:repeating-linear-gradient(to bottom,transparent 0 31px,var(--paper-rule) 31px 32px);}
+.chat-top{display:flex;align-items:center;gap:var(--s2);padding:var(--s3) var(--s3) var(--s3) var(--s2);flex-shrink:0;}
+.chat-title{font-family:var(--serif);font-size:var(--fs-h2,16px);font-weight:600;flex:1;text-align:center;letter-spacing:-.01em;}
+.top-pad{width:36px;flex-shrink:0;}
+.icon-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--ink2);}
+.icon-btn:hover{background:var(--green-faint);}
+.body-scroll{flex:1;overflow-y:auto;overflow-x:hidden;}
+.msg-flow{padding:var(--s2) var(--gutter) var(--s8);display:flex;flex-direction:column;gap:var(--s6);}
+.msg-user{align-self:flex-end;max-width:84%;background:var(--green-bubble);color:#fff;border-radius:var(--r-md);padding:var(--s3) var(--s4);font-size:var(--fs-body);line-height:1.7;word-break:break-word;}
+.msg-ai{align-self:stretch;background:transparent;border:none;padding:0;font-size:var(--fs-body);line-height:var(--lh-read);color:var(--ink);word-break:break-word;}
+.ai-tag{display:flex;align-items:center;gap:var(--s2);font-size:var(--fs-cap);color:var(--ink3);letter-spacing:.06em;margin-bottom:var(--s3);}
+.ai-tag .at-brand{color:var(--green-deep);font-weight:500;display:flex;align-items:center;gap:3px;}
+.ai-time{margin-left:auto;}
+
+/* —— 正文块：高亮/批注的宿主。每个块 position:relative 承载便签覆盖层 —— */
+.para{position:relative;}
+mark.hl{
+  background:var(--yellow-hl);color:inherit;border-radius:2px;padding:1px 0;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone;cursor:pointer;
+  transition:background .12s;
+}
+mark.hl:hover{background:#f2e79b;}
+
+/* —— 便签图标：覆盖层方案（不动文字流），琥珀色 = 系统警示/注意色 —— */
+.note-flag{position:absolute;width:20px;height:20px;margin:0;padding:0;display:flex;align-items:center;justify-content:center;
+  color:var(--amber);cursor:pointer;z-index:6;border-radius:50%;transition:transform .12s;}
+.note-flag:hover{transform:scale(1.18);background:var(--amber-soft);}
+.note-flag svg{filter:drop-shadow(0 1px 1px rgba(255,255,255,.9));}
+
+/* —— 表格：复刻 item_chat_table 语义——发丝线由底色透过 1px 间隙形成 —— */
+.tbl-wrap{margin:var(--s4) 0;overflow-x:auto;}
+table.demo-table{border-collapse:separate;border-spacing:1px;background:var(--line);width:max-content;min-width:100%;}
+table.demo-table th,table.demo-table td{background:var(--surface);padding:10px 12px;font-size:var(--fs-sm);line-height:1.6;text-align:left;position:relative;cursor:text;}
+table.demo-table th{color:var(--ink2);font-weight:600;}
+table.demo-table td{color:var(--ink);}
+mark.hl{cursor:text;}
+
+/* ============ 六格图标菜单（用户约束：只有图标，语义在 aria/title 与顺序里） ============ */
+.hl-menu{position:absolute;z-index:40;display:flex;align-items:stretch;background:var(--surface);
+  border-radius:var(--r-sm);padding:var(--s1);box-shadow:var(--sh-2),0 0 0 1px var(--hairline);}
+.hl-cell{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:6px;color:var(--ink);transition:background .12s;}
+.hl-cell:hover{background:var(--green-faint);}
+.hl-cell.cancel{color:var(--amber);}
+.hl-cell.cancel:hover{background:var(--amber-soft);}
+.hl-sep{width:1px;background:var(--hairline);margin:6px 0;}
+
+/* ============ 底部弹层（批注编辑） ============ */
+.dim{position:absolute;inset:0;background:rgba(22,36,28,.35);z-index:50;animation:fadeIn .18s;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:51;background:var(--surface);
+  border-radius:var(--r-lg) var(--r-lg) 0 0;padding:var(--s4) var(--s4) var(--s6);
+  box-shadow:0 -8px 30px rgba(22,36,28,.18);animation:sheetUp .22s cubic-bezier(.2,.8,.2,1);}
+@keyframes sheetUp{from{transform:translateY(30px);opacity:0;}to{transform:none;opacity:1;}}
+.sheet-grab{width:36px;height:4px;border-radius:var(--r-full);background:var(--line);margin:0 auto var(--s3);}
+.sheet-title{font-family:var(--serif);font-size:16px;font-weight:600;margin-bottom:2px;}
+.sheet-range{font-size:var(--fs-cap);color:var(--ink3);margin-bottom:var(--s3);line-height:1.6;}
+.sheet textarea{width:100%;min-height:92px;resize:vertical;border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:var(--s3) var(--s3);font-size:var(--fs-body);line-height:1.7;background:var(--bg);outline:none;transition:border-color .15s;}
+.sheet textarea:focus{border-color:var(--green);}
+.sheet-actions{display:flex;align-items:center;gap:var(--s3);margin-top:var(--s3);}
+.sheet-actions .grow{flex:1;}
+.btn-ghost{font-size:13px;color:var(--ink2);padding:8px 12px;border-radius:var(--r-sm);}
+.btn-ghost:hover{background:rgba(30,43,35,.05);}
+.btn-danger{font-size:13px;color:var(--red);padding:8px 12px;border-radius:var(--r-sm);}
+.btn-danger:hover{background:var(--red-soft);}
+.btn-save{font-size:13px;font-weight:500;color:#fff;background:var(--green);border-radius:var(--r-full);padding:9px 22px;transition:opacity .15s;}
+.btn-save:disabled{opacity:.35;cursor:default;}
+.btn-save:not(:disabled):hover{background:var(--green-deep);}
+
+/* ============ 横线椭圆 · 便签列表 ============ */
+.oval{position:absolute;z-index:45;width:248px;background:var(--surface);border-radius:var(--r-full);
+  box-shadow:var(--sh-2),0 0 0 1px var(--hairline);padding:10px 16px 12px;animation:sheetUp .18s cubic-bezier(.2,.8,.2,1);}
+.oval-head{display:flex;align-items:center;gap:6px;font-size:var(--fs-cap);color:var(--ink3);letter-spacing:.06em;padding:2px 4px 8px;}
+.oval-head .od{width:6px;height:6px;border-radius:50%;background:var(--amber);}
+.oval-item{width:100%;text-align:left;padding:8px 4px;border-top:1px solid var(--hairline);transition:background .12s;}
+.oval-item:first-of-type{border-top:1px solid var(--line);}
+.oval-item:hover{background:var(--green-faint);}
+.oval-body{font-size:var(--fs-sm);color:var(--ink);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.oval-time{font-size:10px;color:var(--ink3);margin-top:2px;}
+
+/* ============ Toast ============ */
+.toast{position:absolute;left:50%;bottom:64px;transform:translateX(-50%);z-index:60;background:rgba(22,36,28,.88);
+  color:#fff;font-size:12.5px;border-radius:var(--r-full);padding:8px 18px;white-space:nowrap;animation:sheetUp .2s;pointer-events:none;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+const {useState,useEffect,useLayoutEffect,useRef,useCallback} = React;
+
+/* ======================================================================
+   图标族：24dp 网格 / 1.8 描边 / 圆角端点 —— 与 Android ic_action_* 同族
+   （抄录自 android/app/src/main/res/drawable/ic_action_copy.xml 的笔迹规范）
+   ====================================================================== */
+function Icon({size=20,children,viewBox="0 0 24 24"}){
+  return <svg width={size} height={size} viewBox={viewBox} fill="none"
+    stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{children}</svg>;
+}
+const ISpark = ({size=14}) => <Icon size={size}><path d="M12 3.5l2 5.4 5.4 2-5.4 2-2 5.4-2-5.4-5.4-2 5.4-2 2-5.4z"/></Icon>;
+const IBack  = ({size=18}) => <Icon size={size}><path d="M14.5 5.5L8 12l6.5 6.5"/></Icon>;
+const IMap   = ({size=18}) => <Icon size={size}><path d="M4 6.5l5.3-2 5.4 2 5.3-2v13l-5.3 2-5.4-2-5.3 2v-13z"/><path d="M9.3 4.5v13M14.7 6.5v13"/></Icon>;
+const IAsk   = ({size=20}) => <Icon size={size}><path d="M12 3.5l1.9 5.1 5.1 1.9-5.1 1.9-1.9 5.1-1.9-5.1-5.1-1.9 5.1-1.9 1.9-5.1z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2z"/></Icon>;
+const IFork  = ({size=20}) => <Icon size={size}><path d="M7 4v6a4 4 0 004 4h6"/><path d="M14 10.5L17.5 14 14 17.5"/><circle cx="7" cy="4" r="1.6"/></Icon>;
+const ICopy  = ({size=20}) => <Icon size={size}><path d="M11 9h7a2 2 0 012 2v7a2 2 0 01-2 2h-7a2 2 0 01-2-2v-7a2 2 0 012-2z"/><path d="M6 15H5a2 2 0 01-2-2V5a2 2 0 012-2h8a2 2 0 012 2v1"/></Icon>;
+const ISelAll= ({size=20}) => <Icon size={size}><path d="M5 4h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1z"/><path d="M8 12.2l2.8 2.8 5.6-5.6"/></Icon>;
+
+/* —— 新增两枚：记号笔（高亮）与便签（批注）。方案 A/B 为备选字形，落 Android 前拍板 —— */
+const IHighlight = ({size=20,variant='A'}) => variant==='A' ? (
+  <Icon size={size}>
+    <path d="M14.6 3.6l5.8 5.8-8.6 8.6H6.2v-5.6l8.4-8.8z"/>
+    <path d="M12.8 5.4l5.8 5.8"/>
+    <path d="M4.5 20.5h9.5" strokeWidth="2.8"/>
+  </Icon>
+) : (
+  <Icon size={size}>
+    <path d="M5 19.5l1-3.8L15.6 6a2 2 0 012.8 0l-.4-.4a2 2 0 010 2.8L8.8 18.5 5 19.5z"/>
+    <path d="M14 7.5l2.5 2.5"/>
+    <path d="M4.5 20.5h9.5" strokeWidth="2.8"/>
+  </Icon>
+);
+const IHighlightOff = ({size=20,variant='A'}) => (
+  <span style={{position:'relative',display:'inline-flex'}}>
+    <IHighlight size={size} variant={variant}/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="1.8" strokeLinecap="round" style={{position:'absolute',left:0,top:0}}>
+      <path d="M4.5 4.5l15 15"/>
+    </svg>
+  </span>
+);
+const INote = ({size=13}) => (
+  <Icon size={size}>
+    <path d="M6 4h12c.83 0 1.5.67 1.5 1.5V15l-5 5H6c-.83 0-1.5-.67-1.5-1.5v-13C4.5 4.67 5.17 4 6 4z"/>
+    <path d="M14.5 20v-3.5c0-.55.45-1 1-1h4"/>
+    <path d="M8.5 9.5h7M8.5 13h4.5"/>
+  </Icon>
+);
+
+/* ======================================================================
+   文案（演示数据，与产品无涉）
+   ====================================================================== */
+const PARAS_ORIG = [
+  "光合作用的本质，是植物把光能收进「糖」里的过程。叶绿体先用水与光能换来 ATP 和 NADPH，再把它们花在二氧化碳身上，合成出养活整个食物链的有机物。",
+  "决定效率高低的，是两个阶段的配合程度：光反应供能太慢，暗反应就要「停工等料」；而二氧化碳不足时，再充足的 ATP 也只能被浪费掉。",
+  "这也解释了为什么正午的作物反而容易「午休」——气孔关闭保水，二氧化碳进不来，整套流水线被迫降速。"
+];
+const PARAS_ALT = [
+  "重新生成后，这是一段全新的回答文本。此前的所有高亮与批注都会随旧回答一起清除——这是拍板①的语义：锚点不再指向旧文本时，宁可不画，也不画错。",
+  "第二段换成了别的内容，用来验证清除是整条消息级的：不仅正文段落，表格里的高亮同样不会残留。",
+  "收束段同样被替换。若要继续体验，可重新选中任意文字再试一遍六格菜单。"
+];
+const TABLE = {
+  head: ["比较项", "光反应", "暗反应"],
+  rows: [
+    ["场所", "类囊体薄膜", "叶绿体基质"],
+    ["原料", "水、光能", "CO₂、ATP、NADPH"],
+    ["产物", "ATP、氧气", "糖类等有机物"]
+  ]
+};
+const BLOCK_ORDER = ["p1","p2","p3"];
+
+/* 工具：文本块渲染 + 区间合并 */
+function mergeRanges(list, start, end){
+  const all = list.filter(h => !(h.end < start || h.start > end))
+    .concat([{start, end}]);
+  const lo = Math.min(...all.map(h => h.start));
+  const hi = Math.max(...all.map(h => h.end));
+  const kept = list.filter(h => (h.end < start || h.start > end));
+  return kept.concat([{start: lo, end: hi}]);
+}
+function renderMarked(text, ranges, blockId, onTapMark){
+  if(!ranges || ranges.length === 0) return text;
+  const sorted = [...ranges].sort((a,b) => a.start - b.start);
+  const out = []; let cur = 0;
+  sorted.forEach((r,i) => {
+    if(r.start > cur) out.push(text.slice(cur, r.start));
+    out.push(<mark key={'m'+i} className="hl" data-hl={blockId+':'+r.start+':'+r.end}
+      onClick={e => onTapMark(blockId, r, e)}>{text.slice(r.start, r.end)}</mark>);
+    cur = r.end;
+  });
+  if(cur < text.length) out.push(text.slice(cur));
+  return out;
+}
+/* DOM 定位：块内字符偏移 → (节点, 节点内偏移)。mark 内文本视作连续文本 */
+function resolveOffset(blockEl, target){
+  let acc = 0;
+  const walker = document.createTreeWalker(blockEl, NodeFilter.SHOW_TEXT);
+  let n;
+  while((n = walker.nextNode())){
+    const len = n.textContent.length;
+    if(target <= acc + len) return {node: n, offset: target - acc};
+    acc += len;
+  }
+  return null;
+}
+function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+
+/* ======================================================================
+   主组件
+   ====================================================================== */
+function Demo(){
+  const [paras, setParas] = useState(PARAS_ORIG);
+  const [regenerated, setRegenerated] = useState(false);
+  const [highlights, setHighlights] = useState([]);   // {id, blockId, start, end}
+  const [notes, setNotes] = useState([]);             // {id, blockId, start, end, body, time}
+  const [menu, setMenu] = useState(null);             // {blockId,start,end,cancel,x,y}
+  const [sheet, setSheet] = useState(null);           // {editId,blockId,start,end,text,time}
+  const [oval, setOval] = useState(null);             // {x,y,items:[noteId]}
+  const [toast, setToast] = useState(null);
+  const [yellow, setYellow] = useState('#FFF3B0');
+  const [iconVariant, setIconVariant] = useState('A');
+  const [flagPos, setFlagPos] = useState({});         // noteId -> {left,top}
+  const screenRef = useRef(null);
+  const scrollRef = useRef(null);
+  const seq = useRef(100);
+
+  const say = useCallback(msg => {
+    setToast(msg);
+    clearTimeout(say.t); say.t = setTimeout(() => setToast(null), 1700);
+  }, []);
+
+  /* —— 菜单落位：选区矩形 → 屏内坐标，上放不下翻到下方，两端夹取 —— */
+  const placeMenu = useCallback((rect) => {
+    const s = screenRef.current.getBoundingClientRect();
+    const W = 280, H = 52, M = 8;
+    const x = clamp(rect.left + rect.width/2 - W/2 - s.left, M, s.width - W - M);
+    let y = rect.top - s.top - H - M;
+    if(y < M) y = rect.bottom - s.top + M;
+    y = clamp(y, M, s.height - H - M);
+    return {x, y};
+  }, []);
+
+  /* —— 选区求值：限定单块内，算出块内偏移 —— */
+  const evalSelection = useCallback(() => {
+    const sel = window.getSelection();
+    if(!sel || sel.isCollapsed || sel.rangeCount === 0){ return null; }
+    const anchor = sel.anchorNode, focus = sel.focusNode;
+    const aEl = (anchor.nodeType === 3 ? anchor.parentElement : anchor);
+    const blockEl = aEl && aEl.closest ? aEl.closest('[data-block]') : null;
+    if(!blockEl || !screenRef.current.contains(blockEl)) return null;
+    const blockId = blockEl.dataset.block;
+    const pa = resolveOffset(blockEl, 0); // 触发树构建
+    const off = (node, off2) => {
+      let acc = 0;
+      const walker = document.createTreeWalker(blockEl, NodeFilter.SHOW_TEXT);
+      let n;
+      while((n = walker.nextNode())){
+        if(n === node) return acc + off2;
+        acc += n.textContent.length;
+      }
+      return -1;
+    };
+    const s1 = off(anchor, sel.anchorOffset), s2 = off(focus, sel.focusOffset);
+    if(s1 < 0 || s2 < 0) return null;
+    const start = Math.min(s1, s2), end = Math.max(s1, s2);
+    if(end <= start) return null;
+    const rect = sel.getRangeAt(0).getBoundingClientRect();
+    return {blockId, start, end, rect};
+  }, []);
+
+  const openMenuFor = useCallback((blockId, start, end, rect) => {
+    const cancel = highlights.some(h => h.blockId === blockId && h.start === start && h.end === end);
+    const pos = placeMenu(rect);
+    setOval(null);
+    setMenu({blockId, start, end, cancel, ...pos});
+  }, [highlights, placeMenu]);
+
+  /* —— 原生选择 → 菜单（模拟长按选中） —— */
+  useEffect(() => {
+    const onUp = () => setTimeout(() => {
+      const r = evalSelection();
+      if(r) openMenuFor(r.blockId, r.start, r.end, r.rect);
+    }, 0);
+    const onScroll = () => { setMenu(null); setOval(null); };
+    document.addEventListener('mouseup', onUp);
+    const sc = scrollRef.current;
+    if(sc) sc.addEventListener('scroll', onScroll);
+    return () => { document.removeEventListener('mouseup', onUp); if(sc) sc.removeEventListener('scroll', onScroll); };
+  }, [evalSelection, openMenuFor]);
+
+  /* —— 便签图标定位（覆盖层：块右上角语义，随内容定位、不参与排版） —— */
+  useLayoutEffect(() => {
+    const pos = {};
+    notes.forEach(nt => {
+      const blockEl = screenRef.current && screenRef.current.querySelector('[data-block="'+nt.blockId+'"]');
+      if(!blockEl) return;
+      const a = resolveOffset(blockEl, nt.end);
+      const b = resolveOffset(blockEl, Math.max(0, nt.end - 1));
+      if(!a || !b) return;
+      const rg = document.createRange();
+      rg.setStart(b.node, b.offset); rg.setEnd(a.node, a.offset);
+      const r = rg.getBoundingClientRect(), br = blockEl.getBoundingClientRect();
+      pos[nt.id] = {left: r.right - br.left + 1, top: r.top - br.top - 15};
+    });
+    setFlagPos(pos);
+  }, [notes, highlights, paras]);
+
+  /* —— 菜单动作 —— */
+  const closeMenu = () => { setMenu(null); window.getSelection().removeAllRanges(); };
+  const doHighlight = () => {
+    if(!menu) return;
+    const {blockId, start, end, cancel} = menu;
+    if(cancel){
+      setHighlights(list => list.filter(h => !(h.blockId === blockId && h.start === start && h.end === end)));
+      say('已取消高亮');
+    }else{
+      setHighlights(list => mergeRanges(list.filter(h => h.blockId === blockId), start, end)
+        .map(h => ({...h, blockId}))
+        .concat(list.filter(h => h.blockId !== blockId))
+        .map(h => ({...h, id: h.id || ('h' + (++seq.current))})));
+      say('已高亮，松手即可继续阅读');
+    }
+    closeMenu();
+  };
+  const doAnnotate = () => {
+    if(!menu) return;
+    const {blockId, start, end} = menu;
+    const existed = notes.find(n => n.blockId === blockId && n.start === start && n.end === end);
+    if(existed){
+      setSheet({editId: existed.id, blockId, start, end, text: existed.body, time: existed.time});
+      say('该段已有批注，转入编辑');
+    }else{
+      setSheet({editId: null, blockId, start, end, text: '', time: null});
+    }
+    closeMenu();
+  };
+  const doAsk = () => { say('已引用所选句子，可在输入框追问'); closeMenu(); };
+  const doFork = () => { say('（Demo）新建主题不跳转'); closeMenu(); };
+  const doCopy = () => {
+    if(!menu) return;
+    const blockEl = screenRef.current.querySelector('[data-block="'+menu.blockId+'"]');
+    const text = blockEl ? blockEl.textContent.slice(menu.start, menu.end) : '';
+    try{ navigator.clipboard && navigator.clipboard.writeText(text); }catch(e){}
+    say('已复制所选文字'); closeMenu();
+  };
+  const doSelectAll = () => {
+    if(!menu) return;
+    const blockEl = screenRef.current.querySelector('[data-block="'+menu.blockId+'"]');
+    if(!blockEl) return;
+    const len = blockEl.textContent.length;
+    const a = resolveOffset(blockEl, 0), b = resolveOffset(blockEl, len);
+    const rg = document.createRange();
+    rg.setStart(a.node, a.offset); rg.setEnd(b.node, b.offset);
+    const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(rg);
+    openMenuFor(menu.blockId, 0, len, rg.getBoundingClientRect());
+  };
+
+  /* —— 高亮二次点击：恢复选区 + 菜单切「取消高亮」态。
+     仅在「点按」（选区折叠）时触发；拖选途中经过 mark 的松手不算 tap ——
+     那次松手已由 mouseup 处理器按真实选区开菜单。 —— */
+  const onTapMark = (blockId, r, e) => {
+    e.stopPropagation(); e.preventDefault();
+    const sel = window.getSelection();
+    if(sel && !sel.isCollapsed) return;
+    const blockEl = screenRef.current.querySelector('[data-block="'+blockId+'"]');
+    const a = resolveOffset(blockEl, r.start), b = resolveOffset(blockEl, r.end);
+    const rg = document.createRange();
+    rg.setStart(a.node, a.offset); rg.setEnd(b.node, b.offset);
+    sel.removeAllRanges(); sel.addRange(rg);
+    openMenuFor(blockId, r.start, r.end, rg.getBoundingClientRect());
+  };
+
+  /* —— 便签图标点击：同锚点聚簇 —— */
+  const onTapFlag = (nt) => {
+    const cluster = notes.filter(n => n.blockId === nt.blockId && Math.abs(n.end - nt.end) <= 6);
+    if(cluster.length >= 2){
+      const p = flagPos[nt.id] || {left: 0, top: 0};
+      const s = screenRef.current.getBoundingClientRect();
+      const blockEl = screenRef.current.querySelector('[data-block="'+nt.blockId+'"]');
+      const br = blockEl.getBoundingClientRect();
+      setOval({
+        x: clamp(br.left - s.left + p.left - 110, 8, s.width - 264),
+        y: clamp(br.top - s.top + p.top + 18, 8, s.height - 190),
+        items: cluster.map(n => n.id)
+      });
+    }else{
+      setSheet({editId: nt.id, blockId: nt.blockId, start: nt.start, end: nt.end, text: nt.body, time: nt.time});
+    }
+  };
+
+  /* —— 弹层动作 —— */
+  const saveSheet = () => {
+    if(!sheet || !sheet.text.trim()) return;
+    if(sheet.editId){
+      setNotes(list => list.map(n => n.id === sheet.editId ? {...n, body: sheet.text.trim()} : n));
+      say('批注已更新');
+    }else{
+      setNotes(list => list.concat([{id: 'n' + (++seq.current), blockId: sheet.blockId,
+        start: sheet.start, end: sheet.end, body: sheet.text.trim(), time: '刚刚'}]));
+      say('已添加批注');
+    }
+    setSheet(null);
+  };
+  const deleteSheet = () => {
+    if(!sheet || !sheet.editId) return;
+    setNotes(list => list.filter(n => n.id !== sheet.editId));
+    setSheet(null); setOval(null);
+    say('批注已删除');
+  };
+
+  /* —— 拍板①演示：重新生成 → 高亮与批注整条清除 —— */
+  const regen = () => {
+    if(regenerated){
+      setParas(PARAS_ORIG); setRegenerated(false);
+      say('已切回原回答（数据仍为空，请重选）');
+    }else{
+      setParas(PARAS_ALT); setRegenerated(true);
+      setHighlights([]); setNotes([]); setMenu(null); setOval(null); setSheet(null);
+      say('已重新生成 · 原高亮与批注按拍板清除');
+    }
+  };
+
+  /* —— 供 CDP 验证脚本驱动（与真实点击共用同一批 handler） —— */
+  useEffect(() => {
+    window.__demo = {
+      selectRange(blockId, start, end){
+        const blockEl = screenRef.current.querySelector('[data-block="'+blockId+'"]');
+        if(!blockEl) return false;
+        const a = resolveOffset(blockEl, start), b = resolveOffset(blockEl, end);
+        if(!a || !b) return false;
+        const rg = document.createRange();
+        rg.setStart(a.node, a.offset); rg.setEnd(b.node, b.offset);
+        const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(rg);
+        openMenuFor(blockId, start, end, rg.getBoundingClientRect());
+        return true;
+      },
+      tapMenu(action){
+        if(!menu) return false;
+        ({highlight: doHighlight, annotate: doAnnotate, ask: doAsk, fork: doFork,
+          copy: doCopy, selectAll: doSelectAll}[action] || (() => {}))();
+        return true;
+      },
+      tapMarkAt(blockId, index){
+        const hs = highlights.filter(h => h.blockId === blockId);
+        if(!hs[index]) return false;
+        const fakeEvent = {stopPropagation(){}, preventDefault(){}};
+        onTapMark(blockId, hs[index], fakeEvent);
+        return true;
+      },
+      tapFlag(noteId){
+        const nt = notes.find(n => n.id === noteId);
+        if(!nt) return false;
+        onTapFlag(nt); return true;
+      },
+      setNoteText(t){ setSheet(s => s ? {...s, text: t} : s); return true; },
+      saveSheet(){ saveSheet(); return true; },
+      cancelSheet(){ setSheet(null); return true; },
+      ovalPick(noteId){ 
+        const nt = notes.find(n => n.id === noteId);
+        if(!nt) return false;
+        setOval(null);
+        setSheet({editId: nt.id, blockId: nt.blockId, start: nt.start, end: nt.end, text: nt.body, time: nt.time});
+        return true;
+      },
+      closeOval(){ setOval(null); return true; },
+      regen(){ regen(); return true; },
+      setYellow(v){ document.documentElement.style.setProperty('--yellow-hl', v); setYellow(v); return true; },
+      setIconVariant(v){ setIconVariant(v); return true; },
+      state(){
+        return {
+          highlights: highlights.map(h => ({blockId: h.blockId, start: h.start, end: h.end})),
+          notes: notes.map(n => ({blockId: n.blockId, start: n.start, end: n.end, body: n.body, id: n.id})),
+          menuOpen: !!menu, menuCancel: menu ? menu.cancel : false,
+          sheetOpen: !!sheet, sheetEdit: sheet ? sheet.editId : null, sheetText: sheet ? sheet.text : null,
+          ovalOpen: !!oval, ovalCount: oval ? oval.items.length : 0,
+          yellow, iconVariant, regenerated
+        };
+      }
+    };
+  });
+
+  /* —— 渲染 —— */
+  const hlOf = bid => highlights.filter(h => h.blockId === bid);
+  const ntOf = bid => notes.filter(n => n.blockId === bid);
+  const cellIds = [];
+  return (
+    <div className="stage">
+      <aside className="guide">
+        <div className="guide-brand">
+          <span className="guide-name">知芽</span>
+          <span style={{fontSize:11,color:'var(--green-deep)',background:'var(--green-soft)',borderRadius:99,padding:'3px 10px',fontWeight:600,letterSpacing:'.08em'}}>交互 DEMO</span>
+        </div>
+        <div className="guide-sub">对话页「文本高亮 + 批注」· 方案 V1.1 配套</div>
+        <h3>操作路径</h3>
+        <ol className="guide-steps">
+          <li><b>选中任意文字</b>（鼠标拖选 ≈ 长按拖动），弹出六格图标菜单</li>
+          <li>点<b>记号笔</b>：黄色高亮落纸；再点一次同段文字试试合并</li>
+          <li><b>单击已高亮的文字</b>：自动恢复选区，菜单第三格变成带斜杠的「取消高亮」</li>
+          <li>点<b>便签</b>：底部弹层输入批注；保存后选区末尾右上角出现便签角标</li>
+          <li>同一段已有批注再点批注 → 转入编辑（不重复建）</li>
+          <li>末尾相邻的多条批注：点角标弹<b>横线椭圆列表</b>，点条目进入编辑/删除</li>
+          <li><b>表格单元格</b>同样支持选中 → 高亮 → 批注</li>
+          <li>右侧「模拟重新生成」：回答一变，高亮与批注<b>整条清除</b>（拍板①）</li>
+        </ol>
+        <h3>黄色档位（拍板项 D）</h3>
+        <div className="tweak">
+          <div className="tweak-row">
+            {[['#FFF3B0','柔和暖黄'],['#FFE58F','更饱和'],['#FCEFA1','更淡']].map(([hex,name]) => (
+              <button key={hex} className={'chip' + (yellow === hex ? ' on' : '')}
+                onClick={() => window.__demo.setYellow(hex)}>
+                <span className="sw" style={{background:hex}}></span>{name}
+              </button>
+            ))}
+          </div>
+        </div>
+        <h3>记号笔字形（落 Android 前拍板）</h3>
+        <div className="tweak">
+          <div className="tweak-row">
+            <button className={'chip' + (iconVariant === 'A' ? ' on' : '')} onClick={() => window.__demo.setIconVariant('A')}>A · 斜杆笔身</button>
+            <button className={'chip' + (iconVariant === 'B' ? ' on' : '')} onClick={() => window.__demo.setIconVariant('B')}>B · 钢笔尖</button>
+          </div>
+        </div>
+        <h3>拍板①演示</h3>
+        <div className="tweak">
+          <button className="btn-line" onClick={regen}>{regenerated ? '切回原回答' : '模拟重新生成'}</button>
+        </div>
+        <div className="guide-note">
+          假设与边界：鼠标拖选模拟长按；「取消高亮」为图标态切换（非文字按钮）；椭圆列表为胶囊卡片近似；
+          弹层内按钮是对话框动作钮，不受菜单禁文字约束。全部色值取自 tokens.json，唯一新增即黄色高亮。
+        </div>
+      </aside>
+
+      <AndroidFrame width={412} height={892} time="15:23" battery={82}>
+        <div className="screen" ref={screenRef}>
+          <div className="chat-top">
+            <button className="icon-btn"><IBack/></button>
+            <div className="chat-title">分支 · 光合作用</div>
+            <button className="icon-btn"><IMap/></button>
+            <span className="top-pad" style={{width:0}}></span>
+          </div>
+          <div className="body-scroll" ref={scrollRef}>
+            <div className="msg-flow">
+              <div className="msg-user">为什么植物正午反而长得慢？</div>
+              <div className="msg-ai">
+                <div className="ai-tag">
+                  <span className="at-brand"><ISpark/>知芽</span>
+                  <span className="ai-time">15:23</span>
+                </div>
+                {BLOCK_ORDER.map((bid, i) => (
+                  <p key={bid} className="para" data-block={bid}>
+                    {renderMarked(paras[i], hlOf(bid), bid, onTapMark)}
+                    {ntOf(bid).map(nt => flagPos[nt.id] ? (
+                      <button key={nt.id} className="note-flag" data-note-flag={nt.id}
+                        title={'批注：' + nt.body}
+                        style={{left: flagPos[nt.id].left, top: flagPos[nt.id].top}}
+                        onClick={() => onTapFlag(nt)}><INote/></button>
+                    ) : null)}
+                  </p>
+                ))}
+                <div className="tbl-wrap">
+                  <table className="demo-table">
+                    <thead><tr>
+                      {TABLE.head.map((h,c) => {
+                        const bid = 'th' + c; cellIds.push(bid);
+                        return <th key={bid} data-block={bid}>{renderMarked(h, hlOf(bid), bid, onTapMark)}</th>;
+                      })}
+                    </tr></thead>
+                    <tbody>
+                      {TABLE.rows.map((row,r) => <tr key={r}>
+                        {row.map((cell,c) => {
+                          const bid = 'tc' + r + 'c' + c;
+                          return <td key={bid} data-block={bid}>{renderMarked(cell, hlOf(bid), bid, onTapMark)}</td>;
+                        })}
+                      </tr>)}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {menu && (
+            <div className="hl-menu" style={{left: menu.x, top: menu.y}}
+              onMouseDown={e => e.preventDefault()}>
+              <button className="hl-cell" title="问 AI" aria-label="问 AI：把所选句子作为追问上下文" onClick={doAsk}><IAsk/></button>
+              <span className="hl-sep"></span>
+              <button className="hl-cell" title="新建主题" aria-label="新建主题：从该回答开分支" onClick={doFork}><IFork/></button>
+              <span className="hl-sep"></span>
+              <button className={'hl-cell' + (menu.cancel ? ' cancel' : '')}
+                title={menu.cancel ? '取消高亮' : '高亮'}
+                aria-label={menu.cancel ? '取消高亮：移除这段的黄色标记' : '高亮：给所选文字加黄色背景'}
+                onClick={doHighlight}>
+                {menu.cancel ? <IHighlightOff variant={iconVariant}/> : <IHighlight variant={iconVariant}/>}
+              </button>
+              <span className="hl-sep"></span>
+              <button className="hl-cell" title="批注" aria-label="批注：为所选文字写一条便签" onClick={doAnnotate}><INote size={20}/></button>
+              <span className="hl-sep"></span>
+              <button className="hl-cell" title="复制" aria-label="复制所选文字" onClick={doCopy}><ICopy/></button>
+              <span className="hl-sep"></span>
+              <button className="hl-cell" title="全选" aria-label="全选本段" onClick={doSelectAll}><ISelAll/></button>
+            </div>
+          )}
+
+          {oval && (
+            <div className="oval" style={{left: oval.x, top: oval.y}} onMouseDown={e => e.preventDefault()}>
+              <div className="oval-head"><span className="od"></span>{oval.items.length} 条批注 · 同一段落</div>
+              {oval.items.map(id => {
+                const nt = notes.find(n => n.id === id);
+                if(!nt) return null;
+                return (
+                  <button key={id} className="oval-item" onClick={() => window.__demo.ovalPick(id)}>
+                    <div className="oval-body">{nt.body}</div>
+                    <div className="oval-time">{nt.time}</div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {sheet && (
+            <React.Fragment>
+              <div className="dim" onClick={() => setSheet(null)}></div>
+              <div className="sheet">
+                <div className="sheet-grab"></div>
+                <div className="sheet-title">{sheet.editId ? '编辑批注' : '添加批注'}</div>
+                <div className="sheet-range">针对「{paras && (function(){
+                  const blockEl = screenRef.current.querySelector('[data-block="'+sheet.blockId+'"]');
+                  return blockEl ? blockEl.textContent.slice(sheet.start, sheet.end) : '';
+                })()}」</div>
+                <textarea autoFocus placeholder="写下这一段的想法…"
+                  value={sheet.text}
+                  onChange={e => setSheet({...sheet, text: e.target.value})}></textarea>
+                <div className="sheet-actions">
+                  {sheet.editId && <button className="btn-danger" onClick={deleteSheet}>删除</button>}
+                  <span className="grow"></span>
+                  <button className="btn-ghost" onClick={() => setSheet(null)}>取消</button>
+                  <button className="btn-save" disabled={!sheet.text.trim()} onClick={saveSheet}>保存</button>
+                </div>
+              </div>
+            </React.Fragment>
+          )}
+
+          {toast && <div className="toast">{toast}</div>}
+        </div>
+      </AndroidFrame>
+    </div>
+  );
+}
+
+/* ===== AndroidFrame（huashu-design assets/android_frame.jsx，Pixel 8 规格） ===== */
+const androidFrameStyles = {
+  wrapper:{display:'inline-block',padding:10,background:'#1a1a1a',borderRadius:44,
+    boxShadow:'0 0 0 2px #2a2a2a, 0 20px 60px rgba(0,0,0,0.3)',position:'relative'},
+  screen:{position:'relative',borderRadius:36,overflow:'hidden',background:'#fff'},
+  statusBar:{position:'absolute',top:0,left:0,right:0,height:32,display:'flex',alignItems:'center',
+    justifyContent:'space-between',padding:'0 24px',fontSize:14,fontWeight:500,zIndex:20,pointerEvents:'none'},
+  punchHole:{position:'absolute',top:10,left:'50%',transform:'translateX(-50%)',width:14,height:14,
+    background:'#000',borderRadius:'50%',zIndex:30},
+  statusIcons:{display:'flex',alignItems:'center',gap:6},
+  batteryText:{fontSize:11,fontWeight:600,marginLeft:2},
+  content:{position:'absolute',top:32,left:0,right:0,bottom:24,overflow:'hidden'},
+  navBar:{position:'absolute',bottom:0,left:0,right:0,height:24,display:'flex',
+    alignItems:'center',justifyContent:'center',zIndex:10}
+};
+function AndroidFrame({children,width=412,height=892,time='9:41',battery=100}){
+  const textColor = '#1a1a1a';
+  return (
+    <div style={androidFrameStyles.wrapper}>
+      <div style={{...androidFrameStyles.screen,width,height,background:'#fff'}}>
+        <div style={{...androidFrameStyles.statusBar,color:textColor}}>
+          <span>{time}</span>
+          <div style={androidFrameStyles.statusIcons}>
+            <svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor">
+              <rect x="0" y="6" width="2" height="4" rx="0.5"/><rect x="4" y="4" width="2" height="6" rx="0.5"/>
+              <rect x="8" y="2" width="2" height="8" rx="0.5"/><rect x="12" y="0" width="2" height="10" rx="0.5"/>
+            </svg>
+            <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
+              <path d="M7 9a1 1 0 100-2 1 1 0 000 2z" fill="currentColor"/>
+              <path d="M3 6a5 5 0 018 0" stroke="currentColor" strokeWidth="1.2"/>
+              <path d="M0.5 3.5a11 11 0 0113 0" stroke="currentColor" strokeWidth="1.2" opacity="0.6"/>
+            </svg>
+            <div style={{width:22,height:10,border:'1.5px solid currentColor',borderRadius:2,padding:1}}>
+              <div style={{width:(battery+'%'),height:'100%',background:'currentColor',borderRadius:1}}/>
+            </div>
+            <span style={androidFrameStyles.batteryText}>{battery}%</span>
+          </div>
+        </div>
+        <div style={androidFrameStyles.punchHole}></div>
+        <div style={androidFrameStyles.content}>{children}</div>
+        <div style={androidFrameStyles.navBar}>
+          <div style={{width:100,height:4,borderRadius:999,background:'rgba(0,0,0,0.4)'}}></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Demo/>);
+</script>
+</body>
+</html>

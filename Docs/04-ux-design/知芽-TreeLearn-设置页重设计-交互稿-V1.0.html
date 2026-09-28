@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>知芽（TreeLearn） · 设置页重设计交互稿 V1.0（C 方案）</title>
+<!--
+  ============================================================================
+  知芽 · 设置页重设计交互稿 V1.0（方案 C：分组列表 + Key 管理二级页）
+  配套文档：知芽-TreeLearn-设置页重设计方案-V1.0.md（同目录）
+  Token 纪律：:root 与 v1 原型逐值一致，不新增 token、不写裸 hex。
+  范围：设置根页（分组列表）+ Key 管理二级页 + 删除确认弹层。
+       提供商/模型/搜索/语音/文件五个二级页沿用现有设计，本稿不重画。
+  ============================================================================
+-->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#F4F1EB;
+  --surface:#FCFBF8;
+  --ink:#16241C;
+  --ink2:#435449;
+  --ink3:#627067;
+  --line:#E2DFD6;
+  --hairline:rgba(26,40,32,.07);
+  --green:#2B6E45;
+  --green-deep:#164027;
+  --green-soft:#E3F0E7;
+  --green-faint:#F0F7F1;
+  --blue:#2563EB;
+  --amber:#B05108;
+  --amber-soft:#FBF3E2;
+  --red:#C0392B;
+  --red-soft:#FBEAE7;
+
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s6:24px; --s8:32px;
+  --gutter:20px;
+
+  --r-sm:8px;
+  --r-md:14px;
+  --r-lg:18px;
+  --r-full:99px;
+
+  --fs-display:26px;
+  --fs-h1:20px;
+  --fs-h2:16px;
+  --fs-body:15px;
+  --fs-sm:13px;
+  --fs-cap:11px;
+
+  --sh-1:0 1px 2px rgba(22,36,28,.04);
+  --sh-2:0 4px 12px rgba(22,36,28,.06);
+  --serif:'Noto Serif SC','Songti SC',Georgia,serif;
+  --sans:'Noto Sans SC',-apple-system,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:#EDEAE3;font-family:var(--sans);color:var(--ink);}
+button{font-family:var(--sans);border:none;background:none;cursor:pointer;color:inherit;}
+input{font-family:var(--sans);}
+
+/* ---- 演示舞台 ---- */
+.stage{min-height:100vh;display:flex;align-items:flex-start;justify-content:center;gap:48px;padding:40px 24px;flex-wrap:wrap;}
+.walk{width:400px;background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--sh-2);padding:var(--s6);align-self:stretch;}
+.walk h1{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--green-deep);margin-bottom:6px;}
+.walk .w-sub{font-size:var(--fs-sm);color:var(--ink2);line-height:1.7;margin-bottom:var(--s4);}
+.walk h2{font-size:var(--fs-cap);letter-spacing:.14em;color:var(--ink3);font-weight:700;margin:var(--s4) 0 var(--s2);}
+.w-steps{display:flex;flex-direction:column;gap:6px;}
+.w-step{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--bg);border-radius:var(--r-sm);padding:9px 12px;font-size:var(--fs-sm);color:var(--ink2);transition:background .15s;}
+.w-step:hover{background:var(--green-faint);color:var(--green-deep);}
+.w-step .n{font-family:var(--serif);font-weight:700;color:var(--green);font-size:14px;flex-shrink:0;}
+.w-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.w-btns button{border:1px solid var(--line);border-radius:var(--r-full);padding:6px 13px;font-size:12px;color:var(--ink2);background:var(--surface);transition:all .15s;}
+.w-btns button:hover{border-color:var(--green);color:var(--green-deep);}
+.w-note{font-size:var(--fs-cap);color:var(--ink3);line-height:1.8;margin-top:var(--s2);}
+.w-note b{color:var(--green-deep);}
+
+/* ---- 手机屏内组件（与 v1.1 同名同值，便于日后并稿） ---- */
+.screen{height:100%;position:relative;overflow:hidden;}
+.appbar{padding:var(--s2) var(--gutter) 0;display:flex;align-items:center;min-height:52px;}
+.appbar-title{flex:1;display:flex;align-items:center;justify-content:center;}
+.appbar-title .t1{font-family:var(--serif);font-size:var(--fs-h1);font-weight:700;letter-spacing:.02em;}
+.icon-btn{width:40px;height:40px;border-radius:var(--r-full);display:flex;align-items:center;justify-content:center;color:var(--green-deep);flex-shrink:0;}
+.icon-btn:active{background:var(--green-faint);}
+.appbar-spacer{width:40px;flex-shrink:0;}
+
+.set-section{margin:var(--s4) var(--gutter) 0;}
+.set-label{font-size:var(--fs-cap);letter-spacing:.14em;color:var(--ink3);font-weight:700;margin-bottom:var(--s2);}
+.set-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-1);overflow:hidden;}
+.set-card.flush{padding:var(--s1) var(--s4);}
+.set-link{display:flex;align-items:center;gap:var(--s3);min-height:52px;padding:var(--s3) 0;border-bottom:1px solid var(--hairline);cursor:pointer;width:100%;text-align:left;}
+.set-link:last-child{border-bottom:none;}
+.set-link:active{background:var(--green-faint);}
+.set-link .sl-main{flex:1;min-width:0;}
+.set-link .sl-t{font-size:var(--fs-body);font-weight:500;display:block;}
+.set-link .sl-s{font-size:var(--fs-cap);color:var(--ink3);margin-top:3px;line-height:1.5;display:block;}
+.set-link .sl-s.warn{color:var(--amber);}
+.set-link .sl-c{color:var(--ink3);flex-shrink:0;display:flex;}
+
+.key-ok{color:var(--green-deep);font-size:var(--fs-cap);background:var(--green-soft);padding:2px 8px;border-radius:var(--r-full);font-weight:600;}
+.key-bad{color:var(--red);font-size:var(--fs-cap);background:var(--red-soft);padding:2px 8px;border-radius:var(--r-full);font-weight:600;}
+.key-none{color:var(--amber);font-size:var(--fs-cap);background:var(--amber-soft);padding:2px 8px;border-radius:var(--r-full);font-weight:600;}
+
+.btn-primary{background:var(--green);color:var(--surface);border-radius:12px;padding:11px 18px;font-size:14px;font-weight:500;transition:background .15s,transform .1s;}
+.btn-primary:hover{background:var(--green-deep);}
+.btn-primary:active{transform:scale(.97);}
+.btn-ghost{border:1px solid var(--line);border-radius:12px;padding:10px 16px;font-size:var(--fs-sm);color:var(--ink2);background:var(--surface);}
+.btn-ghost:hover{border-color:var(--green);color:var(--green-deep);}
+.btn-danger{color:var(--red);border:1px solid rgba(192,57,43,.28);border-radius:12px;padding:10px 16px;font-size:var(--fs-sm);background:var(--surface);}
+.key-input-row input{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:var(--fs-sm);outline:none;background:var(--bg);}
+.key-input-row input:focus{border-color:var(--green);}
+.danger-link{display:inline-flex;align-items:center;gap:5px;color:var(--red);font-size:var(--fs-sm);font-weight:500;padding:6px 0;border-radius:var(--r-sm);}
+.danger-link:active{color:#A53225;}
+
+.set-note{font-size:var(--fs-cap);color:var(--ink2);line-height:1.8;background:var(--green-faint);border-radius:12px;padding:11px 13px;}
+.set-note b{color:var(--green-deep);}
+
+.tabbar{position:absolute;left:0;right:0;bottom:0;height:64px;background:var(--surface);border-top:1px solid var(--hairline);display:flex;z-index:15;}
+.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10px;color:var(--ink3);}
+.tabbar button.on{color:var(--green-deep);font-weight:600;}
+
+.toast{position:absolute;left:50%;transform:translateX(-50%);bottom:78px;background:var(--ink);color:var(--surface);font-size:12px;padding:9px 16px;border-radius:var(--r-full);z-index:60;white-space:nowrap;animation:toastIn .2s;}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,6px);}to{opacity:1;transform:translate(-50%,0);}}
+
+.overlay-mask{position:absolute;inset:0;background:rgba(30,43,35,.32);z-index:40;display:flex;align-items:flex-end;animation:fadeIn .2s;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.sheet{width:100%;background:var(--surface);border-radius:22px 22px 0 0;padding:10px 18px 22px;animation:sheetUp .3s cubic-bezier(.2,.8,.2,1);}
+@keyframes sheetUp{from{transform:translateY(60px);opacity:0;}to{transform:none;opacity:1;}}
+.sheet .handle{width:38px;height:4px;border-radius:var(--r-full);background:var(--line);margin:2px auto 14px;}
+.sheet h3{font-family:var(--serif);font-size:17px;font-weight:600;margin-bottom:4px;}
+.sheet .sh-sub{font-size:12px;color:var(--ink2);line-height:1.7;margin-bottom:4px;}
+.sheet-actions{display:flex;gap:10px;margin-top:16px;}
+.sheet-actions button{flex:1;}
+
+.fade-in{animation:fadeIn .18s;}
+@keyframes pageIn{from{opacity:0;transform:translateX(14px);}to{opacity:1;transform:none;}}
+.page-in{animation:pageIn .22s cubic-bezier(.2,.8,.2,1);}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState, useEffect, useRef} = React;
+
+/* ================= 图标（与 v1.1 同源） ================= */
+const Ic = ({size=20, children, vb='0 0 24 24'}) => (
+  <svg width={size} height={size} viewBox={vb} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{children}</svg>
+);
+const IBack   = p => <Ic {...p}><path d="M15 5l-7 7 7 7"/></Ic>;
+const IChevR  = p => <Ic {...p} size={16}><path d="M9 5l7 7-7 7"/></Ic>;
+const IHome   = p => <Ic {...p} size={21}><path d="M4 11l8-7 8 7"/><path d="M6 10v9h12v-9"/></Ic>;
+const ILib    = p => <Ic {...p} size={21}><path d="M5 4h5v16H5z"/><path d="M14 4h5v16h-5z"/></Ic>;
+const IGear   = p => <Ic {...p} size={21}><circle cx="12" cy="12" r="3"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M18.4 5.6l-1.8 1.8M7.4 16.6l-1.8 1.8"/></Ic>;
+const IKey    = p => <Ic {...p} size={15}><circle cx="8" cy="14" r="3.5"/><path d="M10.5 11.5L19 3M15 7l3 3"/></Ic>;
+
+/* ================= Android 设备框（与 v1.1 同一形制） ================= */
+const androidFrameStyles = {
+  wrapper:{display:'inline-block',padding:10,background:'#1a1a1a',borderRadius:44,boxShadow:'0 0 0 2px #2a2a2a,0 24px 70px rgba(20,28,22,.38)',position:'relative'},
+  screen:{position:'relative',borderRadius:36,overflow:'hidden',background:'#F7F6F0'},
+  statusBar:{position:'absolute',top:0,left:0,right:0,height:32,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 24px',fontSize:14,fontWeight:500,zIndex:20,pointerEvents:'none'},
+  punchHole:{position:'absolute',top:10,left:'50%',transform:'translateX(-50%)',width:14,height:14,background:'#000',borderRadius:'50%',zIndex:30},
+  statusIcons:{display:'flex',alignItems:'center',gap:6},
+  content:{position:'absolute',top:32,left:0,right:0,bottom:24,overflow:'hidden'},
+  navBar:{position:'absolute',bottom:0,left:0,right:0,height:24,display:'flex',alignItems:'center',justifyContent:'center',zIndex:10},
+};
+function AndroidFrame({children, width=412, height=872, time='9:41', battery=86}) {
+  return (
+    <div style={androidFrameStyles.wrapper}>
+      <div style={{...androidFrameStyles.screen, width, height}}>
+        <div style={{...androidFrameStyles.statusBar, color:'#1a1a1a'}}>
+          <span>{time}</span>
+          <div style={androidFrameStyles.statusIcons}>
+            <svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor"><rect x="0" y="6" width="2" height="4" rx="0.5"/><rect x="4" y="4" width="2" height="6" rx="0.5"/><rect x="8" y="2" width="2" height="8" rx="0.5"/><rect x="12" y="0" width="2" height="10" rx="0.5"/></svg>
+            <div style={{width:22,height:10,border:'1.5px solid currentColor',borderRadius:2,padding:1}}>
+              <div style={{width:battery+'%',height:'100%',background:'currentColor',borderRadius:1}}/>
+            </div>
+            <span style={{fontSize:11,fontWeight:600}}>{battery}%</span>
+          </div>
+        </div>
+        <div style={androidFrameStyles.punchHole}/>
+        <div style={androidFrameStyles.content}>{children}</div>
+        <div style={androidFrameStyles.navBar}>
+          <div style={{width:100,height:4,background:'rgba(0,0,0,.32)',borderRadius:99}}/>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ================= 演示数据 ================= */
+const MASKED = {ok:'sk-••••••••••3f2a', invalid:'sk-••••••••••0x9e'};
+
+/* ================= 应用 ================= */
+function App(){
+  const [screen, setScreen] = useState('settings');       // settings | keyPage
+  const [keyStatus, setKeyStatus] = useState('ok');       // ok | invalid | none
+  const [sheet, setSheet] = useState(null);               // 'delKey' | null
+  const [toast, setToast] = useState(null);
+  const toastTimer = useRef(null);
+
+  const say = msg => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast(msg);
+    toastTimer.current = setTimeout(() => setToast(null), 2200);
+  };
+  useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current); }, []);
+
+  /* ---------- 屏：设置根页（C 方案：纯分组列表） ---------- */
+  const renderSettings = () => (
+    <div className="fade-in" key="settings" style={{height:'100%',display:'flex',flexDirection:'column'}}>
+      <div className="appbar">
+        <button className="icon-btn" onClick={() => say('已在一级页：系统返回演示')}><IBack/></button>
+        <div className="appbar-title"><div className="t1">设置</div></div>
+        <span className="appbar-spacer"/>
+      </div>
+      <div style={{flex:1,overflowY:'auto',paddingBottom:80}}>
+
+        <div className="set-section">
+          <div className="set-label">AI 提供商</div>
+          <div className="set-card flush">
+            <button className="set-link" onClick={() => setScreen('keyPage')}>
+              <span className="sl-main">
+                <span className="sl-t">API KEY · DeepSeek</span>
+                {keyStatus === 'ok'
+                  ? <span className="sl-s">{MASKED.ok} · <span style={{color:'var(--green-deep)',fontWeight:600}}>可用</span></span>
+                  : keyStatus === 'invalid'
+                    ? <span className="sl-s warn">{MASKED.invalid} · 无效 / 额度不足</span>
+                    : <span className="sl-s warn">未配置 · 发送将被阻止</span>}
+              </span>
+              <span className="sl-c"><IChevR/></span>
+            </button>
+            <button className="set-link" onClick={() => say('提供商管理二级页：沿用现有设计，本稿不重画')}>
+              <span className="sl-main">
+                <span className="sl-t">提供商管理</span>
+                <span className="sl-s">管理多提供商与 API Key · 已启用 1 家</span>
+              </span>
+              <span className="sl-c"><IChevR/></span>
+            </button>
+            <button className="set-link" onClick={() => say('模型设置二级页：沿用现有设计，本稿不重画')}>
+              <span className="sl-main">
+                <span className="sl-t">模型设置</span>
+                <span className="sl-s">聊天 / 快速 / 翻译分工与思考预算</span>
+              </span>
+              <span className="sl-c"><IChevR/></span>
+            </button>
+          </div>
+        </div>
+
+        <div className="set-section">
+          <div className="set-label">能力</div>
+          <div className="set-card flush">
+            <button className="set-link" onClick={() => say('搜索服务二级页：沿用现有设计，本稿不重画')}>
+              <span className="sl-main">
+                <span className="sl-t">搜索服务</span>
+                <span className="sl-s">联网搜索、引擎与 API Key</span>
+              </span>
+              <span className="sl-c"><IChevR/></span>
+            </button>
+            <button className="set-link" onClick={() => say('语音二级页：沿用现有设计，本稿不重画')}>
+              <span className="sl-main">
+                <span className="sl-t">语音</span>
+                <span className="sl-s">朗读引擎与试听</span>
+              </span>
+              <span className="sl-c"><IChevR/></span>
+            </button>
+            <button className="set-link" onClick={() => say('文件管理二级页：沿用现有设计，本稿不重画')}>
+              <span className="sl-main">
+                <span className="sl-t">文件管理</span>
+                <span className="sl-s">聊天附件、占用空间与删除</span>
+              </span>
+              <span className="sl-c"><IChevR/></span>
+            </button>
+          </div>
+        </div>
+
+        <div className="set-section">
+          <div className="set-label">数据边界</div>
+          <div className="set-note">
+            主题、分支、思考内容与各家提供商的 Key <b>仅存本机</b>，无云同步与备份，卸载后不可恢复。<br/>
+            生成时相关内容会交由所选提供商处理；历史思考内容会按上下文策略再次提交。
+          </div>
+        </div>
+      </div>
+      {renderTabBar()}
+    </div>
+  );
+
+  /* ---------- 屏：API KEY 管理二级页（C 方案新增） ---------- */
+  const renderKeyPage = () => (
+    <div className="page-in" key="keyPage" style={{height:'100%',display:'flex',flexDirection:'column'}}>
+      <div className="appbar">
+        <button className="icon-btn" onClick={() => setScreen('settings')}><IBack/></button>
+        <div className="appbar-title"><div className="t1">API KEY · DeepSeek</div></div>
+        <span className="appbar-spacer"/>
+      </div>
+      <div style={{flex:1,overflowY:'auto',paddingBottom:30}}>
+
+        <div className="set-section">
+          <div className="set-label">当前 KEY</div>
+          <div className="set-card" style={{padding:'var(--s4)'}}>
+            <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+              <IKey/>
+              {keyStatus === 'ok' && <React.Fragment><span style={{fontSize:'var(--fs-body)',fontWeight:500}}>{MASKED.ok}</span><span className="key-ok">可用</span></React.Fragment>}
+              {keyStatus === 'invalid' && <React.Fragment><span style={{fontSize:'var(--fs-body)',fontWeight:500}}>{MASKED.invalid}</span><span className="key-bad">无效 / 额度不足</span></React.Fragment>}
+              {keyStatus === 'none' && <React.Fragment><span style={{fontSize:'var(--fs-body)',fontWeight:500,color:'var(--ink3)'}}>未配置</span><span className="key-none">发送将被阻止</span></React.Fragment>}
+            </div>
+            <div style={{fontSize:'var(--fs-cap)',color:'var(--ink3)',marginTop:'var(--s2)',lineHeight:1.7}}>
+              仅存本机，可随时替换或删除。无云同步与备份，卸载后不可恢复。
+            </div>
+            {keyStatus !== 'none' && (
+              <div style={{borderTop:'1px solid var(--hairline)',marginTop:'var(--s3)',paddingTop:'var(--s2)'}}>
+                <button className="danger-link" onClick={() => setSheet('delKey')}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>
+                  删除此 Key
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="set-section">
+          <div className="set-label">替换 KEY</div>
+          <div className="set-card" style={{padding:'var(--s4)'}}>
+            <div className="key-input-row">
+              <input id="key-input" placeholder="粘贴新的 DeepSeek API Key"/>
+            </div>
+            <div style={{display:'flex',justifyContent:'flex-end',marginTop:'var(--s3)'}}>
+              <button className="btn-primary" style={{padding:'10px 20px',fontSize:13.5}} onClick={() => {
+                const v = document.getElementById('key-input').value.trim();
+                if (!v){ say('请先输入 Key'); return; }
+                setKeyStatus('ok');
+                document.getElementById('key-input').value = '';
+                say('Key 已配置，可返回继续发送');
+              }}>保存 Key</button>
+            </div>
+            <div style={{fontSize:'var(--fs-cap)',color:'var(--ink3)',lineHeight:1.7,marginTop:'var(--s2)'}}>
+              保存后立即生效，原文不再展示；替换不会影响已存主题与历史回答。
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  /* ---------- 底部标签栏 ---------- */
+  const renderTabBar = () => (
+    <div className="tabbar">
+      <button onClick={() => say('主页 tab：不在本稿范围')}><IHome/>主页</button>
+      <button onClick={() => say('学习库 tab：不在本稿范围')}><ILib/>学习库</button>
+      <button className="on"><IGear/>设置</button>
+    </div>
+  );
+
+  /* ---------- 删除确认弹层 ---------- */
+  const renderSheet = () => !sheet ? null : (
+    <div className="overlay-mask" onClick={() => setSheet(null)}>
+      <div className="sheet" onClick={e => e.stopPropagation()}>
+        <div className="handle"/>
+        <h3>删除 DeepSeek API Key？</h3>
+        <div className="sh-sub">删除后发送会被 Key 守卫拦截并引导重新配置；已存主题与历史回答不受影响。此操作不可恢复。</div>
+        <div className="sheet-actions">
+          <button className="btn-ghost" onClick={() => setSheet(null)}>取消</button>
+          <button className="btn-danger" onClick={() => { setKeyStatus('none'); setSheet(null); say('Key 已删除，发送将被阻止'); }}>确认删除</button>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <AndroidFrame>
+      <div className="screen">
+        {screen === 'settings' ? renderSettings() : renderKeyPage()}
+        {renderSheet()}
+        {toast && <div className="toast">{toast}</div>}
+      </div>
+    </AndroidFrame>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
