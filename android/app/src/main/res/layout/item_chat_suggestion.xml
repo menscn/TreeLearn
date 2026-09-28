@@ -3,6 +3,12 @@
   One suggested follow-up (prototype v2.5 `.sugg-item`). The whole row asks the question; the 44x44
   zone on its right opens a branch from the same answer instead. They are two targets because they are
   two different things - one continues this branch, the other starts a new one.
+
+  2026-09-28 user decision: "新建主题 需要换成图标 ... 不要是文字按钮". This fork zone was a text
+  Button reading "新建主题"; it is now the prototype's own IFork glyph, the same asset the action row's
+  fork button draws (one glyph, one meaning), tinted tl_ink3 to match its siblings. The prototype wraps
+  the glyph in a 44x44 circular zone with a faint green press fill (lines 245-246); a ripple keeps the
+  press feedback without a second drawable for the resting state, which is a bare glyph.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/suggestion_row"
@@ -30,13 +36,14 @@
         android:textColor="@color/tl_ink"
         android:textSize="@dimen/text_sm" />
 
-    <Button
+    <ImageView
         android:id="@+id/suggestion_fork"
         android:layout_width="@dimen/touch_min"
         android:layout_height="@dimen/touch_min"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/chat_suggestion_fork_title"
-        android:text="@string/chat_act_fork"
-        android:textColor="@color/tl_ink3"
-        android:textSize="@dimen/text_cap" />
+        android:padding="@dimen/space_s3"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_action_fork"
+        android:tint="@color/tl_ink3" />
 </LinearLayout>

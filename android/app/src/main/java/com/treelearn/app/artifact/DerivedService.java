@@ -22,6 +22,13 @@ import java.util.List;
 public final class DerivedService
 implements HomeDerivedPort {
 
+    /**
+     * The ceiling the codec accepts for follow-up questions. One constant for both directions: three
+     * questions written and three questions read is the same number, and two literals would be two
+     * numbers that happen to agree today.
+     */
+    static final int ANSWER_RECOMMENDATION_LIMIT = 3;
+
     private final TreeLearnDatabaseHelper helper;
     private final DatabaseTransactionRunner transactions;
     private final GenerationGateway callerGateway;
@@ -48,6 +55,7 @@ implements HomeDerivedPort {
     }
 
     /** Ensures the current stable branch revision has a summary and follow-up questions. */
+    @Override
     public void ensureConversationArtifacts(ChatStore.Conversation conversation,
             GenerationModel model, boolean answerSuggestions) {
         if (conversation == null || conversation.branch == null || model == null) {
@@ -82,11 +90,13 @@ implements HomeDerivedPort {
             return;
         }
         DerivedRequest recommendations = DerivedRequest.answerRecommendations(conversation.branch.id,
-                revisionId, latestAnswer, Collections.emptyList(), 3, model, budget);
+                revisionId, latestAnswer, Collections.emptyList(), ANSWER_RECOMMENDATION_LIMIT, model,
+                budget);
         runIfMissing(recommendations, conversation.branch.topicId);
     }
 
     /** Compresses older history and returns the exact replacement plan, or null on any refusal. */
+    @Override
     public ContextPlan compressHistory(String branchId, String latestRevisionId,
             List<ContextPlan.Entry> olderEntries, List<ContextPlan.Entry> recentEntries,
             GenerationModel model) {
@@ -114,6 +124,47 @@ implements HomeDerivedPort {
         replacement.add(ContextPlan.Entry.summary(row.id, parsed.payload().summary));
         replacement.addAll(recentEntries);
         return new ContextPlan(replacement);
+    }
+
+    /**
+     * Reads back the stored follow-up questions for one branch's displayed answer, or none.
+     *
+     * <p><strong>A read, not a derivation.</strong> {@link #ensureConversationArtifacts} is what
+     * produces the row, on the background thread the screen already kicks off; asking the model again
+     * here would spend a call the read does not own and, worse, would answer a slightly different
+     * question than the one {@code based_on_revision_id} binds the stored strip to. The only caller
+     * with a baseline in hand - {@code ChatWiring.read} - passes the revision the newest row is
+     * showing, so the comparison stays on the read path where it belongs.
+     *
+     * <p>The digest is deliberately not recomputed. Deriving it needs the outline the write path
+     * assembled, and assembling it a second time here is exactly the drift the store's
+     * compare-and-swap exists to prevent; the CAS already dropped any write whose digest no longer
+     * matched. Binding on the revision alone is the weaker check, but it is the one this side can
+     * make honestly, and the presenter treats a mismatch as "no strip" rather than stale text.
+     *
+     * @param branchId the branch whose newest stable revision owns a strip
+     * @param basedOnRevisionId the revision the caller is displaying; a row naming any other version
+     *        is not this conversation's strip, so it reads as none
+     * @return the stored questions, empty when none was derived, the baseline moved on, or the
+     *         payload no longer parses
+     */
+    @Override
+    public List<String> answerRecommendations(String branchId, String basedOnRevisionId) {
+        Guard.id(branchId, "branchId");
+        if (basedOnRevisionId == null || basedOnRevisionId.isEmpty()) {
+            return Collections.emptyList();
+        }
+        SQLiteDatabase database = helper.getWritableDatabase();
+        com.treelearn.data.db.dao.AiArtifactDao.Row row =
+                com.treelearn.data.db.dao.AiArtifactDao.findByKindAndScope(database,
+                        ArtifactKind.ANSWER_RECOMMENDATIONS.wireId, branchId);
+        if (row == null || !basedOnRevisionId.equals(row.basedOnRevisionId)) {
+            return Collections.emptyList();
+        }
+        DerivedResult parsed = ArtifactPayloadCodec.parse(ArtifactKind.ANSWER_RECOMMENDATIONS,
+                row.payload, ANSWER_RECOMMENDATION_LIMIT);
+        List<String> items = parsed.isUsable() ? parsed.payload().items : Collections.<String>emptyList();
+        return items.isEmpty() ? Collections.<String>emptyList() : items;
     }
 
     /** Derives topic-level recommendations from the outline only. */

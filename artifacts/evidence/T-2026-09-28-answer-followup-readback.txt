@@ -1,0 +1,81 @@
+# T-2026-09-28 follow-up 推荐问题读回链路 —— 修复证据
+
+场景：对话页回答卡底部应出现原型 v1.1 `.sugg-block` 推荐问题条（3 条，「能举个具体例子吗？」样式），
+实际不出现。本文件记录根因、修复与验证。
+
+## 1. 根因（读路径缺失，非写路径缺失）
+
+写入侧早已完整：`DerivedService.ensureConversationArtifacts` 会派生 `ANSWER_RECOMMENDATIONS`
+并落入 `ai_artifacts`（`DerivedService.java` 第 84-86 行）。问题在读回侧：
+
+- 修复前 `ChatWiring.read()` 末尾硬编码返回空：
+  `Collections.<Recommendation>emptyList()` 与 `""`（原 `ChatWiring.java:157-159`）。
+- 于是 `ChatViewState.recommendationsVisible()`（`ChatViewState.java:242-243`，要求
+  `!recommendations.isEmpty() && !recommendationsMessageId.isEmpty()`）恒为 false，
+  `ChatScreen.renderSuggestions`（`ChatScreen.java:1143-1148`）永远提前 return。
+- 旧 javadoc 自述「T-011 has no production producer in this build」——**写侧其实已有 producer，只是没人读**。
+
+## 2. 修改点
+
+| 文件 | 改动 |
+|---|---|
+| `android/app/src/main/java/com/treelearn/app/artifact/HomeDerivedPort.java` | 端口新增三个 default 方法：`ensureConversationArtifacts` / `compressHistory` / `answerRecommendations`，使读路径依赖端口而非具体类（可 JVM 测试） |
+| `android/app/src/main/java/com/treelearn/app/artifact/DerivedService.java` | 新增 `answerRecommendations(branchId, basedOnRevisionId)` 读回实现（对照既有 `homeRecommendations` 范式）；抽 `ANSWER_RECOMMENDATION_LIMIT = 3` 常量供写入与读回共用；三个方法补 `@Override` |
+| `android/app/src/main/java/com/treelearn/app/wiring/ChatWiring.java` | 字段与构造器改依赖 `HomeDerivedPort`；`read()` 读回推荐问题并按最新稳定回答的 `activeRevisionId` 绑定 revision；抽 `notifyGenerationListeners`；派生完成后 nudge 监听器触发重读；更新过时 javadoc |
+| `android/app/src/test/java/com/treelearn/app/wiring/ChatWiringRecommendationsTest.java` | 新增 4 例 JVM 单测（新建文件） |
+
+**关键第二处修复（时序）**：派生在 `read()` 起的一次性后台线程里跑，而答案稳定后
+`ChatPresenter` 的轮询已停止（`ChatPresenter.java:315-317`）。若只在 `read()` 里读回，
+派生结果落库后不会再触发重读 → 条带仍不出现。因此在派生线程完成时调用
+`notifyGenerationListeners(branchId)`，走 Presenter 已注册的监听器触发下一次 `read()`。
+监听器回调也**统一为该一个方法**（原 stream observer 的内联循环改为调用它），避免两处实现漂移。
+
+## 3. 验证
+
+### 3.1 全量单测（本线新增，2026-09-28 07:03 实测）
+```
+$ ./gradlew -p android --no-daemon --no-build-cache --console=plain \
+    :app:testDebugUnitTest --tests "com.treelearn.app.wiring.ChatWiringRecommendationsTest"
+BUILD SUCCESSFUL
+```
+XML 报告 `android/app/build/test-results/testDebugUnitTest/TEST-com.treelearn.app.wiring.ChatWiringRecommendationsTest.xml`：
+`tests="4" skipped="0" failures="0" errors="0"`
+
+四例均 PASS：
+- `readCarriesTheStripBoundToTheDisplayedRevision` —— 读回并把 revision 绑定到显示回答
+- `readHidesAStripWhoseBaselineMovedOn` —— 基线已变则读成「无条带」
+- `readWithoutADerivedServiceShowsNoStrip` —— 未装配派生服务不抛异常
+- `readAsksTheStoreOnlyWhenAnAnswerExists` —— 无稳定回答时不问 store
+
+### 3.2 本线三源文件隔离编译（2026-09-28 07:08 实测）
+因共用工作区被另一条工作线并发写入（见 §4），整仓 `compileDebugJavaWithJavac` 被其未完成文件阻断。
+对本线三个文件做隔离编译（classpath = 既有 AGP 产物 + core.jar + data classes + android.jar）：
+
+```
+$ javac -nowarn -proc:none -encoding UTF-8 -d D:/tmp/isolate-out -cp "<AGP 产物;core.jar;android.jar>" \
+    app/src/main/java/com/treelearn/app/artifact/HomeDerivedPort.java \
+    app/src/main/java/com/treelearn/app/artifact/DerivedService.java \
+    app/src/main/java/com/treelearn/app/wiring/ChatWiring.java
+JAVAC_EXIT=0      # 零错误
+```
+
+## 4. 环境说明：整仓构建被并发工作线阻断（非本线引入）
+
+同一 `android/` 树有多条工作线并发写入。本线验证期间，整仓构建连续被**其它线的未完成文件**阻断：
+
+- `android/app/src/main/java/com/treelearn/app/screen/EdgeFadeLayout.java:109`
+  `错误: 不兼容的类型: Rect无法转换为RectF`（该文件 `git status` 为 `??` 未跟踪，非本线文件）
+- `android/app/src/main/res/drawable/bg_count_badge.xml:4`
+  `ParseError: 注释中不允许出现字符串 "--"`（同为 `??` 未跟踪）
+- 期间另有 `mergeDebugResources: Could not create empty folder .../intermediates/...`
+  与 `New files were found. This might happen because a process is still writing to the target directory`
+  —— 并发缓存/目录锁冲突，与本线代码无关。
+
+判据：错误行**零处**指向本线三文件；本线三文件隔离编译 `JAVAC_EXIT=0`；本线 4 例单测全绿。
+**结论：本线改动可交付；整仓构建需待并发线文件落定后复验。**
+
+## 5. 待办（留痕，不在本线范围）
+
+- 真机验收：安装含本次改动的 APK，在对话页发一条问题，确认回答卡底部出现推荐问题条
+  （3 条文本 + 右侧 44×44 分叉热区），且点文字=当前分支追问、点分叉=新建分支。
+- 该验收需等整仓构建恢复（并发线落定）后才能出 APK。

@@ -3,7 +3,7 @@ package com.treelearn.app.wiring;
 import com.treelearn.ai.prompt.DeepSeekContextEncoder;
 import com.treelearn.ai.prompt.DeepSeekRequestAssembler;
 import com.treelearn.ai.prompt.PromptBudget;
-import com.treelearn.app.artifact.DerivedService;
+import com.treelearn.app.artifact.HomeDerivedPort;
 import com.treelearn.app.files.AttachmentTextExtractor;
 import com.treelearn.app.generation.GenerationCoordinator;
 import com.treelearn.app.search.web.ChatSearchStep;
@@ -50,11 +50,16 @@ import java.util.function.BooleanSupplier;
  * admission. What is decided here is what the screen cannot get anywhere else: which status a stored
  * position is in, which question a request's current input is, and which notice a refusal becomes.
  *
- * <p><strong>What a read cannot show yet.</strong> T-011's {@code ANSWER_RECOMMENDATIONS} has no
- * production producer in this build, so the strip is empty and names no revision. An attempt that
- * ended without a stable answer reads as {@code FAILED} with no partial text: the partial content of
- * a finished attempt is not reachable through a query that has a caller today, and inventing one
- * here would be a second read path for the same rows.
+ * <p><strong>The strip is a read-back, not a second derivation.</strong> T-011's {@code
+ * ANSWER_RECOMMENDATIONS} is ensured on the background thread a read kicks off and then read back
+ * here, bound to the newest stable answer's revision. A read therefore never spends a model call of
+ * its own, and a strip derived for a revision the screen is no longer showing reads as no strip -
+ * which is why the revision is part of the snapshot and not re-derived at the row.
+ *
+ * <p><strong>What a read cannot show.</strong> An attempt that ended without a stable answer reads
+ * as {@code FAILED} with no partial text: the partial content of a finished attempt is not reachable
+ * through a query that has a caller today, and inventing one here would be a second read path for
+ * the same rows.
  *
  * <p><strong>Failures stay visible.</strong> No key, a refused decision, a refused fork and a
  * refused admission all come back as a {@link ChatCommandResult} the presenter draws. No command
@@ -70,7 +75,7 @@ public final class ChatWiring implements ChatData, ChatCommands {
     private final KeyVault keyVault;
     private final Clock clock;
     private final PromptBudget budget;
-    private final DerivedService derived;
+    private final HomeDerivedPort derived;
     private final BooleanSupplier answerSuggestions;
     private final ChatSearchStep search;
     /** The attachment store (T-096): read for the cached text, written for the reference row. */
@@ -78,14 +83,24 @@ public final class ChatWiring implements ChatData, ChatCommands {
     private final Set<String> derivedInFlight = ConcurrentHashMap.newKeySet();
     private final ConcurrentHashMap<String, CopyOnWriteArrayList<Runnable>> generationListeners =
             new ConcurrentHashMap<String, CopyOnWriteArrayList<Runnable>>();
-    private final GenerationCoordinator.Observer generationObserver = (operationId, branchId, state) -> {
+    private final GenerationCoordinator.Observer generationObserver =
+            (operationId, branchId, state) -> notifyGenerationListeners(branchId);
+
+    /**
+     * Tells one branch's listeners that its rows may have changed.
+     *
+     * <p>Two events reach this: a stream state change, and the derived strip landing after the
+     * answer stabilised. They are one method because they mean one thing to a listener - "re-read,
+     * something you draw may differ" - and a second copy would be a second place to forget.
+     */
+    private void notifyGenerationListeners(String branchId) {
         List<Runnable> listeners = generationListeners.get(branchId);
         if (listeners != null) {
             for (Runnable listener : listeners) {
                 listener.run();
             }
         }
-    };
+    }
 
     public ChatWiring(ChatStore store, GenerationPort generation, KeyVault keyVault, Clock clock,
             PromptBudget budget) {
@@ -93,18 +108,18 @@ public final class ChatWiring implements ChatData, ChatCommands {
     }
 
     public ChatWiring(ChatStore store, GenerationPort generation, KeyVault keyVault, Clock clock,
-            PromptBudget budget, DerivedService derived, BooleanSupplier answerSuggestions) {
+            PromptBudget budget, HomeDerivedPort derived, BooleanSupplier answerSuggestions) {
         this(store, generation, keyVault, clock, budget, derived, answerSuggestions, null);
     }
 
     public ChatWiring(ChatStore store, GenerationPort generation, KeyVault keyVault, Clock clock,
-            PromptBudget budget, DerivedService derived, BooleanSupplier answerSuggestions,
+            PromptBudget budget, HomeDerivedPort derived, BooleanSupplier answerSuggestions,
             ChatSearchStep search) {
         this(store, generation, keyVault, clock, budget, derived, answerSuggestions, search, null);
     }
 
     public ChatWiring(ChatStore store, GenerationPort generation, KeyVault keyVault, Clock clock,
-            PromptBudget budget, DerivedService derived, BooleanSupplier answerSuggestions,
+            PromptBudget budget, HomeDerivedPort derived, BooleanSupplier answerSuggestions,
             ChatSearchStep search, com.treelearn.app.files.AttachmentStore attachments) {
         this.store = require(store, "store");
         this.generation = require(generation, "generation");
@@ -146,6 +161,12 @@ public final class ChatWiring implements ChatData, ChatCommands {
                 } finally {
                     derivedInFlight.remove(branchId);
                 }
+                // The strip is derived after the answer is stable, and by then the generation poll
+                // has already stopped - without this the strip would be written and never read,
+                // which is exactly the state this wiring shipped in: a complete write path and a
+                // read that always answered "none". One nudge per completion, through the listener
+                // the presenter already registered, so the next read finds the row.
+                notifyGenerationListeners(branchId);
             }, "treelearn-derived-read");
             worker.setDaemon(true);
             worker.start();
@@ -154,9 +175,44 @@ public final class ChatWiring implements ChatData, ChatCommands {
         for (ChatStore.Position position : conversation.positions) {
             messages.add(view(position));
         }
-        return Snapshot.of(conversation.branchTitle, messages,
-                Collections.<Recommendation>emptyList(), "", conversation.branch,
+        // The strip is scoped to the branch, so a read that carries no branch row has nothing to ask
+        // for - which is also why the revision is read off the positions here rather than stored
+        // beside them: the displayed answer's version is the baseline, and that is a fact about the
+        // conversation, not about whether the branch row happened to come along.
+        String recommendationsRevisionId = "";
+        List<String> answerRecommendations = Collections.emptyList();
+        if (conversation.branch != null) {
+            for (ChatStore.Position position : conversation.positions) {
+                if (!position.message.isUser() && position.activeRevision != null) {
+                    recommendationsRevisionId = position.activeRevision.id;
+                }
+            }
+            if (derived != null && !recommendationsRevisionId.isEmpty()) {
+                answerRecommendations = derived.answerRecommendations(conversation.branch.id,
+                        recommendationsRevisionId);
+            }
+        }
+        return Snapshot.of(conversation.branchTitle, messages, newQuestions(answerRecommendations),
+                answerRecommendations.isEmpty() ? "" : recommendationsRevisionId, conversation.branch,
                 conversation.messages, sourceCard(conversation.branch));
+    }
+
+    /**
+     * T-011's stored questions as the screen's own value type.
+     *
+     * <p>The kind is {@code FOLLOW_UP} rather than a second kind for answer suggestions: {@link
+     * Recommendation} classifies what a question <em>is</em> - one the learner did not type - and
+     * both the home strip and this one carry exactly that.
+     */
+    private static List<Recommendation> newQuestions(List<String> questions) {
+        if (questions.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<Recommendation> mapped = new ArrayList<Recommendation>(questions.size());
+        for (String question : questions) {
+            mapped.add(new Recommendation(question, Recommendation.Kind.FOLLOW_UP));
+        }
+        return mapped;
     }
 
     /**

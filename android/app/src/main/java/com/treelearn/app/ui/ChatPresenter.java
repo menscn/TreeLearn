@@ -502,17 +502,43 @@ public final class ChatPresenter implements ChatActions {
         if (message == null || !message.canQuote() || anchor.isEmpty()) {
             return;
         }
-        render(state.withQuote(anchor).withNotice(null));
+        // 2026-09-28: the quote arriving from the selection menu is also what raises the three 问 AI
+        // quick queries - the chips are the quote's affordance, so they rise and fall with it.
+        render(state.withQuote(anchor).withAskAiChips(true).withNotice(null));
     }
 
     @Override
     public void onQuoteCleared() {
-        render(state.withQuote(""));
+        render(state.withQuote("").withAskAiChips(false));
     }
 
     @Override
     public void onSend() {
-        final String text = state.draft.trim();
+        send(state.draft.trim(), true);
+    }
+
+    /**
+     * 2026-09-28: one of the 问 AI quick queries goes out directly. The query is the message text,
+     * the quote the menu set stays the cargo, and the learner's own draft travels unchanged - the
+     * chip answers the selection, not what they were typing. It rides the one send path on purpose:
+     * the same key, archived and missing-key and parsing guards, so a chip can never send what a
+     * typed question could not.
+     */
+    @Override
+    public void onAskAiChipPressed(String query) {
+        String text = query == null ? "" : query.trim();
+        if (text.isEmpty() || state.quote.isEmpty()) {
+            return;
+        }
+        send(text, false);
+    }
+
+    /**
+     * The one send path: every entry, typed or chip, funnels through here. {@code clearDraft} says
+     * whether the composer's own text left with this message - true for a typed send, false for a
+     * chip, whose text was never in the draft.
+     */
+    private void send(final String text, final boolean clearDraft) {
         if (text.isEmpty() || state.sending) {
             return;
         }
@@ -541,15 +567,17 @@ public final class ChatPresenter implements ChatActions {
         } else {
             attachmentId = null;
         }
-        // T-075: a new turn re-attaches the follow - the learner asked, so they want to see.
+        // T-075: a new turn re-attaches the follow - the learner asked, so they want to see. The
+        // chips collapse with every send (2026-09-28: one tap, one query, then they are gone).
         stopRequested = false;
         if (speaker != null) {
             speaker.interrupt();
         }
-        render(state.withSending(true).withStage(Stage.SENDING).withFollow(true, 0));
+        render(state.withAskAiChips(false).withSending(true).withStage(Stage.SENDING)
+                .withFollow(true, 0));
         background.execute(
                 () -> publish(commands.send(branchId, text, quote, attachmentId, model, thinking),
-                        false, true));
+                        false, clearDraft, clearDraft));
     }
 
     /**
@@ -564,6 +592,7 @@ public final class ChatPresenter implements ChatActions {
             return;
         }
         render(state.withQuote("")
+                .withAskAiChips(false)
                 .withComposerAttachment(new ChatViewState.ComposerAttachment(
                         Guard.newId(), displayName, bytes.length,
                         ChatViewState.ComposerAttachment.ParseState.PARSING)));
@@ -944,18 +973,40 @@ public final class ChatPresenter implements ChatActions {
      */
     private void publish(final ChatCommandResult result, final boolean mayOpenBranch,
             final boolean clearDraft) {
+        publish(result, mayOpenBranch, clearDraft, clearDraft);
+    }
+
+    /**
+     * 2026-09-28: the split a chip send needs. A typed send clears the draft and the quote together
+     * (the draft went out as the message); a chip send carries its own query and must keep the
+     * learner's unfinished draft, while the quote still leaves - it rode this message and a stale
+     * quote row would anchor a question the learner never asked.
+     */
+    private void publish(final ChatCommandResult result, final boolean mayOpenBranch,
+            final boolean clearDraft, final boolean clearQuote) {
         ui.post(() -> {
             if (result.isAccepted()) {
                 ChatViewState next = state.withSending(false).withNotice(result.postNotice());
-                render(clearDraft
-                        ? next.withDraft("").withQuote("").withComposerAttachment(null)
-                        : next);
+                if (clearDraft) {
+                    render(next.withDraft("").withQuote("").withComposerAttachment(null));
+                } else if (clearQuote) {
+                    render(next.withQuote("").withComposerAttachment(null));
+                } else {
+                    render(next);
+                }
                 if (mayOpenBranch && !result.branchId().isEmpty()) {
                     sink.openBranch(result.branchId());
                 }
                 if (clearDraft) {
                     // T-076: the sent turn is the store's now; the kept draft record is dropped.
                     drafts.clear(branchId);
+                } else if (clearQuote) {
+                    // The chip send keeps the draft, so the record keeps it too - minus the quote,
+                    // which left with the message and must not come back on the next read.
+                    drafts.save(branchId, new ChatDraftStore.ChatDraft(state.draft, "",
+                            state.model, state.thinkingEnabled));
+                }
+                if (clearDraft || clearQuote) {
                     awaitingFirstRow = true;
                     startGenerationPolling();
                 }
