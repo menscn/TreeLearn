@@ -5,7 +5,7 @@ id: T-2026-09-28-026
 title: 高亮批注数据层 + 纯逻辑（T-A）
 template_version: 2
 task_type: implementation
-status: ready
+status: verifying
 parent_requirement: T-2026-09-28-chat-highlight-annotation-025.md
 requirements_confirmed: true
 generated_by: leader
@@ -52,6 +52,12 @@ Parent summary: 见父需求 T-2026-09-28-chat-highlight-annotation-025.md——
 - `android/app/.../ui/Annotation.java`（新）：定位器、严格重合判重（`isExactOverlap`）、并区间合并（`mergeInto`）+ JVM 测试。
 - 仪器测试：真实 Android SQLite 上 onCreate/onUpgrade/PRAGMA/约束/级联/重开。
 
+### Scope amendments（实现期决策，2026-09-28）
+- **`Annotation` 落点改为 `android/core/.../domain/Annotation.java`**：`:data` 的 DAO 行类型与 `:app` 的 UI 逻辑需要同一个值类型，放 `app/ui` 会造出第二份类型或让 `:data` 反向依赖 `:app`；`:core` 是纯 JVM 域模块，`ReadingAnchor`/`BranchAnchor`（同为定位器值类型）已在此。「纯 JVM 可测」目标不变。
+- **`SqliteChatStore` 接线移入 T-B**：T-A 内 DAO 的唯一 consumer 是测试，store 暴露面此刻没有任何生产调用方——按本仓「无读者的常量即死表面」纪律，T-A 不新增 store 方法；T-B（第一个消费者）接入时一并定义端口形态。
+- **F1/F2/F3（db-migration-reviewer 2026-09-28，见方案 V1.1 §3.1/§3.3）进入验收口径**：DDL 含第 5 条 CHECK（HIGHLIGHT 恒空 body）；`listFor` 的 DELETE+SELECT 必须同事务（DAO 断言 `inTransaction()`）；insert javadoc 写明「仅 stable + 当前显示修订 digest 时写入」的调用方约定。
+- **DAO 去掉 `mergeRange`（Scope 正文与方案 §3.4 的方法清单按此修订）**：合并流的定稿语义是「吸收」（`Annotation.mergeHighlights` 返回并区间 + `absorbedIds`，consumer 删旧行、插新行，同事务执行），单行区间 update 通道在该流中没有调用方；留一个无消费者的 DAO 方法即死表面。`listFor`/`insert`/`delete`/`updateBody` 保留（均有 T-B/D 消费者）。
+
 ### Out of scope
 - span 渲染、菜单、便签 UI（T-B/C/D）；既有表改动。
 
@@ -80,24 +86,25 @@ Parent summary: 见父需求 T-2026-09-28-chat-highlight-annotation-025.md——
 ## TDD execution record
 
 ### RED — failing test first
-- Test/scenario: PENDING（实现时记录：先写 DAO/迁移仪器测试与 Annotation JVM 测试，跑出非零退出码）。
-- Command: PENDING
-- Exit code: PENDING
-- Observed failure: PENDING
-- Failure reason validated: PENDING
+- Test/scenario: 三件套——`:core` AnnotationTest（Locator/Span/工厂/isExactOverlap/mergeHighlights 吸收流，302 行）；`:data` TreeLearnSchemaAnnotationsTest（DDL/迁移/版本链钉文本，210 行）；`:app` AnnotationDaoInstrumentedTest（真实 SQLite 上 fresh/upgrade/约束/DAO 语义，见 androidTest）。外加 SqliteSchemaInstrumentedTest 同批扩展为 12 表世界（含 V1 fixture 过滤器排除 annotations）。RED 取证另含 CMD3 `:app:assembleDebugAndroidTest`（编译仪器测试源集，见 Failure reason validated）。
+- Command: 测试集 = `:core:test` + `:data:testDebugUnitTest`（均带 `--no-build-cache`）；RED 取证见 `artifacts/evidence/T-2026-09-28-annot-red-evidence.txt`，GREEN 取证见 `artifacts/evidence/T-2026-09-28-annot-green-evidence.txt`。
+- Exit code: 1
+- Observed failure: CMD1「程序包Annotation不存在」（AnnotationTest.java:45+）；CMD2「找不到符号」（TreeLearnSchemaAnnotationsTest.java:37+，Annotations 常量类缺失）；CMD3「找不到符号」（AnnotationDaoInstrumentedTest.java:15+，Annotation/AnnotationDao 缺失）。
+- Failure reason validated: 三条失败均为「生产类未实现」的编译失败＝预期 RED；非环境竞态（编译到达 test source set 并点名缺失符号）；设备未占用（编译失败阶段无设备轮价值，真机证据在 GREEN 后取）。
 
 ### GREEN — minimum implementation
-- Implementation: PENDING
-- Command: PENDING
-- Exit code: PENDING
-- Passing evidence: PENDING
-- Regression evidence: PENDING
+- Implementation: `:core` `domain/Annotation.java`（`Container`/`Kind` 枚举、`Locator` prose()/cell() 工厂 + -1 哨兵、`Span` 非空构造、`Merge`（span + absorbedIds 不可变列表）、`isExactOverlap` 严格重合、`mergeHighlights` 传递闭包吸收流、`toString()` 只带 body 长度）；`:data` `TreeLearnSchema.java` V5（`Annotations` 常量类 14 列 + 5 CHECK（含 F1：HIGHLIGHT 恒空 body）、唯一锚索引含 `kind`、`annotationsAnchorIndexStatement()`/`annotationsMessageIndexStatement()` fresh 与迁移共用、`MIGRATION_V4_TO_V5_STATEMENTS` 三语句全复用常量、`MigrationV4ToV5` 注册、`DATABASE_VERSION = 5`）与 `dao/AnnotationDao.java`（`insert` insertOrThrow、`listFor` 同事务 DELETE 失配行 + SELECT 显式过滤 digest（F2）、`delete` 幂等、`updateBody` note-only）；两处既有版本钉文本测试 bump 4→5（`ProviderModelSchemaTest`、`TreeLearnSchemaQuoteInvariantTest`，注释点名 T-026）；`SqliteSchemaInstrumentedTest` 适配 12 表世界（V1 fixture 过滤器排除 annotations）。`mergeRange` 按 Scope amendment 第 4 条不实现。
+- Command: 测试集 = `:core:test` + `:data:testDebugUnitTest`（均带 `--no-build-cache`）；RED 取证见 `artifacts/evidence/T-2026-09-28-annot-red-evidence.txt`，GREEN 取证见 `artifacts/evidence/T-2026-09-28-annot-green-evidence.txt`。
+- Exit code: 0
+- Passing evidence: GREEN 实跑形式为两测试任务合并一条 `--rerun` 命令强制执行（:data 于 17:34 真实重跑；:core:test 的 XML（17:12）经同命令 17:33 BUILD SUCCESSFUL（up-to-date 判定）确认输入未变仍有效）。`AnnotationTest` 25/25（core test-results XML `tests="25" failures="0" errors="0"`）；`TreeLearnSchemaAnnotationsTest` 7/7（data test-results XML 17:34 重生成，`tests="7" failures="0"`）；两模块合计 288 tests / 0 failures / 0 errors（逐 test-results XML 的 `tests=/failures=/errors=` 属性汇总而得）。
+- Regression evidence: :core 全部 20 个测试类、:data 全部 11 个测试类 failures=0（含版本 bump 后的 `ProviderModelSchemaTest` 6/6、`TreeLearnSchemaQuoteInvariantTest` 7/7）。构建期遭遇四次 `fileHashes.lock 拒绝访问`（别线构建持锁，性质判定＝缓存锁竞态：零 Kotlin 坐标、发生在构建服务启动阶段、非测试失败），锁释放后第五次成功；全程留痕 `artifacts/evidence/T-2026-09-28-annot-green-lockcontention-1723.txt`。
 
 ### TDD or sizing exception — only with prior user approval
 - Exception type: 无（估 460 行 >200 软上限，verifier 警告级；<500 红线内，先例 T-004/T-022）。
 
 ## Implementation notes
 
+- **db-migration-reviewer 设计复核（2026-09-28，实现前）**：结论 PARTIAL——设计可过；F1（`CHECK (kind <> 'HIGHLIGHT' OR body = '')`）必须修入 DDL，已修入方案 §3.1；F2/F3（listFor 同事务清除+SELECT 过滤、insert 稳定语义）已采纳修入方案 §3.3；F4 保留 message 索引（实现时在常量旁注明理由）；F5 非负判定集中域层。真实引擎证据 = 本任务验收条款，GREEN 后补。证据：`artifacts/evidence/T-2026-09-28-annot-schema-design-review.txt`。
 - **建表入场记录（table admission guard，sql.md 强制）**：
   - 为何不用既有存储：标记是按 (消息,容器,区间,kind) 可枚举、需唯一约束与级联删除的一等业务事实；塞进 messages 有界 JSON 会失去唯一索引判重与行级删除，且与既有 11 张规范化表的设计不一致。
   - 领域/权威来源：学习标记（对话域）；producer=用户标记动作；consumer=对话页渲染与读路径。
@@ -119,9 +126,10 @@ Parent summary: 见父需求 T-2026-09-28-chat-highlight-annotation-025.md——
 
 ## Handoff notes
 
-- Completed: 任务文件已建。
-- In progress: —
-- Blocker: 无。
+- Completed: RED 三件套 + GREEN 实现（对方会话 16:44–17:01 写 Annotation/TreeLearnSchema V5/AnnotationDao/仪器测试，本会话以 25 例契约测试裁决全绿，javadoc 断句修复一处）；GREEN 记录五键 + `validate_tasks.py` 026 零 error（17:36）；文档同步（`android/README.md` 三处：领域类型表加 Annotation 行、TreeLearnSchema 行十二张+标记表、DAO 表加 AnnotationDao 行；方案文档 §1 现状行加注「T-026 实现后 5/12 张」、§5.1 措辞「现有」→「既有」）；Java-only 基础检查（T-A 产物零 .kt；dex 级 verifyNoKotlinDex 待别线静止后与设备轮同跑）。
+- In progress: T-A 收口提交（分主题、排除设置页别线文件）。
+- Blocker: 无（构建期 fileHashes.lock 竞态四连，锁释放后自愈，留痕见 evidence）。
 - Unblock condition: —
-- Next steps: RED（DAO 仪器测试 + Annotation JVM 测试）→ GREEN（schema/DAO/Annotation）→ 真机 SQLite 证据 → db-migration-reviewer。
-- Watch-outs: 与 T-B/C/D 的接口一旦定稿不再改签名；跨线并发期构建带 `--no-build-cache`。
+- Next steps: 桌面 SQLite 补充验证（JVM 先例 `TreeLearnSchemaQuoteInvariantTest` 模式，明确标注补充非设备证据）→ db-migration-reviewer 收口前第二遍 → 真机 SQLite 仪器测试证据（设备轮，AGP 测后重装；`AnnotationDaoInstrumentedTest` 707 行已就绪，含真 V4 文件升级与 raw SQL 约束断言）→ verified 收口。
+- Watch-outs: 与 T-B/C/D 的接口一旦定稿不再改签名；跨线并发期构建带 `--no-build-cache`；别线（设置页重设计 + ChatPresenter/ReasoningDisclosure 等）持续间歇构建，fileHashes.lock 冲突时按「零 Kotlin 坐标 + 构建服务启动阶段失败」判定性质，勿误判为代码红；别线文件严禁纳入 T-A 提交。
+- 接力记录（2026-09-28 15:4x，第二会话）：曾误判上轮 RED 文件为别线产物并写了冲突的 `app/ui/AnnotationTest.java`，已删除（未提交历史，无损失）；仪器测试已按上轮 `:core` API 重写对齐（`Annotation.Locator/Span/Kind`、`insert(db,messageId,digest,annotation,at)`、`listFor→List<Annotation>`、无 Row 中间类型、无 mergeRange）。上轮 4 项 scope amendments 全部继续有效。

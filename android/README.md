@@ -196,6 +196,7 @@ androidTest APK 的 `classes.dex` 含 Kotlin 描述符（无 `kotlin/jvm/interna
 | `SearchQuery` | 搜索输入的归一化与 LIKE 转义（`:core` 唯一的查询参数产地） | `trim` + 空白折叠 + `toLowerCase(Locale.ROOT)`，归一化后为空即拒绝；`%`/`_`/`\` 逐个转义并显式 `ESCAPE '\'`；**空查询不可能退化成 `%%` 全表扫描**（构造时即抛，不靠调用方自觉） |
 | `SearchHit` | 一条命中：命中字段、定位三元组与片段 | 字段枚举穷尽（标题 / 锚点 / 回答 / 思考 / 失败尝试的部分回答 / 部分思考）；`DISPLAY_ORDER` 是确定性全序，**不依赖 SQL 的返回顺序**；`locatorAnchor()` 给出跳转锚点，失败尝试的命中**不冒充**某个 revision |
 | `ReadingAnchor` / `ReadingPosition` | 语义阅读位置：message/revision + 列表项偏移 + 视口偏移 | **不保存绝对 `scrollY`**（版本切换或字号变化后必然失效）；`resolve` 先按稳定 id 定位再夹取偏移，锚点失效时回退到**当前活动末端**并显式标记 `atLiveEnd` |
+| `Annotation` / `Locator` / `Span` / `Merge` | 对话页正文的高亮/批注值类型：定位器（prose 段序号或表格单元格三元组）+ 字符区间 + 合并结果（T-026） | `Container` 哨兵互斥（PROSE 只有 `proseIndex`、CELL 只有三个表下标，其余 -1）；`Span.of` 对空区间拒绝；**严格重合判重** `isExactOverlap`——同 locator + 同 span 才算重复（与 kind 无关，部分重叠≠重复）；合并走**吸收流**：`mergeHighlights` 返回并区间 + `absorbedIds`，**相接区间也合并**（与已验收 Demo 同一谓词），调用方删旧行、插新行（同事务）；`toString()` 只带 `body.length()`，批注正文不入日志 |
 | `UnreadRollup` / `ViewportSeen` | 未读序号聚合与「真的看过」判定 | 未读只由稳定回答序号推导，**布尔标记表达不了**这件事；折叠祖先吸收子孙未读，归档分支连同子树离开树且**不泄漏给父级**；只有「最新且带 revision 的 AI 位置」真的进入视口才推进 `lastSeen`，推荐与摘要**不制造未读** |
 
 **错误通道规则（改 `:core` 前必读）**：`Guard` 的类注释是唯一权威正文。三条通道按
@@ -221,7 +222,7 @@ androidTest APK 的 `classes.dex` 含 Kotlin 描述符（无 `kotlin/jvm/interna
 
 | 类型 | 职责 | 关键不变量 |
 | :--- | :--- | :--- |
-| `TreeLearnSchema` | 十一张永久表的唯一 DDL 常量源：表名/列名常量、`CREATE_STATEMENTS`、索引、触发器、前向迁移注册表 | DDL 由列常量拼出（改名不会漂移）；时间列一律 `INTEGER` UTC epoch millis，禁用 SQLite 时钟；`DATABASE_VERSION` 与迁移链一致；T-096 起含附件双表（`attachments` 一文件一物理记录、`content_hash` UNIQUE 幂等去重；`message_attachments` 引用挂消息 ID、`message_id` ON DELETE CASCADE，`attachment_id` 为非强制 FK 的语义引用——附件记录不随任何消息删除，删除由 098 双确认链路负责） |
+| `TreeLearnSchema` | 十二张永久表的唯一 DDL 常量源：表名/列名常量、`CREATE_STATEMENTS`、索引、触发器、前向迁移注册表 | DDL 由列常量拼出（改名不会漂移）；时间列一律 `INTEGER` UTC epoch millis，禁用 SQLite 时钟；`DATABASE_VERSION` 与迁移链一致；T-096 起含附件双表（`attachments` 一文件一物理记录、`content_hash` UNIQUE 幂等去重；`message_attachments` 引用挂消息 ID、`message_id` ON DELETE CASCADE，`attachment_id` 为非强制 FK 的语义引用——附件记录不随任何消息删除，删除由 098 双确认链路负责）；T-026 起含标记表 `message_annotations`（`container` 哨兵列 PROSE/CELL 互斥 CHECK、`kind` 入唯一锚索引（同区间允许高亮+批注并存）、HIGHLIGHT 恒空 body 等 5 条 CHECK、`message_id` ON DELETE CASCADE；fresh 建表与 V4→V5 迁移共用同一 DDL 常量，防两路漂移） |
 | `TreeLearnDatabaseHelper` | 唯一可建库/升级的入口：`onCreate` 执行 `CREATE_STATEMENTS`，`onUpgrade` 走前向迁移，`onConfigure` 开启外键 | 每次打开都**回读** `PRAGMA foreign_keys` 并要求为 `1`，否则 fail closed；拒绝降级（`onDowngrade` 抛异常而不是带着半懂的 schema 跑） |
 | `DatabaseTransactionRunner` | 唯一的显式事务边界 | 嵌套开启被拒绝（`IllegalStateException`），不静默并入外层事务；失败整体回滚并原样向上抛；**工作体若自行结束事务，runner 事后抛错——但那次提交已经生效**（检测而非阻止，见下） |
 
@@ -246,6 +247,7 @@ androidTest APK 的 `classes.dex` 含 Kotlin 描述符（无 `kotlin/jvm/interna
 | `FirstTopicCreation` | `topics` + 根 `branches` + 两条 `messages` + `generation_operations`（跨表） | **首题的五类行在一个事务里全成或全败**：复用 `DatabaseTransactionRunner`，不新造事务机制；留下「有 topic 没有根分支」或「有分支没有 attempt」都会让 T-008 的恢复推导出不可重试的空树。**首题不写快照**——根分支没有父分支来源，`context_snapshot_id`/`source_*` 必须是 `NULL`，不要为了「看起来完整」补一行快照（分叉的两步写属 `BranchCreation`）。**跨主题 source 判定是全仓唯一一处**（`sourceRefusal` → 纯判定点 `decideSourceRefusal`）：`source_*` 是 `ON DELETE CASCADE`，跨表规则写不出 CHECK，所以必须在**同一事务内**判定，`BranchCreation` 复用同一入口而不是再写一份。重复 topic id 按**实测扩展码 1555 + SQLite 自己的小写约束文本**判定（纯判定点 `classifyStorageRefusal`），既不只看码（同码还有 `messages.id` 等主键）也不只看措辞（首版写成大写，编译正常却永不匹配，重复创建全被降级成 STORAGE_REFUSED）。失败一律以分类 `Refusal` 返回，不抛裸异常穿透调用方 |
 | `SearchDao` | `branches` + `messages` + `answer_revisions` + `generation_operations`（七臂 `UNION ALL` 跨表） | 本仓唯一读多表的 SQL（技术方案 §6.3）。七个字段各一臂：标题、用户问题、分叉锚点引文、当前展示 revision 的回答与思考、失败尝试的部分正文。**通配符不内联**——七处全是 `LIKE ? ESCAPE '\'` 加参数绑定；回答/思考臂经 `messages.active_revision_id` 连接，所以「没有位置在展示的过期 revision」在结构上不可达，仍被引用的那条只能经**分叉自己的锚点臂**（`b.source_revision_id`）找到；七臂一律 `b.archived_at IS NULL`。union 列名取自第一臂而三张表都有 `id`，因此 branch/message/revision 键必须别名，否则 `Rows.string(cursor, "id")` 会静默取错键 |
 | `ReadingPositionDao` | `branches` 的四个 `reading_*` 列 | 阅读位置是**语义锚点**（message + revision + 两个相对偏移），不是滚动像素；四列同生同灭，`reading_anchor_message_id` 为 `NULL` 即「没有位置」（正是 `ON DELETE SET NULL` 之后的形态）；消息在而偏移缺 = 半截行，**大声失败**而不是当成「从顶部开始」 |
+| `AnnotationDao` | `message_annotations`（T-026） | 写入约定是**调用方义务**：仅 `isStable()` 且 digest 为当前显示修订时才 `insert`（本类无法观测流状态，javadoc 承载）；`listFor(messageId, digest)` 是**唯一自带事务的 DAO 方法**——DELETE 失配行 + SELECT 同事务完成（自愈），SELECT 显式过滤 digest，外层已有事务时并入（savepoint 语义，minSdk 28 安全）；`insert` 刻意走 `insertOrThrow`，UNIQUE/CHECK/FK 异常**原样传播**（本类不做领域码映射，翻译随 T-B/D 消费方落 `ConstraintFailures`）；`updateBody` 仅 NOTE（对 HIGHLIGHT 抛 `IllegalStateException`）；`delete` 幂等 |
 
 **stabilize 的两个不变量，都是「用夹具篡改过的行」才可区分的那种**：
 
@@ -438,11 +440,12 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
 | `MainActivity` | 应用外壳：在 `R.id.shell_host` 里换屏 + 常驻 `R.id.tab_bar` 的显隐与高亮；`R.id.shell_backdrop` 统一绘制全站纸纹，实现 `HomeSink` + `SettingsSink` + `ChatSink` + `TreeCanvasSink` + `NavigationSink` + `SearchPresenter.Sink` + `LibrarySink` | 自己不持草稿、不持状态、不做决策；纸纹是外壳唯一全屏装饰层，页面根布局保持透明；每个屏幕的系统返回由它统一接管（见「系统返回」）；一级 / 二级的分别只由 `swap()` 与 `showTab()` 两处判定（T-052/T-010） |
 | `ui.HomePresenter` | 首页的全部决策 | 草稿只在 accepted 分支清空；推荐点击先写入草稿再走同一条 `onSubmit()`；缺 Key 时只提示并跳设置，**不写任何行**；055 起不再承载搜索/归档/设置导航与列表改名删除动作（落点：标签栏与学习库）。**2026-09-28：`load()` 分两次 post**——历史主题一读到就下发（带它蕴含的相位），推荐条随后单独 post。推荐条是派生物、生产时可能阻塞在模型流上（上限 `BlockingDerivedCaller.TIMEOUT_SECONDS`），合并下发会让卡片在 provider 应答前一直不出现；推荐失败只清空条本身，页面保持第一次 post 的可用状态（PRD 6.2.17 exception 3） |
 | `ui.HomeViewState` | 首页可绘制的全部状态（相位/草稿/Key/模型/思考/历史主题/推荐/提交中/提示） | 四相位 LOADING/EMPTY/ERROR/READY；`topics` 是按最近使用排序的历史来源，首页最多绘制三条并可点击恢复；`hasTopics()` 是「有没有历史主题」的**唯一**判定点——主标语是否出现、推荐区标题取哪一句、区头计数画不画，三处读的都是它；`Notice` 是分类不是句子；两个列表不可变 |
-| `ui.SettingsPresenter` | 设置页决策：读 Key 状态、保存/替换、删除 | Key 文本从不进入任何 ViewState；缓冲区归它所有并 `finally` 擦除，成功失败都擦 |
+| `ui.SettingsPresenter` | 设置段决策：读 Key 状态、保存/替换、删除 | Key 文本从不进入任何 ViewState；缓冲区归它所有并 `finally` 擦除，成功失败都擦。**2026-09-28 设置页重设计起它同时服务两个视图**：根页（只读状态画入口行副标题）与 API KEY 二级页（表单动作），渲染由 `MainActivity.render(SettingsViewState)` 按 `keyAdminScreen` 是否在屏路由 |
 | `ui.SettingsViewState` | 设置页可绘制状态（`keyLine`/`keyMask`/`notice`） | **没有模型与思考字段**——见下「交互事实」 |
 | `ui.KeySnapshot` | Key 的三态（无 / 不可读 / 可读）+ 掩码 | 掩码是唯一能离开本类的形式；短于 12 字符的 Key 全掩，不部分泄露 |
 | `ui.HomeData` / `ui.RootQuestionSubmitter` / `ui.KeyVault` / `ui.SettingsStore` / `ui.UiThread` | 首页与设置页的端口 | 页面不直接访问 DAO / 网关；`HomeData.recommendations` 失败**返回**兜底条而不是抛错 |
-| `screen.HomeScreen` / `screen.SettingsScreen` | 两个视图：只转发手势 + 按 ViewState 绘制 | 唯一本地状态是「回填抑制」（渲染自己写进去的文本不再回调 presenter，避免光标跳动）；历史主题区只画最近 3 条（`MAX_RECENT`，快捷面而非全量列表），区头计数只在 `hasTopics()` 时出现、无主题时改画空态句；卡片的可选部位（摘要行、未读点）由 `ui.TopicCard` 的实际字段决定，空摘要不留占位句；卡片的 content description 把未读数一并说出来，不靠那颗蓝点独自承担这个事实 |
+| `screen.HomeScreen` / `screen.SettingsScreen` | 两个视图：只转发手势 + 按 ViewState 绘制 | 唯一本地状态是「回填抑制」（渲染自己写进去的文本不再回调 presenter，避免光标跳动）；历史主题区只画最近 3 条（`MAX_RECENT`，快捷面而非全量列表），区头计数只在 `hasTopics()` 时出现、无主题时改画空态句；卡片的可选部位（摘要行、未读点）由 `ui.TopicCard` 的实际字段决定，空摘要不留占位句；卡片的 content description 把未读数一并说出来，不靠那颗蓝点独自承担这个事实。**2026-09-28 设置页重设计：`SettingsScreen` 是纯分组导航列表**（「AI 提供商」「能力」两张 flush 卡 + 行间发丝线，全部入口行用 `ic_chevron_right`），不再承载任何表单；Key 的健康度画在「API KEY · DeepSeek」入口行副标题（掩码 + 判定，读同一个 `SettingsViewState`） |
+| `screen.SettingsKeyScreen` | API KEY 二级页（2026-09-28 设置页重设计自根页迁入）：状态卡（掩码 + 三态 pill + 删除文字链）与替换表单卡（输入框 + 44dp 绿底白勾图标按钮同行） | 原 `SettingsScreen` 的密钥处理规则原样随迁：Key 永不成为 `String`（char[] 缓冲移交 presenter 并擦除）、只见掩码、离开窗口即清输入框；全页唯一实心元素是保存图标（`bg_save_ico`/`ic_check`，带 contentDescription）；删除是红色文字链 + `AlertDialog` 确认，永不与保存同排同权；Key 缺失时删除链接与分隔线同隐 |
 | `screen.ModelThinkingPicker` | 输入框内的模型/思考贴附式弹层 | 锚定当前标识；下方空间不足时向上翻转，始终不遮挡触发它的标识 |
 | `screen.RecommendationMarquee` | 首页推荐区 | 推荐项拆成上下两条独立轨道；每条 chip 画两份并按一份宽度回跳，接缝永不可见；上行向左、下行向右；触摸暂停、离手 2.6 s 恢复；离屏/未附加/窄到不可滚动时停滚；chip 是「类别胶囊 + 文本 + 右箭头」三段，其中**文案与两档底色不在此判定**，只向 `screen.RecommendationTag` 取（T-2026-09-27-005）。**2026-09-28 起两条轨道画在 `screen.EdgeFadeLayout` 里**，由它一次性羽化整块左右边缘；`render(...)` 在同一批 chip 上**不做任何事**（按值比较，`HomeScreen` 每次击键都会把整个 state 交下来，重建轨道会让滚动位置归零并重放首帧） |
 | `screen.EdgeFadeLayout` | 会羽化自己左右边缘的纵向容器（2026-09-28，同日两次修正） | 原型的 `mask-image:linear-gradient(90deg,transparent,#000 20px,#000 calc(100% - 20px),transparent)`（挂在 `.rec-row` 每行上）。Android 用 **`DST_IN`** 复刻：`dst_in = dst × src_alpha`，与 CSS mask 的 alpha 语义**一致**，故渐变数组**照抄原型**（两端 `transparent`=隐藏、中间 `#000`=显示），不需要补集。**首版用 `DST_OUT` + 补集数组是真机翻车后修正的**：`DST_OUT`（`dst × (1 − src_alpha)`）在 `drawRect` 上整块生效——source alpha 取自 `Paint`（默认 255）而非 shader，结果整条推荐带被一次擦光，只剩块外边框，实机读数见 `artifacts/evidence/home-fade-fix-2026-09-28.log` 前的截图量测。宽度取 `rec_fade_width`（20dp）。遮罩挂在**包住两行的块**上——这与原型（每行各挂）不同，是有意的偏离：两行一起淡出只需一次离屏绘制，也不会在两行之间留接缝；原型的渐变从**物理左**起算（`90deg` 且 stop 未按逻辑序写），故 RTL 下不对称是**照抄原型**，不是缺陷；宽度 ≤ 两倍羽化宽度时保留硬边而不是整块隐去 |
@@ -562,7 +565,8 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
 - V3.1 6.2.18 point 2 与 point 3 明确：模型与思考模式的入口**内嵌在问答输入框内**，首页根问题输入框
   与对话页追问输入框都提供该入口，**设置页不提供模型配置项**。因此 `SettingsViewState` 没有模型/思考
   字段；模型与思考由 `HomePresenter.onModelSelected` / `onThinkingToggled` 写进 `SettingsRepository`，
-  设置页只负责凭据与数据边界说明。
+  设置段只负责凭据与数据边界说明。**2026-09-28 设置页重设计后**：设置根页是分组导航列表，凭据的
+  表单动作在 API KEY 二级页（`screen.SettingsKeyScreen`），数据边界说明留在根页。
 - 切换只影响之后的新生成；已生成回答不被追溯改写。本层的写法就是「写偏好 + 改 ViewState」，
   不触碰任何回答或分支。
 - **对话页 chip 与全局分工的分界（T-103，2026-09-25）**：进入对话页时 `ChatPresenter` 经
@@ -571,9 +575,12 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
   不随每次渲染重复）。chip 上的选择是**会话内覆盖**（只改 ViewState，随 presenter 消亡），
   不再写穿 `SettingsStore`——持久的选择只属于设置子页（088），双写正是两个表面漂移的根源。
   角色解析的 render 一律 `ui.post` 回主线程（真机 `CalledFromWrongThreadException` 实测教训）。
-- **设置子页入口接线（T-096 补齐）**：供应商/模型/搜索/语音/文件管理五个子页的入口回调此前
+- **设置子页入口接线（T-096 补齐；2026-09-28 设置页重设计扩展）**：供应商/模型/搜索/语音/文件管理五个子页的入口回调此前
   在 `MainActivity` 从未接线（各任务只孤立验证了自己的屏，入口在生产构建里是死的）；T-096
-  按 087 的「预存损坏修复」先例把五个入口一并接上。文件管理子页（`FileManagerScreen`，代码
+  按 087 的「预存损坏修复」先例把五个入口一并接上。**重设计后根页多了第六间房**：API KEY 二级页
+  （`showKeyAdmin()`，`screen.SettingsKeyScreen`），与五间房同一条 room 模式（swap + 返回落
+  `showSettings()`），但它**复用 `settingsPresenter`**（不设新 presenter），渲染由
+  `MainActivity.render(SettingsViewState)` 按 `keyAdminScreen` 是否在屏路由。文件管理子页（`FileManagerScreen`，代码
   构建无 XML）列出全部附件记录（名称/类型/大小/解析态/引用数/物理缺失标注）与总占用，
   删除确认先行——只删文件与记录、引用行转为缺失标注，绝不触碰消息文本。
   **孤儿清理（T-098，2026-09-25）**：进入页面时扫描，判定在 `AttachmentDao.orphanIds` **一处**——

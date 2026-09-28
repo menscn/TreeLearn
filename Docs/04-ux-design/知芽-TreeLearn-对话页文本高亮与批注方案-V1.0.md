@@ -45,7 +45,7 @@
 | 表格布局 | `res/layout/item_chat_table.xml` | `HorizontalScrollView > TableLayout` 直挂；**插覆盖层需在中间加一层 `FrameLayout`** |
 | 布局测试 | `android/app/src/test/.../ui/ChatMessageRowLayoutTest.java` | 引用 `item_chat_table` —— 结构变更必须同步该测试 |
 | 单卡片仲裁 | `ChatScreen.java:826` `showWordMenu()` / `:838` `dismissPopups()` | 全页同时只允许一张卡片；新弹窗必须在此纳管 |
-| DB schema | `android/data/.../db/TreeLearnSchema.java` | `DATABASE_VERSION = 4`；11 张表；`FORWARD_MIGRATIONS` 至 V3→V4；DDL 只许出现在 `onCreate`/`onUpgrade` |
+| DB schema | `android/data/.../db/TreeLearnSchema.java` | `DATABASE_VERSION = 4`；11 张表；`FORWARD_MIGRATIONS` 至 V3→V4（§1 核实于方案编写时；T-026 实现后为 **5 / 12 张**，见 §3.1）；DDL 只许出现在 `onCreate`/`onUpgrade` |
 | SDK | `android/app/build.gradle` | minSdk 28 / targetSdk 36 —— 无 API 兼容障碍 |
 
 ---
@@ -188,7 +188,7 @@ CREATE INDEX idx_annotations_message ON message_annotations(message_id);
 
 ### 3.4 迁移
 
-1. 新增 `Annotations` 常量类（表/列/`*_DEFINITIONS`，同现有 11 张表写法）。
+1. 新增 `Annotations` 常量类（表/列/`*_DEFINITIONS`，同既有 11 张表写法）。
 2. 加入 `TABLE_NAMES`、`CREATE_TABLE_STATEMENTS`、`CREATE_INDEX_STATEMENTS`。
 3. `MIGRATION_V4_TO_V5_STATEMENTS` 与 fresh install **复用同一批字符串常量**（防两路漂移）。
 4. 注册 `MigrationV4ToV5`，`DATABASE_VERSION` 4 → 5。

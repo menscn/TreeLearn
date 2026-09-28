@@ -16,7 +16,9 @@ import java.util.List;
  * 技术方案 V1.0 §5.1 (message / attempt / stable revision), §5.2 (fork source and anchor),
  * §6 (tables), §11 (unread, reading position, rounds), the field surface of the
  * {@code :core} entities those sections describe, and — for the provider/model pair —
- * SPEC-2026-09-23-providers-and-models 数据结构 (user-confirmed, T-2026-09-23-083). The permanent
+ * SPEC-2026-09-23-providers-and-models 数据结构 (user-confirmed, T-2026-09-23-083), and for the
+ * {@code message_annotations} table 对话页文本高亮与批注方案 V1.1 §3 (user-confirmed 2026-09-28,
+ * T-2026-09-28-026; five CHECKs incl. reviewer F1). The permanent
  * tables are exactly the confirmed set; any further table requires a new user confirmation before
  * it may appear here.
  *
@@ -56,7 +58,7 @@ import java.util.List;
 public final class TreeLearnSchema {
 
     /** Bumped only together with a new forward migration. */
-    public static final int DATABASE_VERSION = 4;
+    public static final int DATABASE_VERSION = 5;
 
     private TreeLearnSchema() {
     }
@@ -233,6 +235,24 @@ public final class TreeLearnSchema {
                 CREATED_AT = "created_at";
     }
 
+    /**
+     * One learner's text mark on one answer (T-026, 方案 V1.1 §3, user-confirmed 2026-09-28).
+     * PROSE and CELL share one table on the sentinel columns: a prose row carries
+     * {@code prose_index} with the -1 sentinel in the cell triple, a cell row the mirror image,
+     * and the container CHECK holds the two shapes mutually exclusive. {@code kind} sits inside the
+     * unique anchor so a highlight and a note may coexist on one range (拍板 2026-09-28); the
+     * content digest (the whole answer markdown's SHA-256 at write time) drives the
+     * clear-on-mismatch read — regeneration deletes, nothing relocates (方案 §3.3).
+     */
+    public static final class Annotations {
+        public static final String TABLE = "message_annotations", ID = "id",
+                MESSAGE_ID = "message_id", CONTAINER = "container", PROSE_INDEX = "prose_index",
+                TABLE_INDEX = "table_index", ROW_INDEX = "row_index", COL_INDEX = "col_index",
+                START_OFFSET = "start_offset", END_OFFSET = "end_offset", KIND = "kind",
+                CONTENT_DIGEST = "content_digest", BODY = "body", CREATED_AT = "created_at",
+                UPDATED_AT = "updated_at";
+    }
+
     /** The confirmed permanent tables, in creation order. */
     public static final String[] TABLE_NAMES = {
             Topics.TABLE,
@@ -246,6 +266,7 @@ public final class TreeLearnSchema {
             Models.TABLE,
             Attachments.TABLE,
             MessageAttachments.TABLE,
+            Annotations.TABLE,
     };
 
     // ------------------------------------------------------------------
@@ -511,6 +532,42 @@ public final class TreeLearnSchema {
             MessageAttachments.CREATED_AT + " INTEGER NOT NULL",
     };
 
+    /**
+     * The annotation rows (方案 V1.1 §3.1, user-confirmed 2026-09-28; reviewer F1 added the fifth
+     * CHECK). Exactly five CHECKs: the range, the kind vocabulary, both halves of the body rule,
+     * and the container sentinels. The digest is NOT NULL — it is written by the insert path and
+     * read by the clear, so a row without one could never be judged.
+     */
+    private static final String[] ANNOTATIONS_DEFINITIONS = {
+            Annotations.ID + " TEXT NOT NULL PRIMARY KEY",
+            Annotations.MESSAGE_ID + " TEXT NOT NULL REFERENCES " + Messages.TABLE + "("
+                    + Messages.ID + ") ON DELETE CASCADE",
+            Annotations.CONTAINER + " TEXT NOT NULL",
+            Annotations.PROSE_INDEX + " INTEGER NOT NULL",
+            Annotations.TABLE_INDEX + " INTEGER NOT NULL",
+            Annotations.ROW_INDEX + " INTEGER NOT NULL",
+            Annotations.COL_INDEX + " INTEGER NOT NULL",
+            Annotations.START_OFFSET + " INTEGER NOT NULL",
+            Annotations.END_OFFSET + " INTEGER NOT NULL",
+            Annotations.KIND + " TEXT NOT NULL",
+            Annotations.CONTENT_DIGEST + " TEXT NOT NULL",
+            Annotations.BODY + " TEXT NOT NULL DEFAULT ''",
+            Annotations.CREATED_AT + " INTEGER NOT NULL",
+            Annotations.UPDATED_AT + " INTEGER NOT NULL",
+            "CHECK (" + Annotations.END_OFFSET + " > " + Annotations.START_OFFSET + ")",
+            "CHECK (" + Annotations.KIND + " IN ('HIGHLIGHT','NOTE'))",
+            "CHECK (" + Annotations.KIND + " <> 'NOTE' OR " + Annotations.BODY + " <> '')",
+            // F1 (db-migration-reviewer 2026-09-28): a highlight's body is empty by DDL, not only
+            // by DAO discipline — the mirror of the NOTE half above.
+            "CHECK (" + Annotations.KIND + " <> 'HIGHLIGHT' OR " + Annotations.BODY + " = '')",
+            "CHECK ((" + Annotations.CONTAINER + " = 'PROSE' AND " + Annotations.PROSE_INDEX
+                    + " >= 0 AND " + Annotations.TABLE_INDEX + " = -1 AND " + Annotations.ROW_INDEX
+                    + " = -1 AND " + Annotations.COL_INDEX + " = -1) OR ("
+                    + Annotations.CONTAINER + " = 'CELL' AND " + Annotations.PROSE_INDEX
+                    + " = -1 AND " + Annotations.TABLE_INDEX + " >= 0 AND " + Annotations.ROW_INDEX
+                    + " >= 0 AND " + Annotations.COL_INDEX + " >= 0))",
+    };
+
     /** Index names, exposed so DBAs and guards can assert them without string literals. */
     public static final String INDEX_BRANCHES_TOPIC_PARENT = "idx_branches_topic_parent";
     public static final String INDEX_BRANCHES_SOURCE_REVISION = "idx_branches_source_revision";
@@ -526,6 +583,8 @@ public final class TreeLearnSchema {
     public static final String INDEX_MESSAGE_ATTACHMENTS_MESSAGE = "idx_message_attachments_message";
     public static final String INDEX_MESSAGE_ATTACHMENTS_ATTACHMENT =
             "idx_message_attachments_attachment";
+    public static final String INDEX_ANNOTATIONS_ANCHOR = "idx_annotations_anchor";
+    public static final String INDEX_ANNOTATIONS_MESSAGE = "idx_annotations_message";
 
     /** The only states that count as an in-flight generation (技术方案 §7). */
     private static final String ACTIVE_STATES =
@@ -564,6 +623,8 @@ public final class TreeLearnSchema {
                     + MessageAttachments.TABLE + "(" + MessageAttachments.MESSAGE_ID + ")",
             "CREATE INDEX " + INDEX_MESSAGE_ATTACHMENTS_ATTACHMENT + " ON "
                     + MessageAttachments.TABLE + "(" + MessageAttachments.ATTACHMENT_ID + ")",
+            annotationsAnchorIndexStatement(),
+            annotationsMessageIndexStatement(),
     };
 
     /**
@@ -573,6 +634,31 @@ public final class TreeLearnSchema {
     private static String modelsUniqueIndexStatement() {
         return "CREATE UNIQUE INDEX " + INDEX_MODELS_PROVIDER_MODEL + " ON " + Models.TABLE + "("
                 + Models.PROVIDER_ID + ", " + Models.MODEL_ID + ")";
+    }
+
+    /**
+     * The annotation anchor: one row per (message, container, locator, kind, range). {@code kind}
+     * is inside the key on purpose (拍板 2026-09-28) — the same range may carry a highlight AND a
+     * note — so the dedup backstop lives exactly where the domain's judge
+     * ({@code Annotation.isExactOverlap}, kind-blind for the tap-an-existing-mark flow) does not.
+     * Spelled once here and reused by the V4 → V5 migration verbatim.
+     */
+    private static String annotationsAnchorIndexStatement() {
+        return "CREATE UNIQUE INDEX " + INDEX_ANNOTATIONS_ANCHOR + " ON " + Annotations.TABLE + "("
+                + Annotations.MESSAGE_ID + ", " + Annotations.CONTAINER + ", "
+                + Annotations.PROSE_INDEX + ", " + Annotations.TABLE_INDEX + ", "
+                + Annotations.ROW_INDEX + ", " + Annotations.COL_INDEX + ", " + Annotations.KIND
+                + ", " + Annotations.START_OFFSET + ", " + Annotations.END_OFFSET + ")";
+    }
+
+    /**
+     * The per-message lookup index. Kept beside the unique anchor (reviewer F4, 2026-09-28): the
+     * clear-on-mismatch read deletes by message, and without this index that DELETE and every list
+     * would scan the whole table once marks become numerous.
+     */
+    private static String annotationsMessageIndexStatement() {
+        return "CREATE INDEX " + INDEX_ANNOTATIONS_MESSAGE + " ON " + Annotations.TABLE + "("
+                + Annotations.MESSAGE_ID + ")";
     }
 
     /**
@@ -705,7 +791,7 @@ public final class TreeLearnSchema {
                             + "', '" + GenerationModel.FLASH.wireId + "', "
                             + BUILTIN_SEED_EPOCH_MILLIS + ")"));
 
-    /** The eleven {@code CREATE TABLE} statements, in creation order. */
+    /** The twelve {@code CREATE TABLE} statements, in creation order. */
     public static final List<String> CREATE_TABLE_STATEMENTS =
             Collections.unmodifiableList(Arrays.asList(
                     createTable(Topics.TABLE, TOPICS_DEFINITIONS),
@@ -718,7 +804,8 @@ public final class TreeLearnSchema {
                     createTable(Providers.TABLE, PROVIDERS_DEFINITIONS),
                     createTable(Models.TABLE, MODELS_DEFINITIONS),
                     createTable(Attachments.TABLE, ATTACHMENTS_DEFINITIONS),
-                    createTable(MessageAttachments.TABLE, MESSAGE_ATTACHMENTS_DEFINITIONS)));
+                    createTable(MessageAttachments.TABLE, MESSAGE_ATTACHMENTS_DEFINITIONS),
+                    createTable(Annotations.TABLE, ANNOTATIONS_DEFINITIONS)));
 
     /** Index DDL for a fresh install, exposed for reviewers and tests. */
     public static final List<String> CREATE_INDEX_STATEMENTS =
@@ -786,7 +873,7 @@ public final class TreeLearnSchema {
      */
     public static final List<Migration> FORWARD_MIGRATIONS =
             Collections.unmodifiableList(Arrays.asList(new MigrationV1ToV2(), new MigrationV2ToV3(),
-                    new MigrationV3ToV4()));
+                    new MigrationV3ToV4(), new MigrationV4ToV5()));
 
     /** The single V1 -> V2 step: executes {@link #MIGRATION_V1_TO_V2_STATEMENTS} in order. */
     private static final class MigrationV1ToV2 implements Migration {
@@ -900,6 +987,45 @@ public final class TreeLearnSchema {
             }
         }
     }
+
+    /**
+     * V4 -> V5: the annotation table (T-026, 方案 V1.1 §3, user-confirmed 2026-09-28).
+     *
+     * <p>Three statements, all <em>the same strings</em> a fresh install executes — the table and
+     * its two indexes — so neither the column shapes nor the anchor-dedup rule can drift between
+     * the two install paths. No statement here touches the existing eleven tables: the upgrade only
+     * adds objects, so existing rows cannot be affected.
+     *
+     * <p>Published steps are never rewritten: a released version's migration is part of the
+     * contract with the databases already on devices (rules/sql.md).
+     */
+    public static final List<String> MIGRATION_V4_TO_V5_STATEMENTS =
+            Collections.unmodifiableList(Arrays.asList(
+                    createTable(Annotations.TABLE, ANNOTATIONS_DEFINITIONS),
+                    annotationsAnchorIndexStatement(),
+                    annotationsMessageIndexStatement()));
+
+    /** The single V4 -> V5 step: executes {@link #MIGRATION_V4_TO_V5_STATEMENTS} in order. */
+    private static final class MigrationV4ToV5 implements Migration {
+
+        @Override
+        public int fromVersion() {
+            return 4;
+        }
+
+        @Override
+        public int toVersion() {
+            return 5;
+        }
+
+        @Override
+        public void apply(SQLiteDatabase database) {
+            for (String statement : MIGRATION_V4_TO_V5_STATEMENTS) {
+                database.execSQL(statement);
+            }
+        }
+    }
+
     /**
      * Applies every registered step that lies inside {@code (oldVersion, newVersion]}.
      *

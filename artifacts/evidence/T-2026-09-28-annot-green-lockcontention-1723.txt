@@ -1,0 +1,42 @@
+CMD: (cd android) ./gradlew :core:test :data:testDebugUnitTest --no-build-cache
+Starting a Gradle Daemon, 2 busy and 25 stopped Daemons could not be reused, use --status for details
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Gradle could not start your build.
+> Could not create service of type BuildLifecycleController using ServicesProvider.createBuildLifecycleController().
+   > Could not create service of type BuildModelController using VintageBuildControllerProvider.createBuildModelController().
+      > Could not create service of type FileHasher using BuildSessionServices.createFileHasher().
+         > java.io.FileNotFoundException: D:\Project\Android\Treelearn\android\.gradle\8.14.3\fileHashes\fileHashes.lock (拒绝访问。)
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 8s
+EXITCODE=1
+
+===== 17:36 :core:test --rerun 补跑再次遭遇同一锁（别线新构建窗口）=====
+CMD: (cd android) ./gradlew :core:test --rerun --no-build-cache
+NOTE: 补跑 :core:test 强制执行（上一轮 :core:test 为 up-to-date 判定，XML 为 17:12 全绿产物；:data:testDebugUnitTest 已于 17:34 强制重跑）
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Gradle could not start your build.
+> Could not create service of type BuildLifecycleController using ServicesProvider.createBuildLifecycleController().
+   > Could not create service of type BuildModelController using VintageBuildControllerProvider.createBuildModelController().
+      > Could not create service of type FileHasher using BuildSessionServices.createFileHasher().
+         > java.io.FileNotFoundException: D:\Project\Android\Treelearn\android\.gradle\8.14.3\fileHashes\fileHashes.lock (拒绝访问。)
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 995ms
+EXITCODE=1

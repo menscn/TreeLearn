@@ -1,0 +1,70 @@
+T-2026-09-28-026 (T-A) RED evidence — captured 2026-09-28, second session of the task.
+All three commands run from D:\Project\Android\Treelearn\android with
+--no-build-cache --console=plain (cross-line concurrent period, workspace convention).
+Output below is filtered through grep -E "error:|错误|FAILED|BUILD" (filter stated so the
+evidence stays re-derivable); every EXITCODE= line is read from ${PIPESTATUS[0]} of the
+same run that produced the output above it.
+
+======================================================================
+CMD 1 (JVM, :core):
+  ./gradlew :core:test --tests "com.treelearn.core.domain.AnnotationTest" \
+      :data:testDebugUnitTest --tests "com.treelearn.data.db.TreeLearnSchemaAnnotationsTest" \
+      --no-build-cache --console=plain
+Result: core task failed first (gradle fail-fast); data module captured separately as CMD 2.
+
+  AnnotationTest.java:45: 错误: 程序包Annotation不存在
+  AnnotationTest.java:46: 错误: 程序包Annotation不存在
+  AnnotationTest.java:47: 错误: 程序包Annotation不存在
+  AnnotationTest.java:55: 错误: 程序包Annotation不存在
+  ... (same symbol error at 57, 67, 69, 78-81, 86-91, 100-101, 106, 111 — every use of
+       Annotation.Locator / Annotation.Container / Annotation.Span / Annotation.Kind)
+  BUILD FAILED
+EXITCODE=1
+
+Failure nature: the production type com.treelearn.core.domain.Annotation does not exist.
+That is the intended RED: the test file (staged before this run) pins an API the GREEN step
+must implement. Not an environment failure — the compile reached the test source set and
+named the missing symbol.
+
+======================================================================
+CMD 2 (JVM, :data):
+  ./gradlew :data:testDebugUnitTest --tests "com.treelearn.data.db.TreeLearnSchemaAnnotationsTest" \
+      --no-build-cache --console=plain
+
+  TreeLearnSchemaAnnotationsTest.java:37: 错误: 找不到符号
+  TreeLearnSchemaAnnotationsTest.java:39: 错误: 找不到符号
+  TreeLearnSchemaAnnotationsTest.java:40: 错误: 找不到符号
+  ... (same symbol error at 57, 63, 78-91, 101-114, 138, 143 — every use of
+       TreeLearnSchema.Annotations.* / TreeLearnSchema.INDEX_ANNOTATIONS_* /
+       TreeLearnSchema.MIGRATION_V4_TO_V5_STATEMENTS)
+  BUILD FAILED
+EXITCODE=1
+
+Failure nature: TreeLearnSchema has no Annotations constant class and no V4->V5 migration —
+the schema half of GREEN has not been written.
+
+======================================================================
+CMD 3 (instrumented-test compile, no device occupied):
+  ./gradlew :app:assembleDebugAndroidTest --no-build-cache --console=plain
+
+  AnnotationDaoInstrumentedTest.java:15: 错误: 找不到符号
+  AnnotationDaoInstrumentedTest.java:19: 错误: 找不到符号
+  ... (same symbol error through the file — every use of com.treelearn.core.domain.Annotation
+       and com.treelearn.data.db.dao.AnnotationDao)
+  BUILD FAILED
+EXITCODE=1
+
+Failure nature: same as CMD 1/2 plus the missing AnnotationDao. Device intentionally NOT
+occupied at RED: the failure is a compile failure, so a device run would add nothing.
+
+======================================================================
+RED → GREEN contract this evidence pins
+- :core must provide Annotation (Container/Kind/Locator/Span/Merge, highlight/note factories,
+  isExactOverlap, mergeHighlights) per android/core/src/test/.../AnnotationTest.java.
+- :data must provide TreeLearnSchema.Annotations + top-level INDEX_ANNOTATIONS_ANCHOR /
+  INDEX_ANNOTATIONS_MESSAGE + MIGRATION_V4_TO_V5_STATEMENTS (exactly 3 statements) +
+  DATABASE_VERSION = 5 per android/data/src/test/.../TreeLearnSchemaAnnotationsTest.java.
+- :data must provide AnnotationDao (insert/listFor/delete/updateBody) per
+  android/app/src/androidTest/.../AnnotationDaoInstrumentedTest.java.
+- SqliteSchemaInstrumentedTest EXPECTED_TABLES/COLUMN_SPEC/index sets already extended to the
+  12-table world in the same staging batch (they will stay red until GREEN lands the schema).
