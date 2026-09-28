@@ -1,17 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The row of answer actions. 2026-09-27 user decision: the row follows the prototype's .ai-actions
-  (line 867-878) - copy, reset, fork, the data-driven child entry, then the time - while the app's
-  own extras (quote, translation, speech) keep their state-driven slots before the time, and the
-  version switcher stays a hidden compatibility entry. No capability is removed: copy/fork return
-  from the compatibility layout, quote keeps its whole-answer entry beside the selection menu's
-  selected-text entry.
+  The row of answer actions. 2026-09-28 user decision: the row carries only the four buttons the
+  prototype's .ai-actions leads with - copy, reset (regenerate), fork (new branch), the data-driven
+  child entry - plus the time at the end. The app's own extras (quote, translation, speech) and the
+  hidden version switcher are removed from this row: the user marked them out on the annotated shot
+  ("删除不需要的按钮，比如那个定位、还有语音播放" / "左侧分别为 复制、重新生成、新建分支、分支列表，
+  右侧是生成时间，其他的不要"). Quote keeps its whole-answer entry beside the selection menu, and
+  translation keeps the translation card's header entry, so no learner-facing capability is lost.
 
-  Icon buttons drop minWidth and pad 6dp so the full worst-case row (7 targets + time) still fits
-  a 360dp column; every target stays 44dp tall (WCAG 2.5.8 needs 24dp, the prototype's own targets
-  are 17px glyphs). 2026-09-28 user decision: the child entry's count ("子分支 N") read as cramped and
-  its own 44dp minWidth pushed the icons apart, so the entry lost the minWidth, took symmetric 8dp
-  padding, and moved up from the caption band to text_sm to match the version chip.
+  Spacing 2026-09-28 user decision: the row read "现在隔的太开了". The surplus was never the 44dp
+  target but the 6dp inner padding each button carried on top of its 4dp start margin. Both are gone:
+  every button is @dimen/touch_min wide with no padding, so the four lead in an even 44dp rhythm and
+  the glyphs centre themselves. The 44dp height stays untouched (WCAG 2.5.8 needs 24dp; the prototype's
+  own targets are 17px glyphs).
+
+  All four leads are now glyphs. 2026-09-28 user decision on the child entry: "分支列表 对应的也是图标，
+  不要是文字！" - it used to be a text Button reading "子分支 N"; it is now the prototype's own ITree
+  glyph with the count in a green badge (.ai-act-n), which is exactly what the prototype draws at line
+  1178. Its glyph is ic_nav_tree, the same asset the app bar's nav entry uses - one glyph, one meaning.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/answer_actions"
@@ -22,127 +28,91 @@
 
     <Button
         android:id="@+id/act_copy"
-        android:layout_width="wrap_content"
+        android:layout_width="@dimen/touch_min"
         android:layout_height="@dimen/touch_min"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/cd_act_copy"
         android:drawableStart="@drawable/ic_action_copy"
         android:drawableTint="@color/tl_ink3"
         android:drawablePadding="0dp"
-        android:paddingStart="6dp"
-        android:paddingEnd="6dp"
+        android:paddingStart="0dp"
+        android:paddingEnd="0dp"
         android:text=""
         android:textColor="@color/tl_ink3"
         android:textSize="@dimen/text_cap" />
 
     <Button
         android:id="@+id/act_reset"
-        android:layout_width="wrap_content"
+        android:layout_width="@dimen/touch_min"
         android:layout_height="@dimen/touch_min"
-        android:layout_marginStart="@dimen/space_s1"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/cd_act_reset"
         android:drawableStart="@drawable/ic_nav_restore"
         android:drawableTint="@color/tl_ink3"
         android:drawablePadding="0dp"
-        android:paddingStart="6dp"
-        android:paddingEnd="6dp"
+        android:paddingStart="0dp"
+        android:paddingEnd="0dp"
         android:text=""
         android:textColor="@color/tl_ink3"
         android:textSize="@dimen/text_cap" />
 
     <Button
         android:id="@+id/act_fork"
-        android:layout_width="wrap_content"
+        android:layout_width="@dimen/touch_min"
         android:layout_height="@dimen/touch_min"
-        android:layout_marginStart="@dimen/space_s1"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/cd_act_fork"
         android:drawableStart="@drawable/ic_action_fork"
         android:drawableTint="@color/tl_ink3"
         android:drawablePadding="0dp"
-        android:paddingStart="6dp"
-        android:paddingEnd="6dp"
+        android:paddingStart="0dp"
+        android:paddingEnd="0dp"
         android:text=""
         android:textColor="@color/tl_ink3"
         android:textSize="@dimen/text_cap" />
 
-    <Button
+    <!-- Child-branch list (prototype line 1178): the tree glyph with the child count in a green
+         badge pinned to its top-right corner (.ai-act-n), NOT a text label. 2026-09-28 user decision:
+         "分支列表 对应的也是图标，不要是文字！" The glyph is the prototype's own ITree, which is the
+         same asset the app bar's nav button already draws - one glyph, one meaning. The badge is a
+         child view rather than a compound drawable because it must sit *outside* the glyph's box,
+         which no compound-drawable arrangement can express. -->
+    <FrameLayout
         android:id="@+id/act_children"
-        android:layout_width="wrap_content"
+        android:layout_width="@dimen/touch_min"
         android:layout_height="@dimen/touch_min"
-        android:layout_marginStart="@dimen/space_s1"
         android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:paddingStart="@dimen/space_s2"
-        android:paddingEnd="@dimen/space_s2"
-        android:textColor="@color/tl_ink3"
-        android:textSize="@dimen/text_sm"
-        android:visibility="gone" />
-
-    <Button
-        android:id="@+id/act_quote"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/touch_min"
-        android:layout_marginStart="@dimen/space_s1"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/cd_act_quote"
-        android:drawableStart="@drawable/ic_action_quote"
-        android:drawableTint="@color/tl_ink3"
-        android:drawablePadding="0dp"
-        android:paddingStart="6dp"
-        android:paddingEnd="6dp"
-        android:text=""
-        android:textColor="@color/tl_ink3"
-        android:textSize="@dimen/text_cap" />
-
-    <Button
-        android:id="@+id/act_translate"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/touch_min"
-        android:layout_marginStart="@dimen/space_s1"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/cd_act_translate"
-        android:drawableStart="@drawable/ic_action_translate"
-        android:drawableTint="@color/tl_ink3"
-        android:drawablePadding="0dp"
-        android:paddingStart="6dp"
-        android:paddingEnd="6dp"
-        android:text=""
-        android:textColor="@color/tl_ink3"
-        android:textSize="@dimen/text_cap" />
-
-    <Button
-        android:id="@+id/act_speak"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/touch_min"
-        android:layout_marginStart="@dimen/space_s1"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/cd_act_speak"
-        android:drawableStart="@drawable/ic_action_speak"
-        android:drawableTint="@color/tl_ink3"
-        android:drawablePadding="0dp"
-        android:paddingStart="6dp"
-        android:paddingEnd="6dp"
-        android:text=""
-        android:textColor="@color/tl_ink3"
-        android:textSize="@dimen/text_cap" />
-
-    <TextView
-        android:id="@+id/act_version"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/touch_min"
-        android:layout_marginStart="@dimen/space_s1"
-        android:background="@drawable/bg_pill"
-        android:clickable="true"
         android:focusable="true"
-        android:gravity="center"
-        android:paddingStart="@dimen/space_s2"
-        android:paddingEnd="@dimen/space_s2"
-        android:textColor="@color/tl_ink2"
-        android:textSize="@dimen/text_sm"
-        android:visibility="gone" />
+        android:visibility="gone">
 
-    <!-- The time rides the action row now (prototype .ai-time, line 877); the weight spacer pins
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:duplicateParentState="true"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_nav_tree"
+            android:tint="@color/tl_ink3" />
+
+        <!-- The count rides the glyph's top-right, as in the prototype. It is decor: the number is
+             already in the container's contentDescription, so a screen reader must not read it twice. -->
+        <TextView
+            android:id="@+id/act_children_count"
+            android:layout_width="wrap_content"
+            android:layout_height="14dp"
+            android:layout_gravity="top|end"
+            android:background="@drawable/bg_count_badge"
+            android:duplicateParentState="true"
+            android:gravity="center"
+            android:importantForAccessibility="no"
+            android:minWidth="14dp"
+            android:paddingStart="3dp"
+            android:paddingEnd="3dp"
+            android:textColor="@color/tl_surface"
+            android:textSize="9.5sp" />
+    </FrameLayout>
+
+    <!-- The time rides the action row (prototype .ai-time, line 877); the weight spacer pins
          it to the end without a fixed width. -->
     <View
         android:layout_width="0dp"

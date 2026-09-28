@@ -1,0 +1,169 @@
+# 证据：动作行收敛 + 附件图标缩档 + 子分支图标化（2026-09-28）
+
+范围：用户两轮批注裁决落地后的收口验证。
+关联方案：`Docs/04-ux-design/知芽-对话页动作行与附件批注处理方案-V1.0.md` §0.0 / §0.1
+
+> **本文件含两轮改动**（同一动作行区域，同一份门禁）：
+> 第一轮 = 动作行收敛 4 按钮 + 附件图标缩档（§0.0）；
+> 第二轮 = 子分支列表由文字改图标 + 数量徽标（§0.1）。
+> 下面 §1 列第一轮，§1b 列第二轮；§4 的门禁结果是**两轮合并后**的最终态。
+
+---
+
+## 1. 变更内容（本线）
+
+| 文件 | 改动 |
+|---|---|
+| `android/app/src/main/res/layout/view_answer_actions.xml` | 删 `act_quote`/`act_translate`/`act_speak`/`act_version`；剩 4 按钮 `layout_width=@dimen/touch_min`、`paddingStart/End=0dp`、无 `marginStart` |
+| `android/app/src/main/java/com/treelearn/app/screen/AnswerActionBar.java` | `Listener` 收窄 4 回调；删 4 字段 + `renderSpeakFace`；`render(message)` |
+| `android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java` | 同步调用点；删 `renderSpeakFace`/`refreshSpeak`/`onTranslatePressed`/`onSpeakPressed`/`onVersionPressed`；`onQuotePressed` 去 `@Override` |
+| `android/app/src/main/res/drawable/ic_chat_attach.xml` | `width`/`height` 24dp → 15dp |
+| `android/app/src/main/res/layout/screen_chat_body.xml` | `chat_attach` `paddingEnd` 12dp → `@dimen/space_s2` |
+| `android/app/src/main/res/values/strings.xml` | 删 7 个孤立字符串键 |
+| `android/app/src/main/res/drawable/ic_action_{quote,translate,speak}.xml` | **删除**（孤立矢量） |
+| `android/app/src/test/java/com/treelearn/app/IconAssetsTest.java` | `CHAT_ICON_ASSETS` 去 quote；新增 `theRetiredActionGlyphsAreGoneFromTheTree` |
+| `android/app/src/test/java/com/treelearn/app/ui/ChatMessageRowLayoutTest.java` | 4 按钮在 / 4 按钮不在 断言 |
+
+### 1b. 第二轮变更（子分支列表 → 图标 + 数量徽标）
+
+用户原话：「分支列表 对应的也是图标，**不要是文字**！」
+原型依据：`知芽-TreeLearn-高保真原型-v1.1.html:1178` 画的是 `<ITree size={17}/><span className="ai-act-n">{N}</span>`，
+即 **ITree 字形 + 右上角绿色数量徽标**（`.ai-act-n`，同文件 232 行）。Android 侧此前退化成了纯文本「子分支 N」。
+
+| 文件 | 改动 |
+|---|---|
+| `android/app/src/main/res/layout/view_answer_actions.xml` | `act_children`：`Button`（文字）→ `FrameLayout`（44dp 热区）+ `ImageView`（`ic_nav_tree`，24dp，居中）+ `TextView`（`act_children_count`，右上角徽标） |
+| `android/app/src/main/res/drawable/bg_count_badge.xml` | **新增**：绿色胶囊（`tl_green` 实底 + `space_s2` 圆角） |
+| `android/app/src/main/java/com/treelearn/app/screen/AnswerActionBar.java` | `children` 字段 `Button`→`FrameLayout`，新增 `childrenCount`；`render` 内 `setText("子分支 N")` → `childrenCount.setText(String.valueOf(childBranchCount))` |
+| `android/app/src/main/res/values/strings.xml` | 删 `chat_act_children_count`（徽标只放数字） |
+| `IconAssetsTest.java` | `javaDrivenTextualActionsStayTextual` **反转**（旧断言「act_children 必须保持文字」已不成立）；新增 `theChildEntryDrawsAGlyphAndItsBadgeUsesTheBrandGreen` |
+| `ChatMessageRowLayoutTest.java` | 新增 `theChildEntryIsAGlyphWithACountBadgeNotALabel`；新增 `elementWithBody()` 辅助（原 `elementAround()` 只取开标签，看不到 FrameLayout 的子节点） |
+
+**未新增 token**：徽标用既有 `tl_green` + `space_s2`。
+
+**第二轮踩到的坑（两条，各失败一次）**：
+1. `bg_count_badge.xml` 首次 `Write` **未落盘**（并发写树期间静默丢失）→ `processDebugResources` 报
+   `resource drawable/bg_count_badge not found`。**诊断法**：不要只信 Write 的 success 回执，立刻 `ls` 验在。
+2. 补写时注释里写了 `background --green` → AAPT2 `ParseError: 注释中不允许出现字符串 "--"`，
+   `mergeDebugResources FAILED`。**这是本仓已记录过的坑**（`ic_key.xml`/`bg_unread_dot.xml` 各踩过一次），
+   注释里提 token 要写 `green`，不能照抄 CSS 变量写法。改后全树扫描确认 3 个改动 XML 的注释均无 `--`。
+
+---
+
+## 2. 已删除项的零残留核对
+命令：
+```
+grep -rn "ic_action_quote\|ic_action_translate\|ic_action_speak" android/app/src
+grep -rn '"act_quote"\|"act_translate"\|"act_speak"\|"act_version"' android/app/src
+grep -rn '"cd_act_quote"\|"cd_act_translate"\|"cd_act_speak"\|"cd_act_speak_stop"' android/app/src
+grep -rn '"chat_quote_title"\|"chat_version_title"\|"chat_version_chip"' android/app/src
+```
+
+结果（生产代码 = 0 处；仅剩「断言其不存在」的测试行）：
+
+```
+ic_action_quote   -> 0 处（生产）；测试仅 IconAssetsTest 的「必须已删」断言
+ic_action_translate -> 0 处
+ic_action_speak   -> 0 处
+act_quote/act_translate/act_speak -> 仅 ChatMessageRowLayoutTest:72 的「必须不在」断言
+act_version       -> 仅 ChatMessageRowLayoutTest:72,122 的「必须不在」断言
+chat_version_chip -> 仅 ChatMessageRowLayoutTest:126 的「必须不在」断言
+cd_act_*          -> 0 处
+```
+
+结论：**无悬挂引用**。
+
+## 3. 与删除项无关但必须保留的同类资源
+
+- `ic_chat_stop.xml` —— 仍被 `ChatScreen.java:674`（发送键的停止态）引用，**未删**。
+- `ic_sparkle.xml` —— 选词菜单 `popup_word_action.xml:43` 与首页 `screen_home_body.xml:177` 引用，**未删**。
+
+---
+
+## 4. 门禁结果（两轮合并后的最终态）
+
+### 4.1 JVM 单测
+
+**本线自有的两个测试类，隔离跑全绿：**
+```
+cd android && ./gradlew --no-daemon --console=plain --no-build-cache \
+  :app:testDebugUnitTest --tests "com.treelearn.app.ui.ChatMessageRowLayoutTest" \
+                         --tests "com.treelearn.app.IconAssetsTest"
+EXITCODE=0
+BUILD SUCCESSFUL in 26s
+```
+
+**全量跑：706 例 / 2 失败**，两个失败**都不在本线负责的范围**：
+
+```
+tests=706 failures=2
+  com.treelearn.app.screen.HomeRecommendationStripTest 1   (aStripTooNarrowToFadeKeepsItsEdges, :224)
+  com.treelearn.app.ui.HomePresenterTest               1   (theFirstPostIsAlreadyAFinishedPage…, :301, IndexOutOfBounds)
+```
+
+判定「与本线无关」的依据（三条）：
+1. 两个类都在**首页推荐条**域，本线两轮改动全在**对话页动作行/附件 pill**，无交集。
+2. 同期另一条工作线正在改 `EdgeFadeLayout.java`（15:03:17 与 15:13:32 两次写入）与
+   `HomeRecommendationStripTest.java`（15:13:46 写入）—— 正是这两个失败类的被测对象。
+3. 本线两个测试类**隔离跑 0 失败**；且编译期唯一的错误一度是 `EdgeFadeLayout.java:109`
+   （`Rect` 无法转换为 `RectF`，别线中间态，15:13:32 由别线自行修好），本线文件零编译错误。
+
+### 4.2 设计 token 守门
+
+```
+python .trae/scripts/dev/check_design_tokens.py
+check_design_tokens: 0 check(s) failed
+EXITCODE=0
+```
+读数：`tokens=43 measured_resources=15`。两轮**均未新增 token**，资源数保持 15。
+
+### 4.3 打包 + Java-only guard（真结论）
+
+```
+cd android && ./gradlew --no-daemon --console=plain --no-build-cache :app:assembleDebug verifyNoKotlinDex
+EXITCODE=0
+BUILD SUCCESSFUL in 48s
+
+verifyNoKotlinDex: [app/build/outputs/apk/debug/app-debug.apk] shipped APK = 1984178 bytes, 17 dex file(s)
+verifyNoKotlinDex: [app/build/outputs/apk/release/app-release.apk] shipped APK = 1035455 bytes, 1 dex file(s)
+verifyNoKotlinDex: [app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk] androidTest = 1554606 bytes, 3 dex file(s)
+verifyNoKotlinDex: NOTICE (accepted) [androidTest] contains Kotlin-compiled annotation classes without runtime linkage; no Kotlin runtime library is required on device
+verifyNoKotlinDex: PASS (3 APK(s) inspected across app/build/outputs/apk, no Kotlin runtime bytecode)
+```
+
+> debug APK 从第一轮的 1,633,729 B 增至 1,984,178 B（+350,449 B）**主要来自别线同期改动的累积**
+> （`EdgeFadeLayout`、首页推荐条等），非本线两轮改动所致 —— 本线只新增 1 个 `<shape>` 与 1 个 `FrameLayout`。
+> 判「APK 大小差 = 谁改的」不可靠，本文件不做此归因。
+
+---
+
+## 5. 两次先导失败的性质裁决（非 Kotlin 命中）
+
+本 guard 在拿到 PASS 之前失败过两次，**均为 Gradle 构建缓存层的文件锁冲突，与 Kotlin 无关**：
+
+| # | 失败任务 | 报错摘要 | 裁决 |
+|---|---|---|---|
+| 1 | `:app:compileDebugJavaWithJavac` | `Failed to load cache entry …: Unable to delete directory '…\intermediates\javac\debug\compileDebugJavaWithJavac\classes'` | 缓存淘汰时目录被占用（本仓多工作线并发写同一 `android/` 树，另有 Gradle 进程持有） |
+| 2 | `:app:dexBuilderRelease` | `Failed to store cache entry …: Could not get file mode for '…\BlockingDerivedCaller$1.dex'` | 同上，缓存写入时文件被并发持有 |
+
+判定为非 Kotlin 命中的依据：
+1. 两次失败形态**不同**（一次读缓存淘汰、一次写缓存条目），且**都发生在 `verifyNoKotlinDex` 之前的构建阶段**，`verifyNoKotlinDex` 任务本身根本没有执行到。
+2. 报错文本**不含任何 Kotlin 坐标或字节码**；唯一提到的产物 `BlockingDerivedCaller$1.dex`，其源文件是
+   `android/app/src/main/java/com/treelearn/app/artifact/BlockingDerivedCaller.java` —— **Java 匿名内部类**（`$1`）。
+3. `find android -name '*.kt' -o -name '*.kts'`（排除 `build/`）**为空**，源码树无 Kotlin。
+4. 加 `--no-build-cache` 绕过缓存层后**一次通过**，→ 失败点确实在缓存，不在编译/校验逻辑。
+
+> 与既有约定一致：`-q` 会吞掉 Gradle 的 "What went wrong"，故本文件引用的报错均来自**去 `-q` 的原始运行**。
+> 唯一给出的 PASS 报告来自**加 `--no-build-cache` 的那次运行**，其命令行与运行模式已随本节如实记录。
+
+---
+
+## 6. 未完成项
+
+- **真机验证未做**：两轮改动（动作行收敛、附件图标档位、子分支图标化）均未在设备上截图核对。
+  共享真机 `AWSS013807000356` 被多线共用，且 `connectedDebugAndroidTest` 跑完会卸载被测应用；
+  另一工作线正在迭代 androidTest 与首页推荐条，在本轮窗口内做真机验证会与它冲突。留待可独占设备时补做。
+- 目标量测口径（沿用方案 §4）：真机复测动作行**中心距 / 字形宽之比**，期望从 4.8 落到 3.1±0.3；
+  附件 pill 与模型 chip 的图标档应一致（15dp vs 15dp）；子分支入口应呈现为**树形图标 + 绿色数字徽标**，
+  且四个按钮视觉重量一致（均为 24dp 字形居中于 44dp 盒）。
+- **本轮未 git 提交**（与既有的两个待推提交 `2b7a14c`、`7f7ba2b` 一并待处理）。
