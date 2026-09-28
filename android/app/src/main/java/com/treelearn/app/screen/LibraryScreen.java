@@ -48,6 +48,7 @@ public final class LibraryScreen extends LinearLayout {
     private final EditText searchInput;
 
     private LibraryPresenter actions;
+    private Runnable onBack;
     private boolean rendering;
 
     public LibraryScreen(Context context) {
@@ -61,6 +62,11 @@ public final class LibraryScreen extends LinearLayout {
         segmentDone = findViewById(R.id.library_segment_done);
         searchScope = findViewById(R.id.library_search_scope);
         searchInput = findViewById(R.id.library_search_input);
+        findViewById(R.id.library_back).setOnClickListener(view -> {
+            if (onBack != null) {
+                onBack.run();
+            }
+        });
         segmentInProgress.setOnClickListener(view -> onSegment(LibraryViewState.Segment.IN_PROGRESS));
         segmentDone.setOnClickListener(view -> onSegment(LibraryViewState.Segment.DONE));
         searchInput.addTextChangedListener(new TextWatcher() {
@@ -83,6 +89,15 @@ public final class LibraryScreen extends LinearLayout {
 
     public void setActions(LibraryPresenter value) {
         this.actions = value;
+    }
+
+    /**
+     * Wires the page's own back arrow. The library is drawn from both a tab and (on the tablet) the
+     * same column, so the screen does not decide what back means - it reports the tap and lets
+     * {@code MainActivity}'s single back decision answer it, exactly as the system gesture does.
+     */
+    public void setOnBackPressed(Runnable onBack) {
+        this.onBack = onBack;
     }
 
     public void render(LibraryViewState next) {
@@ -116,8 +131,17 @@ public final class LibraryScreen extends LinearLayout {
      * Which pane is on screen, what each row says and in what order the rows come were all decided
      * before this was called. The two segment pills stay put - tapping one is how the learner walks
      * out of the search state and back to the library's own lists.
+     *
+     * <p>An empty query is not a search page: the guide pane is the prototype's search <em>screen</em>,
+     * and this implementation inlines search into the library, so there is nowhere for the guide to
+     * stand. The library's own lists are the one thing an empty box can be showing, so this paints
+     * nothing and leaves them in place - which is what makes clearing the box land on the lists
+     * rather than on a guide that has no screen to belong to.
      */
     public void showSearch(SearchViewState searchState, SearchPage page) {
+        if (page.pane == SearchPage.Pane.GUIDE) {
+            return;
+        }
         rendering = true;
         try {
             searchScope.setVisibility(VISIBLE);
@@ -136,9 +160,19 @@ public final class LibraryScreen extends LinearLayout {
         }
     }
 
-    /** Leaving the search state clears the box, so the library comes back without a stale query. */
-    public void leaveSearch() {
+    /**
+     * Leaving the search state clears the box, so the library comes back without a stale query.
+     *
+     * <p>Returns whether there was a query to clear. That answer is what tells back's two cases
+     * apart - a live query is what back consumes first, and only a library already showing its own
+     * lists steps out to the home tab - and it is read from the field that actually holds the text
+     * rather than asked of the search stack a second time.
+     */
+    public boolean leaveSearch() {
+        Editable typed = searchInput.getText();
+        boolean hadQuery = typed != null && typed.length() > 0;
         searchInput.setText("");
+        return hadQuery;
     }
 
     private CharSequence searchStateText(SearchViewState searchState, SearchPage.Pane pane) {

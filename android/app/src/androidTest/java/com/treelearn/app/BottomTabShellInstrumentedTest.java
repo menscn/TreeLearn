@@ -13,6 +13,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.SystemClock;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -36,14 +37,15 @@ import org.junit.runner.RunWith;
 /**
  * T-052 acceptance evidence for the bottom-tab shell and the library screen, executed on a real
  * device: the three tabs switch and highlight, a second-level screen hides the bar and returns to
- * the tab that opened it, the library lists the topics the store actually holds, and an empty store
- * gets the guidance sentence rather than a blank list.
+ * the tab that opened it, the library's own back arrow leaves a live search before it steps out, the
+ * library lists the topics the store actually holds, and an empty store gets the guidance sentence
+ * rather than a blank list.
  *
  * <p><strong>Every move is made through a control the product really draws</strong> - the tab items,
- * a library row, the conversation's back and navigation buttons, the navigation page's back button.
- * Nothing here calls a private method or a platform back gesture, because the point of the slice is
- * the shell's own wiring rather than the presenter underneath it (the phase rules are pinned on the
- * JVM by {@code LibraryPresenterTest}).
+ * a library row, the library's and the conversation's back buttons, the navigation page's back
+ * button. Nothing here calls a private method or a platform back gesture, because the point of the
+ * slice is the shell's own wiring rather than the presenter underneath it (the phase rules are pinned
+ * on the JVM by {@code LibraryPresenterTest}).
  *
  * <p><strong>Two environment facts this suite depends on, stated rather than assumed.</strong> (1) The
  * database file is never deleted here: {@code AppContainer} is a process-wide singleton whose
@@ -127,6 +129,44 @@ public final class BottomTabShellInstrumentedTest {
     // ------------------------------------------------------------------
     // 2. Second-level screens: no bar, and back lands on the tab that opened them.
     // ------------------------------------------------------------------
+
+    /**
+     * The library's own arrow is the same request the system gesture makes, and it is consumed in
+     * the same order: a live query goes first and the library's own lists come back, then a second
+     * press leaves for the home tab. The test drives the drawn arrow both times rather than the
+     * gesture, and reads the scope line back, so "the search went away" is a visible fact.
+     */
+    @Test
+    public void theLibraryArrowLeavesTheSearchStateThenStepsBackToHome() {
+        seedTopic(TOPIC_A, TITLE_A, T0, 0);
+        activity = launch();
+
+        click(R.id.tab_library);
+        assertNotNull("the library tab mounts the library screen", waitFor(R.id.library_root));
+        assertEquals("the arrow is drawn on the library header, as on the settings header",
+                View.VISIBLE, view(R.id.library_back).getVisibility());
+        assertEquals("and no search is live, so its scope line is away",
+                View.GONE, view(R.id.library_search_scope).getVisibility());
+
+        // A live query is the first thing the arrow takes away.
+        final EditText box = (EditText) view(R.id.library_search_input);
+        instrumentation.runOnMainSync(() -> box.setText("SYNTHETIC-QUERY"));
+        assertNotNull("typing mounts the search scope line", awaitVisible(R.id.library_search_scope));
+
+        click(R.id.library_back);
+        assertEquals("the first press leaves the search state, clearing the box",
+                "", box.getText().toString());
+        assertNotNull("the library's own lists are what it lands on", waitFor(R.id.library_rows));
+        assertEquals("and the search scope line is taken away with it",
+                View.GONE, view(R.id.library_search_scope).getVisibility());
+        assertHighlighted(R.id.tab_library);
+
+        // A library showing its own lists is the second press's business: it steps back to home.
+        click(R.id.library_back);
+        assertNotNull("with no query live the arrow steps back to the home tab",
+                waitFor(R.id.home_draft));
+        assertHighlighted(R.id.tab_home);
+    }
 
     @Test
     public void aConversationOpenedFromHomeHidesTheBarAndBackLandsOnHome() {

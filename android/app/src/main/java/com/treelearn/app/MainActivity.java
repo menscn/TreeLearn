@@ -304,13 +304,18 @@ public final class MainActivity extends Activity
     /**
      * The one back decision: settings step back to whatever opened them, the navigation page steps back
      * to the conversation it was opened from, the canvas steps back to the conversation it was opened
-     * from - the same move the prototype's canvas appbar makes. The library steps back to the home tab,
-     * a conversation steps back to the tab it was opened from, the search page steps back to the tab
-     * that opened it, and the home page leaves the app.
+     * from - the same move the prototype's canvas appbar makes. The library steps back within itself
+     * while a query is live and to the home tab otherwise, a conversation steps back to the tab it was
+     * opened from, the search page steps back to the tab that opened it, and the home page leaves the
+     * app.
      *
      * <p>Both platforms land here, so there is a single place that decides what back means and no
      * second copy of the rule to drift. A second-level screen returns through {@link #showTab} rather
      * than to the home page: the tab the learner left from is the tab they come back to.
+     *
+     * <p>The library's own arrow reports the same request as the gesture, so the two cannot disagree:
+     * a live query is consumed first (the library's own lists come back), and only a library already
+     * showing its lists steps out to the home tab.
      */
     private void onBackRequested() {
         if (homeDrawerScreen != null
@@ -352,6 +357,16 @@ public final class MainActivity extends Activity
             return;
         }
         if (libraryScreen != null) {
+            // A live query is consumed first: the screen clears the box it holds and says whether
+            // there was one. The clearing arrives back through the box's own watcher as an empty
+            // query, and the presenter then restores the library's own lists - which is also what
+            // takes the search scope line away. A second press, with nothing to clear, steps out.
+            if (libraryScreen.leaveSearch()) {
+                if (libraryPresenter != null) {
+                    libraryPresenter.onSearchLeft();
+                }
+                return;
+            }
             showHome();
             return;
         }
@@ -915,6 +930,7 @@ public final class MainActivity extends Activity
         libraryPresenter = new LibraryPresenter(this, container.uiThread(), container.background(),
                 container.libraryData(), searchPresenter);
         libraryScreen.setActions(libraryPresenter);
+        libraryScreen.setOnBackPressed(this::onBackRequested);
         selectTab(Tab.LIBRARY);
         swap(libraryScreen);
         libraryPresenter.start();

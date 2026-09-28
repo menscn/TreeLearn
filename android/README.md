@@ -529,7 +529,13 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
 - API 33+ 走框架的 `getOnBackInvokedDispatcher().registerOnBackInvokedCallback(...)`；API 28–32 走
   `dispatchKeyEvent(KEYCODE_BACK)` 回落；两条路都收敛到同一个 `onBackRequested()`（设置页 →
   导航页 → 画布 → 对话页 → 学习库 → 退出应用，见「导航页与归档 / 恢复 / 永久删除（T-039）」与
-  「底部标签栏与学习库（T-052）」；学习库搜索态的返回由 `LibraryScreen` 回到列表态，不经宿主）。
+  「底部标签栏与学习库（T-052）」；学习库的返回是**两级**：有搜索词时先由宿主判定、`LibraryScreen`
+  清空搜索框、`LibraryPresenter.onSearchLeft()` 恢复本页列表并留在学习库，无搜索词时才回主页 tab。
+  两级的判定仍在宿主这一处，屏幕与 presenter 各自只做自己那一半）。
+- **学习库页头的返回箭头与系统返回是同一个请求**（2026-09-28 用户裁决）：箭头由
+  `MainActivity.showLibrary()` 绑到同一个 `onBackRequested()`，所以「点箭头」和「按返回手势」不可能给出
+  两个答案。空查询时不画搜索指南（`showSearch()` 对 `Pane.GUIDE` 提前返回）：搜索在本实现内联在学习库，
+  原型那页独立搜索屏的空态指南在这里无处安放，画出来会盖住本页列表。
 - **二级屏的返回落点是发起它的那个标签，不是首页**（T-052）：对话页的返回走 `showTab(currentTab)`，
   因此从学习库进对话再返回落回学习库；`currentTab` 只被标签点击与一级屏自身改写。
 - **不能用 AndroidX 的 `getOnBackPressedDispatcher()`**：lint 的 `GestureBackNavigation` 会这么建议，但
@@ -948,9 +954,9 @@ V3.2 PRD 6.2.16 把 主页 / 学习库 / 设置 并列为一级入口，并给�
 | `library.LibraryData` / `LibrarySink` / `LibraryViewState` / `LibraryPresenter` | 学习库的读端口、出口、可绘制状态与全部判定 | 屏幕**不做任何判定**：能否列出、在哪个相位、每行说什么，全部来自一个不可变 `LibraryViewState`；相位 LOADING / READY / EMPTY / ERROR，空表是 EMPTY 而不是错误 |
 | `wiring.SqliteLibraryStore` | 学习库的真实数据路径：把连接交给 `TopicDao.listOverviews` | **只读**：本切片不加表、不加列、不加 migration、没有写方法可误用，所以它连事务执行器都不需要——那样的构造只可能为了一次裸写 |
 | `wiring.LibraryWiring` | `TopicDao.Overview` → `LibraryViewState.Row` 的映射 | 树名只由 `BranchHeading.of(存下来的标题, 首个用户问题)` 给出，与首页卡片、对话标题**同一个实现**，所以一个主题不可能在库里叫另一个名字 |
-| `screen.LibraryScreen` + `res/layout/screen_library*.xml` / `screen_library_body.xml` / `item_library_topic.xml` | 学习库视图：标题、搜索框（T-054 接管为检索入口）、两个分段位（T-053 接管已完成位）、行列表与状态句 | 行 = 强调条 + 标题 + 「分支数 · 最近使用（· 未读数）」；未读点没读就 `gone`；屏幕里没有 SQL、没有 DAO、没有排序 |
+| `screen.LibraryScreen` + `res/layout/screen_library*.xml` / `screen_library_body.xml` / `item_library_topic.xml` | 学习库视图：返回箭头、标题、搜索框（T-054 接管为检索入口）、两个分段位（T-053 接管已完成位）、行列表与状态句 | 行 = 强调条 + 标题 + 「分支数 · 最近使用（· 未读数）」；未读点没读就 `gone`；屏幕里没有 SQL、没有 DAO、没有排序；箭头只上报同一个返回请求，落点由宿主一处判定 |
 | `AppContainer.libraryData()` | 组合根暴露的端口 | 装配只发生一次，学习库与首页读的是同一条连接、同一条语句 |
-| `android/app/src/androidTest/java/com/treelearn/app/BottomTabShellInstrumentedTest.java` | 本片验收：标签可达与高亮、两条返回落点、学习库真实行、空表空态 | 每个动作都走产品真的画出来的控件（标签项、库行、对话的返回与导航按钮、导航页的返回），不调私有方法、不模拟系统返回手势 |
+| `android/app/src/androidTest/java/com/treelearn/app/BottomTabShellInstrumentedTest.java` | 本片验收：标签可达与高亮、两条返回落点、学习库页头箭头（两级：退搜索 / 回主页）、学习库真实行、空表空态 | 每个动作都走产品真的画出来的控件（标签项、库行、学习库与对话的返回按钮、导航页的返回），不调私有方法、不模拟系统返回手势 |
 
 **这一层的交互事实：**
 

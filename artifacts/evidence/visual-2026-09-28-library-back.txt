@@ -1,0 +1,87 @@
+visual evidence - library back arrow (2026-09-28)
+================================================
+
+WHY
+---
+User report (screenshot Clipboard_Screenshot.png): "学习库没有返回按钮" - the library page
+header carried no back control while the settings page header did, so the two headers of the
+same kind of page (both first-level tabs) read as different styles.
+
+RULING
+------
+User picked option (a): draw a real back arrow on the library header, same form as the settings
+header. Behaviour of the arrow = the same request the system back gesture makes, and it is
+consumed in the same order: a live query is left first (the library's own lists come back), and a
+library already showing its lists steps out to the home tab.
+
+CHANGES
+-------
+- res/layout/screen_library_body.xml  empty touch_min lead View -> ImageView id=library_back
+                                     (ic_nav_back, tl_green_deep tint, borderless bg, -8dp start)
+- res/values/strings.xml              + cd_library_back
+- screen/LibraryScreen.java           + setOnBackPressed(Runnable); arrow wired in ctor;
+                                     leaveSearch() returns whether there was a query;
+                                     showSearch() no longer paints the GUIDE pane (see below)
+- library/LibraryPresenter.java       + onSearchLeft() - restores the library's own lists
+- MainActivity.java                   showLibrary() binds the arrow; onBackRequested() library
+                                     branch: clear the box first, then restore the lists, else home
+- test/IconAssetsTest.java            + assertIconAction(..., "library_back", ...)
+- androidTest/BottomTabShellInstrumentedTest.java  + theLibraryArrowLeavesTheSearchStateThenStepsBackToHome
+
+SIDE EFFECT FOUND AND FIXED (not cosmetic)
+------------------------------------------
+The prototype's search is a separate second-level screen (renderSearch) whose empty state is the
+guide "输入关键词开始搜索". This implementation inlines search into the library, so an empty query
+had no screen for that guide to belong to. Clearing the box therefore used to leave the search
+scope line painted over the library's own lists. showSearch() now returns early for Pane.GUIDE, so
+an empty box leaves the library's lists in place. This is what makes "leaving the search lands on
+the library's lists" true rather than "lands on a guide with nowhere to stand".
+
+COMMANDS AND RESULTS
+--------------------
+$ ./gradlew --no-daemon --console=plain :app:testDebugUnitTest :app:assembleDebug verifyNoKotlinDex
+BUILD SUCCESSFUL
+verifyNoKotlinDex: PASS (3 APK(s) inspected across app/build/outputs/apk, no Kotlin runtime bytecode)
+JVM unit tests: suites=79 tests=683 failures=0 errors=0 skipped=0
+
+$ python .trae/scripts/dev/check_design_tokens.py
+check_design_tokens: 0 check(s) failed
+EXITCODE=0
+(43 tokens / 15 resources unchanged - the prototype edit reused icon-btn/appbar-title/t1/IBack,
+ no new token was introduced)
+
+DEVICE RUN - AWSS013807000356 (1200x2652 @ 520dpi)
+--------------------------------------------------
+$ adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+Success
+$ adb shell pm list packages | grep treelearn
+package:com.treelearn
+$ adb shell am start -n com.treelearn/com.treelearn.app.MainActivity
+mCurrentFocus=Window{... com.treelearn/com.treelearn.app.MainActivity}
+
+Step 1  tap library tab (600,2555)          -> 01-library-arrow.png
+        The green "<" is drawn at the header's left edge, and "学习库" sits to its right at the
+        same metrics as "设置".
+
+Step 2  tap the arrow (103,213), no query    -> 02-arrow-steps-home.png
+        Lands on the home screen; tab bar highlights 主页. A library with its own lists showing
+        steps out to home.
+
+Step 3  tap search box (600,379), input "tree" -> 03-search-live.png
+        dumpsys input_method: mInputShown=true. The scope line "标题 · 问题 · 回答 · 锚定原文"
+        is visible and the empty-result line "没有找到「tree」" is shown: a search is live.
+
+Step 4  tap the arrow (103,213), query live  -> 04-arrow-leaves-search.png
+        The box is back to its placeholder, the scope line is gone, the library's own empty state
+        "还没有学习记录 / 去主页写下第一个问题 →" is back, the tab bar still highlights 学习库.
+
+Step 5  tap settings tab (1000,2560)         -> 05-settings-header-for-symmetry.png
+        The settings header shows the same green "<" in the same place: the two headers now match.
+
+CONCLUSION
+----------
+The library header draws the same back arrow as the settings header (step 1 vs step 5), and the
+arrow behaves as one back request with two levels, matching the gesture: it leaves a live search
+and restores the library's lists (steps 3->4), and with no query it steps out to the home tab
+(step 2). Every gate is green. Device screenshots are the raw screencap output, archived under
+artifacts/evidence/visual-2026-09-28-library-back/.

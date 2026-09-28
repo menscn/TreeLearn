@@ -3256,8 +3256,13 @@ function AppPhone(){
       b.archived && !(b.parentId && branches[b.parentId] && branches[b.parentId].archived));
     return (
       <div className="screen" key="library">
-        {/* 2026-09-27 用户裁决：补「学习库」页面标题（覆盖评审 N6）；搜索唯一正典入口仍是顶部搜索框 */}
+        {/* 2026-09-27 用户裁决：补「学习库」页面标题（覆盖评审 N6）；搜索唯一正典入口仍是顶部搜索框。
+            2026-09-28 用户裁决：一级 tab 顶栏补返回箭头（真机截图发现学习库与设置页头不对称）。
+            箭头行为 = 系统返回的同一请求：有搜索词时先退出搜索态并恢复本页列表，否则回主页 tab。
+            原型中搜索是独立二级页（renderSearch），故此处箭头不含「退搜索」的可见差异；
+            该二级行为由 Android 内联实现承载，见 screen_library_body.xml 注释。 */}
         <div className="appbar" style={{borderBottom:'none'}}>
+          <button className="icon-btn" onClick={() => { setScreen('home'); }}><IBack/></button>
           <div className="appbar-title"><div className="t1">学习库</div></div>
         </div>
         <div className="search-bar" style={{cursor:'text'}} onClick={() => { setSearchQ(''); setScreen('search'); }}>
@@ -3881,6 +3886,7 @@ function App(){
         <h3>V1.1 增量走查路径（本次新增）</h3>
         <ol className="guide-steps">
           <li><b>应用外壳</b>（v3.0）：底部三标签栏（主页 / 学习库 / 设置）承载一级 IA；首页左上角改为<b>抽屉按钮 + 品牌锁定区</b>（logo + 知芽），hero 品牌下新增一行小字 slogan「把复杂问题，学成自己的知识树」；设置 / 学习库顶栏补<b>页面标题</b>（2026-09-27 用户裁决，覆盖评审 N6「一级 tab 不重复标注」口径）。原「搜索 / 归档 / 设置」三个 appbar 图标下线——搜索唯一正典入口改到学习库顶部搜索框。<b>注意</b>：首页迷你热力条（14 天格子 + 连续学习天数）按 <code>SPEC-2026-09-27-home-visual-fidelity</code> 的 M3 口径<b>不纳入</b>本版</li>
+          <li><b>学习库顶栏返回箭头</b>（2026-09-28 用户裁决）：真机走查发现学习库页头无箭头、设置页头有，两页不对称。裁决为学习库也画真返回箭头，与设置同一形制；箭头行为是系统返回的同一请求——有搜索词时先退出搜索态并恢复本页列表，无搜索词时回主页 tab。<b>该箭头把「一级 tab 顶栏不放返回」的旧口径收窄为「两页一致」，并非恢复评审 N6 之前的多图标顶栏</b></li>
           <li><b>抽屉</b>：从首页左上按钮滑出。含「最近学习」整行（点击恢复到该分支）、<b>月历热力图</b>（7 列 × 周数，颜色分档走 <code>--green</code> 系 token，未来日期留空）、以及进入「统计详情」的入口。<b>2026-09-27 起默认载入演示数据</b>（与 v1 演示主题同源），热力图 / 最近学习 / 学习库 / 统计开箱即有内容；空态走查走 设置 → 「重置为空白」</li>
           <li><b>学习库</b>：顶部搜索框（唯一搜索入口）+ 进行中 / 已完成<b>分段</b>；原独立「归档」屏并入「已完成」分段，不再单独成页</li>
           <li><b>统计详情</b>：指标卡组 + 同款月历热力图；指标从既有演示数据现算，不新造第二套假数据</li>

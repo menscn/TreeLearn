@@ -98,6 +98,19 @@ public final class LibraryPresenter {
         }
     }
 
+    /**
+     * Back while the library is the front screen and a search has just been cleared: the library's
+     * own lists are put back.
+     *
+     * <p>Re-rendering is the whole act. It is also what takes the search scope line away, because a
+     * library render is the only thing that hides it - so this restores the list and clears the
+     * search's marks in one move rather than two that could disagree. The box itself was cleared by
+     * the screen before this was called, and that clearing already arrived back as an empty query.
+     */
+    public void onSearchLeft() {
+        render(state);
+    }
+
     /** A tapped result row. The hit travels to the search stack, reachability and all. */
     public void onSearchHitOpened(SearchHit hit) {
         if (search != null) {

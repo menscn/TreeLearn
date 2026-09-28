@@ -19,9 +19,18 @@
     <!-- 2026-09-28 user decision: this title and the settings page's title are the same kind of
          thing, so they must read as one style. The settings header sets the size (text_h1), the
          weight (bold) and the ink (tl_ink); previously the library used text_h2 and the two pages
-         disagreed. The library has no back arrow (it is a first-level tab), so a touch_min-wide,
-         empty lead view takes the arrow's place - that is what makes the two titles' left edges line
-         up instead of the library's starting a whole arrow-width to the left. -->
+         disagreed.
+
+         2026-09-28 user decision (second): the library now carries a real back arrow, like the
+         settings header, instead of the touch_min-wide empty placeholder it used to lead with. The
+         two headers therefore read as one style in full - same lead control, same title metrics.
+         The arrow is what makes them equal; the placeholder only made the titles' left edges line
+         up while leaving the two pages visibly different.
+
+         What back means here is MainActivity's single decision, not this file's. Tapping this arrow
+         reports the same request as the system back gesture, so the two never disagree: while a
+         query is live it leaves the search state and the library's own lists come back, and
+         otherwise it steps back to the home tab. -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -31,10 +40,16 @@
         android:paddingTop="@dimen/space_s4"
         android:paddingEnd="@dimen/page_gutter">
 
-        <View
+        <ImageView
+            android:id="@+id/library_back"
             android:layout_width="@dimen/touch_min"
             android:layout_height="@dimen/touch_min"
-            android:layout_marginStart="-8dp" />
+            android:layout_marginStart="-8dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/cd_library_back"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_nav_back"
+            android:tint="@color/tl_green_deep" />
 
         <TextView android:id="@+id/library_title" android:layout_width="wrap_content"
             android:layout_height="wrap_content"
