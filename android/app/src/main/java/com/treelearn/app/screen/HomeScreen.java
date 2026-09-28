@@ -1,7 +1,6 @@
 package com.treelearn.app.screen;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateUtils;
@@ -12,7 +11,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -41,10 +39,6 @@ public final class HomeScreen extends LinearLayout {
 
     private final EditText draft;
     private final ImageButton send;
-    /** The key pill: the container carries the tint, the icon and the text follow it (T-004). */
-    private final LinearLayout keyPill;
-    private final ImageView keyIcon;
-    private final TextView keyText;
     private final TextView notice;
     private final View hero;
     /** The main slogan: shown only while the home has no history topics (T-003). */
@@ -84,9 +78,6 @@ public final class HomeScreen extends LinearLayout {
 
         draft = findViewById(R.id.home_draft);
         send = findViewById(R.id.home_send);
-        keyPill = findViewById(R.id.home_key_hint);
-        keyIcon = findViewById(R.id.home_key_icon);
-        keyText = findViewById(R.id.home_key_text);
         notice = findViewById(R.id.home_notice);
         hero = findViewById(R.id.home_hero);
         heroTitle = findViewById(R.id.home_hero_title);
@@ -168,7 +159,6 @@ public final class HomeScreen extends LinearLayout {
             }
             modelChip.render(state.model, state.thinkingEnabled);
             send.setEnabled(state.canSubmit());
-            renderKeyHint(state.keyConfigured);
             renderNotice(state.notice);
             hero.setVisibility(VISIBLE);
             heroTitle.setVisibility(state.hasTopics() ? GONE : VISIBLE);
@@ -320,16 +310,6 @@ public final class HomeScreen extends LinearLayout {
         }
         return card.title + "\uff0c"
                 + getContext().getString(R.string.home_topic_unread_cd, card.unreadCount);
-    }
-
-    /** Ready reads as a calm note, a missing key reads as the warning the prototype draws. */
-    private void renderKeyHint(boolean keyConfigured) {
-        int background = keyConfigured ? R.color.tl_green_soft : R.color.tl_amber_soft;
-        int foreground = keyConfigured ? R.color.tl_green_deep : R.color.tl_amber;
-        keyPill.setBackgroundTintList(ColorStateList.valueOf(getContext().getColor(background)));
-        keyIcon.setImageTintList(ColorStateList.valueOf(getContext().getColor(foreground)));
-        keyText.setText(keyConfigured ? R.string.home_key_ready : R.string.home_key_missing);
-        keyText.setTextColor(getContext().getColor(foreground));
     }
 
     private void renderNotice(HomeViewState.Notice value) {

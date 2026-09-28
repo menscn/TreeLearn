@@ -470,17 +470,19 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
     `screen.RuleEditText`（自绘格线输入框）、`screen.RecommendationTag`（推荐标签唯一判定点）。
   - 布局：`item_home_topic.xml`（历史主题卡片）；`item_recommendation.xml` 重写为三段式。
   - drawable：`bg_send_fab`、`bg_topic_card`（`radius_md`；共用 `bg_card` 是 `radius_lg`，本轮**不改**）、
-    `bg_unread_dot`、`ic_brand_sprout`、`ic_key`、`ic_think`、`ic_chevron_down`、`ic_sparkle`、
+    `bg_unread_dot`、`ic_brand_sprout`、`ic_think`、`ic_chevron_down`、`ic_sparkle`、
     `ic_chevron_right`、`ic_tree_branch`。
+  - 2026-09-28：`ic_key` 已删（随首页「未配置 Key」徽标一并移除，全仓无引用）。
 - **文案事实**：区头 `home_recent_title` 由「最近学习」改为「历史主题」；推荐区标题不再是固定串，
   由 `home_rec_starter` / `home_rec_history` 二选一（读 `hasTopics()`）；`home_recommendations_title`
   **字符串已删**（同一 id 保留为视图 id，供动态文案使用）；新增 `home_recent_count`、`home_topic_meta`、
   `home_topics_empty`、`home_topic_unread_cd`。
-- **令牌纪律（2026-09-28 由 008 独立验收更正）**：首页线**新增 1 个不透明 hex 之外的尺寸 token**
+- **令牌纪律（2026-09-28 由 008 独立验收更正；同日二次变更）**：首页线**新增 1 个不透明 hex 之外的尺寸 token**
   `fs-brand`（30px，「首页品牌锁定区」），由 `screen_home_body.xml` 的品牌字 `@dimen/text_brand`（30sp）
   消费；形状与新颜色仍取既有资源名。同期入库的 `green-bubble` / `tl_green_bubble`（`colors.xml` +1 行）
-  **属对话页线**，不是首页线的产物。
-  守门现状：44 token / 16 资源 / 0 failed（命令见 `.trae/scripts/dev/check_design_tokens.py`）；
+  **属对话页线**，不是首页线的产物；该 token 已于 **2026-09-28 随用户气泡退役而删除**（`colors.xml` −1 行，
+  见 `Docs/04-ux-design/design-system/README.md` 变更记录）。
+  守门现状：**43 token / 15 资源 / 0 failed**（命令见 `.trae/scripts/dev/check_design_tokens.py`）；
   三方一致性成立，此前本节「不改 tokens.json、不新增 token」的表述与事实不符，已更正。
 - **与原型的有意偏差**（逐条可核，理由见规格的偏差表）：不做 hover 态；推荐卡与类别胶囊高度按 `touch_min`；
   保留本项目外壳的左上抽屉按钮，不搬原型的顶栏搜索/归档图标与主题卡「⋯」菜单；品牌字形走平台衬线

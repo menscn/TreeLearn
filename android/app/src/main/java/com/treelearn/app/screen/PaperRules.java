@@ -20,7 +20,8 @@ package com.treelearn.app.screen;
  * rule is derived from the nearest opaque token the design already has:
  * <ul>
  *   <li>page rule = {@code tl_line} at {@link #ruleAlpha()} over {@code tl_bg}: composites to
- *       (238,235,228) against the prototype's (238,236,229) - at most one step per channel;</li>
+ *       (240,237,231) against the prototype's (238,236,229) - a deliberately lighter rule, because
+ *       the user read the prototype-strength one on a device and called it too heavy (2026-09-28);</li>
  *   <li>writing rule = {@code tl_green} at {@link #writeAlpha()} over {@code tl_surface}: composites
  *       to (237,241,235) against the prototype's (237,242,235).</li>
  * </ul>
@@ -34,11 +35,17 @@ package com.treelearn.app.screen;
 public final class PaperRules {
 
     /**
-     * {@code tl_line} over {@code tl_bg} at this alpha reproduces the prototype's page rule. The
-     * value is the one that minimises the per-channel distance to the prototype composite; the
-     * tolerance in the test is what keeps it honest.
+     * {@code tl_line} over {@code tl_bg} at this alpha reproduces the prototype's page rule, lightened
+     * on 2026-09-28.
+     *
+     * <p>The value is the one that minimises the per-channel distance to the prototype composite
+     * (2026-09-27: {@code RULE_ALPHA = 79} → (238,235,228)) - but the user read that composite on a
+     * device and called the rules too heavy, so the alpha now sits at just over a third off the
+     * prototype's strength: (240,237,231), a maximum of four steps from the paper it is painted on
+     * rather than seven. The tolerance in the test is what keeps it honest in both directions: too
+     * light and the rule stops reading as a texture at all.
      */
-    private static final int RULE_ALPHA = 79;
+    private static final int RULE_ALPHA = 50;
 
     /**
      * {@code tl_green} over {@code tl_surface} at this alpha reproduces the prototype's writing rule.

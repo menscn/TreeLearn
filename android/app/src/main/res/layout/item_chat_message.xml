@@ -15,18 +15,19 @@
     android:paddingTop="@dimen/space_s4"
     android:paddingBottom="@dimen/space_s4">
 
-    <!-- Learner row: the question as a right-aligned green bubble (prototype .msg-user, line 182),
-         and the sentence it was asked from when there is one. 2026-09-27 user decision: the page
-         follows the design shot, so the grey card becomes the bubble; the quoted sentence rides
-         inside it as a light pill (prototype .quote-in, line 405, tokenised to the solid surface). -->
+    <!-- Learner row: the question as plain text (prototype .msg-user, line 182). 2026-09-27 user
+         decision: the page follows the design shot, so the grey card becomes a green bubble; the
+         quoted sentence rides inside it as a light pill (prototype .quote-in, line 405, tokenised to
+         the solid surface). 2026-09-28 user decision: the green bubble itself is gone as well - the
+         question now reads as body text with no background of its own, the same treatment the AI
+         answer gets, so the two roles differ only by the tag above them and the question's being
+         right-aligned. -->
     <LinearLayout
         android:id="@+id/chat_question_block"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
-        android:background="@drawable/bg_bubble_user"
         android:orientation="vertical"
-        android:padding="@dimen/space_s3"
         android:visibility="gone">
 
         <TextView
@@ -34,7 +35,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_pill"
-            android:backgroundTint="@color/tl_surface"
+            android:backgroundTint="@color/tl_green_faint"
             android:paddingStart="@dimen/space_s2"
             android:paddingTop="@dimen/space_s1"
             android:paddingEnd="@dimen/space_s2"
@@ -48,7 +49,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_s1"
-            android:textColor="@color/tl_surface"
+            android:textColor="@color/tl_ink"
             android:textSize="@dimen/text_body" />
     </LinearLayout>
 

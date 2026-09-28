@@ -15,11 +15,13 @@ import static org.junit.Assert.assertTrue;
  * asserted here, so a later change to a token cannot silently move the texture away from the design
  * without turning red.
  *
- * <p>Expected colour is the prototype's own composite, taken from its token block
- * (Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html, :root at lines 22-72):
- * {@code --paper-rule: rgba(30,43,35,.028)} painted over {@code --bg #F4F1EB} → (238,236,229).
- * The two colour constants below are the Android copies of the tokens the derivation reads
- * (android/app/src/main/res/values/colors.xml).
+ * <p>Expected colour is the design's own composite for the writing rule, taken from the prototype's
+ * token block (Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html, :root at lines 22-72):
+ * {@code --paper-write: rgba(46,125,79,.075)} painted over {@code --surface #FCFBF8} → (237,242,235).
+ * The page rule's target is <em>not</em> the prototype's own composite any more: the prototype strength
+ * read as too heavy on a device, so the page rule was lightened on 2026-09-28 to (240,237,231), a
+ * maximum of four steps from {@code tl_bg} instead of seven. The two colour constants below are the
+ * Android copies of the tokens the derivation reads (android/app/src/main/res/values/colors.xml).
  */
 public final class PaperRulesTest {
 
@@ -38,28 +40,46 @@ public final class PaperRulesTest {
      */
     private static final int TOLERANCE = 2;
 
+    /**
+     * The page rule's composite target, lightened on 2026-09-28: the prototype's own strength
+     * (238,236,229) read as too heavy on a device, so the rule now sits at (240,237,231) - a maximum
+     * of four steps from {@code tl_bg} instead of seven.
+     */
+    private static final int PAGE_RULE_RED = 240;
+
+    private static final int PAGE_RULE_GREEN = 237;
+    private static final int PAGE_RULE_BLUE = 231;
+
     @Test
-    public void theRuleDrawnFromTheLineTokenCompositesToThePrototypesRuleColour() {
+    public void theRuleDrawnFromTheLineTokenCompositesToTheDesignsRuleColour() {
         int painted = PaperRules.composite(BG, LINE, PaperRules.ruleAlpha());
 
         assertTrue("red within tolerance: " + PaperRules.red(painted),
-                Math.abs(PaperRules.red(painted) - 238) <= TOLERANCE);
+                Math.abs(PaperRules.red(painted) - PAGE_RULE_RED) <= TOLERANCE);
         assertTrue("green within tolerance: " + PaperRules.green(painted),
-                Math.abs(PaperRules.green(painted) - 236) <= TOLERANCE);
+                Math.abs(PaperRules.green(painted) - PAGE_RULE_GREEN) <= TOLERANCE);
         assertTrue("blue within tolerance: " + PaperRules.blue(painted),
-                Math.abs(PaperRules.blue(painted) - 229) <= TOLERANCE);
+                Math.abs(PaperRules.blue(painted) - PAGE_RULE_BLUE) <= TOLERANCE);
     }
 
+    /**
+     * The rule has to stay a texture: light enough that the page does not read as ruled paper, dark
+     * enough that it is there at all. This is the pin that a later "make it fainter still" pass has to
+     * get past, and the reason the 2026-09-28 lightening stopped where it did.
+     */
     @Test
-    public void theRuleIsFaintRatherThanFullStrengthInk() {
+    public void theRuleStaysFaintWithoutDisappearingIntoThePaper() {
         int painted = PaperRules.composite(BG, LINE, PaperRules.ruleAlpha());
+        int distance = Math.max(Math.max(Math.abs(PaperRules.red(painted) - PaperRules.red(BG)),
+                        Math.abs(PaperRules.green(painted) - PaperRules.green(BG))),
+                Math.abs(PaperRules.blue(painted) - PaperRules.blue(BG)));
 
         assertTrue("a rule that composites back to the background would be no texture at all",
                 painted != BG);
-        assertTrue("the rule must stay well under half strength, or the page reads as ruled paper",
-                PaperRules.ruleAlpha() > 0 && PaperRules.ruleAlpha() < 128);
-        assertTrue("and it must stay lighter than the separator colour it is derived from",
-                luminance(painted) > luminance(LINE));
+        assertTrue("the rule must stay visible: at least two steps from the paper, measured "
+                + distance, distance >= 2);
+        assertTrue("and it must stay light: no more than five steps from the paper, measured "
+                + distance, distance <= 5);
     }
 
     @Test
@@ -87,7 +107,8 @@ public final class PaperRulesTest {
         assertEquals("full alpha replaces the destination", LINE, PaperRules.composite(BG, LINE, 255));
         assertEquals("zero alpha leaves the destination alone", BG, PaperRules.composite(BG, LINE, 0));
         assertEquals("an opaque colour is returned unchanged", LINE, PaperRules.withAlpha(LINE, 255));
-        assertEquals("alpha keeps the channels", LINE, PaperRules.rgbOf(PaperRules.withAlpha(LINE, 79)));
+        assertEquals("alpha keeps the channels",
+                LINE, PaperRules.rgbOf(PaperRules.withAlpha(LINE, PaperRules.ruleAlpha())));
     }
 
     // ---- T-2026-09-27-004: the composer's writing rule ----
@@ -153,11 +174,5 @@ public final class PaperRulesTest {
     public void theWritingGridStartsOnTheFirstRowsUnderline() {
         assertArrayEquals("a two-row field draws one rule under each row",
                 new float[] {31f, 63f}, PaperRules.lineOffsets(64, 32f, 1f), 0.001f);
-    }
-
-    /** Channel accessors are plain arithmetic on purpose: this class must stay JVM-testable. */
-    private static double luminance(int color) {
-        return 0.2126 * PaperRules.red(color) + 0.7152 * PaperRules.green(color)
-                + 0.0722 * PaperRules.blue(color);
     }
 }

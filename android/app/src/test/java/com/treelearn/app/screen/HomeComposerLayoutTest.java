@@ -19,8 +19,7 @@ import org.junit.Test;
  * that still says what it does, both composer pills are pills, and the two paper textures both read
  * their colour from the one judgement. Every one of these names something the pre-slice markup did not
  * have (it had a plain {@code EditText}, a textual {@code Button} on {@code bg_button_primary}, and a
- * single-{@code TextView} key pill), so none of them is a tautology.
- */
+ * single-{@code TextView} key pill), so none of them is a tautology. */
 public final class HomeComposerLayoutTest {
 
     /** Module-relative roots so the test works regardless of where Gradle runs it. */
@@ -88,18 +87,20 @@ public final class HomeComposerLayoutTest {
     }
 
     @Test
-    public void theKeyPillPairsItsIconWithItsTextAndKeepsSymmetricPadding() throws Exception {
-        String pill = elementAround(composer(), "home_key_hint");
-        assertTrue("the pill is a container now, because it carries an icon as well as a label",
-                pill.startsWith("<LinearLayout"));
-        assertTrue("which holds the key glyph", composer().contains("@drawable/ic_key"));
-        assertTrue("and the label it belongs to",
-                composer().contains("android:id=\"@+id/home_key_text\""));
-        // Symmetry is the point: the pre-slice pill had 4dp on top and 8dp below, which is visible on
-        // a two-character label.
-        assertTrue("the pill pads top and bottom with the same token",
-                pill.contains("android:paddingTop=\"@dimen/space_s1\"")
-                        && pill.contains("android:paddingBottom=\"@dimen/space_s1\""));
+    public void theComposersFootLeadsWithTheModelChipAndCarriesNoKeyStatePill() throws Exception {
+        String composer = composer();
+        // 2026-09-28 user decision: the key-state pill was removed from the composer's foot, so the
+        // settings key card is the one surface that reports a key's state. Pinned here because the
+        // pill's ids were the thing a later "restore what was deleted" pass would reach for.
+        assertTrue("no key-state pill id may come back",
+                !composer.contains("@+id/home_key_hint")
+                        && !composer.contains("@+id/home_key_icon")
+                        && !composer.contains("@+id/home_key_text"));
+        assertTrue("and no key glyph may linger in the composer",
+                !composer.contains("@drawable/ic_key"));
+        assertTrue("the model chip is what leads the foot now",
+                elementAround(composer, "home_model_chip").startsWith(
+                        "<com.treelearn.app.screen.ModelThinkingPicker"));
     }
 
     @Test

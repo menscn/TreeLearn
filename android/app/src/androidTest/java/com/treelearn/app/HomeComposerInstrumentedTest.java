@@ -10,12 +10,10 @@ import android.app.Instrumentation;
 import android.content.Intent;
 import android.text.Layout;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -227,20 +225,52 @@ public final class HomeComposerInstrumentedTest {
     }
 
     @Test
-    public void theKeyPillIsPaddedSymmetricallyAndCarriesItsGlyph() {
+    public void theComposerFootHasNoKeyStatePillOnADeviceEither() {
+        // 2026-09-28 user decision: the key-state pill was removed from the composer's foot, so this
+        // is the on-device half of the pin HomeComposerLayoutTest makes about the markup. The pill's
+        // R.id no longer exists at all (that is what removing it means), so the assertion has to be
+        // made by the id's *name* against the inflated view's own resource name - looking the id up
+        // as a constant is not possible for something that has been deleted.
         Activity activity = launch();
         try {
-            LinearLayout pill = activity.findViewById(R.id.home_key_hint);
-            ImageView icon = activity.findViewById(R.id.home_key_icon);
-            TextView label = activity.findViewById(R.id.home_key_text);
-
-            assertEquals("the pill pads top and bottom with one token, so the label sits centred",
-                    onMain(pill::getPaddingTop), onMain(pill::getPaddingBottom));
-            assertNotNull("and it carries the key glyph the prototype draws", onMain(icon::getDrawable));
-            assertTrue("with the label that says which state the key is in",
-                    onMain(() -> label.getText().length()) > 0);
+            View composerFoot = activity.findViewById(R.id.home_composer);
+            assertNotNull("the composer must still be there for this to mean anything", composerFoot);
+            assertFalse("no view in the composer may carry the retired pill's id",
+                    carriesIdName(composerFoot, "home_key_hint"));
+            assertNotNull("while the model chip is still the thing that leads the foot",
+                    activity.findViewById(R.id.home_model_chip));
         } finally {
             activity.finish();
+        }
+    }
+
+    /** Whether this view or anything under it was inflated with the given id name. */
+    private static boolean carriesIdName(View view, String idName) {
+        if (idName.equals(describeId(view))) {
+            return true;
+        }
+        if (!(view instanceof ViewGroup)) {
+            return false;
+        }
+        ViewGroup group = (ViewGroup) view;
+        for (int index = 0; index < group.getChildCount(); index++) {
+            if (carriesIdName(group.getChildAt(index), idName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** The entry-name half of this view's {@code @+id/...}, or null when it has no id. */
+    private static String describeId(View view) {
+        int id = view.getId();
+        if (id == View.NO_ID) {
+            return null;
+        }
+        try {
+            return view.getResources().getResourceEntryName(id);
+        } catch (android.content.res.Resources.NotFoundException absent) {
+            return null;
         }
     }
 

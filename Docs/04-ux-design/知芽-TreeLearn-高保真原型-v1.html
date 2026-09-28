@@ -31,8 +31,8 @@
   --green-deep:#164027;
   --green-soft:#E3F0E7;  /* 新稿为 rgba；Android 只收不透明 hex，故保留不透明值 */
   --green-faint:#F0F7F1;
-  --green-bubble:#3F6C49;/* 用户消息气泡底。大面积底色与动作色分档：气泡比 --green 柔一档，
-                            避免满屏高饱和绿压住纸感；仅用于 .msg-user，不参与其它绿色元素 */
+  /* --green-bubble 已于 2026-09-28 退役：用户消息不再有气泡底（.msg-user 改为纯文本，与 .msg-ai 一致），
+     该 token 的 16→15 资源连带变更见 design-system/README.md 变更日志 */
   --blue:#2563EB;        /* 未读蓝点（BASE-13 指定实心蓝点） */
   --amber:#B05108;       /* 修正值：新稿 #B45309 在 bg 上只有 4.45，低于 4.5 */
   --amber-soft:#FBF3E2;
@@ -69,7 +69,7 @@
   --sans:'Noto Sans SC',-apple-system,sans-serif;          /* 正文；Android 落系统 sans-serif */
 
   /* —— 纸感：极淡横格，读作纹理而非参考线；正文行高对齐格距 —— */
-  --paper-rule:rgba(30,43,35,.028);
+  --paper-rule:rgba(30,43,35,.018);   /* 2026-09-28 由 .028 减淡：真机上仍读作"粗"，横线弱化到与纸底差 4 阶 */
   --paper-write:rgba(46,125,79,.075);
   --lh-read:28px;   /* 阅读行高 == 格线间距，避免逐行错位 */
 }
@@ -179,7 +179,9 @@ input,textarea{font-family:inherit;color:inherit;}
 .source-banner .sb-ver{font-size:10px;padding:1px 6px;border-radius:var(--r-full);background:rgba(46,125,79,.14);font-weight:600;flex-shrink:0;}
 .arch-banner{margin:var(--s3) var(--gutter) 0;background:rgba(30,43,35,.05);border-radius:var(--r-sm);padding:var(--s2) var(--s3);font-size:var(--fs-cap);color:var(--ink2);display:flex;gap:var(--s2);align-items:center;}
 .msg-flow{padding:var(--s4) var(--gutter) var(--s8);display:flex;flex-direction:column;gap:var(--s6);}
-.msg-user{align-self:flex-end;max-width:84%;background:var(--green-bubble);color:#fff;border-radius:var(--r-md);padding:var(--s3) var(--s4);font-size:var(--fs-body);line-height:1.7;animation:msgIn .3s cubic-bezier(.2,.8,.2,1);word-break:break-word;}
+/* 2026-09-28：用户消息不再做气泡，改为与 .msg-ai 同样的纯文本（只靠右对齐区分角色），
+   原 background/color/border-radius/padding 一并去除——那正是「和 AI 回答样式不一样」的来源 */
+.msg-user{align-self:flex-end;max-width:84%;background:transparent;border-radius:0;padding:0;font-size:var(--fs-body);line-height:1.7;color:var(--ink);text-align:right;animation:msgIn .3s cubic-bezier(.2,.8,.2,1);word-break:break-word;}
 /* AI 回答不做卡片：文字直接落在纸感底上，靠留白与标识行分层（减容器） */
 .msg-ai{align-self:stretch;background:transparent;border:none;padding:0;font-size:var(--fs-body);line-height:var(--lh-read);color:var(--ink);animation:msgIn .3s cubic-bezier(.2,.8,.2,1);word-break:break-word;}
 @keyframes msgIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
@@ -402,7 +404,9 @@ input,textarea{font-family:inherit;color:inherit;}
 .ctx-card.quote{background:rgba(47,107,255,.075);color:#3A5498;}
 .ctx-card .cc-top{display:flex;align-items:center;justify-content:space-between;font-weight:600;margin-bottom:var(--s1);}
 .ctx-card .cc-body{color:var(--ink2);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.msg-user .quote-in{display:block;background:rgba(255,255,255,.22);border-radius:var(--r-sm);padding:var(--s2) var(--s3);font-size:var(--fs-sm);line-height:1.55;margin-bottom:var(--s2);}
+/* 2026-09-28：用户消息去气泡后，引用条不能再靠「白 22% 叠在深色气泡上」取得对比，
+   改为浅绿实底 + 深绿字（Android 侧同用 tl_green_faint / tl_green_deep） */
+.msg-user .quote-in{display:block;background:var(--green-faint);color:var(--green-deep);border-radius:var(--r-sm);padding:var(--s2) var(--s3);font-size:var(--fs-sm);line-height:1.55;margin-bottom:var(--s2);}
 
 /* ============ AI 总结卡（独立卡片，置于分支导航页顶部） ============ */
 .sum-card{margin:var(--s4) var(--gutter) 0;background:var(--surface);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--sh-1);animation:cardIn .3s backwards;}

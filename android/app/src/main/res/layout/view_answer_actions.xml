@@ -9,7 +9,9 @@
 
   Icon buttons drop minWidth and pad 6dp so the full worst-case row (7 targets + time) still fits
   a 360dp column; every target stays 44dp tall (WCAG 2.5.8 needs 24dp, the prototype's own targets
-  are 17px glyphs).
+  are 17px glyphs). 2026-09-28 user decision: the child entry's count ("子分支 N") read as cramped and
+  its own 44dp minWidth pushed the icons apart, so the entry lost the minWidth, took symmetric 8dp
+  padding, and moved up from the caption band to text_sm to match the version chip.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/answer_actions"
@@ -71,9 +73,10 @@
         android:layout_height="@dimen/touch_min"
         android:layout_marginStart="@dimen/space_s1"
         android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:minWidth="@dimen/touch_min"
+        android:paddingStart="@dimen/space_s2"
+        android:paddingEnd="@dimen/space_s2"
         android:textColor="@color/tl_ink3"
-        android:textSize="@dimen/text_cap"
+        android:textSize="@dimen/text_sm"
         android:visibility="gone" />
 
     <Button

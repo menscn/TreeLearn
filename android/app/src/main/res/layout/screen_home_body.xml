@@ -123,42 +123,16 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
+                <!-- 2026-09-28 user decision: the key-state pill (未配置 Key / DeepSeek 已就绪) is
+                     removed from the composer's foot. It repeated what the settings page already
+                     says, and it made the composer's foot look busier than the design does. The
+                     model chip now leads the row; the settings key card remains the one surface
+                     that reports the key's state. -->
+
                 <com.treelearn.app.screen.ModelThinkingPicker
                     android:id="@+id/home_model_chip"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
-
-                <LinearLayout
-                    android:id="@+id/home_key_hint"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/space_s2"
-                    android:background="@drawable/bg_pill"
-                    android:backgroundTint="@color/tl_amber_soft"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingStart="@dimen/space_s3"
-                    android:paddingTop="@dimen/space_s1"
-                    android:paddingEnd="@dimen/space_s3"
-                    android:paddingBottom="@dimen/space_s1">
-
-                    <ImageView
-                        android:id="@+id/home_key_icon"
-                        android:layout_width="13dp"
-                        android:layout_height="13dp"
-                        android:importantForAccessibility="no"
-                        android:src="@drawable/ic_key"
-                        android:tint="@color/tl_amber" />
-
-                    <TextView
-                        android:id="@+id/home_key_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/space_s1"
-                        android:text="@string/home_key_missing"
-                        android:textColor="@color/tl_amber"
-                        android:textSize="@dimen/text_cap" />
-                </LinearLayout>
 
                 <View
                     android:layout_width="0dp"

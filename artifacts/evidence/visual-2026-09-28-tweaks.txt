@@ -1,0 +1,93 @@
+# 2026-09-28 视觉微调 5 项 — 真机取证
+
+# 设备: AWSS013807000356 (1200x2652)
+# APK : android/app/build/outputs/apk/debug/app-debug.apk
+# 安装: adb install -r  → Success
+# 启动: adb shell am start -n com.treelearn/com.treelearn.app.MainActivity
+#       组件名 = com.treelearn/com.treelearn.app.MainActivity
+#       (applicationId=com.treelearn, namespace=com.treelearn.app — 写 .app/.MainActivity 会报 Activity 不存在)
+# 截图: adb exec-out screencap -p
+# 文件: artifacts/evidence/visual-2026-09-28/{01-home,02-library,03-settings}.png
+
+## 构建与守门（命令与退出码当场捕获）
+
+# command: cd android && JAVA_HOME=/d/Environment/Jdk/jdk21 ./gradlew --console=plain :app:testDebugUnitTest :app:assembleDebug verifyNoKotlinDex
+BUILD SUCCESSFUL in 1m 13s
+219 actionable tasks: 19 executed, 4 from cache, 196 up-to-date
+PIPE_EXIT=0
+
+verifyNoKotlinDex: [app/build/outputs/apk/debug/app-debug.apk] shipped APK = 1635577 bytes, 17 dex file(s)
+verifyNoKotlinDex: [app/build/outputs/apk/release/app-release.apk] shipped APK = 1032351 bytes, 1 dex file(s)
+verifyNoKotlinDex: PASS (3 APK(s) inspected across app/build/outputs/apk, no Kotlin runtime bytecode)
+
+# JVM 单测汇总（app/build/test-results/testDebugUnitTest/TEST-*.xml，逐文件读 tests/skipped/failures/errors 相加）
+total tests=683 skipped=0 failures=0 errors=0
+
+# 受影响三个测试文件的逐个读数
+# $ grep -o 'tests="[0-9]*" skipped="[0-9]*" failures="[0-9]*" errors="[0-9]*"' <file>
+TEST-com.treelearn.app.screen.PaperRulesTest.xml        tests="10" skipped="0" failures="0" errors="0"
+TEST-com.treelearn.app.screen.HomeComposerLayoutTest.xml tests="6" skipped="0" failures="0" errors="0"
+TEST-com.treelearn.app.ui.ChatMessageRowLayoutTest.xml  tests="13" skipped="0" failures="0" errors="0"
+
+# design token 守门
+# command: python .trae/scripts/dev/check_design_tokens.py
+OK   原型 :root 解析出 >= 40 个 token — measured=43
+OK   tokens.json 解析出 >= 40 个 token — measured=43
+OK   colors.xml 解析出 >= 1 个资源 — measured=15
+OK   三方一致（原型 :root ↔ tokens.json ↔ colors.xml） — measured_tokens=43 measured_resources=15
+check_design_tokens: 0 check(s) failed
+EXITCODE=0
+
+## 量测 1 — 两项标题同档同左缘（02-library.png vs 03-settings.png）
+
+# 方法: 纯 Python 解码 PNG，在标题行带 y∈[200,275] 内按列统计深色像素(每通道<140)，
+#       输出连续字形 run。设置页返回箭头自身也是一个 run，故它前面的 run 是箭头、后面的才是标题。
+LIB  glyph runs: [(211, 269), (277, 330), (340, 399)]      # 「学习库」三字
+SET  glyph runs: [(95, 123), (210, 270), (275, 335)]       # 箭头 + 「设置」两字
+
+# 结论:
+#   · 学习库标题左缘 x=211，设置页标题左缘 x=210 —— 相差 1px（抗锯齿取整），即对齐。
+#     （此前 library_title 直接吃 page_gutter 左内边距，而设置页标题在 44dp 箭头之后，
+#       两者左缘相差一个箭头宽度；本次给学习库补了同宽占位。）
+#   · 标题行高带: LIB 209..269 (61px) / SET 211..268 (58px) —— 同一档字号(text_h1 20sp)。
+#   · 字形宽度比: 「学习库」199px / 三字，「设置」126px / 两字 —— 同字号下的正常比例。
+
+## 量测 2 — 纸张横线减淡（01-home.png）
+
+# 方法: 取首页中部空白区的一列 x=60，y∈[700,1600]，按行取色；出现最多的颜色=纸底，其余=横线。
+paper colour on device (x=60): #F3F1EB
+distinct rule rows found: 18
+  y=736  rule=#EFEDE7  delta_bg=(4, 4, 4)
+  y=738  rule=#EFEDE7  delta_bg=(4, 4, 4)
+  y=840  rule=#EFEDE7  delta_bg=(4, 4, 4)
+  y=944  rule=#EFEDE7  delta_bg=(4, 4, 4)
+spacing between rules (px): [2, 102, 2, 102, 2, 102]   # 2px 线宽 + 102px 周期（3.0x 密度下 34px 周期）
+
+# 结论:
+#   · 横线实色 #EFEDE7 对纸底 #F3F1EB 的最大通道差 = 4 阶。
+#   · 预测值 (240,237,231) = #F0EDE7，实测 #EFEDE7 —— 最大通道差 1，属截图广色域偏色范围。
+#     广色域 compositor 对中性色精确（此前实测 tl_surface→#FCFBF8、tl_line→#E1DFD7 偏差 0–1），
+#     故此处 4 阶是可信读数。
+#   · 变更前 RULE_ALPHA=79 对应最大通道差 7 阶；现在 4 阶，更弱约 43%。
+
+## 量测 3 — 首页 Key 徽标与 slogan（01-home.png）
+
+# 目视 + 结构双证:
+#   · composer 底行只剩「模型胶囊 + 弹性空档 + 圆形发送键」，无第二胶囊。
+#   · 真机 androidTest 断言 theComposerFootHasNoKeyStatePillOnADeviceEither 通过：
+#     遍历 composer 子树按资源名核对，无任何视图的 id 名为 home_key_hint。
+#     （注: 该 id 已从 R 中删除，故只能用 getResourceEntryName 按名字核对，不能写 R.id.home_key_hint。）
+#   · 空态 slogan「把复杂问题，学成自己的知识树。」在 1200x2652（约 400dp 宽 / 884dp 高）上完整可见；
+#     该文案由 HomeScreen.render() 以 state.hasTopics() 决定显隐，本次未改动。
+#     本机截图与用户"另个手机 slogan 不见了"的机型不一致 —— 该机型需另测，本机不能替代。
+
+## 未覆盖 / 遗留
+
+#   · 「另一台手机上 slogan 不见了」——本机复现不出。判据需在那台机器上取:
+#       ① adb shell wm size / wm density 看屏幕高度与 dpi；
+#       ② 截图上量 home_hero_title 的可见行数与是否被 ScrollView 裁掉。
+#     代码侧已确认: 该文案无 height 上限、无 maxLines、hero 容器 wrap_content，
+#     唯一显隐开关是 hasTopics()（有历史主题时按设计隐藏）。
+#   · 对话页（用户气泡去底色 / 操作行间距 / 附件胶囊高度）本轮未做真机截图验证:
+#     需要先在首页写下一个问题才能进入对话页，会真实调用模型接口。结构侧已由
+#     ChatMessageRowLayoutTest(13 passed) 与编译通过覆盖，视觉需用户在真机确认。

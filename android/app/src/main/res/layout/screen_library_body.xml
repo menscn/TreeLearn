@@ -16,12 +16,33 @@
     android:layout_width="match_parent" android:layout_height="wrap_content"
     android:orientation="vertical" android:paddingBottom="@dimen/space_s6">
 
-    <TextView android:id="@+id/library_title" android:layout_width="match_parent"
+    <!-- 2026-09-28 user decision: this title and the settings page's title are the same kind of
+         thing, so they must read as one style. The settings header sets the size (text_h1), the
+         weight (bold) and the ink (tl_ink); previously the library used text_h2 and the two pages
+         disagreed. The library has no back arrow (it is a first-level tab), so a touch_min-wide,
+         empty lead view takes the arrow's place - that is what makes the two titles' left edges line
+         up instead of the library's starting a whole arrow-width to the left. -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="@dimen/page_gutter" android:paddingTop="@dimen/space_s4"
-        android:paddingEnd="@dimen/page_gutter" android:text="@string/library_title"
-        android:textColor="@color/tl_ink" android:textSize="@dimen/text_h2"
-        android:textStyle="bold" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/page_gutter"
+        android:paddingTop="@dimen/space_s4"
+        android:paddingEnd="@dimen/page_gutter">
+
+        <View
+            android:layout_width="@dimen/touch_min"
+            android:layout_height="@dimen/touch_min"
+            android:layout_marginStart="-8dp" />
+
+        <TextView android:id="@+id/library_title" android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_s2"
+            android:text="@string/library_title"
+            android:textColor="@color/tl_ink" android:textSize="@dimen/text_h1"
+            android:textStyle="bold" />
+    </LinearLayout>
 
     <EditText android:id="@+id/library_search_input" android:layout_width="match_parent"
         android:layout_height="@dimen/touch_min" android:layout_marginStart="@dimen/page_gutter"

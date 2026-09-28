@@ -356,11 +356,14 @@
                         android:visibility="gone" />
 
                     <!-- The attachment entry as the design shot's pill; the paperclip stays the
-                         face so the existing structural gate keeps reading it. -->
+                         face so the existing structural gate keeps reading it. 2026-09-28 user
+                         decision: the pill was 44dp (touch_min) while the model chip beside it is
+                         32dp, so the two read as different-height controls; the pill now sizes to
+                         its content like the chip does, and the row still supplies the 44dp target. -->
                     <TextView
                         android:id="@+id/chat_attach"
                         android:layout_width="wrap_content"
-                        android:layout_height="@dimen/touch_min"
+                        android:layout_height="wrap_content"
                         android:background="@drawable/bg_pill"
                         android:backgroundTint="@color/tl_surface"
                         android:contentDescription="@string/cd_chat_attach"

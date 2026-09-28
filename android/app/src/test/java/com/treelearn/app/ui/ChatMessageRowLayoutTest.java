@@ -19,8 +19,9 @@ import org.junit.Test;
  *   <li><strong>The action row leads with the prototype's set.</strong> Copy, reset, fork, the
  *       data-driven child entry, the app's state-driven extras, and the time closes the row
  *       (prototype `.ai-actions`, lines 867-878).
- *   <li><strong>The learner's message is the green bubble</strong> (`.msg-user`, line 182) and the
- *       answer body is flush - the green left edge is voided with the design shot (spec V1.1 §3.3).
+ *   <li><strong>The learner's message is plain text</strong> (`.msg-user`, line 182), the same
+ *       treatment the AI answer gets - the green bubble was retired on 2026-09-28 - and the answer
+ *       body is flush: the green left edge is voided with the design shot (spec V1.1 §3.3).
  *   <li><strong>The AI tag is the plain brand + spark</strong> (`.at-brand`, line 187), not a chip.
  *   <li><strong>Tapping a code block offers copy</strong> (matrix 1.2): the renderer wires a click
  *       span and the screen forwards it to the existing selection-copy action. The renderer's span
@@ -120,16 +121,21 @@ public final class ChatMessageRowLayoutTest {
     }
 
     @Test
-    public void theLearnerMessageIsTheGreenBubble() throws Exception {
+    public void theLearnerMessageIsPlainTextRatherThanABubble() throws Exception {
+        // 2026-09-28 user decision: the green bubble is gone. The question reads as body text with no
+        // background of its own - the same treatment the AI answer gets - so the two roles differ only
+        // by the tag above them and the question's being right-aligned.
         String xml = read(RES.resolve(Paths.get("layout", "item_chat_message.xml")));
         String block = elementAround(xml, "chat_question_block");
-        assertTrue("the question leaves the grey card for the bubble green",
-                block.contains("@drawable/bg_bubble_user"));
-        assertTrue("the bubble hugs the end like .msg-user (align-self:flex-end)",
+        assertTrue("the question must carry no bubble background of its own",
+                !block.contains("android:background=") && !block.contains("@drawable/bg_bubble_user"));
+        assertTrue("and it must not pad itself like a bubble, or the text shifts off the page gutter",
+                !block.contains("android:padding="));
+        assertTrue("the question still hugs the end like .msg-user (align-self:flex-end)",
                 block.contains("android:layout_gravity=\"end\""));
         String question = elementAround(xml, "chat_question");
-        assertTrue("bubble text is the surface colour", question
-                .contains("android:textColor=\"@color/tl_surface\""));
+        assertTrue("the question's own text is the body ink, not the on-bubble surface colour",
+                question.contains("android:textColor=\"@color/tl_ink\""));
     }
 
     @Test
