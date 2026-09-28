@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Floor of the 44dp save icon button (settings redesign 2026-09-28): tl_green at rest,
+     tl_green_deep while pressed, so the press state comes from this selector and not from Java.
+     The corner is radius_md, the closest token to the prototype's 12px button radius. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/tl_green_deep" />
+            <corners android:radius="@dimen/radius_md" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/tl_green" />
+            <corners android:radius="@dimen/radius_md" />
+        </shape>
+    </item>
+</selector>

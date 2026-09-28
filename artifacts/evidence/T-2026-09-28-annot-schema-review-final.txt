@@ -1,0 +1,37 @@
+T-2026-09-28-026（T-A 高亮批注数据层）db-migration-reviewer 收口前第二遍复核
+时点：2026-09-28（第一遍设计复核后、verified 收口前）。READONLY，本文件为唯一写入。
+输入：角色正文 + sql.md + android.md + 任务文件 + 三份生产代码 + 七份证据 + 只读 git 核查。
+
+[db-migration-reviewer 报告]
+目标引擎: Android SQLite（android.database.sqlite / SQLiteOpenHelper；TreeLearnDatabaseHelper 为唯一建库/升级入口，无 MySQL 生产消费者）
+命中 schema/migration: android/data/.../db/TreeLearnSchema.java——Annotations 常量类（:247-254，14 列）、ANNOTATIONS_DEFINITIONS 14 列+5 CHECK（:541-569）、annotationsAnchorIndexStatement/annotationsMessageIndexStatement（:646-662）、MIGRATION_V4_TO_V5_STATEMENTS 三语句（:1002-1006）、MigrationV4ToV5 注册进 FORWARD_MIGRATIONS（:874-876/:1009-1027）、DATABASE_VERSION=5（:61）；新增 AnnotationDao.java、:core Annotation.java。
+已发布迁移被改: 否（git show f86127f 逐行核对：该提交对 TreeLearnSchema.java 共 131 增/5 删，5 处删除均为 javadoc 措辞×2、DATABASE_VERSION 4→5、"eleven"→"twelve" 注释、CREATE_TABLE_STATEMENTS 尾行扩列、FORWARD_MIGRATIONS 尾行扩列；MIGRATION_V1_TO_V2/V2_TO_V3/V3_TO_V4 语句体、SEED_STATEMENTS 与三个既有 Migration 类零触碰）
+版本与顺序: PASS——4→5 单调递增；单一迁移入口 applyForwardMigrations 缺步 fail-closed（TreeLearnSchema.java:1037-1052），onUpgrade 委托注册表，未注册步抛 IllegalStateException 且不盖章 user_version（仪器测试 SqliteSchemaInstrumentedTest:1082-1110 实证）。
+真实目标引擎执行证据: PASS
+  - 设备轮（权威）：:app:connectedDebugAndroidTest @ HONOR CGA-W00，Android 17 / API 37（≥ minSdk 28），`Starting 42 tests on CGA-W00 - 17` → `Finished 42 tests`，BUILD SUCCESSFUL，EXITCODE=0（T-2026-09-28-annot-green-device.log）。经生产 SQLiteOpenHelper（helper.getWritableDatabase()）执行； AnnotationDaoInstrumentedTest 内断言 fresh 后 PRAGMA user_version=DATABASE_VERSION（:90）、真 V4 手建库盖章 user_version=4（:126-127）→ 生产 onUpgrade 后=5（:142）、逐表行数保全（:154-159）+ 升级后新表立即可写（:162+）。
+  - 起始 user_version、最终 schema/索引/约束/数据验证均有测试级直接断言（双索引 unique/plain 归类 :94-100/:145-151；raw SQL 约束拒绝 CHECK/唯一锚/FK 787/级联）。
+  - 桌面 SQLite 交叉复核（补充、明确标注非设备证据）：SQLite 3.53.1，5/5 PASS，EXITCODE=0，九例非法 CHECK 拒绝 + 唯一锚跨 kind 并存 + FK/级联 + fresh/升级（T-2026-09-28-annot-desktop-sqlite.txt）。
+  - RED：三路编译失败各含 EXITCODE=1，均点名缺失生产符号（T-2026-09-28-annot-red-evidence.txt）。
+新装/升级/重开/失败路径: PASS——fresh onCreate 建表+双索引（设备轮）；真 V4 文件→生产 onUpgrade 逐表保全+立即可写；close/reopen 逐字段回读（设备轮同批）；失败路径=未注册步 fail-closed 且 user_version/schema 双双原样（SqliteSchemaInstrumentedTest:1104-1110；SQLiteOpenHelper 以事务包裹 onUpgrade，迁移中抛错即整体回滚，不留自报最新的半迁移库）。listFor 事务边界（AnnotationDao.java:96-115）：DELETE+SELECT 同事务，异常时 endTransaction 未盖 successful 即回滚，无半状态；SELECT 显式过滤 digest（F2 关闭）；嵌套调用并入外层事务不早提交。
+约束与完整性: PASS——5 条 CHECK（含 F1 HIGHLIGHT 恒空 body，TreeLearnSchema.java:562）+ 唯一锚索引含 kind（:646-652）+ message_id FK ON DELETE CASCADE，设备轮 raw SQL 逐类实证拒绝；同批 12 表世界断言 PRAGMA foreign_key_check 空 + integrity_check=ok（SqliteSchemaInstrumentedTest:515-518、895-896）；外键经 onConfigure 开启、onOpen 回读验证。
+UTC 时间规范: PASS——created_at/updated_at INTEGER NOT NULL，由调用方显式传入 epoch millis（AnnotationDao insert/listFor/updateBody 均不读时钟，javadoc 明示）；seed 时间为固定 UTC 常量；读序含 CREATED_AT 排序（ANCHOR_ORDER）。
+建表入场记录: PASS——任务文件 Implementation notes 按 sql.md 清单逐项齐备（既有存储否证/领域权威/生产消费/行标识/基数增长/保留删除/敏感字段/索引约束/跨实例/发布升级/可观测性/废弃触发）；第 12 张表确认链=方案 §3.1 DDL 随 8 项拍板（2026-09-28）+ 父需求 025。
+文档同步: PASS——android/README.md 三处核实：:199 :core 领域类型表新增 Annotation/Locator/Span/Merge 行；:225 TreeLearnSchema 行改「十二张」并写明 message_annotations 5 条 CHECK/唯一锚含 kind/两路共用 DDL；:250 DAO 表新增 AnnotationDao 行（含 insertOrThrow、listFor 唯一自带事务等语义）。
+专项 guard: PASS——verifyNoKotlinDex 三 APK 检查无 Kotlin 运行时字节码，EXITCODE=0（T-2026-09-28-annot-javaonly-guard.txt）。
+结论: PASS
+失败修复指令: 无。
+
+第一遍（设计复核，PARTIAL）五项处置的落地核验：
+- F1 已入 DDL：CHECK (kind <> 'HIGHLIGHT' OR body = '')（TreeLearnSchema.java:559-562 旁注明出处）。
+- F2 已实现：listFor 同事务 DELETE+SELECT 且 SELECT 过滤 digest（AnnotationDao.java:96-115）。
+- F3 已落 javadoc 与 README:250（仅 isStable() + 当前显示修订 digest 时写入）。
+- F4 保留 idx_annotations_message，理由已注明在方法旁（:654-658）。
+- F5 维持域层集中判定（Annotation.Span.of/Locator 工厂拒绝负值，DDL 不复制）。
+
+第二遍与第一遍的差异：
+1. 性质不同：第一遍为设计级（实现未开始，证据项 N/A-待实现，结论 PARTIAL）；本遍为收口前全量复核，全部 N/A 项已由真实证据填充并逐一裁决。
+2. 新增证据面：第一遍无任何引擎执行；本遍取得设备轮（API 37 真机、生产 helper 路径、42/42）+ 桌面 SQLite 交叉复核 + RED 三路 + JVM 288 例 + Java-only guard，真实引擎证据由「届时缺失即 FAIL」转为 PASS。
+3. 新增历史保护核查：第一遍仅凭现状代码判断；本遍以 git show f86127f 逐行核对提交 diff，实证 V1→V4 已发布迁移语句体零改动（仅列表尾行扩列与注释/版本行）。
+4. 结论由 PARTIAL → PASS：唯一阻止第一遍终判的缺口（真实引擎证据）已闭合，且第一遍全部修复指令（F1 必改、F2/F3 采纳、F4 注明理由、F5 维持）逐项验证落地。
+5. 记录义务项（如实记录，不构成缺陷）：a) 设备日志记录了设备型号与 API 17/37，未单独记录设备侧 SQLite 库版本号（引擎真实性由生产 SQLiteOpenHelper 路径与 PRAGMA 断言充分证明）；b) 任务 TDD 记录所写 GREEN 命令为 `:core:test + :data:testDebugUnitTest`，而本次提供的 green-jvm.log 复核命令为 `:core:test :data:test --rerun`（含 release 变体，同样 EXITCODE=0），两份均为真实 Gradle 运行，命令措辞差异在此留痕；c) 各证据统计（core 223 + data 65 = 288、设备 42、桌面 5/5）交叉一致，未发现矛盾数字；d) Handoff 中「707 行→713 行」的仪器测试快照更正已由对方会话自行记录，本遍以 42/42 全绿版为准。
+EXITCODE=N/A（只读复核报告，无命令执行）
