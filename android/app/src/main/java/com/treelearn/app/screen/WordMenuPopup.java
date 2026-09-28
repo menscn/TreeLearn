@@ -18,7 +18,7 @@ import com.treelearn.app.ui.TextSelection;
 import com.treelearn.app.ui.WordMenu;
 
 /**
- * The four-item menu the app draws over an answer's selected passage, and the sentence it acts on
+ * The four-cell menu the app draws over an answer's selected passage, and the sentence it acts on
  * (PRD 6.2.19 points 1-2, 8).
  *
  * <p><strong>It paints and applies; it never judges.</strong> Which items exist and which of them are
@@ -26,15 +26,21 @@ import com.treelearn.app.ui.WordMenu;
  * where the menu may land comes from there too. This class adds only what needs a window: the
  * measurement of the card and the coordinates of the selected passage.
  *
+ * <p><strong>Four icons in one row, and the words moved to the descriptions.</strong> 2026-09-28
+ * user decision: the menu used to be four text rows under two captions with the selected sentence
+ * named above them; it is now 问 AI, 新建主题, 复制, 全选 as four equal icon cells, with no caption at
+ * all. The item names are not drawn anywhere, so the cells' content descriptions - set in the layout -
+ * are what a screen reader reads out, and this class no longer writes any label.
+ *
  * <p><strong>It is the menu, not a second one.</strong> The screen empties the platform's own
  * selection toolbar and shows this card instead, because a platform menu can neither be ordered nor
  * kept out of its overflow sheet by the app - which is how 新建主题 ended up behind a 更多 sheet while
- * 全选 / 复制 / 翻译 held the visible slots. The rows here, and their order, are therefore the only
+ * 全选 / 复制 / 翻译 held the visible slots. The cells here, and their order, are therefore the only
  * menu the learner sees.
  *
  * <p>The menu applies the passage to the answer's own text view when it opens, and 全选 widens that
  * same selection in place rather than remembering a second one. So the highlight the learner sees, the
- * range {@link TextView#getSelectionStart()} reports and the passage 追问 and 复制 hand over are one
+ * range {@link TextView#getSelectionStart()} reports and the passage 问 AI and 复制 hand over are one
  * value, and the existing selection-reading path stays the only reader.
  */
 public final class WordMenuPopup {
@@ -42,7 +48,7 @@ public final class WordMenuPopup {
     /** The three gestures that leave the menu; 全选 only changes the selection and is answered here. */
     public interface Listener {
 
-        /** 追问: take the sentence as the context of the next question. */
+        /** 问 AI: take the sentence as the context of the next question. */
         void onQuoteRequested();
 
         /** 新建主题: open a branch from this answer. */
@@ -52,17 +58,16 @@ public final class WordMenuPopup {
         void onCopyRequested();
     }
 
-    /** How far a row that is drawn but not pressable is faded - 追问 while the answer is unfinished. */
+    /** How far a cell that is drawn but not pressable is faded - 问 AI while the answer is unfinished. */
     private static final float DISABLED_ALPHA = 0.4f;
 
     private final TextView answer;
     private final ChatMessage message;
     private final Listener listener;
-    private final TextView selectionLabel;
-    private final TextView quoteRow;
-    private final TextView forkRow;
-    private final TextView copyRow;
-    private final TextView selectAllRow;
+    private final View askAiCell;
+    private final View forkCell;
+    private final View copyCell;
+    private final View selectAllCell;
     private final PopupWindow popup;
 
     public WordMenuPopup(TextView answer, ChatMessage message, Listener listener) {
@@ -71,18 +76,14 @@ public final class WordMenuPopup {
         this.listener = listener;
         LinearLayout content = (LinearLayout) LayoutInflater.from(answer.getContext())
                 .inflate(R.layout.popup_word_action, null, false);
-        selectionLabel = content.findViewById(R.id.word_menu_selection);
-        quoteRow = content.findViewById(R.id.word_menu_quote);
-        forkRow = content.findViewById(R.id.word_menu_fork);
-        copyRow = content.findViewById(R.id.word_menu_copy);
-        selectAllRow = content.findViewById(R.id.word_menu_select_all);
-        copyRow.setContentDescription(answer.getContext().getString(R.string.chat_word_copy_desc));
-        selectAllRow.setContentDescription(
-                answer.getContext().getString(R.string.chat_word_select_all_desc));
-        quoteRow.setOnClickListener(row -> choose(listener::onQuoteRequested));
-        forkRow.setOnClickListener(row -> choose(listener::onForkRequested));
-        copyRow.setOnClickListener(row -> choose(listener::onCopyRequested));
-        selectAllRow.setOnClickListener(row -> selectAll());
+        askAiCell = content.findViewById(R.id.word_menu_ask_ai);
+        forkCell = content.findViewById(R.id.word_menu_fork);
+        copyCell = content.findViewById(R.id.word_menu_copy);
+        selectAllCell = content.findViewById(R.id.word_menu_select_all);
+        askAiCell.setOnClickListener(cell -> choose(listener::onQuoteRequested));
+        forkCell.setOnClickListener(cell -> choose(listener::onForkRequested));
+        copyCell.setOnClickListener(cell -> choose(listener::onCopyRequested));
+        selectAllCell.setOnClickListener(cell -> selectAll());
         // Not focusable on purpose: the card must not take window focus away from the answer whose
         // selection it acts on. A transparent background plus outside-touch still dismisses it, and on
         // a non-focusable popup that outside touch also reaches the answer, so tapping away ends the
@@ -181,17 +182,15 @@ public final class WordMenuPopup {
                 layout.getLineBottom(lastLine) + paddingTop - answer.getScrollY()};
     }
 
-    /** Paints the label and the four rows from the selection the answer reports right now. */
+    /** Paints the four cells from the selection the answer reports right now. */
     private void bind() {
         String selected = current().read(answer.getText().toString());
-        selectionLabel.setText(answer.getContext()
-                .getString(R.string.chat_word_selection, selected));
-        forkRow.setVisibility(View.GONE);
+        forkCell.setVisibility(View.GONE);
         for (WordMenu.Entry entry : WordMenu.entriesFor(message, selected)) {
-            TextView row = row(entry.item);
-            row.setVisibility(View.VISIBLE);
-            row.setEnabled(entry.enabled);
-            row.setAlpha(entry.enabled ? 1f : DISABLED_ALPHA);
+            View cell = cell(entry.item);
+            cell.setVisibility(View.VISIBLE);
+            cell.setEnabled(entry.enabled);
+            cell.setAlpha(entry.enabled ? 1f : DISABLED_ALPHA);
         }
     }
 
@@ -202,7 +201,7 @@ public final class WordMenuPopup {
     }
 
     /**
-     * Runs the gesture first and only then puts the card away: 追问, 新建主题 and 复制 all read the
+     * Runs the gesture first and only then puts the card away: 问 AI, 新建主题 and 复制 all read the
      * answer's live selection, and it is the card closing that makes the screen end that selection.
      */
     private void choose(Runnable gesture) {
@@ -226,16 +225,16 @@ public final class WordMenuPopup {
         }
     }
 
-    private TextView row(WordMenu.Item item) {
+    private View cell(WordMenu.Item item) {
         switch (item) {
             case QUOTE:
-                return quoteRow;
+                return askAiCell;
             case FORK:
-                return forkRow;
+                return forkCell;
             case COPY:
-                return copyRow;
+                return copyCell;
             default:
-                return selectAllRow;
+                return selectAllCell;
         }
     }
 }

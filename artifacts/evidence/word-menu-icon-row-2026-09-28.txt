@@ -1,0 +1,107 @@
+=== command: ./gradlew --no-daemon --console=plain :app:testDebugUnitTest --rerun-tasks
+=== run at: 2026-09-28 14:48:11
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 1m 37s
+50 actionable tasks: 50 executed
+EXITCODE=1
+
+=== adjudication: which failures belong to this change, and which do not ===
+This change touched exactly: layout/popup_word_action.xml, values/strings.xml,
+values/dimens.xml, drawable/ic_action_select_all.xml (new), screen/WordMenuPopup.java,
+test/.../IconAssetsTest.java. It has NO call relationship with the reasoning disclosure.
+
+Observed failures (687 total tests, 1 failed):
+  FAILED  com.treelearn.app.ui.ReasoningDisclosureLayoutTest#theDisclosureDoesNotRewriteWhatDidNotChange
+
+IconAssetsTest in this same run: PASSED (see the per-class results below).
+Same command was observed BUILD SUCCESSFUL and BUILD FAILED in consecutive runs
+within four minutes while source files were being rewritten by another work line
+(the repo has several lines writing the same android/ tree concurrently). A failure
+that moves between runs, and names a class this change does not touch, is an
+environment race, not a regression of this change.
+
+=== per-class results, this run ===
+  com.treelearn.app.IconAssetsTest                           tests=10   failed=0
+  com.treelearn.app.artifact.ArtifactInputTest               tests=8    failed=0
+  com.treelearn.app.artifact.ArtifactSchemaTest              tests=11   failed=0
+  com.treelearn.app.artifact.DerivedOperationTest            tests=13   failed=0
+  com.treelearn.app.artifact.DerivedRequestTest              tests=9    failed=0
+  com.treelearn.app.artifact.DerivedServiceBranchTitleTest   tests=4    failed=0
+  com.treelearn.app.artifact.TitleArtifactApplierTest        tests=4    failed=0
+  com.treelearn.app.files.AttachmentTextExtractorTest        tests=8    failed=0
+  com.treelearn.app.generation.GenerationSchedulerTest       tests=5    failed=0
+  com.treelearn.app.generation.LiveAttemptsTest              tests=3    failed=0
+  com.treelearn.app.generation.MessageTranslatorTest         tests=6    failed=0
+  com.treelearn.app.generation.PositionCommandsTest          tests=22   failed=0
+  com.treelearn.app.generation.QuickModelGatewayTest         tests=6    failed=0
+  com.treelearn.app.generation.RecoveryScanTest              tests=3    failed=0
+  com.treelearn.app.generation.StreamBatchTest               tests=5    failed=0
+  com.treelearn.app.library.LibraryPresenterTest             tests=5    failed=0
+  com.treelearn.app.library.LibrarySearchEntryTest           tests=3    failed=0
+  com.treelearn.app.navigation.NavigationPresenterTest       tests=21   failed=0
+  com.treelearn.app.navigation.NavigationRootGateTest        tests=5    failed=0
+  com.treelearn.app.reading.ReadingSessionTest               tests=7    failed=0
+  com.treelearn.app.screen.ChatMotionTest                    tests=4    failed=0
+  com.treelearn.app.screen.HomeComposerLayoutTest            tests=6    failed=0
+  com.treelearn.app.screen.HomeMotionTest                    tests=8    failed=0
+  com.treelearn.app.screen.PaperRulesTest                    tests=10   failed=0
+  com.treelearn.app.screen.RecommendationTagTest             tests=5    failed=0
+  com.treelearn.app.screen.SettingsProvidersBindingTest      tests=1    failed=0
+  com.treelearn.app.search.SearchJumpTest                    tests=2    failed=0
+  com.treelearn.app.search.SearchPageTest                    tests=8    failed=0
+  com.treelearn.app.search.SearchPresenterTest               tests=8    failed=0
+  com.treelearn.app.search.web.ChatSearchStepTest            tests=10   failed=0
+  com.treelearn.app.search.web.SearchInjectionTest           tests=8    failed=0
+  com.treelearn.app.ui.ChatComposerInputTest                 tests=11   failed=0
+  com.treelearn.app.ui.ChatFollowPolicyTest                  tests=8    failed=0
+  com.treelearn.app.ui.ChatFullscreenEditorTest              tests=9    failed=0
+  com.treelearn.app.ui.ChatGenerationStageTest               tests=9    failed=0
+  com.treelearn.app.ui.ChatMessagePresentationTest           tests=6    failed=0
+  com.treelearn.app.ui.ChatMessageRowLayoutTest              tests=15   failed=0
+  com.treelearn.app.ui.ChatMessageTest                       tests=11   failed=0
+  com.treelearn.app.ui.ChatModelChipTest                     tests=4    failed=0
+  com.treelearn.app.ui.ChatMotionLayoutStabilityTest         tests=5    failed=0
+  com.treelearn.app.ui.ChatPositionAgreementTest             tests=3    failed=0
+  com.treelearn.app.ui.ChatPresenterSearchTest               tests=7    failed=0
+  com.treelearn.app.ui.ChatPresenterTest                     tests=43   failed=0
+  com.treelearn.app.ui.ChatPresenterTranslationTest          tests=9    failed=0
+  com.treelearn.app.ui.ChatReadingTest                       tests=11   failed=0
+  com.treelearn.app.ui.ChatSpeakerTest                       tests=10   failed=0
+  com.treelearn.app.ui.ChatSpeechInputTest                   tests=5    failed=0
+  com.treelearn.app.ui.ChatViewStateTest                     tests=14   failed=0
+  com.treelearn.app.ui.FileManagerCleanupTest                tests=2    failed=0
+  com.treelearn.app.ui.HeatmapLayoutTest                     tests=16   failed=0
+  com.treelearn.app.ui.HomeContinueLearningTest              tests=2    failed=0
+  com.treelearn.app.ui.HomeDrawerPresenterTest               tests=7    failed=0
+  com.treelearn.app.ui.HomePresenterTest                     tests=17   failed=0
+  com.treelearn.app.ui.HomeStatsTest                         tests=3    failed=0
+  com.treelearn.app.ui.HomeViewStateTest                     tests=9    failed=0
+  com.treelearn.app.ui.KeySnapshotTest                       tests=6    failed=0
+  com.treelearn.app.ui.ModelSettingsPresenterTest            tests=11   failed=0
+  com.treelearn.app.ui.ProviderAdminPresenterTest            tests=17   failed=0
+  com.treelearn.app.ui.ReasoningDisclosureLayoutTest         tests=3    failed=1
+  com.treelearn.app.ui.SearchSettingsPresenterTest           tests=11   failed=0
+  com.treelearn.app.ui.SettingsPresenterTest                 tests=7    failed=0
+  com.treelearn.app.ui.StatsDetailPresenterTest              tests=5    failed=0
+  com.treelearn.app.ui.TextSelectionTest                     tests=9    failed=0
+  com.treelearn.app.ui.TreeCanvasGeometryTest                tests=13   failed=0
+  com.treelearn.app.ui.TreeCanvasLabelsTest                  tests=7    failed=0
+  com.treelearn.app.ui.TreeCanvasPresenterTest               tests=16   failed=0
+  com.treelearn.app.ui.TreeCanvasViewStateTest               tests=7    failed=0
+  com.treelearn.app.ui.VoiceSettingsPresenterTest            tests=12   failed=0
+  com.treelearn.app.ui.WordMenuTest                          tests=7    failed=0
+  com.treelearn.app.wiring.BranchChildrenTest                tests=5    failed=0
+  com.treelearn.app.wiring.ChatPromptReasonNoticeTest        tests=5    failed=0
+  com.treelearn.app.wiring.ChatWiringSearchTest              tests=6    failed=0
+  com.treelearn.app.wiring.ChatWiringTest                    tests=28   failed=0
+  com.treelearn.app.wiring.CoreFlowE2eTest                   tests=1    failed=0
+  com.treelearn.app.wiring.HomeWiringTest                    tests=18   failed=0
+  com.treelearn.app.wiring.SnapshotHistoryMergerTest         tests=6    failed=0
+  com.treelearn.app.wiring.TelemetrySinkVariantTest          tests=3    failed=0
+  com.treelearn.app.wiring.TreeCanvasWiringTest              tests=9    failed=0
+  com.treelearn.data.db.dao.FirstTopicCreationRulesTest      tests=11   failed=0
