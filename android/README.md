@@ -476,8 +476,12 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
   由 `home_rec_starter` / `home_rec_history` 二选一（读 `hasTopics()`）；`home_recommendations_title`
   **字符串已删**（同一 id 保留为视图 id，供动态文案使用）；新增 `home_recent_count`、`home_topic_meta`、
   `home_topics_empty`、`home_topic_unread_cd`。
-- **令牌纪律**：本轮**不改** `tokens.json` 与 `colors.xml`、**不新增** token；所有新形状与新颜色都取既有
-  资源名（守门现状：44 token / 16 资源 / 0 failed，命令见 `.trae/scripts/dev/check_design_tokens.py`）。
+- **令牌纪律（2026-09-28 由 008 独立验收更正）**：首页线**新增 1 个不透明 hex 之外的尺寸 token**
+  `fs-brand`（30px，「首页品牌锁定区」），由 `screen_home_body.xml` 的品牌字 `@dimen/text_brand`（30sp）
+  消费；形状与新颜色仍取既有资源名。同期入库的 `green-bubble` / `tl_green_bubble`（`colors.xml` +1 行）
+  **属对话页线**，不是首页线的产物。
+  守门现状：44 token / 16 资源 / 0 failed（命令见 `.trae/scripts/dev/check_design_tokens.py`）；
+  三方一致性成立，此前本节「不改 tokens.json、不新增 token」的表述与事实不符，已更正。
 - **与原型的有意偏差**（逐条可核，理由见规格的偏差表）：不做 hover 态；推荐卡与类别胶囊高度按 `touch_min`；
   保留本项目外壳的左上抽屉按钮，不搬原型的顶栏搜索/归档图标与主题卡「⋯」菜单；品牌字形走平台衬线
   （不打包字体）；空态**不提供**「先逛逛示例主题」（App 无示例数据生成器）。

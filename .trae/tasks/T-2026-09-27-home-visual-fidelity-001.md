@@ -4,7 +4,7 @@ id: T-2026-09-27-001
 title: 首页视觉 1:1 还原（父需求）
 template_version: 2
 task_type: requirement
-status: ready
+status: verified
 parent_requirement: null
 requirements_confirmed: true
 generated_by: leader

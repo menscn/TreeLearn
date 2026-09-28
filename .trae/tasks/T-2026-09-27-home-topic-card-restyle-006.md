@@ -4,7 +4,7 @@ id: T-2026-09-27-006
 title: 首页历史主题卡片与空态
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-27-home-visual-fidelity-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -124,7 +124,11 @@ Follow [code-document alignment](../rules/documentation.md).
 
 - Verdict: PENDING
 - Evidence: 目标仪器测试两态 + 真机回归 + JVM 全量，四份证据在 `artifacts/evidence/T-2026-09-27-006-{red,green,regression-device,regression-jvm}.txt`；设计 token 守门复跑 `check_design_tokens.py` → `0 check(s) failed`、EXITCODE=0（44 token / 16 资源不变）。**真机截图仍未取**，待 008 复核时一并取 —— 不得读成已通过。
-- Changed/deleted assertion rationale and equivalent behavior coverage: 无断言删除。`home_recent_list`（仪器测试的点击容器）与被点行的**可点语义**都保留，`BottomTabShellInstrumentedTest` 未改一行即通过，等价覆盖由真机回归证明；`home_recent_title` 的 id 保留、只改文字取值。`HomeScreen.recentRow` 删除属实现内部重构（无对外断言指向它）。
+- Changed/deleted assertion rationale and equivalent behavior coverage: 无断言删除。`home_recent_list`（仪器测试的点击容器）与被点行的**可点语义**都保留；`home_recent_title` 的 id 保留、只改文字取值。`HomeScreen.recentRow` 删除属实现内部重构（无对外断言指向它）。
+- **2026-09-28 由 008 独立验收更正（G3）**：上句「`BottomTabShellInstrumentedTest` 未改一行即通过」与提交事实不符——
+  该测试在同批提交中有一处断言改写：`home_continue` 的 `awaitVisible+click` 改为
+  `clickRow(awaitChildren(R.id.home_recent_list))`。**等价覆盖成立**：断言的同一用户行为（点首页历史行→开对话）不变，
+  新断言走产品真实渲染行、结构真实性更强，且 verifier 隔离复跑绿。归因批次含多条并发线，无法指认到本任务单独责任。
 - Gaps: ① 真机截图未取（头部＋卡片两态）；② 「临时标题」胶囊未实现 —— `ui.TopicCard` 无临时标题字段，卡片不猜测（本任务边界内无法闭环，需数据面另立条目）；③ 摘要**出现的**方向未在本任务断言（fixture 不产派生摘要），该方向由 `LibraryTopicSummaryInstrumentedTest` 在库侧覆盖同一字段。
 - Risks: ① 首页卡片与学习库行是两套形态（信息架构允许：前者是快捷面、后者是正典列表），但两处的「分支数」必须继续同读 `TopicCard.branchCount` —— 若将来有人给首页另算一个数，本条与库侧会分叉；② 未读事实现在同时由蓝点与卡片 content description 承载，若将来有人去掉描述，无障碍就成了「只有形状」。
 - 规模: 判定值约 192 行，超 `estimate: 90` 但**低于 200 软上限**（见 TDD 记录规模表），未触及 500 硬上限

@@ -4,7 +4,7 @@ id: T-2026-09-27-003
 title: 首页版式顺序与品牌锁定区
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-27-home-visual-fidelity-001.md
 requirements_confirmed: true
 generated_by: leader

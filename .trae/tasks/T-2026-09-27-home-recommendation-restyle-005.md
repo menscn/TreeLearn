@@ -4,7 +4,7 @@ id: T-2026-09-27-005
 title: 首页推荐区视觉与标签映射
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-27-home-visual-fidelity-001.md
 requirements_confirmed: true
 generated_by: leader

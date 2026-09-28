@@ -4,7 +4,7 @@ id: T-2026-09-27-008
 title: 首页视觉 1:1 还原独立验证
 template_version: 2
 task_type: verification
-status: ready
+status: verified
 parent_requirement: T-2026-09-27-home-visual-fidelity-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -98,17 +98,77 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Verification report
 
-- Verdict: PENDING
-- Evidence: 待执行时填写
-- Changed/deleted assertion rationale and equivalent behavior coverage: 待执行时填写
-- Gaps: 待执行时填写
-- Risks: 待执行时填写
+执行方式：2026-09-28 由**独立 verifier 子代理**（全新上下文、只读、未参与 002–007 实现）执行；
+本报告段由主会话（Harness）按其产出写入，符合「verifier 只读、报告由主会话写入」的分工。
+
+- Verdict: **PARTIAL**
+  002–007 各条 acceptance 在本仓约定的执行口径（类域批跑 + JVM 全量 + 真机）下证据成立，且 verifier
+  当场复跑全部复现通过；但**全量批跑 `:app:connectedDebugAndroidTest` 两次当场运行均 EXITCODE=1
+  （243 例 / 22 失败，两次失败分布逐条相同）**。按 harness-verification「任一加载守门 FAIL 即 FAIL、
+  缺必要证据为 PARTIAL，绝不 PASS」，不判 PASS；该失败经归因探针证实与 002–007 生产代码无关
+  （隔离批跑全绿、排除 A 前缀 5 类的探针 40 例全绿），故不判 FAIL。
+
+- Evidence: 16 份，均在 `artifacts/evidence/T-2026-09-27-008-*`
+  - `validate-tasks.txt` EXITCODE=1，`files=31 errors=11 warnings=0`；**11 条 ERROR 全部来自
+    T-2026-09-20-017（8 条）与 -019（3 条）历史任务引用已删依赖 + 017 RED 字段缺失＝既有噪声**；
+    本轮 8 个 home 文件（001–008）全部 PASS。
+  - `design-tokens.txt` EXITCODE=0，`0 check(s) failed`，measured_tokens=44 / measured_resources=16。
+  - `javaonly-guard.txt` EXITCODE=0，`PASS (3 APK(s) inspected … no Kotlin runtime bytecode)`；
+    **007 记录的「共树竞态 FAIL」至此收口**（复跑前已确认源码静止）。
+  - `assemble-debug.txt` EXITCODE=0；`lint-debug.txt` EXITCODE=0（75 警告 / 0 错误），其中命中首页线的
+    5 条全为 Warning，清单见 `lint-home-scope.txt`。
+  - `test-debug-unit.txt` / `unit-test-summary.txt` EXITCODE=0（79 份 / tests=683 / 0 失败 / 0 错误）。
+  - `connected-test.txt`＋`connected-test-rerun-full.txt`（全量两轮，均 EXITCODE=1，243/22，
+    失败清单 `connected-failures.txt`、`connected-full-rerun-failures.txt`）；
+    `connected-home-rerun.txt`＋`-summary.txt`（首页+壳层 6 类隔离复跑，EXITCODE=0，22 例 0 失败）；
+    `connected-attribution-probe.txt`（归因探针 40 例 0 失败）。
+  - 真机两态截图：`home-empty.png`（空态）、`home-with-topics.png`（有条目，播种数据经产品读路径渲染）。
+  - RED/GREEN 自洽性：002–007 六份的 RED 与 GREEN **Command 逐字相同**，退出码 1→0 与自述相符，
+    六份 RED 的失败全部在编译期且错误符号只指向当轮新类型/新 id；GREEN 计数逐一相符（6/9/10/5/2/8）。
+    未发现「自述计数与证据文件不同源」。
+
+- Changed/deleted assertion rationale and equivalent behavior coverage:
+  - `HomeBackdropInstrumentedTest` 被 T-010 壳层方案**整写**（`HomeBackdropInstrumentedTest.java:26-38`
+    自注 T-010 acceptance，并新增反向断言「screen_home 不得再带第二层纸纹」:73）。等价覆盖成立且经
+    verifier 隔离复跑 3 例全绿；但 **002 任务文件仍声称「无断言删除」，与生产事实不符**（Gaps G2）。
+  - `BottomTabShellInstrumentedTest` 一处断言改写（`home_continue` 点击 → `clickRow(awaitChildren(
+    R.id.home_recent_list))`）。等价覆盖：断言的同一用户行为（点首页历史行→开对话）不变，新断言走产品
+    渲染行、结构真实性更强，隔离复跑绿；但 **006 文件「未改一行即通过」与提交事实不符**（Gaps G3）。
+  - `HomeScreen.MAX_RECENT` private → 包内可见（供同包单测读取，无行为变化）。
+
+- Gaps:
+  - **G1（最高优先）全量批跑仪器测试 22/243 失败，可复现、未定位污染源**：A 前缀 5 类已排除；候选机理为
+    多测试类 `deleteDatabase()` 与 AppContainer 常开连接的 DB 夹具隔离缺陷（`HomeTopicCardInstrumentedTest`
+    javadoc:46-53 已自述该批跑风险）。失败形态为「no row arrived / never drew N card rows」等待超时。
+    **建议另立任务**：为全套件建立进程内 DB 夹具隔离，先做最小二分定位污染类。与 002–007 无关。
+  - **G2 002 文件与生产事实失同步**：其 AC2/证据/交接仍声称「PaperRuleBackdrop 接入两份 screen_home.xml」
+    「`home_backdrop` id 保持」，现树中均不成立（`home_backdrop` 全仓 grep 0 命中）。
+  - **G3 BottomTabShell 断言改写未登记**（同上），006 文件表述与提交事实不符。
+  - **G4 文档与 token 事实失实**：`android/README.md` 首页一节与 `SPEC-…home-visual-fidelity.md:88`
+    声称「不新增 token / 不改 tokens.json」，而 `30abb8d` 实际新增 `fs-brand`（首页品牌锁定区 30px，
+    由 `screen_home_body.xml:79` `@dimen/text_brand` 消费）与 `green-bubble`（对话线）。
+    **主会话已于 2026-09-28 更正 README 该段**；SPEC:88 的约束特指「纹理色与信纸色以既有 token 派生」，
+    对该具体约束仍成立，故未改。
+  - **G5 005 AC2 仅有单元证据**（`HomePresenterTest:179`），真机未重放推荐点击（设备流程让位于守门/截图）。
+  - **G6 既有关闭项照抄**：M7 后半（就绪文案动态化）、历史卡「临时标题」（`TopicCard` 无字段）。
+
+- Risks:
+  - **R1** 全量批跑失败意味着 CI 若按全量跑 connected 会常红；当前靠「类域批跑」纪律维持绿像，
+    纪律松懈即暴露（与 G1 同根）。
+  - **R2** 纸纹层已上移到壳层全局渲染（所有一级/二级屏都有横格），影响面从「首页」扩大到「全局」。
+  - **R3** `RuleEditText` 行距搜索在极端 fontScale 仍可能停在最近档（004 已登记，本轮未复验）。
+  - **R4** README 的失实表述会误导后续任务引用为依据（G4，已修 README；SPEC 口径见上）。
+  - **R5** 设备过程事实：验证中途 `screencap` 全路径 0 字节（SurfaceFlinger 报 FB protected，疑与真机
+    键入 API Key 触发的隐私保护有关），已重启真机恢复；`connected` 任务结束后 AGP **卸载了被测应用**，
+    主会话已于 2026-09-28 09:xx 重新安装并确认 `pm list packages` 含 `com.treelearn`。
 
 ## Handoff notes
 
-- Completed: 任务创建
-- In progress: 未开始
-- Blocker: 无
-- Unblock condition: 不适用
-- Next steps: 002–007 全部 verified 后执行本任务
-- Watch-outs: 只读；数字必须来自当场命令输出；历史 error 与新增 error 必须分开计数
+- Completed: 002–007 逐条 acceptance 判定、六项机械守门当场输出、首页两态真机截图、RED/GREEN 自洽性核查
+- In progress: 无
+- Blocker: G1（全量批跑仪器测试 22/243 失败，污染源未定位）——它使整条线只能判 PARTIAL，
+  但已证与 002–007 生产代码无关
+- Unblock condition: 另立任务修复全套件 DB 夹具隔离后，复跑 `:app:connectedDebugAndroidTest` 全绿
+- Next steps: ① 立 G1 修复任务（DB 夹具隔离 + 二分定位污染类）；② 002/006 任务文件补 G2/G3 的事实指针；
+  ③ 002–007 与 001 的状态收口待用户拍板（见主会话汇报）
+- Watch-outs: 只读；数字均来自当场命令输出；历史 error（11）与新增 error（0）已分开计数

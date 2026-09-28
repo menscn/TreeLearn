@@ -4,7 +4,7 @@ id: T-2026-09-27-002
 title: 首页纸纹基元与整页背景层
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-27-home-visual-fidelity-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -124,7 +124,7 @@ Follow [code-document alignment](../rules/documentation.md).
 
 - Verdict: PENDING（本任务证据已齐，终判由 `T-2026-09-27-home-visual-fidelity-verification-008.md` 出具；本任务不自判 verified）
 - Evidence: 见 TDD 记录的 4 份证据文件（红 1、绿 1、回归 2），全部位于 `artifacts/evidence/`。
-- Changed/deleted assertion rationale and equivalent behavior coverage: 无断言删除。
+- Changed/deleted assertion rationale and equivalent behavior coverage: 无断言删除。**2026-09-28 由 008 独立验收更正（G2）**：此表述与生产事实不符。本任务的装饰层接入**已被同日 T-010 壳层方案取代**——现树中两份 `layout*/screen_home.xml` 均**不再包含** `PaperRuleBackdrop`（现为 `FrameLayout>ScrollView>include`），纸纹层上移至 `activity_main.xml` 的 `shell_backdrop`；`home_backdrop` 该 id 全仓 grep 0 命中。随之 `HomeBackdropInstrumentedTest` 被整写为壳层断言（该文件:26-38 自注 T-010 acceptance，并新增反向断言「screen_home 不得再带第二层纸纹」:73）。等价覆盖成立且经 verifier 隔离复跑 3 例全绿（两配置渲染、不可点/不可聚焦/无障碍隐藏、token 取值）。本任务的 `PaperRules` 判定实现本身仍是唯一判定点，未被推翻。
 - Gaps: 真机截图上纸纹的**观感**（是否读作纹理而非参考线）未确认——仪器测试只能证结构，证不了观感；留给 008 的真机截图与人工目视。
 - Risks: 低密度屏上横线可能偏明显（1dp 线在低 dpi 下视觉占比更大）；若观感不成立，调整手段是降 `ruleAlpha` 或改 `hairline` 为更细，均在 `PaperRules` 单点完成。
 
@@ -136,3 +136,5 @@ Follow [code-document alignment](../rules/documentation.md).
 - Unblock condition: 不适用。
 - Next steps: ① 008 跑 `check_design_tokens.py` 与 Java-only 守门并出终判；② 若 008 判定观感不成立，按「Risks」里的单点手段回调；③ 003 起按依赖链继续，`screen_home_body.xml` 与 `HomeScreen.java` 的改动须串行。
 - Watch-outs: 不得在 `PaperRuleBackdrop` 里重复一份线距/颜色判定（004 要复用同一实现）；不得改动共享 `bg_*` 资源；`home_backdrop`/`home_screen` 是新增 id，改动首页布局的后续任务不要移除或改名。
+  **已过时（2026-09-28 核）**：本节末尾的 id 约定已不成立——纸纹层改由壳层 `activity_main.xml` 的 `shell_backdrop` 承载，
+  `home_backdrop` 已不存在；后续任务请以 `activity_main.xml` 的壳层为准，勿按本行回改首页布局。

@@ -1,0 +1,47 @@
+# 证据：Java-only 守门（verifyNoKotlinDex）复跑 —— 2026-09-28
+
+用途：闭合 T-2026-09-27-007 Implementation notes 的 Gap (3)「verifyNoKotlinDex 待源码静止复跑」，
+同时作为 T-2026-09-27-008 独立验证的机械守门证据之一。
+
+## 为什么这次复跑有意义（裁决背景）
+
+2026-09-27 那轮 FAIL 的成因已裁决为「共树竞态」：唯一错误是 ChatScreen.java:909 引用被对话页线
+在途删除的 R.id.chat_time（18:49–18:54 该线连续写 6 个文件）。裁决见
+`artifacts/evidence/T-2026-09-27-007-no-kotlin-adjudication.txt`。
+本轮复跑前已确认源码静止：`find android/app/src -type f -newermt "-30 minutes"` 返回空
+（最近一次改动为 2026-09-28 03:06，复跑时刻 09:23）。
+
+## 命令
+
+- Workdir: `D:\Project\Android\Treelearn\android`
+- Command: `JAVA_HOME=/d/Environment/Jdk/jdk21 ./gradlew --no-daemon --console=plain verifyNoKotlinDex`
+- 日期：2026-09-28 09:23–09:24
+
+## 退出码
+
+EXITCODE=0
+
+## 关键输出行
+
+```
+> Task :verifyNoKotlinDex
+verifyNoKotlinDex: [app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk] APK in an androidTest output path (test process) = 1553218 bytes, 3 dex file(s) [classes.dex, classes2.dex, classes3.dex]
+verifyNoKotlinDex: [app/build/outputs/apk/debug/app-debug.apk] shipped APK = 1636259 bytes, 17 dex file(s) [classes.dex, classes11.dex, ... classes14.dex]
+verifyNoKotlinDex: [app/build/outputs/apk/release/app-release.apk] shipped APK = 1034331 bytes, 1 dex file(s) [classes.dex]
+verifyNoKotlinDex: NOTICE (accepted) [app-debug-androidTest.apk] contains Kotlin-compiled annotation classes without runtime linkage ([classes.dex -> Lkotlin/Metadata;]); no Kotlin runtime library is required on device. Kotlin type descriptors in this APK (8): [Lkotlin/Deprecated;, Lkotlin/Metadata;, Lkotlin/ReplaceWith;, Lkotlin/annotation/AnnotationRetention;, Lkotlin/annotation/AnnotationTarget;, Lkotlin/annotation/AnnotationRetention;, Lkotlin/annotation/Target;, Lkotlin/reflect/KClass;]
+verifyNoKotlinDex: PASS (3 APK(s) inspected across app/build/outputs/apk, no Kotlin runtime bytecode)
+
+BUILD SUCCESSFUL in 52s
+215 actionable tasks: 2 executed, 213 up-to-date
+```
+
+## 结论
+
+PASS：3 个 APK（androidTest / debug / release）均不含 Kotlin 运行时字节码。
+androidTest APK 中的 Kotlin 注解类是 ACCEPTED 级 NOTICE（无运行时链接，设备上不需要 Kotlin 运行时库）。
+
+## 连带确认
+
+同一时段 `:app:assembleDebug` 亦 BUILD SUCCESSFUL / EXITCODE=0（2026-09-28 09:00，73 tasks up-to-date），
+产物 `app/build/outputs/apk/debug/app-debug.apk` = 1,636,259 B，已 adb install 到 AWSS013807000356。
+两次构建互相印证：本轮不存在 2026-09-27 那种「编译期源码被并发重写」的竞态。
