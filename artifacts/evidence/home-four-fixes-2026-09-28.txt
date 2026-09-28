@@ -1,0 +1,177 @@
+# 首页四个问题的修复 —— 静态验证证据
+
+来源：用户 2026-09-28 实机走查提出四条，随后一句「执行」授权直接改码（不走 Harness）。
+角色：工程师视角，直接执行路径。
+
+## 一、改动面（9 个文件，md5 见文末）
+
+生产（6）
+  screen/EdgeFadeLayout.java      新增 —— 会羽化左右边缘的纵向容器（问题 2）
+  screen/RecommendationMarquee.java  两条轨道移入 EdgeFadeLayout；render() 跳过无变化重建（问题 1+2）
+  ui/Recommendation.java          补 equals/hashCode —— 使「按值比较」真正成立（问题 1 的前提）
+  ui/HomePresenter.java           load() 拆两次 post：topics 先、recommendations 后（问题 4）
+  res/values/dimens.xml           新增 rec_fade_width = 20dp
+  res/layout/screen_home_body.xml home_recommendations_section 加 space_s4 = 16dp（问题 3）
+
+测试（3）
+  screen/HomeRecommendationStripTest.java  新增 9 例
+  ui/HomePresenterTest.java                +3 例（共 20 例）
+  ui/TestDoubles.java                      FakeHomeData 加 observeStripRead 钩子
+
+## 二、逐条对应用户诉求
+
+问题 1「打字后推荐条闪一下」
+  根因：HomeScreen 每次 render 都把整个 state 交下来，RecommendationMarquee.render()
+  无条件 removeAllViews() 重建两条轨道 → 滚动相位归零、重放首帧 = 可见闪烁。
+  修复：render() 按值比较，同一批 chip 直接 return。
+  前提：ui.Recommendation 是值对象却没有 equals/hashCode，比较此前只是「碰巧」因
+  调用方复用实例而生效 —— 已补上（question + kind 都参与）。
+
+问题 2「左右两侧没有羽化」
+  修复：新建 EdgeFadeLayout，DST_OUT + LinearGradient + saveLayer 擦除自身像素。
+  **关键修正（本项目自己发现的真 bug）**：不能照抄原型 CSS 数组。CSS mask-image 把
+  alpha 当可见度（transparent 隐藏 / #000 显示），DST_OUT 把 source alpha 当擦除量
+  （1 擦 / 0 留），语义相反。照抄 {transparent,#000,#000,transparent} 会把中间擦空、
+  两端留下 —— 正好相反。实现用补集 {0xFF000000, 0x00000000, 0x00000000, 0xFF000000}。
+  遮罩挂在包住两行的块上（不是每行）：两行各自滚动，各自挂遮罩会在两个高度各切一刀。
+  RTL 下不对称是照抄原型（原型 90deg 从物理左起算且 stop 未按逻辑序写）。
+
+问题 3「与输入框间距太小」
+  **读规格后修正了我最初的判断**：我原以为是用户主动偏离原型，实为三层口径不一致——
+    原型 .rec-block     padding:4px 0 6px，自身无 margin（几乎紧贴）
+    首页视觉规格         token 矩阵写 .rec-block → space_s4，但未说明 padding/margin
+    Android 原实现       8dp（仅挂在 marquee 上）
+  取规格自己的数字 16dp（也即用户诉求），是对原型的主动偏离。三层关系写进了 XML 注释
+  与 README 偏差表，以免被后读的人当保真缺陷改回。
+  平台分支：手机 layout/screen_home.xml:17 与平板 layout-sw600dp/screen_home.xml:23
+  **都 include 同一份 screen_home_body.xml**，故改一处即覆盖两端，无分支漂移可能。
+
+问题 4「返回首页历史卡片要等一会儿」
+  根因：load() 原先把 topics 与 recommendations 合并成一次 post。recommendations 是
+  派生物，生产时可能**同步阻塞**在模型流上（上限 BlockingDerivedCaller.TIMEOUT_SECONDS
+  = 90s），卡片因此一直不出现。
+  修复：读 topics → 立即 post（带它蕴含的相位）→ 再读 recommendations → 单独 post。
+  推荐失败只清空条本身，页面保持第一次 post 的可用状态（PRD 6.2.17 exception 3）。
+  HomePresenter.post() 是在 UI 线程上对**当前** state 施加变换，故第二次 post 不会
+  回退第一次的结果。
+
+## 三、验证结果（命令 + 退出码，全部当场捕获）
+
+1) 编译 + 全量单测
+   $ cd android && ./gradlew --no-daemon --console=plain --no-build-cache \
+       -PbuildDir=build-homefix :app:compileDebugJavaWithJavac :app:testDebugUnitTest
+   BUILD SUCCESSFUL in 58s / EXITCODE=0
+   706 tests completed, 0 failed
+   分册核对（XML 自述）：
+     HomeRecommendationStripTest  tests="9"  failures="0" errors="0" skipped="0"
+     HomePresenterTest            tests="20" failures="0" errors="0" skipped="0"
+   日志 artifacts/evidence/home-fixes-2026-09-28-compile-test.log
+
+2) 设计 token 三方守门
+   $ python .trae/scripts/dev/check_design_tokens.py
+   check_design_tokens: 0 check(s) failed / EXITCODE=0
+   43 token / 15 资源 —— 与改动前一致。rec_fade_width 是 dimens 而非 color，
+   不进三方守门，故资源数不动。（注意：新增**不透明 hex** token 才会要求同步 colors.xml。）
+
+3) Java-only 守门
+   $ cd android && ./gradlew -p . --no-daemon --console=plain -q verifyNoKotlinDex
+   verifyNoKotlinDex: PASS (3 APK(s) inspected across app/build/outputs/apk,
+                      no Kotlin runtime bytecode) / EXITCODE=0
+   日志 artifacts/evidence/no-kotlin-2026-09-28-homefix.txt
+
+4) 静态自检
+   7 个 Java 文件括号逐行配平（剥离注释/字符串后）；2 个 XML 可被 ElementTree 解析；
+   res 树内 XML 注释无 `--`；R.txt 含 rec_fade_width。
+
+## 四、过程中修掉的两个真 bug（都是本次自己引入并当场发现的）
+
+A. 渐变方向反了（见上文问题 2）—— 照抄原型数组会把中间擦空，与设计相反。
+B. Canvas.saveLayer 用了废弃的 Rect 重载 —— javac 报「Rect 无法转换为 RectF」。
+   saveLayer(Rect, Paint) 自 API 21 起废弃，且与现代签名不兼容。
+   → 已改 RectF，并在 HomeRecommendationStripTest 补一条断言把这个 API 契约钉住
+     （该断言存在的原因正是：这个错误此前只被 javac 抓到，任何测试都没报）。
+
+## 五、我自己的两条测试断言写错了（已修，非实现问题）
+
+C. aStripTooNarrowToFadeKeepsItsEdges 用 lastIndexOf 比较两个**都有多次出现**的字符串
+   （super.dispatchDraw 出现 2 次、restoreToCount 1 次），比较的不是同一处，断言恒为
+   失败（且方向恰好反了）。改为断言 guard-then-plain-draw 的形状。
+D. theFirstPostIsAlreadyAFinishedPageAndTheSecondOnlyAddsTheStrip 漏调
+   data.observeStripRead(sink)，导致 sinkStatesWhenStripWasRead 保持 -1，
+   get(-2) 抛 IndexOutOfBoundsException。已补钩子，并把该数字的存在性一并断言。
+
+两条都属「断言写得不适配实现」而非实现错误 —— 记录在此，因为它们是典型的
+「改了实现忘了核断言」与「断言过宽/错位」失效模式。
+
+## 六、并发干扰（本次真实遭遇，已单立证据）
+
+详见 artifacts/evidence/foreign-line-interference-2026-09-28.txt：
+  1) 别线 bg_count_badge.xml 的 XML 注释含 `--` → 全仓资源编译失败；15:09 别线自行修复。
+  2) 别线的提交操作带走了本线唯一的**未跟踪新增文件** EdgeFadeLayout.java（15:03 写入，
+     15:11 缺失）→ 编译报「找不到符号」。凭对话中读到的源码逐字重建，md5 回到
+     f791aae20df78647c8a869d305633325（逐字节还原）；随后 git add 使其转为已跟踪，
+     避免再次被带走。
+  3) 共享 app/build 目录被别线 java.exe 持有 → javac 报 IOException 删目录失败。
+     处置：改用独立 -PbuildDir 隔离；但该隔离会从 Gradle 构建缓存恢复时触发
+     「Could not set file mode 755」（Windows 无 chmod），故再加 --no-build-cache。
+
+## 七、未做 / 缺口
+
+- **未做真机验证**。四个问题都是可见交互，按 regression.md 第 5 条需要设备侧行为证据；
+  静态层（编译/单测/守门）只证明各自层。真机 AWSS013807000356 多线共用，装机需协调。
+- 未 git 提交。本线改动与别线改动同处一个工作区，提交范围需用户确认。
+- 遗留编译警告（既有的 deprecation/unchecked 注记）与本次改动无关。
+
+## 八、md5 快照（2026-09-28 15:20）
+
+8e4616d77573bc71e5cf1ec0987212cc  app/src/main/java/com/treelearn/app/screen/EdgeFadeLayout.java
+d4a1f972ebefcc1f0d07accde8ad6e25  app/src/main/java/com/treelearn/app/screen/RecommendationMarquee.java
+f389b01a90f293d6f74dc15ac0defd76  app/src/main/java/com/treelearn/app/ui/Recommendation.java
+12ffb5f5b45fa5d55d83ff2a2533ec42  app/src/main/java/com/treelearn/app/ui/HomePresenter.java
+d966e000f41eff18ea19ba27605f7bb3  app/src/main/res/values/dimens.xml
+730fd3083493b57bb59a6f36fb421ce7  app/src/main/res/layout/screen_home_body.xml
+d80075642641792507151480942922df  app/src/test/java/com/treelearn/app/screen/HomeRecommendationStripTest.java
+aba8d43c6499a0b39069141440b82aba  app/src/test/java/com/treelearn/app/ui/HomePresenterTest.java
+25407f635958fab283aced5ab6a611a0  app/src/test/java/com/treelearn/app/ui/TestDoubles.java
+android/README.md                  （4 处，见 git diff）
+
+==============================================================
+# 后续裁决（2026-09-28 15:36）：羽化的 DST_OUT 结论被真机推翻
+
+用户 15:24 发来实机截图：推荐条中间整块被擦空，只剩上下两条全宽细线（chip 边框）
+与两端窄条残留。**本文件 §二问题 2 与 §四 A 条所述「DST_OUT + 补集数组」的理论是错的。**
+
+## 真机量测（3072x1779 问题截图）
+- 推荐条带 y 780-950：中间 screen x 344-731（约 387px）墨量恒 0；仅左 25px / 右 31px 有残留。
+- y=760 与 y=970 两条全宽深色带（lum=113）＝块外 chip 边框，未被擦（在遮罩 bounds 之外）。
+- 结论：**整个遮罩块内容被一次性全擦**，而非按渐变调制。
+
+## 根因（以官方文档 + 真机复验为准）
+`PorterDuff.Mode.DST_OUT`＝dst × (1 − src_alpha)。静态推理认为 source alpha 来自
+LinearGradient shader，于是「补集数组」应产生两端擦除、中间保留；真机相反。
+实际行为：**drawRect 的 source alpha 取自 Paint（默认 255），shader 未调制擦除**，
+整块 rect 的 destination 全部被擦。shader 只决定颜色、不决定逐像素 alpha 的
+这条路径在硬件加速 + Xfermode 组合下不成立。
+
+## 修正（15:31 编译、15:33 装机、15:34 截图验证）
+- `DST_OUT` → **`DST_IN`**（dst_in = dst × src_alpha，与 CSS mask 的 alpha 语义一致）；
+- 渐变数组**照抄原型** `{0x00000000, 0xFF000000, 0xFF000000, 0x00000000}`，无需补集；
+- javadoc / README / 测试断言同步改写（`theGradientMatchesCssMaskSemanticsUnderDstIn`）。
+
+## 验证（全绿，命令与退出码当场捕获）
+$ ./gradlew --no-daemon --console=plain --no-build-cache :app:assembleDebug :app:testDebugUnitTest
+BUILD SUCCESSFUL / EXITCODE=0 / 706 tests 0 failures（HomeRecommendationStripTest 9/0/0/0）
+$ adb install -r app-debug.apk → Success（lastUpdateTime=2026-09-28 15:33:01）
+$ adb exec-out screencap -p → artifacts/tmp/fade-probe/after-fix-1.png（3200x2136 RGBA）
+量测（推荐 y 带 940-1130）：左 1/5 段 70/73 列有墨、中 1/5 段 69/73 列有墨、
+右 1/5 段 70/73 列有墨 —— 中间内容完整恢复，两端柔和淡出，与 CSS mask 一致。
+
+## 教训（入失败案例库候选）
+1. **Xfermode + shader 的 alpha 归属不能靠静态推理定论**：`saveLayer` 图层上用
+   `drawRect` 应用 `DST_OUT`，source alpha 来自 Paint 而非 shader——「数学上正确」
+   的组合在真机上整块失效。遮罩语义（mask = 乘法）一律用 `DST_IN` + 原样数组。
+2. **可见交互必须真机验证**：本轮静态层（编译/单测/守门）全绿，但羽化整个是反的，
+   直到用户实机截图才暴露。regression.md 第 5 条「布局与原生交互需要设备侧行为证据」
+   不是形式要求。
+3. **写给未来的自己的「为什么不用 X」论述也要实测背书**：本轮 javadoc/README/测试
+   断言三层都写错了同一个理论，全部需要回改——错误理论一旦落入文档，返工是三倍的。

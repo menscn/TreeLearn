@@ -1,0 +1,75 @@
+# 别线文件导致全仓资源编译失败 —— 与本次首页四问修复无关
+
+## 判定
+失败任务 :app:mergeDebugResources
+失败文件 android/app/src/main/res/drawable/bg_count_badge.xml
+报错     javax.xml.stream.XMLStreamException: ParseError at [row,col]:[4,32]
+         Message: 注释中不允许出现字符串 "--"。
+该文件 mtime = 2026-09-28 15:04（本次首页修复已改完资源，此后本线只动 Java）
+
+## 归属
+bg_count_badge.xml 描述的是「回答动作行树形图标的子分支计数徽标」
+（注释自述 prototype .ai-act-n，line 232），属**对话页动作行线**的产物，
+不在本次首页四问修复（screen_home_body.xml / dimens.xml）的任何改动面内。
+违规文本为该文件第 5 行的 `--green`（CSS 变量写法，XML 注释里禁止 `--`）。
+
+## 本仓已知同类失败
+项目记忆已记载：`ic_key.xml`(004)、`bg_unread_dot.xml`(005) 各踩过一次同一坑；
+规则原话「注释里提到 token 要写 blue，不能照抄 CSS 变量写法 --blue」。
+本次是该坑的第三次出现，且出现在一条**不影响本线**的文件上。
+
+## 命令与退出码
+$ cd android && ./gradlew --no-daemon --console=plain :app:compileDebugJavaWithJavac
+EXITCODE=1
+（失败发生在 :app:mergeDebugResources，即 **Java 编译之前**；
+ 资源阶段先于 javac，故本线 Java 改动本轮尚未被编译验证）
+
+## 后续裁决：15:09 别线自行修复，阻塞解除
+
+15:09:07 bg_count_badge.xml 被别线重写，md5 由 129a4c21acbd3c37ee8b123eb7fbd8f7
+变为 843a4d41b40b69e9ecab5aca4041dd69；全仓扫描 `grep -rn -- '--' .../res/ --include='*.xml'`
+在注释内已无命中。15:10 重跑，:app:mergeDebugResources 与 :app:processDebugResources
+均 UP-TO-DATE，证明本线 screen_home_body.xml / dimens.xml 资源阶段通过。
+→ 该阻塞属**别线短暂自我引入并自我修复**，本线无需代为修改。
+
+==============================================================
+# 事故二：别线提交操作吃掉本线未跟踪新增文件 EdgeFadeLayout.java
+
+## 判定
+- 15:03:17 本线写入 EdgeFadeLayout.java（新增未跟踪文件），md5 f791aae20df78647c8a869d305633325。
+- 15:11:13 编译报 `RecommendationMarquee.java:60/104 找不到符号 EdgeFadeLayout`
+  （同包无需 import，故只能是源文件缺失）。
+- 15:12 核实：`ls android/.../screen/EdgeFadeLayout.java` → No such file or directory。
+- 同期本线其余 5 个生产改动文件 + 2 个测试文件**全部存活且 md5 与写入时一致**
+  （RecommendationMarquee d4a1f972… / Recommendation f389b01a… / HomePresenter 12ffb5f5…
+   / dimens.xml d966e000… / screen_home_body.xml 730fd308…），即**只丢了唯一那个未跟踪新文件**。
+- git reflog 同期出现新提交 `7f7ba2b fix(home): 首页 slogan 去掉句号`（作者：别线）。
+
+## 根因
+别线的提交/暂存流程在 15:03–15:11 窗口内触及工作区，未跟踪的新增文件是唯一会被
+此类操作（`git checkout` / `git stash` / 部分 `git add` 后回退等）带走的对象；
+已跟踪文件的修改则保留。**这是共写工作区的第二类干扰**（第一类是 fileHashes.lock）。
+
+## 处置
+1. 15:13 凭本轮对话中读到的完整源码逐字重建 EdgeFadeLayout.java；
+2. 校验 md5 回到 f791aae20df78647c8a869d305633325、行数 114 —— 逐字节还原，非近似恢复；
+3. 立即 `git add` 该文件与 HomeRecommendationStripTest.java，使其由 `??` 转为 `A`，
+   此后别线的提交/清理不会再带走它们。
+   注意：`git add` 时 Git 提示 `LF will be replaced by CRLF`，即工作区 LF 与
+   索引 CRLF 的转换会发生，md5 可能在 Git 触碰后变化（本仓库既有约定）。
+
+## 命令与退出码
+$ cd android && ./gradlew --no-daemon --console=plain -PbuildDir=build-homefix \
+    :app:compileDebugJavaWithJavac
+EXITCODE=1   ← 15:11:13，失败原因 = EdgeFadeLayout.java 缺失（非语法错误）
+
+$ md5sum android/app/src/main/java/com/treelearn/app/screen/EdgeFadeLayout.java
+f791aae20df78647c8a869d305633325   ← 15:13 重建后，与 15:03 写入值一致
+
+## 另一并发发现：共享 app/build 目录不可用
+15:10:20 首跑 :app:compileDebugJavaWithJavac 失败于
+`java.io.IOException: Unable to delete directory '...app/build/intermediates/javac/
+debug/compileDebugJavaWithJavac/classes'`（别线 java.exe 正持有该目录）。
+报错文本**不含任何 Java 语法/符号错误**，属构建目录竞态。
+处置：改用 `-PbuildDir=build-homefix` 走独立构建目录，与别线物理隔离。
+（注：**不要**改 --project-cache-dir，本仓已实测会引入「程序包 R 不存在」假失败。）

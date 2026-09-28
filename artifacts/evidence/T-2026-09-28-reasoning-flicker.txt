@@ -1,0 +1,77 @@
+T-2026-09-28 思考区闪烁修复（Fix 2 / Option A）自证证据
+========================================================
+范围：ReasoningDisclosure 去抖 + 高度钳制改按子视图测量。
+所有命令均在 D:/Project/Android/Treelearn 下执行（gradle 步骤在 android/ 下），
+JAVA_HOME=/d/Environment/Jdk/jdk21，Gradle 8.14.3，--no-daemon --no-build-cache。
+
+[1] 生产代码编译
+命令: ./gradlew --no-daemon --console=plain --no-build-cache :app:compileDebugJavaWithJavac
+输出: BUILD SUCCESSFUL in 1m 39s (47 actionable tasks: 47 executed)
+EXITCODE=0
+说明: 此次编译覆盖别线当时的 EdgeFadeLayout.java（其 15:13 已自行把 Rect 改为
+      RectF 修复了 109 行的类型错误），因此无任何编译错误残留。
+
+[2] 相关单元测试
+命令: ./gradlew --no-daemon --console=plain --no-build-cache :app:testDebugUnitTest --tests "com.treelearn.app.ui.ReasoningDisclosureLayoutTest" --tests "com.treelearn.app.ui.ChatMessageRowLayoutTest"
+输出: BUILD SUCCESSFUL in 31s (54 actionable tasks: 5 executed, 49 up-to-date)
+EXITCODE=0
+用例数（读自 app/build/test-results/testDebugUnitTest/TEST-*.xml）:
+  com.treelearn.app.ui.ChatMessageRowLayoutTest      tests=17 failures=0 errors=0 skipped=0
+  com.treelearn.app.ui.ReasoningDisclosureLayoutTest tests= 3 failures=0 errors=0 skipped=0
+  合计 tests=20 failures=0 errors=0 skipped=0
+关键新增用例: theDisclosureDoesNotRewriteWhatDidNotChange
+  （断言 renderedBody/renderedState/appliedHeight 去抖字段、clampBodyHeight()
+    使用 getMeasuredHeight() 且方法体内不再读 bodyScroll.getHeight()）
+
+[3] Java-only 守门
+命令: ./gradlew --no-daemon --console=plain --no-build-cache -q verifyNoKotlinDex
+输出(尾部): verifyNoKotlinDex: PASS (3 APK(s) inspected across app/build/outputs/apk, no Kotlin runtime bytecode)
+EXITCODE=0
+另: androidTest APK 的 Kotlin 注解类 NOTICE 为既有已接受项（无运行时链接）。
+
+[4] 设备 APK 与本次构建绑定（不拿 build/outputs 代替设备证据）
+命令: adb shell pm path com.treelearn
+      adb pull <返回路径> artifacts/tmp/device/device_base.apk
+      md5sum artifacts/tmp/device/device_base.apk android/app/build/outputs/apk/debug/app-debug.apk
+输出: c0b0ee6e2bc612e7b811541da6ccc1a6  artifacts/tmp/device/device_base.apk
+      c0b0ee6e2bc612e7b811541da6ccc1a6  android/app/build/outputs/apk/debug/app-debug.apk
+EXITCODE=0
+设备: ANRBBB5427000010（横屏 3200x2136 截图坐标=设备坐标）。
+注意: 第一次 pm path 返回的 /data/app/~~476sP8... 路径在拉取时已失效
+      （应用在 15:33 左右被重装过一次，疑似别线安装），重查后拉取成功；
+      两次内容 md5 一致，装的就是本次构建件。
+
+[5] 真机行为复现（用户报告路径：开思考 → 发问 → 观察思考区）
+命令: adb shell am start -n com.treelearn/com.treelearn.app.MainActivity
+      adb shell input tap 1600 607            # 点根问题输入框
+      adb shell input text "explain%sscaled%sdot%sproduct%sattention%swith%sone%stable"
+      adb shell input tap 2252 714            # 点发送
+      for i in 01..12: adb exec-out screencap -p > artifacts/tmp/device/fix2_stream_$i.png; sleep 0.5
+EXITCODE=0
+帧 md5（关键证据）:
+  6326d77d... fix2_stream_01.png   （思考流式中，内容增长）
+  102bb725... fix2_stream_02..06.png  —— 五张字节级相同
+  85cae840... fix2_stream_07.png   （思考已收起为一行 + 正文表格流出）
+  ...（08-12 为正文/表格逐步渲染，均不同，属正文行的正当重绘）
+判读:
+  - 帧 02 显示思考区正文被钳在上限内、右缘出现内部滚动条（Option A 行为保留），
+    状态行「正在形成」表明当时仍处思考阶段、正文未出现——恰是用户报告的闪烁窗口。
+  - 该窗口内连续 5 张截图（约 5 秒）字节级相同 = 思考区零重绘：
+    旧缺陷是每个流式事件无条件 render() + WRAP/320dp 振荡，必然逐帧重绘；
+    现在内容未变即跳过 setText/布局，去抖在真机生效。
+  - 帧 07 思考区干净收起为「思考过程 | 展开」一行，无残余跳动。
+  - 未观察到任何 WRAP(全高) <-> 320dp 来回跳的振荡形态。
+
+[6] 同场验证 Fix 1（顺带）
+  帧 07/12 显示模型实际生成了 GFM 表格并以真表格渲染：
+  表头带(Step/What happens) + 7 数据行、列对齐、长单元格在格内换行、
+  超宽内容落在横向滚动区（Cost 行在表右缘截断可横滚），非字符画。
+  截图: artifacts/tmp/device/fix2_stream_07.png, fix2_stream_12.png
+
+[7] 环境竞态裁决记录（均非代码缺陷，与 memory 既有判据一致）
+  - fileHashes.lock / buildOutputCleanup.lock 拒绝访问: 别线持有 Gradle 锁，
+    轮询至释放后重跑即过（4s BUILD FAILED -> 1m39s BUILD SUCCESSFUL）。
+  - :app:mergeDebugResources FAILED: Unable to delete file
+    '...\intermediates\merged_res\debug\mergeDebugResources' —— intermediates
+    缓存锁冲突，发生在测试任务之前（29 任务全跑完即失败于此），无 Kotlin 坐标，
+    重跑即过。符合「失败在 guard/测试任务之前 + 零 Kotlin 坐标 = 环境竞态」判据。

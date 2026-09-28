@@ -1,0 +1,114 @@
+package com.treelearn.app.screen;
+
+import android.content.Context;
+import android.content.res.Configuration;
+import android.graphics.Canvas;
+import android.graphics.LinearGradient;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.Shader;
+import android.util.AttributeSet;
+import android.widget.LinearLayout;
+
+import com.treelearn.app.R;
+
+/**
+ * A vertical container that fades its own left and right edges out: the prototype's
+ * {@code mask-image:linear-gradient(90deg,transparent,#000 20px,#000 calc(100% - 20px),transparent)}.
+ *
+ * <p><strong>Why a wrapper and not a fading edge on each row.</strong>
+ * {@code setHorizontalFadingEdgeEnabled} is not this: it fades to the background colour, and only
+ * while the content is actually scrollable, so a strip that fits would keep hard edges and a strip
+ * that does not would fade to a colour rather than to nothing. The prototype fades to
+ * <em>transparent</em>, always, by the same 20px at both ends.
+ *
+ * <p>Drawing it once for both rows is the other reason. The strip is two independently scrolling
+ * rows; a mask hung on each row would cut the two rows at two different heights and leave a lighter
+ * seam between them. One mask over the block fades the whole band as one object, which is what the
+ * prototype's single masked {@code .rec-block} does.
+ *
+ * <p><strong>The gradient is not the prototype's array.</strong> CSS's {@code mask-image} reads the
+ * gradient's <em>alpha as visibility</em> - {@code transparent} hides, {@code #000} shows - so the
+ * prototype's stops are "hide, show, show, hide". Painted with {@code DST_OUT} the meaning of alpha
+ * inverts: source alpha 1 <em>erases</em> and 0 <em>keeps</em>. Copying the CSS array across would
+ * therefore erase the middle and keep the edges, i.e. the exact opposite of the design. What this
+ * class builds is that array complemented: opaque at both ends, clear through the middle.
+ *
+ * <p>The two ends are not symmetric. The prototype's gradient starts at the box's <em>left</em> edge
+ * ({@code 90deg} runs left to right, and its stops are not written in logical order), so the fade is
+ * the same 20px on the physical left in both layout directions, while the right fade moves to the
+ * other side when the layout direction flips. This class reproduces that as written; reading "left"
+ * as "leading" would have silently reversed the prototype's own asymmetry.
+ */
+public final class EdgeFadeLayout extends LinearLayout {
+
+    /** Null while there is nothing to fade with, or nothing worth fading. */
+    private Paint fade;
+
+    /** Reused across draws so a frame does not allocate. */
+    private final Rect layerBounds = new Rect();
+
+    public EdgeFadeLayout(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        setOrientation(VERTICAL);
+    }
+
+    /**
+     * Rebuilt on every size change: the stop positions are a function of the width. The gradient is
+     * always built left-to-right in physical coordinates, so it is the stops that move when the
+     * layout direction flips, never the shader.
+     */
+    private void rebuildFade() {
+        int width = getWidth();
+        int edge = getResources().getDimensionPixelSize(R.dimen.rec_fade_width);
+        // A block no wider than its two fades has nothing left to show, so it keeps hard edges rather
+        // than becoming an invisible band.
+        if (width <= 0 || edge <= 0 || width <= edge * 2) {
+            fade = null;
+            return;
+        }
+        boolean mirrored = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
+        float left = (float) edge / width;
+        float right = (float) (width - edge) / width;
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        // Opaque at both ends (erase), clear through the middle (keep) - the complement of the
+        // prototype's own array, for the reason in the class javadoc.
+        paint.setShader(new LinearGradient(0f, 0f, width, 0f,
+                new int[] {0xFF000000, 0x00000000, 0x00000000, 0xFF000000},
+                mirrored ? new float[] {0f, right, left, 1f} : new float[] {0f, left, right, 1f},
+                Shader.TileMode.CLAMP));
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
+        fade = paint;
+    }
+
+    @Override
+    protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
+        super.onSizeChanged(width, height, oldWidth, oldHeight);
+        rebuildFade();
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // A locale change can flip the layout direction under a view that never changes size.
+        rebuildFade();
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        if (fade == null || getWidth() <= 0 || getHeight() <= 0) {
+            super.dispatchDraw(canvas);
+            return;
+        }
+        // The children draw into an offscreen layer, so the gradient erases the strip's own pixels
+        // and nothing underneath them. Without the layer, DST_OUT would punch a hole through to
+        // whatever the parent drew first.
+        layerBounds.set(0, 0, getWidth(), getHeight());
+        int save = canvas.saveLayer(layerBounds, null);
+        super.dispatchDraw(canvas);
+        canvas.drawRect(layerBounds, fade);
+        canvas.restoreToCount(save);
+    }
+}

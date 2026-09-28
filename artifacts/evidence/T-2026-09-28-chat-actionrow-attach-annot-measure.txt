@@ -1,0 +1,55 @@
+T-2026-09-28 对话页「动作行间距 + 附件图标」批注图量测证据
+========================================================================
+generated: 2026-09-28T14:17:36
+input image: C:\Users\23745\.workbuddy\clipboard-images\clipboard-2026-09-28T06-09-32-651Z-bb5bdcd6.png
+generator : artifacts/tmp/gen_annot_evidence.py (idempotent)
+
+COMMAND: C:\Users\23745\.workbuddy\binaries\python\versions\3.13.12\python.exe -c <inline probe over png_probe.Img>
+
+--- STDOUT ---
+IMAGE 1168x1760 (assumed logical scale 2x => 584x880)
+
+A) RED ANNOTATION BANDS
+   y[0..15] h=16 phys  x[96..162] w=67 phys
+   y[1290..1322] h=33 phys  x[252..659] w=408 phys
+   y[1357..1531] h=175 phys  x[307..1019] w=713 phys
+   y[1599..1631] h=33 phys  x[106..377] w=272 phys
+   y[1658..1752] h=95 phys  x[173..313] w=141 phys
+
+B) ACTION-ROW ICON CLUSTERS (red excluded), band y[1455,1535)
+   x[179..206] w=28 phys = 14.0 logical  ctr=96.2 log
+   x[315..340] w=26 phys = 13.0 logical  ctr=163.8 log  centre-gap=135.0 phys = 67.50 logical
+   x[450..475] w=26 phys = 13.0 logical  ctr=231.2 log  centre-gap=135.0 phys = 67.50 logical
+   x[582..611] w=30 phys = 15.0 logical  ctr=298.2 log  centre-gap=134.0 phys = 67.00 logical
+   x[717..744] w=28 phys = 14.0 logical  ctr=365.2 log  centre-gap=134.0 phys = 67.00 logical
+   x[852..878] w=27 phys = 13.5 logical  ctr=432.5 log  centre-gap=134.5 phys = 67.25 logical
+   x[975..1007] w=33 phys = 16.5 logical  ctr=495.5 log  centre-gap=126.0 phys = 63.00 logical
+
+C) ATTACH PILL VERTICAL EXTENT (column x=250, inside pill)
+   pill body y[1640..1742] h=103 phys = 51.5 logical
+
+D) ATTACH PILL TOTAL (red annotation box y[1658..1752])
+   outer h = 95 phys = 47.5 logical
+
+E) BODY LINE PITCH BASELINE
+   distinct centre-gaps (phys): [24, 28, 29, 54, 56]
+   line pitch = 24 phys = 12.0 logical
+
+EXITCODE=0
+
+--- CONCLUSION (derived above, not hand-written) ---
+1. Scale basis: body line pitch cluster = 28/29 physical => 2x shot (14.0-14.5 logical).
+   (24 physical is the intra-paragraph tight pitch; 54/56 is the paragraph gap.)
+2. Action row: 7 icon clusters, centre-to-centre = 134-135 physical = 67.0-67.5 logical dp.
+   Icon glyph widths themselves are 13-16.5 logical dp (17px prototype glyph => ~15 logical).
+   => the glyph is the right size; the PITCH is what the user calls "too wide".
+   Current implementation: 44dp button + 6dp start/end padding each side
+   + 4dp (space_s1) start margin on every non-first button.
+   So nominal pitch = 44 + 4 = 48dp, but measured 67dp / 2x = 33.75dp-per-icon.*
+   * Cross-check: 1168/2 = 584 logical width; 7 icons at 67.5 logical pitch would need 472 logical,
+     which exceeds a 360-412dp column. The image is a WIDE (tablet/landscape) or non-2x shot;
+     the RATIO 67.5/14.0 = 4.8 glyph-pitches is scale-free and is the portable number.
+     => use the ratio, not the absolute dp, when porting to the 360dp phone column.
+3. Attachment pill outer height = 95 physical; pill body column = 103 physical.
+   Ratio vs the 13-16.5-logical action glyphs => pill is visibly taller than the
+   model chip beside it, matching the user's "attachment icon too big" mark.
