@@ -87,6 +87,28 @@ public final class HeatmapLayoutTest {
         }
     }
 
+    // ---- blank cells paint the empty placeholder: the grid stays a full rectangle ----
+
+    @Test
+    public void blankCellsPaintTheEmptyPlaceholderInsteadOfBeingSkipped() {
+        assertEquals(0, HeatmapLayout.colorIndexFor(3, true));
+        assertEquals(0, HeatmapLayout.colorIndexFor(4, true));
+    }
+
+    @Test
+    public void emptyDaysAndBlanksShareThePlaceholderColor() {
+        assertEquals(0, HeatmapLayout.colorIndexFor(0, false));
+        assertEquals(0, HeatmapLayout.colorIndexFor(0, true));
+    }
+
+    @Test
+    public void activeDaysKeepTheirGreenBuckets() {
+        assertEquals(1, HeatmapLayout.colorIndexFor(1, false));
+        assertEquals(2, HeatmapLayout.colorIndexFor(2, false));
+        assertEquals(3, HeatmapLayout.colorIndexFor(3, false));
+        assertEquals(4, HeatmapLayout.colorIndexFor(4, false));
+    }
+
     // ---- measurement: strip (single row) and grid share the same arithmetic ----
 
     @Test
@@ -160,6 +182,27 @@ public final class HeatmapLayoutTest {
         }
         assertTrue("strip form must exist", attrs.contains("name=\"strip\""));
         assertTrue("grid form must exist", attrs.contains("name=\"grid\""));
+    }
+
+    /**
+     * Cross-entry check (failure-library rule): both painting views must route blank judgment
+     * through the one shared predicate, and neither may regain the old skip-blank branch that
+     * left the calendar ragged (missing leading Monday, missing Saturday/Sunday).
+     */
+    @Test
+    public void bothPaintingViewsRouteBlanksThroughTheSharedJudgment() throws Exception {
+        String[] views = new String[] {
+                read(MAIN.resolve(Paths.get("java", "com", "treelearn", "app", "ui",
+                        "HeatmapView.java"))),
+                read(MAIN.resolve(Paths.get("java", "com", "treelearn", "app", "ui",
+                        "MonthCalendarView.java"))),
+        };
+        for (String view : views) {
+            assertTrue("the view must paint blanks via HeatmapLayout.colorIndexFor",
+                    view.contains("HeatmapLayout.colorIndexFor"));
+            assertTrue("the view must not skip blank cells any more",
+                    !view.contains("continue;"));
+        }
     }
 
     private static String read(Path path) throws Exception {

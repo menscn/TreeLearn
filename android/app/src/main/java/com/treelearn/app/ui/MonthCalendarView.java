@@ -8,7 +8,11 @@ import android.view.View;
 
 import com.treelearn.app.R;
 
-/** Seven-column, six-row month heatmap matching the prototype calendar card. */
+/**
+ * Seven-column, six-row month heatmap matching the prototype calendar card, with one
+ * user-directed deviation (2026-09-28): month padding and not-yet-arrived days paint the empty
+ * placeholder so the grid reads as a full rectangle, where the prototype leaves them transparent.
+ */
 public final class MonthCalendarView extends View {
 
     private static final int COLUMNS = 7;
@@ -67,12 +71,10 @@ public final class MonthCalendarView extends View {
     protected void onDraw(Canvas canvas) {
         float corner = Math.min(dp(3.0f), cellSize / 4.0f);
         for (int i = 0; i < CELL_COUNT; ++i) {
-            if (blank[i]) {
-                continue;
-            }
             int column = i % COLUMNS;
             int row = i / COLUMNS;
-            paint.setColor(levels[i] == 0 ? emptyColor : levelColors[levels[i]]);
+            int colorIndex = HeatmapLayout.colorIndexFor(levels[i], blank[i]);
+            paint.setColor(colorIndex == 0 ? emptyColor : levelColors[colorIndex]);
             float left = getPaddingLeft() + column * (cellSize + gap);
             float top = getPaddingTop() + row * (cellSize + gap);
             canvas.drawRoundRect(left, top, left + cellSize, top + cellSize, corner, corner, paint);

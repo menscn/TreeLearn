@@ -35,6 +35,20 @@ public final class HeatmapLayout {
         return levels;
     }
 
+    /**
+     * The color row a cell paints with: {@code 0} is the empty placeholder, {@code 1..4} the
+     * green ramp. A blank cell — month padding or a day that has not arrived — paints the empty
+     * placeholder too, by user call on 2026-09-28: the calendar reads as one full rectangle,
+     * where the prototype leaves those slots transparent. This is the single judgment point;
+     * both painting views route through it.
+     */
+    public static int colorIndexFor(int level, boolean blank) {
+        if (blank || level <= 0) {
+            return 0;
+        }
+        return Math.min(level, LEVEL_MAX);
+    }
+
     public static int resolveRows(int mode, int rows) {
         if (mode == 0) {
             return 1;

@@ -80,11 +80,10 @@ extends View {
     protected void onDraw(Canvas canvas) {
         float corner = this.cellSize / 4.0f;
         for (int i = 0; i < this.levels.length; ++i) {
-            if (this.blank[i]) {
-                continue;
-            }
-            int level = this.levels[i];
-            this.paint.setColor(level == 0 ? this.emptyColor : this.levelColors[level]);
+            // Blanks (month padding, not-yet days) paint the empty placeholder too, so the grid
+            // stays a full rectangle (2026-09-28 user call; the prototype leaves them transparent).
+            int colorIndex = HeatmapLayout.colorIndexFor(this.levels[i], this.blank[i]);
+            this.paint.setColor(colorIndex == 0 ? this.emptyColor : this.levelColors[colorIndex]);
             float x = (float)this.getPaddingLeft() + HeatmapLayout.cellX(i, this.rows, this.cellSize, this.gap);
             float y = (float)this.getPaddingTop() + HeatmapLayout.cellY(i, this.rows, this.cellSize, this.gap);
             canvas.drawRoundRect(x, y, x + this.cellSize, y + this.cellSize, corner, corner, this.paint);

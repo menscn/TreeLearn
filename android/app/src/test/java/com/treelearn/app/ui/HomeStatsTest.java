@@ -28,9 +28,10 @@ public final class HomeStatsTest {
         assertEquals(HomeStats.MONTH_CELL_COUNT, stats.monthIntensities.length);
         assertEquals(1f, stats.monthIntensities[23], 0f);
         assertEquals(1f, stats.monthIntensities[22], 0f);
-        assertEquals("future dates are transparent rather than inactive", -1f,
-                stats.monthIntensities[24], 0f);
-        assertEquals("month-end padding is transparent", -1f, stats.monthIntensities[31], 0f);
+        assertEquals("future dates stay -1 in data; the views paint them as the placeholder",
+                -1f, stats.monthIntensities[24], 0f);
+        assertEquals("month-end padding stays -1 in data; the views paint it as the placeholder",
+                -1f, stats.monthIntensities[31], 0f);
         assertEquals("9\u6708", stats.monthLabel);
         assertEquals(2, stats.streakDays);
         assertEquals(false, stats.empty);
