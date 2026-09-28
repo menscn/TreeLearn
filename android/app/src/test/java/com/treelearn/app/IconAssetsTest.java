@@ -121,9 +121,9 @@ public class IconAssetsTest {
     // ---- T-057: chat, branch and action icons (same drafting convention as T-056) ----
 
     private static final String[] CHAT_ICON_ASSETS = {
-            "ic_action_quote.xml",
             "ic_action_copy.xml",
             "ic_action_fork.xml",
+            "ic_action_select_all.xml",
             "ic_chat_send.xml",
             "ic_chat_attach.xml",
             "ic_chat_close.xml",
@@ -132,13 +132,30 @@ public class IconAssetsTest {
     };
 
     @Test
+    public void theRetiredActionGlyphsAreGoneFromTheTree() {
+        // 2026-09-28 user decision: quote / translate / speak left the answer action row, and no
+        // other screen picked their glyphs up - the selection menu draws 问 AI, 新建主题, 复制 and
+        // 全选 from ic_sparkle / ic_action_fork / ic_action_copy / ic_action_select_all. An unused
+        // vector is not free: it ships in the APK and it invites a later reader to think the action
+        // still exists. Asserting the absence keeps the deletion from being quietly undone.
+        for (String gone : new String[] {
+                "ic_action_quote.xml", "ic_action_translate.xml", "ic_action_speak.xml"}) {
+            assertTrue(gone + " must stay deleted (orphaned by the 2026-09-28 action-row trim)",
+                    !Files.exists(RES.resolve(Paths.get("drawable", gone))));
+        }
+    }
+
+    @Test
     public void chatIconAssetsFollowTheSharedDraftingConvention() throws Exception {
         for (String name : CHAT_ICON_ASSETS) {
             String xml = read(RES.resolve(Paths.get("drawable", name)));
             assertTrue(name + " must declare 24dp viewport", xml.contains("android:viewportWidth=\"24\"")
                     && xml.contains("android:viewportHeight=\"24\""));
-            assertTrue(name + " must render at 24dp", xml.contains("android:width=\"24dp\"")
-                    && xml.contains("android:height=\"24dp\""));
+            // ic_chat_attach draws at 15dp to match the model chip's own glyph in the composer row
+            // (2026-09-28 user decision); the rest render at the 24dp drafting size.
+            String expected = "ic_chat_attach.xml".equals(name) ? "15dp" : "24dp";
+            assertTrue(name + " must render at " + expected, xml.contains("android:width=\"" + expected + "\"")
+                    && xml.contains("android:height=\"" + expected + "\""));
             if (xml.contains("android:strokeColor")) {
                 assertTrue(name + " must use the 1.8 stroke", xml.contains("android:strokeWidth=\"1.8\""));
                 assertTrue(name + " must use round line caps", xml.contains("android:strokeLineCap=\"round\""));
@@ -166,40 +183,125 @@ public class IconAssetsTest {
         // Send stays a Button (Java declares Button) with a compound drawable.
         assertIconAction("layout/screen_chat_body.xml", "chat_send",
                 "@drawable/ic_chat_send", "@string/cd_chat_send");
-        // Answer action row: quote/copy/reset/fork iconify; children/version stay textual (Java-driven).
-        assertIconAction("layout/view_answer_actions.xml", "act_quote",
-                "@drawable/ic_action_quote", "@string/cd_act_quote");
+        // Answer action row: copy/reset/fork iconify; children stays textual (Java-driven). 2026-09-28
+        // user decision: quote/translate/speak left the row, so act_quote is no longer asserted here.
         assertIconAction("layout/view_answer_actions.xml", "act_copy",
                 "@drawable/ic_action_copy", "@string/cd_act_copy");
         assertIconAction("layout/view_answer_actions.xml", "act_reset",
                 "@drawable/ic_nav_restore", "@string/cd_act_reset");
         assertIconAction("layout/view_answer_actions.xml", "act_fork",
                 "@drawable/ic_action_fork", "@string/cd_act_fork");
+        // 2026-09-28 user decision: the recommendation strip's fork zone is a glyph too, drawn with the
+        // very same asset the action row uses - one glyph, one meaning. It used to be a text Button.
+        assertIconAction("layout/item_chat_suggestion.xml", "suggestion_fork",
+                "@drawable/ic_action_fork", "@string/chat_suggestion_fork_title");
     }
 
     @Test
-    public void wordMenuRowsStayTextualAndKeepTheirHotspotHeights() throws Exception {
-        // PRD 6.2.19: the word menu is a full-width text-row menu; iconifying it is out of scope and
-        // the 44dp row height must survive untouched.
+    public void wordMenuIsFourIconCellsInOneRowAndEachKeepsItsHotspotAndDescription() throws Exception {
+        // 2026-09-28 user decision, which replaces the T-056 shape: the menu is 问 AI, 新建主题, 复制
+        // and 全选 as four icon cells in one row - no text label, no captions, no selection label. The
+        // name of an item is therefore not in the layout as text; it must survive as the cell's
+        // contentDescription, or the menu becomes unusable to a screen reader. What this test holds is
+        // that contract, not the old textual shape: it asserts the row, the four cells, their glyphs,
+        // their descriptions and the 44dp target each one is still drawn at.
         String xml = read(RES.resolve(Paths.get("layout", "popup_word_action.xml")));
-        assertTrue("word_menu_quote must keep its text",
-                xml.contains("android:text=\"@string/chat_word_quote\""));
-        assertTrue("word_menu_fork must keep its text",
-                xml.contains("android:text=\"@string/chat_act_fork\""));
-        assertTrue("word menu rows must stay 44dp tall",
-                xml.contains("android:layout_height=\"@dimen/touch_min\""));
+        assertTrue("the menu must be a single horizontal row",
+                xml.contains("android:orientation=\"horizontal\""));
+        String[] cells = {"word_menu_ask_ai", "word_menu_fork", "word_menu_copy",
+                "word_menu_select_all"};
+        String[] glyphs = {"@drawable/ic_sparkle", "@drawable/ic_action_fork",
+                "@drawable/ic_action_copy", "@drawable/ic_action_select_all"};
+        String[] descriptions = {"@string/chat_word_ask_ai_desc", "@string/chat_word_fork_desc",
+                "@string/chat_word_copy_desc", "@string/chat_word_select_all_desc"};
+        for (int i = 0; i < cells.length; i++) {
+            String cell = elementFor(xml, "@+id/" + cells[i]);
+            assertTrue(cells[i] + " must draw its glyph", cell.contains(glyphs[i]));
+            assertTrue(cells[i] + " must carry its content description",
+                    cell.contains("android:contentDescription=\"" + descriptions[i] + "\""));
+            assertTrue(cells[i] + " must stay a 44dp target",
+                    cell.contains("android:layout_height=\"@dimen/touch_min\""));
+            assertTrue(cells[i] + " must not fall back to a text label",
+                    !cell.contains("android:text="));
+        }
+    }
+
+    /**
+     * One element and everything inside it, so an assertion can be scoped to the cell it names rather
+     * than to the whole file - a file-wide `contains` would let a description or a glyph drift onto a
+     * different cell.
+     *
+     * <p>The slice runs to the element's matching close tag, counted by depth, rather than to the
+     * first `>`: it has to include the body, because the glyph lives in a child ImageView and a
+     * tag-only slice would never see it. Comments are stripped first so a commented-out element can
+     * never satisfy an assertion.
+     */
+    private static String elementFor(String xml, String id) {
+        String body = xml.replaceAll("(?s)<!--.*?-->", "");
+        int start = body.indexOf("android:id=\"" + id + "\"");
+        assertTrue("missing element: " + id, start >= 0);
+        int open = body.lastIndexOf('<', start);
+        int openEnd = body.indexOf('>', start);
+        if (body.charAt(openEnd - 1) == '/') {
+            return body.substring(open, openEnd + 1);
+        }
+        int nameEnd = open + 1;
+        while (nameEnd < openEnd && !Character.isWhitespace(body.charAt(nameEnd))) {
+            nameEnd++;
+        }
+        String tag = body.substring(open + 1, nameEnd);
+        Pattern openTag = Pattern.compile("<" + Pattern.quote(tag) + "(?=[\\s/>])");
+        Pattern closeTag = Pattern.compile("</" + Pattern.quote(tag) + "\\s*>");
+        int depth = 0;
+        int cursor = open;
+        while (cursor < body.length()) {
+            java.util.regex.Matcher nextOpen = openTag.matcher(body);
+            java.util.regex.Matcher nextClose = closeTag.matcher(body);
+            boolean hasOpen = nextOpen.find(cursor);
+            boolean hasClose = nextClose.find(cursor);
+            if (hasClose && (!hasOpen || nextClose.start() < nextOpen.start())) {
+                depth--;
+                if (depth == 0) {
+                    return body.substring(open, nextClose.end());
+                }
+                cursor = nextClose.end();
+            } else if (hasOpen) {
+                depth++;
+                cursor = nextOpen.end();
+            } else {
+                break;
+            }
+        }
+        throw new AssertionError("unterminated element: " + id);
     }
 
     @Test
     public void javaDrivenTextualActionsStayTextual() throws Exception {
-        // act_children and act_version are setText-driven from AnswerActionBar; they must not be
-        // iconified in this slice, and chat_retry keeps its label.
-        String actions = read(RES.resolve(Paths.get("layout", "view_answer_actions.xml")));
-        int childrenIdx = actions.indexOf("android:id=\"@+id/act_children\"");
-        int childrenEnd = actions.indexOf('>', childrenIdx);
-        String childrenEl = actions.substring(actions.lastIndexOf('<', childrenIdx), childrenEnd);
-        assertTrue("act_children must stay textual (Java setText)", !childrenEl.contains("@drawable/"));
+        // 2026-09-28 user decision reversed this test's old claim about act_children: the child entry
+        // used to be setText-driven and therefore had to stay textual; it is now a glyph with a count
+        // badge ("分支列表 对应的也是图标，不要是文字！"), so it belongs to the icon slice, not here.
+        // What this test still holds is that a genuinely textual action stays textual: chat_retry
+        // keeps its label. If a future slice iconifies it, that is a decision, and this must be
+        // rewritten rather than deleted.
         String item = read(RES.resolve(Paths.get("layout", "item_chat_message.xml")));
         assertTrue("chat_retry must keep its label", item.contains("android:text=\"@string/chat_retry\""));
+    }
+
+    @Test
+    public void theChildEntryDrawsAGlyphAndItsBadgeUsesTheBrandGreen() throws Exception {
+        // The child entry joined the icon slice on 2026-09-28. Its glyph is ic_nav_tree (the
+        // prototype's own ITree, which the app bar's nav entry also draws), and its count badge is a
+        // solid pill in the same token the prototype's .ai-act-n uses. This is asserted here - beside
+        // the other chat glyphs - because a badge whose fill drifts off the token stops reading as a
+        // count and starts reading as a second colour on the row.
+        String actions = read(RES.resolve(Paths.get("layout", "view_answer_actions.xml")));
+        assertTrue("the child entry must draw the branch tree glyph",
+                actions.contains("android:src=\"@drawable/ic_nav_tree\"")
+                        && actions.contains("android:id=\"@+id/act_children_count\""));
+        String badge = read(RES.resolve(Paths.get("drawable", "bg_count_badge.xml")));
+        assertTrue("the badge must fill with the brand green token (prototype .ai-act-n background)",
+                badge.contains("@color/tl_green"));
+        assertTrue("the badge must be a pill, so a two-digit count still reads",
+                badge.contains("<corners"));
     }
 }

@@ -18,6 +18,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.ScrollView;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,6 +47,7 @@ import com.treelearn.core.domain.AnswerRevision;
 import com.treelearn.core.domain.ReadingAnchor;
 import com.treelearn.core.domain.ReadingPosition;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -107,6 +110,11 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
     private final TextView attachText;
     private View attachEntry;
     private Runnable onAttachPressed;
+    /** 2026-09-28: the three 问 AI quick queries and the row that carries them under the quote. */
+    private final View askChipsRow;
+    private final View askChipWhy;
+    private final View askChipWhat;
+    private final View askChipHow;
     private final EditText draft;
     private final android.widget.ImageView voiceKey;
     private SpeechInputPolicy speechPolicy = new SpeechInputPolicy();
@@ -186,6 +194,13 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         sourceHistory = findViewById(R.id.chat_source_history);
         quoteRow = findViewById(R.id.chat_quote_row);
         quoteText = findViewById(R.id.chat_quote_text);
+        askChipsRow = findViewById(R.id.chat_ask_chips);
+        askChipWhy = findViewById(R.id.chat_ask_why);
+        askChipWhat = findViewById(R.id.chat_ask_what);
+        askChipHow = findViewById(R.id.chat_ask_how);
+        askChipWhy.setOnClickListener(view -> fireChip(R.string.chat_ask_query_why));
+        askChipWhat.setOnClickListener(view -> fireChip(R.string.chat_ask_query_what));
+        askChipHow.setOnClickListener(view -> fireChip(R.string.chat_ask_query_how));
         attachRow = findViewById(R.id.chat_attach_row);
         attachText = findViewById(R.id.chat_attach_text);
         attachEntry = findViewById(R.id.chat_attach);
@@ -310,8 +325,9 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
     public void render(ChatSpeaker.State state) {
         ChatSpeaker.State previous = this.speakState;
         this.speakState = state;
-        this.refreshSpeak(previous.speakingMessageId);
-        this.refreshSpeak(state.speakingMessageId);
+        // 2026-09-28 user decision: the action row no longer carries a speak button, so speech has no
+        // face to repaint. The state is still tracked because the error toast below is the only
+        // learner-visible signal left; the wiring stays for the day speech gets a new entry point.
         if (state.phase == ChatSpeaker.Phase.ERROR && previous.phase != ChatSpeaker.Phase.ERROR) {
             Toast.makeText(getContext(), R.string.voice_notice_playback_error, Toast.LENGTH_SHORT).show();
         }
@@ -321,16 +337,6 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         requestApplyInsets();
-    }
-
-    private void refreshSpeak(String messageId) {
-        if (messageId == null || messageId.isEmpty()) {
-            return;
-        }
-        Row row = this.rows.get(messageId);
-        if (row != null) {
-            row.renderSpeakFace();
-        }
     }
 
     /** Offers the versions of one position; the pick is reported through {@link ChatActions}. */
@@ -367,6 +373,7 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             renderNotice(state.notice);
             renderSourceCard(state);
             renderQuote(state.quote);
+            renderAskAiChips(state);
             renderAttachment(state.composerAttachment);
             renderFollow(state);
             if (!state.draft.contentEquals(draft.getText())) {
@@ -633,6 +640,20 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         quoteText.setText(quoted ? getContext().getString(R.string.chat_quoted, quote) : "");
     }
 
+    /**
+     * 2026-09-28: the 问 AI quick queries ride the quote row - same signal, one draw. The chips
+     * are visible only when the state says so and a quote stands behind them; a quote without the
+     * chips (a prefilled branch anchor, say) draws the quote row alone.
+     */
+    private void renderAskAiChips(ChatViewState state) {
+        askChipsRow.setVisibility(state.askAiChips && !state.quote.isEmpty() ? VISIBLE : GONE);
+    }
+
+    /** One chip tap: its query goes out as-is, carrying the quote; the draft stays untouched. */
+    private void fireChip(int queryRes) {
+        fire(actions -> actions.onAskAiChipPressed(getContext().getString(queryRes)));
+    }
+
     /** T-097: the composer's attachment chip, or nothing while the composer carries none. */
     private void renderAttachment(ChatViewState.ComposerAttachment attachment) {
         if (attachment == null) {
@@ -877,7 +898,12 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         private final TextView question;
         private final TextView quoteChip;
         private final View answerBlock;
-        private final TextView answer;
+        /**
+         * Where the answer's parts are laid out, in document order: prose runs, and tables as real
+         * tables (2026-09-28 user decision). The row owns this host instead of a single text view,
+         * because a table has to be a view to be aligned.
+         */
+        private final LinearLayout answerBody;
         private final View caret;
         private final TextView generating;
         private final View failure;
@@ -894,6 +920,17 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         private ChatMessage message;
         private ChatViewState lastState;
         private String renderedAnswerText;
+        /**
+         * The answer row's own text views, in document order. The first is the layout's {@code
+         * chat_answer}; the rest are the runs after each table. Selection, quote and copy all read
+         * from this list, and none of it is set here: the row is now a sequence, so which view owns
+         * the selection is a runtime answer.
+         */
+        private final List<TextView> answerViews = new ArrayList<TextView>();
+        /** The view this row reads a selection from; the first run, so it is never null. */
+        private TextView answer;
+        /** The views this row inflated for its tables, so a re-render can release their callbacks. */
+        private final List<View> answerTableViews = new ArrayList<View>();
         /** The platform's selection action mode: kept for the handles it owns, emptied of its menu. */
         private ActionMode selectionMode;
         /** This row's own card while one is up; stale references are harmless, refresh() checks. */
@@ -906,6 +943,7 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             quoteChip = root.findViewById(R.id.chat_quote_chip);
             answerBlock = root.findViewById(R.id.chat_answer_block);
             answer = root.findViewById(R.id.chat_answer);
+            answerBody = root.findViewById(R.id.chat_answer_body);
             answer.setTextIsSelectable(true);
             answer.setMovementMethod(LinkMovementMethod.getInstance());
             answer.setCustomSelectionActionModeCallback(new SelectionMenuCallback());
@@ -949,18 +987,16 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
                     state.thinkingEnabled);
             // Matrix 1.2: a tap on a code block copies it, through the same clipboard path a
             // selection copy takes - one write path, one sensitive-clip marking.
+            // 2026-09-28: the answer is now a sequence, because a table is a view and not text.
             if (renderedAnswerText == null || !renderedAnswerText.equals(message.text)) {
-                answer.setText(MarkdownRenderer.render(message.text,
-                        code -> fire(actions -> actions.onSelectionCopyPressed(code))),
-                        TextView.BufferType.SPANNABLE);
+                renderAnswerBody(message.text);
                 renderedAnswerText = message.text;
             }
             renderGenerationSlots(state, message, newestRow);
             renderTranslation(state, message);
             retry.setEnabled(message.canRetry());
             actionBar.setVisibility(message.isStable() ? VISIBLE : GONE);
-            actionBar.render(message, ChatScreen.this.speakState.engineReady,
-                    ChatScreen.this.speakState.speaking(message.messageId));
+            actionBar.render(message);
             renderSuggestions(state, message);
         }
 
@@ -1026,8 +1062,96 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             view.animate().alpha(1f).setDuration(durationMs).start();
         }
 
+        /**
+         * Draws the answer as prose runs and table blocks (2026-09-28 user decision: a table is a
+         * view, not text).
+         *
+         * <p>The first prose run reuses the layout's own {@code chat_answer} view rather than
+         * inflating a copy, so the view a row starts with is the view it keeps when the answer has
+         * no table - and so one fixed view still exists under the id, which is what the layout
+         * tests and the selection callbacks read. Later runs are inflated; only the first is the
+         * anchor.
+         */
+        private void renderAnswerBody(String markdown) {
+            List<MarkdownRenderer.Segment> segments = MarkdownRenderer.renderSegments(markdown,
+                    code -> fire(actions -> actions.onSelectionCopyPressed(code)));
+            answerBody.removeAllViews();
+            answerViews.clear();
+            answerTableViews.clear();
+            for (MarkdownRenderer.Segment segment : segments) {
+                if (segment.isTable) {
+                    View table = inflateTable(segment);
+                    answerTableViews.add(table);
+                    answerBody.addView(table);
+                } else if (segment.text.length() > 0) {
+                    TextView view = answerViews.isEmpty() ? adoptAnswerView() : proseView();
+                    view.setText(segment.text, TextView.BufferType.SPANNABLE);
+                    answerViews.add(view);
+                    answerBody.addView(view);
+                }
+            }
+            if (!answerViews.isEmpty()) {
+                answer = answerViews.get(0);
+            }
+        }
+
+        /** Moves the layout's own answer view into the host, once. */
+        private TextView adoptAnswerView() {
+            ViewGroup parent = (ViewGroup) answer.getParent();
+            if (parent != null) {
+                parent.removeView(answer);
+            }
+            answer.setVisibility(VISIBLE);
+            return answer;
+        }
+
+        /** A prose run after the first: the same view, minus its fixed id. */
+        private TextView proseView() {
+            TextView view = (TextView) LayoutInflater.from(getContext())
+                    .inflate(R.layout.view_chat_answer_text, answerBody, false);
+            view.setTextIsSelectable(true);
+            view.setMovementMethod(LinkMovementMethod.getInstance());
+            view.setCustomSelectionActionModeCallback(new SelectionMenuCallback());
+            return view;
+        }
+
+        /**
+         * One table, as a real table. Cells are {@link TextView}s in a {@link TableLayout}, so the
+         * columns align because layout aligns them - the box-character version could not, because a
+         * wrapped row moved every following glyph. The hairline between rows is the table's own
+         * background showing through the 1dp gap between two rows of cells.
+         */
+        private View inflateTable(MarkdownRenderer.Segment table) {
+            LayoutInflater inflater = LayoutInflater.from(getContext());
+            View scroll = inflater.inflate(R.layout.item_chat_table, answerBody, false);
+            TableLayout layout = scroll.findViewById(R.id.chat_table);
+            int columns = 0;
+            for (List<CharSequence> row : table.table) {
+                columns = Math.max(columns, row.size());
+            }
+            for (int r = 0; r < table.table.size(); r++) {
+                boolean header = table.hasHeader && r == 0;
+                TableRow row = (TableRow) inflater.inflate(R.layout.item_chat_table_row, layout, false);
+                List<CharSequence> cells = table.table.get(r);
+                for (int c = 0; c < columns; c++) {
+                    TextView cell = (TextView) inflater.inflate(header
+                            ? R.layout.item_chat_table_header_cell
+                            : R.layout.item_chat_table_cell, row, false);
+                    if (c < cells.size()) {
+                        cell.setText(cells.get(c));
+                    }
+                    row.addView(cell);
+                }
+                layout.addView(row);
+            }
+            // Stretch only when the table fits; past that the scroll view takes over, because a
+            // stretched column would squash its text instead of letting the table run wider.
+            for (int c = 0; c < columns; c++) {
+                layout.setColumnStretchable(c, true);
+            }
+            return scroll;
+        }
         private void renderQuestion(ChatMessage message) {
-            question.setText(message.text);
             boolean quoted = !message.quote.isEmpty();
             quoteChip.setVisibility(quoted ? VISIBLE : GONE);
             quoteChip.setText(quoted ? getContext().getString(R.string.chat_quoted, message.quote) : "");
@@ -1126,14 +1250,28 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             ChatScreen.this.showWordMenu(this);
         }
 
+        /**
+         * The run the handles are currently on. The answer is a sequence now, so a selection lives in
+         * one of several views and only that one has a range; the first run with one is the answer.
+         */
+        private TextView selectingRun() {
+            for (TextView view : answerViews) {
+                if (view.getSelectionStart() >= 0 && view.getSelectionEnd() > view.getSelectionStart()) {
+                    return view;
+                }
+            }
+            return answer;
+        }
+
         /** The row's own card over the passage the handles cover; null when the selection is empty. */
         private WordMenuPopup openWordMenu() {
-            TextSelection selection = TextSelection.of(answer.getSelectionStart(),
-                    answer.getSelectionEnd());
+            TextView run = selectingRun();
+            TextSelection selection = TextSelection.of(run.getSelectionStart(),
+                    run.getSelectionEnd());
             if (selection.isEmpty()) {
                 return null;
             }
-            WordMenuPopup menu = new WordMenuPopup(answer, message, this);
+            WordMenuPopup menu = new WordMenuPopup(run, message, this);
             menu.setOnClosed(this::onWordMenuClosed);
             menu.show(selection);
             card = menu;
@@ -1159,9 +1297,10 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             // the answer's own text view - the same selection 追问 and 复制 act on. The quote is the
             // offset substring itself, never a trimmed copy, so the stored anchor's quote fills its
             // span exactly. Nothing selected means a whole-answer fork, as before.
-            TextSelection selection = TextSelection.of(answer.getSelectionStart(),
-                    answer.getSelectionEnd());
-            String quote = selection.read(answer.getText().toString());
+            TextView run = selectingRun();
+            TextSelection selection = TextSelection.of(run.getSelectionStart(),
+                    run.getSelectionEnd());
+            String quote = selection.read(run.getText().toString());
             fire(actions -> actions.onForkPressed(messageId, quote, selection.start, selection.end));
         }
 
@@ -1171,14 +1310,20 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             fire(actions -> actions.onSelectionCopyPressed(selectedText()));
         }
 
-        /** What the answer's own text view has selected right now; empty when nothing is selected. */
+        /**
+         * What the answer has selected right now; empty when nothing is. Scans the runs in document
+         * order, because a table splits the answer into more than one text view and the selection is
+         * always in exactly one of them.
+         */
         private String selectedText() {
-            int start = answer.getSelectionStart();
-            int end = answer.getSelectionEnd();
-            if (start < 0 || end <= start) {
-                return "";
+            for (TextView view : answerViews) {
+                int start = view.getSelectionStart();
+                int end = view.getSelectionEnd();
+                if (start >= 0 && end > start) {
+                    return view.getText().subSequence(start, end).toString();
+                }
             }
-            return answer.getText().subSequence(start, end).toString();
+            return "";
         }
 
         private String quotedFromAnswer() {
@@ -1195,7 +1340,10 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             fire(actions -> actions.onReasoningToggled(id));
         }
 
-        @Override
+        /**
+         * The answer text's selection menu is the quote entry now that the action row dropped its
+         * own button (2026-09-28 user decision), so this is called from the menu, not from a row.
+         */
         public void onQuotePressed(String id) {
             final String selection = quotedFromAnswer();
             if (!selection.isEmpty()) {
@@ -1214,21 +1362,6 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         }
 
         @Override
-        public void onTranslatePressed(String id) {
-            fire(actions -> actions.onTranslatePressed(id));
-        }
-
-        @Override
-        public void onSpeakPressed(String id) {
-            fire(actions -> actions.onSpeakPressed(id));
-        }
-
-        void renderSpeakFace() {
-            actionBar.renderSpeakFace(ChatScreen.this.speakState.engineReady,
-                    ChatScreen.this.speakState.speaking(messageId));
-        }
-
-        @Override
         public void onForkPressed(String id) {
             // The bottom action bar forks without a selection: the whole answer stays the anchor.
             fire(actions -> actions.onForkPressed(id, "", 0, 0));
@@ -1237,11 +1370,6 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         @Override
         public void onChildrenPressed(String id) {
             fire(actions -> actions.onChildrenPressed(id));
-        }
-
-        @Override
-        public void onVersionPressed(String id) {
-            fire(actions -> actions.onVersionPressed(id));
         }
 
         /** The row's 子分支 entry is the list's anchor, so the list opens where it was asked for. */

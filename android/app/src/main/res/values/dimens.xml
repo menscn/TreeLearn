@@ -36,8 +36,24 @@
     <!-- T-041 D1: the child-branch popup caps its height so rows beyond one screen stay reachable
          through the ScrollView that wraps its list (same intent as the navigation page's list). -->
     <dimen name="popup_max_height">320dp</dimen>
+    <!-- 2026-09-28: the child-branch popup pins its width. A wrap-content card whose title and
+         scroll box are match_parent cannot resolve a width from an UNSPECIFIED measure, and a
+         pinned width is what lets the row measure happen exactly once, after the rows exist. -->
+    <dimen name="popup_width">280dp</dimen>
     <dimen name="rec_text_max">260dp</dimen>
     <dimen name="picker_min_width">240dp</dimen>
+    <!-- 2026-09-28: how far the recommendation block's chips dissolve at each end. The prototype
+         spells this as 20px inside its own mask-image gradient, not as one of the space tokens, so
+         it is a width and not a gap - and it is deliberately not space_s5/page_gutter even though it
+         shares their value, because changing the page gutter must not move the fade. -->
+    <dimen name="rec_fade_width">20dp</dimen>
+
+    <!-- 2026-09-28: the selection menu became four icon cells in one row (was four full-width text
+         rows). Each cell is the 44dp touch target wide, so the row is 4 × 44 + 3 hairlines + the
+         card's own 4dp padding; the separator is a short rule, not a full-height divider, because
+         a full-height one would cut the row into four unrelated columns. -->
+    <dimen name="word_menu_cell">44dp</dimen>
+    <dimen name="word_menu_sep">20dp</dimen>
 
     <!-- T-066: the reasoning disclosure's DeepSeek form. The rule is the 2dp subordinate line on
          the disclosure's left; the cap is the half-folded body's scroll limit, about 40% of a
@@ -48,6 +64,11 @@
 
     <!-- T-075: the streaming caret (073 §4.1) - one character wide, one line (s4) tall, green. -->
     <dimen name="caret_width">3dp</dimen>
+
+    <!-- 2026-09-28: the 问 AI quick-query chips. The visible pill is compact (the model chip's
+         32dp class) while its 44dp hot zone belongs to the frame that hosts it - the same visual
+         pill / touch target split ModelThinkingPicker already established. -->
+    <dimen name="ask_chip_gap">8dp</dimen>
 
     <!-- The reading measure the wide (sw600dp) layouts cap their column at. Declared in the base
          folder on purpose: a name that exists only under a qualifier is a crash waiting for the

@@ -436,7 +436,7 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
 | :--- | :--- | :--- |
 | `AppContainer` | 依赖装配：真实 `SettingsRepository` + `KeystoreSecretStore`、单后台线程、主 Looper 的 `UiThread` | 只持 application context，不持 Activity；所有 store 调用串行在一条线程上 |
 | `MainActivity` | 应用外壳：在 `R.id.shell_host` 里换屏 + 常驻 `R.id.tab_bar` 的显隐与高亮；`R.id.shell_backdrop` 统一绘制全站纸纹，实现 `HomeSink` + `SettingsSink` + `ChatSink` + `TreeCanvasSink` + `NavigationSink` + `SearchPresenter.Sink` + `LibrarySink` | 自己不持草稿、不持状态、不做决策；纸纹是外壳唯一全屏装饰层，页面根布局保持透明；每个屏幕的系统返回由它统一接管（见「系统返回」）；一级 / 二级的分别只由 `swap()` 与 `showTab()` 两处判定（T-052/T-010） |
-| `ui.HomePresenter` | 首页的全部决策 | 草稿只在 accepted 分支清空；推荐点击先写入草稿再走同一条 `onSubmit()`；缺 Key 时只提示并跳设置，**不写任何行**；055 起不再承载搜索/归档/设置导航与列表改名删除动作（落点：标签栏与学习库） |
+| `ui.HomePresenter` | 首页的全部决策 | 草稿只在 accepted 分支清空；推荐点击先写入草稿再走同一条 `onSubmit()`；缺 Key 时只提示并跳设置，**不写任何行**；055 起不再承载搜索/归档/设置导航与列表改名删除动作（落点：标签栏与学习库）。**2026-09-28：`load()` 分两次 post**——历史主题一读到就下发（带它蕴含的相位），推荐条随后单独 post。推荐条是派生物、生产时可能阻塞在模型流上（上限 `BlockingDerivedCaller.TIMEOUT_SECONDS`），合并下发会让卡片在 provider 应答前一直不出现；推荐失败只清空条本身，页面保持第一次 post 的可用状态（PRD 6.2.17 exception 3） |
 | `ui.HomeViewState` | 首页可绘制的全部状态（相位/草稿/Key/模型/思考/历史主题/推荐/提交中/提示） | 四相位 LOADING/EMPTY/ERROR/READY；`topics` 是按最近使用排序的历史来源，首页最多绘制三条并可点击恢复；`hasTopics()` 是「有没有历史主题」的**唯一**判定点——主标语是否出现、推荐区标题取哪一句、区头计数画不画，三处读的都是它；`Notice` 是分类不是句子；两个列表不可变 |
 | `ui.SettingsPresenter` | 设置页决策：读 Key 状态、保存/替换、删除 | Key 文本从不进入任何 ViewState；缓冲区归它所有并 `finally` 擦除，成功失败都擦 |
 | `ui.SettingsViewState` | 设置页可绘制状态（`keyLine`/`keyMask`/`notice`） | **没有模型与思考字段**——见下「交互事实」 |
@@ -444,7 +444,8 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
 | `ui.HomeData` / `ui.RootQuestionSubmitter` / `ui.KeyVault` / `ui.SettingsStore` / `ui.UiThread` | 首页与设置页的端口 | 页面不直接访问 DAO / 网关；`HomeData.recommendations` 失败**返回**兜底条而不是抛错 |
 | `screen.HomeScreen` / `screen.SettingsScreen` | 两个视图：只转发手势 + 按 ViewState 绘制 | 唯一本地状态是「回填抑制」（渲染自己写进去的文本不再回调 presenter，避免光标跳动）；历史主题区只画最近 3 条（`MAX_RECENT`，快捷面而非全量列表），区头计数只在 `hasTopics()` 时出现、无主题时改画空态句；卡片的可选部位（摘要行、未读点）由 `ui.TopicCard` 的实际字段决定，空摘要不留占位句；卡片的 content description 把未读数一并说出来，不靠那颗蓝点独自承担这个事实 |
 | `screen.ModelThinkingPicker` | 输入框内的模型/思考贴附式弹层 | 锚定当前标识；下方空间不足时向上翻转，始终不遮挡触发它的标识 |
-| `screen.RecommendationMarquee` | 首页推荐区 | 推荐项拆成上下两条独立轨道；每条 chip 画两份并按一份宽度回跳，接缝永不可见；上行向左、下行向右；触摸暂停、离手 2.6 s 恢复；离屏/未附加/窄到不可滚动时停滚；chip 是「类别胶囊 + 文本 + 右箭头」三段，其中**文案与两档底色不在此判定**，只向 `screen.RecommendationTag` 取（T-2026-09-27-005） |
+| `screen.RecommendationMarquee` | 首页推荐区 | 推荐项拆成上下两条独立轨道；每条 chip 画两份并按一份宽度回跳，接缝永不可见；上行向左、下行向右；触摸暂停、离手 2.6 s 恢复；离屏/未附加/窄到不可滚动时停滚；chip 是「类别胶囊 + 文本 + 右箭头」三段，其中**文案与两档底色不在此判定**，只向 `screen.RecommendationTag` 取（T-2026-09-27-005）。**2026-09-28 起两条轨道画在 `screen.EdgeFadeLayout` 里**，由它一次性羽化整块左右边缘；`render(...)` 在同一批 chip 上**不做任何事**（按值比较，`HomeScreen` 每次击键都会把整个 state 交下来，重建轨道会让滚动位置归零并重放首帧） |
+| `screen.EdgeFadeLayout` | 会羽化自己左右边缘的纵向容器（2026-09-28，同日两次修正） | 原型的 `mask-image:linear-gradient(90deg,transparent,#000 20px,#000 calc(100% - 20px),transparent)`（挂在 `.rec-row` 每行上）。Android 用 **`DST_IN`** 复刻：`dst_in = dst × src_alpha`，与 CSS mask 的 alpha 语义**一致**，故渐变数组**照抄原型**（两端 `transparent`=隐藏、中间 `#000`=显示），不需要补集。**首版用 `DST_OUT` + 补集数组是真机翻车后修正的**：`DST_OUT`（`dst × (1 − src_alpha)`）在 `drawRect` 上整块生效——source alpha 取自 `Paint`（默认 255）而非 shader，结果整条推荐带被一次擦光，只剩块外边框，实机读数见 `artifacts/evidence/home-fade-fix-2026-09-28.log` 前的截图量测。宽度取 `rec_fade_width`（20dp）。遮罩挂在**包住两行的块**上——这与原型（每行各挂）不同，是有意的偏离：两行一起淡出只需一次离屏绘制，也不会在两行之间留接缝；原型的渐变从**物理左**起算（`90deg` 且 stop 未按逻辑序写），故 RTL 下不对称是**照抄原型**，不是缺陷；宽度 ≤ 两倍羽化宽度时保留硬边而不是整块隐去 |
 | `screen.RecommendationTag` | 推荐类别 → 标签文案与底色档的**唯一判定点**（T-2026-09-27-005） | 三类 `Kind` 全部手写、**无 `default:` 兜底**——新增一类而不给标签是编译错误，而不是悄悄落到「入门」（旧实现正因有这个兜底，评审 M7 读不出「三类是否都接上」）；底色只有两档：品牌档（`green_soft` 底 + `green_deep` 字）只给「顺着你学的」，其余走中性档（`line` 底 + `ink3` 字），全取既有 token；`item_recommendation.xml` 不再自带 `backgroundTint`/`textColor` |
 | `screen.PaperRules` | 全站纸纹与输入框信纸格线的**同一个**画线实现（T-2026-09-27-002/004/010） | 线距、相位与两个派生色（`paper_rule` / `paper_write`）都在这里算；纹理与信纸只有颜色不同，不写第二套线距；两个具名入口 `pageRuleColour` / `writingRuleColour` 是「谁叠在谁上面」的唯一定义点 |
 | `screen.PaperRuleBackdrop` / `screen.RuleEditText` | 外壳全屏纹理装饰层与自绘格线输入框（T-2026-09-27-004/010） | 外壳纹理层是唯一全屏装饰：不可点、不可聚焦、对无障碍隐藏、不拦抽屉与滚动手势；输入框复用 `PaperRules.lineOffsets(...)` 并只换派生色，行距按实测周期标定（`CALIBRATION_STEPS=4`） |
@@ -484,9 +485,19 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
   见 `Docs/04-ux-design/design-system/README.md` 变更记录）。
   守门现状：**43 token / 15 资源 / 0 failed**（命令见 `.trae/scripts/dev/check_design_tokens.py`）；
   三方一致性成立，此前本节「不改 tokens.json、不新增 token」的表述与事实不符，已更正。
+  2026-09-28 同日第三次变更：新增 `rec_fade_width`（20dp，推荐块左右羽化宽度），**不进三方守门**——
+  它不是原型 `:root` 的变量，而是原型 `mask-image` 里的字面量（`20px`），故 `tokens.json` 与
+  `colors.xml` 都不动，守门数字仍为 43/15。它**刻意不复用** `page_gutter`：两者同为 20dp 是原型的巧合，
+  别名化会让「改页面边距」顺带移动羽化宽度。
 - **与原型的有意偏差**（逐条可核，理由见规格的偏差表）：不做 hover 态；推荐卡与类别胶囊高度按 `touch_min`；
   保留本项目外壳的左上抽屉按钮，不搬原型的顶栏搜索/归档图标与主题卡「⋯」菜单；品牌字形走平台衬线
   （不打包字体）；空态**不提供**「先逛逛示例主题」（App 无示例数据生成器）。
+  **2026-09-28 用户裁决新增一条**：推荐区与输入卡的间距取 `space_s4`（16dp）。此处**三层口径不一致**，
+  故一并记下：原型 `.rec-block` 是 `padding:4px 0 6px`、自身无 margin（几乎紧贴输入卡）；
+  首页视觉规格的 token 矩阵把 `.rec-block` 映射为 `space_s4` 但未说明是 padding 还是 margin，
+  且该值在原型自己的规则里并不出现；Android 实现当初做的是 8dp（仅挂在 marquee 上），用户实机走查
+  认为太挤。本轮取**规格自己的数字**（也即用户诉求），是**对原型的主动偏离**，不是复刻遗漏，更不是
+  原型的 4px。`screen_home_body.xml` 在该 markup 前留了同样意思的注释，以免被当保真缺陷改回。
 - **动效（T-2026-09-27-007）**：两处、且只有两处——首页换屏入场（整屏 280ms 右滑 14dp ＋ 淡入）与
   历史卡片错峰入场（350ms 上浮 10dp ＋ 淡入，每张比前一张晚 60ms）。唯一判定点 `screen.HomeMotion`
   （数值、错峰函数与唯一的入场构造器都在这一个类）；低动效开关**不在此另立副本**，全 app 只由

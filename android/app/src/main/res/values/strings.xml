@@ -288,13 +288,9 @@
     <string name="chat_copy_title">复制整条回答</string>
     <string name="chat_reset_title">重置：重新生成这条回答</string>
     <string name="chat_fork_title">新建主题：从这条回答开一条独立路径</string>
-    <string name="chat_quote_title">引用选中的句子</string>
     <string name="chat_quote_hint">先长按选中要引用的句子</string>
     <string name="chat_quote_clear">取消引用</string>
     <string name="chat_children_title">子分支列表：这条回答分出了 %1$d 个子分支</string>
-    <!-- T-074: the switcher reads "n/N" (073 §3.5); TalkBack hears which answer is displayed (§7). -->
-    <string name="chat_version_title">第 %1$d 个回答，共 %2$d 个版本</string>
-    <string name="chat_version_chip">%1$d/%2$d</string>
 
     <!-- T-075: the generation states (073 §2/§4/§6) - the stopped mark, the follow-latest pill and
          its missed count. -->
@@ -326,13 +322,14 @@
     <string name="chat_error">这段对话暂时读不出来，稍后重试即可。</string>
     <string name="chat_copy_reasoning">思考过程</string>
     <string name="chat_copy_answer">最终回答</string>
-    <!-- Conversation: the action labels (the prototype draws icons; see the note in the layout) -->
+    <!-- Conversation: the action labels (the prototype draws icons; see the note in the layout).
+         chat_act_children stays as the child entry's fallback description when it carries no count;
+         chat_act_children_count was retired 2026-09-28 - the count is now a badge on the tree glyph
+         rather than a text label. -->
     <string name="chat_act_quote">引用</string>
     <string name="chat_act_copy">复制</string>
     <string name="chat_act_reset">重置</string>
-    <string name="chat_act_fork">新建主题</string>
     <string name="chat_act_children">子分支</string>
-    <string name="chat_act_children_count">子分支 %1$d</string>
     <string name="chat_quoted">引用「%1$s」</string>
     <string name="chat_attachment_parsing">解析中…</string>
     <string name="chat_attachment_failed">解析失败：这份文件读不出文本，可移除后重试或直接发送。</string>
@@ -345,13 +342,27 @@
     <string name="chat_voice_denied">麦克风权限被拒绝。请在系统设置中开启后再用语音输入。</string>
     <string name="chat_version_item">v%1$d</string>
     <!-- Conversation: the long-press selection menu and the child-branch popup (PRD 6.2.19/6.2.20) -->
-    <string name="chat_word_selection">选中「%1$s」</string>
-    <string name="chat_word_group_ai">AI 操作</string>
-    <string name="chat_word_group_system">系统操作</string>
-    <string name="chat_word_quote">追问</string>
+    <!-- 2026-09-28 user decision: the menu is four icon cells in one row, no caption and no grouping
+         labels, so the item names below are read out by a screen reader rather than drawn. 追问 is
+         renamed 问 AI to name the actor instead of the speech act. -->
+    <string name="chat_word_ask_ai">问 AI</string>
+    <string name="chat_word_ask_ai_desc">就选中的这段文字继续提问</string>
+    <string name="chat_word_fork_desc">用选中的这段文字新建主题</string>
     <string name="chat_word_copy_desc">复制选中的这段文字</string>
-    <string name="chat_word_select_all">全选</string>
     <string name="chat_word_select_all_desc">选中这条回答的完整内容</string>
+    <!-- 2026-09-28 user decision: tapping 问 AI offers three one-tap queries under the quote row.
+         Each chip sends its query verbatim as the user message (the draft is kept untouched) and
+         the visible labels stay short while the sent text names the intent, per the user's wording
+         of the three intents: process reasons, plain-language meaning, applied worked example. -->
+    <string name="chat_ask_chip_why">为什么</string>
+    <string name="chat_ask_chip_what">是什么</string>
+    <string name="chat_ask_chip_how">怎么用</string>
+    <string name="chat_ask_query_why">围绕我选择的内容，解释其中相关的原因、依据、推导过程或成立条件。</string>
+    <string name="chat_ask_query_what">围绕我选择的内容，指出其中关键的概念、定理或结论，并且用通俗的话解释它在这里面的含义。</string>
+    <string name="chat_ask_query_how">请说明我选择的内容涉及的知识可以用于解决什么问题，适用于什么场景，并给出一个实际的案例，分步说明它如何应用。</string>
+    <string name="cd_chat_ask_why">就选中的内容追问：解释相关的原因、依据和推导过程</string>
+    <string name="cd_chat_ask_what">就选中的内容追问：用通俗的话解释关键概念的含义</string>
+    <string name="cd_chat_ask_how">就选中的内容追问：说明适用场景并给出分步实例</string>
     <string name="chat_children_popup_title">子分支列表 · %1$d</string>
     <string name="chat_children_unread">未读 %1$d</string>
     <string name="chat_copy_clip_label">知芽 回答</string>
@@ -396,13 +407,9 @@
     <string name="cd_chat_quote_clear">取消引用</string>
     <string name="cd_chat_send">发送</string>
     <string name="cd_chat_send_stop">停止生成</string>
-    <string name="cd_act_quote">引用到输入框</string>
     <string name="cd_act_copy">复制回答</string>
     <string name="cd_act_reset">重新生成</string>
     <string name="cd_act_fork">新建主题</string>
-    <string name="cd_act_translate">翻译为中文</string>
-    <string name="cd_act_speak">朗读这条回答</string>
-    <string name="cd_act_speak_stop">停止朗读</string>
     <string name="chat_translation_expand">展开译文</string>
     <string name="chat_translation_collapse">收起译文</string>
     <string name="chat_translation_running">翻译中…</string>

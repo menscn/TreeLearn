@@ -302,6 +302,85 @@
         android:paddingEnd="@dimen/page_gutter"
         android:paddingBottom="@dimen/space_s2">
 
+        <!-- 2026-09-28 user decision: after 问 AI picks the selection, three one-tap queries show
+             here - between the quote row above and the draft below, inside the composer card. Each
+             chip sends its query as-is (the draft is kept) and the row collapses on send, so the
+             frames exist to be tapped once. The visible pill is the model chip's 32dp class; the
+             44dp hot zone is the hosting frame, the split ModelThinkingPicker already uses. -->
+        <LinearLayout
+            android:id="@+id/chat_ask_chips"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <FrameLayout
+                android:id="@+id/chat_ask_why"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/touch_min"
+                android:background="?android:attr/selectableItemBackground"
+                android:contentDescription="@string/cd_chat_ask_why">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/bg_ask_ai_chip"
+                    android:paddingStart="@dimen/space_s3"
+                    android:paddingTop="@dimen/space_s1"
+                    android:paddingEnd="@dimen/space_s3"
+                    android:paddingBottom="@dimen/space_s1"
+                    android:text="@string/chat_ask_chip_why"
+                    android:textColor="@color/tl_green_deep"
+                    android:textSize="@dimen/text_sm" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/chat_ask_what"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/touch_min"
+                android:layout_marginStart="@dimen/ask_chip_gap"
+                android:background="?android:attr/selectableItemBackground"
+                android:contentDescription="@string/cd_chat_ask_what">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/bg_ask_ai_chip"
+                    android:paddingStart="@dimen/space_s3"
+                    android:paddingTop="@dimen/space_s1"
+                    android:paddingEnd="@dimen/space_s3"
+                    android:paddingBottom="@dimen/space_s1"
+                    android:text="@string/chat_ask_chip_what"
+                    android:textColor="@color/tl_green_deep"
+                    android:textSize="@dimen/text_sm" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/chat_ask_how"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/touch_min"
+                android:layout_marginStart="@dimen/ask_chip_gap"
+                android:background="?android:attr/selectableItemBackground"
+                android:contentDescription="@string/cd_chat_ask_how">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/bg_ask_ai_chip"
+                    android:paddingStart="@dimen/space_s3"
+                    android:paddingTop="@dimen/space_s1"
+                    android:paddingEnd="@dimen/space_s3"
+                    android:paddingBottom="@dimen/space_s1"
+                    android:text="@string/chat_ask_chip_how"
+                    android:textColor="@color/tl_green_deep"
+                    android:textSize="@dimen/text_sm" />
+            </FrameLayout>
+        </LinearLayout>
+
         <LinearLayout
             android:id="@+id/chat_composer_card"
             android:layout_width="match_parent"
@@ -359,7 +438,12 @@
                          face so the existing structural gate keeps reading it. 2026-09-28 user
                          decision: the pill was 44dp (touch_min) while the model chip beside it is
                          32dp, so the two read as different-height controls; the pill now sizes to
-                         its content like the chip does, and the row still supplies the 44dp target. -->
+                         its content like the chip does, and the row still supplies the 44dp target.
+                         2026-09-28 second decision: the paperclip was still a 24dp drawable while the
+                         chip's bulb next to it draws at 15dp, so the pill stood a head taller and the
+                         user marked the icon out ("附件图标大小减小"). The drawable is now bounded to
+                         15dp at this usage site, matching the chip, and the trailing padding drops
+                         from s3 to s2 so it mirrors the leading edge. -->
                     <TextView
                         android:id="@+id/chat_attach"
                         android:layout_width="wrap_content"
@@ -372,7 +456,7 @@
                         android:drawableTint="@color/tl_ink2"
                         android:gravity="center"
                         android:paddingStart="@dimen/space_s2"
-                        android:paddingEnd="@dimen/space_s3"
+                        android:paddingEnd="@dimen/space_s2"
                         android:text="@string/chat_attach_label"
                         android:textColor="@color/tl_ink2"
                         android:textSize="@dimen/text_sm" />

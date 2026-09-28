@@ -12,13 +12,14 @@ import org.junit.Test;
 
 /**
  * T-074: structural assertions for the message row and its action bar, read as plain files so they
- * gate the layout on the JVM like {@code ReasoningDisclosureLayoutTest} does. Updated 2026-09-27 to
- * the user's A+B+C decision (the conversation page follows the design shot):
+ * gate the layout on the JVM like {@code ReasoningDisclosureLayoutTest} does. Updated 2026-09-28 to
+ * the user's annotated-shot decision (the conversation page follows the design shot):
  *
  * <ul>
- *   <li><strong>The action row leads with the prototype's set.</strong> Copy, reset, fork, the
- *       data-driven child entry, the app's state-driven extras, and the time closes the row
- *       (prototype `.ai-actions`, lines 867-878).
+ *   <li><strong>The action row carries only the four prototype buttons plus the time.</strong> Copy,
+ *       reset, fork, the data-driven child entry, then the time closes the row (prototype
+ *       `.ai-actions`, lines 867-878). The extras this row used to carry - quote, translation,
+ *       speech - and the hidden version switcher were removed on 2026-09-28 ("其他的不要").
  *   <li><strong>The learner's message is plain text</strong> (`.msg-user`, line 182), the same
  *       treatment the AI answer gets - the green bubble was retired on 2026-09-28 - and the answer
  *       body is flush: the green left edge is voided with the design shot (spec V1.1 §3.3).
@@ -48,6 +49,52 @@ public final class ChatMessageRowLayoutTest {
         return xml.substring(Math.max(0, xml.lastIndexOf('<', idIndex)), elementEnd);
     }
 
+    /**
+     * The element that owns the id <em>and everything inside it</em>, so an assertion can see the
+     * children - a glyph ImageView, a badge TextView - that an open-tag-only slice would miss. The
+     * slice runs to the element's matching close tag, counted by nesting depth, so a sibling that
+     * happens to follow is never swallowed. A self-closing tag returns itself.
+     */
+    private static String elementWithBody(String xml, String id) {
+        String body = xml.replaceAll("(?s)<!--.*?-->", "");
+        int start = body.indexOf("android:id=\"@+id/" + id + "\"");
+        assertTrue("id " + id + " must exist", start >= 0);
+        int open = body.lastIndexOf('<', start);
+        int openEnd = body.indexOf('>', start);
+        assertTrue("malformed layout", openEnd >= 0);
+        if (body.charAt(openEnd - 1) == '/') {
+            return body.substring(open, openEnd + 1);
+        }
+        int nameEnd = open + 1;
+        while (nameEnd < openEnd && !Character.isWhitespace(body.charAt(nameEnd))) {
+            nameEnd++;
+        }
+        String tag = body.substring(open + 1, nameEnd);
+        java.util.regex.Pattern openTag = java.util.regex.Pattern.compile("<" + java.util.regex.Pattern.quote(tag) + "(?=[\\s/>])");
+        java.util.regex.Pattern closeTag = java.util.regex.Pattern.compile("</" + java.util.regex.Pattern.quote(tag) + "\\s*>");
+        int depth = 0;
+        int cursor = open;
+        while (cursor < body.length()) {
+            java.util.regex.Matcher nextOpen = openTag.matcher(body);
+            java.util.regex.Matcher nextClose = closeTag.matcher(body);
+            boolean hasOpen = nextOpen.find(cursor);
+            boolean hasClose = nextClose.find(cursor);
+            if (hasClose && (!hasOpen || nextClose.start() < nextOpen.start())) {
+                depth--;
+                if (depth == 0) {
+                    return body.substring(open, nextClose.end());
+                }
+                cursor = nextClose.end();
+            } else if (hasOpen) {
+                depth++;
+                cursor = nextOpen.end();
+            } else {
+                break;
+            }
+        }
+        throw new AssertionError("unterminated element: " + id);
+    }
+
     @Test
     public void theActionBarLeadsWithThePrototypeSetAndTheTimeClosesIt() throws Exception {
         String xml = read(RES.resolve(Paths.get("layout", "view_answer_actions.xml")));
@@ -55,52 +102,97 @@ public final class ChatMessageRowLayoutTest {
         int reset = xml.indexOf("android:id=\"@+id/act_reset\"");
         int fork = xml.indexOf("android:id=\"@+id/act_fork\"");
         int children = xml.indexOf("android:id=\"@+id/act_children\"");
-        int quote = xml.indexOf("android:id=\"@+id/act_quote\"");
-        int translate = xml.indexOf("android:id=\"@+id/act_translate\"");
-        int speak = xml.indexOf("android:id=\"@+id/act_speak\"");
         int time = xml.indexOf("android:id=\"@+id/act_time\"");
         assertTrue(copy >= 0);
-        assertTrue("copy, reset, fork, the child entry, the extras, and the time last",
-                copy < reset && reset < fork && fork < children && children < quote
-                        && quote < translate && translate < speak && speak < time);
+        assertTrue("copy, reset, fork, the child entry, and the time last",
+                copy < reset && reset < fork && fork < children && children < time);
+    }
+
+    @Test
+    public void theActionRowDropsTheExtrasTheUserMarkedOut() throws Exception {
+        // 2026-09-28 user decision: the annotated shot crossed out the app's own extras and the
+        // hidden version switcher ("删除不需要的按钮，比如那个定位、还有语音播放" / "其他的不要").
+        // The row is exactly the four prototype buttons plus the time - nothing else may come back
+        // without a fresh decision, which is why this asserts absence rather than a count.
+        String xml = read(RES.resolve(Paths.get("layout", "view_answer_actions.xml")));
+        for (String gone : new String[] {"act_quote", "act_translate", "act_speak", "act_version"}) {
+            assertFalse(gone + " was removed from the row and must not reappear",
+                    xml.contains("android:id=\"@+id/" + gone + "\""));
+        }
+        // Quote keeps a way in: the selection menu on the answer text. Translation keeps its card
+        // header. Both are asserted where they live, so their absence here is not a dead feature.
+        String screen = read(Paths.get("src", "main", "java", "com", "treelearn", "app", "screen",
+                "ChatScreen.java"));
+        assertTrue("the selection menu still offers quote",
+                screen.contains("onQuotePressed(id, selection)"));
+        assertTrue("the translation card header still offers a retry",
+                screen.contains("actions.onTranslatePressed(messageId)"));
     }
 
     @Test
     public void everyActionKeepsItsFortyFourDpHotZone() throws Exception {
         String xml = read(RES.resolve(Paths.get("layout", "view_answer_actions.xml")));
-        for (String id : new String[] {"act_quote", "act_copy", "act_reset", "act_fork",
-                "act_children", "act_version"}) {
+        for (String id : new String[] {"act_copy", "act_reset", "act_fork", "act_children"}) {
             assertTrue(id + " must stay 44dp tall", elementAround(xml, id)
                     .contains("android:layout_height=\"@dimen/touch_min\""));
         }
     }
 
     @Test
-    public void theSecondaryIconsAreSpacedByTheSpacingToken() throws Exception {
+    public void theChildEntryIsAGlyphWithACountBadgeNotALabel() throws Exception {
+        // 2026-09-28 user decision, replacing the T-057 shape: "分支列表 对应的也是图标，不要是文字！"
+        // The entry used to be a text Button reading "子分支 N". It is now what the prototype draws at
+        // line 1178 - the ITree glyph with the count in a green badge (.ai-act-n). This test holds that
+        // shape: a glyph, a badge, the number in the badge, and no text label anywhere in the entry.
         String xml = read(RES.resolve(Paths.get("layout", "view_answer_actions.xml")));
-        // s1 (4dp): 2026-09-27 the row carries the prototype's set plus the app's extras, so the
-        // 44dp-tall icon buttons tighten their gaps to keep the whole row inside a 360dp column.
-        // Copy leads the row, so it carries no start margin - the others space off it.
-        for (String id : new String[] {"act_quote", "act_fork", "act_children"}) {
-            assertTrue(id + " must use the s1 spacing token", elementAround(xml, id)
-                    .contains("android:layout_marginStart=\"@dimen/space_s1\""));
+        String entry = elementWithBody(xml, "act_children");
+        assertTrue("the child entry must draw the branch tree glyph (.ai-act ITree)",
+                entry.contains("@drawable/ic_nav_tree"));
+        assertTrue("its count must ride a badge child (.ai-act-n)",
+                entry.contains("android:id=\"@+id/act_children_count\""));
+        assertTrue("the badge must be the green pill",
+                entry.contains("@drawable/bg_count_badge"));
+        // The old shape must be gone: a Button that renders its own text, and the count string that
+        // fed it. Either one coming back means the entry regressed to a label.
+        assertTrue("the entry must not be a Button any more (that is what made it textual)",
+                !entry.contains("<Button"));
+        assertTrue("the entry must carry no android:text of its own",
+                !entry.contains("android:text="));
+        String strings = read(RES.resolve(Paths.get("values", "strings.xml")));
+        assertFalse("the count label string was retired with the text shape",
+                strings.contains("name=\"chat_act_children_count\""));
+    }
+
+    @Test
+    public void theActionButtonsCarryNoInnerPadding() throws Exception {
+        // 2026-09-28 user decision: the row read "现在隔的太开了". The surplus was the 6dp inner
+        // padding each button stacked on its 4dp start margin, not the 44dp target. Both are gone,
+        // so the four leads sit in an even 44dp rhythm with the glyphs centring themselves.
+        String xml = read(RES.resolve(Paths.get("layout", "view_answer_actions.xml")));
+        for (String id : new String[] {"act_copy", "act_reset", "act_fork"}) {
+            String element = elementAround(xml, id);
+            assertTrue(id + " must be exactly the 44dp target wide, so the glyph centres in it",
+                    element.contains("android:layout_width=\"@dimen/touch_min\""));
+            assertTrue(id + " must carry no start padding", element.contains("android:paddingStart=\"0dp\""));
+            assertTrue(id + " must carry no end padding", element.contains("android:paddingEnd=\"0dp\""));
+            assertFalse(id + " must not add its own start margin on top of the 44dp target",
+                    element.contains("android:layout_marginStart="));
         }
-        assertFalse("act_copy leads the row and must have no start margin",
+        // Copy leads the row; nothing in the row carries a start margin any more.
+        assertFalse("no action button may re-introduce a start margin",
                 elementAround(xml, "act_copy").contains("android:layout_marginStart="));
     }
 
     @Test
-    public void theSwitcherReadsAsNOverN() throws Exception {
+    public void theActionRowCarriesNoVersionSwitcher() throws Exception {
+        // 2026-09-28 user decision: the version switcher left the row with the rest of the extras.
+        // The n/N face and its strings are asserted away here so a stray re-add is caught.
         String xml = read(RES.resolve(Paths.get("layout", "view_answer_actions.xml")));
-        String chip = elementAround(xml, "act_version");
-        assertTrue("the chip is the small size", chip.contains("android:textSize=\"@dimen/text_sm\""));
-        assertTrue("the chip is the secondary ink", chip.contains("android:textColor=\"@color/tl_ink2\""));
+        assertFalse("act_version left the row", xml.contains("act_version"));
 
-        String strings = read(RES.resolve(Paths.get("values", "strings.xml")));
-        assertTrue("the chip text is n over N",
-                strings.contains("<string name=\"chat_version_chip\">%1$d/%2$d</string>"));
-        assertTrue("TalkBack hears which answer is displayed out of how many",
-                strings.contains("第 %1$d 个回答，共 %2$d 个版本"));
+        String screen = read(Paths.get("src", "main", "java", "com", "treelearn", "app", "screen",
+                "AnswerActionBar.java"));
+        assertFalse("the bar must not paint a version chip", screen.contains("chat_version_chip"));
     }
 
     @Test
@@ -156,9 +248,33 @@ public final class ChatMessageRowLayoutTest {
         assertTrue("the renderer must wire a click span over code blocks",
                 renderer.contains("ClickableSpan") && renderer.contains("OnCodeBlockClick"));
         String screen = read(SRC.resolve(Paths.get("screen", "ChatScreen.java")));
+        // 2026-09-28: the answer is rendered as segments now, because a table has to be a view to be
+        // aligned. The code tap still forwards to the one selection-copy action.
+        assertTrue("the screen must render the answer as segments",
+                screen.contains("MarkdownRenderer.renderSegments("));
         assertTrue("the screen must forward the code tap to the selection-copy action",
-                screen.contains("MarkdownRenderer.render(message.text,")
-                        && screen.contains("onSelectionCopyPressed(code)"));
+                screen.contains("onSelectionCopyPressed(code)"));
+    }
+
+    @Test
+    public void aTableIsRenderedAsATableAndNotAsText() throws Exception {
+        String renderer = read(SRC.resolve(Paths.get("screen", "MarkdownRenderer.java")));
+        assertTrue("the renderer must not draw box characters any more",
+                !renderer.contains("'┌'") && !renderer.contains("'┼'"));
+
+        String screen = read(SRC.resolve(Paths.get("screen", "ChatScreen.java")));
+        assertTrue("a table must become a real TableLayout",
+                screen.contains("TableLayout") && screen.contains("TableRow"));
+        assertTrue("and it must scroll rather than squash a wide table",
+                screen.contains("R.layout.item_chat_table"));
+
+        // The table's own layouts must exist and be tables, not text with padding.
+        assertTrue("the table host must be a TableLayout",
+                read(RES.resolve(Paths.get("layout", "item_chat_table.xml")))
+                        .contains("<TableLayout"));
+        assertTrue("the row must be a TableRow",
+                read(RES.resolve(Paths.get("layout", "item_chat_table_row.xml")))
+                        .contains("<TableRow"));
     }
 
     @Test
@@ -212,15 +328,15 @@ public final class ChatMessageRowLayoutTest {
     }
 
     @Test
-    public void theActionBarKeepsTheVersionSwitcherHiddenAndShowsThePrototypeSet() throws Exception {
-        // 2026-09-27 user decision: copy and fork return to the row (prototype .ai-actions); the
-        // version switcher stays a hidden compatibility entry, driven by Java.
+    public void theActionRowShowsThePrototypeSetAndNothingHidden() throws Exception {
+        // 2026-09-28 user decision: the row is exactly copy, reset, fork, the child entry and the
+        // time. Nothing rides along hidden any more - the version switcher that used to is gone.
         String actions = read(RES.resolve(Paths.get("layout", "view_answer_actions.xml")));
-        assertTrue("act_version must stay hidden", elementAround(actions, "act_version")
-                .contains("android:visibility=\"gone\""));
-        for (String id : new String[] {"act_copy", "act_fork"}) {
-            assertFalse(id + " must be visible again", elementAround(actions, id)
-                    .contains("android:visibility=\"gone\""));
+        for (String id : new String[] {"act_copy", "act_reset", "act_fork"}) {
+            String element = elementAround(actions, id);
+            assertFalse(id + " must be visible", element.contains("android:visibility=\"gone\""));
+            assertTrue(id + " must expose a content description",
+                    element.contains("android:contentDescription="));
         }
     }
 
@@ -228,10 +344,11 @@ public final class ChatMessageRowLayoutTest {
     public void theSelectionMenuSaysNewTopicAndEmptiesThePlatformToolbar() throws Exception {
         // 2026-09-27 (user decision): the operation that opens a branch from an answer is 新建主题, and
         // the three entrances - the selection menu, the answer action row and the recommendation strip's
-        // fork zone - read the same four strings, so a rename that misses one is caught here.
+        // fork zone - all name it the same way in their content descriptions, so a rename that misses
+        // one is caught here. 2026-09-28 (user decision): the strip's fork zone is a glyph now, so it
+        // carries no visible label; the string it used to print is gone and only the descriptions
+        // remain, which is exactly why this test reads descriptions rather than faces.
         String strings = read(RES.resolve(Paths.get("values", "strings.xml")));
-        assertTrue("the selection menu's row", strings.contains(
-                "<string name=\"chat_act_fork\">新建主题</string>"));
         assertTrue("the action row's face", strings.contains(
                 "<string name=\"cd_act_fork\">新建主题</string>"));
         assertTrue("the action row's description", strings.contains(
@@ -239,6 +356,8 @@ public final class ChatMessageRowLayoutTest {
         assertTrue("the recommendation strip's description", strings.contains(
                 "<string name=\"chat_suggestion_fork_title\">直接用这个问题新建主题</string>"));
         assertFalse("no user-facing copy may still say 新建分支", strings.contains("新建分支"));
+        assertFalse("the strip's fork zone shows no text label any more",
+                strings.contains("chat_act_fork"));
 
         // The four rows are the app's own card now: the platform's selection menu is emptied instead of
         // used, which is what keeps 新建主题 out of the platform's 更多 sheet.
@@ -246,5 +365,20 @@ public final class ChatMessageRowLayoutTest {
         assertTrue("the platform selection toolbar must be emptied", screen.contains("menu.clear()"));
         assertFalse("no action may be handed to the platform selection menu",
                 screen.contains("menu.add(Menu.NONE, R.id.chat_selection"));
+    }
+
+    @Test
+    public void theSuggestionForkZoneIsAGlyphRatherThanATextButton() throws Exception {
+        // 2026-09-28 user decision: "新建主题 需要换成图标 ... 不要是文字按钮". The zone used to be a
+        // text Button; the prototype draws its own IFork there (line 1200), so the row must carry that
+        // glyph and no text at all.
+        String suggestion = read(RES.resolve(Paths.get("layout", "item_chat_suggestion.xml")));
+        String fork = elementAround(suggestion, "suggestion_fork");
+        assertTrue("the fork zone draws the fork glyph", fork.contains("@drawable/ic_action_fork"));
+        assertTrue("the fork zone is an icon view, not a Button", fork.contains("<ImageView"));
+        assertFalse("a glyph carries no android:text", fork.contains("android:text="));
+        assertFalse("a glyph carries no textSize", fork.contains("android:textSize="));
+        assertTrue("the zone keeps its accessibility name", fork.contains("android:contentDescription="));
+        assertTrue("the whole row still asks the question", suggestion.contains("suggestion_text"));
     }
 }

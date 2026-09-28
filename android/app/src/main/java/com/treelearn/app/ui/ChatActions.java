@@ -50,6 +50,13 @@ public interface ChatActions {
     /** Takes the selected sentence as the context of the next question. */
     void onQuotePressed(String messageId, String anchorText);
 
+    /**
+     * 2026-09-28: one of the three 问 AI quick queries was tapped. The query goes out as the user
+     * message as-is, carrying the quote already in the composer; the learner's own draft travels
+     * unchanged, because the chip answers the selection, not what they were typing.
+     */
+    void onAskAiChipPressed(String query);
+
     void onQuoteCleared();
 
     /** T-097: the composer's attachment chip received a picked file's bytes. */
