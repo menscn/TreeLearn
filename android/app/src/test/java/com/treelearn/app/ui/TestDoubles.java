@@ -117,6 +117,25 @@ final class TestDoubles {
         HomeStats stats = HomeStats.empty();
         boolean statsThrow;
 
+        /**
+         * How many states the sink had been handed at the moment the strip was asked for.
+         *
+         * <p>The strip is a derived artifact whose production can block on a model stream for up to
+         * {@code BlockingDerivedCaller.TIMEOUT_SECONDS}, so the order of the two reads is the
+         * behaviour under test: the history list must reach the screen before the strip is even
+         * started, otherwise the page reads as empty until the provider answers.
+         *
+         * <p>-1 while the strip has not been asked for.
+         */
+        int sinkStatesWhenStripWasRead = -1;
+
+        /** Set by a test that wants the read order observed; the fake reports the sink's size at the read. */
+        private TestDoubles.RecordingHomeSink observedSink;
+
+        void observeStripRead(TestDoubles.RecordingHomeSink sink) {
+            this.observedSink = sink;
+        }
+
         @Override
         public HomeStats stats() {
             if (statsThrow) {
@@ -135,6 +154,7 @@ final class TestDoubles {
 
         @Override
         public Recommendations recommendations(boolean hasTopics) {
+            sinkStatesWhenStripWasRead = observedSink == null ? -1 : observedSink.states.size();
             if (recommendationsThrow) {
                 throw new IllegalStateException("the strip could not be produced");
             }

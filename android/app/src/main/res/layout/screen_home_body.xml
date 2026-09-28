@@ -152,10 +152,23 @@
             </LinearLayout>
         </LinearLayout>
 
+        <!-- 2026-09-28 user decision: the strip now sits space_s4 (16dp) under the composer.
+             Three layers disagree here, which is why this carries a note:
+               - the prototype's .rec-block is padding:4px 0 6px with no margin of its own, i.e. it
+                 sits almost flush under the input card (Docs/04-ux-design/...-v1.1.html line 360);
+               - the home visual spec's token matrix maps .rec-block to space_s4 without saying
+                 whether that is padding or margin (Docs/spec/SPEC-2026-09-27-home-visual-fidelity.md
+                 line 52), and its value does not appear anywhere in the prototype's own rule;
+               - the Android build had implemented 8dp (space_s2 on the marquee alone) and the
+                 learner reported it as too tight.
+             This line takes the spec's own number, which the learner's walkthrough independently
+             asked for. It is a departure from the prototype, not a fidelity gap - and it is NOT the
+             prototype's 4px. Do not "fix" it back to 4px or 8dp without asking. -->
         <LinearLayout
             android:id="@+id/home_recommendations_section"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_s4"
             android:orientation="vertical"
             android:visibility="gone">
 

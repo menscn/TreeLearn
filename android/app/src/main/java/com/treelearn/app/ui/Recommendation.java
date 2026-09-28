@@ -28,4 +28,31 @@ public final class Recommendation {
         this.question = Guard.nonBlank(question, "question");
         this.kind = Guard.object(kind, "kind");
     }
+
+    /**
+     * Value identity, because a recommendation is a value: two chips carrying the same question and
+     * the same category are the same chip.
+     *
+     * <p>This is load-bearing rather than cosmetic. {@code RecommendationMarquee} skips a rebuild when
+     * the list handed to it equals the one it drew, and without this comparison existing the answer was
+     * only ever "yes" by accident - the caller happened to pass the same instances back. Anything that
+     * re-creates the list (a store read, a defensive copy that rebuilds its elements) would have made
+     * the strip rebuild and flicker again, with nothing failing to say so.
+     */
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof Recommendation)) {
+            return false;
+        }
+        Recommendation that = (Recommendation) other;
+        return kind == that.kind && question.equals(that.question);
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * question.hashCode() + kind.hashCode();
+    }
 }

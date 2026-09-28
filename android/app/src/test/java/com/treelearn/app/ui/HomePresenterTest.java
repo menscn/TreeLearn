@@ -265,4 +265,69 @@ public final class HomePresenterTest {
         assertTrue(sink.last().keyConfigured);
     }
 
+    /**
+     * 2026-09-28: coming back from a conversation must not wait for the strip.
+     *
+     * <p>Producing the strip is a derived artifact that can block on a model stream for up to
+     * {@code BlockingDerivedCaller.TIMEOUT_SECONDS}, so the topic list is posted as soon as it is
+     * read and the strip follows in a second post. The assertion is on the order, not on the arrival:
+     * by the time the strip is asked for, the history cards are already on the screen.
+     */
+    @Test
+    public void theHistoryListReachesTheScreenBeforeTheStripIsProduced() {
+        data.topics = Collections.singletonList(TestDoubles.topic(TestDoubles.TOPIC_1, "已有"));
+        data.observeStripRead(sink);
+
+        presenter.start();
+
+        assertTrue("the strip must have been read", data.sinkStatesWhenStripWasRead >= 0);
+        assertEquals("the list was already drawn when the strip was produced",
+                2, data.sinkStatesWhenStripWasRead);
+    }
+
+    /**
+     * The first post is a finished page on its own: it carries the phase the read implies, so the
+     * screen is not left in loading while the strip is in flight. The second post only replaces the
+     * strip and must not disturb the phase or the topics it was given.
+     *
+     * <p>The state the screen held when the strip arrived is found by name rather than by index:
+     * the sink is recorded at the moment {@code recommendations(...)} is called, and the last state
+     * recorded before that call is the one the first post produced.
+     */
+    @Test
+    public void theFirstPostIsAlreadyAFinishedPageAndTheSecondOnlyAddsTheStrip() {
+        data.topics = Collections.singletonList(TestDoubles.topic(TestDoubles.TOPIC_1, "已有"));
+        data.observeStripRead(sink);
+
+        presenter.start();
+
+        assertTrue("the strip must have been read", data.sinkStatesWhenStripWasRead > 0);
+        HomeViewState whenStripWasRead = sink.states.get(data.sinkStatesWhenStripWasRead - 1);
+        assertEquals(HomeViewState.Phase.READY, whenStripWasRead.phase);
+        assertEquals(1, whenStripWasRead.topics.size());
+        assertTrue("the strip is not part of the first post", whenStripWasRead.recommendations.isEmpty());
+
+        assertEquals("and the last post only added it",
+                HomeViewState.Phase.READY, sink.last().phase);
+        assertEquals(1, sink.last().topics.size());
+        assertFalse(sink.last().recommendations.isEmpty());
+    }
+
+    /**
+     * A strip that fails after the list has already been drawn leaves the page exactly as the first
+     * post made it: usable, ready, with a notice-free history. This is PRD 6.2.17 exception 3 read
+     * against the split - the failure now happens in its own post rather than alongside the list.
+     */
+    @Test
+    public void aStripThatFailsAfterTheListWasDrawnStillLeavesThePageUsable() {
+        data.topics = Collections.singletonList(TestDoubles.topic(TestDoubles.TOPIC_1, "已有"));
+        data.recommendationsThrow = true;
+
+        presenter.start();
+
+        assertEquals(HomeViewState.Phase.READY, sink.last().phase);
+        assertEquals(1, sink.last().topics.size());
+        assertTrue(sink.last().recommendations.isEmpty());
+        assertNull("a failed strip is not an error", sink.last().notice);
+    }
 }

@@ -157,6 +157,23 @@ public final class HomePresenter implements HomeActions {
         ui.post(() -> sink.openBranch(rootBranchId));
     }
 
+    /**
+     * The store read, delivered in two steps on purpose.
+     *
+     * <p>The topic list is posted the moment it is read. The recommendation strip is a derived
+     * artifact - producing it can block on a model stream for up to
+     * {@code BlockingDerivedCaller.TIMEOUT_SECONDS} - so waiting for it before posting anything would
+     * hold the history cards back behind the strip's provider, which is the delay a learner sees as
+     * "the page came back empty and filled in later". The cards are the page; they go first.
+     *
+     * <p>The two posts are not a partial render: the first carries the phase the read implies, so the
+     * screen is in a finished state (ready or empty) before the strip arrives. The second only
+     * replaces {@code recommendations}. If producing the strip fails, it is dropped and the page is
+     * left exactly as the first post drew it, which is PRD 6.2.17 exception 3.
+     *
+     * <p>Both posts apply their transition to the current state rather than to a copy captured here,
+     * so a draft typed while the strip is still being produced is not overwritten by either.
+     */
     private void load() {
         final List<TopicCard> topics;
         try {
@@ -166,6 +183,8 @@ public final class HomePresenter implements HomeActions {
                     .withNotice(HomeViewState.Notice.STORAGE));
             return;
         }
+        post(current -> current.withTopics(topics).withPhase(HomeViewState.phaseFor(topics))
+                .withNotice(null));
         List<Recommendation> loadedStrip;
         try {
             loadedStrip = data.recommendations(HomeViewState.hasTopics(topics)).items;
@@ -173,9 +192,7 @@ public final class HomePresenter implements HomeActions {
             loadedStrip = Collections.emptyList();
         }
         final List<Recommendation> recommendations = loadedStrip;
-        post(current -> current.withTopics(topics).withRecommendations(recommendations)
-                .withPhase(HomeViewState.phaseFor(topics))
-                .withNotice(null));
+        post(current -> current.withRecommendations(recommendations));
     }
 
     private void post(UnaryOperator<HomeViewState> transition) {

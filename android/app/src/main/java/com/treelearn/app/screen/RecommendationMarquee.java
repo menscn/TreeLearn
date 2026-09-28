@@ -30,6 +30,11 @@ import java.util.List;
  *       PRD 6.2.17 exception 4 explicitly does not require the animation to keep running off screen.
  * </ul>
  *
+ * <p>The two rows live inside one {@link EdgeFadeLayout}, which dissolves both of them together at
+ * the block's left and right edges (the prototype masks {@code .rec-block}, not each row). The mask
+ * is on the wrapper rather than on the rows because two independently scrolling rows each carrying
+ * their own fade would be cut at two different heights.
+ *
  * <p>It carries no state of its own beyond "paused": which chips exist is decided by the presenter, and a
  * tap is reported straight back.
  *
@@ -51,9 +56,25 @@ public final class RecommendationMarquee extends LinearLayout {
 
     private static final int DRIFT_PIXELS = 1;
 
+    /** The block the rows are drawn in, and the only thing that fades. */
+    private final EdgeFadeLayout block;
+
     private final List<HorizontalScrollView> rows = new ArrayList<HorizontalScrollView>(2);
     private final List<LinearLayout> strips = new ArrayList<LinearLayout>(2);
     private final List<Integer> directions = new ArrayList<Integer>(2);
+
+    /**
+     * The chips currently on screen, or null while the strip has never been drawn.
+     *
+     * <p>Null rather than an empty list on purpose: an empty list is a real state (the strip has been
+     * told there is nothing to show, and has hidden itself), and conflating "nothing was ever drawn"
+     * with it would make the first render of an empty strip skip the visibility write it owes.
+     *
+     * <p>Compared by value on every render, because the screen hands the whole state down on every
+     * keystroke and rebuilding the rows would restart the drift and lose the learner's reading
+     * position for a change that did not touch the recommendations.
+     */
+    private List<Recommendation> drawn;
 
     private Listener listener;
     private boolean paused;
@@ -80,16 +101,31 @@ public final class RecommendationMarquee extends LinearLayout {
         super(context, attrs);
         setOrientation(VERTICAL);
         setClipChildren(false);
+        block = new EdgeFadeLayout(context, attrs);
+        addView(block, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
     }
 
     public void setListener(Listener listener) {
         this.listener = listener;
     }
 
-    /** Replaces the chips. An empty strip hides itself rather than showing a blank band. */
+    /**
+     * Replaces the chips. An empty strip hides itself rather than showing a blank band.
+     *
+     * <p>A render that carries the same chips in the same order does nothing at all - not even a
+     * visibility write. The screen renders the whole state on every keystroke, so without this the
+     * rows would be torn down and rebuilt while the learner types, snapping the drift back to zero
+     * and re-running the first frame's layout. "Nothing to change" is answered here, by comparing
+     * what is about to be drawn with what already is, rather than by asking the caller to diff.
+     */
     public void render(List<Recommendation> items) {
+        List<Recommendation> next = new ArrayList<Recommendation>(items);
+        if (drawn != null && next.equals(drawn)) {
+            return;
+        }
+        drawn = next;
         stop();
-        removeAllViews();
+        block.removeAllViews();
         rows.clear();
         strips.clear();
         directions.clear();
@@ -98,6 +134,7 @@ public final class RecommendationMarquee extends LinearLayout {
             return;
         }
         setVisibility(VISIBLE);
+        block.setVisibility(VISIBLE);
         List<Recommendation> first = new ArrayList<Recommendation>();
         List<Recommendation> second = new ArrayList<Recommendation>();
         for (int index = 0; index < items.size(); index++) {
@@ -144,7 +181,7 @@ public final class RecommendationMarquee extends LinearLayout {
         if (separated) {
             rowParams.topMargin = getResources().getDimensionPixelSize(R.dimen.space_s1);
         }
-        addView(row, rowParams);
+        block.addView(row, rowParams);
         rows.add(row);
         strips.add(strip);
         directions.add(direction);
