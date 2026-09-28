@@ -98,7 +98,18 @@
             android:layout_height="wrap_content"
             android:textColor="@color/tl_ink"
             android:textIsSelectable="true"
-            android:textSize="@dimen/text_body" />
+            android:textSize="@dimen/text_body"
+            android:visibility="gone" />
+
+        <!-- 2026-09-28 user decision: a GFM table is not text. Monospaced box drawing cannot line up
+             inside a match_parent TextView, because a wide row soft-wraps and every following box
+             character lands in the wrong column. The answer body is now this host: prose runs are
+             TextViews and tables are real TableLayouts, concatenated in document order. -->
+        <LinearLayout
+            android:id="@+id/chat_answer_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
 
         <!-- T-075: the streaming caret (073 §4.1) - its own reserved slot, visible only in the
              answering stage, so no other slot's hit box ever moves when it appears. -->

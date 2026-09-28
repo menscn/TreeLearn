@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  One cell of a table in an answer (2026-09-28 user decision: a GFM table is a view, not text).
+
+  The cell is a TextView with its own padding and its own background, because a table row is a
+  TableLayout row: the cell is the thing that carries the ink, and the row above it is empty. The
+  two variants are the header cell - secondary ink, bold, on the page colour - and the body cell -
+  the answer ink on the card surface. Header cells are separated from the body by a hairline rule
+  on the row, not on the cell, so the rule spans the whole table.
+
+  Text size is text_sm rather than text_body: a two-column table of Chinese prose already runs to
+  the edge of the measure at body size, and the smaller size is what keeps a comparison table
+  readable instead of scrollable.
+-->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@color/tl_surface"
+    android:paddingStart="@dimen/space_s2"
+    android:paddingTop="@dimen/space_s3"
+    android:paddingEnd="@dimen/space_s2"
+    android:paddingBottom="@dimen/space_s3"
+    android:textColor="@color/tl_ink"
+    android:textSize="@dimen/text_sm" />

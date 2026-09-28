@@ -41,7 +41,22 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/** Converts CommonMark into selectable Android spans without exposing Markdown syntax to the user. */
+/**
+ * Converts CommonMark into selectable Android spans without exposing Markdown syntax to the user.
+ *
+ * <p><strong>A table is a view, not text</strong> (2026-09-28 user decision). The first cut drew a
+ * GFM table as monospaced box characters; it cannot work, and the reason is structural rather than
+ * cosmetic. Box drawing only lines up inside one unwrapped line, and the answer's {@link
+ * android.widget.TextView} is {@code match_parent}, so a wide row soft-wraps and every following
+ * box character lands in the wrong column. Monospace guarantees equal character advance, never that
+ * the box goes unbroken. Counting widths in {@code String.length()} made it worse: a CJK glyph is
+ * one UTF-16 unit but takes two character cells.
+ *
+ * <p>So {@link #renderSegments} emits a <em>sequence</em>: prose runs, and tables carrying their
+ * rows as data. {@link ChatScreen} lays each table out with real cells, which is the one thing
+ * layout is good at. {@link #render(String, OnCodeBlockClick)} stays for reasoning and translation
+ * bodies - flat text with no table of their own - and joins the segments back into one string.
+ */
 public final class MarkdownRenderer {
 
     /** Matrix 1.2: a tap on a code block copies it; the callback is the screen's to forward. */
@@ -56,21 +71,169 @@ public final class MarkdownRenderer {
     private MarkdownRenderer() {
     }
 
+    /** One piece of a rendered answer: a run of prose, or a table the screen must inflate. */
+    public static final class Segment {
+
+        /** True when {@link #table} is present and {@link #text} is not. */
+        public final boolean isTable;
+        /** The prose run; null for a table segment. */
+        public final CharSequence text;
+        /** The table's rows; null for a prose segment. Every row has the table's column count. */
+        public final List<List<CharSequence>> table;
+        /** The header spelling of each column, or empty when the source table declared no header. */
+        public final List<String> header;
+        /** True when the source table declared a header row. */
+        public final boolean hasHeader;
+
+        private Segment(CharSequence text, List<List<CharSequence>> table, List<String> header,
+                boolean hasHeader) {
+            this.text = text;
+            this.table = table == null ? null : Collections.unmodifiableList(table);
+            this.header = header == null ? Collections.<String>emptyList()
+                    : Collections.unmodifiableList(header);
+            this.hasHeader = hasHeader;
+            this.isTable = table != null;
+        }
+
+        static Segment prose(CharSequence text) {
+            return new Segment(text, null, null, false);
+        }
+
+        static Segment table(List<List<CharSequence>> rows, List<String> header, boolean hasHeader) {
+            return new Segment(null, rows, header, hasHeader);
+        }
+    }
+
     public static CharSequence render(String markdown) {
         return render(markdown, null);
     }
 
+    /** Flat rendering: tables are joined back into text. For bodies that never show a table. */
     public static CharSequence render(String markdown, OnCodeBlockClick codeClick) {
-        SpannableStringBuilder out = new SpannableStringBuilder();
+        List<Segment> segments = renderSegments(markdown, codeClick);
+        if (segments.size() == 1 && !segments.get(0).isTable) {
+            return segments.get(0).text;
+        }
+        SpannableStringBuilder joined = new SpannableStringBuilder();
+        for (Segment segment : segments) {
+            if (segment.isTable) {
+                joined.append(flattenTable(segment));
+            } else {
+                joined.append(segment.text);
+            }
+        }
+        trimTrailingNewlines(joined);
+        return joined;
+    }
+
+    /**
+     * The answer body's rendering: prose runs and table blocks in document order. A table never
+     * reaches a {@code TextView}, so no box character can be mis-wrapped; the caller lays each table
+     * out with real cells.
+     */
+    public static List<Segment> renderSegments(String markdown, OnCodeBlockClick codeClick) {
+        List<Segment> segments = new ArrayList<Segment>();
         if (markdown == null || markdown.isEmpty()) {
-            return out;
+            return segments;
         }
         Node document = Parser.builder()
                 .extensions(Collections.singletonList(TablesExtension.create()))
                 .build()
                 .parse(markdown);
-        renderChildren(document, out, 0, codeClick);
-        trimTrailingNewlines(out);
+        SpannableStringBuilder prose = new SpannableStringBuilder();
+        for (Node child = document.getFirstChild(); child != null; child = child.getNext()) {
+            if (child instanceof TableBlock) {
+                flush(segments, prose);
+                segments.add(readTable((TableBlock) child, codeClick));
+                continue;
+            }
+            renderNode(child, prose, 0, codeClick);
+        }
+        trimTrailingNewlines(prose);
+        flush(segments, prose);
+        mergeAdjacentProse(segments);
+        return segments;
+    }
+
+    private static void flush(List<Segment> segments, SpannableStringBuilder prose) {
+        trimTrailingNewlines(prose);
+        if (prose.length() > 0) {
+            segments.add(Segment.prose(new SpannableStringBuilder(prose)));
+            prose.clear();
+        }
+    }
+
+    /** A table between two prose runs must not leave the runs as two boxes with a seam between. */
+    private static void mergeAdjacentProse(List<Segment> segments) {
+        for (int i = segments.size() - 1; i > 0; i--) {
+            Segment previous = segments.get(i - 1);
+            Segment current = segments.get(i);
+            if (previous.isTable || current.isTable) {
+                continue;
+            }
+            SpannableStringBuilder merged = new SpannableStringBuilder(previous.text);
+            if (merged.length() > 0 && merged.charAt(merged.length() - 1) != '\n') {
+                merged.append('\n');
+            }
+            merged.append(current.text);
+            segments.set(i - 1, Segment.prose(merged));
+            segments.remove(i);
+        }
+    }
+
+    /** Turns a table node into a segment: rows as data, so the screen can lay them out. */
+    private static Segment readTable(TableBlock table, OnCodeBlockClick codeClick) {
+        List<List<CharSequence>> rows = new ArrayList<List<CharSequence>>();
+        List<String> header = new ArrayList<String>();
+        boolean hasHeader = false;
+        for (Node section = table.getFirstChild(); section != null; section = section.getNext()) {
+            boolean isHead = section instanceof TableHead;
+            if (!isHead && !(section instanceof TableBody)) {
+                continue;
+            }
+            for (Node row = section.getFirstChild(); row != null; row = row.getNext()) {
+                if (!(row instanceof TableRow)) {
+                    continue;
+                }
+                List<CharSequence> cells = new ArrayList<CharSequence>();
+                for (Node cell = row.getFirstChild(); cell != null; cell = cell.getNext()) {
+                    if (!(cell instanceof TableCell)) {
+                        continue;
+                    }
+                    SpannableStringBuilder cellText = new SpannableStringBuilder();
+                    renderChildren(cell, cellText, 0, codeClick);
+                    trimTrailingNewlines(cellText);
+                    cellText = new SpannableStringBuilder(
+                            cellText.toString().replace('\n', ' ').trim());
+                    cells.add(cellText);
+                    if (isHead) {
+                        header.add(cellText.toString());
+                    }
+                }
+                rows.add(cells);
+                if (isHead) {
+                    hasHeader = true;
+                }
+            }
+        }
+        return Segment.table(rows, header, hasHeader);
+    }
+
+    /**
+     * A table as plain text, one row per line, cells separated by two spaces. The fallback for {@link
+     * #render}, which must return one string, and for a table nested inside another table's cell.
+     */
+    private static CharSequence flattenTable(Segment segment) {
+        StringBuilder out = new StringBuilder();
+        for (List<CharSequence> row : segment.table) {
+            for (int i = 0; i < row.size(); i++) {
+                if (i > 0) {
+                    out.append("  ");
+                }
+                out.append(row.get(i).toString());
+            }
+            out.append('\n');
+        }
         return out;
     }
 
@@ -86,7 +249,9 @@ public final class MarkdownRenderer {
         if (node instanceof Text) {
             out.append(((Text) node).getLiteral());
         } else if (node instanceof TableBlock) {
-            renderTable((TableBlock) node, out, depth, codeClick);
+            // A table nested inside a table has no cell to land in; flattening is the honest answer.
+            out.append(flattenTable(readTable((TableBlock) node, codeClick)));
+            ensureBlockBreak(out);
         } else if (node instanceof SoftLineBreak || node instanceof HardLineBreak) {
             out.append('\n');
         } else if (node instanceof Code) {
@@ -186,101 +351,6 @@ public final class MarkdownRenderer {
                     // The block keeps its own look; the tap is affordance enough for a copy.
                 }
             }, start, out.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
-    }
-
-    private static void renderTable(TableBlock table, SpannableStringBuilder out, int depth,
-            OnCodeBlockClick codeClick) {
-        List<TableRowData> rows = new ArrayList<TableRowData>();
-        for (Node section = table.getFirstChild(); section != null; section = section.getNext()) {
-            boolean header = section instanceof TableHead;
-            if (!(section instanceof TableHead) && !(section instanceof TableBody)) {
-                continue;
-            }
-            for (Node row = section.getFirstChild(); row != null; row = row.getNext()) {
-                if (!(row instanceof TableRow)) {
-                    continue;
-                }
-                List<String> cells = new ArrayList<String>();
-                for (Node cell = row.getFirstChild(); cell != null; cell = cell.getNext()) {
-                    if (!(cell instanceof TableCell)) {
-                        continue;
-                    }
-                    SpannableStringBuilder cellText = new SpannableStringBuilder();
-                    renderChildren(cell, cellText, depth, codeClick);
-                    trimTrailingNewlines(cellText);
-                    cells.add(cellText.toString().replace('\n', ' ').trim());
-                }
-                rows.add(new TableRowData(header, cells));
-            }
-        }
-        if (rows.isEmpty()) {
-            return;
-        }
-
-        int columnCount = 0;
-        for (TableRowData row : rows) {
-            columnCount = Math.max(columnCount, row.cells.size());
-        }
-        if (columnCount == 0) {
-            return;
-        }
-        int[] widths = new int[columnCount];
-        for (TableRowData row : rows) {
-            for (int column = 0; column < row.cells.size(); column++) {
-                widths[column] = Math.max(widths[column], row.cells.get(column).length());
-            }
-        }
-
-        int start = out.length();
-        appendTableBorder(out, widths, '┌', '┬', '┐');
-        boolean headerRendered = false;
-        for (TableRowData row : rows) {
-            out.append('│');
-            for (int column = 0; column < columnCount; column++) {
-                String cell = column < row.cells.size() ? row.cells.get(column) : "";
-                out.append(' ').append(cell);
-                appendSpaces(out, widths[column] - cell.length());
-                out.append(" │");
-            }
-            out.append('\n');
-            if (row.header && !headerRendered) {
-                appendTableBorder(out, widths, '├', '┼', '┤');
-                headerRendered = true;
-            }
-        }
-        appendTableBorder(out, widths, '└', '┴', '┘');
-        out.setSpan(new TypefaceSpan("monospace"), start, out.length(),
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        ensureBlockBreak(out);
-    }
-
-    private static void appendTableBorder(SpannableStringBuilder out, int[] widths,
-            char left, char middle, char right) {
-        out.append(left);
-        for (int column = 0; column < widths.length; column++) {
-            out.append('─');
-            appendSpaces(out, widths[column]);
-            out.append('─');
-            out.append(column == widths.length - 1 ? right : middle);
-        }
-        out.append('\n');
-    }
-
-    private static void appendSpaces(SpannableStringBuilder out, int count) {
-        for (int i = 0; i < count; i++) {
-            out.append(' ');
-        }
-    }
-
-    private static final class TableRowData {
-
-        private final boolean header;
-        private final List<String> cells;
-
-        private TableRowData(boolean header, List<String> cells) {
-            this.header = header;
-            this.cells = cells;
         }
     }
 

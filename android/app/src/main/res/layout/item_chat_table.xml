@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  A table block inside an answer: a real table, not box characters (2026-09-28 user decision).
+
+  Two layers, each solving one problem the other cannot:
+
+  - HorizontalScrollView: a two-column table of Chinese prose is wider than a phone. Scrolling the
+    table alone keeps the answer's own measure intact - the alternative, letting the table push the
+    width, would make every paragraph of the answer scroll sideways too.
+  - TableLayout: the aligning. Stretch columns share whatever width is left over, so a table that
+    fits fills the row and a table that does not scroll instead of squashing.
+-->
+<HorizontalScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/chat_table_scroll"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/space_s4"
+    android:layout_marginBottom="@dimen/space_s4"
+    android:scrollbars="none">
+
+    <TableLayout
+        android:id="@+id/chat_table"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/tl_line" />
+</HorizontalScrollView>
