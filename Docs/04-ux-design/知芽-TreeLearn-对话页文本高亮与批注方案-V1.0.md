@@ -153,6 +153,7 @@ CREATE TABLE message_annotations (
   CHECK (end_offset > start_offset),
   CHECK (kind IN ('HIGHLIGHT','NOTE')),
   CHECK (kind <> 'NOTE' OR body <> ''),
+  CHECK (kind <> 'HIGHLIGHT' OR body = ''),   -- F1（db-migration-reviewer 2026-09-28：HIGHLIGHT 恒空 body 的 DDL 承载）
   CHECK ((container = 'PROSE' AND prose_index >= 0 AND table_index = -1
           AND row_index = -1 AND col_index = -1)
       OR (container = 'CELL'  AND prose_index = -1 AND table_index >= 0
@@ -181,8 +182,8 @@ CREATE INDEX idx_annotations_message ON message_annotations(message_id);
 
 机制：**content-digest 失配清除**。
 1. 创建批注时记录 `content_digest` = SHA-256(该消息当前整条回答 markdown)。
-2. store 读路径加载批注时：`DELETE WHERE message_id=? AND content_digest <> ?` 后再 SELECT —— **一处写路径，自愈**，不依赖「版本切换钩子」是否被正确调用。
-3. **流式期间跳过比对**：生成中回答文本逐 token 变化，若此时比对会把旧稳定回答的批注提前删掉（用户可能取消重新生成回到旧文）；仅在 `message.isStable()` 时执行。
+2. store 读路径加载批注时：`DELETE WHERE message_id=? AND content_digest <> ?` 后再 SELECT —— **一处写路径，自愈**，不依赖「版本切换钩子」是否被正确调用。**F2（reviewer 建议，已采纳）：DELETE 与 SELECT 在同一事务内执行，且 SELECT 显式过滤 `content_digest = ?`，封死比对窗口内 digest 翻转返回失配行的并发窗口。**
+3. **流式期间跳过比对**：生成中回答文本逐 token 变化，若此时比对会把旧稳定回答的批注提前删掉（用户可能取消重新生成回到旧文）；仅在 `message.isStable()` 时执行。**F3（reviewer 建议，已采纳）：insert 路径约定——仅在 `isStable()` 且 digest 取自当前显示修订时接受写入；失配写入依赖读路径自愈属预期行为。**
 4. 单元格结构变化、段落重排 —— 全部被整条 markdown digest 覆盖，粒度够用（本产品的回答只有「整体替换」一种变更形态）。
 
 ### 3.4 迁移
