@@ -1,0 +1,29 @@
+# T-2026-09-27-007 RED - 首页入场与卡片错峰动效（HomeMotion 尚不存在时的首跑）
+# generated: 2026-09-27 18:06:44 +0800  (写盘时刻=本文件所述运行时刻；本文件于 2026-09-27 18:56:12 +0800 生成)
+# workdir: android/
+# command: JAVA_HOME=D:/Environment/Jdk/jdk21 ./gradlew --console=plain :app:testDebugUnitTest --tests "com.treelearn.app.screen.HomeMotionTest" :app:compileDebugAndroidTestJavaWithJavac
+EXITCODE=1
+MEASURED failing task: > Task :app:compileDebugUnitTestJavaWithJavac FAILED
+MEASURED build verdict: BUILD FAILED in 1s
+MEASURED javac total errors: 22
+MEASURED 找不到符号(HomeMotion): 20 处（文件=HomeMotionTest.java，均指向尚未创建的 HomeMotion 常量/方法）
+MEASURED private-access(MAX_RECENT): 2 处（HomeMotionTest 要求读 HomeScreen.MAX_RECENT，当时为 private）
+MEASURED :app:compileDebugAndroidTestJavaWithJavac: 未执行（单测编译先失败，Gradle 短路）
+
+---- 失败点摘录 ----
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\HomeMotionTest.java:53: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\HomeMotionTest.java:54: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\HomeMotionTest.java:55: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\HomeMotionTest.java:56: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\HomeMotionTest.java:57: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\HomeMotionTest.java:62: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\HomeMotionTest.java:63: 错误: 找不到符号
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\HomeMotionTest.java:64: 错误: 找不到符号
+
+---- 失败原因判定 ----
+失败点全部落在本任务新增的测试文件 HomeMotionTest.java（引用未创建的 HomeMotion 与未放宽的 MAX_RECENT），
+生产代码零改动即先行失败：这是「判定先于实现」的 RED，非环境性失败。
+
+---- 命令记录说明 ----
+command: 行中 JAVA_HOME 为 Git Bash 对路径的归一化写法（正斜杠）；两次运行（RED/GREEN）逐字相同，
+判等以记录行为准。RED 只有一次真实捕获：实现落地后 HomeMotion 已存在，编译期失败无法复现。

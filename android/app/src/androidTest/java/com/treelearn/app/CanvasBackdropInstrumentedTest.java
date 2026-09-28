@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -75,6 +76,24 @@ public final class CanvasBackdropInstrumentedTest {
         assertIconAction(screen.findViewById(R.id.tree_fold), touchMin, "the fold action");
         assertIconAction(screen.findViewById(R.id.tree_open), touchMin, "the open action");
         assertIconAction(screen.findViewById(R.id.tree_fit), touchMin, "the fit action");
+    }
+
+    @Test
+    public void thePrototypeCanvasUsesAnOverlayToolRailAndTwoLineTitle() {
+        TreeCanvasScreen screen = screen();
+        int touchMin = context().getResources().getDimensionPixelSize(R.dimen.touch_min);
+
+        assertEquals("the legacy bottom control row is not visible",
+                View.GONE, screen.findViewById(R.id.tree_controls).getVisibility());
+        assertIconAction(screen.findViewById(R.id.tree_zoom_in), touchMin, "the zoom-in action");
+        assertIconAction(screen.findViewById(R.id.tree_zoom_out), touchMin, "the zoom-out action");
+        assertIconAction(screen.findViewById(R.id.tree_fit_tool), touchMin, "the fit rail action");
+        assertIconAction(screen.findViewById(R.id.tree_center), touchMin, "the center action");
+        assertNotNull("the title must have a prototype subtitle line",
+                screen.findViewById(R.id.tree_subtitle));
+        assertNotNull("the node card must have a summary slot",
+                LayoutInflater.from(context()).inflate(R.layout.view_node_popup, null)
+                        .findViewById(R.id.node_popup_summary));
     }
 
     private void assertIconAction(View action, int touchMin, String why) {

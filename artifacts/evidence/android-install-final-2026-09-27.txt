@@ -1,0 +1,34 @@
+Treelearn 对话页批 A+B+C —— 编译安装 + Java-only 守门 + 冷启动（收尾链，2026-09-27 20:06-20:10）
+前置：用户 20:06 确认首页线收工；源码树 19:00 后零写入（find -newermt 采样，20:06:32 核对）；设备 AWSS013807000356 在线。
+
+== 编译与安装 ==
+$ cd android && date && ./gradlew :app:installDebug --console=plain
+BUILD_START 20:06:46 / BUILD_END 20:07:22   # artifacts/tmp/chat-install-final.log
+EXITCODE=0   # BUILD SUCCESSFUL in 28s, "Installed on 1 device."
+设备端核对：dumpsys package com.treelearn → lastUpdateTime=2026-09-27 20:07:18（此前 17:04 已被首页线
+connectedDebugAndroidTest 卸载，本次为全新安装）。
+
+== Java-only 守门（静止树上的正式交付证据，替代 16:56 的 FAIL 与其裁决） ==
+$ powershell -NoProfile -File scripts/no-kotlin-check.ps1   # 静止树上运行
+EXITCODE=0   VERDICT: PASS (13 OK line(s))                  # artifacts/evidence/no-kotlin-2026-09-27-final.txt:33,35
+检查对象含本次装机产物：app-debug.apk = 1,999,855 bytes, 17 dex（:25），无 Kotlin 运行时字节码。
+注：1,999,855 ≠ 20:07 装机瞬间尺寸——守门在 20:08 重跑了 verifyNoKotlinDex 任务（含 assembleRelease 等
+上游任务重打包），与装机件同源同树，仅时间差；如需逐字节核对可 adb pull 后用 artifacts/tmp/apk_diff.py。
+
+== 冷启动与稳定性 ==
+$ adb shell input keyevent KEYCODE_WAKEUP; wm dismiss-keyguard; am start -W -n com.treelearn/com.treelearn.app.MainActivity
+Status: ok   LaunchState: COLD   TotalTime: 372
+topResumedActivity=com.treelearn/.app.MainActivity
+logcat 近 200 行 FATAL EXCEPTION 计数 = 0
+截图：artifacts/evidence/android-chat-batch-abc-2026-09-27.png（1200×2652）
+
+== 截图所见与边界（如实） ==
+截图为**首页**（品牌锁定区 / 输入卡 V4.1 Flash + 未配置 Key + 圆形发送 FAB / 推荐双轨 / 历史主题 / 底栏）——
+即首页线与本线的改动同机共存且无崩溃。**批 A+B+C 的对话页改动不在该截图里**：从首页进对话页需先发出
+根问题，而设备当前「未配置 Key」，发送被禁用（这是 PRD 的预期禁用态，不是缺陷）。对话页布局事实由
+JVM 结构守门保证（app 模块 680 例 0 失败，见 chat-1to1-android-push-2026-09-27.txt）；人工目检待用户
+在设备上配好 Key 后进入任一对话即可。
+
+== 本轮未做 ==
+- 未跑 connectedAndroidTest（仪器测试会把应用卸载——首页线 17:04 的前车之鉴；如需真机仪器测试请单独安排）。
+- 联网胶囊 / 麦克风保持隐藏；AppBar 三入口保留（批 C 口径）。

@@ -1,0 +1,12 @@
+# T-2026-09-27-007 REGRESSION(DEVICE) - 与换屏/首页相关的四个既有套件
+# generated: 2026-09-27 18:48:00 +0800  (运行写盘时刻；本文件于 2026-09-27 18:56:12 +0800 生成)
+# workdir: android/
+# command: JAVA_HOME=D:/Environment/Jdk/jdk21 ./gradlew --console=plain :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.HomeTopicCardInstrumentedTest,com.treelearn.app.HomeComposerInstrumentedTest,com.treelearn.app.HomeBackdropInstrumentedTest,com.treelearn.app.BottomTabShellInstrumentedTest
+EXITCODE=0
+MEASURED build verdict: BUILD SUCCESSFUL in 48s
+MEASURED Finished 15 tests on ALP-AN00 - 13（15 通过 / 0 失败 / 0 错误 / 0 跳过）
+
+覆盖面：HomeTopicCardInstrumentedTest（卡片点进对话）、HomeComposerInstrumentedTest（输入卡）、
+HomeBackdropInstrumentedTest（纸纹装饰层）、BottomTabShellInstrumentedTest（三标签换屏，本任务改动的
+swap() 是三者共用点，属于最贴身的回归）。
+运行前已确认源码静止（18:46 两次采样间隔 40s 无变化），设备无并发仪器测试。

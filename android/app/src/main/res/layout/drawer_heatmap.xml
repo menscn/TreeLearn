@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tl="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer_heatmap_card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_card"
+    android:clickable="true"
+    android:contentDescription="@string/home_heat_cd"
+    android:elevation="@dimen/card_elevation"
+    android:focusable="true"
+    android:minHeight="@dimen/touch_min"
+    android:orientation="vertical"
+    android:padding="@dimen/space_s4">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/drawer_heatmap_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/drawer_heat_title"
+            android:textColor="@color/tl_ink"
+            android:textSize="@dimen/text_h2"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/drawer_heatmap_month"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/tl_ink2"
+            android:textSize="@dimen/text_sm"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/drawer_heatmap_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_s3"
+        android:text="@string/drawer_empty"
+        android:textColor="@color/tl_ink3"
+        android:textSize="@dimen/text_cap"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/drawer_heatmap_weekdays"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/space_s3"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView android:layout_width="@dimen/space_s6" android:layout_height="wrap_content" android:gravity="center" android:text="一" android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+        <TextView android:layout_width="@dimen/space_s6" android:layout_height="wrap_content" android:layout_marginStart="@dimen/space_s1" android:gravity="center" android:text="二" android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+        <TextView android:layout_width="@dimen/space_s6" android:layout_height="wrap_content" android:layout_marginStart="@dimen/space_s1" android:gravity="center" android:text="三" android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+        <TextView android:layout_width="@dimen/space_s6" android:layout_height="wrap_content" android:layout_marginStart="@dimen/space_s1" android:gravity="center" android:text="四" android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+        <TextView android:layout_width="@dimen/space_s6" android:layout_height="wrap_content" android:layout_marginStart="@dimen/space_s1" android:gravity="center" android:text="五" android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+        <TextView android:layout_width="@dimen/space_s6" android:layout_height="wrap_content" android:layout_marginStart="@dimen/space_s1" android:gravity="center" android:text="六" android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+        <TextView android:layout_width="@dimen/space_s6" android:layout_height="wrap_content" android:layout_marginStart="@dimen/space_s1" android:gravity="center" android:text="日" android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+    </LinearLayout>
+
+    <com.treelearn.app.ui.HeatmapView
+        android:id="@+id/drawer_heatmap_cells"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/space_s1"
+        android:contentDescription="@string/home_heat_cells_cd"
+        android:importantForAccessibility="no"
+        tl:tl_cellSize="@dimen/space_s6"
+        tl:tl_columns="7"
+        tl:tl_gap="@dimen/space_s1"
+        tl:tl_mode="grid"
+        tl:tl_rows="6" />
+</LinearLayout>

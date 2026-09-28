@@ -1,0 +1,52 @@
+# T-2026-09-27-003 回归 — 组装 + 真机仪器测试 + APK 内版式顺序核验
+# generated: 2026-09-27 16:44:24 +0800
+# device: AWSS013807000356	device
+# workdir: android/
+# command: JAVA_HOME=<jdk21> ./gradlew --offline :app:assembleDebug :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.AppLaunchInstrumentedTest,com.treelearn.app.BottomTabShellInstrumentedTest
+# note: 证据由脚本当场生成；id 名由 aapt2 dump resources 解析，不做手抄
+EXITCODE=0
+---- build verdict ----
+  Starting 6 tests on ALP-AN00 - 13
+  Finished 6 tests on ALP-AN00 - 13
+  BUILD SUCCESSFUL in 20s
+---- 仪器测试聚合报告（从构建产物读取）----
+  $ grep -o '<testsuite[^>]*>' "$X"
+  <testsuite name="com.treelearn.app.BottomTabShellInstrumentedTest" tests="6" failures="0" errors="0" skipped="0" time="8.172" timestamp="2026-09-27T08:44:09" hostname="localhost">
+  $ 按类计数
+        1 com.treelearn.app.AppLaunchInstrumentedTest
+        5 com.treelearn.app.BottomTabShellInstrumentedTest
+  $ grep -c '<failure\|<error' "$X"  →  0
+---- APK 内 screen_home_body.xml 的元素出现序（顺序即绘制序）----
+    home_content
+    home_appbar
+    home_drawer_button
+    home_primary
+    home_hero
+    home_brand_lockup
+    home_brand_mark
+    home_brand
+    home_hero_title
+    home_composer
+    home_draft
+    home_model_chip
+    home_key_hint
+    home_send
+    home_recommendations_section
+    home_recommendations_title
+    home_recommendations
+    home_recent_section
+    home_recent_title
+    home_recent_list
+    home_notice
+---- 顺序判定（原型：appbar → hero → composer → 推荐 → 历史）----
+  期望主干序: home_content home_appbar home_primary home_hero home_composer home_recommendations_section home_recent_section home_notice
+  实得主干序: home_content home_appbar home_primary home_hero home_composer home_recommendations_section home_recent_section home_notice
+  判定: PASS（与原型一致）
+---- 品牌锁定区与空态标题 id ----
+  home_brand_lockup: 在
+  home_brand_mark: 在
+  home_brand: 在
+  home_hero_title: 在
+---- 契约 id（BottomTabShell 断言对象）----
+  home_draft: 在
+  home_recent_list: 在

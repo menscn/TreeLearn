@@ -1,0 +1,34 @@
+# T-2026-09-27-007 DEVICE - HomeMotionInstrumentedTest 真机验收（ALP-AN00 - 13 / AWSS013807000356）
+# generated: 2026-09-27 18:53 前后（成功轮；本文件于 2026-09-27 18:56:12 +0800 生成)
+# workdir: android/
+# command: JAVA_HOME=D:/Environment/Jdk/jdk21 ./gradlew --console=plain :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.HomeMotionInstrumentedTest
+EXITCODE=0
+MEASURED build verdict: BUILD SUCCESSFUL in 44s
+MEASURED Finished 5 tests on ALP-AN00 - 13（5 通过 / 0 失败 / 0 错误 / 0 跳过）
+
+---- 五个断言各钉住什么 ----
+1. onlyTheHomeEntersWithTheMotionAndTheOtherFirstLevelScreensDoNot:
+   首页整屏入场 280ms/偏移0；学习库、设置 swap 后无动画；回到首页重放入场。
+2. eachHistoryCardWaitsItsOwnTurnBehindTheOnesBeforeIt:
+   三张卡 350ms，startOffset=0/60/120ms（原型 i*0.06s）。
+3. theEntranceIsDrawnNotMoved: 入场后 surface/card 的 alpha=1、translation=0 ——
+   view 动画只改绘制矩阵，测量与命中区不变的直接证据（也是低动效跳过路径不会停在半透明态的依据）。
+4. aLaterRedrawDoesNotReplayTheEntrance: 草稿 setText 触发重绘后，新卡无动画（入场一次性）。
+5. aHistoryCardOpensItsConversationWhileItIsStillEntering: 入场中卡片 VISIBLE、可点、点击进对话。
+
+---- 前置条件（如实记录）----
+设备 animator_duration_scale=null（读作默认 1f），即系统允许动画；套件以 assumeTheSystemKeepsItsAnimations
+先断言此前提。本套件不改设备全局设置（共用真机，另一条工作线在跑）。
+
+---- 探测方法（为什么读 getAnimation 要抢在动画结束前）----
+view 动画跑完后父层会清除它（SDK ViewGroup.finishAnimatingView 在 fillAfter=false 时 clearAnimation），
+所以「启动后隔一会儿读 getAnimation()」恒为 null，区分不了"没有入场"与"入场已完"。套件在
+onActivityPostCreated（performCreate 末尾、首帧绘制前）读首页入场，并用 shell_host 与 home_recent_list
+的 OnHierarchyChangeListener 在每次换屏/每次加卡的同一主线程消息内 post 读取动画对象。
+
+---- 前两轮失败的处理（不掩盖）----
+第 1 轮（18:22, artifacts/tmp/t007-device.log）：3 失败，全部是"动画已结束被父层清除后读到 null"——
+   属测试设计错误，非产品缺陷；诊断轮（18:33, t007-probe.log：reduced=false, surfaceFound=true 仍为 null）
+   定位到上述平台行为。
+第 2 轮（18:43 前后）：4/5 过，剩 1 个 IllegalArgumentException——click() 在主线程回调里再调 runOnMainSync，
+   已改为内联查找。第 3 轮全绿。三轮的原始日志均保留在 artifacts/tmp/。

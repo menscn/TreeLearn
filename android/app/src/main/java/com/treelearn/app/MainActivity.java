@@ -193,7 +193,7 @@ public final class MainActivity extends Activity
 
         // The home drawer (T-106): an overlay on main_drawer_root, outside swap()'s reach. Its
         // navigation hands off to the very same room methods the home screen itself uses, and its
-        // quick list reads the library store's own query — one query, one text.
+        // quick list reads the library store's own query and the drawer owns the compact stats view.
         homeDrawerScreen = new HomeDrawerScreen(this);
         homeDrawerPresenter = new HomeDrawerPresenter(new HomeDrawerPresenter.Sink() {
             @Override
@@ -207,15 +207,11 @@ public final class MainActivity extends Activity
             }
 
             @Override
-            public void openSettings() {
-                showSettings();
-            }
-
-            @Override
             public void openStats() {
                 showStatsDetail();
             }
-        }, container.libraryData()::topics, container.uiThread(), container.background());
+        }, container.libraryData()::topics, container.homeData()::stats, container.uiThread(),
+                container.background());
         homeDrawerScreen.setActions(homeDrawerPresenter);
         ((FrameLayout) findViewById(R.id.main_drawer_root)).addView(homeDrawerScreen,
                 new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
@@ -1127,6 +1123,11 @@ public final class MainActivity extends Activity
         host.removeAllViews();
         host.addView(screen, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        // T-2026-09-27-007: only the home enters with the prototype's motion. The library and the
+        // settings ride this same swap, so an unguarded call here would change how they look too.
+        if (screen == homeScreen) {
+            homeScreen.playEntrance();
+        }
         tabBar.setVisibility(screen == homeScreen || screen == libraryScreen
                 || (screen == settingsScreen && settingsIsAFrontRoom())
                         ? View.VISIBLE : View.GONE);

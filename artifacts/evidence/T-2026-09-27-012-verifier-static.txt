@@ -1,0 +1,66 @@
+T-2026-09-27-012 independent verifier static evidence
+captured-at: 2026-09-27 (developer-provided current date)
+cwd: D:\Project\Android\Treelearn
+mode: READONLY; no production code, task file, or test source modified
+test policy: no new test/build/device run; existing result XML was parsed only
+
+COMMAND: git -c core.quotepath=false status --short -- <T-012 relevant paths>
+EXITCODE=0
+OBSERVED:
+  M android/README.md
+  M android/app/src/main/java/com/treelearn/app/screen/StatsDetailScreen.java
+  M android/app/src/main/java/com/treelearn/app/ui/StatsDetailPresenter.java
+  M android/app/src/main/res/layout/screen_stats_detail.xml
+  ?? android/app/src/main/java/com/treelearn/app/ui/MonthCalendarView.java
+NOTE: drawer files are also modified in the shared worktree by the parallel drawer slice; they are not attributed to T-012 by this verifier.
+
+COMMAND: read-only source assertions (PowerShell string checks)
+EXITCODE=0
+CHECK presenter_42_cells=PASS
+CHECK presenter_monday_first=PASS
+CHECK presenter_transparent_boundaries=PASS
+CHECK screen_metrics_before_heat=PASS
+CHECK screen_metric_order=PASS (streak -> questions -> messages)
+CHECK screen_empty_keeps_card=PASS
+CHECK view_7x6=PASS
+CHECK view_token_colors=PASS (tl_line, tl_green_faint, tl_green_soft, tl_green, tl_green_deep)
+CHECK view_measurement=PASS (width-derived square cells; six-row height)
+CHECK readme_no_stale_7x70=FAIL
+
+SOURCE FACTS:
+  StatsDetailPresenter.java:22-23 fixes the display at 42 cells; lines 130-147 map Monday-first and use -1.0f for leading/trailing/future cells.
+  StatsDetailPresenterTest.java:40-52 covers 42 cells, September Monday offset, future transparency, and month-end padding.
+  StatsDetailPresenterTest.java:72-90 covers leap February 2028-02-29 and excludes March 1.
+  screen_stats_detail.xml:40-83 places metric cards before the heat card; the order is streak, questions, messages.
+  screen_stats_detail.xml:85-105 keeps the heat card and month label in the empty state.
+  StatsDetailScreen.java:65-80 hides weekday/grid/legend for empty data while retaining the heat card.
+  MonthCalendarView.java:14-16 defines a 7x6 grid; lines 32-37 read existing color tokens; lines 50-63 derive measurement from available width; lines 69-78 skip blank cells and draw token colors.
+  android/data/src/main/java/com/treelearn/data/stats/StatsAggregator.java has no current git diff.
+
+COMMAND: git -c core.quotepath=false diff --quiet -- android/data/src/main/java/com/treelearn/data/stats/StatsAggregator.java
+EXITCODE=0
+INTERPRETATION: aggregator source is unchanged in the current worktree.
+
+COMMAND: rg -n --hidden --glob '!artifacts/**' --glob '!android/.gradle/**' --glob '!android/build/**' '7×70|7x70|70 格|十周|近 10 周|近十周|WINDOW_DAYS' .
+EXITCODE=0
+FINDING:
+  android/README.md:454 still says "详情页 7×70". This contradicts the current-month 7x6 implementation and T-012 acceptance criterion.
+  Other matches are historical task/spec text or HomeStats's drawer/window constant and are not treated as current detail documentation.
+
+COMMAND: parse existing JVM XML result (no test rerun)
+EXITCODE=0
+RESULT_FILE: android/app/build/test-results/testDebugUnitTest/TEST-com.treelearn.app.ui.StatsDetailPresenterTest.xml
+RESULT: tests=5 failures=0 errors=0 skipped=0 timestamp=2026-09-27T16:22:47.848Z
+INTERPRETATION: historical/current build output supports the presenter tests, but it is not a verifier rerun.
+
+SCREENSHOT INVENTORY:
+  PRESENT: artifacts/evidence/android-stats-detail-empty-2026-09-27-v2.png (phone empty state; metrics first, heat card/month label visible, calendar/legend hidden)
+  PRESENT: artifacts/evidence/android-stats-detail-2026-09-27.png (older empty statistics view; not non-empty data proof)
+  MISSING: isolated non-empty phone screenshot proving active colors, future transparency, and month-end blanks.
+  MISSING: real sw600dp/tablet-landscape statistics screenshot proving no overflow.
+
+STATIC_VERDICT=PARTIAL
+REASONS:
+  1. README line 454 retains the stale detail-page 7x70 claim.
+  2. No direct MonthCalendarView measurement/color/drawing test is present; HeatmapLayoutTest covers shared math only.
+  3. No non-empty production-data or sw600dp statistics screenshot exists.

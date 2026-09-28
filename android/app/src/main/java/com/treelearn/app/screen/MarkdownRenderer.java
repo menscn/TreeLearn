@@ -29,7 +29,17 @@ import org.commonmark.node.OrderedList;
 import org.commonmark.node.StrongEmphasis;
 import org.commonmark.node.Text;
 import org.commonmark.node.SoftLineBreak;
+import org.commonmark.ext.gfm.tables.TableBlock;
+import org.commonmark.ext.gfm.tables.TableBody;
+import org.commonmark.ext.gfm.tables.TableCell;
+import org.commonmark.ext.gfm.tables.TableHead;
+import org.commonmark.ext.gfm.tables.TableRow;
+import org.commonmark.ext.gfm.tables.TablesExtension;
 import org.commonmark.parser.Parser;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /** Converts CommonMark into selectable Android spans without exposing Markdown syntax to the user. */
 public final class MarkdownRenderer {
@@ -55,7 +65,10 @@ public final class MarkdownRenderer {
         if (markdown == null || markdown.isEmpty()) {
             return out;
         }
-        Node document = Parser.builder().build().parse(markdown);
+        Node document = Parser.builder()
+                .extensions(Collections.singletonList(TablesExtension.create()))
+                .build()
+                .parse(markdown);
         renderChildren(document, out, 0, codeClick);
         trimTrailingNewlines(out);
         return out;
@@ -72,6 +85,8 @@ public final class MarkdownRenderer {
             OnCodeBlockClick codeClick) {
         if (node instanceof Text) {
             out.append(((Text) node).getLiteral());
+        } else if (node instanceof TableBlock) {
+            renderTable((TableBlock) node, out, depth, codeClick);
         } else if (node instanceof SoftLineBreak || node instanceof HardLineBreak) {
             out.append('\n');
         } else if (node instanceof Code) {
@@ -171,6 +186,101 @@ public final class MarkdownRenderer {
                     // The block keeps its own look; the tap is affordance enough for a copy.
                 }
             }, start, out.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+    }
+
+    private static void renderTable(TableBlock table, SpannableStringBuilder out, int depth,
+            OnCodeBlockClick codeClick) {
+        List<TableRowData> rows = new ArrayList<TableRowData>();
+        for (Node section = table.getFirstChild(); section != null; section = section.getNext()) {
+            boolean header = section instanceof TableHead;
+            if (!(section instanceof TableHead) && !(section instanceof TableBody)) {
+                continue;
+            }
+            for (Node row = section.getFirstChild(); row != null; row = row.getNext()) {
+                if (!(row instanceof TableRow)) {
+                    continue;
+                }
+                List<String> cells = new ArrayList<String>();
+                for (Node cell = row.getFirstChild(); cell != null; cell = cell.getNext()) {
+                    if (!(cell instanceof TableCell)) {
+                        continue;
+                    }
+                    SpannableStringBuilder cellText = new SpannableStringBuilder();
+                    renderChildren(cell, cellText, depth, codeClick);
+                    trimTrailingNewlines(cellText);
+                    cells.add(cellText.toString().replace('\n', ' ').trim());
+                }
+                rows.add(new TableRowData(header, cells));
+            }
+        }
+        if (rows.isEmpty()) {
+            return;
+        }
+
+        int columnCount = 0;
+        for (TableRowData row : rows) {
+            columnCount = Math.max(columnCount, row.cells.size());
+        }
+        if (columnCount == 0) {
+            return;
+        }
+        int[] widths = new int[columnCount];
+        for (TableRowData row : rows) {
+            for (int column = 0; column < row.cells.size(); column++) {
+                widths[column] = Math.max(widths[column], row.cells.get(column).length());
+            }
+        }
+
+        int start = out.length();
+        appendTableBorder(out, widths, '┌', '┬', '┐');
+        boolean headerRendered = false;
+        for (TableRowData row : rows) {
+            out.append('│');
+            for (int column = 0; column < columnCount; column++) {
+                String cell = column < row.cells.size() ? row.cells.get(column) : "";
+                out.append(' ').append(cell);
+                appendSpaces(out, widths[column] - cell.length());
+                out.append(" │");
+            }
+            out.append('\n');
+            if (row.header && !headerRendered) {
+                appendTableBorder(out, widths, '├', '┼', '┤');
+                headerRendered = true;
+            }
+        }
+        appendTableBorder(out, widths, '└', '┴', '┘');
+        out.setSpan(new TypefaceSpan("monospace"), start, out.length(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        ensureBlockBreak(out);
+    }
+
+    private static void appendTableBorder(SpannableStringBuilder out, int[] widths,
+            char left, char middle, char right) {
+        out.append(left);
+        for (int column = 0; column < widths.length; column++) {
+            out.append('─');
+            appendSpaces(out, widths[column]);
+            out.append('─');
+            out.append(column == widths.length - 1 ? right : middle);
+        }
+        out.append('\n');
+    }
+
+    private static void appendSpaces(SpannableStringBuilder out, int count) {
+        for (int i = 0; i < count; i++) {
+            out.append(' ');
+        }
+    }
+
+    private static final class TableRowData {
+
+        private final boolean header;
+        private final List<String> cells;
+
+        private TableRowData(boolean header, List<String> cells) {
+            this.header = header;
+            this.cells = cells;
         }
     }
 

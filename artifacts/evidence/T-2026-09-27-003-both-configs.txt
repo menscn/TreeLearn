@@ -1,0 +1,31 @@
+# T-2026-09-27-003 — 手机与平板两种配置的版式同构性
+# generated: 2026-09-27 16:42:16 +0800
+# workdir: android/
+# method: aapt2 直查打包产物 APK 内两份 screen_home 的编译后树，比较它们 include 的目标
+# note: 只看结构，不重跑构建；构建与真机测试见 T-2026-09-27-003-regression.txt
+EXITCODE=0
+---- 布局资源清单 ----
+  $ /d/Environment/Android/SDK/build-tools/36.0.0/aapt2.exe dump resources "$APK" | grep -E 'layout/screen_home'
+      resource 0x7f060012 layout/screen_home
+      resource 0x7f060013 layout/screen_home_body
+---- res/layout/screen_home.xml ----
+  $ /d/Environment/Android/SDK/build-tools/36.0.0/aapt2.exe dump xmltree "$APK" --file res/layout/screen_home.xml | grep -E 'E: |layout=@'
+    E: FrameLayout (line=8)
+        E: com.treelearn.app.screen.PaperRuleBackdrop (line=16)
+        E: ScrollView (line=22)
+            E: include (line=27)
+              A: layout=@0x7f060013
+---- res/layout-sw600dp-v13/screen_home.xml ----
+  $ /d/Environment/Android/SDK/build-tools/36.0.0/aapt2.exe dump xmltree "$APK" --file res/layout-sw600dp-v13/screen_home.xml | grep -E 'E: |layout=@'
+    E: FrameLayout (line=10)
+        E: com.treelearn.app.screen.PaperRuleBackdrop (line=18)
+        E: ScrollView (line=24)
+            E: FrameLayout (line=28)
+---- 判定 ----
+  手机配置 include 的 layout id: 0x7f060013
+  平板配置 include 的 layout id: 0x7f060013
+  解析:     resource 0x7f060013 layout/screen_home_body
+  判定: PASS（两份配置 include 同一份 screen_home_body，版式与顺序不可能漂移）
+---- 两份配置各自的装饰层也在 ----
+  res/layout/screen_home.xml: 含 PaperRuleBackdrop
+  res/layout-sw600dp-v13/screen_home.xml: 含 PaperRuleBackdrop

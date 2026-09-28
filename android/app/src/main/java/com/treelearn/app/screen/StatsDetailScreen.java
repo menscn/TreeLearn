@@ -8,11 +8,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.treelearn.app.R;
-import com.treelearn.app.ui.HeatmapView;
+import com.treelearn.app.ui.MonthCalendarView;
 import com.treelearn.app.ui.StatsDetailPresenter;
 
 /**
- * The statistics detail page (T-104): the full heatmap, the three totals and the empty/failed
+ * The statistics detail page (T-104): the current-month calendar, the three totals and the empty/failed
  * placeholders. The screen only draws the state its presenter hands over — every verdict (empty,
  * failed, streak) was made once, in the presenter, from the same aggregation entry the home strip
  * reads. The back key and the drawer entry (T-106) are the host's wiring.
@@ -24,7 +24,10 @@ public final class StatsDetailScreen extends LinearLayout implements
     private final View empty;
     private final View heatBlock;
     private final View metricRow;
-    private final HeatmapView heatCells;
+    private final View weekdays;
+    private final View legend;
+    private final MonthCalendarView heatCells;
+    private final TextView heatMonth;
     private final TextView questions;
     private final TextView messages;
     private final TextView streak;
@@ -38,7 +41,10 @@ public final class StatsDetailScreen extends LinearLayout implements
         empty = findViewById(R.id.stats_detail_empty);
         heatBlock = findViewById(R.id.stats_heat_scroll);
         metricRow = findViewById(R.id.stats_metric_row);
-        heatCells = (HeatmapView) findViewById(R.id.stats_heat_cells);
+        weekdays = findViewById(R.id.stats_heat_weekdays);
+        legend = findViewById(R.id.stats_heat_legend);
+        heatCells = (MonthCalendarView) findViewById(R.id.stats_heat_cells);
+        heatMonth = findViewById(R.id.stats_heat_month);
         questions = findViewById(R.id.stats_metric_questions);
         messages = findViewById(R.id.stats_metric_messages);
         streak = findViewById(R.id.stats_metric_streak);
@@ -59,11 +65,18 @@ public final class StatsDetailScreen extends LinearLayout implements
         failed.setVisibility(next.failed ? VISIBLE : GONE);
         boolean showEmpty = next.empty && !next.failed;
         empty.setVisibility(showEmpty ? VISIBLE : GONE);
-        boolean showData = !next.empty;
-        heatBlock.setVisibility(showData ? VISIBLE : GONE);
+        boolean showHeat = !next.failed;
+        boolean showCalendar = showHeat && !next.empty;
+        heatBlock.setVisibility(showHeat ? VISIBLE : GONE);
         metricRow.setVisibility(next.failed ? GONE : VISIBLE);
-        if (showData) {
-            heatCells.setIntensities(next.intensities);
+        weekdays.setVisibility(showCalendar ? VISIBLE : GONE);
+        legend.setVisibility(showCalendar ? VISIBLE : GONE);
+        heatCells.setVisibility(showCalendar ? VISIBLE : GONE);
+        if (showHeat) {
+            heatMonth.setText(next.monthLabel);
+        }
+        if (showCalendar) {
+            heatCells.setIntensities(next.monthIntensities);
         }
         questions.setText(String.valueOf(next.totalQuestions));
         messages.setText(String.valueOf(next.totalMessages));

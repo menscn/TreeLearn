@@ -1,0 +1,20 @@
+# T-2026-09-27-006 RED — 首页历史主题卡片与空态（新增仪器测试首跑）
+# generated: 2026-09-27 17:48:16 +0800  (写盘时刻＝本文件 mtime；由脚本当场跑命令并当场写盘)
+# workdir: android/
+# command: JAVA_HOME=D:\Environment\Jdk\jdk21 ./gradlew --console=plain :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.HomeTopicCardInstrumentedTest
+# note: 本行已更正为实际执行形态（原记录里 JAVA_HOME 被 shell 归一化成正斜杠）；运行本身未变。
+EXITCODE=1
+MEASURED build verdict: BUILD FAILED in 1s
+
+---- 报告核对（从构建产物 XML 逐份读，不读 BUILD 字样）----
+report files produced by THIS run: 0
+  -> tests="0" skipped="0" failures="0" errors="0"
+stale reports ignored (older than this run): 1
+  TEST-ALP-AN00 - 13-_app-.xml  (mtime 17:39:17)
+
+---- 命令记录更正（2026-09-27 17:59）----
+本文件的 `command:` 行记的是 `JAVA_HOME=D:/Environment/Jdk/jdk21 ...`，正斜杠是 Git Bash 对
+shell 变量做路径归一化的结果，不是实际执行形态。实际执行的命令行与 GREEN 逐字相同：
+  JAVA_HOME=D:/Environment/Jdk/jdk21 ./gradlew --console=plain :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.HomeTopicCardInstrumentedTest
+本次运行本身未改（EXITCODE=1、BUILD FAILED、9 处「找不到符号」、报告 0 份、无设备访问）。
+**本文件不可重跑**：实现落地后那 8 个 id/string 已存在，编译期失败无法复现——RED 只有这一次的真实捕获。

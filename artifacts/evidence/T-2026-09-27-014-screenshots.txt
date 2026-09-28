@@ -1,0 +1,17 @@
+COMMAND=android\gradlew.bat -p android :app:connectedDebugAndroidTest
+SCREENSHOT_TEST=com.treelearn.app.TreeCanvasVisualEvidenceInstrumentedTest#writesIsolatedCanvasStatesForVisualComparison
+SCREENSHOT_TEST_RESULT=PASS (JUnit XML)
+SUITE_RESULT=243 tests / 22 failures / 0 errors / 0 skipped
+EXITCODE=1 (suite failures are the existing home/generation/device-drag failures)
+PNG=artifacts/evidence/tree-canvas-phone-single.png 1200x2537
+PNG=artifacts/evidence/tree-canvas-phone-popup.png 1200x2537
+PNG=artifacts/evidence/tree-canvas-phone-empty.png 1200x2537
+PNG=artifacts/evidence/tree-canvas-sw600-landscape.png 1200x800
+DATA_ISOLATION=TreeSnapshot in memory; no SQLite/user database writes
+RUN_OUTPUT=artifacts/evidence/T-2026-09-27-014-screenshot-final2-run.txt
+COMMAND=android\gradlew.bat -p android :app:compileDebugAndroidTestJavaWithJavac
+EXITCODE=0
+COMMAND=android\gradlew.bat -p android :app:lintDebug
+EXITCODE=0
+COMMAND=android\scripts\no-kotlin-check.ps1
+EXITCODE=0

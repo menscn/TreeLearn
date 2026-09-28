@@ -1,0 +1,16 @@
+# T-2026-09-27-003 GREEN — 首页版式顺序与品牌锁定区
+# generated: 2026-09-27 16:39:09 +0800
+# workdir: android/
+# command: JAVA_HOME=<jdk21> ./gradlew --console=plain :app:testDebugUnitTest --tests "com.treelearn.app.ui.HomeViewStateTest"
+# note: 本次为第 2 次尝试；第 1 次 EXITCODE=1 因新矢量注释里写了双连字符导致 aapt2 解析失败（已修，见任务文件「实现期失败与修正」）
+EXITCODE=0
+---- build verdict ----
+  BUILD SUCCESSFUL in 6s
+---- 单测报告核对（从构建产物读取，不手抄）----
+  $ grep -o 'tests="[0-9]*" skipped="[0-9]*" failures="[0-9]*" errors="[0-9]*"' "$X"
+  tests="9" skipped="0" failures="0" errors="0"
+  $ grep -o 'testcase name="[^"]*"' "$X" | wc -l
+  9
+  $ grep -o 'testcase name="[^"]*"' "$X" | grep -i hasTopics
+  testcase name="thePhaseFollowsTheSameJudgementTheHeroReads"
+  testcase name="onlyAReadyHomeWithTopicsHasTopics"

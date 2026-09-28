@@ -7,58 +7,54 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/hit_row"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground"
+    android:layout_height="wrap_content" android:layout_marginStart="@dimen/page_gutter"
+    android:layout_marginTop="@dimen/space_s3" android:layout_marginEnd="@dimen/page_gutter"
+    android:background="@drawable/bg_library_card" android:elevation="@dimen/card_elevation"
     android:clickable="true"
     android:focusable="true"
     android:minHeight="@dimen/touch_min"
     android:orientation="vertical"
-    android:paddingStart="@dimen/page_gutter"
+    android:paddingStart="@dimen/space_s3"
     android:paddingTop="@dimen/space_s3"
-    android:paddingEnd="@dimen/page_gutter"
+    android:paddingEnd="@dimen/space_s3"
     android:paddingBottom="@dimen/space_s3">
 
-    <TextView
-        android:id="@+id/hit_field"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/tl_ink3"
-        android:textSize="@dimen/text_cap" />
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:gravity="center_vertical" android:orientation="horizontal">
+
+        <TextView android:id="@+id/hit_source_path" android:layout_width="0dp"
+            android:layout_height="wrap_content" android:layout_weight="1"
+            android:ellipsize="end" android:maxLines="1" android:textColor="@color/tl_ink3"
+            android:textSize="@dimen/text_cap" />
+
+        <TextView android:id="@+id/hit_archived_mark" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:layout_marginStart="@dimen/space_s2"
+            android:background="@drawable/bg_chip" android:paddingStart="@dimen/space_s2"
+            android:paddingEnd="@dimen/space_s2" android:text="@string/done_archived_mark"
+            android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap"
+            android:visibility="gone" />
+
+        <TextView android:id="@+id/hit_field" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:layout_marginStart="@dimen/space_s2"
+            android:background="@drawable/bg_chip" android:paddingStart="@dimen/space_s2"
+            android:paddingEnd="@dimen/space_s2" android:textColor="@color/tl_green_deep"
+            android:textSize="@dimen/text_cap" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/hit_branch_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/space_s1"
+        android:layout_marginTop="@dimen/space_s2"
         android:textColor="@color/tl_ink"
-        android:textSize="@dimen/text_h2"
+        android:fontFamily="serif" android:textSize="@dimen/text_h2"
         android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/hit_source_path"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/space_s1"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textColor="@color/tl_ink3"
-        android:textSize="@dimen/text_cap" />
-
-    <TextView
-        android:id="@+id/hit_archived_mark"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/space_s1"
-        android:text="@string/done_archived_mark"
-        android:textColor="@color/tl_ink3"
-        android:textSize="@dimen/text_cap"
-        android:visibility="gone" />
 
     <TextView
         android:id="@+id/hit_snippet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/space_s1"
+        android:layout_marginTop="@dimen/space_s2"
         android:ellipsize="end"
         android:maxLines="2"
         android:textColor="@color/tl_ink2"

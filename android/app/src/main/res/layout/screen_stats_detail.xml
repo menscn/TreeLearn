@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 统计详情页（T-104）：全量热力图（近 10 周，复用 T-101 的 HeatmapView grid）+ 三张累计指标卡 + 空态/失败降级。
-     入口由抽屉（T-106）接线；返回走 MainActivity 的既有房间返回链。 -->
+<!-- 统计详情页（T-2026-09-27-012）：指标卡在前，当前月份 7 列月历在后；历史数据仍由同一聚合入口提供。 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingStart="@dimen/page_gutter" android:paddingEnd="@dimen/page_gutter"
-    android:paddingBottom="@dimen/space_s8">
+    android:paddingStart="@dimen/page_gutter" android:paddingEnd="@dimen/page_gutter">
 
     <LinearLayout
         android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -24,85 +22,127 @@
             android:textSize="@dimen/text_h1" android:textStyle="bold" />
     </LinearLayout>
 
-    <TextView android:id="@+id/stats_detail_failed"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/space_s3" android:text="@string/stats_failed"
-        android:textColor="@color/tl_amber" android:textSize="@dimen/text_sm"
-        android:visibility="gone" />
+    <ScrollView
+        android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+        android:clipToPadding="false" android:fillViewport="true"
+        android:scrollbars="none">
 
-    <TextView android:id="@+id/stats_detail_empty"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/space_s6" android:text="@string/stats_empty"
-        android:textColor="@color/tl_ink3" android:textSize="@dimen/text_sm"
-        android:visibility="gone" />
+        <LinearLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/space_s8" android:orientation="vertical">
 
-    <HorizontalScrollView android:id="@+id/stats_heat_scroll"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/space_s4" android:scrollbars="none">
+            <TextView android:id="@+id/stats_detail_failed"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_s3" android:text="@string/stats_failed"
+                android:textColor="@color/tl_amber" android:textSize="@dimen/text_sm"
+                android:visibility="gone" />
 
-        <LinearLayout android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:orientation="vertical">
+            <LinearLayout android:id="@+id/stats_metric_row"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_s4" android:baselineAligned="false"
+                android:orientation="horizontal">
 
-            <com.treelearn.app.ui.HeatmapView android:id="@+id/stats_heat_cells"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                tl:tl_columns="70" tl:tl_gap="2dp" tl:tl_mode="grid" tl:tl_rows="7"
-                tl:tl_cellSize="10dp"
-                xmlns:tl="http://schemas.android.com/apk/res-auto" />
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/space_s2" android:layout_weight="1"
+                    android:background="@drawable/bg_card" android:gravity="center_horizontal"
+                    android:orientation="vertical" android:padding="@dimen/space_s4">
+                    <TextView android:id="@+id/stats_metric_streak"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:textColor="@color/tl_green_deep" android:textSize="@dimen/text_display"
+                        android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_s1" android:text="@string/stats_metric_streak"
+                        android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+                </LinearLayout>
 
-            <TextView android:id="@+id/stats_heat_caption"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_s2" android:text="@string/stats_heat_caption"
-                android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/space_s2" android:layout_weight="1"
+                    android:background="@drawable/bg_card" android:gravity="center_horizontal"
+                    android:orientation="vertical" android:padding="@dimen/space_s4">
+                    <TextView android:id="@+id/stats_metric_questions"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:textColor="@color/tl_green_deep" android:textSize="@dimen/text_display"
+                        android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_s1" android:text="@string/stats_metric_questions"
+                        android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+                </LinearLayout>
+
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:background="@drawable/bg_card"
+                    android:gravity="center_horizontal" android:orientation="vertical"
+                    android:padding="@dimen/space_s4">
+                    <TextView android:id="@+id/stats_metric_messages"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:textColor="@color/tl_green_deep" android:textSize="@dimen/text_display"
+                        android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_s1" android:text="@string/stats_metric_messages"
+                        android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/stats_heat_scroll"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_s4" android:background="@drawable/bg_card"
+                android:orientation="vertical" android:padding="@dimen/space_s4">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:gravity="center_vertical" android:orientation="horizontal">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:text="@string/stats_heat_title"
+                        android:textColor="@color/tl_ink" android:textSize="@dimen/text_sm"
+                        android:textStyle="bold" />
+                    <TextView android:id="@+id/stats_heat_month"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+                </LinearLayout>
+
+                <TextView android:id="@+id/stats_detail_empty"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_s3" android:text="@string/stats_empty"
+                    android:textColor="@color/tl_ink3" android:textSize="@dimen/text_sm"
+                    android:visibility="gone" />
+
+                <LinearLayout android:id="@+id/stats_heat_weekdays"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_s3" android:orientation="horizontal">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                        android:gravity="center" android:text="@string/stats_weekday_mon" android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                        android:gravity="center" android:text="@string/stats_weekday_tue" android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                        android:gravity="center" android:text="@string/stats_weekday_wed" android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                        android:gravity="center" android:text="@string/stats_weekday_thu" android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                        android:gravity="center" android:text="@string/stats_weekday_fri" android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                        android:gravity="center" android:text="@string/stats_weekday_sat" android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                        android:gravity="center" android:text="@string/stats_weekday_sun" android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+                </LinearLayout>
+
+                <com.treelearn.app.ui.MonthCalendarView android:id="@+id/stats_heat_cells"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_s2"
+                    android:contentDescription="@string/stats_heat_cd" />
+
+                <LinearLayout android:id="@+id/stats_heat_legend"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_s3" android:gravity="center_vertical"
+                    android:orientation="horizontal">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/stats_heat_less" android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+                    <View android:layout_width="9dp" android:layout_height="9dp" android:layout_marginStart="@dimen/space_s1" android:background="@color/tl_line" />
+                    <View android:layout_width="9dp" android:layout_height="9dp" android:layout_marginStart="@dimen/space_s1" android:background="@color/tl_green_faint" />
+                    <View android:layout_width="9dp" android:layout_height="9dp" android:layout_marginStart="@dimen/space_s1" android:background="@color/tl_green_soft" />
+                    <View android:layout_width="9dp" android:layout_height="9dp" android:layout_marginStart="@dimen/space_s1" android:background="@color/tl_green" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_s1" android:text="@string/stats_heat_more"
+                        android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
-    </HorizontalScrollView>
-
-    <LinearLayout android:id="@+id/stats_metric_row"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/space_s4" android:baselineAligned="false"
-        android:orientation="horizontal">
-
-        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/space_s2" android:layout_weight="1"
-            android:background="@drawable/bg_card" android:orientation="vertical"
-            android:padding="@dimen/space_s3">
-
-            <TextView android:id="@+id/stats_metric_questions"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:textColor="@color/tl_ink" android:textSize="@dimen/text_h2"
-                android:textStyle="bold" />
-
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_s1" android:text="@string/stats_metric_questions"
-                android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
-        </LinearLayout>
-
-        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/space_s2" android:layout_weight="1"
-            android:background="@drawable/bg_card" android:orientation="vertical"
-            android:padding="@dimen/space_s3">
-
-            <TextView android:id="@+id/stats_metric_messages"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:textColor="@color/tl_ink" android:textSize="@dimen/text_h2"
-                android:textStyle="bold" />
-
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_s1" android:text="@string/stats_metric_messages"
-                android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
-        </LinearLayout>
-
-        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-            android:layout_weight="1" android:background="@drawable/bg_card"
-            android:orientation="vertical" android:padding="@dimen/space_s3">
-
-            <TextView android:id="@+id/stats_metric_streak"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:textColor="@color/tl_ink" android:textSize="@dimen/text_h2"
-                android:textStyle="bold" />
-
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_s1" android:text="@string/stats_metric_streak"
-                android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
-        </LinearLayout>
-    </LinearLayout>
+    </ScrollView>
 </LinearLayout>

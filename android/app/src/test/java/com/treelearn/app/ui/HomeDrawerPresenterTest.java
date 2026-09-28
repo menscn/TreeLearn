@@ -5,7 +5,9 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import com.treelearn.app.library.LibraryViewState;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.Test;
 
@@ -13,7 +15,7 @@ import org.junit.Test;
  * T-106: the home drawer's state machine and its quick-list contract, judged without a View.
  *
  * <p>The quick list reuses the library's own query through the {@code QuickTopicsSource} port; the
- * presenter's only computation is the "most recent 10" window and the open/close machine. A tapped
+ * presenter's only computation is the fixed recent-history window and the open/close machine. A tapped
  * topic must route through the very same {@code openBranch} target the home screen uses — a second
  * navigation path is exactly the "one rule, two texts" defect this repo's failure library bans.
  */
@@ -32,7 +34,6 @@ public final class HomeDrawerPresenterTest {
     private static final class RecordingSink implements HomeDrawerPresenter.Sink {
         HomeDrawerPresenter.State last;
         final List<String> openedBranches = new ArrayList<>();
-        int settingsOpens;
         int statsOpens;
 
         @Override
@@ -43,11 +44,6 @@ public final class HomeDrawerPresenterTest {
         @Override
         public void openBranch(String branchId) {
             openedBranches.add(branchId);
-        }
-
-        @Override
-        public void openSettings() {
-            settingsOpens++;
         }
 
         @Override
@@ -78,6 +74,28 @@ public final class HomeDrawerPresenterTest {
         }
     }
 
+    private static final class FixedStats implements HomeDrawerPresenter.StatsSource {
+        private final HomeStats stats;
+        private final RuntimeException failure;
+
+        private FixedStats(HomeStats stats) {
+            this(stats, null);
+        }
+
+        private FixedStats(HomeStats stats, RuntimeException failure) {
+            this.stats = stats;
+            this.failure = failure;
+        }
+
+        @Override
+        public HomeStats read() {
+            if (failure != null) {
+                throw failure;
+            }
+            return stats;
+        }
+    }
+
     @Test
     public void startRendersClosedWithTheMostRecentTenRows() {
         List<LibraryViewState.Row> eleven = new ArrayList<>();
@@ -90,7 +108,7 @@ public final class HomeDrawerPresenterTest {
         presenter.start();
 
         assertEquals(HomeDrawerPresenter.Phase.CLOSED, sink.last.phase);
-        assertEquals("the quick list is a window, never a second full list", 10,
+        assertEquals("the quick list is a fixed window, never a second full list", 3,
                 sink.last.rows.size());
         assertEquals(id("t0"), sink.last.rows.get(0).topicId);
     }
@@ -125,18 +143,13 @@ public final class HomeDrawerPresenterTest {
     }
 
     @Test
-    public void settingAndStatsEntriesCloseTheDrawerFirst() {
+    public void statsEntryClosesTheDrawerFirst() {
         RecordingSink sink = new RecordingSink();
         HomeDrawerPresenter presenter = new HomeDrawerPresenter(sink,
                 new FixedSource(java.util.Collections.singletonList(row("t0"))));
         presenter.start();
         presenter.onDrawerToggled();
 
-        presenter.onSettingsTapped();
-        assertSame(HomeDrawerPresenter.Phase.CLOSED, sink.last.phase);
-        assertEquals(1, sink.settingsOpens);
-
-        presenter.onDrawerToggled();
         presenter.onStatsTapped();
         assertEquals(1, sink.statsOpens);
         assertEquals(HomeDrawerPresenter.Phase.CLOSED, sink.last.phase);
@@ -157,5 +170,33 @@ public final class HomeDrawerPresenterTest {
         presenter.onDrawerToggled();
         assertTrue("a broken read is an empty quick list, not a crash", broken.last.rows.isEmpty());
         assertEquals(HomeDrawerPresenter.Phase.OPEN, broken.last.phase);
+    }
+
+    @Test
+    public void drawerReadsTheSameFourteenDayStatsSnapshotForItsHeatmap() {
+        HomeStats stats = HomeStats.of(Arrays.asList(LocalDate.now()), LocalDate.now(), 1);
+        RecordingSink sink = new RecordingSink();
+        HomeDrawerPresenter presenter = new HomeDrawerPresenter(sink,
+                new FixedSource(new ArrayList<LibraryViewState.Row>()), new FixedStats(stats), null,
+                null);
+
+        presenter.start();
+
+        assertSame(stats, sink.last.stats);
+        assertEquals(14, sink.last.stats.intensities.length);
+    }
+
+    @Test
+    public void brokenStatsSourceHidesOnlyTheDrawerHeatmap() {
+        RecordingSink sink = new RecordingSink();
+        HomeDrawerPresenter presenter = new HomeDrawerPresenter(sink,
+                new FixedSource(java.util.Collections.singletonList(row("t0"))),
+                new FixedStats(null, new IllegalStateException("SYNTHETIC-STATS-BROKEN")), null,
+                null);
+
+        presenter.start();
+
+        assertEquals(1, sink.last.rows.size());
+        assertEquals(null, sink.last.stats);
     }
 }

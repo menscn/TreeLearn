@@ -50,7 +50,9 @@ public final class TreeCanvasPresenter implements TreeCanvasActions {
 
     /** The prototype's node card: wide enough for a title and a fold control, short enough to leave the tree visible. */
     private static final float POPUP_WIDTH_DP = 244f;
-    private static final float POPUP_HEIGHT_DP = 116f;
+    private static final float POPUP_HEIGHT_DP = 168f;
+    private static final float INITIAL_SCALE = 0.92f;
+    private static final float INITIAL_BOTTOM_OFFSET = 180f;
 
     private final TreeCanvasSink sink;
     private final UiThread ui;
@@ -134,12 +136,13 @@ public final class TreeCanvasPresenter implements TreeCanvasActions {
         LayoutResult layout = TreeLayout.compute(built, state.currentBranchId, tier, state.viewport);
         String current = layout.branch(state.currentBranchId) != null
                 ? state.currentBranchId : built.rootId();
-        ViewTransform transform = pinned(layout, current);
+        ViewTransform transform = state.layout.branches().isEmpty()
+                ? initialTransform(layout, current) : pinned(layout, current);
         Density fitted = Density.forScale(transform.scale);
         if (fitted != tier) {
             layout = TreeLayout.compute(built, current, fitted, state.viewport);
             if (state.layout.branches().isEmpty()) {
-                transform = layout.fit(state.viewport);
+                transform = initialTransform(layout, current);
             }
         }
         snapshot = built;
@@ -165,6 +168,17 @@ public final class TreeCanvasPresenter implements TreeCanvasActions {
         }
         return new ViewTransform(previous.scale, previous.translateX + delta.x * previous.scale,
                 previous.translateY + delta.y * previous.scale);
+    }
+
+    /** The prototype opens on the learner's current branch, not on a tiny whole-tree overview. */
+    private ViewTransform initialTransform(LayoutResult layout, String current) {
+        float scale = clamp(INITIAL_SCALE, TreeLayout.MIN_SCALE, TreeLayout.MAX_SCALE);
+        Pt anchor = layout.anchorOf(current);
+        if (anchor == null || state.viewport.width <= 0f || state.viewport.height <= 0f) {
+            return layout.fit(state.viewport);
+        }
+        return new ViewTransform(scale, state.viewport.width / 2f - anchor.x * scale,
+                state.viewport.height - INITIAL_BOTTOM_OFFSET - anchor.y * scale);
     }
 
     @Override
@@ -209,6 +223,18 @@ public final class TreeCanvasPresenter implements TreeCanvasActions {
             fitted = layout.fit(state.viewport);
         }
         render(state.withFrame(layout, fitted));
+    }
+
+    @Override
+    public void onCenterCurrent() {
+        Pt anchor = state.layout.anchorOf(state.currentBranchId);
+        if (anchor == null || state.viewport.width <= 0f || state.viewport.height <= 0f) {
+            return;
+        }
+        ViewTransform current = state.transform;
+        render(state.withTransform(new ViewTransform(current.scale,
+                state.viewport.width / 2f - anchor.x * current.scale,
+                state.viewport.height / 2f - anchor.y * current.scale - 40f)));
     }
 
     @Override

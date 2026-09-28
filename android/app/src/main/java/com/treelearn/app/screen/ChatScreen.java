@@ -5,11 +5,12 @@ import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
-import android.text.format.DateUtils;
 import android.util.AttributeSet;
+import android.view.ActionMode;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
@@ -60,19 +61,18 @@ import java.util.function.Consumer;
  * from a {@link ChatViewState}. Three things are worth knowing about it:
  *
  * <ul>
- *   <li><strong>Rows are rebuilt from the state, never recycled.</strong> Each read builds the rows it
- *       needs and drops the rest, so an open reasoning block lives only in the state's set of message
- *       ids. There is nothing to leak between answers because nothing is reused - at the cost of
- *       rebuilding during a stream, which is the recorded performance risk of this slice.
- *   <li><strong>The selection is read, not remembered.</strong> "Quote" takes whatever the answer's own
- *       text view currently has selected and hands it to the presenter; with nothing selected the
- *       screen says so instead of quoting an empty sentence.
+ *   <li><strong>Rows are keyed and reused by message id.</strong> Each read updates the rows it needs
+ *       without tearing down the message views, so a streaming answer keeps its layout and text
+ *       selection handles instead of flickering through a full list rebuild.
+ *   <li><strong>The selection is read, not remembered.</strong> 追问, 新建主题 and 复制 all take
+ *       whatever the answer's own text view currently has selected and hand that one range over;
+ *       with nothing selected the screen says so instead of acting on an empty sentence.
  *   <li><strong>The two recommendation targets stay apart.</strong> The row asks a follow-up, its own
  *       44dp zone opens a branch; neither is reachable from the other's gesture.
- *   <li><strong>A long press opens the app's own menu.</strong> The gesture selects the sentence under
- *       the press and hands it to {@link WordMenuPopup}, which is where the four items and their
- *       placement live. The listener answers {@code true} on purpose: the platform only starts its own
- *       text toolbar while nothing has handled the long press.
+ *   <li><strong>Answer text is platform-selectable, and the menu over it is the app's.</strong> The
+ *       native selection handles let the learner drag either edge of a partial passage; the platform's
+ *       own toolbar is emptied, so the four rows they see come from {@link WordMenu}, in the order and
+ *       with the labels the app decides (PRD 6.2.19).
  *   <li><strong>The reading position is measured here and decided elsewhere.</strong> The screen
  *       reports how tall a row is, which rows the viewport shows and where the learner stopped - all
  *       facts only a laid-out view has. Where that resolves to, and whether the unread badge may
@@ -83,6 +83,11 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
 
     /** Scroll events arrive in bursts; the view is read once they stop. */
     private static final long SCROLL_SETTLE_MS = 150L;
+
+    private final int basePaddingLeft;
+    private final int basePaddingTop;
+    private final int basePaddingRight;
+    private final int basePaddingBottom;
 
     private final TextView title;
     private final ScrollView scroll;
@@ -122,7 +127,7 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
     /** The rows of the last render, by message id, so a selection can be read back. */
     private final Map<String, Row> rows = new LinkedHashMap<String, Row>();
 
-    /** The two cards that hang over an answer: the word menu, and the child-branch list. */
+    /** The two cards that hang over an answer: the selection menu, and the child-branch list. */
     private WordMenuPopup wordMenu;
     private ChildBranchPopup childrenPopup;
 
@@ -159,6 +164,15 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
     public ChatScreen(Context context, AttributeSet attributes) {
         super(context, attributes);
         setOrientation(VERTICAL);
+        basePaddingLeft = getPaddingLeft();
+        basePaddingTop = getPaddingTop();
+        basePaddingRight = getPaddingRight();
+        basePaddingBottom = getPaddingBottom();
+        setOnApplyWindowInsetsListener((view, insets) -> {
+            setPadding(basePaddingLeft, basePaddingTop + insets.getSystemWindowInsetTop(),
+                    basePaddingRight, basePaddingBottom + insets.getSystemWindowInsetBottom());
+            return insets;
+        });
         LayoutInflater.from(context).inflate(R.layout.screen_chat, this, true);
         title = findViewById(R.id.chat_title);
         scroll = findViewById(R.id.chat_scroll);
@@ -301,6 +315,12 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         if (state.phase == ChatSpeaker.Phase.ERROR && previous.phase != ChatSpeaker.Phase.ERROR) {
             Toast.makeText(getContext(), R.string.voice_notice_playback_error, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        requestApplyInsets();
     }
 
     private void refreshSpeak(String messageId) {
@@ -535,16 +555,29 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
     }
 
     private void renderMessages(ChatViewState state) {
-        rows.clear();
-        messageFlow.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(getContext());
+        Map<String, Row> nextRows = new LinkedHashMap<String, Row>();
         for (int i = 0; i < state.messages.size(); i++) {
             ChatMessage message = state.messages.get(i);
-            Row row = new Row(inflater);
+            Row row = rows.get(message.messageId);
+            if (row == null) {
+                row = new Row(inflater);
+            }
             row.render(state, message, i == state.messages.size() - 1);
-            rows.put(message.messageId, row);
-            messageFlow.addView(row.root);
+            nextRows.put(message.messageId, row);
+            View current = messageFlow.getChildAt(i);
+            if (current != row.root) {
+                if (row.root.getParent() == messageFlow) {
+                    messageFlow.removeView(row.root);
+                }
+                messageFlow.addView(row.root, i);
+            }
         }
+        while (messageFlow.getChildCount() > state.messages.size()) {
+            messageFlow.removeViewAt(messageFlow.getChildCount() - 1);
+        }
+        rows.clear();
+        rows.putAll(nextRows);
     }
 
     /** T-097: the host owns the SAF picker; the screen only reports the attach key. */
@@ -563,7 +596,7 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
 
     /** SPEC-081: no recognition service, no key - hidden, not greyed, not a placeholder. */
     public void setVoiceAvailable(boolean available) {
-        voiceKey.setVisibility(available ? VISIBLE : GONE);
+        voiceKey.setVisibility(GONE);
         if (!available) {
             setListening(false);
         }
@@ -638,8 +671,9 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
                         : R.string.chat_draft_hint));
         sendState = state.sendState();
         send.setEnabled(sendState != ChatViewState.SendState.DISABLED);
-        send.setBackgroundResource(sendState == ChatViewState.SendState.DISABLED
-                ? R.drawable.bg_field : R.drawable.bg_button_primary);
+        // 2026-09-27 user decision: the send control is the circular fab (prototype .send-fab) in
+        // every state - its selector already draws the disabled step, so no rectangular swap here.
+        send.setBackgroundResource(R.drawable.bg_send_fab);
         send.setContentDescription(getContext().getString(sendState == ChatViewState.SendState.STOP
                 ? R.string.cd_chat_send_stop : R.string.cd_chat_send));
         int icon = sendState == ChatViewState.SendState.STOP
@@ -792,17 +826,31 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
     }
 
     /**
-     * Both cards point at a row of one render, so a rebuild - a stream, a fold, a new question - takes
-     * them with it: a menu left open would be acting on an answer that is no longer on screen.
+     * Opens one row's selection card over the passage the platform handles cover, closing whichever
+     * card was already up: two menus over two answers at once would be two selections to reason about.
+     */
+    private void showWordMenu(Row row) {
+        dismissPopups();
+        if (row != null) {
+            wordMenu = row.openWordMenu();
+        }
+    }
+
+    /**
+     * A card must not outlive the selection or the row it was opened from. The fields are cleared
+     * before the cards are told to close, so a card's own "I am gone" callback cannot start the
+     * dismissal over from the top.
      */
     private void dismissPopups() {
-        if (wordMenu != null) {
-            wordMenu.close();
-            wordMenu = null;
+        WordMenuPopup menu = wordMenu;
+        wordMenu = null;
+        if (menu != null) {
+            menu.close();
         }
-        if (childrenPopup != null) {
-            childrenPopup.close();
-            childrenPopup = null;
+        ChildBranchPopup children = childrenPopup;
+        childrenPopup = null;
+        if (children != null) {
+            children.close();
         }
     }
 
@@ -829,7 +877,6 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         private final TextView question;
         private final TextView quoteChip;
         private final View answerBlock;
-        private final TextView time;
         private final TextView answer;
         private final View caret;
         private final TextView generating;
@@ -846,8 +893,11 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         private String messageId = "";
         private ChatMessage message;
         private ChatViewState lastState;
-        private float pressX;
-        private float pressY;
+        private String renderedAnswerText;
+        /** The platform's selection action mode: kept for the handles it owns, emptied of its menu. */
+        private ActionMode selectionMode;
+        /** This row's own card while one is up; stale references are harmless, refresh() checks. */
+        private WordMenuPopup card;
 
         Row(LayoutInflater inflater) {
             root = inflater.inflate(R.layout.item_chat_message, messageFlow, false);
@@ -855,9 +905,10 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             question = root.findViewById(R.id.chat_question);
             quoteChip = root.findViewById(R.id.chat_quote_chip);
             answerBlock = root.findViewById(R.id.chat_answer_block);
-            time = root.findViewById(R.id.chat_time);
             answer = root.findViewById(R.id.chat_answer);
+            answer.setTextIsSelectable(true);
             answer.setMovementMethod(LinkMovementMethod.getInstance());
+            answer.setCustomSelectionActionModeCallback(new SelectionMenuCallback());
             caret = root.findViewById(R.id.chat_caret);
             generating = root.findViewById(R.id.chat_generating_note);
             failure = root.findViewById(R.id.chat_failure);
@@ -879,17 +930,6 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
                 }
             }));
             retry.setOnClickListener(view -> fire(actions -> actions.onRetryPressed(messageId)));
-            answer.setOnTouchListener((view, event) -> {
-                if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                    pressX = event.getX();
-                    pressY = event.getY();
-                }
-                return false;
-            });
-            answer.setOnLongClickListener(view -> {
-                openWordMenu();
-                return true;
-            });
         }
 
         void render(ChatViewState state, ChatMessage message, boolean newestRow) {
@@ -901,16 +941,20 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
                 renderQuestion(message);
                 return;
             }
-            time.setText(DateUtils.getRelativeTimeSpanString(message.createdAt,
-                    System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS));
+            // 2026-09-27 user decision: the time lives in the action row now (prototype .ai-time),
+            // so it appears with the stable answer instead of on the tag line.
+            actionBar.renderTime(message.createdAt);
             disclosure.render(message,
                     state.isReasoningEffectivelyExpanded(message.messageId),
                     state.thinkingEnabled);
             // Matrix 1.2: a tap on a code block copies it, through the same clipboard path a
             // selection copy takes - one write path, one sensitive-clip marking.
-            answer.setText(MarkdownRenderer.render(message.text,
-                    code -> fire(actions -> actions.onSelectionCopyPressed(code))),
-                    TextView.BufferType.SPANNABLE);
+            if (renderedAnswerText == null || !renderedAnswerText.equals(message.text)) {
+                answer.setText(MarkdownRenderer.render(message.text,
+                        code -> fire(actions -> actions.onSelectionCopyPressed(code))),
+                        TextView.BufferType.SPANNABLE);
+                renderedAnswerText = message.text;
+            }
             renderGenerationSlots(state, message, newestRow);
             renderTranslation(state, message);
             retry.setEnabled(message.canRetry());
@@ -1017,6 +1061,116 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             }
         }
 
+        /**
+         * The platform's own selection menu, replaced (PRD 6.2.19 points 1-2, 8).
+         *
+         * <p>The action mode is kept, because it is what draws the draggable handles over the answer.
+         * Its menu is not used: a platform menu can neither be ordered nor labelled nor kept out of its
+         * overflow sheet by the app, which is how 新建主题 ended up behind a 更多 sheet while 全选 / 复制
+         * / 翻译 held the visible slots. Every row the learner sees comes from {@link WordMenuPopup},
+         * which this row draws over the passage those handles cover.
+         */
+        private final class SelectionMenuCallback implements ActionMode.Callback {
+
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                selectionMode = mode;
+                emptyPlatformToolbar(mode, menu);
+                showWordMenu();
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                // The platform re-adds its own items whenever the selection moves; emptying the menu
+                // again here is what keeps them away while the learner drags a handle. The card follows
+                // that same movement, which is what the platform's own toolbar would have done.
+                selectionMode = mode;
+                emptyPlatformToolbar(mode, menu);
+                if (card != null) {
+                    card.refresh();
+                }
+                return true;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                // No item of ours lives in the platform menu; every action is answered by the card.
+                return false;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                selectionMode = null;
+                dismissPopups();
+            }
+        }
+
+        /**
+         * Empties the platform selection menu, twice. Which of the two callbacks - the app's and the
+         * text editor's - runs first is not the same on every build, so the queued pass is what makes
+         * the outcome the same everywhere: whatever was added after this callback is cleared on the next
+         * turn of the main thread, and an empty toolbar is one that hides itself.
+         */
+        private void emptyPlatformToolbar(ActionMode mode, Menu menu) {
+            menu.clear();
+            answer.post(() -> {
+                if (selectionMode == mode) {
+                    mode.getMenu().clear();
+                }
+            });
+        }
+
+        /** Opens this row's card, through the screen that owns the one-card-at-a-time rule. */
+        private void showWordMenu() {
+            ChatScreen.this.showWordMenu(this);
+        }
+
+        /** The row's own card over the passage the handles cover; null when the selection is empty. */
+        private WordMenuPopup openWordMenu() {
+            TextSelection selection = TextSelection.of(answer.getSelectionStart(),
+                    answer.getSelectionEnd());
+            if (selection.isEmpty()) {
+                return null;
+            }
+            WordMenuPopup menu = new WordMenuPopup(answer, message, this);
+            menu.setOnClosed(this::onWordMenuClosed);
+            menu.show(selection);
+            card = menu;
+            return menu;
+        }
+
+        /** The card is gone - a row was chosen, the learner tapped away, or the selection ended. */
+        private void onWordMenuClosed() {
+            ActionMode mode = selectionMode;
+            if (mode != null) {
+                mode.finish();
+            }
+        }
+
+        @Override
+        public void onQuoteRequested() {
+            onQuotePressed(messageId);
+        }
+
+        @Override
+        public void onForkRequested() {
+            // T-065: the menu's fork carries the selected sentence and the offsets it spans, read from
+            // the answer's own text view - the same selection 追问 and 复制 act on. The quote is the
+            // offset substring itself, never a trimmed copy, so the stored anchor's quote fills its
+            // span exactly. Nothing selected means a whole-answer fork, as before.
+            TextSelection selection = TextSelection.of(answer.getSelectionStart(),
+                    answer.getSelectionEnd());
+            String quote = selection.read(answer.getText().toString());
+            fire(actions -> actions.onForkPressed(messageId, quote, selection.start, selection.end));
+        }
+
+        @Override
+        public void onCopyRequested() {
+            // 复制 in the selection menu copies the passage, not the whole answer (PRD 6.2.19 point 5).
+            fire(actions -> actions.onSelectionCopyPressed(selectedText()));
+        }
+
         /** What the answer's own text view has selected right now; empty when nothing is selected. */
         private String selectedText() {
             int start = answer.getSelectionStart();
@@ -1095,48 +1249,5 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             return actionBar;
         }
 
-        /**
-         * 长按 selects the sentence under the press and opens the menu on it. The press coordinates come
-         * from the touch listener because the long-press callback carries none, and an empty answer
-         * opens nothing rather than an empty menu.
-         */
-        private void openWordMenu() {
-            TextSelection selection = TextSelection.sentence(answer.getText().toString(),
-                    answer.getOffsetForPosition(pressX, pressY));
-            if (selection.isEmpty()) {
-                return;
-            }
-            dismissPopups();
-            wordMenu = new WordMenuPopup(answer, message, this);
-            wordMenu.show(selection);
-        }
-
-        @Override
-        public void onQuoteRequested() {
-            onQuotePressed(messageId);
-        }
-
-        @Override
-        public void onForkRequested() {
-            // T-065: the menu's fork carries the selected sentence and the offsets it spans, read
-            // from the answer's own text view - the same selection 追问 and 复制 act on. The quote
-            // is the offset substring itself, never a trimmed copy, so the stored anchor's quote
-            // fills its span exactly. Nothing selected means a whole-answer fork, as before.
-            TextSelection selection = TextSelection.of(answer.getSelectionStart(),
-                    answer.getSelectionEnd());
-            String quote = selection.read(answer.getText().toString());
-            fire(actions -> actions.onForkPressed(messageId, quote, selection.start,
-                    selection.end));
-        }
-
-        @Override
-        public void onCopyRequested() {
-            onSelectionCopy(messageId);
-        }
-
-        /** 复制 in the selection menu copies the passage, not the whole answer (PRD 6.2.19 point 5). */
-        private void onSelectionCopy(String id) {
-            fire(actions -> actions.onSelectionCopyPressed(selectedText()));
-        }
     }
 }

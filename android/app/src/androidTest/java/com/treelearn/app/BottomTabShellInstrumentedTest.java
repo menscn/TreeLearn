@@ -133,9 +133,8 @@ public final class BottomTabShellInstrumentedTest {
         seedTopic(TOPIC_A, TITLE_A, T0, 0);
         activity = launch();
 
-        awaitVisible(R.id.home_continue);
-        click(R.id.home_continue);
-        assertNotNull("a tapped continue-learning row opens the conversation on its branch",
+        clickRow(awaitChildren(R.id.home_recent_list));
+        assertNotNull("a tapped recent-learning row opens the conversation on its branch",
                 waitFor(R.id.chat_root));
         assertBarHidden("a conversation is a second-level screen");
 
@@ -185,6 +184,14 @@ public final class BottomTabShellInstrumentedTest {
         click(R.id.tab_library);
         ViewGroup rows = awaitChildren(R.id.library_rows);
 
+        assertEquals("the in-progress segment exposes its item count",
+                context().getString(R.string.library_segment_in_progress) + " 2",
+                ((TextView) view(R.id.library_segment_in_progress)).getText().toString());
+        assertEquals("the completed segment exposes its item count",
+                context().getString(R.string.library_segment_done) + " 0",
+                ((TextView) view(R.id.library_segment_done)).getText().toString());
+        assertNotNull("library rows use the prototype card surface", rows.getChildAt(0).getBackground());
+
         assertEquals("one row per stored topic", 2, rows.getChildCount());
         assertEquals("the list is newest first", 2, storedTopicCount());
 
@@ -217,6 +224,8 @@ public final class BottomTabShellInstrumentedTest {
         click(R.id.tab_library);
         assertNotNull(waitFor(R.id.library_root));
         assertNotNull("the library screen is up", waitFor(R.id.library_rows));
+        assertEquals("the prototype search scope stays hidden outside search",
+                View.GONE, view(R.id.library_search_scope).getVisibility());
 
         TextView state = awaitState();
         assertEquals("an empty store shows the empty state", View.VISIBLE, state.getVisibility());
@@ -345,9 +354,8 @@ public final class BottomTabShellInstrumentedTest {
     }
 
     /**
-     * Waits for a view the state decides to show. The continue-learning row (055) exists in the
-     * layout but is drawn only while there is history, so a tap must wait for the visibility rather
-     * than for the view to exist.
+     * Waits for a view the state decides to show. A state-backed home view may exist in the layout
+     * before its content is visible, so a tap must wait for the visibility rather than only the view.
      */
     private View awaitVisible(int id) {
         long deadline = SystemClock.uptimeMillis() + WAIT_MS;

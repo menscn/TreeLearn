@@ -1,0 +1,78 @@
+Treelearn Java-only guard — 2026-09-27 三次运行裁决记录
+生成时间: 2026-09-27 17:02:21 +08:00
+目的: 解释同一条命令在 16:56 得到 FAIL、在 16:58 与 17:00 得到 PASS，并给出裁决依据与仍待补的一步。
+
+== 三次运行 ==
+#  时间     命令                                                              退出码  结果
+1  16:56:27 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/no-kotlin-check.ps1
+            （脚本内部调用: gradlew -p <androidRoot> --no-daemon --console=plain -q verifyNoKotlinDex）
+                                                                                  1   VERDICT: FAIL
+2  16:57:56 ./gradlew verifyNoKotlinDex --console=plain --stacktrace               0   BUILD SUCCESSFUL
+3  16:58:53 ./gradlew -p . --no-daemon --console=plain verifyNoKotlinDex --stacktrace
+                                                                                  0   BUILD SUCCESSFUL
+运行 3 的 Gradle 任务与 flags（除 -q）与运行 1 内部调用完全相同，仅去掉静默。
+
+证据文件与引用行:
+  运行 1: artifacts/evidence/no-kotlin-2026-09-27-rerun.txt
+          :34 BUILD FAILED in 59s   :36 VERDICT: FAIL (2 problem(s))   :38 EXITCODE=1
+  运行 2: artifacts/tmp/verifyNoKotlinDex-rerun.log
+          :283 verifyNoKotlinDex: PASS (3 APK(s) inspected across app/build/outputs/apk, no Kotlin runtime bytecode)
+          :293 BUILD SUCCESSFUL in 25s   :295 EXITCODE=0
+  运行 3: artifacts/tmp/guard-exact-repro.log
+          :286 verifyNoKotlinDex: PASS (3 APK(s) inspected across app/build/outputs/apk, no Kotlin runtime bytecode)
+          :296 BUILD SUCCESSFUL in 1m 24s   :298 EXITCODE=0
+
+== 运行 1 的 FAIL 性质: 是「构建没跑完」，不是「发现了 Kotlin」 ==
+运行 1 的全部问题行（no-kotlin-2026-09-27-rerun.txt:28-33）只有：
+  FAIL verifyNoKotlinDex failed (exit 1)
+  FAIL         * Try:  / > Run with --stacktrace option ... / > BUILD FAILED in 59s
+其中没有出现任何 Kotlin 坐标、Kotlin 运行时字节码或 .kt 文件命中。即失败发生在 Gradle 任务执行层，
+不在 Java-only 判定层。
+
+已知取证缺口（如实记录）: 运行 1 用了 -q，Gradle 的 "What went wrong" 正文被静默，失败正文未被捕获；
+因此本裁决无法直接引用原始报错，只能靠下述旁证。补足该缺口的做法是后续在静止树上重跑运行 1 的命令。
+
+== 旁证: 失败窗口内源码被并发改写 ==
+命令: find android -path '*/build/*' -prune -o -path '*/.gradle/*' -prune -o -type f \
+        -newermt "2026-09-27 16:56:20" ! -newermt "2026-09-27 16:57:40" -print
+结果: 命中且仅命中 1 个文件
+  android/app/src/main/java/com/treelearn/app/screen/PaperRules.java
+  mtime = 2026-09-27 16:57:36.020174800 +0800
+时间关系: 运行 1 于 16:56:27 启动、BUILD FAILED in 59s（约 16:57:26 前后结束），即该 Java 源码在
+运行 1 的编译阶段之内被整体重写——编译正在读、文件正在被替换，属典型读写竞态。
+
+排除「构建配置自己坏了」这一竞争解释:
+  android/app/build.gradle    mtime 2026-09-27 11:50:36  （早于该窗口约 5 小时，未动）
+  android/build.gradle        mtime 2026-09-21 02:05:29  （未动）
+  android/settings.gradle     mtime 2026-09-21 00:34:55  （未动）
+  android/README.md           mtime 2026-09-27 16:08:26  （早于队列窗口，未动）
+窗口内唯一被改写的文件是参与编译的 Java 源码本身。
+
+== 裁决 ==
+1. Java-only 不变量在本次验证范围内成立: 运行 2、3 得到 verifyNoKotlinDex PASS、退出码 0，且未出现
+   任何 Kotlin 命中。
+2. 运行 1 的 FAIL 判为环境性竞态（构建期间源码被并发重写），非 Kotlin 命中。依据: 上述窗口内唯一改写
+   文件 + 窗口内构建配置未动 + 源码写入停止后同参数命令连续两次成功。
+3. 本裁决**不**构成「源码树静止时守门 PASS」的结论。三次运行期间 android/app/src 持续被并发写入
+   （16:57:36 → 17:00:50 共 13 个文件，见下方清单），所以守门脚本必须在源码树静止后重跑一次，
+   该次输出才能作为交付证据。此步**尚未执行**。
+
+== 并发写入清单（说明为何必须重跑） ==
+16:57:36 PaperRules.java                 16:58:26 view_model_chip.xml
+16:57:45 PaperRuleBackdrop.java          16:58:43 ModelThinkingPicker.java
+16:57:55 RuleEditText.java               16:59:04 HomeScreen.java
+16:58:01 bg_send_fab.xml, ic_key.xml      16:59:51 HomeComposerLayoutTest.java
+16:58:07 ic_chevron_down.xml, ic_think.xml 17:00:50 HomeComposerInstrumentedTest.java
+16:58:20 screen_home_body.xml
+其中 17:00:50 的写入发生在本会话最后一次构建结束（17:00:25）之后，即写入者不是本会话的构建。
+
+== 时效性: 16:11 的旧证据已作废 ==
+artifacts/evidence/no-kotlin-2026-09-27.txt（16:11）记录其检查的 app-debug.apk = 1,986,149 bytes；
+而 2026-09-27 16:43 安装到设备的 APK = 1,714,231 bytes（设备拉回件核对: artifacts/tmp/device-installed.apk
+= 1,714,231 bytes，逐条比对脚本 artifacts/tmp/apk_diff.py）。两者不同源，旧证据不得再被引用为
+「当前设备 APK 不含 Kotlin」的凭据。
+
+== 复现命令 ==
+grep -nE "VERDICT|EXITCODE=|BUILD FAILED" artifacts/evidence/no-kotlin-2026-09-27-rerun.txt
+grep -nE "verifyNoKotlinDex: PASS|BUILD SUCCESSFUL|EXITCODE=" artifacts/tmp/verifyNoKotlinDex-rerun.log
+grep -nE "verifyNoKotlinDex: PASS|BUILD SUCCESSFUL|EXITCODE=" artifacts/tmp/guard-exact-repro.log

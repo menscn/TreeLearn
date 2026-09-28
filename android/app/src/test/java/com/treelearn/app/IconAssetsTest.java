@@ -123,6 +123,7 @@ public class IconAssetsTest {
             "ic_action_copy.xml",
             "ic_action_fork.xml",
             "ic_chat_send.xml",
+            "ic_chat_attach.xml",
             "ic_chat_close.xml",
             "ic_chat_gear.xml",
             "ic_chat_overview.xml",
@@ -158,6 +159,8 @@ public class IconAssetsTest {
                 "@drawable/ic_chat_gear", "@string/cd_chat_settings");
         assertIconAction("layout/screen_chat_body.xml", "chat_quote_clear",
                 "@drawable/ic_chat_close", "@string/cd_chat_quote_clear");
+        assertIconAction("layout/screen_chat_body.xml", "chat_attach",
+                "@drawable/ic_chat_attach", "@string/cd_chat_attach");
         // Send stays a Button (Java declares Button) with a compound drawable.
         assertIconAction("layout/screen_chat_body.xml", "chat_send",
                 "@drawable/ic_chat_send", "@string/cd_chat_send");

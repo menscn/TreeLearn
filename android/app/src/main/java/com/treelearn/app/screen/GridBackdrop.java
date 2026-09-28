@@ -2,7 +2,10 @@ package com.treelearn.app.screen;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.LinearGradient;
 import android.graphics.Paint;
+import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -23,6 +26,7 @@ import com.treelearn.app.R;
 public final class GridBackdrop extends View {
 
     private final Paint dots;
+    private final Paint floor;
     private final float spacing;
     private final float radius;
 
@@ -35,6 +39,8 @@ public final class GridBackdrop extends View {
         dots = new Paint(Paint.ANTI_ALIAS_FLAG);
         dots.setColor(getContext().getColor(R.color.tl_line));
         dots.setStyle(Paint.Style.FILL);
+        floor = new Paint(Paint.ANTI_ALIAS_FLAG);
+        floor.setStyle(Paint.Style.FILL);
         spacing = getResources().getDimensionPixelSize(R.dimen.space_s6);
         radius = getResources().getDimensionPixelSize(R.dimen.hairline);
         setClickable(false);
@@ -45,6 +51,13 @@ public final class GridBackdrop extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        if (getHeight() > 0 && getWidth() > 0) {
+            int ink = getContext().getColor(R.color.tl_ink);
+            int start = Color.argb(19, Color.red(ink), Color.green(ink), Color.blue(ink));
+            floor.setShader(new LinearGradient(0f, Math.max(0f, getHeight() - 170f),
+                    0f, getHeight(), start, Color.TRANSPARENT, Shader.TileMode.CLAMP));
+            canvas.drawRect(0f, 0f, getWidth(), getHeight(), floor);
+        }
         for (float x = spacing; x < getWidth(); x += spacing) {
             for (float y = spacing; y < getHeight(); y += spacing) {
                 canvas.drawCircle(x, y, radius, dots);

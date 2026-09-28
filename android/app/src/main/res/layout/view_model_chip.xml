@@ -1,15 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The chip itself: current tier, plus the thinking marker while it is on (PRD 6.2.18 point 9). -->
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+  The chip itself: the prototype's .model-chip
+  (Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html line 356), which reads "effort glyph + tier name +
+  thinking marker while it is on + the chevron that says a picker opens below". The thinking marker is
+  coloured in ModelThinkingPicker, because the prototype gives it the identity green while the rest of
+  the chip stays secondary ink.
+
+  This is the visual pill only. The prototype draws it about 22px tall, so it is deliberately NOT the
+  tap target: the 44dp hot zone belongs to the ModelThinkingPicker that hosts it (see that class), which
+  keeps the pill faithful without shrinking the control below @dimen/touch_min.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/model_chip"
     android:layout_width="wrap_content"
-    android:layout_height="@dimen/touch_min"
+    android:layout_height="wrap_content"
     android:background="@drawable/bg_chip"
-    android:clickable="true"
-    android:focusable="true"
     android:gravity="center_vertical"
-    android:minWidth="@dimen/touch_min"
+    android:orientation="horizontal"
     android:paddingStart="@dimen/space_s3"
+    android:paddingTop="@dimen/space_s1"
     android:paddingEnd="@dimen/space_s3"
-    android:textColor="@color/tl_ink"
-    android:textSize="@dimen/text_cap" />
+    android:paddingBottom="@dimen/space_s1">
+
+    <ImageView
+        android:id="@+id/model_chip_effort"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_think"
+        android:tint="@color/tl_ink2" />
+
+    <TextView
+        android:id="@+id/model_chip_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/space_s1"
+        android:importantForAccessibility="no"
+        android:textColor="@color/tl_ink2"
+        android:textSize="@dimen/text_cap" />
+
+    <ImageView
+        android:id="@+id/model_chip_chevron"
+        android:layout_width="11dp"
+        android:layout_height="11dp"
+        android:layout_marginStart="@dimen/space_s1"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_chevron_down"
+        android:tint="@color/tl_ink2" />
+</LinearLayout>

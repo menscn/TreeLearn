@@ -44,4 +44,17 @@ public final class MarkdownRendererInstrumentedTest {
         assertTrue(rendered.toString().contains("return 1;"));
         assertTrue(((Spanned) rendered).getSpans(0, rendered.length(), URLSpan.class).length > 0);
     }
+
+    @Test
+    public void gfmTableBecomesReadableAlignedText() {
+        CharSequence rendered = MarkdownRenderer.render(
+                "| Name | Count |\n| :--- | ---: |\n| apple | 10 |\n| pear | 2 |");
+
+        assertTrue(rendered.toString().contains("Name"));
+        assertTrue(rendered.toString().contains("Count"));
+        assertTrue(rendered.toString().contains("apple"));
+        assertTrue(rendered.toString().contains("┼"));
+        assertFalse(rendered.toString().contains("| :--- |"));
+        assertTrue(((Spanned) rendered).getSpans(0, rendered.length(), TypefaceSpan.class).length > 0);
+    }
 }

@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- One recommendation chip. A tap sends it as the root question, so the chip's own height and the
-     tag are both part of the tap target. -->
+<!--
+  One recommendation chip: the prototype's .rec-chip
+  (Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html line 350), three parts left to right - the category
+  pill, the question, and a trailing chevron.
+
+  Two things this markup deliberately does not decide:
+
+  * The tag's colours. They are per kind, and that judgement lives in RecommendationTag, so the markup
+    carries neither a backgroundTint nor a textColor for the tag. Pinning either one here would give all
+    three categories the same tier and silently undo the judgement.
+  * The chevron's meaning. It is decoration on a chip whose whole surface sends the question as the root
+    question (PRD 6.2.17 point 4); it is not a second, smaller target that opens a detail page.
+
+  The chip's height is @dimen/touch_min rather than the prototype's ~33px, because the chip IS the tap
+  target here. That deviation is registered in the parent spec's deviation table.
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/rec_chip"
     android:layout_width="wrap_content"
@@ -19,12 +33,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_pill"
-        android:backgroundTint="@color/tl_green_soft"
+        android:importantForAccessibility="no"
         android:paddingStart="@dimen/space_s2"
         android:paddingTop="@dimen/space_s1"
         android:paddingEnd="@dimen/space_s2"
         android:paddingBottom="@dimen/space_s1"
-        android:textColor="@color/tl_green_deep"
         android:textSize="@dimen/text_cap" />
 
     <TextView
@@ -32,7 +45,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/space_s2"
+        android:importantForAccessibility="no"
         android:maxWidth="@dimen/rec_text_max"
         android:textColor="@color/tl_ink"
         android:textSize="@dimen/text_sm" />
+
+    <ImageView
+        android:id="@+id/rec_chevron"
+        android:layout_width="@dimen/space_s3"
+        android:layout_height="@dimen/space_s3"
+        android:layout_marginStart="@dimen/space_s2"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_chevron_right"
+        android:tint="@color/tl_ink" />
 </LinearLayout>

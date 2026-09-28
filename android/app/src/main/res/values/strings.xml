@@ -36,11 +36,10 @@
 
     <!-- Home: brand (055), hero and composer -->
     <string name="home_brand_english">TREELEARN</string>
-    <string name="home_hero_title">从一个问题开始，\n种下一棵学习树</string>
-    <string name="home_hero_sub">写下问题，长成一棵树。</string>
+    <string name="home_hero_title">把复杂问题，学成自己的知识树。</string>
+    <string name="cd_home_brand">知芽 Logo</string>
     <string name="home_draft_hint">输入你的根问题，例如：帮我系统理解 Transformer 的注意力机制</string>
     <string name="home_send">发送</string>
-    <string name="home_continue_label">继续学习</string>
     <string name="home_key_missing">未配置 Key</string>
     <string name="home_key_ready">DeepSeek 已就绪</string>
 
@@ -51,13 +50,22 @@
     <string name="home_rec_tag_follow">顺着你学的</string>
     <string name="home_rec_tag_fresh">换个方向</string>
 
-    <!-- Home: continue-learning row and heat strip (055 retired the topic list and its strings) -->
-    <string name="home_heat_streak">连续学习 %1$d 天</string>
-    <string name="home_heat_empty">还没有学习记录，从第一个问题开始吧</string>
-    <string name="home_heat_cd">最近 14 天学习热度，点按查看统计</string>
-    <string name="home_heat_cells_cd">最近 14 天学习热度格图</string>
+    <!-- Home: history-topic section (T-2026-09-27-006) and monthly drawer heatmap -->
+    <string name="home_recent_title">历史主题</string>
+    <string name="home_recent_count">%1$d 个</string>
+    <!-- Branch count · last use, formatted by the platform so it follows the device's own zone and
+         locale. The value mirrors library_topic_meta on purpose: same field (branchCount), same
+         formatter, so the two surfaces cannot disagree about what the line says. -->
+    <string name="home_topic_meta">%1$d 个分支 · %2$s</string>
+    <string name="home_topics_empty">还没有主题</string>
+    <!-- Spoken form of the unread dot: the marker itself is a shape, so the fact it stands for has to
+         reach a screen reader through words as well. The card's content description appends this. -->
+    <string name="home_topic_unread_cd">%1$d 条未读</string>
+    <string name="home_heat_cd">本月学习热度日历，点按查看统计</string>
+    <string name="home_heat_cells_cd">本月学习热度日历格图</string>
     <!-- Tree canvas (T-017): the drawable, its bar, its read phases and the node card. -->
     <string name="tree_title">学习树</string>
+    <string name="tree_canvas_title">总览画布</string>
     <string name="tree_back">返回</string>
     <string name="tree_fold">折叠</string>
     <string name="tree_unfold">展开</string>
@@ -77,6 +85,11 @@
     <string name="cd_tree_unfold">展开分支树</string>
     <string name="cd_tree_open">进入当前分支的对话</string>
     <string name="cd_tree_fit">缩放画布以适应屏幕</string>
+    <string name="cd_tree_back">返回主题</string>
+    <string name="cd_tree_nav">打开分支导航</string>
+    <string name="cd_tree_zoom_in">放大画布</string>
+    <string name="cd_tree_zoom_out">缩小画布</string>
+    <string name="cd_tree_center">回到当前分支</string>
 
     <!-- Home: failure notices, one per category -->
     <string name="notice_key_missing">还没有配置 DeepSeek API Key，先在设置里填一个再发送。</string>
@@ -96,9 +109,19 @@
     <string name="notice_attachment_too_large">附件解析后的文本超出一次回答可携带的上限，请移除该附件或换更小的文件。</string>
     <string name="notice_chat_model_fallback">所选聊天模型已不可用，已回落到内置默认模型。可在「设置 → 模型」中重新选择。</string>
     <string name="notice_no_models">还没有可用的聊天模型，请到「设置 → 模型」添加后回来选择。</string>
-    <string name="stats_detail_title">统计</string>
+    <string name="stats_detail_title">学习统计</string>
     <string name="cd_stats_back">返回</string>
-    <string name="stats_heat_caption">近 10 周学习热度</string>
+    <string name="stats_heat_title">学习热度</string>
+    <string name="stats_heat_cd">当前月份学习热度日历</string>
+    <string name="stats_heat_less">少</string>
+    <string name="stats_heat_more">多</string>
+    <string name="stats_weekday_mon">一</string>
+    <string name="stats_weekday_tue">二</string>
+    <string name="stats_weekday_wed">三</string>
+    <string name="stats_weekday_thu">四</string>
+    <string name="stats_weekday_fri">五</string>
+    <string name="stats_weekday_sat">六</string>
+    <string name="stats_weekday_sun">日</string>
     <string name="stats_metric_questions">提问</string>
     <string name="stats_metric_messages">消息</string>
     <string name="stats_metric_streak">连续天数</string>
@@ -106,11 +129,10 @@
     <string name="stats_failed">统计暂时读不出来，稍后再进来看看。</string>
     <string name="cd_home_drawer">打开菜单</string>
     <string name="cd_drawer_close">关闭菜单</string>
+    <string name="drawer_title">学习概览</string>
+    <string name="drawer_heat_title">学习热度</string>
     <string name="drawer_quick_title">最近学习</string>
-    <string name="drawer_empty">还没有学习记录，去提问开始一个主题吧。</string>
-    <string name="drawer_settings">设置</string>
-    <string name="drawer_stats">学习统计</string>
-    <string name="drawer_extension_title">更多（即将推出）</string>
+    <string name="drawer_empty">还没有学习记录</string>
 
     <!-- T-092: 输入栏搜索开关与底部面板。 -->
     <string name="chat_search_chip">联网</string>
@@ -267,7 +289,7 @@
     <string name="chat_retry_hint">重试不新增消息或分支</string>
     <string name="chat_copy_title">复制整条回答</string>
     <string name="chat_reset_title">重置：重新生成这条回答</string>
-    <string name="chat_fork_title">新建分支：从这条回答开一条独立路径</string>
+    <string name="chat_fork_title">新建主题：从这条回答开一条独立路径</string>
     <string name="chat_quote_title">引用选中的句子</string>
     <string name="chat_quote_hint">先长按选中要引用的句子</string>
     <string name="chat_quote_clear">取消引用</string>
@@ -283,13 +305,13 @@
     <string name="chat_back_to_latest_count">回到最新（%1$d）</string>
 
     <!-- Conversation: a recommendation under the latest answer (BASE-16) -->
-    <string name="chat_suggestion_fork_title">直接用这个问题新建分支</string>
+    <string name="chat_suggestion_fork_title">直接用这个问题新建主题</string>
 
     <!-- Conversation: composer, list states and the clipboard headings -->
     <string name="chat_back">返回</string>
     <string name="chat_overview">总览</string>
     <string name="chat_nav">导航</string>
-    <string name="chat_draft_hint">继续追问…</string>
+    <string name="chat_draft_hint">在当前分支继续追问…</string>
     <!-- T-076: the composer's blocked-state hints (073 §5) - why sending is off, in the placeholder. -->
     <string name="chat_draft_hint_no_key">配置 DeepSeek Key 后可继续提问，点此前往设置</string>
     <string name="chat_draft_hint_archived">分支已归档，取消归档后可继续提问</string>
@@ -310,7 +332,7 @@
     <string name="chat_act_quote">引用</string>
     <string name="chat_act_copy">复制</string>
     <string name="chat_act_reset">重置</string>
-    <string name="chat_act_fork">新建分支</string>
+    <string name="chat_act_fork">新建主题</string>
     <string name="chat_act_children">子分支</string>
     <string name="chat_act_children_count">子分支 %1$d</string>
     <string name="chat_quoted">引用「%1$s」</string>
@@ -318,6 +340,7 @@
     <string name="chat_attachment_failed">解析失败：这份文件读不出文本，可移除后重试或直接发送。</string>
     <string name="chat_attached">附件「%1$s」（%2$s）</string>
     <string name="cd_chat_attach">添加附件</string>
+    <string name="chat_attach_label">附件</string>
     <string name="cd_chat_attachment_remove">移除附件</string>
     <string name="cd_chat_voice">按住说话</string>
     <string name="cd_chat_voice_listening">正在聆听，松开识别</string>
@@ -377,7 +400,7 @@
     <string name="cd_act_quote">引用到输入框</string>
     <string name="cd_act_copy">复制回答</string>
     <string name="cd_act_reset">重新生成</string>
-    <string name="cd_act_fork">新建分支</string>
+    <string name="cd_act_fork">新建主题</string>
     <string name="cd_act_translate">翻译为中文</string>
     <string name="cd_act_speak">朗读这条回答</string>
     <string name="cd_act_speak_stop">停止朗读</string>
@@ -416,9 +439,11 @@
       054's: this slice draws the 「进行中」 list, its own wording and its own empty state.
     -->
     <string name="library_title">学习库</string>
-    <string name="library_search_hint">搜索已学内容</string>
+    <string name="library_search_hint">标题、问题、回答、锚定原文…</string>
+    <string name="library_search_scope">标题 · 问题 · 回答 · 锚定原文</string>
     <string name="library_segment_in_progress">进行中</string>
     <string name="library_segment_done">已完成</string>
+    <string name="library_segment_count">%1$s %2$d</string>
     <string name="library_loading">正在读取本机学习记录…</string>
     <string name="library_empty">还没有学习记录</string>
     <string name="library_empty_guide">去主页写下第一个问题 →</string>

@@ -1,131 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The home column itself (055: brand, composer, continue-learning, recommendations). The phone layout
-  and the tablet layout both include it, so the two configurations cannot drift; only the width that
-  surrounds it differs.
-
-  055 slimmed this column: the header's search / archived / settings entries and the history topic
-  list are gone - their homes are the library tab (search box, topic rows, archived segment) and the
-  settings tab. What stays is the four blocks the new IA names: brand, composer, the continue-learning
-  row (which exists only while there is history) and the recommendation marquee, whose form the user
-  ruled to keep (scrolling marquee, not the mock's card + list).
+  The home page as the prototype draws it (T-003): the column stacks from the top instead of centring
+  a group, and the order is the prototype's own - appbar, brand lockup with the empty-state slogan,
+  composer, recommendations, history. The brand lockup is a horizontal "sprout + 知芽"; the slogan is
+  shown only while the home has no history topics (HomeViewState.hasTopics, read by HomeScreen).
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/home_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/space_s2">
+
+    <LinearLayout
+        android:id="@+id/home_appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/page_gutter"
+        android:paddingTop="@dimen/space_s4"
+        android:paddingEnd="@dimen/page_gutter">
+
+        <ImageView
+            android:id="@+id/home_drawer_button"
+            android:layout_width="@dimen/touch_min"
+            android:layout_height="@dimen/touch_min"
+            android:layout_marginStart="-8dp"
+            android:contentDescription="@string/cd_home_drawer"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_nav_menu"
+            android:tint="@color/tl_ink2" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/home_primary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingBottom="@dimen/space_s8">
+        android:paddingStart="@dimen/page_gutter"
+        android:paddingEnd="@dimen/page_gutter"
+        android:paddingBottom="@dimen/space_s4">
 
-        <!-- Brand: the mark, the Chinese name and the English small line, all in the brand serif.
-             No entries live here any more: settings is a tab, search and archived live in the
-             library. -->
         <LinearLayout
-            android:id="@+id/home_appbar"
+            android:id="@+id/home_hero"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="@dimen/page_gutter"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
             android:paddingTop="@dimen/space_s4"
-            android:paddingEnd="@dimen/page_gutter">
-
-            <ImageView
-                android:id="@+id/home_drawer_button"
-                android:layout_width="@dimen/touch_min"
-                android:layout_height="@dimen/touch_min"
-                android:layout_marginStart="-8dp"
-                android:contentDescription="@string/cd_home_drawer"
-                android:scaleType="centerInside"
-                android:src="@drawable/ic_nav_menu"
-                android:tint="@color/tl_ink2" />
-
-            <ImageView
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:layout_marginStart="@dimen/space_s1"
-                android:importantForAccessibility="no"
-                android:src="@drawable/ic_launcher_foreground" />
+            android:paddingBottom="@dimen/space_s6">
 
             <LinearLayout
+                android:id="@+id/home_brand_lockup"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/space_s2"
-                android:orientation="vertical">
+                android:layout_marginBottom="@dimen/space_s2"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/home_brand_mark"
+                    android:layout_width="@dimen/brand_mark_size"
+                    android:layout_height="@dimen/brand_mark_size"
+                    android:contentDescription="@string/cd_home_brand"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_brand_sprout" />
 
                 <TextView
                     android:id="@+id/home_brand"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_s2"
                     android:fontFamily="serif"
                     android:text="@string/app_name"
                     android:textColor="@color/tl_ink"
-                    android:textSize="@dimen/text_h1"
+                    android:textSize="@dimen/text_brand"
                     android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/home_brand_english"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="serif"
-                    android:importantForAccessibility="no"
-                    android:text="@string/home_brand_english"
-                    android:textColor="@color/tl_ink3"
-                    android:textSize="@dimen/text_cap" />
             </LinearLayout>
-        </LinearLayout>
-
-        <!-- Hero copy: only while there is no topic yet (PRD 6.2.16 example 1). -->
-        <LinearLayout
-            android:id="@+id/home_hero"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingStart="@dimen/page_gutter"
-            android:paddingTop="@dimen/space_s4"
-            android:paddingEnd="@dimen/page_gutter"
-            android:paddingBottom="@dimen/space_s6">
 
             <TextView
                 android:id="@+id/home_hero_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:lineSpacingMultiplier="1.25"
+                android:fontFamily="serif"
+                android:gravity="center"
+                android:lineSpacingMultiplier="1.5"
                 android:text="@string/home_hero_title"
+                android:textAlignment="center"
                 android:textColor="@color/tl_ink"
-                android:textSize="@dimen/text_display" />
-
-            <TextView
-                android:id="@+id/home_hero_sub"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_s2"
-                android:text="@string/home_hero_sub"
-                android:textColor="@color/tl_ink2"
-                android:textSize="@dimen/text_sm" />
+                android:textSize="@dimen/text_h1" />
         </LinearLayout>
 
-        <!-- Mini heat strip (T-2026-09-23-102): sits below the greeting area. No android:id here
-             on purpose: an id on <include> overrides the included root's own
-             home_heat_strip_card id, which is what HomeScreen binds. -->
-        <include
-            layout="@layout/home_heat_strip"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <!-- Root-question composer: always present, draft survives every failure. -->
         <LinearLayout
             android:id="@+id/home_composer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/page_gutter"
-            android:layout_marginEnd="@dimen/page_gutter"
             android:background="@drawable/bg_card"
             android:elevation="@dimen/card_elevation"
             android:orientation="vertical"
             android:padding="@dimen/space_s4">
 
-            <EditText
+            <com.treelearn.app.screen.RuleEditText
                 android:id="@+id/home_draft"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -133,7 +110,8 @@
                 android:hint="@string/home_draft_hint"
                 android:imeOptions="actionSend"
                 android:inputType="textMultiLine|textCapSentences"
-                android:minLines="2"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
                 android:textColor="@color/tl_ink"
                 android:textColorHint="@color/tl_ink3"
                 android:textSize="@dimen/text_body" />
@@ -150,105 +128,163 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
-                <!-- A passive hint, not a button (055): the tab bar owns settings now, and the
-                     missing-key guard still opens settings the moment a send is attempted. -->
-                <TextView
+                <LinearLayout
                     android:id="@+id/home_key_hint"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/space_s2"
                     android:background="@drawable/bg_pill"
                     android:backgroundTint="@color/tl_amber_soft"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
                     android:paddingStart="@dimen/space_s3"
                     android:paddingTop="@dimen/space_s1"
                     android:paddingEnd="@dimen/space_s3"
-                    android:paddingBottom="@dimen/space_s2"
-                    android:text="@string/home_key_missing"
-                    android:textColor="@color/tl_amber"
-                    android:textSize="@dimen/text_cap" />
+                    android:paddingBottom="@dimen/space_s1">
+
+                    <ImageView
+                        android:id="@+id/home_key_icon"
+                        android:layout_width="13dp"
+                        android:layout_height="13dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_key"
+                        android:tint="@color/tl_amber" />
+
+                    <TextView
+                        android:id="@+id/home_key_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_s1"
+                        android:text="@string/home_key_missing"
+                        android:textColor="@color/tl_amber"
+                        android:textSize="@dimen/text_cap" />
+                </LinearLayout>
 
                 <View
                     android:layout_width="0dp"
                     android:layout_height="1dp"
                     android:layout_weight="1" />
 
-                <Button
+                <ImageButton
                     android:id="@+id/home_send"
-                    android:layout_width="wrap_content"
+                    android:layout_width="@dimen/touch_min"
                     android:layout_height="@dimen/touch_min"
-                    android:background="@drawable/bg_button_primary"
+                    android:background="@drawable/bg_send_fab"
+                    android:contentDescription="@string/home_send"
                     android:enabled="false"
-                    android:minWidth="@dimen/touch_min"
-                    android:text="@string/home_send"
-                    android:textColor="@color/tl_surface"
-                    android:textSize="@dimen/text_sm" />
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_chat_send"
+                    android:tint="@color/tl_surface" />
             </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/home_recommendations_section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <!-- The prototype's .rec-head: a sparkle and a short heading, both in the secondary/cap size
+                 band. The heading's text is set from HomeScreen, because it is one of two strings
+                 (试试这些起点 / 猜你想学) chosen by the same hasTopics() judgement the hero reads. -->
+            <LinearLayout
+                android:id="@+id/home_recommendations_head"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/home_recommendations_sparkle"
+                    android:layout_width="@dimen/space_s4"
+                    android:layout_height="@dimen/space_s4"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_sparkle"
+                    android:tint="@color/tl_ink3" />
+
+                <TextView
+                    android:id="@+id/home_recommendations_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_s1"
+                    android:textColor="@color/tl_green_deep"
+                    android:textSize="@dimen/text_cap"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <com.treelearn.app.screen.RecommendationMarquee
+                android:id="@+id/home_recommendations"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_s2" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/home_recent_section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_s6"
+            android:orientation="vertical">
+
+            <!-- The prototype's .home-sec: a short heading and a count on one baseline, the count
+                 empty while there is nothing to count. The horizontal gutter comes from home_primary,
+                 which already carries page_gutter for the whole column. -->
+            <LinearLayout
+                android:id="@+id/home_recent_head"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/home_recent_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/home_recent_title"
+                    android:textColor="@color/tl_ink"
+                    android:textSize="@dimen/text_sm"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/home_recent_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_s2"
+                    android:textColor="@color/tl_ink3"
+                    android:textSize="@dimen/text_cap"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- The prototype's .home-empty. Its "browse the sample topic" link is not carried over:
+                 the app has no sample-topic generator, and the deviation is registered in the spec. -->
+            <TextView
+                android:id="@+id/home_topics_empty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_s6"
+                android:gravity="center"
+                android:lineSpacingMultiplier="1.9"
+                android:text="@string/home_topics_empty"
+                android:textColor="@color/tl_ink3"
+                android:textSize="@dimen/text_sm"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/home_recent_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_s3"
+                android:orientation="vertical"
+                android:visibility="gone" />
         </LinearLayout>
 
         <TextView
             android:id="@+id/home_notice"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/page_gutter"
-            android:layout_marginTop="@dimen/space_s3"
-            android:layout_marginEnd="@dimen/page_gutter"
+            android:layout_marginTop="@dimen/space_s2"
             android:textColor="@color/tl_red"
             android:textSize="@dimen/text_sm"
             android:visibility="gone" />
-
-        <!-- Continue learning (055): the most recent topic as one tappable row, drawn only while
-             there is history - with none, the state carries a null and nothing is rendered here. -->
-        <LinearLayout
-            android:id="@+id/home_continue"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/page_gutter"
-            android:layout_marginTop="@dimen/space_s4"
-            android:layout_marginEnd="@dimen/page_gutter"
-            android:background="@drawable/bg_card"
-            android:clickable="true"
-            android:elevation="@dimen/card_elevation"
-            android:focusable="true"
-            android:gravity="center_vertical"
-            android:minHeight="@dimen/touch_min"
-            android:orientation="horizontal"
-            android:paddingStart="@dimen/space_s4"
-            android:paddingTop="@dimen/space_s2"
-            android:paddingEnd="@dimen/space_s4"
-            android:paddingBottom="@dimen/space_s2"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/home_continue_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_pill"
-                android:backgroundTint="@color/tl_green_soft"
-                android:importantForAccessibility="no"
-                android:paddingStart="@dimen/space_s2"
-                android:paddingTop="@dimen/space_s1"
-                android:paddingEnd="@dimen/space_s2"
-                android:paddingBottom="@dimen/space_s1"
-                android:text="@string/home_continue_label"
-                android:textColor="@color/tl_green_deep"
-                android:textSize="@dimen/text_cap" />
-
-            <TextView
-                android:id="@+id/home_continue_title"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/space_s3"
-                android:layout_weight="1"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:textColor="@color/tl_ink"
-                android:textSize="@dimen/text_body" />
-        </LinearLayout>
-
-        <com.treelearn.app.screen.RecommendationMarquee
-            android:id="@+id/home_recommendations"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_s4"
-            android:visibility="gone" />
     </LinearLayout>
+</LinearLayout>

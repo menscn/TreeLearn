@@ -44,6 +44,7 @@ public final class LibraryScreen extends LinearLayout {
     private final TextView state;
     private final TextView segmentInProgress;
     private final TextView segmentDone;
+    private final TextView searchScope;
     private final EditText searchInput;
 
     private LibraryPresenter actions;
@@ -58,6 +59,7 @@ public final class LibraryScreen extends LinearLayout {
         state = findViewById(R.id.library_state);
         segmentInProgress = findViewById(R.id.library_segment_in_progress);
         segmentDone = findViewById(R.id.library_segment_done);
+        searchScope = findViewById(R.id.library_search_scope);
         searchInput = findViewById(R.id.library_search_input);
         segmentInProgress.setOnClickListener(view -> onSegment(LibraryViewState.Segment.IN_PROGRESS));
         segmentDone.setOnClickListener(view -> onSegment(LibraryViewState.Segment.DONE));
@@ -87,7 +89,8 @@ public final class LibraryScreen extends LinearLayout {
         rendering = true;
         try {
             boolean done = next.segment == LibraryViewState.Segment.DONE;
-            drawSegments(done);
+            searchScope.setVisibility(GONE);
+            drawSegments(next, done);
             boolean listed = next.phase == LibraryViewState.Phase.READY
                     && !(done ? next.archived.isEmpty() : next.rows.isEmpty());
             rows.setVisibility(listed ? VISIBLE : GONE);
@@ -117,6 +120,7 @@ public final class LibraryScreen extends LinearLayout {
     public void showSearch(SearchViewState searchState, SearchPage page) {
         rendering = true;
         try {
+            searchScope.setVisibility(VISIBLE);
             rows.removeAllViews();
             boolean listed = page.pane == SearchPage.Pane.LIST;
             rows.setVisibility(listed ? VISIBLE : GONE);
@@ -202,7 +206,11 @@ public final class LibraryScreen extends LinearLayout {
     }
 
     /** The selected pill is the coloured one; the other keeps the page's own neutral fill. */
-    private void drawSegments(boolean done) {
+    private void drawSegments(LibraryViewState next, boolean done) {
+        segmentInProgress.setText(getContext().getString(R.string.library_segment_count,
+                getContext().getString(R.string.library_segment_in_progress), next.rows.size()));
+        segmentDone.setText(getContext().getString(R.string.library_segment_count,
+                getContext().getString(R.string.library_segment_done), next.archived.size()));
         tint(segmentInProgress, !done);
         tint(segmentDone, done);
     }

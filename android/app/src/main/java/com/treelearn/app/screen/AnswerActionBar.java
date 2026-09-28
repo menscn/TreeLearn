@@ -13,14 +13,16 @@ import com.treelearn.app.R;
 import com.treelearn.app.ui.ChatMessage;
 
 /**
- * One answer's action row (prototype v2.5 `.ai-actions`): quote, copy, reset, fork, the child-branch
- * entry and the version chip.
+ * One answer's action row (prototype v2.5 `.ai-actions`). 2026-09-27 user decision: the row leads
+ * with the prototype's own set - copy, reset, fork, the data-driven child entry - and the time
+ * rides at its end (prototype `.ai-time`, line 877), while the app's extras (quote, translation,
+ * speech) keep their state-driven slots and the version switcher stays a hidden compatibility
+ * entry.
  *
  * <p><strong>Enablement is read, never decided here.</strong> Every button takes its enabled flag from
  * the message's own predicate, which is the same judgement T-010's use case makes before it writes, so
  * a button that looks pressable is a command the store accepts. The row adds nothing to that rule; it
- * only decides what the state cannot show, which is that an answer with no children has no children
- * entry and an answer with one version has no chip.
+ * only decides what the state cannot show: an answer with no children has no child entry.
  *
  * <p>A tap is forwarded with the message id; the screen maps it to the presenter. Nothing here knows
  * what a reset is.
@@ -55,6 +57,7 @@ public final class AnswerActionBar extends LinearLayout {
     private final Button translate;
     private final Button speak;
     private final TextView version;
+    private final TextView time;
 
     private String messageId = "";
     private Listener listener;
@@ -71,6 +74,7 @@ public final class AnswerActionBar extends LinearLayout {
         translate = findViewById(R.id.act_translate);
         speak = findViewById(R.id.act_speak);
         version = findViewById(R.id.act_version);
+        time = findViewById(R.id.act_time);
         quote.setContentDescription(getContext().getString(R.string.chat_quote_title));
         copy.setContentDescription(getContext().getString(R.string.chat_copy_title));
         reset.setContentDescription(getContext().getString(R.string.chat_reset_title));
@@ -107,8 +111,7 @@ public final class AnswerActionBar extends LinearLayout {
         children.setContentDescription(hasChildren
                 ? getContext().getString(R.string.chat_children_title, message.childBranchCount)
                 : getContext().getString(R.string.chat_act_children));
-        boolean hasVersions = message.hasVersionHistory();
-        version.setVisibility(hasVersions ? VISIBLE : GONE);
+        version.setVisibility(GONE);
         // 073 §3.5: the switcher reads "n/N" - which version is displayed, out of how many are stored.
         version.setText(getContext().getString(R.string.chat_version_chip,
                 message.activeRevisionNo(), message.revisionCount));
@@ -119,6 +122,15 @@ public final class AnswerActionBar extends LinearLayout {
     /** The answer the row currently draws; the screen needs it to read a selection. */
     public String messageId() {
         return messageId;
+    }
+
+    /**
+     * Paints the row's trailing time (prototype `.ai-time`). The row is hidden while the answer
+     * streams, so the time appears exactly when the prototype shows it: on a stable answer.
+     */
+    public void renderTime(long createdAtMs) {
+        time.setText(android.text.format.DateUtils.getRelativeTimeSpanString(createdAtMs,
+                System.currentTimeMillis(), android.text.format.DateUtils.MINUTE_IN_MILLIS));
     }
 
     /** Paints the speak button's face (icon + label) for the current speech state. */

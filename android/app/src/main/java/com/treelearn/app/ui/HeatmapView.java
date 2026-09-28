@@ -23,6 +23,7 @@ extends View {
     private final int rows;
     private final int columns;
     private int[] levels = new int[0];
+    private boolean[] blank = new boolean[0];
 
     public HeatmapView(Context context) {
         this(context, null);
@@ -60,6 +61,13 @@ extends View {
 
     public void setIntensities(float[] values) {
         this.levels = HeatmapLayout.levelsFor(values, this.rows * this.columns);
+        this.blank = new boolean[this.levels.length];
+        if (values != null) {
+            int count = Math.min(values.length, this.blank.length);
+            for (int i = 0; i < count; ++i) {
+                this.blank[i] = values[i] < 0.0f;
+            }
+        }
         this.invalidate();
     }
 
@@ -72,6 +80,9 @@ extends View {
     protected void onDraw(Canvas canvas) {
         float corner = this.cellSize / 4.0f;
         for (int i = 0; i < this.levels.length; ++i) {
+            if (this.blank[i]) {
+                continue;
+            }
             int level = this.levels[i];
             this.paint.setColor(level == 0 ? this.emptyColor : this.levelColors[level]);
             float x = (float)this.getPaddingLeft() + HeatmapLayout.cellX(i, this.rows, this.cellSize, this.gap);
@@ -88,4 +99,3 @@ extends View {
         return value * this.getResources().getDisplayMetrics().density;
     }
 }
-

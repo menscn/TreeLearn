@@ -218,7 +218,7 @@ public final class TreeCanvasDeviceInstrumentedTest {
     @Test
     public void thePopupSeamFollowsTheRenderedState() {
         Activity host = instrumentation.startActivitySync(
-                new Intent(target, MainActivity.class));
+                new Intent(target, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         try {
             FrameLayout root = host.findViewById(android.R.id.content);
             TreeCanvasScreen screen = new TreeCanvasScreen(host);

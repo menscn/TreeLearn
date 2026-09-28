@@ -1,0 +1,63 @@
+T-2026-09-27-013 independent verifier static evidence
+captured-at: 2026-09-27
+cwd: D:\Project\Android\Treelearn
+mode: READONLY; no production code, task file, or test source modified
+test policy: no new test/build/device run; existing evidence and current device XML were inspected only
+
+IMPLEMENTATION CHECKS:
+  LibraryScreen.java:88-109 normal render hides searchScope and draws the library state.
+  LibraryScreen.java:120-136 showSearch makes searchScope visible and replaces the shared rows container with search rows or the search empty/error state.
+  screen_library_body.xml:26-36 gives the search control a touch_min height and tokenized search surface.
+  screen_library_body.xml:38-42 defines the search scope line; it has no explicit visibility="gone" on the scope itself, so the initial inflated view defaults visible until the first normal render runs.
+  screen_library_body.xml:48-63 provides the two segment controls; screen_library.xml and layout-sw600dp/screen_library.xml share the body, with the tablet wrapper using content_measure.
+  item_library_topic.xml, item_library_archived.xml and item_search_hit.xml use tokenized card surfaces and touch_min/minWidth controls.
+  MainActivity.java:439-457 keeps search rendered inside the existing LibraryScreen route; no new search route is introduced.
+
+SEARCH-SCOPE STATIC VERDICT:
+  normal render: PASS (searchScope.setVisibility(GONE))
+  search render: PASS (searchScope.setVisibility(VISIBLE))
+  strict initial-inflation-only-search-state: OPEN GAP (XML does not explicitly set the scope GONE)
+
+SCREENSHOT EVIDENCE:
+  PRESENT: artifacts/evidence/android-library-search-shell-2026-09-27-v4.png
+    sidecar: artifacts/evidence/android-library-search-shell-2026-09-27-v4.txt
+    observed: phone normal empty library; search scope is absent; title, search surface, segments and centered empty guidance are visible without clipping.
+  PRESENT: artifacts/evidence/android-library-search-empty-2026-09-27-v1.png
+    sidecar: artifacts/evidence/android-library-search-empty-2026-09-27-v1.txt
+    observed: phone search no-result state; query xyz is visible; search scope is visible only in this search state; empty result is centered and unclipped.
+  MISSING: populated in-progress topic-card screenshot.
+  MISSING: populated completed/archived-card screenshot.
+  MISSING: search-hit card screenshot.
+  MISSING: real sw600dp/tablet-landscape screenshots for normal, archived and search states.
+
+RED/GREEN EVIDENCE:
+  RED: artifacts/evidence/T-013-red-isolated.txt, same JVM command as GREEN, BUILD FAILED, EXITCODE=1.
+  GREEN: artifacts/evidence/T-013-green.txt and T-013-green-repo.txt, JVM command BUILD SUCCESSFUL, EXITCODE=0.
+  Device RED note in task: full package reached 241 tests with 23 failures and the new BottomTabShell fixture assertions timed out before their assertions; this is an incomplete device RED signal, not proof of a T-013-specific visual regression.
+
+GATE EVIDENCE:
+  JVM: T-013-green.txt and T-013-green-repo.txt record BUILD SUCCESSFUL / EXITCODE=0.
+  lint: T-013-lint.txt records three BUILD SUCCESSFUL runs / EXITCODE=0.
+  Java-only: T-013-guard.txt records VERDICT: PASS and EXITCODE=0 on both recorded runs; the dex scan reports no Kotlin runtime bytecode.
+  final Gradle gate: T-013-final-gate.txt records testDebugUnitTest + lintDebug + assembleDebugAndroidTest BUILD SUCCESSFUL / EXITCODE=0.
+  token guard: T-013 task GREEN claims check_design_tokens.py EXITCODE=0, but no task-scoped T-013 evidence file contains that command and result. Generic token evidence exists elsewhere in artifacts/evidence, but it is not independently attributable to this task.
+
+FULL DEVICE XML:
+  FILE: android/app/build/outputs/androidTest-results/connected/debug/TEST-ALP-AN00 - 13-_app-.xml
+  SUITE: com.treelearn.app.AnswerRevisionGenerationOperationDaoInstrumentedTest
+  RESULT: tests=241 failures=23 errors=0 skipped=0 timestamp=2026-09-27T16:37:44
+  T-013-adjacent failures: 3 BottomTabShellInstrumentedTest cases (two library route/return cases and the stored-topic fixture case).
+  Other failures: 13 GenerationCoordinator, 4 HomeMotion, 1 HomeTopicCard, 2 TreeCanvas cases.
+  INTERPRETATION: full device gate is not green; the XML does not isolate a passing T-013 visual matrix.
+
+DOCUMENTATION CHECK:
+  android/README.md:427 describes the search entry as the library top search box.
+  android/README.md:634-635 states the independent search screen view was retired and the entry moved into the library.
+  No current documentation contradiction was found; the older historical wording is explicitly marked by the migration context.
+
+STATIC_VERDICT=PARTIAL
+REASONS:
+  1. Phone normal-empty and search-no-result visual evidence passes, but populated, hit, archived and tablet states are absent.
+  2. Full connected XML is 241 tests / 23 failures, including three library-adjacent fixture failures.
+  3. T-013 token-guard output is claimed in the task but not independently traceable to a task-scoped evidence file.
+  4. Search scope is correctly hidden/shown after state rendering, but its XML initial default is visible rather than fail-closed GONE.

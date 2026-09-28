@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  One home history-topic card: the prototype's .topic-card
+  (Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html lines 170-173 and 1730-1751), three stacked
+  parts - a top row of unread dot + serif title, a two-line summary, and a meta line.
+
+  Two things this markup deliberately does not carry:
+
+  * The rename/delete overflow menu the prototype draws in the top row. The information architecture
+    keeps those actions in the library, where the topic list is the complete one; the home card is a
+    shortcut surface (SPEC-2026-09-27-home-visual-fidelity.md, requirement section).
+  * The 「临时标题」 chip. The prototype shows it while a root title is still provisional, but
+    TopicCard carries no provisional flag, so nothing here can decide it; the chip is registered as a
+    gap on T-2026-09-27-006 rather than drawn on a guess.
+
+  The unread dot is pure decoration: the fact it stands for ("this topic has unread answers") must
+  not be reachable only through a colour, and the card carries it in its own content description.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/home_topic_card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_topic_card"
+    android:clickable="true"
+    android:elevation="@dimen/card_elevation"
+    android:focusable="true"
+    android:minHeight="@dimen/touch_min"
+    android:orientation="vertical"
+    android:padding="@dimen/space_s4">
+
+    <LinearLayout
+        android:id="@+id/home_topic_top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <View
+            android:id="@+id/home_topic_unread"
+            android:layout_width="@dimen/space_s2"
+            android:layout_height="@dimen/space_s2"
+            android:layout_marginTop="@dimen/space_s2"
+            android:layout_marginEnd="@dimen/space_s2"
+            android:background="@drawable/bg_unread_dot"
+            android:importantForAccessibility="no"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/home_topic_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:fontFamily="serif"
+            android:maxLines="2"
+            android:textColor="@color/tl_ink"
+            android:textSize="@dimen/text_h2" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/home_topic_summary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_s2"
+        android:ellipsize="end"
+        android:lineSpacingMultiplier="1.7"
+        android:maxLines="2"
+        android:textColor="@color/tl_ink2"
+        android:textSize="@dimen/text_sm"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/home_topic_meta_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_s3"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/home_topic_tree"
+            android:layout_width="@dimen/space_s3"
+            android:layout_height="@dimen/space_s3"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_tree_branch"
+            android:tint="@color/tl_ink3" />
+
+        <TextView
+            android:id="@+id/home_topic_meta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_s1"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/tl_ink3"
+            android:textSize="@dimen/text_cap" />
+    </LinearLayout>
+</LinearLayout>

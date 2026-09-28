@@ -46,11 +46,17 @@ public final class TreeCanvasScreen extends FrameLayout {
     private final ImageButton fold;
     private final View open;
     private final View navHost;
+    private final TextView canvasTitle;
+    private final TextView canvasSubtitle;
+    private final View zoomIn;
+    private final View zoomOut;
+    private final View center;
 
     private TreeCanvasActions actions;
     private TreeCanvasViewState state;
     private PopupWindow popup;
     private TextView popupTitle;
+    private TextView popupSummary;
     private TextView popupUnread;
     private Button popupFold;
     /** True while the screen itself closes the card, so the dismiss listener stays silent. */
@@ -71,9 +77,20 @@ public final class TreeCanvasScreen extends FrameLayout {
         fold = findViewById(R.id.tree_fold);
         open = findViewById(R.id.tree_open);
         navHost = findViewById(R.id.tree_nav_host);
+        canvasTitle = findViewById(R.id.tree_title);
+        canvasSubtitle = findViewById(R.id.tree_subtitle);
+        zoomIn = findViewById(R.id.tree_zoom_in);
+        zoomOut = findViewById(R.id.tree_zoom_out);
+        center = findViewById(R.id.tree_center);
 
         findViewById(R.id.tree_back).setOnClickListener(view -> fire(TreeCanvasActions::onBackPressed));
         findViewById(R.id.tree_fit).setOnClickListener(view -> fire(TreeCanvasActions::onFit));
+        findViewById(R.id.tree_fit_tool).setOnClickListener(view -> fire(TreeCanvasActions::onFit));
+        zoomIn.setOnClickListener(view -> fire(actions -> actions.onZoom(1.18f,
+                canvas.getWidth() / 2f, canvas.getHeight() / 2f)));
+        zoomOut.setOnClickListener(view -> fire(actions -> actions.onZoom(0.85f,
+                canvas.getWidth() / 2f, canvas.getHeight() / 2f)));
+        center.setOnClickListener(view -> fire(TreeCanvasActions::onCenterCurrent));
         fold.setOnClickListener(view -> fire(actions -> actions.onCollapseToggled(
                 state == null ? null : state.currentBranchId)));
         open.setOnClickListener(view -> fire(TreeCanvasActions::onOpenCurrent));
@@ -110,6 +127,10 @@ public final class TreeCanvasScreen extends FrameLayout {
         if (next.notice != null) {
             notice.setText(R.string.tree_storage_failed);
         }
+        canvasTitle.setText(R.string.tree_canvas_title);
+        String rootTitle = next.snapshot == null ? "" : next.titleOf(next.snapshot.rootId());
+        canvasSubtitle.setText(rootTitle);
+        canvasSubtitle.setVisibility(rootTitle.isEmpty() ? GONE : VISIBLE);
         BranchGeometry current = next.layout.branch(next.currentBranchId);
         fold.setEnabled(ready && current != null);
         renderFoldControl(current);
@@ -154,6 +175,9 @@ public final class TreeCanvasScreen extends FrameLayout {
             buildPopup();
         }
         popupTitle.setText(frame.titleOf(placement.branchId));
+        String summary = frame.summaryOf(placement.branchId);
+        popupSummary.setText(summary);
+        popupSummary.setVisibility(summary.isEmpty() ? GONE : VISIBLE);
         BranchGeometry branch = frame.layout.branch(placement.branchId);
         int unread = branch == null ? 0 : branch.unreadTotal();
         popupUnread.setText(getResources().getString(R.string.tree_node_unread, unread));
@@ -178,6 +202,7 @@ public final class TreeCanvasScreen extends FrameLayout {
         LinearLayout content = (LinearLayout) LayoutInflater.from(getContext())
                 .inflate(R.layout.view_node_popup, null, false);
         popupTitle = content.findViewById(R.id.node_popup_title);
+        popupSummary = content.findViewById(R.id.node_popup_summary);
         popupUnread = content.findViewById(R.id.node_popup_unread);
         popupFold = content.findViewById(R.id.node_popup_fold);
         popupFold.setOnClickListener(view -> fire(actions -> actions.onCollapseToggled(

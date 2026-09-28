@@ -16,12 +16,10 @@ import android.view.View;
 import com.treelearn.app.R;
 import com.treelearn.app.ui.TreeCanvasActions;
 import com.treelearn.app.ui.TreeCanvasViewState;
-import com.treelearn.treelayout.Bounds;
 import com.treelearn.treelayout.BranchGeometry;
 import com.treelearn.treelayout.LabelGeometry;
 import com.treelearn.treelayout.TreeLayout;
 import com.treelearn.treelayout.ViewTransform;
-import com.treelearn.treelayout.ViewportConstraints;
 
 /**
  * The tree as one canvas (architecture 12, prototype v2.5 {@code TreeCanvas}).
@@ -37,30 +35,29 @@ import com.treelearn.treelayout.ViewportConstraints;
  * 44 dp target the layout gave it.
  *
  * <p>What a device adds on top of the JVM suite is the touch stream and the pixels; both are covered by
- * the instrumentation sources, which cannot run this round because no emulator is used.
+ * the instrumentation sources, while the JVM suite keeps the matrix and painter inputs deterministic.
  */
 public final class TreeCanvasView extends View {
 
     private static final float TITLE_TEXT = 13f;
     private static final float SUMMARY_TEXT = 10f;
     private static final float BADGE_TEXT = 10f;
-    private static final float BUD_RADIUS = 9f;
-    private static final float BADGE_RADIUS = 8f;
+    private static final float UNREAD_DOT_RADIUS = 3.6f;
     private static final float LABEL_PAD = 6f;
     private static final float TITLE_BASELINE = 16f;
 
-    private final Paint soil = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint wood = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint woodCurrent = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint leaf = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint leafUnread = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint accent = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint budFill = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint budEdge = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final TextPaint budText = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint unreadDot = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint plate = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint plateEdge = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint leader = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final TextPaint title = new TextPaint(Paint.ANTI_ALIAS_FLAG);
     private final TextPaint summary = new TextPaint(Paint.ANTI_ALIAS_FLAG);
-    private final TextPaint badge = new TextPaint(Paint.ANTI_ALIAS_FLAG);
     private final Path shape = new Path();
     private final RectF box = new RectF();
 
@@ -79,16 +76,19 @@ public final class TreeCanvasView extends View {
 
     public TreeCanvasView(Context context, AttributeSet attributes) {
         super(context, attributes);
-        soil.setColor(color(R.color.tl_line));
         wood.setColor(color(R.color.tl_green));
         woodCurrent.setColor(color(R.color.tl_green_deep));
         leaf.setColor(color(R.color.tl_green));
-        leafUnread.setColor(color(R.color.tl_amber));
-        accent.setColor(color(R.color.tl_amber));
         plate.setColor(color(R.color.tl_surface));
         plateEdge.setColor(color(R.color.tl_line));
         plateEdge.setStyle(Paint.Style.STROKE);
         plateEdge.setStrokeWidth(1f);
+        budFill.setColor(color(R.color.tl_surface));
+        budEdge.setStyle(Paint.Style.STROKE);
+        budEdge.setStrokeWidth(1.5f);
+        budText.setTextSize(BADGE_TEXT);
+        budText.setTextAlign(Paint.Align.CENTER);
+        unreadDot.setColor(color(R.color.tl_blue));
         leader.setColor(color(R.color.tl_ink3));
         leader.setStrokeWidth(1f);
         title.setColor(color(R.color.tl_ink));
@@ -97,9 +97,6 @@ public final class TreeCanvasView extends View {
         summary.setColor(color(R.color.tl_ink2));
         summary.setTextSize(SUMMARY_TEXT);
         summary.setTextAlign(Paint.Align.CENTER);
-        badge.setColor(color(R.color.tl_surface));
-        badge.setTextSize(BADGE_TEXT);
-        badge.setTextAlign(Paint.Align.CENTER);
         setContentDescription(context.getString(R.string.tree_canvas_description));
 
         pinch = new ScaleGestureDetector(context,
@@ -184,7 +181,6 @@ public final class TreeCanvasView extends View {
         canvas.save();
         canvas.translate(transform.translateX, transform.translateY);
         canvas.scale(transform.scale, transform.scale);
-        drawSoil(canvas, frame);
         for (BranchGeometry branch : frame.layout.branches()) {
             drawBranch(canvas, branch);
         }
@@ -194,23 +190,13 @@ public final class TreeCanvasView extends View {
         canvas.restore();
     }
 
-    private void drawSoil(Canvas canvas, TreeCanvasViewState frame) {
-        Bounds bounds = frame.layout.bounds();
-        if (bounds.isEmpty()) {
-            return;
-        }
-        box.set(bounds.minX, 0f, bounds.maxX, ViewportConstraints.DEFAULT_SOIL);
-        canvas.drawRoundRect(box, 6f, 6f, soil);
-    }
-
     private void drawBranch(Canvas canvas, BranchGeometry branch) {
         switch (branch.kind) {
             case LEAF:
                 drawLeaf(canvas, branch);
                 break;
             case BUD:
-                canvas.drawCircle(branch.tipX, branch.tipY, BUD_RADIUS, accent);
-                canvas.drawCircle(branch.tipX, branch.tipY, BUD_RADIUS / 2f, plate);
+                drawBud(canvas, branch);
                 break;
             case LIMB:
             default:
@@ -232,7 +218,11 @@ public final class TreeCanvasView extends View {
         shape.lineTo(branch.tipX - sideX * 1.5f, branch.tipY - sideY * 1.5f);
         shape.lineTo(branch.baseX - sideX * half, branch.baseY - sideY * half);
         shape.close();
-        canvas.drawPath(shape, branch.onCurrentPath ? woodCurrent : wood);
+        Paint branchPaint = branch.onCurrentPath ? woodCurrent : wood;
+        branchPaint.setAlpha(branch.onCurrentPath ? 255 : 158);
+        canvas.drawPath(shape, branchPaint);
+        canvas.drawCircle(branch.tipX, branch.tipY, Math.max(2f, branch.baseWidth * 0.46f), branchPaint);
+        branchPaint.setAlpha(255);
     }
 
     private void drawLeaf(Canvas canvas, BranchGeometry branch) {
@@ -250,14 +240,39 @@ public final class TreeCanvasView extends View {
                 branch.tipX + forwardX * length, branch.tipY + forwardY * length);
         shape.quadTo(middleX - sideX * halfWidth, middleY - sideY * halfWidth, branch.tipX,
                 branch.tipY);
-        canvas.drawPath(shape, branch.unreadTotal() > 0 ? leafUnread : leaf);
+        leaf.setAlpha(branch.onCurrentPath ? 242 : 153);
+        canvas.drawPath(shape, leaf);
+        leaf.setAlpha(255);
     }
 
     private void drawUnread(Canvas canvas, BranchGeometry branch) {
-        float x = branch.anchor().x;
-        float y = branch.anchor().y - BADGE_RADIUS - 2f;
-        canvas.drawCircle(x, y, BADGE_RADIUS, accent);
-        canvas.drawText(Integer.toString(branch.unreadTotal()), x, y + BADGE_TEXT * 0.36f, badge);
+        if (branch.kind == BranchGeometry.Kind.LEAF) {
+            float sin = (float) Math.sin(branch.direction);
+            float cos = (float) Math.cos(branch.direction);
+            float x = branch.tipX + sin * TreeLayout.LEAF_LENGTH * 0.6f
+                    + cos * TreeLayout.LEAF_WIDTH * 0.46f;
+            float y = branch.tipY - cos * TreeLayout.LEAF_LENGTH * 0.6f
+                    + sin * TreeLayout.LEAF_WIDTH * 0.46f;
+            canvas.drawCircle(x, y, UNREAD_DOT_RADIUS, unreadDot);
+        } else if (branch.kind == BranchGeometry.Kind.BUD) {
+            canvas.drawCircle(branch.tipX + 9f, branch.tipY - 9f, 4f, unreadDot);
+        }
+    }
+
+    private void drawBud(Canvas canvas, BranchGeometry branch) {
+        Paint edge = branch.onCurrentPath ? woodCurrent : wood;
+        edge.setAlpha(branch.onCurrentPath ? 255 : 158);
+        budEdge.setColor(edge.getColor());
+        budEdge.setAlpha(edge.getAlpha());
+        budText.setColor(edge.getColor());
+        budText.setAlpha(edge.getAlpha());
+        canvas.drawCircle(branch.tipX, branch.tipY, 12f, budFill);
+        canvas.drawCircle(branch.tipX, branch.tipY, 12f, budEdge);
+        canvas.drawText("+" + branch.hiddenDescendants, branch.tipX,
+                branch.tipY + 3.5f, budText);
+        edge.setAlpha(255);
+        budEdge.setAlpha(255);
+        budText.setAlpha(255);
     }
 
     /**
@@ -265,20 +280,34 @@ public final class TreeCanvasView extends View {
      * a width chosen here, so a long title shortens the same way at every zoom.
      */
     private void drawPlate(Canvas canvas, TreeCanvasViewState frame, LabelGeometry label) {
-        box.set(label.x, label.y, label.x + label.width, label.y + label.height);
-        canvas.drawRoundRect(box, 7f, 7f, plate);
-        canvas.drawRoundRect(box, 7f, 7f, plateEdge);
-        canvas.drawLine(label.x + label.width / 2f, label.y + label.height, label.leaderX,
+        BranchGeometry branch = frame.layout.branch(label.branchId);
+        float pillHeight = LABEL_PAD * 2f + 16f;
+        box.set(label.x, label.y, label.x + label.width, label.y + pillHeight);
+        canvas.drawRoundRect(box, 12f, 12f, plate);
+        plateEdge.setColor(branch != null && branch.onCurrentPath ? color(R.color.tl_green)
+                : color(R.color.tl_line));
+        canvas.drawRoundRect(box, 12f, 12f, plateEdge);
+        leader.setColor(color(R.color.tl_green));
+        leader.setAlpha(82);
+        canvas.drawLine(label.x + label.width / 2f, label.y + pillHeight, label.leaderX,
                 label.leaderY, leader);
+        leader.setAlpha(255);
+        float textX = label.x + LABEL_PAD;
         float room = label.width - 2f * LABEL_PAD;
-        canvas.drawText(TextUtils.ellipsize(frame.titleOf(label.branchId), title, room,
-                TextUtils.TruncateAt.END).toString(), label.x + label.width / 2f, label.y + TITLE_BASELINE,
-                title);
-        if (label.showSummary) {
-            canvas.drawText(TextUtils.ellipsize(frame.summaryOf(label.branchId), summary, room,
-                    TextUtils.TruncateAt.END).toString(), label.x + label.width / 2f, label.y + label.height
-                    - LABEL_PAD, summary);
+        if (branch != null && branch.unreadTotal() > 0) {
+            canvas.drawCircle(textX + 3f, label.y + 12f, 3f, unreadDot);
+            textX += 12f;
+            room -= 12f;
         }
+        title.setTextAlign(Paint.Align.LEFT);
+        canvas.drawText(TextUtils.ellipsize(frame.titleOf(label.branchId), title, room,
+                TextUtils.TruncateAt.END).toString(), textX, label.y + TITLE_BASELINE, title);
+        if (label.showSummary) {
+            canvas.drawText(TextUtils.ellipsize(frame.summaryOf(label.branchId), summary, label.width,
+                    TextUtils.TruncateAt.END).toString(), label.x + label.width / 2f,
+                    label.y + pillHeight + 14f, summary);
+        }
+        title.setTextAlign(Paint.Align.CENTER);
     }
 
     private int color(int resource) {

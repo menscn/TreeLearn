@@ -1,0 +1,47 @@
+﻿Treelearn Java-only guard - RERUN after 2026-09-27 build/install
+RUN AT   : 2026-09-27 16:56:27 +08:00
+COMMAND : powershell -NoProfile -File scripts/no-kotlin-check.ps1
+RUNDIR  : D:\Project\Android\Treelearn\android
+REASON  : previous evidence inspected app-debug.apk = 1986149 bytes; today's built+installed APK = 1714231 bytes
+---- guard output begins ----
+Treelearn Java-only guard
+Android root: D:\Project\Android\Treelearn\android
+
+== Script parse check ==
+OK   2 sibling script(s) parse cleanly (this file excluded: an unparseable guard never reaches this line)
+
+== Kotlin source files ==
+OK   no .kt / .kts / .gradle.kts source files
+
+== Gradle scripts and version catalogs ==
+OK   scanned 12 Gradle script/catalog file(s), comments excluded
+OK   raw-text dependency scan completed (lexer-independent)
+OK   lexer trust check completed (fail-closed on desync)
+
+== Resolved dependency report ==
+OK   no Kotlin coordinates on 53 variant classpath configuration(s) across :app, :core, :data, :ai, :tree-layout (build tooling configurations excluded, 4231 report lines)
+OK   excluded 36 build-tooling configuration(s) (AGP/Gradle are Kotlin themselves; they do not ship in the app)
+
+== Built APK dex tables ==
+
+== Result ==
+FAIL verifyNoKotlinDex failed (exit 1)
+FAIL         * Try:
+        > Run with --stacktrace option to get the stack trace.
+        > Run with --info or --debug option to get more log output.
+        > Run with --scan to get full insights.
+        > Get more help at https://help.gradle.org.
+        BUILD FAILED in 59s
+
+VERDICT: FAIL (2 problem(s))
+---- guard output ends ----
+EXITCODE=1
+
+---- 后续裁决（2026-09-27 17:02 追加，未改动上述任何原始行）----
+本次 FAIL 已被判为环境性竞态，非 Kotlin 命中。依据: 失败窗口 16:56:20-16:57:40 内唯一被改写的文件是
+参与编译的 Java 源码 android/app/src/main/java/com/treelearn/app/screen/PaperRules.java
+(mtime 16:57:36)，且构建配置在该窗口内未被改动；源码写入停止后，同参数的 Gradle 调用连续两次得到
+verifyNoKotlinDex PASS、退出码 0。
+完整裁决与引用行号: artifacts/evidence/no-kotlin-2026-09-27-adjudication.txt
+复现日志: artifacts/tmp/verifyNoKotlinDex-rerun.log:283,293,295 / artifacts/tmp/guard-exact-repro.log:286,296,298
+待补: 本文件不等于最终交付证据；源码树静止后须重跑 scripts/no-kotlin-check.ps1 一次。

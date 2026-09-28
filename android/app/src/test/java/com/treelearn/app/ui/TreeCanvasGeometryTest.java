@@ -85,7 +85,8 @@ public final class TreeCanvasGeometryTest {
 
     @Test
     public void fitUsesTheWholeBoundsCentredAndBottomAligned() {
-        started();
+        TreeCanvasPresenter presenter = started();
+        presenter.onFit();
         ViewportConstraints viewport = ViewportConstraints.of(TreeCanvasDoubles.PHONE_W,
                 TreeCanvasDoubles.PHONE_H);
         ViewTransform fitted = sink.last.transform;
@@ -98,6 +99,22 @@ public final class TreeCanvasGeometryTest {
                 (fitted.toScreen(bounds.minX, 0f).x + fitted.toScreen(bounds.maxX, 0f).x) / 2f, EPS);
         assertTrue("the fit is clamped to a readable range",
                 fitted.scale >= TreeLayout.MIN_SCALE && fitted.scale <= TreeLayout.MAX_SCALE);
+    }
+
+    @Test
+    public void firstLoadUsesPrototypeReadableScaleAndCentersTheCurrentBranch() {
+        started();
+
+        ViewTransform initial = sink.last.transform;
+        Pt current = sink.last.layout.anchorOf(TreeCanvasDoubles.LEAF_A);
+        Pt currentOnScreen = initial.toScreen(current.x, current.y);
+
+        assertEquals("the prototype opens the canvas at its readable entry scale", 0.92f,
+                initial.scale, EPS);
+        assertEquals("the current branch starts on the canvas centre line",
+                TreeCanvasDoubles.PHONE_W / 2f, currentOnScreen.x, EPS);
+        assertEquals("the current branch starts above the prototype's bottom reading offset",
+                TreeCanvasDoubles.PHONE_H - 180f, currentOnScreen.y, EPS);
     }
 
     @Test
@@ -169,6 +186,22 @@ public final class TreeCanvasGeometryTest {
         assertEquals(-37f, moved.x - probe.x, EPS);
         assertEquals(21f, moved.y - probe.y, EPS);
         assertEquals("panning must not rescale", scale, sink.last.transform.scale, EPS);
+    }
+
+    @Test
+    public void centerCurrentKeepsZoomAndPlacesTheCurrentBranchNearTheReadingCenter() {
+        TreeCanvasPresenter presenter = started();
+        presenter.onZoom(1.2f, 120f, 180f);
+        float scale = sink.last.transform.scale;
+
+        presenter.onCenterCurrent();
+
+        Pt anchor = sink.last.layout.anchorOf(TreeCanvasDoubles.LEAF_A);
+        Pt screen = sink.last.transform.toScreen(anchor.x, anchor.y);
+        assertEquals("centering does not change the chosen zoom", scale,
+                sink.last.transform.scale, EPS);
+        assertEquals(TreeCanvasDoubles.PHONE_W / 2f, screen.x, EPS);
+        assertEquals(TreeCanvasDoubles.PHONE_H / 2f - 40f, screen.y, EPS);
     }
 
     @Test

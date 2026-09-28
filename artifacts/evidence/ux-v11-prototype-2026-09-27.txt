@@ -1,0 +1,85 @@
+知芽 TreeLearn · 高保真原型 V1.1（增量）验收证据
+生成时间：2026-09-27 18:50:19（脚本当场捕获，非事后补写）
+==============================================================================
+
+CHECK 1  设计 token 三方一致性守门（原型 :root ↔ tokens.json ↔ colors.xml）
+命令： python .trae/scripts/dev/check_design_tokens.py
+EXITCODE=0
+  | OK   file exists: Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html
+  | OK   file exists: Docs/04-ux-design/design-system/tokens.json
+  | OK   file exists: android/app/src/main/res/values/colors.xml
+  | OK   tokens.json token 名唯一 — measured_dupes=[]
+  | OK   原型 :root 解析出 >= 40 个 token — measured=44
+  | OK   tokens.json 解析出 >= 40 个 token — measured=44
+  | OK   colors.xml 解析出 >= 1 个资源 — measured=16
+  | OK   三方一致（原型 :root ↔ tokens.json ↔ colors.xml） — measured_tokens=44 measured_resources=16
+  | 
+  | check_design_tokens: 0 check(s) failed
+  | EXITCODE=0
+判据：出现 "1 check(s) failed" 即 FAIL；本仓口径为 0 check(s) failed 且 EXITCODE=0。
+
+CHECK 2  V1.1 的 :root 是否与 V1 逐字节一致（V1 仍是唯一权威源）
+EXITCODE=0
+  | root_identical=True
+  | token_count_v1=44 token_count_v11=44
+  | root_md5_v1=87d3f40f699a6b92ada08e48c97dd84c
+  | root_md5_v11=87d3f40f699a6b92ada08e48c97dd84c
+  | 基线裸hex种类=23  V1.1=23
+  | 计数增加的既有值={'#fff': 3}
+  | 基线中从未出现过的新颜色=无
+  |    ctx #fff : ...font-weight:500;white-space:nowrap;} / .btn-primary{background:var(--green);color:#fff;border-radius:12px;padd...
+  |    ctx #fff : ...idth:44px;height:44px;border-radius:var(--r-full);background:var(--green);color:#fff;display:flex;align-item...
+  |    ctx #fff : ...{position:absolute;top:9px;right:9px;font-size:9px;background:var(--ink3);color:#fff;border-radius:var(--r-f...
+  |    ctx #fff : ...msg-user{align-self:flex-end;max-width:84%;background:var(--green-bubble);color:#fff;border-radius:var(--r-m...
+  |    ctx #fff : ...ht:14px;padding:0 3px;border-radius:var(--r-full);background:var(--green);color:#fff;font-size:9.5px;line-he...
+  |    ctx #fff : ...te;left:50%;transform:translateX(-50%);bottom:96px;background:var(--blue);color:#fff;font-size:12px;padding:...
+  |    ctx #fff : ...n:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2...
+  |    ctx #fff : ...var(--bg);color:var(--green-deep);} / .icon-key.rec{background:var(--green);color:#fff;animation:pulse 1.4s in...
+  |    ctx #fff : ...--red);} / .send-fab .stop-sq{width:13px;height:13px;border-radius:2px;background:#fff;} /  / /* ---- 来源卡三态（折叠 chi...
+  |    ctx #fff : ...'}, /   screen:{position:'relative',borderRadius:36,overflow:'hidden',background:'#fff'}, /   statusBar:{positio...
+  |    ctx #fff : ...ssName="cv-bud"> /                         <circle cx={p.x} cy={p.y} r={12} fill="#FFFFFF" stroke={stroke} str...
+  |    ctx #fff : ...      {audioTry ? <React.Fragment><span className="stop-sq" style={{background:'#fff'}}/>停止</React.Fragment>...
+判据：root_identical=True 且「基线中从未出现过的新颜色」为空 → PASS。
+说明：界面层裸 hex 的既有写法（v1 基线本身就有 40 处，多为渐变/纸纹/开关滑块）不因本版新增书写而变成违规；
+      本版只允许复用基线中已存在的颜色值，不得引入新颜色。
+
+CHECK 3  Edge headless 渲染 + 24 步走查点击（含页面异常捕获）
+命令： node artifacts/tmp/v11_smoke.mjs "file:///D:/Project/Android/Treelearn/Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.1.html" artifacts/tmp/v11_shots
+EXITCODE=0
+  | guide 自检: {"sub":"TreeLearn · 树状分支学习 · 高保真交互原型 v3.0（交付 V1.1）","h3":["V1.1 增量走查路径（本次新增）","基线走查路径（v2.5 及以前）","图例"],"olCount":2,"liPerOl":[9,17],"legend":3}
+  | PASS 00_home              key=               tabbar=Y text="知芽 | 知芽 | 把复杂问题，学成自己的知识树 | V4.1 Flash | DeepSeek 已就绪 | 猜你想学 | 顺着你学的 | KV Cache 的显存优化手段 | 顺着你学的 | GQA 与 MLA 压缩方案对比 | 顺着你学的 | RoPE 的长序"
+  | PASS 01_demo_loaded       key=               tabbar=Y text="知芽 | 知芽 | 把复杂问题，学成自己的知识树 | V4.1 Flash | DeepSeek 已就绪 | 猜你想学 | 顺着你学的 | KV Cache 的显存优化手段 | 顺着你学的 | GQA 与 MLA 压缩方案对比 | 顺着你学的 | RoPE 的长序"
+  | PASS 02_drawer            key=               tabbar=Y text="知芽 | 知芽 | 把复杂问题，学成自己的知识树 | V4.1 Flash | DeepSeek 已就绪 | 猜你想学 | 顺着你学的 | KV Cache 的显存优化手段 | 顺着你学的 | GQA 与 MLA 压缩方案对比 | 顺着你学的 | RoPE 的长序"
+  | PASS 03_stats             key=               tabbar=n text="学习统计 | 4 | 连续学习天数 | 10 | 累计提问 | 20 | 累计消息 | 学习热度 | 2026 年 9 月 | 一 | 二 | 三 | 四 | 五 | 六 | 日 | 少 | 多 | 口径只做可从既有记录派生的部分：按天活跃、连续学习天数、累计提问数、累计消息数。 统计读取失"
+  | PASS 04_home              key=               tabbar=Y text="知芽 | 知芽 | 把复杂问题，学成自己的知识树 | V4.1 Flash | DeepSeek 已就绪 | 猜你想学 | 顺着你学的 | KV Cache 的显存优化手段 | 顺着你学的 | GQA 与 MLA 压缩方案对比 | 顺着你学的 | RoPE 的长序"
+  | PASS 05_library           key=               tabbar=Y text="学习库 | 标题 · 问题 · 回答 · 锚定原文 | 进行中 2 | 已完成 1 | 大语言模型的注意力机制 | 主干学习：QKV 原理、缩放点积、多头机制与位置编码的整体框架。 | 8 个分支 | 今天 08:52 | 冷链物流的断链风险点 | 梳理装"
+  | PASS 06_library_done      key=               tabbar=Y text="学习库 | 标题 · 问题 · 回答 · 锚定原文 | 进行中 2 | 已完成 1 | 预冷环节的关键控制点 | 含 0 个后代 · 来源：冷链物流的断链风险点 | 查看详情 | 恢复整棵子树 | 主页 | 学习库 | 设置"
+  | PASS 06b_settings         key=               tabbar=Y text="设置 | DeepSeek API KEY | sk-••••••••••3f2a | 可用 | 仅存本机，可随时替换或删除。 | 保存 | 使用演示 Key | 模拟无效 Key | 删除 Key | 能力配置 | 提供商管理 | 已启用 2 家 · 共 3 家"
+  | PASS 07_providers         key=               tabbar=n text="提供商管理 | OpenAI 兼容 · 已启用 2 家 | 新建 | DeepSeek | https://api.deepseek.com/v1 | 3 个模型 | 硅基流动 | https://api.siliconflow.cn/v1 | 2 个"
+  | PASS 08_providerEdit      key=               tabbar=n text="DeepSeek | 已启用 | 名称 | 基址（Base URL） | API KEY | sk-••••••••••3f2a | 可用 | 仅存本机 Keystore，可随时替换或删除。 | 替换 | 删除 Key | 模型清单 | 拉取模型 | 3 个已入本地清"
+  | PASS 09_pull_fail         key=               tabbar=n text="DeepSeek | 已启用 | 名称 | 基址（Base URL） | API KEY | sk-••••••••••3f2a | 可用 | 仅存本机 Keystore，可随时替换或删除。 | 替换 | 删除 Key | 模型清单 | 拉取模型 | 3 个已入本地清"
+  | PASS 10_modelSettings     key=               tabbar=n text="模型设置 | 三条分工各自选一个模型 | 模型分工 | 聊天模型 | 教学回答主链路 | deepseek-v4.1-flash · DeepSeek | 思考预算 | 随聊天模型 · 每次请求显式传 | 自动 | 快速模型 | 标题 / 摘要等派生杂活 | de"
+  | PASS 11_searchServices    key=               tabbar=n text="搜索服务 | 默认关闭 · 开启后发送前先检索 | 智谱 AI 搜索 | 中文检索 · Key 已配置 | 已启用 | Tavily | 国际检索 · 未配置 Key | 已停用 | 通用参数 | 检索结果数 | 进入上下文的结果条数上限 | 至少保留一个引擎（可"
+  | PASS 12_searchEngine      key=               tabbar=n text="智谱 AI 搜索 | 中文检索 | API KEY | sk-••••••••••7d41 | 可用 | Key 只进 Keystore，与其它提供商的 Key 分开存。 | 保存 | 该引擎特有选项 | 检索结果数 | 10 | 删除该引擎"
+  | PASS 13_voice             key=               tabbar=n text="语音 | 朗读与语音输入均用系统能力 | 朗读引擎 | 系统 TTS | 默认 | 本机引擎 · 零费用、零新依赖 · 第一批不可删除 | 试听 | 学习不是把答案抄下来，而是把问题问清楚。 | 试听 | 降级规则：无 TTS 引擎时本页显示说明且不出现试"
+  | PASS 14_files             key=               tabbar=n text="文件管理 | 附件只存本机私有目录 | 4 | 个附件 · 共 2.3 MB | Transformer 综述.pdf | PDF | 1.8 MB | 09-27 | 被消息引用 | 注意力机制手写笔记.md | Markdown | 24 KB | 09-26 | 被"
+  | PASS 15_chat              key=               tabbar=n text="大语言模型的注意力机制 | 我在工作中需要理解 Transformer 的注意力机制，能系统讲一下吗？ | 知芽 | 思考过程 | 展开 | 注意力机制的核心，是让模型在处理每个词时，动态决定应该关注序列中的哪些其他词。它通过查询（Q）、键"
+  | PASS 16_search_panel      key=               tabbar=n text="大语言模型的注意力机制 | 我在工作中需要理解 Transformer 的注意力机制，能系统讲一下吗？ | 知芽 | 思考过程 | 展开 | 注意力机制的核心，是让模型在处理每个词时，动态决定应该关注序列中的哪些其他词。它通过查询（Q）、键"
+  | PASS 17_search_on         key=               tabbar=n text="大语言模型的注意力机制 | 我在工作中需要理解 Transformer 的注意力机制，能系统讲一下吗？ | 知芽 | 思考过程 | 展开 | 注意力机制的核心，是让模型在处理每个词时，动态决定应该关注序列中的哪些其他词。它通过查询（Q）、键"
+  | PASS 18_sheet_close       key=               tabbar=n text="大语言模型的注意力机制 | 我在工作中需要理解 Transformer 的注意力机制，能系统讲一下吗？ | 知芽 | 思考过程 | 展开 | 注意力机制的核心，是让模型在处理每个词时，动态决定应该关注序列中的哪些其他词。它通过查询（Q）、键"
+  | PASS 19_generating        key=               tabbar=n text="大语言模型的注意力机制 | 我在工作中需要理解 Transformer 的注意力机制，能系统讲一下吗？ | 知芽 | 思考过程 | 展开 | 注意力机制的核心，是让模型在处理每个词时，动态决定应该关注序列中的哪些其他词。它通过查询（Q）、键"
+  | PASS 20_src_card          key=               tabbar=n text="大语言模型的注意力机制 | 我在工作中需要理解 Transformer 的注意力机制，能系统讲一下吗？ | 知芽 | 思考过程 | 展开 | 注意力机制的核心，是让模型在处理每个词时，动态决定应该关注序列中的哪些其他词。它通过查询（Q）、键"
+  | PASS 21_stop_send         key=               tabbar=n text="大语言模型的注意力机制 | 我在工作中需要理解 Transformer 的注意力机制，能系统讲一下吗？ | 知芽 | 思考过程 | 展开 | 注意力机制的核心，是让模型在处理每个词时，动态决定应该关注序列中的哪些其他词。它通过查询（Q）、键"
+  | PASS 22_stop_done         key=               tabbar=n text="大语言模型的注意力机制 | 我在工作中需要理解 Transformer 的注意力机制，能系统讲一下吗？ | 知芽 | 思考过程 | 展开 | 注意力机制的核心，是让模型在处理每个词时，动态决定应该关注序列中的哪些其他词。它通过查询（Q）、键"
+  | 步骤：24/24 PASS
+  | pageerror / console-error 数： 0
+判据：步骤 24/24 PASS 且 pageerror / console-error 数 0 → PASS。
+
+==============================================================================
+结论（由上面三次捕获机械派生，不手工填写）
+  CHECK 1  token 守门            : PASS (EXITCODE=0)
+  CHECK 2  :root 与 V1 一致/无裸hex: PASS (EXITCODE=0)
+  CHECK 3  渲染+走查 24/24 PASS, 页面异常 0 : PASS (EXITCODE=0)
+  截图目录： artifacts/tmp/v11_shots/
+  整体判定： PASS
+==============================================================================

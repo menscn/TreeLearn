@@ -19,8 +19,8 @@ import java.util.concurrent.Executor;
  */
 public final class HomeDrawerPresenter {
 
-    /** The quick-list window; the design mockup may retune it, nothing else reads this constant. */
-    public static final int QUICK_LIMIT = 10;
+    /** The fixed drawer history window; the library remains the canonical full list. */
+    public static final int QUICK_LIMIT = 3;
 
     /** The drawer is either shut or shown; the slide animation is a View detail, not a state. */
     public enum Phase {
@@ -33,6 +33,11 @@ public final class HomeDrawerPresenter {
         List<LibraryViewState.Row> read();
     }
 
+    public interface StatsSource {
+
+        HomeStats read();
+    }
+
     /** The render and navigation ports; the navigation targets are the host's own room methods. */
     public interface Sink {
 
@@ -40,40 +45,51 @@ public final class HomeDrawerPresenter {
 
         void openBranch(String branchId);
 
-        void openSettings();
-
         void openStats();
     }
 
-    /** The drawer's whole world: which phase, and the quick rows the list should draw. */
+    /** The drawer's whole world: phase, quick rows, and the compact heatmap snapshot. */
     public static final class State {
 
         public final Phase phase;
         /** The quick rows, already windowed to {@link #QUICK_LIMIT}; empty means draw the empty. */
         public final List<LibraryViewState.Row> rows;
+        public final HomeStats stats;
 
         public State(Phase phase, List<LibraryViewState.Row> rows) {
+            this(phase, rows, null);
+        }
+
+        public State(Phase phase, List<LibraryViewState.Row> rows, HomeStats stats) {
             this.phase = phase == null ? Phase.CLOSED : phase;
             this.rows = rows == null
                     ? java.util.Collections.<LibraryViewState.Row>emptyList()
                     : java.util.Collections.unmodifiableList(rows);
+            this.stats = stats;
         }
     }
 
     private final Sink sink;
     private final QuickTopicsSource source;
+    private final StatsSource statsSource;
     private final UiThread ui;
     private final Executor background;
     private State state;
 
     public HomeDrawerPresenter(Sink sink, QuickTopicsSource source) {
-        this(sink, source, null, null);
+        this(sink, source, null, null, null);
     }
 
     public HomeDrawerPresenter(Sink sink, QuickTopicsSource source, UiThread ui,
             Executor background) {
+        this(sink, source, null, ui, background);
+    }
+
+    public HomeDrawerPresenter(Sink sink, QuickTopicsSource source, StatsSource statsSource,
+            UiThread ui, Executor background) {
         this.sink = Guard.object(sink, "sink");
         this.source = Guard.object(source, "source");
+        this.statsSource = statsSource;
         this.ui = ui;
         this.background = background;
     }
@@ -87,23 +103,24 @@ public final class HomeDrawerPresenter {
         if (ui != null && background != null) {
             background.execute(() -> {
                 List<LibraryViewState.Row> rows = readRows();
-                ui.post(() -> render(new State(Phase.CLOSED, rows)));
+                HomeStats stats = readStats();
+                ui.post(() -> render(new State(Phase.CLOSED, rows, stats)));
             });
             return;
         }
-        render(new State(Phase.CLOSED, readRows()));
+        render(new State(Phase.CLOSED, readRows(), readStats()));
     }
 
     public void onDrawerToggled() {
-        render(state.phase == Phase.OPEN ? new State(Phase.CLOSED, state.rows)
-                : new State(Phase.OPEN, state.rows));
+        render(state.phase == Phase.OPEN ? new State(Phase.CLOSED, state.rows, state.stats)
+                : new State(Phase.OPEN, state.rows, state.stats));
     }
 
     public void onTopicTapped(String topicId) {
         Guard.id(topicId, "topicId");
         for (LibraryViewState.Row row : state.rows) {
             if (row.topicId.equals(topicId)) {
-                render(new State(Phase.CLOSED, state.rows));
+                render(new State(Phase.CLOSED, state.rows, state.stats));
                 sink.openBranch(row.resumeBranchId);
                 return;
             }
@@ -112,13 +129,8 @@ public final class HomeDrawerPresenter {
                 "the quick list only opens its own rows; unknown topicId " + topicId);
     }
 
-    public void onSettingsTapped() {
-        render(new State(Phase.CLOSED, state.rows));
-        sink.openSettings();
-    }
-
     public void onStatsTapped() {
-        render(new State(Phase.CLOSED, state.rows));
+        render(new State(Phase.CLOSED, state.rows, state.stats));
         sink.openStats();
     }
 
@@ -130,6 +142,17 @@ public final class HomeDrawerPresenter {
             // A broken read is an empty quick list, never a crash: the drawer's other duties
             // (settings, stats) do not depend on the list.
             return new ArrayList<>();
+        }
+    }
+
+    private HomeStats readStats() {
+        if (statsSource == null) {
+            return null;
+        }
+        try {
+            return statsSource.read();
+        } catch (RuntimeException broken) {
+            return null;
         }
     }
 

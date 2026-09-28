@@ -1,0 +1,20 @@
+# T-2026-09-27-002 真机仪器测试 — 首页纸纹两种配置 + 旧行为回归
+# generated: 2026-09-27 16:29:34 +0800
+# device: AWSS013807000356	device
+# workdir: android/
+# command: JAVA_HOME=<jdk21> ./gradlew --offline :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.HomeBackdropInstrumentedTest,com.treelearn.app.AppLaunchInstrumentedTest,com.treelearn.app.BottomTabShellInstrumentedTest
+# mode: connected instrumented test, filter = HomeBackdropInstrumentedTest + AppLaunch + BottomTabShell
+EXITCODE=0
+---- build verdict ----
+  Starting 8 tests on ALP-AN00 - 13
+  Finished 8 tests on ALP-AN00 - 13
+  BUILD SUCCESSFUL in 21s
+---- 聚合报告核对（从构建产物读取，不手抄）----
+  $ grep -o '<testsuite[^>]*>' "$X"
+  <testsuite name="com.treelearn.app.HomeBackdropInstrumentedTest" tests="8" failures="0" errors="0" skipped="0" time="8.968" timestamp="2026-09-27T08:29:33" hostname="localhost">
+  $ grep -o 'testcase name="[^"]*" classname="[^"]*"' "$X" | 按类计数
+        1 com.treelearn.app.AppLaunchInstrumentedTest
+        5 com.treelearn.app.BottomTabShellInstrumentedTest
+        2 com.treelearn.app.HomeBackdropInstrumentedTest
+  $ grep -c '<failure\|<error' "$X"
+  0

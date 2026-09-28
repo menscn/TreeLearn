@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The row of answer actions (073 §3.5): the primary action first, then the version switcher, then
-  the secondary icons. Each is enabled only where the store would accept it, which the screen reads
-  from the message's own predicates; the actions a state does not offer are disabled rather than
-  hidden, so the row does not reflow as an attempt starts and finishes.
+  The row of answer actions. 2026-09-27 user decision: the row follows the prototype's .ai-actions
+  (line 867-878) - copy, reset, fork, the data-driven child entry, then the time - while the app's
+  own extras (quote, translation, speech) keep their state-driven slots before the time, and the
+  version switcher stays a hidden compatibility entry. No capability is removed: copy/fork return
+  from the compatibility layout, quote keeps its whole-answer entry beside the selection menu's
+  selected-text entry.
+
+  Icon buttons drop minWidth and pad 6dp so the full worst-case row (7 targets + time) still fits
+  a 360dp column; every target stays 44dp tall (WCAG 2.5.8 needs 24dp, the prototype's own targets
+  are 17px glyphs).
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/answer_actions"
@@ -13,67 +19,32 @@
     android:orientation="horizontal">
 
     <Button
-        android:id="@+id/act_reset"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/touch_min"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/cd_act_reset"
-        android:drawableStart="@drawable/ic_nav_restore"
-        android:drawableTint="@color/tl_ink3"
-        android:drawablePadding="0dp"
-        android:minWidth="@dimen/touch_min"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
-        android:text=""
-        android:textColor="@color/tl_ink3"
-        android:textSize="@dimen/text_cap" />
-
-    <TextView
-        android:id="@+id/act_version"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/touch_min"
-        android:layout_marginStart="@dimen/space_s2"
-        android:background="@drawable/bg_pill"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center"
-        android:minWidth="@dimen/touch_min"
-        android:paddingStart="@dimen/space_s2"
-        android:paddingEnd="@dimen/space_s2"
-        android:textColor="@color/tl_ink2"
-        android:textSize="@dimen/text_sm"
-        android:visibility="gone" />
-
-    <Button
-        android:id="@+id/act_quote"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/touch_min"
-        android:layout_marginStart="@dimen/space_s2"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/cd_act_quote"
-        android:drawableStart="@drawable/ic_action_quote"
-        android:drawableTint="@color/tl_ink3"
-        android:drawablePadding="0dp"
-        android:minWidth="@dimen/touch_min"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
-        android:text=""
-        android:textColor="@color/tl_ink3"
-        android:textSize="@dimen/text_cap" />
-
-    <Button
         android:id="@+id/act_copy"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/touch_min"
-        android:layout_marginStart="@dimen/space_s2"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/cd_act_copy"
         android:drawableStart="@drawable/ic_action_copy"
         android:drawableTint="@color/tl_ink3"
         android:drawablePadding="0dp"
-        android:minWidth="@dimen/touch_min"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
+        android:paddingStart="6dp"
+        android:paddingEnd="6dp"
+        android:text=""
+        android:textColor="@color/tl_ink3"
+        android:textSize="@dimen/text_cap" />
+
+    <Button
+        android:id="@+id/act_reset"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/touch_min"
+        android:layout_marginStart="@dimen/space_s1"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/cd_act_reset"
+        android:drawableStart="@drawable/ic_nav_restore"
+        android:drawableTint="@color/tl_ink3"
+        android:drawablePadding="0dp"
+        android:paddingStart="6dp"
+        android:paddingEnd="6dp"
         android:text=""
         android:textColor="@color/tl_ink3"
         android:textSize="@dimen/text_cap" />
@@ -82,49 +53,14 @@
         android:id="@+id/act_fork"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/touch_min"
-        android:layout_marginStart="@dimen/space_s2"
+        android:layout_marginStart="@dimen/space_s1"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/cd_act_fork"
         android:drawableStart="@drawable/ic_action_fork"
         android:drawableTint="@color/tl_ink3"
         android:drawablePadding="0dp"
-        android:minWidth="@dimen/touch_min"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
-        android:text=""
-        android:textColor="@color/tl_ink3"
-        android:textSize="@dimen/text_cap" />
-
-    <Button
-        android:id="@+id/act_translate"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/touch_min"
-        android:layout_marginStart="@dimen/space_s2"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/cd_act_translate"
-        android:drawableStart="@drawable/ic_action_translate"
-        android:drawableTint="@color/tl_ink3"
-        android:drawablePadding="0dp"
-        android:minWidth="@dimen/touch_min"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
-        android:text=""
-        android:textColor="@color/tl_ink3"
-        android:textSize="@dimen/text_cap" />
-
-    <Button
-        android:id="@+id/act_speak"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/touch_min"
-        android:layout_marginStart="@dimen/space_s2"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/cd_act_speak"
-        android:drawableStart="@drawable/ic_action_speak"
-        android:drawableTint="@color/tl_ink3"
-        android:drawablePadding="0dp"
-        android:minWidth="@dimen/touch_min"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
+        android:paddingStart="6dp"
+        android:paddingEnd="6dp"
         android:text=""
         android:textColor="@color/tl_ink3"
         android:textSize="@dimen/text_cap" />
@@ -133,10 +69,89 @@
         android:id="@+id/act_children"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/touch_min"
-        android:layout_marginStart="@dimen/space_s2"
+        android:layout_marginStart="@dimen/space_s1"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:minWidth="@dimen/touch_min"
         android:textColor="@color/tl_ink3"
         android:textSize="@dimen/text_cap"
         android:visibility="gone" />
+
+    <Button
+        android:id="@+id/act_quote"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/touch_min"
+        android:layout_marginStart="@dimen/space_s1"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/cd_act_quote"
+        android:drawableStart="@drawable/ic_action_quote"
+        android:drawableTint="@color/tl_ink3"
+        android:drawablePadding="0dp"
+        android:paddingStart="6dp"
+        android:paddingEnd="6dp"
+        android:text=""
+        android:textColor="@color/tl_ink3"
+        android:textSize="@dimen/text_cap" />
+
+    <Button
+        android:id="@+id/act_translate"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/touch_min"
+        android:layout_marginStart="@dimen/space_s1"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/cd_act_translate"
+        android:drawableStart="@drawable/ic_action_translate"
+        android:drawableTint="@color/tl_ink3"
+        android:drawablePadding="0dp"
+        android:paddingStart="6dp"
+        android:paddingEnd="6dp"
+        android:text=""
+        android:textColor="@color/tl_ink3"
+        android:textSize="@dimen/text_cap" />
+
+    <Button
+        android:id="@+id/act_speak"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/touch_min"
+        android:layout_marginStart="@dimen/space_s1"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/cd_act_speak"
+        android:drawableStart="@drawable/ic_action_speak"
+        android:drawableTint="@color/tl_ink3"
+        android:drawablePadding="0dp"
+        android:paddingStart="6dp"
+        android:paddingEnd="6dp"
+        android:text=""
+        android:textColor="@color/tl_ink3"
+        android:textSize="@dimen/text_cap" />
+
+    <TextView
+        android:id="@+id/act_version"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/touch_min"
+        android:layout_marginStart="@dimen/space_s1"
+        android:background="@drawable/bg_pill"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:paddingStart="@dimen/space_s2"
+        android:paddingEnd="@dimen/space_s2"
+        android:textColor="@color/tl_ink2"
+        android:textSize="@dimen/text_sm"
+        android:visibility="gone" />
+
+    <!-- The time rides the action row now (prototype .ai-time, line 877); the weight spacer pins
+         it to the end without a fixed width. -->
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_weight="1" />
+
+    <TextView
+        android:id="@+id/act_time"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/touch_min"
+        android:layout_marginStart="@dimen/space_s1"
+        android:gravity="center_vertical"
+        android:textColor="@color/tl_ink3"
+        android:textSize="@dimen/text_cap" />
 </LinearLayout>

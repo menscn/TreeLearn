@@ -27,10 +27,12 @@
   --ink3:#627067;        /* 弱化（修正值：新稿 #75867B 在 bg 上只有 3.42，低于 4.5） */
   --line:#E2DFD6;
   --hairline:rgba(26,40,32,.07);   /* 极淡分隔，替代重描边 */
-  --green:#2B6E45;       /* 生长绿主色 */
+  --green:#2B6E45;       /* 生长绿主色（动作色：按钮/发送/锚点/叶芽） */
   --green-deep:#164027;
   --green-soft:#E3F0E7;  /* 新稿为 rgba；Android 只收不透明 hex，故保留不透明值 */
   --green-faint:#F0F7F1;
+  --green-bubble:#3F6C49;/* 用户消息气泡底。大面积底色与动作色分档：气泡比 --green 柔一档，
+                            避免满屏高饱和绿压住纸感；仅用于 .msg-user，不参与其它绿色元素 */
   --blue:#2563EB;        /* 未读蓝点（BASE-13 指定实心蓝点） */
   --amber:#B05108;       /* 修正值：新稿 #B45309 在 bg 上只有 4.45，低于 4.5 */
   --amber-soft:#FBF3E2;
@@ -49,6 +51,7 @@
 
   /* —— 字号系统：display 与 caption 拉开约 2.4 倍对比 —— */
   --fs-display:26px;   /* 首页 hero */
+  --fs-brand:30px;     /* 首页品牌锁定区 */
   --fs-h1:20px;        /* 页面主标题 */
   --fs-h2:16px;        /* 卡片/分支标题 */
   --fs-body:15px;      /* 正文（阅读区，移动端建议值） */
@@ -60,7 +63,7 @@
   --sh-2:0 4px 12px rgba(22,36,28,.06);
 
   /* —— 字体：正文走系统 sans-serif；品牌衬线走回退栈，本轮不打包字体 —— */
-  --kai:'LXGW WenKai','Noto Serif SC','Songti SC',serif;   /* 遗留楷体：本片保留不删，退役待定 */
+  --kai:'LXGW WenKai','Noto Serif SC','Songti SC',serif;   /* 遗留楷体：2026-09-27 起 .screen 已改用 --sans；现存唯一引用是 .home-hero .hh-sub（首页 hero 副标题）。退役待定 */
   --serif:'Noto Serif SC','Songti SC',Georgia,serif;       /* 品牌衬线回退栈（各 ROM 字形有差异） */
   --brush:'Ma Shan Zheng','LXGW WenKai',serif;             /* 品牌题字 */
   --sans:'Noto Sans SC',-apple-system,sans-serif;          /* 正文；Android 落系统 sans-serif */
@@ -108,7 +111,7 @@ input,textarea{font-family:inherit;color:inherit;}
 .legend .fork-sample{color:var(--green);font-weight:700;}
 
 /* ============ 手机内通用 ============ */
-.screen{height:100%;display:flex;flex-direction:column;position:relative;font-family:var(--kai);
+.screen{height:100%;display:flex;flex-direction:column;position:relative;font-family:var(--sans);/* 2026-09-27 由 --kai 改为 --sans：对话页设计稿与真机 themes.xml 均为 sans-serif，楷体是与两者都不符的一方 */
   background-color:var(--bg);
   background-image:repeating-linear-gradient(to bottom,transparent 0 31px,var(--paper-rule) 31px 32px);
   animation:screenIn .28s cubic-bezier(.2,.8,.2,1);}
@@ -142,8 +145,10 @@ input,textarea{font-family:inherit;color:inherit;}
 .demo-link:hover{color:var(--green-deep);}
 
 /* ============ 首页 ============ */
-.home-hero{padding:var(--s4) var(--gutter) var(--s6);}
-.home-hero .hh-title{font-family:var(--brush);font-size:var(--fs-display);font-weight:400;line-height:1.4;letter-spacing:.01em;}
+.home-hero{padding:var(--s4) var(--gutter) var(--s6);text-align:center;}
+.home-hero .hh-brand{display:flex;align-items:center;justify-content:center;gap:var(--s2);margin-bottom:var(--s2);color:var(--green-deep);}
+.home-hero .hh-brand .hh-name{font-family:var(--serif);font-size:var(--fs-brand);font-weight:700;color:var(--ink);}
+.home-hero .hh-title{font-family:var(--serif);font-size:var(--fs-h1);font-weight:600;line-height:1.5;letter-spacing:.01em;}
 .home-hero .hh-sub{font-family:var(--kai);font-size:var(--fs-sm);color:var(--ink2);line-height:1.7;margin-top:var(--s2);}
 /* 输入框用信纸格线，暗示"在这里书写" */
 .home-input{margin:0 var(--gutter);background:var(--surface);border-radius:var(--r-lg);padding:var(--s4);box-shadow:var(--sh-1);}
@@ -174,7 +179,7 @@ input,textarea{font-family:inherit;color:inherit;}
 .source-banner .sb-ver{font-size:10px;padding:1px 6px;border-radius:var(--r-full);background:rgba(46,125,79,.14);font-weight:600;flex-shrink:0;}
 .arch-banner{margin:var(--s3) var(--gutter) 0;background:rgba(30,43,35,.05);border-radius:var(--r-sm);padding:var(--s2) var(--s3);font-size:var(--fs-cap);color:var(--ink2);display:flex;gap:var(--s2);align-items:center;}
 .msg-flow{padding:var(--s4) var(--gutter) var(--s8);display:flex;flex-direction:column;gap:var(--s6);}
-.msg-user{align-self:flex-end;max-width:84%;background:var(--green);color:#fff;border-radius:var(--r-md) var(--r-md) var(--s1) var(--r-md);padding:var(--s3) var(--s4);font-size:var(--fs-body);line-height:1.7;animation:msgIn .3s cubic-bezier(.2,.8,.2,1);word-break:break-word;}
+.msg-user{align-self:flex-end;max-width:84%;background:var(--green-bubble);color:#fff;border-radius:var(--r-md);padding:var(--s3) var(--s4);font-size:var(--fs-body);line-height:1.7;animation:msgIn .3s cubic-bezier(.2,.8,.2,1);word-break:break-word;}
 /* AI 回答不做卡片：文字直接落在纸感底上，靠留白与标识行分层（减容器） */
 .msg-ai{align-self:stretch;background:transparent;border:none;padding:0;font-size:var(--fs-body);line-height:var(--lh-read);color:var(--ink);animation:msgIn .3s cubic-bezier(.2,.8,.2,1);word-break:break-word;}
 @keyframes msgIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
@@ -1641,7 +1646,8 @@ function AppPhone(){
       return (
         <div className="rec-block">
           <div className="rec-head"><ISparkle2/><span className="rh-t">试试这些起点</span></div>
-          {recRow(REC_STARTER, '入门', true, false)}
+          {recRow(REC_STARTER.filter((_, i) => i % 2 === 0), '入门', true, false)}
+          {recRow(REC_STARTER.filter((_, i) => i % 2 === 1), '入门', true, true)}
         </div>
       );
     }
@@ -1661,10 +1667,7 @@ function AppPhone(){
     return (
       <div className="screen" key="home">
         <div className="appbar" style={{borderBottom:'none',paddingTop:14}}>
-          <div style={{display:'flex',alignItems:'center',gap:8,flex:1,color:'var(--green-deep)'}}>
-            <ISprout size={26}/>
-            <span className="serif" style={{fontSize:21,fontWeight:700,color:'var(--ink)'}}>知芽</span>
-          </div>
+          <div style={{flex:1}}/>
           <button className="icon-btn" onClick={() => { setSearchQ(''); setScreen('search'); }}><ISearch/></button>
           <button className="icon-btn" onClick={() => setScreen('archived')}>
             <IBox/>{archivedCount > 0 && <span className="icon-badge">{archivedCount}</span>}
@@ -1673,12 +1676,10 @@ function AppPhone(){
         </div>
 
         <div className="body-scroll">
-          {!hasTopics && (
-            <div className="home-hero">
-              <div className="hh-title serif">从一个问题开始，<br/>种下一棵学习树</div>
-              <div className="hh-sub">写下问题，长成一棵树。</div>
-            </div>
-          )}
+          <div className="home-hero">
+            <div className="hh-brand"><ISprout size={56}/><span className="hh-name">知芽</span></div>
+            {!hasTopics && <div className="hh-title">把复杂问题，学成自己的知识树。</div>}
+          </div>
 
           <div className="home-input">
             <textarea rows={2}

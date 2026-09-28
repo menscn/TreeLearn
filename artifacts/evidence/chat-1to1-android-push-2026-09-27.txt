@@ -1,0 +1,52 @@
+Treelearn 对话页 1:1 推送（批 A+B+C，2026-09-27 用户拍板「A+B+C；联网胶囊不需要；录音暂不需要」）
+证据生成时间: 2026-09-27 19:01 +08:00
+
+== 改动清单（全部在对话页编辑面，与首页线无文件重叠） ==
+新增 drawable:
+  android/app/src/main/res/drawable/bg_bubble_user.xml     用户气泡底 = tl_green_bubble + radius_md（原型 .msg-user:182）
+  android/app/src/main/res/drawable/bg_composer_inner.xml  输入卡纸面 = tl_bg + radius_lg（原型 .composer .inner:229）
+  android/app/src/main/res/drawable/ic_ai_spark.xml        AI 标识星标 = 原型 ISpark:443，14dp，使用点 tint
+布局:
+  item_chat_message.xml   ① 问题块 bg_card→bg_bubble_user、右对齐(wrap+layout_gravity=end)、文字 tl_surface、
+                            引用 chip 改白底绿字  ② AI 标识去灰底胶囊→ic_ai_spark+tl_green_deep+bold，
+                            chat_time 整体移除  ③ 删正文左缘绿竖线（answer_rule View+包裹层），正文与光标顶格
+  view_answer_actions.xml 重写：复制→重答→分叉→子分支(数据驱动)→引用→翻译→朗读→[weight 空位]→act_time；
+                            copy/fork 由 gone 改可见；按钮去 minWidth、padding 10→6dp、间距 s2→s1（360dp 容下全部入口）
+  screen_chat_body.xml    composer 两层卡片化：chat_composer_card(bg_composer_inner) 内 = 草稿(去下划线)+
+                            工具行[展开键(gone)/附件胶囊(ic_chat_attach+「附件」)/联网(gone, 不需要)/模型 chip/语音(gone, 不需要)]
+                            + 圆形发送键 bg_send_fab；全部既有 id 保留
+Java:
+  AnswerActionBar.java    +act_time 引用与 renderTime(createdAt)（时间只随 stable 操作行出现，= 原型 .ai-time:877）
+  ChatScreen.java         行内时间渲染改喂 actionBar.renderTime；删除 DateUtils import；
+                            发送键背景覆盖改为恒 bg_send_fab（原代码会在渲染时用 bg_field/bg_button_primary 冲掉圆形 FAB）
+字符串/dimens:
+  strings.xml             chat_draft_hint「继续追问…」→「在当前分支继续追问…」；新增 chat_attach_label「附件」
+  dimens.xml              删除 answer_rule（已无引用）
+批 C 按建议口径：AppBar 三入口（树导航/总览/设置）保留未动——图里的分享/书无法安全映射，删入口是不可逆决定，待设计侧明确。
+
+== 验证证据（命令 + 退出码） ==
+$ python .trae/scripts/dev/check_design_tokens.py
+EXITCODE=0   # OK 三方一致（原型 :root ↔ tokens.json ↔ colors.xml） — measured_tokens=44 measured_resources=16, 0 check(s) failed
+
+$ cd android && ./gradlew :app:testDebugUnitTest --tests "com.treelearn.app.ui.ChatMessageRowLayoutTest" --tests "com.treelearn.app.IconAssetsTest" --console=plain
+EXITCODE=0   # artifacts/tmp/chat-1to1-jvm-tests.log（首轮 EXITCODE=1：act_copy 是行首无 margin，测试口径已修正后过）
+
+$ cd android && ./gradlew :app:testDebugUnitTest --console=plain
+EXITCODE=0   # artifacts/tmp/chat-1to1-full-unittests.log, BUILD SUCCESSFUL
+             # 计数（app/build/test-results/testDebugUnitTest/TEST-*.xml 汇总）: tests=680 failures=0 errors=0 skipped=0
+
+XML 良构校验: 8 个改动 XML 全部 ElementTree parse OK（本轮会话内执行）。
+
+== 断言语义已随拍板更新（不是放松） ==
+ChatMessageRowLayoutTest.java 重写 6 处：行序断言（copy<reset<fork<children<quote<translate<speak<time）、
+间距 s1、左缘竖线「必须不存在」且 dimens 无孤儿 token、气泡=bg_bubble_user+end 对齐+surface 文字、
+AI 标识=ic_ai_spark 无底色、composer=bg_send_fab+bg_composer_inner+新提示语；composer 的
+search_chip/voice/expand「必须保持 gone」断言原样保留（用户：联网/录音不需要）。IconAssetsTest 未改且通过
+（act_copy 的 contentDescription 回归为 cd_act_copy，与原文件一致）。
+
+== 未做（边界） ==
+- 真机安装：维持上轮结论，等首页线 androidTest 迭代收工再统一「编译→Java-only 守门→安装→冷启动验证」。
+- 联网胶囊与麦克风：按用户指令保持隐藏（chat_search_chip / chat_voice 均 visibility=gone，ChatScreen.java:600 亦强制 voice GONE）。
+- 已知偏差（有意）：① 气泡未设 84% 最大宽（长问题会占满整行，右对齐不变）；② 气泡内引用 chip 用实色
+  tl_surface 代替原型的 rgba 白（token 守门禁止未注册色）；③ 操作行 7 入口并存时图标按钮宽 36dp（高 44dp），
+  换取 360dp 下不溢出。

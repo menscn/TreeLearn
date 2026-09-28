@@ -1,0 +1,12 @@
+# T-2026-09-27-002 GREEN 回归 — 接入两份首页布局后，单测 + APK 组装同轮复跑
+# generated: 2026-09-27 16:31:52 +0800
+# workdir: android/
+# command: JAVA_HOME=<jdk21> ./gradlew --offline :app:testDebugUnitTest --tests "*PaperRulesTest" :app:assembleDebug
+EXITCODE=0
+---- build verdict ----
+  BUILD SUCCESSFUL in 1s
+---- 单测报告核对（从构建产物读取，不手抄）----
+  $ grep -o 'tests="[0-9]*" skipped="[0-9]*" failures="[0-9]*" errors="[0-9]*"' "app/build/test-results/testDebugUnitTest/TEST-com.treelearn.app.screen.PaperRulesTest.xml"
+  tests="6" skipped="0" failures="0" errors="0"
+---- 组装产物 ----
+  -rw-r--r-- 1 23745 197609 1988325 Sep 27 16:27 app/build/outputs/apk/debug/app-debug.apk

@@ -108,4 +108,41 @@ public final class HomeViewStateTest {
         assertEquals(starters.size(),
                 HomeData.Recommendations.starterFallback(starters).items.size());
     }
+
+    /**
+     * The home's single judgement about "does this home have history topics" (T-003). The prototype
+     * shows its main slogan only while `hasTopics` is false, and the section head counts topics only
+     * while it is true, so both read this one answer rather than each writing its own predicate.
+     */
+    @Test
+    public void onlyAReadyHomeWithTopicsHasTopics() {
+        HomeViewState fresh = HomeViewState.initial(GenerationModel.FLASH, false, true);
+        assertFalse("a fresh home is still loading, so it has none", fresh.hasTopics());
+        assertFalse("the loading phase answers no",
+                fresh.withPhase(HomeViewState.Phase.LOADING).hasTopics());
+        assertFalse("the failure phase answers no",
+                fresh.withPhase(HomeViewState.Phase.ERROR).hasTopics());
+        assertFalse("the empty phase answers no",
+                fresh.withPhase(HomeViewState.Phase.EMPTY).hasTopics());
+        assertFalse("a ready phase cannot turn an empty list into topics",
+                fresh.withPhase(HomeViewState.Phase.READY).hasTopics());
+
+        List<TopicCard> one = Collections.singletonList(
+                TestDoubles.topic(TestDoubles.TOPIC_1, "标题"));
+        HomeViewState ready = fresh.withTopics(one).withPhase(HomeViewState.Phase.READY);
+        assertTrue("a ready home that read a topic has topics", ready.hasTopics());
+    }
+
+    /** The phase the store's answer implies, and the list test behind it, are one judgement. */
+    @Test
+    public void thePhaseFollowsTheSameJudgementTheHeroReads() {
+        List<TopicCard> none = Collections.<TopicCard>emptyList();
+        assertFalse("no topics", HomeViewState.hasTopics(none));
+        assertEquals(HomeViewState.Phase.EMPTY, HomeViewState.phaseFor(none));
+
+        List<TopicCard> one = Collections.singletonList(
+                TestDoubles.topic(TestDoubles.TOPIC_1, "标题"));
+        assertTrue("one topic", HomeViewState.hasTopics(one));
+        assertEquals(HomeViewState.Phase.READY, HomeViewState.phaseFor(one));
+    }
 }

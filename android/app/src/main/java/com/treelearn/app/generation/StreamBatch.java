@@ -1,10 +1,11 @@
 package com.treelearn.app.generation;
 
 /**
- * The 250 ms / 256 character write window of technical design 7.
+ * The 80 ms / 64 character write window used to keep answer rendering visibly streaming without
+ * writing every provider token separately.
  *
- * <p>A batch becomes due when 256 characters have accumulated across <em>both</em> channels, or when
- * 250 ms have passed since the first delta of the window, whichever comes first. The clock is passed
+ * <p>A batch becomes due when 64 characters have accumulated across <em>both</em> channels, or when
+ * 80 ms have passed since the first delta of the window, whichever comes first. The clock is passed
  * in, so the window is a pure function of an injected "now" and no test has to sleep.
  *
  * <p>The window opens with the first unflushed delta rather than with the object: an attempt that
@@ -17,11 +18,11 @@ package com.treelearn.app.generation;
  */
 public final class StreamBatch {
 
-    /** 7: 256 accumulated characters, counted across both channels. */
-    public static final int MAX_CHARS = 256;
+    /** 64 accumulated characters, counted across both channels. */
+    public static final int MAX_CHARS = 64;
 
-    /** 7: 250 ms since the first delta of the window. */
-    public static final long MAX_MILLIS = 250L;
+    /** 80 ms since the first delta of the window. */
+    public static final long MAX_MILLIS = 80L;
 
     private final StringBuilder reasoning = new StringBuilder();
     private final StringBuilder answer = new StringBuilder();

@@ -1,0 +1,25 @@
+# T-2026-09-27-003 RED — 首页版式顺序与品牌锁定区
+# generated: 2026-09-27 16:36:31 +0800
+# workdir: android/
+# command: JAVA_HOME=<jdk21> ./gradlew --console=plain :app:testDebugUnitTest --tests "com.treelearn.app.ui.HomeViewStateTest"
+# observed: 新增断言引用尚未实现的 HomeViewState.hasTopics(List)/phaseFor(List)/hasTopics()，编译失败
+EXITCODE=1
+MEASURED cannot-find-symbol lines: 20
+MEASURED error summary: 10 个错误
+---- 首个符号错误 ----
+66:D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:120: 错误: 找不到符号
+67-        assertFalse("a fresh home is still loading, so it has none", fresh.hasTopics());
+68-                                                                          ^
+69-  符号:   方法 hasTopics()
+--
+71:D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:122: 错误: 找不到符号
+72-                fresh.withPhase(HomeViewState.Phase.LOADING).hasTopics());
+73-                                                            ^
+74-  符号:   方法 hasTopics()
+--
+76:D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\HomeViewStateTest.java:124: 错误: 找不到符号
+77-                fresh.withPhase(HomeViewState.Phase.ERROR).hasTopics());
+78-                                                          ^
+79-  符号:   方法 hasTopics()
+---- build verdict ----
+BUILD FAILED in 1s

@@ -7,22 +7,41 @@
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/library_topic" android:layout_width="match_parent"
-    android:layout_height="wrap_content" android:background="?android:attr/selectableItemBackground"
-    android:clickable="true" android:focusable="true" android:gravity="center_vertical"
-    android:minHeight="@dimen/touch_min" android:orientation="horizontal">
+    android:layout_height="wrap_content" android:layout_marginStart="@dimen/page_gutter"
+    android:layout_marginTop="@dimen/space_s3" android:layout_marginEnd="@dimen/page_gutter"
+    android:background="@drawable/bg_library_card" android:clickable="true"
+    android:elevation="@dimen/card_elevation" android:focusable="true"
+    android:gravity="center_vertical" android:minHeight="@dimen/touch_min"
+    android:orientation="horizontal">
 
     <View android:id="@+id/library_topic_accent" android:layout_width="3dp"
         android:layout_height="match_parent"
-        android:background="@color/tl_green" android:importantForAccessibility="no" />
+        android:alpha="0" android:background="@color/tl_green"
+        android:importantForAccessibility="no" />
 
     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
         android:layout_weight="1" android:orientation="vertical"
         android:paddingStart="@dimen/space_s4" android:paddingTop="@dimen/space_s2"
         android:paddingEnd="@dimen/space_s2" android:paddingBottom="@dimen/space_s2">
 
-        <TextView android:id="@+id/library_topic_title" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:ellipsize="end" android:maxLines="1"
-            android:textColor="@color/tl_ink" android:textSize="@dimen/text_h2" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:gravity="center_vertical" android:orientation="horizontal">
+
+            <TextView android:id="@+id/library_topic_title" android:layout_width="0dp"
+                android:layout_height="wrap_content" android:layout_weight="1"
+                android:ellipsize="end" android:fontFamily="serif" android:maxLines="2"
+                android:textColor="@color/tl_ink" android:textSize="@dimen/text_h2"
+                android:textStyle="bold" />
+
+            <View android:id="@+id/library_topic_unread" android:layout_width="8dp"
+                android:layout_height="8dp" android:layout_marginStart="@dimen/space_s2"
+                android:background="@drawable/bg_unread_dot" android:importantForAccessibility="no"
+                android:visibility="gone" />
+
+            <ImageView android:layout_width="@dimen/space_s4" android:layout_height="@dimen/space_s4"
+                android:layout_marginStart="@dimen/space_s2" android:contentDescription="@null"
+                android:src="@drawable/ic_chevron_right" android:tint="@color/tl_ink3" />
+        </LinearLayout>
 
         <!-- The topic's root summary (T-061, PRD 6.2.16 point 4). Gone when the topic has none:
              one line fewer, never an explanatory placeholder standing in for it. -->
@@ -37,8 +56,4 @@
             android:textSize="@dimen/text_cap" />
     </LinearLayout>
 
-    <View android:id="@+id/library_topic_unread" android:layout_width="8dp"
-        android:layout_height="8dp" android:layout_marginEnd="@dimen/space_s4"
-        android:background="@drawable/bg_pill" android:backgroundTint="@color/tl_green"
-        android:importantForAccessibility="no" android:visibility="gone" />
 </LinearLayout>

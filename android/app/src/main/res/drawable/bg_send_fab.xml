@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The composer's send control (prototype .send-fab,
+  Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html line 140): a circle at the identity green, with a
+  pressed step and a disabled step, so it needs no corner radius to tune.
+
+  The disabled step takes the existing line token instead of the prototype's one-off #CFD5CE: the colour
+  guard accepts registered tokens only, and this slice may not add a resource. Inactive controls are
+  exempt from the contrast rule (WCAG 1.4.3), but not from meaning: the control also carries
+  enabled=false and a content description, so "you cannot send yet" is never carried by colour alone.
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false">
+        <shape android:shape="oval">
+            <solid android:color="@color/tl_line" />
+        </shape>
+    </item>
+    <item android:state_pressed="true">
+        <shape android:shape="oval">
+            <solid android:color="@color/tl_green_deep" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/tl_green" />
+        </shape>
+    </item>
+</selector>

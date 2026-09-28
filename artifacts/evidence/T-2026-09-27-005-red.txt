@@ -1,0 +1,47 @@
+# T-2026-09-27-005 RED — 首页推荐区视觉与标签映射（标签映射的唯一判定点）
+# generated: 2026-09-27 17:35:35 +0800  (写盘时刻＝本文件 mtime；该次运行于 17:34:59 启动)
+# workdir: android/
+# command: JAVA_HOME=D:\Environment\Jdk\jdk21 ./gradlew --console=plain :app:testDebugUnitTest --tests "com.treelearn.app.screen.RecommendationTagTest"
+EXITCODE=1
+MEASURED failing task: > Task :app:compileDebugUnitTestJavaWithJavac FAILED
+MEASURED build verdict: BUILD FAILED in 1s
+MEASURED cannot-find-symbol lines: 30
+
+---- 失败点（逐条，含文件:行号）----
+66:D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\RecommendationTagTest.java:48: 错误: 找不到符号
+71:D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\RecommendationTagTest.java:50: 错误: 找不到符号
+76:D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\RecommendationTagTest.java:52: 错误: 找不到符号
+81:D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\RecommendationTagTest.java:57: 错误: 找不到符号
+86:D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\RecommendationTagTest.java:58: 错误: 找不到符号
+91:D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\RecommendationTagTest.java:59: 错误: 找不到符号
+96:D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\RecommendationTagTest.java:72: 错误: 找不到符号
+101:D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\RecommendationTagTest.java:74: 错误: 找不到符号
+106:D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\RecommendationTagTest.java:76: 错误: 找不到符号
+111:D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\RecommendationTagTest.java:79: 错误: 找不到符号
+116:D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\RecommendationTagTest.java:81: 错误: 找不到符号
+121:D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\RecommendationTagTest.java:83: 错误: 找不到符号
+126:D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\RecommendationTagTest.java:85: 错误: 找不到符号
+131:D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\RecommendationTagTest.java:87: 错误: 找不到符号
+136:D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\RecommendationTagTest.java:89: 错误: 找不到符号
+150:  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\RecommendationTagTest.java:48: 错误: 找不到符号
+155:  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\RecommendationTagTest.java:50: 错误: 找不到符号
+160:  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\RecommendationTagTest.java:52: 错误: 找不到符号
+165:  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\RecommendationTagTest.java:57: 错误: 找不到符号
+170:  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\RecommendationTagTest.java:58: 错误: 找不到符号
+
+---- 原始输出摘录（首个错误）----
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\RecommendationTagTest.java:48: 错误: 找不到符号
+        assertEquals("入门", R.string.home_rec_tag_starter, RecommendationTag.labelRes(
+                                                          ^
+  符号:   变量 RecommendationTag
+  位置: 类 RecommendationTagTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\RecommendationTagTest.java:50: 错误: 找不到符号
+        assertEquals("顺着你学的", R.string.home_rec_tag_follow, RecommendationTag.labelRes(
+                                                            ^
+
+---- 元数据更正（2026-09-27 17:42:02）----
+本条更正只改注释行，未改任何 MEASURED 值：
+  - 原 `generated:` 行写作 17:34:59（该次运行启动时刻），与文件真实 mtime（17:35:35，写盘时刻）不一致；
+    现改为写盘时刻，并附注运行启动时刻。
+  - 本次更正使本文件 mtime 前移到 2026-09-27 17:42:02；TDD 时序不以此为准，以文件系统 mtime 为准：
+      测试 RecommendationTagTest.java 17:34:51  <  RED 写盘 17:35:35  <  实现 RecommendationTag.java 17:35:58  <  GREEN 写盘 17:37:54

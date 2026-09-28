@@ -15,7 +15,7 @@ import org.junit.Test;
  * and where it lands (PRD 6.2.19).
  *
  * <p>"Not offered" and "not pressable" are different answers here, and the difference is a
- * requirement rather than a rendering choice: PRD 6.2.19 exception 1 takes 新建分支 off a
+ * requirement rather than a rendering choice: PRD 6.2.19 exception 1 takes 新建主题 off a
  * half-finished answer entirely, while 引用 is still drawn for one - greyed, because the store would
  * refuse it - so that the menu does not silently swallow the tap.
  */
@@ -41,11 +41,11 @@ public final class WordMenuTest {
     }
 
     @Test
-    public void aHalfFinishedAnswerIsNotOfferedANewBranchAtAll() {
+    public void aHalfFinishedAnswerIsNotOfferedANewTopicAtAll() {
         for (ChatMessage unfinished : Arrays.asList(generating(), failed())) {
             List<WordMenu.Entry> entries = WordMenu.entriesFor(unfinished, SELECTED);
 
-            assertFalse("a partial answer must not offer a new branch",
+            assertFalse("a partial answer must not offer a new topic (新建主题)",
                     items(entries).contains(WordMenu.Item.FORK));
             assertFalse(enabled(entries, WordMenu.Item.QUOTE));
             assertTrue("a partial answer is still readable material",

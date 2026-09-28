@@ -150,6 +150,11 @@ public final class LibraryArchiveInstrumentedTest {
 
         assertTrue("the completed segment must list the archived branch; the list holds: "
                 + texts(R.id.library_rows), texts(R.id.library_rows).contains(ARCHIVED_TITLE));
+        assertEquals("the completed segment exposes its item count",
+                context().getString(R.string.library_segment_done) + " 1",
+                ((TextView) view(R.id.library_segment_done)).getText().toString());
+        assertNotNull("archived rows use the prototype card surface",
+                rowView(ARCHIVED_TITLE, R.id.library_done_row).getBackground());
 
         // The row's own three facts, read off the row the product drew: its title, where it came from,
         // and the archived mark. The source and the ancestor path are derived from the same read the

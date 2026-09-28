@@ -1,0 +1,44 @@
+T-2026-09-27-010 independent read-only verifier evidence — updated
+Captured: 2026-09-28
+Working directory: D:\Project\Android\Treelearn
+Mode: source/layout inspection plus targeted instrumentation result; no production files, task files, or tests modified
+Long-test policy: no full Gradle/device suite rerun
+
+Static command:
+  PowerShell read-only assertions over activity_main.xml, phone/sw600dp screen_home.xml,
+  both screen_tab_bar.xml files, chat/navigation/tree route roots, PaperRuleBackdrop.java,
+  and HomeBackdropInstrumentedTest.java.
+Static exit code: 0
+
+Targeted command:
+  android\gradlew.bat -p android :app:connectedDebugAndroidTest '-Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.HomeBackdropInstrumentedTest' --rerun
+Targeted exit code: 0
+Targeted XML:
+  android\app\build\outputs\androidTest-results\connected\debug\TEST-ALP-AN00 - 13-_app-.xml
+Targeted result: tests=3, failures=0, errors=0, skipped=0.
+Cases:
+  theRuleParametersComeFromExistingTokens — pass
+  theTabBarAndRouteRootsDoNotHideTheSharedPaperTexture — pass
+  theBackdropSitsBelowTheColumnAndIsPureDecorationInBothConfigurations — pass
+
+PASS — activity_main.xml defines shell_backdrop at lines 20-23 and places it before main_root at lines 20-26.
+PASS — shell_backdrop fills the viewport at activity_main.xml:22-23.
+PASS — main_root no longer declares opaque tl_bg at activity_main.xml:25-29.
+PASS — phone screen_tab_bar.xml uses @android:color/transparent at line 18.
+PASS — sw600dp screen_tab_bar.xml uses @android:color/transparent at line 11.
+PASS — phone and sw600dp home layouts contain no PaperRuleBackdrop/home_backdrop.
+PASS — chat/navigation/tree route roots contain no root-level opaque @color/tl_bg.
+PASS — HomeBackdropInstrumentedTest checks both phone and tablet tab-bar transparency at lines 69-72.
+PASS — HomeBackdropInstrumentedTest checks screen_home plus chat/navigation/tree layout roots at lines 73-76.
+PASS — HomeBackdropInstrumentedTest checks duplicate PaperRuleBackdrop absence and opaque root background absence at lines 86-94.
+PASS — PaperRuleBackdrop documentation names shell ownership and pure-decoration behavior at lines 11-27 and 46-48.
+PASS — PaperRuleBackdrop derives spacing, thickness, and colour from existing tokens at lines 19-24 and 42-45.
+PASS — existing inspected XML layouts parse successfully.
+
+RESIDUAL COVERAGE NOTE — the new test inflates R.layout.screen_home with the phone target context;
+  it does not directly create a sw600dp context for screen_home. Static source inspection confirms both
+  screen_home.xml variants contain no local backdrop, and the shell z-order test does execute in both
+  phone and tablet contexts. This is a test-shape limitation, not a current production defect.
+
+RESIDUAL TASK-EVIDENCE NOTE — no post-fix screenshot was captured in this verifier turn. The prior
+  screenshot predates the transparent tab-bar change and must not be used as post-fix visual proof.

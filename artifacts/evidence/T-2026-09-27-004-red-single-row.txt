@@ -1,0 +1,24 @@
+# T-2026-09-27-004 RED(追加) — 单行草稿必须留在自己的格线行内
+# generated: 2026-09-27 18:40:09   (输出由 am instrument 当场捕获)
+# workdir: android/
+# note: 004 主体已 verifying；这是本会话在真机复核时新发现缺陷的 TDD RED。
+#       断言用 getBaseline()(视图坐标) —— 布局坐标不含垂直居中偏移，测不到此缺陷。
+# command: adb shell am instrument -w -e class com.treelearn.app.HomeComposerInstrumentedTest#aSingleRowDraftStaysInsideItsOwnGridRow
+#           com.treelearn.test/androidx.test.runner.AndroidJUnitRunner
+# exit code: am instrument 对「有用例失败」也返回 0，故以输出里的 FAILURES!!! 为准 = YES(RED 成立)
+
+---- 当场输出（尾部）----
+Error in aSingleRowDraftStaysInsideItsOwnGridRow(com.treelearn.app.HomeComposerInstrumentedTest):
+java.lang.AssertionError: the glyph's bottom - descender included - stays above the first rule at 104, measured 137 (vertical gravity mask 16, 0=top 16=centre_vertical 80=bottom)
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at com.treelearn.app.HomeComposerInstrumentedTest.aSingleRowDraftStaysInsideItsOwnGridRow(HomeComposerInstrumentedTest.java:155)
+Time: 1.092
+There was 1 failure:
+1) aSingleRowDraftStaysInsideItsOwnGridRow(com.treelearn.app.HomeComposerInstrumentedTest)
+java.lang.AssertionError: the glyph's bottom - descender included - stays above the first rule at 104, measured 137 (vertical gravity mask 16, 0=top 16=centre_vertical 80=bottom)
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at com.treelearn.app.HomeComposerInstrumentedTest.aSingleRowDraftStaysInsideItsOwnGridRow(HomeComposerInstrumentedTest.java:155)
+FAILURES!!!
+Tests run: 1,  Failures: 1

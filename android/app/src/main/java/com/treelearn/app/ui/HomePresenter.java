@@ -138,14 +138,6 @@ public final class HomePresenter implements HomeActions {
         background.execute(() -> submit(question, model, thinking));
     }
 
-    /**
-     * The heat strip. Navigation only; no destination screen is wired in this build, so the tap is
-     * accepted and currently does nothing - the strip is informational.
-     */
-    @Override
-    public void onHeatStripTapped() {
-    }
-
     private void submit(String question, GenerationModel model, boolean thinking) {
         final SubmitResult result;
         try {
@@ -176,26 +168,14 @@ public final class HomePresenter implements HomeActions {
         }
         List<Recommendation> loadedStrip;
         try {
-            loadedStrip = data.recommendations(!topics.isEmpty()).items;
+            loadedStrip = data.recommendations(HomeViewState.hasTopics(topics)).items;
         } catch (RuntimeException recommendationUnavailable) {
             loadedStrip = Collections.emptyList();
         }
         final List<Recommendation> recommendations = loadedStrip;
-        final boolean hasTopics = !topics.isEmpty();
-        HomeViewState.HeatStrip heatStrip = loadHeatStrip();
         post(current -> current.withTopics(topics).withRecommendations(recommendations)
-                .withPhase(hasTopics ? HomeViewState.Phase.READY : HomeViewState.Phase.EMPTY)
-                .withNotice(null).withHeatStrip(heatStrip));
-    }
-
-    private HomeViewState.HeatStrip loadHeatStrip() {
-        try {
-            HomeStats stats = data.stats();
-            return stats.empty ? HomeViewState.HeatStrip.empty()
-                    : HomeViewState.HeatStrip.visible(stats.intensities, stats.streakDays);
-        } catch (RuntimeException statsUnavailable) {
-            return HomeViewState.HeatStrip.hidden();
-        }
+                .withPhase(HomeViewState.phaseFor(topics))
+                .withNotice(null));
     }
 
     private void post(UnaryOperator<HomeViewState> transition) {

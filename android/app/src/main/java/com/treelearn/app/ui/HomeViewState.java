@@ -27,7 +27,7 @@ public final class HomeViewState {
     public enum Phase {
         /** The store is being read; the composer stays usable. */
         LOADING,
-        /** No topic yet: hero copy, starter recommendations, the guide line where the list goes. */
+        /** No topic yet: the same centered prompt with starter recommendations below. */
         EMPTY,
         /** The store could not be read: the list is replaced by the failure, the draft is kept. */
         ERROR,
@@ -136,12 +136,9 @@ public final class HomeViewState {
     public final boolean submitting;
     /** Null when there is nothing to report. */
     public final Notice notice;
-    /** The learning-heat strip to draw, or a hidden placeholder when stats are unavailable. */
-    public final HeatStrip heatStrip;
-
     private HomeViewState(Phase phase, String draft, boolean keyConfigured, GenerationModel model,
             boolean thinkingEnabled, List<TopicCard> topics, List<Recommendation> recommendations,
-            boolean submitting, Notice notice, HeatStrip heatStrip) {
+            boolean submitting, Notice notice) {
         this.phase = phase;
         this.draft = draft == null ? "" : draft;
         this.keyConfigured = keyConfigured;
@@ -152,7 +149,6 @@ public final class HomeViewState {
                 recommendations));
         this.submitting = submitting;
         this.notice = notice;
-        this.heatStrip = heatStrip;
     }
 
     /** The state before the first read: loading, nothing known about the store, composer ready. */
@@ -160,7 +156,7 @@ public final class HomeViewState {
             boolean keyConfigured) {
         return new HomeViewState(Phase.LOADING, "", keyConfigured, model, thinkingEnabled,
                 Collections.<TopicCard>emptyList(), Collections.<Recommendation>emptyList(), false,
-                null, HeatStrip.hidden());
+                null);
     }
 
     /** True when the send control may be pressed: something to send, and no attempt in flight. */
@@ -169,102 +165,87 @@ public final class HomeViewState {
     }
 
     /**
-     * The continue-learning row (055): the topic the learner used last, or null when there is no
-     * history. The list was ordered newest first, so the first card is the one they left off on -
-     * and a null is the state's way of saying the row must not appear at all, not that it appears
-     * empty.
+     * The single judgement this screen has about history topics (T-003): a home has topics only once
+     * the store has actually been read ({@link Phase#READY}) <em>and</em> that read came back with at
+     * least one.
+     *
+     * <p>Both consumers read this one answer instead of each writing its own predicate: the hero's
+     * main slogan is shown while it is false - the prototype renders its title under {@code
+     * !hasTopics} - and the section head's count is shown while it is true.
+     *
+     * <p>The phase guard is deliberate: a home that is still loading, or that failed to read, has
+     * nothing trustworthy on screen about topics, so it answers no even if a list is still attached.
+     * The list test is equally deliberate: nothing in this type prevents a caller from building a
+     * {@link Phase#READY} state with an empty list, so it does not assume that caller away.
      */
+    public boolean hasTopics() {
+        return hasTopics(topics) && phase == Phase.READY;
+    }
+
+    /**
+     * Whether a read result carries history topics. This is the judgement {@link #hasTopics()} and
+     * {@link #phaseFor(List)} both derive from - it is the one place the rule "does this home have
+     * history topics" is written, so the presenter, the hero and the section head cannot disagree.
+     */
+    public static boolean hasTopics(List<TopicCard> topics) {
+        return !topics.isEmpty();
+    }
+
+    /**
+     * The phase a successful read implies: topics mean {@link Phase#READY}, none means
+     * {@link Phase#EMPTY}. Loading and failure are decided by the presenter, not by the read result.
+     */
+    public static Phase phaseFor(List<TopicCard> topics) {
+        return hasTopics(topics) ? Phase.READY : Phase.EMPTY;
+    }
+
+    /** The newest topic, retained for callers that need the single-topic resume shortcut. */
     public TopicCard continueTopic() {
         return topics.isEmpty() ? null : topics.get(0);
     }
 
     public HomeViewState withPhase(Phase value) {
         return new HomeViewState(value, draft, keyConfigured, model, thinkingEnabled, topics,
-                recommendations, submitting, notice, this.heatStrip);
+                recommendations, submitting, notice);
     }
 
     public HomeViewState withDraft(String value) {
         return new HomeViewState(phase, value, keyConfigured, model, thinkingEnabled, topics,
-                recommendations, submitting, notice, this.heatStrip);
+                recommendations, submitting, notice);
     }
 
     public HomeViewState withKeyConfigured(boolean value) {
         return new HomeViewState(phase, draft, value, model, thinkingEnabled, topics,
-                recommendations, submitting, notice, this.heatStrip);
+                recommendations, submitting, notice);
     }
 
     public HomeViewState withModel(GenerationModel value) {
         return new HomeViewState(phase, draft, keyConfigured, value, thinkingEnabled, topics,
-                recommendations, submitting, notice, this.heatStrip);
+                recommendations, submitting, notice);
     }
 
     public HomeViewState withThinkingEnabled(boolean value) {
         return new HomeViewState(phase, draft, keyConfigured, model, value, topics,
-                recommendations, submitting, notice, this.heatStrip);
+                recommendations, submitting, notice);
     }
 
     public HomeViewState withTopics(List<TopicCard> value) {
         return new HomeViewState(phase, draft, keyConfigured, model, thinkingEnabled, value,
-                recommendations, submitting, notice, this.heatStrip);
+                recommendations, submitting, notice);
     }
 
     public HomeViewState withRecommendations(List<Recommendation> value) {
         return new HomeViewState(phase, draft, keyConfigured, model, thinkingEnabled, topics, value,
-                submitting, notice, this.heatStrip);
+                submitting, notice);
     }
 
     public HomeViewState withSubmitting(boolean value) {
         return new HomeViewState(phase, draft, keyConfigured, model, thinkingEnabled, topics,
-                recommendations, value, notice, this.heatStrip);
+                recommendations, value, notice);
     }
 
     public HomeViewState withNotice(Notice value) {
         return new HomeViewState(phase, draft, keyConfigured, model, thinkingEnabled, topics,
-                recommendations, submitting, value, this.heatStrip);
-    }
-
-    public HomeViewState withHeatStrip(HeatStrip value) {
-        return new HomeViewState(phase, draft, keyConfigured, model, thinkingEnabled, topics,
-                recommendations, submitting, notice, value);
-    }
-
-    /**
-     * The learning-heat strip the home screen draws.
-     *
-     * <p>One value carries both the visibility decision and the payload, so the screen never asks
-     * the store twice and never draws a half-populated strip.
-     */
-    public static final class HeatStrip {
-
-        public enum Status {
-            /** Nothing to show; the card is removed from the layout. */
-            HIDDEN,
-            /** Stats exist but are empty; the "no record yet" line is shown. */
-            EMPTY,
-            /** Stats exist and have activity; the heatmap and streak are shown. */
-            VISIBLE
-        }
-
-        public final Status status;
-        public final float[] intensities;
-        public final int streakDays;
-
-        private HeatStrip(Status status, float[] intensities, int streakDays) {
-            this.status = status;
-            this.intensities = intensities;
-            this.streakDays = streakDays;
-        }
-
-        public static HeatStrip hidden() {
-            return new HeatStrip(Status.HIDDEN, new float[0], 0);
-        }
-
-        public static HeatStrip empty() {
-            return new HeatStrip(Status.EMPTY, new float[0], 0);
-        }
-
-        public static HeatStrip visible(float[] intensities, int streakDays) {
-            return new HeatStrip(Status.VISIBLE, intensities, streakDays);
-        }
+                recommendations, submitting, value);
     }
 }

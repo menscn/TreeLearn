@@ -171,7 +171,7 @@ FAILED / INTERRUPTED -> 用户手动 RETRY -> 新 GenerationOperation
 - 不同分支可并行，应用级并发上限为 2；更多请求停留在 `STAGED`，按创建顺序启动。这是本机资源和个人 API 配额之间的保守平衡。
 - `GenerationCoordinator` 属于 Application 进程，不属于 Activity/Fragment。切换分支、旋转屏幕或进入后台不会主动取消。
 - 首版不启用前台服务。系统终止进程后网络连接自然结束；下次启动把遗留的 `VALIDATING/SUBMITTING/STREAMING_*` 原子改为 `INTERRUPTED`，保留已落盘内容，不自动重发。
-- SSE 内容按 250ms 或累计 256 字符任一先到的条件批量落盘，避免每个 token 写数据库。进程突然终止时最多损失一个未刷新的小批次。
+- SSE 内容按 80ms 或累计 64 字符任一先到的条件批量落盘，避免每个 token 写数据库，同时让界面保持连续流式反馈。进程突然终止时最多损失一个未刷新的小批次。
 - 归档不取消生成，结果继续写入已归档分支；永久删除主题/子树先取消范围内操作，再在事务中级联删除。晚到回调必须以 operation ID 和终态校验拒绝写回。
 
 ## 8. 首次主题创建原子性

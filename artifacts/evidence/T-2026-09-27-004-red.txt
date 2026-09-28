@@ -1,0 +1,53 @@
+# T-2026-09-27-004 RED — 首页输入卡视觉与发送控件（信纸格线派生色判定）
+# generated: 2026-09-27 16:56:28 +0800  (更正：原头部误写 17:05，见文末「元数据更正」)
+# workdir: android/
+# command: JAVA_HOME=D:\Environment\Jdk\jdk21 ./gradlew --console=plain :app:testDebugUnitTest --tests "com.treelearn.app.screen.PaperRulesTest"
+# observed: 新增断言引用尚未实现的 PaperRules.writingRuleColour(int,int) / pageRuleColour(int,int)，编译失败
+# exit code: 见下方 EXITCODE= 行（由脚本当场捕获，非手抄）
+EXITCODE=1
+MEASURED failing task: `> Task :app:compileDebugUnitTestJavaWithJavac FAILED`
+MEASURED error count: `5 个错误`（同一份错误 Gradle 打印两遍：`> Task` 段一次、`* What went wrong` 段一次，故 grep -c 计数为 10）
+MEASURED cannot-find-symbol lines: 10（上条的 2×5）
+MEASURED build verdict: `BUILD FAILED in 1s` / `52 actionable tasks: 1 executed, 51 up-to-date`
+
+---- 失败点（逐条，含文件:行号）----
+PaperRulesTest.java:103: 错误: 找不到符号   →  符号: 方法 writingRuleColour(int,int)   位置: 类 PaperRules
+PaperRulesTest.java:121: 错误: 找不到符号   →  符号: 方法 pageRuleColour(int,int)     位置: 类 PaperRules
+PaperRulesTest.java:122: 错误: 找不到符号   →  符号: 方法 writingRuleColour(int,int)   位置: 类 PaperRules
+PaperRulesTest.java:141: 错误: 找不到符号   →  符号: 方法 pageRuleColour(int,int)     位置: 类 PaperRules
+PaperRulesTest.java:144: 错误: 找不到符号   →  符号: 方法 writingRuleColour(int,int)   位置: 类 PaperRules
+
+---- 原始输出摘录（首个错误）----
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\screen\PaperRulesTest.java:103: 错误: 找不到符号
+        int painted = PaperRules.writingRuleColour(SURFACE, GREEN);
+                                ^
+  符号:   方法 writingRuleColour(int,int)
+  位置: 类 PaperRules
+
+---- 这次 RED 为什么成立（不是"测试写错"，是"实现还没到"）----
+1. `namingTheTwoRulesDoesNotChangeWhatWasAlreadyPainted` 与
+   `theTwoRulesAreDifferentInksRatherThanOneTextureDrawnTwice` 断言的是**同一条判定的两个具名入口**：
+   页纹 = tl_line 叠 tl_bg、写纹 = tl_green 叠 tl_surface。这两个方向（谁叠在谁上面）目前只写在
+   PaperRuleBackdrop 的构造里（第 41-42 行内联 composite 调用），004 要把它们收敛成唯一判定点，
+   所以测试必须先引用还不存在的入口 → 编译失败。
+2. `theWritingRuleDerivedFromTheGreenTokenCompositesToThePrototypesWritingColour` 断言写纹合成值
+   落在原型 `--paper-write: rgba(46,125,79,.075)` over `--surface #FCFBF8` = (237,242,235) 的
+   逐通道 ±2 容差内。这是验收点 1 的直接落点。
+3. `theWritingGridStartsOnTheFirstRowsUnderline` 钉线距相位（两行空场 = 31/63），它只依赖既有的
+   lineOffsets，本轮**未参与**失败——因为整个测试源集编译失败，任何用例都没能执行。这一点如实记录，
+   不把它算进 RED 的失败证据。
+
+---- 元数据更正（2026-09-27 17:23，由后续会话追加，不覆盖原文）----
+本文件头部原先写 `# generated: 2026-09-27 17:05 +0800`，与文件自身的写入时间不符。
+实测（命令与输出均为当场捕获）：
+  $ date -r artifacts/evidence/T-2026-09-27-004-red.txt '+%Y-%m-%d %H:%M:%S %z'
+  -> 2026-09-27 16:56:28 +0800
+  $ stat -c %Y artifacts/evidence/T-2026-09-27-004-red.txt
+  -> 1790499388
+相邻文件的写入时间（同一次会话内的先后顺序，用于判断哪个时间是真的）：
+  16:55:47  android/app/src/test/java/com/treelearn/app/screen/PaperRulesTest.java
+  16:56:28  artifacts/evidence/T-2026-09-27-004-red.txt      <- 本文件
+  16:57:36  android/app/src/main/java/com/treelearn/app/screen/PaperRules.java
+结论：真实捕获时间是 **16:56:28**；头部原写的 17:05 是错值，已就地更正。
+该错值不影响 RED 的有效性：顺序是「先写测试(16:55:47) → 取 RED 失败(16:56:28) → 才写实现(16:57:36)」，
+失败时被测方法确实不存在，与正文记录的 `cannot find symbol` 相互印证；错的只是那一行时间。

@@ -1,0 +1,21 @@
+# T-2026-09-27-007 verifyNoKotlinDex - 裁决记录（FAIL，属共树在途竞态，非本任务）
+# generated: 2026-09-27 18:51:11 +0800  (运行写盘时刻；本文件于 2026-09-27 18:56:12 +0800 生成)
+# workdir: android/
+# command: JAVA_HOME=D:/Environment/Jdk/jdk21 ./gradlew --console=plain verifyNoKotlinDex
+EXITCODE=1
+MEASURED failing task: > Task :app:compileDebugJavaWithJavac FAILED
+MEASURED javac total errors: 1（唯一一处）
+MEASURED 失败行: D://...//screen//ChatScreen.java:909: 错误: 找不到符号  R.id.chat_time
+
+---- 性质判定（按既有判据：看问题行归属，不看 BUILD 摘要）----
+唯一错误落在 ChatScreen.java:909（对话页线），与本任务改动（HomeMotion/HomeScreen/MainActivity 及其测试）
+无交集。18:49-18:54 对话页线正在连续写 item_chat_message.xml / AnswerActionBar.java / ChatScreen.java /
+screen_chat_body.xml（各文件 mtime 为证），属典型的「共树在途重写」：该线删了 chat_time 但 ChatScreen
+的引用还没改完。
+
+本任务自身可编译性的旁证（不与失败轮混淆，原始日志保留）：
+- 18:47 全量 JVM 回归（79 份 / 679 tests / 0 失败）含 :app:compileDebugJavaWithJavac 成功；
+- 18:48 / 18:52 两轮真机构建同样跑过 compileDebugJavaWithJavac，成功。
+
+处置：不在他人活动写盘期反复重跑；verifyNoKotlinDex 留待 T-008 独立验证在源码静止时复跑，本文件
+只作裁决记录，不作为本任务的通过证据。

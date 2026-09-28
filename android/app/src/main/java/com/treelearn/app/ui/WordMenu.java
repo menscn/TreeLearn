@@ -8,7 +8,7 @@ import java.util.List;
  * and where it lands (PRD 6.2.19).
  *
  * <p><strong>The enablement is read, never decided here.</strong> Every item takes its flag from the
- * message's own predicate, so the menu offers exactly what the store would accept: 新建分支 is
+ * message's own predicate, so the menu offers exactly what the store would accept: 新建主题 is
  * <em>absent</em> while an answer is unfinished, which is PRD 6.2.19 exception 1 rather than a
  * rendering choice, and 引用 is drawn but greyed, so a tap the store would refuse is visibly refused
  * instead of silently swallowed.

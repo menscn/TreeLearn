@@ -1,10 +1,17 @@
 package com.treelearn.app.screen;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -21,6 +28,14 @@ import com.treelearn.core.domain.GenerationModel;
  *
  * <p>The popover is anchored to the chip and flips above it when there is not enough room below, so it
  * never covers the control that opened it.
+ *
+ * <p><strong>Who is the tap target.</strong> The prototype draws this pill about 22px tall
+ * (Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html line 356), which is smaller than the
+ * {@code @dimen/touch_min} a control has to be. The two are therefore split: the pill
+ * ({@code R.layout.view_model_chip}) stays faithful, and this container - which carries the click, the
+ * focus and the {@code touch_min} height, and is what TalkBack focuses - is the control. The label
+ * inside is hidden from accessibility so the whole chip is announced once, as it was when the pill
+ * itself was the target.
  */
 public final class ModelThinkingPicker extends LinearLayout {
 
@@ -34,7 +49,7 @@ public final class ModelThinkingPicker extends LinearLayout {
 
     private static final String MARK = "\u2713";
 
-    private final TextView chip;
+    private final TextView chipLabel;
 
     private Listener listener;
     private GenerationModel model = GenerationModel.FLASH;
@@ -44,9 +59,15 @@ public final class ModelThinkingPicker extends LinearLayout {
     public ModelThinkingPicker(Context context, AttributeSet attrs) {
         super(context, attrs);
         setOrientation(HORIZONTAL);
-        chip = (TextView) LayoutInflater.from(context).inflate(R.layout.view_model_chip, this, false);
-        addView(chip);
-        chip.setOnClickListener(view -> togglePopover());
+        setGravity(Gravity.CENTER_VERTICAL);
+        View chip = LayoutInflater.from(context).inflate(R.layout.view_model_chip, this, false);
+        chipLabel = chip.findViewById(R.id.model_chip_label);
+        addView(chip, new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT));
+        setMinimumHeight(getResources().getDimensionPixelSize(R.dimen.touch_min));
+        setClickable(true);
+        setFocusable(true);
+        setOnClickListener(view -> togglePopover());
         renderChip();
     }
 
@@ -66,9 +87,24 @@ public final class ModelThinkingPicker extends LinearLayout {
 
     private void renderChip() {
         String label = getContext().getString(shortLabelRes(model));
-        chip.setText(thinkingEnabled
-                ? label + getContext().getString(R.string.model_thinking_suffix)
-                : label);
+        if (!thinkingEnabled) {
+            chipLabel.setText(label);
+        } else {
+            // The thinking marker is the one part of the chip the prototype colours with the identity
+            // green (its .thk rule), so it is spanned rather than the whole label being recoloured.
+            String marker = getContext().getString(R.string.model_thinking_suffix);
+            SpannableString marked = new SpannableString(label + marker);
+            marked.setSpan(new ForegroundColorSpan(getContext().getColor(R.color.tl_green_deep)),
+                    label.length(), marked.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            marked.setSpan(new StyleSpan(Typeface.BOLD), label.length(), marked.length(),
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            chipLabel.setText(marked);
+        }
+        // The container is the control, so it is also the node TalkBack reads. The label inside is
+        // hidden from accessibility on purpose, so the chip is announced exactly once, as "the chip
+        // says X, double tap to activate" - the same announcement as when the pill itself was the
+        // target, which is what keeps the 44dp split from silently costing the control its name.
+        setContentDescription(chipLabel.getText());
     }
 
     private void togglePopover() {

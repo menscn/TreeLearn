@@ -1,0 +1,21 @@
+# T-2026-09-27-004 GREEN(追加) — 单行草稿留在自己的格线行内（RuleEditText 钉垂直顶对齐）
+# generated: 2026-09-27 19:26:47   (输出由 am instrument 当场捕获)
+# workdir: android/
+# fix: RuleEditText 构造里把垂直重力钉到 TOP（pinToTheTopOfItsBox），文字与格线共用视图顶部锚点。
+#      对应 RED 见 T-2026-09-27-004-red-single-row.txt（measured 137 > 104，gravity mask 16=CENTRE_VERTICAL）。
+# command: adb shell am instrument -w -e class com.treelearn.app.HomeComposerInstrumentedTest com.treelearn.test/androidx.test.runner.AndroidJUnitRunner
+# exit code: am instrument 对失败也返回 0，以输出 OK/FAILURES 为准。
+
+---- HomeComposerInstrumentedTest（含新增 aSingleRowDraftStaysInsideItsOwnGridRow）----
+com.treelearn.app.HomeComposerInstrumentedTest:......
+Time: 5.604
+OK (6 tests)
+
+---- 其余 home 相关三类（AppLaunch / HomeBackdrop / BottomTabShell）----
+* daemon not running; starting now at tcp:5037
+* daemon started successfully
+com.treelearn.app.HomeBackdropInstrumentedTest:..
+com.treelearn.app.BottomTabShellInstrumentedTest:.....
+com.treelearn.app.AppLaunchInstrumentedTest:.
+Time: 7.144
+OK (8 tests)

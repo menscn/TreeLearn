@@ -16,11 +16,8 @@ public interface HomeActions {
 
     void onRecommendationTapped(Recommendation recommendation);
 
-    /** Tapping the continue-learning row: resume the topic's last branch, no decision to make. */
+    /** Tapping a recent-learning row: resume the topic's last branch, no decision to make. */
     void onTopicTapped(TopicCard card);
-
-    /** Tapping the heat strip: navigate to stats, no decision to make. */
-    void onHeatStripTapped();
 
     void onModelSelected(GenerationModel model);
 

@@ -1,0 +1,27 @@
+# T-2026-09-27-004 GREEN — 首页输入卡视觉与发送控件（信纸格线派生色判定）
+# generated: 2026-09-27 17:39:18   (命令/退出码/报告数字均由本脚本当场捕获后写盘)
+# workdir: android/
+# command: JAVA_HOME=D:\Environment\Jdk\jdk21 ./gradlew --console=plain :app:testDebugUnitTest --tests "com.treelearn.app.screen.PaperRulesTest"
+# note: 与 RED 的 Command 逐字相同（契约要求）。执行前删除 test-results 目录，
+#       使本次为真实执行而非 up-to-date 跳过；目标测试选择与 RED 完全一致。
+EXITCODE=0
+MEASURED build: BUILD SUCCESSFUL in 1s
+MEASURED tasks: 54 actionable tasks: 1 executed, 53 up-to-date
+MEASURED report: TEST-com.treelearn.app.screen.PaperRulesTest.xml  (mtime 2026-09-27 17:38:45)
+MEASURED counts: tests=10 skipped=0 failures=0 errors=0
+
+---- 用例逐条（读报告 XML，非手抄）----
+  ok   theWritingRuleDerivedFromTheGreenTokenCompositesToThePrototypesWritingColour   <- 本次 RED→GREEN 的核心断言
+  ok   theRuleDrawnFromTheLineTokenCompositesToThePrototypesRuleColour
+  ok   aDegenerateSpacingDrawsNothingInsteadOfLoopingForever
+  ok   linesSitOnTheLastPixelsOfEveryRowOfTheSpacingGrid
+  ok   theTwoRulesAreDifferentInksRatherThanOneTextureDrawnTwice
+  ok   namingTheTwoRulesDoesNotChangeWhatWasAlreadyPainted
+  ok   opacityIsAppliedPerChannelAndSaturatesAtTheEnds
+  ok   theWritingGridStartsOnTheFirstRowsUnderline
+  ok   aRowIsDrawnOnlyWhenItFitsCompletely
+  ok   theRuleIsFaintRatherThanFullStrengthInk
+
+---- 回归证据摘要（明细见 T-2026-09-27-004-regression.txt）----
+  JVM 全量 :app 单测: 78 suites / 671 tests / 0 failures / 0 errors  (exit 0)
+  真机 home 相关仪器测试: 13 tests / 0 failures  (exit 0)  见 T-2026-09-27-004-regression.txt

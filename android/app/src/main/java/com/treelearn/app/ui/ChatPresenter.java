@@ -976,7 +976,7 @@ public final class ChatPresenter implements ChatActions {
             while (polling.get() && System.currentTimeMillis() < deadline) {
                 background.execute(this::read);
                 try {
-                    Thread.sleep(750L);
+                    Thread.sleep(200L);
                 } catch (InterruptedException interrupted) {
                     Thread.currentThread().interrupt();
                     break;

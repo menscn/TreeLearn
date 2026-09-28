@@ -331,7 +331,7 @@ runner **阻止不了**，只能在事后检测到并抛 `IllegalStateException`
 | :--- | :--- | :--- |
 | `GenerationCoordinator` | 提交、调度、批量落盘、取消、启动恢复、观察接口 | 每个分支同时只有一个 attempt（跑着或等着）；每个 attempt 只写一次终态；stable 由领域判定，协调器只问不判 |
 | `GenerationScheduler` | 并发上限与 FIFO 的纯决策 | 上限 2；等待按到达顺序；`BRANCH_BUSY` 的拒绝**不占槽位、不占队列位**；只有跑着的那一路离开才放槽并唤醒最老的等待者 |
-| `StreamBatch` | 250 ms / 256 字符写窗口 | 两路字符合计计数；窗口自**第一个未刷盘 delta** 开始（空批次永不到期）；`onFlushed` 关闭窗口，下一个 delta 重新开窗 |
+| `StreamBatch` | 80 ms / 64 字符写窗口 | 两路字符合计计数；窗口自**第一个未刷盘 delta** 开始（空批次永不到期）；`onFlushed` 关闭窗口，下一个 delta 重新开窗 |
 | `GenerationGateway` | 协调器与 `:ai` 之间的端口 | 签名里没有 API key：密钥由装配层注入，协调器不可能把它带进日志或事件 |
 | `AiGatewayStreams` | 生产装配：`AiGateway` + `KeystoreSecretStore` | 读出的 key 用后 `Arrays.fill` 擦除；`SecretStoreException` → `onTerminal(FAILED, keyMissing())`，不抛进网络线程 |
 | `GenerationTelemetry` | 脱敏事件出口 | 接口只能携带 operationId / branchId / 字符数 / 错误类别，**正文进不来**：脱敏由类型保证，不靠调用方自觉 |
@@ -341,7 +341,7 @@ runner **阻止不了**，只能在事后检测到并抛 `IllegalStateException`
 **运行时事实（技术方案 §7 / §9.2 / §8）：**
 
 - 应用内并发上限 **2**，其余按到达顺序 FIFO 等待；同一分支第二次提交被 `BRANCH_BUSY` 拒绝。
-- 部分 reasoning/answer 按 **250 ms 或 256 字符**（先到者）批量写库；不足阈值的内容留在内存，
+- 部分 reasoning/answer 按 **80 ms 或 64 字符**（先到者）批量写库；不足阈值的内容留在内存，
   终态之前一定会 flush。
 - 提交顺序：先组装（失败 → `PROMPT_BUILD`，不开连接、不占槽位）→ 校验请求记录的版本与命令钉住的
   版本一致（不一致 → `VERSION_MISMATCH`）→ 占位 → **先写 operation 行再开连接**。
@@ -435,23 +435,61 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
 | 类型 | 职责 | 关键不变量 |
 | :--- | :--- | :--- |
 | `AppContainer` | 依赖装配：真实 `SettingsRepository` + `KeystoreSecretStore`、单后台线程、主 Looper 的 `UiThread` | 只持 application context，不持 Activity；所有 store 调用串行在一条线程上 |
-| `MainActivity` | 应用外壳：在 `R.id.shell_host` 里换屏 + 常驻 `R.id.tab_bar` 的显隐与高亮，实现 `HomeSink` + `SettingsSink` + `ChatSink` + `TreeCanvasSink` + `NavigationSink` + `SearchPresenter.Sink` + `LibrarySink` | 自己不持草稿、不持状态、不做决策；每个屏幕的系统返回由它统一接管（见「系统返回」）；一级 / 二级的分别只由 `swap()` 与 `showTab()` 两处判定（T-052） |
+| `MainActivity` | 应用外壳：在 `R.id.shell_host` 里换屏 + 常驻 `R.id.tab_bar` 的显隐与高亮；`R.id.shell_backdrop` 统一绘制全站纸纹，实现 `HomeSink` + `SettingsSink` + `ChatSink` + `TreeCanvasSink` + `NavigationSink` + `SearchPresenter.Sink` + `LibrarySink` | 自己不持草稿、不持状态、不做决策；纸纹是外壳唯一全屏装饰层，页面根布局保持透明；每个屏幕的系统返回由它统一接管（见「系统返回」）；一级 / 二级的分别只由 `swap()` 与 `showTab()` 两处判定（T-052/T-010） |
 | `ui.HomePresenter` | 首页的全部决策 | 草稿只在 accepted 分支清空；推荐点击先写入草稿再走同一条 `onSubmit()`；缺 Key 时只提示并跳设置，**不写任何行**；055 起不再承载搜索/归档/设置导航与列表改名删除动作（落点：标签栏与学习库） |
-| `ui.HomeViewState` | 首页可绘制的全部状态（相位/草稿/Key/模型/思考/继续学习/推荐/提交中/提示） | 四相位 LOADING/EMPTY/ERROR/READY；`continueTopic()` 是「继续学习」行的唯一来源（最近主题，无历史为 null，行不出现）；`Notice` 是分类不是句子；两个列表不可变 |
+| `ui.HomeViewState` | 首页可绘制的全部状态（相位/草稿/Key/模型/思考/历史主题/推荐/提交中/提示） | 四相位 LOADING/EMPTY/ERROR/READY；`topics` 是按最近使用排序的历史来源，首页最多绘制三条并可点击恢复；`hasTopics()` 是「有没有历史主题」的**唯一**判定点——主标语是否出现、推荐区标题取哪一句、区头计数画不画，三处读的都是它；`Notice` 是分类不是句子；两个列表不可变 |
 | `ui.SettingsPresenter` | 设置页决策：读 Key 状态、保存/替换、删除 | Key 文本从不进入任何 ViewState；缓冲区归它所有并 `finally` 擦除，成功失败都擦 |
 | `ui.SettingsViewState` | 设置页可绘制状态（`keyLine`/`keyMask`/`notice`） | **没有模型与思考字段**——见下「交互事实」 |
 | `ui.KeySnapshot` | Key 的三态（无 / 不可读 / 可读）+ 掩码 | 掩码是唯一能离开本类的形式；短于 12 字符的 Key 全掩，不部分泄露 |
 | `ui.HomeData` / `ui.RootQuestionSubmitter` / `ui.KeyVault` / `ui.SettingsStore` / `ui.UiThread` | 首页与设置页的端口 | 页面不直接访问 DAO / 网关；`HomeData.recommendations` 失败**返回**兜底条而不是抛错 |
-| `screen.HomeScreen` / `screen.SettingsScreen` | 两个视图：只转发手势 + 按 ViewState 绘制 | 唯一本地状态是「回填抑制」（渲染自己写进去的文本不再回调 presenter，避免光标跳动） |
+| `screen.HomeScreen` / `screen.SettingsScreen` | 两个视图：只转发手势 + 按 ViewState 绘制 | 唯一本地状态是「回填抑制」（渲染自己写进去的文本不再回调 presenter，避免光标跳动）；历史主题区只画最近 3 条（`MAX_RECENT`，快捷面而非全量列表），区头计数只在 `hasTopics()` 时出现、无主题时改画空态句；卡片的可选部位（摘要行、未读点）由 `ui.TopicCard` 的实际字段决定，空摘要不留占位句；卡片的 content description 把未读数一并说出来，不靠那颗蓝点独自承担这个事实 |
 | `screen.ModelThinkingPicker` | 输入框内的模型/思考贴附式弹层 | 锚定当前标识；下方空间不足时向上翻转，始终不遮挡触发它的标识 |
-| `screen.RecommendationMarquee` | 首页推荐条 | 每条 chip 画两份、按一份宽度回跳，接缝永不可见；触摸暂停、离手 2.6 s 恢复；离屏/未附加/窄到不可滚动时停滚 |
+| `screen.RecommendationMarquee` | 首页推荐区 | 推荐项拆成上下两条独立轨道；每条 chip 画两份并按一份宽度回跳，接缝永不可见；上行向左、下行向右；触摸暂停、离手 2.6 s 恢复；离屏/未附加/窄到不可滚动时停滚；chip 是「类别胶囊 + 文本 + 右箭头」三段，其中**文案与两档底色不在此判定**，只向 `screen.RecommendationTag` 取（T-2026-09-27-005） |
+| `screen.RecommendationTag` | 推荐类别 → 标签文案与底色档的**唯一判定点**（T-2026-09-27-005） | 三类 `Kind` 全部手写、**无 `default:` 兜底**——新增一类而不给标签是编译错误，而不是悄悄落到「入门」（旧实现正因有这个兜底，评审 M7 读不出「三类是否都接上」）；底色只有两档：品牌档（`green_soft` 底 + `green_deep` 字）只给「顺着你学的」，其余走中性档（`line` 底 + `ink3` 字），全取既有 token；`item_recommendation.xml` 不再自带 `backgroundTint`/`textColor` |
+| `screen.PaperRules` | 全站纸纹与输入框信纸格线的**同一个**画线实现（T-2026-09-27-002/004/010） | 线距、相位与两个派生色（`paper_rule` / `paper_write`）都在这里算；纹理与信纸只有颜色不同，不写第二套线距；两个具名入口 `pageRuleColour` / `writingRuleColour` 是「谁叠在谁上面」的唯一定义点 |
+| `screen.PaperRuleBackdrop` / `screen.RuleEditText` | 外壳全屏纹理装饰层与自绘格线输入框（T-2026-09-27-004/010） | 外壳纹理层是唯一全屏装饰：不可点、不可聚焦、对无障碍隐藏、不拦抽屉与滚动手势；输入框复用 `PaperRules.lineOffsets(...)` 并只换派生色，行距按实测周期标定（`CALIBRATION_STEPS=4`） |
 | `wiring.AndroidSettingsStore` | 真实存储：`SettingsRepository` + `KeystoreSecretStore` | app 层唯一接触密钥材料的地方，且只为生成掩码；`read()` 的缓冲在 `finally` 擦除 |
 | `wiring.HomeWiring` | 首页的**真实**数据路径（T-032）：主题列表 + 首题提交，实现 `HomeData` 与 `RootQuestionSubmitter` | 列表是 `TopicDao.listOverviews` 的一条只读 SQL；首题经 `FirstTopicCreation` 单事务写入、经 `GenerationCoordinator.submitFirstTopic` 受理；缺 Key 时返回可见的 `KEY_MISSING` 且**一行都不写** |
 | `wiring.HomeStore` / `wiring.SqliteHomeStore` | 首页的端口与它的 SQLite 实现 | 端口只做存取、不重写判定；`recentTopics()` 不兜底、不造行，空库就是空列表 |
-| `ui.HomeStats` / `ui.HeatmapView` / `ui.HeatmapLayout` | 学习热度的三个层次（T-100/101/102）：聚合结果、自绘 View、纯 Java 布局数学 | 活跃判定在 `data.stats.StatsAggregator` 一处（`HAS_ANY_ANSWER`：当天有过回答修订）；`HeatmapView` 以 XML attrs 支持 strip（14 天单行）与 grid（详情页 7×70）两种形态，颜色全走 `R.color` token |
-| `ui.StatsDetailPresenter` / `screen.StatsDetailScreen` | 统计详情页（T-104）：近 10 周全量热力图 + 累计提问/消息/连续天数三卡 | 读**同一**聚合入口（`HomeStore.statsRaw()` → `StatsAggregator`），与首页热力条共享判定、不可能出现两套口径；页面只把 `activeDays` 映射到 70 格窗口，totals/streak 原样透传不二次计算；查询失败降级为可见占位（failed 态），空库显示空态而非假「0 天」；入口由抽屉（T-106）接线 |
-| `ui.HomeDrawerPresenter` / `screen.HomeDrawerScreen` | 首页抽屉（T-106）：自绘覆盖层（无 DrawerLayout 依赖）+ 快捷主题列表（最近 10 条）+ 设置/统计入口 + 扩展位骨架 | 快捷列表走 `LibraryData.topics()`（学习库的**同一**查询，`grep OVERVIEW_SELECT` 全仓仅定义一次使用一次）；点击主题与首页行走同一 `openBranch` 目标；开合是 CLOSED/OPEN 两态机，导航后强制收拢；无搜索、无助手切换、无第二份全量列表——学习库保持正典；返回键先收抽屉再走房间返回（`onBackRequested` 首分支）；`activity_main.xml` 外层包 `FrameLayout`（`main_drawer_root`）让抽屉盖住 tab bar 且不被 `swap()` 清除 |
+ | `ui.HomeStats` / `ui.HeatmapView` / `ui.HeatmapLayout` | 学习热度的三个层次（T-100/101/102）：聚合结果、自绘 View、纯 Java 布局数学 | 活跃判定在 `data.stats.StatsAggregator` 一处（`HAS_ANY_ANSWER`：当天有过回答修订）；`HeatmapView` 以 XML attrs 支持抽屉标准 7×6 月历网格，详情页由 `MonthCalendarView` 绘制当前月 7 列月历，颜色全走 `R.color` token |
+| `ui.StatsDetailPresenter` / `screen.StatsDetailScreen` | 统计详情页（T-104/012）：累计指标卡 + 当前月份 7 列月历热力卡 | 读**同一**聚合入口（`HomeStore.statsRaw()` → `StatsAggregator`），与抽屉热力图共享判定、不可能出现两套口径；页面只把当前月的 `activeDays` 映射到 7×6 月历，月初/月末/未来日期透明，totals/streak 原样透传不二次计算；历史记录与抽屉窗口不改写；查询失败降级为可见占位（failed 态），空库显示空态；入口由抽屉热力图接线 |
+| `ui.HomeDrawerPresenter` / `screen.HomeDrawerScreen` | 首页抽屉（T-106）：自绘覆盖层（无 DrawerLayout 依赖）+「学习概览」标题 + 标准 7×6 日历热力图 + 固定最近 3 条主题 + 空历史提示 | 热力图读 `HomeData.stats()` 的同一聚合结果并可点击进入详情；快捷列表走 `LibraryData.topics()`（学习库的**同一**查询）；点击主题与首页行走同一 `openBranch` 目标；关闭按钮只收拢抽屉，设置通过底部标签栏进入；开合是 CLOSED/OPEN 两态机，导航后强制收拢；不使用中段滚动、不显示统计文字入口、不复制学习库全量列表；返回键先收抽屉再走房间返回（`onBackRequested` 首分支）；`activity_main.xml` 外层包 `FrameLayout`（`main_drawer_root`）让抽屉盖住 tab bar 且不被 `swap()` 清除 |
 | `wiring.BranchHeading` | 卡片标题与对话标题的**唯一**判定点（存了标题用标题，否则用根问题） | 首页与对话读同一个方法，一个主题不可能两处叫两个名字 |
+
+**首页 1:1 视觉还原（2026-09-27，父需求 T-2026-09-27-001）：**
+
+把 `Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html` 的**首页**视觉语法落到这一层。裁决正文是
+`Docs/spec/SPEC-2026-09-27-home-visual-fidelity.md`；本节只记这一层现在**是什么**。
+
+- **版式顺序（自上而下，滚动页自顶部自然排布，不再垂直居中）**：顶栏（保留左上抽屉按钮）→ 品牌锁定区
+  （幼苗 ＋ 衬线品牌名横排居中）→ 主标语（**仅在没有历史主题时**出现）→ 输入卡（信纸格线 ＋ 底行
+  「模型胶囊 / Key 胶囊 / 圆形发送键」）→ 推荐区（星芒 ＋ 短标题，两轨反向横滚）→ 历史主题（区头 ＋ 计数，
+  其下卡片列或空态句）。**本顺序取代** `SPEC-2026-09-27-home-drawer-ux.md` 的「推荐区在输入框之上」。
+- **新增的首页专属资源**（与全站共用资源**并存不收敛**，见该规格的共享资源冻结条）：
+  - 类：`screen.PaperRules`（唯一画线实现）、`screen.PaperRuleBackdrop`（整页纸纹装饰层）、
+    `screen.RuleEditText`（自绘格线输入框）、`screen.RecommendationTag`（推荐标签唯一判定点）。
+  - 布局：`item_home_topic.xml`（历史主题卡片）；`item_recommendation.xml` 重写为三段式。
+  - drawable：`bg_send_fab`、`bg_topic_card`（`radius_md`；共用 `bg_card` 是 `radius_lg`，本轮**不改**）、
+    `bg_unread_dot`、`ic_brand_sprout`、`ic_key`、`ic_think`、`ic_chevron_down`、`ic_sparkle`、
+    `ic_chevron_right`、`ic_tree_branch`。
+- **文案事实**：区头 `home_recent_title` 由「最近学习」改为「历史主题」；推荐区标题不再是固定串，
+  由 `home_rec_starter` / `home_rec_history` 二选一（读 `hasTopics()`）；`home_recommendations_title`
+  **字符串已删**（同一 id 保留为视图 id，供动态文案使用）；新增 `home_recent_count`、`home_topic_meta`、
+  `home_topics_empty`、`home_topic_unread_cd`。
+- **令牌纪律**：本轮**不改** `tokens.json` 与 `colors.xml`、**不新增** token；所有新形状与新颜色都取既有
+  资源名（守门现状：44 token / 16 资源 / 0 failed，命令见 `.trae/scripts/dev/check_design_tokens.py`）。
+- **与原型的有意偏差**（逐条可核，理由见规格的偏差表）：不做 hover 态；推荐卡与类别胶囊高度按 `touch_min`；
+  保留本项目外壳的左上抽屉按钮，不搬原型的顶栏搜索/归档图标与主题卡「⋯」菜单；品牌字形走平台衬线
+  （不打包字体）；空态**不提供**「先逛逛示例主题」（App 无示例数据生成器）。
+- **动效（T-2026-09-27-007）**：两处、且只有两处——首页换屏入场（整屏 280ms 右滑 14dp ＋ 淡入）与
+  历史卡片错峰入场（350ms 上浮 10dp ＋ 淡入，每张比前一张晚 60ms）。唯一判定点 `screen.HomeMotion`
+  （数值、错峰函数与唯一的入场构造器都在这一个类）；低动效开关**不在此另立副本**，全 app 只由
+  `ChatMotion` 读系统动画缩放（动画关=直接呈现最终态，不会停在半透明）。入场只挂在整屏 `HomeScreen`
+  上、由 `MainActivity.swap` 的 `screen == homeScreen` 分支启动（学习库/设置照旧无动画）；卡片错峰由
+  「入场待用」标志交给第一次真正画出卡片的 render 消费，之后的重绘一律不再重放。有意偏差：原型错峰
+  无上限，Android 侧设 5 档（300ms）封顶，首页只画 ≤3 张故观感不变。
+- **已知未闭环**：历史主题卡的「临时标题」胶囊未实现——`ui.TopicCard` 没有这个字段，卡片不做猜测；
+  推荐区就绪文案的动态化（评审 M7 后半）同样未闭环，见父需求 Deferred。
 
 **请求预算（T-032 的一次决定）：**
 
@@ -665,9 +703,9 @@ T-040（2026-09-22）给 T-015 已有的检索端口接上独立搜索屏；**T-
 ## 应用层入口索引（`:app`）—— 对话、思考披露与回答操作（T-013）、长按划词与子分支列表（T-041）
 
 对话页沿用 T-012 的外壳：同一个 `MainActivity`、同一个 `R.id.shell_host`，`ChatScreen` 是换进宿主的
-回答与 reasoning 使用 `screen.MarkdownRenderer` 将 CommonMark 转成原生 `Spannable`：标题、强调、列表、
-引用、代码块和链接均不把 Markdown 标记原样显示；回答仍保持可选择复制，链接使用 Android 原生
-`URLSpan`。T-074 起代码块（围栏/缩进）整体可点即复制——走 `onSelectionCopyPressed` 同一条剪贴板路径，
+回答与 reasoning 使用 `screen.MarkdownRenderer` 将 CommonMark 与 GFM 表格转成原生 `Spannable`：标题、强调、列表、
+引用、代码块、表格和链接均不把 Markdown 标记原样显示；回答仍保持可选择复制，链接使用 Android 原生
+`URLSpan`。表格以可选择的等宽网格文本绘制，避免为表格拆开回答的选区模型。T-074 起代码块（围栏/缩进）整体可点即复制——走 `onSelectionCopyPressed` 同一条剪贴板路径，
 敏感标记与提示一致。解析依赖只在 `:app`，不进入领域层或数据层。
 第三个子视图，因此没有第二个 Activity、没有导航库。消息、思考、版本与推荐全部来自 `ChatViewState`，
 View 自己不持内容。
@@ -682,11 +720,11 @@ View 自己不持内容。
 | `ui.ChatPresenter` | 对话页的全部决策 | 重试/重置/切版只**转发**给 T-010 的用例，UI 层没有任何路径能移动 revision 指针；一次 send 不在这里追行，而是清草稿后重新读 |
 | `screen.ChatScreen` | 列表 + 引用条 + 输入区（含模型/思考入口） | 只转发手势、按 ViewState 绘制 |
 | `screen.ReasoningDisclosure` | 思考披露：44dp 折叠头 + 正文 | 默认折叠；无 reasoning 且无在跑尝试时整块隐藏；展开态不在这里存 |
-| `screen.AnswerActionBar` | 引用/复制/重置/新建分支/子分支/版本 chip | 按 `ChatMessage` 谓词启用；不可用是**禁用**而不是隐藏，流式过程中行不重排 |
-| `ui.TextSelection` | 一段文字的选区，与它的两个取法（整条回答 / 长按所在的那一句） | 纯 JVM 值类型，不含任何 Android 类型；文本视图未被动过时报的 `(-1,-1)` 与「空选区」是同一个答案 |
-| `ui.WordMenu` | 长按菜单的**唯一**判定点：四项里哪些出现、哪些可按，以及菜单落在哪里 | 每一项的 flag 都读 `ChatMessage` 自己的谓词；未完成或失败的回答**不出现**「新建分支」，而不是画出来再禁用（PRD 6.2.19 异常 1） |
+| `screen.AnswerActionBar` | 引用/重置/翻译/朗读/子分支 | 按 `ChatMessage` 谓词启用；复制、新建主题与版本切换入口按当前精简 UI 隐藏；选中文字后的追问与新建主题由应用自绘的划词菜单承载 |
+| `ui.TextSelection` | 一段文字的选区值类型 | 纯 JVM 值类型，不含任何 Android 类型；划词菜单与底部引用读的是同一段平台选区 |
+| `ui.WordMenu` | 划词菜单的判定类型 | 四项、可点与否、落点都在这里；回答文字使用 Android 原生可拖动选区，菜单由 `WordMenuPopup` 绘制，平台工具条被清空（2026-09-27） |
 | `ui.ChildBranch` | 子分支弹层的一行：去哪、叫什么、还欠多少 | 标题由装配层解析后传入，弹层不自己从可能为空的存储标题推第二个名字 |
-| `screen.WordMenuPopup` | 四项菜单的承载与落点测量（`PopupWindow` + 一份布局） | 只画、只转发，不判定；「全选」就地改的**就是**回答自己的选区，因此高亮、`getSelectionStart()` 与交出去的那段文字恒为同一个值 |
+| `screen.WordMenuPopup` | 划词菜单的承载类（`PopupWindow`） | 菜单由它画出并定位到选中句；它只画与套用，判定全部来自 `WordMenu` |
 | `screen.ChildBranchPopup` | 子分支列表弹层（`PopupWindow` + `showAsDropDown`） | 行是**传进来**的，弹层不读库；只有点行才导航，点外面或按返回只关列表 |
 | `wiring.BranchChildren` | 「这条回答的直接子分支」与「每个位置各有几个子分支」的唯一判定点 | 子 = 非根、带 source message、未归档；chips 与弹层两处读同一份，因此不会出现「数量说有、列表却拿不出」 |
 | `wiring.ChatWiring` | 对话的**真实**数据路径（T-032）：读回 + 五条命令，实现 `ChatData` 与 `ChatCommands` | 读回走 `MessageDao.findByBranch` / `AnswerRevisionDao` / `GenerationOperationDao`；`send`/`retry`/`reset` 装配请求后交协调器、`selectRevision` 直接落库、`fork` 走 `BranchCreation`；每条拒绝都以可见 `Notice` 返回 |
@@ -727,34 +765,27 @@ View 自己不持内容。
   文件被 098 清掉后重试失去附件块是**有意为之**的降级，不是 bug）。注入上限 20000 字符
   （`AttachmentTextExtractor.INJECTABLE_CHARS`，≈1/3 容量预算）：超限→ `ATTACHMENT_TOO_LARGE`
   拒绝，不截断、不静默丢弃——与引用超限的失败关闭同一姿态。
-- **语音输入键（T-095，2026-09-25，SPEC-081）**：输入栏发送键旁新增长按说话键（`ImageButton`，
-  44dp，项目图标惯例）。零依赖——直接封装平台 `SpeechRecognizer`（`speech/PlatformSpeechInput`，
-  `SpeechInputGateway` 端口隔离）；识别文本**追加进草稿、不直接发送**（走 `onDraftChanged` 同一条
-  保存-渲染链，持久化/通知清理/草稿恢复一处不少）；无识别服务→键**不渲染**（无假入口）；麦克风
-  权限只在对话页首次长按时询问（manifest 声明 `RECORD_AUDIO`），拒绝→键置灰 + 现场一次 Toast 引导
-  （`SpeechInputPolicy` 承载三态判定），再次授予自动恢复；识别出错→保留平台已产出的 partial 文本
-  （[OFF] 保险），静默无匹配则草稿不动。宿主拥有识别会话与权限流（`MainActivity`），离开聊天房间
-  一律 `stopSpeechSession()`；判定三态在 `SpeechInputPolicy` 一处，屏只画。
-- **长按划词弹的是应用自己的菜单（T-041）**：`item_chat_message.xml` 的 `textIsSelectable` 仍在，但长按由
-  `ChatScreen.Row` 的 `OnLongClickListener` 接管——回调返回 `true`，平台因此不再启动它自己的文本工具条；
-  它把按下坐标换算成字符偏移、取该字符所在的**整句**，交给 `WordMenuPopup`。菜单分「AI 操作」（追问 / 新建分支）
-  与「系统操作」（复制 / 全选）两组，每行都是 44dp 且整宽，四个热区因此不可能重叠；落点由 `WordMenu` 计算，
-  优先落在选中句**上方**（上方放不下才翻到下方）并夹在窗口内，故不会遮住它要操作的那句话。
-  「复制」在这里复制的是**选中的那一段**（PRD 6.2.19 第 5 条），与回答行上复制整条回答的按钮不是同一个动作。
+- **输入栏能力精简（2026-09-27）**：聊天页隐藏联网开关、语音输入和全屏编辑入口，保留模型/思考选择、附件导入与发送；
+  附件入口使用纸夹图标，仍由宿主的 SAF picker 处理文件选择。语音与全屏相关的 presenter/host 能力保留，当前布局不提供入口。
+- **长按划词＝原生手柄 + 应用自绘菜单（2026-09-27，同日修订）**：回答 `TextView` 开启 `textIsSelectable`，
+  `ChatScreen.Row` 不接管长按，Android 原生选择手柄允许拖动调整起止位置；平台自带的划词工具条（全选 / 复制 /
+  平台翻译等）在 `SelectionMenuCallback` 里被清空，菜单改由应用自己绘制的 `WordMenuPopup` 承载——四项固定为
+  **追问 / 新建主题 / 复制 / 全选**，顺序、文案与「是否会被收进更多」都由应用决定。起因是平台工具条无法由应用
+  排序：应用追加的两项永远排在系统项之后，「新建主题」（当时叫「新建分支」）因此被挤进「更多」（用户拍板
+  2026-09-27）。卡片关闭会一并结束平台选择，手柄与菜单同生同灭；底部引用动作读取回答视图当前的同一段选区。
 - **「子分支」弹层列出的是这条回答直接分出、且未归档的子分支（T-041）**：分支在点开之前就读好了，
   `ChatSink.openChildren` 把列表一起交出来，所以弹层在 UI 线程上不读库；点一行经 `ChatSink.openBranch` 进入该分支，
   这条路径与画布/首页进入分支是同一条。本轮把原先那句「子分支列表还没接」的占位文案从 `strings.xml` 整体删掉了，
   `android/` 下不再有任何形式的引用（本句刻意不写出它的字符串名与原文，否则等于又把它引回来一次；
   那条断言与扫描输出见 `artifacts/evidence/T-041-scans.txt`）。
-- **按钮叫「新建分支」，数据仍叫「分叉」**：`chat_act_fork` 与相关 `contentDescription` 统一为「新建分支」
-  （PRD 6.2.19 第 4 条），`app/src/main` 下已无「分叉」二字；本节在描述 `anchor_quote` / `source_revision_id` /
-  级联这类**数据概念**时仍写「分叉」，因为那是 schema 与既有文档里的名词，不是按钮文案。
-- **全屏编辑器（T-077，073 §5.1）**：composer 控件行左侧的展开入口钮（`chat_expand`，44dp）打开全屏覆盖层
-  `overlay_fullscreen_editor.xml`；覆盖层是 `ChatViewState.fullscreenEditing` 这一个只读快照位驱动的 View，
-  不是新状态机。入口在空草稿 / 归档 / 无 Key 三态灰显（归档与无 Key 的灰显点击给对应提示），编辑经
-  `onDraftChanged` 走 076 的同一条持久化链路，「完成」「取消」「关闭」与系统返回（`ChatScreen.onSystemBack`，
-  由 `MainActivity.onBackRequested` 先问对话页）都落在同一个 `onFullscreenEditClosed`——只关不清，草稿永不因
-  关闭而丢。低动效下开合直接切换；进入与关闭各有 TalkBack 播报。
+- **按钮叫「新建主题」，数据仍叫「分叉」**：`chat_act_fork`、`chat_fork_title`、`cd_act_fork` 与
+  `chat_suggestion_fork_title` 统一为「新建主题」（用户拍板 2026-09-27，取代 PRD 6.2.19 第 4 条的
+  「新建分支」），三处入口——划词菜单、回答操作行、推荐条分叉热区——读的是同一组字符串，
+  `ChatMessageRowLayoutTest` 的反向扫描保证 `strings.xml` 里不再有「新建分支」；`app/src/main` 下已无
+  「分叉」二字。本节在描述 `anchor_quote` / `source_revision_id` / 级联这类**数据概念**时仍写「分叉」，
+  因为那是 schema 与既有文档里的名词，不是按钮文案。
+- **全屏编辑器（T-077，073 §5.1）**：`overlay_fullscreen_editor.xml` 与 `ChatViewState.fullscreenEditing` 仍保留，
+  但当前聊天输入栏隐藏 `chat_expand` 入口；草稿仍由普通输入框编辑，现有关闭与恢复路径不受影响。
 
 **已知缺口与记录的偏差（不要读成已解决）：**
 
@@ -768,13 +799,8 @@ View 自己不持内容。
   2. **已结束但没有稳定版本的尝试读不到半截正文**：这种位置读回为 `FAILED`、正文为空。终态尝试的 partial
      文本在本 build 没有带调用方的查询能读到，而现造一条就是给同一批行开第二条读路径；`FAILED` 的整个
      作用正是「不让半截回答被当成回答」。
-  3. **`fork` 不发起生成**：新建分支只建子分支与它的出生快照，子分支的第一问由学习者自己提（父分支的自动生成
-     属 T-039 范围）；并且只允许从「显示着稳定版本」的 AI 位置新建分支，与 `ChatMessage.canFork()` 同条件。
-- **平台自己的文本工具条可能与应用菜单并存（T-041，无设备，未验证）**：本切片只保证「长按」这一条手势被应用接管
-  （`OnLongClickListener` 返回 `true`）。**拖动选择手柄**或**双击选词**仍可能唤起平台自己的悬浮工具条，从而与
-  `WordMenuPopup` 同屏出现两套操作。零 AndroidX 约束下没有可用的 `setCustomSelectionActionModeCallback`
-  等价物，也没有主题级的 `windowActionModeOverlay` 开关，所以这一条**只能上设备才能判定**，本轮记为
-  `deferred — 用户自行装机验证（user decision 2026-09-21）`，不得读成已解决。
+  3. **`fork` 不发起生成**：新建主题只建子分支与它的出生快照，子分支的第一问由学习者自己提（父分支的自动生成
+     属 T-039 范围）；并且只允许从「显示着稳定版本」的 AI 位置新建主题，与 `ChatMessage.canFork()` 同条件。
 - **T-041 的规模超了 500 行硬上限**：本切片 **544 非空非注释生产行**（新增 9 个文件 502 行 + 既有文件改动 42 行，
   判定值以外的物理行为 727 行；命令与逐文件明细见 `artifacts/evidence/T-041-sizing.txt`）。口径按
   `.trae/rules/harness-tasks.md` 第 45 行「新增文件按全部非空非注释行，既有文件只按本次改动行」。
@@ -880,7 +906,7 @@ View 自己不持内容。
 
 - **两条入口**：对话页顶栏的 `chat_nav`、画布顶栏的 `tree_nav` 都进入导航页，都回**进来时那段对话**。
   首页的第三条（`home_archived`）已随 055 首页瘦身删除——浏览历史与归档内容由学习库承担，
-  「继续学习」行承担最近主题的快捷回访。
+  首页底部「历史主题」列表承担最近主题的快捷回访，学习库仍是完整历史的权威入口。
 - **永久删除必须先经确认，且确认前不写库**：行的「永久删除」只发 `onDeleteRequested(branchId, SUBTREE)`，
   由 presenter 数出这次删除覆盖的分支数并给出 `pendingDelete` 计划；屏幕据此弹**一次**系统对话框，
   文案用 `navigation_delete_body` 的 `%2$d` 写出受影响子树的分支数量（含目标自身）；
@@ -908,7 +934,7 @@ V3.2 PRD 6.2.16 把 主页 / 学习库 / 设置 并列为一级入口，并给�
 
 | 类型 | 职责 | 关键不变量 |
 | :--- | :--- | :--- |
-| `res/layout/activity_main.xml` | 应用外壳的盒子：`LinearLayout(main_root)` 里是 `shell_host`（`0dp` + `weight=1`）与 `<include layout="@layout/screen_tab_bar"/>` | 标签栏是**外壳的一部分**，不是任何屏幕画的；`R.id.main_root` 与 `R.id.home_draft` 都仍在（`AppLaunchInstrumentedTest` 依赖） |
+| `res/layout/activity_main.xml` | 应用外壳的盒子：`main_drawer_root` 先放 `shell_backdrop`，再放 `LinearLayout(main_root)`；后者包含 `shell_host`（`0dp` + `weight=1`）与 `<include layout="@layout/screen_tab_bar"/>` | 纸纹与标签栏都是**外壳的一部分**，不是任何屏幕画的；`R.id.main_root`、`R.id.shell_backdrop` 与 `R.id.home_draft` 都仍在（`AppLaunchInstrumentedTest` 依赖） |
 | `res/layout/screen_tab_bar.xml` + `layout-sw600dp/` 镜像 | 三个标签项 `tab_home` / `tab_library` / `tab_settings`，每项 `minHeight=touch_min`，带 24dp 图标与标签 | 三项在同一个布局里**各自命名 id**（`tab_home_icon` 等）：三个 `tab_icon` 是重复 id，lint 在 `abortOnError` 下会当场让 `check` 失败；图标与文案仍留在声明式布局里，没有搬到代码 |
 | `MainActivity.swap(View)` | 换屏，并且是**唯一**判定标签栏显隐的地方 | 判定读的是外壳自己刚换上去的那块屏幕（`screen == homeScreen \|\| screen == libraryScreen \|\| (screen == settingsScreen && settingsIsAFrontRoom())`），所以栏与屏不可能互相不一致；让每个屏自己定位一次标签栏，就是在第一次有人忘记时开始漂移 |
 | `MainActivity.showTab(Tab)` / `selectTab(Tab)` / `markTab(...)` | 一级目的地按名称进入；`currentTab` 是「一级现在站在哪」的唯一记录 | `showTab` 是**除点标签之外唯一移动一级的方式**，二级屏只读它、不写它；`markTab` 同时给 label 上色与给 icon 上 tint（`tl_green_deep` / `tl_ink3`），只改一个就是半选中 |

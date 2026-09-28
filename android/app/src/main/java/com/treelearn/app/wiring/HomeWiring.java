@@ -134,8 +134,8 @@ public final class HomeWiring implements HomeData, RootQuestionSubmitter {
      * Aggregates the raw store counts into the home heat-strip facts.
      *
      * <p>The calendar math lives in {@code StatsAggregator}; this method only reads the raw counts
-     * and converts them. A store with no rows returns {@link HomeStats#empty()}, which the screen
-     * draws as the "no record yet" line rather than a broken "0 天".
+     * and converts them. A store with no rows returns an empty monthly calendar plus the current
+     * month label, so the drawer keeps its shape without inventing activity.
      */
     @Override
     public HomeStats stats() {
@@ -143,7 +143,7 @@ public final class HomeWiring implements HomeData, RootQuestionSubmitter {
         LocalDate today = LocalDate.now(clock);
         StatsAggregator.StatsResult result = StatsAggregator.aggregate(raw.answerTimestamps,
                 raw.totalQuestions, raw.totalMessages, clock.getZone(), today);
-        return result.isEmpty() ? HomeStats.empty()
+        return result.isEmpty() ? HomeStats.empty(today)
                 : HomeStats.of(result.activeDays(), today, result.currentStreak());
     }
 

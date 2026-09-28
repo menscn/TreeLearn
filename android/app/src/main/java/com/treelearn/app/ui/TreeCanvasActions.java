@@ -21,6 +21,10 @@ public interface TreeCanvasActions {
     /** The explicit "fit the whole tree" control. */
     void onFit();
 
+    /** Centres the current branch without changing the learner's zoom. */
+    default void onCenterCurrent() {
+    }
+
     /** A tap in screen pixels; the presenter inverts its own matrix before hit-testing. */
     void onTap(float screenX, float screenY);
 

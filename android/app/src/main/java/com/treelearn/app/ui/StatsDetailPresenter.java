@@ -5,20 +5,22 @@ import com.treelearn.data.stats.StatsAggregator;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Executor;
 
 /**
- * The statistics detail page (T-104): the full heatmap and the three totals, read through the SAME
+ * The statistics detail page (T-104): the current-month calendar and the three totals, read through the SAME
  * aggregation entry point as the home strip — {@link HomeStore#statsRaw()} feeding
  * {@link StatsAggregator} — so the two surfaces cannot grow two different verdicts about "was this
- * day active". The page maps the ten-week window for the grid and passes the totals through
+ * day active". The page maps only the current month for display and passes the totals through
  * untouched; it never recounts anything.
  */
 public final class StatsDetailPresenter {
 
-    /** The detail grid covers ten weeks, one column per day, today on the last column. */
-    public static final int WINDOW_DAYS = 70;
+    /** The detail calendar is a fixed seven-column by six-row month grid. */
+    public static final int MONTH_CELL_COUNT = 42;
 
     /** The render port; the screen draws the state it is given and decides nothing. */
     public interface Sink {
@@ -40,17 +42,25 @@ public final class StatsDetailPresenter {
 
         public final boolean empty;
         public final boolean failed;
-        /** One intensity per day, oldest first, today last; 1.0 active, 0.0 not. */
-        public final float[] intensities;
+        /** One intensity per Monday-first calendar cell; -1.0 means transparent blank. */
+        public final float[] monthIntensities;
+        /** Zero-based Monday-first column for the first day of the month. */
+        public final int monthFirstWeekday;
+        public final int monthDays;
+        public final String monthLabel;
         public final long totalQuestions;
         public final long totalMessages;
         public final int streakDays;
 
-        private State(boolean empty, boolean failed, float[] intensities, long totalQuestions,
+        private State(boolean empty, boolean failed, float[] monthIntensities,
+                int monthFirstWeekday, int monthDays, String monthLabel, long totalQuestions,
                 long totalMessages, int streakDays) {
             this.empty = empty;
             this.failed = failed;
-            this.intensities = intensities;
+            this.monthIntensities = monthIntensities;
+            this.monthFirstWeekday = monthFirstWeekday;
+            this.monthDays = monthDays;
+            this.monthLabel = monthLabel;
             this.totalQuestions = totalQuestions;
             this.totalMessages = totalMessages;
             this.streakDays = streakDays;
@@ -89,7 +99,7 @@ public final class StatsDetailPresenter {
             try {
                 next = read();
             } catch (RuntimeException failed) {
-                next = new State(false, true, new float[WINDOW_DAYS], 0L, 0L, 0);
+                next = failedState();
             }
             final State frozen = next;
             ui.post(() -> {
@@ -104,15 +114,39 @@ public final class StatsDetailPresenter {
         LocalDate today = LocalDate.now(clock);
         StatsAggregator.StatsResult result = StatsAggregator.aggregate(raw.answerTimestamps,
                 raw.totalQuestions, raw.totalMessages, clock.getZone(), today);
-        if (result.isEmpty()) {
-            return new State(true, false, new float[WINDOW_DAYS], 0L, 0L, 0);
+        YearMonth month = YearMonth.from(today);
+        return new State(result.isEmpty(), false, monthValues(month, today, result.activeDays()),
+                firstWeekday(month), month.lengthOfMonth(), monthLabel(month),
+                result.totalQuestions(), result.totalMessages(), result.currentStreak());
+    }
+
+    private State failedState() {
+        LocalDate today = LocalDate.now(clock);
+        YearMonth month = YearMonth.from(today);
+        return new State(false, true, monthValues(month, today, java.util.Collections.<LocalDate>emptyList()),
+                firstWeekday(month), month.lengthOfMonth(), monthLabel(month), 0L, 0L, 0);
+    }
+
+    private static float[] monthValues(YearMonth month, LocalDate today, List<LocalDate> activeDays) {
+        float[] values = new float[MONTH_CELL_COUNT];
+        int first = firstWeekday(month);
+        int days = month.lengthOfMonth();
+        for (int cell = 0; cell < values.length; ++cell) {
+            int day = cell - first + 1;
+            if (day < 1 || day > days || day > today.getDayOfMonth()) {
+                values[cell] = -1.0f;
+            } else {
+                values[cell] = activeDays.contains(month.atDay(day)) ? 1.0f : 0.0f;
+            }
         }
-        List<LocalDate> activeDays = result.activeDays();
-        float[] intensities = new float[WINDOW_DAYS];
-        for (int i = 0; i < WINDOW_DAYS; ++i) {
-            intensities[i] = activeDays.contains(today.minusDays(WINDOW_DAYS - 1 - i)) ? 1.0f : 0.0f;
-        }
-        return new State(false, false, intensities, result.totalQuestions(),
-                result.totalMessages(), result.currentStreak());
+        return values;
+    }
+
+    private static int firstWeekday(YearMonth month) {
+        return month.atDay(1).getDayOfWeek().getValue() - 1;
+    }
+
+    private static String monthLabel(YearMonth month) {
+        return String.format(Locale.ROOT, "%d 年 %d 月", month.getYear(), month.getMonthValue());
     }
 }

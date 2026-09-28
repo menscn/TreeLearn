@@ -51,7 +51,7 @@ public final class TreeCanvasPresenterTest {
     }
 
     @Test
-    public void startReadsTheTopicFitsTheWholeTreeAndRendersReady() {
+    public void startReadsTheTopicOpensOnTheCurrentBranchAndRendersReady() {
         TreeCanvasPresenter presenter = phone(TreeCanvasDoubles.LEAF_A);
         presenter.start();
 
@@ -65,8 +65,10 @@ public final class TreeCanvasPresenterTest {
 
         ViewportConstraints viewport = ViewportConstraints.of(TreeCanvasDoubles.PHONE_W,
                 TreeCanvasDoubles.PHONE_H);
-        assertEquals(state.layout.fit(viewport).scale, state.transform.scale, EPS);
-        assertEquals(state.layout.fit(viewport).translateY, state.transform.translateY, EPS);
+        assertEquals(0.92f, state.transform.scale, EPS);
+        assertEquals(TreeCanvasDoubles.PHONE_W / 2f,
+                state.transform.toScreen(state.layout.anchorOf(TreeCanvasDoubles.LEAF_A).x,
+                        state.layout.anchorOf(TreeCanvasDoubles.LEAF_A).y).x, EPS);
         assertTrue("the canvas shows the branch the caller asked for",
                 state.layout.branch(TreeCanvasDoubles.LEAF_A) != null);
         assertEquals("loading then ready", 2, sink.renders);

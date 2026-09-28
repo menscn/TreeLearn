@@ -1,0 +1,55 @@
+[2026-09-27] 划词菜单改为应用自绘 + 「新建分支」改名「新建主题」
+direct execution（无 Harness task）—— 用户拍板 2026-09-27
+
+== 变更的运行时事实 ==
+1. 长按选中回答文字后：原生选择手柄保留（textIsSelectable + 平台 ActionMode），平台自带的划词工具条
+   （全选 / 复制 / 平台翻译…）在 ChatScreen.Row.SelectionMenuCallback 里被清空，菜单改由 WordMenuPopup
+   绘制，四项固定为 追问 / 新建主题 / 复制 / 全选（顺序取自 WordMenu.Item：QUOTE, FORK, COPY, SELECT_ALL）。
+   起因：平台工具条无法由应用排序，应用追加的项永远排在系统项之后，「新建分支」因此被挤进「更多」。
+2. 文案：chat_act_fork / cd_act_fork / chat_fork_title / chat_suggestion_fork_title 由「新建分支」改为「新建主题」，
+   三处入口（划词菜单、回答底部操作行、推荐问题旁分叉热区）读同一组字符串。
+3. 新增：WordMenuPopup.refresh()（拖动选区手柄时卡片与「选中「…」」标签跟随），WordMenuPopup.setOnClosed()
+   （卡片关闭即结束平台选择，手柄与菜单同生同灭），ChatScreen.showWordMenu/dismissPopups 统一管理两张卡片。
+4. 删除：values/ids.xml 的 chat_selection_quote / chat_selection_fork（不再往平台菜单加项）；
+   ChatScreen.Row.hasSelection()（唯一调用方是被删掉的平台菜单回调）。
+
+== 命令与证据 ==
+$ cd android && ./gradlew.bat :app:testDebugUnitTest --console=plain
+EXITCODE=0（BUILD SUCCESSFUL）
+  新用例确实执行过（读测试报告 XML，而不是读 BUILD 字样）：
+  $ grep -o 'name="theSelectionMenuSaysNewTopicAndEmptiesThePlatformToolbar"[^>]*' \
+        android/app/build/test-results/testDebugUnitTest/*.xml
+  → TEST-com.treelearn.app.ui.ChatMessageRowLayoutTest.xml:name="theSelectionMenuSaysNewTopicAndEmptiesThePlatformToolbar" ... time="0.003"/
+
+$ cd android && ./gradlew.bat check --console=plain
+EXITCODE=0（BUILD SUCCESSFUL，295 actionable tasks: 27 executed, 2 from cache, 266 up-to-date）
+  其中：
+  verifyNoKotlinDex: PASS (3 APK(s) inspected across app/build/outputs/apk, no Kotlin runtime bytecode)
+  :app:lint、:app:check、:core:check、:data:check、:ai:check、:tree-layout:check 全部通过
+  单测计数（debug + release，读 test-results XML 求和）：tests=1296 failures+errors=0
+
+$ cd android && <shell> -NoProfile -File scripts/no-kotlin-check.ps1
+EXITCODE=0，VERDICT: PASS (13 OK line(s))
+  原始输出：artifacts/evidence/no-kotlin-2026-09-27.txt（本命令的输出被重编码为 UTF-8）
+  时效性注（2026-09-27 17:02 追加，未改动上述原始行）：该次 PASS 检查的是 1,986,149 bytes 的
+  app-debug.apk；16:43 装机后设备上的 APK 已是 1,714,231 bytes，两者不同源。引用「当前 APK
+  不含 Kotlin」这类结论时请改用 artifacts/evidence/no-kotlin-2026-09-27-adjudication.txt。
+
+== 反向查找（旧术语是否还有匹配项）==
+$ grep -rn "新建分支" android/app/src/main   → 0 匹配
+$ grep -rn "chat_selection" android/         → 0 处生产匹配（只剩测试里的反向断言字符串）
+PRD V3.2 刻意保留历史原文的行：59 / 60（V3.1 用户原话指令表）、814（V3.0 背景段）、1036 / 1039（早于本次的历史行）。
+仍写「新建分支」但**刻意不改**的产物（原型为 2026-09-27 用户拍板保持原样；其余为历史快照）：
+  Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html —— 用户可见文案在 868 / 910 / 1527 行，需求清单在 2408 / 2410 行
+  Docs/06-delivery/TreeLearn_V1_交付报告.md —— 104 / 105 行（V1 交付时的历史快照）
+  Docs/01-demand/（V3.0 基准、V3.1 增量基准）、Docs/03-prd-draft/V3.0 与 V3.1 旧版 PRD、Docs/04a-ux-cross-review/（当日评审快照）
+
+== 缺口（未完成，不得读成已通过）==
+- 设备侧行为未取得：本机未连接设备，未跑 connectedDebugAndroidTest，也没有真机截图。必须由用户装机确认三件事：
+  (a) 平台工具条确实不再出现，只剩应用卡片；
+  (b) 原生选择手柄仍可拖动，且拖动时卡片跟随、标签刷新；
+  (c) 点卡片外、或点任一项之后，手柄与菜单一起消失。
+  回退路径（若某 ROM 在菜单被清空时直接结束 ActionMode，表现为卡片闪一下就没了）：把 SelectionMenuCallback
+  改成把四项加进平台菜单（menu.add 四项，项目与顺序仍由应用掌控），放弃自绘卡片。
+- 平板横屏未验证：本次未改布局与 Manifest，风险面＝卡片落点；WordMenu.leftFor / topFor 已做窗口内夹取，
+  有 JVM 用例（WordMenuTest）覆盖。

@@ -1,0 +1,14 @@
+# T-2026-09-27-007 GREEN - 同一命令、最终实现（HomeMotion + HomeScreen + MainActivity）
+# generated: 2026-09-27 18:45:09 +0800  (本次运行写盘时刻；本文件于 2026-09-27 18:56:12 +0800 生成)
+# workdir: android/
+# command: JAVA_HOME=D:/Environment/Jdk/jdk21 ./gradlew --console=plain :app:testDebugUnitTest --tests "com.treelearn.app.screen.HomeMotionTest" :app:compileDebugAndroidTestJavaWithJavac
+EXITCODE=0
+MEASURED build verdict: BUILD SUCCESSFUL in 15s
+---- 报告核对（读 XML，不读 BUILD 字样；按 run-start 时间过滤）----
+MEASURED report: TEST-com.treelearn.app.screen.HomeMotionTest.xml
+MEASURED tests=8 failures=0 errors=0 skipped=0 (reports=1)
+
+---- 命令记录说明 ----
+与 RED 的 command 行逐字相同（JAVA_HOME 同为归一化写法）。本次为最终代码状态下的复跑：
+首次 GREEN 后 instrumented 验收测试揭示「动画结束即被父层清除」的测试设计缺陷，产品实现随按原型
+语义微调（入场改挂在整屏 HomeScreen 上），故 GREEN 以最终态复跑并以此文件为准。

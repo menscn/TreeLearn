@@ -1,0 +1,34 @@
+# T-2026-09-27-002 GREEN（两份首页布局接入 PaperRuleBackdrop 之后）
+# generated: 2026-09-27 16:30:55 +0800
+# workdir: android/
+# command: JAVA_HOME=<jdk21> ./gradlew --offline :app:assembleDebug
+# why: 两份 screen_home.xml 已改动，需证明它们能过 aapt2 并进入 APK
+# note: gradle 按内容哈希判定 UP-TO-DATE，故不引用 task 是否 executed；改为直接核验打包产物 APK 内编译过的布局
+EXITCODE=0
+---- build verdict ----
+  BUILD SUCCESSFUL in 1s
+---- APK 内布局条目 ----
+        996  1981-01-01 01:01   res/layout-sw600dp-v13/screen_home.xml
+        852  1981-01-01 01:01   res/layout/screen_home.xml
+       5660  1981-01-01 01:01   res/layout/screen_home_body.xml
+---- 资源 id 名解析（让下面的十六进制 id 可读）----
+  $ /d/Environment/Android/SDK/build-tools/36.0.0/aapt2.exe dump resources "$APK" | grep -E 'home_screen|home_backdrop|home_root'
+      resource 0x7f050061 id/home_backdrop
+      resource 0x7f050075 id/home_root
+      resource 0x7f050076 id/home_screen
+---- 手机配置 layout/screen_home.xml 的编译后树（只取首层兄弟）----
+  $ /d/Environment/Android/SDK/build-tools/36.0.0/aapt2.exe dump xmltree "$APK" --file res/layout/screen_home.xml | grep -E '^\s*E: |id\(0x'
+    E: FrameLayout (line=8)
+      A: http://schemas.android.com/apk/res/android:id(0x010100d0)=@0x7f050076
+        E: com.treelearn.app.screen.PaperRuleBackdrop (line=16)
+        E: ScrollView (line=22)
+---- 平板配置 layout-sw600dp-v13/screen_home.xml 的编译后树（只取首层兄弟）----
+  $ /d/Environment/Android/SDK/build-tools/36.0.0/aapt2.exe dump xmltree "$APK" --file res/layout-sw600dp-v13/screen_home.xml | grep -E '^\s*E: |id\(0x'
+    E: FrameLayout (line=10)
+      A: http://schemas.android.com/apk/res/android:id(0x010100d0)=@0x7f050076
+        E: com.treelearn.app.screen.PaperRuleBackdrop (line=18)
+        E: ScrollView (line=24)
+---- 判定 ----
+  APK 内 screen_home 条目数: 3（期望 >= 3：手机、sw600dp、body）
+  res/layout/screen_home.xml: 含 PaperRuleBackdrop —— PASS
+  res/layout-sw600dp-v13/screen_home.xml: 含 PaperRuleBackdrop —— PASS

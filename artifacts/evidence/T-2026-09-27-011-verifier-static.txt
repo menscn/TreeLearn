@@ -1,0 +1,62 @@
+T-2026-09-27-011 independent verifier static evidence
+captured-at: 2026-09-27
+cwd: D:\Project\Android\Treelearn
+mode: READONLY; no production code, task file, or test source modified
+test policy: no new test/build/device run; existing JVM XML and device result inventory were inspected only
+
+COMMAND: read-only source assertions (PowerShell string checks)
+EXITCODE=0
+CHECK drawer_card_background=PASS
+CHECK drawer_empty_view=PASS
+CHECK drawer_grid_7x6=PASS
+CHECK screen_empty_visibility=PASS
+CHECK home_stats_sentinel=PASS
+CHECK heatmap_skips_blank=PASS
+CHECK instrumented_empty_assertions=PASS
+
+SOURCE FACTS:
+  drawer_heatmap.xml:4-14 defines a clickable/elevated card with an existing touch_min minimum height.
+  drawer_heatmap.xml:45-53 defines the in-card empty message, initially GONE.
+  drawer_heatmap.xml:55-71 defines seven horizontal weekday labels; lines 73-85 configure HeatmapView as 7 columns x 6 rows.
+  HomeDrawerScreen.java:109-120 keeps the card visible when stats exists, shows the empty message and hides weekdays/cells for empty stats, and feeds monthIntensities for non-empty stats.
+  HomeStats.java:41-50 writes monthIntensities as firstDayOffset + day (row-major calendar-cell order); lines 58-61 initialize all cells to -1.0f, making future/month-end cells transparent sentinels.
+  HeatmapView.java:62-70 records values below zero as blank; lines 80-90 skip blank cells before drawing.
+  HomeDrawerScreenInstrumentedTest.java:24-35 asserts the empty card is VISIBLE, the empty message is VISIBLE, and the calendar cells are GONE.
+
+COMMAND: read-only coordinate probe for 2026-09-23 (the HomeStats test fixture)
+EXITCODE=0
+PROBE: HomeStats firstDayOffset=1; September 23 is stored at array index 23.
+EXPECTED_CALENDAR_POSITION: weekday column=2 (Wednesday), week row=3.
+HeatmapLayout.cellX/cellY use column=index/rows and row=index%rows with rows=6.
+ACTUAL_HEATMAP_POSITION: column=3, row=5.
+COORDINATE_PROBE=FAIL (row-major producer vs column-major renderer)
+IMPACT: populated drawer cells are transposed/misplaced relative to the horizontal Monday-to-Sunday header. The empty state cannot reveal this because all cells are hidden.
+
+COMMAND: parse existing JVM XML result (no test rerun)
+EXITCODE=0
+RESULT_FILE: android/app/build/test-results/testDebugUnitTest/TEST-com.treelearn.app.ui.HomeStatsTest.xml
+RESULT: tests=3 failures=0 errors=0 skipped=0 timestamp=2026-09-27T16:22:47.837Z
+INTERPRETATION: HomeStats sentinel assertions pass, but they only inspect array indices and do not exercise HeatmapView's coordinate transform.
+
+COMMAND: inventory existing connected instrumentation result files (no test rerun)
+EXITCODE=0
+FINDING: NO_MATCHING_DRAWER_INSTRUMENTATION_RESULT for HomeDrawerScreenInstrumentedTest / emptyStatsKeepTheHeatCard.
+INTERPRETATION: The test source exists, but an independently inspectable current device result for this class is absent. The available connected XML is for HomeBackdropInstrumentedTest, not T-011.
+
+SCOPE/STATUS:
+  M android/app/src/main/java/com/treelearn/app/screen/HomeDrawerScreen.java
+  M android/app/src/main/java/com/treelearn/app/ui/HeatmapView.java
+  M android/app/src/main/java/com/treelearn/app/ui/HomeStats.java
+  ?? android/app/src/androidTest/java/com/treelearn/app/HomeDrawerScreenInstrumentedTest.java
+  ?? android/app/src/main/res/layout/drawer_heatmap.xml
+  StatsAggregator.java has no current git diff; this verifier did not alter it.
+
+SCREENSHOT GAPS:
+  PRESENT: artifacts/evidence/android-home-drawer-2026-09-27-v2.png and android-home-drawer-2026-09-27.png (phone drawer visuals only).
+  LIMITATION: the screenshots show a 7x6 gray-cell state but do not prove the in-card empty-message visibility or a correctly positioned active date.
+  MISSING: isolated non-empty drawer fixture screenshot with known active dates.
+  MISSING: real sw600dp/tablet-landscape drawer screenshot.
+  MISSING: current device result for HomeDrawerScreenInstrumentedTest.
+
+STATIC_VERDICT=REJECT
+BLOCKING_FINDING: HomeStats month-cell indexing and HeatmapView rendering order disagree; the populated drawer calendar cannot be accepted as weekday-aligned 1:1 visual behavior.
