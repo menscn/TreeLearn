@@ -37,6 +37,8 @@ final class ChatTestDoubles {
     static final String PARENT_BRANCH = "99999999-9999-4999-8999-999999999999";
     static final String TOPIC = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
     static final String BIRTH_SNAPSHOT = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+    /** One stored highlight row's id, for tests that hand the store's own marks back through a read. */
+    static final String ANNOTATION = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
 
     static final String QUESTION = "why does attention scale by root d";
     static final String ANSWER = "because the dot products grow with d";
@@ -83,6 +85,20 @@ final class ChatTestDoubles {
             List<Recommendation> recommendations, String revisionId) {
         return ChatData.Snapshot.of(title, messages, recommendations, revisionId, null,
                 Collections.<Message>emptyList(), null);
+    }
+
+    /**
+     * A read that also carries the marks the store holds for each answer.
+     *
+     * <p>The annotations channel rides the same read as the rows, so a test about a projection
+     * that must be corrected by the store has to hand the store's own answer to the read: an empty
+     * map here is "the store holds no mark", which is exactly what a refused highlight leaves
+     * behind.
+     */
+    static ChatData.Snapshot readWithMarks(String title, List<ChatMessage> messages,
+            java.util.Map<String, List<Annotation>> annotations) {
+        return ChatData.Snapshot.of(title, messages, Collections.<Recommendation>emptyList(), "",
+                null, Collections.<Message>emptyList(), null, annotations);
     }
 
     /** A read that also carries the branch row behind it and the source card the wiring built. */
@@ -272,6 +288,14 @@ final class ChatTestDoubles {
         final List<String> overviewsOpened = new ArrayList<String>();
         final List<String> navigationsOpened = new ArrayList<String>();
         final List<ReadingPosition> restored = new ArrayList<ReadingPosition>();
+        /**
+         * Every marks push the presenter makes, in order. The screen draws from the newest one, so
+         * a test that cares whether a projection survived an authoritative read has to see the
+         * pushes themselves - an empty list here means the presenter never repushed, which is a
+         * different failure from a push that carried the old marks.
+         */
+        final List<java.util.Map<String, List<Annotation>>> marksRenders =
+                new ArrayList<java.util.Map<String, List<Annotation>>>();
         int settingsOpened;
         int closed;
 
@@ -282,6 +306,12 @@ final class ChatTestDoubles {
 
         @Override
         public void renderAnnotations(java.util.Map<String, List<Annotation>> annotations) {
+            marksRenders.add(annotations);
+        }
+
+        /** The marks the screen would be drawing right now; null before the first push. */
+        java.util.Map<String, List<Annotation>> lastMarks() {
+            return marksRenders.isEmpty() ? null : marksRenders.get(marksRenders.size() - 1);
         }
 
         @Override

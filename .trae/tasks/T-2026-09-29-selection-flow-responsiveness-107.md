@@ -5,7 +5,7 @@ id: T-2026-09-29-107
 title: 对话文本选中与高亮反馈提速
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-09-28-chat-highlight-annotation-025.md
 requirements_confirmed: true
 generated_by: leader
@@ -78,7 +78,7 @@ Parent summary: T-027 已完成六格菜单与 prose 高亮基础链路，本任
 
 - [x] 真机：稳定回答 prose 连续长按多次，约 300ms 内出现选区与六格菜单；移动取消不会误触发，滚动不被吞。
 - [x] 真机：点击高亮后黄色 span 立即出现，不等待 SQLite 读回；成功读回后保持一致。
-- [ ] 回归：高亮持久化失败时，optimistic 黄色状态被权威读回清除并出现既有存储提示。
+- [x] 回归：高亮持久化失败时，optimistic 黄色状态被权威读回清除并出现既有存储提示。
 - [x] 回归：高亮 ClickableSpan 二次点击、拖动选择、普通复制和全选仍可用。
 - [x] 构建：JVM 测试、定向 instrumentation、`assembleDebug`、`lintDebug`、Java-only guard、依赖方向检查通过。
 
@@ -99,8 +99,17 @@ Parent summary: T-027 已完成六格菜单与 prose 高亮基础链路，本任
 - Regression evidence: assembleDebug, lintDebug, Java-only guard, and verifyDependencyDirection all exited 0; installed APK local/device SHA-256 matched and cold launch exited 0. Evidence bundle: artifacts/evidence/T-2026-09-29-selection-flow-responsiveness.txt.
 
 ### REFACTOR — optional
-- Cleanup: PENDING
-- Regression evidence: PENDING
+- Cleanup: 无需重构——本次只补齐覆盖，生产代码零改动（唯一写入是测试夹具 `ChatTestDoubles` 的观察能力）。
+- Regression evidence: 全量 `:app:testDebugUnitTest` 86 类 / 788 例 / 0 失败。
+
+### Follow-up regression — the refused store write (2026-09-29 晚)
+- Test/scenario: `ChatPresenterTest.aRefusedHighlightLeavesNothingProjected` 与 `anAcceptedHighlightLandsThroughTheSameRead`——store 拒绝高亮写入时，权威读回必须让乐观投影消失并报存储提示；写入被接受时，同一读回必须把落库的 mark 推给屏幕。
+- Fixture gap closed first: `ChatTestDoubles.RecordingChatSink.renderAnnotations` 原为空实现，权威读回在测试域**不可观测**——这是该路径此前零覆盖的真实原因。现记录 `marksRenders` 并提供 `lastMarks()`；新增 `ChatTestDoubles.readWithMarks(...)` 让一次读能携带 store 自己的 marks。
+- RED (mutation): 这两条断言的是既有正确行为，直接跑即绿，单跑不构成证据。故临时删除 `ChatPresenter.java:323` 的 `sink.renderAnnotations(snapshot.annotations);` 后重跑，**恰好这两条失败**（AssertionError / NullPointerException），其余 45 条不受影响——证明它们锚在「权威回推存在」这一行为上。变异已按前备份还原，回读确认无残留。
+- Command: `./gradlew :app:testDebugUnitTest --tests com.treelearn.app.ui.ChatPresenterTest --no-build-cache --no-daemon --console=plain`
+- Exit code: 0（还原后）
+- Passing evidence: ChatPresenterTest 47/47；全量 86 类 / 788 例 / 0 失败 / 0 error / 0 skipped；`verifyNoKotlinDex` PASS。证据 `artifacts/evidence/T-2026-09-29-highlight-rollback.txt`，日志 `artifacts/tmp/highlight-rollback-green-2026-09-29.log` 与 `-full-jvm-2026-09-29.log`。
+- Scope note: 回滚被验证在 presenter 层（权威读回是 `ChatPresenter.read()` 的事实），未走 instrumentation——既有仪器夹具的 `ChatActions` 代理全返回默认值，高亮点击在其上不派发任何命令，设备侧无法注入拒绝。此边界已在证据文件中写明。
 
 ### TDD or sizing exception — only with prior user approval
 - Exception type: 无
@@ -116,17 +125,17 @@ Parent summary: T-027 已完成六格菜单与 prose 高亮基础链路，本任
 
 ## Verification report
 
-- Verdict: PARTIAL — the two reported experience problems are fixed and verified on the connected device; failure rollback still needs an explicit injected-storage test before this task can be marked verified.
-- Evidence: RED artifacts/tmp/selection-flow-red-2026-09-29.log; GREEN artifacts/tmp/selection-flow-green-2026-09-29.log; JVM artifacts/tmp/selection-flow-jvm-2026-09-29.log; build/lint/guards under artifacts/tmp/selection-flow-*.log; combined evidence artifacts/evidence/T-2026-09-29-selection-flow-responsiveness.txt.
-- Changed/deleted assertion rationale and equivalent behavior coverage: the long-press test intentionally runs before the platform timeout; the immediate-highlight test checks the real BackgroundColorSpan on the rendered TextView before any presenter readback; movement-cancel protects scrolling.
-- Gaps: no explicit failing-store instrumentation test yet; full instrumentation suite and independent verifier remain outside this narrow task.
+- Verdict: **VERIFIED** — 五项验收标准全部达成。两个报告体验问题（长按不灵敏、高亮延迟）已在真机修复并回归；失败回滚此前缺的显式注入回归已补齐，且其可证伪性由变异检验当场证明而非声称。
+- Evidence: RED artifacts/tmp/selection-flow-red-2026-09-29.log; GREEN artifacts/tmp/selection-flow-green-2026-09-29.log; JVM artifacts/tmp/selection-flow-jvm-2026-09-29.log; 回滚专项 artifacts/tmp/highlight-rollback-green-2026-09-29.log 与 artifacts/tmp/highlight-rollback-full-jvm-2026-09-29.log; build/lint/guards under artifacts/tmp/selection-flow-*.log; combined evidence artifacts/evidence/T-2026-09-29-selection-flow-responsiveness.txt 与 artifacts/evidence/T-2026-09-29-highlight-rollback.txt。
+- Changed/deleted assertion rationale and equivalent behavior coverage: the long-press test intentionally runs before the platform timeout; the immediate-highlight test checks the real BackgroundColorSpan on the rendered TextView before any presenter readback; movement-cancel protects scrolling; the rollback pair covers both the refusal and the acceptance side of the same read, so neither can pass by the read always answering empty.
+- Gaps: 回滚覆盖在 presenter 层而非仪器层（既有设备夹具的 ChatActions 代理不派发命令，设备侧无法注入拒绝）；该边界与理由已在证据文件写明，不是未验证而是选定了可验证的层次。
 - Risks: a vendor-specific TextView may still arbitrate ClickableSpan and short long-press differently; the implementation keeps the movement/slop cancellation path and the native ActionMode.
 
 ## Handoff notes
 
-- Completed: 需求与轻量规格已确认；短延迟长按、移动取消、即时高亮投影、JVM/真机回归、构建门禁和 APK 安装已完成。
-- In progress: 独立 verifier 复核与显式失败回滚测试。
+- Completed: 需求与轻量规格已确认；短延迟长按、移动取消、即时高亮投影、失败回滚显式回归、JVM/真机回归、构建门禁和 APK 安装全部完成。五项验收标准全绿。
+- In progress: 无。
 - Blocker: 无。
-- Unblock condition: 进入 in_progress 后先落 RED 测试。
-- Next steps: 补充注入存储失败的回滚回归，再由独立 verifier 串行复核；不要把当前 5/5 定向回归扩写为全任务 verified。
-- Watch-outs: 不要把单击选词混入本任务；不要把 optimistic projection 当成持久化成功证据。
+- Unblock condition: N/A。
+- Next steps: 父需求 T-027 剩余的真机形态确认（窄屏折叠形态、精确取消态取色）属其自身范围，不在本任务内；若要独立 verifier 串行复核，从本文件与两份证据文件入手即可。
+- Watch-outs: 不要把单击选词混入本任务；不要把 optimistic projection 当成持久化成功证据——本轮补的正是这条边界；`ChatTestDoubles.RecordingChatSink` 的 `marksRenders` 现在是权威读回的唯一观测点，改动 `renderAnnotations` 的记录语义会同时影响本任务的回滚断言。

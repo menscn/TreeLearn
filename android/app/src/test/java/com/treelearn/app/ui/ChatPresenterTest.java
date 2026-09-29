@@ -6,11 +6,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import com.treelearn.core.domain.Annotation;
 import com.treelearn.core.domain.AnswerRevision;
 import com.treelearn.core.domain.GenerationModel;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -773,5 +775,75 @@ public final class ChatPresenterTest {
 
     private static Recommendation recommendation() {
         return ChatTestDoubles.recommendation("how does temperature affect it");
+    }
+
+    /**
+     * T-107: a highlight the store refused must leave no paint behind.
+     *
+     * <p>The screen projects the yellow mark before it dispatches the write, so the learner sees
+     * the tap land immediately. That projection is not evidence of anything - SQLite is the only
+     * authority - and the refusal path is what proves it: the store answers refused, the presenter
+     * reports the storage notice, and the unconditional read that follows hands the store's own
+     * marks back to the screen. Here the store holds no mark for the answer, so the read must push
+     * an empty list for it and the projection has nothing left to draw from.
+     */
+    @Test
+    public void aRefusedHighlightLeavesNothingProjected() {
+        data.snapshot = ChatTestDoubles.readWithMarks("Transformer attention",
+                ChatTestDoubles.messages(ChatTestDoubles.ask(ChatTestDoubles.M_ASK, ChatTestDoubles.QUESTION),
+                        ChatTestDoubles.stableAnswer(ChatTestDoubles.M_ANSWER, ChatTestDoubles.ANSWER)),
+                Collections.<String, List<Annotation>>emptyMap());
+        commands.highlightResult = ChatCommandResult.refused(HomeViewState.Notice.STORAGE);
+
+        ChatPresenter presenter = presenter();
+        presenter.start();
+        assertTrue("the store's own marks must reach the screen on the first read",
+                sink.lastMarks() != null && sink.lastMarks().isEmpty());
+
+        presenter.onHighlightPressed(ChatTestDoubles.M_ANSWER, 0, 0, 8);
+
+        assertEquals("a refused highlight must reach the store once", true,
+                commands.called("applyHighlight"));
+        assertEquals("the refusal must be reported as the storage notice",
+                HomeViewState.Notice.STORAGE, sink.last().notice);
+        assertNotNull("the authoritative read must push marks back to the screen", sink.lastMarks());
+        assertTrue("a refused highlight must leave no mark for the answer",
+                sink.lastMarks().get(ChatTestDoubles.M_ANSWER) == null
+                        || sink.lastMarks().get(ChatTestDoubles.M_ANSWER).isEmpty());
+    }
+
+    /**
+     * The other half of the refusal path: a write that is accepted still lands through the same
+     * read, so the mark the learner sees after the read is the stored one and not the projection.
+     * Without this, "the projection is corrected by the read" could be satisfied by a read that
+     * always answers empty, which would silently drop every successful highlight too.
+     */
+    @Test
+    public void anAcceptedHighlightLandsThroughTheSameRead() {
+        Annotation stored = Annotation.highlight(ChatTestDoubles.ANNOTATION,
+                Annotation.Locator.prose(0), 0, 8);
+        data.snapshot = ChatTestDoubles.readWithMarks("Transformer attention",
+                ChatTestDoubles.messages(ChatTestDoubles.ask(ChatTestDoubles.M_ASK, ChatTestDoubles.QUESTION),
+                        ChatTestDoubles.stableAnswer(ChatTestDoubles.M_ANSWER, ChatTestDoubles.ANSWER)),
+                Collections.<String, List<Annotation>>emptyMap());
+        commands.highlightResult = ChatCommandResult.succeeded();
+
+        ChatPresenter presenter = presenter();
+        presenter.start();
+
+        // The store now holds the row the command wrote; the read that follows the command is what
+        // the screen paints from.
+        data.snapshot = ChatTestDoubles.readWithMarks("Transformer attention",
+                ChatTestDoubles.messages(ChatTestDoubles.ask(ChatTestDoubles.M_ASK, ChatTestDoubles.QUESTION),
+                        ChatTestDoubles.stableAnswer(ChatTestDoubles.M_ANSWER, ChatTestDoubles.ANSWER)),
+                Collections.singletonMap(ChatTestDoubles.M_ANSWER,
+                        Collections.singletonList(stored)));
+
+        presenter.onHighlightPressed(ChatTestDoubles.M_ANSWER, 0, 0, 8);
+
+        assertNull("an accepted highlight reports no failure", sink.last().notice);
+        assertNotNull(sink.lastMarks().get(ChatTestDoubles.M_ANSWER));
+        assertEquals("the stored mark must be what the screen ends up drawing", 1,
+                sink.lastMarks().get(ChatTestDoubles.M_ANSWER).size());
     }
 }

@@ -1,0 +1,69 @@
+Harness evidence: T-2026-09-29-107 (acceptance item "highlight rollback on a refused store write")
+Captured: 2026-09-29
+
+[METHOD]
+The acceptance item asked for an explicit injected-storage regression before the task could leave
+PARTIAL. The store-refusal path is not reachable from the existing instrumentation fixture: that
+suite drives ChatScreen with a ChatActions proxy whose every method returns a default value
+(WordMenuPopupInstrumentedTest.noopActions, lines 321-330), so a highlight tap there dispatches
+nothing and the projection is never corrected by any read. The correction itself is a JVM-layer
+fact - ChatPresenter.read() pushes the store's own marks to the sink on every read, unconditionally
+- so the regression is placed where the behaviour lives, in ChatPresenterTest.
+
+[FIXTURE GAP CLOSED FIRST]
+RecordingChatSink.renderAnnotations was an empty override, so no test could observe which marks the
+presenter had pushed. It now records them in marksRenders and exposes lastMarks(). This is the
+reason the path had no coverage: the authoritative read was unobservable from the test doubles,
+not merely untested. ChatTestDoubles.readWithMarks(...) was added so a read can carry the store's
+own marks, which is what "the store holds no mark" needs to be expressible.
+
+[RED - mutation check, proving the tests are falsifiable]
+The two new tests assert already-correct behaviour, so a plain run is GREEN from the start and
+would prove nothing on its own. To establish that they are anchored on the behaviour and not on
+tautologies, the authoritative push in ChatPresenter.read() was temporarily removed (single line,
+line 323) and the suite re-run.
+
+Mutation: ChatPresenter.java:323  sink.renderAnnotations(snapshot.annotations);  ->  comment
+Command: ./gradlew :app:testDebugUnitTest --tests com.treelearn.app.ui.ChatPresenterTest --no-build-cache --no-daemon --console=plain
+Exit code: 1
+Observed:
+  ChatPresenterTest > aRefusedHighlightLeavesNothingProjected FAILED
+    java.lang.AssertionError at ChatPresenterTest.java:800
+  ChatPresenterTest > anAcceptedHighlightLandsThroughTheSameRead FAILED
+    java.lang.NullPointerException at ChatPresenterTest.java:845
+  47 tests completed, 2 failed
+Only the two new tests failed; the other 45 were unaffected, so they pin the presence of the
+authoritative push rather than a coincidental pass.
+The mutation was reverted from the pre-mutation copy; ChatPresenter.java was re-read and contains
+no MUTATION marker (grep count 0), and line 323 is the original call again.
+
+[GREEN]
+Command: ./gradlew :app:testDebugUnitTest --tests com.treelearn.app.ui.ChatPresenterTest --no-build-cache --no-daemon --console=plain
+Result: 47 tests completed, 47 passed, 0 failed
+EXITCODE=0
+Source=artifacts/tmp/highlight-rollback-green-2026-09-29.log
+
+[FULL JVM REGRESSION]
+Command: ./gradlew :app:testDebugUnitTest --no-build-cache --no-daemon --console=plain
+Result: 86 classes / 788 tests / failures=0 / errors=0 / skipped=0
+EXITCODE=0
+Source=artifacts/tmp/highlight-rollback-full-jvm-2026-09-29.log
+
+[JAVA-ONLY GUARD]
+Command: ./gradlew verifyNoKotlinDex --no-build-cache --no-daemon --console=plain
+Result: PASS (3 APK(s) inspected, no Kotlin runtime bytecode)
+EXITCODE=0
+
+[WHAT THE TWO TESTS HOLD]
+aRefusedHighlightLeavesNothingProjected: the store answers refused(Notice.STORAGE); the tap must
+reach the store exactly once; the storage notice must be reported; and the read that follows must
+push marks for the answer that do not contain the projection - an absent entry or an empty list,
+which is what "the store holds nothing there" reads as on the screen. A projection that outlived a
+refusal would be a fake success, which is the trap the acceptance item was written about.
+anAcceptedHighlightLandsThroughTheSameRead: the store now holds the written row, and the same read
+must push it. This is the anti-tautology half - a read that always answered empty would satisfy the
+refusal test while silently dropping every successful highlight.
+
+[VERDICT]
+The last open acceptance item of T-2026-09-29-107 is now covered by a falsifiable JVM regression,
+with the falsifiability itself demonstrated by mutation rather than asserted.
