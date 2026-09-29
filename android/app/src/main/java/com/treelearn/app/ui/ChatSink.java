@@ -18,6 +18,17 @@ public interface ChatSink {
     void render(ChatViewState state);
 
     /**
+     * Hands the annotations of the conversation's answers to the screen, beside the state they
+     * belong to (T-B). They ride their own port rather than the state for one reason: a highlight
+     * write changes no answer text, so no state diff would ever repaint the spans - the screen
+     * repaints them from this hand-over instead. The map covers the stable answers; marks of a
+     * message that is not in it are simply absent.
+     *
+     * @param annotations per message id, the marks whose digest still matches the displayed answer
+     */
+    void renderAnnotations(java.util.Map<String, List<com.treelearn.core.domain.Annotation>> annotations);
+
+    /**
      * Puts the text on the system clipboard.
      *
      * <p>The text contains the answer and its reasoning, so it is handed over and forgotten: the

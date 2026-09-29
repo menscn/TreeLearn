@@ -4,7 +4,7 @@ id: T-2026-09-28-100
 title: 对话回答数学公式渲染（父需求）
 template_version: 2
 task_type: requirement
-status: ready
+status: verifying
 parent_requirement: null
 requirements_confirmed: true
 generated_by: leader
@@ -28,7 +28,7 @@ tdd_mode: not-applicable
 - AI recommendation and rationale: 选自绘 `ReplacementSpan`（无新依赖、随 TextView 排版、保留选中复制、流式友好、APK 体积不变），复杂式降级为等宽源码；不选 WebView+KaTeX（列表里每公式一个 WebView 性能差、高度要 JS 回传、选中复制失效、+1.5MB assets），不选 jlatexmath（许可风险、Bitmap 缩放糊）。用户已采纳。
 - User choice and custom additions: 用户 2026-09-28 四项拍板——① 行内范围「都支持」：`$...$`、`$$...$$`、`\(...\)`、`\[...\]` 全认；② 降级形态：等宽底色源码；③ 流式期间：显示源码，避免文字跳动；④ 朗读：跳掉公式或读成「公式」；⑤ 走 Harness。
 - AI-autonomous decisions: 任务切分为四个垂直切片（101 扫描抽取 / 102 解析建树 / 103 布局与绘制 / 104 接入与降级），串行依赖；布局计算与 Canvas 绘制分离，使布局尺寸可在纯 JVM 单测断言、绘制只留给 androidTest 与真机证据；货币保护规则为「行内 `$...$` 内容须含数学特征字符（`\ ^ _ { }` 等）且同行闭合」。
-- User-confirmation decisions: 上述四项拍板 + 走 Harness；未要求规模例外，各子任务按 ≤200 行控制。
+- User-confirmation decisions: 上述四项拍板 + 走 Harness；2026-09-28 用户补充批准 T-102、T-103 两项作事后规模例外。审批时两项均记录为 369 行；当前实测 T-102 为 378 行（较原记录增加 9 行，超 200 行 178 行 / 89%，仍低于 500 行硬上限），T-103 为 369 行（超 200 行 169 行 / 84.5%）。这里的 378 行是现状复核，不声称用户另行批准了精确的 378 行数值。例外仅限这两个任务，其余任务仍按 ≤200 行目标执行；这是事后追认，记录为流程偏差，不扩展为全局豁免。
 - Acceptance evidence: 101/102 用 `android/app/src/test` JVM 单测（RED→GREEN）；103 布局用 JVM 单测、绘制用 androidTest 截图或真机 screencap；104 用既有 `MarkdownRendererInstrumentedTest` 相邻场景回归 + 真机答案页截图。
 - Facts: `MarkdownRenderer.renderSegments` 为答案路径（`ChatScreen.java:1076`），`render()` 仅用于思维链与译文（`ReasoningDisclosure.java:134`）；表格以 Segment 形式由 `ChatScreen.inflateTable` 落成真实 TableLayout；`ChatSpeaker.stripMarkdown`（`ChatSpeaker.java:132`）会把 `\frac{1}{2}` 整串念出（朗读入口已屏蔽，代码仍在）。
 - Assumptions: AI 输出的公式分隔符为 LaTeX 常见四种；公式复杂度以中小学到大学本科通识为主；答案 TextView 为 `match_parent`、正文走 `--sans`。
@@ -91,7 +91,9 @@ tdd_mode: not-applicable
 ### REFACTOR — optional
 - N/A（父需求）
 ### TDD or sizing exception — only with prior user approval
-- 无例外；未申请规模例外。
+- T-102：用户于 2026-09-28 明确允许该任务作带说明的规模例外；事后追认。审批时记录 369 行；当前实测 378 行（增加 9 行，超 200 行 178 行 / 89%，低于 500 行硬上限）。此处如实更新现状，不声称用户另行批准精确 378 行。理由：按原确认范围保留解析器 API，并以独立验收和回归证据控制风险。剩余风险：单任务审阅负担增加；任务仍受 T-101 依赖阻塞。
+- T-103：用户于 2026-09-28 明确允许对该项作带说明的特例批注；事后追认 369 行，超 200 行 169 行（84.5%），低于 500 行硬上限。理由：实现已由前序会话完成，保留紧密关联的测量、布局、绘制与行高代码，并以 JVM/真机测试及独立验收控制风险。剩余风险：单任务审阅负担增加。
+- 该追认是流程偏差，不改变 Harness 默认规模规则，也不适用于 T-101、T-104 或批注任务。
 
 ## Implementation notes
 
@@ -101,16 +103,21 @@ tdd_mode: not-applicable
 
 ## Verification report
 
-- Verdict: PENDING
-- Evidence: 待 101–104 完成后汇总。
-- Gaps: 真实回答样本缺失（无抓取样本），验收用构造样例与单测覆盖。
-- Risks: 自绘覆盖不全（降级兜底）；并发编辑冲突。
+- Verdict: PARTIAL
+- Evidence: T-104 定向 renderer 与朗读测试各 11/11；lint、Java-only guard、debug 构建通过；设备安装与主 Activity 启动证据见 `artifacts/evidence/T-2026-09-28-math-renderer-install-launch.txt`。
+- Gaps: T-101 仍为 blocked/FAIL；T-102 为 PARTIAL；T-103 的字号缩放与 Paint 状态缺陷已修复并有 3/3 真机证据，但独立 verifier 对 Harness evidence 给出 FAIL；T-104 仍缺保留 RED 证据和完整答案页视觉截图；全量 connected instrumentation 当前为 275 项中 29 项失败。
+- Risks: 公式链仍受 T-101 的规模/TDD 缺口和 T-104 独立验收缺口阻塞；不支持公式继续降级为源码，不把定向 11/11 推断为全量 PASS。
+
+### Independent verifier addendum (latest)
+
+- Verdict: PARTIAL. 定向公式与相关 UI 仪器测试共 17/17 通过，最新 Debug APK 已重新构建、安装、冷启动且本地/设备 SHA-256 一致；T-103 独立 verifier 仍对 Harness evidence 给出 FAIL。
+- Remaining blockers: T-101 为 FAIL/BLOCKED；T-102 为 PARTIAL；T-103 缺可回读 RED 与同行中文基线证据；T-104 缺可复核 RED、真实答案页视觉截图与完整 Task v2 证据；全量 connected instrumentation 当前为 275 项中 29 项失败。
 
 ## Handoff notes
 
-- Completed: 需求澄清与四项拍板、现状核实、任务拆分。
-- In progress: 待派 101。
-- Blocker: 无。
-- Unblock condition: —
-- Next steps: 派 T-101（扫描抽取）实现，RED 先行。
+- Completed: 需求澄清与四项拍板、101–104 功能实现推进；T-104 debug APK 已安装并启动。用户明确授权 T-104 仅功能推进，父需求最终仅 PARTIAL。
+- In progress: 上游缺口与 T-104 独立验收仍待闭环。
+- Blocker: T-101 blocked/FAIL；T-102 PARTIAL；T-103 独立 verifier 对 Harness evidence FAIL；T-104 红测证据和答案页视觉证据缺失。
+- Unblock condition: 按各任务契约补齐缺口；T-103 修复授权已取得，但仍需补齐可回读 RED/同行基线并完成重新验收；独立 verifier 确认所有验收项后才可考虑 verified。
+- Next steps: 保持父需求与 T-104 verdict 为 PARTIAL；不再扩大 T-103 代码范围，优先补齐 T-101/T-102/T-104 的剩余证据。
 - Watch-outs: 未闭合公式必须保持源码直出（流式不闪）；货币写法不可误判；代码块内 `$` 不解析；答案首段视图 id 与选中复制不能被破坏。

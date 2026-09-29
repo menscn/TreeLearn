@@ -124,6 +124,9 @@ public class IconAssetsTest {
             "ic_action_copy.xml",
             "ic_action_fork.xml",
             "ic_action_select_all.xml",
+            "ic_action_highlight.xml",
+            "ic_action_note.xml",
+            "ic_action_highlight_off.xml",
             "ic_chat_send.xml",
             "ic_chat_attach.xml",
             "ic_chat_close.xml",
@@ -134,10 +137,11 @@ public class IconAssetsTest {
     @Test
     public void theRetiredActionGlyphsAreGoneFromTheTree() {
         // 2026-09-28 user decision: quote / translate / speak left the answer action row, and no
-        // other screen picked their glyphs up - the selection menu draws 问 AI, 新建主题, 复制 and
-        // 全选 from ic_sparkle / ic_action_fork / ic_action_copy / ic_action_select_all. An unused
-        // vector is not free: it ships in the APK and it invites a later reader to think the action
-        // still exists. Asserting the absence keeps the deletion from being quietly undone.
+        // other screen picked their glyphs up - the selection menu draws 问 AI, 新建主题, 高亮、批注、
+        // 复制 and 全选 as six icon cells in one row, with 更多 kept only as the fallback for a window
+        // too narrow to draw them whole. An unused vector is not free: it ships in the APK and it
+        // invites a later reader to think the action still exists. Asserting the absence keeps the
+        // deletion from being quietly undone.
         for (String gone : new String[] {
                 "ic_action_quote.xml", "ic_action_translate.xml", "ic_action_speak.xml"}) {
             assertTrue(gone + " must stay deleted (orphaned by the 2026-09-28 action-row trim)",
@@ -198,21 +202,22 @@ public class IconAssetsTest {
     }
 
     @Test
-    public void wordMenuIsFourIconCellsInOneRowAndEachKeepsItsHotspotAndDescription() throws Exception {
-        // 2026-09-28 user decision, which replaces the T-056 shape: the menu is 问 AI, 新建主题, 复制
-        // and 全选 as four icon cells in one row - no text label, no captions, no selection label. The
-        // name of an item is therefore not in the layout as text; it must survive as the cell's
-        // contentDescription, or the menu becomes unusable to a screen reader. What this test holds is
-        // that contract, not the old textual shape: it asserts the row, the four cells, their glyphs,
-        // their descriptions and the 44dp target each one is still drawn at.
+    public void wordMenuIsSixIconCellsInOneRowAndEachKeepsItsHotspotAndDescription() throws Exception {
+        // 2026-09-28 terminal state: the row is 问 AI, 新建主题, 高亮, 批注, 复制 and 全选 - six icon
+        // cells, and no 更多 submenu. The name of an item is therefore not in the layout as text; it
+        // must survive as the cell's contentDescription, or the menu becomes unusable to a screen
+        // reader. What this test holds is that contract: the row, six cells, their glyphs, their
+        // descriptions and the 44dp target each one is still drawn at.
         String xml = read(RES.resolve(Paths.get("layout", "popup_word_action.xml")));
         assertTrue("the menu must be a single horizontal row",
                 xml.contains("android:orientation=\"horizontal\""));
-        String[] cells = {"word_menu_ask_ai", "word_menu_fork", "word_menu_copy",
-                "word_menu_select_all"};
+        String[] cells = {"word_menu_ask_ai", "word_menu_fork", "word_menu_highlight",
+                "word_menu_note", "word_menu_copy", "word_menu_select_all"};
         String[] glyphs = {"@drawable/ic_sparkle", "@drawable/ic_action_fork",
+                "@drawable/ic_action_highlight", "@drawable/ic_action_note",
                 "@drawable/ic_action_copy", "@drawable/ic_action_select_all"};
         String[] descriptions = {"@string/chat_word_ask_ai_desc", "@string/chat_word_fork_desc",
+                "@string/chat_word_highlight_desc", "@string/chat_word_note_desc",
                 "@string/chat_word_copy_desc", "@string/chat_word_select_all_desc"};
         for (int i = 0; i < cells.length; i++) {
             String cell = elementFor(xml, "@+id/" + cells[i]);
@@ -224,6 +229,69 @@ public class IconAssetsTest {
             assertTrue(cells[i] + " must not fall back to a text label",
                     !cell.contains("android:text="));
         }
+    }
+
+    @Test
+    public void moreIsAFallbackCellThatStaysHiddenUntilTheRowHasNoRoom() throws Exception {
+        // 更多 survived the six-cell decision as the width fallback and nothing else: a window too
+        // narrow to draw the six cells whole keeps a prefix of them and folds the tail into this
+        // cell's card. It is not an operation - it is deliberately not one of WordMenu.Item's values -
+        // and it must not be drawn at all on a window that does have room, which is why it starts gone.
+        String xml = read(RES.resolve(Paths.get("layout", "popup_word_action.xml")));
+        String cell = elementFor(xml, "@+id/word_menu_more");
+        assertTrue("更多 must draw its glyph", cell.contains("@drawable/ic_nav_more"));
+        assertTrue("更多 must carry its content description",
+                cell.contains("android:contentDescription=\"@string/chat_word_more_desc\""));
+        assertTrue("更多 must stay a 44dp target",
+                cell.contains("android:layout_height=\"@dimen/touch_min\""));
+        assertTrue("更多 must not fall back to a text label", !cell.contains("android:text="));
+        assertTrue("更多 must stay hidden until a narrow window asks for it",
+                cell.contains("android:visibility=\"gone\""));
+    }
+
+    @Test
+    public void theSixCellsFollowThePrototypeOrder() throws Exception {
+        // 方案 V1.1 §2.1 plus the 2026-09-28 terminal state: 问AI | 新建主题 | 高亮 | 批注 | 复制 | 全选.
+        String xml = read(RES.resolve(Paths.get("layout", "popup_word_action.xml")));
+        int previous = -1;
+        for (String cell : new String[] {"word_menu_ask_ai", "word_menu_fork", "word_menu_highlight",
+                "word_menu_note", "word_menu_copy", "word_menu_select_all"}) {
+            int at = xml.indexOf("android:id=\"@+id/" + cell + "\"");
+            assertTrue("cell " + cell + " must exist", at >= 0);
+            assertTrue("cell " + cell + " must follow its prototype predecessor", at > previous);
+            previous = at;
+        }
+    }
+
+    @Test
+    public void moreMenuCarriesEveryOperationAsAnIconOnlyFallback() throws Exception {
+        // The fold must never cost an operation: whichever cells the row had no room for are drawn
+        // here, in the row's own order, so the card holds all six and WordMenuPopup shows the tail
+        // that was actually folded.
+        String xml = read(RES.resolve(Paths.get("layout", "popup_word_more.xml")));
+        assertTrue("more menu must be vertical", xml.contains("android:orientation=\"vertical\""));
+        assertMoreCell(xml, "word_menu_more_quote", "@drawable/ic_sparkle",
+                "@string/chat_word_ask_ai_desc");
+        assertMoreCell(xml, "word_menu_more_fork", "@drawable/ic_action_fork",
+                "@string/chat_word_fork_desc");
+        assertMoreCell(xml, "word_menu_more_highlight", "@drawable/ic_action_highlight",
+                "@string/chat_word_highlight_desc");
+        assertMoreCell(xml, "word_menu_more_note", "@drawable/ic_action_note",
+                "@string/chat_word_note_desc");
+        assertMoreCell(xml, "word_menu_more_copy", "@drawable/ic_action_copy",
+                "@string/chat_word_copy_desc");
+        assertMoreCell(xml, "word_menu_more_select_all", "@drawable/ic_action_select_all",
+                "@string/chat_word_select_all_desc");
+    }
+
+    private void assertMoreCell(String xml, String id, String drawable, String description) {
+        String cell = elementFor(xml, "@+id/" + id);
+        assertTrue(id + " must draw its glyph", cell.contains(drawable));
+        assertTrue(id + " must carry its content description",
+                cell.contains("android:contentDescription=\"" + description + "\""));
+        assertTrue(id + " must stay a 44dp target",
+                cell.contains("android:layout_height=\"@dimen/touch_min\""));
+        assertTrue(id + " must not fall back to a text label", !cell.contains("android:text="));
     }
 
     /**

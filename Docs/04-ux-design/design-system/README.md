@@ -6,7 +6,7 @@
 
 | 位置 | 角色 |
 | :--- | :--- |
-| [`../知芽-TreeLearn-高保真原型-v1.html`](../知芽-TreeLearn-高保真原型-v1.html) 的 `:root` 区块（第 22–74 行） | **权威**：设计系统的当前态定义，44 个 token 的数值出处 |
+| [`../知芽-TreeLearn-高保真原型-v1.html`](../知芽-TreeLearn-高保真原型-v1.html) 的 `:root` 区块（第 22–75 行） | **权威**：设计系统的当前态定义，44 个 token 的数值出处 |
 | `tokens.json`（本目录） | **镜像**：同一批 token 的分组 + 用途注释，供 Figma 变量与后续工具读取 |
 | [`../../../android/app/src/main/res/values/colors.xml`](../../../android/app/src/main/res/values/colors.xml) | **副本**：Android 侧落地的不透明 hex 子集（16 个 `tl_*` 资源） |
 
@@ -23,7 +23,7 @@ python .trae/scripts/dev/check_design_tokens.py --selftest # 守门自身的正�
 
 | 分组 | token | 说明 |
 | :--- | :--- | :--- |
-| `color` | `bg` `surface` `ink` `ink2` `ink3` `line` `hairline` `green` `green-deep` `green-soft` `green-faint` `blue` `amber` `amber-soft` `red` `red-soft` `paper-rule` `paper-write` | 纸感米白底 + 生长绿主色 + 语义色（未读蓝、警示琥珀、危险红）。`green` 是**动作色**（按钮/发送/锚点/叶芽）。`green-bubble` 已于 2026-09-28 退役：用户消息不再有气泡底 |
+| `color` | `bg` `surface` `ink` `ink2` `ink3` `line` `hairline` `green` `green-deep` `green-soft` `green-faint` `blue` `amber` `amber-soft` `red` `red-soft` `yellow-highlight` `paper-rule` `paper-write` | 纸感米白底 + 生长绿主色 + 语义色（未读蓝、警示琥珀、危险红、高亮黄）。`green` 是**动作色**（按钮/发送/锚点/叶芽）。`green-bubble` 已于 2026-09-28 退役：用户消息不再有气泡底 |
 | `space` | `s1` `s2` `s3` `s4` `s6` `s8` `gutter` | 4pt 基准，**只用** 4/8/12/16/24/32 六档 |
 | `radius` | `r-sm` `r-md` `r-lg` `r-full` | 只保留 3 档 + 全圆 |
 | `fontSize` | `fs-display` `fs-h1` `fs-h2` `fs-body` `fs-sm` `fs-cap` | display 与 caption 拉开约 2.4 倍对比（26/11） |
@@ -41,6 +41,7 @@ python .trae/scripts/dev/check_design_tokens.py --selftest # 守门自身的正�
 
 ## 变更记录
 
+- **2026-09-28 · 新增 `yellow-highlight`（对话页高亮批注 T-B「菜单 6 格 + prose 高亮」，用户拍板 D）**：正文高亮动作的底色 `#FFF3B0`（柔和暖黄）。按固定顺序三处落地：原型 `:root` 增 `--yellow-highlight`（区块变为第 22–75 行）→ `tokens.json` 增 `color.yellow-highlight` → `colors.xml` 增 `tl_yellow_highlight`（Android 资源 15→16）。`check_design_tokens.py` 判定 `measured_tokens=44 measured_resources=16`，0 failure。消费处：`Highlighter` 往 prose 段 flush 的黄色 `BackgroundColorSpan`（对话页文本高亮，方案 V1.1 §2.2）。
 - **2026-09-28 · 学习库页头补返回箭头（用户拍板，真机走查发现两页不对称）**：走查真机截图发现学习库页头没有返回控件、设置页头有，两页同属一级 tab 却读成两种样式。裁决为**学习库也画真返回箭头，与设置同形制**（`ic_nav_back` + `tl_green_deep` tint + borderless + `-8dp` start），上一轮补的 `touch_min` 空占位 `View` 退役。箭头行为 = 系统返回的同一请求：**有搜索词时先退出搜索态并恢复本页列表，无搜索词时回主页 tab**。
   - **不改 token**：原型 `renderLibrary()` 的箭头复用既有 class（`icon-btn` / `appbar-title` / `t1`）与既有组件 `IBack`，没有新增视觉值，故 `measured_tokens=43 measured_resources=15` 保持不变，`check_design_tokens.py` 0 failure。
   - **原型与实现的搜索结构差异（连带修掉的实现缺陷）**：原型里搜索是**独立二级页**（`renderSearch`，自带 appbar 与返回箭头），其空态指南「输入关键词开始搜索」属于那一页；Android 把搜索**内联**进学习库（`showSearch`，无独立屏），于是空查询的指南态**无处安放**——清空搜索框后，搜索的 scope 行会盖在本页列表上。`LibraryScreen.showSearch()` 现对 `Pane.GUIDE` 提前返回，空查询即维持本页列表。这条不是观感问题，是「离开搜索落到本页列表」这句话能否成立的前提。

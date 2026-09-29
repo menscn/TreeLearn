@@ -359,12 +359,26 @@ public final class ChatMessageRowLayoutTest {
         assertFalse("the strip's fork zone shows no text label any more",
                 strings.contains("chat_act_fork"));
 
-        // The four rows are the app's own card now: the platform's selection menu is emptied instead of
-        // used, which is what keeps 新建主题 out of the platform's 更多 sheet.
+        // The app owns the six primary cells (更多 is the width fallback behind them, not a menu); the
+        // platform selection menu is emptied instead of used, which keeps 新建主题 out of the
+        // platform's overflow sheet.
         String screen = read(SRC.resolve(Paths.get("screen", "ChatScreen.java")));
         assertTrue("the platform selection toolbar must be emptied", screen.contains("menu.clear()"));
         assertFalse("no action may be handed to the platform selection menu",
                 screen.contains("menu.add(Menu.NONE, R.id.chat_selection"));
+    }
+
+    @Test
+    public void selectionMenuProtectsTheLongPressUpBeforeEnablingOutsideDismiss() throws Exception {
+        String popup = read(SRC.resolve(Paths.get("screen", "WordMenuPopup.java")));
+        assertTrue("the primary popup must start with outside dismissal disabled",
+                popup.contains("popup.setOutsideTouchable(false)"));
+        assertTrue("outside dismissal must be enabled only after the popup is posted",
+                popup.contains("enableOutsideTouchAfterOpening(popup)")
+                        && popup.contains("answer.post(() ->"));
+        assertTrue("more must stay inside the same selection lifecycle",
+                popup.contains("morePopup.setOutsideTouchable(false)")
+                        && popup.contains("enableOutsideTouchAfterOpening(morePopup)"));
     }
 
     @Test

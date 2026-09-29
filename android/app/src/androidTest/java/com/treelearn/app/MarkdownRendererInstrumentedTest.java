@@ -4,6 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.graphics.Color;
+import android.text.style.AlignmentSpan;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.ClickableSpan;
 import android.text.Spanned;
 import android.text.style.StyleSpan;
 import android.text.style.TypefaceSpan;
@@ -12,6 +16,7 @@ import android.text.style.URLSpan;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.treelearn.app.screen.MarkdownRenderer;
+import com.treelearn.app.ui.math.MathSpan;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -99,5 +104,89 @@ public final class MarkdownRendererInstrumentedTest {
 
         assertEquals(1, segments.size());
         assertTrue(segments.get(0).isTable);
+    }
+
+    @Test
+    public void renderReplacesInlineAndBlockFormulasWithMathSpans() {
+        CharSequence rendered = MarkdownRenderer.render(
+                "\u9762\u79ef $x^2$\u3002\n\n$$\n\\frac{1}{2}\n$$");
+
+        assertTrue(rendered instanceof Spanned);
+        assertFalse(rendered.toString().contains("$"));
+        assertFalse(rendered.toString().contains("\\frac"));
+        Spanned spans = (Spanned) rendered;
+        assertEquals(2, spans.getSpans(0, spans.length(), MathSpan.class).length);
+        assertTrue(spans.getSpans(0, spans.length(), AlignmentSpan.Standard.class).length > 0);
+    }
+
+    @Test
+    public void renderSegmentsAppliesMathInsideProseAndRealTableCells() {
+        List<MarkdownRenderer.Segment> segments = MarkdownRenderer.renderSegments(
+                "\u6b63\u6587 $x^2$\u3002\n\n| \u516c\u5f0f |\n| --- |\n| $\\frac{1}{2}$ |", null);
+
+        assertEquals(2, segments.size());
+        Spanned prose = (Spanned) segments.get(0).text;
+        assertEquals(1, prose.getSpans(0, prose.length(), MathSpan.class).length);
+        assertTrue(segments.get(1).isTable);
+        CharSequence cell = segments.get(1).table.get(1).get(0);
+        assertTrue(cell instanceof Spanned);
+        assertFalse(cell.toString().contains("\\frac"));
+        assertEquals(1, ((Spanned) cell).getSpans(0, cell.length(), MathSpan.class).length);
+    }
+
+    @Test
+    public void unsupportedMathFallsBackToDelimiterFreeTintedMonospaceSource() {
+        CharSequence rendered = MarkdownRenderer.render(
+                "\u4e0d\u652f\u6301\uff1a$\\begin{matrix}a\\end{matrix}$\u3002");
+
+        assertTrue(rendered instanceof Spanned);
+        assertEquals("\u4e0d\u652f\u6301\uff1a\\begin{matrix}a\\end{matrix}\u3002", rendered.toString());
+        Spanned spans = (Spanned) rendered;
+        TypefaceSpan[] typefaces = spans.getSpans(0, spans.length(), TypefaceSpan.class);
+        BackgroundColorSpan[] backgrounds = spans.getSpans(
+                0, spans.length(), BackgroundColorSpan.class);
+        assertEquals(1, typefaces.length);
+        assertEquals("monospace", typefaces[0].getFamily());
+        assertEquals(1, backgrounds.length);
+        assertEquals(Color.rgb(242, 240, 232), backgrounds[0].getBackgroundColor());
+    }
+
+    @Test
+    public void codeCurrencyAndUnclosedStreamingMathRemainUnrecognized() {
+        CharSequence rendered = MarkdownRenderer.render(
+                "\u884c\u5185\u4ee3\u7801 `$x^2$`\uff0c\u91d1\u989d $5 \u5230 $10\u3002\n\n```tex\n$x^2$\n```");
+
+        assertTrue(rendered.toString().contains("$x^2$"));
+        assertTrue(rendered.toString().contains("$5 \u5230 $10"));
+        assertEquals(0, ((Spanned) rendered)
+                .getSpans(0, rendered.length(), MathSpan.class).length);
+
+        CharSequence streaming = MarkdownRenderer.render("\u6b63\u5728\u8f93\u5165 $$\\frac{1");
+        assertEquals("\u6b63\u5728\u8f93\u5165 $$\\frac{1", streaming.toString());
+        assertEquals(0, ((Spanned) streaming)
+                .getSpans(0, streaming.length(), MathSpan.class).length);
+    }
+
+    @Test
+    public void scannerShapedLiteralDoesNotCollideWithARealFormulaPlaceholder() {
+        CharSequence rendered = MarkdownRenderer.render("TLMATH0TL \u4e0e $x^2$");
+
+        assertTrue(rendered.toString().startsWith("TLMATH0TL \u4e0e "));
+        assertEquals(1, ((Spanned) rendered)
+                .getSpans(0, rendered.length(), MathSpan.class).length);
+    }
+
+    @Test
+    public void formulaWiringKeepsCodeBlockCopyCallback() {
+        final String[] copied = new String[1];
+
+        CharSequence rendered = MarkdownRenderer.render(
+                "```java\nreturn 1;\n```\n\n$x^2$", code -> copied[0] = code);
+
+        ClickableSpan[] clickSpans = ((Spanned) rendered)
+                .getSpans(0, rendered.length(), ClickableSpan.class);
+        assertEquals(1, clickSpans.length);
+        clickSpans[0].onClick(null);
+        assertEquals("return 1;\n", copied[0]);
     }
 }

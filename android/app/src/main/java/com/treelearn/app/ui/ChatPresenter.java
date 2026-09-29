@@ -315,7 +315,13 @@ public final class ChatPresenter implements ChatActions {
         if (!generating) {
             polling.set(false);
         }
-        ui.post(() -> render(apply(snapshot)));
+        ui.post(() -> {
+            render(apply(snapshot));
+            // T-B: the marks are not view state - they are handed to the screen beside it, the
+            // same one-channel-per-fact rule openChildren follows. Every read re-pushes, so a
+            // highlight written by a command lands the way one stored long ago does.
+            sink.renderAnnotations(snapshot.annotations);
+        });
     }
 
     /**
@@ -575,9 +581,11 @@ public final class ChatPresenter implements ChatActions {
         }
         render(state.withAskAiChips(false).withSending(true).withStage(Stage.SENDING)
                 .withFollow(true, 0));
+        // The quote always leaves with an accepted send - it rode this message; only the draft's
+        // clearing depends on whose words went out (a chip's query was never in the draft).
         background.execute(
                 () -> publish(commands.send(branchId, text, quote, attachmentId, model, thinking),
-                        false, clearDraft, clearDraft));
+                        false, clearDraft, true));
     }
 
     /**
@@ -719,11 +727,22 @@ public final class ChatPresenter implements ChatActions {
     public void onChildrenPressed(String messageId) {
         ChatMessage message = state.message(messageId);
         if (message == null || !message.hasChildren()) {
+            render(state.withNotice(HomeViewState.Notice.STORAGE));
             return;
         }
         background.execute(() -> {
-            final List<ChildBranch> children = data.children(branchId, messageId);
-            ui.post(() -> sink.openChildren(messageId, children));
+            try {
+                final List<ChildBranch> children = data.children(branchId, messageId);
+                ui.post(() -> {
+                    if (children == null || children.isEmpty()) {
+                        render(state.withNotice(HomeViewState.Notice.STORAGE));
+                    } else {
+                        sink.openChildren(messageId, children);
+                    }
+                });
+            } catch (RuntimeException failure) {
+                ui.post(() -> render(state.withNotice(HomeViewState.Notice.STORAGE)));
+            }
         });
     }
 
@@ -739,6 +758,26 @@ public final class ChatPresenter implements ChatActions {
             return;
         }
         sink.copyToClipboard(text);
+    }
+
+    @Override
+    public void onHighlightPressed(String messageId, int proseIndex, int startInclusive,
+            int endInclusive) {
+        ChatMessage message = state.message(messageId);
+        if (message == null || !message.canQuote() || proseIndex < 0
+                || startInclusive < 0 || endInclusive <= startInclusive
+                || endInclusive > message.text.length()) {
+            return;
+        }
+        background.execute(() -> publish(commands.applyHighlight(messageId, message.text,
+                proseIndex, startInclusive, endInclusive), false, false));
+    }
+
+    @Override
+    public void onNotePressed(String messageId, int proseIndex, int startInclusive,
+            int endInclusive) {
+        // The note editor and persistence path belong to T-D. Keep the menu contract wired without
+        // inventing a second storage path or silently changing the selected range here.
     }
 
     @Override

@@ -4,14 +4,14 @@ id: T-2026-09-28-101
 title: 公式扫描抽取与占位
 template_version: 2
 task_type: implementation
-status: verifying
+status: blocked
 parent_requirement: T-2026-09-28-chat-math-formula-rendering-100.md
 requirements_confirmed: true
 generated_by: leader
 owner: android-math-implementer
 owner_lane: android
 stack: android
-estimated_production_lines: 120
+estimated_production_lines: 270
 shared_code_touched: false
 depends_on: [T-2026-09-28-chat-math-formula-rendering-100.md]
 tdd_mode: required
@@ -68,7 +68,7 @@ tdd_mode: required
 - [x] `价格 $5 到 $10` 不被抽取（内容无数学特征字符）。（`MathScannerTest.currencyAmountsAreNotExtracted`）
 - [x] 未闭合 `$$\frac{1` 不被抽取，原文保留（流式场景）。（`MathScannerTest.unterminatedDelimiterIsLeftAsSource`；另有 `inlineDollarDoesNotCrossBlankLine` 覆盖跨空行）
 - [x] 占位符不含 `\`、`*`、`_`、`` ` ``、`$`、`[`、`]` 等 markdown 元字符；同一输入两次 `scan` 结果稳定（幂等）。（`MathScannerTest.placeholdersAreAsciiSafeAndIndexed` / `scanIsIdempotentOnMaskedOutput`）
-- [x] JVM 单测 RED→GREEN 证据齐备；既有 `MarkdownRendererInstrumentedTest` 不受影响（本任务未接线）。（TDD execution record 的 RED 退出码 1、GREEN 退出码 0；全量 730 用例 0 失败）
+- [ ] 初始 13 项 JVM 单测有 RED→GREEN；后补 5 项当前通过但无先行 RED 记录，因此 TDD 验收未闭环。最新全量回归 781/0/0/0，详见最终证据；本任务未接线 `MarkdownRenderer`。
 
 ## TDD execution record
 
@@ -87,8 +87,14 @@ tdd_mode: required
 - Regression evidence: 同一 Gradle 命令去掉 `--tests` 过滤跑全量 JVM 单测，退出码 0 取自 `android/app/build/tdd-t101/regression-run.log:82` 的 `EXIT=0`（`regression-run.log:80` 为 `BUILD SUCCESSFUL in 20s`）；汇总取自 `android/app/build/tdd-t101/regression-summary.txt:1` 的 `suites=83 tests=730 skipped=0 failures=0 errors=0`（由 `android/app/build/test-results/testDebugUnitTest/*.xml` 各 `<testsuite>` 属性聚合得出）。本任务未接线 `MarkdownRenderer`，`MarkdownRendererInstrumentedTest` 是 androidTest，不在该 JVM 任务内，未被本任务改动触及。
 
 ### REFACTOR — optional
-- Cleanup: 无额外重构（最小实现已按职责拆分扫描/复制/闭合查找私有方法，未做超出范围的清理）。
-- Regression evidence: 与 GREEN 同一条全量回归命令，退出码 0 取自 `android/app/build/tdd-t101/regression-run.log:82`；`android/app/build/tdd-t101/regression-summary.txt:1` 为 `suites=83 tests=730 skipped=0 failures=0 errors=0`。
+- Cleanup: 主会话复核（非子代理自评）发现两处缺陷并修复，另放宽一处判定；改动落在 GREEN 之后，故记在本段而非 GREEN。
+  1. `MathScanner.scan` 的换行分支没有把 `lineStart` 复位为 `true`（`android/app/src/main/java/com/treelearn/app/ui/math/MathScanner.java:49-53`）→ 只有**首行**会检测围栏/缩进代码块；正文之后的 ``` 代码块里的 `$x^2$` 会被误抽成公式。原 13 个用例的围栏/缩进样本全在文本开头，故未暴露。修复：换行分支加 `lineStart = true;`。
+  2. `findClosing` 遇到「前一字符为空白」的候选闭合时**继续往后找**（`MathScanner.java:128-135`）→ `$x^2 $ 和 $y^2$` 会把中间正文吞成一个 latex 为 `x^2 $ 和 $y^2` 的公式。修复：遇到不可用候选即 `return -1`，放弃该段（`$x^2 $` 原样保留），后续 `$y^2$` 仍独立抽取。
+  3. 判定放宽：`consumeDollar` 由 `hasMathSignal(latex)` 改为 `hasMathSignal(latex) || isAsciiToken(latex)`，新增 `isAsciiToken`（≤12 的可打印 ASCII 且无空白）。理由：仅靠数学特征字符会把 `$a+b$`、`$x$` 这类最常见的行内式留在源码态，与用户「都支持」的拍板不符；中文货币 `$5到$10` 因含非 ASCII 仍被拒绝（无空白可依托，靠字符范围挡住）。
+- 新增 5 个用例覆盖上述三处：`fencedCodeBlockAfterProseIsLeftUntouched`、`indentedCodeBlockAfterProseIsLeftUntouched`、`spaceBeforeClosingDollarAbandonsOnlyThatRun`、`shortAsciiInlineIsExtractedWithoutSignalCharacter`、`chineseCurrencyWithoutSpaceIsNotExtracted`。
+- Command: cd /d/Project/Android/Treelearn/android && JAVA_HOME=/d/Environment/Jdk/jdk21 ./gradlew :app:testDebugUnitTest --tests "*MathScannerTest*" --no-build-cache
+- Exit code: 0
+- Regression evidence: 退出码 0 与 `BUILD SUCCESSFUL in 2m 45s` 取自主会话本轮构建输出；用例汇总取自 `android/app/build/test-results/testDebugUnitTest/TEST-com.treelearn.app.ui.math.MathScannerTest.xml:2` 的 `tests="18" failures="0"`（原 13 + 新增 5，`grep -c '<testcase'` 得 18）。生产代码非空非注释行数复核为 270（MathScanner 248 + MathFormula 11 + MathScanResult 11，由 `grep -v '^[[:space:]]*$' | grep -v '^[[:space:]]*\*' | grep -v '^[[:space:]]*//' | grep -v '^[[:space:]]*/\*' | wc -l` 得），超 200 软上限 35%，按任务契约第 45 行记为警告级，未申请规模例外。
 
 ### TDD or sizing exception — only with prior user approval
 - 无例外。
@@ -110,15 +116,16 @@ tdd_mode: required
 
 ## Verification report
 
-- Verdict: PENDING
-- Evidence: PENDING
-- Gaps: PENDING
-- Risks: PENDING
+- Verdict: FAIL
+- Evidence: 独立 verifier Russell 两轮只读复核；父任务 `.trae/tasks/T-2026-09-28-chat-math-formula-rendering-100.md` 第 27、31、96 行限定单任务 ≤200 行且例外只覆盖 T-102/T-103；`artifacts/evidence/T-2026-09-28-math-scanner-production-lines.txt` 实测 270 行；`artifacts/evidence/T-2026-09-28-math-parser-jvm-regression-final.txt` 退出码 0，`MathScannerTest.xml` 为 18/0/0/0，全量 86 XML 为 781/0/0/0；`artifacts/evidence/T-2026-09-28-math-parser-java-only-guard.txt` 为 PASS。
+- Gaps: T-101 超出父任务 ≤200 行范围 70 行，且没有获批例外；5 个后补测试没有先行 RED 证据。最终 18 项 XML 缺失已由本轮全量回归补齐，但不能补正上述规模与 TDD 流程缺口。
+- Risks: T-102 依赖 T-101；在此任务重新规划并通过复核前，后续任务不得标为 verified，父任务也不得报完成。
 
 ## Handoff notes
 
-- Completed: 新增 `android/app/src/main/java/com/treelearn/app/ui/math/{MathScanner,MathFormula,MathScanResult}.java` 与 `android/app/src/test/java/com/treelearn/app/ui/math/MathScannerTest.java`（13 个 JUnit4 用例）；RED→GREEN 证据已写入 TDD execution record；四个文件已 `git add`。未接线 `MarkdownRenderer`（属 T-104）。
-- In progress: 无。
-- Blocker: 无。（构建曾因并发工作线占用 `android/.gradle/fileHashes.lock` 失败，用 `--no-build-cache` + 独立 `--project-cache-dir` 绕过，非代码阻塞。）
-- Next steps: T-102 基于 `MathFormula.latex` 做 LaTeX 解析建树；T-104 在 `MarkdownRenderer.renderSegments` 前调用 `MathScanner.scan`，并在 `SpannableStringBuilder` 中按占位符 `TLMATH<index>TL` 定位替换为 `MathSpan`（未闭合/解析失败降级为等宽源码）。
+- Completed: Scanner 当前 18 项定向测试与全量 781 项 JVM 测试通过；完整日志与 XML 已刷新。
+- In progress: 代码功能已具备，但任务验收被独立 verifier 判 FAIL，等待重新规划。
+- Blocker: 生产代码 270 行超过父任务 200 行上限；后补 5 项测试缺先行 RED，不能事后伪造或追认。
+- Unblock condition: 重新规划符合父任务规模/TDD 契约的任务范围，并完成相应实现与独立复核；仅追加规模例外不能补正 TDD 缺口。
+- Next steps: 保留本任务 FAIL；后续任务可继续做功能性复核与 APK 交付，但不得将依赖 T-101 的任务或父需求标记为 verified/complete。
 - Watch-outs: 占位符必须 ASCII 安全；`$$` 须先于 `$` 匹配；`\[` 为块级不要当行内；104 接线时占位符定位要按 `TLMATH<index>TL` 全字匹配，避免把正文里的同形字符串误替换。

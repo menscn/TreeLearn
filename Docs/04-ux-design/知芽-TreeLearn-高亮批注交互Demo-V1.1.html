@@ -129,7 +129,7 @@ table.demo-table th{color:var(--ink2);font-weight:600;}
 table.demo-table td{color:var(--ink);}
 mark.hl{cursor:text;}
 
-/* ============ 六格图标菜单（用户约束：只有图标，语义在 aria/title 与顺序里） ============ */
+/* ============ 五格主菜单 + 更多子菜单（用户约束：只有图标，语义在 aria/title 与顺序里） ============ */
 .hl-menu{position:absolute;z-index:40;display:flex;align-items:stretch;background:var(--surface);
   border-radius:var(--r-sm);padding:var(--s1);box-shadow:var(--sh-2),0 0 0 1px var(--hairline);}
 .hl-cell{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:6px;color:var(--ink);transition:background .12s;}
@@ -137,6 +137,9 @@ mark.hl{cursor:text;}
 .hl-cell.cancel{color:var(--amber);}
 .hl-cell.cancel:hover{background:var(--amber-soft);}
 .hl-sep{width:1px;background:var(--hairline);margin:6px 0;}
+.hl-more-menu{position:absolute;z-index:41;right:0;top:calc(100% + 8px);display:flex;flex-direction:column;
+  background:var(--surface);border-radius:var(--r-sm);padding:var(--s1);box-shadow:var(--sh-2),0 0 0 1px var(--hairline);}
+.hl-more-menu .hl-sep{width:auto;height:1px;margin:0 6px;}
 
 /* ============ 底部弹层（批注编辑） ============ */
 .dim{position:absolute;inset:0;background:rgba(22,36,28,.35);z-index:50;animation:fadeIn .18s;}
@@ -197,6 +200,7 @@ const IAsk   = ({size=20}) => <Icon size={size}><path d="M12 3.5l1.9 5.1 5.1 1.9
 const IFork  = ({size=20}) => <Icon size={size}><path d="M7 4v6a4 4 0 004 4h6"/><path d="M14 10.5L17.5 14 14 17.5"/><circle cx="7" cy="4" r="1.6"/></Icon>;
 const ICopy  = ({size=20}) => <Icon size={size}><path d="M11 9h7a2 2 0 012 2v7a2 2 0 01-2 2h-7a2 2 0 01-2-2v-7a2 2 0 012-2z"/><path d="M6 15H5a2 2 0 01-2-2V5a2 2 0 012-2h8a2 2 0 012 2v1"/></Icon>;
 const ISelAll= ({size=20}) => <Icon size={size}><path d="M5 4h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1z"/><path d="M8 12.2l2.8 2.8 5.6-5.6"/></Icon>;
+const IDots  = ({size=20}) => <Icon size={size}><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></Icon>;
 
 /* —— 新增两枚：记号笔（高亮）与便签（批注）。方案 A/B 为备选字形，落 Android 前拍板 —— */
 const IHighlight = ({size=20,variant='A'}) => variant==='A' ? (
@@ -240,7 +244,7 @@ const PARAS_ORIG = [
 const PARAS_ALT = [
   "重新生成后，这是一段全新的回答文本。此前的所有高亮与批注都会随旧回答一起清除——这是拍板①的语义：锚点不再指向旧文本时，宁可不画，也不画错。",
   "第二段换成了别的内容，用来验证清除是整条消息级的：不仅正文段落，表格里的高亮同样不会残留。",
-  "收束段同样被替换。若要继续体验，可重新选中任意文字再试一遍六格菜单。"
+  "收束段同样被替换。若要继续体验，可重新选中任意文字再试一遍五格主菜单与更多子菜单。"
 ];
 const TABLE = {
   head: ["比较项", "光反应", "暗反应"],
@@ -296,7 +300,7 @@ function Demo(){
   const [regenerated, setRegenerated] = useState(false);
   const [highlights, setHighlights] = useState([]);   // {id, blockId, start, end}
   const [notes, setNotes] = useState([]);             // {id, blockId, start, end, body, time}
-  const [menu, setMenu] = useState(null);             // {blockId,start,end,cancel,x,y}
+  const [menu, setMenu] = useState(null);             // {blockId,start,end,cancel,x,y,moreOpen}
   const [sheet, setSheet] = useState(null);           // {editId,blockId,start,end,text,time}
   const [oval, setOval] = useState(null);             // {x,y,items:[noteId]}
   const [toast, setToast] = useState(null);
@@ -315,7 +319,7 @@ function Demo(){
   /* —— 菜单落位：选区矩形 → 屏内坐标，上放不下翻到下方，两端夹取 —— */
   const placeMenu = useCallback((rect) => {
     const s = screenRef.current.getBoundingClientRect();
-    const W = 280, H = 52, M = 8;
+    const W = 240, H = 52, M = 8;
     const x = clamp(rect.left + rect.width/2 - W/2 - s.left, M, s.width - W - M);
     let y = rect.top - s.top - H - M;
     if(y < M) y = rect.bottom - s.top + M;
@@ -355,7 +359,7 @@ function Demo(){
     const cancel = highlights.some(h => h.blockId === blockId && h.start === start && h.end === end);
     const pos = placeMenu(rect);
     setOval(null);
-    setMenu({blockId, start, end, cancel, ...pos});
+    setMenu({blockId, start, end, cancel, moreOpen: false, ...pos});
   }, [highlights, placeMenu]);
 
   /* —— 原生选择 → 菜单（模拟长按选中） —— */
@@ -419,6 +423,10 @@ function Demo(){
   };
   const doAsk = () => { say('已引用所选句子，可在输入框追问'); closeMenu(); };
   const doFork = () => { say('（Demo）新建主题不跳转'); closeMenu(); };
+  const toggleMore = () => {
+    if(!menu) return;
+    setMenu(current => current ? {...current, moreOpen: !current.moreOpen} : current);
+  };
   const doCopy = () => {
     if(!menu) return;
     const blockEl = screenRef.current.querySelector('[data-block="'+menu.blockId+'"]');
@@ -519,7 +527,7 @@ function Demo(){
       },
       tapMenu(action){
         if(!menu) return false;
-        ({highlight: doHighlight, annotate: doAnnotate, ask: doAsk, fork: doFork,
+        ({highlight: doHighlight, annotate: doAnnotate, ask: doAsk, fork: doFork, more: toggleMore,
           copy: doCopy, selectAll: doSelectAll}[action] || (() => {}))();
         return true;
       },
@@ -553,7 +561,7 @@ function Demo(){
         return {
           highlights: highlights.map(h => ({blockId: h.blockId, start: h.start, end: h.end})),
           notes: notes.map(n => ({blockId: n.blockId, start: n.start, end: n.end, body: n.body, id: n.id})),
-          menuOpen: !!menu, menuCancel: menu ? menu.cancel : false,
+          menuOpen: !!menu, menuCancel: menu ? menu.cancel : false, moreOpen: menu ? !!menu.moreOpen : false,
           sheetOpen: !!sheet, sheetEdit: sheet ? sheet.editId : null, sheetText: sheet ? sheet.text : null,
           ovalOpen: !!oval, ovalCount: oval ? oval.items.length : 0,
           yellow, iconVariant, regenerated
@@ -576,7 +584,7 @@ function Demo(){
         <div className="guide-sub">对话页「文本高亮 + 批注」· 方案 V1.1 配套</div>
         <h3>操作路径</h3>
         <ol className="guide-steps">
-          <li><b>选中任意文字</b>（鼠标拖选 ≈ 长按拖动），弹出六格图标菜单</li>
+          <li><b>选中任意文字</b>（鼠标拖选 ≈ 长按拖动），弹出五格主菜单；点「更多」再打开复制/全选子菜单</li>
           <li>点<b>记号笔</b>：黄色高亮落纸；再点一次同段文字试试合并</li>
           <li><b>单击已高亮的文字</b>：自动恢复选区，菜单第三格变成带斜杠的「取消高亮」</li>
           <li>点<b>便签</b>：底部弹层输入批注；保存后选区末尾右上角出现便签角标</li>
@@ -678,9 +686,14 @@ function Demo(){
               <span className="hl-sep"></span>
               <button className="hl-cell" title="批注" aria-label="批注：为所选文字写一条便签" onClick={doAnnotate}><INote size={20}/></button>
               <span className="hl-sep"></span>
-              <button className="hl-cell" title="复制" aria-label="复制所选文字" onClick={doCopy}><ICopy/></button>
-              <span className="hl-sep"></span>
-              <button className="hl-cell" title="全选" aria-label="全选本段" onClick={doSelectAll}><ISelAll/></button>
+              <button className="hl-cell" title="更多" aria-label="更多：复制或全选" onClick={toggleMore}><IDots/></button>
+              {menu.moreOpen && (
+                <div className="hl-more-menu" onMouseDown={e => e.preventDefault()}>
+                  <button className="hl-cell" title="复制" aria-label="复制所选文字" onClick={doCopy}><ICopy/></button>
+                  <span className="hl-sep"></span>
+                  <button className="hl-cell" title="全选" aria-label="全选本段" onClick={doSelectAll}><ISelAll/></button>
+                </div>
+              )}
             </div>
           )}
 

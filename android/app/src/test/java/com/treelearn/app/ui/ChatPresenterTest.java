@@ -427,6 +427,9 @@ public final class ChatPresenterTest {
                                 ChatMessage.Status.STABLE, ChatMessage.Phase.ANSWER,
                                 ChatTestDoubles.REV_1, 1, 2, false, 1L)),
                 Collections.<Recommendation>emptyList(), "");
+        data.children = Arrays.asList(
+                new ChildBranch(ChatTestDoubles.CHILD_BRANCH, "first child", 0L),
+                new ChildBranch("99999999-9999-4999-9999-999999999999", "second child", 1L));
 
         ChatPresenter presenter = presenter();
         presenter.start();
@@ -566,6 +569,32 @@ public final class ChatPresenterTest {
         assertEquals(0, commands.lastForkStart);
         assertEquals(0, commands.lastForkEnd);
         assertEquals("the draft is not touched by a fork", "", sink.last().draft);
+    }
+
+    @Test
+    public void anEmptyChildReadReportsAVisibleFailureInsteadOfDoingNothing() {
+        data.snapshot = conversation();
+        data.children = Collections.emptyList();
+
+        ChatPresenter presenter = presenter();
+        presenter.start();
+        presenter.onChildrenPressed(ChatTestDoubles.M_ANSWER);
+
+        assertEquals(HomeViewState.Notice.STORAGE, sink.last().notice);
+        assertTrue(sink.childrenOpened.isEmpty());
+    }
+
+    @Test
+    public void aChildReadExceptionReportsAVisibleFailureInsteadOfEscapingTheWorker() {
+        data.snapshot = conversation();
+        data.childrenThrow = true;
+
+        ChatPresenter presenter = presenter();
+        presenter.start();
+        presenter.onChildrenPressed(ChatTestDoubles.M_ANSWER);
+
+        assertEquals(HomeViewState.Notice.STORAGE, sink.last().notice);
+        assertTrue(sink.childrenOpened.isEmpty());
     }
 
     @Test

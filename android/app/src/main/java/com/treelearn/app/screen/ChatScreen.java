@@ -3,6 +3,8 @@ package com.treelearn.app.screen;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
+import android.text.Selection;
+import android.text.Spannable;
 import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
 import android.util.AttributeSet;
@@ -11,7 +13,9 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
@@ -40,9 +44,11 @@ import com.treelearn.app.ui.ChatViewState;
 import com.treelearn.app.ui.ChatViewState.Stage;
 import com.treelearn.app.ui.ChildBranch;
 import com.treelearn.app.ui.HomeViewState;
+import com.treelearn.app.ui.Highlighter;
 import com.treelearn.app.ui.Recommendation;
 import com.treelearn.app.ui.SourceCard;
 import com.treelearn.app.ui.TextSelection;
+import com.treelearn.core.domain.Annotation;
 import com.treelearn.core.domain.AnswerRevision;
 import com.treelearn.core.domain.ReadingAnchor;
 import com.treelearn.core.domain.ReadingPosition;
@@ -86,6 +92,7 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
 
     /** Scroll events arrive in bursts; the view is read once they stop. */
     private static final long SCROLL_SETTLE_MS = 150L;
+    private static final long FAST_SELECTION_DELAY_MS = 300L;
 
     private final int basePaddingLeft;
     private final int basePaddingTop;
@@ -134,10 +141,14 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
 
     /** The rows of the last render, by message id, so a selection can be read back. */
     private final Map<String, Row> rows = new LinkedHashMap<String, Row>();
+    /** Marks arrive beside the view state because a highlight changes spans, not answer text. */
+    private Map<String, List<Annotation>> annotationMarks = Collections.emptyMap();
 
     /** The two cards that hang over an answer: the selection menu, and the child-branch list. */
     private WordMenuPopup wordMenu;
+    private String wordMenuMessageId = "";
     private ChildBranchPopup childrenPopup;
+    private String childrenPopupMessageId = "";
 
     private ChatActions actions;
     private boolean rendering;
@@ -317,6 +328,21 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         });
     }
 
+    /** Repaints the marks handed over by the presenter's read without rebuilding the conversation. */
+    public void renderAnnotations(Map<String, List<Annotation>> annotations) {
+        annotationMarks = annotations == null
+                ? Collections.<String, List<Annotation>>emptyMap() : annotations;
+        for (Row row : rows.values()) {
+            row.renderAnnotations(annotationMarks.get(row.messageId));
+        }
+    }
+
+    private void renderOptimisticAnnotations(String messageId, List<Annotation> nextMarks) {
+        Map<String, List<Annotation>> projected = new LinkedHashMap<>(annotationMarks);
+        projected.put(messageId, nextMarks);
+        renderAnnotations(projected);
+    }
+
     public void setSpeaker(ChatSpeaker speaker) {
         this.speaker = speaker;
     }
@@ -365,11 +391,12 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
     public void render(ChatViewState state) {
         rendering = true;
         try {
-            dismissPopups();
             title.setText(state.branchTitle);
             loading.setVisibility(state.phase == ChatViewState.Phase.LOADING ? VISIBLE : GONE);
             error.setVisibility(state.phase == ChatViewState.Phase.ERROR ? VISIBLE : GONE);
             renderMessages(state);
+            dismissWordMenuIfUnavailable(state);
+            dismissChildrenPopupIfUnavailable(state);
             renderNotice(state.notice);
             renderSourceCard(state);
             renderQuote(state.quote);
@@ -844,6 +871,7 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             return;
         }
         childrenPopup = ChildBranchPopup.show(row.childrenAnchor(), children, listener);
+        childrenPopupMessageId = messageId;
     }
 
     /**
@@ -854,6 +882,7 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         dismissPopups();
         if (row != null) {
             wordMenu = row.openWordMenu();
+            wordMenuMessageId = wordMenu == null ? "" : row.messageId;
         }
     }
 
@@ -863,13 +892,52 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
      * dismissal over from the top.
      */
     private void dismissPopups() {
+        dismissWordMenu();
+        dismissChildrenPopup();
+    }
+
+    private void dismissWordMenu() {
         WordMenuPopup menu = wordMenu;
         wordMenu = null;
+        wordMenuMessageId = "";
         if (menu != null) {
             menu.close();
         }
+    }
+
+    private void dismissWordMenuIfUnavailable(ChatViewState state) {
+        if (wordMenu == null) {
+            return;
+        }
+        boolean messagePresent = false;
+        for (ChatMessage message : state.messages) {
+            if (message.messageId.equals(wordMenuMessageId)) {
+                messagePresent = true;
+                break;
+            }
+        }
+        if (!messagePresent || !wordMenu.hasLiveSelection()) {
+            dismissWordMenu();
+        }
+    }
+
+    private void dismissChildrenPopupIfUnavailable(ChatViewState state) {
+        if (childrenPopup == null) {
+            return;
+        }
+        for (ChatMessage message : state.messages) {
+            if (message.messageId.equals(childrenPopupMessageId)
+                    && message.isStable() && message.hasChildren()) {
+                return;
+            }
+        }
+        dismissChildrenPopup();
+    }
+
+    private void dismissChildrenPopup() {
         ChildBranchPopup children = childrenPopup;
         childrenPopup = null;
+        childrenPopupMessageId = "";
         if (children != null) {
             children.close();
         }
@@ -891,7 +959,7 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
 
     /** One row of the flow, and the forwarding of its gestures. */
     private final class Row implements ReasoningDisclosure.Listener, AnswerActionBar.Listener,
-            WordMenuPopup.Listener {
+            WordMenuPopup.Listener, Highlighter.OnHighlightTapped {
 
         private final View root;
         private final View questionBlock;
@@ -918,6 +986,7 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
 
         private String messageId = "";
         private ChatMessage message;
+        private List<Annotation> marks = Collections.emptyList();
         private ChatViewState lastState;
         private String renderedAnswerText;
         /**
@@ -947,6 +1016,7 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             answer.setTextIsSelectable(true);
             answer.setMovementMethod(LinkMovementMethod.getInstance());
             answer.setCustomSelectionActionModeCallback(new SelectionMenuCallback());
+            installFastSelection(answer);
             caret = root.findViewById(R.id.chat_caret);
             generating = root.findViewById(R.id.chat_generating_note);
             failure = root.findViewById(R.id.chat_failure);
@@ -973,6 +1043,8 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         void render(ChatViewState state, ChatMessage message, boolean newestRow) {
             messageId = message.messageId;
             this.message = message;
+            List<Annotation> currentMarks = annotationMarks.get(messageId);
+            marks = currentMarks == null ? Collections.<Annotation>emptyList() : currentMarks;
             questionBlock.setVisibility(message.isAi() ? GONE : VISIBLE);
             answerBlock.setVisibility(message.isAi() ? VISIBLE : GONE);
             if (!message.isAi()) {
@@ -1093,6 +1165,19 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             if (!answerViews.isEmpty()) {
                 answer = answerViews.get(0);
             }
+            repaintAnswerMarks();
+        }
+
+        private void renderAnnotations(List<Annotation> nextMarks) {
+            marks = nextMarks == null ? Collections.<Annotation>emptyList() : nextMarks;
+            repaintAnswerMarks();
+        }
+
+        private void repaintAnswerMarks() {
+            for (int index = 0; index < answerViews.size(); index++) {
+                Highlighter.repaint(answerViews.get(index), marks,
+                        Annotation.Locator.prose(index), this);
+            }
         }
 
         /** Moves the layout's own answer view into the host, once. */
@@ -1112,7 +1197,119 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             view.setTextIsSelectable(true);
             view.setMovementMethod(LinkMovementMethod.getInstance());
             view.setCustomSelectionActionModeCallback(new SelectionMenuCallback());
+            installFastSelection(view);
             return view;
+        }
+
+        private void installFastSelection(final TextView view) {
+            FastSelectionTouchListener listener = new FastSelectionTouchListener(view);
+            view.setOnTouchListener(listener);
+            view.addOnAttachStateChangeListener(listener);
+        }
+
+        private final class FastSelectionTouchListener
+                implements View.OnTouchListener, View.OnAttachStateChangeListener {
+
+            private final TextView view;
+            private float downX;
+            private float downY;
+            private boolean triggered;
+            private final int touchSlop;
+            private final Runnable trigger;
+
+            FastSelectionTouchListener(TextView view) {
+                this.view = view;
+                touchSlop = ViewConfiguration.get(view.getContext()).getScaledTouchSlop();
+                trigger = () -> {
+                    if (selectionMode != null || !this.view.isAttachedToWindow()) {
+                        return;
+                    }
+                    this.view.cancelLongPress();
+                    triggered = selectWordAndStartActionMode(this.view, downX, downY);
+                };
+            }
+
+            @Override
+            public boolean onTouch(View touched, MotionEvent event) {
+                switch (event.getActionMasked()) {
+                    case MotionEvent.ACTION_DOWN:
+                        downX = event.getX();
+                        downY = event.getY();
+                        triggered = false;
+                        if (selectionMode == null) {
+                            view.postDelayed(trigger, FAST_SELECTION_DELAY_MS);
+                        }
+                        return false;
+                    case MotionEvent.ACTION_MOVE:
+                        if (!triggered && movedBeyondSlop(event)) {
+                            view.removeCallbacks(trigger);
+                        }
+                        return triggered;
+                    case MotionEvent.ACTION_UP:
+                        view.removeCallbacks(trigger);
+                        boolean consumed = triggered;
+                        triggered = false;
+                        return consumed;
+                    case MotionEvent.ACTION_CANCEL:
+                        view.removeCallbacks(trigger);
+                        triggered = false;
+                        return false;
+                    default:
+                        return triggered;
+                }
+            }
+
+            @Override
+            public void onViewAttachedToWindow(View attached) {
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View detached) {
+                view.removeCallbacks(trigger);
+                triggered = false;
+            }
+
+            private boolean movedBeyondSlop(MotionEvent event) {
+                return Math.abs(event.getX() - downX) > touchSlop
+                        || Math.abs(event.getY() - downY) > touchSlop;
+            }
+        }
+
+        private boolean selectWordAndStartActionMode(TextView view, float x, float y) {
+            CharSequence text = view.getText();
+            if (!(text instanceof Spannable) || text.length() == 0) {
+                return false;
+            }
+            int offset = Math.max(0, Math.min(view.getOffsetForPosition(x, y), text.length() - 1));
+            int[] range = wordRange(text, offset);
+            if (range[0] >= range[1]) {
+                return false;
+            }
+            Selection.setSelection((Spannable) text, range[0], range[1]);
+            return view.startActionMode(new SelectionMenuCallback(), ActionMode.TYPE_FLOATING) != null;
+        }
+
+        private int[] wordRange(CharSequence text, int offset) {
+            int cursor = offset;
+            while (cursor > 0 && Character.isWhitespace(text.charAt(cursor))) {
+                cursor--;
+            }
+            if (Character.isWhitespace(text.charAt(cursor))) {
+                return new int[] {cursor, cursor + 1};
+            }
+            int start = cursor;
+            int end = cursor + 1;
+            while (start > 0 && isWordCharacter(text.charAt(start - 1))) {
+                start--;
+            }
+            while (end < text.length() && isWordCharacter(text.charAt(end))) {
+                end++;
+            }
+            return new int[] {start, end};
+        }
+
+        private boolean isWordCharacter(char value) {
+            return Character.isLetterOrDigit(value) || value == '_';
         }
 
         /**
@@ -1271,7 +1468,7 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             if (selection.isEmpty()) {
                 return null;
             }
-            WordMenuPopup menu = new WordMenuPopup(run, message, this);
+            WordMenuPopup menu = new WordMenuPopup(run, message, marks, answerViews.indexOf(run), this);
             menu.setOnClosed(this::onWordMenuClosed);
             menu.show(selection);
             card = menu;
@@ -1308,6 +1505,42 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         public void onCopyRequested() {
             // 复制 in the selection menu copies the passage, not the whole answer (PRD 6.2.19 point 5).
             fire(actions -> actions.onSelectionCopyPressed(selectedText()));
+        }
+
+        @Override
+        public void onHighlightRequested() {
+            TextView run = selectingRun();
+            TextSelection selection = TextSelection.of(run.getSelectionStart(),
+                    run.getSelectionEnd());
+            if (selection.isEmpty()) {
+                return;
+            }
+            int proseIndex = answerViews.indexOf(run);
+            List<Annotation> projected = Highlighter.optimisticMarks(marks,
+                    Annotation.Locator.prose(proseIndex), selection.start, selection.end);
+            ChatScreen.this.renderOptimisticAnnotations(messageId, projected);
+            fire(actions -> actions.onHighlightPressed(messageId, proseIndex, selection.start,
+                    selection.end));
+        }
+
+        @Override
+        public void onNoteRequested() {
+            TextView run = selectingRun();
+            TextSelection selection = TextSelection.of(run.getSelectionStart(),
+                    run.getSelectionEnd());
+            if (selection.isEmpty()) {
+                return;
+            }
+            int proseIndex = answerViews.indexOf(run);
+            fire(actions -> actions.onNotePressed(messageId, proseIndex, selection.start,
+                    selection.end));
+        }
+
+        @Override
+        public void onHighlightTapped(TextView container, Annotation highlight) {
+            Highlighter.select(container, highlight);
+            container.post(() -> container.startActionMode(new SelectionMenuCallback(),
+                    ActionMode.TYPE_FLOATING));
         }
 
         /**

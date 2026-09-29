@@ -1,0 +1,29 @@
+﻿T-104 debug APK install, launch, and concurrent reinstall timeline
+T104_InstallCapturedAt=2026-09-28T23:43:12.2040952+08:00
+Device=ANRBBB5427000010; Android 17; API 37
+T104_InstallAPK=D:\Project\Android\Treelearn\android\app\build\outputs\apk\debug\app-debug.apk
+T104_InstallAPK_SHA256=4CB662746A3FBEB1886448C93C827AAFA8BF68785E47951F67D15D502119850A
+T104_InstallAPK_Bytes=1460944
+T104_InstallCommand=adb install -r <T104_InstallAPK>
+T104_InstallOutput=Success
+T104_INSTALL_EXITCODE=0
+T104_LaunchCommand=adb shell am start -W -n com.treelearn/com.treelearn.app.MainActivity
+T104_LaunchOutput=Status: ok; LaunchState: COLD; Activity: com.treelearn/.app.MainActivity; Complete
+T104_LAUNCH_EXITCODE=0
+T104_ActivityStack=mActivityComponent=com.treelearn/.app.MainActivity; window com.treelearn/com.treelearn.app.MainActivity; process pid=17960
+T104_Package=versionName 1.0; firstInstallTime 2026-09-28 23:43:15; lastUpdateTime 2026-09-28 23:43:15
+T104_PulledInstalledAPK=artifacts/tmp/math-renderer-installed-base.apk
+T104_PulledAPK_SHA256=4CB662746A3FBEB1886448C93C827AAFA8BF68785E47951F67D15D502119850A
+T104_InstallTimeBytesMatch=true
+
+At 2026-09-29T00:01:52.1629120+08:00, current app-debug.apk SHA256=DC7F0EC4EF7D234127A980BB464BEDDF769780B29BA0A04A788959D945E6CFAB; bytes=1775421; LastWrite=2026-09-28T23:47:44.5855347+08:00. It did not then match the T104-installed package; no install was issued by this task.
+
+Current device package recheck captured at 2026-09-29T00:08:05.6198137+08:00
+Command=adb shell pm path com.treelearn; adb pull installed base APK; compare SHA-256
+Installed package firstInstallTime=2026-09-28 23:57:56; lastUpdateTime=2026-09-28 23:58:25
+PulledCurrentDeviceAPK=artifacts/tmp/current-device-treelearn-base.apk
+CurrentDeviceAPK_SHA256=DC7F0EC4EF7D234127A980BB464BEDDF769780B29BA0A04A788959D945E6CFAB
+CurrentDeviceAPK_matches_T104_snapshot=false
+CurrentDeviceAPK_matches_app_debug_output=true
+CurrentProcessPID=none; no post-reinstall launch was attempted by this task.
+Conclusion=A concurrent reinstall replaced the T104 package after its launch check; current installed package matches the current app-debug output, but its source changes were not reviewed in T-104.

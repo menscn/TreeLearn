@@ -1,5 +1,6 @@
 package com.treelearn.app.ui;
 
+import com.treelearn.core.domain.Annotation;
 import com.treelearn.core.domain.Branch;
 import com.treelearn.core.domain.Guard;
 import com.treelearn.core.domain.Message;
@@ -7,6 +8,7 @@ import com.treelearn.core.domain.Message;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Everything the conversation reads from the store, behind one port (technical design 13).
@@ -80,9 +82,18 @@ public interface ChatData {
          */
         public final SourceCard sourceCard;
 
+        /**
+         * T-B: the annotations whose digest still matches each displayed answer, per message id.
+         * They ride the same read as the rows (one store call, one conversation snapshot) so a
+         * highlight can never describe a different text than the row next to it. Answers without
+         * marks are absent; the map is empty when the store read never ran.
+         */
+        public final Map<String, List<Annotation>> annotations;
+
         private Snapshot(String branchTitle, List<ChatMessage> messages,
                 List<Recommendation> answerRecommendations, String recommendationsRevisionId,
-                Branch branch, List<Message> readingRows, SourceCard sourceCard) {
+                Branch branch, List<Message> readingRows, SourceCard sourceCard,
+                Map<String, List<Annotation>> annotations) {
             this.branchTitle = branchTitle == null ? "" : branchTitle;
             this.messages = Collections.unmodifiableList(new ArrayList<ChatMessage>(messages));
             this.answerRecommendations = Collections.unmodifiableList(
@@ -92,16 +103,26 @@ public interface ChatData {
             this.branch = branch;
             this.readingRows = Collections.unmodifiableList(new ArrayList<Message>(readingRows));
             this.sourceCard = sourceCard;
+            this.annotations = annotations == null
+                    ? Collections.<String, List<Annotation>>emptyMap() : annotations;
         }
 
         public static Snapshot of(String branchTitle, List<ChatMessage> messages,
                 List<Recommendation> answerRecommendations, String recommendationsRevisionId,
                 Branch branch, List<Message> readingRows, SourceCard sourceCard) {
+            return of(branchTitle, messages, answerRecommendations, recommendationsRevisionId,
+                    branch, readingRows, sourceCard, null);
+        }
+
+        public static Snapshot of(String branchTitle, List<ChatMessage> messages,
+                List<Recommendation> answerRecommendations, String recommendationsRevisionId,
+                Branch branch, List<Message> readingRows, SourceCard sourceCard,
+                Map<String, List<Annotation>> annotations) {
             Guard.object(messages, "messages");
             Guard.object(answerRecommendations, "answerRecommendations");
             Guard.object(readingRows, "readingRows");
             return new Snapshot(branchTitle, messages, answerRecommendations,
-                    recommendationsRevisionId, branch, readingRows, sourceCard);
+                    recommendationsRevisionId, branch, readingRows, sourceCard, annotations);
         }
 
     }

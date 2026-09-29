@@ -1,9 +1,12 @@
 package com.treelearn.app.wiring;
 
+import com.treelearn.core.domain.Annotation;
 import com.treelearn.core.domain.AnswerRevision;
 import com.treelearn.core.domain.Branch;
 import com.treelearn.core.domain.ContextPlan;
+import com.treelearn.app.ui.ChatMessage;
 import com.treelearn.app.ui.ChildBranch;
+import com.treelearn.app.ui.Highlighter;
 import com.treelearn.core.domain.DomainResult;
 import com.treelearn.core.domain.GenerationCommand;
 import com.treelearn.core.domain.GenerationModel;
@@ -13,6 +16,7 @@ import com.treelearn.data.db.dao.ContextSnapshotDao;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The conversation path's rows and decisions, behind one port, without a database handle.
@@ -97,6 +101,30 @@ public interface ChatStore {
 
     /** @return the position, or null when no row carries the id */
     Message position(String messageId);
+
+    /**
+     * The annotations whose digest still matches each answer's displayed text (T-026's
+     * digest-clearing read, 方案 V1.1 §3.3). The digest is computed here, from the very text the
+     * answer displays, so no caller ever carries the hashing rule and no mark can be read against a
+     * different revision than the one on screen.
+     *
+     * @param answers the rows to read marks for; rows without a stable text are skipped inside
+     * @return marks per message id; a row whose read came back empty may be absent
+     */
+    Map<String, List<Annotation>> annotations(List<ChatMessage> answers);
+
+    /**
+     * Runs one highlight decision against the store in a single transaction (方案 V1.1 §2.2): a
+     * cancel deletes the row it names, a write deletes the absorbed rows and inserts the union row.
+     * The digest is computed here from {@code answerText} — the same text the read path hashed —
+     * so a mark written now is readable by the next read.
+     *
+     * @param proseIndex the ordinal of the prose segment the mark anchors in
+     * @param plan       the decision {@code Highlighter.plan} produced
+     * @param now        the write's application-written UTC epoch millis (rules/sql.md)
+     */
+    void applyHighlight(String messageId, String answerText, int proseIndex,
+            Highlighter.Plan plan, long now);
 
     /** One branch and its positions, in conversation order. */
     final class Conversation {

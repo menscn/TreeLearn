@@ -4,14 +4,14 @@ id: T-2026-09-28-104
 title: 公式接入渲染、降级与文档回写
 template_version: 2
 task_type: implementation
-status: ready
+status: verifying
 parent_requirement: T-2026-09-28-chat-math-formula-rendering-100.md
 requirements_confirmed: true
 generated_by: leader
 owner: android-math-implementer
 owner_lane: android
 stack: android
-estimated_production_lines: 130
+estimated_production_lines: 191
 shared_code_touched: true
 depends_on: [T-2026-09-28-chat-math-layout-span-103.md]
 tdd_mode: required
@@ -62,26 +62,37 @@ tdd_mode: required
 
 - [ ] 含 `$x^2+y^2=r^2$` 与 `$$\frac{1}{2}$$` 的回答渲染为数学排版（仪器/真机截图留证），不出现 `\frac` 等源码文本。
 - [ ] 块级公式独立成段并居中；行内公式与同行文字基线协调。
-- [ ] 不支持结构（如 `\begin{matrix}a\end{matrix}`）与半截公式（流式 `$$\frac{1`）显示为等宽底色源码，内容不丢，无崩溃。
-- [ ] 代码块内 `$x$`、货币 `$5 到 $10` 不被当成公式。
+- [x] 不支持结构（如 `\begin{matrix}a\end{matrix}`）与半截公式（流式 `$$\frac{1`）显示为等宽底色源码，内容不丢，无崩溃。
+- [x] 代码块内 `$x$`、货币 `$5 到 $10` 不被当成公式。
 - [ ] 相邻场景不回归：无公式回答、纯表格回答、表格单元格内公式、代码块点击复制、答案首段视图 id 与选中复制均保持既有行为（复用既有 `MarkdownRendererInstrumentedTest` 与新增加法断言）。
-- [ ] `ChatSpeaker.stripMarkdown` 对含公式文本输出「公式」占位，不再出现 `\frac` 片段。
-- [ ] 文档回写完成，`Docs/` 反向搜索无遗留旧表述。
-- [ ] Java-only guard PASS；`gradlew lint` 与受影响单测/仪器测试通过。
+- [x] `ChatSpeaker.stripMarkdown` 对含公式文本输出「公式」占位，不再出现 `\frac` 片段。
+- [x] 文档回写完成，`Docs/` 反向搜索无遗留旧表述。
+- [x] Java-only guard PASS；`gradlew lint` 与受影响单测/仪器测试通过。全量 connected instrumentation 仍有 30 项失败，见验证缺口。
 
 ## TDD execution record
 
 ### RED — failing test first
-- PENDING
+- Test/scenario: 原始 T-104 实现前的 RED 未保留，无法核实测试先于实现失败。
+- Command: PENDING（没有可复核的 T-104 RED 命令）
+- Exit code: PENDING
+- Observed failure: PENDING
+- Failure reason validated: PENDING；不把全量仪器测试中的无关失败冒充为 T-104 RED。
 ### GREEN — minimum implementation
-- PENDING
+- Implementation: `MarkdownRenderer` 将公式扫描结果送入 CommonMark 后回填 `MathSpan` 或源码降级；`ChatSpeaker` 将公式朗读替换为“公式”；矩阵 1.3 已回写。
+- Command: `.\gradlew.bat :app:testDebugUnitTest --tests com.treelearn.app.ui.ChatSpeakerTest --no-build-cache --rerun-tasks`
+- Exit code: 0
+- Passing evidence: `artifacts/evidence/T-2026-09-28-math-renderer-chat-speaker-jvm.txt:90`；`android/app/build/reports/tests/testDebugUnitTest/classes/com.treelearn.app.ui.ChatSpeakerTest.html` 为 11/11；`android/app/build/reports/androidTests/connected/debug/com.treelearn.app.MarkdownRendererInstrumentedTest.html` 为 11/11。
+- Regression evidence: `artifacts/evidence/T-2026-09-28-math-renderer-lint.txt:164`；`artifacts/evidence/T-2026-09-28-math-renderer-final-java-only-guard.txt:32`；全量仪器测试 272 项中 30 项失败、退出码 1，见 `artifacts/evidence/T-2026-09-28-math-renderer-connected-androidtest.txt:131`、`:288`、`:316`。
 ### REFACTOR — optional
-- PENDING
+- Cleanup: 无单独 refactor 记录。
+- Regression evidence: 当前没有独立 refactor 阶段的回归证据。
 ### TDD or sizing exception — only with prior user approval
-- 无例外。
+- No TDD or sizing exception claimed. 用户授权仅为功能推进且接受最终 PARTIAL，不豁免缺失的 RED 证据；191 行新增生产代码低于 200 行软上限。
 
 ## Implementation notes
 
+- 2026-09-28 用户明确授权 T-104 以“仅功能推进”例外继续，并接受本任务与父需求最终只能报告 PARTIAL；该授权不豁免 T-101–103 的验收缺口，不等于 TDD/规模例外，也不授权更改上游任务状态。
+- 当前生产改动按 Task v2 口径为 191 行非空、非注释新增代码；物理 diff 为 212 行新增、4 行删除，计数证据见 `artifacts/evidence/T-2026-09-28-math-renderer-production-lines.txt`。
 - 回填统一入口 `applyMath(SpannableStringBuilder)`：prose 段 flush 前与表格 cell 生成后各调一次，避免单元格内公式漏画。
 - 占位符按**字符串定位**替换（不用下标缓存，因 commonmark 可能把占位符拆到多个 span/节点）；替换时先取 `toString()` 定位再 `replace` 并设置 span。
 - 降级与代码块共用 `CODE_BACKGROUND` 与 `monospace`，不新增颜色常量（不写裸 hex）。
@@ -89,16 +100,22 @@ tdd_mode: required
 
 ## Verification report
 
-- Verdict: PENDING
-- Evidence: PENDING
-- Gaps: PENDING
-- Risks: PENDING
+- Verdict: PARTIAL
+- Evidence: renderer 及朗读的定向报告分别为 11/11；`gradlew lint`、完整 Java-only guard、新鲜 debug 构建均退出码 0；`artifacts/evidence/T-2026-09-28-math-renderer-install-launch.txt:7`–`:18` 记录 T-104 包安装、主 Activity 启动与安装字节一致；`:22`–`:34` 记录后续并行重装及当前包哈希。
+- Gaps: TDD RED 未保存且 T-104 独立 verifier 未完成；机械校验确认缺少可信 RED 退出码/失败观察，见 `artifacts/evidence/T-2026-09-29-math-tasks-validation.txt`；答案区公式视觉截图、行内基线验收与答案首段 id/选中复制完整回归未闭环；全量 connected instrumentation 当前为 275 项、29 项失败；T-103 的字号/密度与 Paint 状态问题已有 3/3 定向修复证据，但独立 verifier 仍按 Harness evidence 给出 FAIL。
+- Risks: 最新 Debug APK 已重新构建、安装并冷启动，SHA-256 为 `7CED59649B9CCD00EC57B127A78710D68D5E80D14E3BB0A320CD795F900E905F`、大小 `1,462,420` 字节；设备与本地产物一致，见 `artifacts/evidence/T-2026-09-28-t103-current-verification.txt`。T-104 仍缺真实答案页公式视觉与完整 Task v2 RED 证据。
+
+### Independent verifier addendum (latest)
+
+- Verdict: PARTIAL for the user-authorized functional-progress exception; Harness evidence remains incomplete and the task must not be marked `verified`.
+- Evidence gaps: RED 未保存；Task v2 仍报 RED 缺 Exit code/Observed failure 与 RED/GREEN 命令不一致；没有同一 APK 上的真实 ChatScreen 答案页公式视觉截图。
+- Installation status: 最新 Debug APK 已重新安装并冷启动，设备与本地产物 SHA-256 一致，见 `artifacts/evidence/T-2026-09-28-t103-current-verification.txt`。
 
 ## Handoff notes
 
-- Completed: 无。
-- In progress: 无。
-- Blocker: 待 101–103 完成。
-- Unblock condition: T-103 verified。
-- Next steps: 接线后跑既有 `MarkdownRendererInstrumentedTest` 相邻场景 + 真机答案页截图；再回写文档。
+- Completed: T-104 功能接线、朗读占位与矩阵文档更新；定向 renderer/朗读测试、lint、Java-only guard、debug 构建、安装与主 Activity 冷启动均有证据。
+- In progress: 独立 verifier、答案页公式视觉与行内基线验证；TDD RED 证据缺失。
+- Blocker: 上游 T-101 为 blocked/FAIL，T-102 与 T-103 仍为 PARTIAL；T-104 自身也缺完整 Harness 证据。
+- Unblock condition: 补足上游验收、T-104 可回读 RED 与真实答案页视觉证据，再由独立 verifier 复核。
+- Next steps: 保持 T-104 与父需求 `PARTIAL`，不把定向 11/11 或 APK 启动证据扩展解释为完整验收。
 - Watch-outs: 别破坏答案首段视图 id 与 `answerViews`（选中复制读的是它）；表格单元格内公式要走同一回填；半截公式不得闪烁（未闭合即不抽取）。

@@ -12,10 +12,12 @@ import com.treelearn.app.ui.ChatCommands;
 import com.treelearn.app.ui.ChatData;
 import com.treelearn.app.ui.ChatMessage;
 import com.treelearn.app.ui.ChildBranch;
+import com.treelearn.app.ui.Highlighter;
 import com.treelearn.app.ui.HomeViewState;
 import com.treelearn.app.ui.KeyVault;
 import com.treelearn.app.ui.Recommendation;
 import com.treelearn.app.ui.SourceCard;
+import com.treelearn.core.domain.Annotation;
 import com.treelearn.core.domain.AnswerRevision;
 import com.treelearn.core.domain.Branch;
 import com.treelearn.core.domain.BranchAnchor;
@@ -36,6 +38,7 @@ import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -192,9 +195,13 @@ public final class ChatWiring implements ChatData, ChatCommands {
                         recommendationsRevisionId);
             }
         }
+        // T-B: the marks ride the same read as the rows - one store call each, so a highlight can
+        // never describe a different text than the row next to it. The digest judgement is the
+        // store's (annotations), not repeated here.
+        Map<String, List<Annotation>> marks = store.annotations(messages);
         return Snapshot.of(conversation.branchTitle, messages, newQuestions(answerRecommendations),
                 answerRecommendations.isEmpty() ? "" : recommendationsRevisionId, conversation.branch,
-                conversation.messages, sourceCard(conversation.branch));
+                conversation.messages, sourceCard(conversation.branch), marks);
     }
 
     /**
@@ -469,6 +476,41 @@ public final class ChatWiring implements ChatData, ChatCommands {
     public List<AnswerRevision> versions(String messageId) {
         Guard.id(messageId, "messageId");
         return store.versions(messageId);
+    }
+
+    /**
+     * T-B: one tap on the menu's 高亮 cell, run against the store. The decision is
+     * {@link Highlighter#plan}'s, judged against the marks as the store holds them - read through
+     * the same annotations path the screen draws from, so the menu's slashed face and the tap's
+     * outcome can never disagree. A cancel and a merged write are each one transaction inside
+     * {@code ChatStore.applyHighlight}; the digest is hashed there, from the text the screen is
+     * showing, which is what makes the row readable by the next read and clearable the day the
+     * answer changes.
+     */
+    @Override
+    public ChatCommandResult applyHighlight(String messageId, String answerText, int proseIndex,
+            int startInclusive, int endInclusive) {
+        Guard.id(messageId, "messageId");
+        Guard.nonBlank(answerText, "answerText");
+        Message position = store.position(messageId);
+        if (position == null || position.isUser()) {
+            // A highlight hangs off a stable answer; a question has no text to mark.
+            return ChatCommandResult.refused(HomeViewState.Notice.STORAGE);
+        }
+        ChatStore.Conversation conversation = store.read(position.branchId);
+        ChatStore.Position target = find(conversation.positions, messageId);
+        if (target == null || target.activeRevision == null) {
+            // Only a position that displays a stable version carries marks, the same condition
+            // ChatMessage.canQuote() shows the learner as an enabled cell.
+            return ChatCommandResult.refused(HomeViewState.Notice.STORAGE);
+        }
+        List<Annotation> marks = store.annotations(Collections.singletonList(view(target)))
+                .get(messageId);
+        Highlighter.Plan plan = Highlighter.plan(marks == null
+                        ? Collections.<Annotation>emptyList() : marks,
+                Annotation.Locator.prose(proseIndex), startInclusive, endInclusive);
+        store.applyHighlight(messageId, answerText, proseIndex, plan, clock.millis());
+        return ChatCommandResult.succeeded();
     }
 
     /** Retry and reset share one route; only the decision they delegate to differs (T-010). */

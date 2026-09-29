@@ -16,6 +16,7 @@ public final class MathScanner {
     private static final String PLACEHOLDER_PREFIX = "TLMATH";
     private static final String PLACEHOLDER_SUFFIX = "TL";
     private static final String MATH_SIGNALS = "\\^_{}";
+    private static final int MAX_ASCII_TOKEN = 12;
     private static final String DOUBLE_DOLLAR = "$$";
     private static final String CLOSE_PAREN = "\\)";
     private static final String CLOSE_BRACKET = "\\]";
@@ -49,6 +50,7 @@ public final class MathScanner {
             if (c == '\n') {
                 out.append(c);
                 i++;
+                lineStart = true;
                 continue;
             }
             lineStart = false;
@@ -83,7 +85,7 @@ public final class MathScanner {
         int close = findClosing(src, start + 1, "$", false, true);
         if (close > start + 1) {
             String latex = src.substring(start + 1, close);
-            if (hasMathSignal(latex)) {
+            if (hasMathSignal(latex) || isAsciiToken(latex)) {
                 appendFormula(out, latex, false, formulas);
                 return close + 1 - start;
             }
@@ -127,11 +129,13 @@ public final class MathScanner {
         int limit = src.length() - token.length();
         for (int i = from; i <= limit; i++) {
             if (src.startsWith(token, i)) {
-                boolean usable = !requireNonSpaceBefore
-                        || (i > from && !Character.isWhitespace(src.charAt(i - 1)));
-                if (usable) {
-                    return i;
+                // An unusable candidate ends the search: keeping on would swallow the prose
+                // between two formulas into one bogus formula.
+                if (requireNonSpaceBefore
+                        && !(i > from && !Character.isWhitespace(src.charAt(i - 1)))) {
+                    return -1;
                 }
+                return i;
             } else if (!allowBlankLine && src.charAt(i) == '\n' && isBlankLine(src, i)) {
                 return -1;
             }
@@ -154,6 +158,25 @@ public final class MathScanner {
             }
         }
         return false;
+    }
+
+    /**
+     * A short run of printable ASCII with no space. It covers the common inline forms that carry
+     * no signal character at all - {@code $x$}, {@code $a+b$} - which a signal-only rule would
+     * leave as raw source. CJK and spaces are rejected on purpose: Chinese currency runs like
+     * {@code $5到$10} have no space to lean on, and rejecting them here is what keeps them prose.
+     */
+    private static boolean isAsciiToken(String latex) {
+        if (latex.isEmpty() || latex.length() > MAX_ASCII_TOKEN) {
+            return false;
+        }
+        for (int i = 0; i < latex.length(); i++) {
+            char c = latex.charAt(i);
+            if (c <= ' ' || c > '~') {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static boolean isIndentedCodeLine(String src, int start) {

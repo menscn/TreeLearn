@@ -43,6 +43,13 @@ public final class ChildBranchPopup {
      * Opens the list under the view that asked for it. The platform's own drop-down placement is used
      * rather than a hand-computed one: it flips above the anchor when the list does not fit below it,
      * which is the one rule this card shares with every other popup in the app.
+     *
+     * <p>The rows are added <em>before</em> the card is measured. Measuring the empty card - the
+     * order this used to carry - returned a near-zero height for a card whose title and scroll box
+     * are both {@code match_parent}, so {@code setHeight} pinned the window to that nothing and the
+     * tap read as dead: the window opened, but there was nothing in it to see. The width is pinned
+     * as well ({@code popup_width}), because an UNSPECIFIED measure of a wrap-content card cannot
+     * resolve what its match-parent children want.
      */
     public static ChildBranchPopup show(View anchor, List<ChildBranch> children,
             Listener listener) {
@@ -56,15 +63,19 @@ public final class ChildBranchPopup {
                 LinearLayout.LayoutParams.WRAP_CONTENT, true);
         popup.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         popup.setOutsideTouchable(true);
-        content.measure(0, 0);
-        int maxPx = context.getResources().getDimensionPixelSize(R.dimen.popup_max_height);
-        popup.setHeight(Math.min(content.getMeasuredHeight(), maxPx));
         popup.setElevation(context.getResources().getDimension(R.dimen.card_elevation));
         ChildBranchPopup shown = new ChildBranchPopup(popup);
         LayoutInflater inflater = LayoutInflater.from(context);
         for (ChildBranch child : children) {
             list.addView(row(inflater, list, context, child, shown, listener));
         }
+        int widthPx = context.getResources().getDimensionPixelSize(R.dimen.popup_width);
+        int maxPx = context.getResources().getDimensionPixelSize(R.dimen.popup_max_height);
+        content.measure(
+                View.MeasureSpec.makeMeasureSpec(widthPx, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+        popup.setWidth(widthPx);
+        popup.setHeight(Math.min(content.getMeasuredHeight(), maxPx));
         popup.showAsDropDown(anchor);
         return shown;
     }

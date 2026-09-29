@@ -3,14 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>知芽（TreeLearn） · 设置页重设计交互稿 V1.0（C 方案）</title>
+<title>知芽（TreeLearn） · 设置页重设计交互稿 V1.1（C 方案 · 全设置段）</title>
 <!--
   ============================================================================
-  知芽 · 设置页重设计交互稿 V1.0（方案 C：分组列表 + Key 管理二级页）
+  知芽 · 设置页重设计交互稿 V1.1（方案 C：分组列表 + Key 管理二级页 + 全设置段走查）
   配套文档：知芽-TreeLearn-设置页重设计方案-V1.0.md（同目录）
+  V1.1 增量：补齐五个二级页（提供商/模型/搜索/语音/文件）与两个三级页
+  （提供商编辑/引擎详情）；提供商编辑页与引擎详情页的 Key 表单同步套用
+  「保存右对齐 + 删除文字链」层级（v1.1 原型 :3446/:3649 的旧反模式在此修正）。
   Token 纪律：:root 与 v1 原型逐值一致，不新增 token、不写裸 hex。
-  范围：设置根页（分组列表）+ Key 管理二级页 + 删除确认弹层。
-       提供商/模型/搜索/语音/文件五个二级页沿用现有设计，本稿不重画。
+  简化说明：模型选择器/思考预算在 v1.1 用锚点 popover，本稿统一为底部
+  sheet（移动端同族交互），不影响信息结构与文案。
   ============================================================================
 -->
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
@@ -74,20 +77,19 @@ input{font-family:var(--sans);}
 .w-step{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--bg);border-radius:var(--r-sm);padding:9px 12px;font-size:var(--fs-sm);color:var(--ink2);transition:background .15s;}
 .w-step:hover{background:var(--green-faint);color:var(--green-deep);}
 .w-step .n{font-family:var(--serif);font-weight:700;color:var(--green);font-size:14px;flex-shrink:0;}
-.w-btns{display:flex;gap:8px;flex-wrap:wrap;}
-.w-btns button{border:1px solid var(--line);border-radius:var(--r-full);padding:6px 13px;font-size:12px;color:var(--ink2);background:var(--surface);transition:all .15s;}
-.w-btns button:hover{border-color:var(--green);color:var(--green-deep);}
 .w-note{font-size:var(--fs-cap);color:var(--ink3);line-height:1.8;margin-top:var(--s2);}
 .w-note b{color:var(--green-deep);}
 
 /* ---- 手机屏内组件（与 v1.1 同名同值，便于日后并稿） ---- */
 .screen{height:100%;position:relative;overflow:hidden;}
 .appbar{padding:var(--s2) var(--gutter) 0;display:flex;align-items:center;min-height:52px;}
-.appbar-title{flex:1;display:flex;align-items:center;justify-content:center;}
+.appbar-title{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;min-width:0;}
 .appbar-title .t1{font-family:var(--serif);font-size:var(--fs-h1);font-weight:700;letter-spacing:.02em;}
+.appbar-title .t2{font-size:var(--fs-cap);color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;max-width:100%;}
 .icon-btn{width:40px;height:40px;border-radius:var(--r-full);display:flex;align-items:center;justify-content:center;color:var(--green-deep);flex-shrink:0;}
 .icon-btn:active{background:var(--green-faint);}
 .appbar-spacer{width:40px;flex-shrink:0;}
+.appbar-side{flex-shrink:0;display:flex;align-items:center;}
 
 .set-section{margin:var(--s4) var(--gutter) 0;}
 .set-label{font-size:var(--fs-cap);letter-spacing:.14em;color:var(--ink3);font-weight:700;margin-bottom:var(--s2);}
@@ -97,8 +99,8 @@ input{font-family:var(--sans);}
 .set-link:last-child{border-bottom:none;}
 .set-link:active{background:var(--green-faint);}
 .set-link .sl-main{flex:1;min-width:0;}
-.set-link .sl-t{font-size:var(--fs-body);font-weight:500;display:block;}
-.set-link .sl-s{font-size:var(--fs-cap);color:var(--ink3);margin-top:3px;line-height:1.5;display:block;}
+.set-link .sl-t{font-size:var(--fs-body);font-weight:500;display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap;}
+.set-link .sl-s{font-size:var(--fs-cap);color:var(--ink3);margin-top:3px;line-height:1.5;display:block;width:100%;}
 .set-link .sl-s.warn{color:var(--amber);}
 .set-link .sl-c{color:var(--ink3);flex-shrink:0;display:flex;}
 
@@ -109,33 +111,77 @@ input{font-family:var(--sans);}
 .btn-primary{background:var(--green);color:var(--surface);border-radius:12px;padding:11px 18px;font-size:14px;font-weight:500;transition:background .15s,transform .1s;}
 .btn-primary:hover{background:var(--green-deep);}
 .btn-primary:active{transform:scale(.97);}
+.btn-primary:disabled{background:var(--line);cursor:default;}
 .btn-ghost{border:1px solid var(--line);border-radius:12px;padding:10px 16px;font-size:var(--fs-sm);color:var(--ink2);background:var(--surface);}
 .btn-ghost:hover{border-color:var(--green);color:var(--green-deep);}
 .btn-danger{color:var(--red);border:1px solid rgba(192,57,43,.28);border-radius:12px;padding:10px 16px;font-size:var(--fs-sm);background:var(--surface);}
-.key-input-row input{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:var(--fs-sm);outline:none;background:var(--bg);}
+.btn-danger:disabled{color:var(--ink3);border-color:var(--line);cursor:default;}
+.key-input-row{display:flex;gap:var(--s2);}
+.key-input-row input{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:var(--fs-sm);outline:none;background:var(--bg);}
 .key-input-row input:focus{border-color:var(--green);}
+.save-ico{width:44px;height:44px;border-radius:12px;background:var(--green);color:var(--surface);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s,transform .1s;}
+.save-ico:hover{background:var(--green-deep);}
+.save-ico:active{transform:scale(.96);}
 .danger-link{display:inline-flex;align-items:center;gap:5px;color:var(--red);font-size:var(--fs-sm);font-weight:500;padding:6px 0;border-radius:var(--r-sm);}
 .danger-link:active{color:#A53225;}
 
 .set-note{font-size:var(--fs-cap);color:var(--ink2);line-height:1.8;background:var(--green-faint);border-radius:12px;padding:11px 13px;}
 .set-note b{color:var(--green-deep);}
 
+/* ---- v1.1 移植：提供商卡 / 开关 / 文件行 / 提示块 ---- */
+.prov-card{margin:var(--s3) var(--gutter) 0;background:var(--surface);border-radius:var(--r-md);box-shadow:var(--sh-1);padding:var(--s4);cursor:pointer;transition:box-shadow .15s;}
+.prov-card:hover{box-shadow:var(--sh-2);}
+.prov-card.off{background:var(--bg);box-shadow:none;}
+.prov-card.off .pv-t{color:var(--ink3);}
+.prov-top{display:flex;align-items:center;gap:var(--s3);}
+.prov-top .pv-main{flex:1;min-width:0;}
+.prov-top .pv-t{font-size:var(--fs-h2);font-weight:600;line-height:1.4;letter-spacing:-.01em;}
+.prov-top .pv-u{font-size:var(--fs-cap);color:var(--ink3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pv-badge{font-size:var(--fs-cap);padding:2px 8px;border-radius:var(--r-full);background:var(--green-soft);color:var(--green-deep);font-weight:600;flex-shrink:0;}
+.pv-badge.off{background:var(--line);color:var(--ink3);}
+.switch{width:42px;height:24px;border-radius:var(--r-full);background:#D5D2C4;position:relative;transition:background .2s;flex-shrink:0;cursor:pointer;border:none;padding:0;}
+.switch.on{background:var(--green);}
+.switch i{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s;}
+.switch.on i{transform:translateX(18px);}
+.model-pill{font-size:var(--fs-cap);padding:3px 9px;border-radius:var(--r-full);background:var(--bg);color:var(--ink2);border:1px solid var(--line);}
+.chip-arch{font-size:10px;padding:2px 7px;border-radius:var(--r-full);background:#EDEBE2;color:var(--ink3);font-weight:500;white-space:nowrap;}
+.hint-block{margin:var(--s4) var(--gutter) 0;font-size:var(--fs-cap);color:var(--ink3);line-height:1.8;}
+.file-row{margin:var(--s3) var(--gutter) 0;display:flex;align-items:center;gap:var(--s3);background:var(--surface);border-radius:var(--r-md);box-shadow:var(--sh-1);padding:var(--s3) var(--s4);min-height:64px;}
+.file-row .fr-main{flex:1;min-width:0;}
+.file-row .fr-n{font-size:var(--fs-body);font-weight:500;line-height:1.4;word-break:break-all;}
+.file-row .fr-m{display:flex;flex-wrap:wrap;gap:var(--s2);font-size:var(--fs-cap);color:var(--ink3);margin-top:3px;}
+.file-row .fr-m .miss{color:var(--amber);}
+.file-row .fr-del{width:44px;height:44px;border-radius:var(--r-full);display:flex;align-items:center;justify-content:center;color:var(--ink3);flex-shrink:0;}
+.file-row .fr-del:hover{background:var(--red-soft);color:var(--red);}
+.data-head{margin:var(--s4) var(--gutter) 0;background:var(--surface);border-radius:var(--r-md);box-shadow:var(--sh-1);padding:var(--s4);display:flex;align-items:center;gap:var(--s3);}
+.data-head .dh-n{font-family:var(--serif);font-size:var(--fs-h1);font-weight:700;color:var(--green-deep);line-height:1.1;}
+.data-head .dh-l{font-size:var(--fs-cap);color:var(--ink3);margin-top:2px;}
+.form-row{margin:var(--s3) var(--gutter) 0;}
+.form-label{font-size:var(--fs-cap);letter-spacing:.1em;color:var(--ink3);font-weight:700;margin-bottom:var(--s2);}
+.form-input{width:100%;border:1px solid var(--line);border-radius:var(--r-sm);padding:11px 13px;font-size:var(--fs-sm);outline:none;background:var(--surface);}
+.form-input:focus{border-color:var(--green);}
+.inline-note{margin-top:var(--s3);font-size:var(--fs-sm);border-radius:var(--r-sm);padding:var(--s2) var(--s3);line-height:1.6;display:flex;align-items:center;gap:var(--s2);}
+.inline-note.warn{background:var(--amber-soft);color:var(--amber);}
+.inline-note.ok{background:var(--green-faint);color:var(--green-deep);}
+
+/* ---- 浮层 ---- */
 .tabbar{position:absolute;left:0;right:0;bottom:0;height:64px;background:var(--surface);border-top:1px solid var(--hairline);display:flex;z-index:15;}
 .tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10px;color:var(--ink3);}
 .tabbar button.on{color:var(--green-deep);font-weight:600;}
-
-.toast{position:absolute;left:50%;transform:translateX(-50%);bottom:78px;background:var(--ink);color:var(--surface);font-size:12px;padding:9px 16px;border-radius:var(--r-full);z-index:60;white-space:nowrap;animation:toastIn .2s;}
+.toast{position:absolute;left:50%;transform:translateX(-50%);bottom:78px;background:var(--ink);color:var(--surface);font-size:12px;padding:9px 16px;border-radius:var(--r-full);z-index:60;white-space:nowrap;animation:toastIn .2s;max-width:86%;overflow:hidden;text-overflow:ellipsis;}
 @keyframes toastIn{from{opacity:0;transform:translate(-50%,6px);}to{opacity:1;transform:translate(-50%,0);}}
-
 .overlay-mask{position:absolute;inset:0;background:rgba(30,43,35,.32);z-index:40;display:flex;align-items:flex-end;animation:fadeIn .2s;}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
-.sheet{width:100%;background:var(--surface);border-radius:22px 22px 0 0;padding:10px 18px 22px;animation:sheetUp .3s cubic-bezier(.2,.8,.2,1);}
+.sheet{width:100%;background:var(--surface);border-radius:22px 22px 0 0;padding:10px 18px 22px;animation:sheetUp .3s cubic-bezier(.2,.8,.2,1);max-height:82%;overflow-y:auto;}
 @keyframes sheetUp{from{transform:translateY(60px);opacity:0;}to{transform:none;opacity:1;}}
 .sheet .handle{width:38px;height:4px;border-radius:var(--r-full);background:var(--line);margin:2px auto 14px;}
 .sheet h3{font-family:var(--serif);font-size:17px;font-weight:600;margin-bottom:4px;}
 .sheet .sh-sub{font-size:12px;color:var(--ink2);line-height:1.7;margin-bottom:4px;}
 .sheet-actions{display:flex;gap:10px;margin-top:16px;}
 .sheet-actions button{flex:1;}
+.sheet .sheet-input{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:var(--fs-sm);outline:none;background:var(--bg);margin-top:var(--s2);}
+.sheet .sheet-input:focus{border-color:var(--green);}
+.popover-group{padding:var(--s2) var(--s4) 3px;font-size:10px;color:var(--ink3);letter-spacing:.1em;font-weight:600;}
 
 .fade-in{animation:fadeIn .18s;}
 @keyframes pageIn{from{opacity:0;transform:translateX(14px);}to{opacity:1;transform:none;}}
@@ -157,6 +203,14 @@ const IHome   = p => <Ic {...p} size={21}><path d="M4 11l8-7 8 7"/><path d="M6 1
 const ILib    = p => <Ic {...p} size={21}><path d="M5 4h5v16H5z"/><path d="M14 4h5v16h-5z"/></Ic>;
 const IGear   = p => <Ic {...p} size={21}><circle cx="12" cy="12" r="3"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M18.4 5.6l-1.8 1.8M7.4 16.6l-1.8 1.8"/></Ic>;
 const IKey    = p => <Ic {...p} size={15}><circle cx="8" cy="14" r="3.5"/><path d="M10.5 11.5L19 3M15 7l3 3"/></Ic>;
+const IPlus   = p => <Ic {...p} size={15}><path d="M12 5v14M5 12h14"/></Ic>;
+const ICheck  = p => <Ic {...p} size={16}><path d="M4 12.5l5 5L20 6.5"/></Ic>;
+const IClose  = p => <Ic {...p} size={15}><path d="M6 6l12 12M18 6L6 18"/></Ic>;
+const IWarn   = p => <Ic {...p} size={14}><path d="M12 3L2 20h20L12 3z"/><path d="M12 10v4M12 17.5v.5"/></Ic>;
+const IFile   = p => <Ic {...p} size={22}><path d="M6 3h8l4 4v14H6V3z"/><path d="M14 3v4h4"/></Ic>;
+const ITrash  = p => <Ic {...p} size={16}><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13M10 11v6M14 11v6"/></Ic>;
+const ISpeak  = p => <Ic {...p} size={16}><path d="M11 5L6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 010 7M18 6a8.5 8.5 0 010 12"/></Ic>;
+const ICheckSave = p => <Ic {...p} size={20} vb="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" strokeWidth="2.4"/></Ic>;
 
 /* ================= Android 设备框（与 v1.1 同一形制） ================= */
 const androidFrameStyles = {
@@ -192,14 +246,54 @@ function AndroidFrame({children, width=412, height=872, time='9:41', battery=86}
   );
 }
 
-/* ================= 演示数据 ================= */
-const MASKED = {ok:'sk-••••••••••3f2a', invalid:'sk-••••••••••0x9e'};
+/* ================= 演示数据（与 v1.1 PROV_SEED/ENGINES_SEED/FILES_SEED 同源） ================= */
+const MASKED = {ok:'sk-••••••••••3f2a', invalid:'sk-••••••••••0x9e', engine:'sk-••••••••••7d41'};
+const PROV_SEED = [
+  {id:'p1', name:'DeepSeek', base:'https://api.deepseek.com/v1', enabled:true, key:'ok',
+   models:['deepseek-v4.1-flash','deepseek-chat','deepseek-reasoner']},
+  {id:'p2', name:'硅基流动', base:'https://api.siliconflow.cn/v1', enabled:true, key:'ok',
+   models:['Qwen/Qwen3-32B','deepseek-ai/DeepSeek-V3']},
+  {id:'p3', name:'AiHubMix', base:'https://aihubmix.com/v1', enabled:false, key:'none',
+   models:['gpt-4o-mini','claude-sonnet-4']},
+];
+const ROLES_SEED = {
+  chat:      {pid:'p1', model:'deepseek-v4.1-flash'},
+  fast:      {pid:'p1', model:'deepseek-v4.1-flash'},
+  translate: {pid:'p2', model:'Qwen/Qwen3-32B'},
+};
+const ROLE_LABEL = {chat:'聊天模型', fast:'快速模型', translate:'翻译模型'};
+const ROLE_DESC  = {chat:'教学回答主链路', fast:'标题 / 摘要等派生杂活', translate:'翻译用途'};
+const THINK_LEVELS = ['关','自动','低','中','高'];
+const ENGINES_SEED = [
+  {id:'s1', name:'智谱 AI 搜索', enabled:true,  key:'ok',   caps:'中文检索', opts:[{k:'检索结果数', v:'10'}]},
+  {id:'s2', name:'Tavily',       enabled:false, key:'none', caps:'国际检索', opts:[{k:'检索深度', v:'基础'}]},
+];
+const FILES_SEED = [
+  {id:'fa', name:'Transformer 综述.pdf',   type:'PDF',      kb:1843, date:'09-27', ref:true},
+  {id:'fb', name:'注意力机制手写笔记.md',  type:'Markdown', kb:24,   date:'09-26', ref:true},
+  {id:'fc', name:'冷链条码规范.docx',      type:'Word',     kb:96,   date:'09-24', ref:false},
+  {id:'fd', name:'KV Cache 显存示意图.png', type:'PNG',      kb:412,  date:'09-22', ref:false, missing:true},
+];
+const fmtKB = kb => kb >= 1024 ? (kb/1024).toFixed(1) + ' MB' : kb + ' KB';
 
 /* ================= 应用 ================= */
 function App(){
-  const [screen, setScreen] = useState('settings');       // settings | keyPage
-  const [keyStatus, setKeyStatus] = useState('ok');       // ok | invalid | none
-  const [sheet, setSheet] = useState(null);               // 'delKey' | null
+  const [screen, setScreen] = useState('settings');
+  const [backTo, setBackTo] = useState('settings');
+  const [keyStatus, setKeyStatus] = useState('ok');
+  const [providers, setProviders] = useState(PROV_SEED);
+  const [provEditId, setProvEditId] = useState(null);
+  const [provDraft, setProvDraft] = useState({name:'', base:''});
+  const [pullState, setPullState] = useState('');
+  const [roles, setRoles] = useState(ROLES_SEED);
+  const [thinkLevel, setThinkLevel] = useState('自动');
+  const [suggOn, setSuggOn] = useState(true);
+  const [engines, setEngines] = useState(ENGINES_SEED);
+  const [engineId, setEngineId] = useState(null);
+  const [files, setFiles] = useState(FILES_SEED);
+  const [audioTry, setAudioTry] = useState(false);
+  const [sheet, setSheet] = useState(null);
+  const [npDraft, setNpDraft] = useState({name:'', base:''});
   const [toast, setToast] = useState(null);
   const toastTimer = useRef(null);
 
@@ -209,6 +303,16 @@ function App(){
     toastTimer.current = setTimeout(() => setToast(null), 2200);
   };
   useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current); }, []);
+
+  const go = (s, back) => { setScreen(s); if (back) setBackTo(back); };
+  const provById = id => providers.find(p => p.id === id);
+  const enabledProvCount = () => providers.filter(p => p.enabled).length;
+  const roleModel = r => {
+    const rm = roles[r];
+    const prov = providers.find(p => p.id === rm.pid);
+    if (!rm.pid || !prov || !prov.enabled) return {model:'未配置', prov:'提供商不可用'};
+    return {model: rm.model, prov: prov.name};
+  };
 
   /* ---------- 屏：设置根页（C 方案：纯分组列表） ---------- */
   const renderSettings = () => (
@@ -223,7 +327,7 @@ function App(){
         <div className="set-section">
           <div className="set-label">AI 提供商</div>
           <div className="set-card flush">
-            <button className="set-link" onClick={() => setScreen('keyPage')}>
+            <button className="set-link" onClick={() => go('keyPage')}>
               <span className="sl-main">
                 <span className="sl-t">API KEY · DeepSeek</span>
                 {keyStatus === 'ok'
@@ -234,17 +338,17 @@ function App(){
               </span>
               <span className="sl-c"><IChevR/></span>
             </button>
-            <button className="set-link" onClick={() => say('提供商管理二级页：沿用现有设计，本稿不重画')}>
+            <button className="set-link" onClick={() => go('providers')}>
               <span className="sl-main">
                 <span className="sl-t">提供商管理</span>
-                <span className="sl-s">管理多提供商与 API Key · 已启用 1 家</span>
+                <span className="sl-s">管理多提供商与 API Key · 已启用 {enabledProvCount()} 家 · 共 {providers.length} 家</span>
               </span>
               <span className="sl-c"><IChevR/></span>
             </button>
-            <button className="set-link" onClick={() => say('模型设置二级页：沿用现有设计，本稿不重画')}>
+            <button className="set-link" onClick={() => go('modelSettings')}>
               <span className="sl-main">
                 <span className="sl-t">模型设置</span>
-                <span className="sl-s">聊天 / 快速 / 翻译分工与思考预算</span>
+                <span className="sl-s">聊天 {roleModel('chat').model} · 快速 {roleModel('fast').model} · 翻译 {roleModel('translate').model}</span>
               </span>
               <span className="sl-c"><IChevR/></span>
             </button>
@@ -254,24 +358,24 @@ function App(){
         <div className="set-section">
           <div className="set-label">能力</div>
           <div className="set-card flush">
-            <button className="set-link" onClick={() => say('搜索服务二级页：沿用现有设计，本稿不重画')}>
+            <button className="set-link" onClick={() => go('searchServices')}>
               <span className="sl-main">
                 <span className="sl-t">搜索服务</span>
-                <span className="sl-s">联网搜索、引擎与 API Key</span>
+                <span className="sl-s">联网搜索、引擎与 API Key · {engines.some(e => e.enabled && e.key === 'ok') ? '已开启 · ' + engines.find(e => e.enabled && e.key === 'ok').name : '默认关闭'}</span>
               </span>
               <span className="sl-c"><IChevR/></span>
             </button>
-            <button className="set-link" onClick={() => say('语音二级页：沿用现有设计，本稿不重画')}>
+            <button className="set-link" onClick={() => go('voice')}>
               <span className="sl-main">
                 <span className="sl-t">语音</span>
-                <span className="sl-s">朗读引擎与试听</span>
+                <span className="sl-s">朗读引擎与试听 · 系统 TTS（默认）</span>
               </span>
               <span className="sl-c"><IChevR/></span>
             </button>
-            <button className="set-link" onClick={() => say('文件管理二级页：沿用现有设计，本稿不重画')}>
+            <button className="set-link" onClick={() => go('files')}>
               <span className="sl-main">
                 <span className="sl-t">文件管理</span>
-                <span className="sl-s">聊天附件、占用空间与删除</span>
+                <span className="sl-s">{files.length} 个附件 · {files.filter(f => !f.ref).length} 个可清理</span>
               </span>
               <span className="sl-c"><IChevR/></span>
             </button>
@@ -290,16 +394,15 @@ function App(){
     </div>
   );
 
-  /* ---------- 屏：API KEY 管理二级页（C 方案新增） ---------- */
+  /* ---------- 屏：API KEY 管理二级页 ---------- */
   const renderKeyPage = () => (
     <div className="page-in" key="keyPage" style={{height:'100%',display:'flex',flexDirection:'column'}}>
       <div className="appbar">
-        <button className="icon-btn" onClick={() => setScreen('settings')}><IBack/></button>
+        <button className="icon-btn" onClick={() => go('settings')}><IBack/></button>
         <div className="appbar-title"><div className="t1">API KEY · DeepSeek</div></div>
         <span className="appbar-spacer"/>
       </div>
       <div style={{flex:1,overflowY:'auto',paddingBottom:30}}>
-
         <div className="set-section">
           <div className="set-label">当前 KEY</div>
           <div className="set-card" style={{padding:'var(--s4)'}}>
@@ -314,29 +417,25 @@ function App(){
             </div>
             {keyStatus !== 'none' && (
               <div style={{borderTop:'1px solid var(--hairline)',marginTop:'var(--s3)',paddingTop:'var(--s2)'}}>
-                <button className="danger-link" onClick={() => setSheet('delKey')}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>
-                  删除此 Key
+                <button className="danger-link" onClick={() => setSheet({type:'delKey'})}>
+                  <ITrash size={13}/>删除此 Key
                 </button>
               </div>
             )}
           </div>
         </div>
-
         <div className="set-section">
           <div className="set-label">替换 KEY</div>
           <div className="set-card" style={{padding:'var(--s4)'}}>
             <div className="key-input-row">
-              <input id="key-input" placeholder="粘贴新的 DeepSeek API Key"/>
-            </div>
-            <div style={{display:'flex',justifyContent:'flex-end',marginTop:'var(--s3)'}}>
-              <button className="btn-primary" style={{padding:'10px 20px',fontSize:13.5}} onClick={() => {
+              <input id="key-input" placeholder="粘贴新的 DeepSeek API Key" aria-label="粘贴新的 DeepSeek API Key"/>
+              <button className="save-ico" aria-label="保存 Key" onClick={() => {
                 const v = document.getElementById('key-input').value.trim();
                 if (!v){ say('请先输入 Key'); return; }
                 setKeyStatus('ok');
                 document.getElementById('key-input').value = '';
                 say('Key 已配置，可返回继续发送');
-              }}>保存 Key</button>
+              }}><ICheckSave/></button>
             </div>
             <div style={{fontSize:'var(--fs-cap)',color:'var(--ink3)',lineHeight:1.7,marginTop:'var(--s2)'}}>
               保存后立即生效，原文不再展示；替换不会影响已存主题与历史回答。
@@ -347,6 +446,440 @@ function App(){
     </div>
   );
 
+  /* ---------- 屏：提供商管理 ---------- */
+  const renderProviders = () => (
+    <div className="page-in" key="providers" style={{height:'100%',display:'flex',flexDirection:'column'}}>
+      <div className="appbar">
+        <button className="icon-btn" onClick={() => go('settings')}><IBack/></button>
+        <div className="appbar-title">
+          <div className="t1">提供商管理</div>
+          <div className="t2">OpenAI 兼容 · 已启用 {enabledProvCount()} 家</div>
+        </div>
+        <button className="btn-primary" style={{padding:'9px 13px',fontSize:12.5,display:'flex',alignItems:'center',gap:4}}
+          onClick={() => { setNpDraft({name:'', base:''}); setSheet({type:'newProvider'}); }}>
+          <IPlus/>新建
+        </button>
+      </div>
+      <div style={{flex:1,overflowY:'auto',paddingBottom:30}}>
+        {providers.map((p, i) => (
+          <div key={p.id} className={'prov-card' + (p.enabled ? '' : ' off')}
+            onClick={() => { setProvEditId(p.id); setProvDraft({name:p.name, base:p.base}); setPullState(''); go('providerEdit', 'providers'); }}>
+            <div className="prov-top">
+              <div className="pv-main">
+                <div className="pv-t">{p.name}</div>
+                <div className="pv-u">{p.base}</div>
+              </div>
+              <span className={'pv-badge' + (p.enabled ? '' : ' off')}>{p.models.length} 个模型</span>
+              <button className={'switch' + (p.enabled ? ' on' : '')}
+                onClick={e => { e.stopPropagation(); setProviders(ps => ps.map(x => x.id === p.id ? {...x, enabled: !x.enabled} : x));
+                  say(p.enabled ? '已禁用 ' + p.name + ' · 其模型不参与任何分工' : '已启用 ' + p.name); }}><i/></button>
+            </div>
+            {!p.enabled && <div className="inline-note warn" style={{marginBottom:0}}><IWarn/>已禁用 · 其模型不参与任何分工</div>}
+          </div>
+        ))}
+        <div className="hint-block">
+          拉取模型对「基址 /models」发 GET、Bearer 鉴权、解析 data[].id、失败即空；
+          删除提供商先弹确认，删「最后一个启用中的提供商」时文案升级为警示级。
+        </div>
+      </div>
+    </div>
+  );
+
+  /* ---------- 屏：提供商编辑（Key 表单已套用新按钮层级） ---------- */
+  const renderProviderEdit = () => {
+    const p = provById(provEditId);
+    if (!p) return null;
+    return (
+      <div className="page-in" key="providerEdit" style={{height:'100%',display:'flex',flexDirection:'column'}}>
+        <div className="appbar">
+          <button className="icon-btn" onClick={() => go('providers')}><IBack/></button>
+          <div className="appbar-title">
+            <div className="t1">{p.name}</div>
+            <div className="t2">{p.enabled ? '已启用' : '已禁用'}</div>
+          </div>
+          <span className="appbar-spacer"/>
+        </div>
+        <div style={{flex:1,overflowY:'auto',paddingBottom:30}}>
+          <div className="form-row">
+            <div className="form-label">名称</div>
+            <input className="form-input" value={provDraft.name}
+              onChange={e => setProvDraft(d => ({...d, name: e.target.value}))}
+              onBlur={() => setProviders(ps => ps.map(x => x.id === p.id ? {...x, name: provDraft.name || x.name} : x))}/>
+          </div>
+          <div className="form-row">
+            <div className="form-label">基址（Base URL）</div>
+            <input className="form-input" value={provDraft.base}
+              onChange={e => setProvDraft(d => ({...d, base: e.target.value}))}
+              onBlur={() => setProviders(ps => ps.map(x => x.id === p.id ? {...x, base: provDraft.base || x.base} : x))}/>
+          </div>
+
+          <div className="form-row">
+            <div className="form-label">当前 KEY</div>
+            <div className="set-card" style={{padding:'var(--s4)'}}>
+              <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+                <IKey/>
+                {p.key === 'ok'
+                  ? <React.Fragment><span style={{fontSize:'var(--fs-body)',fontWeight:500}}>{MASKED.ok}</span><span className="key-ok">可用</span></React.Fragment>
+                  : <React.Fragment><span style={{fontSize:'var(--fs-body)',fontWeight:500,color:'var(--ink3)'}}>未配置</span><span className="key-none">该提供商模型不可用</span></React.Fragment>}
+              </div>
+              <div style={{fontSize:'var(--fs-cap)',color:'var(--ink3)',marginTop:'var(--s2)',lineHeight:1.7}}>
+                仅存本机 Keystore，可随时替换或删除。
+              </div>
+              {p.key === 'ok' && (
+                <div style={{borderTop:'1px solid var(--hairline)',marginTop:'var(--s3)',paddingTop:'var(--s2)'}}>
+                  <button className="danger-link" onClick={() => setSheet({type:'delProviderKey', payload:{id:p.id}})}>
+                    <ITrash size={13}/>删除此 Key
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-label">替换 KEY</div>
+            <div className="set-card" style={{padding:'var(--s4)'}}>
+              <div className="key-input-row">
+                <input id={'pk-' + p.id} placeholder="粘贴新的 API Key" aria-label="粘贴新的 API Key"/>
+                <button className="save-ico" aria-label="保存 Key" onClick={() => {
+                  const el = document.getElementById('pk-' + p.id);
+                  if (!el || !el.value.trim()){ say('请先输入 Key'); return; }
+                  setProviders(ps => ps.map(x => x.id === p.id ? {...x, key:'ok'} : x));
+                  el.value = '';
+                  say('Key 已替换');
+                }}><ICheckSave/></button>
+              </div>
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-label">模型清单</div>
+            <div style={{display:'flex',gap:'var(--s2)',alignItems:'center',flexWrap:'wrap'}}>
+              <button className="btn-ghost" disabled={pullState === 'busy'}
+                style={pullState === 'busy' ? {opacity:.6} : null}
+                onClick={() => { setPullState('busy'); setTimeout(() => setPullState('ok'), 800); }}>
+                {pullState === 'busy' ? '拉取中…' : '拉取模型'}
+              </button>
+              <span style={{fontSize:'var(--fs-cap)',color:'var(--ink3)'}}>{p.models.length} 个已入本地清单</span>
+            </div>
+            {pullState === 'ok' && (
+              <div className="inline-note ok"><ICheck/>拉取成功，已按模型 ID 去重合并</div>
+            )}
+          </div>
+
+          <div className="form-row">
+            <div className="form-label">已入清单（逐项可删）</div>
+            <div className="set-card flush">
+              {p.models.length === 0 ? (
+                <div style={{padding:'var(--s3) 0',fontSize:'var(--fs-cap)',color:'var(--ink3)'}}>清单为空，先点「拉取模型」</div>
+              ) : p.models.map(m => (
+                <div className="set-link" key={m} style={{cursor:'default'}}>
+                  <span className="sl-main"><span className="sl-t" style={{display:'block'}}>{m}</span></span>
+                  <button className="sl-c" style={{width:44,height:44,justifyContent:'center',borderRadius:'var(--r-full)',background:'none'}}
+                    onClick={() => { setProviders(ps => ps.map(x => x.id === p.id ? {...x, models: x.models.filter(y => y !== m)} : x));
+                      const used = Object.entries(roles).find(([r, rm]) => rm.pid === p.id && rm.model === m);
+                      if (used) setRoles(rs => ({...rs, [used[0]]: {pid: p.id, model:'未配置'}}));
+                      say('已从清单移除 ' + m); }}>
+                    <IClose/>
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="form-row" style={{marginTop:'var(--s6)'}}>
+            <button className="btn-danger" style={{width:'100%',padding:'11px'}}
+              onClick={() => setSheet({type:'delProvider', payload:{id:p.id}})}>删除提供商</button>
+            {p.enabled && enabledProvCount() === 1 && (
+              <div className="inline-note warn"><IWarn/>这是最后一个启用中的提供商，删除后将无可用模型</div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  /* ---------- 屏：模型设置 ---------- */
+  const renderModelSettings = () => (
+    <div className="page-in" key="modelSettings" style={{height:'100%',display:'flex',flexDirection:'column'}}>
+      <div className="appbar">
+        <button className="icon-btn" onClick={() => go('settings')}><IBack/></button>
+        <div className="appbar-title">
+          <div className="t1">模型设置</div>
+          <div className="t2">三条分工各自选一个模型</div>
+        </div>
+        <span className="appbar-spacer"/>
+      </div>
+      <div style={{flex:1,overflowY:'auto',paddingBottom:30}}>
+        <div className="set-section">
+          <div className="set-label">模型分工</div>
+          <div className="set-card flush">
+            {['chat','fast','translate'].map(r => {
+              const rm = roleModel(r);
+              const bad = rm.model === '未配置';
+              return (
+                <button className="set-link" key={r} onClick={() => setSheet({type:'roleModel', payload:{role:r}})}>
+                  <span className="sl-main">
+                    <span className="sl-t">{ROLE_LABEL[r]}<span className="chip-arch">{ROLE_DESC[r]}</span></span>
+                    <span className={'sl-s' + (bad ? ' warn' : '')}>
+                      {bad ? '未配置 · 发送会被 Key 守卫拦截并引导设置' : rm.model + ' · ' + rm.prov}
+                    </span>
+                  </span>
+                  <span className="sl-c"><IChevR/></span>
+                </button>
+              );
+            })}
+            <button className="set-link" onClick={() => setSheet({type:'think'})}>
+              <span className="sl-main">
+                <span className="sl-t">思考预算</span>
+                <span className="sl-s">随聊天模型 · 每次请求显式传</span>
+              </span>
+              <span className="model-pill" style={{marginRight:'var(--s2)'}}>{thinkLevel}</span>
+              <span className="sl-c"><IChevR/></span>
+            </button>
+            <div className="set-link" style={{cursor:'default'}}>
+              <span className="sl-main">
+                <span className="sl-t" style={{display:'block'}}>聊天建议</span>
+                <span className="sl-s">控制回答下方是否生成推荐问题</span>
+              </span>
+              <button className={'switch' + (suggOn ? ' on' : '')} onClick={() => setSuggOn(v => !v)}><i/></button>
+            </div>
+          </div>
+        </div>
+        <div className="hint-block">
+          选择器按提供商分组，已禁用提供商的模型不出现；禁用或删除提供商时，正用着它的分工自动回落并提示。
+          思考预算五档（关 / 自动 / 低 / 中 / 高）是知芽的裁剪值，档位名走字符串资源、不写数值。
+        </div>
+      </div>
+    </div>
+  );
+
+  /* ---------- 屏：搜索服务 ---------- */
+  const renderSearchServices = () => (
+    <div className="page-in" key="searchServices" style={{height:'100%',display:'flex',flexDirection:'column'}}>
+      <div className="appbar">
+        <button className="icon-btn" onClick={() => go('settings')}><IBack/></button>
+        <div className="appbar-title">
+          <div className="t1">搜索服务</div>
+          <div className="t2">默认关闭 · 开启后发送前先检索</div>
+        </div>
+        <span className="appbar-spacer"/>
+      </div>
+      <div style={{flex:1,overflowY:'auto',paddingBottom:30}}>
+        {engines.map((e, i) => (
+          <div key={e.id} className={'prov-card' + (e.enabled ? '' : ' off')}
+            onClick={() => { setEngineId(e.id); go('searchEngine', 'searchServices'); }}>
+            <div className="prov-top">
+              <div className="pv-main">
+                <div className="pv-t">{e.name}</div>
+                <div className="pv-u">{e.caps} · {e.key === 'ok' ? 'Key 已配置' : '未配置 Key'}</div>
+              </div>
+              <span className={'pv-badge' + (e.enabled ? '' : ' off')}>{e.enabled ? '已启用' : '已停用'}</span>
+              <button className={'switch' + (e.enabled ? ' on' : '')}
+                onClick={ev => { ev.stopPropagation(); setEngines(es => es.map(x => x.id === e.id ? {...x, enabled: !x.enabled} : x));
+                  say(e.enabled ? '已停用 ' + e.name : (e.key === 'ok' ? '已启用 ' + e.name : '已启用 ' + e.name + ' · 未配置 Key，检索会被拦截')); }}><i/></button>
+            </div>
+          </div>
+        ))}
+        <div className="set-section">
+          <div className="set-label">通用参数</div>
+          <div className="set-card flush">
+            <div className="set-link" style={{cursor:'default'}}>
+              <span className="sl-main">
+                <span className="sl-t" style={{display:'block'}}>检索结果数</span>
+                <span className="sl-s">进入上下文的结果条数上限</span>
+              </span>
+              <input className="form-input" style={{width:72,textAlign:'center',padding:'8px'}}
+                defaultValue="10" onChange={ev => { ev.target.value = ev.target.value.replace(/[^\d]/g, ''); }}/>
+            </div>
+          </div>
+        </div>
+        <div className="hint-block">
+          至少保留一个引擎（可删除条件＝引擎数大于一）。检索结果不落库，唯一持久化痕迹是答案文本里的序号引用标记。
+        </div>
+      </div>
+    </div>
+  );
+
+  /* ---------- 屏：引擎详情（Key 表单已套用新按钮层级） ---------- */
+  const renderSearchEngine = () => {
+    const e = engines.find(x => x.id === engineId);
+    if (!e) return null;
+    const onlyOne = engines.length <= 1;
+    return (
+      <div className="page-in" key="searchEngine" style={{height:'100%',display:'flex',flexDirection:'column'}}>
+        <div className="appbar">
+          <button className="icon-btn" onClick={() => go('searchServices')}><IBack/></button>
+          <div className="appbar-title">
+            <div className="t1">{e.name}</div>
+            <div className="t2">{e.caps}</div>
+          </div>
+          <span className="appbar-spacer"/>
+        </div>
+        <div style={{flex:1,overflowY:'auto',paddingBottom:30}}>
+          <div className="form-row">
+            <div className="form-label">当前 KEY</div>
+            <div className="set-card" style={{padding:'var(--s4)'}}>
+              <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+                <IKey/>
+                {e.key === 'ok'
+                  ? <React.Fragment><span style={{fontSize:'var(--fs-body)',fontWeight:500}}>{MASKED.engine}</span><span className="key-ok">可用</span></React.Fragment>
+                  : <React.Fragment><span style={{fontSize:'var(--fs-body)',fontWeight:500,color:'var(--ink3)'}}>未配置</span><span className="key-none">开启搜索会被拦截</span></React.Fragment>}
+              </div>
+              <div style={{fontSize:'var(--fs-cap)',color:'var(--ink3)',marginTop:'var(--s2)',lineHeight:1.7}}>
+                Key 只进 Keystore，与其它提供商的 Key 分开存。
+              </div>
+              {e.key === 'ok' && (
+                <div style={{borderTop:'1px solid var(--hairline)',marginTop:'var(--s3)',paddingTop:'var(--s2)'}}>
+                  <button className="danger-link" onClick={() => { setEngines(es => es.map(x => x.id === e.id ? {...x, key:'none'} : x)); say('引擎 Key 已删除'); }}>
+                    <ITrash size={13}/>删除此 Key
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="form-row">
+            <div className="form-label">替换 KEY</div>
+            <div className="set-card" style={{padding:'var(--s4)'}}>
+              <div className="key-input-row">
+                <input id={'ek-' + e.id} placeholder="粘贴该引擎的 API Key" aria-label="粘贴该引擎的 API Key"/>
+                <button className="save-ico" aria-label="保存 Key" onClick={() => {
+                  const el = document.getElementById('ek-' + e.id);
+                  if (!el || !el.value.trim()){ say('请先输入 Key'); return; }
+                  setEngines(es => es.map(x => x.id === e.id ? {...x, key:'ok'} : x));
+                  el.value = '';
+                  say('Key 已保存');
+                }}><ICheckSave/></button>
+              </div>
+            </div>
+          </div>
+          <div className="form-row">
+            <div className="form-label">该引擎特有选项</div>
+            <div className="set-card flush">
+              {e.opts.map(o => (
+                <div className="set-link" key={o.k} style={{cursor:'default'}}>
+                  <span className="sl-main"><span className="sl-t" style={{display:'block'}}>{o.k}</span></span>
+                  <span className="model-pill">{o.v}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="form-row" style={{marginTop:'var(--s6)'}}>
+            <button className="btn-danger" style={{width:'100%',padding:'11px'}} disabled={onlyOne}
+              onClick={() => setSheet({type:'delEngine', payload:{id:e.id}})}>
+              删除该引擎
+            </button>
+            {onlyOne && <div className="inline-note warn"><IWarn/>只剩一个引擎，不可删除</div>}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  /* ---------- 屏：语音 ---------- */
+  const renderVoice = () => (
+    <div className="page-in" key="voice" style={{height:'100%',display:'flex',flexDirection:'column'}}>
+      <div className="appbar">
+        <button className="icon-btn" onClick={() => go('settings')}><IBack/></button>
+        <div className="appbar-title">
+          <div className="t1">语音</div>
+          <div className="t2">朗读与语音输入均用系统能力</div>
+        </div>
+        <span className="appbar-spacer"/>
+      </div>
+      <div style={{flex:1,overflowY:'auto',paddingBottom:30}}>
+        <div className="set-section">
+          <div className="set-label">朗读引擎</div>
+          <div className="set-card flush">
+            <div className="set-link" style={{cursor:'default'}}>
+              <span className="sl-main">
+                <span className="sl-t">系统 TTS<span className="chip-arch">默认</span></span>
+                <span className="sl-s">本机引擎 · 零费用、零新依赖 · 第一批不可删除</span>
+              </span>
+              <span className="sl-c" style={{color:'var(--green)'}}><ICheck/></span>
+            </div>
+          </div>
+        </div>
+        <div className="set-section">
+          <div className="set-label">试听</div>
+          <div className="set-card" style={{padding:'var(--s4)'}}>
+            <div style={{fontSize:'var(--fs-sm)',color:'var(--ink2)',lineHeight:1.8}}>
+              学习不是把答案抄下来，而是把问题问清楚。
+            </div>
+            <div className="sheet-actions" style={{marginTop:'var(--s4)'}}>
+              <button className="btn-primary" style={{padding:'11px',display:'flex',alignItems:'center',justifyContent:'center',gap:6}}
+                onClick={() => { setAudioTry(v => !v); say(audioTry ? '已停止试听' : '试听中 · 再点即停止'); }}>
+                {audioTry
+                  ? <React.Fragment><span style={{width:13,height:13,borderRadius:2,background:'#fff',display:'inline-block'}}/>停止</React.Fragment>
+                  : <React.Fragment><ISpeak/>试听</React.Fragment>}
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="hint-block">
+          降级规则：无 TTS 引擎时本页显示说明且不出现试听按钮；消息动作条也不渲染朗读动作。
+          朗读中离开对话页自动停止；生成中的最新行不可朗读，已完成的历史行可以。
+        </div>
+      </div>
+    </div>
+  );
+
+  /* ---------- 屏：文件管理 ---------- */
+  const renderFiles = () => {
+    const orphan = files.filter(f => !f.ref);
+    const total = files.reduce((s, f) => s + f.kb, 0);
+    return (
+      <div className="page-in" key="files" style={{height:'100%',display:'flex',flexDirection:'column'}}>
+        <div className="appbar">
+          <button className="icon-btn" onClick={() => go('settings')}><IBack/></button>
+          <div className="appbar-title">
+            <div className="t1">文件管理</div>
+            <div className="t2">附件只存本机私有目录</div>
+          </div>
+          <span className="appbar-spacer"/>
+        </div>
+        <div style={{flex:1,overflowY:'auto',paddingBottom:30}}>
+          <div className="data-head">
+            <IFile/>
+            <div>
+              <div className="dh-n">{files.length}</div>
+              <div className="dh-l">个附件 · 共 {fmtKB(total)}</div>
+            </div>
+          </div>
+          {files.map(f => (
+            <div className="file-row" key={f.id}>
+              <div className="fr-main">
+                <div className="fr-n">{f.name}</div>
+                <div className="fr-m">
+                  <span>{f.type}</span><span>{fmtKB(f.kb)}</span><span>{f.date}</span>
+                  {f.missing && <span className="miss">文件已缺失</span>}
+                  {!f.ref ? <span className="miss">可清理 · 无消息引用</span> : <span>被消息引用</span>}
+                </div>
+              </div>
+              <button className="fr-del" onClick={() => setSheet({type:'delFile', payload:{id:f.id}})}><ITrash/></button>
+            </div>
+          ))}
+          <div className="set-section">
+            <div className="set-label">孤儿清理</div>
+            <div className="set-card flush">
+              <button className="set-link" style={{cursor: orphan.length ? 'pointer' : 'default'}}
+                onClick={() => orphan.length ? setSheet({type:'cleanOrphan'}) : null}>
+                <span className="sl-main">
+                  <span className="sl-t" style={{display:'block'}}>清理孤儿</span>
+                  <span className="sl-s">{orphan.length ? orphan.length + ' 个文件已不被任何消息引用' : '没有可清理的文件'}</span>
+                </span>
+                <span className="sl-c"><IChevR/></span>
+              </button>
+            </div>
+          </div>
+          <div className="hint-block">
+            删除为确认式；删掉被引用的文件后消息文本保留，只在消息附件区标注「文件已缺失」——不级联删消息内容。
+            孤儿清理先列清单再确认，不自动删。
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   /* ---------- 底部标签栏 ---------- */
   const renderTabBar = () => (
     <div className="tabbar">
@@ -356,25 +889,180 @@ function App(){
     </div>
   );
 
-  /* ---------- 删除确认弹层 ---------- */
-  const renderSheet = () => !sheet ? null : (
-    <div className="overlay-mask" onClick={() => setSheet(null)}>
-      <div className="sheet" onClick={e => e.stopPropagation()}>
-        <div className="handle"/>
+  /* ---------- 弹层（统一 sheet 形制） ---------- */
+  const renderSheet = () => {
+    if (!sheet) return null;
+    const close = () => setSheet(null);
+    const S = sheet;
+
+    if (S.type === 'delKey') return (
+      <Wrap onClose={close}>
         <h3>删除 DeepSeek API Key？</h3>
         <div className="sh-sub">删除后发送会被 Key 守卫拦截并引导重新配置；已存主题与历史回答不受影响。此操作不可恢复。</div>
-        <div className="sheet-actions">
-          <button className="btn-ghost" onClick={() => setSheet(null)}>取消</button>
-          <button className="btn-danger" onClick={() => { setKeyStatus('none'); setSheet(null); say('Key 已删除，发送将被阻止'); }}>确认删除</button>
+        <Actions onClose={close} dangerLabel="确认删除" onDanger={() => { setKeyStatus('none'); close(); say('Key 已删除，发送将被阻止'); }}/>
+      </Wrap>
+    );
+
+    if (S.type === 'delProviderKey') return (
+      <Wrap onClose={close}>
+        <h3>删除该提供商的 API Key？</h3>
+        <div className="sh-sub">删除后该提供商的模型全部不可用，发送会被 Key 守卫拦截并引导设置。此操作不可恢复。</div>
+        <Actions onClose={close} dangerLabel="确认删除" onDanger={() => {
+          setProviders(ps => ps.map(x => x.id === S.payload.id ? {...x, key:'none'} : x)); close(); say('Key 已删除');
+        }}/>
+      </Wrap>
+    );
+
+    if (S.type === 'delProvider') {
+      const p = provById(S.payload.id);
+      const lastEnabled = p.enabled && enabledProvCount() === 1;
+      return (
+        <Wrap onClose={close}>
+          <h3>删除「{p.name}」？</h3>
+          <div className="sh-sub">删除后该提供商的模型全部不可用，发送会被 Key 守卫拦截并引导设置；已存主题与历史回答不受影响。此操作不可恢复。</div>
+          {lastEnabled && <div className="inline-note warn"><IWarn/>这是最后一个启用中的提供商，删除后将无可用模型</div>}
+          <Actions onClose={close} dangerLabel="确认删除" onDanger={() => {
+            setProviders(ps => ps.filter(x => x.id !== S.payload.id));
+            setRoles(rs => {
+              const next = {...rs};
+              Object.keys(next).forEach(r => { if (next[r].pid === S.payload.id) next[r] = {pid:null, model:'未配置'}; });
+              return next;
+            });
+            close(); go('providers', 'settings'); say('已删除 ' + p.name);
+          }}/>
+        </Wrap>
+      );
+    }
+
+    if (S.type === 'newProvider') return (
+      <Wrap onClose={close}>
+        <h3>新建提供商</h3>
+        <div className="sh-sub">OpenAI 兼容接口。创建后进入编辑页拉取模型、配置 Key。</div>
+        <input className="sheet-input" placeholder="名称（如 MyProxy）" value={npDraft.name} onChange={e => setNpDraft(d => ({...d, name:e.target.value}))}/>
+        <input className="sheet-input" placeholder="基址（https://…/v1）" value={npDraft.base} onChange={e => setNpDraft(d => ({...d, base:e.target.value}))}/>
+        <Actions onClose={close} okLabel="创建" onOk={() => {
+          if (!npDraft.name.trim()){ say('请先输入名称'); return; }
+          const id = 'p' + (providers.length + 1) + '-' + Date.now();
+          setProviders(ps => [...ps, {id, name:npDraft.name.trim(), base:npDraft.base.trim() || 'https://example.com/v1', enabled:false, key:'none', models:[]}]);
+          close(); say('已创建，点击卡片继续配置');
+        }}/>
+      </Wrap>
+    );
+
+    if (S.type === 'roleModel') {
+      const r = S.payload.role;
+      const enabled = providers.filter(p => p.enabled);
+      return (
+        <Wrap onClose={close}>
+          <h3>选择{ROLE_LABEL[r]}</h3>
+          <div className="sh-sub">按提供商分组 · 已禁用提供商的模型不出现</div>
+          {enabled.length === 0 && <div className="sh-sub" style={{color:'var(--amber)'}}>没有启用中的提供商，先去「提供商管理」启用</div>}
+          {enabled.map(p => (
+            <div key={p.id}>
+              <div className="popover-group">{p.name}</div>
+              <div className="set-card flush" style={{marginBottom:'var(--s2)'}}>
+                {p.models.map(m => (
+                  <button className="set-link" key={m} onClick={() => {
+                    setRoles(rs => ({...rs, [r]: {pid:p.id, model:m}}));
+                    close(); say(ROLE_LABEL[r] + ' 已切到 ' + m);
+                  }}>
+                    <span className="sl-main"><span className="sl-t" style={{display:'block'}}>{m}</span></span>
+                    {roles[r].pid === p.id && roles[r].model === m && <span className="sl-c" style={{color:'var(--green)'}}><ICheck/></span>}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </Wrap>
+      );
+    }
+
+    if (S.type === 'think') return (
+      <Wrap onClose={close}>
+        <h3>思考预算</h3>
+        <div className="sh-sub">五档离散值 · 档位名走字符串资源、不写数值</div>
+        <div className="set-card flush">
+          {THINK_LEVELS.map(l => (
+            <button className="set-link" key={l} onClick={() => { setThinkLevel(l); close(); say('思考预算：' + l); }}>
+              <span className="sl-main"><span className="sl-t" style={{display:'block'}}>{l}</span></span>
+              {thinkLevel === l && <span className="sl-c" style={{color:'var(--green)'}}><ICheck/></span>}
+            </button>
+          ))}
         </div>
+      </Wrap>
+    );
+
+    if (S.type === 'delEngine') return (
+      <Wrap onClose={close}>
+        <h3>删除引擎「{engines.find(x => x.id === S.payload.id).name}」？</h3>
+        <div className="sh-sub">删除后该引擎不再参与检索；至少保留一个引擎。此操作不可恢复。</div>
+        <Actions onClose={close} dangerLabel="确认删除" onDanger={() => {
+          setEngines(es => es.filter(x => x.id !== S.payload.id));
+          close(); go('searchServices', 'settings'); say('引擎已删除');
+        }}/>
+      </Wrap>
+    );
+
+    if (S.type === 'delFile') {
+      const f = files.find(x => x.id === S.payload.id);
+      return (
+        <Wrap onClose={close}>
+          <h3>删除「{f.name}」？</h3>
+          <div className="sh-sub">{f.ref ? '该文件正被消息引用：删除后消息文本保留，附件区标注「文件已缺失」——不级联删消息内容。' : '该文件没有被任何消息引用，删除后不影响任何消息。'}此操作不可恢复。</div>
+          <Actions onClose={close} dangerLabel="确认删除" onDanger={() => {
+            setFiles(fs => fs.filter(x => x.id !== S.payload.id)); close(); say('文件已删除');
+          }}/>
+        </Wrap>
+      );
+    }
+
+    if (S.type === 'cleanOrphan') {
+      const orphan = files.filter(f => !f.ref);
+      return (
+        <Wrap onClose={close}>
+          <h3>清理 {orphan.length} 个孤儿文件？</h3>
+          <div className="sh-sub">{orphan.map(f => f.name).join('、')}。这些文件已不被任何消息引用。此操作不可恢复。</div>
+          <Actions onClose={close} dangerLabel="确认清理" onDanger={() => {
+            setFiles(fs => fs.filter(f => f.ref)); close(); say('已清理 ' + orphan.length + ' 个文件');
+          }}/>
+        </Wrap>
+      );
+    }
+    return null;
+  };
+
+  const Wrap = ({children, onClose}) => (
+    <div className="overlay-mask" onClick={onClose}>
+      <div className="sheet" onClick={e => e.stopPropagation()}>
+        <div className="handle"/>{children}
       </div>
     </div>
   );
+  const Actions = ({onClose, okLabel, okLabel2, dangerLabel, onOk, onDanger}) => (
+    <div className="sheet-actions">
+      <button className="btn-ghost" onClick={onClose}>取消</button>
+      {dangerLabel
+        ? <button className="btn-danger" onClick={onDanger}>{dangerLabel}</button>
+        : <button className="btn-primary" onClick={onOk}>{okLabel}</button>}
+    </div>
+  );
+
+  const screens = {
+    settings: renderSettings,
+    keyPage: renderKeyPage,
+    providers: renderProviders,
+    providerEdit: renderProviderEdit,
+    modelSettings: renderModelSettings,
+    searchServices: renderSearchServices,
+    searchEngine: renderSearchEngine,
+    voice: renderVoice,
+    files: renderFiles,
+  };
 
   return (
     <AndroidFrame>
       <div className="screen">
-        {screen === 'settings' ? renderSettings() : renderKeyPage()}
+        {screens[screen]()}
         {renderSheet()}
         {toast && <div className="toast">{toast}</div>}
       </div>

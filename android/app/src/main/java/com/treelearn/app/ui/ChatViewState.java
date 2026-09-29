@@ -141,6 +141,14 @@ public final class ChatViewState {
     /** The one attachment the composer carries (T-097); null while the composer carries none. */
     public final ComposerAttachment composerAttachment;
 
+    /**
+     * 2026-09-28: whether the three 问 AI quick-query chips are showing under the quote row. They
+     * appear when the selection menu's 问 AI sets a quote, each tap sends its query and collapses
+     * them, and any clear of the quote takes them with it - they are the quote's affordance, never
+     * an independent surface.
+     */
+    public final boolean askAiChips;
+
     /** The composer's attachment chip: what it is, how big, and where its parse stands (T-097). */
     public static final class ComposerAttachment {
 
@@ -167,7 +175,8 @@ public final class ChatViewState {
             String recommendationsMessageId, HomeViewState.Notice notice, boolean sending,
             SourceCard sourceCard, boolean sourceCardExpanded, Stage stage, boolean followLatest,
             int missedCount, boolean archived, boolean fullscreenEditing, Translations translations,
-            boolean searchEnabled, String searchEngineLabel, ComposerAttachment composerAttachment) {
+            boolean searchEnabled, String searchEngineLabel, ComposerAttachment composerAttachment,
+            boolean askAiChips) {
         this.phase = Guard.object(phase, "phase");
         this.branchId = Guard.id(branchId, "branchId");
         this.branchTitle = branchTitle == null ? "" : branchTitle;
@@ -195,6 +204,7 @@ public final class ChatViewState {
         this.searchEnabled = searchEnabled;
         this.searchEngineLabel = searchEngineLabel == null ? "" : searchEngineLabel;
         this.composerAttachment = composerAttachment;
+        this.askAiChips = askAiChips;
     }
 
     public static ChatViewState initial(String branchId, GenerationModel model,
@@ -203,7 +213,7 @@ public final class ChatViewState {
                 "", keyConfigured, model, thinkingEnabled, Collections.<String>emptySet(),
                 Collections.<String>emptySet(),
                 Collections.<Recommendation>emptyList(), "", null, false, null, false,
-                Stage.IDLE, true, 0, false, false, Translations.EMPTY, false, "", null);
+                Stage.IDLE, true, 0, false, false, Translations.EMPTY, false, "", null, false);
     }
 
     /** @return the row with this id, or null when the conversation does not contain it */
@@ -295,14 +305,25 @@ public final class ChatViewState {
 
     /**
      * Swaps the composer's attachment chip (T-097). Null clears it; the mutual exclusion with the
-     * quote is the presenter's decision and is applied before this builder is reached.
+     * quote is the presenter's decision and is applied before this builder is reached. The chips
+     * collapse with it: an attachment and the 问 AI chips are both quote-riding surfaces, and an
+     * attachment pick is a different intent, so the chips have nothing to anchor.
      */
     public ChatViewState withComposerAttachment(ComposerAttachment value) {
         return new ChatViewState(phase, branchId, branchTitle, messages, draft, quote,
                 keyConfigured, model, thinkingEnabled, expandedReasoning, collapsedReasoning,
                 recommendations, recommendationsMessageId, notice, sending, sourceCard,
                 sourceCardExpanded, stage, followLatest, missedCount, archived, fullscreenEditing,
-                translations, searchEnabled, searchEngineLabel, value);
+                translations, searchEnabled, searchEngineLabel, value, false);
+    }
+
+    /** Shows or hides the three 问 AI quick queries; they never outlive the quote they ride. */
+    public ChatViewState withAskAiChips(boolean value) {
+        return new ChatViewState(phase, branchId, branchTitle, messages, draft, quote,
+                keyConfigured, model, thinkingEnabled, expandedReasoning, collapsedReasoning,
+                recommendations, recommendationsMessageId, notice, sending, sourceCard,
+                sourceCardExpanded, stage, followLatest, missedCount, archived, fullscreenEditing,
+                translations, searchEnabled, searchEngineLabel, composerAttachment, value);
     }
 
     public ChatViewState withKeyConfigured(boolean value) {
@@ -364,7 +385,7 @@ public final class ChatViewState {
                 nextQuote, nextKeyConfigured, nextModel, nextThinkingEnabled, nextExpanded,
                 nextCollapsed, nextRecommendations, nextRecommendationsMessageId, nextNotice,
                 nextSending, sourceCard, sourceCardExpanded, stage, followLatest, missedCount,
-                archived, fullscreenEditing, translations, searchEnabled, searchEngineLabel, composerAttachment);
+                archived, fullscreenEditing, translations, searchEnabled, searchEngineLabel, composerAttachment, askAiChips);
     }
 
     /** Replaces the source card with a read's answer; the expansion state travels unchanged. */
@@ -374,7 +395,7 @@ public final class ChatViewState {
                 recommendations,
                 recommendationsMessageId, notice, sending, value, sourceCardExpanded, stage,
                 followLatest, missedCount, archived, fullscreenEditing, translations, searchEnabled,
-                searchEngineLabel, composerAttachment);
+                searchEngineLabel, composerAttachment, askAiChips);
     }
 
     public ChatViewState withSourceCardExpanded(boolean value) {
@@ -383,7 +404,7 @@ public final class ChatViewState {
                 recommendations,
                 recommendationsMessageId, notice, sending, sourceCard, value, stage,
                 followLatest, missedCount, archived, fullscreenEditing, translations, searchEnabled,
-                searchEngineLabel, composerAttachment);
+                searchEngineLabel, composerAttachment, askAiChips);
     }
 
     /** T-075: sets the generation stage; the rest of the state travels unchanged. */
@@ -392,7 +413,7 @@ public final class ChatViewState {
                 model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
                 recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
                 value == null ? Stage.IDLE : value, followLatest, missedCount, archived,
-                fullscreenEditing, translations, searchEnabled, searchEngineLabel, composerAttachment);
+                fullscreenEditing, translations, searchEnabled, searchEngineLabel, composerAttachment, askAiChips);
     }
 
     /** T-075: sets the scroll-follow state; the rest of the state travels unchanged. */
@@ -401,7 +422,7 @@ public final class ChatViewState {
                 model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
                 recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
                 stage, following, missedSoFar, archived, fullscreenEditing, translations,
-                searchEnabled, searchEngineLabel, composerAttachment);
+                searchEnabled, searchEngineLabel, composerAttachment, askAiChips);
     }
 
     /**
@@ -413,7 +434,7 @@ public final class ChatViewState {
                 model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
                 recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
                 stage, followLatest, missedCount, value, fullscreenEditing, translations,
-                searchEnabled, searchEngineLabel, composerAttachment);
+                searchEnabled, searchEngineLabel, composerAttachment, askAiChips);
     }
 
     /** Enters or leaves fullscreen edit mode; the rest of the state travels unchanged. */
@@ -422,7 +443,7 @@ public final class ChatViewState {
                 model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
                 recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
                 stage, followLatest, missedCount, archived, value, translations, searchEnabled,
-                searchEngineLabel, composerAttachment);
+                searchEngineLabel, composerAttachment, askAiChips);
     }
 
     /**
@@ -438,7 +459,7 @@ public final class ChatViewState {
                 model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
                 recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
                 stage, followLatest, missedCount, archived, fullscreenEditing,
-                translations.started(messageId), searchEnabled, searchEngineLabel, composerAttachment);
+                translations.started(messageId), searchEnabled, searchEngineLabel, composerAttachment, askAiChips);
     }
 
     public ChatViewState withTranslationFinished(String messageId, String translation) {
@@ -446,7 +467,7 @@ public final class ChatViewState {
                 model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
                 recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
                 stage, followLatest, missedCount, archived, fullscreenEditing,
-                translations.finished(messageId, translation), searchEnabled, searchEngineLabel, composerAttachment);
+                translations.finished(messageId, translation), searchEnabled, searchEngineLabel, composerAttachment, askAiChips);
     }
 
     public ChatViewState withTranslationToggled(String messageId) {
@@ -454,7 +475,7 @@ public final class ChatViewState {
                 model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
                 recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
                 stage, followLatest, missedCount, archived, fullscreenEditing,
-                translations.toggled(messageId), searchEnabled, searchEngineLabel, composerAttachment);
+                translations.toggled(messageId), searchEnabled, searchEngineLabel, composerAttachment, askAiChips);
     }
 
     public ChatViewState withSearchEnabled(boolean value, String engineLabel) {
@@ -462,7 +483,7 @@ public final class ChatViewState {
                 model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
                 recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
                 stage, followLatest, missedCount, archived, fullscreenEditing, translations,
-                value, engineLabel, composerAttachment);
+                value, engineLabel, composerAttachment, askAiChips);
     }
 
     public boolean isTranslating(String messageId) {

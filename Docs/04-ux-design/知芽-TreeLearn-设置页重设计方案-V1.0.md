@@ -2,11 +2,11 @@
 
 | 项 | 值 |
 |---|---|
-| 版本 | V1.0（待拍板） |
+| 版本 | V1.1（已落地） |
 | 日期 | 2026-09-28 |
-| 状态 | 设计方案，未落任何生产代码 |
+| 状态 | **Android 已按本稿落地**（用户 2026-09-28 16:59 拍板「执行」，四项待拍板均按建议执行：落地全部映射、标题保留「API KEY · DeepSeek」、删除文字链左对齐、provider_admin 同批重排） |
 | 配套产物 | `知芽-TreeLearn-设置页重设计-交互稿-V1.0.html`（同目录，可点击走查） |
-| 用户裁决 | 2026-09-28 用户在 A/B/C 三方向中选定 **C · 大改**（iOS 式分组列表 + 二级页返回栈） |
+| 用户裁决 | 2026-09-28 用户在 A/B/C 三方向中选定 **C · 大改**（iOS 式分组列表 + 二级页返回栈）；同日二裁：**替换 KEY 表单收成单行，保存按钮改为 44dp 绿底白勾图标**（输入框 + 图标按钮同行） |
 
 ---
 
@@ -64,9 +64,10 @@
 - 发丝线分隔后：**「删除此 Key」红色文字链**（13sp，配垃圾桶图标，左对齐）。仅在 Key 存在时显示。点击弹确认层，不直接执行。
 
 **「替换 KEY」表单卡**
-- 输入框（`bg_field`，hint 与 `strings.xml:152` 一致）。
-- **「保存 Key」实心主按钮，右对齐，独占一行**——它是全页唯一实心按钮，落点在表单内，视觉上「属于这个表单」而不是「挂在输入框下面」。
-- 表单卡底部补一行 11sp 灰字说明：「保存后立即生效，原文不再展示；替换不会影响已存主题与历史回答。」
+- **输入框与保存图标按钮同行**（用户 2026-09-28 裁决：单行、按钮用图标不用文字）：右侧为 44dp 绿底白勾图标按钮（`--green` 底、`--surface` 勾形、radius 12），按按压态 `--green-deep`；44dp 满足 `touch_min`。
+- 图标按钮**必须带 `aria-label` / `android:contentDescription="保存"`**（纯图形控件的无名替代）。
+- 表单卡底部一行 11sp 灰字说明：「保存后立即生效，原文不再展示；替换不会影响已存主题与历史回答。」
+- 同款单行图标表单适用于**全部三处 Key 表单**：Key 页（替换 KEY）、提供商编辑页（替换 KEY）、引擎详情页（替换 KEY）。
 
 **删除确认弹层**（bottom sheet，沿用 v1.1 `.sheet` 形制）
 - 标题「删除 DeepSeek API Key？」+ 后果说明（Key 守卫拦截、已存主题不受影响、不可恢复）。
@@ -76,20 +77,41 @@
 
 | 层级 | 动作 | 形式 | 位置 |
 |---|---|---|---|
-| L1 提交 | 保存 Key | 实心主按钮（唯一） | 替换表单卡内，右对齐 |
+| L1 提交 | 保存 Key | 44dp 绿底白勾**图标按钮**（唯一实心元素，带 contentDescription） | 替换表单卡内，与输入框同行右侧 |
 | L2 辅助 | 状态 pill / 说明文字 | 文本 | 当前 KEY 卡 |
 | L3 破坏性 | 删除此 Key | 红色文字链 + 确认弹层 | 当前 KEY 卡内，发丝线下方 |
 
 原则：**一屏至多一个实心主按钮；正向提交与破坏性动作永不同排同权。**
 
-### 3.4 交互稿走查路径
+### 3.4 五个二级页与两个三级页（V1.1 交互稿扩量）
+
+用户追问「其他设置选项」后，交互稿从「根页 + Key 页」扩为**全设置段可走查**（V1.1）：
+
+| 页面 | 层级 | 本稿处理 |
+|---|---|---|
+| 提供商管理 | 二级 | 自 v1.1 移植：提供商卡 + 启用开关 + 新建 sheet；根页副标题实时显示「已启用 N 家 · 共 M 家」 |
+| 提供商编辑 | 三级 | 自 v1.1 移植，**Key 表单重排为新层级**（见下）；模型清单可拉取/逐项删除 |
+| 模型设置 | 二级 | 自 v1.1 移植：三分工行 + 思考预算 + 聊天建议开关；模型选择器改用底部 sheet（v1.1 为锚点 popover，同族交互简化，不影响结构文案） |
+| 搜索服务 / 引擎详情 | 二级/三级 | 自 v1.1 移植；引擎详情页 **Key 表单同样重排为新层级** |
+| 语音 / 文件管理 | 二级 | 自 v1.1 移植：试听按钮、孤儿清理确认流程 |
+
+**新增发现（扩展了原问题清单）**：Key 表单的反模式不止根页一处——
+原型 `知芽-TreeLearn-高保真原型-v1.1.html:3446-3461`（提供商编辑）与 `:3649-3658`（引擎详情）
+都是「按钮贴输入框 + 删除大按钮在下」；Android 真机已建的 `screen_provider_admin.xml:178-194`
+（`provider_key_save` + `provider_key_delete` 同排）**同样中招**。
+本稿已把这两处统一为 §3.3 的 L1/L3 层级；落地时须同步修改 `screen_provider_admin.xml`。
+
+### 3.5 交互稿走查路径
 
 打开 `知芽-TreeLearn-设置页重设计-交互稿-V1.0.html`：
 1. 根页浏览三组列表 → 点「API KEY · DeepSeek」进二级页；
-2. 二级页点「删除此 Key」→ 确认弹层 → 确认后变「未配置」态；
-3. 在「替换 KEY」粘贴任意内容 → 保存 → 变「可用」态；
-4. 返回根页，确认入口行副标题与二级页状态联动。
+2. 二级页点「删除此 Key」→ 确认弹层 → 确认后变「未配置」态；粘贴任意内容保存 → 变「可用」态；
+3. 提供商管理：切换 AiHubMix 开关 → 进 DeepSeek 编辑页，核对「当前 KEY / 替换 KEY」两卡与新按钮层级；
+4. 模型设置：点任意分工行 → 按提供商分组选模型；思考预算五档选「高」；
+5. 搜索服务：进智谱引擎详情，核对 Key 表单新层级；
+6. 文件管理：清理孤儿（4 行 → 2 行），单文件删除走确认弹层。
 （演示控制已移到交互稿侧栏说明，不占产品页面——v1.1 里「演示数据」区块在真机产品中本就不存在。）
+（已验证：`artifacts/tmp/verify_settings_redesign.mjs` 10/10 PASS、pageerror=0、EXITCODE=0，2026-09-28。）
 
 ## 四、与既有裁决 / 契约的关系
 
@@ -101,25 +123,39 @@
 | 2026-09-28 裁决：设置根页顶栏 = 返回箭头 + 标题 | 保持不变（真机已是此形制，`screen_settings_body.xml:11-39`） |
 | Token 守门（43 token / 15 资源基数） | 不新增 token，复用 `--line/--hairline/--red/--green` 全部既有值；改动后跑 `check_design_tokens.py` 应为 `0 check(s) failed` |
 
-## 五、Android 落地映射（待用户确认后执行）
+## 五、Android 落地映射（2026-09-28 已执行）
 
-| 文件 | 动作 | 预估 |
+**落地结果与 §5 预估的偏差**：
+- `ic_chevron_right.xml` 已由首页线先行入库（v1 原型 chip 注释），本稿直接复用，**未再新增**；
+- `bg_save_ico.xml` 圆角取 `radius_md`（14dp）——dimens 无 12dp 档，且「布局只引用名字，不内联 dp」，取最接近的既有 token；
+- `screen_provider_admin.xml` 的删除文字链初始 `gone`，可见性由 `ProviderAdminScreen.renderEditor` 按 `editor.key.line` 驱动；
+- 提供商编辑页与 Key 页的**删除一律先弹 `AlertDialog` 确认**（§3.3 L3 语义，三处行为一致）；
+
+| 文件 | 实际动作 | 状态 |
 |---|---|---|
-| `res/layout/screen_settings_body.xml` | 重写为分组列表：Key 卡移除，改「API KEY · DeepSeek」入口行；六行并入两张 flush 分组卡；`ic_nav_more` → `ic_chevron_right` | ~-60 行 |
-| `res/layout/screen_settings_key_body.xml` | **新增**：Key 二级页（状态卡 + 表单卡，结构见 §3.2） | ~130 行 |
-| `screen_settings_key_title.xml` 等 appbar | 沿用现有二级页页头形制 | 少量 |
-| `res/drawable/ic_chevron_right.xml` | **新增**（「›」矢量），不动 `ic_nav_more`（其他处仍在用） | ~10 行 |
-| `SettingsKeyScreen.java` | **新增**：从 `SettingsScreen` 拆出 Key 渲染/保存/删除逻辑 | ~120 行 |
-| `SettingsScreen.java` | 删去 Key 卡相关 id 与方法，补 Key 入口行回调 | ~-80 行 |
-| `MainActivity.java` | sub-settings rooms 增加一间 keyRoom（入栈/返回/保存状态恢复） | ~30 行 |
-| `strings.xml` | 增删少量条目（Key 页标题、删除确认文案） | ~10 行 |
+| `res/layout/screen_settings_body.xml` | 重写为两张 flush 分组卡（「AI 提供商」「能力」），Key 卡移除改「API KEY · DeepSeek」入口行（副标题动态），六处 `ic_nav_more` → `ic_chevron_right` | 完成 |
+| `res/layout/screen_settings_key.xml` + `screen_settings_key_body.xml` | **新增**：Key 二级页（状态卡 + 替换表单卡，结构 §3.2） | 完成 |
+| `res/drawable/ic_check.xml`、`res/drawable/bg_save_ico.xml` | **新增**：白勾矢量 + 绿底图标按钮 selector（radius_md） | 完成 |
+| `screen/SettingsKeyScreen.java` | **新增**：状态卡 + 表单卡 + 删除确认弹层，密钥处理规则（char[] 缓冲、掩码唯一、离窗清场）原样随迁 | 完成 |
+| `screen/SettingsScreen.java` | 重写为纯分组导航列表；`render` 只画 Key 入口行副标题（掩码 + 判定三态） | 完成 |
+| `MainActivity.java` | `keyAdminScreen` 第六间房：`showKeyAdmin()` 复用 `settingsPresenter`（不设新 presenter），`render(SettingsViewState)` 按 `keyAdminScreen` 是否在屏路由；返回栈条件与 `showSettings()` 清场同步 | 完成 |
+| `screen_provider_admin.xml` + `ProviderAdminScreen.java` | Key 表单重排为单行图标按钮 + 红字删除链（确认弹层先行），`renderEditor` 按 Key 存在性控制删除链可见性 | 完成 |
+| `strings.xml` | 新增 12 条（分组头/入口行/Key 页/确认弹层/contentDescription）；删除 2 条无引用旧条目（`settings_key_section`、`settings_key_save`） | 完成 |
 
-**守门与验证**：改完跑 `python .trae/scripts/dev/check_design_tokens.py`（应 0 failed）；Java-only guard（禁 Kotlin）；真机装机走查 §3.4 路径。XML 注释禁 `--`。
+**验证记录（2026-09-28）**：
+- `check_design_tokens.py`：`0 check(s) failed`，43 token / 15 `tl_*` 资源基数不变；
+- XML 注释 `--` 全树扫描：0 违规；
+- `:app:compileDebugJavaWithJavac` BUILD SUCCESSFUL（首轮在共享 `app/build/` 上撞别线缓存锁竞态，`-PbuildDir=build-settingsfix --no-build-cache` 独立目录重跑即过）；
+- `verifyNoKotlinDex` PASS（3 APK 零 Kotlin 字节码）；
+- 真机：APK 装机成功、应用可启动、首页渲染正常；设置段走查被设备占用打断（共用平板有人在使用，且首装包 2 分钟内被别线测试流程卸载），**待设备空闲后按 §3.5 补走查**。
 
-## 六、待拍板项
+**其余四间房（模型/搜索/语音/文件）在真机端目前是代码拼装的占位 stub**（无独立布局文件），后续按各自 SPEC 落地时直接采用 v1.1 页面结构即可，本方案不重复展开。
 
-| # | 议题 | 建议 | 理由与代价 |
-|---|---|---|---|
-| 1 | 本方案是否按稿落地 | 按交互稿执行 §5 映射 | 交互稿已可走查；落地约 +240/-140 行，不触 token 基数 |
-| 2 | 根页「API KEY」入口行标题 | 「API KEY · DeepSeek」（提供商动态后缀） | 与现有 Key 卡动态标题逻辑一致；多提供商扩展时无需改结构 |
-| 3 | 删除文字链对齐 | 左对齐（状态卡内容流内） | iOS 惯例为整行右置箭头式，但本卡非导航行，左对齐更贴合「卡内动作」语义 |
+## 六、待拍板项（2026-09-28 已全部按建议执行）
+
+| # | 议题 | 建议 → 执行 |
+|---|---|---|
+| 1 | 本方案是否按稿落地 | 按交互稿执行 §5 映射 → **已落地**（用户拍板「执行」） |
+| 2 | 根页「API KEY」入口行标题 | 「API KEY · DeepSeek」→ **按建议执行**（`settings_key_entry_title`） |
+| 3 | 删除文字链对齐 | 左对齐（状态卡内容流内）→ **按建议执行** |
+| 4 | `screen_provider_admin.xml` 的 Key 表单是否同批落地 | 同批 → **已同批重排** |

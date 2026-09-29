@@ -1,0 +1,41 @@
+Harness evidence: T-2026-09-29-107
+Captured: 2026-09-29
+
+[RED]
+Command=./gradlew.bat :app:connectedDebugAndroidTest '-Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.WordMenuPopupInstrumentedTest' --no-build-cache --no-daemon --console=plain
+First run result=environment lock: failed to hash app/build/outputs/androidTest-results/connected/debug/ALP-AN00 - 13/utp.0.log.lck; no Java or Gradle process remained.
+Retry result=behavior RED; physicalLongPressKeepsSelectionAndMenuAfterGestureReturns failed; highlightAppearsBeforeReadback failed.
+Retry EXITCODE=1
+Source=artifacts/tmp/selection-flow-red-2026-09-29.log
+
+[GREEN]
+Command=./gradlew.bat :app:connectedDebugAndroidTest '-Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.WordMenuPopupInstrumentedTest' --no-build-cache --no-daemon --console=plain
+Device=AWSS013807000356 / ALP-AN00 - 13
+Result=WordMenuPopupInstrumentedTest 5/5
+EXITCODE=0
+Source=artifacts/tmp/selection-flow-green-2026-09-29.log
+
+[JVM]
+Command=./gradlew.bat :app:testDebugUnitTest --tests com.treelearn.app.ui.HighlighterTest --no-build-cache --no-daemon --console=plain
+Result=HighlighterTest tests=10 skipped=0 failures=0 errors=0
+EXITCODE=0
+Source=artifacts/tmp/selection-flow-jvm-2026-09-29.log
+
+[BUILD_GATES]
+Command=./gradlew.bat :app:assembleDebug --rerun-tasks --no-build-cache --no-daemon --console=plain
+EXITCODE=0
+Command=./gradlew.bat :app:lintDebug --no-build-cache --no-daemon --console=plain
+EXITCODE=0
+Command=powershell -NoProfile -ExecutionPolicy Bypass -File scripts/no-kotlin-check.ps1
+EXITCODE=0
+Command=./gradlew.bat verifyDependencyDirection --no-build-cache --no-daemon --console=plain
+EXITCODE=0
+
+[INSTALL]
+Device=AWSS013807000356
+APK=android/app/build/outputs/apk/debug/app-debug.apk
+Install=Success
+Local SHA256=7c9e471ae4c18f06eef9fe47336e94794ac415c0347a5459a3e7ba5e06922486
+Device SHA256=7c9e471ae4c18f06eef9fe47336e94794ac415c0347a5459a3e7ba5e06922486
+Hash match=True
+Launch EXITCODE=0

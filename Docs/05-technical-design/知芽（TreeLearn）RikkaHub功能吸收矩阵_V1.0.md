@@ -17,7 +17,7 @@
 |---|---|---|---|---|---|---|---|
 | 1.1 | Markdown 正文渲染（列表/粗斜体/链接/引用块） | `ui/components/richtext/` | 已有 `MarkdownRenderer.java`（`app/screen/`），覆盖范围 UNKNOWN（待逐语法核对） | adapt：先盘点缺口再补 | P0 | 074 | [PART] 渲染失败回退纯文本不丢内容 |
 | 1.2 | 代码块：高亮、语言标注、块内复制 | `:highlight` 模块、`ui/components/richtext/` | 无代码块专用呈现（UNKNOWN，待核 renderer） | adapt：先做「等宽块+复制」高亮库延后 | P1 | 074 | [PART] 复制失败提示 |
-| 1.3 | 表格 / LaTeX / Mermaid 渲染 | `ui/components/table/`、README Features | 无 | defer：学习主流程非必需，渲染成本高 | P2 | 独立任务 | [PART] 降级为原文 |
+| 1.3 | 表格 / LaTeX / Mermaid 渲染 | `ui/components/table/`、README Features | 现状（2026-09-28）：表格由 Android 真实表格视图呈现；四种公式定界符已接入扫描、解析与 MathSpan，renderer 仪器断言通过；但 MathSpan 独立复核 FAIL（固定 16f、未适配宿主字号/密度、绘制后未恢复 Paint 状态），故整条公式链路未验收；Mermaid 未实现 | 历史决策（原矩阵日期 2026-09-23）保留：defer（学习主流程非必需，渲染成本高）/ P2 / [PART] 降级为原文。现状（2026-09-28）：不支持公式降级为去定界符源码、未闭合流式公式保留原文；Mermaid 继续 defer | P2 | T-101–104 | [PART] 不支持或未闭合公式保留为源码 |
 | 1.4 | 思维链（reasoning）折叠卡：生成中自动展开+计时、结束自动收起 | `ui/components/message/ChatMessageReasoning.kt` | 已有 `ReasoningDisclosure.java` + 流式披露（T-066 交付）；计时 UNKNOWN | adapt：对照补计时与收起时机 | P0 | 075 | [CANCEL] 取消时保留已披露内容 |
 | 1.5 | 消息常驻动作条 + 更多抽屉 | `ui/components/message/ChatMessageActions.kt` | 已有 `view_answer_actions.xml`/`AnswerActionBar.java`（retry/reset/fork/quote/copy） | adopt：按 073 视觉规格重排 | P0 | 074 | [DUP] 生成中禁用破坏性动作 |
 | 1.6 | 版本切换器「← 1/N →」 | `ui/components/message/ChatMessageBranch.kt` | 已有 version/revision 动作（`ChatActions.java` onVersionPressed/onRevisionSelected），呈现形式 UNKNOWN | adapt：按 073 统一呈现 | P0 | 074 | [RECOVER] 越界下标回退（见分支规格 T-070） |

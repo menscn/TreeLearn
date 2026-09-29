@@ -28,6 +28,7 @@ implements ProviderAdminPresenter.Sink {
     private EditText baseInput;
     private EditText keyInput;
     private TextView keyMask;
+    private TextView keyDelete;
     private Button fetchButton;
     private Button deleteButton;
     private String editorId;
@@ -61,12 +62,8 @@ implements ProviderAdminPresenter.Sink {
         });
         this.findViewById(R.id.provider_save).setOnClickListener(view -> this.save());
         this.findViewById(R.id.provider_key_save).setOnClickListener(view -> this.saveKey());
-        this.findViewById(R.id.provider_key_delete).setOnClickListener(view -> {
-            this.clearField();
-            if (this.actions != null) {
-                this.actions.onKeyDeletePressed();
-            }
-        });
+        this.keyDelete = (TextView)this.findViewById(R.id.provider_key_delete);
+        this.keyDelete.setOnClickListener(view -> this.confirmKeyDelete());
         this.fetchButton.setOnClickListener(view -> {
             if (this.actions != null) {
                 this.actions.onFetchPressed();
@@ -169,6 +166,7 @@ implements ProviderAdminPresenter.Sink {
         this.nameInput.setText((CharSequence)editor.name);
         this.baseInput.setText((CharSequence)editor.baseUrl);
         this.keyMask.setText((CharSequence)(editor.key.line == KeySnapshot.Line.MISSING ? this.getContext().getString(R.string.editor_key_none) : editor.key.mask));
+        this.keyDelete.setVisibility(editor.key.line == KeySnapshot.Line.MISSING ? View.GONE : View.VISIBLE);
         this.fetchButton.setEnabled(!editor.fetchBusy);
         this.fetchButton.setText(editor.fetchBusy ? R.string.editor_fetching : R.string.editor_fetch);
         if (editor.fetchFailed) {
@@ -214,6 +212,16 @@ implements ProviderAdminPresenter.Sink {
         }
         String name = this.currentName();
         new AlertDialog.Builder(this.getContext()).setTitle(R.string.providers_delete_title).setMessage((CharSequence)(this.getContext().getString(R.string.providers_delete_body, new Object[]{name}) + (lastEnabled ? "\n\n" + this.getContext().getString(R.string.providers_delete_last) : ""))).setPositiveButton(R.string.providers_delete_ok, (dialog, which) -> this.actions.onDeleteConfirmed()).setNegativeButton(R.string.navigation_cancel, (dialog, which) -> this.actions.onDeleteCanceled()).show();
+    }
+
+    /** Delete is a text link with a confirm dialog, never a button beside the save icon. */
+    private void confirmKeyDelete() {
+        new AlertDialog.Builder(this.getContext()).setTitle(R.string.settings_key_delete_confirm_title).setMessage((CharSequence)this.getContext().getString(R.string.settings_key_delete_confirm_body)).setPositiveButton(R.string.settings_key_delete_confirm_ok, (dialog, which) -> {
+            this.clearField();
+            if (this.actions != null) {
+                this.actions.onKeyDeletePressed();
+            }
+        }).setNegativeButton(R.string.navigation_cancel, null).show();
     }
 
     private String currentProviderId() {

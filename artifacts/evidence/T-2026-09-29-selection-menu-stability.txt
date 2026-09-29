@@ -1,0 +1,52 @@
+CapturedAt=2026-09-29
+Device=AWSS013807000356 / ALP-AN00 - 13
+API_KEY=not used; no credentials in command line, logs, screenshots, or evidence
+
+[RED]
+Scenario=Unrelated ChatScreen state render must preserve a visible custom selection menu and non-empty selection.
+Command=.\gradlew.bat :app:connectedDebugAndroidTest '-Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.WordMenuPopupInstrumentedTest' --no-build-cache --no-daemon --console=plain
+WorkingDirectory=D:\Project\Android\Treelearn\android
+Exit code=1
+Observed failure=WordMenuPopupInstrumentedTest.unrelatedStateRenderKeepsSelectionMenuAndSelection failed because the custom menu was dismissed after screen.render(renderedState).
+Failure reason validated=ChatScreen.render unconditionally called dismissWordMenu before rendering messages.
+Raw log=artifacts/tmp/word-menu-state-red-2026-09-29.log
+
+[GREEN]
+Scenario=The same targeted test command after the minimum lifecycle fix.
+Command=.\gradlew.bat :app:connectedDebugAndroidTest '-Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.WordMenuPopupInstrumentedTest' --no-build-cache --no-daemon --console=plain
+WorkingDirectory=D:\Project\Android\Treelearn\android
+Exit code=0
+Observed result=3 tests passed, including physicalLongPressKeepsSelectionAndMenuAfterGestureReturns and unrelatedStateRenderKeepsSelectionMenuAndSelection.
+Raw log=artifacts/tmp/word-menu-state-green-2026-09-29.log
+
+[JVM_REGRESSION]
+Command=.\gradlew.bat :app:testDebugUnitTest --tests com.treelearn.app.ui.ChatMessageRowLayoutTest --tests com.treelearn.app.ui.WordMenuTest --no-build-cache --no-daemon --console=plain
+Exit code=0
+Raw log=artifacts/tmp/selection-menu-jvm-green-2026-09-29.log
+
+[FOCUSED_DEVICE_REGRESSION]
+Command=.\gradlew.bat :app:connectedDebugAndroidTest '-Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.<TEST_CLASS>' --no-build-cache --no-daemon --console=plain, repeated for MathSpanInstrumentedTest, MarkdownRendererInstrumentedTest, ChildBranchPopupLifecycleInstrumentedTest, RecommendationForkHotZoneInstrumentedTest and WordMenuPopupInstrumentedTest
+Exit code=0 for every class
+Observed result=MathSpan 3/3; MarkdownRenderer 11/11; ChildBranchPopup 1/1; RecommendationFork 1/1; WordMenuPopup 3/3; total 19/19 targeted tests passed.
+
+[BUILD_GATES]
+Command=.\gradlew.bat :app:assembleDebug --rerun-tasks --no-build-cache --no-daemon --console=plain
+Exit code=0
+Command=.\gradlew.bat :app:lintDebug --no-build-cache --no-daemon --console=plain
+Exit code=0
+Command=powershell -NoProfile -ExecutionPolicy Bypass -File scripts/no-kotlin-check.ps1
+Exit code=0
+Command=.\gradlew.bat verifyDependencyDirection --no-build-cache --no-daemon --console=plain
+Exit code=0
+
+[INSTALL]
+APK=D:\Project\Android\Treelearn\android\app\build\outputs\apk\debug\app-debug.apk
+Install=Success
+Local SHA256=86eb74e06be08fb3e5a90e77c30719acaf7b2b0f77de9ed76c99f65f5336254d
+Device SHA256=86eb74e06be08fb3e5a90e77c30719acaf7b2b0f77de9ed76c99f65f5336254d
+Hash match=True
+Launch exit code=0
+Resumed activity=com.treelearn/.app.MainActivity
+
+[VERDICT]
+Targeted selection lifecycle regression fixed and installed. The parent Harness task remains PARTIAL for its unrelated unverified narrow-screen, highlight-state and full-suite baseline items.

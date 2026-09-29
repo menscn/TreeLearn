@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The card 更多 opens when the six-cell row cannot be drawn whole (see popup_word_action.xml): a
+  vertical stack of the operations the row had no room for, in the row's own order, so the learner
+  loses depth on a narrow screen and never loses an operation.
+
+  Every one of the six operations is present here and starts hidden; `WordMenuPopup` shows exactly
+  the tail that `WordMenu#fitFor` folded out of the row, and the hairline before a cell is shown
+  with it, so a folded pair never leaves a stray rule at the card's end. The cells are icon-only
+  like the row's - 菜单格一律图标承载，不得文字按钮 - and each keeps a contentDescription, because
+  the item's name is drawn nowhere. Each cell is a 44dp-tall target of the row's own cell width, so
+  the stack reads as the same menu seen end on.
+
+  高亮 carries the same slashed-marker face here as in the row: 取消高亮 is a state of the cell, not
+  a separate item (方案 §2.3), and WordMenuPopup switches both faces at bind time.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/word_menu_more_card"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_card"
+    android:orientation="vertical"
+    android:padding="@dimen/space_s1">
+
+    <FrameLayout
+        android:id="@+id/word_menu_more_quote"
+        android:layout_width="@dimen/word_menu_cell"
+        android:layout_height="@dimen/touch_min"
+        android:background="?android:attr/selectableItemBackground"
+        android:contentDescription="@string/chat_word_ask_ai_desc"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:duplicateParentState="true"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_sparkle"
+            android:tint="@color/tl_ink" />
+    </FrameLayout>
+
+    <View
+        android:id="@+id/word_menu_more_sep_fork"
+        android:layout_width="@dimen/word_menu_sep"
+        android:layout_height="@dimen/hairline"
+        android:layout_gravity="center_horizontal"
+        android:background="@color/tl_line"
+        android:visibility="gone" />
+
+    <FrameLayout
+        android:id="@+id/word_menu_more_fork"
+        android:layout_width="@dimen/word_menu_cell"
+        android:layout_height="@dimen/touch_min"
+        android:background="?android:attr/selectableItemBackground"
+        android:contentDescription="@string/chat_word_fork_desc"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:duplicateParentState="true"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_action_fork"
+            android:tint="@color/tl_ink" />
+    </FrameLayout>
+
+    <View
+        android:id="@+id/word_menu_more_sep_highlight"
+        android:layout_width="@dimen/word_menu_sep"
+        android:layout_height="@dimen/hairline"
+        android:layout_gravity="center_horizontal"
+        android:background="@color/tl_line"
+        android:visibility="gone" />
+
+    <FrameLayout
+        android:id="@+id/word_menu_more_highlight"
+        android:layout_width="@dimen/word_menu_cell"
+        android:layout_height="@dimen/touch_min"
+        android:background="?android:attr/selectableItemBackground"
+        android:contentDescription="@string/chat_word_highlight_desc"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/word_menu_more_highlight_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:duplicateParentState="true"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_action_highlight"
+            android:tint="@color/tl_ink" />
+    </FrameLayout>
+
+    <View
+        android:id="@+id/word_menu_more_sep_note"
+        android:layout_width="@dimen/word_menu_sep"
+        android:layout_height="@dimen/hairline"
+        android:layout_gravity="center_horizontal"
+        android:background="@color/tl_line"
+        android:visibility="gone" />
+
+    <FrameLayout
+        android:id="@+id/word_menu_more_note"
+        android:layout_width="@dimen/word_menu_cell"
+        android:layout_height="@dimen/touch_min"
+        android:background="?android:attr/selectableItemBackground"
+        android:contentDescription="@string/chat_word_note_desc"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:duplicateParentState="true"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_action_note"
+            android:tint="@color/tl_ink" />
+    </FrameLayout>
+
+    <View
+        android:id="@+id/word_menu_more_sep_copy"
+        android:layout_width="@dimen/word_menu_sep"
+        android:layout_height="@dimen/hairline"
+        android:layout_gravity="center_horizontal"
+        android:background="@color/tl_line"
+        android:visibility="gone" />
+
+    <FrameLayout
+        android:id="@+id/word_menu_more_copy"
+        android:layout_width="@dimen/word_menu_cell"
+        android:layout_height="@dimen/touch_min"
+        android:background="?android:attr/selectableItemBackground"
+        android:contentDescription="@string/chat_word_copy_desc"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:duplicateParentState="true"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_action_copy"
+            android:tint="@color/tl_ink" />
+    </FrameLayout>
+
+    <View
+        android:id="@+id/word_menu_more_sep_select_all"
+        android:layout_width="@dimen/word_menu_sep"
+        android:layout_height="@dimen/hairline"
+        android:layout_gravity="center_horizontal"
+        android:background="@color/tl_line"
+        android:visibility="gone" />
+
+    <FrameLayout
+        android:id="@+id/word_menu_more_select_all"
+        android:layout_width="@dimen/word_menu_cell"
+        android:layout_height="@dimen/touch_min"
+        android:background="?android:attr/selectableItemBackground"
+        android:contentDescription="@string/chat_word_select_all_desc"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:duplicateParentState="true"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_action_select_all"
+            android:tint="@color/tl_ink" />
+    </FrameLayout>
+</LinearLayout>

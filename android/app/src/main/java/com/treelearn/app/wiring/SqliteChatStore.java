@@ -4,7 +4,10 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.treelearn.ai.prompt.DeepSeekContextEncoder;
 import com.treelearn.app.generation.AnswerVersions;
+import com.treelearn.app.ui.ChatMessage;
 import com.treelearn.app.ui.ChildBranch;
+import com.treelearn.app.ui.Highlighter;
+import com.treelearn.core.domain.Annotation;
 import com.treelearn.core.domain.AnswerRevision;
 import com.treelearn.core.domain.Branch;
 import com.treelearn.core.domain.ContextPlan;
@@ -18,6 +21,7 @@ import com.treelearn.core.domain.Topic;
 import com.treelearn.data.db.DatabaseTransactionRunner;
 import com.treelearn.data.db.TreeLearnDatabaseHelper;
 import com.treelearn.data.db.dao.AnswerRevisionDao;
+import com.treelearn.data.db.dao.AnnotationDao;
 import com.treelearn.data.db.dao.AttachmentDao;
 import com.treelearn.data.db.dao.BranchCreation;
 import com.treelearn.data.db.dao.BranchDao;
@@ -27,10 +31,15 @@ import com.treelearn.data.db.dao.GenerationOperationRow;
 import com.treelearn.data.db.dao.MessageDao;
 import com.treelearn.data.db.dao.TopicDao;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * The conversation's rows and its store-side decisions, read and written through the real local
@@ -234,6 +243,86 @@ public final class SqliteChatStore implements ChatStore {
     public Message position(String messageId) {
         Guard.id(messageId, "messageId");
         return MessageDao.findById(database(), messageId);
+    }
+
+    @Override
+    public Map<String, List<Annotation>> annotations(List<ChatMessage> answers) {
+        SQLiteDatabase database = database();
+        Map<String, List<Annotation>> out = new LinkedHashMap<String, List<Annotation>>();
+        for (ChatMessage answer : answers) {
+            // A streaming attempt's displayed text is not the stored text the digest was computed
+            // from; reading against it would clear the marks the moment the read lands. The row's
+            // own stored text is empty until a stable revision exists, which skips it here.
+            if (answer == null || answer.messageId == null || answer.text.isEmpty()
+                    || !answer.isStable()) {
+                continue;
+            }
+            out.put(answer.messageId,
+                    AnnotationDao.listFor(database, answer.messageId, digest(answer.text)));
+        }
+        return out;
+    }
+
+    @Override
+    public void applyHighlight(String messageId, String answerText, int proseIndex,
+            Highlighter.Plan plan, long now) {
+        Guard.id(messageId, "messageId");
+        Guard.object(plan, "plan");
+        String digest = digest(answerText);
+        SQLiteDatabase database = database();
+        if (plan.kind == Highlighter.Kind.CANCEL) {
+            // The caller's duty (T-026's F3): this only runs on a stable answer, so the digest
+            // hashed here is the one the next read will hash again.
+            runner.run(database, db -> {
+                AnnotationDao.delete(db, plan.cancelId);
+                return null;
+            });
+            return;
+        }
+        if (plan.merge.absorbedIds.isEmpty()) {
+            Annotation union = Annotation.highlight(UUID.randomUUID().toString(),
+                    Annotation.Locator.prose(proseIndex),
+                    plan.merge.span.start, plan.merge.span.end);
+            runner.run(database, db -> {
+                AnnotationDao.insert(db, messageId, digest, union, now);
+                return null;
+            });
+            return;
+        }
+        // One transaction for the whole merge: the absorbed rows die and the union row lands
+        // together, so no read can see the passage half-marked (方案 V1.1 §2.2's merge rule).
+        String unionId = UUID.randomUUID().toString();
+        Annotation union = Annotation.highlight(unionId, Annotation.Locator.prose(proseIndex),
+                plan.merge.span.start, plan.merge.span.end);
+        runner.run(database, db -> {
+            for (String absorbed : plan.merge.absorbedIds) {
+                AnnotationDao.delete(db, absorbed);
+            }
+            AnnotationDao.insert(db, messageId, digest, union, now);
+            return null;
+        });
+    }
+
+    /**
+     * The SHA-256 hex of the answer text, the one digest rule the table's clear-on-mismatch read
+     * judges against (方案 V1.1 §3.3). Computed from the same text the row displays, UTF-8.
+     */
+    private static String digest(String text) {
+        try {
+            byte[] hash = MessageDigest.getInstance("SHA-256")
+                    .digest(text.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hex = new StringBuilder(hash.length * 2);
+            for (byte part : hash) {
+                String digit = Integer.toHexString(part & 0xff);
+                if (digit.length() == 1) {
+                    hex.append('0');
+                }
+                hex.append(digit);
+            }
+            return hex.toString();
+        } catch (NoSuchAlgorithmException impossible) {
+            throw new IllegalStateException("every JVM ships SHA-256", impossible);
+        }
     }
 
     private SQLiteDatabase database() {

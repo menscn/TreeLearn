@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   The settings column itself, shared verbatim by the phone layout and the tablet layout.
+
+  Settings redesign (2026-09-28, scheme C): the page is a pure grouped navigation list. The key
+  card moved out to its own room (screen_settings_key_body.xml) and survives here only as the
+  "API KEY" entry row whose subtitle carries the credential's live state. Two flush group cards
+  hold the entries, rows separated by hairlines, and every disclosure chevron is ic_chevron_right
+  per the prototype review's M6 ruling.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -44,7 +50,7 @@
             android:paddingStart="@dimen/page_gutter"
             android:paddingTop="@dimen/space_s6"
             android:paddingEnd="@dimen/page_gutter"
-            android:text="@string/settings_key_section"
+            android:text="@string/settings_group_ai"
             android:textColor="@color/tl_ink3"
             android:textSize="@dimen/text_cap" />
 
@@ -56,104 +62,151 @@
             android:layout_marginEnd="@dimen/page_gutter"
             android:background="@drawable/bg_card"
             android:elevation="@dimen/card_elevation"
-            android:orientation="vertical"
-            android:padding="@dimen/space_s4">
+            android:orientation="vertical">
 
+            <!-- T-087 kept its entry row; the key room entry sits in front of it. -->
             <LinearLayout
+                android:id="@+id/settings_key_entry"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="?android:attr/selectableItemBackground"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:minHeight="@dimen/touch_min"
+                android:orientation="horizontal"
+                android:padding="@dimen/space_s4">
 
-                <TextView
-                    android:id="@+id/settings_key_mask"
+                <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textColor="@color/tl_ink"
-                    android:textSize="@dimen/text_body" />
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/settings_key_state"
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_key_entry_title"
+                        android:textColor="@color/tl_ink"
+                        android:textSize="@dimen/text_body" />
+
+                    <TextView
+                        android:id="@+id/settings_key_sub"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_key_state_none"
+                        android:textColor="@color/tl_ink3"
+                        android:textSize="@dimen/text_cap" />
+                </LinearLayout>
+
+                <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/space_s2"
-                    android:background="@drawable/bg_pill"
-                    android:paddingStart="@dimen/space_s2"
-                    android:paddingTop="@dimen/space_s1"
-                    android:paddingEnd="@dimen/space_s2"
-                    android:paddingBottom="@dimen/space_s1"
-                    android:textSize="@dimen/text_cap" />
+                    android:contentDescription="@string/settings_key_entry_title"
+                    android:src="@drawable/ic_chevron_right"
+                    android:tint="@color/tl_ink3" />
             </LinearLayout>
 
-            <TextView
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_s1"
-                android:text="@string/settings_key_sub"
-                android:textColor="@color/tl_ink2"
-                android:textSize="@dimen/text_sm" />
-
-            <EditText
-                android:id="@+id/settings_key_input"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/touch_min"
-                android:layout_marginTop="@dimen/space_s3"
-                android:background="@drawable/bg_field"
-                android:hint="@string/settings_key_input_hint"
-                android:imeOptions="actionDone"
-                android:importantForAutofill="no"
-                android:inputType="textPassword"
-                android:maxLines="1"
-                android:paddingStart="@dimen/space_s3"
-                android:paddingEnd="@dimen/space_s3"
-                android:textColor="@color/tl_ink"
-                android:textColorHint="@color/tl_ink3"
-                android:textSize="@dimen/text_sm" />
+                android:layout_height="@dimen/hairline"
+                android:background="@color/tl_line" />
 
             <LinearLayout
+                android:id="@+id/settings_providers_entry"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_s3"
+                android:background="?android:attr/selectableItemBackground"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:minHeight="@dimen/touch_min"
+                android:orientation="horizontal"
+                android:padding="@dimen/space_s4">
 
-                <Button
-                    android:id="@+id/settings_key_save"
-                    android:layout_width="wrap_content"
-                    android:layout_height="@dimen/touch_min"
-                    android:background="@drawable/bg_button_primary"
-                    android:minWidth="@dimen/touch_min"
-                    android:text="@string/settings_key_save"
-                    android:textColor="@color/tl_surface"
-                    android:textSize="@dimen/text_sm" />
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-                <Button
-                    android:id="@+id/settings_key_delete"
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/providers_entry_title"
+                        android:textColor="@color/tl_ink"
+                        android:textSize="@dimen/text_body" />
+
+                    <TextView
+                        android:id="@+id/settings_providers_sub"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/providers_entry_sub"
+                        android:textColor="@color/tl_ink3"
+                        android:textSize="@dimen/text_cap" />
+                </LinearLayout>
+
+                <ImageView
                     android:layout_width="wrap_content"
-                    android:layout_height="@dimen/touch_min"
-                    android:layout_marginStart="@dimen/space_s2"
-                    android:background="@drawable/bg_button_danger"
-                    android:minWidth="@dimen/touch_min"
-                    android:text="@string/settings_key_delete"
-                    android:textColor="@color/tl_red"
-                    android:textSize="@dimen/text_sm"
-                    android:visibility="gone" />
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/providers_entry_title"
+                    android:src="@drawable/ic_chevron_right"
+                    android:tint="@color/tl_ink3" />
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/settings_notice"
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/hairline"
+                android:background="@color/tl_line" />
+
+            <LinearLayout
+                android:id="@+id/settings_models_entry"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_s2"
-                android:textColor="@color/tl_red"
-                android:textSize="@dimen/text_sm"
-                android:visibility="gone" />
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:minHeight="@dimen/touch_min"
+                android:orientation="horizontal"
+                android:padding="@dimen/space_s4">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/models_entry_title"
+                        android:textColor="@color/tl_ink"
+                        android:textSize="@dimen/text_body" />
+
+                    <TextView
+                        android:id="@+id/settings_models_sub"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/models_entry_sub"
+                        android:textColor="@color/tl_ink3"
+                        android:textSize="@dimen/text_cap" />
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/models_entry_title"
+                    android:src="@drawable/ic_chevron_right"
+                    android:tint="@color/tl_ink3" />
+            </LinearLayout>
         </LinearLayout>
 
-        <!-- T-087: the provider management entry, between the key card and the boundary note. -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/page_gutter"
+            android:paddingTop="@dimen/space_s6"
+            android:paddingEnd="@dimen/page_gutter"
+            android:text="@string/settings_group_capability"
+            android:textColor="@color/tl_ink3"
+            android:textSize="@dimen/text_cap" />
+
         <LinearLayout
-            android:id="@+id/settings_providers_entry"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/page_gutter"
@@ -161,216 +214,137 @@
             android:layout_marginEnd="@dimen/page_gutter"
             android:background="@drawable/bg_card"
             android:elevation="@dimen/card_elevation"
-            android:gravity="center_vertical"
-            android:minHeight="@dimen/touch_min"
-            android:orientation="horizontal"
-            android:padding="@dimen/space_s4">
+            android:orientation="vertical">
 
+            <!-- T-091: the search service entry, next to the model entry. -->
             <LinearLayout
-                android:layout_width="0dp"
+                android:id="@+id/settings_search_entry"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:minHeight="@dimen/touch_min"
+                android:orientation="horizontal"
+                android:padding="@dimen/space_s4">
 
-                <TextView
-                    android:layout_width="match_parent"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/providers_entry_title"
-                    android:textColor="@color/tl_ink"
-                    android:textSize="@dimen/text_body" />
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/settings_providers_sub"
-                    android:layout_width="match_parent"
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/search_entry_title"
+                        android:textColor="@color/tl_ink"
+                        android:textSize="@dimen/text_body" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/search_entry_sub"
+                        android:textColor="@color/tl_ink3"
+                        android:textSize="@dimen/text_cap" />
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/providers_entry_sub"
-                    android:textColor="@color/tl_ink3"
-                    android:textSize="@dimen/text_cap" />
+                    android:contentDescription="@string/search_entry_title"
+                    android:src="@drawable/ic_chevron_right"
+                    android:tint="@color/tl_ink3" />
             </LinearLayout>
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/providers_entry_title"
-                android:src="@drawable/ic_nav_more"
-                android:tint="@color/tl_ink3" />
-        </LinearLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/hairline"
+                android:background="@color/tl_line" />
 
-        <!-- T-088: the model settings entry, next to the provider entry. -->
-        <LinearLayout
-            android:id="@+id/settings_models_entry"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/page_gutter"
-            android:layout_marginTop="@dimen/space_s2"
-            android:layout_marginEnd="@dimen/page_gutter"
-            android:background="@drawable/bg_card"
-            android:elevation="@dimen/card_elevation"
-            android:gravity="center_vertical"
-            android:minHeight="@dimen/touch_min"
-            android:orientation="horizontal"
-            android:padding="@dimen/space_s4">
-
+            <!-- T-093: the voice entry, next to the search entry. -->
             <LinearLayout
-                android:layout_width="0dp"
+                android:id="@+id/settings_voice_entry"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:minHeight="@dimen/touch_min"
+                android:orientation="horizontal"
+                android:padding="@dimen/space_s4">
 
-                <TextView
-                    android:layout_width="match_parent"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/models_entry_title"
-                    android:textColor="@color/tl_ink"
-                    android:textSize="@dimen/text_body" />
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/settings_models_sub"
-                    android:layout_width="match_parent"
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/voice_entry_title"
+                        android:textColor="@color/tl_ink"
+                        android:textSize="@dimen/text_body" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/voice_entry_sub"
+                        android:textColor="@color/tl_ink3"
+                        android:textSize="@dimen/text_cap" />
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/models_entry_sub"
-                    android:textColor="@color/tl_ink3"
-                    android:textSize="@dimen/text_cap" />
+                    android:contentDescription="@string/voice_entry_title"
+                    android:src="@drawable/ic_chevron_right"
+                    android:tint="@color/tl_ink3" />
             </LinearLayout>
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/models_entry_title"
-                android:src="@drawable/ic_nav_more"
-                android:tint="@color/tl_ink3" />
-        </LinearLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/hairline"
+                android:background="@color/tl_line" />
 
-        <!-- T-091: the search service entry, next to the model entry. -->
-        <LinearLayout
-            android:id="@+id/settings_search_entry"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/page_gutter"
-            android:layout_marginTop="@dimen/space_s2"
-            android:layout_marginEnd="@dimen/page_gutter"
-            android:background="@drawable/bg_card"
-            android:elevation="@dimen/card_elevation"
-            android:gravity="center_vertical"
-            android:minHeight="@dimen/touch_min"
-            android:orientation="horizontal"
-            android:padding="@dimen/space_s4">
-
+            <!-- T-096: the file manager entry, next to the voice entry. -->
             <LinearLayout
-                android:layout_width="0dp"
+                android:id="@+id/settings_files_entry"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:minHeight="@dimen/touch_min"
+                android:orientation="horizontal"
+                android:padding="@dimen/space_s4">
 
-                <TextView
-                    android:layout_width="match_parent"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/search_entry_title"
-                    android:textColor="@color/tl_ink"
-                    android:textSize="@dimen/text_body" />
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="match_parent"
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_files_title"
+                        android:textColor="@color/tl_ink"
+                        android:textSize="@dimen/text_body" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_files_sub"
+                        android:textColor="@color/tl_ink3"
+                        android:textSize="@dimen/text_cap" />
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/search_entry_sub"
-                    android:textColor="@color/tl_ink3"
-                    android:textSize="@dimen/text_cap" />
+                    android:contentDescription="@string/settings_files_title"
+                    android:src="@drawable/ic_chevron_right"
+                    android:tint="@color/tl_ink3" />
             </LinearLayout>
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/search_entry_title"
-                android:src="@drawable/ic_nav_more"
-                android:tint="@color/tl_ink3" />
-        </LinearLayout>
-
-        <!-- T-093: the voice entry, next to the search entry. -->
-        <LinearLayout
-            android:id="@+id/settings_voice_entry"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/page_gutter"
-            android:layout_marginTop="@dimen/space_s2"
-            android:layout_marginEnd="@dimen/page_gutter"
-            android:background="@drawable/bg_card"
-            android:elevation="@dimen/card_elevation"
-            android:gravity="center_vertical"
-            android:minHeight="@dimen/touch_min"
-            android:orientation="horizontal"
-            android:padding="@dimen/space_s4">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/voice_entry_title"
-                    android:textColor="@color/tl_ink"
-                    android:textSize="@dimen/text_body" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/voice_entry_sub"
-                    android:textColor="@color/tl_ink3"
-                    android:textSize="@dimen/text_cap" />
-            </LinearLayout>
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/voice_entry_title"
-                android:src="@drawable/ic_nav_more"
-                android:tint="@color/tl_ink3" />
-        </LinearLayout>
-
-        <!-- T-096: the file manager entry, next to the voice entry. -->
-        <LinearLayout
-            android:id="@+id/settings_files_entry"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/page_gutter"
-            android:layout_marginTop="@dimen/space_s2"
-            android:layout_marginEnd="@dimen/page_gutter"
-            android:background="@drawable/bg_card"
-            android:elevation="@dimen/card_elevation"
-            android:gravity="center_vertical"
-            android:minHeight="@dimen/touch_min"
-            android:orientation="horizontal"
-            android:padding="@dimen/space_s4">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_files_title"
-                    android:textColor="@color/tl_ink"
-                    android:textSize="@dimen/text_body" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_files_sub"
-                    android:textColor="@color/tl_ink3"
-                    android:textSize="@dimen/text_cap" />
-            </LinearLayout>
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/settings_files_title"
-                android:src="@drawable/ic_nav_more"
-                android:tint="@color/tl_ink3" />
         </LinearLayout>
 
         <TextView

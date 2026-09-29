@@ -1,5 +1,8 @@
 package com.treelearn.app.ui;
 
+import com.treelearn.app.ui.math.MathFormula;
+import com.treelearn.app.ui.math.MathScanResult;
+import com.treelearn.app.ui.math.MathScanner;
 import com.treelearn.app.ui.UiThread;
 import com.treelearn.app.voice.TtsEngine;
 import java.util.ArrayList;
@@ -133,7 +136,76 @@ public final class ChatSpeaker {
         if (text == null) {
             return "";
         }
+        PlaceholderProtection protection = protectLiteralPlaceholders(text);
+        MathScanResult math = MathScanner.scan(protection.markdown);
+        text = math.masked;
+        for (MathFormula formula : math.formulas) {
+            text = text.replace(formula.placeholder, "\u516c\u5f0f");
+        }
+        for (LiteralPlaceholder placeholder : protection.placeholders) {
+            text = text.replace(placeholder.marker, placeholder.literal);
+        }
         return text.replaceAll("```[\\s\\S]*?```", " ").replaceAll("`([^`]*)`", "$1").replaceAll("!\\[[^]]*]\\([^)]*\\)", " ").replaceAll("\\[([^]]*)]\\([^)]*\\)", "$1").replaceAll("[#*>_~|]", " ").replaceAll("\\s+", " ").trim();
+    }
+
+    private static PlaceholderProtection protectLiteralPlaceholders(String text) {
+        StringBuilder protectedText = new StringBuilder(text.length());
+        ArrayList<LiteralPlaceholder> placeholders = new ArrayList<LiteralPlaceholder>();
+        int index = 0;
+        while (index < text.length()) {
+            int end = scannerPlaceholderEnd(text, index);
+            if (end < 0) {
+                protectedText.append(text.charAt(index++));
+                continue;
+            }
+            String literal = text.substring(index, end);
+            int markerIndex = placeholders.size();
+            String marker;
+            do {
+                marker = "\ue000TLLITERAL" + markerIndex++ + "\ue001";
+            } while (text.contains(marker));
+            protectedText.append(marker);
+            placeholders.add(new LiteralPlaceholder(literal, marker));
+            index = end;
+        }
+        return new PlaceholderProtection(protectedText.toString(), placeholders);
+    }
+
+    private static int scannerPlaceholderEnd(String text, int start) {
+        if (!text.startsWith("TLMATH", start)) {
+            return -1;
+        }
+        int index = start + "TLMATH".length();
+        int digitsStart = index;
+        while (index < text.length() && text.charAt(index) >= '0' && text.charAt(index) <= '9') {
+            index++;
+        }
+        if (index == digitsStart || !text.startsWith("TL", index)) {
+            return -1;
+        }
+        return index + 2;
+    }
+
+    private static final class PlaceholderProtection {
+
+        final String markdown;
+        final List<LiteralPlaceholder> placeholders;
+
+        PlaceholderProtection(String markdown, List<LiteralPlaceholder> placeholders) {
+            this.markdown = markdown;
+            this.placeholders = placeholders;
+        }
+    }
+
+    private static final class LiteralPlaceholder {
+
+        final String literal;
+        final String marker;
+
+        LiteralPlaceholder(String literal, String marker) {
+            this.literal = literal;
+            this.marker = marker;
+        }
     }
 
     static List<String> chunk(String text) {

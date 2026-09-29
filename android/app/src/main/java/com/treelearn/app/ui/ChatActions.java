@@ -98,6 +98,28 @@ public interface ChatActions {
      */
     void onForkPressed(String messageId, String quote, int startInclusive, int endExclusive);
 
+    /**
+     * 高亮: mark, unmark or merge the selected passage of one prose segment (方案 V1.1 §2.2–§2.3).
+     *
+     * <p>The offsets are the selection as the answer's own text view reports it, and
+     * {@code proseIndex} is the ordinal of the prose run the selection lives in - the same pairing
+     * the annotation's locator stores. What the tap means (cancel a highlight the selection sits
+     * exactly on, or write one merged with whatever it intersects) is the presenter's to decide,
+     * through {@link Highlighter#plan}.
+     *
+     * @param proseIndex the ordinal of the prose segment carrying the selection, 0-based
+     * @param startInclusive the inclusive character offset of the selection in that segment's text
+     * @param endExclusive the exclusive character offset of the selection in that segment's text
+     */
+    void onHighlightPressed(String messageId, int proseIndex, int startInclusive, int endInclusive);
+
+    /**
+     * 批注: attach a note to the selected passage. T-B finalises this signature and does nothing
+     * with it yet - the editor dialog, the anchor and the list are T-D's, and T-D may not change
+     * the signature (task file hand-off note).
+     */
+    void onNotePressed(String messageId, int proseIndex, int startInclusive, int endInclusive);
+
     /** Opens or closes the source card's upstream history (T-065). */
     void onSourceCardToggled();
 

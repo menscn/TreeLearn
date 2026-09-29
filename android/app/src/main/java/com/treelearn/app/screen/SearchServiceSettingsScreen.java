@@ -6,6 +6,7 @@ import android.content.res.ColorStateList;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
+import android.text.InputType;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -159,7 +160,7 @@ implements SearchSettingsPresenter.Sink {
         panel.addView((View)mask);
         this.keyInput = new EditText(this.getContext());
         this.keyInput.setHint(R.string.search_key_input_hint);
-        this.keyInput.setInputType(129);
+        this.keyInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         this.keyInput.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO);
         this.keyInput.setMaxLines(1);
         this.keyInput.setImeOptions(6);

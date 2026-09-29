@@ -51,4 +51,17 @@ public interface ChatCommands {
 
     /** The stored versions of one position, oldest first. Never null; empty when there is none. */
     List<AnswerRevision> versions(String messageId);
+
+    /**
+     * T-B: applies one tap on the menu's 高亮 cell to the stored marks (方案 V1.1 §2.2). The
+     * decision - cancel the mark under the selection, or write the merged union - is
+     * {@link Highlighter#plan}'s, run against the marks as the store holds them; this command only
+     * names the position and the span the learner selected. {@code answerText} is the text the
+     * screen is showing for this answer; the store hashes that very text, so a mark written now is
+     * readable by the next read and is cleared the day the answer changes.
+     *
+     * @param proseIndex the ordinal of the prose segment the selection sits in
+     */
+    ChatCommandResult applyHighlight(String messageId, String answerText, int proseIndex,
+            int startInclusive, int endInclusive);
 }

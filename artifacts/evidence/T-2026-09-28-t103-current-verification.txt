@@ -1,0 +1,39 @@
+Command=cd android; .\gradlew.bat :app:testDebugUnitTest --tests "com.treelearn.app.ui.math.MathLayoutTest" --no-build-cache --rerun-tasks --console=plain
+Result=BUILD SUCCESSFUL
+JVM_EXITCODE=0
+JVM_RESULT=TEST-com.treelearn.app.ui.math.MathLayoutTest.xml tests=5 skipped=0 failures=0 errors=0
+
+Command=cd android; .\gradlew.bat :app:connectedDebugAndroidTest --no-build-cache --rerun-tasks --console=plain
+Result=BUILD FAILED because the full suite reported existing adjacent failures
+CONNECTED_TOTAL=275
+CONNECTED_FAILURES=29
+CONNECTED_EXITCODE=1
+CONNECTED_SCOPE=Failures were in database migration, home/navigation, generation coordinator, tree canvas, and related adjacent tests; MathSpanInstrumentedTest and MarkdownRendererInstrumentedTest remained green.
+MATHSPAN_RESULT=tests=3 failures=0 skipped=0 successful=100%
+MARKDOWN_RENDERER_RESULT=tests=11 failures=0 skipped=0 successful=100%
+
+Command=cd android; .\gradlew.bat lint --no-build-cache --rerun-tasks --console=plain
+Result=BUILD SUCCESSFUL
+LINT_EXITCODE=0
+
+Command=cd android; powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\no-kotlin-check.ps1
+Result=VERDICT: PASS (13 OK line(s))
+GUARD_EXITCODE=0
+
+Command=cd android; .\gradlew.bat :app:assembleDebug --no-build-cache --rerun-tasks --console=plain
+Result=BUILD SUCCESSFUL
+BUILD_EXITCODE=0
+APK=D:\Project\Android\Treelearn\android\app\build\outputs\apk\debug\app-debug.apk
+APK_SHA256=7CED59649B9CCD00EC57B127A78710D68D5E80D14E3BB0A320CD795F900E905F
+APK_BYTES=1462420
+
+Command=cd android; adb install -r .\app\build\outputs\apk\debug\app-debug.apk; adb shell am force-stop com.treelearn; adb shell am start -W -n com.treelearn/com.treelearn.app.MainActivity
+INSTALL_RESULT=Success
+INSTALL_EXITCODE=0
+LAUNCH_STATUS=ok
+LAUNCH_EXITCODE=0
+APP_PID=29585
+FOCUSED_APP=com.treelearn/.app.MainActivity
+DEVICE_APK_SHA256=7CED59649B9CCD00EC57B127A78710D68D5E80D14E3BB0A320CD795F900E905F
+DEVICE_APK_BYTES=1462420
+BYTE_MATCH=True

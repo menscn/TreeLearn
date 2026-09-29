@@ -3,8 +3,11 @@ package com.treelearn.app.wiring;
 import com.treelearn.ai.prompt.DeepSeekRequest;
 import com.treelearn.app.generation.GenerationCoordinator;
 import com.treelearn.app.ui.ChildBranch;
+import com.treelearn.app.ui.ChatMessage;
+import com.treelearn.app.ui.Highlighter;
 import com.treelearn.app.ui.KeyVault;
 import com.treelearn.core.domain.AnswerRevision;
+import com.treelearn.core.domain.Annotation;
 import com.treelearn.core.domain.Branch;
 import com.treelearn.core.domain.ContextPlan;
 import com.treelearn.core.domain.DomainResult;
@@ -191,6 +194,16 @@ final class WiringDoubles {
         @Override
         public List<ChildBranch> children(String branchId, String messageId) {
             return children;
+        }
+
+        @Override
+        public Map<String, List<Annotation>> annotations(List<ChatMessage> answers) {
+            return new HashMap<String, List<Annotation>>();
+        }
+
+        @Override
+        public void applyHighlight(String messageId, String answerText, int proseIndex,
+                Highlighter.Plan plan, long now) {
         }
 
         @Override

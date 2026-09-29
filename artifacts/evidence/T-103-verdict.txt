@@ -1,0 +1,43 @@
+T-103 公式布局计算与自绘 Span — 汇总证据
+生成时间: 2026-09-28
+
+CMD-1 RED：JVM 单测最初失败（问题已定位并修复）
+  命令: 不可用（早期 RED 未保留完整日志）；修复记录如下:
+  1) MathLayoutTest 引用尚未实现的 MathLayout / MathSpan 类 — 通过实现四个生产文件解决。
+  2) 上标基线偏移方向写反：原 supBaselineY = base.ascent - rise + sup.ascent 导致上标沉到基线下；改为 supBaselineY = base.ascent - rise。
+  3) MathSpan 初版只实现 LineHeightSpan.WithDensity 的 6 参 chooseHeight，编译器报抽象方法未实现；补 6 参转发到 7 参版本。
+  4) MathLayoutTest 断言 hasText(box,"i=1") 误把 ROW 拆字的下限当整体字符串；改为分别检查 \u2211、i、=、1、n。
+
+CMD-2 GREEN：JVM 单测 MathLayoutTest 5/5 通过
+  命令: cd android && JAVA_HOME=/d/Environment/Jdk/jdk21 ./gradlew :app:testDebugUnitTest --tests "com.treelearn.app.ui.math.MathLayoutTest" --no-build-cache --rerun
+  完整日志: artifacts/evidence/T-103-jvm-mathlayouttest.log
+  EXITCODE=0
+  关键输出: BUILD SUCCESSFUL in 2s
+  XML 结果: android/app/build/test-results/testDebugUnitTest/TEST-com.treelearn.app.ui.math.MathLayoutTest.xml tests="5" skipped="0" failures="0" errors="0"
+
+CMD-3 仪器/真机：MathSpanInstrumentedTest 2/2 通过
+  设备: ANRBBB5427000010 (CGA-W00, API 37)
+  命令: cd android && JAVA_HOME=/d/Environment/Jdk/jdk21 ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.MathSpanInstrumentedTest --no-build-cache
+  完整日志: artifacts/evidence/T-103-connected-androidtest.log
+  EXITCODE=0
+  关键输出: Starting 2 tests on CGA-W00 - 17 / Finished 2 tests on CGA-W00 - 17 / BUILD SUCCESSFUL in 19s
+  绘制证据 PNG: artifacts/evidence/math-span-draw-evidence.png (2156 bytes, 显示 1/2 + sqrt(x^2))
+
+CMD-4 Java-only guard
+  命令: find android/app/src/main/java/com/treelearn/app/ui/math android/app/src/test/java/com/treelearn/app/ui/math -name "*.kt"
+  输出: (空)
+  VERDICT=PASS 无 Kotlin 文件，未修改 build.gradle，保持 Java-only。
+
+CMD-5 生产代码行数（官方口径：非空非注释）
+  命令: python -X utf8 .trae/scripts/dev/count_production_lines.py <四个生产文件>
+  输出:
+       6  MathMetrics.java
+      23  PaintMetrics.java
+     259  MathLayout.java
+      81  MathSpan.java
+     369  TOTAL
+  说明: 超过 200 行软上限（规则允许警告），未超过 500 行硬上限。增量大部来自八种节点各自的布局规则与显式命名常量。
+
+VERDICT: PASS
+GAPS: 无。
+RISKS: 未接入 MarkdownRenderer，公式尚未对用户可见；T-104 负责接线和降级。

@@ -4,9 +4,9 @@ id: T-2026-09-28-024
 title: 仪器测试全量批跑 DB 夹具隔离缺陷
 template_version: 2
 task_type: requirement
-status: clarifying
+status: ready
 parent_requirement: null
-requirements_confirmed: false
+requirements_confirmed: true
 generated_by: agent
 owner: android-dev
 owner_lane: android
@@ -31,15 +31,15 @@ tdd_mode: required
 - Core flow and reversibility: 定位污染源测试类 → 让每个测试类拿到独立的 DB 夹具（或统一走 helper 重建 + 容器重建）
   → 全量复跑绿。属测试基建改动，可逆。
 - Inputs/outputs: 输入为现有 androidTest 套件与 `AppContainer` 的 DB 持有方式；输出为隔离机制 + 全量绿的证据。
-- State and exception handling: **待用户拍板**（本任务创建于验收收口时，需求尚未与用户逐条确认）。
+- State and exception handling: 若二分定位期间发现失败并非 DB 夹具串扰，停止改隔离机制，记录证据并回到需求澄清；修复后仍须全量批跑，隔离批跑不能替代全量验收。
 - Constraints and trade-offs: 优先不动生产代码；若必须动（如 `AppContainer` 的连接生命周期），需单独论证并登记。
   候选方案：① 统一 `deleteDatabase()` 为「helper 重建 + 容器重建」；② 引入进程内夹具隔离（如每个类独立 DB 名）；
   ③ 最小二分定位污染类后按类修。
 - AI recommendation and rationale: 建议先做**最小二分定位**再选隔离方案——当前已排除字母序最前 5 类，
   但污染源未定位，直接上通用隔离方案可能过度设计。
-- User choice and custom additions: 待确认。
+- User choice and custom additions: 用户于 2026-09-28 确认按推荐方案执行：先二分定位污染源，再实施最小隔离修复；不先引入通用隔离。
 - AI-autonomous decisions: 无。
-- User-confirmation decisions: 是否立此任务（2026-09-28 用户就 008 收口选项裁决「收口并单立缺陷任务」，已确认）。
+- User-confirmation decisions: ① 是否立此任务（2026-09-28 用户就 008 收口选项裁决「收口并单立缺陷任务」）；② 先二分定位、再最小修复（2026-09-28 用户确认「按你建议来，按照 harness」）。
 - Acceptance evidence: 全量 `connectedDebugAndroidTest` 的 EXITCODE=0 与测试计数证据文件。
 - Facts: 多个 androidTest 类在 setUp/tearDown 调 `context().deleteDatabase(...)`
   （如 `AnswerVersions`:91,103、`AttachmentOrphanCleanup`:60,76、`AttachmentParseInject`:56,68），
@@ -148,8 +148,8 @@ Follow [code-document alignment](../rules/documentation.md).
 
 - Completed: 任务创建（由 008 独立验收的 G1 缺口转立）
 - In progress: 无
-- Blocker: 需求尚未与用户逐条确认（status 保持 clarifying）
-- Unblock condition: 用户确认问题口径与隔离方案选型
-- Next steps: ① 与用户确认方案选型（二分定位优先 / 直接上通用隔离）；② 定位污染源；③ 实施隔离并全量复跑
+- Blocker: 无
+- Unblock condition: N/A；需求与方案已由用户确认
+- Next steps: ① 源码静止后按二分方案定位污染类；② 按根因做最小隔离修复；③ 全量复跑 connectedDebugAndroidTest 并核对测试计数
 - Watch-outs: 不要为了「跑绿」而删除或弱化既有断言；不要顺手改生产逻辑；全量跑前确认源码静止
   （本仓有多条工作线共写 android/ 树的历史）

@@ -1,6 +1,7 @@
 package com.treelearn.app.ui;
 
 import com.treelearn.core.domain.AnswerRevision;
+import com.treelearn.core.domain.Annotation;
 import com.treelearn.core.domain.Branch;
 import com.treelearn.core.domain.BranchAnchor;
 import com.treelearn.core.domain.BranchSource;
@@ -117,6 +118,7 @@ final class ChatTestDoubles {
         ChatCommandResult resetResult = ChatCommandResult.ran(OP);
         ChatCommandResult selectResult = ChatCommandResult.ran(OP);
         ChatCommandResult forkResult = ChatCommandResult.openedBranch(BRANCH_2);
+        ChatCommandResult highlightResult = ChatCommandResult.ran(OP);
         List<AnswerRevision> versions = Collections.emptyList();
 
         final List<String> calls = new ArrayList<String>();
@@ -194,6 +196,14 @@ final class ChatTestDoubles {
             return versions;
         }
 
+        @Override
+        public ChatCommandResult applyHighlight(String messageId, String answerText, int proseIndex,
+                int startInclusive, int endInclusive) {
+            calls.add("applyHighlight");
+            lastMessageId = messageId;
+            return highlightResult;
+        }
+
         boolean called(String name) {
             return calls.contains(name);
         }
@@ -227,6 +237,7 @@ final class ChatTestDoubles {
         ChatData.Snapshot snapshot = snapshot(Collections.<ChatMessage>emptyList());
         List<ChildBranch> children = Collections.emptyList();
         boolean throwsInstead;
+        boolean childrenThrow;
         int reads;
         final List<String> branchesRead = new ArrayList<String>();
 
@@ -243,6 +254,9 @@ final class ChatTestDoubles {
         @Override
         public List<ChildBranch> children(String branchId, String messageId) {
             branchesRead.add(branchId + "/" + messageId);
+            if (childrenThrow) {
+                throw new IllegalStateException("the child list could not be read");
+            }
             return children;
         }
     }
@@ -264,6 +278,10 @@ final class ChatTestDoubles {
         @Override
         public void render(ChatViewState state) {
             states.add(state);
+        }
+
+        @Override
+        public void renderAnnotations(java.util.Map<String, List<Annotation>> annotations) {
         }
 
         @Override

@@ -103,6 +103,14 @@ public final class ChatSpeakerTest {
     }
 
     @Test
+    public void chunkingSpeaksEachMathFormulaAsAFormulaPlaceholder() {
+        List<String> segments = ChatSpeaker.chunk("\u6c42\u503c $\\frac{1}{2}$ \u4e0e $x^2$\u3002");
+
+        assertEquals(1, segments.size());
+        assertEquals("\u6c42\u503c \u516c\u5f0f \u4e0e \u516c\u5f0f\u3002", segments.get(0));
+    }
+
+    @Test
     public void aPlaybackErrorTurnsErrorAndTheNextPressRetries() {
         speaker.onSpeakPressed("m1", "回答。");
 

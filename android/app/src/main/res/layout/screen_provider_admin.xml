@@ -150,23 +150,9 @@
                 android:textColor="@color/tl_ink"
                 android:textSize="@dimen/text_body" />
 
-            <EditText
-                android:id="@+id/provider_key_input"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/touch_min"
-                android:layout_marginTop="@dimen/space_s2"
-                android:background="@drawable/bg_field"
-                android:hint="@string/editor_key_input_hint"
-                android:imeOptions="actionDone"
-                android:importantForAutofill="no"
-                android:inputType="textPassword"
-                android:maxLines="1"
-                android:paddingStart="@dimen/space_s3"
-                android:paddingEnd="@dimen/space_s3"
-                android:textColor="@color/tl_ink"
-                android:textColorHint="@color/tl_ink3"
-                android:textSize="@dimen/text_sm" />
-
+            <!-- Key form rearranged (settings redesign 2026-09-28): input and save icon on one
+                 row, the save icon the row's only filled element; delete is a red text link with
+                 a confirm dialog, never a button beside save. -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -174,27 +160,47 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <Button
-                    android:id="@+id/provider_key_save"
-                    android:layout_width="wrap_content"
+                <EditText
+                    android:id="@+id/provider_key_input"
+                    android:layout_width="0dp"
                     android:layout_height="@dimen/touch_min"
-                    android:background="@drawable/bg_button_primary"
-                    android:minWidth="@dimen/touch_min"
-                    android:text="@string/editor_key_save"
-                    android:textColor="@color/tl_surface"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_field"
+                    android:hint="@string/editor_key_input_hint"
+                    android:imeOptions="actionDone"
+                    android:importantForAutofill="no"
+                    android:inputType="textNoSuggestions"
+                    android:maxLines="1"
+                    android:paddingStart="@dimen/space_s3"
+                    android:paddingEnd="@dimen/space_s3"
+                    android:textColor="@color/tl_ink"
+                    android:textColorHint="@color/tl_ink3"
                     android:textSize="@dimen/text_sm" />
 
-                <Button
-                    android:id="@+id/provider_key_delete"
-                    android:layout_width="wrap_content"
+                <ImageView
+                    android:id="@+id/provider_key_save"
+                    android:layout_width="@dimen/touch_min"
                     android:layout_height="@dimen/touch_min"
                     android:layout_marginStart="@dimen/space_s2"
-                    android:background="@drawable/bg_button_danger"
-                    android:minWidth="@dimen/touch_min"
-                    android:text="@string/editor_key_delete"
-                    android:textColor="@color/tl_red"
-                    android:textSize="@dimen/text_sm" />
+                    android:background="@drawable/bg_save_ico"
+                    android:contentDescription="@string/cd_settings_key_save"
+                    android:padding="@dimen/space_s2"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_check" />
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/provider_key_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_s2"
+                android:background="?android:attr/selectableItemBackground"
+                android:paddingTop="@dimen/space_s1"
+                android:paddingBottom="@dimen/space_s1"
+                android:text="@string/editor_key_delete"
+                android:textColor="@color/tl_red"
+                android:textSize="@dimen/text_sm"
+                android:visibility="gone" />
 
             <Button
                 android:id="@+id/provider_fetch"

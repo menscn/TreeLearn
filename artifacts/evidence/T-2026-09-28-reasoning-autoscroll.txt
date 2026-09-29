@@ -1,0 +1,78 @@
+T-2026-09-28 思考区自动跟随滚动修复（Fix 3）自证证据
+=====================================================
+范围：ReasoningDisclosure 的 320dp 半折容器在流式期间跟随自身尾部；
+      学习者手动上滑即交还位置所有权，滑回末端才恢复跟随。
+命令均在 D:/Project/Android/Treelearn 下执行（gradle 步骤在 android/ 下），
+JAVA_HOME=/d/Environment/Jdk/jdk21，Gradle 8.14.3，--no-daemon --no-build-cache。
+
+[0] 问题与根因
+用户报告：「思考过程没有自动跟随滚动」。
+根因：view_reasoning.xml 的 reasoning_body_scroll 是高度上限 reasoning_max_height(320dp)
+的 ScrollView；正文变高被钳制后滚动位置恒为 0，于是流式期间一直显示思考的**开头几行**，
+新增内容落在视口下方不可见（T-2026-09-28-reasoning-flicker 帧 02 顶部可见、滑块在顶即为证）。
+
+[1] 改法（android/app/src/main/java/com/treelearn/app/screen/ReasoningDisclosure.java）
+- 新增 followingTail 字段（初值 true）＋ atTail()：view 高度 - padding 求 maxScroll，
+  留 space_s3 容差；bodyScroll.setOnScrollChangeListener → followingTail = atTail()。
+  即「学习者与组件共用同一个 scroll view，任何一次滚动都重新声明谁拥有位置」，
+  与对话主列表 T-075 follow-latest 的交还语义一致。
+- 新增 followTail(content, maxHeight)：视口 = min(content, maxHeight)，
+  tail = content - 视口，仅当 scrollY != tail 时 scrollTo(0, tail)（避免逐 token 无谓重绘）。
+- followTail 在 clampBodyHeight 的 post 内、用**同一次** measure 结果调用——
+  只有那里知道刚写入的内容多高；另起一个 post 会读到上一帧的范围。
+- 新答案 / 隐藏分支把 followingTail 复位为 true（新流无人滚动过）。
+
+[2] 测试
+命令: ./gradlew --no-daemon --console=plain --no-build-cache :app:testDebugUnitTest --tests "com.treelearn.app.ui.ReasoningDisclosureLayoutTest" --tests "com.treelearn.app.ui.ChatMessageRowLayoutTest"
+输出: BUILD SUCCESSFUL in 29s (54 actionable tasks: 54 executed)
+EXITCODE=0
+用例数（读自 app/build/test-results/testDebugUnitTest/TEST-*.xml）:
+  ChatMessageRowLayoutTest        tests=17 failures=0 errors=0
+  ReasoningDisclosureLayoutTest   tests= 4 failures=0 errors=0
+  合计 tests=21 failures=0 errors=0 skipped=0
+新增用例 theBodyFollowsItsOwnTail：断言 followingTail 存在、setOnScrollChangeListener 决定
+所有权、atTail() 按内容测量、bodyScroll.scrollTo(0, tail)、if (!followingTail) 提前返回、
+followTail(content, maxHeight) 位于 clampBodyHeight 内、followingTail = true 出现 >= 3 处。
+
+[3] 打包与 Java-only 守门
+命令: ./gradlew --no-daemon --console=plain --no-build-cache :app:assembleDebug verifyNoKotlinDex
+输出: BUILD SUCCESSFUL in 58s (215 actionable tasks: 203 executed, 12 up-to-date)
+      verifyNoKotlinDex: PASS (3 APK(s) inspected across app/build/outputs/apk, no Kotlin runtime bytecode)
+EXITCODE=0
+（注：守门任务在根项目，写 :app:verifyNoKotlinDex 会报 task not found。）
+
+[4] 设备 APK 绑定
+命令: adb install -r app/build/outputs/apk/debug/app-debug.apk
+      adb shell pm path com.treelearn ; adb pull <路径> artifacts/tmp/device/fix3_device.apk
+      md5sum 两侧
+输出: 1bd1fc90420c584a487f7a28f935e1ba  artifacts/tmp/device/fix3_device.apk
+      1bd1fc90420c584a487f7a28f935e1ba  app/build/outputs/apk/debug/app-debug.apk
+EXITCODE=0（install 输出 Success）
+设备: ANRBBB5427000010，横屏 3200x2136 截图坐标 = 设备坐标。
+
+[5] 真机行为验证
+命令: adb shell input text "compare%sscaled%sdot%sproduct%sattention%sand%sadditive%sattention%swith%sone%stable"
+      adb shell input tap 2252 714    # 发送
+      for i in 01..14: adb exec-out screencap -p > artifacts/tmp/device/fix3_stream_$i.png; sleep 0.4
+关键帧判读（14 帧 md5 全不相同 = 内容确实在流）:
+  fix3_stream_03.png  思考仍「正在形成」；右缘滚动条滑块在**底端**；
+                      视口显示的是最新尾部（"Fast: parallelizable, no extra parameters"），
+                      非开头几行 → 跟随生效（对照修复前 fix2_stream_02.png 滑块在顶端）。
+  fix3_stream_09.png  仍是「正在形成」，滑块仍在底端，内容进一步更新到尾部
+                      （"Empirical: with d_k = 64 ..."）→ 持续跟随。
+  fix3_stream_14.png  思考收起为「思考过程 | 展开」一行，正文开始流入 → 阶段切换正常。
+对照证据: artifacts/tmp/device/fix2_stream_02.png（修复前：滑块在顶、显示开头）、
+          artifacts/tmp/device/fix3_stream_03.png / fix3_stream_09.png（修复后：滑块在底、显示尾部）。
+
+[6] 未覆盖项（诚实记录）
+「学习者手动上滑 → followingTail=false → 流式不再抢回」这一分支由单元断言
+theBodyFollowsItsOwnTail 覆盖（JVM 无 ScrollView 测量能力）；真机上因每次提问的思考时长
+不可控，脚本两次尝试都落在思考已结束/新回合的窗口，未能在此次会话截到该分支的对照帧。
+建议日常使用中手动上滑一次复核：应停在原处、不再被拉回底部。
+
+[7] 环境竞态裁决（非代码缺陷）
+- ChildBranchPopup.java:72 找不到符号 R.dimen.popup_width：该文件 15:50:34 由别线修改并
+  引用尚未加入的 token；dimens.xml(15:32) 只有 popup_max_height。等待其于第 2 轮补上
+  name="popup_width" 且源码静止后重跑即过。与既有 popup_word_action.xml 引用未定义字符串
+  同类（在途状态），未改其文件。
+- 另有 Gradle 两把锁（fileHashes / buildOutputCleanup）拒绝访问，轮询至释放后重跑即过。

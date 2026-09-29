@@ -159,4 +159,53 @@ public class MathScannerTest {
         assertEquals(first.masked, second.masked);
         assertEquals(first.masked, MathScanner.scan(first.masked).masked);
     }
+
+    @Test
+    public void fencedCodeBlockAfterProseIsLeftUntouched() {
+        String markdown = "正文说明\n```\n$x^2$\n```\n收尾";
+
+        MathScanResult result = MathScanner.scan(markdown);
+
+        assertTrue(result.formulas.isEmpty());
+        assertEquals(markdown, result.masked);
+    }
+
+    @Test
+    public void indentedCodeBlockAfterProseIsLeftUntouched() {
+        String markdown = "正文说明\n    $x^2$\n收尾";
+
+        MathScanResult result = MathScanner.scan(markdown);
+
+        assertTrue(result.formulas.isEmpty());
+        assertEquals(markdown, result.masked);
+    }
+
+    @Test
+    public void spaceBeforeClosingDollarAbandonsOnlyThatRun() {
+        MathScanResult result = MathScanner.scan("$x^2 $ 和 $y^2$");
+
+        assertEquals(1, result.formulas.size());
+        assertEquals("y^2", result.formulas.get(0).latex);
+        assertTrue("the prose between the two runs must not be swallowed",
+                result.masked.contains("$x^2 $"));
+    }
+
+    @Test
+    public void shortAsciiInlineIsExtractedWithoutSignalCharacter() {
+        MathScanResult result = MathScanner.scan("令 $a+b$ 为");
+
+        assertEquals(1, result.formulas.size());
+        assertEquals("a+b", result.formulas.get(0).latex);
+        assertFalse(result.formulas.get(0).block);
+    }
+
+    @Test
+    public void chineseCurrencyWithoutSpaceIsNotExtracted() {
+        String markdown = "价格 $5到$10";
+
+        MathScanResult result = MathScanner.scan(markdown);
+
+        assertTrue(result.formulas.isEmpty());
+        assertEquals(markdown, result.masked);
+    }
 }

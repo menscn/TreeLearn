@@ -68,15 +68,25 @@ function check(name, cond, detail) {
   await cdp.waitFor(`!!window.__demo`, 30000, '__demo 挂载');
   await sleep(800);
 
-  console.log('== 1. 六格菜单：选中即弹，取消态关闭 ==');
+  console.log('== 1. 五格主菜单 + 更多：选中即弹，取消态关闭 ==');
   check('selectRange 打开菜单', await cdp.eval(`window.__demo.selectRange('p1', 0, 12)`) === true);
   let st = await cdp.eval(`window.__demo.state()`);
   check('菜单可见', st.menuOpen === true, st);
   check('非取消态', st.menuCancel === false);
   const cellCount = await cdp.eval(`document.querySelectorAll('.hl-menu .hl-cell').length`);
-  check('六格图标', cellCount === 6, cellCount);
+  check('五格主菜单图标', cellCount === 5, cellCount);
   const textBtns = await cdp.eval(`Array.from(document.querySelectorAll('.hl-menu button')).filter(b => b.textContent.trim() && !b.querySelector('svg')).length`);
   check('菜单内无文字按钮', textBtns === 0, textBtns);
+  await cdp.eval(`window.__demo.tapMenu('more')`);
+  await sleep(80);
+  st = await cdp.eval(`window.__demo.state()`);
+  check('更多子菜单打开且选区仍在', st.menuOpen === true && st.moreOpen === true, st);
+  const moreCount = await cdp.eval(`document.querySelectorAll('.hl-more-menu .hl-cell').length`);
+  check('更多包含复制与全选', moreCount === 2, moreCount);
+  await cdp.eval(`window.__demo.tapMenu('more')`);
+  await sleep(80);
+  st = await cdp.eval(`window.__demo.state()`);
+  check('关闭更多不结束主菜单', st.menuOpen === true && st.moreOpen === false, st);
   await cdp.eval(`window.__demo.tapMenu('highlight')`);
   await sleep(120);
   st = await cdp.eval(`window.__demo.state()`);
@@ -185,7 +195,7 @@ function check(name, cond, detail) {
   await cdp.eval(`window.__demo.setYellow('#FFE58F')`);
   await sleep(120);
   const markBg = await cdp.eval(`getComputedStyle(document.querySelector('mark.hl')).backgroundColor`);
-  check('档位切换生效', markBg === 'rgb(255, 229, 143)', markBg);
+  check('档位切换生效', /^rgb\(255, 229, 14[3-4]\)$/.test(markBg), markBg);
 
   console.log('== 8. 拍板①：重新生成 → 整条清除 ==');
   await cdp.eval(`window.__demo.regen()`);

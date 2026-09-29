@@ -52,9 +52,15 @@ public final class ChatAskAiChipsTest {
                 drafts);
     }
 
+    /** A conversation whose answer is stable, so the selection menu's quote can anchor on it. */
+    private void aReadableConversation() {
+        data.snapshot = ChatTestDoubles.snapshot(ChatTestDoubles.messages(
+                ChatTestDoubles.stableAnswer(ChatTestDoubles.M_ASK, ChatTestDoubles.ANSWER)));
+    }
+
     @Test
     public void theSelectionMenusAskAiRaisesTheChipsWithTheQuote() {
-        data.snapshot = ChatTestDoubles.snapshot(Collections.<ChatMessage>emptyList());
+        aReadableConversation();
         ChatPresenter presenter = deferredPresenter();
         presenter.onResumed();
         deferred.drain();
@@ -67,7 +73,7 @@ public final class ChatAskAiChipsTest {
 
     @Test
     public void clearingTheQuoteTakesTheChipsDown() {
-        data.snapshot = ChatTestDoubles.snapshot(Collections.<ChatMessage>emptyList());
+        aReadableConversation();
         ChatPresenter presenter = deferredPresenter();
         presenter.onResumed();
         deferred.drain();
@@ -81,7 +87,7 @@ public final class ChatAskAiChipsTest {
 
     @Test
     public void aChipTapSendsItsQueryCarriesTheQuoteAndKeepsTheDraft() {
-        data.snapshot = ChatTestDoubles.snapshot(Collections.<ChatMessage>emptyList());
+        aReadableConversation();
         ChatPresenter presenter = deferredPresenter();
         presenter.onResumed();
         deferred.drain();
@@ -106,7 +112,7 @@ public final class ChatAskAiChipsTest {
 
     @Test
     public void aRefusedChipSendKeepsEverythingTheLearnerHad() {
-        data.snapshot = ChatTestDoubles.snapshot(Collections.<ChatMessage>emptyList());
+        aReadableConversation();
         ChatPresenter presenter = deferredPresenter();
         presenter.onResumed();
         deferred.drain();

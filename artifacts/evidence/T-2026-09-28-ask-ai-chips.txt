@@ -1,0 +1,96 @@
+T-2026-09-28 问AI三chips（为什么/是什么/怎么用）实现证据
+=============================================================
+时间：2026-09-28 15:28 - 16:08
+执行：WorkBuddy 会话（对话页工作线）
+
+## 变更清单
+
+资源（3 新 1 改）：
+- android/app/src/main/res/drawable/bg_ask_ai_chip.xml  [新增, git add A 状态]
+  selector：默认 tl_surface 底 + hairline tl_green 描边，pressed 填 tl_green_soft。
+  注释无 "--"（AAPT2 红线，已扫描）。
+- android/app/src/main/res/layout/screen_chat_body.xml  [修改]
+  chat_composer 内新增 chat_ask_chips 行（chat_ask_why/what/how 三个 FrameLayout，
+  各 44dp(touch_min) 触控高 + 内嵌 32dp 级视觉 pill，与 ModelThinkingPicker 的
+  "视觉 pill / 触控宿主分离"先例同构；contentDescription 用 cd_chat_ask_*）。
+- android/app/src/main/res/values/strings.xml  [修改]
+  新增 chat_ask_chip_why/what/how、chat_ask_query_why/what/how（用户逐字给的
+  三条 query 文案）、cd_chat_ask_why/what/how。
+- android/app/src/main/res/values/dimens.xml  [修改]
+  新增 ask_chip_gap=8dp。（曾误加 ask_chip_height=32dp，已删——视觉高由
+  padding 决定，不设固定值。）
+
+Java（4 改 1 新）：
+- android/app/src/main/java/com/treelearn/app/ui/ChatViewState.java
+  尾部新增 public final boolean askAiChips；构造器/initial()/copy() 及全部
+  with* 同步 +1 参数；新增 withAskAiChips(boolean)；withComposerAttachment
+  固定传 false（附件与 chips 同为依附 quote 的表面，互斥）。
+- android/app/src/main/java/com/treelearn/app/ui/ChatActions.java
+  新增 void onAskAiChipPressed(String query)。
+- android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java
+  onSend() 抽出私有 send(text, clearDraft)；onAskAiChipPressed：query 非空
+  且 state.quote 非空 → send(text, false)（草稿保留）。
+  onQuotePressed 成功 → withQuote(anchor).withAskAiChips(true)。
+  onQuoteCleared / onAttachmentPicked → withAskAiChips(false)。
+  send() 的 render 统一 withAskAiChips(false)（发送即收起）。
+  publish 重载 (result, mayOpenBranch, clearDraft, clearQuote)：
+  - typed send  = publish(..., clearDraft=true,  clearQuote=true)  原行为
+  - chip send   = publish(..., clearDraft=false, clearQuote=true)  新行为
+  - position/fork = 3 参重载 → (clearDraft, clearDraft)            原行为
+  clearQuote 分支：drafts.save(branchId, ChatDraft(state.draft, "", model,
+  thinking)) —— 保留草稿、丢掉已发出的 quote；awaitingFirstRow + 轮询照常。
+- android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java
+  字段 askChipsRow/askChipWhy/askChipWhat/askChipHow；findViewById + 点击
+  fireChip(R.string.chat_ask_query_*)；renderAskAiChips(state)（quote 非空
+  且 askAiChips 才 VISIBLE），挂在 render() 的 renderQuote 之后。
+- android/app/src/test/java/com/treelearn/app/ui/ChatAskAiChipsTest.java  [新增, git add A]
+  6 例：菜单问AI带起 chips / 清引用收起 / chip 发送 query+quote 且保留草稿
+  （存储记录同步更新）/ refused 保留一切 / 无 quote 拒发 / T-065 预填不弹 chips。
+
+## 关键语义（用户拍板 2026-09-28）
+
+1. chips 三条 query 文案 = 用户原话逐字入库（strings.xml chat_ask_query_*）。
+2. 选了 chip 直接发送 → chips 收起（一次性）。
+3. 点 chip 时草稿保留，chip query 单独发出；quote 作为 cargo 一起走。
+
+## 验证证据
+
+构建目录隔离：-PbuildDir=build-chips --no-build-cache
+（别线 15:27-15:28 仍在写 EdgeFadeLayout.java / HomeRecommendationStripTest.java，
+共享 build/ 会竞态，故隔离。）
+
+1) 编译：:app:compileDebugJavaWithJavac → BUILD SUCCESSFUL（EXITCODE=0）
+   注: 某些输入文件使用或覆盖了已过时的 API。（既有警告，非本轮引入）
+
+2) 类域隔离测试 :app:testDebugUnitTest --tests 8 类
+   （16:04:35 运行）→ BUILD SUCCESSFUL
+   IconAssetsTest=11  ChatAskAiChipsTest=6  ChatComposerInputTest=11
+   ChatMessageRowLayoutTest=17  ChatPresenterTest=43  ChatViewStateTest=14
+   WordMenuTest=7  ChatWiringRecommendationsTest=4
+   TOTAL 113 FAILED 0
+
+3) Java-only guard：./gradlew verifyNoKotlinDex（16:06）→ BUILD SUCCESSFUL
+   EXITCODE=0，无 Kotlin 命中。
+
+4) 设计 token 守门：python .trae/scripts/dev/check_design_tokens.py
+   → measured_tokens=43 measured_resources=15, 0 check(s) failed
+   （本轮未新增颜色 token，三方一致未被破坏。）
+
+## 过程中修掉的两个自身 bug（供后续会话参考）
+
+A. 测试首版用空消息 snapshot → onQuotePressed 的 state.message(M_ASK) 为 null
+   → 校验拒绝。修：aReadableConversation() 放入 stableAnswer。
+   （教训：canQuote=canFork=isStable，quote 类测试的 snapshot 必须有 stable 行。）
+
+B. send() 曾把 clearDraft 同时传给 publish 的 clearQuote → chip 路径
+   (false,false)，quote 永不清除。由单用例诊断输出定位：
+   render#5 sending=false quote=the scaling sentence → publish 走了 render(next)
+   分支。修：publish(..., clearDraft, true)，quote 的清除独立于 draft。
+   （教训：诊断时先确认 XML 时间戳晚于源码 mtime——中途读过一次旧 XML，
+   3 个"失败"里 2 个是旧产物残留；--rerun-tasks 拿到真结果后只剩 1 个。）
+
+## 未尽事项
+
+- 真机安装验证未做（别线共用设备 AWSS013807000356 的 androidTest 会卸载被测
+  应用，本轮以结构测试为证；下一轮装机时顺带截图验收）。
+- PRD §6.2.19 规格正文与两轮用户决定（取消分组 / 问AI chips）的同步待用户点头。

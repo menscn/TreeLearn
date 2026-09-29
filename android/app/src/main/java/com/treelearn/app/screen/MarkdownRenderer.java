@@ -2,9 +2,11 @@ package com.treelearn.app.screen;
 
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextPaint;
+import android.text.style.AlignmentSpan;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
@@ -40,6 +42,13 @@ import org.commonmark.parser.Parser;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import com.treelearn.app.ui.math.MathFormula;
+import com.treelearn.app.ui.math.MathNode;
+import com.treelearn.app.ui.math.MathParser;
+import com.treelearn.app.ui.math.MathScanResult;
+import com.treelearn.app.ui.math.MathScanner;
+import com.treelearn.app.ui.math.MathSpan;
 
 /**
  * Converts CommonMark into selectable Android spans without exposing Markdown syntax to the user.
@@ -136,19 +145,24 @@ public final class MarkdownRenderer {
         if (markdown == null || markdown.isEmpty()) {
             return segments;
         }
+        PlaceholderProtection literalProtection = protectLiteralPlaceholders(markdown);
+        MathScanResult math = MathScanner.scan(literalProtection.markdown);
         Node document = Parser.builder()
                 .extensions(Collections.singletonList(TablesExtension.create()))
                 .build()
-                .parse(markdown);
+                .parse(math.masked);
         SpannableStringBuilder prose = new SpannableStringBuilder();
         for (Node child = document.getFirstChild(); child != null; child = child.getNext()) {
             if (child instanceof TableBlock) {
+                applyMath(prose, math.formulas, literalProtection.placeholders);
                 flush(segments, prose);
-                segments.add(readTable((TableBlock) child, codeClick));
+                segments.add(readTable((TableBlock) child, codeClick, math.formulas,
+                        literalProtection.placeholders));
                 continue;
             }
             renderNode(child, prose, 0, codeClick);
         }
+        applyMath(prose, math.formulas, literalProtection.placeholders);
         trimTrailingNewlines(prose);
         flush(segments, prose);
         mergeAdjacentProse(segments);
@@ -183,6 +197,12 @@ public final class MarkdownRenderer {
 
     /** Turns a table node into a segment: rows as data, so the screen can lay them out. */
     private static Segment readTable(TableBlock table, OnCodeBlockClick codeClick) {
+        return readTable(table, codeClick, Collections.<MathFormula>emptyList(),
+                Collections.<LiteralPlaceholder>emptyList());
+    }
+
+    private static Segment readTable(TableBlock table, OnCodeBlockClick codeClick,
+            List<MathFormula> formulas, List<LiteralPlaceholder> literalPlaceholders) {
         List<List<CharSequence>> rows = new ArrayList<List<CharSequence>>();
         List<String> header = new ArrayList<String>();
         boolean hasHeader = false;
@@ -205,6 +225,7 @@ public final class MarkdownRenderer {
                     trimTrailingNewlines(cellText);
                     cellText = new SpannableStringBuilder(
                             cellText.toString().replace('\n', ' ').trim());
+                    applyMath(cellText, formulas, literalPlaceholders);
                     cells.add(cellText);
                     if (isHead) {
                         header.add(cellText.toString());
@@ -224,17 +245,132 @@ public final class MarkdownRenderer {
      * #render}, which must return one string, and for a table nested inside another table's cell.
      */
     private static CharSequence flattenTable(Segment segment) {
-        StringBuilder out = new StringBuilder();
+        SpannableStringBuilder out = new SpannableStringBuilder();
         for (List<CharSequence> row : segment.table) {
             for (int i = 0; i < row.size(); i++) {
                 if (i > 0) {
                     out.append("  ");
                 }
-                out.append(row.get(i).toString());
+                out.append(row.get(i));
             }
             out.append('\n');
         }
         return out;
+    }
+
+    private static void applyMath(SpannableStringBuilder out, List<MathFormula> formulas,
+            List<LiteralPlaceholder> literalPlaceholders) {
+        for (MathFormula formula : formulas) {
+            String rendered = out.toString();
+            int start = rendered.indexOf(formula.placeholder);
+            if (start < 0) {
+                continue;
+            }
+            int end = start + formula.placeholder.length();
+            MathNode node = MathParser.parse(formula.latex);
+            if (node == null) {
+                out.replace(start, end, formula.latex);
+                int fallbackEnd = start + formula.latex.length();
+                if (fallbackEnd > start) {
+                    out.setSpan(new TypefaceSpan("monospace"), start, fallbackEnd,
+                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    out.setSpan(new BackgroundColorSpan(CODE_BACKGROUND), start, fallbackEnd,
+                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+                continue;
+            }
+            out.replace(start, end, "\ufffc");
+            int formulaEnd = start + 1;
+            out.setSpan(MathSpan.create(node, formula.block), start, formulaEnd,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            if (formula.block) {
+                applyBlockAlignment(out, start, formulaEnd);
+            }
+        }
+        restoreLiteralPlaceholders(out, literalPlaceholders);
+    }
+
+    private static void applyBlockAlignment(SpannableStringBuilder out, int start, int end) {
+        String rendered = out.toString();
+        int paragraphStart = rendered.lastIndexOf('\n', start - 1) + 1;
+        int paragraphBreak = rendered.indexOf('\n', end);
+        int paragraphEnd = paragraphBreak < 0 ? rendered.length() : paragraphBreak + 1;
+        if (paragraphEnd > paragraphStart) {
+            out.setSpan(new AlignmentSpan.Standard(Layout.Alignment.ALIGN_CENTER), paragraphStart,
+                    paragraphEnd, Spannable.SPAN_PARAGRAPH);
+        }
+    }
+
+    private static void restoreLiteralPlaceholders(SpannableStringBuilder out,
+            List<LiteralPlaceholder> placeholders) {
+        for (LiteralPlaceholder placeholder : placeholders) {
+            int start = out.toString().indexOf(placeholder.marker);
+            while (start >= 0) {
+                int end = start + placeholder.marker.length();
+                out.replace(start, end, placeholder.literal);
+                start = out.toString().indexOf(placeholder.marker, start + placeholder.literal.length());
+            }
+        }
+    }
+
+    private static PlaceholderProtection protectLiteralPlaceholders(String markdown) {
+        StringBuilder protectedMarkdown = new StringBuilder(markdown.length());
+        List<LiteralPlaceholder> placeholders = new ArrayList<LiteralPlaceholder>();
+        int index = 0;
+        while (index < markdown.length()) {
+            int end = scannerPlaceholderEnd(markdown, index);
+            if (end < 0) {
+                protectedMarkdown.append(markdown.charAt(index++));
+                continue;
+            }
+            String literal = markdown.substring(index, end);
+            int markerIndex = placeholders.size();
+            String marker;
+            do {
+                marker = "\ue000TLLITERAL" + markerIndex++ + "\ue001";
+            } while (markdown.contains(marker));
+            protectedMarkdown.append(marker);
+            placeholders.add(new LiteralPlaceholder(literal, marker));
+            index = end;
+        }
+        return new PlaceholderProtection(protectedMarkdown.toString(), placeholders);
+    }
+
+    private static int scannerPlaceholderEnd(String text, int start) {
+        if (!text.startsWith("TLMATH", start)) {
+            return -1;
+        }
+        int index = start + "TLMATH".length();
+        int digitsStart = index;
+        while (index < text.length() && text.charAt(index) >= '0' && text.charAt(index) <= '9') {
+            index++;
+        }
+        if (index == digitsStart || !text.startsWith("TL", index)) {
+            return -1;
+        }
+        return index + 2;
+    }
+
+    private static final class PlaceholderProtection {
+
+        final String markdown;
+        final List<LiteralPlaceholder> placeholders;
+
+        PlaceholderProtection(String markdown, List<LiteralPlaceholder> placeholders) {
+            this.markdown = markdown;
+            this.placeholders = placeholders;
+        }
+    }
+
+    private static final class LiteralPlaceholder {
+
+        final String literal;
+        final String marker;
+
+        LiteralPlaceholder(String literal, String marker) {
+            this.literal = literal;
+            this.marker = marker;
+        }
     }
 
     private static void renderChildren(Node parent, SpannableStringBuilder out, int depth,

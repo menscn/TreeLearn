@@ -29,6 +29,7 @@ import com.treelearn.app.screen.NavigationScreen;
 import com.treelearn.app.screen.ProviderAdminScreen;
 import com.treelearn.app.screen.SearchServiceSettingsScreen;
 import com.treelearn.app.screen.StatsDetailScreen;
+import com.treelearn.app.screen.SettingsKeyScreen;
 import com.treelearn.app.screen.SettingsScreen;
 import com.treelearn.app.screen.TreeCanvasScreen;
 import com.treelearn.app.screen.VoiceSettingsScreen;
@@ -63,6 +64,7 @@ import com.treelearn.app.ui.TreeCanvasSink;
 import com.treelearn.app.ui.TreeCanvasViewState;
 import com.treelearn.app.ui.VoiceSettingsPresenter;
 import com.treelearn.core.domain.AnswerRevision;
+import com.treelearn.core.domain.Annotation;
 import com.treelearn.app.voice.SystemTtsEngine;
 import com.treelearn.core.domain.GenerationModel;
 import com.treelearn.core.domain.ReadingAnchor;
@@ -70,6 +72,7 @@ import com.treelearn.core.domain.ReadingPosition;
 import com.treelearn.treelayout.ViewportConstraints;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * The app shell: one Activity, one content host, and the persistent bottom tab bar that carries the
@@ -148,7 +151,9 @@ public final class MainActivity extends Activity
     private LibraryScreen libraryScreen;
     private LibraryPresenter libraryPresenter;
 
-    /** The four sub-settings rooms and their decisions; null while the room is not on screen. */
+    /** The sub-settings rooms and their decisions; null while the room is not on screen. The key
+     *  room shares the settings presenter, so it holds no presenter field of its own. */
+    private SettingsKeyScreen keyAdminScreen;
     private ProviderAdminScreen providerAdminScreen;
     private ProviderAdminPresenter providerAdminPresenter;
     private ModelSettingsScreen modelSettingsScreen;
@@ -188,7 +193,8 @@ public final class MainActivity extends Activity
                 container.background(), container.settingsStore());
 
         homeScreen.setActions(homePresenter);
-        settingsScreen.setActions(settingsPresenter);
+        // The settings root page is a pure navigation list; the settings presenter's actions are
+        // consumed by the key room (showKeyAdmin), which shares the presenter and its store reads.
         settingsScreen.setOnBackPressed(this::onBackRequested);
 
         // The home drawer (T-106): an overlay on main_drawer_root, outside swap()'s reach. Its
@@ -223,6 +229,7 @@ public final class MainActivity extends Activity
         // pattern for all five; the file manager (T-096) needs its own entry to be alive, and the
         // four predecessors are repaired by the same stroke rather than left dead.
         settingsScreen.setOnProvidersPressed(this::showProviders);
+        settingsScreen.setOnKeyPressed(this::showKeyAdmin);
         settingsScreen.setOnModelsPressed(this::showModels);
         settingsScreen.setOnSearchPressed(this::showSearchSettings);
         settingsScreen.setOnVoicePressed(this::showVoiceSettings);
@@ -327,7 +334,7 @@ public final class MainActivity extends Activity
             showHome();
             return;
         }
-        if (providerAdminScreen != null || modelSettingsScreen != null
+        if (keyAdminScreen != null || providerAdminScreen != null || modelSettingsScreen != null
                 || searchSettingsScreen != null || voiceSettingsScreen != null
                 || fileManagerScreen != null) {
             showSettings();
@@ -395,7 +402,11 @@ public final class MainActivity extends Activity
 
     @Override
     public void render(SettingsViewState state) {
-        settingsScreen.render(state);
+        if (keyAdminScreen != null) {
+            keyAdminScreen.render(state);
+        } else {
+            settingsScreen.render(state);
+        }
     }
 
     /**
@@ -414,6 +425,13 @@ public final class MainActivity extends Activity
     public void render(ChatViewState state) {
         if (chatScreen != null && isTheBranchOnScreen(state.branchId)) {
             chatScreen.render(state);
+        }
+    }
+
+    @Override
+    public void renderAnnotations(Map<String, List<Annotation>> annotations) {
+        if (chatScreen != null) {
+            chatScreen.renderAnnotations(annotations);
         }
     }
 
@@ -600,6 +618,7 @@ public final class MainActivity extends Activity
         showingSettings = true;
         libraryScreen = null;
         libraryPresenter = null;
+        keyAdminScreen = null;
         providerAdminScreen = null;
         providerAdminPresenter = null;
         modelSettingsScreen = null;
@@ -616,6 +635,17 @@ public final class MainActivity extends Activity
         settingsPresenter.start();
         refreshProvidersSubtitle();
         refreshModelsSubtitle();
+    }
+
+    /** Opens the API KEY room (settings redesign 2026-09-28). It shares the settings presenter, so
+     *  its renders arrive through {@link #render(SettingsViewState)} and are routed by whether the
+     *  room is on screen; start() re-reads the store, exactly like every other room's open. */
+    private void showKeyAdmin() {
+        keyAdminScreen = new SettingsKeyScreen(this);
+        keyAdminScreen.setActions(settingsPresenter);
+        keyAdminScreen.setOnBackPressed(this::onBackRequested);
+        swap(keyAdminScreen);
+        settingsPresenter.start();
     }
 
     private void showProviders() {
