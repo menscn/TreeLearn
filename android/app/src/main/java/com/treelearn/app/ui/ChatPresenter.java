@@ -13,6 +13,7 @@ import com.treelearn.core.domain.ReadingPosition;
 import com.treelearn.app.ui.ChatSpeaker;
 import com.treelearn.app.ui.ChatViewState.Stage;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -207,11 +208,25 @@ public final class ChatPresenter implements ChatActions {
 
     /** First load: the reading phase is shown while the branch is read. */
     public void start() {
+        start("");
+    }
+
+    /** Loads a branch and, when supplied, submits its first question after the branch is ready. */
+    public void start(String initialQuestion) {
+        final String firstQuestion = initialQuestion == null ? "" : initialQuestion.trim();
         render(restored().withPhase(ChatViewState.Phase.LOADING));
         background.execute(() -> {
             read();
             resolveChatRole();
+            if (!firstQuestion.isEmpty()) {
+                ui.post(() -> sendInitialQuestion(firstQuestion));
+            }
         });
+    }
+
+    private void sendInitialQuestion(String question) {
+        render(state.withDraft(question));
+        send(question, true);
     }
 
     /**
@@ -481,9 +496,17 @@ public final class ChatPresenter implements ChatActions {
     }
 
     @Override
+    public void onFollowLatestPaused() {
+        if (state.followLatest) {
+            render(state.withFollow(false, state.missedCount));
+        }
+    }
+
+    @Override
     public void onReasoningToggled(String messageId) {
         ChatMessage message = state.message(messageId);
-        if (message == null || !message.canExpandReasoning()) {
+        if (message == null || (!message.canExpandReasoning()
+                && AnswerContentProjection.project(message).reasoning.isEmpty())) {
             return;
         }
         // T-066: the tap flips the effective state - which during a reasoning stream is open by
@@ -498,7 +521,14 @@ public final class ChatPresenter implements ChatActions {
         if (message == null || !message.canCopy()) {
             return;
         }
-        sink.copyToClipboard(message.copyText(labels));
+        AnswerContentProjection projection = AnswerContentProjection.project(message);
+        String copied = projection.answer;
+        String reasoning = message.reasoning.isEmpty() ? projection.reasoning : message.reasoning;
+        if (state.thinkingEnabled && !reasoning.isEmpty()) {
+            copied = labels.reasoning + "\n" + reasoning + "\n\n" + labels.answer + "\n"
+                    + projection.answer;
+        }
+        sink.copyToClipboard(copied);
     }
 
     @Override
@@ -583,9 +613,15 @@ public final class ChatPresenter implements ChatActions {
                 .withFollow(true, 0));
         // The quote always leaves with an accepted send - it rode this message; only the draft's
         // clearing depends on whose words went out (a chip's query was never in the draft).
-        background.execute(
-                () -> publish(commands.send(branchId, text, quote, attachmentId, model, thinking),
-                        false, clearDraft, true));
+        background.execute(() -> {
+            ChatCommandResult result = commands.send(branchId, text, quote, attachmentId, model,
+                    thinking);
+            boolean readBeforePublish = result.isAccepted();
+            if (readBeforePublish) {
+                read();
+            }
+            publish(result, false, clearDraft, true, "", true, readBeforePublish);
+        });
     }
 
     /**
@@ -654,7 +690,8 @@ public final class ChatPresenter implements ChatActions {
         }
         GenerationModel model = state.model;
         render(state.withTranslationStarted(messageId));
-        background.execute(() -> translator.translate(model, message.text,
+        String answer = AnswerContentProjection.project(message).answer;
+        background.execute(() -> translator.translate(model, answer,
                 (ok, translation) -> ui.post(() -> render(
                         state.withTranslationFinished(messageId, ok ? translation : "")))));
     }
@@ -673,7 +710,7 @@ public final class ChatPresenter implements ChatActions {
         if (speaker == null || message == null || !message.canSpeak()) {
             return;
         }
-        speaker.onSpeakPressed(messageId, message.text);
+        speaker.onSpeakPressed(messageId, AnswerContentProjection.project(message).answer);
     }
 
     /**
@@ -720,7 +757,7 @@ public final class ChatPresenter implements ChatActions {
         }
         // The suggestion fork asks the question directly and anchors no sentence: the quote and the
         // question are two different forks' cargoes, and they never travel together.
-        fork(state.recommendationsMessageId, question.trim(), "", 0, 0);
+        fork(state.recommendationsMessageId, question.trim(), "", 0, 0, true);
     }
 
     @Override
@@ -744,6 +781,10 @@ public final class ChatPresenter implements ChatActions {
                 ui.post(() -> render(state.withNotice(HomeViewState.Notice.STORAGE)));
             }
         });
+    }
+
+    public void onChildBranchChosen(String childBranchId) {
+        openConversationBranch(childBranchId, "");
     }
 
     /**
@@ -858,7 +899,18 @@ public final class ChatPresenter implements ChatActions {
 
     @Override
     public void onBackPressed() {
+        if (readingBranch != null && readingBranch.parentBranchId != null) {
+            sink.openBranch(readingBranch.parentBranchId);
+            return;
+        }
         sink.close();
+    }
+
+    private void openConversationBranch(String targetBranchId, String initialQuestion) {
+        if (targetBranchId == null || targetBranchId.isEmpty()) {
+            return;
+        }
+        sink.openBranch(targetBranchId, initialQuestion == null ? "" : initialQuestion);
     }
 
     /**
@@ -996,19 +1048,25 @@ public final class ChatPresenter implements ChatActions {
 
     private void fork(final String messageId, final String question, final String quote,
             final int startInclusive, final int endExclusive) {
+        fork(messageId, question, quote, startInclusive, endExclusive, false);
+    }
+
+    private void fork(final String messageId, final String question, final String quote,
+            final int startInclusive, final int endExclusive, final boolean autoSendQuestion) {
         background.execute(() -> publish(
                 commands.fork(messageId, question, quote, startInclusive, endExclusive), true,
-                false));
+                false, false, autoSendQuestion ? question : ""));
     }
 
     /**
      * What every accepted or refused command does next, in one place.
      *
-     * <p>An accepted command clears the in-flight flag and - only for a send - the draft and the quote,
-     * then reads again so the store, not the view state, is what the screen shows. A refused command
-     * keeps everything the learner had and renders the failure category. Either way the read that
-     * follows is unconditional: a refusal can still have changed the branch (a retry refused because an
-     * attempt is already running means the screen is about to see that attempt's output).
+     * <p>An accepted send reads the authoritative store on the background worker before this UI
+     * callback clears the draft and dismisses the keyboard, so the message is already in state. A
+     * refused command keeps everything the learner had and renders the failure category. When no
+     * pre-publish read has run, the follow-up read is unconditional: a refusal can still have changed
+     * the branch (a retry refused because an attempt is already running means the screen is about to
+     * see that attempt's output).
      */
     private void publish(final ChatCommandResult result, final boolean mayOpenBranch,
             final boolean clearDraft) {
@@ -1023,6 +1081,24 @@ public final class ChatPresenter implements ChatActions {
      */
     private void publish(final ChatCommandResult result, final boolean mayOpenBranch,
             final boolean clearDraft, final boolean clearQuote) {
+        publish(result, mayOpenBranch, clearDraft, clearQuote, "");
+    }
+
+    private void publish(final ChatCommandResult result, final boolean mayOpenBranch,
+            final boolean clearDraft, final boolean clearQuote, final String initialQuestion) {
+        publish(result, mayOpenBranch, clearDraft, clearQuote, initialQuestion, false);
+    }
+
+    private void publish(final ChatCommandResult result, final boolean mayOpenBranch,
+            final boolean clearDraft, final boolean clearQuote, final String initialQuestion,
+            final boolean dismissKeyboard) {
+        publish(result, mayOpenBranch, clearDraft, clearQuote, initialQuestion, dismissKeyboard,
+                false);
+    }
+
+    private void publish(final ChatCommandResult result, final boolean mayOpenBranch,
+            final boolean clearDraft, final boolean clearQuote, final String initialQuestion,
+            final boolean dismissKeyboard, final boolean readBeforePublish) {
         ui.post(() -> {
             if (result.isAccepted()) {
                 ChatViewState next = state.withSending(false).withNotice(result.postNotice());
@@ -1033,8 +1109,11 @@ public final class ChatPresenter implements ChatActions {
                 } else {
                     render(next);
                 }
+                if (dismissKeyboard) {
+                    sink.dismissKeyboard();
+                }
                 if (mayOpenBranch && !result.branchId().isEmpty()) {
-                    sink.openBranch(result.branchId());
+                    openConversationBranch(result.branchId(), initialQuestion);
                 }
                 if (clearDraft) {
                     // T-076: the sent turn is the store's now; the kept draft record is dropped.
@@ -1052,7 +1131,9 @@ public final class ChatPresenter implements ChatActions {
             } else {
                 render(state.withSending(false).withNotice(result.notice()));
             }
-            background.execute(this::read);
+            if (!readBeforePublish) {
+                background.execute(this::read);
+            }
         });
     }
 

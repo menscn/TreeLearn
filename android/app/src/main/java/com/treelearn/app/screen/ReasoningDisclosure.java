@@ -100,8 +100,14 @@ public final class ReasoningDisclosure extends LinearLayout {
 
     /** Draws one answer's disclosure, or hides itself when that answer has nothing to disclose. */
     public void render(ChatMessage message, boolean expanded, boolean thinkingEnabled) {
+        render(message, message.reasoning, expanded, thinkingEnabled);
+    }
+
+    public void render(ChatMessage message, String reasoning, boolean expanded,
+            boolean thinkingEnabled) {
         messageId = message.messageId;
-        if (!thinkingEnabled || !message.canExpandReasoning()) {
+        String visibleReasoning = reasoning == null ? "" : reasoning;
+        if (!thinkingEnabled || (visibleReasoning.isEmpty() && !message.isFormingReasoning())) {
             setVisibility(GONE);
             // Nothing behind the disclosure; drop the caches so a later answer re-draws from scratch.
             body.setText("");
@@ -129,7 +135,7 @@ public final class ReasoningDisclosure extends LinearLayout {
             renderedState = nextState;
         }
 
-        CharSequence nextBody = bodyText(message, expanded);
+        CharSequence nextBody = bodyText(message, visibleReasoning, expanded);
         if (!nextBody.toString().contentEquals(renderedBody)) {
             body.setText(MarkdownRenderer.render(nextBody.toString()), TextView.BufferType.SPANNABLE);
             renderedBody = nextBody;
@@ -158,14 +164,14 @@ public final class ReasoningDisclosure extends LinearLayout {
     }
 
     /** Before the first reasoning token the body says what is happening instead of staying blank. */
-    private CharSequence bodyText(ChatMessage message, boolean expanded) {
+    private CharSequence bodyText(ChatMessage message, String reasoning, boolean expanded) {
         if (!expanded) {
             return "";
         }
-        if (message.reasoning.isEmpty()) {
+        if (reasoning.isEmpty()) {
             return getContext().getString(R.string.chat_reasoning_pending);
         }
-        return message.reasoning;
+        return reasoning;
     }
 
     /**

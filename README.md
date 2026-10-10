@@ -106,6 +106,10 @@ cd android
 ./gradlew check
 ```
 
+APK 版本号统一维护在 `android/version.properties`，从 `1.0.0` 开始；Bug 修复执行
+`./scripts/version.ps1 patch`，小特性执行 `minor`，大特性或大版本更新执行 `major`。
+查看 Gradle 实际注入的 APK 版本可运行 `./gradlew :app:printVersion`。
+
 Android 常用命令、Release 签名与 DeepSeek 密钥配置见 [`android/README.md`](android/README.md)。
 
 > **Release 签名说明**：keystore 存放于仓库之外，凭据只从进程环境变量读取（`TREELEARN_KEYSTORE_PATH` 等），其次读取已被 gitignore 的 `android/keystore.properties`。密钥与口令不进入仓库、日志、APK 或交付报告。

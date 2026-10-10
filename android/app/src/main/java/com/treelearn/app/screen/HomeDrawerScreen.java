@@ -170,7 +170,7 @@ public final class HomeDrawerScreen extends FrameLayout {
         button.setImageResource(R.drawable.ic_chat_close);
         button.setImageTintList(android.content.res.ColorStateList.valueOf(
                 context.getColor(R.color.tl_ink2)));
-        button.setBackground(null);
+        button.setBackgroundResource(R.drawable.bg_icon_button);
         button.setContentDescription(context.getString(R.string.cd_drawer_close));
         button.setMinimumWidth(getResources().getDimensionPixelSize(R.dimen.touch_min));
         button.setMinimumHeight(getResources().getDimensionPixelSize(R.dimen.touch_min));

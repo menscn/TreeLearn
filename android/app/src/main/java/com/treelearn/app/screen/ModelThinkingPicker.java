@@ -64,6 +64,7 @@ public final class ModelThinkingPicker extends LinearLayout {
         chipLabel = chip.findViewById(R.id.model_chip_label);
         addView(chip, new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
+        setForeground(getContext().getDrawable(R.drawable.fg_pill_ripple));
         setMinimumHeight(getResources().getDimensionPixelSize(R.dimen.touch_min));
         setClickable(true);
         setFocusable(true);

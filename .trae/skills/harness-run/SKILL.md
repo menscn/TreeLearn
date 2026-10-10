@@ -1,6 +1,6 @@
 ---
 name: harness-run
-description: Harness 触发词入口的完整执行手册：澄清 → 拆 task → 按栈派工 → guard → verifier → commit。主会话只做调度（工头），不代写 frontend/backend/android 业务代码；subagent 失败只许重试/重派。当用户说「按 harness-run 做这个跨栈需求 / 工头模式 / 按 harness 调度 / harness-run / Harness mode / foreman mode / cross-stack request」时触发。
+description: Harness 触发词入口的完整执行手册：实质澄清 → 拆 task → 按栈派工与内部恢复 → guard → 独立 verifier → 用户要求时提交。主会话默认调度；仅在能力、任务范围、lane、权限和专项 guard 允许时安全接手。当用户说「按 harness-run 做这个跨栈需求 / 工头模式 / 按 harness 调度 / harness-run / Harness mode / foreman mode / cross-stack request」时触发。
 ---
 
 # harness-run —— Harness 调度执行手册
@@ -11,7 +11,7 @@ description: Harness 触发词入口的完整执行手册：澄清 → 拆 task 
 
 你是 **Harness（调度者/工头）**，不是栈型 implementer。
 
-**禁止**主会话对下列路径直接写业务代码：
+默认禁止主会话直接写下列业务代码；仅允许按“Subagent 调用失败时”中的条件安全接手当前 task，不得借接手越过已分配 lane 或必需专项 guard：
 
 - `frontend/**`
 - `backend/**`
@@ -28,24 +28,24 @@ description: Harness 触发词入口的完整执行手册：澄清 → 拆 task 
 
 违反角色锁定 → 视为任务失败，用户可要求回滚。
 
-## Subagent 调用失败时（强制，源自失败案例库教训）
+## Subagent 调用失败时（内部恢复，不自动转用户阻塞）
 
-**不能因为 subagent/Task 报错、超时或无输出，就在主会话里「顶上」代写业务代码。**
+**不能因为 subagent/Task 报错、超时或无输出就盲目重试或越权接手；故障本身也不是要求用户介入的理由。**
 
-按顺序处理，直至 subagent 可用或用户明确改需求：
+按故障原因选择恢复路径，每次尝试都应有新的验证依据：
 
-1. **立刻重试**：同一角色，把说明改短、范围改小（例如只要求产出一个 task 文件或大纲），排除无关上下文。
-2. **再次重试/拆步**：超时或偶发失败重复派发；必要时拆成两步（先 `requirement-decomposer`，再单个栈型 implementer）。
-3. **对用户透明**：简要说明失败现象与已重试次数；建议检查环境或新开会话仅做「继续 harness-run」。
-4. **仍然失败**：停在调度层，请用户介入（降级需求、换时段、人工拆 task）。**未成功派起对应 subagent 前，主会话不进入业务代码实现。**
+1. **同角色重试**：对瞬时错误缩短上下文、明确失败点或缩小当前 task，不改变已确认范围。
+2. **改派或拆步**：角色不匹配、任务过宽或能力不可用时，改派合适 owner；必要时由 decomposer 拆成仍在确认范围内的有界步骤。
+3. **安全接手**：若派工仍不可用，且主会话具备该任务所需能力、变更在当前 task 的 lane/权限/范围内并能运行所有适用 guard，可接手实现并如实记录。不得接手需要缺失权限或专门能力的改动。
+4. **明确阻塞**：只有在没有安全恢复路径、必须等待用户作出实质决定/提供不可替代权限，或独立验收能力不可用时才停为 `blocked`。记录失败现象、已尝试恢复、解除条件和可续接步骤；不要要求用户手工重派、拆 task 或仅为上下文压力重开会话。
 
-同理，验环节守门命令（lint、行数预算、验收点对照）必须由 `verifier` 执行；主会话不得自跑 lint「等价代替」verifier。
+验收守门命令（lint、行数预算、验收点对照）仍必须由独立 `verifier` 执行；主会话不得自跑 lint 或以安全接手为由替代 verifier。若 verifier 不可用，可改派独立 verifier；无法保持独立性时必须 blocked。
 
 ## 执行流程（澄清 → 拆 → 派 → 守门 → 验 → 提交）
 
 ### 0. 澄清
 
-- 读 [`.trae/rules/harness-clarification.md`](../../rules/harness-clarification.md)，按协作选项协议分阶段澄清，覆盖需求清单并明确 non-goals。
+- 读 [`.trae/rules/harness-clarification.md`](../../rules/harness-clarification.md)，覆盖需求清单并明确 non-goals；用户当前明确请求或 accepted intent 已确认的内容不重复提问。仅实质未知项需用户决定；其余由 AI 记录为自主决策。
 - 存在未能解决且可能实质改变实现的决策时，不得进入拆分。
 
 ### 1. 拆
@@ -71,7 +71,7 @@ description: Harness 触发词入口的完整执行手册：澄清 → 拆 task 
 
 ### 3. 验
 
-- implementer 声称完成 → 派 `verifier`（[`.trae/agents/verifier.md`](../../agents/verifier.md)，READONLY）。
+- implementer 声称完成 → 派独立 `verifier`（[`.trae/agents/verifier.md`](../../agents/verifier.md)，READONLY）。FAIL 后在原 task 范围内修复并再次独立验收；验证通过前不得进入正常完成态。
 - 读 [`.trae/rules/harness-verification.md`](../../rules/harness-verification.md)；verifier 输出结构化 PASS/FAIL/PARTIAL 报告后，由主会话把报告原文写入对应 task 文件「Verification report / 验收报告」段。
 - 仅当 verifier **PASS** 才视为可合并/可提交；FAIL → 派回原 implementer 修复后再验。
 
@@ -105,7 +105,8 @@ description: Harness 触发词入口的完整执行手册：澄清 → 拆 task 
 
 ## 上下文管理
 
-- 上下文用量 ≥ 40% → 建议调 `context-handoff`，把进度写入 task「Handoff notes / 交接备忘」再开新会话。
+- 上下文压力只触发内部接力：把决策、当前状态、证据和下一步写入 task「Handoff notes / 交接备忘」，优先在当前会话继续；平台支持时由 AI 自行压缩或接续上下文。
+- 不要求用户仅因比例或上下文压力重开会话。平台限制确实阻止安全继续时，保留可恢复的任务状态并报告具体阻塞与续接点，不报告完成或 PASS。
 
 ## 单次需求最短自检流
 

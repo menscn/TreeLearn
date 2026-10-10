@@ -252,11 +252,11 @@ public final class HomeMotionInstrumentedTest {
         assertNull("the library is swapped in exactly as it was - no entrance motion",
                 awaitSwap(R.id.library_root).animation);
 
-        click(R.id.tab_settings);
-        assertNotNull("the settings tab mounts the settings screen", waitFor(R.id.settings_root));
+        click(R.id.home_settings_button);
+        assertNotNull("the home gear mounts the settings screen", waitFor(R.id.settings_root));
         assertNull("the settings too", awaitSwap(R.id.settings_root).animation);
 
-        click(R.id.tab_home);
+        click(R.id.settings_back);
         Animation again = awaitSwap(R.id.home_screen).animation;
         assertNotNull("coming back to the home replays its entrance", again);
         assertEquals("and it is the same 280ms entrance", HomeMotion.SCREEN_ENTER_MS,

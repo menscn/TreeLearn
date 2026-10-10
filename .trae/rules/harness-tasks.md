@@ -36,6 +36,17 @@ clarifying | ready | in_progress -> canceled
 - 历史 `planned/done/completed/complete/implemented/accepted` 仅为只读兼容别名，在 v2 文件中无效。
 - 父 `requirement` 任务保存完整协作记录；子任务用其描述性文件名引用 `parent_requirement`，在 `depends_on` 中引用依赖文件名，只保留与本任务相关的摘要。稳定任务 ID 不是文件引用。
 
+## Harness authorization and requirement confirmation
+
+- 用户选择 Harness 后，AI 获准在已确认的目标与边界内创建父 requirement、拆分子任务并连续执行；这不是对每张 task 或普通阶段交接的逐项审批。
+- `requirements_confirmed: true` 表示实质目标、范围与验收已由用户当前明确请求、已接受的 intent、已确认规格或对话中的明确决定覆盖，且没有待用户裁定的实质问题；它不表示用户必须再次批准 AI 对同一内容的父任务复述。
+- 父 requirement 是完整记录和执行边界。创建时注明确认来源；只有缺少可能实质改变实现或验收的信息时才保持 `clarifying` 并向用户询问该项。确认后不因创建子任务或进入普通阶段而重复请求批准。
+
+## Execution continuity and recovery
+
+- 普通派工、工具或执行失败不是自动的用户阻塞。AI 应先判断故障类型，并在不改变确认范围的前提下，采用有新验证依据的重试、缩小任务、改派合适 owner，或在自身具备能力且不越过任务 lane、权限和专项 guard 时安全接手；将恢复方式与结果记入任务文件。
+- 不进行没有新假设或验证价值的盲目重试。没有安全恢复路径、缺少必须由用户提供的权限/决定，或独立 verifier 不可用时，记录为 `blocked`，说明具体阻塞、已尝试路径、解除条件和可续接步骤。不得要求用户执行普通重派/拆分/重开会话，也不得用实现者自检替代独立验收。
+
 ## Task sizing and TDD contract
 
 本节约束仅在用户选择 Harness 且创建/执行 Task v2 文件时生效。200/500 行阈值是 Harness 内部的任务规模控制，不是进入 Harness 的自动触发器。
@@ -67,5 +78,5 @@ clarifying | ready | in_progress -> canceled
 
 - 不实现业务代码。只在已授权创建/拆分 Harness 任务后动作；否则返回 `HARNESS_NOT_SELECTED`，不创建文件。
 - 应用上述任务契约、文件名、状态、规模与 TDD 要求。实现任务用 `tdd_mode: required`，除非此前有已批准的例外。
-- 拆分前要求用户 Harness 选择证据和用户确认的父 `requirement` 任务；缺少实质信息时返回 `NEEDS_CLARIFICATION`（含当前理解、推荐、2–4 个可行选项、自由输入），不创建可执行子任务。
+- 拆分前要求 Harness 选择证据及明确的需求确认来源（用户当前请求、已接受的 intent、已确认规格或对话决定）；decomposer 自行建立父 `requirement` 记录，不要求用户再批准等价复述。缺少会实质改变实现或验收的信息时返回 `NEEDS_CLARIFICATION`，只询问该问题并暂停可执行子任务创建。
 - 返回任务 ID、描述性文件名、负责人、依赖、估算生产行数和验收标准。

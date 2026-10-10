@@ -38,8 +38,9 @@ public interface ChatCommands {
     ChatCommandResult selectRevision(String messageId, String revisionId, long now);
 
     /**
-     * Opens a branch from this answer; {@code question} prefills it when the fork copies a
-     * suggestion (T-065).
+     * Opens a branch from this answer; {@code question} is carried to the new branch when the
+     * fork comes from a recommendation (T-065). The host submits that question after the new
+     * branch presenter is ready; this command itself only creates the branch and snapshot.
      *
      * <p>{@code quote} with its offsets anchors the sentence the fork was made from: quote and
      * offsets must describe the same range, and a fork whose quote is empty anchors the whole

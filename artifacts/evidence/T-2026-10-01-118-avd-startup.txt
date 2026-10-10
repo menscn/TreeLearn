@@ -1,0 +1,29 @@
+CapturedAt=2026-10-01T12:54:37.3410339+08:00
+Task=T-2026-10-01-118
+Device=emulator-5558; Android API 36; not target handset
+Purpose=verify fresh MainActivity launch after installation
+Command=adb -s emulator-5558 shell am force-stop com.treelearn
+(no output)
+ExitCode=-999
+Command=adb -s emulator-5558 logcat -c
+(no output)
+ExitCode=-999
+Command=adb -s emulator-5558 shell am start -W -n com.treelearn/.app.MainActivity
+Starting: Intent { cmp=com.treelearn/.app.MainActivity }
+Status: ok
+LaunchState: COLD
+Activity: com.treelearn/.app.MainActivity
+TotalTime: 1144
+WaitTime: 1147
+Complete
+ExitCode=-999
+Command=adb -s emulator-5558 shell pidof com.treelearn
+6885
+ExitCode=-999
+Command=adb -s emulator-5558 shell dumpsys activity activities | Select-String mResumedActivity
+    topResumedActivity=ActivityRecord{234651802 u0 com.treelearn/.app.MainActivity t98}
+ExitCode=-999
+Command=adb -s emulator-5558 logcat -d -s AndroidRuntime:E
+(no output)
+ExitCode=-999
+CompletedAt=2026-10-01T12:54:41.4664103+08:00

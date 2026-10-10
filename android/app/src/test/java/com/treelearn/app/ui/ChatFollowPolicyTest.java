@@ -159,4 +159,16 @@ public final class ChatFollowPolicyTest {
         assertTrue(sink.last().followLatest);
         assertEquals(0, sink.last().missedCount);
     }
+
+    @Test
+    public void anOverflowPauseDetachesWithoutDroppingTheMissedCount() {
+        dataWith(generating("a"));
+        ChatPresenter presenter = presenter();
+        presenter.start();
+
+        presenter.onFollowLatestPaused();
+
+        assertFalse(sink.last().followLatest);
+        assertEquals(0, sink.last().missedCount);
+    }
 }

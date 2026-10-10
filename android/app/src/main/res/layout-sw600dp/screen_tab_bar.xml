@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Tablet tab bar: the same three items, capped at the reading measure and centred, so a landscape
-  tablet does not stretch three labels across the whole width. The items are identical to the phone
+  Tablet tab bar: the same two items, capped at the reading measure and centred, so a landscape
+  tablet does not stretch the labels across the whole width. The items are identical to the phone
   copy on purpose - the qualifier changes the box, never the contents - and each item names its own
-  icon and label for the reason the phone copy records (three items, one layout, no duplicate ids).
+  icon and label for the reason the phone copy records (multiple items, one layout, no duplicate ids).
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/tab_bar"
@@ -45,18 +45,5 @@
                 android:text="@string/tab_library" android:textSize="@dimen/text_cap" />
         </LinearLayout>
 
-        <LinearLayout android:id="@+id/tab_settings" android:layout_width="0dp"
-            android:layout_height="wrap_content" android:layout_weight="1"
-            android:background="?android:attr/selectableItemBackground" android:clickable="true"
-            android:focusable="true" android:gravity="center" android:minHeight="@dimen/touch_min"
-            android:orientation="vertical" android:paddingTop="@dimen/space_s2"
-            android:paddingBottom="@dimen/space_s2">
-            <ImageView android:id="@+id/tab_settings_icon" android:layout_width="24dp"
-                android:layout_height="24dp" android:importantForAccessibility="no"
-                android:src="@drawable/ic_tab_settings" />
-            <TextView android:id="@+id/tab_settings_label" android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_s1"
-                android:text="@string/tab_settings" android:textSize="@dimen/text_cap" />
-        </LinearLayout>
     </LinearLayout>
 </LinearLayout>

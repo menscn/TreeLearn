@@ -1,0 +1,931 @@
+CapturedAt=2026-10-01T12:49:51.7614578+08:00
+Task=T-2026-10-01-118
+Device=emulator-5558; Android API 36 AVD
+Command=adb -s emulator-5558 shell am instrument -w com.treelearn.test/androidx.test.runner.AndroidJUnitRunner
+Mode=FULL_ANDROIDTEST_PACKAGE; no class filter
+
+com.treelearn.app.AnnotationDaoInstrumentedTest:.................
+com.treelearn.app.AnswerRevisionGenerationOperationDaoInstrumentedTest:............
+com.treelearn.app.AnswerVersionsInstrumentedTest:..........
+com.treelearn.app.AppLaunchInstrumentedTest:.
+com.treelearn.app.AttachmentOrphanCleanupInstrumentedTest:...
+com.treelearn.app.AttachmentParseInjectInstrumentedTest:.....
+com.treelearn.app.AttachmentStorageInstrumentedTest:..
+Error in aVersionThreeDatabaseIsUpgradedToTheCurrentSchemaByTheProductionHelper(com.treelearn.app.AttachmentStorageInstrumentedTest):
+android.database.sqlite.SQLiteException: table message_annotations already exists (code 1 SQLITE_ERROR): , while compiling: CREATE TABLE message_annotations (id TEXT NOT NULL PRIMARY KEY, message_id TEXT NOT NULL REFERENCES messages(id) ON DELETE CASCADE, container TEXT NOT NULL, prose_index INTEGER NOT NULL, table_index INTEGER NOT NULL, row_index INTEGER NOT NULL, col_index INTEGER NOT NULL, start_offset INTEGER NOT NULL, end_offset INTEGER NOT NULL, kind TEXT NOT NULL, content_digest TEXT NOT NULL, body TEXT NOT NULL DEFAULT '', created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, CHECK (end_offset > start_offset), CHECK (kind IN ('HIGHLIGHT','NOTE')), CHECK (kind <> 'NOTE' OR body <> ''), CHECK (kind <> 'HIGHLIGHT' OR body = ''), CHECK ((container = 'PROSE' AND prose_index >= 0 AND table_index = -1 AND row_index = -1 AND col_index = -1) OR (container = 'CELL' AND prose_index = -1 AND table_index >= 0 AND row_index >= 0 AND col_index >= 0)))
+	at android.database.sqlite.SQLiteConnection.nativePrepareStatement(Native Method)
+	at android.database.sqlite.SQLiteConnection.-$$Nest$smnativePrepareStatement(Unknown Source:0)
+	at android.database.sqlite.SQLiteConnection$PreparedStatementCache.createStatement(SQLiteConnection.java:1627)
+	at android.database.sqlite.SQLiteConnection.acquirePreparedStatementLI(SQLiteConnection.java:1117)
+	at android.database.sqlite.SQLiteConnection.acquirePreparedStatement(SQLiteConnection.java:1145)
+	at android.database.sqlite.SQLiteConnection.prepare(SQLiteConnection.java:708)
+	at android.database.sqlite.SQLiteSession.prepare(SQLiteSession.java:625)
+	at android.database.sqlite.SQLiteProgram.<init>(SQLiteProgram.java:62)
+	at android.database.sqlite.SQLiteStatement.<init>(SQLiteStatement.java:34)
+	at android.database.sqlite.SQLiteDatabase.executeSql(SQLiteDatabase.java:2232)
+	at android.database.sqlite.SQLiteDatabase.execSQL(SQLiteDatabase.java:2152)
+	at com.treelearn.data.db.TreeLearnSchema$MigrationV4ToV5.apply(TreeLearnSchema.java:1024)
+	at com.treelearn.data.db.TreeLearnSchema.applyForwardMigrations(TreeLearnSchema.java:1050)
+	at com.treelearn.data.db.TreeLearnDatabaseHelper.onUpgrade(TreeLearnDatabaseHelper.java:47)
+	at android.database.sqlite.SQLiteOpenHelper.getDatabaseLocked(SQLiteOpenHelper.java:433)
+	at android.database.sqlite.SQLiteOpenHelper.getWritableDatabase(SQLiteOpenHelper.java:332)
+	at com.treelearn.app.AttachmentStorageInstrumentedTest.aVersionThreeDatabaseIsUpgradedToTheCurrentSchemaByTheProductionHelper(AttachmentStorageInstrumentedTest.java:217)
+..
+com.treelearn.app.BottomTabShellInstrumentedTest:..
+Error in aConversationOpenedFromHomeHidesTheBarAndBackLandsOnHome(com.treelearn.app.BottomTabShellInstrumentedTest):
+java.lang.AssertionError: no row arrived in view 2131034233 within 10000ms
+	at com.treelearn.app.BottomTabShellInstrumentedTest.awaitChildren(BottomTabShellInstrumentedTest.java:351)
+	at com.treelearn.app.BottomTabShellInstrumentedTest.aConversationOpenedFromHomeHidesTheBarAndBackLandsOnHome(BottomTabShellInstrumentedTest.java:176)
+
+Error in aConversationOpenedFromTheLibraryHidesTheBarAndNavigationLandsBackOnTheLibrary(com.treelearn.app.BottomTabShellInstrumentedTest):
+java.lang.AssertionError: no row arrived in view 2131034267 within 10000ms
+	at com.treelearn.app.BottomTabShellInstrumentedTest.awaitChildren(BottomTabShellInstrumentedTest.java:351)
+	at com.treelearn.app.BottomTabShellInstrumentedTest.aConversationOpenedFromTheLibraryHidesTheBarAndNavigationLandsBackOnTheLibrary(BottomTabShellInstrumentedTest.java:193)
+
+Error in theLibraryListsTheStoredTopicsWithTheirOwnFields(com.treelearn.app.BottomTabShellInstrumentedTest):
+java.lang.AssertionError: no row arrived in view 2131034267 within 10000ms
+	at com.treelearn.app.BottomTabShellInstrumentedTest.awaitChildren(BottomTabShellInstrumentedTest.java:351)
+	at com.treelearn.app.BottomTabShellInstrumentedTest.theLibraryListsTheStoredTopicsWithTheirOwnFields(BottomTabShellInstrumentedTest.java:225)
+.
+com.treelearn.app.BranchCreationInstrumentedTest:..........
+com.treelearn.app.CanvasBackdropInstrumentedTest:....
+com.treelearn.app.ChatScreenReasoningLeakInstrumentedTest:..
+com.treelearn.app.ChildBranchPopupLifecycleInstrumentedTest:.
+com.treelearn.app.ContextSnapshotAiArtifactDaoInstrumentedTest:............
+com.treelearn.app.DeepSeekPayloadDecoderInstrumentedTest:..........
+com.treelearn.app.DeepSeekRequestBodyInstrumentedTest:...
+com.treelearn.app.DeepSeekStreamInstrumentedTest:...
+com.treelearn.app.FileManagerScreenInstrumentedTest:..
+com.treelearn.app.FirstTopicCreationInstrumentedTest:.........
+com.treelearn.app.GenerationCoordinatorInstrumentedTest:
+Error in theFirstTopicWriteRunsInsideTheAcceptedCallbackBeforeAnyDelta(com.treelearn.app.GenerationCoordinatorInstrumentedTest):
+java.lang.AssertionError
+	at org.junit.Assert.fail(Assert.java:87)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertTrue(Assert.java:53)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.theFirstTopicWriteRunsInsideTheAcceptedCallbackBeforeAnyDelta(GenerationCoordinatorInstrumentedTest.java:398)
+
+Error in cancellingDiscardsLateEventsAndRecordsThemRedacted(com.treelearn.app.GenerationCoordinatorInstrumentedTest):
+java.lang.AssertionError: no call was opened at index 0
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest$FakeGateway.handle(GenerationCoordinatorInstrumentedTest.java:594)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.cancellingDiscardsLateEventsAndRecordsThemRedacted(GenerationCoordinatorInstrumentedTest.java:229)
+
+Error in aSecondAttemptForABusyBranchIsRefusedAndWritesNoRow(com.treelearn.app.GenerationCoordinatorInstrumentedTest):
+java.lang.AssertionError: expected:<BRANCH_BUSY> but was:<VERSION_MISMATCH>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.aSecondAttemptForABusyBranchIsRefusedAndWritesNoRow(GenerationCoordinatorInstrumentedTest.java:192)
+
+Error in aNormallyCompletedStreamStabilizesAndCopiesThePinnedVersionVerbatim(com.treelearn.app.GenerationCoordinatorInstrumentedTest):
+java.lang.AssertionError: no call was opened at index 0
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest$FakeGateway.handle(GenerationCoordinatorInstrumentedTest.java:594)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.aNormallyCompletedStreamStabilizesAndCopiesThePinnedVersionVerbatim(GenerationCoordinatorInstrumentedTest.java:289)
+..
+Error in detachingAnObserverDoesNotCancelTheAttempt(com.treelearn.app.GenerationCoordinatorInstrumentedTest):
+java.lang.AssertionError: no call was opened at index 0
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest$FakeGateway.handle(GenerationCoordinatorInstrumentedTest.java:594)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.detachingAnObserverDoesNotCancelTheAttempt(GenerationCoordinatorInstrumentedTest.java:485)
+
+Error in deltasArePersistedOnlyWhenTheWriteWindowIsReached(com.treelearn.app.GenerationCoordinatorInstrumentedTest):
+java.lang.AssertionError: no call was opened at index 0
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest$FakeGateway.handle(GenerationCoordinatorInstrumentedTest.java:594)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.deltasArePersistedOnlyWhenTheWriteWindowIsReached(GenerationCoordinatorInstrumentedTest.java:207)
+
+Error in aFailedStreamKeepsThePartialContentAndCreatesNoRevision(com.treelearn.app.GenerationCoordinatorInstrumentedTest):
+java.lang.AssertionError: no call was opened at index 0
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest$FakeGateway.handle(GenerationCoordinatorInstrumentedTest.java:594)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.aFailedStreamKeepsThePartialContentAndCreatesNoRevision(GenerationCoordinatorInstrumentedTest.java:254)
+
+Error in aNormallyCompletedStreamWithoutAnAnswerIsRefusedByTheDomainNotByTheCoordinator(com.treelearn.app.GenerationCoordinatorInstrumentedTest):
+java.lang.AssertionError: no call was opened at index 0
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest$FakeGateway.handle(GenerationCoordinatorInstrumentedTest.java:594)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.aNormallyCompletedStreamWithoutAnAnswerIsRefusedByTheDomainNotByTheCoordinator(GenerationCoordinatorInstrumentedTest.java:274)
+
+Error in theThirdBranchWaitsAndStartsOnlyWhenASlotIsGivenBack(com.treelearn.app.GenerationCoordinatorInstrumentedTest):
+java.lang.AssertionError: 7: the application runs at most two generations expected:<2> but was:<0>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:647)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.theThirdBranchWaitsAndStartsOnlyWhenASlotIsGivenBack(GenerationCoordinatorInstrumentedTest.java:162)
+
+Error in aStorageRefusalLeavesNoAttemptAndFreesTheBranch(com.treelearn.app.GenerationCoordinatorInstrumentedTest):
+java.lang.AssertionError: 8: a local persistence failure is reported, not swallowed expected:<STORAGE> but was:<VERSION_MISMATCH>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.aStorageRefusalLeavesNoAttemptAndFreesTheBranch(GenerationCoordinatorInstrumentedTest.java:374)
+
+Error in theAttemptRowIsDurableBeforeTheCallOpens(com.treelearn.app.GenerationCoordinatorInstrumentedTest):
+java.lang.AssertionError
+	at org.junit.Assert.fail(Assert.java:87)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertTrue(Assert.java:53)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.theAttemptRowIsDurableBeforeTheCallOpens(GenerationCoordinatorInstrumentedTest.java:136)
+
+Error in aPromptBuildRefusalNeverReachesTheGatewayAndLeavesTheSlotFree(com.treelearn.app.GenerationCoordinatorInstrumentedTest):
+java.lang.AssertionError: the slot is still free afterwards
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.aPromptBuildRefusalNeverReachesTheGatewayAndLeavesTheSlotFree(GenerationCoordinatorInstrumentedTest.java:341)
+
+Error in aRefusedAcceptedWriteClosesTheConnectionAndFreesTheSlot(com.treelearn.app.GenerationCoordinatorInstrumentedTest):
+java.lang.AssertionError: no call was opened at index 0
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest$FakeGateway.handle(GenerationCoordinatorInstrumentedTest.java:594)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.aRefusedAcceptedWriteClosesTheConnectionAndFreesTheSlot(GenerationCoordinatorInstrumentedTest.java:430)
+
+com.treelearn.app.HomeBackdropInstrumentedTest:.
+Error in theTabBarAndRouteRootsDoNotHideTheSharedPaperTexture(com.treelearn.app.HomeBackdropInstrumentedTest):
+android.view.InflateException: Binary XML file line #142 in com.treelearn:layout/screen_tree_body: Binary XML file line #142 in com.treelearn:layout/screen_tree_body: Error inflating class <unknown>
+Caused by: android.view.InflateException: Binary XML file line #142 in com.treelearn:layout/screen_tree_body: Error inflating class <unknown>
+Caused by: java.lang.reflect.InvocationTargetException
+	at java.lang.reflect.Constructor.newInstance0(Native Method)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:343)
+	at android.view.LayoutInflater.createView(LayoutInflater.java:743)
+	at android.view.LayoutInflater.createViewFromTag(LayoutInflater.java:895)
+	at android.view.LayoutInflater.createViewFromTag(LayoutInflater.java:850)
+	at android.view.LayoutInflater.rInflate(LayoutInflater.java:1012)
+	at android.view.LayoutInflater.rInflateChildren(LayoutInflater.java:973)
+	at android.view.LayoutInflater.rInflate(LayoutInflater.java:1016)
+	at android.view.LayoutInflater.rInflateChildren(LayoutInflater.java:973)
+	at android.view.LayoutInflater.inflate(LayoutInflater.java:571)
+	at android.view.LayoutInflater.inflate(LayoutInflater.java:462)
+	at com.treelearn.app.HomeBackdropInstrumentedTest.assertNoPaperBackdrop(HomeBackdropInstrumentedTest.java:87)
+	at com.treelearn.app.HomeBackdropInstrumentedTest.theTabBarAndRouteRootsDoNotHideTheSharedPaperTexture(HomeBackdropInstrumentedTest.java:76)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
+	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:63)
+	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+	at androidx.test.runner.AndroidJUnit4.run(AndroidJUnit4.java:111)
+	at org.junit.runners.Suite.runChild(Suite.java:128)
+	at org.junit.runners.Suite.runChild(Suite.java:27)
+	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:115)
+	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:67)
+	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:58)
+	at androidx.test.runner.AndroidJUnitRunner.onStart(AndroidJUnitRunner.java:446)
+	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2627)
+Caused by: java.lang.RuntimeException: Can't create handler inside thread Thread[Instr: androidx.test.runner.AndroidJUnitRunner,5,main] that has not called Looper.prepare()
+	at android.os.Handler.<init>(Handler.java:253)
+	at android.os.Handler.<init>(Handler.java:155)
+	at android.view.GestureDetector$GestureHandler.<init>(GestureDetector.java:314)
+	at android.view.GestureDetector.<init>(GestureDetector.java:453)
+	at android.view.GestureDetector.<init>(GestureDetector.java:425)
+	at android.view.ScaleGestureDetector.setQuickScaleEnabled(ScaleGestureDetector.java:436)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:233)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:203)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:187)
+	at com.treelearn.app.screen.TreeCanvasView.<init>(TreeCanvasView.java:102)
+	... 46 more
+.
+com.treelearn.app.HomeComposerInstrumentedTest:......
+com.treelearn.app.HomeDrawerScreenInstrumentedTest:.
+com.treelearn.app.HomeMotionInstrumentedTest:
+Error in aHistoryCardOpensItsConversationWhileItIsStillEntering(com.treelearn.app.HomeMotionInstrumentedTest):
+java.lang.AssertionError: the home's first card was never laid out
+	at com.treelearn.app.HomeMotionInstrumentedTest.awaitFirstChild(HomeMotionInstrumentedTest.java:451)
+	at com.treelearn.app.HomeMotionInstrumentedTest.aHistoryCardOpensItsConversationWhileItIsStillEntering(HomeMotionInstrumentedTest.java:351)
+
+Error in eachHistoryCardWaitsItsOwnTurnBehindTheOnesBeforeIt(com.treelearn.app.HomeMotionInstrumentedTest):
+java.lang.AssertionError: the home never drew 3 card rows within 10000ms
+	at com.treelearn.app.HomeMotionInstrumentedTest.awaitCardCount(HomeMotionInstrumentedTest.java:431)
+	at com.treelearn.app.HomeMotionInstrumentedTest.eachHistoryCardWaitsItsOwnTurnBehindTheOnesBeforeIt(HomeMotionInstrumentedTest.java:279)
+
+Error in theEntranceIsDrawnNotMoved(com.treelearn.app.HomeMotionInstrumentedTest):
+java.lang.AssertionError: the home's first card was never laid out
+	at com.treelearn.app.HomeMotionInstrumentedTest.awaitFirstChild(HomeMotionInstrumentedTest.java:451)
+	at com.treelearn.app.HomeMotionInstrumentedTest.theEntranceIsDrawnNotMoved(HomeMotionInstrumentedTest.java:302)
+
+Error in aLaterRedrawDoesNotReplayTheEntrance(com.treelearn.app.HomeMotionInstrumentedTest):
+java.lang.AssertionError: the home never drew 1 card rows within 10000ms
+	at com.treelearn.app.HomeMotionInstrumentedTest.awaitCardCount(HomeMotionInstrumentedTest.java:431)
+	at com.treelearn.app.HomeMotionInstrumentedTest.aLaterRedrawDoesNotReplayTheEntrance(HomeMotionInstrumentedTest.java:324)
+.
+com.treelearn.app.HomeTopicCardInstrumentedTest:
+Error in aStoredTopicIsDrawnAsACardWithItsTitleAndMetaAndStillOpensTheConversation(com.treelearn.app.HomeTopicCardInstrumentedTest):
+java.lang.AssertionError: no row arrived in view 2131034233 within 10000ms
+	at com.treelearn.app.HomeTopicCardInstrumentedTest.awaitChildren(HomeTopicCardInstrumentedTest.java:201)
+	at com.treelearn.app.HomeTopicCardInstrumentedTest.aStoredTopicIsDrawnAsACardWithItsTitleAndMetaAndStillOpensTheConversation(HomeTopicCardInstrumentedTest.java:107)
+.
+com.treelearn.app.LibraryArchiveInstrumentedTest:.....
+com.treelearn.app.LibraryTopicSummaryInstrumentedTest:..
+com.treelearn.app.MarkdownRendererInstrumentedTest:...........
+com.treelearn.app.MathSpanInstrumentedTest:...
+com.treelearn.app.ModelListMergeInstrumentedTest:.....
+com.treelearn.app.NavigationStoreInstrumentedTest:......
+com.treelearn.app.ProviderModelDaoInstrumentedTest:...
+Error in aVersionTwoDatabaseIsUpgradedToTheCurrentSchemaWithItsDataIntact(com.treelearn.app.ProviderModelDaoInstrumentedTest):
+android.database.sqlite.SQLiteException: table message_annotations already exists (code 1 SQLITE_ERROR): , while compiling: CREATE TABLE message_annotations (id TEXT NOT NULL PRIMARY KEY, message_id TEXT NOT NULL REFERENCES messages(id) ON DELETE CASCADE, container TEXT NOT NULL, prose_index INTEGER NOT NULL, table_index INTEGER NOT NULL, row_index INTEGER NOT NULL, col_index INTEGER NOT NULL, start_offset INTEGER NOT NULL, end_offset INTEGER NOT NULL, kind TEXT NOT NULL, content_digest TEXT NOT NULL, body TEXT NOT NULL DEFAULT '', created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, CHECK (end_offset > start_offset), CHECK (kind IN ('HIGHLIGHT','NOTE')), CHECK (kind <> 'NOTE' OR body <> ''), CHECK (kind <> 'HIGHLIGHT' OR body = ''), CHECK ((container = 'PROSE' AND prose_index >= 0 AND table_index = -1 AND row_index = -1 AND col_index = -1) OR (container = 'CELL' AND prose_index = -1 AND table_index >= 0 AND row_index >= 0 AND col_index >= 0)))
+	at android.database.sqlite.SQLiteConnection.nativePrepareStatement(Native Method)
+	at android.database.sqlite.SQLiteConnection.-$$Nest$smnativePrepareStatement(Unknown Source:0)
+	at android.database.sqlite.SQLiteConnection$PreparedStatementCache.createStatement(SQLiteConnection.java:1627)
+	at android.database.sqlite.SQLiteConnection.acquirePreparedStatementLI(SQLiteConnection.java:1117)
+	at android.database.sqlite.SQLiteConnection.acquirePreparedStatement(SQLiteConnection.java:1145)
+	at android.database.sqlite.SQLiteConnection.prepare(SQLiteConnection.java:708)
+	at android.database.sqlite.SQLiteSession.prepare(SQLiteSession.java:625)
+	at android.database.sqlite.SQLiteProgram.<init>(SQLiteProgram.java:62)
+	at android.database.sqlite.SQLiteStatement.<init>(SQLiteStatement.java:34)
+	at android.database.sqlite.SQLiteDatabase.executeSql(SQLiteDatabase.java:2232)
+	at android.database.sqlite.SQLiteDatabase.execSQL(SQLiteDatabase.java:2152)
+	at com.treelearn.data.db.TreeLearnSchema$MigrationV4ToV5.apply(TreeLearnSchema.java:1024)
+	at com.treelearn.data.db.TreeLearnSchema.applyForwardMigrations(TreeLearnSchema.java:1050)
+	at com.treelearn.data.db.TreeLearnDatabaseHelper.onUpgrade(TreeLearnDatabaseHelper.java:47)
+	at android.database.sqlite.SQLiteOpenHelper.getDatabaseLocked(SQLiteOpenHelper.java:433)
+	at android.database.sqlite.SQLiteOpenHelper.getWritableDatabase(SQLiteOpenHelper.java:332)
+	at com.treelearn.app.ProviderModelDaoInstrumentedTest.aVersionTwoDatabaseIsUpgradedToTheCurrentSchemaWithItsDataIntact(ProviderModelDaoInstrumentedTest.java:128)
+...
+com.treelearn.app.ProviderSecretStoreInstrumentedTest:.....
+com.treelearn.app.RealDataPathWiringInstrumentedTest:..........
+com.treelearn.app.RecommendationForkHotZoneInstrumentedTest:.
+com.treelearn.app.SearchUnreadReadingInstrumentedTest:............
+com.treelearn.app.SecretBackupConfigInstrumentedTest:..
+com.treelearn.app.SecretStoreInstrumentedTest:........
+com.treelearn.app.SqliteSchemaInstrumentedTest:.........................
+com.treelearn.app.TopicBranchMessageDaoInstrumentedTest:...............
+com.treelearn.app.TreeCanvasDeviceInstrumentedTest:
+Error in theTwoColumnLayoutIsATabletResourceOnly(com.treelearn.app.TreeCanvasDeviceInstrumentedTest):
+android.view.InflateException: Binary XML file line #32 in com.treelearn:layout/screen_tree: Binary XML file line #142 in com.treelearn:layout/screen_tree_body: Error inflating class <unknown>
+Caused by: android.view.InflateException: Binary XML file line #142 in com.treelearn:layout/screen_tree_body: Error inflating class <unknown>
+Caused by: java.lang.reflect.InvocationTargetException
+	at java.lang.reflect.Constructor.newInstance0(Native Method)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:343)
+	at android.view.LayoutInflater.createView(LayoutInflater.java:743)
+	at android.view.LayoutInflater.createViewFromTag(LayoutInflater.java:895)
+	at android.view.LayoutInflater.createViewFromTag(LayoutInflater.java:850)
+	at android.view.LayoutInflater.rInflate(LayoutInflater.java:1012)
+	at android.view.LayoutInflater.rInflateChildren(LayoutInflater.java:973)
+	at android.view.LayoutInflater.rInflate(LayoutInflater.java:1016)
+	at android.view.LayoutInflater.rInflateChildren(LayoutInflater.java:973)
+	at android.view.LayoutInflater.parseInclude(LayoutInflater.java:1148)
+	at android.view.LayoutInflater.rInflate(LayoutInflater.java:1008)
+	at android.view.LayoutInflater.rInflateChildren(LayoutInflater.java:973)
+	at android.view.LayoutInflater.inflate(LayoutInflater.java:571)
+	at android.view.LayoutInflater.inflate(LayoutInflater.java:462)
+	at android.view.LayoutInflater.inflate(LayoutInflater.java:413)
+	at com.treelearn.app.TreeCanvasDeviceInstrumentedTest.theTwoColumnLayoutIsATabletResourceOnly(TreeCanvasDeviceInstrumentedTest.java:85)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
+	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:63)
+	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+	at androidx.test.runner.AndroidJUnit4.run(AndroidJUnit4.java:111)
+	at org.junit.runners.Suite.runChild(Suite.java:128)
+	at org.junit.runners.Suite.runChild(Suite.java:27)
+	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:115)
+	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:67)
+	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:58)
+	at androidx.test.runner.AndroidJUnitRunner.onStart(AndroidJUnitRunner.java:446)
+	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2627)
+Caused by: java.lang.RuntimeException: Can't create handler inside thread Thread[Instr: androidx.test.runner.AndroidJUnitRunner,5,main] that has not called Looper.prepare()
+	at android.os.Handler.<init>(Handler.java:253)
+	at android.os.Handler.<init>(Handler.java:155)
+	at android.view.GestureDetector$GestureHandler.<init>(GestureDetector.java:314)
+	at android.view.GestureDetector.<init>(GestureDetector.java:453)
+	at android.view.GestureDetector.<init>(GestureDetector.java:425)
+	at android.view.ScaleGestureDetector.setQuickScaleEnabled(ScaleGestureDetector.java:436)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:233)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:203)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:187)
+	at com.treelearn.app.screen.TreeCanvasView.<init>(TreeCanvasView.java:102)
+	... 49 more
+
+Error in theRealTouchStreamReachesTheCanvasCallbacks(com.treelearn.app.TreeCanvasDeviceInstrumentedTest):
+java.lang.RuntimeException: Can't create handler inside thread Thread[Instr: androidx.test.runner.AndroidJUnitRunner,5,main] that has not called Looper.prepare()
+	at android.os.Handler.<init>(Handler.java:253)
+	at android.os.Handler.<init>(Handler.java:155)
+	at android.view.GestureDetector$GestureHandler.<init>(GestureDetector.java:314)
+	at android.view.GestureDetector.<init>(GestureDetector.java:453)
+	at android.view.GestureDetector.<init>(GestureDetector.java:425)
+	at android.view.ScaleGestureDetector.setQuickScaleEnabled(ScaleGestureDetector.java:436)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:233)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:203)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:187)
+	at com.treelearn.app.screen.TreeCanvasView.<init>(TreeCanvasView.java:102)
+	at com.treelearn.app.screen.TreeCanvasView.<init>(TreeCanvasView.java:74)
+	at com.treelearn.app.TreeCanvasDeviceInstrumentedTest.theRealTouchStreamReachesTheCanvasCallbacks(TreeCanvasDeviceInstrumentedTest.java:148)
+
+Error in thePopupSeamFollowsTheRenderedState(com.treelearn.app.TreeCanvasDeviceInstrumentedTest):
+android.view.InflateException: Binary XML file line #14 in com.treelearn:layout/screen_tree: Binary XML file line #142 in com.treelearn:layout/screen_tree_body: Error inflating class <unknown>
+Caused by: android.view.InflateException: Binary XML file line #142 in com.treelearn:layout/screen_tree_body: Error inflating class <unknown>
+Caused by: java.lang.reflect.InvocationTargetException
+	at java.lang.reflect.Constructor.newInstance0(Native Method)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:343)
+	at android.view.LayoutInflater.createView(LayoutInflater.java:743)
+	at android.view.LayoutInflater.createViewFromTag(LayoutInflater.java:895)
+	at android.view.LayoutInflater.createViewFromTag(LayoutInflater.java:850)
+	at android.view.LayoutInflater.rInflate(LayoutInflater.java:1012)
+	at android.view.LayoutInflater.rInflateChildren(LayoutInflater.java:973)
+	at android.view.LayoutInflater.rInflate(LayoutInflater.java:1016)
+	at android.view.LayoutInflater.rInflateChildren(LayoutInflater.java:973)
+	at android.view.LayoutInflater.parseInclude(LayoutInflater.java:1148)
+	at android.view.LayoutInflater.rInflate(LayoutInflater.java:1008)
+	at android.view.LayoutInflater.rInflateChildren(LayoutInflater.java:973)
+	at android.view.LayoutInflater.inflate(LayoutInflater.java:571)
+	at android.view.LayoutInflater.inflate(LayoutInflater.java:462)
+	at com.treelearn.app.screen.TreeCanvasScreen.<init>(TreeCanvasScreen.java:71)
+	at com.treelearn.app.screen.TreeCanvasScreen.<init>(TreeCanvasScreen.java:66)
+	at com.treelearn.app.TreeCanvasDeviceInstrumentedTest.thePopupSeamFollowsTheRenderedState(TreeCanvasDeviceInstrumentedTest.java:224)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
+	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:63)
+	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+	at androidx.test.runner.AndroidJUnit4.run(AndroidJUnit4.java:111)
+	at org.junit.runners.Suite.runChild(Suite.java:128)
+	at org.junit.runners.Suite.runChild(Suite.java:27)
+	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:115)
+	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:67)
+	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:58)
+	at androidx.test.runner.AndroidJUnitRunner.onStart(AndroidJUnitRunner.java:446)
+	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2627)
+Caused by: java.lang.RuntimeException: Can't create handler inside thread Thread[Instr: androidx.test.runner.AndroidJUnitRunner,5,main] that has not called Looper.prepare()
+	at android.os.Handler.<init>(Handler.java:253)
+	at android.os.Handler.<init>(Handler.java:155)
+	at android.view.GestureDetector$GestureHandler.<init>(GestureDetector.java:314)
+	at android.view.GestureDetector.<init>(GestureDetector.java:453)
+	at android.view.GestureDetector.<init>(GestureDetector.java:425)
+	at android.view.ScaleGestureDetector.setQuickScaleEnabled(ScaleGestureDetector.java:436)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:233)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:203)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:187)
+	at com.treelearn.app.screen.TreeCanvasView.<init>(TreeCanvasView.java:102)
+	... 50 more
+
+com.treelearn.app.TreeCanvasStoreInstrumentedTest:........
+com.treelearn.app.TreeCanvasVisualEvidenceInstrumentedTest:
+Error in writesIsolatedCanvasStatesForVisualComparison(com.treelearn.app.TreeCanvasVisualEvidenceInstrumentedTest):
+android.view.InflateException: Binary XML file line #14 in com.treelearn:layout/screen_tree: Binary XML file line #142 in com.treelearn:layout/screen_tree_body: Error inflating class <unknown>
+Caused by: android.view.InflateException: Binary XML file line #142 in com.treelearn:layout/screen_tree_body: Error inflating class <unknown>
+Caused by: java.lang.reflect.InvocationTargetException
+	at java.lang.reflect.Constructor.newInstance0(Native Method)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:343)
+	at android.view.LayoutInflater.createView(LayoutInflater.java:743)
+	at android.view.LayoutInflater.createViewFromTag(LayoutInflater.java:895)
+	at android.view.LayoutInflater.createViewFromTag(LayoutInflater.java:850)
+	at android.view.LayoutInflater.rInflate(LayoutInflater.java:1012)
+	at android.view.LayoutInflater.rInflateChildren(LayoutInflater.java:973)
+	at android.view.LayoutInflater.rInflate(LayoutInflater.java:1016)
+	at android.view.LayoutInflater.rInflateChildren(LayoutInflater.java:973)
+	at android.view.LayoutInflater.parseInclude(LayoutInflater.java:1148)
+	at android.view.LayoutInflater.rInflate(LayoutInflater.java:1008)
+	at android.view.LayoutInflater.rInflateChildren(LayoutInflater.java:973)
+	at android.view.LayoutInflater.inflate(LayoutInflater.java:571)
+	at android.view.LayoutInflater.inflate(LayoutInflater.java:462)
+	at com.treelearn.app.screen.TreeCanvasScreen.<init>(TreeCanvasScreen.java:71)
+	at com.treelearn.app.screen.TreeCanvasScreen.<init>(TreeCanvasScreen.java:66)
+	at com.treelearn.app.TreeCanvasVisualEvidenceInstrumentedTest.writesIsolatedCanvasStatesForVisualComparison(TreeCanvasVisualEvidenceInstrumentedTest.java:52)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
+	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:63)
+	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+	at androidx.test.runner.AndroidJUnit4.run(AndroidJUnit4.java:111)
+	at org.junit.runners.Suite.runChild(Suite.java:128)
+	at org.junit.runners.Suite.runChild(Suite.java:27)
+	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:115)
+	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:67)
+	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:58)
+	at androidx.test.runner.AndroidJUnitRunner.onStart(AndroidJUnitRunner.java:446)
+	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2627)
+Caused by: java.lang.RuntimeException: Can't create handler inside thread Thread[Instr: androidx.test.runner.AndroidJUnitRunner,5,main] that has not called Looper.prepare()
+	at android.os.Handler.<init>(Handler.java:253)
+	at android.os.Handler.<init>(Handler.java:155)
+	at android.view.GestureDetector$GestureHandler.<init>(GestureDetector.java:314)
+	at android.view.GestureDetector.<init>(GestureDetector.java:453)
+	at android.view.GestureDetector.<init>(GestureDetector.java:425)
+	at android.view.ScaleGestureDetector.setQuickScaleEnabled(ScaleGestureDetector.java:436)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:233)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:203)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:187)
+	at com.treelearn.app.screen.TreeCanvasView.<init>(TreeCanvasView.java:102)
+	... 50 more
+
+com.treelearn.app.WordMenuPopupInstrumentedTest:.....
+
+Time: 182.613
+There were 28 failures:
+1) aVersionThreeDatabaseIsUpgradedToTheCurrentSchemaByTheProductionHelper(com.treelearn.app.AttachmentStorageInstrumentedTest)
+android.database.sqlite.SQLiteException: table message_annotations already exists (code 1 SQLITE_ERROR): , while compiling: CREATE TABLE message_annotations (id TEXT NOT NULL PRIMARY KEY, message_id TEXT NOT NULL REFERENCES messages(id) ON DELETE CASCADE, container TEXT NOT NULL, prose_index INTEGER NOT NULL, table_index INTEGER NOT NULL, row_index INTEGER NOT NULL, col_index INTEGER NOT NULL, start_offset INTEGER NOT NULL, end_offset INTEGER NOT NULL, kind TEXT NOT NULL, content_digest TEXT NOT NULL, body TEXT NOT NULL DEFAULT '', created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, CHECK (end_offset > start_offset), CHECK (kind IN ('HIGHLIGHT','NOTE')), CHECK (kind <> 'NOTE' OR body <> ''), CHECK (kind <> 'HIGHLIGHT' OR body = ''), CHECK ((container = 'PROSE' AND prose_index >= 0 AND table_index = -1 AND row_index = -1 AND col_index = -1) OR (container = 'CELL' AND prose_index = -1 AND table_index >= 0 AND row_index >= 0 AND col_index >= 0)))
+	at android.database.sqlite.SQLiteConnection.nativePrepareStatement(Native Method)
+	at android.database.sqlite.SQLiteConnection.-$$Nest$smnativePrepareStatement(Unknown Source:0)
+	at android.database.sqlite.SQLiteConnection$PreparedStatementCache.createStatement(SQLiteConnection.java:1627)
+	at android.database.sqlite.SQLiteConnection.acquirePreparedStatementLI(SQLiteConnection.java:1117)
+	at android.database.sqlite.SQLiteConnection.acquirePreparedStatement(SQLiteConnection.java:1145)
+	at android.database.sqlite.SQLiteConnection.prepare(SQLiteConnection.java:708)
+	at android.database.sqlite.SQLiteSession.prepare(SQLiteSession.java:625)
+	at android.database.sqlite.SQLiteProgram.<init>(SQLiteProgram.java:62)
+	at android.database.sqlite.SQLiteStatement.<init>(SQLiteStatement.java:34)
+	at android.database.sqlite.SQLiteDatabase.executeSql(SQLiteDatabase.java:2232)
+	at android.database.sqlite.SQLiteDatabase.execSQL(SQLiteDatabase.java:2152)
+	at com.treelearn.data.db.TreeLearnSchema$MigrationV4ToV5.apply(TreeLearnSchema.java:1024)
+	at com.treelearn.data.db.TreeLearnSchema.applyForwardMigrations(TreeLearnSchema.java:1050)
+	at com.treelearn.data.db.TreeLearnDatabaseHelper.onUpgrade(TreeLearnDatabaseHelper.java:47)
+	at android.database.sqlite.SQLiteOpenHelper.getDatabaseLocked(SQLiteOpenHelper.java:433)
+	at android.database.sqlite.SQLiteOpenHelper.getWritableDatabase(SQLiteOpenHelper.java:332)
+	at com.treelearn.app.AttachmentStorageInstrumentedTest.aVersionThreeDatabaseIsUpgradedToTheCurrentSchemaByTheProductionHelper(AttachmentStorageInstrumentedTest.java:217)
+2) aConversationOpenedFromHomeHidesTheBarAndBackLandsOnHome(com.treelearn.app.BottomTabShellInstrumentedTest)
+java.lang.AssertionError: no row arrived in view 2131034233 within 10000ms
+	at com.treelearn.app.BottomTabShellInstrumentedTest.awaitChildren(BottomTabShellInstrumentedTest.java:351)
+	at com.treelearn.app.BottomTabShellInstrumentedTest.aConversationOpenedFromHomeHidesTheBarAndBackLandsOnHome(BottomTabShellInstrumentedTest.java:176)
+3) aConversationOpenedFromTheLibraryHidesTheBarAndNavigationLandsBackOnTheLibrary(com.treelearn.app.BottomTabShellInstrumentedTest)
+java.lang.AssertionError: no row arrived in view 2131034267 within 10000ms
+	at com.treelearn.app.BottomTabShellInstrumentedTest.awaitChildren(BottomTabShellInstrumentedTest.java:351)
+	at com.treelearn.app.BottomTabShellInstrumentedTest.aConversationOpenedFromTheLibraryHidesTheBarAndNavigationLandsBackOnTheLibrary(BottomTabShellInstrumentedTest.java:193)
+4) theLibraryListsTheStoredTopicsWithTheirOwnFields(com.treelearn.app.BottomTabShellInstrumentedTest)
+java.lang.AssertionError: no row arrived in view 2131034267 within 10000ms
+	at com.treelearn.app.BottomTabShellInstrumentedTest.awaitChildren(BottomTabShellInstrumentedTest.java:351)
+	at com.treelearn.app.BottomTabShellInstrumentedTest.theLibraryListsTheStoredTopicsWithTheirOwnFields(BottomTabShellInstrumentedTest.java:225)
+5) theFirstTopicWriteRunsInsideTheAcceptedCallbackBeforeAnyDelta(com.treelearn.app.GenerationCoordinatorInstrumentedTest)
+java.lang.AssertionError
+	at org.junit.Assert.fail(Assert.java:87)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertTrue(Assert.java:53)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.theFirstTopicWriteRunsInsideTheAcceptedCallbackBeforeAnyDelta(GenerationCoordinatorInstrumentedTest.java:398)
+6) cancellingDiscardsLateEventsAndRecordsThemRedacted(com.treelearn.app.GenerationCoordinatorInstrumentedTest)
+java.lang.AssertionError: no call was opened at index 0
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest$FakeGateway.handle(GenerationCoordinatorInstrumentedTest.java:594)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.cancellingDiscardsLateEventsAndRecordsThemRedacted(GenerationCoordinatorInstrumentedTest.java:229)
+7) aSecondAttemptForABusyBranchIsRefusedAndWritesNoRow(com.treelearn.app.GenerationCoordinatorInstrumentedTest)
+java.lang.AssertionError: expected:<BRANCH_BUSY> but was:<VERSION_MISMATCH>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.aSecondAttemptForABusyBranchIsRefusedAndWritesNoRow(GenerationCoordinatorInstrumentedTest.java:192)
+8) aNormallyCompletedStreamStabilizesAndCopiesThePinnedVersionVerbatim(com.treelearn.app.GenerationCoordinatorInstrumentedTest)
+java.lang.AssertionError: no call was opened at index 0
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest$FakeGateway.handle(GenerationCoordinatorInstrumentedTest.java:594)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.aNormallyCompletedStreamStabilizesAndCopiesThePinnedVersionVerbatim(GenerationCoordinatorInstrumentedTest.java:289)
+9) detachingAnObserverDoesNotCancelTheAttempt(com.treelearn.app.GenerationCoordinatorInstrumentedTest)
+java.lang.AssertionError: no call was opened at index 0
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest$FakeGateway.handle(GenerationCoordinatorInstrumentedTest.java:594)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.detachingAnObserverDoesNotCancelTheAttempt(GenerationCoordinatorInstrumentedTest.java:485)
+10) deltasArePersistedOnlyWhenTheWriteWindowIsReached(com.treelearn.app.GenerationCoordinatorInstrumentedTest)
+java.lang.AssertionError: no call was opened at index 0
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest$FakeGateway.handle(GenerationCoordinatorInstrumentedTest.java:594)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.deltasArePersistedOnlyWhenTheWriteWindowIsReached(GenerationCoordinatorInstrumentedTest.java:207)
+11) aFailedStreamKeepsThePartialContentAndCreatesNoRevision(com.treelearn.app.GenerationCoordinatorInstrumentedTest)
+java.lang.AssertionError: no call was opened at index 0
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest$FakeGateway.handle(GenerationCoordinatorInstrumentedTest.java:594)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.aFailedStreamKeepsThePartialContentAndCreatesNoRevision(GenerationCoordinatorInstrumentedTest.java:254)
+12) aNormallyCompletedStreamWithoutAnAnswerIsRefusedByTheDomainNotByTheCoordinator(com.treelearn.app.GenerationCoordinatorInstrumentedTest)
+java.lang.AssertionError: no call was opened at index 0
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest$FakeGateway.handle(GenerationCoordinatorInstrumentedTest.java:594)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.aNormallyCompletedStreamWithoutAnAnswerIsRefusedByTheDomainNotByTheCoordinator(GenerationCoordinatorInstrumentedTest.java:274)
+13) theThirdBranchWaitsAndStartsOnlyWhenASlotIsGivenBack(com.treelearn.app.GenerationCoordinatorInstrumentedTest)
+java.lang.AssertionError: 7: the application runs at most two generations expected:<2> but was:<0>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:647)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.theThirdBranchWaitsAndStartsOnlyWhenASlotIsGivenBack(GenerationCoordinatorInstrumentedTest.java:162)
+14) aStorageRefusalLeavesNoAttemptAndFreesTheBranch(com.treelearn.app.GenerationCoordinatorInstrumentedTest)
+java.lang.AssertionError: 8: a local persistence failure is reported, not swallowed expected:<STORAGE> but was:<VERSION_MISMATCH>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.aStorageRefusalLeavesNoAttemptAndFreesTheBranch(GenerationCoordinatorInstrumentedTest.java:374)
+15) theAttemptRowIsDurableBeforeTheCallOpens(com.treelearn.app.GenerationCoordinatorInstrumentedTest)
+java.lang.AssertionError
+	at org.junit.Assert.fail(Assert.java:87)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertTrue(Assert.java:53)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.theAttemptRowIsDurableBeforeTheCallOpens(GenerationCoordinatorInstrumentedTest.java:136)
+16) aPromptBuildRefusalNeverReachesTheGatewayAndLeavesTheSlotFree(com.treelearn.app.GenerationCoordinatorInstrumentedTest)
+java.lang.AssertionError: the slot is still free afterwards
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.aPromptBuildRefusalNeverReachesTheGatewayAndLeavesTheSlotFree(GenerationCoordinatorInstrumentedTest.java:341)
+17) aRefusedAcceptedWriteClosesTheConnectionAndFreesTheSlot(com.treelearn.app.GenerationCoordinatorInstrumentedTest)
+java.lang.AssertionError: no call was opened at index 0
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest$FakeGateway.handle(GenerationCoordinatorInstrumentedTest.java:594)
+	at com.treelearn.app.GenerationCoordinatorInstrumentedTest.aRefusedAcceptedWriteClosesTheConnectionAndFreesTheSlot(GenerationCoordinatorInstrumentedTest.java:430)
+18) theTabBarAndRouteRootsDoNotHideTheSharedPaperTexture(com.treelearn.app.HomeBackdropInstrumentedTest)
+android.view.InflateException: Binary XML file line #142 in com.treelearn:layout/screen_tree_body: Binary XML file line #142 in com.treelearn:layout/screen_tree_body: Error inflating class <unknown>
+Caused by: android.view.InflateException: Binary XML file line #142 in com.treelearn:layout/screen_tree_body: Error inflating class <unknown>
+Caused by: java.lang.reflect.InvocationTargetException
+	at java.lang.reflect.Constructor.newInstance0(Native Method)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:343)
+	at android.view.LayoutInflater.createView(LayoutInflater.java:743)
+	at android.view.LayoutInflater.createViewFromTag(LayoutInflater.java:895)
+	at android.view.LayoutInflater.createViewFromTag(LayoutInflater.java:850)
+	at android.view.LayoutInflater.rInflate(LayoutInflater.java:1012)
+	at android.view.LayoutInflater.rInflateChildren(LayoutInflater.java:973)
+	at android.view.LayoutInflater.rInflate(LayoutInflater.java:1016)
+	at android.view.LayoutInflater.rInflateChildren(LayoutInflater.java:973)
+	at android.view.LayoutInflater.inflate(LayoutInflater.java:571)
+	at android.view.LayoutInflater.inflate(LayoutInflater.java:462)
+	at com.treelearn.app.HomeBackdropInstrumentedTest.assertNoPaperBackdrop(HomeBackdropInstrumentedTest.java:87)
+	at com.treelearn.app.HomeBackdropInstrumentedTest.theTabBarAndRouteRootsDoNotHideTheSharedPaperTexture(HomeBackdropInstrumentedTest.java:76)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
+	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:63)
+	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+	at androidx.test.runner.AndroidJUnit4.run(AndroidJUnit4.java:111)
+	at org.junit.runners.Suite.runChild(Suite.java:128)
+	at org.junit.runners.Suite.runChild(Suite.java:27)
+	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:115)
+	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:67)
+	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:58)
+	at androidx.test.runner.AndroidJUnitRunner.onStart(AndroidJUnitRunner.java:446)
+	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2627)
+Caused by: java.lang.RuntimeException: Can't create handler inside thread Thread[Instr: androidx.test.runner.AndroidJUnitRunner,5,main] that has not called Looper.prepare()
+	at android.os.Handler.<init>(Handler.java:253)
+	at android.os.Handler.<init>(Handler.java:155)
+	at android.view.GestureDetector$GestureHandler.<init>(GestureDetector.java:314)
+	at android.view.GestureDetector.<init>(GestureDetector.java:453)
+	at android.view.GestureDetector.<init>(GestureDetector.java:425)
+	at android.view.ScaleGestureDetector.setQuickScaleEnabled(ScaleGestureDetector.java:436)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:233)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:203)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:187)
+	at com.treelearn.app.screen.TreeCanvasView.<init>(TreeCanvasView.java:102)
+	... 46 more
+19) aHistoryCardOpensItsConversationWhileItIsStillEntering(com.treelearn.app.HomeMotionInstrumentedTest)
+java.lang.AssertionError: the home's first card was never laid out
+	at com.treelearn.app.HomeMotionInstrumentedTest.awaitFirstChild(HomeMotionInstrumentedTest.java:451)
+	at com.treelearn.app.HomeMotionInstrumentedTest.aHistoryCardOpensItsConversationWhileItIsStillEntering(HomeMotionInstrumentedTest.java:351)
+20) eachHistoryCardWaitsItsOwnTurnBehindTheOnesBeforeIt(com.treelearn.app.HomeMotionInstrumentedTest)
+java.lang.AssertionError: the home never drew 3 card rows within 10000ms
+	at com.treelearn.app.HomeMotionInstrumentedTest.awaitCardCount(HomeMotionInstrumentedTest.java:431)
+	at com.treelearn.app.HomeMotionInstrumentedTest.eachHistoryCardWaitsItsOwnTurnBehindTheOnesBeforeIt(HomeMotionInstrumentedTest.java:279)
+21) theEntranceIsDrawnNotMoved(com.treelearn.app.HomeMotionInstrumentedTest)
+java.lang.AssertionError: the home's first card was never laid out
+	at com.treelearn.app.HomeMotionInstrumentedTest.awaitFirstChild(HomeMotionInstrumentedTest.java:451)
+	at com.treelearn.app.HomeMotionInstrumentedTest.theEntranceIsDrawnNotMoved(HomeMotionInstrumentedTest.java:302)
+22) aLaterRedrawDoesNotReplayTheEntrance(com.treelearn.app.HomeMotionInstrumentedTest)
+java.lang.AssertionError: the home never drew 1 card rows within 10000ms
+	at com.treelearn.app.HomeMotionInstrumentedTest.awaitCardCount(HomeMotionInstrumentedTest.java:431)
+	at com.treelearn.app.HomeMotionInstrumentedTest.aLaterRedrawDoesNotReplayTheEntrance(HomeMotionInstrumentedTest.java:324)
+23) aStoredTopicIsDrawnAsACardWithItsTitleAndMetaAndStillOpensTheConversation(com.treelearn.app.HomeTopicCardInstrumentedTest)
+java.lang.AssertionError: no row arrived in view 2131034233 within 10000ms
+	at com.treelearn.app.HomeTopicCardInstrumentedTest.awaitChildren(HomeTopicCardInstrumentedTest.java:201)
+	at com.treelearn.app.HomeTopicCardInstrumentedTest.aStoredTopicIsDrawnAsACardWithItsTitleAndMetaAndStillOpensTheConversation(HomeTopicCardInstrumentedTest.java:107)
+24) aVersionTwoDatabaseIsUpgradedToTheCurrentSchemaWithItsDataIntact(com.treelearn.app.ProviderModelDaoInstrumentedTest)
+android.database.sqlite.SQLiteException: table message_annotations already exists (code 1 SQLITE_ERROR): , while compiling: CREATE TABLE message_annotations (id TEXT NOT NULL PRIMARY KEY, message_id TEXT NOT NULL REFERENCES messages(id) ON DELETE CASCADE, container TEXT NOT NULL, prose_index INTEGER NOT NULL, table_index INTEGER NOT NULL, row_index INTEGER NOT NULL, col_index INTEGER NOT NULL, start_offset INTEGER NOT NULL, end_offset INTEGER NOT NULL, kind TEXT NOT NULL, content_digest TEXT NOT NULL, body TEXT NOT NULL DEFAULT '', created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, CHECK (end_offset > start_offset), CHECK (kind IN ('HIGHLIGHT','NOTE')), CHECK (kind <> 'NOTE' OR body <> ''), CHECK (kind <> 'HIGHLIGHT' OR body = ''), CHECK ((container = 'PROSE' AND prose_index >= 0 AND table_index = -1 AND row_index = -1 AND col_index = -1) OR (container = 'CELL' AND prose_index = -1 AND table_index >= 0 AND row_index >= 0 AND col_index >= 0)))
+	at android.database.sqlite.SQLiteConnection.nativePrepareStatement(Native Method)
+	at android.database.sqlite.SQLiteConnection.-$$Nest$smnativePrepareStatement(Unknown Source:0)
+	at android.database.sqlite.SQLiteConnection$PreparedStatementCache.createStatement(SQLiteConnection.java:1627)
+	at android.database.sqlite.SQLiteConnection.acquirePreparedStatementLI(SQLiteConnection.java:1117)
+	at android.database.sqlite.SQLiteConnection.acquirePreparedStatement(SQLiteConnection.java:1145)
+	at android.database.sqlite.SQLiteConnection.prepare(SQLiteConnection.java:708)
+	at android.database.sqlite.SQLiteSession.prepare(SQLiteSession.java:625)
+	at android.database.sqlite.SQLiteProgram.<init>(SQLiteProgram.java:62)
+	at android.database.sqlite.SQLiteStatement.<init>(SQLiteStatement.java:34)
+	at android.database.sqlite.SQLiteDatabase.executeSql(SQLiteDatabase.java:2232)
+	at android.database.sqlite.SQLiteDatabase.execSQL(SQLiteDatabase.java:2152)
+	at com.treelearn.data.db.TreeLearnSchema$MigrationV4ToV5.apply(TreeLearnSchema.java:1024)
+	at com.treelearn.data.db.TreeLearnSchema.applyForwardMigrations(TreeLearnSchema.java:1050)
+	at com.treelearn.data.db.TreeLearnDatabaseHelper.onUpgrade(TreeLearnDatabaseHelper.java:47)
+	at android.database.sqlite.SQLiteOpenHelper.getDatabaseLocked(SQLiteOpenHelper.java:433)
+	at android.database.sqlite.SQLiteOpenHelper.getWritableDatabase(SQLiteOpenHelper.java:332)
+	at com.treelearn.app.ProviderModelDaoInstrumentedTest.aVersionTwoDatabaseIsUpgradedToTheCurrentSchemaWithItsDataIntact(ProviderModelDaoInstrumentedTest.java:128)
+25) theTwoColumnLayoutIsATabletResourceOnly(com.treelearn.app.TreeCanvasDeviceInstrumentedTest)
+android.view.InflateException: Binary XML file line #32 in com.treelearn:layout/screen_tree: Binary XML file line #142 in com.treelearn:layout/screen_tree_body: Error inflating class <unknown>
+Caused by: android.view.InflateException: Binary XML file line #142 in com.treelearn:layout/screen_tree_body: Error inflating class <unknown>
+Caused by: java.lang.reflect.InvocationTargetException
+	at java.lang.reflect.Constructor.newInstance0(Native Method)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:343)
+	at android.view.LayoutInflater.createView(LayoutInflater.java:743)
+	at android.view.LayoutInflater.createViewFromTag(LayoutInflater.java:895)
+	at android.view.LayoutInflater.createViewFromTag(LayoutInflater.java:850)
+	at android.view.LayoutInflater.rInflate(LayoutInflater.java:1012)
+	at android.view.LayoutInflater.rInflateChildren(LayoutInflater.java:973)
+	at android.view.LayoutInflater.rInflate(LayoutInflater.java:1016)
+	at android.view.LayoutInflater.rInflateChildren(LayoutInflater.java:973)
+	at android.view.LayoutInflater.parseInclude(LayoutInflater.java:1148)
+	at android.view.LayoutInflater.rInflate(LayoutInflater.java:1008)
+	at android.view.LayoutInflater.rInflateChildren(LayoutInflater.java:973)
+	at android.view.LayoutInflater.inflate(LayoutInflater.java:571)
+	at android.view.LayoutInflater.inflate(LayoutInflater.java:462)
+	at android.view.LayoutInflater.inflate(LayoutInflater.java:413)
+	at com.treelearn.app.TreeCanvasDeviceInstrumentedTest.theTwoColumnLayoutIsATabletResourceOnly(TreeCanvasDeviceInstrumentedTest.java:85)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
+	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:63)
+	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+	at androidx.test.runner.AndroidJUnit4.run(AndroidJUnit4.java:111)
+	at org.junit.runners.Suite.runChild(Suite.java:128)
+	at org.junit.runners.Suite.runChild(Suite.java:27)
+	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:115)
+	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:67)
+	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:58)
+	at androidx.test.runner.AndroidJUnitRunner.onStart(AndroidJUnitRunner.java:446)
+	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2627)
+Caused by: java.lang.RuntimeException: Can't create handler inside thread Thread[Instr: androidx.test.runner.AndroidJUnitRunner,5,main] that has not called Looper.prepare()
+	at android.os.Handler.<init>(Handler.java:253)
+	at android.os.Handler.<init>(Handler.java:155)
+	at android.view.GestureDetector$GestureHandler.<init>(GestureDetector.java:314)
+	at android.view.GestureDetector.<init>(GestureDetector.java:453)
+	at android.view.GestureDetector.<init>(GestureDetector.java:425)
+	at android.view.ScaleGestureDetector.setQuickScaleEnabled(ScaleGestureDetector.java:436)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:233)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:203)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:187)
+	at com.treelearn.app.screen.TreeCanvasView.<init>(TreeCanvasView.java:102)
+	... 49 more
+26) theRealTouchStreamReachesTheCanvasCallbacks(com.treelearn.app.TreeCanvasDeviceInstrumentedTest)
+java.lang.RuntimeException: Can't create handler inside thread Thread[Instr: androidx.test.runner.AndroidJUnitRunner,5,main] that has not called Looper.prepare()
+	at android.os.Handler.<init>(Handler.java:253)
+	at android.os.Handler.<init>(Handler.java:155)
+	at android.view.GestureDetector$GestureHandler.<init>(GestureDetector.java:314)
+	at android.view.GestureDetector.<init>(GestureDetector.java:453)
+	at android.view.GestureDetector.<init>(GestureDetector.java:425)
+	at android.view.ScaleGestureDetector.setQuickScaleEnabled(ScaleGestureDetector.java:436)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:233)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:203)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:187)
+	at com.treelearn.app.screen.TreeCanvasView.<init>(TreeCanvasView.java:102)
+	at com.treelearn.app.screen.TreeCanvasView.<init>(TreeCanvasView.java:74)
+	at com.treelearn.app.TreeCanvasDeviceInstrumentedTest.theRealTouchStreamReachesTheCanvasCallbacks(TreeCanvasDeviceInstrumentedTest.java:148)
+27) thePopupSeamFollowsTheRenderedState(com.treelearn.app.TreeCanvasDeviceInstrumentedTest)
+android.view.InflateException: Binary XML file line #14 in com.treelearn:layout/screen_tree: Binary XML file line #142 in com.treelearn:layout/screen_tree_body: Error inflating class <unknown>
+Caused by: android.view.InflateException: Binary XML file line #142 in com.treelearn:layout/screen_tree_body: Error inflating class <unknown>
+Caused by: java.lang.reflect.InvocationTargetException
+	at java.lang.reflect.Constructor.newInstance0(Native Method)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:343)
+	at android.view.LayoutInflater.createView(LayoutInflater.java:743)
+	at android.view.LayoutInflater.createViewFromTag(LayoutInflater.java:895)
+	at android.view.LayoutInflater.createViewFromTag(LayoutInflater.java:850)
+	at android.view.LayoutInflater.rInflate(LayoutInflater.java:1012)
+	at android.view.LayoutInflater.rInflateChildren(LayoutInflater.java:973)
+	at android.view.LayoutInflater.rInflate(LayoutInflater.java:1016)
+	at android.view.LayoutInflater.rInflateChildren(LayoutInflater.java:973)
+	at android.view.LayoutInflater.parseInclude(LayoutInflater.java:1148)
+	at android.view.LayoutInflater.rInflate(LayoutInflater.java:1008)
+	at android.view.LayoutInflater.rInflateChildren(LayoutInflater.java:973)
+	at android.view.LayoutInflater.inflate(LayoutInflater.java:571)
+	at android.view.LayoutInflater.inflate(LayoutInflater.java:462)
+	at com.treelearn.app.screen.TreeCanvasScreen.<init>(TreeCanvasScreen.java:71)
+	at com.treelearn.app.screen.TreeCanvasScreen.<init>(TreeCanvasScreen.java:66)
+	at com.treelearn.app.TreeCanvasDeviceInstrumentedTest.thePopupSeamFollowsTheRenderedState(TreeCanvasDeviceInstrumentedTest.java:224)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
+	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:63)
+	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+	at androidx.test.runner.AndroidJUnit4.run(AndroidJUnit4.java:111)
+	at org.junit.runners.Suite.runChild(Suite.java:128)
+	at org.junit.runners.Suite.runChild(Suite.java:27)
+	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:115)
+	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:67)
+	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:58)
+	at androidx.test.runner.AndroidJUnitRunner.onStart(AndroidJUnitRunner.java:446)
+	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2627)
+Caused by: java.lang.RuntimeException: Can't create handler inside thread Thread[Instr: androidx.test.runner.AndroidJUnitRunner,5,main] that has not called Looper.prepare()
+	at android.os.Handler.<init>(Handler.java:253)
+	at android.os.Handler.<init>(Handler.java:155)
+	at android.view.GestureDetector$GestureHandler.<init>(GestureDetector.java:314)
+	at android.view.GestureDetector.<init>(GestureDetector.java:453)
+	at android.view.GestureDetector.<init>(GestureDetector.java:425)
+	at android.view.ScaleGestureDetector.setQuickScaleEnabled(ScaleGestureDetector.java:436)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:233)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:203)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:187)
+	at com.treelearn.app.screen.TreeCanvasView.<init>(TreeCanvasView.java:102)
+	... 50 more
+28) writesIsolatedCanvasStatesForVisualComparison(com.treelearn.app.TreeCanvasVisualEvidenceInstrumentedTest)
+android.view.InflateException: Binary XML file line #14 in com.treelearn:layout/screen_tree: Binary XML file line #142 in com.treelearn:layout/screen_tree_body: Error inflating class <unknown>
+Caused by: android.view.InflateException: Binary XML file line #142 in com.treelearn:layout/screen_tree_body: Error inflating class <unknown>
+Caused by: java.lang.reflect.InvocationTargetException
+	at java.lang.reflect.Constructor.newInstance0(Native Method)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:343)
+	at android.view.LayoutInflater.createView(LayoutInflater.java:743)
+	at android.view.LayoutInflater.createViewFromTag(LayoutInflater.java:895)
+	at android.view.LayoutInflater.createViewFromTag(LayoutInflater.java:850)
+	at android.view.LayoutInflater.rInflate(LayoutInflater.java:1012)
+	at android.view.LayoutInflater.rInflateChildren(LayoutInflater.java:973)
+	at android.view.LayoutInflater.rInflate(LayoutInflater.java:1016)
+	at android.view.LayoutInflater.rInflateChildren(LayoutInflater.java:973)
+	at android.view.LayoutInflater.parseInclude(LayoutInflater.java:1148)
+	at android.view.LayoutInflater.rInflate(LayoutInflater.java:1008)
+	at android.view.LayoutInflater.rInflateChildren(LayoutInflater.java:973)
+	at android.view.LayoutInflater.inflate(LayoutInflater.java:571)
+	at android.view.LayoutInflater.inflate(LayoutInflater.java:462)
+	at com.treelearn.app.screen.TreeCanvasScreen.<init>(TreeCanvasScreen.java:71)
+	at com.treelearn.app.screen.TreeCanvasScreen.<init>(TreeCanvasScreen.java:66)
+	at com.treelearn.app.TreeCanvasVisualEvidenceInstrumentedTest.writesIsolatedCanvasStatesForVisualComparison(TreeCanvasVisualEvidenceInstrumentedTest.java:52)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
+	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:63)
+	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+	at androidx.test.runner.AndroidJUnit4.run(AndroidJUnit4.java:111)
+	at org.junit.runners.Suite.runChild(Suite.java:128)
+	at org.junit.runners.Suite.runChild(Suite.java:27)
+	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:115)
+	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:67)
+	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:58)
+	at androidx.test.runner.AndroidJUnitRunner.onStart(AndroidJUnitRunner.java:446)
+	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2627)
+Caused by: java.lang.RuntimeException: Can't create handler inside thread Thread[Instr: androidx.test.runner.AndroidJUnitRunner,5,main] that has not called Looper.prepare()
+	at android.os.Handler.<init>(Handler.java:253)
+	at android.os.Handler.<init>(Handler.java:155)
+	at android.view.GestureDetector$GestureHandler.<init>(GestureDetector.java:314)
+	at android.view.GestureDetector.<init>(GestureDetector.java:453)
+	at android.view.GestureDetector.<init>(GestureDetector.java:425)
+	at android.view.ScaleGestureDetector.setQuickScaleEnabled(ScaleGestureDetector.java:436)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:233)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:203)
+	at android.view.ScaleGestureDetector.<init>(ScaleGestureDetector.java:187)
+	at com.treelearn.app.screen.TreeCanvasView.<init>(TreeCanvasView.java:102)
+	... 50 more
+
+FAILURES!!!
+Tests run: 281,  Failures: 28
+
+
+ADB_EXITCODE=0
+JUnitVerdictExitCode=1
+DurationSeconds=190.21
+CompletedAt=2026-10-01T12:53:02.0542025+08:00

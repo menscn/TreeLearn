@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -71,6 +72,7 @@ import com.treelearn.core.domain.ReadingAnchor;
 import com.treelearn.core.domain.ReadingPosition;
 import com.treelearn.treelayout.ViewportConstraints;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -90,28 +92,25 @@ import java.util.Map;
  * T-039 and search in T-040: further children of the same host, not second Activities. The library is
  * the fifth, and the only one that is a first-level destination rather than a screen opened from one.
  *
- * <p>The shell is the only place that knows about every screen; it holds no view state, no draft and no
- * decision of its own beyond two: which screen is on top - because that is what back acts on - and
- * which tab the first level is standing on, because that is what back returns to. A conversation, a
- * canvas, the navigation page and the library are created per visit and dropped when they are left, so
- * nothing keeps a read screen or its presenter alive.
+ * <p>The shell is the only place that knows about every screen; it holds no view state or draft, only
+ * the screen on top, the selected first-level tab, and the entry route for an open conversation. A
+ * conversation, a canvas, the navigation page and the library are created per visit and dropped when
+ * they are left, so nothing keeps a read screen or its presenter alive.
  */
 public final class MainActivity extends Activity
         implements HomeSink, SettingsSink, ChatSink, TreeCanvasSink, NavigationSink,
         SearchPresenter.Sink, LibrarySink {
 
-    /** The three first-level destinations the bottom bar carries. */
+    /** The first-level destinations the bottom bar carries. */
     private enum Tab {
         HOME,
-        LIBRARY,
-        SETTINGS
+        LIBRARY
     }
 
     private FrameLayout host;
     private View tabBar;
     private View tabHome;
     private View tabLibrary;
-    private View tabSettings;
     /**
      * The tab the first level is standing on. Only a tab tap or a first-level screen changes it: a
      * second-level screen leaves it alone, which is what makes a return land where it came from.
@@ -128,6 +127,7 @@ public final class MainActivity extends Activity
     private ChatPresenter chatPresenter;
     /** The branch the conversation shows; null while the conversation is not on screen. */
     private String chatBranchId;
+    private ChatEntryRoute chatEntryRoute;
 
     private TreeCanvasScreen treeCanvasScreen;
     private TreeCanvasPresenter treeCanvasPresenter;
@@ -180,7 +180,6 @@ public final class MainActivity extends Activity
         tabBar = findViewById(R.id.tab_bar);
         tabHome = findViewById(R.id.tab_home);
         tabLibrary = findViewById(R.id.tab_library);
-        tabSettings = findViewById(R.id.tab_settings);
         registerSystemBack();
 
         container = AppContainer.get(this);
@@ -193,6 +192,7 @@ public final class MainActivity extends Activity
                 container.background(), container.settingsStore());
 
         homeScreen.setActions(homePresenter);
+        homeScreen.setOnSettingsPressed(this::showSettings);
         // The settings root page is a pure navigation list; the settings presenter's actions are
         // consumed by the key room (showKeyAdmin), which shares the presenter and its store reads.
         settingsScreen.setOnBackPressed(this::onBackRequested);
@@ -237,7 +237,6 @@ public final class MainActivity extends Activity
 
         tabHome.setOnClickListener(view -> showHome());
         tabLibrary.setOnClickListener(view -> showLibrary());
-        tabSettings.setOnClickListener(view -> showSettings());
 
         showHome();
     }
@@ -341,7 +340,7 @@ public final class MainActivity extends Activity
             return;
         }
         if (showingSettings) {
-            if (chatBranchId == null) {
+            if (SettingsBackRoute.afterBack(chatBranchId) == SettingsBackRoute.Target.HOME) {
                 showHome();
             } else {
                 showChat(chatBranchId);
@@ -360,6 +359,7 @@ public final class MainActivity extends Activity
             if (chatScreen != null && chatScreen.onSystemBack()) {
                 return;
             }
+            chatEntryRoute = null;
             showTab(currentTab);
             return;
         }
@@ -390,14 +390,27 @@ public final class MainActivity extends Activity
         showSettings();
     }
 
-    /**
-     * A tapped topic, a branch a fork just created, or a node tapped on the canvas opens the
-     * conversation on that branch. Both {@link ChatSink} and {@link TreeCanvasSink} ask for it, and it
-     * is one method on purpose: wherever a branch is chosen, it opens the same way.
-     */
+    /** All chat entry points use the opened branch's parent hierarchy for top-bar Back. */
     @Override
     public void openBranch(String branchId) {
         showChat(branchId);
+    }
+
+    @Override
+    public void openBranch(String branchId, String initialQuestion) {
+        showChat(branchId, initialQuestion);
+    }
+
+    @Override
+    public void dismissKeyboard() {
+        if (chatScreen == null || chatScreen.getWindowToken() == null) {
+            return;
+        }
+        InputMethodManager inputMethodManager =
+                (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        if (inputMethodManager != null) {
+            inputMethodManager.hideSoftInputFromWindow(chatScreen.getWindowToken(), 0);
+        }
     }
 
     @Override
@@ -566,12 +579,13 @@ public final class MainActivity extends Activity
 
     /**
      * The child-branch list of one answer. The branches were read before this was called, so the list
-     * is drawn from what the presenter handed over; its rows open a branch the same way every other
-     * branch is opened, and leaving the list without choosing one opens nothing.
+     * is drawn from what the presenter handed over; a selected row returns to the current presenter
+     * so its branch visit is added to the back history.
      */
     @Override
     public void openChildren(String messageId, List<ChildBranch> children) {
-        chatScreen.showChildren(messageId, children, this::openBranch);
+        ChatPresenter presenter = chatPresenter;
+        chatScreen.showChildren(messageId, children, presenter::onChildBranchChosen);
     }
 
     @Override
@@ -579,13 +593,45 @@ public final class MainActivity extends Activity
         chatScreen.showVersions(messageId, versions);
     }
 
-    /** A conversation is left for the first level it was opened from, not for the home page. */
+    /** Closing a root conversation restores the screen that opened the chat. */
     @Override
     public void close() {
-        showTab(currentTab);
+        ChatEntryRoute route = chatEntryRoute;
+        chatEntryRoute = null;
+        if (route == null) {
+            showTab(currentTab);
+            return;
+        }
+        route.restore(new ChatEntryRoute.Restorer() {
+            @Override
+            public void showTab(ChatEntryRoute.Destination destination) {
+                switch (destination) {
+                    case LIBRARY:
+                        showLibrary();
+                        break;
+                    case SETTINGS:
+                        MainActivity.this.showSettings();
+                        break;
+                    default:
+                        showHome();
+                        break;
+                }
+            }
+
+            @Override
+            public void showCanvas(String branchId) {
+                showTree(branchId);
+            }
+
+            @Override
+            public void showNavigation(String branchId) {
+                MainActivity.this.showNavigation(branchId);
+            }
+        });
     }
 
     private void showHome() {
+        chatEntryRoute = null;
         navigationBranchId = null;
         navigationScreen = null;
         navigationPresenter = null;
@@ -609,12 +655,7 @@ public final class MainActivity extends Activity
     }
 
     private void showSettings() {
-        // Settings is a first-level destination when it is reached as one. Reached from a conversation
-        // it is a detour inside that conversation, and the level underneath stays where it was, which is
-        // what makes leaving it return to the conversation rather than to the settings tab.
-        if (settingsIsAFrontRoom()) {
-            selectTab(Tab.SETTINGS);
-        }
+        // Settings is a room opened from Home or Chat, not a bottom navigation destination.
         showingSettings = true;
         libraryScreen = null;
         libraryPresenter = null;
@@ -943,6 +984,7 @@ public final class MainActivity extends Activity
      * next launch.
      */
     private void showLibrary() {
+        chatEntryRoute = null;
         navigationBranchId = null;
         navigationScreen = null;
         navigationPresenter = null;
@@ -967,11 +1009,15 @@ public final class MainActivity extends Activity
     }
 
     /**
-     * Opens the conversation on one branch. The screen and its presenter are built here and dropped
-     * when the conversation is left, so the branch id - not a surviving view - is what a return needs.
+     * Opens a conversation on one branch. Its screen is rebuilt per visit; the branch and first-entry
+     * route, rather than a surviving view, determine where its top-bar Back goes.
      */
     private void showChat(String branchId) {
-        showChat(branchId, null);
+        showChat(branchId, null, "");
+    }
+
+    private void showChat(String branchId, String initialQuestion) {
+        showChat(branchId, null, initialQuestion);
     }
 
     /**
@@ -985,9 +1031,14 @@ public final class MainActivity extends Activity
      * the UI thread.
      */
     private void showChat(String branchId, ReadingAnchor explicitAnchor) {
+        showChat(branchId, explicitAnchor, "");
+    }
+
+    private void showChat(String branchId, ReadingAnchor explicitAnchor, String initialQuestion) {
         if (branchId == null || branchId.isEmpty()) {
             return;
         }
+        chatEntryRoute = captureChatEntryRoute(chatEntryRoute);
         navigationBranchId = null;
         navigationScreen = null;
         navigationPresenter = null;
@@ -1039,7 +1090,7 @@ public final class MainActivity extends Activity
                 }
             });
         }
-        chatPresenter.start();
+        chatPresenter.start(initialQuestion);
         chatSpeaker.start();
     }
 
@@ -1058,6 +1109,7 @@ public final class MainActivity extends Activity
         if (branchId == null || branchId.isEmpty()) {
             return;
         }
+        chatEntryRoute = null;
         navigationBranchId = null;
         navigationScreen = null;
         navigationPresenter = null;
@@ -1109,6 +1161,7 @@ public final class MainActivity extends Activity
      * dropped when the page is left, so the branch id - not a surviving view - is what a return needs.
      */
     private void enterNavigation(String topicId, String branchId) {
+        chatEntryRoute = null;
         treeBranchId = null;
         treeCanvasScreen = null;
         treeCanvasPresenter = null;
@@ -1175,17 +1228,7 @@ public final class MainActivity extends Activity
             homeScreen.playEntrance();
         }
         tabBar.setVisibility(screen == homeScreen || screen == libraryScreen
-                || (screen == settingsScreen && settingsIsAFrontRoom())
-                        ? View.VISIBLE : View.GONE);
-    }
-
-    /**
-     * True when settings stands as a first-level destination rather than as a detour from a conversation.
-     * One rule with two readers - {@link #showSettings()} and {@link #swap(View)} - so the bar and the
-     * highlight cannot disagree about what the page is.
-     */
-    private boolean settingsIsAFrontRoom() {
-        return chatBranchId == null;
+                ? View.VISIBLE : View.GONE);
     }
 
     /** A first-level destination, by tab. The only way the level moves besides the tab tap itself. */
@@ -1194,13 +1237,24 @@ public final class MainActivity extends Activity
             case LIBRARY:
                 showLibrary();
                 break;
-            case SETTINGS:
-                showSettings();
-                break;
             default:
                 showHome();
                 break;
         }
+    }
+
+    private ChatEntryRoute captureChatEntryRoute(ChatEntryRoute existing) {
+        ChatEntryRoute.Destination selectedTab;
+        switch (currentTab) {
+            case LIBRARY:
+                selectedTab = ChatEntryRoute.Destination.LIBRARY;
+                break;
+            default:
+                selectedTab = ChatEntryRoute.Destination.HOME;
+                break;
+        }
+        return ChatEntryRoute.captureIfAbsent(existing, selectedTab, libraryScreen != null,
+                navigationBranchId, treeBranchId);
     }
 
     /** Marks where the first level stands; the bar is a readout of that fact and decides nothing. */
@@ -1208,7 +1262,6 @@ public final class MainActivity extends Activity
         currentTab = tab;
         markTab(tabHome, R.id.tab_home_icon, R.id.tab_home_label, tab == Tab.HOME);
         markTab(tabLibrary, R.id.tab_library_icon, R.id.tab_library_label, tab == Tab.LIBRARY);
-        markTab(tabSettings, R.id.tab_settings_icon, R.id.tab_settings_label, tab == Tab.SETTINGS);
     }
 
     /**

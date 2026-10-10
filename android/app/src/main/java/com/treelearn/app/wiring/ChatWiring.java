@@ -467,8 +467,8 @@ public final class ChatWiring implements ChatData, ChatCommands {
         if (created.isRefused()) {
             return ChatCommandResult.refused(HomeViewState.Notice.STORAGE);
         }
-        // No attempt is started here. The new branch's first question is the learner's to ask, and a
-        // message row written without one would be a turn nobody can answer.
+        // No attempt is started here. The host may submit the recommendation after the new branch
+        // presenter is ready; writing a message in this command would bypass that branch lifecycle.
         return ChatCommandResult.openedBranch(child.id);
     }
 

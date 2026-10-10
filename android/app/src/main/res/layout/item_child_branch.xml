@@ -6,10 +6,23 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/child_branch_row"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/touch_min"
+    android:layout_height="wrap_content"
     android:background="?android:attr/selectableItemBackground"
     android:gravity="center_vertical"
-    android:orientation="horizontal">
+    android:minHeight="@dimen/touch_min"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/space_s2"
+    android:paddingTop="@dimen/space_s1"
+    android:paddingEnd="@dimen/space_s1"
+    android:paddingBottom="@dimen/space_s1">
+
+    <ImageView
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginEnd="@dimen/space_s2"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_nav_tree"
+        android:tint="@color/tl_green" />
 
     <TextView
         android:id="@+id/child_branch_title"
@@ -17,15 +30,29 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:ellipsize="end"
-        android:maxLines="1"
+        android:fontFamily="sans-serif-medium"
+        android:maxLines="2"
         android:textColor="@color/tl_ink"
-        android:textSize="@dimen/text_sm" />
+        android:textSize="@dimen/text_body" />
 
     <TextView
         android:id="@+id/child_branch_unread"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/bg_popup_unread"
         android:paddingStart="@dimen/space_s2"
+        android:paddingTop="@dimen/space_s1"
+        android:paddingEnd="@dimen/space_s2"
+        android:paddingBottom="@dimen/space_s1"
         android:textColor="@color/tl_amber"
-        android:textSize="@dimen/text_cap" />
+        android:textSize="@dimen/text_cap"
+        android:visibility="gone" />
+
+    <ImageView
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="@dimen/space_s1"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_chevron_right"
+        android:tint="@color/tl_ink3" />
 </LinearLayout>

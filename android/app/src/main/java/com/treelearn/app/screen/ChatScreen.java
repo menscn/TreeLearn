@@ -21,7 +21,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
-import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -36,6 +35,7 @@ import android.view.Window;
 import android.widget.ImageView;
 
 import com.treelearn.app.R;
+import com.treelearn.app.ui.AnswerContentProjection;
 import com.treelearn.app.ui.SpeechInputPolicy;
 import com.treelearn.app.ui.ChatActions;
 import com.treelearn.app.ui.ChatMessage;
@@ -100,7 +100,7 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
     private final int basePaddingBottom;
 
     private final TextView title;
-    private final ScrollView scroll;
+    private final FollowScrollView scroll;
     private final LinearLayout messageFlow;
     private final View loading;
     private final View error;
@@ -174,6 +174,16 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
     private ReadingAnchor settledAnchor;
     /** What the last settle reported as visible, so a scroll that shows nothing new stays silent. */
     private Set<String> settledVisible = Collections.emptySet();
+    private String followBranchId = "";
+    private String followTailId = "";
+    private String overflowPauseMessageId = "";
+    private boolean overflowPauseActive;
+    private boolean userPauseActive;
+    private boolean userTouchTracking;
+    private boolean userGesturePastSlop;
+    private float userTouchStartY;
+    private int userTouchStartScrollY;
+    private boolean programmaticScroll;
     private final Runnable scrollSettled = this::reportScroll;
 
     public ChatScreen(Context context) {
@@ -278,7 +288,7 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
                 actions.onSend();
             }
         }));
-        followLatest.setOnClickListener(view -> fire(actions -> actions.onFollowLatestPressed()));
+        followLatest.setOnClickListener(view -> reattachFollowLatest());
         searchChip.setOnClickListener(view -> showSearchPanel());
         fullscreenEntry.setOnClickListener(view -> fire(actions -> {
             if (fullscreenEntryAvailable) {
@@ -307,7 +317,33 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         // where the learner was, and neither can be taken before the rows have been laid out.
         messageFlow.addOnLayoutChangeListener((view, left, top, right, bottom, oldLeft, oldTop,
                 oldRight, oldBottom) -> reportRowsLaidOut());
+        int touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        scroll.setTouchObserver((view, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                userTouchTracking = true;
+                userGesturePastSlop = false;
+                userTouchStartY = event.getY();
+                userTouchStartScrollY = scroll.getScrollY();
+            } else if (userTouchTracking && (action == MotionEvent.ACTION_MOVE
+                    || action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL)) {
+                if (Math.abs(event.getY() - userTouchStartY) > touchSlop) {
+                    userGesturePastSlop = true;
+                    if (scroll.getScrollY() != userTouchStartScrollY) {
+                        pauseFollowForManualScroll();
+                    }
+                }
+                if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                    userTouchTracking = false;
+                }
+            }
+            return false;
+        });
         scroll.setOnScrollChangeListener((view, x, y, oldX, oldY) -> {
+            if (y != oldY && !programmaticScroll && userTouchTracking
+                    && userGesturePastSlop && y != userTouchStartScrollY) {
+                pauseFollowForManualScroll();
+            }
             scroll.removeCallbacks(scrollSettled);
             scroll.postDelayed(scrollSettled, SCROLL_SETTLE_MS);
         });
@@ -391,6 +427,8 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
     public void render(ChatViewState state) {
         rendering = true;
         try {
+            prepareFollowState(state);
+            lastRenderedState = state;
             title.setText(state.branchTitle);
             loading.setVisibility(state.phase == ChatViewState.Phase.LOADING ? VISIBLE : GONE);
             error.setVisibility(state.phase == ChatViewState.Phase.ERROR ? VISIBLE : GONE);
@@ -434,11 +472,11 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         String fingerprint = tail == null ? "" : tail.messageId + "#" + tail.text.length() + "#" + tail.reasoning.length();
         boolean contentChanged = !fingerprint.equals(renderedTail);
         renderedTail = fingerprint;
-        boolean following = state.followLatest;
+        boolean following = state.followLatest && !overflowPauseActive && !userPauseActive;
         if (pendingPosition != null) {
             applyPosition();
         } else if (following && (contentChanged || !renderedFollowing)) {
-            scroll.post(() -> scroll.fullScroll(View.FOCUS_DOWN));
+            scroll.post(() -> scrollProgrammatically(() -> scroll.fullScroll(View.FOCUS_DOWN)));
         }
         renderedFollowing = following;
     }
@@ -463,14 +501,24 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         Row row = position == null || position.messageId == null
                 ? null : rows.get(position.messageId);
         if (row == null) {
-            scroll.post(() -> scroll.fullScroll(View.FOCUS_DOWN));
+            scroll.post(() -> scrollProgrammatically(() -> scroll.fullScroll(View.FOCUS_DOWN)));
             return;
         }
         // The stored form is "pixels into this row, and pixels of viewport above it"; scrolling is
         // that pair solved for a scroll offset, which is the whole reason neither is a page offset.
         int target = Math.max(0,
                 row.root.getTop() + position.listItemOffset - position.viewportOffset);
-        scroll.post(() -> scroll.scrollTo(0, target));
+        scroll.post(() -> scrollProgrammatically(() -> scroll.scrollTo(0, target)));
+    }
+
+    private void scrollProgrammatically(Runnable scrollAction) {
+        boolean wasProgrammatic = programmaticScroll;
+        programmaticScroll = true;
+        try {
+            scrollAction.run();
+        } finally {
+            programmaticScroll = wasProgrammatic;
+        }
     }
 
     /**
@@ -488,6 +536,7 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
      * settle.
      */
     private void reportRowsLaidOut() {
+        checkFollowOverflow();
         if (rowsReported || rows.isEmpty()) {
             return;
         }
@@ -499,6 +548,43 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         Set<String> visible = visibleRows();
         settledVisible = visible;
         fire(actions -> actions.onRowsLaidOut(itemHeightPx, visible));
+    }
+
+    private void prepareFollowState(ChatViewState state) {
+        String tailId = state.messages.isEmpty() ? ""
+                : state.messages.get(state.messages.size() - 1).messageId;
+        if (!state.branchId.equals(followBranchId) || !tailId.equals(followTailId)) {
+            overflowPauseMessageId = "";
+            overflowPauseActive = false;
+            userPauseActive = false;
+            userTouchTracking = false;
+            userGesturePastSlop = false;
+        }
+        followBranchId = state.branchId;
+        followTailId = tailId;
+    }
+
+    private void checkFollowOverflow() {
+        ChatViewState state = lastRenderedState;
+        if (state == null || state.phase != ChatViewState.Phase.READY || !state.followLatest
+                || overflowPauseActive || userPauseActive || state.messages.isEmpty()) {
+            return;
+        }
+        ChatMessage tail = state.messages.get(state.messages.size() - 1);
+        if (!tail.isGenerating() || tail.messageId.equals(overflowPauseMessageId)) {
+            return;
+        }
+        Row row = rows.get(tail.messageId);
+        if (row == null || scroll.getHeight() <= 0) {
+            return;
+        }
+        if (row.answerBody.getHeight() <= scroll.getHeight()) {
+            return;
+        }
+        overflowPauseMessageId = tail.messageId;
+        overflowPauseActive = true;
+        renderFollow(state);
+        fire(actions -> actions.onFollowLatestPaused());
     }
 
     /** The row ids the viewport reaches right now, measured from the rows' laid-out bounds. */
@@ -581,11 +667,22 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         }
         settledAnchor = anchor;
         Set<String> visible = visibleRows();
-        if (visible.equals(settledVisible)) {
+        if (!visible.equals(settledVisible)) {
+            settledVisible = visible;
+            fire(actions -> actions.onViewportChanged(visible));
+        }
+    }
+
+    private void pauseFollowForManualScroll() {
+        if (userPauseActive) {
             return;
         }
-        settledVisible = visible;
-        fire(actions -> actions.onViewportChanged(visible));
+        userPauseActive = true;
+        overflowPauseActive = false;
+        if (lastRenderedState != null) {
+            renderFollow(lastRenderedState);
+        }
+        fire(actions -> actions.onFollowLatestPaused());
     }
 
     private void renderMessages(ChatViewState state) {
@@ -774,11 +871,22 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
      * on a ready screen; while it counts missed growths the count rides the label.
      */
     private void renderFollow(ChatViewState state) {
-        boolean detached = state.phase == ChatViewState.Phase.READY && !state.followLatest;
+        boolean detached = state.phase == ChatViewState.Phase.READY
+                && (!state.followLatest || overflowPauseActive || userPauseActive);
         followLatest.setVisibility(detached ? VISIBLE : GONE);
         followLatest.setText(detached && state.missedCount > 0
                 ? getContext().getString(R.string.chat_back_to_latest_count, state.missedCount)
                 : getContext().getString(R.string.chat_back_to_latest));
+    }
+
+    private void reattachFollowLatest() {
+        overflowPauseActive = false;
+        userPauseActive = false;
+        scroll.removeCallbacks(scrollSettled);
+        if (lastRenderedState != null) {
+            renderFollow(lastRenderedState.withFollow(true, 0));
+        }
+        fire(actions -> actions.onFollowLatestPressed());
     }
 
     private TextWatcher draftForwarder() {
@@ -986,6 +1094,8 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
 
         private String messageId = "";
         private ChatMessage message;
+        private AnswerContentProjection answerProjection =
+                AnswerContentProjection.project("", false);
         private List<Annotation> marks = Collections.emptyList();
         private ChatViewState lastState;
         private String renderedAnswerText;
@@ -1013,6 +1123,8 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             answerBlock = root.findViewById(R.id.chat_answer_block);
             answer = root.findViewById(R.id.chat_answer);
             answerBody = root.findViewById(R.id.chat_answer_body);
+            answerBody.addOnLayoutChangeListener((view, left, top, right, bottom, oldLeft, oldTop,
+                    oldRight, oldBottom) -> checkFollowOverflow());
             answer.setTextIsSelectable(true);
             answer.setMovementMethod(LinkMovementMethod.getInstance());
             answer.setCustomSelectionActionModeCallback(new SelectionMenuCallback());
@@ -1054,15 +1166,19 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             // 2026-09-27 user decision: the time lives in the action row now (prototype .ai-time),
             // so it appears with the stable answer instead of on the tag line.
             actionBar.renderTime(message.createdAt);
-            disclosure.render(message,
+            AnswerContentProjection projection = AnswerContentProjection.project(message);
+            answerProjection = projection;
+            String disclosureReasoning = message.reasoning.isEmpty()
+                    ? projection.reasoning : message.reasoning;
+            disclosure.render(message, disclosureReasoning,
                     state.isReasoningEffectivelyExpanded(message.messageId),
                     state.thinkingEnabled);
             // Matrix 1.2: a tap on a code block copies it, through the same clipboard path a
             // selection copy takes - one write path, one sensitive-clip marking.
             // 2026-09-28: the answer is now a sequence, because a table is a view and not text.
-            if (renderedAnswerText == null || !renderedAnswerText.equals(message.text)) {
-                renderAnswerBody(message.text);
-                renderedAnswerText = message.text;
+            if (renderedAnswerText == null || !renderedAnswerText.equals(projection.answer)) {
+                renderAnswerBody(projection.answer);
+                renderedAnswerText = projection.answer;
             }
             renderGenerationSlots(state, message, newestRow);
             renderTranslation(state, message);
@@ -1498,7 +1614,20 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             TextSelection selection = TextSelection.of(run.getSelectionStart(),
                     run.getSelectionEnd());
             String quote = selection.read(run.getText().toString());
-            fire(actions -> actions.onForkPressed(messageId, quote, selection.start, selection.end));
+            int start = selection.start;
+            int end = selection.end;
+            if (!quote.isEmpty()) {
+                AnswerContentProjection.SourceRange sourceRange =
+                        answerProjection.sourceRangeForUniqueText(quote);
+                if (sourceRange == null) {
+                    return;
+                }
+                start = sourceRange.start;
+                end = sourceRange.end;
+            }
+            int sourceStart = start;
+            int sourceEnd = end;
+            fire(actions -> actions.onForkPressed(messageId, quote, sourceStart, sourceEnd));
         }
 
         @Override

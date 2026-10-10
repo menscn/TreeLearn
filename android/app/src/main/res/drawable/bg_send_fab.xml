@@ -9,20 +9,25 @@
   exempt from the contrast rule (WCAG 1.4.3), but not from meaning: the control also carries
   enabled=false and a content description, so "you cannot send yet" is never carried by colour alone.
 -->
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_enabled="false">
-        <shape android:shape="oval">
-            <solid android:color="@color/tl_line" />
-        </shape>
-    </item>
-    <item android:state_pressed="true">
-        <shape android:shape="oval">
-            <solid android:color="@color/tl_green_deep" />
-        </shape>
-    </item>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/ripple_primary">
     <item>
+        <selector>
+            <item android:state_enabled="false">
+                <shape android:shape="oval">
+                    <solid android:color="@color/tl_line" />
+                </shape>
+            </item>
+            <item>
+                <shape android:shape="oval">
+                    <solid android:color="@color/tl_green" />
+                </shape>
+            </item>
+        </selector>
+    </item>
+    <item android:id="@android:id/mask">
         <shape android:shape="oval">
-            <solid android:color="@color/tl_green" />
+            <solid android:color="@android:color/white" />
         </shape>
     </item>
-</selector>
+</ripple>

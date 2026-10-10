@@ -136,6 +136,7 @@ final class ChatTestDoubles {
         ChatCommandResult forkResult = ChatCommandResult.openedBranch(BRANCH_2);
         ChatCommandResult highlightResult = ChatCommandResult.ran(OP);
         List<AnswerRevision> versions = Collections.emptyList();
+        Runnable afterAcceptedSend;
 
         final List<String> calls = new ArrayList<String>();
         String lastText = "";
@@ -159,6 +160,9 @@ final class ChatTestDoubles {
             lastAttachmentId = attachmentId;
             lastModel = model;
             lastThinking = thinkingEnabled;
+            if (sendResult.isAccepted() && afterAcceptedSend != null) {
+                afterAcceptedSend.run();
+            }
             return sendResult;
         }
 
@@ -235,6 +239,14 @@ final class ChatTestDoubles {
             pending.add(command);
         }
 
+        boolean runNext() {
+            if (pending.isEmpty()) {
+                return false;
+            }
+            pending.remove(0).run();
+            return true;
+        }
+
         int drain() {
             int ran = 0;
             while (!pending.isEmpty()) {
@@ -282,6 +294,7 @@ final class ChatTestDoubles {
         final List<ChatViewState> states = new ArrayList<ChatViewState>();
         final List<String> copied = new ArrayList<String>();
         final List<String> branchesOpened = new ArrayList<String>();
+        final List<String> branchQuestions = new ArrayList<String>();
         final List<String> childrenOpened = new ArrayList<String>();
         final List<List<ChildBranch>> childrenListed = new ArrayList<List<ChildBranch>>();
         final List<String> versionMenus = new ArrayList<String>();
@@ -298,10 +311,16 @@ final class ChatTestDoubles {
                 new ArrayList<java.util.Map<String, List<Annotation>>>();
         int settingsOpened;
         int closed;
+        int keyboardDismissals;
 
         @Override
         public void render(ChatViewState state) {
             states.add(state);
+        }
+
+        @Override
+        public void dismissKeyboard() {
+            keyboardDismissals++;
         }
 
         @Override
@@ -327,6 +346,14 @@ final class ChatTestDoubles {
         @Override
         public void openBranch(String branchId) {
             branchesOpened.add(branchId);
+        }
+
+        @Override
+        public void openBranch(String branchId, String initialQuestion) {
+            branchesOpened.add(branchId);
+            if (!initialQuestion.isEmpty()) {
+                branchQuestions.add(initialQuestion);
+            }
         }
 
         @Override

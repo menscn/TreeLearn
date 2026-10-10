@@ -97,28 +97,33 @@ public final class BottomTabShellInstrumentedTest {
     }
 
     // ------------------------------------------------------------------
-    // 1. The three tabs.
+    // 1. The two tabs and the settings room.
     // ------------------------------------------------------------------
 
     @Test
-    public void theThreeTabsAreAllReachableAndEachOneHighlightsWhatItShows() {
+    public void theTwoTabsAndHomeSettingsEntryReachTheirScreens() {
         activity = launch();
 
         assertEquals("the bar is the shell, so it is on screen with the home tab",
                 View.VISIBLE, view(R.id.tab_bar).getVisibility());
+        android.view.ViewGroup bar = (android.view.ViewGroup) view(R.id.tab_bar);
+        android.view.ViewGroup tabItems = (android.view.ViewGroup) bar.getChildAt(1);
+        assertEquals("only Home and Library remain in the bottom bar", 2,
+                tabItems.getChildCount());
         assertHighlighted(R.id.tab_home);
 
         click(R.id.tab_library);
         assertNotNull("the library tab mounts the library screen", waitFor(R.id.library_root));
         assertHighlighted(R.id.tab_library);
 
-        click(R.id.tab_settings);
-        assertNotNull("the settings tab mounts the settings screen", waitFor(R.id.settings_root));
-        assertHighlighted(R.id.tab_settings);
-
         click(R.id.tab_home);
-        assertNotNull("the home tab mounts the home screen again",
-                waitFor(R.id.home_draft));
+        assertNotNull("the home tab mounts the home screen again", waitFor(R.id.home_draft));
+        click(R.id.home_settings_button);
+        assertNotNull("the home gear opens settings", waitFor(R.id.settings_root));
+        assertBarHidden("settings is a room, not a bottom tab");
+
+        click(R.id.settings_back);
+        assertNotNull("settings returns to the home that opened it", waitFor(R.id.home_draft));
         assertHighlighted(R.id.tab_home);
 
         click(R.id.tab_library);
@@ -452,7 +457,7 @@ public final class BottomTabShellInstrumentedTest {
      * back per tab, so a bar that highlighted the wrong item could not pass by highlighting anything.
      */
     private void assertHighlighted(int selectedTabId) {
-        for (int tabId : new int[]{R.id.tab_home, R.id.tab_library, R.id.tab_settings}) {
+        for (int tabId : new int[]{R.id.tab_home, R.id.tab_library}) {
             int expected = context().getColor(
                     tabId == selectedTabId ? R.color.tl_green_deep : R.color.tl_ink3);
             assertEquals("tab " + tabId + " label", expected, labelColor(tabId));
@@ -485,14 +490,14 @@ public final class BottomTabShellInstrumentedTest {
         if (tabId == R.id.tab_home) {
             return R.id.tab_home_label;
         }
-        return tabId == R.id.tab_library ? R.id.tab_library_label : R.id.tab_settings_label;
+        return tabId == R.id.tab_home ? R.id.tab_home_label : R.id.tab_library_label;
     }
 
     private static int iconOf(int tabId) {
         if (tabId == R.id.tab_home) {
             return R.id.tab_home_icon;
         }
-        return tabId == R.id.tab_library ? R.id.tab_library_icon : R.id.tab_settings_icon;
+        return tabId == R.id.tab_home ? R.id.tab_home_icon : R.id.tab_library_icon;
     }
 
     private void assertBarHidden(String why) {

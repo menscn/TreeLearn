@@ -4,6 +4,28 @@ plugins {
     id 'com.android.application'
 }
 
+def versionPropertiesFile = rootProject.file('version.properties')
+if (!versionPropertiesFile.isFile()) {
+    throw new GradleException("Missing Android version source: ${versionPropertiesFile}")
+}
+
+def versionProperties = new Properties()
+versionPropertiesFile.withInputStream { versionProperties.load(it) }
+def appVersionName = versionProperties.getProperty('TREELEARN_VERSION', '').trim()
+def appVersionMatch = appVersionName =~ /^(0|[1-9][0-9]{0,2})\.(0|[1-9][0-9]{0,2})\.(0|[1-9][0-9]{0,2})$/
+if (!appVersionMatch.matches()) {
+    throw new GradleException("TREELEARN_VERSION must use MAJOR.MINOR.PATCH, got '${appVersionName}'")
+}
+
+def appVersionMajor = appVersionMatch[0][1].toInteger()
+def appVersionMinor = appVersionMatch[0][2].toInteger()
+def appVersionPatch = appVersionMatch[0][3].toInteger()
+def appVersionParts = [appVersionMajor, appVersionMinor, appVersionPatch]
+if (appVersionParts.any { it > 999 }) {
+    throw new GradleException("TREELEARN_VERSION components must be <= 999, got '${appVersionName}'")
+}
+def appVersionCode = appVersionMajor * 1000000 + appVersionMinor * 1000 + appVersionPatch
+
 // ---------------------------------------------------------------------------
 // Release signing for personal sideloading.
 //
@@ -33,8 +55,8 @@ android {
         applicationId 'com.treelearn'
         minSdk 28
         targetSdk 36
-        versionCode 1
-        versionName '1.0'
+        versionCode appVersionCode
+        versionName appVersionName
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
 
@@ -107,4 +129,13 @@ dependencies {
 
     androidTestImplementation 'androidx.test:runner:1.5.1'
     androidTestImplementation 'junit:junit:4.13.2'
+}
+
+tasks.register('printVersion') {
+    group = 'versioning'
+    description = 'Print the validated APK version name and numeric version code.'
+    doLast {
+        println "versionName=${appVersionName}"
+        println "versionCode=${appVersionCode}"
+    }
 }

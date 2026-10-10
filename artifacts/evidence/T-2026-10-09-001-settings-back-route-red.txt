@@ -1,0 +1,136 @@
+COMMAND=.\gradlew.bat :app:testDebugUnitTest --tests com.treelearn.app.SettingsBackRouteTest --rerun-tasks --no-daemon --console=plain
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+> Task :core:compileJava
+> Task :core:processResources NO-SOURCE
+> Task :core:classes
+> Task :core:jar
+> Task :tree-layout:compileJava
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes
+> Task :tree-layout:jar
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues
+> Task :ai:generateDebugResources
+> Task :ai:packageDebugResources
+> Task :ai:processDebugNavigationResources
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :ai:javaPreCompileDebug
+> Task :app:javaPreCompileDebug
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :ai:compileDebugLibraryResources
+> Task :data:processDebugNavigationResources
+> Task :ai:writeDebugAarMetadata
+> Task :data:writeDebugAarMetadata
+> Task :ai:parseDebugLocalResources
+> Task :app:processDebugNavigationResources
+> Task :app:checkDebugAarMetadata
+> Task :app:generateDebugResValues
+> Task :app:compileDebugNavigationResources
+> Task :data:generateDebugResValues
+> Task :data:generateDebugResources
+> Task :data:packageDebugResources
+> Task :ai:generateDebugRFile
+> Task :app:mapDebugSourceSetPaths
+> Task :ai:compileDebugJavaWithJavac
+> Task :app:generateDebugResources
+> Task :ai:bundleLibRuntimeToJarDebug
+> Task :ai:bundleLibCompileToJarDebug
+> Task :app:packageDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :ai:extractDeepLinksDebug
+> Task :app:extractDeepLinksDebug
+> Task :data:extractDeepLinksDebug
+> Task :data:compileDebugLibraryResources
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :data:javaPreCompileDebug
+> Task :data:parseDebugLocalResources
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :app:javaPreCompileDebugUnitTest
+> Task :data:processDebugManifest
+> Task :ai:processDebugManifest
+> Task :app:parseDebugLocalResources
+> Task :app:mergeDebugResources
+> Task :data:generateDebugRFile
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :data:compileDebugJavaWithJavac
+> Task :app:processDebugUnitTestJavaRes NO-SOURCE
+> Task :app:processDebugManifestForPackage
+> Task :data:bundleLibCompileToJarDebug
+> Task :data:bundleLibRuntimeToJarDebug
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :app:processDebugResources
+
+> Task :app:compileDebugJavaWithJavac
+注: 某些输入文件使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+注: 某些输入文件使用了未经检查或不安全的操作。
+注: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:bundleDebugClassesToRuntimeJar
+
+> Task :app:compileDebugUnitTestJavaWithJavac
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\SettingsBackRouteTest.java:11: 错误: 程序包SettingsBackRoute不存在
+        assertEquals(SettingsBackRoute.Target.HOME, SettingsBackRoute.afterBack(null));
+                                      ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\SettingsBackRouteTest.java:11: 错误: 找不到符号
+        assertEquals(SettingsBackRoute.Target.HOME, SettingsBackRoute.afterBack(null));
+                                                    ^
+  符号:   变量 SettingsBackRoute
+  位置: 类 SettingsBackRouteTest
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\SettingsBackRouteTest.java:16: 错误: 程序包SettingsBackRoute不存在
+        assertEquals(SettingsBackRoute.Target.CHAT,
+                                      ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\SettingsBackRouteTest.java:17: 错误: 找不到符号
+                SettingsBackRoute.afterBack("branch-123"));
+                ^
+  符号:   变量 SettingsBackRoute
+  位置: 类 SettingsBackRouteTest
+4 个错误
+
+> Task :app:compileDebugUnitTestJavaWithJavac FAILED
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugUnitTestJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\SettingsBackRouteTest.java:11: 错误: 找不到符号
+          assertEquals(SettingsBackRoute.Target.HOME, SettingsBackRoute.afterBack(null));
+                                                      ^
+    符号:   变量 SettingsBackRoute
+    位置: 类 SettingsBackRouteTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\SettingsBackRouteTest.java:17: 错误: 找不到符号
+                  SettingsBackRoute.afterBack("branch-123"));
+                  ^
+    符号:   变量 SettingsBackRoute
+    位置: 类 SettingsBackRouteTest
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\SettingsBackRouteTest.java:11: 错误: 程序包SettingsBackRoute不存在
+          assertEquals(SettingsBackRoute.Target.HOME, SettingsBackRoute.afterBack(null));
+                                        ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\SettingsBackRouteTest.java:16: 错误: 程序包SettingsBackRoute不存在
+          assertEquals(SettingsBackRoute.Target.CHAT,
+                                        ^
+  4 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 1m 6s
+53 actionable tasks: 53 executed
+EXITCODE=1

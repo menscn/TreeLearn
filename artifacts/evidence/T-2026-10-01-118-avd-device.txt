@@ -1,0 +1,17 @@
+CapturedAt=2026-10-01T12:48:31.7805408+08:00
+Task=T-2026-10-01-118
+Command=adb devices -l; adb -s emulator-5558 shell getprop ro.product.model; adb -s emulator-5558 shell getprop ro.build.version.release
+Purpose=confirm API 36 AVD identity; no APK installed by this check
+Command=adb devices -l
+List of devices attached
+AWSS013807000356       device product:ALP-AN00 model:ALP_AN00 device:HNALP-Q transport_id:7
+emulator-5558          device product:sdk_gphone64_x86_64 model:sdk_gphone64_x86_64 device:emu64xa transport_id:8
+
+ExitCode=0
+Command=adb -s emulator-5558 shell getprop ro.product.model
+sdk_gphone64_x86_64
+ExitCode=0
+Command=adb -s emulator-5558 shell getprop ro.build.version.release
+16
+ExitCode=0
+CapturedAtEnd=2026-10-01T12:48:32.4445258+08:00

@@ -1,0 +1,32 @@
+CapturedAt=2026-10-01T12:55:41.8318685+08:00
+Task=T-2026-10-01-118
+Device=emulator-5558; Android API 36; not target handset
+Mode=fresh Activity launch and process/resumed/crash-log check
+Command=adb -s emulator-5558 shell am force-stop com.treelearn
+(no output)
+ExitCode=0
+Command=adb -s emulator-5558 logcat -c
+(no output)
+ExitCode=0
+Command=adb -s emulator-5558 shell am start -W -n com.treelearn/.app.MainActivity
+Starting: Intent { cmp=com.treelearn/.app.MainActivity }
+Status: ok
+LaunchState: COLD
+Activity: com.treelearn/.app.MainActivity
+TotalTime: 1494
+WaitTime: 1497
+Complete
+ExitCode=0
+Command=adb -s emulator-5558 shell pidof com.treelearn
+6939
+ExitCode=0
+Command=adb -s emulator-5558 shell dumpsys activity activities (filtered to resumed activity)
+    topResumedActivity=ActivityRecord{100331034 u0 com.treelearn/.app.MainActivity t99}
+ExitCode=0
+Command=adb -s emulator-5558 logcat -d -s AndroidRuntime:E
+(no output)
+ExitCode=0
+Assessment=PASS
+AssessmentCommand=PowerShell exact checks for am-start status, numeric app PID, resumed MainActivity and no fatal AndroidRuntime entry
+AssessmentExitCode=0
+CompletedAt=2026-10-01T12:55:46.2449913+08:00

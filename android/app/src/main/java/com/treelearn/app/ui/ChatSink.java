@@ -18,6 +18,11 @@ public interface ChatSink {
     void render(ChatViewState state);
 
     /**
+     * Hides the system input method after an accepted send.
+     */
+    void dismissKeyboard();
+
+    /**
      * Hands the annotations of the conversation's answers to the screen, beside the state they
      * belong to (T-B). They ride their own port rather than the state for one reason: a highlight
      * write changes no answer text, so no state diff would ever repaint the spans - the screen
@@ -36,8 +41,13 @@ public interface ChatSink {
      */
     void copyToClipboard(String text);
 
-    /** Enters a branch: the one a fork just created, or another the learner picked. */
+    /** Opens a conversation on the requested branch. */
     void openBranch(String branchId);
+
+    /** Enters a newly created branch and optionally submits its first question. */
+    default void openBranch(String branchId, String initialQuestion) {
+        openBranch(branchId);
+    }
 
     /**
      * Opens the child-branch list drawn from one answer.

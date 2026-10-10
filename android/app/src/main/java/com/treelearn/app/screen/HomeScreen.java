@@ -58,10 +58,20 @@ public final class HomeScreen extends LinearLayout {
     private HomeActions actions;
     /** The drawer button (T-106); the host owns the drawer, the screen only reports the press. */
     private Runnable onDrawerPressed;
+    private Runnable onSettingsPressed;
 
     /** The drawer button's press lands on the host, which owns the drawer's lifecycle. */
     public void setOnDrawerPressed(Runnable onDrawerPressed) {
         this.onDrawerPressed = onDrawerPressed;
+    }
+
+    public void setOnSettingsPressed(Runnable onSettingsPressed) {
+        this.onSettingsPressed = onSettingsPressed;
+        findViewById(R.id.home_settings_button).setOnClickListener(view -> {
+            if (this.onSettingsPressed != null) {
+                this.onSettingsPressed.run();
+            }
+        });
     }
     private boolean rendering;
     /**

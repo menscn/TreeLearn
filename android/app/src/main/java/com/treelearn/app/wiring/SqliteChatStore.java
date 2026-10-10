@@ -88,8 +88,8 @@ public final class SqliteChatStore implements ChatStore {
         for (Message row : rows) {
             positions.add(position(database, row, forks, attempt));
         }
-        return new Conversation(titleOf(branch, rows), Collections.unmodifiableList(positions),
-                branch, Collections.unmodifiableList(rows));
+        return new Conversation(BranchHeading.of(branch.title(), firstLearnerMessage(rows)),
+                Collections.unmodifiableList(positions), branch, Collections.unmodifiableList(rows));
     }
 
     @Override
@@ -116,7 +116,7 @@ public final class SqliteChatStore implements ChatStore {
         for (Branch child : BranchChildren.of(BranchDao.findByTopic(database, branch.topicId),
                 messageId)) {
             children.add(new ChildBranch(child.id,
-                    titleOf(child, MessageDao.findByBranch(database, child.id)),
+                    childTitleOf(database, child, MessageDao.findByBranch(database, child.id)),
                     child.unreadCount()));
         }
         return children;
@@ -378,13 +378,10 @@ public final class SqliteChatStore implements ChatStore {
         return BranchChildren.countsOf(BranchDao.findByTopic(database, topicId));
     }
 
-    /**
-     * The branch's heading, through the one implementation of that rule ({@link BranchHeading}): the
-     * stored title when there is one, otherwise the branch's first learner message. A branch with
-     * neither reads as the empty string, which the screen draws as a plain, untitled conversation.
-     */
-    private static String titleOf(Branch branch, List<Message> rows) {
-        return BranchHeading.of(branch.title(), firstLearnerMessage(rows));
+    /** The child-list heading through the one implementation of that rule. */
+    private static String childTitleOf(SQLiteDatabase database, Branch branch, List<Message> rows) {
+        return BranchHeading.of(branch.title(), firstLearnerMessage(rows), sourceAnswer(database,
+                branch));
     }
 
     /** The branch's first learner message, or null when it stores none. */
@@ -395,5 +392,14 @@ public final class SqliteChatStore implements ChatStore {
             }
         }
         return null;
+    }
+
+    /** The stable answer captured when a child branch was created, or null when it is unavailable. */
+    private static String sourceAnswer(SQLiteDatabase database, Branch branch) {
+        if (branch.source == null) {
+            return null;
+        }
+        AnswerRevision revision = AnswerRevisionDao.findById(database, branch.source.sourceRevisionId);
+        return revision == null ? null : revision.answerContent;
     }
 }

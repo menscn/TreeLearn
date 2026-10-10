@@ -1,0 +1,10 @@
+Task=T-2026-10-01-115
+CapturedAt=2026-10-08T21:04:42+08:00
+WorkingDirectory=android
+Command=.\gradlew.bat :app:testDebugUnitTest --rerun-tasks --tests com.treelearn.app.ChatEntryRouteTest --no-daemon --console=plain
+Mode=Targeted JVM unit tests with ChatEntryRoute.captureIfAbsent mutated to replace the original route with the current screen
+ExitCode=1
+Result=6 tests completed; 1 failed
+ObservedFailure=openingAncestorBranchesDoesNotReplaceTheOriginalEntry
+FailureReason=Replacing rather than retaining the first entry causes opening an ancestor branch to lose the original library return destination.
+TestSHA256=EA26F52DAC229B50BDDE4257107382609011B823D9478DA3C33F727ABCADD409

@@ -1,0 +1,193 @@
+﻿CapturedAt=2026-10-08T18:49:23.5259048+08:00
+Mode=RED expanded branch-history contract tests before implementation
+WorkingDirectory=D:\Project\Android\Treelearn\android
+Command=.\gradlew.bat :app:testDebugUnitTest --rerun-tasks --tests com.treelearn.app.ui.ChatPresenterTest
+ChatPresenterTestSHA256=B7F7A1D97E4F46F69CCAB4C5A29719BF6EE2BB622A49349AC03EFAD40D746B6B
+--- OUTPUT ---
+> Task :core:compileJava
+> Task :core:processResources NO-SOURCE
+> Task :core:classes
+> Task :core:jar
+> Task :tree-layout:compileJava
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes
+> Task :tree-layout:jar
+> Task :ai:preBuild UP-TO-DATE
+> Task :ai:preDebugBuild UP-TO-DATE
+> Task :ai:generateDebugResValues
+> Task :ai:generateDebugResources
+> Task :ai:packageDebugResources
+> Task :ai:processDebugNavigationResources
+> Task :ai:processDebugJavaRes NO-SOURCE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :ai:javaPreCompileDebug
+> Task :ai:parseDebugLocalResources
+> Task :app:javaPreCompileDebug
+> Task :ai:compileDebugLibraryResources
+> Task :data:preBuild UP-TO-DATE
+> Task :data:preDebugBuild UP-TO-DATE
+> Task :data:processDebugNavigationResources
+> Task :ai:writeDebugAarMetadata
+> Task :data:writeDebugAarMetadata
+> Task :ai:generateDebugRFile
+> Task :app:processDebugNavigationResources
+> Task :ai:compileDebugJavaWithJavac
+> Task :app:checkDebugAarMetadata
+> Task :app:compileDebugNavigationResources
+> Task :app:generateDebugResValues
+> Task :ai:bundleLibRuntimeToJarDebug
+> Task :data:generateDebugResValues
+> Task :ai:bundleLibCompileToJarDebug
+> Task :data:generateDebugResources
+> Task :data:packageDebugResources
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :app:packageDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :ai:extractDeepLinksDebug
+> Task :app:extractDeepLinksDebug
+> Task :data:extractDeepLinksDebug
+> Task :ai:processDebugManifest
+> Task :data:compileDebugLibraryResources
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :data:javaPreCompileDebug
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes NO-SOURCE
+> Task :data:processDebugJavaRes NO-SOURCE
+> Task :app:javaPreCompileDebugUnitTest
+> Task :data:parseDebugLocalResources
+> Task :data:processDebugManifest
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
+> Task :app:parseDebugLocalResources
+> Task :app:mergeDebugResources
+> Task :data:generateDebugRFile
+> Task :app:processDebugResources
+> Task :data:compileDebugJavaWithJavac
+> Task :data:bundleLibCompileToJarDebug
+> Task :data:bundleLibRuntimeToJarDebug
+
+> Task :app:compileDebugJavaWithJavac
+注: 某些输入文件使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+注: 某些输入文件使用了未经检查或不安全的操作。
+注: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:bundleDebugClassesToRuntimeJar
+
+> Task :app:compileDebugUnitTestJavaWithJavac FAILED
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:358: 错误: 方法不会覆盖或实现超类型的方法
+        @Override
+        ^
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:945: 错误: 找不到符号
+        presenter.onChildBranchChosen(childBranchId);
+                 ^
+  符号:   方法 onChildBranchChosen(String)
+  位置: 类型为ChatPresenter的变量 presenter
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:967: 错误: 找不到符号
+        presenter.onChildBranchChosen(selectedSiblingId);
+                 ^
+  符号:   方法 onChildBranchChosen(String)
+  位置: 类型为ChatPresenter的变量 presenter
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:991: 错误: 找不到符号
+        first.onChildBranchChosen(secondBranchId);
+             ^
+  符号:   方法 onChildBranchChosen(String)
+  位置: 类型为ChatPresenter的变量 first
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:997: 错误: 找不到符号
+        second.onChildBranchChosen(thirdBranchId);
+              ^
+  符号:   方法 onChildBranchChosen(String)
+  位置: 类型为ChatPresenter的变量 second
+D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:1034: 错误: 对于ChatPresenter(RecordingChatSink,InlineUi,InlineExecutor,FakeKeyVault,FakeChatData,FakeChatCommands,FakeSettingsStore,CopyLabels,String,NoPositionStore,ChatDraftStore,<空值>,<空值>,<空值>,<空值>,<空值>,<空值>,List<String>), 找不到合适的构造器
+        return new ChatPresenter(sink, new TestDoubles.InlineUi(), new TestDoubles.InlineExecutor(),
+               ^
+    构造器 ChatPresenter.ChatPresenter(ChatSink,UiThread,Executor,KeyVault,ChatData,ChatCommands,SettingsStore,CopyLabels,String,ReadingStore)不适用
+      (实际参数列表和形式参数列表长度不同)
+    构造器 ChatPresenter.ChatPresenter(ChatSink,UiThread,Executor,KeyVault,ChatData,ChatCommands,SettingsStore,CopyLabels,String,ReadingStore,ChatDraftStore)不适用
+      (实际参数列表和形式参数列表长度不同)
+    构造器 ChatPresenter.ChatPresenter(ChatSink,UiThread,Executor,KeyVault,ChatData,ChatCommands,SettingsStore,CopyLabels,String,ReadingStore,Translator)不适用
+      (实际参数列表和形式参数列表长度不同)
+    构造器 ChatPresenter.ChatPresenter(ChatSink,UiThread,Executor,KeyVault,ChatData,ChatCommands,SettingsStore,CopyLabels,String,ReadingStore,ChatDraftStore,Translator)不适用
+      (实际参数列表和形式参数列表长度不同)
+    构造器 ChatPresenter.ChatPresenter(ChatSink,UiThread,Executor,KeyVault,ChatData,ChatCommands,SettingsStore,CopyLabels,String,ReadingStore,ChatRoleSource)不适用
+      (实际参数列表和形式参数列表长度不同)
+    构造器 ChatPresenter.ChatPresenter(ChatSink,UiThread,Executor,KeyVault,ChatData,ChatCommands,SettingsStore,CopyLabels,String,ReadingStore,ChatDraftStore,Translator,ChatSearchStep)不适用
+      (实际参数列表和形式参数列表长度不同)
+    构造器 ChatPresenter.ChatPresenter(ChatSink,UiThread,Executor,KeyVault,ChatData,ChatCommands,SettingsStore,CopyLabels,String,ReadingStore,ChatDraftStore,Translator,ChatSearchStep,ChatSpeaker)不适用
+      (实际参数列表和形式参数列表长度不同)
+    构造器 ChatPresenter.ChatPresenter(ChatSink,UiThread,Executor,KeyVault,ChatData,ChatCommands,SettingsStore,CopyLabels,String,ReadingStore,ChatDraftStore,Translator,ChatSearchStep,ChatSpeaker,AttachmentStore)不适用
+      (实际参数列表和形式参数列表长度不同)
+    构造器 ChatPresenter.ChatPresenter(ChatSink,UiThread,Executor,KeyVault,ChatData,ChatCommands,SettingsStore,CopyLabels,String,ReadingStore,ChatDraftStore,Translator,ChatSearchStep,ChatSpeaker,AttachmentStore,ChatRoleSource)不适用
+      (实际参数列表和形式参数列表长度不同)
+6 个错误
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugUnitTestJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:1034: 错误: 对于ChatPresenter(RecordingChatSink,InlineUi,InlineExecutor,FakeKeyVault,FakeChatData,FakeChatCommands,FakeSettingsStore,CopyLabels,String,NoPositionStore,ChatDraftStore,<空值>,<空值>,<空值>,<空值>,<空值>,<空值>,List<String>), 找不到合适的构造器
+          return new ChatPresenter(sink, new TestDoubles.InlineUi(), new TestDoubles.InlineExecutor(),
+                 ^
+      构造器 ChatPresenter.ChatPresenter(ChatSink,UiThread,Executor,KeyVault,ChatData,ChatCommands,SettingsStore,CopyLabels,String,ReadingStore)不适用
+        (实际参数列表和形式参数列表长度不同)
+      构造器 ChatPresenter.ChatPresenter(ChatSink,UiThread,Executor,KeyVault,ChatData,ChatCommands,SettingsStore,CopyLabels,String,ReadingStore,ChatDraftStore)不适用
+        (实际参数列表和形式参数列表长度不同)
+      构造器 ChatPresenter.ChatPresenter(ChatSink,UiThread,Executor,KeyVault,ChatData,ChatCommands,SettingsStore,CopyLabels,String,ReadingStore,Translator)不适用
+        (实际参数列表和形式参数列表长度不同)
+      构造器 ChatPresenter.ChatPresenter(ChatSink,UiThread,Executor,KeyVault,ChatData,ChatCommands,SettingsStore,CopyLabels,String,ReadingStore,ChatDraftStore,Translator)不适用
+        (实际参数列表和形式参数列表长度不同)
+      构造器 ChatPresenter.ChatPresenter(ChatSink,UiThread,Executor,KeyVault,ChatData,ChatCommands,SettingsStore,CopyLabels,String,ReadingStore,ChatRoleSource)不适用
+        (实际参数列表和形式参数列表长度不同)
+      构造器 ChatPresenter.ChatPresenter(ChatSink,UiThread,Executor,KeyVault,ChatData,ChatCommands,SettingsStore,CopyLabels,String,ReadingStore,ChatDraftStore,Translator,ChatSearchStep)不适用
+        (实际参数列表和形式参数列表长度不同)
+      构造器 ChatPresenter.ChatPresenter(ChatSink,UiThread,Executor,KeyVault,ChatData,ChatCommands,SettingsStore,CopyLabels,String,ReadingStore,ChatDraftStore,Translator,ChatSearchStep,ChatSpeaker)不适用
+        (实际参数列表和形式参数列表长度不同)
+      构造器 ChatPresenter.ChatPresenter(ChatSink,UiThread,Executor,KeyVault,ChatData,ChatCommands,SettingsStore,CopyLabels,String,ReadingStore,ChatDraftStore,Translator,ChatSearchStep,ChatSpeaker,AttachmentStore)不适用
+        (实际参数列表和形式参数列表长度不同)
+      构造器 ChatPresenter.ChatPresenter(ChatSink,UiThread,Executor,KeyVault,ChatData,ChatCommands,SettingsStore,CopyLabels,String,ReadingStore,ChatDraftStore,Translator,ChatSearchStep,ChatSpeaker,AttachmentStore,ChatRoleSource)不适用
+        (实际参数列表和形式参数列表长度不同)
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatTestDoubles.java:358: 错误: 方法不会覆盖或实现超类型的方法
+          @Override
+          ^
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:945: 错误: 找不到符号
+          presenter.onChildBranchChosen(childBranchId);
+                   ^
+    符号:   方法 onChildBranchChosen(String)
+    位置: 类型为ChatPresenter的变量 presenter
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:967: 错误: 找不到符号
+          presenter.onChildBranchChosen(selectedSiblingId);
+                   ^
+    符号:   方法 onChildBranchChosen(String)
+    位置: 类型为ChatPresenter的变量 presenter
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:991: 错误: 找不到符号
+          first.onChildBranchChosen(secondBranchId);
+               ^
+    符号:   方法 onChildBranchChosen(String)
+    位置: 类型为ChatPresenter的变量 first
+  D:\Project\Android\Treelearn\android\app\src\test\java\com\treelearn\app\ui\ChatPresenterTest.java:997: 错误: 找不到符号
+          second.onChildBranchChosen(thirdBranchId);
+                ^
+    符号:   方法 onChildBranchChosen(String)
+    位置: 类型为ChatPresenter的变量 second
+  6 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 8s
+53 actionable tasks: 53 executed
+EXITCODE=1

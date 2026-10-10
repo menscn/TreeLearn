@@ -17,6 +17,25 @@
 
 `AGP 9.x` 被刻意排除：它内置 Kotlin 支持，与 Java-only 守门直接冲突。
 
+## APK 版本号
+
+版本唯一来源是 [`version.properties`](version.properties)，当前初始版本为 `1.0.0`。
+三位数字语义固定为 `主版本.小版本.修复版本`：Bug 修复执行 patch，增加小特性执行 minor，
+大特性或大版本更新执行 major。Gradle 会校验三段数字，并生成同样的 `versionName`；对应的
+Android `versionCode` 为 `主版本 * 1000000 + 小版本 * 1000 + 修复版本`，保证版本号递增。
+
+在 `android/` 目录执行：
+
+```powershell
+./scripts/version.ps1 show     # 查看当前版本
+./scripts/version.ps1 patch    # 1.0.0 -> 1.0.1
+./scripts/version.ps1 minor    # 1.0.0 -> 1.1.0
+./scripts/version.ps1 major    # 1.0.0 -> 2.0.0
+./gradlew.bat :app:printVersion
+```
+
+脚本只接受 `0..999` 的三段数字；非法版本会拒绝构建或拒绝写入，不会生成半截版本文件。
+
 ## 模块与依赖方向
 
 ```text
@@ -209,7 +228,7 @@ androidTest APK 的 `classes.dex` 含 Kotlin 描述符（无 `kotlin/jvm/interna
 「The declared exceptions to the first bullet」段为唯一权威正文，本文件不复制入口名与数量。新增同类入口
 必须登记到该段，不要让 README 或第二个类持有副本。
 
-**供应商边界（不要放进 `:core`）**：上下文封装标签 `<treelearn_reasoning>` / `<treelearn_answer>` 与引用信封 `<treelearn_quote>` 只存在于 `:ai` 的 `DeepSeekContextEncoder`；`ContextPlan` 没有能装下它们的字段，UI 也不显示它们。system 提示词恰好一条且位于首位，由 `:ai` 的请求组装器（`DeepSeekRequestAssembler`）负责，出生快照与 `ContextPlan` 都不含 system。
+**供应商边界（不要放进 `:core`）**：历史上下文中的 `<treelearn_reasoning>` / `<treelearn_answer>` 与引用信封 `<treelearn_quote>` 由 `:ai` 的 `DeepSeekContextEncoder` 编码；这不定义生成响应的输出协议。当前 UI 在 `ChatScreen` 消费端用 `AnswerContentProjection` 分离识别出的外层推理/答案：答案投影进入正文、翻译、朗读、复制与选区，推理仅在思考开启时进入独立 disclosure。system 提示词恰好一条且位于首位，由 `:ai` 的请求组装器（`DeepSeekRequestAssembler`）负责，出生快照与 `ContextPlan` 都不含 system。
 
 **校验顺序**：参数形状先于业务判定，按参数声明顺序执行。因此一次同时带「畸形参数」与「不可用版本」
 的调用抛 `IllegalArgumentException`，不会用业务码遮住调用方的 bug。
@@ -429,10 +448,10 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
 都用同一种方式接上（各见对应小节）；检索入口现位于学习库顶部搜索框
 （T-040 接线、T-054 迁入，见「检索栈与搜索入口（T-040 → T-054）」）。
 
-**但一级目的地自 T-052 起多了一件外壳：常驻底部标签栏。** PRD V3.2 6.2.16 把 主页 / 学习库 / 设置
-并列为三个对等入口，`activity_main.xml` 因此从「一个 `shell_host`」变成「`shell_host` + 常驻
-`screen_tab_bar`」：标签栏由外壳拥有、任何屏幕都不自己画一份，显隐只在 `MainActivity.swap()` 一处判定，
-二级屏返回落回发起它的那个标签。细节见「底部标签栏与学习库（T-052）」一节。
+**一级导航由外壳统一承载。** PRD V3.2 原先将主页 / 学习库 / 设置并列；2026-10-09 用户确认将设置改为
+从首页右上角打开的辅助页面，底部栏只保留主页与学习库。`activity_main.xml` 的标签栏仍由外壳拥有，
+任何屏幕都不自行绘制，显隐由 `MainActivity.swap()` 一处判定；设置返回按调用来源回首页或聊天；聊天页
+顶部返回按分支父级上行，根分支关闭恢复聊天来源页面。设计变更见 [设置入口与按钮反馈更新](../Docs/04-ux-design/知芽-TreeLearn-设置入口与按钮反馈更新-2026-10-09.md)，分支返回见 T-115。
 
 | 类型 | 职责 | 关键不变量 |
 | :--- | :--- | :--- |
@@ -457,7 +476,7 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
 | `wiring.HomeStore` / `wiring.SqliteHomeStore` | 首页的端口与它的 SQLite 实现 | 端口只做存取、不重写判定；`recentTopics()` 不兜底、不造行，空库就是空列表 |
  | `ui.HomeStats` / `ui.HeatmapView` / `ui.HeatmapLayout` | 学习热度的三个层次（T-100/101/102）：聚合结果、自绘 View、纯 Java 布局数学 | 活跃判定在 `data.stats.StatsAggregator` 一处（`HAS_ANY_ANSWER`：当天有过回答修订）；`HeatmapView` 以 XML attrs 支持抽屉标准 7×6 月历网格，详情页由 `MonthCalendarView` 绘制当前月 7 列月历，颜色全走 `R.color` token |
 | `ui.StatsDetailPresenter` / `screen.StatsDetailScreen` | 统计详情页（T-104/012）：累计指标卡 + 当前月份 7 列月历热力卡 | 读**同一**聚合入口（`HomeStore.statsRaw()` → `StatsAggregator`），与抽屉热力图共享判定、不可能出现两套口径；页面只把当前月的 `activeDays` 映射到 7×6 月历，月初/月末/未来日期透明，totals/streak 原样透传不二次计算；历史记录与抽屉窗口不改写；查询失败降级为可见占位（failed 态），空库显示空态；入口由抽屉热力图接线 |
-| `ui.HomeDrawerPresenter` / `screen.HomeDrawerScreen` | 首页抽屉（T-106）：自绘覆盖层（无 DrawerLayout 依赖）+「学习概览」标题 + 标准 7×6 日历热力图 + 固定最近 3 条主题 + 空历史提示 | 热力图读 `HomeData.stats()` 的同一聚合结果并可点击进入详情；快捷列表走 `LibraryData.topics()`（学习库的**同一**查询）；点击主题与首页行走同一 `openBranch` 目标；关闭按钮只收拢抽屉，设置通过底部标签栏进入；开合是 CLOSED/OPEN 两态机，导航后强制收拢；不使用中段滚动、不显示统计文字入口、不复制学习库全量列表；返回键先收抽屉再走房间返回（`onBackRequested` 首分支）；`activity_main.xml` 外层包 `FrameLayout`（`main_drawer_root`）让抽屉盖住 tab bar 且不被 `swap()` 清除 |
+| `ui.HomeDrawerPresenter` / `screen.HomeDrawerScreen` | 首页抽屉（T-106）：自绘覆盖层（无 DrawerLayout 依赖）+「学习概览」标题 + 标准 7×6 日历热力图 + 固定最近 3 条主题 + 空历史提示 | 热力图读 `HomeData.stats()` 的同一聚合结果并可点击进入详情；快捷列表走 `LibraryData.topics()`（学习库的**同一**查询）；点击主题与首页行走同一 `openBranch` 目标；关闭按钮只收拢抽屉，设置由首页右上角齿轮进入；开合是 CLOSED/OPEN 两态机，导航后强制收拢；不使用中段滚动、不显示统计文字入口、不复制学习库全量列表；返回键先收抽屉再走房间返回（`onBackRequested` 首分支）；`activity_main.xml` 外层包 `FrameLayout`（`main_drawer_root`）让抽屉盖住 tab bar 且不被 `swap()` 清除 |
 | `wiring.BranchHeading` | 卡片标题与对话标题的**唯一**判定点（存了标题用标题，否则用根问题） | 首页与对话读同一个方法，一个主题不可能两处叫两个名字 |
 
 **首页 1:1 视觉还原（2026-09-27，父需求 T-2026-09-27-001）：**
@@ -550,8 +569,9 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
   `MainActivity.showLibrary()` 绑到同一个 `onBackRequested()`，所以「点箭头」和「按返回手势」不可能给出
   两个答案。空查询时不画搜索指南（`showSearch()` 对 `Pane.GUIDE` 提前返回）：搜索在本实现内联在学习库，
   原型那页独立搜索屏的空态指南在这里无处安放，画出来会盖住本页列表。
-- **二级屏的返回落点是发起它的那个标签，不是首页**（T-052）：对话页的返回走 `showTab(currentTab)`，
-  因此从学习库进对话再返回落回学习库；`currentTab` 只被标签点击与一级屏自身改写。
+- **对话页顶部返回按分支父级逐层上行**（T-115）：每次读取当前分支的 `parentBranchId` 并打开直接父分支；连续返回逐级到祖先，兄弟分支返回到共同父级。
+  此规则对回答分叉、子分支选择，以及从学习库、导航页、画布等入口打开的分支一律适用；根分支没有父级时关闭对话并重建最初打开它的来源页面。来源页临时状态（如搜索词、画布视口）不保留。
+  这只调整聊天页顶部返回；`MainActivity.onBackRequested()` 的系统返回决策和其它屏幕导航保持不变。
 - **不能用 AndroidX 的 `getOnBackPressedDispatcher()`**：lint 的 `GestureBackNavigation` 会这么建议，但
   `:app` 主代码的编译类路径解析出来是**零 AndroidX 坐标**（只有四个 project 依赖，见
   `artifacts/evidence/T-012-lint.txt` 的 `:app:dependencies` 输出），而 `androidx.activity` 会连同
@@ -565,8 +585,8 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
 - V3.1 6.2.18 point 2 与 point 3 明确：模型与思考模式的入口**内嵌在问答输入框内**，首页根问题输入框
   与对话页追问输入框都提供该入口，**设置页不提供模型配置项**。因此 `SettingsViewState` 没有模型/思考
   字段；模型与思考由 `HomePresenter.onModelSelected` / `onThinkingToggled` 写进 `SettingsRepository`，
-  设置段只负责凭据与数据边界说明。**2026-09-28 设置页重设计后**：设置根页是分组导航列表，凭据的
-  表单动作在 API KEY 二级页（`screen.SettingsKeyScreen`），数据边界说明留在根页。
+  设置段负责凭据及能力入口。**2026-09-28 设置页重设计后**：设置根页是分组导航列表，凭据的
+  表单动作在 API KEY 二级页（`screen.SettingsKeyScreen`）；2026-10-09 起不再显示数据边界说明。
 - 切换只影响之后的新生成；已生成回答不被追溯改写。本层的写法就是「写偏好 + 改 ViewState」，
   不触碰任何回答或分支。
 - **对话页 chip 与全局分工的分界（T-103，2026-09-25）**：进入对话页时 `ChatPresenter` 经
@@ -745,33 +765,39 @@ View 自己不持内容。
 | `ui.ChatMessage` | 一行对话、它的阶段与它允许的操作 | 操作谓词**就是存储的判定**：`canRetry`/`canReset`/`canSelectRevision` 与 T-010 的 `PositionCommands` 同条件，`ChatPositionAgreementTest` 用同一组输入驱动两边逐一比对，因此「按钮可点」等于「用例接受」 |
 | `ui.ChatViewState` | 对话页可绘制的全部状态（相位/分支/消息/草稿/引用/Key/模型/思考/**展开集合**/推荐/提示/发送中） | 展开集合按 **messageId** 键，不是列表下标；`withMessages` 只换列表，草稿、引用与展开态原样带走；失败分类**复用** `HomeViewState.Notice` |
 | `ui.ChatData` / `ui.ChatCommands` / `ui.ChatActions` | 读、命令、用户操作三个端口 | 页面不直接访问 DAO、网关或协调器 |
-| `ui.ChatSink` | 导航、剪贴板、子分支列表与版本菜单的出口 | 复制文本交出去即忘：实现只写剪贴板，不落盘、不打印 |
+| `ui.ChatSink` | 导航、输入法隐藏、剪贴板、子分支列表与版本菜单的出口 | 复制文本交出去即忘：实现只写剪贴板，不落盘、不打印 |
 | `ui.CopyLabels` | 复制文本的两个小标题 | 由 `AppContainer` 从 `strings.xml` 取值注入；presenter 没有 Context，也不内联文案 |
-| `ui.ChatPresenter` | 对话页的全部决策 | 重试/重置/切版只**转发**给 T-010 的用例，UI 层没有任何路径能移动 revision 指针；一次 send 不在这里追行，而是清草稿后重新读 |
+| `ui.ChatPresenter` | 对话页的全部决策 | 重试/重置/切版只**转发**给 T-010 的用例，UI 层没有任何路径能移动 revision 指针；发送接受后先在后台读回权威消息，再清草稿并请求隐藏输入法 |
 | `screen.ChatScreen` | 列表 + 引用条 + 输入区（含模型/思考入口） | 只转发手势、按 ViewState 绘制 |
 | `screen.ReasoningDisclosure` | 思考披露：44dp 折叠头 + 正文 | 默认折叠；无 reasoning 且无在跑尝试时整块隐藏；展开态不在这里存 |
 | `screen.AnswerActionBar` | 引用/重置/翻译/朗读/子分支 | 按 `ChatMessage` 谓词启用；复制、新建主题与版本切换入口按当前精简 UI 隐藏；选中文字后的追问与新建主题由应用自绘的划词菜单承载 |
 | `ui.TextSelection` | 一段文字的选区值类型 | 纯 JVM 值类型，不含任何 Android 类型；划词菜单与底部引用读的是同一段平台选区 |
 | `ui.WordMenu` | 划词菜单的判定类型 | 六格主菜单（问 AI / 新建主题 / 高亮 / 批注 / 复制 / 全选），可点与否、落点都在这里；终态无「更多」子菜单，六格一律图标承载（T-B 拍板硬约束）；`fitFor` 是窄屏宽度兜底——窗口装不下六格时保留前缀、尾部折进「更多」卡片，操作一个不少；高亮/批注为新增 MARK 组（批注弹窗属 T-D）；回答文字使用 Android 原生可拖动选区，菜单由 `WordMenuPopup` 绘制，平台工具条被清空 |
-| `ui.ChildBranch` | 子分支弹层的一行：去哪、叫什么、还欠多少 | 标题由装配层解析后传入，弹层不自己从可能为空的存储标题推第二个名字 |
+| `ui.ChildBranch` | 子分支弹层的一行：去哪、叫什么、还欠多少 | 标题由装配层解析后传入：已保存标题优先，其次首条问题，再以来源回答首句或“未命名分支”兜底；弹层不自己推导 |
 | `screen.WordMenuPopup` | 划词菜单的承载类（`PopupWindow`） | 菜单由它画出并定位到选中句；它只画与套用，判定全部来自 `WordMenu` |
-| `screen.ChildBranchPopup` | 子分支列表弹层（`PopupWindow` + `showAsDropDown`） | 行是**传进来**的，弹层不读库；只有点行才导航，点外面或按返回只关列表 |
+| `screen.ChildBranchPopup` | 子分支列表弹层（`PopupWindow` + 窗口内避让定位） | 行是**传进来**的，弹层不读库；优先显示在操作栏上方并夹紧到安全边距，只有点行才导航，点外面或按返回只关列表 |
 | `wiring.BranchChildren` | 「这条回答的直接子分支」与「每个位置各有几个子分支」的唯一判定点 | 子 = 非根、带 source message、未归档；chips 与弹层两处读同一份，因此不会出现「数量说有、列表却拿不出」 |
 | `wiring.ChatWiring` | 对话的**真实**数据路径（T-032）：读回 + 五条命令，实现 `ChatData` 与 `ChatCommands` | 读回走 `MessageDao.findByBranch` / `AnswerRevisionDao` / `GenerationOperationDao`；`send`/`retry`/`reset` 装配请求后交协调器、`selectRevision` 直接落库、`fork` 走 `BranchCreation`；每条拒绝都以可见 `Notice` 返回 |
-| `wiring.ChatStore` / `wiring.SqliteChatStore` | 对话的端口与它的 SQLite 实现 | 端口**委托** T-010 的 `AnswerVersions`/`PositionCommands`，不复制它们的判定；`history()` 用编码器自己的 `ContextPlan.Entry` 词汇表达「问题之前的行」——非根分支先经 `ContextSnapshot.fromStored` 读回出生快照、由 `SnapshotHistoryMerger`（T-064，纯 JVM 类型）按 sources 顺序展开成前置 entry，再接本分支行；快照行缺失（根分支）时就是存储的行。快照不可解码或引用的行已不在时经 `ChatStore.SnapshotUnreadable` 拒绝本次请求（STORAGE 提示），不静默丢上游背景 |
+| `wiring.ChatStore` / `wiring.SqliteChatStore` | 对话的端口与它的 SQLite 实现 | 端口**委托** T-010 的 `AnswerVersions`/`PositionCommands`，不复制它们的判定；分支标题按 `BranchHeading` 统一读取，子分支在保存标题和首条问题都为空时读取其固定来源修订的回答首句作为临时名称，完全无文本时显示“未命名分支”；`history()` 用编码器自己的 `ContextPlan.Entry` 词汇表达「问题之前的行」——非根分支先经 `ContextSnapshot.fromStored` 读回出生快照、由 `SnapshotHistoryMerger`（T-064，纯 JVM 类型）按 sources 顺序展开成前置 entry，再接本分支行；快照行缺失（根分支）时就是存储的行。快照不可解码或引用的行已不在时经 `ChatStore.SnapshotUnreadable` 拒绝本次请求（STORAGE 提示），不静默丢上游背景 |
 | `wiring.PromptLimits` | 请求预算的两个数字，全应用唯一取值点 | `AppContainer` 用 `PromptLimits.budget()` 构造那一个 `PromptBudget`；数字与理由见 `:app` 首页一节的「请求预算（T-032 的一次决定）」 |
 | `wiring.LogcatTelemetry` | 协调器的遥测出口 | 只记状态与计数，**不记** Key、system prompt、问题、回答或 reasoning 正文 |
 
 **这一层的交互事实：**
 
+- **长回答跟随（T-117）：**生成中的答案超过可视高度时暂停自动跟随并显示「回到最新」；用户拖动且内容位置实际改变时立即进入手动阅读；点击按钮跳至末尾并恢复后续流式增量跟随。短回答不显示该按钮，切换分支会重新判定。
 - **思考与回答分开呈现**：`layout/view_reasoning.xml` 的披露头与正文是两块，正文默认 `visibility="gone"`，
   由 `ChatViewState.expandedReasoning`（messageId 集合）驱动。展开态只活在页面会话里，不落库、不跨重启，
   也**不按 adapter position 记忆**——列表每次读都会重建，按 id 键才不会把 A 的展开态串到 B。
+- **回答帧只在 UI 投影**：`ChatScreen` 只识别消息开头的完整 `<treelearn_reasoning>…</treelearn_reasoning>` 与
+  `<treelearn_answer>…</treelearn_answer>` 结构；回答正文进入答案视图，推理仅在思考开启时进入既有披露区。
+  未闭合的推理帧不会落入答案；普通行内标签和代码示例保持原文。此规则只约束 Android 展示，不定义 provider 输出协议，
+  也不改写持久化内容或历史上下文编码。
 - **复制全文按「思考过程 + 最终回答」组合**：格式只定义在一处（`ChatMessage.copyText`），两个小标题来自
   `strings.xml` 的 `chat_copy_reasoning` / `chat_copy_answer`；没有 reasoning 时复制内容就是回答本身。
 - **推荐条只挂「最新且稳定」的那条回答**：读到的 `recommendationsRevisionId` 必须等于最新一行的
   `activeRevisionId` 且该行 stable。于是追问之后、生成中、切版之后三种情况都由同一条规则自动隐藏（BASE-16），
   没有第二处判断。
+- **发送接受后即时可见并收起输入法**：命令接受后先在后台从权威存储读回用户问题，再清草稿并请求宿主隐藏软键盘；后续读回继续刷新生成状态，不在 ViewState 乐观追加，避免重复消息。拒绝时保留草稿与既有提示。
 - **失败保留草稿与引用**：只有 accepted 才清，和首页输入框同一条规则。
 - **引用真正进请求（T-044，2026-09-22）**：`messages.quoted_text` 里的那句话会随请求发给模型——它编进
   **当前问题**的正文（`<treelearn_quote>` 信封、换行、转义后的引文、换行、`</treelearn_quote>`、换行、问题原文），
@@ -809,8 +835,9 @@ View 自己不持内容。
   复制等真正动作才关闭主菜单并结束平台选择；「全选」只扩展回答视图的当前选区并保留菜单，便于继续从「复制」格执行复制。
   底部引用动作读取回答视图当前的同一段选区。
 - **「子分支」弹层列出的是这条回答直接分出、且未归档的子分支（T-041）**：分支在点开之前就读好了，
-  `ChatSink.openChildren` 把列表一起交出来，所以弹层在 UI 线程上不读库；点一行经 `ChatSink.openBranch` 进入该分支，
-  这条路径与画布/首页进入分支是同一条。本轮把原先那句「子分支列表还没接」的占位文案从 `strings.xml` 整体删掉了，
+  `ChatSink.openChildren` 把列表一起交出来，所以弹层在 UI 线程上不读库；点一行经当前 `ChatPresenter.onChildBranchChosen`
+  打开子分支；聊天页顶部返回随后按其 `parentBranchId` 回到直接父级。弹层按窗口可用空间优先显示在回答操作栏上方，卡片内滚动并夹紧到安全边距，
+  避免靠近底部输入框时内容被裁切；行内保留分支标题、未读状态和进入箭头。本轮把原先那句「子分支列表还没接」的占位文案从 `strings.xml` 整体删掉了，
   `android/` 下不再有任何形式的引用（本句刻意不写出它的字符串名与原文，否则等于又把它引回来一次；
   那条断言与扫描输出见 `artifacts/evidence/T-041-scans.txt`）。
 - **按钮叫「新建主题」，数据仍叫「分叉」**：`chat_act_fork`、`chat_fork_title`、`cd_act_fork` 与
@@ -834,8 +861,9 @@ View 自己不持内容。
   2. **已结束但没有稳定版本的尝试读不到半截正文**：这种位置读回为 `FAILED`、正文为空。终态尝试的 partial
      文本在本 build 没有带调用方的查询能读到，而现造一条就是给同一批行开第二条读路径；`FAILED` 的整个
      作用正是「不让半截回答被当成回答」。
-  3. **`fork` 不发起生成**：新建主题只建子分支与它的出生快照，子分支的第一问由学习者自己提（父分支的自动生成
-     属 T-039 范围）；并且只允许从「显示着稳定版本」的 AI 位置新建主题，与 `ChatMessage.canFork()` 同条件。
+  3. **`fork` 的生成边界**：`ChatWiring.fork` 只创建子分支与出生快照；从推荐问题入口创建的子分支由宿主在
+     新 Presenter 就绪后自动发送该问题，普通文本选区 fork 仍只创建分支、不自动发送；并且只允许从「显示着稳定
+     版本」的 AI 位置新建主题，与 `ChatMessage.canFork()` 同条件。
 - **T-041 的规模超了 500 行硬上限**：本切片 **544 非空非注释生产行**（新增 9 个文件 502 行 + 既有文件改动 42 行，
   判定值以外的物理行为 727 行；命令与逐文件明细见 `artifacts/evidence/T-041-sizing.txt`）。口径按
   `.trae/rules/harness-tasks.md` 第 45 行「新增文件按全部非空非注释行，既有文件只按本次改动行」。
@@ -964,19 +992,20 @@ View 自己不持内容。
 - **规模超硬上限**：本切片 **646 非空非注释生产行**（新增 531 + 改动 115，`artifacts/evidence/T-039-sizing-final.txt`），
   超 200 行软上限、也超 500 行硬上限；**没有用户批准的规模例外**，属待裁定偏差，不得当成已批准例外引用。
 
-## 应用层入口索引（`:app`）—— 底部标签栏与学习库（T-052）
+## 应用层入口索引（`:app`）—— 两项底部导航与设置入口
 
-V3.2 PRD 6.2.16 把 主页 / 学习库 / 设置 并列为一级入口，并给出一个常驻底部标签栏。此前 `MainActivity`
-只有「一个 Activity、一个宿主」，一级目的地由页面自身充当；本节记录这一层外壳、学习库屏，以及它们各自
-**唯一的那处判定**。
+V3.2 PRD 6.2.16 原先把主页 / 学习库 / 设置并列为一级入口。2026-10-09 用户确认设置改由首页右上角齿轮
+打开，不再占据底部 tab；当前底部只保留主页与学习库，设置是返回调用来源的辅助页面。此前 `MainActivity`
+只有「一个 Activity、一个宿主」，本节记录外壳、学习库屏与设置入口的**唯一判定**。
 
 | 类型 | 职责 | 关键不变量 |
 | :--- | :--- | :--- |
 | `res/layout/activity_main.xml` | 应用外壳的盒子：`main_drawer_root` 先放 `shell_backdrop`，再放 `LinearLayout(main_root)`；后者包含 `shell_host`（`0dp` + `weight=1`）与 `<include layout="@layout/screen_tab_bar"/>` | 纸纹与标签栏都是**外壳的一部分**，不是任何屏幕画的；`R.id.main_root`、`R.id.shell_backdrop` 与 `R.id.home_draft` 都仍在（`AppLaunchInstrumentedTest` 依赖） |
-| `res/layout/screen_tab_bar.xml` + `layout-sw600dp/` 镜像 | 三个标签项 `tab_home` / `tab_library` / `tab_settings`，每项 `minHeight=touch_min`，带 24dp 图标与标签 | 三项在同一个布局里**各自命名 id**（`tab_home_icon` 等）：三个 `tab_icon` 是重复 id，lint 在 `abortOnError` 下会当场让 `check` 失败；图标与文案仍留在声明式布局里，没有搬到代码 |
-| `MainActivity.swap(View)` | 换屏，并且是**唯一**判定标签栏显隐的地方 | 判定读的是外壳自己刚换上去的那块屏幕（`screen == homeScreen \|\| screen == libraryScreen \|\| (screen == settingsScreen && settingsIsAFrontRoom())`），所以栏与屏不可能互相不一致；让每个屏自己定位一次标签栏，就是在第一次有人忘记时开始漂移 |
-| `MainActivity.showTab(Tab)` / `selectTab(Tab)` / `markTab(...)` | 一级目的地按名称进入；`currentTab` 是「一级现在站在哪」的唯一记录 | `showTab` 是**除点标签之外唯一移动一级的方式**，二级屏只读它、不写它；`markTab` 同时给 label 上色与给 icon 上 tint（`tl_green_deep` / `tl_ink3`），只改一个就是半选中 |
-| `MainActivity.settingsIsAFrontRoom()` | 「设置是不是一级目的地」这一条规则的唯一实现 | 两个读者（`showSettings()` 与 `swap()`）共用它；从对话里进设置是**旁路**，一级仍停在对话，所以返回回到那段对话 |
+| `res/layout/screen_tab_bar.xml` + `layout-sw600dp/` 镜像 | 两个标签项 `tab_home` / `tab_library`，每项 `minHeight=touch_min`，带 24dp 图标与标签 | 两项在同一个布局里**各自命名 id**（`tab_home_icon`、`tab_library_icon`）；图标与文案仍留在声明式布局里 |
+| `MainActivity.swap(View)` | 换屏，并且是**唯一**判定标签栏显隐的地方 | 只有主页与学习库显示底栏；设置、聊天、画布及其它辅助页面隐藏底栏 |
+| `MainActivity.showTab(Tab)` / `selectTab(Tab)` / `markTab(...)` | 两个底部目的地按名称进入；`currentTab` 是主页或学习库的唯一记录 | 二级屏保留此前 tab；`markTab` 同时给 label 上色与给 icon 上 tint（`tl_green_deep` / `tl_ink3`），只改一个就是半选中 |
+| `HomeScreen.home_settings_button` / `MainActivity.showSettings()` | 首页右上角齿轮打开设置根页 | 设置根页不设为当前 tab；从首页打开后返回首页，从聊天打开后返回原聊天；缺少 Key 的引导仍走同一设置页 |
+| `SettingsBackRoute.afterBack(String)` | 设置页返回目标的唯一判定 | 当前有聊天分支时返回聊天，否则返回首页；设置页不再通过底部 tab 导航 |
 | `library.LibraryData` / `LibrarySink` / `LibraryViewState` / `LibraryPresenter` | 学习库的读端口、出口、可绘制状态与全部判定 | 屏幕**不做任何判定**：能否列出、在哪个相位、每行说什么，全部来自一个不可变 `LibraryViewState`；相位 LOADING / READY / EMPTY / ERROR，空表是 EMPTY 而不是错误 |
 | `wiring.SqliteLibraryStore` | 学习库的真实数据路径：把连接交给 `TopicDao.listOverviews` | **只读**：本切片不加表、不加列、不加 migration、没有写方法可误用，所以它连事务执行器都不需要——那样的构造只可能为了一次裸写 |
 | `wiring.LibraryWiring` | `TopicDao.Overview` → `LibraryViewState.Row` 的映射 | 树名只由 `BranchHeading.of(存下来的标题, 首个用户问题)` 给出，与首页卡片、对话标题**同一个实现**，所以一个主题不可能在库里叫另一个名字 |
@@ -986,10 +1015,9 @@ V3.2 PRD 6.2.16 把 主页 / 学习库 / 设置 并列为一级入口，并给�
 
 **这一层的交互事实：**
 
-- **标签栏显隐只有一条规则**：一级目的地（主页 / 学习库 / 作为一级的设置）显示，二级屏（对话、画布、导航页、
-  作为旁路的设置）隐藏；判定集中在 `swap()`，屏幕不参与。
-- **二级屏返回落回发起它的标签**：对话页的返回走 `showTab(currentTab)`，画布与导航页各自回到打开它的
-  那段对话。从主页进对话返回落主页、从学习库进对话（再到导航页）逐层返回落学习库，两条路都各有真机用例。
+- **标签栏显隐只有一条规则**：主页 / 学习库显示；设置、对话、画布与导航页隐藏；判定集中在 `swap()`，屏幕不参与。
+- **设置入口与返回**：首页右上角齿轮打开设置；从聊天内的齿轮或缺 Key 引导进入时，返回仍回到原聊天。
+- **系统返回与聊天页顶部返回分工不同**：对话页系统返回仍走 `showTab(currentTab)`；顶部返回按 T-115 沿分支父级逐层上行，根分支关闭后恢复打开聊天的来源页面。画布与导航页自己的返回仍回到打开它们的对话；重建来源页面时不保留临时视图状态。
 - **学习库的行点击复用同一条开门路径**：行 → `LibraryPresenter.onTopicTapped` → `ChatSink.openBranch(resumeBranchId)`
   → `MainActivity.showChat(branchId)`，与首页列表项点开的是同一个方法，不是第二份「怎么打开一段对话」。
 - **每次进学习库都是新读一次**：屏幕与 presenter 按访问构造、离开即丢，所以在对话里新建的主题下一次看就在
@@ -1046,7 +1074,7 @@ V3.2 PRD 6.2.16 把 主页 / 学习库 / 设置 并列为一级入口，并给�
 
 来源为 Figma 新稿 `src/icons.tsx`（25 枚线性图标）。工程按领地分片登记：
 
-- **052**：`ic_tab_home / ic_tab_library / ic_tab_settings`（底部标签栏）。
+- **052**：`ic_tab_home / ic_tab_library`（底部标签栏）；首页设置按钮复用 `ic_chat_gear`。
 - **056（导航、列表与设置）**：`ic_nav_back / ic_nav_chat / ic_nav_tree / ic_nav_more / ic_nav_restore`，
   用于 `screen_navigation_body`、`item_navigation_row`、`screen_settings_body`。
 - **057（对话与动作）**：`ic_action_quote / ic_action_copy / ic_action_fork`、

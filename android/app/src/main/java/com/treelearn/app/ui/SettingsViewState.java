@@ -5,7 +5,7 @@ package com.treelearn.app.ui;
  *
  * <p>Model and thinking are deliberately absent: V3.1 6.2.18 point 2 puts that switch inside the
  * question input, where it is visible next to the question it applies to, and says the settings page
- * does not offer it. This screen owns the credential and the data-boundary note.
+ * does not offer it. This screen owns credential status and settings navigation.
  */
 public final class SettingsViewState {
 

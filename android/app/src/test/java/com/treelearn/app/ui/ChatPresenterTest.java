@@ -8,6 +8,9 @@ import static org.junit.Assert.assertTrue;
 
 import com.treelearn.core.domain.Annotation;
 import com.treelearn.core.domain.AnswerRevision;
+import com.treelearn.core.domain.Branch;
+import com.treelearn.core.domain.BranchAnchor;
+import com.treelearn.core.domain.BranchSource;
 import com.treelearn.core.domain.GenerationModel;
 
 import java.util.Arrays;
@@ -186,6 +189,7 @@ public final class ChatPresenterTest {
 
     @Test
     public void copyHandsTheWholeAnswerToTheSinkAndNothingElse() {
+        settings.thinking = true;
         data.snapshot = conversation();
 
         ChatPresenter presenter = presenter();
@@ -291,6 +295,87 @@ public final class ChatPresenterTest {
         assertEquals("the read that follows an accepted send is the second one", 2, data.reads);
     }
 
+    @Test
+    public void anAcceptedSendShowsTheStoredQuestionBeforeTheNextBackgroundRead() {
+        data.snapshot = conversation();
+        commands.sendResult = ChatCommandResult.ran(ChatTestDoubles.OP);
+        ChatTestDoubles.QueueingExecutor deferred = new ChatTestDoubles.QueueingExecutor();
+        String question = "why did my question disappear";
+        commands.afterAcceptedSend = () -> data.snapshot = ChatTestDoubles.read(
+                "Transformer attention", ChatTestDoubles.messages(
+                        ChatTestDoubles.ask(ChatTestDoubles.M_ASK, ChatTestDoubles.QUESTION),
+                        ChatTestDoubles.stableAnswer(ChatTestDoubles.M_ANSWER,
+                                ChatTestDoubles.ANSWER),
+                        ChatTestDoubles.ask(ChatTestDoubles.M_ASK_2, question)),
+                Collections.<Recommendation>emptyList(), "");
+
+        ChatPresenter presenter = new ChatPresenter(sink, new TestDoubles.InlineUi(), deferred, key,
+                data, commands, settings, LABELS, ChatTestDoubles.BRANCH,
+                new ChatTestDoubles.NoPositionStore());
+        presenter.start();
+        deferred.drain();
+        presenter.onDraftChanged(question);
+        presenter.onSend();
+        boolean sendFinished = deferred.runNext();
+        ChatViewState beforeRead = sink.last();
+        deferred.drain();
+
+        assertTrue(sendFinished);
+        assertEquals(3, beforeRead.messages.size());
+        assertEquals(ChatTestDoubles.M_ASK_2, beforeRead.messages.get(2).messageId);
+        assertEquals(question, beforeRead.messages.get(2).text);
+    }
+
+    @Test
+    public void anAcceptedQuestionRemainsVisibleWhenGenerationFailsBeforePublish() {
+        data.snapshot = conversation();
+        commands.sendResult = ChatCommandResult.ran(ChatTestDoubles.OP);
+        ChatTestDoubles.QueueingExecutor deferred = new ChatTestDoubles.QueueingExecutor();
+        String question = "why did generation fail";
+        commands.afterAcceptedSend = () -> data.snapshot = ChatTestDoubles.read(
+                "Transformer attention", ChatTestDoubles.messages(
+                        ChatTestDoubles.ask(ChatTestDoubles.M_ASK, ChatTestDoubles.QUESTION),
+                        ChatTestDoubles.stableAnswer(ChatTestDoubles.M_ANSWER,
+                                ChatTestDoubles.ANSWER),
+                        ChatTestDoubles.ask(ChatTestDoubles.M_ASK_2, question),
+                        ChatMessage.ai(ChatTestDoubles.M_ANSWER_2, "partial answer",
+                                "partial reasoning", ChatMessage.Status.FAILED,
+                                ChatMessage.Phase.ANSWER, "", 0, 0, false, 2L)),
+                Collections.<Recommendation>emptyList(), "");
+
+        ChatPresenter presenter = new ChatPresenter(sink, new TestDoubles.InlineUi(), deferred, key,
+                data, commands, settings, LABELS, ChatTestDoubles.BRANCH,
+                new ChatTestDoubles.NoPositionStore());
+        presenter.start();
+        deferred.drain();
+        presenter.onDraftChanged(question);
+        presenter.onSend();
+        boolean sendFinished = deferred.runNext();
+        ChatViewState acceptedWithFailure = sink.last();
+
+        assertTrue(sendFinished);
+        assertEquals(4, acceptedWithFailure.messages.size());
+        assertEquals(ChatTestDoubles.M_ASK_2, acceptedWithFailure.messages.get(2).messageId);
+        assertEquals(question, acceptedWithFailure.messages.get(2).text);
+        assertTrue(acceptedWithFailure.messages.get(3).isFailed());
+    }
+
+    @Test
+    public void anAcceptedSendRequestsKeyboardDismissalButARefusedSendDoesNot() {
+        data.snapshot = conversation();
+        ChatPresenter presenter = presenter();
+        presenter.start();
+        presenter.onDraftChanged("why is it scaled");
+        presenter.onSend();
+
+        assertEquals(1, sink.keyboardDismissals);
+
+        commands.sendResult = ChatCommandResult.refused(HomeViewState.Notice.NETWORK_INTERRUPTED);
+        presenter.onDraftChanged("keep this draft");
+        presenter.onSend();
+
+        assertEquals(1, sink.keyboardDismissals);
+    }
     @Test
     public void aSendInFlightIsNotStartedTwice() {
         data.snapshot = conversation();
@@ -574,6 +659,70 @@ public final class ChatPresenterTest {
     }
 
     @Test
+    public void aRecommendationForkCarriesItsQuestionIntoTheNewBranch() {
+        data.snapshot = withStrip(recommendation(), ChatTestDoubles.REV_1);
+
+        ChatPresenter presenter = presenter();
+        presenter.start();
+        presenter.onRecommendationForked("how does temperature affect it");
+
+        assertEquals(Collections.singletonList("how does temperature affect it"),
+                sink.branchQuestions);
+        assertEquals(Collections.singletonList("fork"), commands.calls);
+    }
+
+    @Test
+    public void aRejectedRecommendationForkDoesNotOpenABranchOrSendTheQuestion() {
+        data.snapshot = withStrip(recommendation(), ChatTestDoubles.REV_1);
+        commands.forkResult = ChatCommandResult.refused(HomeViewState.Notice.STORAGE);
+
+        ChatPresenter presenter = presenter();
+        presenter.start();
+        presenter.onRecommendationForked("how does temperature affect it");
+
+        assertEquals(Collections.singletonList("fork"), commands.calls);
+        assertTrue(sink.branchesOpened.isEmpty());
+        assertTrue(sink.branchQuestions.isEmpty());
+        assertFalse(commands.calls.contains("send"));
+    }
+
+    @Test
+    public void aBlankRecommendationQuestionDoesNotCreateABranch() {
+        data.snapshot = withStrip(recommendation(), ChatTestDoubles.REV_1);
+
+        ChatPresenter presenter = presenter();
+        presenter.start();
+        presenter.onRecommendationForked("   ");
+
+        assertTrue(commands.calls.isEmpty());
+        assertTrue(sink.branchesOpened.isEmpty());
+        assertTrue(sink.branchQuestions.isEmpty());
+    }
+
+    @Test
+    public void aNewBranchCanAutoSendItsInitialQuestionThroughTheNormalSendPath() {
+        data.snapshot = conversation();
+
+        ChatPresenter presenter = presenter();
+        presenter.start("how does temperature affect it");
+
+        assertEquals(Collections.singletonList("send"), commands.calls);
+        assertEquals("how does temperature affect it", commands.lastText);
+    }
+
+    @Test
+    public void aRejectedInitialQuestionStaysInTheNewBranchDraft() {
+        data.snapshot = conversation();
+        commands.sendResult = ChatCommandResult.refused(HomeViewState.Notice.STORAGE);
+
+        ChatPresenter presenter = presenter();
+        presenter.start("how does temperature affect it");
+
+        assertEquals("how does temperature affect it", sink.last().draft);
+        assertEquals(HomeViewState.Notice.STORAGE, sink.last().notice);
+    }
+
+    @Test
     public void anEmptyChildReadReportsAVisibleFailureInsteadOfDoingNothing() {
         data.snapshot = conversation();
         data.children = Collections.emptyList();
@@ -734,12 +883,160 @@ public final class ChatPresenterTest {
         assertEquals(ChatTestDoubles.ANSWER, commands.lastQuote);
         assertEquals(0, commands.lastForkStart);
         assertEquals(ChatTestDoubles.ANSWER.length(), commands.lastForkEnd);
+        assertTrue(sink.branchQuestions.isEmpty());
+        assertFalse(commands.calls.contains("send"));
+    }
+
+    @Test
+    public void backFromExternallyOpenedBranchReturnsToItsParent() {
+        String externalBranchId = "88888888-8888-4888-8888-888888888888";
+        Branch externalBranch = branch(externalBranchId, ChatTestDoubles.PARENT_BRANCH,
+                1_700_000_000_001L);
+        data.snapshot = ChatTestDoubles.withBranch(
+                Collections.<ChatMessage>emptyList(), externalBranch, null);
+
+        ChatPresenter presenter = presenter(externalBranchId);
+        presenter.start();
+        presenter.onBackPressed();
+
+        assertEquals(Collections.singletonList(ChatTestDoubles.PARENT_BRANCH), sink.branchesOpened);
+        assertEquals(0, sink.closed);
+    }
+
+    @Test
+    public void backAfterOpeningForkReturnsToItsTreeParent() {
+        String visibleBranchId = ChatTestDoubles.BRANCH;
+        Branch visibleBranch = branch(visibleBranchId, ChatTestDoubles.PARENT_BRANCH,
+                1_700_000_000_002L);
+        data.snapshot = ChatTestDoubles.withBranch(Arrays.asList(
+                ChatTestDoubles.ask(ChatTestDoubles.M_ASK, ChatTestDoubles.QUESTION),
+                ChatTestDoubles.stableAnswer(ChatTestDoubles.M_ANSWER,
+                        ChatTestDoubles.ANSWER)), visibleBranch, null);
+
+        ChatPresenter presenter = presenter(visibleBranchId);
+        presenter.start();
+        presenter.onForkPressed(ChatTestDoubles.M_ANSWER, "", 0, 0);
+
+        String unrelatedTreeParent = "99999999-9999-4999-8999-999999999999";
+        data.snapshot = ChatTestDoubles.withBranch(Collections.<ChatMessage>emptyList(),
+                branch(ChatTestDoubles.BRANCH_2, unrelatedTreeParent, 1_700_000_000_003L), null);
+        ChatPresenter forkPresenter = presenter(ChatTestDoubles.BRANCH_2);
+        forkPresenter.start();
+        forkPresenter.onBackPressed();
+
+        assertEquals(Arrays.asList(ChatTestDoubles.BRANCH_2, unrelatedTreeParent),
+                sink.branchesOpened);
+        assertEquals(0, sink.closed);
+    }
+
+    @Test
+    public void backAfterSelectingAChildReturnsToItsDirectParent() {
+        String visibleBranchId = ChatTestDoubles.BRANCH;
+        String childBranchId = "66666666-6666-4666-8666-666666666666";
+        data.snapshot = ChatTestDoubles.withBranch(Collections.<ChatMessage>emptyList(),
+                branch(visibleBranchId, ChatTestDoubles.PARENT_BRANCH, 1_700_000_000_010L), null);
+
+        ChatPresenter presenter = presenter(visibleBranchId);
+        presenter.start();
+        presenter.onChildBranchChosen(childBranchId);
+
+        data.snapshot = ChatTestDoubles.withBranch(Collections.<ChatMessage>emptyList(),
+                branch(childBranchId, visibleBranchId, 1_700_000_000_011L), null);
+        ChatPresenter childPresenter = presenter(childBranchId);
+        childPresenter.start();
+        childPresenter.onBackPressed();
+
+        assertEquals(Arrays.asList(childBranchId, visibleBranchId), sink.branchesOpened);
+        assertEquals(0, sink.closed);
+    }
+
+    @Test
+    public void backAfterSelectingASiblingReturnsToTheirCommonParent() {
+        String visibleBranchId = "66666666-6666-4666-8666-666666666666";
+        String selectedSiblingId = "77777777-7777-4777-8777-777777777777";
+        data.snapshot = ChatTestDoubles.withBranch(Collections.<ChatMessage>emptyList(),
+                branch(visibleBranchId, ChatTestDoubles.PARENT_BRANCH, 1_700_000_000_020L), null);
+
+        ChatPresenter presenter = presenter(visibleBranchId);
+        presenter.start();
+        presenter.onChildBranchChosen(selectedSiblingId);
+
+        data.snapshot = ChatTestDoubles.withBranch(Collections.<ChatMessage>emptyList(),
+                branch(selectedSiblingId, ChatTestDoubles.PARENT_BRANCH, 1_700_000_000_021L), null);
+        ChatPresenter siblingPresenter = presenter(selectedSiblingId);
+        siblingPresenter.start();
+        siblingPresenter.onBackPressed();
+
+        assertEquals(Arrays.asList(selectedSiblingId, ChatTestDoubles.PARENT_BRANCH),
+                sink.branchesOpened);
+        assertEquals(0, sink.closed);
+    }
+
+    @Test
+    public void nestedBranchReturnsFollowEachParentUntilTheRootCloses() {
+        String firstBranchId = "66666666-6666-4666-8666-666666666666";
+        String secondBranchId = "77777777-7777-4777-8777-777777777777";
+        String thirdBranchId = "88888888-8888-4888-8888-888888888888";
+        data.snapshot = ChatTestDoubles.withBranch(Collections.<ChatMessage>emptyList(),
+                branch(firstBranchId, ChatTestDoubles.PARENT_BRANCH, 1_700_000_000_030L), null);
+
+        ChatPresenter first = presenter(firstBranchId);
+        first.start();
+        first.onChildBranchChosen(secondBranchId);
+
+        data.snapshot = ChatTestDoubles.withBranch(Collections.<ChatMessage>emptyList(),
+                branch(secondBranchId, firstBranchId, 1_700_000_000_031L), null);
+        ChatPresenter second = presenter(secondBranchId);
+        second.start();
+        second.onChildBranchChosen(thirdBranchId);
+
+        data.snapshot = ChatTestDoubles.withBranch(Collections.<ChatMessage>emptyList(),
+                branch(thirdBranchId, secondBranchId, 1_700_000_000_032L), null);
+        ChatPresenter third = presenter(thirdBranchId);
+        third.start();
+        third.onBackPressed();
+
+        assertEquals(Arrays.asList(secondBranchId, thirdBranchId, secondBranchId), sink.branchesOpened);
+        data.snapshot = ChatTestDoubles.withBranch(Collections.<ChatMessage>emptyList(),
+                branch(secondBranchId, firstBranchId, 1_700_000_000_031L), null);
+        ChatPresenter returnedSecond = presenter(secondBranchId);
+        returnedSecond.start();
+        returnedSecond.onBackPressed();
+
+        assertEquals(firstBranchId, sink.branchesOpened.get(3));
+        data.snapshot = ChatTestDoubles.withBranch(Collections.<ChatMessage>emptyList(),
+                branch(firstBranchId, ChatTestDoubles.PARENT_BRANCH, 1_700_000_000_030L), null);
+        ChatPresenter returnedFirst = presenter(firstBranchId);
+        returnedFirst.start();
+        returnedFirst.onBackPressed();
+
+        assertEquals(Arrays.asList(secondBranchId, thirdBranchId, secondBranchId, firstBranchId,
+                ChatTestDoubles.PARENT_BRANCH), sink.branchesOpened);
+        data.snapshot = ChatTestDoubles.withBranch(Collections.<ChatMessage>emptyList(),
+                branch(ChatTestDoubles.PARENT_BRANCH, null, 1_700_000_000_029L), null);
+        ChatPresenter returnedRoot = presenter(ChatTestDoubles.PARENT_BRANCH);
+        returnedRoot.start();
+        returnedRoot.onBackPressed();
+        assertEquals(1, sink.closed);
     }
 
     private ChatPresenter presenter() {
+        return presenter(ChatTestDoubles.BRANCH);
+    }
+
+    private ChatPresenter presenter(String branchId) {
         return new ChatPresenter(sink, new TestDoubles.InlineUi(), new TestDoubles.InlineExecutor(),
-                key, data, commands, settings, LABELS, ChatTestDoubles.BRANCH,
-                new ChatTestDoubles.NoPositionStore());
+                key, data, commands, settings, LABELS, branchId,
+                new ChatTestDoubles.NoPositionStore(), ChatDraftStore.NOOP, null, null, null, null,
+                null);
+    }
+
+    private static Branch branch(String branchId, String parentBranchId, long createdAt) {
+        BranchSource source = parentBranchId == null ? null : BranchSource.restore(parentBranchId,
+                ChatTestDoubles.M_ANSWER, ChatTestDoubles.REV_1, BranchAnchor.wholeAnswer(),
+                ChatTestDoubles.BIRTH_SNAPSHOT);
+        return Branch.restore(branchId, ChatTestDoubles.TOPIC, parentBranchId,
+                source, null, createdAt, createdAt, 0L, 0L, false, null);
     }
 
     private static ChatData.Snapshot conversation() {

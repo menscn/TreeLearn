@@ -32,6 +32,8 @@ public interface ChatActions {
      */
     void onFollowLatestPressed();
 
+    void onFollowLatestPaused();
+
     /** Opens or closes the reasoning block of one answer. */
     void onReasoningToggled(String messageId);
 

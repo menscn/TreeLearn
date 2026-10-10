@@ -1,0 +1,40 @@
+CapturedAt=2026-10-01T21:39:38.8920632+08:00
+Task=T-2026-10-01-117
+WorkingDirectory=D:\Project\Android\Treelearn
+Command=adb install app-debug.apk; adb install app-debug-androidTest.apk; adb am instrument -w -e class com.treelearn.app.ChatScreenFollowModeInstrumentedTest com.treelearn.test/androidx.test.runner.AndroidJUnitRunner
+Mode=API 36 AVD emulator-5558; both APKs rebuilt immediately before installation
+INSTALL_APP
+Performing Streamed Install
+Success
+INSTALL_APP_EXITCODE=0
+INSTALL_TEST
+Performing Streamed Install
+Success
+INSTALL_TEST_EXITCODE=0
+INSTRUMENTATION
+
+com.treelearn.app.ChatScreenFollowModeInstrumentedTest:....
+Error in switchingBranchesResetsTheOverflowPauseForTheNewAnswer(com.treelearn.app.ChatScreenFollowModeInstrumentedTest):
+java.lang.AssertionError: a new branch gets its own overflow pause expected:<2> but was:<3>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:647)
+	at com.treelearn.app.ChatScreenFollowModeInstrumentedTest.switchingBranchesResetsTheOverflowPauseForTheNewAnswer(ChatScreenFollowModeInstrumentedTest.java:162)
+
+
+Time: 16.114
+There was 1 failure:
+1) switchingBranchesResetsTheOverflowPauseForTheNewAnswer(com.treelearn.app.ChatScreenFollowModeInstrumentedTest)
+java.lang.AssertionError: a new branch gets its own overflow pause expected:<2> but was:<3>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:647)
+	at com.treelearn.app.ChatScreenFollowModeInstrumentedTest.switchingBranchesResetsTheOverflowPauseForTheNewAnswer(ChatScreenFollowModeInstrumentedTest.java:162)
+
+FAILURES!!!
+Tests run: 5,  Failures: 1
+
+
+ADB_EXITCODE=0
+JUnitVerdictExitCode=1
+CompletedAt=2026-10-01T21:40:09.7191176+08:00
