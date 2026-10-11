@@ -4,7 +4,7 @@ id: T-2026-10-10-048
 title: 前端已读/阅读位置/未读消费
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-10-treelearn-local-web-edition-001.md
 requirements_confirmed: true
 generated_by: leader
@@ -104,6 +104,7 @@ Follow [code-document alignment](../rules/documentation.md).
 ## Verification report
 
 - Verdict: PASS（实现者自检全绿；独立 verifier 终验待统一复核）
+- Independent verifier re-check (2026-10-11, READONLY subagent, evidence-free re-runs, merged pass covering T-045..049): PASS——后端 :check 复跑 exit 0（284 PASSED / 0 FAILED + checkstyle 0 error）、前端 test 180/180 + lint + 守卫自测/扫描 + build 全 exit 0、validate_tasks.py errors=0（warnings=33 软预算）；证据交叉核对一致（045 red 11 败→green 11/11、047 red 8/9→green 9/9、048-red 回退实录 exit 1）；代码抽查（树布局装配/批注判定/划选映射/Markdown 兼容）逐条符合；E2E 证据脱敏确认（无 Key 明文）。非阻塞发现：046-guard 过程证据含已修复的旧拦截；1 例 waitFor 偶发超时复跑过（Gradle 并行抢 CPU）；CELL 划选/手势缩放/浏览器视觉复核为遗留项。
 - Evidence: `artifacts/evidence/T-2026-10-10-048-{test,lint,build}.txt`。
 - Changed/deleted assertion rationale and equivalent behavior coverage: 无删除既有断言。
 - Gaps: 阅读位置进入时恢复（Conversation.readingAnchor 滚动定位）未做
