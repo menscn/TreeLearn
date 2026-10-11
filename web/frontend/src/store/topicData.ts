@@ -2,7 +2,7 @@
 // （api.md §6.2 主题详情、§6.3 分支树/消息/追问、§6.4 取消/重试）。变更类请求一律带
 // 客户端生成的 `commandId`（api.md §4）。响应按契约类型解码，形状漂移由 fixtures 测试守。
 import { api } from '../api/client';
-import type { Branch, BranchTree, TreeLayoutResponse, Conversation, Message, Operation, Topic, TurnAccepted } from '../api/types';
+import type { Branch, BranchTree, TreeLayoutResponse, Conversation, Message, Operation, ReadingAnchor, Topic, TurnAccepted } from '../api/types';
 
 export function newCommandId(): string {
   const webCrypto = globalThis.crypto;
@@ -19,6 +19,22 @@ export function loadBranchTree(topicId: string): Promise<BranchTree> {
 }
 
 /** 契约 §6.11：C 树图几何（服务端按默认 scale=1.0 计算；currentBranchId 不在树内时服务端回落根分支）。 */
+/** 契约 §6.3：`seen` 只前进（回退/越界 409 `SEQUENCE_OUT_OF_ORDER`）。 */
+export function markBranchSeen(branchId: string, seenThroughSequence: number): Promise<unknown> {
+  return api.post(`/branches/${branchId}/seen`, { commandId: newCommandId(), seenThroughSequence });
+}
+
+/** 契约 §6.3：阅读位置（语义锚点）；revisionId 为 null 表示跟随当前位置显示的版本。 */
+export function saveReadingPosition(branchId: string, anchor: ReadingAnchor): Promise<unknown> {
+  return api.put(`/branches/${branchId}/reading-position`, {
+    commandId: newCommandId(),
+    messageId: anchor.messageId,
+    revisionId: anchor.revisionId,
+    listItemOffset: anchor.listItemOffset,
+    viewportOffset: anchor.viewportOffset,
+  });
+}
+
 export function loadTreeLayout(topicId: string, currentBranchId: string | null): Promise<TreeLayoutResponse> {
   const query = currentBranchId === null ? '' : `?currentBranchId=${encodeURIComponent(currentBranchId)}`;
   return api.get<TreeLayoutResponse>(`/topics/${topicId}/tree-layout${query}`);

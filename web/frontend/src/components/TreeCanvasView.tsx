@@ -118,7 +118,10 @@ export function TreeCanvasView({ topicId, currentBranchId, onNavigate }: TreeCan
               </g>
             );
           })}
-          {labels.map((label) => (
+          {labels.map((label) => {
+            const owner = branches.find((branch) => branch.branchId === label.branchId);
+            const unread = owner?.ownUnread ?? 0;
+            return (
             <g key={`label-${label.branchId}`}>
               <line
                 x1={pad2(label.leaderX)}
@@ -159,8 +162,28 @@ export function TreeCanvasView({ topicId, currentBranchId, onNavigate }: TreeCan
                   {label.summary}
                 </text>
               ) : null}
+              {unread > 0 ? (
+                <g data-testid={`unread-badge-${label.branchId}`}>
+                  <circle
+                    cx={pad2(label.x + label.width - 9)}
+                    cy={pad2(label.y + 9)}
+                    r={pad2(8)}
+                    fill={PATH_CURRENT}
+                  />
+                  <text
+                    x={pad2(label.x + label.width - 9)}
+                    y={pad2(label.y + 12.5)}
+                    textAnchor="middle"
+                    fontSize={10}
+                    fill={LABEL_FILL}
+                  >
+                    {unread}
+                  </text>
+                </g>
+              ) : null}
             </g>
-          ))}
+            );
+          })}
           {hits.map((hit) => {
             const label = titleById.get(hit.branchId);
             const name = label !== undefined && label.title !== '' ? label.title : hit.branchId;

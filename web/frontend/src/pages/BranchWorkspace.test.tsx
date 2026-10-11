@@ -74,6 +74,7 @@ interface Handlers {
   send?: () => Response;
   resolve?: () => unknown;
   tree?: () => Response;
+  branchTree?: () => Response;
 }
 interface Call { method: string; url: string; body: Record<string, unknown> | null }
 
@@ -84,7 +85,7 @@ function installFetch(handlers: Handlers = {}): Call[] {
     const method = (init?.method ?? 'GET').toUpperCase();
     calls.push({ method, url, body: typeof init?.body === 'string' ? JSON.parse(init.body) : null });
     if (method === 'GET' && url === '/api/topics/t1') return handlers.topic ? handlers.topic() : json(TOPIC);
-    if (method === 'GET' && url === '/api/topics/t1/branches') return json(TREE);
+    if (method === 'GET' && url === '/api/topics/t1/branches') return handlers.branchTree ? handlers.branchTree() : json(TREE);
     if (method === 'GET' && url.startsWith('/api/topics/t1/tree-layout')) return handlers.tree ? handlers.tree() : json(TREE_LAYOUT);
     if (method === 'GET' && url === '/api/settings/model-resolution') return json(handlers.resolve ? handlers.resolve() : { roles: { CHAT: { providerId: 'p', modelId: 'deepseek-v4-pro', fallback: 'NONE' }, FAST: { providerId: null, modelId: null, fallback: 'EMPTY' }, TRANSLATION: { providerId: null, modelId: null, fallback: 'EMPTY' } } });
     if (method === 'GET' && /^\/api\/branches\/[^/]+\/messages$/.test(url)) return handlers.conversation ? handlers.conversation(url.split('/')[3]) : json(conversation([userMessage('u1', '光合作用是什么？'), aiMessage('a1', '光合作用是植物利用光能把二氧化碳和水合成有机物的过程。')]));
@@ -236,6 +237,15 @@ describe('BranchWorkspace layout switching', () => {
     // 触达区点击 → 导航到该分支（/topic/t1?branch=b-child）。
     fireEvent.click(screen.getByRole('button', { name: '子分支' }));
     await waitFor(() => expect(window.location.search).toContain('branch=b-child'));
+    // ownUnread=1 的叶名牌带未读徽标。
+    expect(document.querySelector('[data-testid="unread-badge-b-child"]')).not.toBeNull();
+  });
+
+  it('marks the branch seen on entry when it has unread answers', async () => {
+    const calls = installFetch({ branchTree: () => json({ ...TREE, nodes: TREE.nodes.map((node) => node.id === ROOT ? { ...node, unreadCount: 2, latestStableSequence: 5 } : node) }) });
+    renderWorkspace();
+    await screen.findByRole('heading', { name: '光合作用是什么' });
+    await waitFor(() => expect(calls.some((call) => call.method === 'POST' && call.url === `/api/branches/${ROOT}/seen`)).toBe(true));
   });
 
   it('shows the empty note when the server layout has no branches', async () => {

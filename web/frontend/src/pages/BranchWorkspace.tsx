@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
 
 import { ApiError, errorI18nKey, FALLBACK_ERROR_KEY, isErrorCode } from '../api/errors';
 import type { OperationFrameSource, TerminalKind } from '../api/sse';
-import type { Branch, BranchTree, Message, Topic } from '../api/types';
+import type { Branch, BranchTree, Message, ReadingAnchor, Topic } from '../api/types';
 import { Composer } from '../components/Composer';
 import { GlassPanel } from '../components/GlassPanel';
 import { IconButton } from '../components/IconButton';
@@ -21,7 +21,7 @@ import { navigate } from '../platform/router';
 import { draftKeyFor } from '../store/drafts';
 import { loadHomeConfig } from '../store/homeData';
 import { readLayout, WORKSPACE_LAYOUTS, writeLayout, type WorkspaceLayout } from '../store/layoutPreference';
-import { cancelOperation, loadBranchTree, loadConversation, loadTopic, operationEventsUrl, resolveBranch, retryMessage, rootBranch, sendBranchMessage } from '../store/topicData';
+import { cancelOperation, loadBranchTree, loadConversation, loadTopic, markBranchSeen, operationEventsUrl, resolveBranch, retryMessage, rootBranch, saveReadingPosition, sendBranchMessage } from '../store/topicData';
 
 // 工作区（任务 T-2026-10-10-031）：`/topic/:id` 的 A 专注阅读 + B 并排分支 + C 树图占位。
 // 顶部为根分支标题（=主题标题）、到当前分支的面包屑、布局切换与返回；阅读列渲染已提交
@@ -67,12 +67,32 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
       const running = conversation.messages.find((message) => message.activeOperationId !== null) ?? null;
       setActiveOperationId(running?.activeOperationId ?? null);
       setActiveMessageId(running?.id ?? null);
+      // 进入分支即标记已读到最新稳定序（只前进；后端拒绝回退）。fire-and-forget：失败不打断阅读。
+      if (branch.unreadCount > 0) {
+        markBranchSeen(branch.id, branch.latestStableSequence).catch(() => {});
+      }
     }).catch((reason: unknown) => { if (active) setError(errorKey(reason)); });
     loadHomeConfig().then((config) => { if (active) setModel(config.model); }).catch(() => {});
-    return () => { active = false; };
+    return () => {
+      active = false;
+      // 卸载/切分支时保存阅读位置（语义锚点：最后一条 AI 消息 + 其显示版本；无 AI 消息不保存）。
+      const anchor = loadedRef.current;
+      if (anchor !== null) {
+        saveReadingPosition(anchor.branchId, anchor.anchor).catch(() => {});
+      }
+    };
   }, [topicId, branchId]);
 
   const source = loaded?.branch.source ?? null;
+  // 阅读位置锚点：最后一条消息与其显示版本（cleanup 里经 ref 读取最新值，避免闭包过期）。
+  const loadedRef = useRef<{ branchId: string; anchor: ReadingAnchor } | null>(null);
+  useEffect(() => {
+    const answer = [...(loaded?.messages ?? [])].reverse().find((message) => message.role === 'AI');
+    loadedRef.current = answer === undefined ? null : {
+      branchId: loaded?.branch.id ?? '',
+      anchor: { messageId: answer.id, revisionId: answer.activeRevisionId, listItemOffset: 0, viewportOffset: 0 },
+    };
+  }, [loaded]);
   useEffect(() => {
     if (layout !== 'B' || source === null) return;
     let active = true;
