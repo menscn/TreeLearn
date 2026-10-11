@@ -1,0 +1,14 @@
+=== E2E real-key generation verification (2026-10-11) ===
+1. PUT /api/providers/...0001/key -> hasKey=true (key REDACTED, stored in Windows Credential Manager Treelearn-Web/provider/<id>)
+2. POST /api/providers/...0001/models (real DeepSeek call) -> added=1, models=[deepseek-flash, deepseek-v4-pro]
+3. PUT /api/settings/model-roles -> CHAT/FAST/TRANSLATION all resolve to DeepSeek (model-resolution fallback=NONE)
+4. POST /api/topics (commandId=81af8b25-005f-4714-8afc-fde9d7c75f9a) -> 200 TopicBootstrap topicId=e5417ea7-0b27-430a-bbb2-b597cac57aa5 operationId=78877952-0316-46cb-a792-1ec880ebc0bc
+5. GET /api/operations/{id}/events (SSE) -> snapshot + stable terminal frame, seq=33, revision e1a7666d, model=deepseek-v4-pro
+6. Authoritative read-back GET /api/branches/{root}/messages -> AI answer persisted (see below)
+--- SSE stable frame (answer content) ---
+data:{"operationId":"78877952-0316-46cb-a792-1ec880ebc0bc","seq":33,"revision":{"id":"e1a7666d-be00-4420-995e-7a92fd92839c","messageId":"5b56fc05-da53-412e-a266-41b326c543dc","revisionNo":1,"reasoningContent":"","answerContent":"光合作用是植物、藻类和某些细菌利用光能，把二氧化碳和水转化为储存化学能的有机物（主要是葡萄糖）并释放氧气的过程。","model":"deepseek-v4-pro","thinkingEnabled":false,"promptPolicyVersion":"tl-learning-answer/1.1.0","createdAtMillis":1791704028910}}
+EXITCODE=0
+
+--- authoritative read-back (GET /api/branches/{root}/messages) ---
+AI message 5b56fc05-da53-412e-a266-41b326c543dc activeRevisionId=e1a7666d-be00-4420-995e-7a92fd92839c versions=1
+answerContent: 光合作用是植物、藻类和某些细菌利用光能，把二氧化碳和水转化为储存化学能的有机物（主要是葡萄糖）并释放氧气的过程。

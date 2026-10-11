@@ -2,7 +2,7 @@
 // （api.md §6.2 主题详情、§6.3 分支树/消息/追问、§6.4 取消/重试）。变更类请求一律带
 // 客户端生成的 `commandId`（api.md §4）。响应按契约类型解码，形状漂移由 fixtures 测试守。
 import { api } from '../api/client';
-import type { Branch, BranchTree, TreeLayoutResponse, Conversation, Message, Operation, ReadingAnchor, Topic, TurnAccepted } from '../api/types';
+import type { AnnotationList, Branch, BranchTree, TreeLayoutResponse, Conversation, Message, Operation, ReadingAnchor, Topic, TurnAccepted } from '../api/types';
 
 export function newCommandId(): string {
   const webCrypto = globalThis.crypto;
@@ -73,4 +73,23 @@ export function cancelOperation(operationId: string): Promise<Operation> {
 
 export function retryMessage(messageId: string, input: { model: string; thinkingEnabled: boolean }): Promise<{ message: Message; operation: Operation }> {
   return api.post<{ message: Message; operation: Operation }>(`/messages/${messageId}/retry`, { commandId: newCommandId(), model: input.model, thinkingEnabled: input.thinkingEnabled });
+}
+/** 契约 §6.10：读取时后端按显示文本 digest 清理失效批注后返回当前集。 */
+export function loadAnnotations(messageId: string): Promise<AnnotationList> {
+  return api.get<AnnotationList>(`/messages/${messageId}/annotations`);
+}
+
+export type AnnotationWriteInput = { messageId: string } & (
+  | { kind: 'HIGHLIGHT'; container: 'PROSE'; proseIndex: number; start: number; end: number }
+  | { kind: 'HIGHLIGHT'; container: 'CELL'; tableIndex: number; rowIndex: number; colIndex: number; start: number; end: number }
+  | { kind: 'NOTE'; container: 'PROSE'; proseIndex: number; start: number; end: number; body: string }
+);
+
+export function createAnnotation(input: AnnotationWriteInput): Promise<AnnotationList> {
+  const { messageId, ...request } = input;
+  return api.post<AnnotationList>(`/messages/${messageId}/annotations`, { commandId: newCommandId(), ...request });
+}
+
+export function deleteAnnotation(annotationId: string): Promise<{ deletedAnnotationId: string }> {
+  return api.delete<{ deletedAnnotationId: string }>(`/annotations/${annotationId}`, { commandId: newCommandId() });
 }

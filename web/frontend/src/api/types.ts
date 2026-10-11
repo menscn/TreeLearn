@@ -133,3 +133,18 @@ export interface TreeLayoutBranch { branchId: string; kind: 'LEAF' | 'LIMB' | 'B
 export interface TreeLayoutLabel { branchId: string; x: number; y: number; width: number; height: number; row: number; showSummary: boolean; leaderX: number; leaderY: number; title: string; summary: string }
 export interface TreeLayoutHit { branchId: string; source: 'LABEL' | 'ANCHOR'; x: number; y: number; width: number; height: number }
 export interface TreeLayoutResponse { topicId: string; currentBranchId: string | null; bounds: TreeLayoutBounds; branches: TreeLayoutBranch[]; labels: TreeLayoutLabel[]; hits: TreeLayoutHit[] }
+
+/** 契约 §6.10 批注：锚点为原文 UTF-16 半开区间 [start, end)；container=PROSE 用 proseIndex，CELL 用三元组。 */
+export interface Annotation {
+  id: string;
+  kind: 'HIGHLIGHT' | 'NOTE';
+  container: 'PROSE' | 'CELL';
+  proseIndex: number;
+  tableIndex: number;
+  rowIndex: number;
+  colIndex: number;
+  start: number;
+  end: number;
+  body: string;
+}
+export interface AnnotationList { messageId: string; annotations: Annotation[] }

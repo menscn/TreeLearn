@@ -173,7 +173,7 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
         <SideBySideView currentTitle={branchTitle} currentMessages={loaded.messages} source={source} sourceTitle={parentTitle} sourceMessages={sourceMessages} />
       ) : (
         <div className="workspace__reading">
-          {loaded.messages.length === 0 ? <p className="workspace__empty">{t('workspace.empty')}</p> : loaded.messages.map((message) => <MessageView key={message.id} message={message} />)}
+          {loaded.messages.length === 0 ? <p className="workspace__empty">{t('workspace.empty')}</p> : loaded.messages.map((message) => <MessageView key={message.id} message={message} annotationsEnabled />)}
         </div>
       )}
       {activeOperationId !== null ? (
