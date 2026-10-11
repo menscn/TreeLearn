@@ -134,7 +134,7 @@ Follow [code-document alignment](../rules/documentation.md).
 - In progress: 无——T-042/043/044 已收口（任务文件回填、`validate_tasks.py` errors=0、README/交付报告重核）。
 - Blocker: **仓库 `.git` 损坏（2026-10-11）**：`refs/heads/master` 与全部提交对象丢失（`.git/logs/HEAD` 末记录 6d669c2「feat(web): 设置端点、分叉端点与前端设置页」），`git cat-file` 确认对象库 0 个提交；远端 `github.com/menscn/TreeLearn` 404（不存在或私有），沙箱代理 502 + 直连超时双路断。工作树、暂存区（全部文件已 `git add` 为 blob）与全部测试证据完好。**解除条件：用户提供本地备份克隆或恢复远端可达**；在那之前任何提交都不可能，代码与测试不受影响。
 - Unblock condition: ① git 仓库恢复 → 补提交；② 用户提供 Web 端 API Key → 补真实生成端到端验收；③ 用户对规模项裁定 → 关闭流程偏差。
-- Next steps: ① **git 仓库恢复（最优先，阻塞一切提交）** ② 独立 verifier 终验 T-042/043/044 ③ 浏览器视觉复核（学习库/统计页）④ 真实 Provider Key 端到端生成 ⑤ 后续功能波次：树图 C 视图（依赖树布局端点）→ 已读/阅读位置前端消费、来源定位、选文引用、高亮批注 → 附件与文件管理、推荐问题、上下文压缩、翻译、朗读、语音 → 多标签页竞争/浏览器重连/Android fixtures 等价验证。
+- Next steps: ① ~~git 恢复~~（0743b52 起已恢复）② ~~042-049 终验~~（全部 verified）③ ~~真实 Provider Key~~（2026-10-11 e2e 已验）④ ~~第二/三波功能~~（T-042..055 全部交付，矩阵 26/34 已交付）剩余：联网搜索、深度派生 kinds（根标题/摘要/推荐/压缩）、附件解析入 prompt、浏览器视觉/多标签页复核、Android fixtures 等价执行（T-022）。
 - Watch-outs:
   - `web/README.md` 的「已知缺口」行、矩阵与契约应随每个后续任务同步（文档一致性守卫）。
   - 服务只绑定 loopback；数据与 Android 完全独立，无同步。

@@ -103,8 +103,8 @@ class CommandIdIdempotencyTest {
     private ChatCommandService freshService() {
         DesktopGenerationCoordinator coordinator = new DesktopGenerationCoordinator(jdbc, topics, branches,
                 messages, operations, new GenerationEventBus(), gateway, clock);
-        return new ChatCommandService(topics, branches, messages, operations, coordinator, providers,
-                models, secrets, budget, clock);
+        return new ChatCommandService(topics, branches, messages, operations, revisions, coordinator,
+                providers, models, secrets, budget, clock);
     }
 
     private int operationRowCount() {

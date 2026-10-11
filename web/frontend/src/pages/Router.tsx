@@ -4,6 +4,7 @@ import { useI18n } from '../i18n/I18nProvider';
 import { AppShell } from '../layouts/AppShell';
 import { SettingsLayout, type SettingsSection } from '../layouts/SettingsLayout';
 import { BranchWorkspace } from './BranchWorkspace';
+import { FilesPage } from './FilesPage';
 import { HomePage } from './HomePage';
 import { LibraryPage } from './LibraryPage';
 import { ModelRolesPage } from './ModelRolesPage';
@@ -24,11 +25,12 @@ function AboutPage() {
 }
 
 function settingsSection(section: string | null): SettingsSection {
-  return section === 'providers' || section === 'model-roles' ? section : 'about';
+  return section === 'providers' || section === 'model-roles' || section === 'files' ? section : 'about';
 }
 
 function settingsContent(section: string | null) {
   if (section === 'providers') return <ProviderEditorPage />;
+  if (section === 'files') return <FilesPage />;
   if (section === 'model-roles') return <ModelRolesPage />;
   return <AboutPage />;
 }

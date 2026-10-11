@@ -1,10 +1,11 @@
 package com.treelearn.web.generation;
 
 import com.treelearn.web.storage.AnnotationStore;
+import com.treelearn.web.storage.AttachmentStore;
+import com.treelearn.web.storage.DesktopDatabase;
 import com.treelearn.web.storage.AnswerRevisionStore;
 import com.treelearn.web.storage.ArtifactStore;
 import com.treelearn.web.storage.BranchStore;
-import com.treelearn.web.storage.DesktopDatabase;
 import com.treelearn.web.storage.JdbcSupport;
 import com.treelearn.web.storage.MessageStore;
 import com.treelearn.web.storage.OperationStore;
@@ -59,6 +60,12 @@ public class GenerationConfiguration {
     @Bean
     AnnotationStore annotationStore(JdbcSupport jdbc) {
         return new AnnotationStore(jdbc);
+    }
+
+    @Bean
+    AttachmentStore attachmentStore(JdbcSupport jdbc, DesktopDatabase database,
+            @org.springframework.beans.factory.annotation.Value("${treelearn.attachments.max-bytes:20971520}") long maxBytes) {
+        return new AttachmentStore(jdbc, database.dataDir(), maxBytes);
     }
 
     @Bean

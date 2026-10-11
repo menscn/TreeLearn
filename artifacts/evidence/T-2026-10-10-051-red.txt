@@ -1,0 +1,64 @@
+> Task :core:compileJava UP-TO-DATE
+> Task :ai-protocol:compileJava UP-TO-DATE
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+> Task :ai-protocol:processResources NO-SOURCE
+> Task :ai-protocol:classes UP-TO-DATE
+> Task :ai-protocol:jar UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+2026-10-11T17:18:54.155+08:00  INFO 23212 --- [treelearn-web-backend] [ionShutdownHook] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-10-11T17:18:54.159+08:00  INFO 23212 --- [treelearn-web-backend] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+
+> Task :test
+
+VersionCommandEndpointsTest > resetEndpointIsWired() FAILED
+    java.lang.AssertionError: Status expected:<200> but was:<404>
+        at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:62)
+        at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:129)
+        at org.springframework.test.web.servlet.result.StatusResultMatchers.lambda$matcher$0(StatusResultMatchers.java:600)
+        at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:212)
+        at com.treelearn.web.api.VersionCommandEndpointsTest.resetEndpointIsWired(VersionCommandEndpointsTest.java:51)
+
+VersionCommandEndpointsTest > selectEndpointIsWired() FAILED
+    java.lang.AssertionError: Status expected:<200> but was:<404>
+        at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:62)
+        at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:129)
+        at org.springframework.test.web.servlet.result.StatusResultMatchers.lambda$matcher$0(StatusResultMatchers.java:600)
+        at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:212)
+        at com.treelearn.web.api.VersionCommandEndpointsTest.selectEndpointIsWired(VersionCommandEndpointsTest.java:60)
+
+2 tests completed, 2 failed
+
+> Task :test FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/23745/AppData/Local/Temp/tl-042-build/treelearn-web-backend/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///C:/Users/23745/AppData/Local/Temp/tl-042-build/treelearn-web-backend/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 5s
+10 actionable tasks: 2 executed, 8 up-to-date
+EXITCODE=1

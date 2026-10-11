@@ -600,6 +600,12 @@ Model：
 派生任务复用 operation + SSE 机制，以 `promptPurpose` 区分，结果落 `ai_artifacts`（按 kind）。派生失败**保留旧结果**，绝不回落到教学提示词（`DerivedOperation.run`）。
 
 **`POST /api/derived`** —— 启动一个派生操作。
+
+> **实现切片（T-2026-10-10-052，2026-10-11）**：本端点当前仅支持 `MESSAGE_TRANSLATION`（语义自足：
+> 源文本即 currentInput、稳定版前置、`tl-message-translation/1.0.0`、走 operation + SSE）。其余六个
+> kind 依赖 Android `ArtifactInputs.entries/outline` 的深度输入组装（birth context / tree outline /
+> compression turns），当前返回 `400 DERIVED_KIND_UNSUPPORTED`（params.kind）明示不支持，Deferred
+> 另立任务；未知 kind → `400 DERIVED_KIND_INVALID`。GET 全 kind 可用。
 - 请求：`{ "commandId", "kind", "scopeId", "basedOnRevisionId"?, "model"? }`
   - **请求 `kind` 词汇表（大写枚举，仅请求侧）**：`ROOT_TITLE`/`BRANCH_TITLE`/`BRANCH_SUMMARY`/`ANSWER_RECOMMENDATIONS`/`HOME_RECOMMENDATIONS`/`CONTEXT_COMPRESSION`/`MESSAGE_TRANSLATION`。它不同于落库 `ai_artifacts.kind` 的 wireId（小写、见 5.10）：`MESSAGE_TRANSLATION` 只存在于请求（翻译不落库），其余六项与 5.10 表格一一对应但大小写不同。
   - `scopeId`：`BRANCH` 作用域为 branchId，`TOPIC` 作用域为 topicId（`ArtifactKind.Scope`）。

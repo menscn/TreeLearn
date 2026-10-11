@@ -6,6 +6,7 @@ import com.treelearn.ai.prompt.DeepSeekRequest;
 import com.treelearn.ai.prompt.DeepSeekRequestAssembler;
 import com.treelearn.ai.prompt.PromptBudget;
 import com.treelearn.ai.prompt.PromptBuildException;
+import com.treelearn.core.domain.AnswerRevision;
 import com.treelearn.core.domain.Branch;
 import com.treelearn.core.domain.ContextPlan;
 import com.treelearn.core.domain.DomainResult;
@@ -16,6 +17,7 @@ import com.treelearn.core.domain.Message;
 import com.treelearn.core.domain.PromptPurpose;
 import com.treelearn.core.domain.Topic;
 import com.treelearn.web.credential.SecretPort;
+import com.treelearn.web.storage.AnswerRevisionStore;
 import com.treelearn.web.storage.BranchStore;
 import com.treelearn.web.storage.MessageStore;
 import com.treelearn.web.storage.ModelStore;
@@ -57,6 +59,7 @@ public final class ChatCommandService {
     private final BranchStore branches;
     private final MessageStore messages;
     private final OperationStore operations;
+    private final AnswerRevisionStore revisions;
     private final DesktopGenerationCoordinator coordinator;
     private final ProviderStore providers;
     private final ModelStore models;
@@ -66,10 +69,12 @@ public final class ChatCommandService {
     private final Object acceptLock = new Object();
 
     public ChatCommandService(TopicStore topics, BranchStore branches, MessageStore messages,
-            OperationStore operations, DesktopGenerationCoordinator coordinator, ProviderStore providers,
+            OperationStore operations, AnswerRevisionStore revisions,
+            DesktopGenerationCoordinator coordinator, ProviderStore providers,
             ModelStore models, SecretPort secrets, PromptBudget budget, Clock clock) {
         this.topics = topics; this.branches = branches; this.messages = messages;
-        this.operations = operations; this.coordinator = coordinator; this.providers = providers;
+        this.operations = operations; this.revisions = revisions; this.coordinator = coordinator;
+        this.providers = providers;
         this.models = models; this.secrets = secrets; this.budget = budget; this.clock = clock;
     }
 
@@ -173,6 +178,78 @@ public final class ChatCommandService {
             submit(command, request);
             return replayedReplaced(operation(accept.accepted.operationId));
         }
+    }
+
+    /**
+     * §6.4 重置：与 retry 同为「对同一位置发起新尝试」（旧版本保留、ordinal 不动、不多插问答），
+     * 差异只在判定前置——该位置必须**已显示稳定版本**（{@code activeRevisionId != null}，
+     * 镜像 Android {@code AnswerVersions.reset} 的 {@code resetRefusal}），否则 409
+     * {@code OPERATION_NOT_STABLE}。commandId 幂等与 retry 同一持久载体。
+     */
+    public Replaced reset(String messageId, String commandId, String modelId, boolean thinking) {
+        requireCommand(commandId);
+        synchronized (acceptLock) {
+            Optional<OperationStore.Operation> stored = operations.byCommandId(commandId);
+            if (stored.isPresent()) {
+                return replayedReplaced(stored.get());
+            }
+            GenerationModel model = resolveModel(modelId);
+            Message ai = messages.get(messageId).orElseThrow(
+                    () -> new ServiceRefusalException("OPERATION_NOT_COMPLETABLE", Map.of()));
+            if (!ai.isAi()) {
+                throw new ServiceRefusalException("MESSAGE_ROLE_MISMATCH", Map.of());
+            }
+            Optional<OperationStore.Operation> active = operations.activeForBranch(ai.branchId);
+            if (active.isPresent()) {
+                throw new ServiceRefusalException("ILLEGAL_STATE_TRANSITION",
+                        Map.of("state", active.get().state.name()));
+            }
+            if (ai.activeRevisionId() == null) {
+                throw new ServiceRefusalException("OPERATION_NOT_STABLE", Map.of());
+            }
+            MessageStore.Position question = precedingQuestion(ai);
+            long now = clock.millis();
+            DeepSeekRequest request = assemble(ai.branchId, question.message.ordinal,
+                    question.message.userContent, question.message.quotedText(), thinking);
+            GenerationCommand command =
+                    command(commandId, ai.branchId, ai.id, model, thinking, request, now);
+            DesktopGenerationCoordinator.AcceptOutcome accept = coordinator.acceptForRetry(command);
+            if (!accept.isAccepted()) {
+                throw coordinatorRefusal(accept.refusal, ai.branchId);
+            }
+            submit(command, request);
+            return replayedReplaced(operation(accept.accepted.operationId));
+        }
+    }
+
+    /**
+     * §6.4 版本选择：仅移动显示指针（{@link MessageStore#setActiveRevision}）。
+     * 判定镜像 Android {@code AnswerVersions.selectRevision} + {@code PositionCommands.selectRefusal}：
+     * 位置或版本缺失、版本不属于该位置 → 404 {@code OPERATION_NOT_COMPLETABLE}；分支仍有活跃尝试 →
+     * 409 {@code ILLEGAL_STATE_TRANSITION}；重复选择当前显示版本 → 409 {@code REVISION_IMMUTABLE}
+     * （共享域 {@link Message#activateRevision} 判定，错误码即其 DomainErrorCode 名）。
+     * 子分支的出生版本存于自身 {@code source_revision_id}，此处不触碰、无级联。
+     */
+    public AnswerRevision selectRevision(String messageId, String revisionId, String commandId) {
+        requireCommand(commandId);
+        Message position = messages.get(messageId).orElseThrow(
+                () -> new ServiceRefusalException("OPERATION_NOT_COMPLETABLE", Map.of()));
+        AnswerRevision target = revisions.get(revisionId).orElseThrow(
+                () -> new ServiceRefusalException("OPERATION_NOT_COMPLETABLE", Map.of()));
+        if (!target.messageId.equals(position.id)) {
+            throw new ServiceRefusalException("OPERATION_NOT_COMPLETABLE", Map.of());
+        }
+        Optional<OperationStore.Operation> active = operations.activeForBranch(position.branchId);
+        if (active.isPresent()) {
+            throw new ServiceRefusalException("ILLEGAL_STATE_TRANSITION",
+                    Map.of("state", active.get().state.name()));
+        }
+        DomainResult<Void> switched = position.activateRevision(revisionId);
+        if (switched.isFailure()) {
+            throw new ServiceRefusalException(switched.error().code.name(), Map.of());
+        }
+        messages.setActiveRevision(messageId, revisionId);
+        return target;
     }
 
     // ------------------------------------------------------------------ internals

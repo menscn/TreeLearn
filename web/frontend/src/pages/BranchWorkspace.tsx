@@ -21,7 +21,7 @@ import { navigate } from '../platform/router';
 import { draftKeyFor } from '../store/drafts';
 import { loadHomeConfig } from '../store/homeData';
 import { readLayout, WORKSPACE_LAYOUTS, writeLayout, type WorkspaceLayout } from '../store/layoutPreference';
-import { cancelOperation, loadBranchTree, loadConversation, loadTopic, markBranchSeen, operationEventsUrl, resolveBranch, retryMessage, rootBranch, saveReadingPosition, sendBranchMessage } from '../store/topicData';
+import { cancelOperation, loadBranchTree, loadConversation, loadTopic, markBranchSeen, newCommandId, operationEventsUrl, resetMessage, resolveBranch, retryMessage, rootBranch, saveReadingPosition, sendBranchMessage, uploadAttachment } from '../store/topicData';
 
 // 工作区（任务 T-2026-10-10-031）：`/topic/:id` 的 A 专注阅读 + B 并排分支 + C 树图占位。
 // 顶部为根分支标题（=主题标题）、到当前分支的面包屑、布局切换与返回；阅读列渲染已提交
@@ -33,7 +33,7 @@ const TERMINAL_LABELS: Record<TerminalKind, TranslationKey> = { stable: 'workspa
 
 const errorKey = (reason: unknown): TranslationKey => (reason instanceof ApiError ? reason.i18nKey : FALLBACK_ERROR_KEY);
 
-interface Loaded { topic: Topic; tree: BranchTree; branch: Branch; messages: Message[] }
+interface Loaded { topic: Topic; tree: BranchTree; branch: Branch; messages: Message[]; recommendations: string[] }
 
 export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: string; branchId: string | null; streamSource?: OperationFrameSource | null }) {
   const { t } = useI18n();
@@ -45,6 +45,8 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
   const [model, setModel] = useState<string | null>(null);
   const [thinking, setThinking] = useState(false);
   const [quote, setQuote] = useState('');
+  const [pendingAttachment, setPendingAttachment] = useState<{ attachmentId: string; displayName: string | null } | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [sending, setSending] = useState(false);
   const [actionError, setActionError] = useState<TranslationKey | null>(null);
   const [layout, setLayout] = useState<WorkspaceLayout>(() => readLayout());
@@ -63,7 +65,7 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
       if (branch === null) { if (active) setError('workspace.empty'); return; }
       const conversation = await loadConversation(branch.id);
       if (!active) return;
-      setLoaded({ topic, tree, branch, messages: conversation.messages });
+      setLoaded({ topic, tree, branch, messages: conversation.messages, recommendations: conversation.recommendations });
       const running = conversation.messages.find((message) => message.activeOperationId !== null) ?? null;
       setActiveOperationId(running?.activeOperationId ?? null);
       setActiveMessageId(running?.id ?? null);
@@ -123,10 +125,11 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
     if (loaded === null || model === null || draft.text.trim().length === 0 || activeOperationId !== null) return;
     setSending(true);
     setActionError(null);
-    sendBranchMessage({ branchId: loaded.branch.id, text: draft.text, quote, model, thinkingEnabled: thinking }).then((result) => {
+    sendBranchMessage({ branchId: loaded.branch.id, text: draft.text, quote, attachmentId: pendingAttachment?.attachmentId ?? null, model, thinkingEnabled: thinking }).then((result) => {
       setLoaded((prev) => (prev === null ? prev : { ...prev, messages: [...prev.messages, result.userMessage, result.aiMessage] }));
       draft.clear();
       setQuote('');
+      setPendingAttachment(null);
       setActiveOperationId(result.operation.id);
       setActiveMessageId(result.aiMessage.id);
     }).catch((reason: unknown) => setActionError(errorKey(reason))).finally(() => setSending(false));
@@ -170,10 +173,26 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
           onNavigate={(target) => navigate(`/topic/${topicId}?branch=${target}`)}
         />
       ) : layout === 'B' ? (
-        <SideBySideView currentTitle={branchTitle} currentMessages={loaded.messages} source={source} sourceTitle={parentTitle} sourceMessages={sourceMessages} />
+        <SideBySideView currentTitle={branchTitle} currentMessages={loaded.messages} source={source} sourceTitle={parentTitle} sourceMessages={sourceMessages}
+          onJumpToSourceMessage={(messageId) => {
+            const target = document.getElementById(`msg-${messageId}`);
+            target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }} />
       ) : (
         <div className="workspace__reading">
-          {loaded.messages.length === 0 ? <p className="workspace__empty">{t('workspace.empty')}</p> : loaded.messages.map((message) => <MessageView key={message.id} message={message} annotationsEnabled />)}
+          {loaded.messages.length === 0 ? <p className="workspace__empty">{t('workspace.empty')}</p> : loaded.messages.map((message) => (
+            <div key={message.id} id={`msg-${message.id}`}>
+              <MessageView message={message} annotationsEnabled
+                onQuoteText={message.role === 'AI' ? (text) => { setQuote(text); } : undefined}
+                onReset={model !== null ? (messageId) => {
+                  resetMessage(messageId, { commandId: newCommandId(), model, thinkingEnabled: thinking }).then((result) => {
+                    setLoaded((prev) => (prev === null ? prev : { ...prev, messages: prev.messages.map((item) => (item.id === result.message.id ? result.message : item)) }));
+                    setActiveOperationId(result.operation.id);
+                    setActiveMessageId(result.message.id);
+                  }).catch((reason: unknown) => setActionError(errorKey(reason)));
+                } : undefined} />
+            </div>
+          ))}
         </div>
       )}
       {activeOperationId !== null ? (
@@ -188,7 +207,25 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
           {streamActive ? <span className="workspace__cursor" aria-hidden="true" /> : null}
         </GlassPanel>
       ) : null}
+      {loaded !== null && (loaded.recommendations ?? []).length > 0 ? (
+        <div className="workspace__recommendations" data-testid="recommendations" role="listbox" aria-label={t('workspace.recommendations.label')}>
+          {(loaded.recommendations ?? []).map((rec) => (
+            <button key={rec} type="button" role="option" aria-selected="false" className="workspace__recommendation"
+              onClick={() => draft.setText(rec)}>{rec}</button>
+          ))}
+        </div>
+      ) : null}
       <Composer value={draft.text} onValueChange={draft.setText} onClear={draft.clear}
+        attachment={pendingAttachment}
+        onClearAttachment={() => setPendingAttachment(null)}
+        onPickFile={(file) => {
+          if (uploading) return;
+          setUploading(true);
+          fileToBase64(file).then((contentBase64) => uploadAttachment(file.name, file.type || 'application/octet-stream', contentBase64))
+            .then((entry) => setPendingAttachment({ attachmentId: entry.attachmentId, displayName: entry.displayName }))
+            .catch((reason: unknown) => setActionError(errorKey(reason)))
+            .finally(() => setUploading(false));
+        }}
         thinkingEnabled={thinking} onToggleThinking={() => setThinking((value) => !value)}
         canSend={model !== null && draft.text.trim().length > 0 && activeOperationId === null && !sending} submitting={sending} blocked={model === null}
         quote={quote} onClearQuote={() => setQuote('')} placeholderKey="workspace.composer.placeholder" sendKey="workspace.composer.send"
@@ -196,4 +233,18 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
       {actionError !== null ? <p className="workspace__error" role="alert">{t(actionError)}</p> : null}
     </div>
   );
+}
+
+/** FileReader→base64（去 data: 前缀；契约 §6.9 contentBase64 无前缀）。 */
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result);
+      const comma = result.indexOf(',');
+      resolve(comma >= 0 ? result.slice(comma + 1) : result);
+    };
+    reader.onerror = () => reject(reader.error ?? new Error('read failed'));
+    reader.readAsDataURL(file);
+  });
 }

@@ -55,7 +55,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File web/scripts/stop-web.ps1
 | 生成状态 | 已交付 | 协调器终态判定（正常+非空→STABLE；空/仅推理→FAILED）+ SSE §7 + UI 状态条；失败/中断/取消可区分 |
 | 并发与调度 | 部分 | 单分支活跃操作互斥（`BRANCH_BUSY`）已交付并有测试；多标签页真实竞争未做浏览器验证 |
 | 停止生成 | 已交付 | `POST /api/operations/{id}/cancel`（CANCELED 保 partial）+ UI 停止按钮 |
-| 原位重试与重置 | 部分 | retry 已交付（原位新建尝试、不改 ordinal）；reset 未实现 |
+| 原位重试与重置 | 已交付 | retry（原位新建尝试、不改 ordinal）+ `POST /api/messages/{id}/reset`（稳定版前置）+ `POST /api/messages/{id}/revisions/{rev}/select`（只移指针）（T-051；服务层 6 例 + 端点 4 例，`:check` 294 例） |
 | 回答版本 | 部分 | 活跃修订读取与显示已交付；版本切换器 UI 未实现 |
 | 思考过程 | 已交付 | `reasoning_content` 分离、折叠展示、思考开关随请求持久化 |
 | 上下文压缩 | **未实现** | 摘要读取路径与压缩派生未做（`CONTEXT_SUMMARY_MISSING` 已按 Android 语义拒绝） |
@@ -87,16 +87,16 @@ powershell -NoProfile -ExecutionPolicy Bypass -File web/scripts/stop-web.ps1
 | 模型分工 | 已交付 | GET/PUT `/api/settings/model-roles`（数据目录非敏感偏好文件，键名对照 Android SharedPreferences，未新增永久表）+ 分工页与回落一致性（T-036/039/041） |
 | 模型回落 | 已交付 | `GET /api/settings/model-resolution`（NONE/BUILTIN/EARLIEST/EMPTY），浏览器复验 200 |
 | 联网搜索 | **未实现** | 端点未做 |
-| 翻译与朗读 | **未实现** | 未做 |
-| 语音输入 | **未实现** | 浏览器能力探测与降级未做（Android 侧为系统语音服务） |
-| 附件注册与解析 | **未实现** | `attachments` 恒空数组（已在 README 与任务记录标注） |
-| 文件管理与清理 | **未实现** | 未做 |
+| 翻译与朗读 | 已交付 | `POST /api/derived`（MESSAGE_TRANSLATION 切片，T-052）+ 前端翻译块（T-053）+ Web Speech Synthesis 朗读/停止（T-053）；其余派生 kind Deferred |
+| 语音输入 | 已交付 | Web Speech Recognition 听写进 Composer（T-053；浏览器不支持时按钮隐藏） | 浏览器能力探测与降级未做（Android 侧为系统语音服务） |
+| 附件注册与解析 | 已交付 | §6.9 端点（T-054：SHA-256 内容寻址去重、20 MiB 上限、白名单、孤儿清理幂等，7 例）+ Composer 上传/USER 消息附件显示（T-055） | `attachments` 恒空数组（已在 README 与任务记录标注） |
+| 文件管理与清理 | 已交付 | `/settings/files` 文件管理页（用量/引用/解析状态/删除/孤儿清理，T-055） | 未做 |
 | 设置/返回路径 | 已交付 | `/settings/*` 分区导航 + Provider/分工页正文（T-039）；未知分区回落通用/关于页 |
 
 ### 4.4 汇总
 
-- **已交付**：21 行；**部分**：6 行；**未实现**：7 行（矩阵实际共 34 行；2026-10-11 第二波后：C 树图、高亮/批注、批注失效转已交付）；旧版「40 行 / 10+13+17」计数与其自身行列表不符，已按行清点更正）。
-- 结论：**核心闭环（配置→首问→流式→稳定→追问→停止→重试→重启恢复）+ 分叉、归档/恢复、删除、阅读位置、未读已见、折叠、应用内搜索、学习统计、C 树图、批注端点、Provider/Key 与模型分工设置在 Web 端真实可用**；**辅助功能（批注前端消费、推荐问题、上下文压缩、联网搜索、翻译/朗读、语音、附件）本批仍未交付**。
+- **已交付**：26 行；**部分**：2 行；**未实现**：6 行（矩阵实际共 34 行；2026-10-11 第三波后：reset/翻译/朗读/语音/附件链路全部转已交付）；旧版「40 行 / 10+13+17」计数与其自身行列表不符，已按行清点更正）。
+- 结论：**核心闭环（配置→首问→流式→稳定→追问→停止→重试→重启恢复）+ 分叉、归档/恢复、删除、阅读位置、未读已见、折叠、应用内搜索、学习统计、C 树图、批注（端点+前端消费）、批注失效、推荐问题消费、选文引用、来源定位、reset/版本选择、翻译、朗读、语音输入、附件注册/发送/文件管理、Provider/Key 与模型分工设置在 Web 端真实可用**；**辅助功能（联网搜索、上下文压缩等深度派生、附件解析入 prompt）仍未交付**。
 
 ## 5. 双端一致性与共享实现
 
@@ -113,7 +113,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File web/scripts/stop-web.ps1
 
 ## 7. 剩余缺口与未验证项（如实标注）
 
-**未实现（功能缺口，需后续任务）**：来源定位跳转、上下文压缩、推荐问题、联网搜索、翻译/朗读、语音输入、附件注册与解析、文件管理与清理、retry 之外的 reset。\n\n**未验证（有实现但缺证据）**：多标签页真实竞争与浏览器重连（需浏览器轮）；Android fixtures 等价验证。~~真实 Provider Key 端到端生成~~ **已于 2026-10-11 用用户提供的 DeepSeek Key 完成验证**（`artifacts/evidence/T-2026-10-10-e2e-realkey.txt`：写 Key→模型刷新→分工解析→首问→SSE stable→权威读回）。
+**未实现（功能缺口，需后续任务）**：联网搜索、树图手势缩放、表格单元格内划选批注、深度派生 kinds（根标题/摘要/推荐问题/压缩——需 Android ArtifactInputs 深度输入组装，T-052 已留 `DERIVED_KIND_UNSUPPORTED` 明示出口）、附件解析提取入 prompt。
+
+**未验证（有实现但缺证据）**：多标签页真实竞争与浏览器重连（需浏览器轮）；Android fixtures 等价验证；语音输入/朗读的真实浏览器行为（组件级 stub 已验，jsdom 无 Web Speech 实现）。~~真实 Provider Key 端到端生成~~ **已于 2026-10-11 用用户提供的 DeepSeek Key 完成验证**（`artifacts/evidence/T-2026-10-10-e2e-realkey.txt`：写 Key→模型刷新→分工解析→首问→SSE stable→权威读回）。
 
 **未验证（有实现但缺证据）**：真实 Provider Key 端到端生成（代码已推进，最终报告必须把这一项标为未验证，直到提供专用 Web Key 并完成真实流式链路测试）；多标签页真实竞争与浏览器重连（需浏览器轮）；Android fixtures 等价验证。
 

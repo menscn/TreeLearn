@@ -5,7 +5,10 @@ import { useI18n } from '../i18n/I18nProvider';
 import { createAnnotation, deleteAnnotation, loadAnnotations } from '../store/topicData';
 import { Dialog } from './Dialog';
 import { IconButton } from './IconButton';
-import { Trash2 } from './icons';
+import { TranslationBlock } from './TranslationBlock';
+import { speak, speechAvailable, stopSpeaking } from '../lib/speech';
+import { selectRevision } from '../store/topicData';
+import { Languages, RotateCcw, Trash2, Volume2 } from './icons';
 import { Markdown, type Highlight } from './markdown/Markdown';
 import { proseIndexForRange, selectionToRange } from '../lib/selectionRange';
 
@@ -44,8 +47,8 @@ function AnnotationList({ message, annotations, onDeleted }:
   );
 }
 
-function MessageView({ message, highlight = null, annotationsEnabled = false }:
-{ message: Message; highlight?: TextHighlight | null; annotationsEnabled?: boolean }) {
+function MessageView({ message, highlight = null, annotationsEnabled = false, onQuoteText, onReset }:
+{ message: Message; highlight?: TextHighlight | null; annotationsEnabled?: boolean; onQuoteText?: (text: string) => void; onReset?: (messageId: string) => void }) {
   const { t } = useI18n();
   const answerRef = useRef<HTMLDivElement | null>(null);
   const [annotations, setAnnotations] = useState<Annotation[]>([]);
@@ -53,6 +56,12 @@ function MessageView({ message, highlight = null, annotationsEnabled = false }:
   const [pendingIndex, setPendingIndex] = useState(-1);
   const [noteDraft, setNoteDraft] = useState('');
   const [noteOpen, setNoteOpen] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
+  const [translationOpen, setTranslationOpen] = useState(false);
+  // 显示版本覆盖：切版本持久化后本地立即生效（conversation 刷新由父组件拉取兜底）。
+  const [displayRevisionId, setDisplayRevisionId] = useState<string | null>(null);
+  const revisionMemo = activeRevision(message);
+  const answerText = revisionMemo?.answerContent ?? '';
 
   useEffect(() => {
     if (!annotationsEnabled || message.role !== 'AI') return;
@@ -114,11 +123,22 @@ function MessageView({ message, highlight = null, annotationsEnabled = false }:
     return (
       <article className="message message--user">
         {message.quotedText.length > 0 ? <blockquote className="message__quote">{message.quotedText}</blockquote> : null}
+        {message.attachments.length > 0 ? (
+          <div className="message__attachments" data-testid={`attachments-${message.id}`}>
+            {message.attachments.map((ref) => (
+              <a key={ref.attachmentId} className={ref.present ? 'message__attachment' : 'message__attachment message__attachment--missing'}
+                href={`/api/attachments/${ref.attachmentId}/content`} download={ref.displayName ?? undefined}>
+                {ref.present ? (ref.displayName ?? t('home.composer.attachment.unnamed')) : t('home.composer.attachment.missing')}
+              </a>
+            ))}
+          </div>
+        ) : null}
         <div className="message__user"><Markdown text={message.userContent ?? ''} /></div>
       </article>
     );
   }
-  const revision = activeRevision(message);
+  const revision = displayRevisionId === null ? activeRevision(message)
+    : message.versions.find((version) => version.id === displayRevisionId) ?? activeRevision(message);
   const reasoning = revision?.reasoningContent ?? '';
   return (
     <article className="message message--ai">
@@ -141,6 +161,43 @@ function MessageView({ message, highlight = null, annotationsEnabled = false }:
           withOffsets={annotationsEnabled}
         />
       </div>
+      <div className="message__tools" data-testid={`tools-${message.id}`}>
+        {revision !== null && speechAvailable() ? (
+          <IconButton icon={Volume2} label={t(speaking ? 'workspace.action.stopSpeech' : 'workspace.action.speak')}
+            onClick={() => {
+              if (speaking) {
+                stopSpeaking();
+                setSpeaking(false);
+                return;
+              }
+              speak(revision.answerContent);
+              setSpeaking(true);
+            }} />
+        ) : null}
+        {revision !== null && message.versions.length > 1 ? (
+          <label className="message__versions">
+            <span className="message__versions-label">{t('workspace.versions.label')}</span>
+            <select value={revision.id} data-testid={`versions-${message.id}`}
+              onChange={(event) => {
+                const target = event.currentTarget.value;
+                selectRevision(message.id, target).then(() => setDisplayRevisionId(target)).catch(() => {});
+              }}>
+              {message.versions.map((version) => (
+                <option key={version.id} value={version.id}>
+                  {t('workspace.versions.option').replace('{n}', String(version.revisionNo))}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
+        {revision !== null ? (
+          <IconButton icon={Languages} label={t('workspace.translation.action')} onClick={() => setTranslationOpen((prev) => !prev)} />
+        ) : null}
+        {onReset && message.versions.length > 0 ? (
+          <IconButton icon={RotateCcw} label={t('workspace.action.reset')} onClick={() => onReset(message.id)} />
+        ) : null}
+      </div>
+      {revision !== null && translationOpen ? <TranslationBlock messageId={message.id} revisionId={revision.id} /> : null}
       {annotationsEnabled && pending !== null ? (
         <div className="annotation-bar" role="toolbar" aria-label={t('annotation.bar.label')}>
           <button type="button" className="annotation-bar__action" data-testid="annotation-highlight"
@@ -151,6 +208,12 @@ function MessageView({ message, highlight = null, annotationsEnabled = false }:
             onClick={() => setNoteOpen(true)}>
             {t('annotation.action.note')}
           </button>
+          {onQuoteText ? (
+            <button type="button" className="annotation-bar__action" data-testid="annotation-quote"
+              onClick={() => { onQuoteText(answerText.slice(pending.start, pending.end)); closePending(); }}>
+              {t('annotation.action.quote')}
+            </button>
+          ) : null}
           <button type="button" className="annotation-bar__action" data-testid="annotation-cancel" onClick={closePending}>
             {t('annotation.action.cancel')}
           </button>

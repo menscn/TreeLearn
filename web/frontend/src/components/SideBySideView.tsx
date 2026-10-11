@@ -12,6 +12,8 @@ interface SideBySideViewProps {
   source: BranchSource | null;
   sourceTitle: string | null;
   sourceMessages: Message[] | null;
+  /** T-050 来源定位跳转：把当前列滚动/聚焦到来源锚点对应的原消息（消息需带 DOM id）。 */
+  onJumpToSourceMessage?: (messageId: string) => void;
 }
 
 function anchorRange(source: BranchSource): TextHighlight | null {
@@ -19,19 +21,24 @@ function anchorRange(source: BranchSource): TextHighlight | null {
   return startInclusive !== null && endExclusive !== null ? { start: startInclusive, end: endExclusive } : null;
 }
 
-function SourceColumn({ source, sourceTitle, sourceMessages }: { source: BranchSource; sourceTitle: string | null; sourceMessages: Message[] | null }) {
+function SourceColumn({ source, sourceTitle, sourceMessages, onJumpToSourceMessage }:
+{ source: BranchSource; sourceTitle: string | null; sourceMessages: Message[] | null; onJumpToSourceMessage?: (messageId: string) => void }) {
   const { t } = useI18n();
   const located = sourceMessages?.find((message) => message.id === source.sourceMessageId) ?? null;
   return (
     <>
       <h3 className="side-by-side__title">{sourceTitle ?? t('workspace.source.parent')}</h3>
       {located !== null ? <MessageView message={located} highlight={anchorRange(source)} /> : <p className="side-by-side__note">{t('workspace.source.anchorMissing')}</p>}
+      {located !== null && onJumpToSourceMessage ? (
+        <button type="button" className="side-by-side__jump" data-testid="jump-to-source"
+          onClick={() => onJumpToSourceMessage(located.id)}>{t('workspace.source.jump')}</button>
+      ) : null}
       <p className="side-by-side__note">{t('workspace.source.snapshot')}: {source.contextSnapshotId}</p>
     </>
   );
 }
 
-export function SideBySideView({ currentTitle, currentMessages, source, sourceTitle, sourceMessages }: SideBySideViewProps) {
+export function SideBySideView({ currentTitle, currentMessages, source, sourceTitle, sourceMessages, onJumpToSourceMessage }: SideBySideViewProps) {
   const { t } = useI18n();
   return (
     <div className="side-by-side">
@@ -40,7 +47,7 @@ export function SideBySideView({ currentTitle, currentMessages, source, sourceTi
         {currentMessages.map((message) => <MessageView key={message.id} message={message} />)}
       </section>
       <section className="side-by-side__column" aria-label={sourceTitle ?? t('workspace.source.parent')}>
-        {source === null ? <p className="side-by-side__note">{t('workspace.noSource')}</p> : <SourceColumn source={source} sourceTitle={sourceTitle} sourceMessages={sourceMessages} />}
+        {source === null ? <p className="side-by-side__note">{t('workspace.noSource')}</p> : <SourceColumn source={source} sourceTitle={sourceTitle} sourceMessages={sourceMessages} onJumpToSourceMessage={onJumpToSourceMessage} />}
       </section>
     </div>
   );

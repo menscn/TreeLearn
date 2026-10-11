@@ -141,6 +141,24 @@ class CoreApiController {
                 ApiDtoMapper.operation(replaced.operation()));
     }
 
+    /** §6.4 重置：对已显示稳定版本的位置发起新尝试（判定与幂等在 {@code ChatCommandService.reset}）。 */
+    @PostMapping("/api/messages/{id}/reset")
+    TopicDtos.MessageOperation reset(@PathVariable String id,
+            @RequestBody RequestDtos.MessageRegenerateRequest request) {
+        ChatCommandService.Replaced replaced = commands.reset(id, request.commandId(), request.model(),
+                request.thinkingEnabled());
+        return new TopicDtos.MessageOperation(message(replaced.message()),
+                ApiDtoMapper.operation(replaced.operation()));
+    }
+
+    /** §6.4 版本选择：仅移动显示指针，返回切换后的版本。 */
+    @PostMapping("/api/messages/{id}/revisions/{revisionId}/select")
+    MessageDtos.AnswerRevision selectRevision(@PathVariable String id,
+            @PathVariable String revisionId,
+            @RequestBody RequestDtos.CommandRequest request) {
+        return ApiDtoMapper.revision(commands.selectRevision(id, revisionId, request.commandId()));
+    }
+
     private MessageDtos.Message message(Message message) {
         return ApiDtoMapper.message(message, revisions.listForMessage(message.id));
     }

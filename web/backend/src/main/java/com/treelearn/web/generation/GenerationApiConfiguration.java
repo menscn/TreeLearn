@@ -3,6 +3,7 @@ package com.treelearn.web.generation;
 import com.treelearn.ai.prompt.PromptBudget;
 import com.treelearn.web.credential.SecretPort;
 import com.treelearn.web.credential.WindowsCredentialSecretPort;
+import com.treelearn.web.storage.AnswerRevisionStore;
 import com.treelearn.web.storage.BranchStore;
 import com.treelearn.web.storage.JdbcSupport;
 import com.treelearn.web.storage.MessageStore;
@@ -71,9 +72,10 @@ public class GenerationApiConfiguration {
 
     @Bean
     ChatCommandService chatCommandService(TopicStore topics, BranchStore branches, MessageStore messages,
-            OperationStore operations, DesktopGenerationCoordinator coordinator, ProviderStore providers,
+            OperationStore operations, AnswerRevisionStore revisions,
+            DesktopGenerationCoordinator coordinator, ProviderStore providers,
             ModelStore models, SecretPort secrets, PromptBudget budget, Clock clock) {
-        return new ChatCommandService(topics, branches, messages, operations, coordinator, providers,
-                models, secrets, budget, clock);
+        return new ChatCommandService(topics, branches, messages, operations, revisions, coordinator,
+                providers, models, secrets, budget, clock);
     }
 }

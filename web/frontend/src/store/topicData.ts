@@ -2,7 +2,7 @@
 // （api.md §6.2 主题详情、§6.3 分支树/消息/追问、§6.4 取消/重试）。变更类请求一律带
 // 客户端生成的 `commandId`（api.md §4）。响应按契约类型解码，形状漂移由 fixtures 测试守。
 import { api } from '../api/client';
-import type { AnnotationList, Branch, BranchTree, TreeLayoutResponse, Conversation, Message, Operation, ReadingAnchor, Topic, TurnAccepted } from '../api/types';
+import type { AnnotationList, AnswerRevision, Attachment, AttachmentList, Branch, BranchTree, TreeLayoutResponse, Conversation, Message, MessageGenerationRequest, MessageOperation, Operation, ReadingAnchor, Topic, TurnAccepted } from '../api/types';
 
 export function newCommandId(): string {
   const webCrypto = globalThis.crypto;
@@ -63,8 +63,8 @@ export function operationEventsUrl(operationId: string): string {
   return `/api/operations/${operationId}/events`;
 }
 
-export function sendBranchMessage(input: { branchId: string; text: string; quote: string; model: string; thinkingEnabled: boolean }): Promise<TurnAccepted> {
-  return api.post<TurnAccepted>(`/branches/${input.branchId}/messages`, { commandId: newCommandId(), text: input.text, quote: input.quote, attachmentId: null, model: input.model, thinkingEnabled: input.thinkingEnabled });
+export function sendBranchMessage(input: { branchId: string; text: string; quote: string; attachmentId?: string | null; model: string; thinkingEnabled: boolean }): Promise<TurnAccepted> {
+  return api.post<TurnAccepted>(`/branches/${input.branchId}/messages`, { commandId: newCommandId(), text: input.text, quote: input.quote, attachmentId: input.attachmentId ?? null, model: input.model, thinkingEnabled: input.thinkingEnabled });
 }
 
 export function cancelOperation(operationId: string): Promise<Operation> {
@@ -92,4 +92,51 @@ export function createAnnotation(input: AnnotationWriteInput): Promise<Annotatio
 
 export function deleteAnnotation(annotationId: string): Promise<{ deletedAnnotationId: string }> {
   return api.delete<{ deletedAnnotationId: string }>(`/annotations/${annotationId}`, { commandId: newCommandId() });
+}
+
+/** 契约 §6.4：reset 对已显示稳定版本的位置发起新尝试（旧版本保留）。 */
+export function resetMessage(messageId: string, request: MessageGenerationRequest): Promise<MessageOperation> {
+  return api.post<MessageOperation>(`/messages/${messageId}/reset`, request);
+}
+
+/** 契约 §6.4：切换显示版本（仅移动指针），返回切换后的版本。 */
+export function selectRevision(messageId: string, revisionId: string): Promise<AnswerRevision> {
+  return api.post<AnswerRevision>(`/messages/${messageId}/revisions/${revisionId}/select`, { commandId: newCommandId() });
+}
+
+/** 契约 §6.5（T-052 切片）：启动 MESSAGE_TRANSLATION 派生，返回 operation（订阅 SSE 到终态）。 */
+export function startTranslation(revisionId: string): Promise<Operation> {
+  return api.post<Operation>('/derived', { commandId: newCommandId(), kind: 'MESSAGE_TRANSLATION', scopeId: revisionId });
+}
+
+/** 契约 §6.5：读取派生产物（payload 为解析后的 JSON；stale 为基线判定结果）。 */
+export function loadDerivedArtifact(kind: string, scopeId: string, basedOnRevisionId: string): Promise<{ kind: string; scopeId: string; stale: boolean; payload: unknown }> {
+  const query = `?kind=${encodeURIComponent(kind)}&scopeId=${encodeURIComponent(scopeId)}&basedOnRevisionId=${encodeURIComponent(basedOnRevisionId)}`;
+  return api.get(`/derived${query}`);
+}
+
+
+/** 契约 §6.9：上传附件（内容寻址去重），返回含 attachmentId 的完整条目。 */
+export function uploadAttachment(displayName: string, mimeType: string, contentBase64: string): Promise<Attachment> {
+  return api.post<Attachment>('/attachments', { commandId: newCommandId(), displayName, mimeType, contentBase64 });
+}
+
+/** 契约 §6.9：文件管理页列表（含全局用量）。 */
+export function listAttachments(): Promise<AttachmentList> {
+  return api.get<AttachmentList>('/attachments');
+}
+
+/** 契约 §6.9：下载/预览内容（返回 base64，前端负责解码或落 objURL）。 */
+export function loadAttachmentContent(attachmentId: string): Promise<{ attachmentId: string; displayName: string | null; mimeType: string; contentBase64: string }> {
+  return api.get(`/attachments/${attachmentId}/content`);
+}
+
+/** 契约 §6.9：删除（无引用才允许；幂等）。 */
+export function deleteAttachment(attachmentId: string): Promise<{ deletedAttachmentId: string }> {
+  return api.delete<{ deletedAttachmentId: string }>(`/attachments/${attachmentId}`, { commandId: newCommandId() });
+}
+
+/** 契约 §6.9：清理孤儿（无引用附件）并返回清理明细。 */
+export function cleanupOrphanAttachments(): Promise<{ deletedAttachmentIds: string[]; freedBytes: number }> {
+  return api.post<{ deletedAttachmentIds: string[]; freedBytes: number }>('/attachments/cleanup-orphans', { commandId: newCommandId() });
 }

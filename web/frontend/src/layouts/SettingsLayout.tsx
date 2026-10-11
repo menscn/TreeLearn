@@ -2,18 +2,19 @@ import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 import { IconButton } from '../components/IconButton';
-import { Info, KeyRound, SlidersHorizontal } from '../components/icons';
+import { Info, KeyRound, Library, SlidersHorizontal } from '../components/icons';
 import type { TranslationKey } from '../i18n';
 import { useI18n } from '../i18n/I18nProvider';
 import { navigate } from '../platform/router';
 
 // 设置分区导航（任务 T-2026-10-10-039）：icon-only 分区入口 + 内容槽。布局层不得反向
 // 依赖 pages，页面由 Router 经 children 注入。窄窗仍保留图标分区栏，导航始终可达。
-export type SettingsSection = 'providers' | 'model-roles' | 'about';
+export type SettingsSection = 'providers' | 'model-roles' | 'files' | 'about';
 
 const SECTIONS: readonly { id: SettingsSection; path: string; labelKey: TranslationKey; icon: LucideIcon }[] = [
   { id: 'providers', path: '/settings/providers', labelKey: 'settings.sections.providers', icon: KeyRound },
   { id: 'model-roles', path: '/settings/model-roles', labelKey: 'settings.sections.modelRoles', icon: SlidersHorizontal },
+  { id: 'files', path: '/settings/files', labelKey: 'settings.sections.files', icon: Library },
   { id: 'about', path: '/settings/about', labelKey: 'settings.sections.about', icon: Info },
 ];
 
