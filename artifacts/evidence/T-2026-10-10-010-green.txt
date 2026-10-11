@@ -1,0 +1,130 @@
+﻿T-2026-10-10-010 GREEN | command: gradlew.bat :test --rerun-tasks | cwd: web/backend | EXIT_CODE=0
+> Task :core:compileJava
+> Task :tree-layout:compileJava
+> Task :compileJava
+> Task :processResources
+> Task :classes
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+> Task :core:processResources NO-SOURCE
+> Task :core:classes
+> Task :core:jar
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes
+> Task :tree-layout:jar
+Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+
+> Task :test
+
+ReadyEndpointTest > readyEndpointAnswersOverRealHttpOnTheLoopbackPort() PASSED
+
+SharedClasspathTest > sharedCoreModuleIsOnTheCompileAndRuntimeClasspath() PASSED
+
+DatabaseMigratorTest > aFailingStepRollsBackTheWholeChainLeavingNoObjects() PASSED
+
+DatabaseMigratorTest > aMissingStepFailsClosedBeforeAnyStatementRuns() PASSED
+
+DatabaseMigratorTest > downgradeIsRefusedWithAReadableMessage() PASSED
+
+DatabaseMigratorTest > rerunningMigrationOnAnOpenDatabaseIsANoOp() PASSED
+
+DdlLocationGuardTest > ddlAppearsOnlyInDesktopSchema() PASSED
+
+DesktopSchemaConstraintsTest > contextSnapshotsAreImmutableAndDeleteOnlyWithTheirBranch() PASSED
+
+DesktopSchemaConstraintsTest > quoteInvariantRejectsAiQuoteAndEmptyUserQuoteButAcceptsANonEmptyQuote() PASSED
+
+DesktopSchemaConstraintsTest > annotationContainerCheckRejectsMismatchedShapes() PASSED
+
+DesktopSchemaConstraintsTest > modelUniqueIndexIsCaseExact() PASSED
+
+DesktopSchemaConstraintsTest > quoteInvariantAlsoRejectsAQuoteAddedToAnAiRowByUpdate() PASSED
+
+DesktopSchemaConstraintsTest > oneActiveOperationPerBranchWhileTerminalRowsCoexist() PASSED
+
+DesktopSchemaConstraintsTest > deletingATopicCascadesToItsBranchesAndMessages() PASSED
+
+DesktopSchemaConstraintsTest > answerRevisionsAreImmutableAndDeleteOnlyWithTheirMessage() PASSED
+
+DesktopSchemaConstraintsTest > messageRoleAndContentChecksRejectInvalidRows() PASSED
+
+DesktopSchemaConstraintsTest > userMessageContentRefusesUpdate() PASSED
+
+DesktopSchemaConstraintsTest > oneRootBranchPerTopicWhileChildrenRemainInsertable() PASSED
+
+DesktopSchemaConstraintsTest > terminalGenerationOperationRefusesUpdate() PASSED
+
+DesktopSchemaConstraintsTest > legalAnnotationShapesAreAccepted() PASSED
+
+DesktopSchemaConstraintsTest > attachmentParseStateCheckRejectsUnknownState() PASSED
+
+DesktopSchemaFreshInstallTest > connectionFactoryEnforcesForeignKeysAndStaysHealthy() PASSED
+
+DesktopSchemaFreshInstallTest > freshInstallCreatesTheFinalShapeOnRealSqlite() PASSED
+
+ReadingAndUnreadStoreTest > unreadDerivesFromTheSequenceGapAndNeverMovesBackwardsOrPastTheLatest() PASSED
+
+ReadingAndUnreadStoreTest > aBranchWithoutAStoredPositionHasNone() PASSED
+
+ReadingAndUnreadStoreTest > aReadingPositionRoundTripsAndClearsWithItsMessage() PASSED
+
+RevisionAndOrdinalStoreTest > switchingTheActiveRevisionIsReadBackByListForBranch() PASSED
+
+RevisionAndOrdinalStoreTest > gettingAMessageThatDoesNotExistIsEmpty() PASSED
+
+RevisionAndOrdinalStoreTest > blankContentIsRefusedAndTheQuoteTranslatesBothWays() PASSED
+
+RevisionAndOrdinalStoreTest > nextOrdinalIsOneAboveTheHighestStored() PASSED
+
+RevisionAndOrdinalStoreTest > theOrdinalMustBeUniqueWithinABranch() PASSED
+
+RevisionAndOrdinalStoreTest > aDuplicateRevisionNumberIsRefusedByTheStore() PASSED
+
+RevisionAndOrdinalStoreTest > revisionsAreNumberedByTheStoreInAscendingOrder() PASSED
+
+StorageStartupTest > startupCreatesTheDatabaseAndRerunningTheMigrationIsANoOp() PASSED
+
+StorageStartupTest > aDatabaseNewerThanTheProgramStopsTheService() PASSED
+
+TimestampRoundTripTest > messageAndRevisionTimestampsKeepMillisecondPrecision() PASSED
+
+TimestampRoundTripTest > topicsAreListedByRecencyAndTheMillisecondSurvivesTheRoundTrip() PASSED
+
+TopicBranchMessageStoreTest > listForTopicReturnsAPreOrderTreeAndTheNavigatorsAgree() PASSED
+
+TopicBranchMessageStoreTest > theDerivedDisplayTitleFallsBackToTheRootQuestion() PASSED
+
+TopicBranchMessageStoreTest > touchLastVisitedRecordsTheBranchAndTheStamp() PASSED
+
+TopicBranchMessageStoreTest > createWritesTheTopicAndItsRootBranchAtomically() PASSED
+
+TopicBranchMessageStoreTest > clearingTheTitleWritesNull() PASSED
+
+TopicBranchMessageStoreTest > aForkedChildReadsBackWithItsProvenanceAndBirthSnapshot() PASSED
+
+TopicBranchMessageStoreTest > theRootBranchCarriesNoProvenance() PASSED
+
+TopicBranchMessageStoreTest > twoTopicsMayEachCarryTheirOwnSingleRoot() PASSED
+
+TopicBranchMessageStoreTest > renameCollapseArchiveAndRestoreArePersisted() PASSED
+
+TopicBranchMessageStoreTest > aRootBranchCarryingProvenanceColumnsIsRefusedByTheStore() PASSED
+
+TopicBranchMessageStoreTest > aSecondRootBranchInOneTopicIsRefused() PASSED
+
+TopicBranchMessageStoreTest > deleteCascadeRemovesTheWholeTree() PASSED
+
+2026-10-10T19:56:43.647+08:00  INFO 50360 --- [treelearn-web-backend] [ionShutdownHook] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-10-10T19:56:43.653+08:00  INFO 50360 --- [treelearn-web-backend] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/web/backend/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 8s
+8 actionable tasks: 8 executed

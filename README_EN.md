@@ -22,7 +22,7 @@ TreeLearn turns the conversation into **a tree**. Start from a root question; fr
 
 It is **local-first**: no backend, no account, no cloud sync. Everything lives in SQLite on your own device, and the DeepSeek API key is stored only through the Android Keystore.
 
-> **Status: early-stage work in progress.** The `:core` domain layer holds 17 core types; `:app` and `:data` are at skeleton stage; `:ai` and `:tree-layout` have no source yet. Do not expect a usable product.
+> **Status:** the Android client keeps evolving (`:core` holds 29 domain types, `:tree-layout` 12 pure-JVM types; `:app` / `:data` / `:ai` all carry production source). The **Web local edition** (`web/`, added 2026-10-10) is in early development: the loopback service, frontend skeleton and design system are in place, and features land against the consistency matrix. Judge by real run evidence.
 
 ---
 
@@ -59,6 +59,11 @@ It is **local-first**: no backend, no account, no cloud sync. Everything lives i
 :core         ->  Domain model (pure JVM, no android.* imports)
 :tree-layout  ->  Tree geometry (pure JVM)
 ```
+
+> Since 2026-10-10 the `:core` and `:tree-layout` sources live in `web/shared/domain` and
+> `web/shared/tree-layout`; Android and the local Web service (`web/backend`) reference the
+> **same** implementation through projectDir (project and package names unchanged; structure
+> guard: `web/scripts/check-shared-modules.ps1`).
 
 | Module | Responsibility | Explicitly forbidden |
 | :--- | :--- | :--- |
@@ -108,6 +113,23 @@ cd android
 
 See [`android/README.md`](android/README.md) for common commands, release signing, and DeepSeek key configuration.
 
+### Web local edition (localhost, data independent from the phone)
+
+Start the local service and use TreeLearn in a browser, with no phone or emulator involved:
+
+```powershell
+# Backend (loopback 127.0.0.1:8733)
+powershell -NoProfile -ExecutionPolicy Bypass -File web/scripts/start-backend.ps1
+
+# Frontend dev entry (http://127.0.0.1:5173, /api proxied to 8733)
+cd web/frontend; pnpm install; pnpm dev
+
+# Stop the backend (by the 127.0.0.1:8733 listener; idempotent when already free)
+powershell -NoProfile -ExecutionPolicy Bypass -File web/scripts/stop-backend.ps1
+```
+
+Full start/stop/guard instructions live in [`web/README.md`](web/README.md); the two sides never sync, and the desktop data directory will be documented there once the storage task lands.
+
 > **Release signing:** the keystore lives outside the repository. Credentials are read from process environment variables (`TREELEARN_KEYSTORE_PATH`, etc.), falling back to the gitignored `android/keystore.properties`. Keys and passphrases never enter the repository, logs, APK, or delivery reports.
 
 ---
@@ -116,13 +138,19 @@ See [`android/README.md`](android/README.md) for common commands, release signin
 
 ```text
 Treelearn/
-├─ android/               Android client (multi-module Gradle project)
+├─ android/               Android client (multi-module Gradle; :core/:tree-layout point at web/shared)
 │  ├─ app/                UI layer
-│  ├─ core/               Domain layer (pure JVM)
+│  ├─ core/               Domain layer (source moved to web/shared/domain)
 │  ├─ data/               Local persistence
 │  ├─ ai/                 DeepSeek gateway
-│  ├─ tree-layout/        Tree layout math
+│  ├─ tree-layout/        Tree layout math (source moved to web/shared/tree-layout)
 │  └─ scripts/            Guard and dev scripts
+├─ web/                   Web local edition (React client + local Java service + shared pure-JVM modules)
+│  ├─ frontend/            React + TypeScript + Vite client
+│  ├─ backend/             Local Spring Boot service (loopback 8733)
+│  ├─ shared/              Shared pure-Java modules (single implementation)
+│  ├─ scripts/             Start/stop scripts and structure guards
+│  └─ README.md            Authoritative start/stop guide for the Web edition
 ├─ Docs/                  Requirements / PRD / UX / technical design
 ├─ artifacts/             Guard and acceptance evidence
 └─ .trae/                 Harness rules, roles, and tasks

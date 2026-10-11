@@ -1,0 +1,15 @@
+{
+  "scenario": "malformed-json",
+  "note": "畸形 JSON：无法解析为 JSON 对象 → PARSE_FAILED；已派发的增量保留，不半应用之后的帧。",
+  "lines": [
+    "data: {\"choices\":[{\"delta\":{\"content\":\"先\"}}]}",
+    "",
+    "data: {oops",
+    ""
+  ],
+  "expectedEvents": [
+    { "reasoningChunk": "", "contentChunk": "先" }
+  ],
+  "expectedTerminal": "FAILED",
+  "expectedErrorKind": "PARSE_FAILED"
+}

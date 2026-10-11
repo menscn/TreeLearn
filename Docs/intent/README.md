@@ -30,6 +30,8 @@
 
 ## 交接
 
+当前已确认的 Web 本地版范围与设计交付见 [2026-10-10 意图](INTENT-2026-10-10-local-web-edition.md)；两端数据独立，开发资料从 [AI 交接入口](../05-technical-design/TreeLearn_Web本地版_AI开发交接入口.md)读取。
+
 - 模板：`.trae/templates/INTENT.md`
 - 产出角色：`intent-capturer`（定义在 `.trae/agents/`）
 - 收敛判据：`pm-discovery`（定义在 `.trae/skills/`）

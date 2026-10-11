@@ -1,0 +1,8 @@
+﻿=== release HTTP checks (service: java -jar bootJar; dist hosted same-origin on 127.0.0.1:8733) ===
+ROOT_SPA | http://127.0.0.1:8733/ | HTTP 200 | contentType=text/html | bytes=403
+DEEP_ROUTE | http://127.0.0.1:8733/library | HTTP 200 | contentType=text/html | bytes=403
+TOPIC_ROUTE | http://127.0.0.1:8733/topic/11111111-1111-1111-1111-111111111111 | HTTP 200 | contentType=text/html | bytes=403
+STATIC_ASSET | http://127.0.0.1:8733/assets/index-DpDlvT5G.js | HTTP 200 | contentType=text/javascript | bytes=275846
+API_READY | http://127.0.0.1:8733/api/health/ready | HTTP 200 | contentType=application/json | bytes=52
+API_TOPICS | http://127.0.0.1:8733/api/topics | HTTP 200 | contentType=application/json | bytes=2
+API_UNKNOWN_404 | http://127.0.0.1:8733/api/does-not-exist | HTTP 404 | body={"error":{"code":"NOT_FOUND","params":{"resource":"endpoint"},"retryable":false},"requestId":"9c1156e0-6a9f-4224-84bf-0fc4e137842b"}

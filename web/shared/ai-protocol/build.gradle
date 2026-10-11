@@ -1,0 +1,33 @@
+// :ai-protocol — portable DeepSeek request/prompt/SSE protocol core.
+// Pure Java on purpose: no android.*, no org.json, no third-party HTTP client. The platform
+// pieces (JsonWriter body encoder, org.json decoders, android.util.Log, the socket factory) stay
+// in android/ai and are wired through the ports declared here. Enforced by verifyDependencyDirection.
+plugins {
+    id 'java-library'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 17
+    options.encoding = 'UTF-8'
+}
+
+dependencies {
+    // Terms in the public signatures (Guard, GenerationModel, PromptPurpose, PromptSpec, ContextPlan,
+    // DomainResult) are :core types, so this is an api dependency, not implementation.
+    api project(':core')
+
+    testImplementation 'junit:junit:4.13.2'
+}
+
+tasks.named('test') {
+    useJUnit()
+    testLogging {
+        events 'passed', 'failed', 'skipped'
+        exceptionFormat 'full'
+    }
+}

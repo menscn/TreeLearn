@@ -1,0 +1,9 @@
+T-2026-10-10-013 无明文兜底路径证据
+命令: Select-String -Path web/backend/src/main/java/com/treelearn/web/credential/*.java -Pattern 'Files\.write|FileOutputStream|FileWriter|PrintWriter|RandomAccessFile|Files\.newOutputStream|writeString|import java\.io'
+MATCHES=0
+(无命中：凭据包无任何文件写入 API、无 java.io 导入；失败只抛类型化 SecretAccessException)
+
+补充：日志 API 扫描
+命令: Select-String -Path ...credential/*.java -Pattern 'Logger|log\.|System\.out|System\.err'
+MATCHES=0
+(无命中：凭据包不主动打日志，秘密不可能进入日志)

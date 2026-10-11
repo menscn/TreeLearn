@@ -1,0 +1,54 @@
+// 工作区数据访问（任务 T-2026-10-10-031）：只经契约客户端 `api` 取数/下发命令
+// （api.md §6.2 主题详情、§6.3 分支树/消息/追问、§6.4 取消/重试）。变更类请求一律带
+// 客户端生成的 `commandId`（api.md §4）。响应按契约类型解码，形状漂移由 fixtures 测试守。
+import { api } from '../api/client';
+import type { Branch, BranchTree, Conversation, Message, Operation, Topic, TurnAccepted } from '../api/types';
+
+export function newCommandId(): string {
+  const webCrypto = globalThis.crypto;
+  if (webCrypto !== undefined && typeof webCrypto.randomUUID === 'function') return webCrypto.randomUUID();
+  return `cmd-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+}
+
+export function loadTopic(topicId: string): Promise<Topic> {
+  return api.get<Topic>(`/topics/${topicId}`);
+}
+
+export function loadBranchTree(topicId: string): Promise<BranchTree> {
+  return api.get<BranchTree>(`/topics/${topicId}/branches`);
+}
+
+export function loadConversation(branchId: string): Promise<Conversation> {
+  return api.get<Conversation>(`/branches/${branchId}/messages`);
+}
+
+// 根分支：`parentBranchId` 与 `source` 恰好在根分支同时为 null（api.md §5.2）。
+export function rootBranch(tree: BranchTree): Branch | null {
+  return tree.nodes.find((node) => node.parentBranchId === null && node.source === null) ?? tree.nodes.find((node) => node.parentBranchId === null) ?? null;
+}
+
+// 当前分支：显式查询参数优先，其次主题的 `lastVisitedBranchId`，最后回落到根分支。
+export function resolveBranch(tree: BranchTree, preferredId: string | null): Branch | null {
+  if (preferredId !== null) {
+    const preferred = tree.nodes.find((node) => node.id === preferredId);
+    if (preferred !== undefined) return preferred;
+  }
+  return rootBranch(tree);
+}
+
+// 契约 §5.6：操作的 `sseUrl` 固定为 `/api/operations/{id}/events`。
+export function operationEventsUrl(operationId: string): string {
+  return `/api/operations/${operationId}/events`;
+}
+
+export function sendBranchMessage(input: { branchId: string; text: string; quote: string; model: string; thinkingEnabled: boolean }): Promise<TurnAccepted> {
+  return api.post<TurnAccepted>(`/branches/${input.branchId}/messages`, { commandId: newCommandId(), text: input.text, quote: input.quote, attachmentId: null, model: input.model, thinkingEnabled: input.thinkingEnabled });
+}
+
+export function cancelOperation(operationId: string): Promise<Operation> {
+  return api.post<Operation>(`/operations/${operationId}/cancel`, { commandId: newCommandId() });
+}
+
+export function retryMessage(messageId: string, input: { model: string; thinkingEnabled: boolean }): Promise<{ message: Message; operation: Operation }> {
+  return api.post<{ message: Message; operation: Operation }>(`/messages/${messageId}/retry`, { commandId: newCommandId(), model: input.model, thinkingEnabled: input.thinkingEnabled });
+}

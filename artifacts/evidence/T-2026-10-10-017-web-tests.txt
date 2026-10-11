@@ -1,0 +1,287 @@
+﻿> Task :core:compileJava UP-TO-DATE
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :compileJava
+> Task :processResources UP-TO-DATE
+> Task :classes
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+
+> Task :test
+
+InterruptionSweeperTest > sweepSettlesEveryActiveRowAcrossBranchesInOnePass() PASSED
+
+InterruptionSweeperTest > sweepSettlesAStreamingAttemptToInterruptedKeepingItsPartialContent() PASSED
+
+InterruptionSweeperTest > aStagedRowTakesTheDomainsRecoveryTarget() PASSED
+
+InterruptionSweeperTest > startupMigratesThenSweepsBeforeTheContextIsReady() PASSED
+
+InterruptionSweeperTest > sweepIsIdempotentAndLeavesTerminalRowsAlone() PASSED
+
+OperationSnapshotArtifactStoreTest > aSecondInFlightAttemptForOneBranchIsRefusedByThePartialIndex() PASSED
+
+OperationSnapshotArtifactStoreTest > anArtifactRoundTripsAndASecondInsertForThePairIsRefused() FAILED
+    com.treelearn.web.storage.StorageException: update failed: INSERT INTO ai_artifacts(id, kind, scope_id, prompt_purpose, prompt_policy_version, payload, based_on_revision_id, input_digest, created_at, updated_at) SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM ai_artifacts WHERE kind = ? AND scope_id = ?)
+        at app//com.treelearn.web.storage.JdbcSupport.update(JdbcSupport.java:93)
+        at app//com.treelearn.web.storage.JdbcSupport.lambda$update$3(JdbcSupport.java:60)
+        at app//com.treelearn.web.storage.JdbcSupport.withConnection(JdbcSupport.java:117)
+        at app//com.treelearn.web.storage.JdbcSupport.update(JdbcSupport.java:60)
+        at app//com.treelearn.web.storage.ArtifactStore.insert(ArtifactStore.java:82)
+        at app//com.treelearn.web.storage.OperationSnapshotArtifactStoreTest.anArtifactRoundTripsAndASecondInsertForThePairIsRefused(OperationSnapshotArtifactStoreTest.java:185)
+
+        Caused by:
+        org.sqlite.SQLiteException: [SQLITE_CONSTRAINT_FOREIGNKEY] A foreign key constraint failed (FOREIGN KEY constraint failed)
+            at app//org.sqlite.core.DB.newSQLException(DB.java:1182)
+            at app//org.sqlite.core.DB.newSQLException(DB.java:1193)
+            at app//org.sqlite.core.DB.execute(DB.java:988)
+            at app//org.sqlite.core.DB.executeUpdate(DB.java:1057)
+            at app//org.sqlite.jdbc3.JDBC3PreparedStatement.lambda$executeLargeUpdate$2(JDBC3PreparedStatement.java:130)
+            at app//org.sqlite.jdbc3.JDBC3Statement.withConnectionTimeout(JDBC3Statement.java:464)
+            at app//org.sqlite.jdbc3.JDBC3PreparedStatement.executeLargeUpdate(JDBC3PreparedStatement.java:125)
+            at app//org.sqlite.jdbc3.JDBC3PreparedStatement.executeUpdate(JDBC3PreparedStatement.java:106)
+            at app//com.treelearn.web.storage.JdbcSupport.update(JdbcSupport.java:91)
+            ... 5 more
+
+OperationSnapshotArtifactStoreTest > progressAppendsItsDeltasAndMovesTheState() PASSED
+
+OperationSnapshotArtifactStoreTest > aSecondBirthSnapshotForOneBranchIsRefused() PASSED
+
+OperationSnapshotArtifactStoreTest > aBirthSnapshotRoundTripsThroughItsCodec() PASSED
+
+OperationSnapshotArtifactStoreTest > replaceSwapsTheStoredArtifactAndDeleteCleansTheScope() FAILED
+    com.treelearn.web.storage.StorageException: update failed: INSERT INTO ai_artifacts(id, kind, scope_id, prompt_purpose, prompt_policy_version, payload, based_on_revision_id, input_digest, created_at, updated_at) SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM ai_artifacts WHERE kind = ? AND scope_id = ?)
+        at app//com.treelearn.web.storage.JdbcSupport.update(JdbcSupport.java:93)
+        at app//com.treelearn.web.storage.JdbcSupport.lambda$update$3(JdbcSupport.java:60)
+        at app//com.treelearn.web.storage.JdbcSupport.withConnection(JdbcSupport.java:117)
+        at app//com.treelearn.web.storage.JdbcSupport.update(JdbcSupport.java:60)
+        at app//com.treelearn.web.storage.ArtifactStore.insert(ArtifactStore.java:82)
+        at app//com.treelearn.web.storage.OperationSnapshotArtifactStoreTest.replaceSwapsTheStoredArtifactAndDeleteCleansTheScope(OperationSnapshotArtifactStoreTest.java:239)
+
+        Caused by:
+        org.sqlite.SQLiteException: [SQLITE_CONSTRAINT_FOREIGNKEY] A foreign key constraint failed (FOREIGN KEY constraint failed)
+            at app//org.sqlite.core.DB.newSQLException(DB.java:1182)
+            at app//org.sqlite.core.DB.newSQLException(DB.java:1193)
+            at app//org.sqlite.core.DB.execute(DB.java:988)
+            at app//org.sqlite.core.DB.executeUpdate(DB.java:1057)
+            at app//org.sqlite.jdbc3.JDBC3PreparedStatement.lambda$executeLargeUpdate$2(JDBC3PreparedStatement.java:130)
+            at app//org.sqlite.jdbc3.JDBC3Statement.withConnectionTimeout(JDBC3Statement.java:464)
+            at app//org.sqlite.jdbc3.JDBC3PreparedStatement.executeLargeUpdate(JDBC3PreparedStatement.java:125)
+            at app//org.sqlite.jdbc3.JDBC3PreparedStatement.executeUpdate(JDBC3PreparedStatement.java:106)
+            at app//com.treelearn.web.storage.JdbcSupport.update(JdbcSupport.java:91)
+            ... 5 more
+
+OperationSnapshotArtifactStoreTest > applyIfBaselineMatchesUpdatesInPlaceAndDropsAStaleWrite() FAILED
+    com.treelearn.web.storage.StorageException: update failed: INSERT INTO ai_artifacts(id, kind, scope_id, prompt_purpose, prompt_policy_version, payload, based_on_revision_id, input_digest, created_at, updated_at) SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM ai_artifacts WHERE kind = ? AND scope_id = ?)
+        at app//com.treelearn.web.storage.JdbcSupport.update(JdbcSupport.java:93)
+        at app//com.treelearn.web.storage.JdbcSupport.lambda$update$3(JdbcSupport.java:60)
+        at app//com.treelearn.web.storage.JdbcSupport.withConnection(JdbcSupport.java:117)
+        at app//com.treelearn.web.storage.JdbcSupport.update(JdbcSupport.java:60)
+        at app//com.treelearn.web.storage.ArtifactStore.insert(ArtifactStore.java:82)
+        at app//com.treelearn.web.storage.OperationSnapshotArtifactStoreTest.applyIfBaselineMatchesUpdatesInPlaceAndDropsAStaleWrite(OperationSnapshotArtifactStoreTest.java:216)
+
+        Caused by:
+        org.sqlite.SQLiteException: [SQLITE_CONSTRAINT_FOREIGNKEY] A foreign key constraint failed (FOREIGN KEY constraint failed)
+            at app//org.sqlite.core.DB.newSQLException(DB.java:1182)
+            at app//org.sqlite.core.DB.newSQLException(DB.java:1193)
+            at app//org.sqlite.core.DB.execute(DB.java:988)
+            at app//org.sqlite.core.DB.executeUpdate(DB.java:1057)
+            at app//org.sqlite.jdbc3.JDBC3PreparedStatement.lambda$executeLargeUpdate$2(JDBC3PreparedStatement.java:130)
+            at app//org.sqlite.jdbc3.JDBC3Statement.withConnectionTimeout(JDBC3Statement.java:464)
+            at app//org.sqlite.jdbc3.JDBC3PreparedStatement.executeLargeUpdate(JDBC3PreparedStatement.java:125)
+            at app//org.sqlite.jdbc3.JDBC3PreparedStatement.executeUpdate(JDBC3PreparedStatement.java:106)
+            at app//com.treelearn.web.storage.JdbcSupport.update(JdbcSupport.java:91)
+            ... 5 more
+
+OperationSnapshotArtifactStoreTest > activeForBranchSeesOnlyTheInFlightAttemptAndForgetsItOnceTerminal() PASSED
+
+OperationSnapshotArtifactStoreTest > markTerminalFollowsTheDomainsTransitionRule() PASSED
+
+OperationSnapshotArtifactStoreTest > aStaleInputDoesNotMasqueradeAsTheCurrentResult() FAILED
+    com.treelearn.web.storage.StorageException: update failed: INSERT INTO ai_artifacts(id, kind, scope_id, prompt_purpose, prompt_policy_version, payload, based_on_revision_id, input_digest, created_at, updated_at) SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM ai_artifacts WHERE kind = ? AND scope_id = ?)
+        at app//com.treelearn.web.storage.JdbcSupport.update(JdbcSupport.java:93)
+        at app//com.treelearn.web.storage.JdbcSupport.lambda$update$3(JdbcSupport.java:60)
+        at app//com.treelearn.web.storage.JdbcSupport.withConnection(JdbcSupport.java:117)
+        at app//com.treelearn.web.storage.JdbcSupport.update(JdbcSupport.java:60)
+        at app//com.treelearn.web.storage.ArtifactStore.insert(ArtifactStore.java:82)
+        at app//com.treelearn.web.storage.OperationSnapshotArtifactStoreTest.aStaleInputDoesNotMasqueradeAsTheCurrentResult(OperationSnapshotArtifactStoreTest.java:203)
+
+        Caused by:
+        org.sqlite.SQLiteException: [SQLITE_CONSTRAINT_FOREIGNKEY] A foreign key constraint failed (FOREIGN KEY constraint failed)
+            at app//org.sqlite.core.DB.newSQLException(DB.java:1182)
+            at app//org.sqlite.core.DB.newSQLException(DB.java:1193)
+            at app//org.sqlite.core.DB.execute(DB.java:988)
+            at app//org.sqlite.core.DB.executeUpdate(DB.java:1057)
+            at app//org.sqlite.jdbc3.JDBC3PreparedStatement.lambda$executeLargeUpdate$2(JDBC3PreparedStatement.java:130)
+            at app//org.sqlite.jdbc3.JDBC3Statement.withConnectionTimeout(JDBC3Statement.java:464)
+            at app//org.sqlite.jdbc3.JDBC3PreparedStatement.executeLargeUpdate(JDBC3PreparedStatement.java:125)
+            at app//org.sqlite.jdbc3.JDBC3PreparedStatement.executeUpdate(JDBC3PreparedStatement.java:106)
+            at app//com.treelearn.web.storage.JdbcSupport.update(JdbcSupport.java:91)
+            ... 5 more
+
+OperationSnapshotArtifactStoreTest > aTerminalRowRefusesEveryLaterWrite() PASSED
+
+OperationSnapshotArtifactStoreTest > aFreshAttemptIsStoredAsStagedAndLooksUpByIdentityAndCommandId() PASSED
+
+OperationSnapshotArtifactStoreTest > aSnapshotWhosePayloadDoesNotHashToItsDigestIsRefused() PASSED
+
+gradlew.bat : Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because boot
+strap classpath has been appended
+At line:15 char:1113
++ ... ipgrep\bin'; $out = & .\gradlew.bat test --console=plain 2>&1; $c=$LA ...
++                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Java HotSpot(TM...s been appended:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+> Task :test
+
+ReadyEndpointTest > readyEndpointAnswersOverRealHttpOnTheLoopbackPort() PASSED
+
+SharedClasspathTest > sharedCoreModuleIsOnTheCompileAndRuntimeClasspath() PASSED
+
+DatabaseMigratorTest > aFailingStepRollsBackTheWholeChainLeavingNoObjects() PASSED
+
+DatabaseMigratorTest > aMissingStepFailsClosedBeforeAnyStatementRuns() PASSED
+
+DatabaseMigratorTest > downgradeIsRefusedWithAReadableMessage() PASSED
+
+DatabaseMigratorTest > rerunningMigrationOnAnOpenDatabaseIsANoOp() PASSED
+
+DdlLocationGuardTest > ddlAppearsOnlyInDesktopSchema() PASSED
+
+DesktopSchemaConstraintsTest > contextSnapshotsAreImmutableAndDeleteOnlyWithTheirBranch() PASSED
+
+DesktopSchemaConstraintsTest > quoteInvariantRejectsAiQuoteAndEmptyUserQuoteButAcceptsANonEmptyQuote() PASSED
+
+DesktopSchemaConstraintsTest > annotationContainerCheckRejectsMismatchedShapes() PASSED
+
+DesktopSchemaConstraintsTest > modelUniqueIndexIsCaseExact() PASSED
+
+DesktopSchemaConstraintsTest > quoteInvariantAlsoRejectsAQuoteAddedToAnAiRowByUpdate() PASSED
+
+DesktopSchemaConstraintsTest > oneActiveOperationPerBranchWhileTerminalRowsCoexist() PASSED
+
+DesktopSchemaConstraintsTest > deletingATopicCascadesToItsBranchesAndMessages() PASSED
+
+DesktopSchemaConstraintsTest > answerRevisionsAreImmutableAndDeleteOnlyWithTheirMessage() PASSED
+
+DesktopSchemaConstraintsTest > messageRoleAndContentChecksRejectInvalidRows() PASSED
+
+DesktopSchemaConstraintsTest > userMessageContentRefusesUpdate() PASSED
+
+DesktopSchemaConstraintsTest > oneRootBranchPerTopicWhileChildrenRemainInsertable() PASSED
+
+DesktopSchemaConstraintsTest > terminalGenerationOperationRefusesUpdate() PASSED
+
+DesktopSchemaConstraintsTest > legalAnnotationShapesAreAccepted() PASSED
+
+DesktopSchemaConstraintsTest > attachmentParseStateCheckRejectsUnknownState() PASSED
+
+DesktopSchemaFreshInstallTest > connectionFactoryEnforcesForeignKeysAndStaysHealthy() PASSED
+
+DesktopSchemaFreshInstallTest > freshInstallCreatesTheFinalShapeOnRealSqlite() PASSED
+
+ReadingAndUnreadStoreTest > unreadDerivesFromTheSequenceGapAndNeverMovesBackwardsOrPastTheLatest() PASSED
+
+ReadingAndUnreadStoreTest > aBranchWithoutAStoredPositionHasNone() PASSED
+
+ReadingAndUnreadStoreTest > aReadingPositionRoundTripsAndClearsWithItsMessage() PASSED
+
+RevisionAndOrdinalStoreTest > switchingTheActiveRevisionIsReadBackByListForBranch() PASSED
+
+RevisionAndOrdinalStoreTest > switchingTheActiveRevisionWhileAnAttemptIsRunningIsRefused() PASSED
+
+RevisionAndOrdinalStoreTest > gettingAMessageThatDoesNotExistIsEmpty() PASSED
+
+RevisionAndOrdinalStoreTest > blankContentIsRefusedAndTheQuoteTranslatesBothWays() PASSED
+
+RevisionAndOrdinalStoreTest > nextOrdinalIsOneAboveTheHighestStored() PASSED
+
+RevisionAndOrdinalStoreTest > switchingTheActiveRevisionOfAUserPositionIsRefused() PASSED
+
+RevisionAndOrdinalStoreTest > bindingASecondAttemptWhileOneIsRunningIsRefused() PASSED
+
+RevisionAndOrdinalStoreTest > theOrdinalMustBeUniqueWithinABranch() PASSED
+
+RevisionAndOrdinalStoreTest > aDuplicateRevisionNumberIsRefusedByTheStore() PASSED
+
+RevisionAndOrdinalStoreTest > revisionsAreNumberedByTheStoreInAscendingOrder() PASSED
+
+RevisionAndOrdinalStoreTest > reactivatingTheRevisionAlreadyDisplayedIsRefusedAsTheDomainDoes() PASSED
+
+StorageStartupTest > startupCreatesTheDatabaseAndRerunningTheMigrationIsANoOp() PASSED
+
+StorageStartupTest > aDatabaseNewerThanTheProgramStopsTheService() PASSED
+
+TimestampRoundTripTest > messageAndRevisionTimestampsKeepMillisecondPrecision() PASSED
+
+TimestampRoundTripTest > topicsAreListedByRecencyAndTheMillisecondSurvivesTheRoundTrip() PASSED
+
+TopicBranchMessageStoreTest > theDerivedDisplayTitleFallsBackToTheRootQuestion() PASSED
+
+TopicBranchMessageStoreTest > touchLastVisitedRecordsTheBranchAndTheStamp() PASSED
+
+TopicBranchMessageStoreTest > createWritesTheTopicAndItsRootBranchAtomically() PASSED
+
+TopicBranchMessageStoreTest > clearingTheTitleWritesNull() PASSED
+
+TopicBranchMessageStoreTest > aForkedChildReadsBackWithItsProvenanceAndBirthSnapshot() PASSED
+
+TopicBranchMessageStoreTest > theRootBranchCarriesNoProvenance() PASSED
+
+TopicBranchMessageStoreTest > twoTopicsMayEachCarryTheirOwnSingleRoot() PASSED
+
+TopicBranchMessageStoreTest > renameCollapseArchiveAndRestoreArePersisted() PASSED
+
+TopicBranchMessageStoreTest > aRootBranchCarryingProvenanceColumnsIsRefusedByTheStore() PASSED
+
+TopicBranchMessageStoreTest > aSecondRootBranchInOneTopicIsRefused() PASSED
+
+TopicBranchMessageStoreTest > deleteCascadeRemovesTheWholeTree() PASSED
+
+TopicBranchMessageStoreTest > listForTopicReturnsBranchesInCreationOrderAndTheNavigatorsAgree() PASSED
+
+2026-10-10T20:48:13.242+08:00  INFO 12476 --- [treelearn-web-backend] [ionShutdownHook] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-10-10T20:48:13.244+08:00  INFO 12476 --- [treelearn-web-backend] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+
+> Task :test FAILED
+
+71 tests completed, 4 failed
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/web/backend/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///D:/Project/Android/Treelearn/web/backend/build/reports/tests/tes
+t/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 7s
+8 actionable tasks: 2 executed, 6 up-to-date
+EXITCODE=1
+
+=== ATTRIBUTION (T-2026-10-10-017) ===
+The 4 failures are all com.treelearn.web.storage.OperationSnapshotArtifactStoreTest (SQLite FK
+constraint on ai_artifacts), a test owned by the CONCURRENT in-flight task T-2026-10-10-011
+(desktop-dao-operation-snapshot-artifact). Its uncommitted files are present in this working tree:
+web/backend/src/main/java/com/treelearn/web/storage/{OperationStore,ArtifactStore,SnapshotStore,
+InterruptionSweeper}.java + modified StorageConfiguration.java + the new test file. Its own RED
+evidence is artifacts/evidence/T-2026-10-10-011-red.txt. T-2026-10-10-017 changed NO web/backend/src
+file. The shared modules pass in the same web build: see T-2026-10-10-017-web-shared-tests.txt (exit 0).

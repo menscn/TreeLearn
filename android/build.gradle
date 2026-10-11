@@ -19,19 +19,22 @@ apply from: 'gradle/verify-no-kotlin.gradle'
 //
 //   :app          -> :core :data :ai :tree-layout
 //   :data  :ai    -> :core
+//   :ai           -> :core :ai-protocol
+//   :ai-protocol  -> :core
 //   :core         -> (nothing; pure JVM, no Android at all)
 //   :tree-layout  -> (nothing; pure JVM, no Android at all)
 // ---------------------------------------------------------------------------
 def moduleDependencyRules = [
         ':core'       : [],
         ':tree-layout': [],
+        ':ai-protocol': [':core'],
         ':data'       : [':core'],
-        ':ai'         : [':core'],
+        ':ai'         : [':core', ':ai-protocol'],
         ':app'        : [':core', ':data', ':ai', ':tree-layout'],
 ]
 
 // Modules that must stay free of the Android platform.
-def pureJvmModules = [':core', ':tree-layout']
+def pureJvmModules = [':core', ':tree-layout', ':ai-protocol']
 
 // Every configuration that can carry a project dependency. Checking only
 // implementation/api misses `compileOnly project(':app')`, which is just as much

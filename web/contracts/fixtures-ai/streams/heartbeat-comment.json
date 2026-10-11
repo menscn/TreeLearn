@@ -1,0 +1,18 @@
+{
+  "scenario": "heartbeat-comment",
+  "note": "心跳注释行（以 ':' 开头）与未知字段被忽略，不产生事件，也不影响结束判定。",
+  "lines": [
+    ": keep-alive",
+    "",
+    "data: {\"choices\":[{\"delta\":{\"content\":\"答\"}}]}",
+    ": ping",
+    "",
+    "data: [DONE]",
+    ""
+  ],
+  "expectedEvents": [
+    { "reasoningChunk": "", "contentChunk": "答" }
+  ],
+  "expectedTerminal": "COMPLETED",
+  "expectedErrorKind": null
+}

@@ -22,7 +22,7 @@ TreeLearn 的做法是：**把对话变成一棵树**。从一个根问题开始
 
 它同时是一款 **local-first（本地优先）** 应用：没有后端、没有账号、没有云同步。所有数据都在你自己手机的 SQLite 里，DeepSeek API Key 只经过 Android Keystore 加密保存。
 
-> **项目状态：早期开发中（WIP）。** 领域层 `:core` 已落地 17 个核心类型，`:app` 与 `:data` 处于骨架阶段，`:ai` 与 `:tree-layout` 尚未填入源码。请勿作为可用产品期待。
+> **项目状态**：Android 客户端持续迭代中（`:core` 29 个领域类型、`:tree-layout` 12 个纯 JVM 类型，`:app` / `:data` / `:ai` 均有生产源码）；**Web 本地版**（`web/`，2026-10-10 新增）处于早期开发：本机服务与前端骨架、设计系统已就绪，功能按功能一致性矩阵逐项交付。请以实际运行证据为准。
 
 ---
 
@@ -59,6 +59,10 @@ TreeLearn 的做法是：**把对话变成一棵树**。从一个根问题开始
 :core         ->  领域模型（纯 JVM，不引用 android.*）
 :tree-layout  ->  树几何计算（纯 JVM）
 ```
+
+> `:core` 与 `:tree-layout` 的源码自 2026-10-10 起位于 `web/shared/domain`、`web/shared/tree-layout`，
+> Android 与其 Web 本机服务（`web/backend`）以 projectDir 引用**同一份**实现（项目名与包名不变；
+> 结构守卫 `web/scripts/check-shared-modules.ps1`）。
 
 | 模块 | 职责 | 明确禁止 |
 | :--- | :--- | :--- |
@@ -112,6 +116,23 @@ APK 版本号统一维护在 `android/version.properties`，从 `1.0.0` 开始�
 
 Android 常用命令、Release 签名与 DeepSeek 密钥配置见 [`android/README.md`](android/README.md)。
 
+### Web 本地版（localhost，数据与手机版相互独立）
+
+电脑启动本机服务后通过浏览器使用知芽，普通使用不依赖手机或模拟器：
+
+```powershell
+# 后端（loopback 127.0.0.1:8733）
+powershell -NoProfile -ExecutionPolicy Bypass -File web/scripts/start-backend.ps1
+
+# 前端开发口（http://127.0.0.1:5173，/api 代理到 8733）
+cd web/frontend; pnpm install; pnpm dev
+
+# 停止后端（按 127.0.0.1:8733 监听进程停止；空闲时幂等成功）
+powershell -NoProfile -ExecutionPolicy Bypass -File web/scripts/stop-backend.ps1
+```
+
+完整启动/停止/守卫说明见 [`web/README.md`](web/README.md)；两端数据不同步，桌面数据目录在存储任务落地后写入该文件。
+
 > **Release 签名说明**：keystore 存放于仓库之外，凭据只从进程环境变量读取（`TREELEARN_KEYSTORE_PATH` 等），其次读取已被 gitignore 的 `android/keystore.properties`。密钥与口令不进入仓库、日志、APK 或交付报告。
 
 ---
@@ -120,13 +141,19 @@ Android 常用命令、Release 签名与 DeepSeek 密钥配置见 [`android/READ
 
 ```text
 Treelearn/
-├─ android/               Android 客户端（Gradle 多模块工程）
+├─ android/               Android 客户端（Gradle 多模块工程；:core/:tree-layout 指向 web/shared）
 │  ├─ app/                UI 层
-│  ├─ core/               领域层（纯 JVM）
+│  ├─ core/               领域层（源已迁 web/shared/domain）
 │  ├─ data/               本地持久化
 │  ├─ ai/                 DeepSeek 网关
-│  ├─ tree-layout/        树布局计算
+│  ├─ tree-layout/        树布局计算（源已迁 web/shared/tree-layout）
 │  └─ scripts/            守门与开发脚本
+├─ web/                   Web 本地版（React 前端 + 本机 Java 服务 + 共享纯 JVM 构件）
+│  ├─ frontend/            React + TypeScript + Vite 客户端
+│  ├─ backend/             本机 Spring Boot 服务（loopback 8733）
+│  ├─ shared/              两端共享的纯 Java 构件（唯一实现）
+│  ├─ scripts/             启停脚本与结构守卫
+│  └─ README.md            Web 本地版启动说明（权威）
 ├─ Docs/                  需求 / PRD / UX / 技术设计文档
 ├─ artifacts/             守门与验收证据
 └─ .trae/                 Harness 工程规则、角色与任务

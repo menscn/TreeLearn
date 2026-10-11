@@ -1,0 +1,18 @@
+{
+  "scenario": "normal-reasoning-and-answer",
+  "note": "正常流：先推理后回答，两条增量各成一次事件，[DONE] 结束；对照 Android ProviderJson.Deltas 的双通道分离。",
+  "lines": [
+    "data: {\"choices\":[{\"delta\":{\"reasoning_content\":\"先想\"}}]}",
+    "",
+    "data: {\"choices\":[{\"delta\":{\"content\":\"答案\"}}]}",
+    "",
+    "data: [DONE]",
+    ""
+  ],
+  "expectedEvents": [
+    { "reasoningChunk": "先想", "contentChunk": "" },
+    { "reasoningChunk": "", "contentChunk": "答案" }
+  ],
+  "expectedTerminal": "COMPLETED",
+  "expectedErrorKind": null
+}

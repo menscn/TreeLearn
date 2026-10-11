@@ -1,0 +1,17 @@
+{
+  "scenario": "empty-and-role-only",
+  "note": "无内容增量：空 choices、仅 role 的 chunk、空 delta 都是 EMPTY，不派发事件。",
+  "lines": [
+    "data: {\"choices\":[]}",
+    "",
+    "data: {\"choices\":[{\"delta\":{\"role\":\"assistant\"}}]}",
+    "",
+    "data: {\"choices\":[{\"delta\":{}}]}",
+    "",
+    "data: [DONE]",
+    ""
+  ],
+  "expectedEvents": [],
+  "expectedTerminal": "COMPLETED",
+  "expectedErrorKind": null
+}

@@ -1,0 +1,830 @@
+﻿node.exe : $ vitest run
+At C:\nvm4w\nodejs\node_modules\npm\pnpm.ps1:24 char:5
++     & "node$exe"  "$basedir/node_modules/pnpm/bin/pnpm.mjs" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ vitest run:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90mD:/Project/Android/Treelearn/web/frontend[39m
+
+ [31m❯[39m src/pages/Router.test.tsx [2m([22m[2m0 test[22m[2m)[22m
+ [31m❯[39m src/platform/router.test.ts [2m([22m[2m0 test[22m[2m)[22m
+ [31m❯[39m src/pages/HomePage.test.tsx [2m([22m[2m0 test[22m[2m)[22m
+ [31m❯[39m src/store/drafts.test.ts [2m([22m[2m0 test[22m[2m)[22m
+ [32m✓[39m src/i18n/i18n.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/api/__tests__/errors.i18n.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/api/__tests__/sse.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m src/api/__tests__/fixtures.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+ [32m✓[39m src/components/components.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 153[2mms[22m[39m
+ [31m❯[39m src/layouts/AppShell.test.tsx [2m([22m[2m4 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[32m 234[2mms[22m[39m
+   [31m❯[39m AppShell [2m(4)[22m
+[31m     [31m×[31m renders translated icon-only navigation with the active route marked[39m[32m 154[2mms[22m[39m
+[31m     [31m×[31m navigates on Enter so the primary navigation is keyboard reachable[39m[32m 24[2mms[22m[39m
+[31m     [31m×[31m returns focus to the content region on Escape[39m[32m 23[2mms[22m[39m
+[31m     [31m×[31m switches the document language and re-resolves copy at render time[39m[32m 30[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Suites 4 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/platform/router.test.ts[2m [ src/platform/router.test.ts ][22m
+[31m[1mError[22m: Failed to resolve import "./router" from "src/platform/router.test.ts". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36mD:/Project/Android/Treelearn/web/frontend/src/platform/router.test.ts[39m:3:69
+[33m  1  |  import { afterEach, describe, expect, it, vi } from "vitest";
+  2  |  import { currentPath, matchRoute, navigate, subscribeLocation } from "./router";
+     |                                                                        ^
+  3  |  // Minimal internal router (no routing dependency). These tests lock the four
+  4  |  // supported paths, the 404 fallback, and the History API plumbing.[39m
+[90m [2m❯[22m TransformPluginContext._formatLog node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vite/d
+ist/node/chunks/node.js:[2m8766:39[22m[39m
+[90m [2m❯[22m TransformPluginContext.error node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vite/dist/n
+ode/chunks/node.js:[2m8763:14[22m[39m
+[90m [2m❯[22m normalizeUrl node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vite/dist/node/chunks/node.
+js:[2m26632:18[22m[39m
+[90m [2m❯[22m node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vite/dist/node/chunks/node.js:[2m26702:
+30[22m[39m
+[90m [2m❯[22m TransformPluginContext.transform node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vite/di
+st/node/chunks/node.js:[2m26668:4[22m[39m
+[90m [2m❯[22m EnvironmentPluginContainer.transform node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vit
+e/dist/node/chunks/node.js:[2m8545:14[22m[39m
+[90m [2m❯[22m loadAndTransform node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vite/dist/node/chunks/n
+ode.js:[2m20184:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/pages/HomePage.test.tsx[2m [ src/pages/HomePage.test.tsx ][22m
+[31m[1mError[22m: Failed to resolve import "./HomePage" from "src/pages/HomePage.test.tsx". Does the file exist?[39
+m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36mD:/Project/Android/Treelearn/web/frontend/src/pages/HomePage.test.tsx[39m:6:25
+[33m  2  |  import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+  3  |  import { I18nProvider } from "../i18n/I18nProvider";
+  4  |  import { HomePage } from "./HomePage";
+     |                            ^
+  5  |  var _jsxFileName = "D:/Project/Android/Treelearn/web/frontend/src/pages/HomePage.test.tsx";
+  6  |  import { jsxDEV as _jsxDEV } from "react/jsx-dev-runtime";[39m
+[90m [2m❯[22m TransformPluginContext._formatLog node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vite/d
+ist/node/chunks/node.js:[2m8766:39[22m[39m
+[90m [2m❯[22m TransformPluginContext.error node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vite/dist/n
+ode/chunks/node.js:[2m8763:14[22m[39m
+[90m [2m❯[22m normalizeUrl node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vite/dist/node/chunks/node.
+js:[2m26632:18[22m[39m
+[90m [2m❯[22m node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vite/dist/node/chunks/node.js:[2m26702:
+30[22m[39m
+[90m [2m❯[22m TransformPluginContext.transform node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vite/di
+st/node/chunks/node.js:[2m26668:4[22m[39m
+[90m [2m❯[22m EnvironmentPluginContainer.transform node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vit
+e/dist/node/chunks/node.js:[2m8545:14[22m[39m
+[90m [2m❯[22m loadAndTransform node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vite/dist/node/chunks/n
+ode.js:[2m20184:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/pages/Router.test.tsx[2m [ src/pages/Router.test.tsx ][22m
+[31m[1mError[22m: Failed to resolve import "./Router" from "src/pages/Router.test.tsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36mD:/Project/Android/Treelearn/web/frontend/src/pages/Router.test.tsx[39m:5:23
+[33m  2  |  import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+  3  |  import { I18nProvider } from "../i18n/I18nProvider";
+  4  |  import { Router } from "./Router";
+     |                          ^
+  5  |  var _jsxFileName = "D:/Project/Android/Treelearn/web/frontend/src/pages/Router.test.tsx";
+  6  |  import { jsxDEV as _jsxDEV } from "react/jsx-dev-runtime";[39m
+[90m [2m❯[22m TransformPluginContext._formatLog node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vite/d
+ist/node/chunks/node.js:[2m8766:39[22m[39m
+[90m [2m❯[22m TransformPluginContext.error node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vite/dist/n
+ode/chunks/node.js:[2m8763:14[22m[39m
+[90m [2m❯[22m normalizeUrl node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vite/dist/node/chunks/node.
+js:[2m26632:18[22m[39m
+[90m [2m❯[22m node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vite/dist/node/chunks/node.js:[2m26702:
+30[22m[39m
+[90m [2m❯[22m TransformPluginContext.transform node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vite/di
+st/node/chunks/node.js:[2m26668:4[22m[39m
+[90m [2m❯[22m EnvironmentPluginContainer.transform node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vit
+e/dist/node/chunks/node.js:[2m8545:14[22m[39m
+[90m [2m❯[22m loadAndTransform node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vite/dist/node/chunks/n
+ode.js:[2m20184:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/store/drafts.test.ts[2m [ src/store/drafts.test.ts ][22m
+[31m[1mError[22m: Failed to resolve import "./drafts" from "src/store/drafts.test.ts". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36mD:/Project/Android/Treelearn/web/frontend/src/store/drafts.test.ts[39m:11:7
+[33m  1  |  import { beforeEach, describe, expect, it } from "vitest";
+  2  |  ...RAFT_KEY, pruneExpiredDrafts, readDraft, writeDraft } from "./drafts";
+     |                                                                 ^
+  3  |  // Drafts are a recoverable local cache, not authoritative data: keyed per
+  4  |  // branch/home, discarded once expired (retention) or explicitly cleared.[39m
+[90m [2m❯[22m TransformPluginContext._formatLog node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vite/d
+ist/node/chunks/node.js:[2m8766:39[22m[39m
+[90m [2m❯[22m TransformPluginContext.error node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vite/dist/n
+ode/chunks/node.js:[2m8763:14[22m[39m
+[90m [2m❯[22m normalizeUrl node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vite/dist/node/chunks/node.
+js:[2m26632:18[22m[39m
+[90m [2m❯[22m node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vite/dist/node/chunks/node.js:[2m26702:
+30[22m[39m
+[90m [2m❯[22m TransformPluginContext.transform node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vite/di
+st/node/chunks/node.js:[2m26668:4[22m[39m
+[90m [2m❯[22m EnvironmentPluginContainer.transform node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vit
+e/dist/node/chunks/node.js:[2m8545:14[22m[39m
+[90m [2m❯[22m loadAndTransform node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/node_modules/vite/dist/node/chunks/n
+ode.js:[2m20184:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯[22m[39m
+
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 4 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/layouts/AppShell.test.tsx[2m > [22mAppShell[2m > [22mrenders translated icon-only nav
+igation with the active route marked
+[31m[1mTestingLibraryElementError[22m: Unable to find an accessible element with the role "button" and name "学习库"
+
+Here are the accessible roles:
+
+  complementary:
+
+  Name "主导航":
+  [36m<aside[31m
+    [33maria-label[31m=[32m"主导航"[31m
+    [33mclass[31m=[32m"app-shell__sidebar"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+  main:
+
+  Name "":
+  [36m<main[31m
+    [33mclass[31m=[32m"app-shell__main"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+  banner:
+
+  Name "":
+  [36m<header[31m
+    [33mclass[31m=[32m"app-shell__header"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+  heading:
+
+  Name "专注阅读":
+  [36m<h1[31m
+    [33mclass[31m=[32m"app-shell__title"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+  button:
+
+  Name "切换到 English":
+  [36m<button[31m
+    [33maria-label[31m=[32m"切换到 English"[31m
+    [33mclass[31m=[32m"icon-button"[31m
+    [33mtitle[31m=[32m"切换到 English"[31m
+    [33mtype[31m=[32m"button"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+  region:
+
+  Name "工作区内容":
+  [36m<section[31m
+    [33maria-label[31m=[32m"工作区内容"[31m
+    [33mclass[31m=[32m"app-shell__content"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p[31m
+    [33mclass[31m=[32m"app-shell__placeholder"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[31m
+  [36m<div>[31m
+    [36m<div[31m
+      [33mclass[31m=[32m"app-shell"[31m
+    [36m>[31m
+      [36m<aside[31m
+        [33maria-label[31m=[32m"主导航"[31m
+        [33mclass[31m=[32m"app-shell__sidebar"[31m
+      [36m>[31m
+        [36m<span[31m
+          [33mclass[31m=[32m"app-shell__brand"[31m
+        [36m>[31m
+          [0m知芽[0m
+        [36m</span>[31m
+      [36m</aside>[31m
+      [36m<main[31m
+        [33mclass[31m=[32m"app-shell__main"[31m
+      [36m>[31m
+        [36m<header[31m
+          [33mclass[31m=[32m"app-shell__header"[31m
+        [36m>[31m
+          [36m<h1[31m
+            [33mclass[31m=[32m"app-shell__title"[31m
+          [36m>[31m
+            [0m专注阅读[0m
+          [36m</h1>[31m
+          [36m<button[31m
+            [33maria-label[31m=[32m"切换到 English"[31m
+            [33mclass[31m=[32m"icon-button"[31m
+            [33mtitle[31m=[32m"切换到 English"[31m
+            [33mtype[31m=[32m"button"[31m
+          [36m>[31m
+            [36m<svg[31m
+              [33maria-hidden[31m=[32m"true"[31m
+              [33mclass[31m=[32m"lucide lucide-languages"[31m
+              [33mfill[31m=[32m"none"[31m
+              [33mheight[31m=[32m"20"[31m
+              [33mstroke[31m=[32m"currentColor"[31m
+              [33mstroke-linecap[31m=[32m"round"[31m
+              [33mstroke-linejoin[31m=[32m"round"[31m
+              [33mstroke-width[31m=[32m"1.8"[31m
+              [33mviewBox[31m=[32m"0 0 24 24"[31m
+              [33mwidth[31m=[32m"20"[31m
+              [33mxmlns[31m=[32m"http://www.w3.org/2000/svg"[31m
+            [36m>[31m
+              [36m<path[31m
+                [33md[31m=[32m"m5 8 6 6"[31m
+              [36m/>[31m
+              [36m<path[31m
+                [33md[31m=[32m"m4 14 6-6 2-3"[31m
+              [36m/>[31m
+              [36m<path[31m
+                [33md[31m=[32m"M2 5h12"[31m
+              [36m/>[31m
+              [36m<path[31m
+                [33md[31m=[32m"M7 2h1"[31m
+              [36m/>[31m
+              [36m<path[31m
+                [33md[31m=[32m"m22 22-5-10-5 10"[31m
+              [36m/>[31m
+              [36m<path[31m
+                [33md[31m=[32m"M14 18h6"[31m
+              [36m/>[31m
+            [36m</svg>[31m
+          [36m</button>[31m
+        [36m</header>[31m
+        [36m<section[31m
+          [33maria-label[31m=[32m"工作区内容"[31m
+          [33mclass[31m=[32m"app-shell__content"[31m
+        [36m>[31m
+          [36m<div[31m
+            [33mclass[31m=[32m"glass-panel"[31m
+          [36m>[31m
+            [36m<p[31m
+              [33mclass[31m=[32m"app-shell__placeholder"[31m
+            [36m>[31m
+              [0m工作区占位：对话与树导航在后续任务接入。[0m
+            [36m</p>[31m
+          [36m</div>[31m
+        [36m</section>[31m
+      [36m</main>[31m
+    [36m</div>[31m
+  [36m</div>[31m
+[36m</body>[31m[39m
+[90m [2m❯[22m Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/do
+m/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js
+:[2m76:38[22m[39m
+[90m [2m❯[22m node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js
+:[2m52:17[22m[39m
+[90m [2m❯[22m node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js
+:[2m95:19[22m[39m
+[36m [2m❯[22m src/layouts/AppShell.test.tsx:[2m26:19[22m[39m
+    [90m 24|[39m     renderShell({ name: 'library' });
+    [90m 25|[39m     expect(screen.getByText('知芽')).toBeInTheDocument();
+    [90m 26|[39m     expect(screen.getByRole('button', { name: '学习库' })).toHaveAttribut…
+    [90m   |[39m                   [31m^[39m
+    [90m 27|[39m     expect(screen.getByRole('button', { name: '主页' })).not.toHaveAttri…
+    [90m 28|[39m     expect(screen.getByRole('button', { name: '设置' })).toBeInTheDocume…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/layouts/AppShell.test.tsx[2m > [22mAppShell[2m > [22mnavigates on Enter so the primar
+y navigation is keyboard reachable
+[31m[1mTestingLibraryElementError[22m: Unable to find an accessible element with the role "button" and name "学习库"
+
+Here are the accessible roles:
+
+  complementary:
+
+  Name "主导航":
+  [36m<aside[31m
+    [33maria-label[31m=[32m"主导航"[31m
+    [33mclass[31m=[32m"app-shell__sidebar"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+  main:
+
+  Name "":
+  [36m<main[31m
+    [33mclass[31m=[32m"app-shell__main"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+  banner:
+
+  Name "":
+  [36m<header[31m
+    [33mclass[31m=[32m"app-shell__header"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+  heading:
+
+  Name "专注阅读":
+  [36m<h1[31m
+    [33mclass[31m=[32m"app-shell__title"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+  button:
+
+  Name "切换到 English":
+  [36m<button[31m
+    [33maria-label[31m=[32m"切换到 English"[31m
+    [33mclass[31m=[32m"icon-button"[31m
+    [33mtitle[31m=[32m"切换到 English"[31m
+    [33mtype[31m=[32m"button"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+  region:
+
+  Name "工作区内容":
+  [36m<section[31m
+    [33maria-label[31m=[32m"工作区内容"[31m
+    [33mclass[31m=[32m"app-shell__content"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p[31m
+    [33mclass[31m=[32m"app-shell__placeholder"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[31m
+  [36m<div>[31m
+    [36m<div[31m
+      [33mclass[31m=[32m"app-shell"[31m
+    [36m>[31m
+      [36m<aside[31m
+        [33maria-label[31m=[32m"主导航"[31m
+        [33mclass[31m=[32m"app-shell__sidebar"[31m
+      [36m>[31m
+        [36m<span[31m
+          [33mclass[31m=[32m"app-shell__brand"[31m
+        [36m>[31m
+          [0m知芽[0m
+        [36m</span>[31m
+      [36m</aside>[31m
+      [36m<main[31m
+        [33mclass[31m=[32m"app-shell__main"[31m
+      [36m>[31m
+        [36m<header[31m
+          [33mclass[31m=[32m"app-shell__header"[31m
+        [36m>[31m
+          [36m<h1[31m
+            [33mclass[31m=[32m"app-shell__title"[31m
+          [36m>[31m
+            [0m专注阅读[0m
+          [36m</h1>[31m
+          [36m<button[31m
+            [33maria-label[31m=[32m"切换到 English"[31m
+            [33mclass[31m=[32m"icon-button"[31m
+            [33mtitle[31m=[32m"切换到 English"[31m
+            [33mtype[31m=[32m"button"[31m
+          [36m>[31m
+            [36m<svg[31m
+              [33maria-hidden[31m=[32m"true"[31m
+              [33mclass[31m=[32m"lucide lucide-languages"[31m
+              [33mfill[31m=[32m"none"[31m
+              [33mheight[31m=[32m"20"[31m
+              [33mstroke[31m=[32m"currentColor"[31m
+              [33mstroke-linecap[31m=[32m"round"[31m
+              [33mstroke-linejoin[31m=[32m"round"[31m
+              [33mstroke-width[31m=[32m"1.8"[31m
+              [33mviewBox[31m=[32m"0 0 24 24"[31m
+              [33mwidth[31m=[32m"20"[31m
+              [33mxmlns[31m=[32m"http://www.w3.org/2000/svg"[31m
+            [36m>[31m
+              [36m<path[31m
+                [33md[31m=[32m"m5 8 6 6"[31m
+              [36m/>[31m
+              [36m<path[31m
+                [33md[31m=[32m"m4 14 6-6 2-3"[31m
+              [36m/>[31m
+              [36m<path[31m
+                [33md[31m=[32m"M2 5h12"[31m
+              [36m/>[31m
+              [36m<path[31m
+                [33md[31m=[32m"M7 2h1"[31m
+              [36m/>[31m
+              [36m<path[31m
+                [33md[31m=[32m"m22 22-5-10-5 10"[31m
+              [36m/>[31m
+              [36m<path[31m
+                [33md[31m=[32m"M14 18h6"[31m
+              [36m/>[31m
+            [36m</svg>[31m
+          [36m</button>[31m
+        [36m</header>[31m
+        [36m<section[31m
+          [33maria-label[31m=[32m"工作区内容"[31m
+          [33mclass[31m=[32m"app-shell__content"[31m
+        [36m>[31m
+          [36m<div[31m
+            [33mclass[31m=[32m"glass-panel"[31m
+          [36m>[31m
+            [36m<p[31m
+              [33mclass[31m=[32m"app-shell__placeholder"[31m
+            [36m>[31m
+              [0m工作区占位：对话与树导航在后续任务接入。[0m
+            [36m</p>[31m
+          [36m</div>[31m
+        [36m</section>[31m
+      [36m</main>[31m
+    [36m</div>[31m
+  [36m</div>[31m
+[36m</body>[31m[39m
+[90m [2m❯[22m Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/do
+m/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js
+:[2m76:38[22m[39m
+[90m [2m❯[22m node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js
+:[2m52:17[22m[39m
+[90m [2m❯[22m node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js
+:[2m95:19[22m[39m
+[36m [2m❯[22m src/layouts/AppShell.test.tsx:[2m33:30[22m[39m
+    [90m 31|[39m   it('navigates on Enter so the primary navigation is keyboard reachab…
+    [90m 32|[39m     renderShell({ name: 'home' });
+    [90m 33|[39m     fireEvent.keyDown(screen.getByRole('button', { name: '学习库' }), { k…
+    [90m   |[39m                              [31m^[39m
+    [90m 34|[39m     expect(window.location.pathname).toBe('/library');
+    [90m 35|[39m   });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/layouts/AppShell.test.tsx[2m > [22mAppShell[2m > [22mreturns focus to the content reg
+ion on Escape
+[31m[1mTestingLibraryElementError[22m: Unable to find an accessible element with the role "button" and name "主页"
+
+Here are the accessible roles:
+
+  complementary:
+
+  Name "主导航":
+  [36m<aside[31m
+    [33maria-label[31m=[32m"主导航"[31m
+    [33mclass[31m=[32m"app-shell__sidebar"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+  main:
+
+  Name "":
+  [36m<main[31m
+    [33mclass[31m=[32m"app-shell__main"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+  banner:
+
+  Name "":
+  [36m<header[31m
+    [33mclass[31m=[32m"app-shell__header"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+  heading:
+
+  Name "专注阅读":
+  [36m<h1[31m
+    [33mclass[31m=[32m"app-shell__title"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+  button:
+
+  Name "切换到 English":
+  [36m<button[31m
+    [33maria-label[31m=[32m"切换到 English"[31m
+    [33mclass[31m=[32m"icon-button"[31m
+    [33mtitle[31m=[32m"切换到 English"[31m
+    [33mtype[31m=[32m"button"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+  region:
+
+  Name "工作区内容":
+  [36m<section[31m
+    [33maria-label[31m=[32m"工作区内容"[31m
+    [33mclass[31m=[32m"app-shell__content"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p[31m
+    [33mclass[31m=[32m"app-shell__placeholder"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[31m
+  [36m<div>[31m
+    [36m<div[31m
+      [33mclass[31m=[32m"app-shell"[31m
+    [36m>[31m
+      [36m<aside[31m
+        [33maria-label[31m=[32m"主导航"[31m
+        [33mclass[31m=[32m"app-shell__sidebar"[31m
+      [36m>[31m
+        [36m<span[31m
+          [33mclass[31m=[32m"app-shell__brand"[31m
+        [36m>[31m
+          [0m知芽[0m
+        [36m</span>[31m
+      [36m</aside>[31m
+      [36m<main[31m
+        [33mclass[31m=[32m"app-shell__main"[31m
+      [36m>[31m
+        [36m<header[31m
+          [33mclass[31m=[32m"app-shell__header"[31m
+        [36m>[31m
+          [36m<h1[31m
+            [33mclass[31m=[32m"app-shell__title"[31m
+          [36m>[31m
+            [0m专注阅读[0m
+          [36m</h1>[31m
+          [36m<button[31m
+            [33maria-label[31m=[32m"切换到 English"[31m
+            [33mclass[31m=[32m"icon-button"[31m
+            [33mtitle[31m=[32m"切换到 English"[31m
+            [33mtype[31m=[32m"button"[31m
+          [36m>[31m
+            [36m<svg[31m
+              [33maria-hidden[31m=[32m"true"[31m
+              [33mclass[31m=[32m"lucide lucide-languages"[31m
+              [33mfill[31m=[32m"none"[31m
+              [33mheight[31m=[32m"20"[31m
+              [33mstroke[31m=[32m"currentColor"[31m
+              [33mstroke-linecap[31m=[32m"round"[31m
+              [33mstroke-linejoin[31m=[32m"round"[31m
+              [33mstroke-width[31m=[32m"1.8"[31m
+              [33mviewBox[31m=[32m"0 0 24 24"[31m
+              [33mwidth[31m=[32m"20"[31m
+              [33mxmlns[31m=[32m"http://www.w3.org/2000/svg"[31m
+            [36m>[31m
+              [36m<path[31m
+                [33md[31m=[32m"m5 8 6 6"[31m
+              [36m/>[31m
+              [36m<path[31m
+                [33md[31m=[32m"m4 14 6-6 2-3"[31m
+              [36m/>[31m
+              [36m<path[31m
+                [33md[31m=[32m"M2 5h12"[31m
+              [36m/>[31m
+              [36m<path[31m
+                [33md[31m=[32m"M7 2h1"[31m
+              [36m/>[31m
+              [36m<path[31m
+                [33md[31m=[32m"m22 22-5-10-5 10"[31m
+              [36m/>[31m
+              [36m<path[31m
+                [33md[31m=[32m"M14 18h6"[31m
+              [36m/>[31m
+            [36m</svg>[31m
+          [36m</button>[31m
+        [36m</header>[31m
+        [36m<section[31m
+          [33maria-label[31m=[32m"工作区内容"[31m
+          [33mclass[31m=[32m"app-shell__content"[31m
+        [36m>[31m
+          [36m<div[31m
+            [33mclass[31m=[32m"glass-panel"[31m
+          [36m>[31m
+            [36m<p[31m
+              [33mclass[31m=[32m"app-shell__placeholder"[31m
+            [36m>[31m
+              [0m工作区占位：对话与树导航在后续任务接入。[0m
+            [36m</p>[31m
+          [36m</div>[31m
+        [36m</section>[31m
+
+[2m Test Files [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m5 passed[39m[22m[90m (10)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m30 passed[39m[22m[90m (34)[39m
+[2m   Start at [22m 21:46:42
+[2m   Duration [22m 2.66s[2m (environment 73%, setup 15%, transform 6%, import 3%, tests 2%, worker 1%)[22m
+      [36m</main>[31m
+    [36m</div>[31m
+  [36m</div>[31m
+[36m</body>[31m[39m
+[90m [2m❯[22m Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/do
+m/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js
+:[2m76:38[22m[39m
+[90m [2m❯[22m node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js
+:[2m52:17[22m[39m
+[90m [2m❯[22m node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js
+:[2m95:19[22m[39m
+[36m [2m❯[22m src/layouts/AppShell.test.tsx:[2m39:25[22m[39m
+    [90m 37|[39m   it('returns focus to the content region on Escape', () => {
+    [90m 38|[39m     renderShell({ name: 'home' });
+    [90m 39|[39m     const home = screen.getByRole('button', { name: '主页' });
+    [90m   |[39m                         [31m^[39m
+    [90m 40|[39m     home.focus();
+    [90m 41|[39m     expect(document.activeElement).toBe(home);
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/layouts/AppShell.test.tsx[2m > [22mAppShell[2m > [22mswitches the document language a
+nd re-resolves copy at render time
+[31m[1mTestingLibraryElementError[22m: Unable to find an accessible element with the role "button" and name "Home"
+
+Here are the accessible roles:
+
+  complementary:
+
+  Name "Primary navigation":
+  [36m<aside[31m
+    [33maria-label[31m=[32m"Primary navigation"[31m
+    [33mclass[31m=[32m"app-shell__sidebar"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+  main:
+
+  Name "":
+  [36m<main[31m
+    [33mclass[31m=[32m"app-shell__main"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+  banner:
+
+  Name "":
+  [36m<header[31m
+    [33mclass[31m=[32m"app-shell__header"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+  heading:
+
+  Name "Focus reading":
+  [36m<h1[31m
+    [33mclass[31m=[32m"app-shell__title"[31m
+  [36m/>[31m
+
+
+  --------------------------------------------------
+  button:
+
+  Name "Switch to 中文":
+  [36m<button[31m
+    [33maria-label[31m=[32m"Switch to 中文"[31m
+    [33mclass[31m=[32m"icon-button"[31m
+    [33mtitle[31m=[32m"Switch to 中文"[31m
+    [33mtype[31m=[32m"button"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+  region:
+
+  Name "Workspace content":
+  [36m<section[31m
+    [33maria-label[31m=[32m"Workspace content"[31m
+    [33mclass[31m=[32m"app-shell__content"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p[31m
+    [33mclass[31m=[32m"app-shell__placeholder"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[31m
+  [36m<div>[31m
+    [36m<div[31m
+      [33mclass[31m=[32m"app-shell"[31m
+    [36m>[31m
+      [36m<aside[31m
+        [33maria-label[31m=[32m"Primary navigation"[31m
+        [33mclass[31m=[32m"app-shell__sidebar"[31m
+      [36m>[31m
+        [36m<span[31m
+          [33mclass[31m=[32m"app-shell__brand"[31m
+        [36m>[31m
+          [0mTreeLearn[0m
+        [36m</span>[31m
+      [36m</aside>[31m
+      [36m<main[31m
+        [33mclass[31m=[32m"app-shell__main"[31m
+      [36m>[31m
+        [36m<header[31m
+          [33mclass[31m=[32m"app-shell__header"[31m
+        [36m>[31m
+          [36m<h1[31m
+            [33mclass[31m=[32m"app-shell__title"[31m
+          [36m>[31m
+            [0mFocus reading[0m
+          [36m</h1>[31m
+          [36m<button[31m
+            [33maria-label[31m=[32m"Switch to 中文"[31m
+            [33mclass[31m=[32m"icon-button"[31m
+            [33mtitle[31m=[32m"Switch to 中文"[31m
+            [33mtype[31m=[32m"button"[31m
+          [36m>[31m
+            [36m<svg[31m
+              [33maria-hidden[31m=[32m"true"[31m
+              [33mclass[31m=[32m"lucide lucide-languages"[31m
+              [33mfill[31m=[32m"none"[31m
+              [33mheight[31m=[32m"20"[31m
+              [33mstroke[31m=[32m"currentColor"[31m
+              [33mstroke-linecap[31m=[32m"round"[31m
+              [33mstroke-linejoin[31m=[32m"round"[31m
+              [33mstroke-width[31m=[32m"1.8"[31m
+              [33mviewBox[31m=[32m"0 0 24 24"[31m
+              [33mwidth[31m=[32m"20"[31m
+              [33mxmlns[31m=[32m"http://www.w3.org/2000/svg"[31m
+            [36m>[31m
+              [36m<path[31m
+                [33md[31m=[32m"m5 8 6 6"[31m
+              [36m/>[31m
+              [36m<path[31m
+                [33md[31m=[32m"m4 14 6-6 2-3"[31m
+              [36m/>[31m
+              [36m<path[31m
+                [33md[31m=[32m"M2 5h12"[31m
+              [36m/>[31m
+              [36m<path[31m
+                [33md[31m=[32m"M7 2h1"[31m
+              [36m/>[31m
+              [36m<path[31m
+                [33md[31m=[32m"m22 22-5-10-5 10"[31m
+              [36m/>[31m
+              [36m<path[31m
+                [33md[31m=[32m"M14 18h6"[31m
+              [36m/>[31m
+            [36m</svg>[31m
+          [36m</button>[31m
+        [36m</header>[31m
+        [36m<section[31m
+          [33maria-label[31m=[32m"Workspace content"[31m
+          [33mclass[31m=[32m"app-shell__content"[31m
+        [36m>[31m
+          [36m<div[31m
+            [33mclass[31m=[32m"glass-panel"[31m
+          [36m>[31m
+            [36m<p[31m
+              [33mclass[31m=[32m"app-shell__placeholder"[31m
+            [36m>[31m
+              [0mWorkspace placeholder: conversation and tree navigation arrive in later tasks.[0m
+            [36m</p>[31m
+          [36m</div>[31m
+        [36m</section>[31m
+      [36m</main>[31m
+    [36m</div>[31m
+  [36m</div>[31m
+[36m</body>[31m[39m
+[90m [2m❯[22m Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/do
+m/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js
+:[2m76:38[22m[39m
+[90m [2m❯[22m node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js
+:[2m52:17[22m[39m
+[90m [2m❯[22m node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js
+:[2m95:19[22m[39m
+[36m [2m❯[22m src/layouts/AppShell.test.tsx:[2m51:19[22m[39m
+    [90m 49|[39m     fireEvent.click(screen.getByRole('button', { name: '切换到 English' }…
+    [90m 50|[39m     expect(document.documentElement.lang).toBe('en-US');
+    [90m 51|[39m     expect(screen.getByRole('button', { name: 'Home' })).toBeInTheDocu…
+    [90m   |[39m                   [31m^[39m
+    [90m 52|[39m   });
+    [90m 53|[39m });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯[22m[39m
+
+[ELIFECYCLE] Test failed. See above for more details.
+EXITCODE=1

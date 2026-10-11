@@ -1,0 +1,12 @@
+{
+  "scenario": "truncated-connection",
+  "note": "连接截断：收到增量后 EOF 且无 [DONE] → INTERRUPTED（非错误），部分内容不得成为稳定答案。",
+  "lines": [
+    "data: {\"choices\":[{\"delta\":{\"content\":\"半句\"}}]}"
+  ],
+  "expectedEvents": [
+    { "reasoningChunk": "", "contentChunk": "半句" }
+  ],
+  "expectedTerminal": "INTERRUPTED",
+  "expectedErrorKind": null
+}

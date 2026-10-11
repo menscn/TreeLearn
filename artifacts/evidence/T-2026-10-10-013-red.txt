@@ -1,0 +1,275 @@
+T-2026-10-10-013 RED | command: gradlew.bat :test --rerun-tasks | cwd: web/backend | EXIT_CODE=1
+> Task :core:compileJava
+> Task :tree-layout:compileJava
+> Task :compileJava
+> Task :processResources
+> Task :classes
+
+> Task :compileTestJava FAILED
+gradlew.bat : D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecr
+etPortTest.java:30: 错误: 找不到符号
+At line:15 char:1113
++ ... ripgrep\bin'; $out = & .\gradlew.bat :test --rerun-tasks 2>&1 | Out-S ...
++                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (D:\Project\Andr...a:30: 错误: 找不到符号:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+    private final WindowsCredentialSecretPort port = new WindowsCredentialSecretPort();
+                  ^
+  符号:   类 WindowsCredentialSecretPort
+  位置: 类 WindowsCredentialSecretPortTest
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\CredentialProbe.java:19: 错误: 找不到符号
+        WindowsCredentialSecretPort port = new WindowsCredentialSecretPort();
+        ^
+  符号:   类 WindowsCredentialSecretPort
+  位置: 类 CredentialProbe
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\CredentialProbe.java:19: 错误: 找不到符号
+        WindowsCredentialSecretPort port = new WindowsCredentialSecretPort();
+                                               ^
+  符号:   类 WindowsCredentialSecretPort
+  位置: 类 CredentialProbe
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.jav
+a:30: 错误: 找不到符号
+    private final WindowsCredentialSecretPort port = new WindowsCredentialSecretPort();
+                                                         ^
+  符号:   类 WindowsCredentialSecretPort
+  位置: 类 WindowsCredentialSecretPortTest
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.jav
+a:44: 错误: 找不到符号
+        String target = SecretPort.providerTarget(UUID.randomUUID().toString());
+                        ^
+  符号:   变量 SecretPort
+  位置: 类 WindowsCredentialSecretPortTest
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.jav
+a:94: 错误: 找不到符号
+                SecretPort.TARGET_PREFIX,
+                ^
+  符号:   变量 SecretPort
+  位置: 类 WindowsCredentialSecretPortTest
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.jav
+a:95: 错误: 找不到符号
+                SecretPort.TARGET_PREFIX + "has space",
+                ^
+  符号:   变量 SecretPort
+  位置: 类 WindowsCredentialSecretPortTest
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.jav
+a:96: 错误: 找不到符号
+                SecretPort.TARGET_PREFIX + "slash/inside",
+                ^
+  符号:   变量 SecretPort
+  位置: 类 WindowsCredentialSecretPortTest
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.jav
+a:97: 错误: 找不到符号
+                SecretPort.TARGET_PREFIX + "x".repeat(SecretPort.MAX_TARGET_LENGTH))) {
+                ^
+  符号:   变量 SecretPort
+  位置: 类 WindowsCredentialSecretPortTest
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.jav
+a:97: 错误: 找不到符号
+                SecretPort.TARGET_PREFIX + "x".repeat(SecretPort.MAX_TARGET_LENGTH))) {
+                                                      ^
+  符号:   变量 SecretPort
+  位置: 类 WindowsCredentialSecretPortTest
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.jav
+a:98: 错误: 找不到符号
+            SecretAccessException refused = assertThrows(SecretAccessException.class,
+            ^
+  符号:   类 SecretAccessException
+  位置: 类 WindowsCredentialSecretPortTest
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.jav
+a:98: 错误: 找不到符号
+            SecretAccessException refused = assertThrows(SecretAccessException.class,
+                                                         ^
+  符号:   类 SecretAccessException
+  位置: 类 WindowsCredentialSecretPortTest
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.jav
+a:100: 错误: 找不到符号
+            assertEquals(SecretAccessError.INVALID_TARGET, refused.code());
+                         ^
+  符号:   变量 SecretAccessError
+  位置: 类 WindowsCredentialSecretPortTest
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.jav
+a:101: 错误: 找不到符号
+            assertThrows(SecretAccessException.class, () -> port.has(illegal));
+                         ^
+  符号:   类 SecretAccessException
+  位置: 类 WindowsCredentialSecretPortTest
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.jav
+a:102: 错误: 找不到符号
+            assertThrows(SecretAccessException.class, () -> port.read(illegal));
+                         ^
+  符号:   类 SecretAccessException
+  位置: 类 WindowsCredentialSecretPortTest
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.jav
+a:103: 错误: 找不到符号
+            assertThrows(SecretAccessException.class, () -> port.delete(illegal));
+                         ^
+  符号:   类 SecretAccessException
+  位置: 类 WindowsCredentialSecretPortTest
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.jav
+a:105: 错误: 找不到符号
+        assertThrows(SecretAccessException.class, () -> port.save(null, "secret".toCharArray()));
+                     ^
+  符号:   类 SecretAccessException
+  位置: 类 WindowsCredentialSecretPortTest
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.jav
+a:116: 错误: 找不到符号
+        SecretAccessException refused = assertThrows(SecretAccessException.class,
+        ^
+  符号:   类 SecretAccessException
+  位置: 类 WindowsCredentialSecretPortTest
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.jav
+a:116: 错误: 找不到符号
+        SecretAccessException refused = assertThrows(SecretAccessException.class,
+                                                     ^
+  符号:   类 SecretAccessException
+  位置: 类 WindowsCredentialSecretPortTest
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.jav
+a:118: 错误: 找不到符号
+        assertEquals(SecretAccessError.MALFORMED, refused.code());
+                     ^
+  符号:   变量 SecretAccessError
+  位置: 类 WindowsCredentialSecretPortTest
+20 个错误
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/web/backend/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileTestJava'.
+> Compilation failed; see the compiler output below.
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.j
+ava:30: 错误: 找不到符号
+      private final WindowsCredentialSecretPort port = new WindowsCredentialSecretPort();
+                    ^
+    符号:   类 WindowsCredentialSecretPort
+    位置: 类 WindowsCredentialSecretPortTest
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\CredentialProbe.java:19: 错误: 找不到符
+号
+          WindowsCredentialSecretPort port = new WindowsCredentialSecretPort();
+          ^
+    符号:   类 WindowsCredentialSecretPort
+    位置: 类 CredentialProbe
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\CredentialProbe.java:19: 错误: 找不到符
+号
+          WindowsCredentialSecretPort port = new WindowsCredentialSecretPort();
+                                                 ^
+    符号:   类 WindowsCredentialSecretPort
+    位置: 类 CredentialProbe
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.j
+ava:30: 错误: 找不到符号
+      private final WindowsCredentialSecretPort port = new WindowsCredentialSecretPort();
+                                                           ^
+    符号:   类 WindowsCredentialSecretPort
+    位置: 类 WindowsCredentialSecretPortTest
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.j
+ava:44: 错误: 找不到符号
+          String target = SecretPort.providerTarget(UUID.randomUUID().toString());
+                          ^
+    符号:   变量 SecretPort
+    位置: 类 WindowsCredentialSecretPortTest
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.j
+ava:94: 错误: 找不到符号
+                  SecretPort.TARGET_PREFIX,
+                  ^
+    符号:   变量 SecretPort
+    位置: 类 WindowsCredentialSecretPortTest
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.j
+ava:95: 错误: 找不到符号
+                  SecretPort.TARGET_PREFIX + "has space",
+                  ^
+    符号:   变量 SecretPort
+    位置: 类 WindowsCredentialSecretPortTest
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.j
+ava:96: 错误: 找不到符号
+                  SecretPort.TARGET_PREFIX + "slash/inside",
+                  ^
+    符号:   变量 SecretPort
+    位置: 类 WindowsCredentialSecretPortTest
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.j
+ava:97: 错误: 找不到符号
+                  SecretPort.TARGET_PREFIX + "x".repeat(SecretPort.MAX_TARGET_LENGTH))) {
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+5 actionable tasks: 5 executed
+                  ^
+    符号:   变量 SecretPort
+    位置: 类 WindowsCredentialSecretPortTest
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.j
+ava:97: 错误: 找不到符号
+                  SecretPort.TARGET_PREFIX + "x".repeat(SecretPort.MAX_TARGET_LENGTH))) {
+                                                        ^
+    符号:   变量 SecretPort
+    位置: 类 WindowsCredentialSecretPortTest
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.j
+ava:98: 错误: 找不到符号
+              SecretAccessException refused = assertThrows(SecretAccessException.class,
+              ^
+    符号:   类 SecretAccessException
+    位置: 类 WindowsCredentialSecretPortTest
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.j
+ava:98: 错误: 找不到符号
+              SecretAccessException refused = assertThrows(SecretAccessException.class,
+                                                           ^
+    符号:   类 SecretAccessException
+    位置: 类 WindowsCredentialSecretPortTest
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.j
+ava:100: 错误: 找不到符号
+              assertEquals(SecretAccessError.INVALID_TARGET, refused.code());
+                           ^
+    符号:   变量 SecretAccessError
+    位置: 类 WindowsCredentialSecretPortTest
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.j
+ava:101: 错误: 找不到符号
+              assertThrows(SecretAccessException.class, () -> port.has(illegal));
+                           ^
+    符号:   类 SecretAccessException
+    位置: 类 WindowsCredentialSecretPortTest
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.j
+ava:102: 错误: 找不到符号
+              assertThrows(SecretAccessException.class, () -> port.read(illegal));
+                           ^
+    符号:   类 SecretAccessException
+    位置: 类 WindowsCredentialSecretPortTest
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.j
+ava:103: 错误: 找不到符号
+              assertThrows(SecretAccessException.class, () -> port.delete(illegal));
+                           ^
+    符号:   类 SecretAccessException
+    位置: 类 WindowsCredentialSecretPortTest
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.j
+ava:105: 错误: 找不到符号
+          assertThrows(SecretAccessException.class, () -> port.save(null, "secret".toCharArray()));
+                       ^
+    符号:   类 SecretAccessException
+    位置: 类 WindowsCredentialSecretPortTest
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.j
+ava:116: 错误: 找不到符号
+          SecretAccessException refused = assertThrows(SecretAccessException.class,
+          ^
+    符号:   类 SecretAccessException
+    位置: 类 WindowsCredentialSecretPortTest
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.j
+ava:116: 错误: 找不到符号
+          SecretAccessException refused = assertThrows(SecretAccessException.class,
+                                                       ^
+    符号:   类 SecretAccessException
+    位置: 类 WindowsCredentialSecretPortTest
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\credential\WindowsCredentialSecretPortTest.j
+ava:118: 错误: 找不到符号
+          assertEquals(SecretAccessError.MALFORMED, refused.code());
+                       ^
+    符号:   变量 SecretAccessError
+    位置: 类 WindowsCredentialSecretPortTest
+  20 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+BUILD FAILED in 2s

@@ -1,0 +1,32 @@
+﻿# T-2026-10-10-031 业务行规模（非空非注释；cwd=web/frontend）
+# 口径：新增文件=全部非空非注释行；既有文件=本次 git added 的非空非注释行。测试/证据不计入。
+# 判定值 = 非空非注释（2026-09-21 用户裁定口径）。
+
+## 新增文件
+   20  src/store/layoutPreference.ts
+   38  src/store/topicData.ts
+   45  src/hooks/useOperationStream.ts
+   39  src/components/MessageView.tsx
+   39  src/components/SideBySideView.tsx
+  152  src/pages/BranchWorkspace.tsx
+subtotal new = 333
+
+## 修改文件（仅本次改动行）
+    8  src/platform/router.ts
+    4  src/hooks/useRoute.ts
+   10  src/hooks/useDraft.ts
+   43  src/api/sse.ts
+   14  src/components/Composer.tsx
+    1  src/components/icons.ts
+   10  src/pages/Router.tsx
+   28  src/styles/global.css
+   23  src/i18n/zh-CN.ts
+   23  src/i18n/en-US.ts
+subtotal modified = 164
+
+## 合计与阈值关系
+TOTAL = 497（含 i18n 资源 46 行）
+TOTAL(excl i18n) = 451
+vs 400 估算：超 97 行
+vs 500 硬上限：未超（余 3 行）
+# 备注：规模超 400 估算主因 i18n 资源行（46）与 sse.ts 帧源重构新增行；判定与例外由主会话在任务文件裁定。

@@ -1,0 +1,28 @@
+$ pnpm check:design && tsc --noEmit && vite build
+$ pnpm check:design-tokens && pnpm check:contrast && pnpm check:user-copy-i18n
+$ node scripts/check-design-tokens.mjs
+OK   committed tokens.css matches the generator (54 custom propertie(s))
+VERDICT: PASS (1 OK line)
+$ node scripts/check-contrast.mjs
+OK   15.28:1 (min 4.5) - ink on web-white (body text on content surface)
+OK   13.15:1 (min 4.5) - ink on web-mist (text on mist background)
+OK   7.65:1 (min 4.5) - ink2 on web-white (secondary text)
+OK   14.44:1 (min 4.5) - ink on composited glass panel over web-mist
+OK   4.72:1 (min 4.5) - web-on-sage on web-sage (primary action label)
+OK   3.56:1 (min 3) - web-sage on web-white (control border/icon)
+OK   5.11:1 (min 4.5) - ink2 on web-mint (selected-state text)
+VERDICT: PASS (7 pair(s) at or above threshold)
+$ node scripts/check-user-copy-i18n.mjs
+OK   no hardcoded user copy found in 37 production source file(s)
+VERDICT: PASS (1 OK line)
+[36mvite v8.3.4 [32mbuilding client environment for production...[36m[39m
+transforming...
+✓ 1949 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.40 kB │ gzip:  0.28 kB
+dist/assets/index-DBrpc_i-.css   12.98 kB │ gzip:  3.00 kB
+dist/assets/index-CkPpwb8H.js   307.09 kB │ gzip: 95.41 kB
+
+[32m✓ built in 764ms[39m
+BUILD-EXIT=0

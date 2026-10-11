@@ -18,8 +18,17 @@ dependencyResolutionManagement {
 
 rootProject.name = 'treelearn'
 
-include ':app'
+// Shared pure-JVM modules live under web/shared and are consumed by BOTH builds
+// through projectDir references (single implementation, never a copy).
+// The web backend build (web/backend/settings.gradle) points at the same dirs.
+// Structure guard: web/scripts/check-shared-modules.ps1 (task T-2026-10-10-005).
 include ':core'
+project(':core').projectDir = file('../web/shared/domain')
+include ':tree-layout'
+project(':tree-layout').projectDir = file('../web/shared/tree-layout')
+include ':ai-protocol'
+project(':ai-protocol').projectDir = file('../web/shared/ai-protocol')
+
+include ':app'
 include ':data'
 include ':ai'
-include ':tree-layout'

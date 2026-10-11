@@ -1,0 +1,126 @@
+﻿T-2026-10-10-012 RED | command: gradlew.bat :test --rerun-tasks | cwd: web/backend | EXIT_CODE=1
+> Task :core:compileJava
+> Task :tree-layout:compileJava
+> Task :compileJava
+> Task :processResources
+> Task :classes
+
+> Task :compileTestJava FAILED
+gradlew.bat : D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\storage\ProviderModelStoreTest.j
+ava:25: 错误: 找不到符号
+At line:15 char:1113
++ ... ripgrep\bin'; $out = & .\gradlew.bat :test --rerun-tasks 2>&1 | Out-S ...
++                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (D:\Project\Andr...a:25: 错误: 找不到符号:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+    private ProviderStore providers;
+            ^
+  符号:   类 ProviderStore
+  位置: 类 ProviderModelStoreTest
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\storage\ProviderModelStoreTest.java:26: 错误: 找不
+到符号
+    private ModelStore models;
+            ^
+  符号:   类 ModelStore
+  位置: 类 ProviderModelStoreTest
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\storage\ProviderModelStoreTest.java:34: 错误: 程序
+包ProviderStore不存在
+    private static ProviderStore.Provider provider(String id, String name) {
+                                ^
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\storage\ProviderModelStoreTest.java:30: 错误: 找不
+到符号
+        providers = new ProviderStore(jdbc);
+                        ^
+  符号:   类 ProviderStore
+  位置: 类 ProviderModelStoreTest
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\storage\ProviderModelStoreTest.java:31: 错误: 找不
+到符号
+        models = new ModelStore(jdbc);
+                     ^
+  符号:   类 ModelStore
+  位置: 类 ProviderModelStoreTest
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\storage\ProviderModelStoreTest.java:35: 错误: 程序
+包ProviderStore不存在
+        return new ProviderStore.Provider(id, name, "https://example.test", true, false, T0, T0);
+                                ^
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\storage\ProviderModelStoreTest.java:55: 错误: 程序
+包ProviderStore不存在
+        ProviderStore.Provider afterDisable = providers.get(id).orElseThrow();
+                     ^
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\storage\ProviderModelStoreTest.java:63: 错误: 程序
+包ProviderStore不存在
+        ProviderStore.Provider afterEnable = providers.get(id).orElseThrow();
+                     ^
+D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\storage\ProviderModelStoreTest.java:105: 错误: 程
+序包ProviderStore不存在
+        ProviderStore.Provider seed = providers
+                     ^
+9 个错误
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/web/backend/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileTestJava'.
+> Compilation failed; see the compiler output below.
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\storage\ProviderModelStoreTest.java:25: 错误: 
+找不到符号
+      private ProviderStore providers;
+              ^
+    符号:   类 ProviderStore
+    位置: 类 ProviderModelStoreTest
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\storage\ProviderModelStoreTest.java:26: 错误: 
+找不到符号
+      private ModelStore models;
+              ^
+    符号:   类 ModelStore
+    位置: 类 ProviderModelStoreTest
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\storage\ProviderModelStoreTest.java:30: 错误: 
+找不到符号
+          providers = new ProviderStore(jdbc);
+                          ^
+    符号:   类 ProviderStore
+    位置: 类 ProviderModelStoreTest
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\storage\ProviderModelStoreTest.java:31: 错误: 
+找不到符号
+          models = new ModelStore(jdbc);
+                       ^
+    符号:   类 ModelStore
+    位置: 类 ProviderModelStoreTest
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\storage\ProviderModelStoreTest.java:34: 错误: 
+程序包ProviderStore不存在
+      private static ProviderStore.Provider provider(String id, String name) {
+                                  ^
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\storage\ProviderModelStoreTest.java:35: 错误: 
+程序包ProviderStore不存在
+          return new ProviderStore.Provider(id, name, "https://example.test", true, false, T0, T0);
+                                  ^
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\storage\ProviderModelStoreTest.java:55: 错误: 
+程序包ProviderStore不存在
+          ProviderStore.Provider afterDisable = providers.get(id).orElseThrow();
+                       ^
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\storage\ProviderModelStoreTest.java:63: 错误: 
+程序包ProviderStore不存在
+          ProviderStore.Provider afterEnable = providers.get(id).orElseThrow();
+                       ^
+  D:\Project\Android\Treelearn\web\backend\src\test\java\com\treelearn\web\storage\ProviderModelStoreTest.java:105: 错误:
+ 程序包ProviderStore不存在
+          ProviderStore.Provider seed = providers
+                       ^
+  9 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 2s
+5 actionable tasks: 5 executed
+

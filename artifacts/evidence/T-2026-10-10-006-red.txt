@@ -1,0 +1,77 @@
+﻿Generated: 2026-10-10T18:50:07.5840179+08:00
+RED method: mutation-based falsification (implementation and tests were authored together; strict test-first was not run - recorded as a process deviation).
+Mutation: GlassPanel ignores the raised variant class. Command: pnpm test (cwd=web/frontend)
+node.exe : $ vitest run
+At C:\nvm4w\nodejs\node_modules\npm\pnpm.ps1:24 char:5
++     & "node$exe"  "$basedir/node_modules/pnpm/bin/pnpm.mjs" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ vitest run:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90mD:/Project/Android/Treelearn/web/frontend[39m
+
+ [32m✓[39m src/i18n/i18n.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [31m❯[39m src/components/components.test.tsx [2m([22m[2m5 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 151[2mms[22m[39m
+   [32m✓[39m IconButton [2m(2)[22m
+     [32m✓[39m is an icon-only button whose accessible name is the translated label[32m 107[2mms[22m[39m
+     [32m✓[39m exposes the solid variant for primary actions[32m 9[2mms[22m[39m
+   [31m❯[39m GlassPanel [2m(1)[22m
+[31m     [31m×[31m defaults to the panel surface and switches to the raised surface[39m[32m 8[2mms[22m[39m
+   [32m✓[39m Toast [2m(1)[22m
+     [32m✓[39m announces the message through role=status only while visible[32m 7[2mms[22m[39m
+   [32m✓[39m Dialog [2m(1)[22m
+     [32m✓[39m opens with the translated title and closes through the icon button[32m 17[2mms[22m[39m
+ [32m✓[39m src/layouts/AppShell.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 136[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/components/components.test.tsx[2m > [22mGlassPanel[2m > [22mdefaults to the panel sur
+face and switches to the raised surface
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveClass([22m[32m[32m"glass-panel--raised"[32m[31m
+[2m)[22m
+
+Expected the element to have class:
+[32m  glass-panel--raised[31m
+Received:
+[31m  glass-panel[31m[39m
+[36m [2m❯[22m src/components/components.test.tsx:[2m39:43[22m[39m
+    [90m 37|[39m       </GlassPanel>,
+    [90m 38|[39m     );
+    [90m 39|[39m     expect(screen.getByTestId('surface')).toHaveClass('glass-panel--ra…
+    [90m   |[39m                                           [31m^[39m
+    [90m 40|[39m   });
+    [90m 41|[39m });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m8 passed[39m[22m[90m (9)[39m
+[2m   Start at [22m 18:50:08
+[2m   Duration [22m 1.64s[2m (environment 64%, setup 15%, import 7%, tests 7%, transform 6%, worker 1%)[22m
+
+[ELIFECYCLE] Test failed. See above for more details.
+EXITCODE_RED=1
+RESTORED_IDENTICAL=True
+Command (restored): pnpm test
+node.exe : $ vitest run
+At C:\nvm4w\nodejs\node_modules\npm\pnpm.ps1:24 char:5
++     & "node$exe"  "$basedir/node_modules/pnpm/bin/pnpm.mjs" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ vitest run:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90mD:/Project/Android/Treelearn/web/frontend[39m
+
+ [32m✓[39m src/i18n/i18n.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/components/components.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 155[2mms[22m[39m
+ [32m✓[39m src/layouts/AppShell.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 144[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m9 passed[39m[22m[90m (9)[39m
+[2m   Start at [22m 18:50:10
+[2m   Duration [22m 1.61s[2m (environment 63%, setup 16%, import 8%, tests 7%, transform 5%, worker 1%)[22m
+
+EXITCODE_RESTORED=0

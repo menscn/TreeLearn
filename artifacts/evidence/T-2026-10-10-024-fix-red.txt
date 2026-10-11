@@ -1,0 +1,356 @@
+﻿> Task :core:compileJava
+> Task :ai-protocol:compileJava
+> Task :tree-layout:compileJava
+
+> Task :compileJava
+.\gradlew.bat : 注: 某些输入文件使用或覆盖了已过时的 API。
+At line:15 char:1106
++ ... pgrep\bin'; .\gradlew.bat :test --rerun-tasks --console=plain 2>&1 |  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (注: 某些输入文件使用或覆盖了已过时的 API。:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+
+> Task :processResources
+> Task :classes
+
+> Task :compileTestJava
+注: 某些输入文件使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+> Task :ai-protocol:processResources NO-SOURCE
+> Task :ai-protocol:classes
+> Task :ai-protocol:jar
+> Task :core:processResources NO-SOURCE
+> Task :core:classes
+> Task :core:jar
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes
+> Task :tree-layout:jar
+Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpat
+h has been appended
+
+> Task :test
+
+ReadyEndpointTest > readyEndpointAnswersOverRealHttpOnTheLoopbackPort() PASSED
+
+SharedClasspathTest > sharedCoreModuleIsOnTheCompileAndRuntimeClasspath() PASSED
+
+GatewayAdapterFixturesTest > streamChunksDecodeToTheExpectedEventsAndTerminal() PASSED
+
+GatewayAdapterFixturesTest > modelListsDecodeToTheExpectedIdsOrRefusal() PASSED
+
+GatewayAdapterFixturesTest > theFactoryWiresTheSharedGatewayToTheDesktopAdapters() PASSED
+
+GatewayAdapterFixturesTest > requestBodiesMatchTheAndroidRequestShape() PASSED
+
+StubProviderStreamTest > realSseStreamDeliversIncrementalDeltasAndCompletes() PASSED
+
+StubProviderStreamTest > cancelIsDistinctFromAStreamEnd() PASSED
+
+StubProviderStreamTest > aCleanEndWithoutTheSentinelIsInterrupted() PASSED
+
+StubProviderStreamTest > aReadFailureMidStreamIsClassifiedAsNetworkInterrupted() PASSED
+
+StubProviderStreamTest > aMalformedStreamIsClassifiedAsParseFailed() PASSED
+
+StubProviderStreamTest > providerStatusesAreClassified() PASSED
+
+StubProviderStreamTest > anInBandErrorFrameIsClassifiedAsProviderUnavailable() PASSED
+
+WindowsCredentialSecretPortTest > illegalTargetsAreRejectedBeforeAnyPlatformCall() PASSED
+
+WindowsCredentialSecretPortTest > overwritingReplacesTheStoredSecret() PASSED
+
+WindowsCredentialSecretPortTest > saveThenHasThenReadRoundTripsNonAsciiText() PASSED
+
+WindowsCredentialSecretPortTest > hasNeverReturnsTheSecretAndFailuresDoNotLeakItThroughToString() PASSED
+
+WindowsCredentialSecretPortTest > deleteRemovesTheCredentialSoHasIsFalseAndReadIsEmpty() PASSED
+
+WindowsCredentialSecretPortTest > aSecondProcessReadsTheSameCredentialWithoutPrintingTheSecret() PASSED
+
+WindowsCredentialSecretPortTest > readingAndCheckingAMissingTargetIsEmptyRatherThanFailing() PASSED
+
+DesktopGenerationStubGatewayTest > aRealSseStreamOverALoopbackSocketStabilizesTheAnswer() PASSED
+
+GenerationContextAssemblerTest > anUnresolvableSnapshotSourceIsRefused() PASSED
+
+GenerationContextAssemblerTest > aBirthSnapshotStaysFrozenWhenTheParentResetsItsDisplayedRevision() PASSED
+
+GenerationContextAssemblerTest > aRootBranchReplaysItsOwnTurnsAndExcludesTheCurrentQuestion() PASSED
+
+GenerationContextAssemblerTest > aSnapshotSummarySourceIsRefusedRatherThanInvented() PASSED
+
+GenerationContextAssemblerTest > overBudgetContextIsRefusedWithTheSharedCode() PASSED
+
+GenerationContextAssemblerTest > olderRoundsAreReplacedByOneCompressionSummaryAtTheAndroidSplit() PASSED
+
+GenerationCoordinatorTest > anAcceptThatFailsMidTransactionRollsBackEveryRow() PASSED
+
+GenerationCoordinatorTest > aNormalCompletionWithANonEmptyAnswerBecomesStableAndClosesTheStream() PASSED
+
+GenerationCoordinatorTest > aBranchWithAnInFlightAttemptRefusesANewCommand() PASSED
+
+GenerationCoordinatorTest > submitWithoutAnAcceptedAttemptIsRefused() PASSED
+
+GenerationCoordinatorTest > aRepeatedCommandIdReturnsTheSameOperationAndNeverOpensASecondCall() PASSED
+
+GenerationCoordinatorTest > theTimeHalfOfTheWriteWindowPersistsWithoutReachingTheCharThreshold() PASSED
+
+GenerationCoordinatorTest > anInterruptedStreamKeepsItsPartialContent() PASSED
+
+GenerationCoordinatorTest > aReasoningOnlyAnswerEndsAsFailedMirroringAndroid() PASSED
+
+GenerationCoordinatorTest > cancelKeepsThePartialContentAndALateCompletionChangesNothing() PASSED
+
+GenerationCoordinatorTest > anAttemptLeftByARestartStillRefusesANewCommandOnItsBranch() PASSED
+
+GenerationCoordinatorTest > deltasFanOutToTheBusAndPersistOnlyOnceTheWindowIsDue() PASSED
+
+GenerationCoordinatorTest > acceptForNewTopicCommitsFiveRowGroupsAndSubmitOpensOneCall() PASSED
+
+GenerationCoordinatorTest > anEmptyAnswerEndsAsFailedAndWritesNoRevision() PASSED
+
+GenerationCoordinatorTest > aProviderFailureIsFailedWithItsErrorCategory() PASSED
+
+GenerationEventBusTest > anOperationOnlySeesItsOwnEvents() PASSED
+
+GenerationEventBusTest > seqIsMonotonicPerOperationAndTypesFollowThePublishOrder() PASSED
+
+GenerationEventBusTest > unsubscribingRemovesTheListenerWithoutAffectingTheOthers() PASSED
+
+GenerationEventBusTest > aTerminalEventClosesTheStreamAndLaterEventsAreIgnored() PASSED
+
+GenerationEventBusTest > theBufferIsBoundedAndReplayReportsTheGap() PASSED
+
+GenerationPlannerTest > anEnabledProviderWithoutAKeyIsRefusedWithKeyMissing() PASSED
+
+GenerationPlannerTest > aDisabledProviderContributesNoModelAndFallsBack() PASSED
+
+GenerationPlannerTest > noEnabledProviderYieldsEmptyAndNoModels() PASSED
+
+GenerationPlannerTest > aConfiguredAvailableModelResolvesWithNoneAndNoRefusal() PASSED
+
+GenerationPlannerTest > aPurposeMapsToItsRole() PASSED
+
+GenerationPlannerTest > anUnconfiguredRoleResolvesThroughTheSameFallbackChain() PASSED
+
+GenerationPlannerTest > withoutABuiltinTheEarliestAvailableModelIsUsed() PASSED
+
+GenerationPlannerTest > aMissingConfiguredPairFallsBackToTheBuiltinThenTheEarliest() PASSED
+
+DatabaseMigratorTest > aFailingStepRollsBackTheWholeChainLeavingNoObjects() PASSED
+
+DatabaseMigratorTest > aMissingStepFailsClosedBeforeAnyStatementRuns() PASSED
+
+DatabaseMigratorTest > downgradeIsRefusedWithAReadableMessage() PASSED
+
+DatabaseMigratorTest > rerunningMigrationOnAnOpenDatabaseIsANoOp() PASSED
+
+DdlLocationGuardTest > ddlAppearsOnlyInDesktopSchema() PASSED
+
+DesktopSchemaConstraintsTest > contextSnapshotsAreImmutableAndDeleteOnlyWithTheirBranch() PASSED
+
+DesktopSchemaConstraintsTest > quoteInvariantRejectsAiQuoteAndEmptyUserQuoteButAcceptsANonEmptyQuote() PASSED
+
+DesktopSchemaConstraintsTest > annotationContainerCheckRejectsMismatchedShapes() PASSED
+
+DesktopSchemaConstraintsTest > modelUniqueIndexIsCaseExact() PASSED
+
+DesktopSchemaConstraintsTest > quoteInvariantAlsoRejectsAQuoteAddedToAnAiRowByUpdate() PASSED
+
+DesktopSchemaConstraintsTest > oneActiveOperationPerBranchWhileTerminalRowsCoexist() PASSED
+
+DesktopSchemaConstraintsTest > deletingATopicCascadesToItsBranchesAndMessages() PASSED
+
+DesktopSchemaConstraintsTest > answerRevisionsAreImmutableAndDeleteOnlyWithTheirMessage() PASSED
+
+DesktopSchemaConstraintsTest > messageRoleAndContentChecksRejectInvalidRows() PASSED
+
+DesktopSchemaConstraintsTest > userMessageContentRefusesUpdate() PASSED
+
+DesktopSchemaConstraintsTest > oneRootBranchPerTopicWhileChildrenRemainInsertable() PASSED
+
+DesktopSchemaConstraintsTest > terminalGenerationOperationRefusesUpdate() PASSED
+
+DesktopSchemaConstraintsTest > legalAnnotationShapesAreAccepted() PASSED
+
+DesktopSchemaConstraintsTest > attachmentParseStateCheckRejectsUnknownState() PASSED
+
+DesktopSchemaFreshInstallTest > connectionFactoryEnforcesForeignKeysAndStaysHealthy() PASSED
+
+DesktopSchemaFreshInstallTest > freshInstallCreatesTheFinalShapeOnRealSqlite() PASSED
+
+GenerationStabilizerTest > aSecondStabilizationOfTheSamePositionGetsTheNextRevisionNumber() PASSED
+
+GenerationStabilizerTest > stabilizeRefusesAnEmptyAnswerAndKeepsTheAttemptRetryable() PASSED
+
+GenerationStabilizerTest > aLateSecondStabilizationIsRefusedAndWritesNothing() PASSED
+
+GenerationStabilizerTest > stabilizeWritesRevisionActiveReferenceAndSequenceTogether() PASSED
+
+GenerationStabilizerTest > stabilizeRefusesAnAttemptThatNeverReachedTheAnswerPhase() PASSED
+
+InterruptionSweeperTest > sweepSettlesEveryActiveRowAcrossBranchesInOnePass() PASSED
+
+InterruptionSweeperTest > sweepSettlesAStreamingAttemptToInterruptedKeepingItsPartialContent() PASSED
+
+InterruptionSweeperTest > aStagedRowTakesTheDomainsRecoveryTarget() PASSED
+
+InterruptionSweeperTest > startupMigratesThenSweepsBeforeTheContextIsReady() PASSED
+
+InterruptionSweeperTest > sweepIsIdempotentAndLeavesTerminalRowsAlone() PASSED
+
+OperationSnapshotArtifactStoreTest > aSecondInFlightAttemptForOneBranchIsRefusedByThePartialIndex() PASSED
+
+OperationSnapshotArtifactStoreTest > anArtifactRoundTripsAndASecondInsertForThePairIsRefused() PASSED
+
+OperationSnapshotArtifactStoreTest > progressAppendsItsDeltasAndMovesTheState() PASSED
+
+OperationSnapshotArtifactStoreTest > aSecondBirthSnapshotForOneBranchIsRefused() PASSED
+
+OperationSnapshotArtifactStoreTest > aBirthSnapshotRoundTripsThroughItsCodec() PASSED
+
+OperationSnapshotArtifactStoreTest > replaceSwapsTheStoredArtifactAndDeleteCleansTheScope() PASSED
+
+OperationSnapshotArtifactStoreTest > applyIfBaselineMatchesUpdatesInPlaceAndDropsAStaleWrite() PASSED
+
+OperationSnapshotArtifactStoreTest > activeForBranchSeesOnlyTheInFlightAttemptAndForgetsItOnceTerminal() PASSED
+
+OperationSnapshotArtifactStoreTest > markTerminalFollowsTheDomainsTransitionRule() PASSED
+
+OperationSnapshotArtifactStoreTest > aStaleInputDoesNotMasqueradeAsTheCurrentResult() PASSED
+
+OperationSnapshotArtifactStoreTest > aTerminalRowRefusesEveryLaterWrite() PASSED
+
+OperationSnapshotArtifactStoreTest > markTerminalRefusesStableAndLeavesTheRowUntouched() PASSED
+
+OperationSnapshotArtifactStoreTest > aFreshAttemptIsStoredAsStagedAndLooksUpByIdentityAndCommandId() PASSED
+
+OperationSnapshotArtifactStoreTest > aSnapshotWhosePayloadDoesNotHashToItsDigestIsRefused() PASSED
+
+OperationStoreStablePathTest > markStableRefusesAnEmptyFinalAnswer() PASSED
+
+OperationStoreStablePathTest > markStableMovesAStreamingAnswerToStableAndClearsAnyPriorError() PASSED
+
+OperationStoreStablePathTest > markStableRefusesAnAttemptThatNeverReachedTheAnswerPhase() PASSED
+
+OperationStoreStablePathTest > markStableRefusesAnAttemptThatAlreadyEnded() PASSED
+
+OperationStoreStablePathTest > updateProgressRefusesStableAndEveryOtherTerminalTarget() FAILED
+    org.opentest4j.AssertionFailedError: updateProgress must not be a second way to write STABLE ==> Expected com.treelearn.web.storage.StorageException to be thrown, but nothing was thrown.
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:159)
+        at app//org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:74)
+        at app//org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:40)
+        at app//org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3249)
+        at app//com.treelearn.web.storage.OperationStoreStablePathTest.updateProgressRefusesStableAndEveryOtherTerminalTarget(OperationStoreStablePathTest.java:88)
+
+OperationStoreStablePathTest > markTerminalStillRefusesStableSoThereIsExactlyOneWriter() PASSED
+
+ProviderModelStoreTest > deletingAModelRowThatDoesNotExistIsRefusedLikeAndroid() PASSED
+
+ProviderModelStoreTest > aDuplicateProviderNameIsRefusedByTheStore() PASSED
+
+ProviderModelStoreTest > theBuiltinSeedIsReadableAndSurvivesAMerge() PASSED
+
+ProviderModelStoreTest > upsertManyOnlyAddsAndDedupsCaseExactly() PASSED
+
+ProviderModelStoreTest > deletingAProviderCascadesToItsModels() PASSED
+
+ProviderModelStoreTest > deletingByRowIdentityNeverTouchesAnotherProvidersSameWireId() PASSED
+
+ProviderModelStoreTest > deletingOneModelRowKeepsItsSiblingsAndItsProvider() PASSED
+
+ProviderModelStoreTest > updatingNameBaseUrlAndEnabledReadsBackConsistently() PASSED
+
+ReadingAndUnreadStoreTest > unreadDerivesFromTheSequenceGapAndNeverMovesBackwardsOrPastTheLatest() PASSED
+
+ReadingAndUnreadStoreTest > aBranchWithoutAStoredPositionHasNone() PASSED
+
+ReadingAndUnreadStoreTest > aReadingPositionRoundTripsAndClearsWithItsMessage() PASSED
+
+RevisionAndOrdinalStoreTest > switchingTheActiveRevisionIsReadBackByListForBranch() PASSED
+
+RevisionAndOrdinalStoreTest > switchingTheActiveRevisionWhileAnAttemptIsRunningIsRefused() PASSED
+
+RevisionAndOrdinalStoreTest > gettingAMessageThatDoesNotExistIsEmpty() PASSED
+
+RevisionAndOrdinalStoreTest > blankContentIsRefusedAndTheQuoteTranslatesBothWays() PASSED
+
+RevisionAndOrdinalStoreTest > nextOrdinalIsOneAboveTheHighestStored() PASSED
+
+RevisionAndOrdinalStoreTest > switchingTheActiveRevisionOfAUserPositionIsRefused() PASSED
+
+RevisionAndOrdinalStoreTest > bindingASecondAttemptWhileOneIsRunningIsRefused() PASSED
+
+RevisionAndOrdinalStoreTest > theOrdinalMustBeUniqueWithinABranch() PASSED
+
+RevisionAndOrdinalStoreTest > aDuplicateRevisionNumberIsRefusedByTheStore() PASSED
+
+RevisionAndOrdinalStoreTest > revisionsAreNumberedByTheStoreInAscendingOrder() PASSED
+
+RevisionAndOrdinalStoreTest > reactivatingTheRevisionAlreadyDisplayedIsRefusedAsTheDomainDoes() PASSED
+
+StorageStartupTest > startupCreatesTheDatabaseAndRerunningTheMigrationIsANoOp() PASSED
+
+StorageStartupTest > aDatabaseNewerThanTheProgramStopsTheService() PASSED
+
+TimestampRoundTripTest > messageAndRevisionTimestampsKeepMillisecondPrecision() PASSED
+
+TimestampRoundTripTest > topicsAreListedByRecencyAndTheMillisecondSurvivesTheRoundTrip() PASSED
+
+TopicBranchMessageStoreTest > theDerivedDisplayTitleFallsBackToTheRootQuestion() PASSED
+
+TopicBranchMessageStoreTest > touchLastVisitedRecordsTheBranchAndTheStamp() PASSED
+
+TopicBranchMessageStoreTest > createWritesTheTopicAndItsRootBranchAtomically() PASSED
+
+TopicBranchMessageStoreTest > clearingTheTitleWritesNull() PASSED
+
+TopicBranchMessageStoreTest > aForkedChildReadsBackWithItsProvenanceAndBirthSnapshot() PASSED
+
+TopicBranchMessageStoreTest > theRootBranchCarriesNoProvenance() PASSED
+
+TopicBranchMessageStoreTest > twoTopicsMayEachCarryTheirOwnSingleRoot() PASSED
+
+TopicBranchMessageStoreTest > renameCollapseArchiveAndRestoreArePersisted() PASSED
+
+TopicBranchMessageStoreTest > aRootBranchCarryingProvenanceColumnsIsRefusedByTheStore() PASSED
+
+TopicBranchMessageStoreTest > aSecondRootBranchInOneTopicIsRefused() PASSED
+
+TopicBranchMessageStoreTest > deleteCascadeRemovesTheWholeTree() PASSED
+
+TopicBranchMessageStoreTest > listForTopicReturnsBranchesInCreationOrderAndTheNavigatorsAgree() PASSED
+
+2026-10-10T23:06:02.283+08:00  INFO 10872 --- [treelearn-web-backend] [ionShutdownHook] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-10-10T23:06:02.285+08:00  INFO 10872 --- [treelearn-web-backend] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+
+> Task :test FAILED
+
+143 tests completed, 1 failed
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/web/backend/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///D:/Project/Android/Treelearn/web/backend/build/reports/tests/tes
+t/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 19s
+10 actionable tasks: 10 executed

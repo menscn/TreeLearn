@@ -1,0 +1,665 @@
+﻿T-2026-10-10-010 CHECK | command: gradlew.bat check --rerun-tasks | cwd: web/backend | EXIT_CODE=0
+> Task :core:compileJava
+> Task :tree-layout:compileJava
+> Task :compileJava
+> Task :processResources
+> Task :classes
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+> Task :core:processResources NO-SOURCE
+> Task :core:classes
+> Task :core:jar
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes
+> Task :tree-layout:jar
+
+> Task :test
+
+TopicBranchMessageStoreTest > listForTopicReturnsAPreOrderTreeAndTheNavigatorsAgree() PASSED
+
+TopicBranchMessageStoreTest > theDerivedDisplayTitleFallsBackToTheRootQuestion() PASSED
+
+TopicBranchMessageStoreTest > touchLastVisitedRecordsTheBranchAndTheStamp() PASSED
+
+TopicBranchMessageStoreTest > createWritesTheTopicAndItsRootBranchAtomically() PASSED
+
+TopicBranchMessageStoreTest > clearingTheTitleWritesNull() PASSED
+
+TopicBranchMessageStoreTest > aForkedChildReadsBackWithItsProvenanceAndBirthSnapshot() PASSED
+
+TopicBranchMessageStoreTest > theRootBranchCarriesNoProvenance() PASSED
+
+TopicBranchMessageStoreTest > twoTopicsMayEachCarryTheirOwnSingleRoot() PASSED
+
+TopicBranchMessageStoreTest > renameCollapseArchiveAndRestoreArePersisted() PASSED
+
+TopicBranchMessageStoreTest > aRootBranchCarryingProvenanceColumnsIsRefusedByTheStore() PASSED
+
+TopicBranchMessageStoreTest > aSecondRootBranchInOneTopicIsRefused() PASSED
+
+TopicBranchMessageStoreTest > deleteCascadeRemovesTheWholeTree() PASSED
+
+> Task :checkstyleMain
+> Task :checkstyleTest
+Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+
+> Task :test
+
+ReadyEndpointTest > readyEndpointAnswersOverRealHttpOnTheLoopbackPort() PASSED
+
+SharedClasspathTest > sharedCoreModuleIsOnTheCompileAndRuntimeClasspath() PASSED
+
+DatabaseMigratorTest > aFailingStepRollsBackTheWholeChainLeavingNoObjects() PASSED
+
+DatabaseMigratorTest > aMissingStepFailsClosedBeforeAnyStatementRuns() PASSED
+
+DatabaseMigratorTest > downgradeIsRefusedWithAReadableMessage() PASSED
+
+DatabaseMigratorTest > rerunningMigrationOnAnOpenDatabaseIsANoOp() PASSED
+
+DdlLocationGuardTest > ddlAppearsOnlyInDesktopSchema() PASSED
+
+DesktopSchemaConstraintsTest > contextSnapshotsAreImmutableAndDeleteOnlyWithTheirBranch() PASSED
+
+DesktopSchemaConstraintsTest > quoteInvariantRejectsAiQuoteAndEmptyUserQuoteButAcceptsANonEmptyQuote() PASSED
+
+DesktopSchemaConstraintsTest > annotationContainerCheckRejectsMismatchedShapes() PASSED
+
+DesktopSchemaConstraintsTest > modelUniqueIndexIsCaseExact() PASSED
+
+DesktopSchemaConstraintsTest > quoteInvariantAlsoRejectsAQuoteAddedToAnAiRowByUpdate() PASSED
+
+DesktopSchemaConstraintsTest > oneActiveOperationPerBranchWhileTerminalRowsCoexist() PASSED
+
+DesktopSchemaConstraintsTest > deletingATopicCascadesToItsBranchesAndMessages() PASSED
+
+DesktopSchemaConstraintsTest > answerRevisionsAreImmutableAndDeleteOnlyWithTheirMessage() PASSED
+
+DesktopSchemaConstraintsTest > messageRoleAndContentChecksRejectInvalidRows() PASSED
+
+DesktopSchemaConstraintsTest > userMessageContentRefusesUpdate() PASSED
+
+DesktopSchemaConstraintsTest > oneRootBranchPerTopicWhileChildrenRemainInsertable() PASSED
+
+DesktopSchemaConstraintsTest > terminalGenerationOperationRefusesUpdate() PASSED
+
+DesktopSchemaConstraintsTest > legalAnnotationShapesAreAccepted() PASSED
+
+DesktopSchemaConstraintsTest > attachmentParseStateCheckRejectsUnknownState() PASSED
+
+DesktopSchemaFreshInstallTest > connectionFactoryEnforcesForeignKeysAndStaysHealthy() PASSED
+
+DesktopSchemaFreshInstallTest > freshInstallCreatesTheFinalShapeOnRealSqlite() PASSED
+
+ReadingAndUnreadStoreTest > unreadDerivesFromTheSequenceGapAndNeverMovesBackwardsOrPastTheLatest() PASSED
+
+ReadingAndUnreadStoreTest > aBranchWithoutAStoredPositionHasNone() PASSED
+
+ReadingAndUnreadStoreTest > aReadingPositionRoundTripsAndClearsWithItsMessage() PASSED
+
+RevisionAndOrdinalStoreTest > switchingTheActiveRevisionIsReadBackByListForBranch() PASSED
+
+RevisionAndOrdinalStoreTest > gettingAMessageThatDoesNotExistIsEmpty() PASSED
+
+RevisionAndOrdinalStoreTest > blankContentIsRefusedAndTheQuoteTranslatesBothWays() PASSED
+
+RevisionAndOrdinalStoreTest > nextOrdinalIsOneAboveTheHighestStored() PASSED
+
+RevisionAndOrdinalStoreTest > theOrdinalMustBeUniqueWithinABranch() PASSED
+
+RevisionAndOrdinalStoreTest > aDuplicateRevisionNumberIsRefusedByTheStore() PASSED
+
+RevisionAndOrdinalStoreTest > revisionsAreNumberedByTheStoreInAscendingOrder() PASSED
+
+StorageStartupTest > startupCreatesTheDatabaseAndRerunningTheMigrationIsANoOp() PASSED
+
+StorageStartupTest > aDatabaseNewerThanTheProgramStopsTheService() PASSED
+
+TimestampRoundTripTest > messageAndRevisionTimestampsKeepMillisecondPrecision() PASSED
+
+TimestampRoundTripTest > topicsAreListedByRecencyAndTheMillisecondSurvivesTheRoundTrip() PASSED
+
+2026-10-10T19:56:22.866+08:00  INFO 45928 --- [treelearn-web-backend] [ionShutdownHook] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-10-10T19:56:22.869+08:00  INFO 45928 --- [treelearn-web-backend] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+
+> Task :check
+> Task :core:compileTestJava
+> Task :core:processTestResources NO-SOURCE
+> Task :core:testClasses
+
+> Task :core:test
+
+AnnotationTest > anExactReHighlightOfTheSameRangeAbsorbsAndRewritesIt PASSED
+
+AnnotationTest > anIntersectingSelectionAbsorbsTheOldRow PASSED
+
+AnnotationTest > aNegativeStartIsRefused PASSED
+
+AnnotationTest > annotationsWithTheSameFieldsAreEqual PASSED
+
+AnnotationTest > touchingHighlightsMergeToo PASSED
+
+AnnotationTest > theExactSameAnchorIsAnExactOverlapRegardlessOfKind PASSED
+
+AnnotationTest > aPartialOverlapIsNotAnExactOverlap PASSED
+
+AnnotationTest > theSameRangeInAnotherContainerIsNotAnExactOverlap PASSED
+
+AnnotationTest > spansCompareByBounds PASSED
+
+AnnotationTest > anEmptyOrInvertedRangeIsRefused PASSED
+
+AnnotationTest > theSameStartWithADifferentEndIsNotAnExactOverlap PASSED
+
+AnnotationTest > aNoteCarriesItsBody PASSED
+
+AnnotationTest > aCellLocatorCarriesTheCellTripleAndAProseSentinel PASSED
+
+AnnotationTest > anEmptyHistoryYieldsTheSelectionAlone PASSED
+
+AnnotationTest > aSelectionBridgingTwoHighlightsAbsorbsBoth PASSED
+
+AnnotationTest > aHighlightHasAnEmptyBody PASSED
+
+AnnotationTest > negativeLocatorComponentsAreRefused PASSED
+
+AnnotationTest > anAnnotationNeedsAWellFormedIdAndLocator PASSED
+
+AnnotationTest > anInvertedOrEmptySelectionIsRefused PASSED
+
+AnnotationTest > highlightsOfAnotherContainerAreNeverAbsorbed PASSED
+
+AnnotationTest > aSelectionInsideAnExistingHighlightLeavesTheSpanUnchanged PASSED
+
+AnnotationTest > locatorsCompareByAllFiveComponents PASSED
+
+AnnotationTest > aSelectionThatTouchesNothingStandsAlone PASSED
+
+AnnotationTest > aNoteWithABlankBodyIsRefused PASSED
+
+AnnotationTest > aProseLocatorCarriesTheProseIndexAndNegativeSentinelsElsewhere PASSED
+
+AnswerRevisionTest > restoreIsRehydrationOnly PASSED
+
+AnswerRevisionTest > resetCreatesNewRevisionAndOldBranchSourceKeepsTheOldOne PASSED
+
+AnswerRevisionTest > missingOrBlankPolicyVersionIsRefused PASSED
+
+AnswerRevisionTest > theConstructorIsNotAPublicCreationPath PASSED
+
+AnswerRevisionTest > reasoningAndAnswerBelongToTheSameStableVersion PASSED
+
+AnswerRevisionTest > revisionNumberMustBePositive PASSED
+
+AnswerRevisionTest > blankAnswerCannotBecomeStable PASSED
+
+AnswerRevisionTest > createChecksPolicyOwnershipWhileRestoreTrustsTheStoredRow PASSED
+
+AnswerRevisionTest > policyVersionIsCopiedVerbatim PASSED
+
+AnswerRevisionTest > allFieldsAreFinalAndNoSetterExists PASSED
+
+AnswerRevisionTest > aPolicyVersionThatNoPurposeOwnsIsRefused PASSED
+
+AnswerRevisionTest > thinkingDisabledKeepsAnEmptyReasoningFieldButNoNull PASSED
+
+AnswerRevisionTest > aCallerBugIsReportedBeforeTheVersionDecision PASSED
+
+BranchSourceTest > provenanceRejectsMalformedIdentifiers PASSED
+
+BranchSourceTest > aRangedAnchorNeedsBothOffsetsAndTheQuoteAndHashFallback PASSED
+
+BranchSourceTest > stableStateYieldsProvenanceThatPinsExactlyThatRevision PASSED
+
+BranchSourceTest > everyUnfinishedOrFailedStateIsRefusedAsABranchSource PASSED
+
+BranchSourceTest > theConstructorIsNotAPublicCreationPath PASSED
+
+BranchSourceTest > aChildBranchInheritsItsParentFromTheProvenance PASSED
+
+BranchSourceTest > restoreIsRehydrationOnlyButStillValidatesItsInput PASSED
+
+BranchSourceTest > aRootBranchCarriesNoProvenance PASSED
+
+BranchSourceTest > theQuoteMustBeExactlyTheAnchoredRange PASSED
+
+BranchSourceTest > wholeAnswerForkCarriesNoOffsetsButStillPinsARevision PASSED
+
+BranchSourceTest > aNonRootBranchCannotExistWithoutProvenance PASSED
+
+BranchSourceTest > aStableStateWithoutARevisionIdIsACallerBugNotABusinessFailure PASSED
+
+BranchTest > aBranchKnowsWhetherItIsRoot PASSED
+
+BranchTest > lastSeenCanNeverExceedLatestByConstruction PASSED
+
+BranchTest > readingPositionCannotRunAheadOfWhatExists PASSED
+
+BranchTest > aRejectedMutationLeavesTheBranchUntouched PASSED
+
+BranchTest > readingPositionCannotMoveBackwards PASSED
+
+BranchTest > unreadDerivesFromTheSequenceGap PASSED
+
+BranchTest > topicAndBranchIdentifiersAreUuidStrings PASSED
+
+BranchTest > titleAndCollapseUpdatesNeverCreateUnread PASSED
+
+BranchTest > archivingStampsUpdatedAtWithTheArchiveTime PASSED
+
+BranchTest > updatedAtIsReadableAndNeverPredatesCreation PASSED
+
+BranchTest > titleMayBeAbsentButNeverBlank PASSED
+
+BranchTest > restoreKeepsTheRootAndProvenanceRulesOfTheConstructor PASSED
+
+BranchTest > restoreRefusesAnUpdatedAtOlderThanCreation PASSED
+
+BranchTest > archivingKeepsTheBranchesOwnHistory PASSED
+
+BranchTest > restoreCarriesStateThatNoCreationPathCouldProduce PASSED
+
+BuildContextPlanUseCaseTest > theBranchesOwnTurnFollowsTheRevisionThatPositionDisplays PASSED
+
+BuildContextPlanUseCaseTest > aSummaryTheCompressionNeverProducedForbidsTheRequestInsteadOfDroppingReasoning PASSED
+
+BuildContextPlanUseCaseTest > theCapacityTheCallerReservedForSystemAndTheQuestionIsNotFree PASSED
+
+BuildContextPlanUseCaseTest > aSummaryThatCoversQuestionReasoningAndAnswerTravelsAsOneEntry PASSED
+
+BuildContextPlanUseCaseTest > thePlanIsOrderedBirthFirstThenThisBranchesOwnTurns PASSED
+
+BuildContextPlanUseCaseTest > aSourceTheStoreCannotResolveForbidsTheRequest PASSED
+
+BuildContextPlanUseCaseTest > malformedArgumentsAreCallerBugs PASSED
+
+BuildContextPlanUseCaseTest > theBirthHalfIsPinnedToTheSnapshotEvenAfterTheParentMovesOn PASSED
+
+BuildContextPlanUseCaseTest > anEmptyHistoryIsAValidRequest PASSED
+
+BuildContextPlanUseCaseTest > anAnswerPositionWithoutADisplayedRevisionContributesNoTurn PASSED
+
+ContextSnapshotTest > laterMutationsOfTheCallerListCannotReachTheSnapshot PASSED
+
+ContextSnapshotTest > malformedIdentifiersAndTimestampsAreCallerBugs PASSED
+
+ContextSnapshotTest > theSnapshotIdentityNeverCarriesContent PASSED
+
+ContextSnapshotTest > everyPayloadOutsideTheSchemaIsRefused PASSED
+
+ContextSnapshotTest > aStoredSnapshotReadsBackThroughTheStructuredParser PASSED
+
+ContextSnapshotTest > aSnapshotWithoutSourcesIsNotASnapshot PASSED
+
+ContextSnapshotTest > theCanonicalPayloadIsTheDocumentedWireShapeAndItsDigestIsDerived PASSED
+
+ContextSnapshotTest > aPayloadWhoseDigestDoesNotMatchIsRefused PASSED
+
+ContextSnapshotTest > theSnapshotIsUnaffectedByEverythingThatHappensUpstreamAfterwards PASSED
+
+ContextSnapshotTest > equalContextsProduceByteIdenticalPayloads PASSED
+
+ContextSnapshotTest > everySourceKindSurvivesTheCodec PASSED
+
+ContextSnapshotTest > aSchemaVersionThisBuildCannotReadIsRefused PASSED
+
+GenerationCommandTest > versionLookalikesAreRefused PASSED
+
+GenerationCommandTest > aMissingVersionIsRefusedWithThePromptPolicyCode PASSED
+
+GenerationCommandTest > malformedArgumentsAreCallerBugsNotBusinessFailures PASSED
+
+GenerationCommandTest > theVersionIsPinnedWithoutReformatting PASSED
+
+GenerationCommandTest > aCallerBugIsReportedBeforeTheVersionDecision PASSED
+
+GenerationCommandTest > aCommandPinsTheVersionOfItsDeclaredPurpose PASSED
+
+GenerationCommandTest > aVersionOwnedByAnotherPurposeIsRefused PASSED
+
+GenerationCommandTest > theDescriptionNamesThePinAndCarriesNoPromptText PASSED
+
+GenerationCommandTest > thePinnedVersionIsFinal PASSED
+
+GenerationOperationTest > thePinnedVersionCannotBeRewrittenForTheLifeOfTheOperation PASSED
+
+GenerationOperationTest > aNullDeltaIsACallerBug PASSED
+
+GenerationOperationTest > reachingStableDirectlyIsRefusedBecauseStabilizeOwnsThatMove PASSED
+
+GenerationOperationTest > aLateReasoningDeltaIsAppendedWithoutSteppingBack PASSED
+
+GenerationOperationTest > aThinkingDisabledAttemptStabilizesWithEmptyReasoning PASSED
+
+GenerationOperationTest > stabilizeCopiesTheBuffersAndThePinnedVersionVerbatim PASSED
+
+GenerationOperationTest > anEmptyDeltaIsAcceptedWithoutOpeningAChannel PASSED
+
+GenerationOperationTest > anInterruptedAttemptBehavesLikeAFailedOne PASSED
+
+GenerationOperationTest > illegalTransitionsAreReportedAsDomainErrors PASSED
+
+GenerationOperationTest > aBadRevisionNumberIsRefusedByTheRevisionItself PASSED
+
+GenerationOperationTest > aFailedAttemptRejectsLateCallbacksAndCannotBeStabilized PASSED
+
+GenerationOperationTest > stabilizeRequiresANonEmptyAnswer PASSED
+
+GenerationOperationTest > aNullTransitionTargetIsACallerBugNotABusinessFailure PASSED
+
+GenerationOperationTest > aDeltaThatArrivedBeforeStreamingIsRefused PASSED
+
+GenerationOperationTest > anOperationInheritsThePinnedVersionAndIdentityFromItsCommand PASSED
+
+GenerationOperationTest > anAnswerDeltaMovesSubmittingStraightIntoTheAnswerPhase PASSED
+
+GenerationOperationTest > aSecondStabilizationIsRefused PASSED
+
+GenerationOperationTest > aCallerBugIsReportedBeforeTheAttemptStateIsConsulted PASSED
+
+GenerationOperationTest > theOperationDescriptionNamesTheStateAndTheBuffers PASSED
+
+GenerationOperationTest > aReasoningDeltaOpensTheReasoningPhase PASSED
+
+GenerationStateTest > theDerivedPredicatesCoverEveryState PASSED
+
+GenerationStateTest > legalTransitionReturnsTheNextState PASSED
+
+GenerationStateTest > happyPathTransitionsAreLegal PASSED
+
+GenerationStateTest > anyUnfinishedStateCanFailBeInterruptedOrBeCanceled PASSED
+
+GenerationStateTest > everyRecoverableStateMapsToExactlyOneTerminalTarget PASSED
+
+GenerationStateTest > terminalStatesHaveNoRecoveryTarget PASSED
+
+GenerationStateTest > skippingForwardIsRefused PASSED
+
+GenerationStateTest > processRecoveryCoversEveryStateThatCannotSurviveARestart PASSED
+
+GenerationStateTest > illegalTransitionIsReportedAsADomainError PASSED
+
+GenerationStateTest > lateCallbackOnATerminalStateIsReportedAsADomainError PASSED
+
+GenerationStateTest > aNullTransitionTargetIsACallerBugNotABusinessFailure PASSED
+
+GenerationStateTest > onlyStableCountsAsStable PASSED
+
+GenerationStateTest > movingBackwardsIsRefused PASSED
+
+GenerationStateTest > onlyFailedAndInterruptedAreRetryableInPlace PASSED
+
+GenerationStateTest > aReasoningPhaseThatProducedNoAnswerCannotBecomeStable PASSED
+
+GenerationStateTest > terminalStatesNeverChangeAgain PASSED
+
+GuardTest > newIdProducesCanonicalDistinctUuids PASSED
+
+GuardTest > objectChecksAcceptEnumsAndValueObjectsAndRefuseNull PASSED
+
+GuardTest > canonicalUuidStringsAreAccepted PASSED
+
+GuardTest > countersRefuseNegativeValues PASSED
+
+GuardTest > nullAndEmptyIdentifiersAreRefused PASSED
+
+GuardTest > nonCanonicalSpellingsOfAValidUuidAreRefused PASSED
+
+MessageQuoteTest > aRowWhoseQuoteColumnIsNullReadsBackAsAnEmptyString PASSED
+
+MessageQuoteTest > aCorruptAiRowCarryingAQuoteFailsLoudly PASSED
+
+MessageQuoteTest > aNullQuoteIsRefusedAtTheDomainBoundary PASSED
+
+MessageQuoteTest > aUserPositionCarriesTheQuotedPassage PASSED
+
+MessageQuoteTest > theExistingFactoryStillProducesAPositionWithoutAQuote PASSED
+
+MessageQuoteTest > anEmptyQuoteIsNoQuoteRatherThanAQuotedEmptyPassage PASSED
+
+MessageQuoteTest > theQuoteIsImmutableLikeTheRestOfThePosition PASSED
+
+MessageQuoteTest > anAiPositionNeverCarriesAQuote PASSED
+
+MessageQuoteTest > theEightArgumentRestoreStillMeansNoQuote PASSED
+
+MessageQuoteTest > restoringAUserRowKeepsTheQuote PASSED
+
+MessageTest > restoreKeepsTheRoleAndContentRules PASSED
+
+MessageTest > aUserPositionCarriesNoRevisionAndNoAttempt PASSED
+
+MessageTest > endingTheAttemptInTheSameTransactionThenAllowsTheSwitch PASSED
+
+MessageTest > blankLearnerTextIsRefused PASSED
+
+MessageTest > learnerTextIsFinalAndThePositionExposesNoSetter PASSED
+
+MessageTest > clearingAFailedAttemptKeepsTheDisplayedRevision PASSED
+
+MessageTest > activatingANewRevisionSwitchesTheDisplayedVersion PASSED
+
+MessageTest > aStableRevisionCannotBeAttachedToALearnerPosition PASSED
+
+MessageTest > aSecondAttemptAtTheSamePositionIsRefusedWhileOneIsRunning PASSED
+
+MessageTest > ordinalIsBranchLocalAndNonNegative PASSED
+
+MessageTest > theDisplayedRevisionCannotBeSwitchedWhileAnAttemptIsRunning PASSED
+
+MessageTest > anAttemptCannotBeBoundToALearnerPosition PASSED
+
+MessageTest > reactivatingTheSameRevisionIsRefused PASSED
+
+MessageTest > anAiPositionCannotBeGivenLearnerText PASSED
+
+MessageTest > restoreCarriesTheActiveReferencesNoCreationPathCouldProduce PASSED
+
+PromptPurposeTest > everyPurposeOwnsItsDocumentedVersion PASSED
+
+PromptPurposeTest > theEnumMatchesTheAuthoritativeFirstReleaseListExactly PASSED
+
+PromptPurposeTest > thePrefixDirectionIsTheExactReverseOfTheVersionDirection PASSED
+
+PromptPurposeTest > theDeclarationOrderMatchesTheDocument PASSED
+
+PromptPurposeTest > aVersionOfAnotherPurposeIsRefused PASSED
+
+PromptPurposeTest > absenceOfAVersionHasOneDefinition PASSED
+
+PromptPurposeTest > theTeachingAnswerPurposeOwnsTheDocumentedVersion PASSED
+
+PromptPurposeTest > aCanonicalSemverSuffixIsAccepted PASSED
+
+PromptPurposeTest > everyPrefixIsUnambiguous PASSED
+
+PromptPurposeTest > theVersionDecisionIsExpressedAsADomainError PASSED
+
+PromptPurposeTest > aNonSemverSuffixIsRefused PASSED
+
+PromptPurposeTest > thereIsNoSeparateKeyPointsPurpose PASSED
+
+PromptSpecTest > aMissingBodyOrPurposeIsACallerBug PASSED
+
+PromptSpecTest > theVersionDecisionIsTheSameOneGenerationCommandMakes PASSED
+
+PromptSpecTest > aVersionOwnedByAnotherPurposeIsReportedAsAMismatch PASSED
+
+PromptSpecTest > aSpecCarriesItsPurposeVersionAndBody PASSED
+
+PromptSpecTest > aBlankSystemContentIsRefused PASSED
+
+PromptSpecTest > aBlankVersionIsReportedAsTheMissingPolicyCode PASSED
+
+PromptSpecTest > theSpecHasNoProviderSpecificField PASSED
+
+PromptSpecTest > theDescriptionNeverCarriesThePromptBody PASSED
+
+ReadingAnchorTest > aMessageThatStillExistsResolvesToItsOwnIndex PASSED
+
+ReadingAnchorTest > malformedAnchorsAndLayoutsAreCallerBugs PASSED
+
+ReadingAnchorTest > aDeletedAnchorFallsBackToTheLiveEndWithoutInventingAnOffset PASSED
+
+ReadingAnchorTest > aPositionThatCarriesNoRevisionStaysThatWayWhenRebased PASSED
+
+ReadingAnchorTest > aRevisionThatIsNoLongerActiveIsRebasedOntoTheCurrentOne PASSED
+
+ReadingAnchorTest > anEmptyBranchHasNoIndexAtAll PASSED
+
+ReadingAnchorTest > offsetsAreClampedToWhatTheCurrentLayoutStillHas PASSED
+
+SearchHitTest > aFailedAttemptHitLocatesTheMessageWithoutClaimingARevision PASSED
+
+SearchHitTest > theDisplayOrderIsFieldThenTopicThenBranchThenOrdinalThenRevision PASSED
+
+SearchHitTest > identifiersAndSnippetsAreValidatedLikeEveryOtherDomainValue PASSED
+
+SearchHitTest > aQuestionHitIsMessageBoundAndOrderedAfterTitle PASSED
+
+SearchHitTest > aRevisionCannotBeAttachedToAHitThatNamesNoMessage PASSED
+
+SearchHitTest > aHitWithoutAMessageMustNotClaimAnOrdinal PASSED
+
+SearchHitTest > aTitleHitIsNotMessageBoundAndLocatesNothing PASSED
+
+SearchHitTest > anAnswerHitLocatesTheExactMessageAndRevision PASSED
+
+SearchQueryTest > aNullOrNegativeLengthQueryIsACallerBug PASSED
+
+SearchQueryTest > theEscapeCharacterItselfIsEscaped PASSED
+
+SearchQueryTest > chineseTextIsKeptVerbatim PASSED
+
+SearchQueryTest > percentAndUnderscoreAreEscapedAsLiterals PASSED
+
+SearchQueryTest > normalisationTrimsCollapsesWhitespaceAndFoldsCase PASSED
+
+SearchQueryTest > theSameTextAlwaysProducesTheSamePattern PASSED
+
+SearchQueryTest > aBlankQueryIsEmptyAndNeverBecomesAWildcardScan PASSED
+
+TopicTest > anUpdateMustNotPredateCreation PASSED
+
+TopicTest > malformedIdentifiersAreRefusedAtConstruction PASSED
+
+TopicTest > visitingABranchKeepsIdentityAndCreationTime PASSED
+
+TopicTest > aFreshTopicHasNotBeenVisitedYet PASSED
+
+TopicTest > timestampsAreUtcEpochMillisAndNeverNegative PASSED
+
+TopicTest > aTopicCarriesNoNameOfItsOwn PASSED
+
+UnreadRollupTest > aCollapsedBranchThatHidesOnlyArchivedChildrenKeepsItsOwnBadge PASSED
+
+UnreadRollupTest > aBranchWhoseParentIsNotInTheSnapshotIsStillShown PASSED
+
+UnreadRollupTest > aBranchWithNothingUnreadIsStillListed PASSED
+
+UnreadRollupTest > anExpandedAncestorShowsEachBranchsOwnBadge PASSED
+
+UnreadRollupTest > aCollapsedAncestorCarriesTheUnreadItHides PASSED
+
+UnreadRollupTest > anArchivedBranchAndItsSubtreeLeaveTheVisibleTreeEntirely PASSED
+
+ViewportSeenTest > anOlderAnswerEnteringTheViewportChangesNothing PASSED
+
+ViewportSeenTest > aUserQuestionScrollingPastClearsNothing PASSED
+
+ViewportSeenTest > nothingIsClearedWhileNoAnswerHasAStableRevision PASSED
+
+ViewportSeenTest > anAlreadyReadBranchIsUntouched PASSED
+
+ViewportSeenTest > anEmptyViewportNeverAdvancesAnything PASSED
+
+ViewportSeenTest > theNewestUnreadAnswerEnteringTheViewportClearsTheUnread PASSED
+
+> Task :core:check
+> Task :tree-layout:compileTestJava
+> Task :tree-layout:processTestResources NO-SOURCE
+> Task :tree-layout:testClasses
+
+> Task :tree-layout:test
+
+TreeLayoutGeometryTest > segmentLengthUsesRoundsDepthDecayAndTheCap PASSED
+
+TreeLayoutGeometryTest > siblingsFanOutByLeafWeightAndSproutAlongTheirParent PASSED
+
+TreeLayoutGeometryTest > emptySnapshotProducesAnEmptyFiniteResult PASSED
+
+TreeLayoutGeometryTest > rootIsATrunkGrowingStraightUpWithRoundDerivedLength PASSED
+
+TreeLayoutGeometryTest > collapsedBranchWithoutVisibleChildrenIsStillALeaf PASSED
+
+TreeLayoutGeometryTest > snapshotChildrenKeepTheirInputOrder PASSED
+
+TreeLayoutGeometryTest > singleNodeTreeIsOneLeafAndKeepsTheSoilBand PASSED
+
+TreeLayoutGeometryTest > currentPathIsFlaggedAndFallsBackToTheRootWhenTargetIsNotVisible PASSED
+
+TreeLayoutGeometryTest > deepChainStaysFinite PASSED
+
+TreeLayoutGeometryTest > sameInputProducesBitIdenticalOutput PASSED
+
+TreeLayoutGeometryTest > collapsedBranchCountsHiddenDescendantsAndTheirUnread PASSED
+
+TreeLayoutGeometryTest > branchWithOnlyArchivedChildrenBecomesALeaf PASSED
+
+TreeLayoutGeometryTest > largeTreeStaysFiniteAndReportsItsSize PASSED
+
+TreeLayoutGeometryTest > archivedSubtreesLeaveTheDefaultLayout PASSED
+
+TreeLayoutGeometryTest > childOrderFollowsTheSnapshotOrder PASSED
+
+TreeLayoutHitFitAnchorTest > screenPointsRoundTripThroughTheFitTransform PASSED
+
+TreeLayoutHitFitAnchorTest > hitTestOutsideEveryRegionReturnsNull PASSED
+
+TreeLayoutHitFitAnchorTest > degenerateViewportsStayFinite PASSED
+
+TreeLayoutHitFitAnchorTest > collapseNeverMovesTheSurvivingNodes PASSED
+
+TreeLayoutHitFitAnchorTest > archivingASiblingReportsTheExactAnchorShift PASSED
+
+TreeLayoutHitFitAnchorTest > boundsCoverEveryTipBaseAndLabel PASSED
+
+TreeLayoutHitFitAnchorTest > everyVisibleNodeIsHittableAtItsOwnAnchor PASSED
+
+TreeLayoutHitFitAnchorTest > viewTransformRefusesANonPositiveScale PASSED
+
+TreeLayoutHitFitAnchorTest > fitKeepsTheTreeInsideTheViewportAndAlignsTheBottom PASSED
+
+TreeLayoutHitFitAnchorTest > hitTestAtALabelCentreReturnsTheLabeledBranch PASSED
+
+TreeLayoutHitFitAnchorTest > viewportRefusesNegativeOrZeroTouchTarget PASSED
+
+TreeLayoutLabelTest > midDensityPlacesOneBarLabelPerLeafAtTheMeasuredPosition PASSED
+
+TreeLayoutLabelTest > crowdedBarOmitsLabelsButKeepsEveryNodeHittable PASSED
+
+TreeLayoutLabelTest > farDensityPlacesNoLabelsAndKeepsEveryNodeHittable PASSED
+
+TreeLayoutLabelTest > nearDensityAddsTheSummaryLineOnlyWhenTheBranchHasOne PASSED
+
+TreeLayoutLabelTest > canopyBarSitsEntirelyAboveTheCrownAndAboveEveryLeafBox PASSED
+
+TreeLayoutLabelTest > currentBranchLeafTakesTheFirstRow PASSED
+
+TreeLayoutLabelTest > barLabelsNeverOverlapAndNeverCoverALeaf PASSED
+
+TreeLayoutLabelTest > densityIsDerivedFromTheZoomScale PASSED
+
+> Task :tree-layout:check
+
+[Incubating] Problems report is available at: file:///D:/Project/Android/Treelearn/web/backend/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 11s
+14 actionable tasks: 14 executed

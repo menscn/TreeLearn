@@ -82,7 +82,7 @@ tdd_mode: required
 
 ### RED — failing test first
 - Test/scenario: `ChildBranchPopupLifecycleInstrumentedTest.childPopupRemainsVisibleAfterNonDestructiveStateRender` fails because `ChatScreen.render` dismisses the popup during an unrelated draft update.
-- Command: `.\gradlew.bat :app:connectedDebugAndroidTest --no-build-cache`
+- Command: `.\gradlew.bat :app:connectedDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=com.treelearn.app.ChildBranchPopupLifecycleInstrumentedTest" --no-build-cache --no-daemon --console=plain`
 - Exit code: 1
 - Observed failure: Full device suite finished 272 tests with 30 failures; the targeted popup lifecycle assertion failed.
 - Failure reason validated: Assertion at `ChildBranchPopupLifecycleInstrumentedTest.java:91` reports the popup is no longer showing after the unrelated render; evidence is `artifacts/evidence/T-2026-09-28-math-renderer-connected-androidtest.txt` lines 161–164 and 288–316.

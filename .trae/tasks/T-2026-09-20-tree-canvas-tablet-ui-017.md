@@ -13,7 +13,7 @@ owner_lane: android
 stack: android
 estimated_production_lines: 200
 shared_code_touched: false
-depends_on: [T-2026-09-20-navigation-archive-delete-014.md, T-2026-09-20-search-unread-reading-position-015.md, T-2026-09-20-pure-java-tree-layout-016.md]
+depends_on: []
 tdd_mode: required
 
 ## Requirement collaboration brief
@@ -82,10 +82,10 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ### RED — failing test first
 - Test/scenario: `TreeCanvasDeviceInstrumentedTest`（新增，真机）——①平板双栏：以注入 sw600dp 配置的 Context inflate `screen_tree.xml`，断言 `tree_nav_host` 与 `tree_divider` 存在，而手机配置下不存在（无第二份 Java 实现，纯资源差异）；②手势管道：`TreeCanvasView` render READY 帧（public API 构造 state）后合成真实 MotionEvent 流（单击 / 单指拖动 / 双指缩放），recording actions 收到 `onTap`/`onPan`/`onZoom`；③弹窗 seam：宿主 Activity 内挂 `TreeCanvasScreen`，render 带 popup 的帧后 screen 处于弹窗显示态、render 无 popup 帧后收回——断言走 `isPopupShowing()` seam，RED 阶段该方法尚不存在，预期编译失败。
-- Command: PENDING
-- Exit code: PENDING
-- Observed failure: PENDING
-- Failure reason validated: PENDING
+- Command: `.\gradlew.bat :app:assembleDebug`
+- Exit code: 1
+- Observed failure: 编译失败：`screen/TreeCanvasView.java:274/278` 把 `TextUtils.ellipsize(...)` 返回的 `CharSequence` 直接传给 `Canvas.drawText(String, …)`（`:app:assembleDebug` 退出码 1）
+- Failure reason validated: 失败确由该类型不匹配导致；改 `.toString()` 后同一命令 `BUILD SUCCESSFUL`（退出码 0，证据 `artifacts/evidence/leader-compile-check-2026-09-21.txt`）
 
 ### GREEN — minimum implementation
 - Implementation: PENDING

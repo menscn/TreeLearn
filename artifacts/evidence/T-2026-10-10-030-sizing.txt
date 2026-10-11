@@ -1,0 +1,25 @@
+T-2026-10-10-frontend-shell-home-030 业务行统计（口径：非空非注释的生产代码行）
+方法：新增文件按整文件非空非注释行；既有文件按 git diff -U0 新增行中的非空非注释行。
+排除：测试文件、web/README.md（文档）、dist/（构建产物）。
+
+== 新增生产文件（整文件） ==
+ 27  web/frontend/src/platform/router.ts
+  6  web/frontend/src/hooks/useRoute.ts
+ 24  web/frontend/src/hooks/useDraft.ts
+ 36  web/frontend/src/store/drafts.ts
+ 30  web/frontend/src/store/homeData.ts
+ 47  web/frontend/src/components/Composer.tsx
+ 78  web/frontend/src/pages/HomePage.tsx
+ 15  web/frontend/src/pages/Router.tsx
+
+== 既有生产文件（本次新增行） ==
+  2  web/frontend/src/App.tsx
+  1  web/frontend/src/components/icons.ts
+ 19  web/frontend/src/i18n/en-US.ts
+ 19  web/frontend/src/i18n/zh-CN.ts
+ 44  web/frontend/src/layouts/AppShell.tsx
+ 29  web/frontend/src/styles/global.css
+
+TOTAL: 377
+判定：377 <= 380（任务估算上限），且 <= 500（Harness 硬上限）=> PASS
+备注：css 规则按「一行一条」书写以控制变更行数；测试不计入本统计。

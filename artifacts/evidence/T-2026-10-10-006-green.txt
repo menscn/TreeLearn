@@ -1,0 +1,188 @@
+﻿Generated: 2026-10-10T18:24:20.8720820+08:00
+Command1: pnpm test
+node.exe : $ vitest run
+At C:\nvm4w\nodejs\node_modules\npm\pnpm.ps1:24 char:5
++     & "node$exe"  "$basedir/node_modules/pnpm/bin/pnpm.mjs" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ vitest run:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90mD:/Project/Android/Treelearn/web/frontend[39m
+
+ [32m✓[39m src/i18n/i18n.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m src/components/components.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 141[2mms[22m[39m
+ [32m✓[39m src/layouts/AppShell.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 143[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m9 passed[39m[22m[90m (9)[39m
+[2m   Start at [22m 18:24:21
+[2m   Duration [22m 1.62s[2m (environment 61%, setup 16%, import 10%, tests 7%, transform 5%, worker 1%)[22m
+
+EXITCODE_TEST=0
+Command2: pnpm lint
+node.exe : $ eslint . && node scripts/check-user-copy-i18n.mjs
+At C:\nvm4w\nodejs\node_modules\npm\pnpm.ps1:24 char:5
++     & "node$exe"  "$basedir/node_modules/pnpm/bin/pnpm.mjs" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ eslint . && n...r-copy-i18n.mjs:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+OK   no hardcoded user copy found in 9 production source file(s)
+VERDICT: PASS (1 OK line)
+EXITCODE_LINT=0
+Command3: pnpm run check:design-tokens -- --selftest
+node.exe : $ node scripts/check-design-tokens.mjs "--selftest"
+At C:\nvm4w\nodejs\node_modules\npm\pnpm.ps1:24 char:5
++     & "node$exe"  "$basedir/node_modules/pnpm/bin/pnpm.mjs" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ node scripts/...js "--selftest":String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+SELFTEST CASE OK: committed CSS matches the generator (51 propertie(s))
+SELFTEST CASE OK: injected colour change detected
+SELFTEST CASE OK: hand-edited CSS detected
+SELFTEST CASE OK: removed web colour detected
+SELFTEST VERDICT: PASS (4 case(s), every tamper branch turned red)
+EXITCODE_TOKENS_SELFTEST=0
+Command4: pnpm run check:contrast -- --selftest
+node.exe : $ node scripts/check-contrast.mjs "--selftest"
+At C:\nvm4w\nodejs\node_modules\npm\pnpm.ps1:24 char:5
++     & "node$exe"  "$basedir/node_modules/pnpm/bin/pnpm.mjs" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ node scripts/...js "--selftest":String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+SELFTEST CASE OK: black on white computes 21:1
+SELFTEST CASE OK: mid-grey on white fails the 4.5 threshold
+SELFTEST CASE OK: alpha compositor blends 50% white over black to ~127.5
+SELFTEST VERDICT: PASS (3 case(s))
+EXITCODE_CONTRAST_SELFTEST=0
+Command5: pnpm build
+node.exe : $ pnpm check:design && tsc --noEmit && vite build
+At C:\nvm4w\nodejs\node_modules\npm\pnpm.ps1:24 char:5
++     & "node$exe"  "$basedir/node_modules/pnpm/bin/pnpm.mjs" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ pnpm check:de...t && vite build:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+$ pnpm check:design-tokens && pnpm check:contrast && pnpm check:user-copy-i18n
+$ node scripts/check-design-tokens.mjs
+OK   committed tokens.css matches the generator (51 custom propertie(s))
+VERDICT: PASS (1 OK line)
+$ node scripts/check-contrast.mjs
+OK   15.28:1 (min 4.5) - ink on web-white (body text on content surface)
+OK   13.15:1 (min 4.5) - ink on web-mist (text on mist background)
+OK   7.65:1 (min 4.5) - ink2 on web-white (secondary text)
+OK   14.66:1 (min 4.5) - ink on composited glass panel over web-mist
+OK   4.72:1 (min 4.5) - web-on-sage on web-sage (primary action label)
+OK   3.56:1 (min 3) - web-sage on web-white (control border/icon)
+OK   5.11:1 (min 4.5) - ink2 on web-mint (selected-state text)
+VERDICT: PASS (7 pair(s) at or above threshold)
+$ node scripts/check-user-copy-i18n.mjs
+OK   no hardcoded user copy found in 9 production source file(s)
+VERDICT: PASS (1 OK line)
+[36mvite v8.3.4 [32mbuilding client environment for production...[36m[39m
+transforming...
+✓ 1917 modules transformed.
+[31m✗[39m Build failed in 163ms
+[31merror during build:
+[31mBuild failed with 1 error:
+
+[plugin vite:css-post]
+SyntaxError: [lightningcss minify] Unexpected token Delim('*')
+80 |   * Every value here comes from the generated tokens (src/styles/tokens.css):
+81 |   * the mint Web namespace (web-white / web-mist / web-mint / web-sage /
+82 |   * web-on-sage), the base scales (s*/r-*/fs-*/sh-*/lh-read) and the glass
+   |                                         ^
+83 |   * primitives. No literal colour or size is allowed in component styles -
+84 |   * the drift guard (scripts/check-design-tokens.mjs) only covers the token
+    at Module.<anonymous> (D:\Project\Android\Treelearn\web\frontend\node_modules\.pnpm\lightningcss@1.33.0\node_module
+s\lightningcss\node\index.js:56:14)
+    at minifyCSS (file:///D:/Project/Android/Treelearn/web/frontend/node_modules/.pnpm/vite@8.3.4_@types+node@26.6.4/no
+de_modules/vite/dist/node/chunks/node.js:30767:59)
+    at async finalizeCss (file:///D:/Project/Android/Treelearn/web/frontend/node_modules/.pnpm/vite@8.3.4_@types+node@2
+6.6.4/node_modules/vite/dist/node/chunks/node.js:30609:36)
+    at async Promise.all (index 1)
+    at async Object.run (file:///D:/Project/Android/Treelearn/web/frontend/node_modules/.pnpm/vite@8.3.4_@types+node@26
+.6.4/node_modules/vite/dist/node/chunks/node.js:3055:22)
+    at async PluginContextImpl.renderChunk (file:///D:/Project/Android/Treelearn/web/frontend/node_modules/.pnpm/vite@8
+.3.4_@types+node@26.6.4/node_modules/vite/dist/node/chunks/node.js:30114:19)
+    at async plugin (file:///D:/Project/Android/Treelearn/web/frontend/node_modules/.pnpm/rolldown@1.2.13/node_modules/
+rolldown/dist/shared/bindingify-input-options-C0gEvtnB.mjs:1813:16)
+    at async plugin.<computed> (file:///D:/Project/Android/Treelearn/web/frontend/node_modules/.pnpm/rolldown@1.2.13/no
+de_modules/rolldown/dist/shared/bindingify-input-options-C0gEvtnB.mjs:2316:12)[31m
+    at aggregateBindingErrorsIntoJsError (file:///D:/Project/Android/Treelearn/web/frontend/node_modules/.pnpm/rolldown
+@1.2.13/node_modules/rolldown/dist/shared/error-Dsqzw0Oa.mjs:49:18)
+    at unwrapBindingResult (file:///D:/Project/Android/Treelearn/web/frontend/node_modules/.pnpm/rolldown@1.2.13/node_m
+odules/rolldown/dist/shared/error-Dsqzw0Oa.mjs:19:128)
+    at #build (file:///D:/Project/Android/Treelearn/web/frontend/node_modules/.pnpm/rolldown@1.2.13/node_modules/rolldo
+wn/dist/shared/rolldown-D_vNlorD.mjs:133:34)
+    at async buildEnvironment (file:///D:/Project/Android/Treelearn/web/frontend/node_modules/.pnpm/vite@8.3.4_@types+n
+ode@26.6.4/node_modules/vite/dist/node/chunks/node.js:34716:66)
+    at async Object.build (file:///D:/Project/Android/Treelearn/web/frontend/node_modules/.pnpm/vite@8.3.4_@types+node@
+26.6.4/node_modules/vite/dist/node/chunks/node.js:35137:19)
+    at async Object.buildApp (file:///D:/Project/Android/Treelearn/web/frontend/node_modules/.pnpm/vite@8.3.4_@types+no
+de@26.6.4/node_modules/vite/dist/node/chunks/node.js:35134:153)
+    at async CAC.<anonymous> (file:///D:/Project/Android/Treelearn/web/frontend/node_modules/.pnpm/vite@8.3.4_@types+no
+de@26.6.4/node_modules/vite/dist/node/cli.js:780:3) {
+  errors: [Getter/Setter]
+}[39m
+[ELIFECYCLE] Command failed with exit code 1.
+EXITCODE_BUILD=1
+Command6 (after comment fix): pnpm build
+node.exe : $ pnpm check:design && tsc --noEmit && vite build
+At C:\nvm4w\nodejs\node_modules\npm\pnpm.ps1:24 char:5
++     & "node$exe"  "$basedir/node_modules/pnpm/bin/pnpm.mjs" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ pnpm check:de...t && vite build:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+$ pnpm check:design-tokens && pnpm check:contrast && pnpm check:user-copy-i18n
+$ node scripts/check-design-tokens.mjs
+OK   committed tokens.css matches the generator (51 custom propertie(s))
+VERDICT: PASS (1 OK line)
+$ node scripts/check-contrast.mjs
+OK   15.28:1 (min 4.5) - ink on web-white (body text on content surface)
+OK   13.15:1 (min 4.5) - ink on web-mist (text on mist background)
+OK   7.65:1 (min 4.5) - ink2 on web-white (secondary text)
+OK   14.66:1 (min 4.5) - ink on composited glass panel over web-mist
+OK   4.72:1 (min 4.5) - web-on-sage on web-sage (primary action label)
+OK   3.56:1 (min 3) - web-sage on web-white (control border/icon)
+OK   5.11:1 (min 4.5) - ink2 on web-mint (selected-state text)
+VERDICT: PASS (7 pair(s) at or above threshold)
+$ node scripts/check-user-copy-i18n.mjs
+OK   no hardcoded user copy found in 9 production source file(s)
+VERDICT: PASS (1 OK line)
+[36mvite v8.3.4 [32mbuilding client environment for production...[36m[39m
+transforming...
+✓ 1917 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.40 kB │ gzip:  0.28 kB
+dist/assets/index-FhLPn1yQ.css    4.21 kB │ gzip:  1.47 kB
+dist/assets/index-CnQsZiYT.js   225.44 kB │ gzip: 71.08 kB
+
+[32m✓ built in 239ms[39m
+EXITCODE_BUILD2=0
+Command7 (after html lang fix): pnpm test
+node.exe : $ vitest run
+At C:\nvm4w\nodejs\node_modules\npm\pnpm.ps1:24 char:5
++     & "node$exe"  "$basedir/node_modules/pnpm/bin/pnpm.mjs" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ vitest run:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90mD:/Project/Android/Treelearn/web/frontend[39m
+
+ [32m✓[39m src/i18n/i18n.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/layouts/AppShell.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 145[2mms[22m[39m
+ [32m✓[39m src/components/components.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 163[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m9 passed[39m[22m[90m (9)[39m
+[2m   Start at [22m 18:47:34
+[2m   Duration [22m 2.00s[2m (environment 60%, setup 20%, import 8%, tests 6%, transform 5%, worker 1%)[22m
+
+EXITCODE_TEST2=0

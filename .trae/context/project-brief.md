@@ -13,20 +13,24 @@
 - 模块：`:app`、`:core`、`:data`、`:ai`、`:tree-layout`；依赖只能向下，`:core` 不碰 Android UI、网络、数据库实现。
 - 构建：Gradle Groovy DSL、Java 17 toolchain、`minSdk 28`。
 - UI 与状态：原生 XML/View 加自定义 View/Canvas；显式 ScreenController/Presenter 配不可变 ViewState。
-- 存储：`SQLiteOpenHelper` 加显式 DAO 和前向版本迁移；核心七张逻辑表 + 提供商/模型配置两张表（T-083 交付，共九张）。
+- 存储：`SQLiteOpenHelper` 加显式 DAO 和前向版本迁移；当前表清单以 `android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java` 的 `TABLE_NAMES` 为准，含核心学习、Provider/模型、附件/引用及批注。
 - 网络与模型：`HttpsURLConnection` 加自建 SSE 解析；OpenAI 兼容多供应商（基线变更依据：`Docs/spec/SPEC-2026-09-23-providers-and-models.md`，accepted），思考模式开关每次请求显式传。
 - 密钥：Android Keystore（AES-GCM）；明文不进 SQLite、日志或备份。
 
 ## 关键约束
 
 - Java-only：不写 Kotlin 源码，不加 Kotlin Gradle 插件，不引 `org.jetbrains.kotlin` 或 `-ktx` 坐标。
-- 无服务端：不做账号、同步、共享、云备份、远程遥测；`frontend/` 与 `backend/` 目录目前不存在。
+- Web 本地版（2026-10-10 用户确认）：`web/` 一级目录落地——`web/frontend`（React+TS+Vite 骨架与设计系统）、`web/backend`（本机 Spring Boot，loopback 8733）、`web/shared`（`:core`/`:tree-layout` 源码迁移后的唯一实现，两端 projectDir 引用）、`web/scripts`（启停与结构守卫）；数据与 Android 独立，边界只覆盖本机 Web，不包含账号、同步、公网、云备份或远程遥测；权威启动说明见 `web/README.md`；详见 `Docs/intent/INTENT-2026-10-10-local-web-edition.md` 与功能一致性矩阵。
 - 时间：落库与对外传输统一用 UTC epoch 毫秒。
 - 触屏热区不小于 44dp。
 - 单人开发：所有流程都必须假设没有第二个人做复核。
 - 规模：单个任务的生产代码目标 200 行；RikkaHub 吸收战役内（T-086～T-105，用户 2026-09-24 两次裁定「可以放行」「预授权追认」）实测超 500 行的任务记「预授权追认」例外后放行——实现者须两轮压缩后如实记录，verifier 须独立实测行数并评估风险；战役外维持 200/500 原口径。
 
 ## 权威文档索引
+
+- `Docs/intent/INTENT-2026-10-10-local-web-edition.md`（localhost Web 版，数据独立，accepted）
+- `Docs/spec/SPEC-2026-10-10-local-web-edition.md`（专注阅读主布局与薄荷雾面配色，设计 review 稿）
+- `Docs/05-technical-design/TreeLearn_Web本地版_AI开发交接入口.md`（HTML、功能对照与详细开发方案的入口；不代表实现完成）
 
 - `Docs/01-demand/结构化需求基准说明书_知芽（TreeLearn）_V3.0.md`
 - `Docs/01-demand/结构化需求基准说明书_知芽（TreeLearn）_V3.1增量.md`

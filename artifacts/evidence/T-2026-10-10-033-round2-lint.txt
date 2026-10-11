@@ -1,0 +1,78 @@
+﻿### lint/guards (2026-10-11T02:57:05.8841238+08:00)
+--- pnpm lint ---
+node.exe : $ eslint . && node scripts/check-user-copy-i18n.mjs
+At C:\nvm4w\nodejs\node_modules\npm\pnpm.ps1:24 char:5
++     & "node$exe"  "$basedir/node_modules/pnpm/bin/pnpm.mjs" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ eslint . && n...r-copy-i18n.mjs:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+OK   no hardcoded user copy found in 29 production source file(s)
+VERDICT: PASS (1 OK line)
+EXIT=0
+--- check:design-tokens ---
+node.exe : $ node scripts/check-design-tokens.mjs
+At C:\nvm4w\nodejs\node_modules\npm\pnpm.ps1:24 char:5
++     & "node$exe"  "$basedir/node_modules/pnpm/bin/pnpm.mjs" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ node scripts/check-design-tokens.mjs:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+OK   committed tokens.css matches the generator (54 custom propertie(s))
+VERDICT: PASS (1 OK line)
+EXIT=0
+--- check:design-tokens --selftest ---
+node.exe : $ node scripts/check-design-tokens.mjs "--selftest"
+At C:\nvm4w\nodejs\node_modules\npm\pnpm.ps1:24 char:5
++     & "node$exe"  "$basedir/node_modules/pnpm/bin/pnpm.mjs" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ node scripts/...js "--selftest":String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+SELFTEST CASE OK: committed CSS matches the generator (54 propertie(s))
+SELFTEST CASE OK: injected colour change detected
+SELFTEST CASE OK: hand-edited CSS detected
+SELFTEST CASE OK: removed web colour detected
+SELFTEST VERDICT: PASS (4 case(s), every tamper branch turned red)
+EXIT=0
+--- check:contrast ---
+node.exe : $ node scripts/check-contrast.mjs
+At C:\nvm4w\nodejs\node_modules\npm\pnpm.ps1:24 char:5
++     & "node$exe"  "$basedir/node_modules/pnpm/bin/pnpm.mjs" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ node scripts/check-contrast.mjs:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+OK   15.28:1 (min 4.5) - ink on web-white (body text on content surface)
+OK   13.15:1 (min 4.5) - ink on web-mist (text on mist background)
+OK   7.65:1 (min 4.5) - ink2 on web-white (secondary text)
+OK   14.44:1 (min 4.5) - ink on composited glass panel over web-mist
+OK   4.72:1 (min 4.5) - web-on-sage on web-sage (primary action label)
+OK   3.56:1 (min 3) - web-sage on web-white (control border/icon)
+OK   5.11:1 (min 4.5) - ink2 on web-mint (selected-state text)
+VERDICT: PASS (7 pair(s) at or above threshold)
+EXIT=0
+--- check:contrast --selftest ---
+node.exe : $ node scripts/check-contrast.mjs "--selftest"
+At C:\nvm4w\nodejs\node_modules\npm\pnpm.ps1:24 char:5
++     & "node$exe"  "$basedir/node_modules/pnpm/bin/pnpm.mjs" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ node scripts/...js "--selftest":String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+SELFTEST CASE OK: black on white computes 21:1
+SELFTEST CASE OK: mid-grey on white fails the 4.5 threshold
+SELFTEST CASE OK: alpha compositor blends 50% white over black to ~127.5
+SELFTEST VERDICT: PASS (3 case(s))
+EXIT=0
+--- check:user-copy-i18n ---
+node.exe : $ node scripts/check-user-copy-i18n.mjs
+At C:\nvm4w\nodejs\node_modules\npm\pnpm.ps1:24 char:5
++     & "node$exe"  "$basedir/node_modules/pnpm/bin/pnpm.mjs" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ node scripts/check-user-copy-i18n.mjs:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+OK   no hardcoded user copy found in 29 production source file(s)
+VERDICT: PASS (1 OK line)
+EXIT=0

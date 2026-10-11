@@ -1,0 +1,712 @@
+> Task :core:compileJava UP-TO-DATE
+> Task :ai-protocol:compileJava UP-TO-DATE
+> Task :tree-layout:compileJava UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :ai-protocol:processResources NO-SOURCE
+> Task :ai-protocol:classes UP-TO-DATE
+> Task :ai-protocol:jar UP-TO-DATE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :tree-layout:processResources NO-SOURCE
+> Task :tree-layout:classes UP-TO-DATE
+> Task :tree-layout:jar UP-TO-DATE
+Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+
+> Task :test
+
+ReadyEndpointTest > readyEndpointAnswersOverRealHttpOnTheLoopbackPort() PASSED
+
+SharedClasspathTest > sharedCoreModuleIsOnTheCompileAndRuntimeClasspath() PASSED
+
+GatewayAdapterFixturesTest > streamChunksDecodeToTheExpectedEventsAndTerminal() PASSED
+
+GatewayAdapterFixturesTest > modelListsDecodeToTheExpectedIdsOrRefusal() PASSED
+
+GatewayAdapterFixturesTest > theFactoryWiresTheSharedGatewayToTheDesktopAdapters() PASSED
+
+GatewayAdapterFixturesTest > requestBodiesMatchTheAndroidRequestShape() PASSED
+
+StubProviderStreamTest > realSseStreamDeliversIncrementalDeltasAndCompletes() PASSED
+
+StubProviderStreamTest > cancelIsDistinctFromAStreamEnd() PASSED
+
+StubProviderStreamTest > aCleanEndWithoutTheSentinelIsInterrupted() PASSED
+
+StubProviderStreamTest > aReadFailureMidStreamIsClassifiedAsNetworkInterrupted() PASSED
+
+StubProviderStreamTest > aMalformedStreamIsClassifiedAsParseFailed() PASSED
+
+StubProviderStreamTest > providerStatusesAreClassified() PASSED
+
+StubProviderStreamTest > anInBandErrorFrameIsClassifiedAsProviderUnavailable() PASSED
+
+BranchLifecycleEndpointsTest > archiveAndRestoreRefuseIllegalTransitions() PASSED
+
+BranchLifecycleEndpointsTest > seenOnlyMovesForward() PASSED
+
+BranchLifecycleEndpointsTest > readingPositionRoundTripsAndClearsWithItsMessage() PASSED
+
+BranchLifecycleEndpointsTest > subtreeDeleteRemovesOnlyThatSubtree() PASSED
+
+BranchLifecycleEndpointsTest > collapsePersistsAndReadsBackThroughTheTree() PASSED
+
+BranchLifecycleEndpointsTest > wholeTopicPreviewMarksTheRootAsWholeTopic() PASSED
+
+BranchLifecycleEndpointsTest > staleDigestIsRefusedAndNothingIsDeleted() PASSED
+
+BranchLifecycleEndpointsTest > rootBranchCannotBeArchivedOrRestored() PASSED
+
+BranchLifecycleEndpointsTest > topicDeleteCancelsActiveOperationThenDeletes() PASSED
+
+BranchLifecycleEndpointsTest > deletingRootBranchRemovesTheWholeTopic() PASSED
+
+BranchLifecycleEndpointsTest > repeatedDeleteAndCommandIdReplayAreIdempotent() PASSED
+
+BranchLifecycleEndpointsTest > archivingDoesNotCancelGeneration() PASSED
+
+BranchLifecycleEndpointsTest > subtreePreviewCoversDescendantsIncludingArchived() PASSED
+
+CoreApiControllersTest > errorMatrixMapsCodesToStatusAndEnvelope() PASSED
+
+CoreApiControllersTest > unknownTopicReturnsNotFoundEnvelope() PASSED
+
+CoreApiControllersTest > sendMessageReturnsTurnAcceptedShape() PASSED
+
+CoreApiControllersTest > unknownBranchConversationReturnsNotFound() PASSED
+
+CoreApiControllersTest > activeOperationWithoutOneReturnsNullBody() PASSED
+
+CoreApiControllersTest > topicsListReturnsSummaryRows() PASSED
+
+CoreApiControllersTest > operationReadsReturnOperationShape() PASSED
+
+CoreApiControllersTest > branchTreeCarriesTopicIdAndNodeFields() PASSED
+
+CoreApiControllersTest > retryReturnsMessageAndOperationShape() PASSED
+
+CoreApiControllersTest > unclassifiedFailureReturnsInternalError() PASSED
+
+CoreApiControllersTest > activeOperationWithMissingOrInvalidBranchIdIsRequestInvalid() PASSED
+
+CoreApiControllersTest > createTopicReturnsBootstrapShape() PASSED
+
+CoreApiControllersTest > conversationReturnsMessagesWithEmptyAttachmentsAndVersions() PASSED
+
+CoreApiEndToEndTest > noConfiguredProviderYieldsNoModels() PASSED
+
+CoreApiEndToEndTest > malformedModelTokenIsRejectedWithFourHundred() PASSED
+
+CoreApiEndToEndTest > repeatedCommandIdReturnsTheSameOperation() PASSED
+
+CoreApiEndToEndTest > theCoreLoopRunsOverRealHttp() PASSED
+
+ForkEndpointsTest > selectionForkPersistsAnchorColumns() PASSED
+
+ForkEndpointsTest > nonStableSourceIsRefused() PASSED
+
+ForkEndpointsTest > rootBranchWithProvenanceIsRejectedBySchema() PASSED
+
+ForkEndpointsTest > repeatedCommandIdReturnsSameForkAndOperation() PASSED
+
+ForkEndpointsTest > birthSnapshotDoesNotReflectLaterParentContent() PASSED
+
+ForkEndpointsTest > malformedAnchorIsRefused() PASSED
+
+ForkEndpointsTest > firstQuestionIsAcceptedAtomically() PASSED
+
+ForkEndpointsTest > wholeAnswerForkFreezesBirthSnapshot() PASSED
+
+ForkEndpointsTest > foreignTopicSourceIsRefused() PASSED
+
+ForkEndpointsTest > failedFirstQuestionLandsNoPositions() PASSED
+
+OperationEventsControllerTest > subscribingAfterFailureEmitsSnapshotThenFailedThenCloses() PASSED
+
+OperationEventsControllerTest > keepaliveCommentAppearsDuringSilence() PASSED
+
+OperationEventsControllerTest > normalStreamEmitsSnapshotThenDeltasThenStableAndCloses() PASSED
+
+OperationEventsControllerTest > canceledStreamEmitsCanceledTerminal() PASSED
+
+OperationEventsControllerTest > aGapBeforeTheBufferStartPublishesASnapshotFirst() PASSED
+
+OperationEventsControllerTest > aMidStreamSubscriptionKeepsSeqContiguousFromTheSnapshot() PASSED
+
+OperationEventsControllerTest > closingTheClientClearsTheBusSubscription() PASSED
+
+OperationEventsControllerTest > interruptedStreamEmitsInterruptedTerminal() PASSED
+
+OperationEventsControllerTest > subscribingAfterStableEmitsSnapshotThenStableThenCloses() PASSED
+
+OperationEventsControllerTest > unknownOperationReturnsTheErrorEnvelope() PASSED
+
+OperationEventsControllerTest > capturesTheRawWireFormatForEvidence() PASSED
+
+OperationEventsControllerTest > reconnectWithinTheBufferReplaysMissingFramesWithoutASnapshot() PASSED
+
+OperationEventsControllerTest > failedStreamEmitsFailedTerminalWithErrorCode() PASSED
+
+ProviderSettingsControllerTest > refreshModelsMergesOnlyNewIds() PASSED
+
+ProviderSettingsControllerTest > savingAKeyOnAnUnknownProviderIsNotFound() PASSED
+
+ProviderSettingsControllerTest > refreshModelsWithoutKeyIsKeyMissing() PASSED
+
+ProviderSettingsControllerTest > modelRolesInvalidBudgetIsRequestInvalid() PASSED
+
+ProviderSettingsControllerTest > deletingTheLastEnabledProviderIsNotBlocked() PASSED
+
+ProviderSettingsControllerTest > modelRolesUnknownRoleKeyIsRequestInvalid() PASSED
+
+ProviderSettingsControllerTest > savingAKeyMarksHasKeyAndNeverEchoesTheKey() PASSED
+
+ProviderSettingsControllerTest > savingAnEmptyKeyIsKeyRequired() PASSED
+
+ProviderSettingsControllerTest > updateUnknownProviderIsNotFound() PASSED
+
+ProviderSettingsControllerTest > keySaveFailureIsReportedAsKeySaveFailed() PASSED
+
+ProviderSettingsControllerTest > createProviderValidatesNameAndBaseUrl() PASSED
+
+ProviderSettingsControllerTest > deletingAKeyClearsHasKey() PASSED
+
+ProviderSettingsControllerTest > createdProviderIsEnabledOpenAiCompatibleWithoutKey() PASSED
+
+ProviderSettingsControllerTest > createProviderRefusesDuplicateName() PASSED
+
+ProviderSettingsControllerTest > listModelsOnUnknownProviderIsNotFound() PASSED
+
+ProviderSettingsControllerTest > modelRolesUpdatePersistsRolesBudgetAndSuggestions() PASSED
+
+ProviderSettingsControllerTest > listModelsReturnsTheProvidersModels() PASSED
+
+ProviderSettingsControllerTest > listModelsReturnsEmptyArrayForAProviderWithoutModels() PASSED
+
+ProviderSettingsControllerTest > refreshModelsOnProviderFailureIsProviderUnavailable() PASSED
+
+ProviderSettingsControllerTest > refreshModelsDedupsCaseExactly() PASSED
+
+ProviderSettingsControllerTest > modelRolesDefaultToNoModelsWithoutConfiguration() PASSED
+
+ProviderSettingsControllerTest > deleteProviderCascadesItsModels() PASSED
+
+ProviderSettingsControllerTest > updateProviderPersistsNameBaseUrlAndEnabled() PASSED
+
+ProviderSettingsControllerTest > providersListMatchesTheProviderFixtureShape() PASSED
+
+ProviderSettingsKeyTest > aSavedKeyIsStoredInWindowsCredentialsAndNeverEchoed() PASSED
+
+SearchStatsEndpointsTest > unknownTermReturnsNoHitsWithoutError() FAILED
+    org.opentest4j.AssertionFailedError: GET /api/search?q=zzz-no-such-term -> {"error":{"code":"NOT_FOUND","params":{"resource":"endpoint"},"retryable":false},"requestId":"9b2b90d8-5dd1-451f-8962-9c5354400c58"} ==> expected: <200> but was: <404>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+        at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:152)
+        at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:590)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.get(SearchStatsEndpointsTest.java:318)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.search(SearchStatsEndpointsTest.java:294)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.unknownTermReturnsNoHitsWithoutError(SearchStatsEndpointsTest.java:96)
+
+SearchStatsEndpointsTest > invalidTimeZoneAndMonthAreRequestInvalid() FAILED
+    org.opentest4j.AssertionFailedError: body: {"error":{"code":"NOT_FOUND","params":{"resource":"endpoint"},"retryable":false},"requestId":"b36d39a7-9aef-4be1-a641-43d34dd5b7c7"} ==> expected: <400> but was: <404>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+        at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:152)
+        at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:590)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.assertRefusal(SearchStatsEndpointsTest.java:329)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.invalidTimeZoneAndMonthAreRequestInvalid(SearchStatsEndpointsTest.java:265)
+
+SearchStatsEndpointsTest > totalsAndDetailShareOneSource() FAILED
+    org.opentest4j.AssertionFailedError: GET /api/stats?timeZone=Asia%2FShanghai -> {"error":{"code":"NOT_FOUND","params":{"resource":"endpoint"},"retryable":false},"requestId":"b04feee2-d831-4e57-96a1-025b2c378a5d"} ==> expected: <200> but was: <404>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+        at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:152)
+        at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:590)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.get(SearchStatsEndpointsTest.java:318)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.stats(SearchStatsEndpointsTest.java:302)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.totalsAndDetailShareOneSource(SearchStatsEndpointsTest.java:189)
+
+SearchStatsEndpointsTest > streakEndingYesterdayStillCounts() FAILED
+    org.opentest4j.AssertionFailedError: GET /api/stats?timeZone=Asia%2FShanghai -> {"error":{"code":"NOT_FOUND","params":{"resource":"endpoint"},"retryable":false},"requestId":"c1801f47-676f-418f-b952-30ef6e668ddf"} ==> expected: <200> but was: <404>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+        at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:152)
+        at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:590)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.get(SearchStatsEndpointsTest.java:318)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.stats(SearchStatsEndpointsTest.java:302)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.streakEndingYesterdayStillCounts(SearchStatsEndpointsTest.java:235)
+
+SearchStatsEndpointsTest > streakCountsConsecutiveDaysAndBreaksOnAGap() FAILED
+    org.opentest4j.AssertionFailedError: GET /api/stats?timeZone=Asia%2FShanghai -> {"error":{"code":"NOT_FOUND","params":{"resource":"endpoint"},"retryable":false},"requestId":"3f783c43-ca18-4385-806b-5118bc4ef12d"} ==> expected: <200> but was: <404>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+        at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:152)
+        at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:590)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.get(SearchStatsEndpointsTest.java:318)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.stats(SearchStatsEndpointsTest.java:302)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.streakCountsConsecutiveDaysAndBreaksOnAGap(SearchStatsEndpointsTest.java:225)
+
+SearchStatsEndpointsTest > monthDefaultsToTheCurrentMonthInTheTimeZone() FAILED
+    org.opentest4j.AssertionFailedError: GET /api/stats?timeZone=Asia%2FShanghai -> {"error":{"code":"NOT_FOUND","params":{"resource":"endpoint"},"retryable":false},"requestId":"234dee5f-2e2a-440e-90d0-4707d1f599f4"} ==> expected: <200> but was: <404>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+        at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:152)
+        at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:590)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.get(SearchStatsEndpointsTest.java:318)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.stats(SearchStatsEndpointsTest.java:302)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.monthDefaultsToTheCurrentMonthInTheTimeZone(SearchStatsEndpointsTest.java:259)
+
+SearchStatsEndpointsTest > emptyRequestedMonthReturnsBlankCellsNotAnError() FAILED
+    org.opentest4j.AssertionFailedError: GET /api/stats?timeZone=Asia%2FShanghai&month=2026-08 -> {"error":{"code":"NOT_FOUND","params":{"resource":"endpoint"},"retryable":false},"requestId":"713d36ae-9ba9-4aaf-9ab3-0d488b9c49f2"} ==> expected: <200> but was: <404>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+        at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:152)
+        at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:590)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.get(SearchStatsEndpointsTest.java:318)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.stats(SearchStatsEndpointsTest.java:302)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.emptyRequestedMonthReturnsBlankCellsNotAnError(SearchStatsEndpointsTest.java:243)
+
+SearchStatsEndpointsTest > crossNaturalDayBoundaryFollowsDeviceTimeZone() FAILED
+    org.opentest4j.AssertionFailedError: GET /api/stats?timeZone=Asia%2FShanghai -> {"error":{"code":"NOT_FOUND","params":{"resource":"endpoint"},"retryable":false},"requestId":"644c0018-2550-4774-be4f-c5d71a25d56d"} ==> expected: <200> but was: <404>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+        at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:152)
+        at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:590)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.get(SearchStatsEndpointsTest.java:318)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.stats(SearchStatsEndpointsTest.java:302)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.crossNaturalDayBoundaryFollowsDeviceTimeZone(SearchStatsEndpointsTest.java:206)
+
+SearchStatsEndpointsTest > threeScopesReturnLocatedHitsInDisplayOrder() FAILED
+    org.opentest4j.AssertionFailedError: GET /api/search?q=%E5%85%89%E5%90%88%E4%BD%9C%E7%94%A8 -> {"error":{"code":"NOT_FOUND","params":{"resource":"endpoint"},"retryable":false},"requestId":"d93b8eeb-25be-4d4e-b49f-dd67f287f1ef"} ==> expected: <200> but was: <404>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+        at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:152)
+        at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:590)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.get(SearchStatsEndpointsTest.java:318)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.search(SearchStatsEndpointsTest.java:294)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.threeScopesReturnLocatedHitsInDisplayOrder(SearchStatsEndpointsTest.java:103)
+
+SearchStatsEndpointsTest > hitIntervalIsUtf16WithinTheSnippet() FAILED
+    org.opentest4j.AssertionFailedError: GET /api/search?q=%E5%85%89%E5%90%88%E4%BD%9C%E7%94%A8 -> {"error":{"code":"NOT_FOUND","params":{"resource":"endpoint"},"retryable":false},"requestId":"63d097c6-2f88-47be-bf62-b2c79e7984d3"} ==> expected: <200> but was: <404>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+        at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:152)
+        at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:590)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.get(SearchStatsEndpointsTest.java:318)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.search(SearchStatsEndpointsTest.java:294)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.hitIntervalIsUtf16WithinTheSnippet(SearchStatsEndpointsTest.java:134)
+
+SearchStatsEndpointsTest > blankQueryReturnsEmptyHitsWithoutReachingTheStore() FAILED
+    org.opentest4j.AssertionFailedError: GET /api/search?q= -> {"error":{"code":"NOT_FOUND","params":{"resource":"endpoint"},"retryable":false},"requestId":"8b99db3e-e22a-4d57-bcaf-adc190bf2217"} ==> expected: <200> but was: <404>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+        at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:152)
+        at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:590)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.get(SearchStatsEndpointsTest.java:318)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.search(SearchStatsEndpointsTest.java:294)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.blankQueryReturnsEmptyHitsWithoutReachingTheStore(SearchStatsEndpointsTest.java:85)
+
+SearchStatsEndpointsTest > asciiMatchIsCaseInsensitiveAndIntervalTracksTheSnippet() FAILED
+    org.opentest4j.AssertionFailedError: GET /api/search?q=PHOTOSYNTHESIS -> {"error":{"code":"NOT_FOUND","params":{"resource":"endpoint"},"retryable":false},"requestId":"b91eb59c-b903-4432-8de2-d8a3adbc1b7a"} ==> expected: <200> but was: <404>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+        at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:152)
+        at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:590)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.get(SearchStatsEndpointsTest.java:318)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.search(SearchStatsEndpointsTest.java:294)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.asciiMatchIsCaseInsensitiveAndIntervalTracksTheSnippet(SearchStatsEndpointsTest.java:150)
+
+SearchStatsEndpointsTest > emptyLibraryReturnsZeroStructure() FAILED
+    org.opentest4j.AssertionFailedError: GET /api/stats?timeZone=Asia%2FShanghai -> {"error":{"code":"NOT_FOUND","params":{"resource":"endpoint"},"retryable":false},"requestId":"ccd566ab-5e55-48f1-a459-f58e7a480835"} ==> expected: <200> but was: <404>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+        at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:152)
+        at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:590)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.get(SearchStatsEndpointsTest.java:318)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.stats(SearchStatsEndpointsTest.java:302)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.emptyLibraryReturnsZeroStructure(SearchStatsEndpointsTest.java:175)
+
+SearchStatsEndpointsTest > archivedBranchIsNotSearchable() FAILED
+    org.opentest4j.AssertionFailedError: GET /api/search?q=%E5%85%89%E5%90%88%E4%BD%9C%E7%94%A8 -> {"error":{"code":"NOT_FOUND","params":{"resource":"endpoint"},"retryable":false},"requestId":"61545934-58d1-4898-a1dd-31fef8295353"} ==> expected: <200> but was: <404>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+        at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:152)
+        at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:590)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.get(SearchStatsEndpointsTest.java:318)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.search(SearchStatsEndpointsTest.java:294)
+        at app//com.treelearn.web.api.SearchStatsEndpointsTest.archivedBranchIsNotSearchable(SearchStatsEndpointsTest.java:168)
+
+SettingsApiControllerTest > earliestAvailableModelResolvesToEarliestToken() PASSED
+
+SettingsApiControllerTest > unsavedRolesKeepThePreFixFallbackChain() PASSED
+
+SettingsApiControllerTest > builtinProviderWithoutKeyResolvesToBuiltinToken() PASSED
+
+SettingsApiControllerTest > modelResolutionShapeMatchesTheContractFixture() PASSED
+
+SettingsApiControllerTest > emptyConfigurationReportsEmptyFallbackWithHttp200() PASSED
+
+SettingsApiControllerTest > savedRoleAssignmentIsReflectedByModelResolution() PASSED
+
+SettingsApiControllerTest > unavailableSavedRoleFallsBackThroughThePlannerChain() PASSED
+
+CommandFixturesTest > everyCommandFixtureDeserializesIntoItsRequestRecord() PASSED
+
+DtoFixturesRoundTripTest > everyDtoFixtureRoundTripsToTheSameJson() PASSED
+
+ErrorEnvelopeFixturesTest > everyErrorFixtureRoundTripsThroughTheEnvelope() PASSED
+
+StrictnessTest > theSameJsonWithoutTheExtraFieldIsAccepted() PASSED
+
+StrictnessTest > anUnknownFieldMakesTheDeserializationFailSoContractDriftIsVisible() PASSED
+
+WindowsCredentialSecretPortTest > illegalTargetsAreRejectedBeforeAnyPlatformCall() PASSED
+
+WindowsCredentialSecretPortTest > overwritingReplacesTheStoredSecret() PASSED
+
+WindowsCredentialSecretPortTest > saveThenHasThenReadRoundTripsNonAsciiText() PASSED
+
+WindowsCredentialSecretPortTest > hasNeverReturnsTheSecretAndFailuresDoNotLeakItThroughToString() PASSED
+
+WindowsCredentialSecretPortTest > deleteRemovesTheCredentialSoHasIsFalseAndReadIsEmpty() PASSED
+
+WindowsCredentialSecretPortTest > aSecondProcessReadsTheSameCredentialWithoutPrintingTheSecret() PASSED
+
+WindowsCredentialSecretPortTest > readingAndCheckingAMissingTargetIsEmptyRatherThanFailing() PASSED
+
+CommandIdIdempotencyTest > aReplayAfterARestartFindsTheStoredOperationWithoutASecondCallOrRow() PASSED
+
+CommandIdIdempotencyTest > aRepeatedCommandIdInTheSameProcessReturnsTheSameOperationWithoutASecondCall() PASSED
+
+CommandIdIdempotencyTest > replayingATerminalOperationReturnsItsCurrentStateWithoutANewVersionOrCall() PASSED
+
+CommandIdIdempotencyTest > aFollowUpReplayAfterARestartReturnsTheSameOperation() PASSED
+
+DesktopGenerationStubGatewayTest > aRealSseStreamOverALoopbackSocketStabilizesTheAnswer() PASSED
+
+GenerationContextAssemblerTest > anUnresolvableSnapshotSourceIsRefused() PASSED
+
+GenerationContextAssemblerTest > aBirthSnapshotStaysFrozenWhenTheParentResetsItsDisplayedRevision() PASSED
+
+GenerationContextAssemblerTest > aRootBranchReplaysItsOwnTurnsAndExcludesTheCurrentQuestion() PASSED
+
+GenerationContextAssemblerTest > aSnapshotSummarySourceIsRefusedRatherThanInvented() PASSED
+
+GenerationContextAssemblerTest > overBudgetContextIsRefusedWithTheSharedCode() PASSED
+
+GenerationContextAssemblerTest > olderRoundsAreReplacedByOneCompressionSummaryAtTheAndroidSplit() PASSED
+
+GenerationCoordinatorTest > anAcceptThatFailsMidTransactionRollsBackEveryRow() PASSED
+
+GenerationCoordinatorTest > aNormalCompletionWithANonEmptyAnswerBecomesStableAndClosesTheStream() PASSED
+
+GenerationCoordinatorTest > aBranchWithAnInFlightAttemptRefusesANewCommand() PASSED
+
+GenerationCoordinatorTest > submitWithoutAnAcceptedAttemptIsRefused() PASSED
+
+GenerationCoordinatorTest > aRepeatedCommandIdReturnsTheSameOperationAndNeverOpensASecondCall() PASSED
+
+GenerationCoordinatorTest > theTimeHalfOfTheWriteWindowPersistsWithoutReachingTheCharThreshold() PASSED
+
+GenerationCoordinatorTest > anInterruptedStreamKeepsItsPartialContent() PASSED
+
+GenerationCoordinatorTest > aReasoningOnlyAnswerEndsAsFailedMirroringAndroid() PASSED
+
+GenerationCoordinatorTest > cancelKeepsThePartialContentAndALateCompletionChangesNothing() PASSED
+
+GenerationCoordinatorTest > anAttemptLeftByARestartStillRefusesANewCommandOnItsBranch() PASSED
+
+GenerationCoordinatorTest > deltasFanOutToTheBusAndPersistOnlyOnceTheWindowIsDue() PASSED
+
+GenerationCoordinatorTest > acceptForNewTopicCommitsFiveRowGroupsAndSubmitOpensOneCall() PASSED
+
+GenerationCoordinatorTest > anEmptyAnswerEndsAsFailedAndWritesNoRevision() PASSED
+
+GenerationCoordinatorTest > aProviderFailureIsFailedWithItsErrorCategory() PASSED
+
+GenerationEventBusTest > anOperationOnlySeesItsOwnEvents() PASSED
+
+GenerationEventBusTest > seqIsMonotonicPerOperationAndTypesFollowThePublishOrder() PASSED
+
+GenerationEventBusTest > unsubscribingRemovesTheListenerWithoutAffectingTheOthers() PASSED
+
+GenerationEventBusTest > aTerminalEventClosesTheStreamAndLaterEventsAreIgnored() PASSED
+
+GenerationEventBusTest > theBufferIsBoundedAndReplayReportsTheGap() PASSED
+
+GenerationPlannerTest > anEnabledProviderWithoutAKeyIsRefusedWithKeyMissing() PASSED
+
+GenerationPlannerTest > aDisabledProviderContributesNoModelAndFallsBack() PASSED
+
+GenerationPlannerTest > noEnabledProviderYieldsEmptyAndNoModels() PASSED
+
+GenerationPlannerTest > aConfiguredAvailableModelResolvesWithNoneAndNoRefusal() PASSED
+
+GenerationPlannerTest > aPurposeMapsToItsRole() PASSED
+
+GenerationPlannerTest > anUnconfiguredRoleResolvesThroughTheSameFallbackChain() PASSED
+
+GenerationPlannerTest > withoutABuiltinTheEarliestAvailableModelIsUsed() PASSED
+
+GenerationPlannerTest > aMissingConfiguredPairFallsBackToTheBuiltinThenTheEarliest() PASSED
+
+SpaFallbackTest > readyEndpointIsUnchanged() PASSED
+
+SpaFallbackTest > unknownApiIsNeverFellBackToTheSpaIndex() PASSED
+
+SpaFallbackTest > mixedCaseApiPrefixIsNeverFellBackAndYieldsJsonNotFound() PASSED
+
+SpaFallbackTest > rootServesTheSpaIndex() PASSED
+
+SpaFallbackTest > bareApiNamespaceStaysReservedAndUnchanged() PASSED
+
+SpaFallbackTest > frontendRoutesFallBackToTheSpaIndex() PASSED
+
+SpaFallbackTest > uppercaseApiPrefixIsNeverFellBackAndYieldsJsonNotFound() PASSED
+
+SpaFallbackTest > realStaticAssetIsServedFromDiskNotFallback() PASSED
+
+StaticHostingTest > apiNamespaceStillWorksWhenDistIsMissing() PASSED
+
+StaticHostingTest > sseEndpointNamespaceIsNotSwallowedByTheFallback() PASSED
+
+StaticHostingTest > frontendRoutesAlsoShowTheHintWhenDistIsMissing() PASSED
+
+StaticHostingTest > unknownApiStillReturnsTheErrorEnvelopeWhenDistIsMissing() PASSED
+
+StaticHostingTest > missingDistDoesNotBlockStartupAndRootShowsAReadableHint() PASSED
+
+DatabaseMigratorTest > aFailingStepRollsBackTheWholeChainLeavingNoObjects() PASSED
+
+DatabaseMigratorTest > aMissingStepFailsClosedBeforeAnyStatementRuns() PASSED
+
+DatabaseMigratorTest > downgradeIsRefusedWithAReadableMessage() PASSED
+
+DatabaseMigratorTest > rerunningMigrationOnAnOpenDatabaseIsANoOp() PASSED
+
+DdlLocationGuardTest > ddlAppearsOnlyInDesktopSchema() PASSED
+
+DesktopSchemaConstraintsTest > contextSnapshotsAreImmutableAndDeleteOnlyWithTheirBranch() PASSED
+
+DesktopSchemaConstraintsTest > quoteInvariantRejectsAiQuoteAndEmptyUserQuoteButAcceptsANonEmptyQuote() PASSED
+
+DesktopSchemaConstraintsTest > annotationContainerCheckRejectsMismatchedShapes() PASSED
+
+DesktopSchemaConstraintsTest > modelUniqueIndexIsCaseExact() PASSED
+
+DesktopSchemaConstraintsTest > quoteInvariantAlsoRejectsAQuoteAddedToAnAiRowByUpdate() PASSED
+
+DesktopSchemaConstraintsTest > oneActiveOperationPerBranchWhileTerminalRowsCoexist() PASSED
+
+DesktopSchemaConstraintsTest > deletingATopicCascadesToItsBranchesAndMessages() PASSED
+
+DesktopSchemaConstraintsTest > answerRevisionsAreImmutableAndDeleteOnlyWithTheirMessage() PASSED
+
+DesktopSchemaConstraintsTest > messageRoleAndContentChecksRejectInvalidRows() PASSED
+
+DesktopSchemaConstraintsTest > userMessageContentRefusesUpdate() PASSED
+
+DesktopSchemaConstraintsTest > oneRootBranchPerTopicWhileChildrenRemainInsertable() PASSED
+
+DesktopSchemaConstraintsTest > terminalGenerationOperationRefusesUpdate() PASSED
+
+DesktopSchemaConstraintsTest > legalAnnotationShapesAreAccepted() PASSED
+
+DesktopSchemaConstraintsTest > attachmentParseStateCheckRejectsUnknownState() PASSED
+
+DesktopSchemaFreshInstallTest > connectionFactoryEnforcesForeignKeysAndStaysHealthy() PASSED
+
+DesktopSchemaFreshInstallTest > freshInstallCreatesTheFinalShapeOnRealSqlite() PASSED
+
+GenerationStabilizerTest > aSecondStabilizationOfTheSamePositionGetsTheNextRevisionNumber() PASSED
+
+GenerationStabilizerTest > stabilizeRefusesAnEmptyAnswerAndKeepsTheAttemptRetryable() PASSED
+
+GenerationStabilizerTest > aLateSecondStabilizationIsRefusedAndWritesNothing() PASSED
+
+GenerationStabilizerTest > stabilizeWritesRevisionActiveReferenceAndSequenceTogether() PASSED
+
+GenerationStabilizerTest > stabilizeRefusesAnAttemptThatNeverReachedTheAnswerPhase() PASSED
+
+InterruptionSweeperTest > sweepSettlesEveryActiveRowAcrossBranchesInOnePass() PASSED
+
+InterruptionSweeperTest > sweepSettlesAStreamingAttemptToInterruptedKeepingItsPartialContent() PASSED
+
+InterruptionSweeperTest > aStagedRowTakesTheDomainsRecoveryTarget() PASSED
+
+InterruptionSweeperTest > startupMigratesThenSweepsBeforeTheContextIsReady() PASSED
+
+InterruptionSweeperTest > sweepIsIdempotentAndLeavesTerminalRowsAlone() PASSED
+
+OperationSnapshotArtifactStoreTest > aSecondInFlightAttemptForOneBranchIsRefusedByThePartialIndex() PASSED
+
+OperationSnapshotArtifactStoreTest > anArtifactRoundTripsAndASecondInsertForThePairIsRefused() PASSED
+
+OperationSnapshotArtifactStoreTest > progressAppendsItsDeltasAndMovesTheState() PASSED
+
+OperationSnapshotArtifactStoreTest > aSecondBirthSnapshotForOneBranchIsRefused() PASSED
+
+OperationSnapshotArtifactStoreTest > aBirthSnapshotRoundTripsThroughItsCodec() PASSED
+
+OperationSnapshotArtifactStoreTest > replaceSwapsTheStoredArtifactAndDeleteCleansTheScope() PASSED
+
+OperationSnapshotArtifactStoreTest > applyIfBaselineMatchesUpdatesInPlaceAndDropsAStaleWrite() PASSED
+
+OperationSnapshotArtifactStoreTest > activeForBranchSeesOnlyTheInFlightAttemptAndForgetsItOnceTerminal() PASSED
+
+OperationSnapshotArtifactStoreTest > markTerminalFollowsTheDomainsTransitionRule() PASSED
+
+OperationSnapshotArtifactStoreTest > aStaleInputDoesNotMasqueradeAsTheCurrentResult() PASSED
+
+OperationSnapshotArtifactStoreTest > aTerminalRowRefusesEveryLaterWrite() PASSED
+
+OperationSnapshotArtifactStoreTest > markTerminalRefusesStableAndLeavesTheRowUntouched() PASSED
+
+OperationSnapshotArtifactStoreTest > aFreshAttemptIsStoredAsStagedAndLooksUpByIdentityAndCommandId() PASSED
+
+OperationSnapshotArtifactStoreTest > aSnapshotWhosePayloadDoesNotHashToItsDigestIsRefused() PASSED
+
+OperationStoreStablePathTest > markStableRefusesAnEmptyFinalAnswer() PASSED
+
+OperationStoreStablePathTest > markStableMovesAStreamingAnswerToStableAndClearsAnyPriorError() PASSED
+
+OperationStoreStablePathTest > markStableRefusesAnAttemptThatNeverReachedTheAnswerPhase() PASSED
+
+OperationStoreStablePathTest > markStableRefusesAnAttemptThatAlreadyEnded() PASSED
+
+OperationStoreStablePathTest > updateProgressRefusesStableAndEveryOtherTerminalTarget() PASSED
+
+OperationStoreStablePathTest > markTerminalStillRefusesStableSoThereIsExactlyOneWriter() PASSED
+
+ProviderModelStoreTest > deletingAModelRowThatDoesNotExistIsRefusedLikeAndroid() PASSED
+
+ProviderModelStoreTest > aDuplicateProviderNameIsRefusedByTheStore() PASSED
+
+ProviderModelStoreTest > theBuiltinSeedIsReadableAndSurvivesAMerge() PASSED
+
+ProviderModelStoreTest > upsertManyOnlyAddsAndDedupsCaseExactly() PASSED
+
+ProviderModelStoreTest > deletingAProviderCascadesToItsModels() PASSED
+
+ProviderModelStoreTest > deletingByRowIdentityNeverTouchesAnotherProvidersSameWireId() PASSED
+
+ProviderModelStoreTest > deletingOneModelRowKeepsItsSiblingsAndItsProvider() PASSED
+
+ProviderModelStoreTest > updatingNameBaseUrlAndEnabledReadsBackConsistently() PASSED
+
+ReadingAndUnreadStoreTest > unreadDerivesFromTheSequenceGapAndNeverMovesBackwardsOrPastTheLatest() PASSED
+
+ReadingAndUnreadStoreTest > aBranchWithoutAStoredPositionHasNone() PASSED
+
+ReadingAndUnreadStoreTest > aReadingPositionRoundTripsAndClearsWithItsMessage() PASSED
+
+RevisionAndOrdinalStoreTest > switchingTheActiveRevisionIsReadBackByListForBranch() PASSED
+
+RevisionAndOrdinalStoreTest > switchingTheActiveRevisionWhileAnAttemptIsRunningIsRefused() PASSED
+
+RevisionAndOrdinalStoreTest > gettingAMessageThatDoesNotExistIsEmpty() PASSED
+
+RevisionAndOrdinalStoreTest > blankContentIsRefusedAndTheQuoteTranslatesBothWays() PASSED
+
+RevisionAndOrdinalStoreTest > nextOrdinalIsOneAboveTheHighestStored() PASSED
+
+RevisionAndOrdinalStoreTest > switchingTheActiveRevisionOfAUserPositionIsRefused() PASSED
+
+RevisionAndOrdinalStoreTest > bindingASecondAttemptWhileOneIsRunningIsRefused() PASSED
+
+RevisionAndOrdinalStoreTest > theOrdinalMustBeUniqueWithinABranch() PASSED
+
+RevisionAndOrdinalStoreTest > aDuplicateRevisionNumberIsRefusedByTheStore() PASSED
+
+RevisionAndOrdinalStoreTest > revisionsAreNumberedByTheStoreInAscendingOrder() PASSED
+
+RevisionAndOrdinalStoreTest > reactivatingTheRevisionAlreadyDisplayedIsRefusedAsTheDomainDoes() PASSED
+
+StorageStartupTest > startupCreatesTheDatabaseAndRerunningTheMigrationIsANoOp() PASSED
+
+StorageStartupTest > aDatabaseNewerThanTheProgramStopsTheService() PASSED
+
+TimestampRoundTripTest > messageAndRevisionTimestampsKeepMillisecondPrecision() PASSED
+
+TimestampRoundTripTest > topicsAreListedByRecencyAndTheMillisecondSurvivesTheRoundTrip() PASSED
+
+TopicBranchMessageStoreTest > theDerivedDisplayTitleFallsBackToTheRootQuestion() PASSED
+
+TopicBranchMessageStoreTest > touchLastVisitedRecordsTheBranchAndTheStamp() PASSED
+
+TopicBranchMessageStoreTest > createWritesTheTopicAndItsRootBranchAtomically() PASSED
+
+TopicBranchMessageStoreTest > clearingTheTitleWritesNull() PASSED
+
+TopicBranchMessageStoreTest > aForkedChildReadsBackWithItsProvenanceAndBirthSnapshot() PASSED
+
+TopicBranchMessageStoreTest > theRootBranchCarriesNoProvenance() PASSED
+
+TopicBranchMessageStoreTest > twoTopicsMayEachCarryTheirOwnSingleRoot() PASSED
+
+TopicBranchMessageStoreTest > renameCollapseArchiveAndRestoreArePersisted() PASSED
+
+TopicBranchMessageStoreTest > aRootBranchCarryingProvenanceColumnsIsRefusedByTheStore() PASSED
+
+TopicBranchMessageStoreTest > aSecondRootBranchInOneTopicIsRefused() PASSED
+
+TopicBranchMessageStoreTest > deleteCascadeRemovesTheWholeTree() PASSED
+
+TopicBranchMessageStoreTest > listForTopicReturnsBranchesInCreationOrderAndTheNavigatorsAgree() PASSED
+
+2026-10-11T12:42:52.104+08:00  INFO 44976 --- [treelearn-web-backend] [ionShutdownHook] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-10-11T12:42:52.106+08:00  INFO 44976 --- [treelearn-web-backend] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+2026-10-11T12:42:52.115+08:00  INFO 44976 --- [treelearn-web-backend] [ionShutdownHook] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-10-11T12:42:52.116+08:00  INFO 44976 --- [treelearn-web-backend] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+2026-10-11T12:42:52.121+08:00  INFO 44976 --- [treelearn-web-backend] [ionShutdownHook] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-10-11T12:42:52.123+08:00  INFO 44976 --- [treelearn-web-backend] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+2026-10-11T12:42:52.127+08:00  INFO 44976 --- [treelearn-web-backend] [ionShutdownHook] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-10-11T12:42:52.130+08:00  INFO 44976 --- [treelearn-web-backend] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+2026-10-11T12:42:52.135+08:00  INFO 44976 --- [treelearn-web-backend] [ionShutdownHook] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-10-11T12:42:52.136+08:00  INFO 44976 --- [treelearn-web-backend] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+2026-10-11T12:42:52.142+08:00  INFO 44976 --- [treelearn-web-backend] [ionShutdownHook] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-10-11T12:42:52.143+08:00  INFO 44976 --- [treelearn-web-backend] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+
+> Task :test FAILED
+
+264 tests completed, 14 failed
+
+[Incubating] Problems report is available at: file:///C:/Users/23745/AppData/Local/Temp/tl-042-build/treelearn-web-backend/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///C:/Users/23745/AppData/Local/Temp/tl-042-build/treelearn-web-backend/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 31s
+10 actionable tasks: 1 executed, 9 up-to-date
+EXITCODE=1

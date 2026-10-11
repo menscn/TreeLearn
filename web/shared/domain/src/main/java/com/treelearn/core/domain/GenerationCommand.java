@@ -1,0 +1,174 @@
+package com.treelearn.core.domain;
+
+/**
+ * An immutable request to start one generation attempt (technical design §5.1, §9.2).
+ *
+ * <p>The command exists for a single reason: the prompt policy version must be fixed <em>before</em>
+ * the remote acceptance boundary is crossed, and must then travel unchanged through the attempt and
+ * into the stable revision. Pinning it here — rather than reading "the current policy version" at
+ * stabilization time — is what makes an old answer reproducible after the registry has moved on
+ * (§3.2). Retrying or resetting a position creates a <em>new</em> command with the then-current
+ * version; the revision already produced keeps the version that actually produced it.
+ *
+ * <p>Every field is final and the type has no setter, so a command cannot be re-pointed after the
+ * request has been sent.
+ *
+ * <p>The class holds no prompt body and no question text. The body lives in {@code :ai}'s registry
+ * (§9.2 forbids persisting it), and the conversation content is read from the context snapshot when
+ * the request is assembled, so nothing here can go stale between submit and stream.
+ *
+ * <p><strong>Identity and the carried client command id.</strong> The command's {@link #id} is the
+ * identity that reaches {@code generation_operations.command_id} (contract §4). By default {@link #create}
+ * mints a fresh domain UUID so the Android calls keep their current behaviour unchanged. A caller that
+ * receives a client-generated {@code commandId} (the local web backend does, contract §4) must carry that
+ * value into this identity instead, so a replay after a restart finds the already-stored row; that entry
+ * point is {@link #createWithId}. Both paths produce the same object shape; they differ only in who owns
+ * the id.
+ */
+public final class GenerationCommand {
+
+    public final String id;
+    /** The branch this attempt belongs to; §7 allows at most one active attempt per branch. */
+    public final String branchId;
+    /** The AI message position this attempt answers into. A retry reuses the same position. */
+    public final String messageId;
+    public final PromptPurpose purpose;
+    /** The pinned version. Copied verbatim into the operation and into the stable revision. */
+    public final String promptPolicyVersion;
+    public final GenerationModel model;
+    public final boolean thinkingEnabled;
+    public final long createdAt;
+
+    private GenerationCommand(
+            String id,
+            String branchId,
+            String messageId,
+            PromptPurpose purpose,
+            String promptPolicyVersion,
+            GenerationModel model,
+            boolean thinkingEnabled,
+            long createdAt) {
+        this.id = Guard.id(id, "id");
+        requireArgumentShape(branchId, messageId, purpose, model, createdAt);
+        this.branchId = branchId;
+        this.messageId = messageId;
+        this.purpose = purpose;
+        this.model = model;
+        this.thinkingEnabled = thinkingEnabled;
+        this.createdAt = createdAt;
+        this.promptPolicyVersion = Guard.nonBlank(promptPolicyVersion, "promptPolicyVersion");
+    }
+
+    /**
+     * The shape checks for the six non-version arguments, defined once and used by both
+     * {@link #create} and the constructor.
+     *
+     * <p>It exists as a method because {@code create} has to run these <em>before</em> the policy
+     * decision (see its javadoc) while the constructor must keep validating on its own — the
+     * constructor is the invariant authority and must stay correct for any future caller. Writing the
+     * checks once and calling them from both places keeps that ordering without a second definition of
+     * what a well-formed argument is.
+     */
+    private static void requireArgumentShape(
+            String branchId, String messageId, PromptPurpose purpose, GenerationModel model, long now) {
+        Guard.id(branchId, "branchId");
+        Guard.id(messageId, "messageId");
+        Guard.object(purpose, "purpose");
+        Guard.object(model, "model");
+        Guard.epochMillis(now, "createdAt");
+    }
+
+    /**
+     * Pins the policy version and returns the command, or refuses when the version cannot be trusted.
+     *
+     * <p>Per the error-channel rule in {@link Guard} this method uses both channels, split by what the
+     * caller can do about the mistake. A missing or foreign version is a <em>declared</em> business
+     * condition — §3.2 makes the version mandatory, so its absence is expressible and reportable — and
+     * returns {@link DomainErrorCode#PROMPT_POLICY_VERSION_REQUIRED} or
+     * {@link DomainErrorCode#PROMPT_POLICY_VERSION_MISMATCH}. A malformed identifier, a missing purpose
+     * or model, or a negative timestamp is a caller bug and throws {@link IllegalArgumentException}.
+     *
+     * <p><strong>Declared exception to the first bullet of the error-channel rule.</strong> This entry
+     * point reports an <em>absent</em> version as a code rather than throwing, which
+     * {@link Guard}'s rule otherwise reserves for caller bugs. It is one of the exceptions listed
+     * there, together with {@link AnswerRevision#create}, and for the same reason: §3.2 makes the
+     * version a mandatory part of the request contract, so "this request pinned no version" is a
+     * condition the caller must be able to report and not a malformed argument. A
+     * round-1-independent audit of T-021 found this entry point using the exemption without
+     * declaring it, which is why {@link Guard} now carries the list.
+     *
+     * <p>The decision itself lives in {@link PromptPurpose#versionFailureFor}, shared with
+     * {@link PromptSpec#of}, so the two prompt-policy entry points cannot answer differently for the
+     * same input again.
+     *
+     * <p><strong>Check order.</strong> Argument shapes are verified before the version decision, in
+     * the declared order of the arguments. A caller that passes both a malformed identifier and an
+     * absent version therefore gets the {@link IllegalArgumentException} for the identifier: a
+     * malformed argument means the caller's own code is broken, and reporting a policy code for such a
+     * call would suggest the input was well formed and merely needed a version pinned.
+     *
+     * @return a failure with {@code PROMPT_POLICY_VERSION_REQUIRED} when no version was pinned, or
+     *         {@code PROMPT_POLICY_VERSION_MISMATCH} when the version is not owned by {@code purpose}.
+     *         Accepting either would let an unattributable answer become a stable revision.
+     */
+    public static DomainResult<GenerationCommand> create(
+            String branchId,
+            String messageId,
+            PromptPurpose purpose,
+            String promptPolicyVersion,
+            GenerationModel model,
+            boolean thinkingEnabled,
+            long now) {
+        requireArgumentShape(branchId, messageId, purpose, model, now);
+        DomainError versionFailure =
+                PromptPurpose.versionFailureFor(purpose, promptPolicyVersion);
+        if (versionFailure != null) {
+            return DomainResult.fail(versionFailure);
+        }
+        return DomainResult.ok(new GenerationCommand(
+                Guard.newId(), branchId, messageId, purpose, promptPolicyVersion, model,
+                thinkingEnabled, now));
+    }
+
+    /**
+     * The same command as {@link #create}, but the caller supplies the identity.
+     *
+     * <p>It exists for one caller shape: a client that generates its own {@code commandId} (contract
+     * §4) so the value reaches {@code generation_operations.command_id} and a replay — including one
+     * after a restart — finds the already-stored attempt instead of starting a second one. The
+     * Android client keeps using {@link #create} and mints a fresh id, so its behaviour is unchanged.
+     *
+     * <p>The carried id must be a canonical lowercase UUID, the same shape every other identifier in
+     * this package uses ({@link Guard#id}). A malformed id is a caller bug and throws
+     * {@link IllegalArgumentException} <em>before</em> the version decision, honouring the package's
+     * check-order rule: a call carrying both a malformed id and an absent version reports the id.
+     *
+     * @param id the identity to pin, normally the client-supplied {@code commandId}
+     */
+    public static DomainResult<GenerationCommand> createWithId(
+            String id,
+            String branchId,
+            String messageId,
+            PromptPurpose purpose,
+            String promptPolicyVersion,
+            GenerationModel model,
+            boolean thinkingEnabled,
+            long now) {
+        Guard.id(id, "id");
+        requireArgumentShape(branchId, messageId, purpose, model, now);
+        DomainError versionFailure =
+                PromptPurpose.versionFailureFor(purpose, promptPolicyVersion);
+        if (versionFailure != null) {
+            return DomainResult.fail(versionFailure);
+        }
+        return DomainResult.ok(new GenerationCommand(
+                id, branchId, messageId, purpose, promptPolicyVersion, model, thinkingEnabled, now));
+    }
+
+    @Override
+    public String toString() {
+        return "GenerationCommand[message=" + messageId + ", " + purpose + " "
+                + promptPolicyVersion + ", " + model.wireId
+                + (thinkingEnabled ? ", thinking" : ", no thinking") + "]";
+    }
+}

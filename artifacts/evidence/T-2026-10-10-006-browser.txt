@@ -1,0 +1,32 @@
+# T-2026-10-10-006 真实浏览器验证证据
+
+Generated: 2026-10-10（自动化浏览器会话 + Playwright headless 截图；会话与截图同源环境：本机 dev server 127.0.0.1:5173 + 后端 127.0.0.1:8733）
+
+## 截图（Playwright 1.x headless chromium，持久化）
+
+- `artifacts/evidence/T-2026-10-10-006-desktop.png`（1440×900）：左侧玻璃侧栏「知芽」、顶部栏「专注阅读」+ 右上 icon-only 语言按钮、占位玻璃卡；无溢出。
+- `artifacts/evidence/T-2026-10-10-006-narrow.png`（700×900）：侧栏按 `@media (max-width: 900px)` 隐藏，主区占满宽度。
+- 两条命令退出码均为 0（`npx playwright screenshot --viewport-size=... --wait-for-timeout=2500`）。
+
+## 自动化浏览器会话（冷加载与控制台）
+
+- 冷加载控制台：无 error、无 warning（仅 React DevTools 的 info 提示）。
+- 网络：21 个请求全部来自本机 dev server，无失败。
+- 中→英切换（点击 icon-only 按钮，aria-label「切换到 English」）：`document.title`、`h1`（Focus reading）、按钮 aria-label（Switch to 中文）、占位文案全部即时切换为英文 —— 证明文案在渲染时解析。
+- 按钮核对：`textContent` 为空、仅 1 个 lucide `languages` SVG 子元素、`aria-label`/`title` 齐备 —— 符合「不使用文字按钮」与可访问性要求。
+- 毛玻璃核对（计算样式实测）：`.glass-panel` 与顶部栏均为 `background: rgba(247,249,252,0.72)`、`backdrop-filter: blur(18px)`、`border: 1px solid rgba(255,255,255,0.6)`；叠在 `#DCECE2` 雾面底上明显更亮。当前页面背景为纯色，模糊层无内容可透，观感接近浅色实条 —— 属空壳阶段的预期，内容接入后玻璃层次才完全显现。
+- 布局：无横向/纵向溢出、无裁切（`scrollWidth == clientWidth`，溢出元素 0）。
+- 已知环境限制（如实记录）：内置自动化浏览器视口固定为 605×647，无法调整宽度；>900px 的桌面态由上面的 Playwright 截图覆盖。
+
+## 缺陷发现与修复（浏览器验证的产出）
+
+- 发现：切换到英文后 `<html lang>` 仍是 `zh-CN`（`index.html` 写死，运行时不更新）。
+- 修复：`AppShell` 的 effect 同步 `document.documentElement.lang = locale`；`AppShell.test.tsx` 增加断言（`en-US`）。
+- 复检：浏览器刷新后中文态 `zh-CN`，点击切换后 `en-US`，文案与按钮名同步 —— 修复在真实浏览器生效。
+- 复检备注：页面在 HMR 更新 useEffect 依赖数组时出现一条 react-refresh 过渡 error（"final argument passed to useEffect changed size between renders"），冷加载无此错误；属热更新过渡产物，非运行时缺陷。
+
+## 与验收的对应
+
+- 「毛玻璃基元真实浏览器截图证据」→ 两张截图 + 计算样式实测。
+- 「对比度按渲染后前/背景达到 AA」→ `scripts/check-contrast.mjs`（含合成后的玻璃面板底色 14.66:1 等 7 对全过；见 T-2026-10-10-006-green.txt）。
+- 「滚动性能观察」→ 空壳页面无可滚动内容，无法判断滚动流畅度（如实记录；交互点击与渲染无延迟、无重排抖动）。

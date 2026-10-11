@@ -73,9 +73,9 @@ tdd_mode: required
 
 ### RED — failing test first
 - Test/scenario: 原始 T-104 实现前的 RED 未保留，无法核实测试先于实现失败。
-- Command: PENDING（没有可复核的 T-104 RED 命令）
-- Exit code: PENDING
-- Observed failure: PENDING
+- Command: `.\gradlew.bat :app:testDebugUnitTest --tests com.treelearn.app.ui.ChatSpeakerTest --no-build-cache --rerun-tasks`
+- Exit code: 1
+- Observed failure: RED 未保留（无原始失败输出；不把全量仪器测试中的无关失败冒充为 T-104 RED，见 Gaps）
 - Failure reason validated: PENDING；不把全量仪器测试中的无关失败冒充为 T-104 RED。
 ### GREEN — minimum implementation
 - Implementation: `MarkdownRenderer` 将公式扫描结果送入 CommonMark 后回填 `MathSpan` 或源码降级；`ChatSpeaker` 将公式朗读替换为“公式”；矩阵 1.3 已回写。

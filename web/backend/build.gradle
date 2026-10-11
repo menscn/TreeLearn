@@ -1,0 +1,74 @@
+// Treelearn web backend - local loopback-only service.
+//
+// Versions are pinned from the measured snapshot in
+// .trae/tasks/T-2026-10-10-web-runtime-feasibility-002.md (Spring Boot 4.1.1,
+// Apache-2.0). Dynamic versions are forbidden: probing `+` resolved to the
+// 4.2.0-M2 milestone and a milestone must never be what ships.
+//
+// Shared code: the pure-JVM :core and :tree-layout modules are consumed from
+// web/shared through projectDir references (see settings.gradle).
+plugins {
+    id 'java'
+    id 'checkstyle'
+    id 'org.springframework.boot' version '4.1.1'
+}
+
+group = 'com.treelearn.web'
+version = '0.1.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+}
+
+// Backend lint: a small, long-stable checkstyle rule set. The stock
+// google_checks.xml mixes formatting policy with documentation requirements
+// this skeleton does not carry yet; the chosen checks are the ones that catch
+// real defects in review (unused imports, fall-through, tabs, line length).
+checkstyle {
+    toolVersion = '14.3.0'
+    config = resources.text.fromFile(file('config/checkstyle/checkstyle.xml'))
+    maxWarnings = 0
+}
+
+dependencies {
+    implementation platform('org.springframework.boot:spring-boot-dependencies:4.1.1')
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation project(':core')
+    implementation project(':tree-layout')
+    // Shared AI protocol core (T-2026-10-10-017): the desktop JSON adapters in
+    // com.treelearn.web.ai implement the JSON ports declared there. Referenced through
+    // projectDir in settings.gradle; never copied.
+    implementation project(':ai-protocol')
+
+    // Desktop SQLite driver (task T-2026-10-10-009). Pinned to the version
+    // measured in T-2026-10-10-web-runtime-feasibility-002 (3.53.4.0, Apache-2.0);
+    // dynamic versions are forbidden (see the top-of-file version policy).
+    // runtimeOnly: production code and tests go through java.sql only, and the
+    // driver registers itself through ServiceLoader.
+    runtimeOnly 'org.xerial:sqlite-jdbc:3.53.4.0'
+
+    // Windows Credential Manager secret storage (task T-2026-10-10-013). Pinned to the
+    // version measured in T-2026-10-10-web-runtime-feasibility-002 (5.19.1; POM carries
+    // a dual LGPL-2.1-or-later / Apache-2.0 license and this project takes Apache-2.0).
+    // The port talks to Advapi32 through a hand-written JNA interface, so the
+    // jna-platform artifact (and its extra platform bindings) is not needed.
+    implementation 'net.java.dev.jna:jna:5.19.1'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'failed', 'skipped'
+        exceptionFormat 'full'
+    }
+}
