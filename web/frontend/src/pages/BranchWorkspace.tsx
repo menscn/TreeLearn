@@ -7,6 +7,7 @@ import type { Branch, BranchTree, Message, Topic } from '../api/types';
 import { Composer } from '../components/Composer';
 import { GlassPanel } from '../components/GlassPanel';
 import { IconButton } from '../components/IconButton';
+import { TreeCanvasView } from '../components/TreeCanvasView';
 import { Icon } from '../components/Icon';
 import { ArrowLeft, ChevronRight, Columns2, Maximize2, Network, RotateCcw, Square } from '../components/icons';
 import { Markdown } from '../components/markdown/Markdown';
@@ -143,7 +144,11 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
         </div>
       </GlassPanel>
       {layout === 'C' ? (
-        <GlassPanel className="workspace__placeholder"><p className="workspace__note">{t('workspace.layout.treeUnavailable')}</p></GlassPanel>
+        <TreeCanvasView
+          topicId={topicId}
+          currentBranchId={loaded.branch.id}
+          onNavigate={(target) => navigate(`/topic/${topicId}?branch=${target}`)}
+        />
       ) : layout === 'B' ? (
         <SideBySideView currentTitle={branchTitle} currentMessages={loaded.messages} source={source} sourceTitle={parentTitle} sourceMessages={sourceMessages} />
       ) : (

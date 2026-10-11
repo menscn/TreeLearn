@@ -1,6 +1,7 @@
 package com.treelearn.web.generation;
 
 import com.treelearn.web.storage.AnswerRevisionStore;
+import com.treelearn.web.storage.ArtifactStore;
 import com.treelearn.web.storage.BranchStore;
 import com.treelearn.web.storage.DesktopDatabase;
 import com.treelearn.web.storage.JdbcSupport;
@@ -47,6 +48,11 @@ public class GenerationConfiguration {
     @Bean
     AnswerRevisionStore answerRevisionStore(JdbcSupport jdbc) {
         return new AnswerRevisionStore(jdbc);
+    }
+
+    @Bean
+    ArtifactStore artifactStore(JdbcSupport jdbc) {
+        return new ArtifactStore(jdbc);
     }
 
     @Bean

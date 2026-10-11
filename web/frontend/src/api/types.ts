@@ -127,3 +127,9 @@ export function isGenerationState(value: unknown): value is GenerationState {
 export function isAnswerRevision(value: unknown): value is AnswerRevision {
   return typeof value === 'object' && value !== null && typeof (value as AnswerRevision).id === 'string';
 }
+/** 契约 §6.11 树布局响应：几何由服务端 `:tree-layout` 计算，前端只做缩放平移与交互。 */
+export interface TreeLayoutBounds { minX: number; minY: number; maxX: number; maxY: number }
+export interface TreeLayoutBranch { branchId: string; kind: 'LEAF' | 'LIMB' | 'BUD'; depth: number; rounds: number; ownUnread: number; hiddenDescendants: number; hiddenUnread: number; baseX: number; baseY: number; tipX: number; tipY: number; baseWidth: number; tipWidth: number; length: number; direction: number; onCurrentPath: boolean }
+export interface TreeLayoutLabel { branchId: string; x: number; y: number; width: number; height: number; row: number; showSummary: boolean; leaderX: number; leaderY: number; title: string; summary: string }
+export interface TreeLayoutHit { branchId: string; source: 'LABEL' | 'ANCHOR'; x: number; y: number; width: number; height: number }
+export interface TreeLayoutResponse { topicId: string; currentBranchId: string | null; bounds: TreeLayoutBounds; branches: TreeLayoutBranch[]; labels: TreeLayoutLabel[]; hits: TreeLayoutHit[] }

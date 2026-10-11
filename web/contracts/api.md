@@ -118,6 +118,7 @@
 | `DELETION_PLAN_EXPIRED` | 409 | false | `{}` | 删除确认携带的预览 digest 与当前树快照不符（Web 新增：预览-确认两步 + digest；对齐 `NavigationData.plan` 的 fail-closed 口径，见 6.2 / 6.3） |
 | `SCOPE_UNRESOLVABLE` | 409 | false | `{}` | 删除预览依赖的树快照无法解析/已失效：目标不在树中、无树、或节点指向不存在的父（`NavigationData.plan` 返回 null → `NavigationViewState.Notice.SCOPE_UNRESOLVABLE`），fail-closed 不展示错误范围 |
 | `TOPIC_ID_ALREADY_EXISTS` | 409 | false | `{}` | 同一 `commandId` 之外重复创建同一主题 id（`FirstTopicCreation.Refusal.TOPIC_ID_ALREADY_EXISTS`） |
+| `SCALE_INVALID` | 400 | false | `{ "field" }` | 树布局请求的 `scale` 不是有限正数；`field` 恒为 `scale` |
 | `BRANCH_NOT_ARCHIVABLE` | 400 | false | `{}` | 对根分支执行归档/恢复：根分支不可归档（`Branch.isRoot()`；对齐矩阵「根分支不可归档」） |
 | `NOTE_BODY_REQUIRED` | 400 | false | `{ "field" }` | 写入 NOTE 批注但正文为空；`field` 恒为 `body`（`Annotation.note` 拒绝空正文） |
 | `SOURCE_MESSAGE_NOT_IN_TOPIC` | 400 | false | `{}` | 分叉来源消息/版本不属于本主题（`FirstTopicCreation.Refusal.SOURCE_MESSAGE_NOT_IN_TOPIC`、`BranchCreation.Refusal.SOURCE_NOT_IN_THIS_TOPIC`） |
@@ -667,6 +668,15 @@ Model：
 
 **`DELETE /api/annotations/{id}`** —— 删除批注。请求 `{ "commandId" }`；响应 `200`：`{ "deletedAnnotationId" }`；幂等（不存在视为成功）。
 
+### 6.11 树布局（C 树图）
+
+**`GET /api/topics/{id}/tree-layout?scale=&currentBranchId=`** —— 服务端计算 C 树图几何（`TreeLayout.compute`，与 Android `TreeCanvasPresenter` 同一共享 `:tree-layout` 模块）。
+- 参数：`scale` 可选（默认 `1.0`，服务端按 `Density.forScale` 决定 near/mid/far 层级，标签与摘要行随层级出现/消失）；`currentBranchId` 可选（当前分支及其到根的路径加亮 `onCurrentPath=true`；不在树内时按共享模块 `resolveCurrent` 语义回落到根分支，不报错）。
+- 数据装配（镜像 Android `TreeCanvasWiring`）：行序= `BranchStore.listForTopic` 顺序；`rounds`=该分支已提交 USER 消息数（不含生成中的行）；`ownUnread`=`Branch.unreadCount()`；`summary`=该分支 `ai_artifacts(kind=branch_summary, scope_id=分支id)` payload JSON 的 `summary` 字段文本（`ArtifactPayloadCodec`；缺失/畸形/空文本=空串，不是占位符）；父行缺失的孤儿行按 Android `snapshotOf` 语义跳过；无根（根行缺失）返回空布局而非报错。根行 archived 视为装配失败 → `500 STORAGE_REFUSED`（共享域不变量被绕过，fail-closed）。
+- 响应 `200`：`{ "topicId", "currentBranchId": string|null, "bounds": {minX,minY,maxX,maxY}, "branches": [BranchGeometry...], "labels": [LabelGeometry...], "hits": [HitRegion...]（含 `source` ∈ `LABEL`/`ANCHOR`） }`，字段与 `:tree-layout` 几何类一一对应（`branches`: branchId/kind/depth/rounds/ownUnread/hiddenDescendants/hiddenUnread/baseX/baseY/tipX/tipY/baseWidth/tipWidth/length/direction/onCurrentPath；`labels`: branchId/x/y/width/height/row/showSummary/leaderX/leaderY + `title`（分支标题，空串兜底）+ `summary`（showSummary=true 时的摘要文本，否则空串）——标签文本随几何一起下发，前端不自行拼装；`hits`: branchId/x/y/width/height）。前端不得自行推几何，只消费服务端结果。
+- 服务端以固定视口 `ViewportConstraints.of(800, 1200)`（`:tree-layout` 默认触达 44/垫 26/土壤带 44）计算，bounds 已含土壤带；前端只做缩放平移适配，不参与几何计算。
+- 主题不存在 → `404 NOT_FOUND`（`params.resource=topic`）；`scale` 非法（非有限正数）→ `400 SCALE_INVALID`（`params.field=scale`）。
+
 ---
 
 ## 7. SSE 协议
@@ -810,6 +820,8 @@ Model：
 | 通用 | `ANY /api/**`（未声明路径） | 兜底 `404 NOT_FOUND`（`resource=endpoint`） |
 
 ---
+
+`GET /api/topics/{id}/tree-layout` — C 树图几何（§6.11）。
 
 ## 12. 对照来源
 

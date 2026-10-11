@@ -49,6 +49,21 @@ function loadSseFrames(name: string): SseFrame[] {
 function replaySource(frames: SseFrame[]): OperationFrameSource {
   return { subscribe: (sink) => { for (const frame of frames) sink.onFrame(frame); return () => {}; } };
 }
+const TREE_LAYOUT = {
+  topicId: 't1',
+  currentBranchId: ROOT,
+  bounds: { minX: -100, minY: -400, maxX: 100, maxY: 44 },
+  branches: [
+    { branchId: ROOT, kind: 'LIMB', depth: 0, rounds: 1, ownUnread: 0, hiddenDescendants: 0, hiddenUnread: 0, baseX: 0, baseY: 0, tipX: 0, tipY: -156, baseWidth: 4.6, tipWidth: 3, length: 156, direction: 0, onCurrentPath: true },
+    { branchId: 'b-child', kind: 'LEAF', depth: 1, rounds: 0, ownUnread: 1, hiddenDescendants: 0, hiddenUnread: 0, baseX: 0, baseY: -156, tipX: 24, tipY: -254.4, baseWidth: 3, tipWidth: 2, length: 98.4, direction: 0.24, onCurrentPath: false },
+  ],
+  labels: [
+    { branchId: 'b-child', x: -44, y: -345.4, width: 136, height: 43, row: 0, showSummary: true, leaderX: 24, leaderY: -254.4, title: '子分支', summary: '一段摘要' },
+  ],
+  hits: [
+    { branchId: 'b-child', source: 'LABEL', x: -44, y: -345.4, width: 136, height: 43 },
+  ],
+};
 const stillStreaming = replaySource([{ id: '1', event: 'snapshot', data: { operationId: 'op-stop', seq: 1, state: 'SUBMITTING', reasoningContent: '', answerContent: '' } }]);
 
 interface Handlers {
@@ -58,6 +73,7 @@ interface Handlers {
   retry?: () => Response;
   send?: () => Response;
   resolve?: () => unknown;
+  tree?: () => Response;
 }
 interface Call { method: string; url: string; body: Record<string, unknown> | null }
 
@@ -69,6 +85,7 @@ function installFetch(handlers: Handlers = {}): Call[] {
     calls.push({ method, url, body: typeof init?.body === 'string' ? JSON.parse(init.body) : null });
     if (method === 'GET' && url === '/api/topics/t1') return handlers.topic ? handlers.topic() : json(TOPIC);
     if (method === 'GET' && url === '/api/topics/t1/branches') return json(TREE);
+    if (method === 'GET' && url.startsWith('/api/topics/t1/tree-layout')) return handlers.tree ? handlers.tree() : json(TREE_LAYOUT);
     if (method === 'GET' && url === '/api/settings/model-resolution') return json(handlers.resolve ? handlers.resolve() : { roles: { CHAT: { providerId: 'p', modelId: 'deepseek-v4-pro', fallback: 'NONE' }, FAST: { providerId: null, modelId: null, fallback: 'EMPTY' }, TRANSLATION: { providerId: null, modelId: null, fallback: 'EMPTY' } } });
     if (method === 'GET' && /^\/api\/branches\/[^/]+\/messages$/.test(url)) return handlers.conversation ? handlers.conversation(url.split('/')[3]) : json(conversation([userMessage('u1', '光合作用是什么？'), aiMessage('a1', '光合作用是植物利用光能把二氧化碳和水合成有机物的过程。')]));
     if (method === 'POST' && /^\/api\/operations\/[^/]+\/cancel$/.test(url)) return handlers.cancel ? handlers.cancel() : json({ id: 'op-stop', state: 'CANCELED' });
@@ -203,7 +220,7 @@ describe('BranchWorkspace follow-up composer', () => {
 });
 
 describe('BranchWorkspace layout switching', () => {
-  it('persists the layout and shows the C placeholder with its reason', async () => {
+  it('persists the layout and renders the C tree canvas from the server layout', async () => {
     installFetch();
     renderWorkspace();
     await screen.findByRole('heading', { name: '光合作用是什么' });
@@ -212,8 +229,21 @@ describe('BranchWorkspace layout switching', () => {
     await waitFor(() => expect(localStorage.getItem('workspace:layout')).toBe('B'));
 
     fireEvent.click(screen.getByRole('button', { name: '树图' }));
-    expect(await screen.findByText('C 树图布局依赖服务端树布局端点，尚未接入。')).toBeInTheDocument();
+    expect(await screen.findByText('子分支')).toBeInTheDocument();
+    expect(screen.getByText('一段摘要')).toBeInTheDocument();
     expect(localStorage.getItem('workspace:layout')).toBe('C');
+
+    // 触达区点击 → 导航到该分支（/topic/t1?branch=b-child）。
+    fireEvent.click(screen.getByRole('button', { name: '子分支' }));
+    await waitFor(() => expect(window.location.search).toContain('branch=b-child'));
+  });
+
+  it('shows the empty note when the server layout has no branches', async () => {
+    installFetch({ tree: () => json({ ...TREE_LAYOUT, branches: [], labels: [], hits: [] }) });
+    renderWorkspace();
+    await screen.findByRole('heading', { name: '光合作用是什么' });
+    fireEvent.click(screen.getByRole('button', { name: '树图' }));
+    expect(await screen.findByText('暂无可绘制的分支树。')).toBeInTheDocument();
   });
 
   it('shows the fork source side by side when layout B is chosen on a forked branch', async () => {

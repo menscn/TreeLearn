@@ -73,7 +73,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File web/scripts/stop-web.ps1
 | 批注失效 | **未实现** | 同上 |
 | 草稿与阅读位置 | 已交付 | 草稿按分支保存/恢复/清理（T-031）+ `PUT /api/branches/{id}/reading-position`（语义锚点、锚点消息删除 ON DELETE SET NULL 置空，真实 HTTP+SQLite 证据，T-042） |
 | 未读 | 部分 | 分支树携带未读对与派生值 + `POST /api/branches/{id}/seen` 只前进（409 `SEQUENCE_OUT_OF_ORDER`，T-042）；跨标签页真实竞争未做浏览器验证 |
-| 树导航与折叠 | 部分 | 分支树端点 + `POST /api/branches/{id}/collapse` 持久化并经树读回（T-042）；树图探索 C 视图未实现（依赖服务端树布局端点） |
+| 树导航与折叠 | 已交付 | 分支树端点 + 折叠持久化（T-042）+ C 树图全链路：§6.11 布局端点（共享 `:tree-layout` 几何，T-045）+ 前端 `TreeCanvasView` 渲染与点击导航（T-046） |
 | 归档与恢复 | 已交付 | `POST /api/branches/{id}/{archive,restore}`：根分支 400 `BRANCH_NOT_ARCHIVABLE`、状态冲突 409、归档不取消生成（真实 HTTP+SQLite 13 例，T-042） |
 | 删除 | 已交付 | 删除预览（快照范围 + SHA-256 digest）与确认删除（先取消活跃操作再单事务删除、digest 过期 409、幂等），真实 HTTP+SQLite（T-042） |
 | 应用内搜索 | 已交付 | `GET /api/search`（七臂 UNION ALL 镜像 Android SearchDao、归档不可搜、DISPLAY_ORDER、UTF-16 命中区间）+ 学习库页三范围分组/高亮/Ctrl+K（真实 HTTP+SQLite 14 例，T-043/044） |
@@ -95,7 +95,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File web/scripts/stop-web.ps1
 
 ### 4.4 汇总
 
-- **已交付**：17 行；**部分**：7 行；**未实现**：10 行（矩阵实际共 34 行；旧版「40 行 / 10+13+17」计数与其自身行列表不符，已按行清点更正）。
+- **已交付**：18 行；**部分**：6 行；**未实现**：10 行（矩阵实际共 34 行；2026-10-11 第二波开工后 C 树图由「部分」转「已交付」）；旧版「40 行 / 10+13+17」计数与其自身行列表不符，已按行清点更正）。
 - 结论：**核心闭环（配置→首问→流式→稳定→追问→停止→重试→重启恢复）+ 分叉、归档/恢复、删除、阅读位置、未读已见、折叠、应用内搜索、学习统计、Provider/Key 与模型分工设置在 Web 端真实可用**；**辅助功能（树图 C 视图、高亮/批注、推荐问题、上下文压缩、联网搜索、翻译/朗读、语音、附件）本批仍未交付**。
 
 ## 5. 双端一致性与共享实现
@@ -113,7 +113,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File web/scripts/stop-web.ps1
 
 ## 7. 剩余缺口与未验证项（如实标注）
 
-**未实现（功能缺口，需后续任务）**：树图 C 视图（依赖服务端树布局端点）、来源定位跳转、上下文压缩、推荐问题、高亮/批注及失效清理、联网搜索、翻译/朗读、语音输入、附件注册与解析、文件管理与清理、retry 之外的 reset。
+**未实现（功能缺口，需后续任务）**：来源定位跳转、上下文压缩、推荐问题、高亮/批注及失效清理、联网搜索、翻译/朗读、语音输入、附件注册与解析、文件管理与清理、retry 之外的 reset。
 
 **未验证（有实现但缺证据）**：真实 Provider Key 端到端生成（代码已推进，最终报告必须把这一项标为未验证，直到提供专用 Web Key 并完成真实流式链路测试）；多标签页真实竞争与浏览器重连（需浏览器轮）；Android fixtures 等价验证。
 
