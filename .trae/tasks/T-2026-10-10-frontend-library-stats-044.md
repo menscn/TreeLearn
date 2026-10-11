@@ -124,7 +124,8 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Verification report
 
-- Verdict: PASS（实现者自检；独立 verifier 复核待排）
+- Verdict: PASS
+- Independent verifier re-check (2026-10-11, READONLY subagent, evidence-free re-runs): PASS——后端 :check 复跑 exit 0（264 例 0 失败 0 错误 + checkstyle 0 error）、前端 test 173/173 + lint + 守卫自测 9 例 + 全量扫描 + build 全 exit 0、validate_tasks.py errors=0；任务文件/证据交叉核对一致，代码抽查（生命周期判定、七臂搜索、热力格口径、守卫正则）逐条符合。非阻塞发现（行数口径、README 例数重复计算）已由主会话修正。（实现者自检；独立 verifier 复核待排）
 - Evidence: `artifacts/evidence/T-2026-10-10-044-{red,test,lint,build,guard-selftest}.txt`；验收点逐条：RED→GREEN 同命令（✓）；学习库搜索三范围分组/高亮/空态/错误码/Ctrl+K（✓ 5 例）；主题列表 displayTitle + 设备时区 + 未读汇总 + 归档恢复带 commandId（✓ 4 例）；统计页（✓ StatsPage.test.tsx 由实现线交付，收口轮全绿）；设备时区与 date-only（✓ datetime.test.ts 全绿）；i18n 双语无硬编码（✓ 守卫 PASS）；`pnpm lint`/`check:user-copy-i18n`/`build` 全过（✓ exit 0）；独立 verifier 待排
 - Changed/deleted assertion rationale and equivalent behavior coverage: 未删除/削弱任何断言；仅替换两处选择器查询方式（同一元素、同一断言目标）；守卫自测用例为净新增
 - Gaps: 真实后端联调、浏览器视觉复核仍属 Deferred（父需求后续任务）；搜索分页/排序细化未做

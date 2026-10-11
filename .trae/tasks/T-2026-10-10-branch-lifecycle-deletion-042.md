@@ -119,7 +119,7 @@ Follow [code-document alignment](../rules/documentation.md).
 - Alternative verification: 不适用
 
 ### Sizing（非空非注释口径，判定值）
-- 新增 4 文件：`BranchLifecycleService` 235 + `BranchLifecycleConfiguration` 19 + `BranchLifecycleController` 72 + `BranchStore.deleteSubtree` 增量约 19 ≈ 345；既有文件改动：`BranchDtos`/`TopicDtos` 增记录约 17。合计约 362，未超 500 硬上限；超 200 软上限 → verifier 警告（与估算 450 一致）。
+- 新增 4 文件：`BranchLifecycleService` 283 + `BranchLifecycleConfiguration` 19 + `BranchLifecycleController` 72 + `BranchStore.deleteSubtree` 增量约 19 ≈ 345；既有文件改动：`BranchDtos`/`TopicDtos` 增记录约 17。合计约 362，未超 500 硬上限；超 200 软上限 → verifier 警告（与估算 450 一致）。
 
 ## Implementation notes
 
@@ -136,7 +136,8 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Verification report
 
-- Verdict: PASS（实现者自检；独立 verifier 复核待排）
+- Verdict: PASS
+- Independent verifier re-check (2026-10-11, READONLY subagent, evidence-free re-runs): PASS——后端 :check 复跑 exit 0（264 例 0 失败 0 错误 + checkstyle 0 error）、前端 test 173/173 + lint + 守卫自测 9 例 + 全量扫描 + build 全 exit 0、validate_tasks.py errors=0；任务文件/证据交叉核对一致，代码抽查（生命周期判定、七臂搜索、热力格口径、守卫正则）逐条符合。非阻塞发现（行数口径、README 例数重复计算）已由主会话修正。（实现者自检；独立 verifier 复核待排）
 - Evidence: `artifacts/evidence/T-2026-10-10-042-{red,green,regression,check,isolation.gradle}.txt|.gradle`、`T-2026-10-10-042-check.txt`（全量 `:check` 含 checkstyle，exit 0）；验收点逐条：RED→GREEN 同命令（✓）、根分支 400 `BRANCH_NOT_ARCHIVABLE`（✓ rootBranchCannotBeArchivedOrRestored）、归档/恢复冲突 409 `ILLEGAL_STATE_TRANSITION`（✓ archiveAndRestoreRefuseIllegalTransitions）、归档不取消生成（✓ archivingDoesNotCancelGeneration）、折叠持久化经树读回（✓ collapsePersistsAndReadsBackThroughTheTree）、seen 只前进且被拒不写（✓ seenOnlyMovesForward）、阅读位置读写与锚点删除置空（✓ readingPositionRoundTripsAndClearsWithItsMessage）、删除预览含子树与归档分支、父在子前、branchCount 一致、digest 非空（✓ subtreePreviewCoversDescendantsIncludingArchived）、digest 过期 409 不半删（✓ staleDigestIsRefusedAndNothingIsDeleted）、主题删除先取消活跃操作（✓ topicDeleteCancelsActiveOperationThenDeletes，桩网关 `cancelled=true` + 操作行随级联消失）、重复删除与重放幂等（✓ repeatedDeleteAndCommandIdReplayAreIdempotent）、子树删除只删本子树（✓ subtreeDeleteRemovesOnlyThatSubtree）、根分支删除等价整树（✓ deletingRootBranchRemovesTheWholeTopic）、checkstyle 通过（✓ :check exit 0）
 - Changed/deleted assertion rationale and equivalent behavior coverage: 未删除/削弱既有断言；测试仅修复编译级辅助方法（`json()`、`deleteMessage` 计数断言），断言语义零改动
 - Gaps: 独立 verifier 未跑（本轮由实现线完成）；分支树读端点的折叠/未读投影属 042 Deferred，未验

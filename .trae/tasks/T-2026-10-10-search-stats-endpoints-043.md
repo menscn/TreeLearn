@@ -123,7 +123,8 @@ Follow [code-document alignment](../rules/documentation.md).
 
 ## Verification report
 
-- Verdict: PASS（实现者自检；独立 verifier 复核待排）
+- Verdict: PASS
+- Independent verifier re-check (2026-10-11, READONLY subagent, evidence-free re-runs): PASS——后端 :check 复跑 exit 0（264 例 0 失败 0 错误 + checkstyle 0 error）、前端 test 173/173 + lint + 守卫自测 9 例 + 全量扫描 + build 全 exit 0、validate_tasks.py errors=0；任务文件/证据交叉核对一致，代码抽查（生命周期判定、七臂搜索、热力格口径、守卫正则）逐条符合。非阻塞发现（行数口径、README 例数重复计算）已由主会话修正。（实现者自检；独立 verifier 复核待排）
 - Evidence: `artifacts/evidence/T-2026-10-10-043-{red,green}.txt` + `T-2026-10-10-042-check.txt`（全量 `:check`，exit 0）；验收点逐条：空查询 200 空 hits 不扫全表（✓ blankQueryReturnsEmptyHitsWithoutReachingTheStore）、无结果 200（✓ unknownTermReturnsNoHitsWithoutError）、三范围命中可定位且空字段 null/-1/0（✓ threeScopesReturnLocatedHitsInDisplayOrder）、`DISPLAY_ORDER`（✓ 同上，TITLE→QUESTION→ANSWER）、区间为 UTF-16 半开且与 snippet 一致、CJK 与 ASCII 大小写（✓ hitIntervalIsUtf16WithinTheSnippet + asciiMatchIsCaseInsensitiveAndIntervalTracksTheSnippet）、归档不可搜（✓ archivedBranchIsNotSearchable）、统计与 DB 同源（✓ totalsAndDetailShareOneSource）、跨自然日按设备时区（✓ crossNaturalDayBoundaryFollowsDeviceTimeZone，Asia/Shanghai 10-04 vs Los_Angeles 10-03）、连续天数（✓ streakCountsConsecutiveDaysAndBreaksOnAGap + streakEndingYesterdayStillCounts）、空月零值/未来月 -1/`activeDays` 不按月裁剪（✓ emptyRequestedMonthReturnsBlankCellsNotAnError）、月份缺省按时区当月（✓ monthDefaultsToTheCurrentMonthInTheTimeZone）、非法时区/月 400 `REQUEST_INVALID`（✓ invalidTimeZoneAndMonthAreRequestInvalid）、checkstyle（✓）
 - Changed/deleted assertion rationale and equivalent behavior coverage: 无删除/削弱既有断言；测试文件仅移除未用 `UUID` import（checkstyle UnusedImports，maxWarnings=0）
 - Gaps: 独立 verifier 未跑（本轮由实现线完成）；命中区间算法（snippet 内首个折叠命中）为任务记录的偏差决策，契约未钉死
