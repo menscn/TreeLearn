@@ -23,6 +23,19 @@ export function formatDateTime(millis: number, locale: string, timeZone: string 
   return new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short', timeZone }).format(new Date(millis));
 }
 
+// 相对时间：回答动作行行尾的生成时间。Android 用 DateUtils.getRelativeTimeSpanString(..,
+// MINUTE_IN_MILLIS)（AnswerActionBar.renderTime），即「5 分钟前 / 2 小时前 / 昨天」这类相对量；
+// 这里按同一语义走 Intl.RelativeTimeFormat（numeric: 'auto' 让 0 秒读作「现在」）。
+export function formatRelativeTime(millis: number, locale: string, nowMillis: number = Date.now()): string {
+  const formatter = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+  const seconds = Math.round((millis - nowMillis) / 1000);
+  const distance = Math.abs(seconds);
+  if (distance < 60) return formatter.format(seconds, 'second');
+  if (distance < 3600) return formatter.format(Math.round(seconds / 60), 'minute');
+  if (distance < 86400) return formatter.format(Math.round(seconds / 3600), 'hour');
+  return formatter.format(Math.round(seconds / 86400), 'day');
+}
+
 // date-only 月：以 UTC 正午构造，保证不因时区偏移跨月，再按界面语言显示。
 export function formatMonthLabel(month: string, locale: string): string {
   const match = /^(\d{4})-(\d{2})$/.exec(month);

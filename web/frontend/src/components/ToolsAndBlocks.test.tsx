@@ -62,14 +62,64 @@ describe('MessageView version tools (T-053)', () => {
     expect(onReset).toHaveBeenCalledWith('m-ai');
   });
 
-  it('reads the answer aloud when speech is available', () => {
-    const speak = vi.fn();
-    const cancel = vi.fn();
-    vi.stubGlobal('speechSynthesis', { cancel, speak });
-    vi.stubGlobal('SpeechSynthesisUtterance', class Utterance { text: string; constructor(text: string) { this.text = text; } });
-    renderView(<MessageView message={aiMessage()} annotationsEnabled />);
-    fireEvent.click(screen.getByRole('button', { name: '朗读回答' }));
-    expect(speak).toHaveBeenCalled();
+  // 「朗读回答」随 T-128 移除：Android 用户裁决删掉语音播放（ChatScreen 注释：
+  // "speech has no learner-visible signal left"），动作行不再有朗读入口。
+});
+
+// T-128 回答动作行：Android view_answer_actions.xml / AnswerActionBar —— 四个纯图标 + 行尾相对时间。
+describe('MessageView answer action row (T-128)', () => {
+  afterEach(() => {
+    cleanup();
+    vi.clearAllMocks();
+  });
+
+  const fiveMinutesAgo = () => Date.now() - 5 * 60 * 1000;
+
+  it('carries the four glyph actions and the trailing time, and nothing else', () => {
+    renderView(
+      <MessageView message={aiMessage({ createdAtMillis: fiveMinutesAgo() })} annotationsEnabled
+        onReset={vi.fn()} onForkAnswer={vi.fn()} onListChildren={vi.fn()} childBranchCount={2} />,
+    );
+    const row = screen.getByTestId('actions-m-ai');
+    // 恰好四个按钮：复制 / 重新生成 / 新建分支 / 分支列表。
+    expect(row.querySelectorAll('button')).toHaveLength(4);
+    expect(screen.getByRole('button', { name: '复制回答' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '重新生成' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '新建分支' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '子分支列表（2）' })).toBeInTheDocument();
+    // 纯图标：四个按钮自身都不带可见文字（Android：All four leads are glyphs）；
+    // 计数徽标是按钮外的角标 span，不影响按钮本身是纯图标。
+    for (const button of row.querySelectorAll('button')) expect(button.textContent?.trim()).toBe('');
+    expect(screen.getByTestId('children-m-ai').parentElement?.querySelector('.message__action-count')?.textContent).toBe('2');
+    // 行尾相对时间。
+    expect(screen.getByTestId('time-m-ai').textContent).toContain('分钟前');
+    // 朗读与翻译都不在动作行里。
+    expect(screen.queryByRole('button', { name: '朗读回答' })).toBeNull();
+    expect(row.contains(screen.getByTestId('translation-start-m-ai'))).toBe(false);
+  });
+
+  it('hides the child-branch entry entirely when the answer has no children', () => {
+    renderView(<MessageView message={aiMessage()} annotationsEnabled onListChildren={vi.fn()} childBranchCount={0} />);
+    expect(screen.queryByTestId('children-m-ai')).toBeNull();
+    expect(screen.getByTestId('actions-m-ai').querySelectorAll('button')).toHaveLength(1);
+  });
+
+  it('keeps the version switch out of the action row but still reachable', () => {
+    const two = aiMessage({
+      versions: [
+        { id: 'rev-1', messageId: 'm-ai', revisionNo: 1, reasoningContent: '', answerContent: '第一版', model: 'm', thinkingEnabled: false, promptPolicyVersion: 'p', createdAtMillis: 0 },
+        { id: 'rev-2', messageId: 'm-ai', revisionNo: 2, reasoningContent: '', answerContent: '第二版', model: 'm', thinkingEnabled: false, promptPolicyVersion: 'p', createdAtMillis: 0 },
+      ],
+    });
+    renderView(<MessageView message={two} annotationsEnabled />);
+    const select = screen.getByTestId('versions-m-ai');
+    expect(select).toBeInTheDocument();
+    expect(screen.getByTestId('actions-m-ai').contains(select)).toBe(false);
+  });
+
+  it('hides the whole row while the answer is still streaming', () => {
+    renderView(<MessageView message={aiMessage()} annotationsEnabled onReset={vi.fn()} streamText="生成中…" />);
+    expect(screen.queryByTestId('actions-m-ai')).toBeNull();
   });
 });
 
@@ -95,7 +145,8 @@ describe('TranslationBlock (T-053, T-052 slice endpoint)', () => {
     renderView(<TranslationBlock messageId="m-ai" revisionId="rev-1" />);
     fireEvent.click(screen.getByTestId('translation-start-m-ai'));
     expect(await screen.findByText('Photosynthesis is the process...')).toBeInTheDocument();
-    expect(loadDerivedArtifact).toHaveBeenCalledWith('MESSAGE_TRANSLATION', 'rev-1', 'rev-1');
+    expect(startTranslation).toHaveBeenCalledWith('m-ai', 'rev-1');
+    expect(loadDerivedArtifact).toHaveBeenCalledWith('message_translation', 'm-ai', 'rev-1');
   });
 
   it('shows the failure note when the operation terminates non-stable', async () => {

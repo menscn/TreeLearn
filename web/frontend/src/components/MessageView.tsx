@@ -6,9 +6,9 @@ import { createAnnotation, deleteAnnotation, loadAnnotations } from '../store/to
 import { Dialog } from './Dialog';
 import { IconButton } from './IconButton';
 import { TranslationBlock } from './TranslationBlock';
-import { speak, speechAvailable, stopSpeaking } from '../lib/speech';
 import { selectRevision } from '../store/topicData';
-import { Copy, Ellipsis, GitFork, Languages, RotateCcw, Trash2, Volume2 } from './icons';
+import { formatRelativeTime } from '../platform/datetime';
+import { Copy, GitFork, Network, RotateCcw, Trash2 } from './icons';
 import { Markdown, type Highlight } from './markdown/Markdown';
 import { proseIndexForRange, selectionToRange } from '../lib/selectionRange';
 
@@ -55,15 +55,14 @@ function MessageView({ message, highlight = null, annotationsEnabled = false, on
   streamReasoning?: string | null;
   /** T-126：回答位底部区域（生成状态行 + 停止/原位重试）。 */
   footer?: ReactNode | null }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const answerRef = useRef<HTMLDivElement | null>(null);
   const [annotations, setAnnotations] = useState<Annotation[]>([]);
   const [pending, setPending] = useState<Highlight | null>(null);
   const [pendingIndex, setPendingIndex] = useState(-1);
   const [noteDraft, setNoteDraft] = useState('');
   const [noteOpen, setNoteOpen] = useState(false);
-  const [speaking, setSpeaking] = useState(false);
-  const [translationOpen, setTranslationOpen] = useState(false);
+  // T-128：翻译卡常驻渲染（翻译入口由卡片自己承载，动作行不再放翻译图标）。
   // 复制回答的二态反馈：copied/failed 各自 2s 后复位；失败不暴露底层异常，只换可行动文案。
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const copyTimer = useRef<number | null>(null);
@@ -164,6 +163,11 @@ function MessageView({ message, highlight = null, annotationsEnabled = false, on
   const revision = displayRevisionId === null ? activeRevision(message)
     : message.versions.find((version) => version.id === displayRevisionId) ?? activeRevision(message);
   const reasoning = streamReasoning !== null ? streamReasoning : (revision?.reasoningContent ?? '');
+  // T-128 动作行（Android view_answer_actions.xml / AnswerActionBar）：
+  // 只留四个纯图标（复制 / 重新生成 / 新建分支 / 分支列表）+ 行尾相对时间；生成中整行隐藏。
+  // 分支列表是树形图标加右上角绿色计数徽标，无子分支时整项不出现（不是禁用）。
+  // 版本切换：Android 也还没安置新入口（onVersionPressed 无调用方），Web 保留能力但移出四图标行。
+  // 翻译入口由 TranslationBlock 自己承载（Android：the translation card keeps its own header entry）。
   return (
     <article className="message message--ai">
       {reasoning.length > 0 ? (
@@ -190,58 +194,49 @@ function MessageView({ message, highlight = null, annotationsEnabled = false, on
         )}
       </div>
       {streamText === null ? (
-      <div className="message__tools" data-testid={`tools-${message.id}`}>
-        {revision !== null && speechAvailable() ? (
-          <IconButton icon={Volume2} label={t(speaking ? 'workspace.action.stopSpeech' : 'workspace.action.speak')} showLabel
-            onClick={() => {
-              if (speaking) {
-                stopSpeaking();
-                setSpeaking(false);
-                return;
-              }
-              speak(revision.answerContent);
-              setSpeaking(true);
-            }} />
-        ) : null}
-        {revision !== null && message.versions.length > 1 ? (
-          <label className="message__versions">
-            <span className="message__versions-label">{t('workspace.versions.label')}</span>
-            <select value={revision.id} data-testid={`versions-${message.id}`}
-              onChange={(event) => {
-                const target = event.currentTarget.value;
-                selectRevision(message.id, target).then(() => setDisplayRevisionId(target)).catch(() => {});
-              }}>
-              {message.versions.map((version) => (
-                <option key={version.id} value={version.id}>
-                  {t('workspace.versions.option').replace('{n}', String(version.revisionNo))}
-                </option>
-              ))}
-            </select>
-          </label>
-        ) : null}
+      <>
+      <div className="message__actions" data-testid={`actions-${message.id}`}>
         {revision !== null ? (
-          <IconButton icon={Languages} label={t('workspace.translation.action')} showLabel onClick={() => setTranslationOpen((prev) => !prev)} />
-        ) : null}
-        {revision !== null ? (
-          <IconButton icon={Copy} showLabel
+          <IconButton icon={Copy}
             label={copyState === 'failed' ? t('workspace.action.copyFailed') : copyState === 'copied' ? t('markdown.code.copied') : t('workspace.action.copyAnswer')}
             onClick={handleCopyAnswer} />
         ) : null}
+        {onReset && message.versions.length > 0 ? (
+          <IconButton icon={RotateCcw} label={t('workspace.action.reset')} onClick={() => onReset(message.id)} />
+        ) : null}
         {onForkAnswer && revision !== null && message.activeOperationId === null ? (
-          <IconButton icon={GitFork} label={t('workspace.action.fork')} showLabel data-testid={`fork-${message.id}`}
+          <IconButton icon={GitFork} label={t('workspace.action.fork')} data-testid={`fork-${message.id}`}
             onClick={() => onForkAnswer(message.id, revision.id)} />
         ) : null}
-        {onListChildren ? (
-          <IconButton icon={Ellipsis} showLabel
-            label={t('workspace.action.children').replace('{n}', String(childBranchCount ?? 0))}
-            data-testid={`children-${message.id}`} onClick={() => onListChildren(message.id)} />
+        {onListChildren && (childBranchCount ?? 0) > 0 ? (
+          <span className="message__action-badge">
+            <IconButton icon={Network} label={t('workspace.action.children').replace('{n}', String(childBranchCount ?? 0))}
+              data-testid={`children-${message.id}`} onClick={() => onListChildren(message.id)} />
+            <span className="message__action-count" aria-hidden="true">{childBranchCount ?? 0}</span>
+          </span>
         ) : null}
-        {onReset && message.versions.length > 0 ? (
-          <IconButton icon={RotateCcw} label={t('workspace.action.reset')} showLabel onClick={() => onReset(message.id)} />
-        ) : null}
+        <span className="message__actions-spacer" />
+        <span className="message__time" data-testid={`time-${message.id}`}>{formatRelativeTime(message.createdAtMillis, locale)}</span>
       </div>
+      {revision !== null && message.versions.length > 1 ? (
+        <label className="message__versions">
+          <span className="message__versions-label">{t('workspace.versions.label')}</span>
+          <select value={revision.id} data-testid={`versions-${message.id}`}
+            onChange={(event) => {
+              const target = event.currentTarget.value;
+              selectRevision(message.id, target).then(() => setDisplayRevisionId(target)).catch(() => {});
+            }}>
+            {message.versions.map((version) => (
+              <option key={version.id} value={version.id}>
+                {t('workspace.versions.option').replace('{n}', String(version.revisionNo))}
+              </option>
+            ))}
+          </select>
+        </label>
       ) : null}
-      {revision !== null && translationOpen ? <TranslationBlock messageId={message.id} revisionId={revision.id} /> : null}
+      </>
+      ) : null}
+      {revision !== null ? <TranslationBlock messageId={message.id} revisionId={revision.id} /> : null}
       {annotationsEnabled && streamText === null && pending !== null ? (
         <div className="annotation-bar" role="toolbar" aria-label={t('annotation.bar.label')}>
           <button type="button" className="annotation-bar__action" data-testid="annotation-highlight"

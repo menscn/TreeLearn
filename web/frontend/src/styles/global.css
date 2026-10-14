@@ -449,8 +449,20 @@ dialog.dialog::backdrop {
 
 .message__attachment--missing { color: var(--ink3); text-decoration: line-through; }
 
-/* 回答动作行：图标+文字横排（对齐 Android view_answer_actions.xml）。 */
-.message__tools { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; }
+/* 回答动作行（T-128，Android view_answer_actions.xml）：四个纯图标 + 行尾时间。
+   图标区 44px 触达、零内距（@dimen/touch_min；原型 17px 字形居中），不再带文字。 */
+.message__actions { display: flex; align-items: center; gap: var(--s1); }
+
+.message__actions .icon-button { width: 44px; min-width: 44px; height: 44px; padding: 0; }
+
+.message__actions-spacer { flex: 1; }
+
+.message__time { font-size: var(--fs-sm); color: var(--ink3); }
+
+/* 分支列表计数徽标（原型 .ai-act-n）：绿底、贴在图标右上角；纯装饰，计数已在按钮可访问名里。 */
+.message__action-badge { position: relative; display: inline-flex; }
+
+.message__action-count { position: absolute; top: 2px; right: 0; min-width: 14px; height: 14px; padding: 0 var(--s1); border-radius: var(--r-full); background: var(--green); color: var(--surface); font-size: var(--fs-cap); line-height: 14px; text-align: center; }
 
 /* 生成状态行（T-126）：贴在回答位内部末尾，与 Android 生成中/失败态同位置，不再用底部独立面板。 */
 .message__stream-status { display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap; }
