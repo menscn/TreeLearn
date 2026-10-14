@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { BranchTree, Conversation, Message, Topic } from '../api/types';
 import type { OperationFrameSource, SseFrame } from '../api/sse';
 import { I18nProvider } from '../i18n/I18nProvider';
+import { navigate } from '../platform/router';
 import { readDraft } from '../store/drafts';
 import { BranchWorkspace } from './BranchWorkspace';
 
@@ -72,6 +73,7 @@ interface Handlers {
   cancel?: () => Response;
   retry?: () => Response;
   send?: () => Response;
+  fork?: () => Response;
   resolve?: () => unknown;
   tree?: () => Response;
   branchTree?: () => Response;
@@ -92,6 +94,7 @@ function installFetch(handlers: Handlers = {}): Call[] {
     if (method === 'POST' && /^\/api\/operations\/[^/]+\/cancel$/.test(url)) return handlers.cancel ? handlers.cancel() : json({ id: 'op-stop', state: 'CANCELED' });
     if (method === 'POST' && /^\/api\/messages\/[^/]+\/retry$/.test(url)) return handlers.retry ? handlers.retry() : json({ message: aiMessage('a1', '重试中'), operation: { id: 'op-retry' } });
     if (method === 'POST' && /^\/api\/branches\/[^/]+\/messages$/.test(url)) return handlers.send ? handlers.send() : json({ userMessage: userMessage('u2', '追问'), aiMessage: aiMessage('a2', '回答', 'op-new'), operation: { id: 'op-new', messageId: 'a2' } });
+    if (method === 'POST' && /^\/api\/branches\/[^/]+\/forks$/.test(url)) return handlers.fork ? handlers.fork() : json({ branch: { id: 'b-new', topicId: 't1', parentBranchId: null, source: null, title: null, createdAtMillis: 3, updatedAtMillis: 3, latestStableSequence: 0, lastSeenStableSequence: 0, unreadCount: 0, collapsed: false, archivedAtMillis: null }, source: null, bootstrap: null });
     if (method === 'POST' && /^\/api\/branches\/[^/]+\/seen$/.test(url)) return json({ branchId: url.split('/')[3] });
     if (method === 'PUT' && /^\/api\/branches\/[^/]+\/reading-position$/.test(url)) return json({ branchId: url.split('/')[3] });
     throw new Error(`unexpected ${method} ${url}`);
@@ -482,5 +485,67 @@ describe('BranchWorkspace per-branch follow-up drafts', () => {
     await waitFor(() => expect(calls.some((call) => call.method === 'POST' && call.url === `/api/branches/${ROOT}/messages`)).toBe(true));
     await waitFor(() => expect(localStorage.getItem(`draft:${ROOT}`)).toBeNull());
     expect((screen.getByLabelText('继续追问…') as HTMLTextAreaElement).value).toBe('');
+  });
+});
+
+// T-130：Android 的 ChatPresenter.onRecommendationFollowed 是先入草稿再立刻发送
+// （"A tapped chip becomes the draft first, so a blocked send still shows what was tapped"），
+// HomePresenter.onRecommendationTapped 同口径；返回则按入口还原目标，不是固定回主页。
+describe('BranchWorkspace recommendation follow-through (T-130)', () => {
+  const REC = '叶绿体在光合作用里具体做什么？';
+  const NO_MODEL = { roles: { CHAT: { providerId: null, modelId: null, fallback: 'EMPTY' }, FAST: { providerId: null, modelId: null, fallback: 'EMPTY' }, TRANSLATION: { providerId: null, modelId: null, fallback: 'EMPTY' } } };
+
+  function recommendationFetch(handlers: Handlers = {}) {
+    return installFetch({
+      ...handlers,
+      conversation: () => json({ branchId: ROOT, messages: [userMessage('u1', '光合作用是什么？'), aiMessage('a1', '光合作用是植物利用光能把二氧化碳和水合成有机物的过程。')], readingAnchor: null, recommendations: [REC] }),
+    });
+  }
+
+  it('sends the tapped recommendation instead of only filling the draft', async () => {
+    const calls = recommendationFetch();
+    renderWorkspace();
+    fireEvent.click(await screen.findByText(REC));
+
+    await waitFor(() => expect(calls.some((call) => call.method === 'POST' && call.url === `/api/branches/${ROOT}/messages`)).toBe(true));
+    expect(calls.find((call) => call.method === 'POST' && call.url === `/api/branches/${ROOT}/messages`)?.body?.text).toBe(REC);
+    await waitFor(() => expect((screen.getByLabelText('继续追问…') as HTMLTextAreaElement).value).toBe(''));
+  });
+
+  it('leaves the tapped question in the draft when nothing can send it', async () => {
+    const calls = recommendationFetch({ resolve: () => NO_MODEL });
+    renderWorkspace();
+    fireEvent.click(await screen.findByText(REC));
+
+    await waitFor(() => expect((screen.getByLabelText('继续追问…') as HTMLTextAreaElement).value).toBe(REC));
+    expect(calls.some((call) => call.method === 'POST' && call.url === `/api/branches/${ROOT}/messages`)).toBe(false);
+  });
+
+  it('keeps the fork zone from sending a follow-up', async () => {
+    const calls = recommendationFetch();
+    renderWorkspace();
+    fireEvent.click(await screen.findByTestId('fork-recommendation-0'));
+
+    await waitFor(() => expect(calls.some((call) => call.method === 'POST' && call.url === `/api/branches/${ROOT}/forks`)).toBe(true));
+    expect(calls.some((call) => call.method === 'POST' && call.url === `/api/branches/${ROOT}/messages`)).toBe(false);
+  });
+
+  it('returns to the entry point that opened the branch, not always to home', async () => {
+    recommendationFetch();
+    window.history.replaceState({}, '', '/library');
+    navigate('/topic/t1');
+    renderWorkspace();
+    fireEvent.click(await screen.findByTestId('workspace-back'));
+
+    await waitFor(() => expect(window.location.pathname).toBe('/library'));
+  });
+
+  it('falls back to home when the branch page carries no recorded entry', async () => {
+    recommendationFetch();
+    window.history.replaceState({}, '', '/topic/t1');
+    renderWorkspace();
+    fireEvent.click(await screen.findByTestId('workspace-back'));
+
+    await waitFor(() => expect(window.location.pathname).toBe('/'));
   });
 });

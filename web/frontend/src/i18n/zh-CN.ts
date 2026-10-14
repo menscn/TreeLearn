@@ -23,7 +23,7 @@ export const zhCN = {
   'placeholder.body': '此视图的内容在后续任务接入。',
   'notFound.title': '页面不存在',
   'notFound.body': '这个地址没有对应的页面，请从导航重新进入。',
-  'workspace.back': '返回主页',
+  'workspace.back': '返回',
   'workspace.loading': '正在加载主题…',
   'workspace.empty': '这个分支还没有消息。',
   'workspace.layout.label': '切换布局',

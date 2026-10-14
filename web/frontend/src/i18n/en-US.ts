@@ -27,7 +27,7 @@ export const enUS: Record<keyof typeof zhCN, string> = {
   'placeholder.body': "This view's content arrives in a later task.",
   'notFound.title': 'Page not found',
   'notFound.body': 'No page matches this address. Use the navigation to continue.',
-  'workspace.back': 'Back to home',
+  'workspace.back': 'Back',
   'workspace.loading': 'Loading topic…',
   'workspace.empty': 'This branch has no messages yet.',
   'workspace.layout.label': 'Switch layout',

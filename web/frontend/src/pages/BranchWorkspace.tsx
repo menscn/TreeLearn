@@ -18,7 +18,7 @@ import { useI18n } from '../i18n/I18nProvider';
 import { useDraft } from '../hooks/useDraft';
 import { useOperationStream } from '../hooks/useOperationStream';
 import { sha256Hex } from '../lib/digest';
-import { navigate } from '../platform/router';
+import { historyFrom, navigate } from '../platform/router';
 import { draftKeyFor } from '../store/drafts';
 import { loadHomeConfig } from '../store/homeData';
 import { readLayout, WORKSPACE_LAYOUTS, writeLayout, type WorkspaceLayout } from '../store/layoutPreference';
@@ -195,12 +195,13 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
     }).catch((reason: unknown) => setActionError(errorKey(reason)));
   }, [activeMessageId, retryTarget, model, thinking]);
 
-  const handleSend = useCallback(() => {
-    if (loaded === null || model === null || draft.text.trim().length === 0 || activeOperationId !== null) return;
+  // 发送的唯一出口：composer 与推荐 chip 共用同一条路径，守卫与副作用只有一份。
+  const submit = useCallback((text: string, textQuote: string) => {
+    if (loaded === null || model === null || text.trim().length === 0 || activeOperationId !== null) return false;
     setSending(true);
     setActionError(null);
     setRetryTarget(null);
-    sendBranchMessage({ branchId: loaded.branch.id, text: draft.text, quote, attachmentId: pendingAttachment?.attachmentId ?? null, model, thinkingEnabled: thinking }).then((result) => {
+    sendBranchMessage({ branchId: loaded.branch.id, text, quote: textQuote, attachmentId: pendingAttachment?.attachmentId ?? null, model, thinkingEnabled: thinking }).then((result) => {
       setLoaded((prev) => (prev === null ? prev : { ...prev, messages: [...prev.messages, result.userMessage, result.aiMessage] }));
       draft.clear();
       setQuote('');
@@ -208,7 +209,21 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
       setActiveOperationId(result.operation.id);
       setActiveMessageId(result.aiMessage.id);
     }).catch((reason: unknown) => setActionError(errorKey(reason))).finally(() => setSending(false));
-  }, [loaded, model, quote, thinking, activeOperationId, draft.text, draft.clear]);
+    return true;
+  }, [loaded, model, thinking, activeOperationId, pendingAttachment?.attachmentId, draft.clear]);
+
+  const handleSend = useCallback(() => { submit(draft.text, quote); }, [submit, draft.text, quote]);
+
+  /**
+   * T-130 推荐即发送：对齐 Android `ChatPresenter.onRecommendationFollowed` —— 先成为草稿再
+   * 立刻发送，这样发送被拦住时输入框里仍留着被点的那个问题，而不是什么都没发生。
+   * 推荐行上的分叉热区走它自己的入口（handleForkRecommendation），两个手势互不可达。
+   */
+  const handleFollowRecommendation = useCallback((question: string) => {
+    if (loaded === null || activeOperationId !== null) return;
+    draft.setText(question.trim());
+    submit(question.trim(), '');
+  }, [loaded, activeOperationId, draft.setText, submit]);
 
   // 整条分叉（契约 §6.3，anchor=null）：创建即跳转到新分支；bootstrap 首问由新页面加载时恢复。
   const handleForkAnswer = useCallback((messageId: string, revisionId: string) => {
@@ -260,7 +275,8 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
   return (
     <div className="workspace">
       <GlassPanel className="workspace__bar">
-        <IconButton icon={ArrowLeft} label={t('workspace.back')} onClick={() => navigate('/')} />
+        <IconButton icon={ArrowLeft} label={t('workspace.back')} data-testid="workspace-back"
+          onClick={() => navigate(historyFrom() ?? '/')} />
         <nav className="workspace__crumbs" aria-label={t('nav.topic')}>
           <h2 className="workspace__crumb workspace__crumb--root">{rootTitle}</h2>
           {loaded.branch.id !== root?.id ? (
@@ -329,7 +345,7 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
           {(loaded.recommendations ?? []).map((rec, index) => (
             <div key={rec} className="workspace__recommendation-row">
               <button type="button" role="option" aria-selected="false" className="workspace__recommendation"
-                onClick={() => draft.setText(rec)}>{rec}</button>
+                onClick={() => handleFollowRecommendation(rec)}>{rec}</button>
               <IconButton icon={GitFork} label={t('workspace.recommendations.fork')} className="workspace__recommendation-fork"
                 data-testid={`fork-recommendation-${index}`} onClick={() => handleForkRecommendation(rec)} />
             </div>

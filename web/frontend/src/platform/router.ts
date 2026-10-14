@@ -35,9 +35,23 @@ export function subscribeLocation(listener: () => void): () => void {
   return () => window.removeEventListener('popstate', listener);
 }
 
+/**
+ * T-130：每次跳转都把「从哪来」写进历史条目，使被打开的页面能按入口还原返回目标，
+ * 而不是一律回主页（对齐 Android 的系统返回栈：回到打开它的那一屏）。
+ */
 export function navigate(to: string): void {
-  if (window.location.pathname === to) return;
-  window.history.pushState({}, '', to);
+  // 完整位置（含 ?branch=）比较：只比 pathname 会让同一分支页内的分支切换被吞掉。
+  if (currentLocation() === to) return;
+  window.history.pushState({ from: currentLocation() }, '', to);
   // pushState 不触发 popstate；手动派发让订阅者重新读取位置。
   window.dispatchEvent(new PopStateEvent('popstate'));
+}
+
+/**
+ * 打开当前页面的那个位置；直接输入地址（或刷新）进来时为 null —— 那时没有「上一屏」可言。
+ * 只接受站内绝对路径，外部写入的 state 不参与路由。
+ */
+export function historyFrom(): string | null {
+  const state = window.history.state as { from?: unknown } | null;
+  return typeof state?.from === 'string' && state.from.startsWith('/') ? state.from : null;
 }
