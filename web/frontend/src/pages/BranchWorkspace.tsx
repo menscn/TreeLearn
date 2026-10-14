@@ -34,7 +34,7 @@ const TERMINAL_LABELS: Record<TerminalKind, TranslationKey> = { stable: 'workspa
 
 const errorKey = (reason: unknown): TranslationKey => (reason instanceof ApiError ? reason.i18nKey : FALLBACK_ERROR_KEY);
 
-interface Loaded { topic: Topic; tree: BranchTree; branch: Branch; messages: Message[]; recommendations: string[] }
+interface Loaded { topic: Topic; tree: BranchTree; branch: Branch; messages: Message[]; recommendations: string[]; anchor: ReadingAnchor | null }
 
 export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: string; branchId: string | null; streamSource?: OperationFrameSource | null }) {
   const { t } = useI18n();
@@ -69,14 +69,11 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
       if (branch === null) { if (active) setError('workspace.empty'); return; }
       const conversation = await loadConversation(branch.id);
       if (!active) return;
-      setLoaded({ topic, tree, branch, messages: conversation.messages, recommendations: conversation.recommendations });
+      setLoaded({ topic, tree, branch, messages: conversation.messages, recommendations: conversation.recommendations, anchor: conversation.readingAnchor });
       const running = conversation.messages.find((message) => message.activeOperationId !== null) ?? null;
       setActiveOperationId(running?.activeOperationId ?? null);
       setActiveMessageId(running?.id ?? null);
-      // 进入分支即标记已读到最新稳定序（只前进；后端拒绝回退）。fire-and-forget：失败不打断阅读。
-      if (branch.unreadCount > 0) {
-        markBranchSeen(branch.id, branch.latestStableSequence).catch(() => {});
-      }
+      restoredRef.current = false;
     }).catch((reason: unknown) => { if (active) setError(errorKey(reason)); });
     loadHomeConfig().then((config) => { if (active) setModel(config.model); }).catch(() => {});
     return () => {
@@ -90,6 +87,40 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
   }, [topicId, branchId]);
 
   const source = loaded?.branch.source ?? null;
+  // T-127 阅读恢复：打开分支时定位到上次读到的消息位；无锚点或锚点已失效则到最新端
+  // （Android ReadingSession.open：无 stored anchor → ReadingPosition.liveEnd）。
+  const restoredRef = useRef(false);
+  useEffect(() => {
+    if (restoredRef.current || loaded === null || loaded.messages.length === 0) return;
+    restoredRef.current = true;
+    const anchored = loaded.anchor === null ? null : document.getElementById(`msg-${loaded.anchor.messageId}`);
+    const liveEnd = document.getElementById(`msg-${loaded.messages[loaded.messages.length - 1].id}`);
+    const target = anchored ?? liveEnd;
+    if (target !== null && typeof target.scrollIntoView === 'function') target.scrollIntoView({ block: 'center' });
+  }, [loaded]);
+  // T-127 未读口径：只在新回答真正进入视口后清未读（Android ViewportSeen：进入分支不算看过）。
+  const newestAnswerId = useMemo(() => {
+    const messages = loaded?.messages ?? [];
+    for (let index = messages.length - 1; index >= 0; index -= 1) {
+      const message = messages[index];
+      if (message.role === 'AI' && message.activeRevisionId !== null) return message.id;
+    }
+    return null;
+  }, [loaded?.messages]);
+  const branch = loaded?.branch ?? null;
+  useEffect(() => {
+    if (branch === null || branch.unreadCount === 0 || newestAnswerId === null) return;
+    const target = document.getElementById(`msg-${newestAnswerId}`);
+    // 环境没有 IntersectionObserver（旧浏览器/jsdom）时静默降级：宁可不清未读，也不谎报已读。
+    if (target === null || typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      observer.disconnect();
+      markBranchSeen(branch.id, branch.latestStableSequence).catch(() => {});
+    });
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [branch, newestAnswerId]);
   // 阅读位置锚点：最后一条消息与其显示版本（cleanup 里经 ref 读取最新值，避免闭包过期）。
   const loadedRef = useRef<{ branchId: string; anchor: ReadingAnchor } | null>(null);
   useEffect(() => {

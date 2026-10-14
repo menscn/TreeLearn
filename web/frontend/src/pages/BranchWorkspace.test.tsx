@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -92,9 +92,47 @@ function installFetch(handlers: Handlers = {}): Call[] {
     if (method === 'POST' && /^\/api\/operations\/[^/]+\/cancel$/.test(url)) return handlers.cancel ? handlers.cancel() : json({ id: 'op-stop', state: 'CANCELED' });
     if (method === 'POST' && /^\/api\/messages\/[^/]+\/retry$/.test(url)) return handlers.retry ? handlers.retry() : json({ message: aiMessage('a1', '重试中'), operation: { id: 'op-retry' } });
     if (method === 'POST' && /^\/api\/branches\/[^/]+\/messages$/.test(url)) return handlers.send ? handlers.send() : json({ userMessage: userMessage('u2', '追问'), aiMessage: aiMessage('a2', '回答', 'op-new'), operation: { id: 'op-new', messageId: 'a2' } });
+    if (method === 'POST' && /^\/api\/branches\/[^/]+\/seen$/.test(url)) return json({ branchId: url.split('/')[3] });
+    if (method === 'PUT' && /^\/api\/branches\/[^/]+\/reading-position$/.test(url)) return json({ branchId: url.split('/')[3] });
     throw new Error(`unexpected ${method} ${url}`);
   }));
   return calls;
+}
+
+// T-127：jsdom 没有 IntersectionObserver，装一个可手动触发进入视口的探针。
+interface ObserverProbe { enter: (elementId: string) => void; observed: () => string[] }
+
+function installIntersectionObserver(): ObserverProbe {
+  const observers: { targets: Element[]; fire: (target: Element) => void }[] = [];
+  class MockObserver {
+    private readonly targets: Element[] = [];
+    constructor(private readonly callback: (entries: { target: Element; isIntersecting: boolean }[]) => void) {
+      observers.push({ targets: this.targets, fire: (target) => this.callback([{ target, isIntersecting: true }]) });
+    }
+    // 真实浏览器在 observe 时立刻回调一次当前状态；这里按「尚未进入视口」投递，
+    // 否则「进入分支即已读」这种捷径在测试里根本不会被触发，断言就成了恒真。
+    observe(target: Element) { this.targets.push(target); this.callback([{ target, isIntersecting: false }]); }
+    unobserve() { }
+    disconnect() { this.targets.length = 0; }
+    takeRecords() { return []; }
+  }
+  vi.stubGlobal('IntersectionObserver', MockObserver as unknown as typeof IntersectionObserver);
+  return {
+    observed: () => observers.flatMap((observer) => observer.targets.map((target) => target.id)),
+    enter: (elementId) => {
+      for (const observer of observers) {
+        const target = observer.targets.find((element) => element.id === elementId);
+        if (target !== undefined) observer.fire(target);
+      }
+    },
+  };
+}
+
+// 阅读位置恢复只能靠 scrollIntoView 的目标来观测（jsdom 没有真实布局）。
+function installScrollSpy(): string[] {
+  const scrolled: string[] = [];
+  Element.prototype.scrollIntoView = function record(this: Element) { scrolled.push(this.id); };
+  return scrolled;
 }
 
 function workspace(streamSource: OperationFrameSource | undefined, branchId: string | null) {
@@ -241,12 +279,7 @@ describe('BranchWorkspace layout switching', () => {
     expect(document.querySelector('[data-testid="unread-badge-b-child"]')).not.toBeNull();
   });
 
-  it('marks the branch seen on entry when it has unread answers', async () => {
-    const calls = installFetch({ branchTree: () => json({ ...TREE, nodes: TREE.nodes.map((node) => node.id === ROOT ? { ...node, unreadCount: 2, latestStableSequence: 5 } : node) }) });
-    renderWorkspace();
-    await screen.findByRole('heading', { name: '光合作用是什么' });
-    await waitFor(() => expect(calls.some((call) => call.method === 'POST' && call.url === `/api/branches/${ROOT}/seen`)).toBe(true));
-  });
+  // 原「进入分支即标记已读」断言与 Android ViewportSeen 口径相反，已由下方 T-127 describe 取代。
 
   it('shows the empty note when the server layout has no branches', async () => {
     installFetch({ tree: () => json({ ...TREE_LAYOUT, branches: [], labels: [], hits: [] }) });
@@ -323,6 +356,80 @@ describe('BranchWorkspace generation closure (T-126)', () => {
     await waitFor(() => expect(document.getElementById('msg-a1')?.textContent).toContain('取消后保留的部分回答'));
     fireEvent.change(screen.getByLabelText('继续追问…'), { target: { value: '继续问' } });
     await waitFor(() => expect(screen.getByRole('button', { name: '发送追问' })).toBeEnabled());
+  });
+});
+
+// T-127 未读口径与阅读恢复：未读只在新回答真正进入视口后清除（Android ViewportSeen.java:38-51）；
+// 打开分支按 readingAnchor 回到上次位置，无锚点或锚点失效则到最新端（ReadingSession.java:46-54）。
+describe('BranchWorkspace unread and reading restore (T-127)', () => {
+  const unreadTree = (unreadCount: number, latestStableSequence = 5) => json({
+    ...TREE,
+    nodes: TREE.nodes.map((node) => (node.id === ROOT ? { ...node, unreadCount, latestStableSequence } : node)),
+  });
+
+  it('does not mark the branch seen on entry, only after the newest answer enters the viewport', async () => {
+    const calls = installFetch({ branchTree: () => unreadTree(2) });
+    const observer = installIntersectionObserver();
+    renderWorkspace();
+    await screen.findByRole('heading', { name: '光合作用是什么' });
+    await waitFor(() => expect(observer.observed()).toContain('msg-a1'));
+    // 进入即发 seen 是 Android 明令否掉的捷径：没上屏的回答不能被标成已读。
+    expect(calls.some((call) => call.method === 'POST' && call.url === `/api/branches/${ROOT}/seen`)).toBe(false);
+
+    await act(async () => { observer.enter('msg-a1'); });
+    await waitFor(() => expect(calls.some((call) => call.method === 'POST' && call.url === `/api/branches/${ROOT}/seen`)).toBe(true));
+    expect(calls.find((call) => call.url === `/api/branches/${ROOT}/seen`)?.body).toMatchObject({ seenThroughSequence: 5 });
+  });
+
+  it('never sends seen for a branch that has no unread answers', async () => {
+    const calls = installFetch({ branchTree: () => unreadTree(0) });
+    const observer = installIntersectionObserver();
+    renderWorkspace();
+    await screen.findByRole('heading', { name: '光合作用是什么' });
+    await waitFor(() => expect(document.getElementById('msg-a1')).not.toBeNull());
+    await act(async () => { observer.enter('msg-a1'); });
+    await waitFor(() => expect(document.getElementById('msg-a1')).not.toBeNull());
+    expect(calls.some((call) => call.method === 'POST' && call.url === `/api/branches/${ROOT}/seen`)).toBe(false);
+  });
+
+  it('restores the reading position to the anchored message', async () => {
+    const scrolled = installScrollSpy();
+    installFetch({
+      conversation: () => json({
+        branchId: ROOT,
+        messages: [userMessage('u1', '光合作用是什么？'), aiMessage('a1', '第一条回答'), aiMessage('a2', '最新一条回答')],
+        readingAnchor: { messageId: 'a1', revisionId: 'r1', listItemOffset: 0, viewportOffset: 0 },
+        recommendations: [],
+      }),
+    });
+    renderWorkspace();
+    await waitFor(() => expect(scrolled).toContain('msg-a1'));
+  });
+
+  it('opens at the live end when there is no anchor or the anchor points nowhere', async () => {
+    const scrolled = installScrollSpy();
+    installFetch({
+      conversation: () => json({
+        branchId: ROOT,
+        messages: [userMessage('u1', '光合作用是什么？'), aiMessage('a1', '第一条回答'), aiMessage('a2', '最新一条回答')],
+        readingAnchor: { messageId: 'gone', revisionId: 'r1', listItemOffset: 0, viewportOffset: 0 },
+        recommendations: [],
+      }),
+    });
+    renderWorkspace();
+    await waitFor(() => expect(scrolled).toContain('msg-a2'));
+
+    scrolled.length = 0;
+    installFetch({
+      conversation: () => json({
+        branchId: ROOT,
+        messages: [userMessage('u1', '光合作用是什么？'), aiMessage('a1', '第一条回答'), aiMessage('a2', '最新一条回答')],
+        readingAnchor: null,
+        recommendations: [],
+      }),
+    });
+    renderWorkspace();
+    await waitFor(() => expect(scrolled).toContain('msg-a2'));
   });
 });
 
