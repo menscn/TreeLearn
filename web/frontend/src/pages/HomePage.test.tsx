@@ -166,6 +166,65 @@ describe('HomePage recent topics', () => {
   });
 });
 
+// T-131：Android HomeScreen/screen_home_body 的口径——
+// ① brand lockup（芽 + 知芽）恒显示；② 主标语只在「还没有历史主题」时出现；
+// ③ 最近学习是快捷面：标题带计数（没有就不显示计数，不是显示 0）、最多 MAX_RECENT=3 条、
+//    整卡是点击目标（item_home_topic.xml 里没有单独的 chevron 按钮）。
+describe('HomePage structure (T-131)', () => {
+  function summary(topicId: string, title: string, lastUsedAtMillis: number) {
+    return { topicId, rootTitle: title, rootQuestion: `${title}？`, displayTitle: title, lastUsedAtMillis };
+  }
+
+  it('drops the hero slogan once there are history topics, and keeps the brand lockup either way', async () => {
+    installFetch({ topics: () => [summary('t1', '光合作用的原理', 1700000001000)] });
+    renderHome();
+
+    expect(await screen.findByText('光合作用的原理')).toBeInTheDocument();
+    expect(screen.queryByText('今天，想从哪个问题开始？')).toBeNull();
+    expect(screen.getByTestId('home-brand')).toHaveTextContent('知芽');
+  });
+
+  it('shows the hero slogan while the home has no topics yet', async () => {
+    installFetch({ topics: () => [] });
+    renderHome();
+
+    expect(await screen.findByText('今天，想从哪个问题开始？')).toBeInTheDocument();
+    expect(screen.getByTestId('home-brand')).toHaveTextContent('知芽');
+    // 反恒真配对的下半：没有可数之物时计数整条消失，不是显示「0 个」。
+    expect(screen.queryByTestId('home-recent-count')).toBeNull();
+  });
+
+  it('counts the history topics and hides the count instead of showing zero', async () => {
+    installFetch({ topics: () => [summary('t1', '主题一', 1700000001000), summary('t2', '主题二', 1700000002000)] });
+    renderHome();
+
+    expect(await screen.findByTestId('home-recent-count')).toHaveTextContent('2 个');
+  });
+
+  it('draws at most three history cards however many topics the read returned', async () => {
+    installFetch({
+      topics: () => [
+        summary('t1', '主题一', 1700000001000), summary('t2', '主题二', 1700000002000),
+        summary('t3', '主题三', 1700000003000), summary('t4', '主题四', 1700000004000),
+        summary('t5', '主题五', 1700000005000),
+      ],
+    });
+    renderHome();
+
+    await screen.findByText('主题一');
+    expect(screen.getAllByTestId('home-topic-card')).toHaveLength(3);
+    expect(screen.queryByText('主题四')).toBeNull();
+  });
+
+  it('opens the topic from anywhere on the card, not only from a trailing button', async () => {
+    installFetch({ topics: () => [summary('t1', '光合作用的原理', 1700000001000)] });
+    renderHome();
+
+    fireEvent.click(await screen.findByText('光合作用的原理'));
+    await waitFor(() => expect(window.location.pathname).toBe('/topic/t1'));
+  });
+});
+
 describe('HomePage draft and i18n', () => {
   it('restores the home draft after a remount', async () => {
     installFetch();

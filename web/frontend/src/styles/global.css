@@ -335,6 +335,11 @@ dialog.dialog::backdrop {
 
 .home__hero { display: flex; flex-direction: column; gap: var(--s2); }
 
+/* T-131 brand lockup（screen_home_body.xml 的 home_brand_lockup）：芽图标 + 品牌名，恒显示。 */
+.home__brand { display: flex; align-items: center; gap: var(--s2); }
+
+.home__brand-name { font-family: var(--font-serif); font-size: var(--fs-body); font-weight: 700; color: var(--ink); }
+
 .home__title { margin: 0; font-family: var(--font-serif); font-size: var(--fs-display); font-weight: 500; letter-spacing: 0.01em; }
 
 .home__subtitle, .home__empty, .home__topic-label, .placeholder-page__body { margin: 0; color: var(--ink2); }
@@ -343,12 +348,22 @@ dialog.dialog::backdrop {
 
 .home__recent { display: flex; flex-direction: column; }
 
-.home__recent-title { margin: 0 0 var(--s1); font-size: var(--fs-sm); font-weight: 500; color: var(--ink2); }
+/* T-131：home_recent_head —— 标题与计数同一行；计数在没有可数之物时整条隐藏。 */
+.home__recent-head { display: flex; align-items: baseline; gap: var(--s2); margin-bottom: var(--s1); }
 
-.home__topics { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.home__recent-title { margin: 0; font-size: var(--fs-sm); font-weight: 500; color: var(--ink2); }
 
-/* bg_topic_card（Android res/drawable/bg_topic_card.xml）：白面 + radius_md + elevation 1dp，无描边。 */
-.home__topic-card { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); padding: var(--s4); border: none; border-radius: var(--r-md); background: var(--surface); box-shadow: var(--sh-1); }
+.home__recent-count { font-size: var(--fs-cap); color: var(--ink3); }
+
+.home__topics { display: flex; flex-direction: column; gap: var(--s3); margin: 0; padding: 0; list-style: none; }
+
+/* bg_topic_card（Android res/drawable/bg_topic_card.xml）：白面 + radius_md + elevation 1dp，无描边。
+   T-131：整张卡是点击目标（item_home_topic.xml 自身 clickable，没有单独的 chevron 按钮）。 */
+.home__topic-card { display: flex; flex-direction: column; gap: var(--s2); width: 100%; padding: var(--s4); border: none; border-radius: var(--r-md); background: var(--surface); box-shadow: var(--sh-1); text-align: left; cursor: pointer; font: inherit; color: inherit; }
+
+.home__topic-label { font-family: var(--font-serif); font-size: var(--fs-h2); color: var(--ink); }
+
+.home__topic-meta { font-size: var(--fs-cap); color: var(--ink3); }
 
 /* ---------- composer ---------- */
 
