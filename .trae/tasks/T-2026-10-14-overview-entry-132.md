@@ -2,7 +2,7 @@ id: T-2026-10-14-132
 title: 移除 A/B/C 布局档位，树回到 Android 的总览入口（/topic/:id/tree）
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-13-web-android-alignment-123.md
 requirements_confirmed: true
 generated_by: leader
@@ -133,7 +133,9 @@ tdd_mode: required
 
 ## Verification report
 
-- Verdict: PENDING（待独立 verifier 复核）
+- Verdict: PASS with nits（独立 verifier 复核，2026-10-14）
+- Verifier evidence: 复核确认对话页已无 A/B/C 档位、只有 overview 入口，`Router.tsx:50-51` 挂 `topicTree` → `TopicTreePage` → `TreeCanvasView`；Android 权威 `ChatActions.java:144`、`ChatPresenter.java:860` 引文属实；重跑 `npx vitest run` 234/234 全绿。
+- Verifier nit: 变异 A 的备份因 Windows 大小写不敏感被同名文件覆盖（`router.green.bak` / `Router.green.bak`），回退靠手工 Edit 而非备份比对；本任务已把该坑写进证据文件，且全量复跑 234/234 证明无残留。以后同目录备份必须改名区分大小写。
 - Evidence: `artifacts/evidence/T-132-overview-entry-{red,green,mutation}.txt`
 - Changed/deleted assertion rationale and equivalent behavior coverage: 删除三条依赖 A/B/C 档位的旧断言（与 Android 无 layout 概念的口径相反）；新增四条覆盖「无档位 / 总览入口带 branch / 树页渲染 / 分叉分支走面包屑无并排」；树画布的空布局提示（`workspace.tree.empty`）现由树页承担，等价覆盖见 Router 用例的同一组件路径。
 - Gaps: ① 侧栏快捷分支列表（Android `onNavigationPressed` 的分支列表屏）未做；② `SideBySideView` 与 `layoutPreference` 保留在仓库但已无引用，Android 对应的来源卡形状不同；③ 侧栏在主题页上下文的内容收敛未做。

@@ -2,7 +2,7 @@ id: T-2026-10-14-131
 title: 首页结构对齐 Android（brand lockup / hero 条件显示 / 最近学习计数与三条上限 / 整卡可点）
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-13-web-android-alignment-123.md
 requirements_confirmed: true
 generated_by: leader
@@ -139,7 +139,9 @@ tdd_mode: required
 
 ## Verification report
 
-- Verdict: PENDING（待独立 verifier 复核）
+- Verdict: PASS with nits（独立 verifier 复核，2026-10-14）
+- Verifier evidence: 复核确认 brand 恒显、标语条件显示、`MAX_RECENT=3`、整卡 `<button>` 均已落地；Android 权威 `HomeScreen.java:174/217/232-236` 与 `item_home_topic.xml` 引文属实；重跑 `npx vitest run` 234/234 全绿。
+- Verifier nit: 变异 D 曾恒真（本任务已自行发现并修补），verifier 复查确认负向断言 `queryByTestId('home-recent-count')` 为 null 确实在位且能证伪。
 - Evidence: `artifacts/evidence/T-131-home-structure-{red,green,mutation}.txt`
 - Changed/deleted assertion rationale and equivalent behavior coverage: 未删除既有断言；新增五条覆盖首页结构；首问提交与草稿的等价覆盖由既有 `HomePage composer state machine` / `draft and i18n` 用例继续承担。
 - Gaps: ① 首页推荐条（数据源 = 后端 `HOME_RECOMMENDATIONS`，待 T-133）；② 卡片的摘要、未读点、分支数（`TopicSummary` 缺字段，待契约扩展）；③ 卡片入场动画（Android `HomeMotion` 的错峰入场）未做。

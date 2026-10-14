@@ -2,7 +2,7 @@ id: T-2026-10-14-130
 title: 推荐即发送与返回按入口还原（对齐 ChatPresenter.onRecommendationFollowed）
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-13-web-android-alignment-123.md
 requirements_confirmed: true
 generated_by: leader
@@ -130,7 +130,8 @@ tdd_mode: required
 
 ## Verification report
 
-- Verdict: PENDING（待独立 verifier 复核）
+- Verdict: PASS（独立 verifier 复核，2026-10-14）
+- Verifier evidence: 复核确认「先入草稿再发送」与 `navigate(historyFrom() ?? '/')` 已落地，分叉热区仍独立；Android 权威 `ChatPresenter.java:745/754` 引文属实；重跑 `npx vitest run` 234/234 全绿。
 - Evidence: `artifacts/evidence/T-130-recommendation-send-{red,green,mutation}.txt`
 - Changed/deleted assertion rationale and equivalent behavior coverage: 未删除既有断言；新增五条覆盖推荐发送与返回目标；既有推荐分叉用例（`BranchWorkspace.fork.test.tsx`）继续承担分叉侧覆盖。
 - Gaps: 首页推荐跑马灯（Android `RecommendationMarquee` 的双行反向漂移与触摸暂停）未实现，留给 T-131。

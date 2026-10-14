@@ -2,7 +2,7 @@ id: T-2026-10-14-128
 title: 回答动作行改为 Android 的四纯图标 + 尾部时间
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-13-web-android-alignment-123.md
 requirements_confirmed: true
 generated_by: leader
@@ -133,7 +133,8 @@ tdd_mode: required
 
 ## Verification report
 
-- Verdict: PENDING
+- Verdict: PASS（独立 verifier 复核，2026-10-14）
+- Verifier evidence: 复核确认 `MessageView.tsx:235-273` 确为四纯图标 + 行尾 `formatRelativeTime`，Android 权威 `AnswerActionBar.java:110` 引文属实；重跑 `npx vitest run`（cwd=web/frontend）29 files / 234 tests 全绿、EXITCODE=0，与本任务证据序列一致。
 - Evidence: （待独立 verifier 复核）
 - Changed/deleted assertion rationale and equivalent behavior coverage: 删除「动作行带文字标签」类断言，改为
   「四纯图标 + 时间」断言；版本切换的等价覆盖由 `ToolsAndBlocks.test.tsx` 的 T-053 用例继续承担（该用例
