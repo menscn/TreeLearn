@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { LucideIcon } from 'lucide-react';
 
 import { ApiError, errorI18nKey, FALLBACK_ERROR_KEY, isErrorCode } from '../api/errors';
 import type { OperationFrameSource, TerminalKind } from '../api/sse';
@@ -8,11 +7,9 @@ import { Composer } from '../components/Composer';
 import { Dialog } from '../components/Dialog';
 import { GlassPanel } from '../components/GlassPanel';
 import { IconButton } from '../components/IconButton';
-import { TreeCanvasView } from '../components/TreeCanvasView';
 import { Icon } from '../components/Icon';
-import { ArrowLeft, ChevronRight, Columns2, GitFork, Maximize2, Network, RotateCcw, Square } from '../components/icons';
+import { ArrowLeft, ChevronRight, GitFork, Network, RotateCcw, Square } from '../components/icons';
 import { MessageView } from '../components/MessageView';
-import { SideBySideView } from '../components/SideBySideView';
 import type { TranslationKey } from '../i18n';
 import { useI18n } from '../i18n/I18nProvider';
 import { useDraft } from '../hooks/useDraft';
@@ -21,15 +18,14 @@ import { sha256Hex } from '../lib/digest';
 import { historyFrom, navigate } from '../platform/router';
 import { draftKeyFor } from '../store/drafts';
 import { loadHomeConfig } from '../store/homeData';
-import { readLayout, WORKSPACE_LAYOUTS, writeLayout, type WorkspaceLayout } from '../store/layoutPreference';
 import { cancelOperation, forkBranch, loadBranchTree, loadConversation, loadTopic, markBranchSeen, newCommandId, operationEventsUrl, resetMessage, resolveBranch, retryMessage, rootBranch, saveReadingPosition, sendBranchMessage, uploadAttachment } from '../store/topicData';
 
 // 工作区（任务 T-2026-10-10-031）：`/topic/:id` 的 A 专注阅读 + B 并排分支 + C 树图占位。
-// 顶部为根分支标题（=主题标题）、到当前分支的面包屑、布局切换与返回；阅读列渲染已提交
+// 顶部为根分支标题（=主题标题）、到当前分支的面包屑、总览入口与返回；阅读列渲染已提交
 // 消息位；流式区订阅当前活跃操作（sse.ts 帧源 → useOperationStream），提供停止/原位重试；
-// 追问 composer 带引用 chip。C 视图依赖服务端树布局端点，本轮仅占位说明（前端不计算树布局）。
-const LAYOUT_ICONS: Record<WorkspaceLayout, LucideIcon> = { A: Maximize2, B: Columns2, C: Network };
-const LAYOUT_LABELS: Record<WorkspaceLayout, TranslationKey> = { A: 'workspace.layout.focus', B: 'workspace.layout.sideBySide', C: 'workspace.layout.tree' };
+// 追问 composer 带引用 chip。
+// T-132：整棵树是**入口**（`/topic/:id/tree`，对齐 Android `chat_overview` → `sink.openOverview`），
+// 不再是本页的 A/B/C 布局档位；本页固定为单列阅读。
 const TERMINAL_LABELS: Record<TerminalKind, TranslationKey> = { stable: 'workspace.status.stable', failed: 'workspace.status.failed', interrupted: 'workspace.status.interrupted', canceled: 'workspace.status.canceled' };
 
 const errorKey = (reason: unknown): TranslationKey => (reason instanceof ApiError ? reason.i18nKey : FALLBACK_ERROR_KEY);
@@ -42,7 +38,6 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
   const [error, setError] = useState<TranslationKey | null>(null);
   const [activeOperationId, setActiveOperationId] = useState<string | null>(null);
   const [activeMessageId, setActiveMessageId] = useState<string | null>(null);
-  const [sourceMessages, setSourceMessages] = useState<Message[] | null>(null);
   const [model, setModel] = useState<string | null>(null);
   const [thinking, setThinking] = useState(false);
   const [quote, setQuote] = useState('');
@@ -50,7 +45,6 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
   const [uploading, setUploading] = useState(false);
   const [sending, setSending] = useState(false);
   const [actionError, setActionError] = useState<TranslationKey | null>(null);
-  const [layout, setLayout] = useState<WorkspaceLayout>(() => readLayout());
   // 「子分支列表」弹窗：打开时记录来源消息 id，列表取自分支树的 source.sourceMessageId。
   const [childrenFor, setChildrenFor] = useState<string | null>(null);
   // 追问草稿按分支保存（reuse T-030 的 useDraft）：切换分支不丢各分支草稿、重挂载恢复。
@@ -60,7 +54,6 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
     let active = true;
     setLoaded(null);
     setError(null);
-    setSourceMessages(null);
     setActiveOperationId(null);
     setActionError(null);
     setRetryTarget(null);
@@ -86,7 +79,6 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
     };
   }, [topicId, branchId]);
 
-  const source = loaded?.branch.source ?? null;
   // T-127 阅读恢复：打开分支时定位到上次读到的消息位；无锚点或锚点已失效则到最新端
   // （Android ReadingSession.open：无 stored anchor → ReadingPosition.liveEnd）。
   const restoredRef = useRef(false);
@@ -130,13 +122,6 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
       anchor: { messageId: answer.id, revisionId: answer.activeRevisionId, listItemOffset: 0, viewportOffset: 0 },
     };
   }, [loaded]);
-  useEffect(() => {
-    if (layout !== 'B' || source === null) return;
-    let active = true;
-    loadConversation(source.parentBranchId).then((conversation) => { if (active) setSourceMessages(conversation.messages); }).catch(() => { if (active) setSourceMessages([]); });
-    return () => { active = false; };
-  }, [layout, source]);
-
   const stream = useOperationStream({ operationId: activeOperationId, url: activeOperationId !== null ? operationEventsUrl(activeOperationId) : null, source: streamSource ?? null });
   const streamActive = activeOperationId !== null && stream.terminal === null;
 
@@ -175,8 +160,6 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
     }
     return index;
   }, [loaded?.tree.nodes]);
-
-  const chooseLayout = useCallback((next: WorkspaceLayout) => { setLayout(next); writeLayout(next); }, []);
 
   const handleStop = useCallback(() => {
     if (activeOperationId === null) return;
@@ -266,7 +249,6 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
   const root = rootBranch(loaded.tree);
   const rootTitle = root?.title ?? t('nav.topic');
   const branchTitle = loaded.branch.title ?? rootTitle;
-  const parentTitle = loaded.tree.nodes.find((node) => node.id === source?.parentBranchId)?.title ?? null;
   const statusKey: TranslationKey = stream.terminal === null ? 'workspace.status.generating' : TERMINAL_LABELS[stream.terminal.kind];
   // 失败终态的 errorCode 映射到 errors.<code> 具体可行动文案；未知/缺失码回退通用「生成失败」。
   const failedCode = stream.terminal?.kind === 'failed' ? stream.terminal.errorCode : undefined;
@@ -286,26 +268,10 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
             </>
           ) : null}
         </nav>
-        <div className="workspace__layout" role="group" aria-label={t('workspace.layout.label')}>
-          {WORKSPACE_LAYOUTS.map((value) => (
-            <IconButton key={value} icon={LAYOUT_ICONS[value]} label={t(LAYOUT_LABELS[value])} showLabel aria-pressed={layout === value} className={layout === value ? 'workspace__layout--active' : undefined} onClick={() => chooseLayout(value)} />
-          ))}
-        </div>
+        <IconButton icon={Network} label={t('workspace.overview')} data-testid="workspace-overview"
+          onClick={() => navigate(`/topic/${topicId}/tree?branch=${loaded.branch.id}`)} />
       </GlassPanel>
-      {layout === 'C' ? (
-        <TreeCanvasView
-          topicId={topicId}
-          currentBranchId={loaded.branch.id}
-          onNavigate={(target) => navigate(`/topic/${topicId}?branch=${target}`)}
-        />
-      ) : layout === 'B' ? (
-        <SideBySideView currentTitle={branchTitle} currentMessages={loaded.messages} source={source} sourceTitle={parentTitle} sourceMessages={sourceMessages}
-          onJumpToSourceMessage={(messageId) => {
-            const target = document.getElementById(`msg-${messageId}`);
-            target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }} />
-      ) : (
-        <div className="workspace__reading">
+      <div className="workspace__reading">
           {loaded.messages.length === 0 ? <p className="workspace__empty">{t('workspace.empty')}</p> : loaded.messages.map((message) => {
             // T-126：生成中的回答在它自己的消息位里推进；终态解除锁后，失败/中断仍留原位重试。
             const streaming = activeOperationId !== null && message.id === activeMessageId;
@@ -338,8 +304,7 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
               </div>
             );
           })}
-        </div>
-      )}
+      </div>
       {loaded !== null && (loaded.recommendations ?? []).length > 0 ? (
         <div className="workspace__recommendations" data-testid="recommendations" role="listbox" aria-label={t('workspace.recommendations.label')}>
           {(loaded.recommendations ?? []).map((rec, index) => (

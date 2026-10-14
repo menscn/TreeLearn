@@ -1,5 +1,8 @@
 export type Route =
-  | { name: 'home' } | { name: 'library' } | { name: 'stats' } | { name: 'topic'; id: string; branchId: string | null }
+  | { name: 'home' } | { name: 'library' } | { name: 'stats' }
+  | { name: 'topic'; id: string; branchId: string | null }
+  /** T-132：整棵树自己那一屏（Android `sink.openOverview`）。 */
+  | { name: 'topicTree'; id: string; branchId: string | null }
   | { name: 'settings'; section: string | null } | { name: 'notFound'; path: string };
 
 // 最小内部路由（任务 T-2026-10-10-030；T-2026-10-10-031 增加 `branch` 查询参数）：
@@ -11,10 +14,14 @@ export function matchRoute(pathname: string, search = ''): Route {
   if (path === '/library') return { name: 'library' };
   if (path === '/stats') return { name: 'stats' };
   if (path.startsWith('/topic/')) {
-    const id = path.slice('/topic/'.length);
+    let id = path.slice('/topic/'.length);
+    // T-132：`/topic/<id>/tree` 是总览屏；分支参数仍然带在查询串上。
+    const tree = id.endsWith('/tree');
+    if (tree) id = id.slice(0, -'/tree'.length);
     if (id.length === 0) return { name: 'notFound', path };
     const branch = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search).get('branch');
-    return { name: 'topic', id: decodeURIComponent(id), branchId: branch && branch.length > 0 ? branch : null };
+    const branchId = branch && branch.length > 0 ? branch : null;
+    return { name: tree ? 'topicTree' : 'topic', id: decodeURIComponent(id), branchId };
   }
   if (path === '/settings') return { name: 'settings', section: null };
   if (path.startsWith('/settings/')) return { name: 'settings', section: path.slice('/settings/'.length) };

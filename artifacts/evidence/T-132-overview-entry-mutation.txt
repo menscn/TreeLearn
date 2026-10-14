@@ -1,0 +1,24 @@
+CMD: npx vitest run src/pages/BranchWorkspace.test.tsx   /   npx vitest run src/pages/Router.test.tsx
+DATE: 2026-10-14 21:53:40
+说明：三个变异各改一处生产代码，重跑对应测试文件；备份在 artifacts/tmp/t132/。
+      注意（本机坑）：Windows 文件系统大小写不敏感，`router.green.bak` 与 `Router.green.bak`
+      落到同一个文件，后写的 Router.tsx 覆盖了 router.ts 的备份。router.ts 的变异 A 已用 Edit
+      反向改回并目视核对（含 `tree ? 'topicTree' : 'topic'` 分支、navigate 写 from、historyFrom）。
+
+变异 A：matchRoute 不再识别 `/tree`（一律返回 name:'topic'）
+  FAIL  Router > renders the topic overview screen at /topic/:id/tree
+  Tests  1 failed | 7 passed (8)
+
+变异 B：总览入口不带 branch（navigate(`/topic/${topicId}/tree`)）
+  FAIL  BranchWorkspace overview entry (T-132) > opens the topic overview from its own entry, carrying the branch it stands on
+  Tests  1 failed | 26 passed (27)
+
+变异 C：Router 不挂树页（topicTree 也渲染 BranchWorkspace）
+  FAIL  Router > renders the topic overview screen at /topic/:id/tree
+  Tests  1 failed | 7 passed (8)
+
+反恒真配对：
+  正向 —— 总览入口把当前 branch 带过去（B 盯）；/topic/:id/tree 真能渲染树画布（A、C 盯）
+  负向 —— 顶栏不存在任何布局档位按钮、localStorage 不再写 workspace:layout、
+           分叉分支上不再出现来源并排（snap-1 不渲染）
+还原后全量：Test Files 29 passed (29) / Tests 234 passed (234)；tsc 0、eslint 0、三守门 PASS、build 0

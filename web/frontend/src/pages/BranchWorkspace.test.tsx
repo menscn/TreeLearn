@@ -261,48 +261,44 @@ describe('BranchWorkspace follow-up composer', () => {
   });
 });
 
-describe('BranchWorkspace layout switching', () => {
-  it('persists the layout and renders the C tree canvas from the server layout', async () => {
+// T-132：Android 里树是**入口**而不是布局档位——`chat_overview` → `sink.openOverview(branchId)`
+// 「opens the whole topic's canvas」；整棵树有自己那一屏，对话页本身没有 A/B/C 三档切换。
+// 旧「切换布局并持久化 / 并排分支」三条断言与这个口径相反，整体改写为下面的入口断言。
+describe('BranchWorkspace overview entry (T-132)', () => {
+  it('offers no A/B/C layout switch at all', async () => {
     installFetch();
     renderWorkspace();
     await screen.findByRole('heading', { name: '光合作用是什么' });
 
-    fireEvent.click(screen.getByRole('button', { name: '并排分支' }));
-    await waitFor(() => expect(localStorage.getItem('workspace:layout')).toBe('B'));
-
-    fireEvent.click(screen.getByRole('button', { name: '树图' }));
-    expect(await screen.findByText('子分支')).toBeInTheDocument();
-    expect(screen.getByText('一段摘要')).toBeInTheDocument();
-    expect(localStorage.getItem('workspace:layout')).toBe('C');
-
-    // 触达区点击 → 导航到该分支（/topic/t1?branch=b-child）。
-    fireEvent.click(screen.getByRole('button', { name: '子分支' }));
-    await waitFor(() => expect(window.location.search).toContain('branch=b-child'));
-    // ownUnread=1 的叶名牌带未读徽标。
-    expect(document.querySelector('[data-testid="unread-badge-b-child"]')).not.toBeNull();
+    expect(screen.queryByRole('button', { name: '专注阅读' })).toBeNull();
+    expect(screen.queryByRole('button', { name: '并排分支' })).toBeNull();
+    expect(screen.queryByRole('button', { name: '树图' })).toBeNull();
+    expect(screen.queryByRole('group', { name: '切换布局' })).toBeNull();
+    expect(localStorage.getItem('workspace:layout')).toBeNull();
   });
 
-  // 原「进入分支即标记已读」断言与 Android ViewportSeen 口径相反，已由下方 T-127 describe 取代。
-
-  it('shows the empty note when the server layout has no branches', async () => {
-    installFetch({ tree: () => json({ ...TREE_LAYOUT, branches: [], labels: [], hits: [] }) });
-    renderWorkspace();
+  it('opens the topic overview from its own entry, carrying the branch it stands on', async () => {
+    installFetch();
+    renderWorkspace(undefined, ROOT);
     await screen.findByRole('heading', { name: '光合作用是什么' });
-    fireEvent.click(screen.getByRole('button', { name: '树图' }));
-    expect(await screen.findByText('暂无可绘制的分支树。')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('workspace-overview'));
+    await waitFor(() => expect(window.location.pathname).toBe('/topic/t1/tree'));
+    expect(window.location.search).toBe(`?branch=${ROOT}`);
   });
 
-  it('shows the fork source side by side when layout B is chosen on a forked branch', async () => {
+  it('names the parent branch in the breadcrumb on a forked branch, without a side-by-side pane', async () => {
     installFetch({
       conversation: (branchId) => branchId === CHILD
         ? json({ branchId: CHILD, messages: [userMessage('c0', '那光反应在哪里进行？'), aiMessage('c1', '光反应在类囊体薄膜上进行。')], readingAnchor: null, recommendations: [] })
         : json(conversation([userMessage('s0', '光合作用是什么？'), aiMessage('src-1', '光合作用是植物利用光能把二氧化碳和水合成有机物的过程。')])),
     });
-    localStorage.setItem('workspace:layout', 'B');
     renderWorkspace(undefined, CHILD);
-    expect(await screen.findByRole('heading', { name: '光合作用的分支追问' })).toBeInTheDocument();
-    expect(await screen.findByText(/合成有机物的过程。$/)).toBeInTheDocument();
-    expect(await screen.findByText(/snap-1/)).toBeInTheDocument();
+
+    // 面包屑：根主题标题 + 当前分支名（Android ChatScreen 的 crumbs），来源不再占半屏。
+    expect(await screen.findByRole('heading', { name: '光合作用是什么' })).toBeInTheDocument();
+    expect(screen.getByText('光合作用的分支追问')).toBeInTheDocument();
+    expect(screen.queryByText(/snap-1/)).toBeNull();
   });
 });
 

@@ -10,6 +10,7 @@ import { LibraryPage } from './LibraryPage';
 import { ModelRolesPage } from './ModelRolesPage';
 import { ProviderEditorPage } from './ProviderEditorPage';
 import { StatsPage } from './StatsPage';
+import { TopicTreePage } from './TopicTreePage';
 
 // 路由 → 页面映射放在 pages 层：布局层不得反向依赖 pages，由本组件把页面注入 AppShell。
 // `/library` 与 `/stats` 为真实页（T-2026-10-10-044）；`/settings/<section>` 由 SettingsLayout
@@ -46,7 +47,9 @@ export function Router() {
         ? <StatsPage />
         : route.name === 'topic'
           ? <BranchWorkspace topicId={route.id} branchId={route.branchId} />
-          : route.name === 'settings'
+          : route.name === 'topicTree'
+            ? <TopicTreePage topicId={route.id} branchId={route.branchId} />
+            : route.name === 'settings'
             ? <SettingsLayout active={settingsSection(route.section)}>{settingsContent(route.section)}</SettingsLayout>
             : (
               <GlassPanel className="placeholder-page">

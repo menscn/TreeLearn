@@ -14,7 +14,7 @@ const NAV_ITEMS: readonly { key: 'home' | 'library' | 'stats' | 'settings'; path
   { key: 'settings', path: '/settings', labelKey: 'nav.settings', icon: Settings },
 ];
 const TITLE_KEYS: Record<Route['name'], TranslationKey> = {
-  home: 'nav.home', library: 'nav.library', stats: 'nav.stats', topic: 'nav.topic', settings: 'nav.settings', notFound: 'notFound.title',
+  home: 'nav.home', library: 'nav.library', stats: 'nav.stats', topic: 'nav.topic', topicTree: 'workspace.overview', settings: 'nav.settings', notFound: 'notFound.title',
 };
 
 // 桌面断点与 global.css 的 `@media (min-width: 1024px)` 一致：断点以下是 88px 图标栏，
@@ -50,6 +50,9 @@ function useWideSidebar(): boolean {
  * 应用外壳（任务 T-2026-10-10-030）：icon-only 主导航、当前路由高亮、双语切换、键盘可达
  * （Tab 移动、Enter 激活、Escape 回到内容区）。页面内容由 Router 经 children 注入
  * （layouts 不得反向依赖 pages）。窄窗保留 88px 图标栏，导航始终可达。
+ *
+ * 纸上书房方向 D1（2026-10-12）：桌面宽栏（≥1024）导航项呈现「图标 + 文字」；
+ * 窄窗仍为纯图标栏（宽度不够放文字），可访问名始终由 aria-label 承载。
  */
 export function AppShell({ route, children }: { route: Route; children: ReactNode }) {
   const { t, locale, setLocale } = useI18n();
@@ -84,6 +87,7 @@ export function AppShell({ route, children }: { route: Route; children: ReactNod
               key={item.key}
               icon={item.icon}
               label={t(item.labelKey)}
+              showLabel={wideSidebar}
               className={item.key === activeNav ? 'app-shell__nav-item--active' : undefined}
               aria-current={item.key === activeNav ? 'page' : undefined}
               onClick={() => navigate(item.path)}

@@ -72,7 +72,7 @@ export function TreeCanvasView({ topicId, currentBranchId, onNavigate }: TreeCan
         <svg
           className="workspace__tree-canvas"
           role="img"
-          aria-label={t('workspace.layout.tree')}
+          aria-label={t('workspace.overview')}
           viewBox={`${pad2(bounds.minX - pad)} ${pad2(bounds.minY - pad)} ${pad2(bounds.maxX - bounds.minX + pad * 2)} ${pad2(bounds.maxY - bounds.minY + pad * 2)}`}
         >
           {/* Draw order: limbs first, then label plates, then hit rects on top (click-only). */}
