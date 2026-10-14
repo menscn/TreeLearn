@@ -3,12 +3,14 @@
  *
  * Single implementation used by BOTH the generator (writes src/styles/tokens.css)
  * and the guard (re-builds in memory and compares), so the committed CSS can
- * never drift from the two authoritative JSON files:
- *   - Docs/04-ux-design/web-local-design-tokens.json  (Web colour namespace + glass)
- *   - Docs/04-ux-design/design-system/tokens.json     (base scales + base colours)
+ * never drift from the authoritative JSON files:
+ *   - Docs/04-ux-design/web-local-design-tokens.json  (Web mapping: colour-free)
+ *   - Docs/04-ux-design/design-system/tokens.json     (base colours + scales)
  *
- * The alias resolution mirrors the prototype's WEB_MINT_TOKENS block: web-*
- * aliases become var() references, base.* aliases resolve to the base token.
+ * Since 2026-10-13 (parent T-2026-10-13-123) the Web client has NO colour
+ * namespace of its own: every opaque colour is emitted straight from the base
+ * token file, and the local JSON may only reference it (aliases) or derive
+ * transparency from it (glass rgba of a base token's own channels).
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -24,20 +26,6 @@ export function readTokenSources(frontendRoot) {
   return { webTokens, baseTokens };
 }
 
-// Base colours that survive into the Web namespace (the rest are superseded by
-// the web aliases and are intentionally not emitted).
-const BASE_COLOUR_NAMES = [
-  'ink',
-  'ink2',
-  'hairline',
-  'red',
-  'red-soft',
-  'amber',
-  'amber-soft',
-  'blue',
-  'yellow-highlight',
-  'green-deep',
-];
 
 const SCALE_GROUPS = [
   ['space', 'space'],
@@ -50,8 +38,8 @@ export function buildTokenCss(webTokens, baseTokens) {
   const lines = [];
   lines.push('/*');
   lines.push(' * Generated file - do not edit by hand.');
-  lines.push(' * Source: Docs/04-ux-design/web-local-design-tokens.json (Web namespace, glass)');
-  lines.push(' *         Docs/04-ux-design/design-system/tokens.json (base scales + base colours)');
+  lines.push(' * Source: Docs/04-ux-design/design-system/tokens.json (base colours + scales)');
+  lines.push(' *         Docs/04-ux-design/web-local-design-tokens.json (references and derived transparency)');
   lines.push(' * Regenerate: pnpm generate:tokens    Guard: pnpm check:design-tokens');
   lines.push(' */');
   lines.push(':root {');
@@ -61,37 +49,26 @@ export function buildTokenCss(webTokens, baseTokens) {
     lines.push(`  --${name}: ${value};${comment}`);
   };
 
-  lines.push('  /* Web colour namespace (user-selected mint palette) */');
-  for (const [name, value] of Object.entries(webTokens.color)) {
-    emit(name, value);
+  lines.push('  /* Base colours - the single source of every opaque colour (Android design baseline) */');
+  for (const [name, token] of Object.entries(baseTokens.color)) {
+    if (name.startsWith('$')) continue;
+    emit(name, token.value, token.note);
   }
 
   lines.push('');
-  lines.push('  /* Semantic aliases (resolution mirrors the prototype WEB_MINT_TOKENS block) */');
+  lines.push('  /* Web aliases: references into the base palette, never new values */');
   for (const [alias, target] of Object.entries(webTokens.aliases)) {
-    if (target.startsWith('web-')) {
-      emit(alias, `var(--${target})`);
-      continue;
-    }
-    const baseName = target.replace(/^base\./, '');
-    if (baseName === alias) {
+    if (alias.startsWith('$')) continue;
+    const reference = target.startsWith('ref:')
+      ? target.slice('ref:'.length)
+      : target.replace(/^base\./, '');
+    if (reference === alias) {
       continue; // the base colour is already emitted under this exact name
     }
-    if (BASE_COLOUR_NAMES.includes(baseName)) {
-      emit(alias, `var(--${baseName})`);
-    } else {
-      emit(alias, baseTokens.color[baseName].value);
+    if (baseTokens.color[reference] === undefined) {
+      throw new Error(`alias "--${alias}" points at unknown base colour "${reference}"`);
     }
-  }
-
-  lines.push('');
-  lines.push('  /* Base colours kept for state and reading surfaces */');
-  for (const name of BASE_COLOUR_NAMES) {
-    const token = baseTokens.color[name];
-    if (token === undefined) {
-      throw new Error(`base token "${name}" missing from design-system/tokens.json`);
-    }
-    emit(name, token.value, token.note);
+    emit(alias, `var(--${reference})`);
   }
 
   for (const [jsonGroup, cssName] of SCALE_GROUPS) {
@@ -117,9 +94,10 @@ export function buildTokenCss(webTokens, baseTokens) {
   }
 
   lines.push('');
-  lines.push('  /* glass surfaces (Web namespace) */');
-  for (const [name, value] of Object.entries(webTokens.glass)) {
+  lines.push('  /* overlay surfaces (derived from Android surface/ink; no backdrop blur) */');
+  for (const [name, rawValue] of Object.entries(webTokens.glass)) {
     if (name.startsWith('$')) continue;
+    const value = rawValue.startsWith('ref:') ? `var(--${rawValue.slice('ref:'.length)})` : rawValue;
     emit(`glass-${name}`, value);
   }
 

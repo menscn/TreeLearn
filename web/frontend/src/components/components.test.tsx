@@ -25,6 +25,14 @@ describe('IconButton', () => {
     render(<IconButton icon={Languages} label="primary action" variant="solid" />);
     expect(screen.getByRole('button', { name: 'primary action' })).toHaveClass('icon-button--solid');
   });
+
+  it('renders the label as visible text next to the icon when showLabel is set (D1)', () => {
+    render(<IconButton icon={Languages} label="开始学习" variant="solid" showLabel />);
+    const button = screen.getByRole('button', { name: '开始学习' });
+    expect(button).toHaveClass('icon-button--with-label');
+    expect(button).toHaveTextContent('开始学习');
+    expect(button).toHaveAttribute('title', '开始学习');
+  });
 });
 
 describe('GlassPanel', () => {
@@ -42,66 +50,106 @@ describe('GlassPanel', () => {
   });
 });
 
-// 毛玻璃是设计系统的行为契约：面板/浮层必须真正应用 backdrop-filter 模糊，且在浏览器
-// 不支持时保留半透明填充并强化描边。断言直接读取 global.css（vitest cwd = web/frontend），
-// 因为 jsdom 不计算样式，类名本身不足以证明模糊真的落地。
-describe('glass surface design system', () => {
-  const css = readFileSync(join(process.cwd(), 'src', 'styles', 'global.css'), 'utf8');
-
-  // 断言顺序契约而非仅存在性：压缩器按 browserslist targets 只保留最后一个同名（等价）声明，
-  // 现代 Chrome/Edge 已移除 -webkit-backdrop-filter，只认标准属性。若把标准属性写在 -webkit- 之前，
-  // 构建后标准属性会被剥离（历史上正是如此，导致毛玻璃失效）。故每个规则都必须「-webkit- 在前、标准在后」。
-  it('declares the -webkit- prefix before the standard backdrop-filter in every glass rule', () => {
-    expect(css).toMatch(
-      /\.glass-panel \{[^}]*webkit-backdrop-filter: blur\(var\(--glass-blur\)\);[^}]*backdrop-filter: blur\(var\(--glass-blur\)\)/,
-    );
-    expect(css).toMatch(
-      /\.glass-panel--raised \{[^}]*webkit-backdrop-filter: blur\(var\(--glass-blur-raised\)\);[^}]*backdrop-filter: blur\(var\(--glass-blur-raised\)\)/,
-    );
-    expect(css).toMatch(
-      /\.app-shell__sidebar \{[^}]*webkit-backdrop-filter: blur\(var\(--glass-blur\)\);[^}]*backdrop-filter: blur\(var\(--glass-blur\)\)/,
-    );
-    expect(css).toMatch(
-      /\.app-shell__header \{[^}]*webkit-backdrop-filter: blur\(var\(--glass-blur\)\);[^}]*backdrop-filter: blur\(var\(--glass-blur\)\)/,
-    );
-    expect(css).toMatch(
-      /\.toast \{[^}]*webkit-backdrop-filter: blur\(var\(--glass-blur-raised\)\);[^}]*backdrop-filter: blur\(var\(--glass-blur-raised\)\)/,
-    );
-    expect(css).toMatch(
-      /dialog\.dialog \{[^}]*webkit-backdrop-filter: blur\(var\(--glass-blur-raised\)\);[^}]*backdrop-filter: blur\(var\(--glass-blur-raised\)\)/,
-    );
-  });
-
-  it('degrades to a translucent fill with a reinforced outline when backdrop-filter is unsupported', () => {
-    expect(css).toContain('@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)))');
-    expect(css).toMatch(/@supports not \(\(backdrop-filter: blur\(1px\)\) or \(-webkit-backdrop-filter: blur\(1px\)\)\) \{[\s\S]*?border-color: var\(--line\)/);
-  });
-});
-
-// 模糊纯色不产生任何视觉差异，所以毛玻璃要能被感知，页面背景背后必须有可被模糊的层次。
-// 断言直接读取 global.css 与生成的 tokens.css（vitest cwd = web/frontend），证明光斑确实
-// 存在、取自 token 变量，且没有回退成写死的色值。
-describe('page background depth layers', () => {
+// 纸上书房（方向 B，2026-10-12 用户拍板）的设计契约写死在 CSS 里：D4 去毛玻璃去光斑、
+// D2 发丝线分隔、D3 衬线只做 display、D1 文字按钮。断言直接读取 global.css 与生成的
+// tokens.css（vitest cwd = web/frontend），因为 jsdom 不计算样式，类名本身不足以证明
+// 视觉契约真的落地。
+describe('android baseline surfaces', () => {
   const css = readFileSync(join(process.cwd(), 'src', 'styles', 'global.css'), 'utf8');
   const tokens = readFileSync(join(process.cwd(), 'src', 'styles', 'tokens.css'), 'utf8');
 
-  it('paints low-opacity mist spots behind the glass surfaces from tokens only', () => {
-    expect(css).toMatch(/body \{[\s\S]*?radial-gradient\([^;]*var\(--bg-glow-mint\)/);
-    expect(css).toMatch(/body \{[\s\S]*?radial-gradient\([^;]*var\(--bg-glow-sage\)/);
-    expect(css).toMatch(/body \{[\s\S]*?radial-gradient\([^;]*var\(--bg-wash\)/);
-    expect(css).toMatch(/body \{[\s\S]*?background-attachment: fixed/);
+  it('drops backdrop blur everywhere (D4: depth comes from the paper ramp, not blur)', () => {
+    expect(css).not.toMatch(/backdrop-filter/);
+    expect(tokens).toMatch(/--glass-blur: 0px/);
   });
 
-  it('declares the background layer tokens and a more translucent panel fill', () => {
-    expect(tokens).toMatch(/--bg-wash: rgba\(247,249,252,0\.55\)/);
-    expect(tokens).toMatch(/--bg-glow-mint: rgba\(169,216,194,0\.38\)/);
-    expect(tokens).toMatch(/--bg-glow-sage: rgba\(103,141,106,0\.14\)/);
-    expect(tokens).toMatch(/--glass-panel: rgba\(247,249,252,0\.62\)/);
+  it('keeps panel/overlay surfaces on paper tokens with hairline borders (D2/D4)', () => {
+    expect(css).toMatch(/\.glass-panel \{[^}]*background: var\(--glass-panel\)[^}]*border: 1px solid var\(--hairline\)/);
+    expect(css).toMatch(/dialog\.dialog \{[^}]*background: var\(--glass-raised\)/);
+  });
+
+  it('paints a flat paper body without background glows (D4)', () => {
+    expect(css).toMatch(/body \{[\s\S]*?background-color: var\(--bg\)/);
+    expect(css).not.toMatch(/radial-gradient/);
+    expect(tokens).not.toMatch(/--bg-glow/);
+    expect(tokens).not.toMatch(/--bg-wash/);
+  });
+
+  // 2026-10-13 用户裁决：《纸上书房》Web 独立色板作废（父需求 T-2026-10-13-123）。
+  // 从此 tokens.css 里出现的每个色值都必须能在 Android 基础 token 文件里按名查到。
+  it('derives every colour from the Android base token file (no local palette)', () => {
+    const basePath = join(process.cwd(), '..', '..', 'Docs', '04-ux-design', 'design-system', 'tokens.json');
+    const base = JSON.parse(readFileSync(basePath, 'utf8')) as {
+      color: Record<string, { value: string }>;
+    };
+
+    // 字面量比对而非正则：hairline 的值是 rgba(...)，括号是正则元字符。
+    expect(tokens).not.toMatch(/--web-[a-z]/);
+    for (const [name, token] of Object.entries(base.color)) {
+      expect(tokens).toContain(`--${name}: ${token.value};`);
+    }
+  });
+
+  it('composites overlays only from Android surface and ink tokens', () => {
+    expect(tokens).toMatch(/--glass-panel: rgba\(252, ?251, ?248,/);
+    expect(tokens).toMatch(/--glass-scrim: rgba\(22, ?36, ?28,/);
+    expect(tokens).toMatch(/--glass-border: var\(--line\)/);
   });
 
   it('keeps global.css free of literal colour values', () => {
     expect(css).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
     expect(css).not.toMatch(/\brgba?\(/);
+  });
+});
+
+// D1 文字按钮 + D3 衬线 display 的 CSS 契约。
+describe('paper typography and text buttons', () => {
+  const css = readFileSync(join(process.cwd(), 'src', 'styles', 'global.css'), 'utf8');
+
+  it('carries a visible label next to the icon (D1)', () => {
+    expect(css).toMatch(/\.icon-button--with-label \{/);
+    expect(css).toMatch(/\.icon-button__label \{/);
+    // 绿色上的字用 Android 的近白surface（同 `view_answer_actions.xml:104-112` 计数角标的写法）。
+    expect(css).toMatch(/\.btn \{[^}]*background: var\(--green\)[^}]*color: var\(--surface\)/);
+  });
+
+  it('uses serif for display surfaces only (D3)', () => {
+    expect(css).toMatch(/\.home__title \{[^}]*font-family: var\(--font-serif\)/);
+    expect(css).toMatch(/\.settings-page__title \{[^}]*font-family: var\(--font-serif\)/);
+    expect(css).toMatch(/\.md-heading \{[^}]*font-family: var\(--font-serif\)/);
+    expect(css).toMatch(/\.composer__input \{[^}]*font: inherit/);
+  });
+});
+
+// T-125：表面形制回到 Android（卡片 drawable 的等价契约）。
+// 依据：res/drawable/bg_topic_card.xml（surface + radius_md，无描边，elevation→sh-1）、
+// bg_library_card.xml（surface + hairline stroke + radius_md）、bg_card.xml（surface + radius_lg）。
+describe('android surface form', () => {
+  const css = readFileSync(join(process.cwd(), 'src', 'styles', 'global.css'), 'utf8');
+
+  it('gives the home topic card the bg_topic_card form (surface, r-md, sh-1, no stroke)', () => {
+    expect(css).toMatch(/\.home__topic-card \{[^}]*padding: var\(--s4\)[^}]*border: none[^}]*border-radius: var\(--r-md\)[^}]*background: var\(--surface\)[^}]*box-shadow: var\(--sh-1\)/);
+  });
+
+  it('gives library rows the bg_library_card form (surface, hairline stroke, r-md, sh-1)', () => {
+    for (const cls of ['library__topic-card', 'library__hit']) {
+      expect(css).toMatch(new RegExp(`\\.${cls} \\{[^}]*padding: var\\(--s3\\) var\\(--s4\\)[^}]*border: 1px solid var\\(--hairline\\)[^}]*border-radius: var\\(--r-md\\)[^}]*background: var\\(--surface\\)[^}]*box-shadow: var\\(--sh-1\\)`));
+    }
+  });
+
+  // bg_card.xml 只有 solid surface + corners radius_lg：无描边；投影由布局的 elevation 承担。
+  it('gives settings-style lists the bg_card container form (surface, r-lg, sh-1, no stroke)', () => {
+    for (const cls of ['providers__list', 'model-roles__list', 'files-page__list']) {
+      expect(css).toMatch(new RegExp(`\\.${cls} \\{[^}]*border: none[^}]*border-radius: var\\(--r-lg\\)[^}]*background: var\\(--surface\\)[^}]*box-shadow: var\\(--sh-1\\)`));
+    }
+  });
+
+  it('reads Android gutters instead of any 4px horizontal padding', () => {
+    expect(css).not.toMatch(/padding: var\(--s[0-9]\) var\(--s1\)/);
+  });
+
+  it('gives the library search field the bg_field form (bg fill, hairline stroke, r-sm)', () => {
+    expect(css).toMatch(/\.library__search-input \{[^}]*padding: var\(--s2\) var\(--s3\)[^}]*border: 1px solid var\(--hairline\)[^}]*border-radius: var\(--r-sm\)[^}]*background: var\(--bg\)/);
   });
 });
 

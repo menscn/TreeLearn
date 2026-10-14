@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 import type { Annotation, Message } from '../api/types';
 import { useI18n } from '../i18n/I18nProvider';
@@ -8,7 +8,7 @@ import { IconButton } from './IconButton';
 import { TranslationBlock } from './TranslationBlock';
 import { speak, speechAvailable, stopSpeaking } from '../lib/speech';
 import { selectRevision } from '../store/topicData';
-import { Languages, RotateCcw, Trash2, Volume2 } from './icons';
+import { Copy, Ellipsis, GitFork, Languages, RotateCcw, Trash2, Volume2 } from './icons';
 import { Markdown, type Highlight } from './markdown/Markdown';
 import { proseIndexForRange, selectionToRange } from '../lib/selectionRange';
 
@@ -47,8 +47,14 @@ function AnnotationList({ message, annotations, onDeleted }:
   );
 }
 
-function MessageView({ message, highlight = null, annotationsEnabled = false, onQuoteText, onReset }:
-{ message: Message; highlight?: TextHighlight | null; annotationsEnabled?: boolean; onQuoteText?: (text: string) => void; onReset?: (messageId: string) => void }) {
+function MessageView({ message, highlight = null, annotationsEnabled = false, onQuoteText, onReset, onForkAnswer, onForkSelection, childBranchCount, onListChildren, streamText = null, streamReasoning = null, footer = null }:
+{ message: Message; highlight?: TextHighlight | null; annotationsEnabled?: boolean; onQuoteText?: (text: string) => void; onReset?: (messageId: string) => void; onForkAnswer?: (messageId: string, revisionId: string) => void; onForkSelection?: (messageId: string, revisionId: string, start: number, end: number, quote: string) => void; childBranchCount?: number; onListChildren?: (messageId: string) => void;
+  /** T-126：非空时以流式正文替代修订内容（生成在回答位内推进，不再有底部面板）。 */
+  streamText?: string | null;
+  /** T-126：非空时以流式思考替代修订里的思考内容。 */
+  streamReasoning?: string | null;
+  /** T-126：回答位底部区域（生成状态行 + 停止/原位重试）。 */
+  footer?: ReactNode | null }) {
   const { t } = useI18n();
   const answerRef = useRef<HTMLDivElement | null>(null);
   const [annotations, setAnnotations] = useState<Annotation[]>([]);
@@ -58,6 +64,10 @@ function MessageView({ message, highlight = null, annotationsEnabled = false, on
   const [noteOpen, setNoteOpen] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [translationOpen, setTranslationOpen] = useState(false);
+  // 复制回答的二态反馈：copied/failed 各自 2s 后复位；失败不暴露底层异常，只换可行动文案。
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const copyTimer = useRef<number | null>(null);
+  useEffect(() => () => { if (copyTimer.current !== null) window.clearTimeout(copyTimer.current); }, []);
   // 显示版本覆盖：切版本持久化后本地立即生效（conversation 刷新由父组件拉取兜底）。
   const [displayRevisionId, setDisplayRevisionId] = useState<string | null>(null);
   const revisionMemo = activeRevision(message);
@@ -119,6 +129,20 @@ function MessageView({ message, highlight = null, annotationsEnabled = false, on
       .catch(() => {});
   }, [message.id, noteDraft, pending, pendingIndex, write]);
 
+  // 复制整条回答（最终文本；思考过程不并入）。非安全上下文无 clipboard 时按失败处理。
+  const handleCopyAnswer = useCallback(() => {
+    const current = activeRevision(message);
+    if (current === null) return;
+    const clipboard = navigator.clipboard;
+    if (clipboard === undefined) {
+      setCopyState('failed');
+    } else {
+      clipboard.writeText(current.answerContent).then(() => setCopyState('copied')).catch(() => setCopyState('failed'));
+    }
+    if (copyTimer.current !== null) window.clearTimeout(copyTimer.current);
+    copyTimer.current = window.setTimeout(() => setCopyState('idle'), 2000);
+  }, [message]);
+
   if (message.role === 'USER') {
     return (
       <article className="message message--user">
@@ -139,7 +163,7 @@ function MessageView({ message, highlight = null, annotationsEnabled = false, on
   }
   const revision = displayRevisionId === null ? activeRevision(message)
     : message.versions.find((version) => version.id === displayRevisionId) ?? activeRevision(message);
-  const reasoning = revision?.reasoningContent ?? '';
+  const reasoning = streamReasoning !== null ? streamReasoning : (revision?.reasoningContent ?? '');
   return (
     <article className="message message--ai">
       {reasoning.length > 0 ? (
@@ -154,16 +178,21 @@ function MessageView({ message, highlight = null, annotationsEnabled = false, on
         onMouseUp={annotationsEnabled ? onSelectionDone : undefined}
         onTouchEnd={annotationsEnabled ? onSelectionDone : undefined}
       >
-        <Markdown
-          text={revision?.answerContent ?? ''}
-          highlight={highlight}
-          highlights={annotationsEnabled ? proseHighlights : undefined}
-          withOffsets={annotationsEnabled}
-        />
+        {streamText !== null ? (
+          <Markdown text={streamText} />
+        ) : (
+          <Markdown
+            text={revision?.answerContent ?? ''}
+            highlight={highlight}
+            highlights={annotationsEnabled ? proseHighlights : undefined}
+            withOffsets={annotationsEnabled}
+          />
+        )}
       </div>
+      {streamText === null ? (
       <div className="message__tools" data-testid={`tools-${message.id}`}>
         {revision !== null && speechAvailable() ? (
-          <IconButton icon={Volume2} label={t(speaking ? 'workspace.action.stopSpeech' : 'workspace.action.speak')}
+          <IconButton icon={Volume2} label={t(speaking ? 'workspace.action.stopSpeech' : 'workspace.action.speak')} showLabel
             onClick={() => {
               if (speaking) {
                 stopSpeaking();
@@ -191,14 +220,29 @@ function MessageView({ message, highlight = null, annotationsEnabled = false, on
           </label>
         ) : null}
         {revision !== null ? (
-          <IconButton icon={Languages} label={t('workspace.translation.action')} onClick={() => setTranslationOpen((prev) => !prev)} />
+          <IconButton icon={Languages} label={t('workspace.translation.action')} showLabel onClick={() => setTranslationOpen((prev) => !prev)} />
+        ) : null}
+        {revision !== null ? (
+          <IconButton icon={Copy} showLabel
+            label={copyState === 'failed' ? t('workspace.action.copyFailed') : copyState === 'copied' ? t('markdown.code.copied') : t('workspace.action.copyAnswer')}
+            onClick={handleCopyAnswer} />
+        ) : null}
+        {onForkAnswer && revision !== null && message.activeOperationId === null ? (
+          <IconButton icon={GitFork} label={t('workspace.action.fork')} showLabel data-testid={`fork-${message.id}`}
+            onClick={() => onForkAnswer(message.id, revision.id)} />
+        ) : null}
+        {onListChildren ? (
+          <IconButton icon={Ellipsis} showLabel
+            label={t('workspace.action.children').replace('{n}', String(childBranchCount ?? 0))}
+            data-testid={`children-${message.id}`} onClick={() => onListChildren(message.id)} />
         ) : null}
         {onReset && message.versions.length > 0 ? (
-          <IconButton icon={RotateCcw} label={t('workspace.action.reset')} onClick={() => onReset(message.id)} />
+          <IconButton icon={RotateCcw} label={t('workspace.action.reset')} showLabel onClick={() => onReset(message.id)} />
         ) : null}
       </div>
+      ) : null}
       {revision !== null && translationOpen ? <TranslationBlock messageId={message.id} revisionId={revision.id} /> : null}
-      {annotationsEnabled && pending !== null ? (
+      {annotationsEnabled && streamText === null && pending !== null ? (
         <div className="annotation-bar" role="toolbar" aria-label={t('annotation.bar.label')}>
           <button type="button" className="annotation-bar__action" data-testid="annotation-highlight"
             onClick={() => write({ messageId: message.id, kind: 'HIGHLIGHT', container: 'PROSE', proseIndex: pendingIndex, start: pending.start, end: pending.end })}>
@@ -212,6 +256,15 @@ function MessageView({ message, highlight = null, annotationsEnabled = false, on
             <button type="button" className="annotation-bar__action" data-testid="annotation-quote"
               onClick={() => { onQuoteText(answerText.slice(pending.start, pending.end)); closePending(); }}>
               {t('annotation.action.quote')}
+            </button>
+          ) : null}
+          {onForkSelection && revision !== null ? (
+            <button type="button" className="annotation-bar__action" data-testid="annotation-fork"
+              onClick={() => {
+                onForkSelection(message.id, revision.id, pending.start, pending.end, revision.answerContent.slice(pending.start, pending.end));
+                closePending();
+              }}>
+              {t('annotation.action.fork')}
             </button>
           ) : null}
           <button type="button" className="annotation-bar__action" data-testid="annotation-cancel" onClick={closePending}>
@@ -235,6 +288,7 @@ function MessageView({ message, highlight = null, annotationsEnabled = false, on
           {t('annotation.dialog.submit')}
         </button>
       </Dialog>
+      {footer}
     </article>
   );
 }

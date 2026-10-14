@@ -142,11 +142,24 @@ describe('LibraryPage topics and archive', () => {
   it('lists archived subtree roots and restores one with a commandId', async () => {
     const calls = installFetch({ tree: () => json({ topicId: 't1', nodes: [branch('b1', null, 0), branch('arc', 'b1', 0, 1700000000000, '已归档分支')] }) });
     renderLibrary();
+    // 归档归「已完成」分段（原型 v1.1）：默认分段只显示进行中主题，需先切分段。
+    fireEvent.click(screen.getByTestId('segment-archived'));
     expect(await screen.findByText('已归档分支')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: '恢复分支' }));
     await waitFor(() => expect(calls.some((call) => call.method === 'POST' && call.url === '/api/branches/arc/restore')).toBe(true));
     const restore = calls.find((call) => call.url === '/api/branches/arc/restore');
     expect(typeof restore?.body?.commandId).toBe('string');
+  });
+
+  it('switches between in-progress and completed segments', async () => {
+    installFetch({ tree: () => json({ topicId: 't1', nodes: [branch('b1', null, 0), branch('arc', 'b1', 0, 1700000000000, '已归档分支')] }) });
+    renderLibrary();
+    // 默认在「进行中」：归档项与归档小节不可见；切到「已完成」后出现，主题小节让位。
+    expect(await screen.findByRole('heading', { name: '全部主题' })).toBeInTheDocument();
+    expect(screen.queryByText('已归档分支')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('segment-archived'));
+    expect(await screen.findByText('已归档分支')).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: '全部主题' })).not.toBeInTheDocument();
   });
 
   it('renders the two locales without hardcoded copy', async () => {

@@ -1,46 +1,25 @@
 {
   "$meta": {
-    "name": "知芽 Web · 薄荷雾面",
-    "date": "2026-10-10",
-    "scope": "Web prototype and future Web client only",
-    "source": "user-provided palette image, 2026-10-10",
-    "reference": "web-local-assets/mint-palette-reference.png",
+    "name": "知芽 Web 表面映射（无独立色板）",
+    "date": "2026-10-13",
+    "scope": "mapping only - the Web client must not define colours of its own",
+    "source": "父需求 T-2026-10-13-123：用户 2026-10-13 00:18 裁决「回退纸上书房 + 逐屏重排」——Web 以 Android 当前屏幕为体验基线。",
+    "supersedes": "web-local-design-tokens.json 2026-10-12 纸上书房版（web-paper/web-paper-deep/web-surface/web-ink/web-ink2/web-ink3/web-accent/web-accent-soft/web-hairline/web-hairline-strong/web-on-accent/web-highlight）与 2026-10-10 薄荷雾面版（web-white/web-mist/web-mint/web-sage/web-on-sage）",
     "baseTokens": "design-system/tokens.json",
-    "icons": "知芽-TreeLearn-高保真原型-v1.1.html",
-    "note": "User-selected palette overrides the legacy growth-green colour mapping for this Web design. Base spacing/radius/typography remain inherited."
+    "note": "本文件自本次起不再承载任何色值：所有不透明颜色一律取自 Android 设计基线 design-system/tokens.json（这三方一致守门 .trae/scripts/dev/check_design_tokens.py 已覆盖）。`color` 为空是刻意的——它正是『Web 不再有独立色板』的机械化证据。`aliases` 只做语义名到基础 token 的引用，`glass` 只允许两种写法：`ref:<token>` 引向已有变量，或以基础 token 的同色 rgba 表达透明度（panel/raised = surface 的 92%/97%；scrim = ink 的 28%；blur 恒为 0px）。新增不透明色值须先过 design-system 与 Android colors.xml 的三方守门。"
   },
-  "color": {
-    "web-white": "#F7F9FC",
-    "web-mist": "#DCECE2",
-    "web-mint": "#A9D8C2",
-    "web-sage": "#678D6A",
-    "web-on-sage": "#0F1B12"
-  },
+  "color": {},
   "aliases": {
-    "bg": "web-mist",
-    "surface": "web-white",
-    "green-soft": "web-mint",
-    "green-faint": "web-mist",
-    "line": "web-mist",
-    "ink": "base.ink",
-    "ink2": "base.ink2",
-    "ink3": "base.ink2",
-    "green": "base.green-deep",
-    "green-deep": "base.green-deep"
-  },
-  "background": {
-    "$note": "Web 页面背景层次（2026-10-10，任务 T-2026-10-10-033 第 2 轮）。极淡的薄荷光斑/雾面，为毛玻璃面板背后提供可被 backdrop-filter 模糊的内容；全部为低透明度 rgba，合成后仍接近底色，不喧宾夺主。wash 是近白雾面，glow-mint 是左上薄荷光斑，glow-sage 是右下鼠尾草晕。",
-    "wash": "rgba(247,249,252,0.55)",
-    "glow-mint": "rgba(169,216,194,0.38)",
-    "glow-sage": "rgba(103,141,106,0.14)"
+    "$note": "语义名 → 基础 token。基础盘已同时提供 line（不透明描边, #E2DFD6）与 hairline（极淡分隔, rgba(26,40,32,.07)）；Web 历史上另有一个 hairline-strong 名，它没有对应的 Android token，故本次收敛到 line。",
+    "hairline-strong": "base.line"
   },
   "glass": {
-    "$note": "Web 毛玻璃基元（2026-10-10，任务 T-2026-10-10-006）。panel 用于常驻面板与侧栏，raised 用于浮层/弹层，scrim 是对话框背后的暗化层，border 是玻璃边缘亮线，blur/blur-raised 是 CSS backdrop-filter 半径。panel 于 T-2026-10-10-033 第 2 轮由 0.72 下调到 0.62，让背后层次透出更多、模糊可见（对比度守卫仍过）。",
-    "panel": "rgba(247,249,252,0.62)",
-    "raised": "rgba(247,249,252,0.84)",
-    "scrim": "rgba(15,27,18,0.28)",
-    "border": "rgba(255,255,255,0.6)",
-    "blur": "18px",
-    "blur-raised": "24px"
+    "$note": "浮层基元：承 Android surface #FCFBF8 与 ink #16241C 的同色半透明，层次靠色阶不靠模糊。panel=常驻分隔面，raised=浮层，scrim=对话框背后的暗化层，border 直接引用 line。",
+    "panel": "rgba(252,251,248,0.92)",
+    "raised": "rgba(252,251,248,0.97)",
+    "scrim": "rgba(22,36,28,0.28)",
+    "border": "ref:line",
+    "blur": "0px",
+    "blur-raised": "0px"
   }
 }

@@ -1,0 +1,19 @@
+### MUTATION A: 首页历史卡退回发丝线行（去圆角/投影/白面）
+EXITCODE=1
+[41m[1m FAIL [22m[49m src/components/components.test.tsx[2m > [22mandroid surface form[2m > [22mgives the home topic card the bg_topic_card form (surface, r-md, sh-1, no stroke)
+
+### MUTATION B: 搜索框描边换成 --hairline-strong（验证断言能分辨）
+EXITCODE=1
+[41m[1m FAIL [22m[49m src/components/components.test.tsx[2m > [22mandroid surface form[2m > [22mgives the library search field the bg_field form (bg fill, hairline stroke, r-sm)
+
+### 还原校验
+RESTORE_EXIT=0
+
+### MUTATION C: settings 列表容器加回描边（border: none → 1px solid var(--hairline)，验证「bg_card 无描边」断言可证伪）
+变异点：web/frontend/src/styles/global.css:679 .providers__list
+备份/还原：artifacts/tmp/t125-mutation-c/global.css.bak（已还原，回读 border: none 确认）
+CMD: npx vitest run src/components/components.test.tsx
+EXITCODE=1
+ FAIL  src/components/components.test.tsx > android surface form > gives settings-style lists the bg_card container form (surface, r-lg, sh-1, no stroke)
+ Tests  1 failed | 18 passed (19)
+背景：首轮实现曾误给 bg_card 容器加描边，verifier 指出 Android bg_card.xml 无描边；改为 border: none 后断言反向为「必须 border: none」，本变异证明反向后的断言仍能被侦测。

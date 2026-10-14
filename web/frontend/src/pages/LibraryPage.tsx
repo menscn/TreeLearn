@@ -49,6 +49,8 @@ export function LibraryPage() {
   const [result, setResult] = useState<SearchResult | null>(null);
   const [searchError, setSearchError] = useState<TranslationKey | null>(null);
   const [actionError, setActionError] = useState<TranslationKey | null>(null);
+  // 学习库分段（原型 v1.1：进行中 / 已完成；归档分支归「已完成」）。
+  const [segment, setSegment] = useState<'active' | 'archived'>('active');
 
   const load = useCallback(async () => {
     try {
@@ -112,7 +114,7 @@ export function LibraryPage() {
       <section className="library__search" aria-label={t('library.search.placeholder')}>
         <form className="library__search-bar" onSubmit={(event) => { event.preventDefault(); void handleSearch(); }}>
           <input ref={inputRef} className="library__search-input" type="search" aria-label={t('library.search.placeholder')} placeholder={t('library.search.placeholder')} value={query} onChange={(event) => setQuery(event.target.value)} />
-          <IconButton icon={Search} label={t('library.search.submit')} type="submit" />
+          <IconButton icon={Search} label={t('library.search.submit')} variant="solid" showLabel type="submit" />
         </form>
         {searchError !== null ? <p className="library__error" role="alert">{t(searchError)}</p> : null}
         {result === null && searchError === null && trimmedQuery.length === 0 ? <p className="library__note">{t('library.search.empty')}</p> : null}
@@ -127,7 +129,7 @@ export function LibraryPage() {
                   <li key={`${hit.field}-${hit.topicId}-${hit.branchId}-${hit.messageId ?? ''}-${hit.revisionId ?? ''}-${hit.start}`} className="library__hit">
                     <p className="library__snippet">{parts.before}<mark className="library__mark">{parts.match}</mark>{parts.after}</p>
                     {hit.messageId !== null ? <span className="library__location"><span>{t('library.search.ordinal')}</span><strong>{hit.messageOrdinal}</strong></span> : null}
-                    <IconButton icon={ChevronRight} label={t('library.search.open')} onClick={() => navigate(`/topic/${hit.topicId}?branch=${hit.branchId}`)} />
+                    <IconButton icon={ChevronRight} label={t('library.search.open')} showLabel onClick={() => navigate(`/topic/${hit.topicId}?branch=${hit.branchId}`)} />
                   </li>
                 );
               })}
@@ -136,6 +138,14 @@ export function LibraryPage() {
         )))}
       </section>
 
+      <div className="library__segments" role="group" aria-label={t('library.topics.title')}>
+        <button type="button" className="library__segment" aria-pressed={segment === 'active'} data-testid="segment-active"
+          onClick={() => setSegment('active')}>{t('library.segment.active')}</button>
+        <button type="button" className="library__segment" aria-pressed={segment === 'archived'} data-testid="segment-archived"
+          onClick={() => setSegment('archived')}>{t('library.segment.archived')}</button>
+      </div>
+
+      {segment === 'active' ? (
       <section className="library__section" aria-label={t('library.topics.title')}>
         <h3 className="library__section-title">{t('library.topics.title')}</h3>
         {loadError !== null ? <p className="library__error" role="alert">{t(loadError)}</p> : null}
@@ -149,14 +159,14 @@ export function LibraryPage() {
                   <span className="library__topic-title">{title}</span>
                   <span className="library__meta"><span>{t('library.topic.lastUsed')}</span><strong>{formatDateTime(topic.lastUsedAtMillis, locale, timeZone)}</strong></span>
                   <span className="library__meta"><span>{t('library.topic.unread')}</span><strong>{unreadRollup(trees[topic.topicId] ?? [])}</strong></span>
-                  <IconButton icon={ChevronRight} label={t('library.topic.open')} onClick={() => navigate(`/topic/${topic.topicId}`)} />
+                  <IconButton icon={ChevronRight} label={t('library.topic.open')} showLabel onClick={() => navigate(`/topic/${topic.topicId}`)} />
                 </GlassPanel>
               </li>
             );
           })}
         </ul>
       </section>
-
+      ) : (
       <section className="library__section" aria-label={t('library.archive.title')}>
         <h3 className="library__section-title">{t('library.archive.title')}</h3>
         {actionError !== null ? <p className="library__error" role="alert">{t(actionError)}</p> : null}
@@ -166,11 +176,12 @@ export function LibraryPage() {
             <li key={branch.id} className="library__archive-item">
               <span className="library__topic-title">{branch.title ?? t('library.archive.untitled')}</span>
               <span className="library__meta">{formatDateTime(branch.updatedAtMillis, locale, timeZone)}</span>
-              <IconButton icon={RotateCcw} label={t('library.archive.restore')} onClick={() => void handleRestore(branch.id)} />
+              <IconButton icon={RotateCcw} label={t('library.archive.restore')} showLabel onClick={() => void handleRestore(branch.id)} />
             </li>
           ))}
         </ul>
       </section>
+      )}
     </div>
   );
 }

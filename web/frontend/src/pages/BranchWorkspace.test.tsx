@@ -270,6 +270,62 @@ describe('BranchWorkspace layout switching', () => {
   });
 });
 
+// T-126 生成终态闭环：终态后必须解锁追问、读回权威内容，且流式正文落在回答位里。
+describe('BranchWorkspace generation closure (T-126)', () => {
+  it('unlocks the follow-up composer and reads the authoritative answer back after a stable terminal', async () => {
+    const frames = loadSseFrames('stream-stable');
+    const operationId = (frames[0].data as { operationId: string }).operationId;
+    let conversationCalls = 0;
+    installFetch({
+      conversation: () => {
+        conversationCalls += 1;
+        return conversationCalls === 1
+          ? json(conversation([userMessage('u1', '问题'), aiMessage('a1', '旧回答', operationId)]))
+          : json(conversation([userMessage('u1', '问题'), aiMessage('a1', '权威读回的答案')]));
+      },
+    });
+    renderWorkspace(replaySource(frames));
+
+    await waitFor(() => expect(conversationCalls).toBeGreaterThan(1));
+    await waitFor(() => expect(document.getElementById('msg-a1')?.textContent).toContain('权威读回的答案'));
+    expect(document.getElementById('msg-a1')?.textContent).not.toContain('把二氧化碳和水合成有机物并释放氧气的过程。');
+
+    fireEvent.change(screen.getByLabelText('继续追问…'), { target: { value: '再问一句' } });
+    await waitFor(() => expect(screen.getByRole('button', { name: '发送追问' })).toBeEnabled());
+  });
+
+  it('renders the streamed answer inside the answer slot, not in a bottom panel', async () => {
+    const frames: SseFrame[] = [
+      { id: '1', event: 'snapshot', data: { operationId: 'op-live', seq: 1, state: 'STREAMING_ANSWER', reasoningContent: '', answerContent: '' } },
+      { id: '2', event: 'answer_delta', data: { operationId: 'op-live', seq: 2, delta: '流式落在回答位里的正文。' } },
+    ];
+    installFetch({ conversation: () => json(conversation([userMessage('u1', '问题'), aiMessage('a1', '', 'op-live')])) });
+    renderWorkspace(replaySource(frames));
+
+    await waitFor(() => expect(document.getElementById('msg-a1')?.textContent).toContain('流式落在回答位里的正文。'));
+    expect(document.querySelector('.workspace__stream')).toBeNull();
+  });
+
+  it('keeps the partial answer after a canceled terminal and unlocks the composer', async () => {
+    const frames = loadSseFrames('stream-canceled');
+    const operationId = (frames[0].data as { operationId: string }).operationId;
+    let conversationCalls = 0;
+    installFetch({
+      conversation: () => {
+        conversationCalls += 1;
+        return conversationCalls === 1
+          ? json(conversation([userMessage('u1', '问题'), aiMessage('a1', '', operationId)]))
+          : json(conversation([userMessage('u1', '问题'), aiMessage('a1', '取消后保留的部分回答')]));
+      },
+    });
+    renderWorkspace(replaySource(frames));
+
+    await waitFor(() => expect(document.getElementById('msg-a1')?.textContent).toContain('取消后保留的部分回答'));
+    fireEvent.change(screen.getByLabelText('继续追问…'), { target: { value: '继续问' } });
+    await waitFor(() => expect(screen.getByRole('button', { name: '发送追问' })).toBeEnabled());
+  });
+});
+
 describe('BranchWorkspace per-branch follow-up drafts', () => {
   function twoBranchFetch(handlers: Handlers = {}) {
     return installFetch({

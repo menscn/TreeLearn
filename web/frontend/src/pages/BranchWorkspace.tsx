@@ -1,27 +1,28 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
 
 import { ApiError, errorI18nKey, FALLBACK_ERROR_KEY, isErrorCode } from '../api/errors';
 import type { OperationFrameSource, TerminalKind } from '../api/sse';
 import type { Branch, BranchTree, Message, ReadingAnchor, Topic } from '../api/types';
 import { Composer } from '../components/Composer';
+import { Dialog } from '../components/Dialog';
 import { GlassPanel } from '../components/GlassPanel';
 import { IconButton } from '../components/IconButton';
 import { TreeCanvasView } from '../components/TreeCanvasView';
 import { Icon } from '../components/Icon';
-import { ArrowLeft, ChevronRight, Columns2, Maximize2, Network, RotateCcw, Square } from '../components/icons';
-import { Markdown } from '../components/markdown/Markdown';
+import { ArrowLeft, ChevronRight, Columns2, GitFork, Maximize2, Network, RotateCcw, Square } from '../components/icons';
 import { MessageView } from '../components/MessageView';
 import { SideBySideView } from '../components/SideBySideView';
 import type { TranslationKey } from '../i18n';
 import { useI18n } from '../i18n/I18nProvider';
 import { useDraft } from '../hooks/useDraft';
 import { useOperationStream } from '../hooks/useOperationStream';
+import { sha256Hex } from '../lib/digest';
 import { navigate } from '../platform/router';
 import { draftKeyFor } from '../store/drafts';
 import { loadHomeConfig } from '../store/homeData';
 import { readLayout, WORKSPACE_LAYOUTS, writeLayout, type WorkspaceLayout } from '../store/layoutPreference';
-import { cancelOperation, loadBranchTree, loadConversation, loadTopic, markBranchSeen, newCommandId, operationEventsUrl, resetMessage, resolveBranch, retryMessage, rootBranch, saveReadingPosition, sendBranchMessage, uploadAttachment } from '../store/topicData';
+import { cancelOperation, forkBranch, loadBranchTree, loadConversation, loadTopic, markBranchSeen, newCommandId, operationEventsUrl, resetMessage, resolveBranch, retryMessage, rootBranch, saveReadingPosition, sendBranchMessage, uploadAttachment } from '../store/topicData';
 
 // 工作区（任务 T-2026-10-10-031）：`/topic/:id` 的 A 专注阅读 + B 并排分支 + C 树图占位。
 // 顶部为根分支标题（=主题标题）、到当前分支的面包屑、布局切换与返回；阅读列渲染已提交
@@ -50,6 +51,8 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
   const [sending, setSending] = useState(false);
   const [actionError, setActionError] = useState<TranslationKey | null>(null);
   const [layout, setLayout] = useState<WorkspaceLayout>(() => readLayout());
+  // 「子分支列表」弹窗：打开时记录来源消息 id，列表取自分支树的 source.sourceMessageId。
+  const [childrenFor, setChildrenFor] = useState<string | null>(null);
   // 追问草稿按分支保存（reuse T-030 的 useDraft）：切换分支不丢各分支草稿、重挂载恢复。
   const draft = useDraft(draftKeyFor(loaded?.branch.id ?? branchId));
 
@@ -60,6 +63,7 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
     setSourceMessages(null);
     setActiveOperationId(null);
     setActionError(null);
+    setRetryTarget(null);
     Promise.all([loadTopic(topicId), loadBranchTree(topicId)]).then(async ([topic, tree]) => {
       const branch = resolveBranch(tree, branchId ?? topic.lastVisitedBranchId);
       if (branch === null) { if (active) setError('workspace.empty'); return; }
@@ -105,6 +109,42 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
   const stream = useOperationStream({ operationId: activeOperationId, url: activeOperationId !== null ? operationEventsUrl(activeOperationId) : null, source: streamSource ?? null });
   const streamActive = activeOperationId !== null && stream.terminal === null;
 
+  // T-126 生成终态闭环：终态到达后读回权威消息/版本，解除生成锁（四种终态都保留已收内容），
+  // 并把失败/中断的原位重试钉在对应回答位上——不再让「生成完一次就再也问不下去」发生。
+  const activeBranchRef = useRef<string | null>(null);
+  const activeMessageRef = useRef<string | null>(null);
+  const [retryTarget, setRetryTarget] = useState<string | null>(null);
+  useEffect(() => { activeBranchRef.current = loaded?.branch.id ?? null; }, [loaded]);
+  useEffect(() => { activeMessageRef.current = activeMessageId; }, [activeMessageId]);
+  useEffect(() => {
+    if (stream.terminal === null) return;
+    const branchId = activeBranchRef.current;
+    const messageId = activeMessageRef.current;
+    if (branchId === null) return;
+    let active = true;
+    loadConversation(branchId).then((conversation) => {
+      if (!active) return;
+      setLoaded((prev) => (prev === null ? prev : { ...prev, messages: conversation.messages, recommendations: conversation.recommendations }));
+    }).catch(() => {}).finally(() => {
+      if (!active) return;
+      setActiveOperationId(null);
+      setActiveMessageId(null);
+      setRetryTarget(stream.terminal !== null && (stream.terminal.kind === 'failed' || stream.terminal.kind === 'interrupted') ? messageId : null);
+    });
+    return () => { active = false; };
+  }, [stream.terminal]);
+
+  // 子分支索引：来源消息 id → 直接从它分出的子分支（契约 §6.3 forks 的溯源字段）。
+  const childrenByMessage = useMemo(() => {
+    const index = new Map<string, Branch[]>();
+    for (const node of loaded?.tree.nodes ?? []) {
+      const key = node.source?.sourceMessageId;
+      if (key === undefined) continue;
+      index.set(key, [...(index.get(key) ?? []), node]);
+    }
+    return index;
+  }, [loaded?.tree.nodes]);
+
   const chooseLayout = useCallback((next: WorkspaceLayout) => { setLayout(next); writeLayout(next); }, []);
 
   const handleStop = useCallback(() => {
@@ -113,18 +153,22 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
   }, [activeOperationId]);
 
   const handleRetry = useCallback(() => {
-    if (activeMessageId === null || model === null) return;
-    retryMessage(activeMessageId, { model, thinkingEnabled: thinking }).then((result) => {
+    // 原位重试：终态锁解除后仍以 retryTarget 定位到那条回答。
+    const target = retryTarget ?? activeMessageId;
+    if (target === null || model === null) return;
+    setRetryTarget(null);
+    retryMessage(target, { model, thinkingEnabled: thinking }).then((result) => {
       setLoaded((prev) => (prev === null ? prev : { ...prev, messages: prev.messages.map((message) => (message.id === result.message.id ? result.message : message)) }));
       setActiveOperationId(result.operation.id);
       setActiveMessageId(result.message.id);
     }).catch((reason: unknown) => setActionError(errorKey(reason)));
-  }, [activeMessageId, model, thinking]);
+  }, [activeMessageId, retryTarget, model, thinking]);
 
   const handleSend = useCallback(() => {
     if (loaded === null || model === null || draft.text.trim().length === 0 || activeOperationId !== null) return;
     setSending(true);
     setActionError(null);
+    setRetryTarget(null);
     sendBranchMessage({ branchId: loaded.branch.id, text: draft.text, quote, attachmentId: pendingAttachment?.attachmentId ?? null, model, thinkingEnabled: thinking }).then((result) => {
       setLoaded((prev) => (prev === null ? prev : { ...prev, messages: [...prev.messages, result.userMessage, result.aiMessage] }));
       draft.clear();
@@ -134,6 +178,41 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
       setActiveMessageId(result.aiMessage.id);
     }).catch((reason: unknown) => setActionError(errorKey(reason))).finally(() => setSending(false));
   }, [loaded, model, quote, thinking, activeOperationId, draft.text, draft.clear]);
+
+  // 整条分叉（契约 §6.3，anchor=null）：创建即跳转到新分支；bootstrap 首问由新页面加载时恢复。
+  const handleForkAnswer = useCallback((messageId: string, revisionId: string) => {
+    if (loaded === null) return;
+    setActionError(null);
+    forkBranch({ branchId: loaded.branch.id, sourceMessageId: messageId, sourceRevisionId: revisionId })
+      .then((result) => { navigate(`/topic/${topicId}?branch=${result.branch.id}`); })
+      .catch((reason: unknown) => setActionError(errorKey(reason)));
+  }, [loaded, topicId]);
+
+  // 选文分叉：hash 与共享域 codec 同算法（SHA-256 十六进制）；安全上下文不可用时明确拒绝。
+  const handleForkSelection = useCallback((messageId: string, revisionId: string, start: number, end: number, quote: string) => {
+    if (loaded === null) return;
+    setActionError(null);
+    sha256Hex(quote).then(
+      (hash) => {
+        forkBranch({ branchId: loaded.branch.id, sourceMessageId: messageId, sourceRevisionId: revisionId, anchor: { startInclusive: start, endExclusive: end, quote, hash } })
+          .then((result) => { navigate(`/topic/${topicId}?branch=${result.branch.id}`); })
+          .catch((reason: unknown) => setActionError(errorKey(reason)));
+      },
+      () => setActionError('workspace.fork.hashUnavailable'),
+    );
+  }, [loaded, topicId]);
+
+  // 推荐问题直达分叉（原型 v2.2 右侧分叉热区）：来源挂最新回答，问题原子接受为首问。
+  const handleForkRecommendation = useCallback((question: string) => {
+    if (loaded === null) return;
+    setActionError(null);
+    if (model === null) { setActionError('errors.KEY_MISSING'); return; }
+    const lastAi = [...loaded.messages].reverse().find((item) => item.role === 'AI');
+    if (lastAi === undefined || lastAi.activeRevisionId === null) { setActionError('workspace.empty'); return; }
+    forkBranch({ branchId: loaded.branch.id, sourceMessageId: lastAi.id, sourceRevisionId: lastAi.activeRevisionId, question, model, thinkingEnabled: thinking })
+      .then((result) => { navigate(`/topic/${topicId}?branch=${result.branch.id}`); })
+      .catch((reason: unknown) => setActionError(errorKey(reason)));
+  }, [loaded, model, thinking, topicId]);
 
   if (error !== null) return <GlassPanel className="workspace"><p className="workspace__error" role="alert">{t(error)}</p></GlassPanel>;
   if (loaded === null) return <GlassPanel className="workspace"><p className="workspace__loading">{t('workspace.loading')}</p></GlassPanel>;
@@ -162,7 +241,7 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
         </nav>
         <div className="workspace__layout" role="group" aria-label={t('workspace.layout.label')}>
           {WORKSPACE_LAYOUTS.map((value) => (
-            <IconButton key={value} icon={LAYOUT_ICONS[value]} label={t(LAYOUT_LABELS[value])} aria-pressed={layout === value} className={layout === value ? 'workspace__layout--active' : undefined} onClick={() => chooseLayout(value)} />
+            <IconButton key={value} icon={LAYOUT_ICONS[value]} label={t(LAYOUT_LABELS[value])} showLabel aria-pressed={layout === value} className={layout === value ? 'workspace__layout--active' : undefined} onClick={() => chooseLayout(value)} />
           ))}
         </div>
       </GlassPanel>
@@ -180,38 +259,49 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
           }} />
       ) : (
         <div className="workspace__reading">
-          {loaded.messages.length === 0 ? <p className="workspace__empty">{t('workspace.empty')}</p> : loaded.messages.map((message) => (
-            <div key={message.id} id={`msg-${message.id}`}>
-              <MessageView message={message} annotationsEnabled
-                onQuoteText={message.role === 'AI' ? (text) => { setQuote(text); } : undefined}
-                onReset={model !== null ? (messageId) => {
-                  resetMessage(messageId, { commandId: newCommandId(), model, thinkingEnabled: thinking }).then((result) => {
-                    setLoaded((prev) => (prev === null ? prev : { ...prev, messages: prev.messages.map((item) => (item.id === result.message.id ? result.message : item)) }));
-                    setActiveOperationId(result.operation.id);
-                    setActiveMessageId(result.message.id);
-                  }).catch((reason: unknown) => setActionError(errorKey(reason)));
-                } : undefined} />
-            </div>
-          ))}
+          {loaded.messages.length === 0 ? <p className="workspace__empty">{t('workspace.empty')}</p> : loaded.messages.map((message) => {
+            // T-126：生成中的回答在它自己的消息位里推进；终态解除锁后，失败/中断仍留原位重试。
+            const streaming = activeOperationId !== null && message.id === activeMessageId;
+            const retrying = retryTarget !== null && message.id === retryTarget;
+            return (
+              <div key={message.id} id={`msg-${message.id}`}>
+                <MessageView message={message} annotationsEnabled
+                  streamText={streaming && stream.answer.length > 0 ? stream.answer : null}
+                  streamReasoning={streaming && stream.reasoning.length > 0 ? stream.reasoning : null}
+                  footer={streaming || retrying ? (
+                    <div className="message__stream-status" aria-live="polite">
+                      <span className="workspace__status-text">{statusText}</span>
+                      {streamActive ? <IconButton icon={Square} label={t('workspace.action.stop')} variant="solid" onClick={handleStop} /> : null}
+                      {retrying || stream.terminal?.kind === 'failed' || stream.terminal?.kind === 'interrupted' ? <IconButton icon={RotateCcw} label={t('workspace.action.retry')} onClick={handleRetry} /> : null}
+                      {streamActive ? <span className="workspace__cursor" aria-hidden="true" /> : null}
+                    </div>
+                  ) : null}
+                  onQuoteText={message.role === 'AI' ? (text) => { setQuote(text); } : undefined}
+                  onReset={model !== null ? (messageId) => {
+                    resetMessage(messageId, { commandId: newCommandId(), model, thinkingEnabled: thinking }).then((result) => {
+                      setLoaded((prev) => (prev === null ? prev : { ...prev, messages: prev.messages.map((item) => (item.id === result.message.id ? result.message : item)) }));
+                      setActiveOperationId(result.operation.id);
+                      setActiveMessageId(result.message.id);
+                    }).catch((reason: unknown) => setActionError(errorKey(reason)));
+                  } : undefined}
+                  onForkAnswer={message.role === 'AI' ? handleForkAnswer : undefined}
+                  onForkSelection={message.role === 'AI' ? handleForkSelection : undefined}
+                  childBranchCount={message.role === 'AI' ? (childrenByMessage.get(message.id)?.length ?? 0) : undefined}
+                  onListChildren={message.role === 'AI' ? (messageId) => setChildrenFor(messageId) : undefined} />
+              </div>
+            );
+          })}
         </div>
       )}
-      {activeOperationId !== null ? (
-        <GlassPanel className="workspace__stream" aria-live="polite">
-          <div className="workspace__status">
-            <span className="workspace__status-text">{statusText}</span>
-            {streamActive ? <IconButton icon={Square} label={t('workspace.action.stop')} variant="solid" onClick={handleStop} /> : null}
-            {stream.terminal?.kind === 'failed' || stream.terminal?.kind === 'interrupted' ? <IconButton icon={RotateCcw} label={t('workspace.action.retry')} onClick={handleRetry} /> : null}
-          </div>
-          {stream.reasoning.length > 0 ? <details className="workspace__reasoning"><summary>{t('workspace.reasoning.toggle')}</summary><p>{stream.reasoning}</p></details> : null}
-          {stream.answer.length > 0 ? <div className="workspace__answer"><Markdown text={stream.answer} /></div> : null}
-          {streamActive ? <span className="workspace__cursor" aria-hidden="true" /> : null}
-        </GlassPanel>
-      ) : null}
       {loaded !== null && (loaded.recommendations ?? []).length > 0 ? (
         <div className="workspace__recommendations" data-testid="recommendations" role="listbox" aria-label={t('workspace.recommendations.label')}>
-          {(loaded.recommendations ?? []).map((rec) => (
-            <button key={rec} type="button" role="option" aria-selected="false" className="workspace__recommendation"
-              onClick={() => draft.setText(rec)}>{rec}</button>
+          {(loaded.recommendations ?? []).map((rec, index) => (
+            <div key={rec} className="workspace__recommendation-row">
+              <button type="button" role="option" aria-selected="false" className="workspace__recommendation"
+                onClick={() => draft.setText(rec)}>{rec}</button>
+              <IconButton icon={GitFork} label={t('workspace.recommendations.fork')} className="workspace__recommendation-fork"
+                data-testid={`fork-recommendation-${index}`} onClick={() => handleForkRecommendation(rec)} />
+            </div>
           ))}
         </div>
       ) : null}
@@ -231,6 +321,23 @@ export function BranchWorkspace({ topicId, branchId, streamSource }: { topicId: 
         quote={quote} onClearQuote={() => setQuote('')} placeholderKey="workspace.composer.placeholder" sendKey="workspace.composer.send"
         onSend={handleSend} onStop={() => {}} onOpenSettings={() => navigate('/settings/providers')} />
       {actionError !== null ? <p className="workspace__error" role="alert">{t(actionError)}</p> : null}
+      <Dialog open={childrenFor !== null} title={t('workspace.children.title')} closeLabel={t('annotation.action.cancel')} onClose={() => setChildrenFor(null)}>
+        {childrenFor !== null && (childrenByMessage.get(childrenFor)?.length ?? 0) === 0 ? (
+          <p className="workspace__note">{t('workspace.children.empty')}</p>
+        ) : (
+          <ul className="workspace__children-list">
+            {(childrenFor === null ? [] : childrenByMessage.get(childrenFor) ?? []).map((node) => (
+              <li key={node.id}>
+                <button type="button" className="workspace__children-item" data-testid={`child-${node.id}`}
+                  onClick={() => { setChildrenFor(null); navigate(`/topic/${topicId}?branch=${node.id}`); }}>
+                  <span className="workspace__children-title">{node.title ?? t('workspace.tree.untitled')}</span>
+                  <Icon icon={ChevronRight} size="sm" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Dialog>
     </div>
   );
 }

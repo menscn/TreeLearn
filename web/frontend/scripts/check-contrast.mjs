@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * Web contrast guard (task T-2026-10-10-006).
+ * Web contrast guard (task T-2026-10-10-006; Android baseline since 2026-10-13).
  *
  * Computes WCAG 2.x contrast ratios from the authoritative token values for
  * every foreground/background pair the Web surface actually uses - including
- * the EFFECTIVE glass background (the token's translucent fill composited over
- * its backdrop), because the repo UX rule is to judge the rendered pair, not
- * the colour names.
+ * the EFFECTIVE overlay background (the token's translucent fill composited
+ * over its backdrop), because the repo UX rule is to judge the rendered pair,
+ * not the colour names.
  *
  * Thresholds: body/secondary text 4.5:1, non-text controls and icons 3:1
  * (WCAG AA). Exit codes: 0 = PASS, 1 = FAIL, 3 = INCONCLUSIVE (selftest).
@@ -56,18 +56,28 @@ export function contrastRatio(foreground, background) {
 }
 
 function buildPairs(webTokens, baseTokens) {
-  const colour = (name) => parseColour(webTokens.color[name]);
-  const base = (name) => parseColour(baseTokens.color[name].value);
-  const glassPanelOverMist = composite(parseColour(webTokens.glass.panel), colour('web-mist'));
+  // Since 2026-10-13 every colour here comes from the Android baseline file:
+  // "well/hover" reads green-faint, and the primary button label reads the
+  // near-white surface on green (as Android's own count badge does, see
+  // android/app/src/main/res/layout/view_answer_actions.xml:104-112).
+  const colour = (name) => parseColour(baseTokens.color[name].value);
+  const overlayOverBg = composite(parseColour(webTokens.glass.panel), colour('bg'));
 
   return [
-    { name: 'ink on web-white (body text on content surface)', fg: base('ink'), bg: colour('web-white'), min: 4.5 },
-    { name: 'ink on web-mist (text on mist background)', fg: base('ink'), bg: colour('web-mist'), min: 4.5 },
-    { name: 'ink2 on web-white (secondary text)', fg: base('ink2'), bg: colour('web-white'), min: 4.5 },
-    { name: 'ink on composited glass panel over web-mist', fg: base('ink'), bg: glassPanelOverMist, min: 4.5 },
-    { name: 'web-on-sage on web-sage (primary action label)', fg: colour('web-on-sage'), bg: colour('web-sage'), min: 4.5 },
-    { name: 'web-sage on web-white (control border/icon)', fg: colour('web-sage'), bg: colour('web-white'), min: 3.0 },
-    { name: 'ink2 on web-mint (selected-state text)', fg: base('ink2'), bg: colour('web-mint'), min: 4.5 },
+    { name: 'ink on bg (body text)', fg: colour('ink'), bg: colour('bg'), min: 4.5 },
+    { name: 'ink on surface (body text on input/code surface)', fg: colour('ink'), bg: colour('surface'), min: 4.5 },
+    { name: 'ink2 on bg (secondary text)', fg: colour('ink2'), bg: colour('bg'), min: 4.5 },
+    { name: 'ink2 on green-faint (secondary text on well/hover)', fg: colour('ink2'), bg: colour('green-faint'), min: 4.5 },
+    { name: 'ink3 on bg (caption text)', fg: colour('ink3'), bg: colour('bg'), min: 4.5 },
+    { name: 'green on bg (link/action text)', fg: colour('green'), bg: colour('bg'), min: 4.5 },
+    { name: 'surface on green (primary button label)', fg: colour('surface'), bg: colour('green'), min: 4.5 },
+    { name: 'ink on green-soft (selected-state text)', fg: colour('ink'), bg: colour('green-soft'), min: 4.5 },
+    { name: 'ink on yellow-highlight (marked body text)', fg: colour('ink'), bg: colour('yellow-highlight'), min: 4.5 },
+    { name: 'amber on bg (warning text)', fg: colour('amber'), bg: colour('bg'), min: 4.5 },
+    { name: 'red on bg (error text)', fg: colour('red'), bg: colour('bg'), min: 4.5 },
+    { name: 'blue on bg (unread dot, non-text)', fg: colour('blue'), bg: colour('bg'), min: 3.0 },
+    { name: 'green on surface (control border/icon)', fg: colour('green'), bg: colour('surface'), min: 3.0 },
+    { name: 'ink on composited overlay panel over bg (dialog/toast text)', fg: colour('ink'), bg: overlayOverBg, min: 4.5 },
   ];
 }
 
