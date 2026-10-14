@@ -8,7 +8,7 @@ import { IconButton } from './IconButton';
 import { TranslationBlock } from './TranslationBlock';
 import { selectRevision } from '../store/topicData';
 import { formatRelativeTime } from '../platform/datetime';
-import { Copy, GitFork, Network, RotateCcw, Trash2 } from './icons';
+import { Copy, GitFork, Highlighter, MessageSquare, Network, RotateCcw, Sparkles, TextSelect, Trash2 } from './icons';
 import { Markdown, type Highlight } from './markdown/Markdown';
 import { proseIndexForRange, selectionToRange } from '../lib/selectionRange';
 
@@ -142,6 +142,43 @@ function MessageView({ message, highlight = null, annotationsEnabled = false, on
     copyTimer.current = window.setTimeout(() => setCopyState('idle'), 2000);
   }, [message]);
 
+  // T-129 划词菜单的复制格：只复制选中的片段（不及物到整条回答，也不并入思考过程）。
+  const copySelection = useCallback((text: string) => {
+    const clipboard = navigator.clipboard;
+    if (clipboard === undefined) {
+      setCopyState('failed');
+    } else {
+      clipboard.writeText(text).then(() => setCopyState('copied')).catch(() => setCopyState('failed'));
+    }
+    if (copyTimer.current !== null) window.clearTimeout(copyTimer.current);
+    copyTimer.current = window.setTimeout(() => setCopyState('idle'), 2000);
+  }, []);
+
+  // T-129 全选：把选区就地扩成整条回答（Android WordMenuPopup 注释：「全选 widens that same
+  // selection in place rather than remembering a second one」），于是高亮/复制/问 AI 读到的
+  // 仍是同一个选区，不存在第二份状态。
+  const selectAllAnswer = useCallback(() => {
+    const container = answerRef.current;
+    if (container === null || answerText.length === 0) return;
+    const selection = typeof window === 'undefined' ? null : window.getSelection();
+    if (selection !== null) {
+      const range = document.createRange();
+      range.selectNodeContents(container);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+    setPending({ start: 0, end: answerText.length });
+    setPendingIndex(selection === null ? -1 : proseIndexForRange(container, selection));
+  }, [answerText]);
+
+  // 划词菜单的退场：Android 没有「取消」格，点空白处收起；Web 上等价的是 Esc。
+  useEffect(() => {
+    if (pending === null) return;
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') closePending(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [pending, closePending]);
+
   if (message.role === 'USER') {
     return (
       <article className="message message--user">
@@ -238,33 +275,26 @@ function MessageView({ message, highlight = null, annotationsEnabled = false, on
       ) : null}
       {revision !== null ? <TranslationBlock messageId={message.id} revisionId={revision.id} /> : null}
       {annotationsEnabled && streamText === null && pending !== null ? (
-        <div className="annotation-bar" role="toolbar" aria-label={t('annotation.bar.label')}>
-          <button type="button" className="annotation-bar__action" data-testid="annotation-highlight"
-            onClick={() => write({ messageId: message.id, kind: 'HIGHLIGHT', container: 'PROSE', proseIndex: pendingIndex, start: pending.start, end: pending.end })}>
-            {t('annotation.action.highlight')}
-          </button>
-          <button type="button" className="annotation-bar__action" data-testid="annotation-note"
-            onClick={() => setNoteOpen(true)}>
-            {t('annotation.action.note')}
-          </button>
+        <div className="word-menu" role="toolbar" aria-label={t('annotation.bar.label')} data-testid="word-menu">
           {onQuoteText ? (
-            <button type="button" className="annotation-bar__action" data-testid="annotation-quote"
-              onClick={() => { onQuoteText(answerText.slice(pending.start, pending.end)); closePending(); }}>
-              {t('annotation.action.quote')}
-            </button>
+            <IconButton icon={Sparkles} label={t('annotation.action.quote')} data-testid="annotation-quote"
+              onClick={() => { onQuoteText(answerText.slice(pending.start, pending.end)); closePending(); }} />
           ) : null}
           {onForkSelection && revision !== null ? (
-            <button type="button" className="annotation-bar__action" data-testid="annotation-fork"
+            <IconButton icon={GitFork} label={t('annotation.action.fork')} data-testid="annotation-fork"
               onClick={() => {
                 onForkSelection(message.id, revision.id, pending.start, pending.end, revision.answerContent.slice(pending.start, pending.end));
                 closePending();
-              }}>
-              {t('annotation.action.fork')}
-            </button>
+              }} />
           ) : null}
-          <button type="button" className="annotation-bar__action" data-testid="annotation-cancel" onClick={closePending}>
-            {t('annotation.action.cancel')}
-          </button>
+          <IconButton icon={Highlighter} label={t('annotation.action.highlight')} data-testid="annotation-highlight"
+            onClick={() => write({ messageId: message.id, kind: 'HIGHLIGHT', container: 'PROSE', proseIndex: pendingIndex, start: pending.start, end: pending.end })} />
+          <IconButton icon={MessageSquare} label={t('annotation.action.note')} data-testid="annotation-note"
+            onClick={() => setNoteOpen(true)} />
+          <IconButton icon={Copy} label={t('annotation.action.copy')} data-testid="annotation-copy"
+            onClick={() => { void copySelection(answerText.slice(pending.start, pending.end)); }} />
+          <IconButton icon={TextSelect} label={t('annotation.action.selectAll')} data-testid="annotation-select-all"
+            onClick={selectAllAnswer} />
         </div>
       ) : null}
       {annotationsEnabled

@@ -1,0 +1,25 @@
+T-129 变异检验（每个变异只改一处生产代码，重跑 npx vitest run src/components/MessageView.annotations.test.tsx）
+DATE: 2026-10-14 21:03
+备份：artifacts/tmp/t129/MessageView.green.bak（已还原；回读确认三处均无残留，全量 223/223）
+
+### MUTATION A: 复制格改成复制整条回答（copySelection(answerText) 而非选中片段）
+CMD: npx vitest run src/components/MessageView.annotations.test.tsx
+EXITCODE=1
+ FAIL  ... > word menu (T-129) > copies only the selected passage
+ Tests  1 failed | 8 passed (9)
+
+### MUTATION B: 全选只扩 DOM 选区、不就地更新 pending（制造第二份状态）
+CMD: npx vitest run src/components/MessageView.annotations.test.tsx
+EXITCODE=1
+ FAIL  ... > word menu (T-129) > widens the selection in place so 全选之后的高亮覆盖整条回答
+ Tests  1 failed | 8 passed (9)
+
+### MUTATION C: 菜单格加回文字（给复制格加 showLabel）
+CMD: npx vitest run src/components/MessageView.annotations.test.tsx
+EXITCODE=1
+ FAIL  ... > word menu (T-129) > draws the six icon cells in Android order, with no text button
+ Tests  1 failed | 8 passed (9)
+
+### 结论
+三条断言各自可被独立证伪且互不串扰。B 尤其关键：它验证的是「全选就地扩选区、不另记一份」
+这一条 Android 明确写下的语义（WordMenuPopup 类注释），只改 DOM 选区而不更新 pending 会被抓住。

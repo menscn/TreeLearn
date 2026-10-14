@@ -152,3 +152,76 @@ describe('annotation frontend consumption (T-049)', () => {
     await waitFor(() => expect(screen.queryByText('备注')).toBeNull());
   });
 });
+
+// T-129 划词菜单：Android popup_word_action.xml —— 六格图标行，顺序为
+// 问 AI / 新建主题 / 高亮 / 批注 / 复制 / 全选；「菜单格一律图标承载，不得文字按钮」。
+describe('word menu (T-129)', () => {
+  afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+    window.getSelection()?.removeAllRanges();
+  });
+
+  function selectChars(container: HTMLElement, length: number) {
+    const answer = container.querySelector('.message__answer') as HTMLElement;
+    const span = answer.querySelector('[data-md-start]') as HTMLElement;
+    const textNode = span.firstChild as Text;
+    const range = document.createRange();
+    range.setStart(textNode, 0);
+    range.setEnd(textNode, Math.min(length, textNode.textContent?.length ?? 0));
+    const selection = window.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+    fireEvent.mouseUp(answer);
+    return answer;
+  }
+
+  const CELLS = ['annotation-quote', 'annotation-fork', 'annotation-highlight', 'annotation-note', 'annotation-copy', 'annotation-select-all'];
+
+  it('draws the six icon cells in Android order, with no text button', async () => {
+    installFetch();
+    const { container } = render(
+      <I18nProvider>
+        <MessageView message={aiMessage()} annotationsEnabled onQuoteText={vi.fn()} onForkSelection={vi.fn()} />
+      </I18nProvider>,
+    );
+    selectChars(container, 4);
+    const menu = await screen.findByTestId('word-menu');
+    expect(Array.from(menu.querySelectorAll('button')).map((button) => button.getAttribute('data-testid'))).toEqual(CELLS);
+    // 菜单格一律图标承载，不得文字按钮。
+    for (const button of menu.querySelectorAll('button')) expect(button.textContent?.trim()).toBe('');
+  });
+
+  it('copies only the selected passage', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    installFetch();
+    const { container } = render(<I18nProvider><MessageView message={aiMessage()} annotationsEnabled /></I18nProvider>);
+    selectChars(container, 4);
+    fireEvent.click(await screen.findByTestId('annotation-copy'));
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith(ANSWER.slice(0, 4)));
+  });
+
+  it('widens the selection in place so 全选之后的高亮覆盖整条回答', async () => {
+    const calls = installFetch({ write: (body) => json({ messageId: 'm1', annotations: [{ id: 'an9', kind: 'HIGHLIGHT', container: 'PROSE', proseIndex: 0, tableIndex: -1, rowIndex: -1, colIndex: -1, start: (body as { start: number }).start, end: (body as { end: number }).end, body: '' }] }) });
+    const { container } = render(<I18nProvider><MessageView message={aiMessage()} annotationsEnabled /></I18nProvider>);
+    selectChars(container, 4);
+    fireEvent.click(await screen.findByTestId('annotation-select-all'));
+    fireEvent.click(screen.getByTestId('annotation-highlight'));
+    await waitFor(() => expect(calls.some((call) => call.method === 'POST')).toBe(true));
+    const writeCall = calls.find((call) => call.method === 'POST') as Call;
+    expect(writeCall.body).toMatchObject({ container: 'PROSE', start: 0, end: ANSWER.length });
+  });
+
+  it('offers no cancel cell and closes on Escape', async () => {
+    installFetch();
+    const { container } = render(<I18nProvider><MessageView message={aiMessage()} annotationsEnabled /></I18nProvider>);
+    selectChars(container, 4);
+    const menu = await screen.findByTestId('word-menu');
+    // Android 的六格里没有「取消」格（点空白处收起）。
+    expect(screen.queryByTestId('annotation-cancel')).toBeNull();
+    fireEvent.keyDown(window, { key: 'Escape' });
+    await waitFor(() => expect(screen.queryByTestId('word-menu')).toBeNull());
+    expect(menu).toBeTruthy();
+  });
+});
