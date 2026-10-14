@@ -2,7 +2,7 @@
 // （api.md §6.2 主题详情、§6.3 分支树/消息/追问、§6.4 取消/重试）。变更类请求一律带
 // 客户端生成的 `commandId`（api.md §4）。响应按契约类型解码，形状漂移由 fixtures 测试守。
 import { api } from '../api/client';
-import type { AnnotationList, AnswerRevision, Attachment, AttachmentList, Branch, BranchTree, TreeLayoutResponse, Conversation, Message, MessageGenerationRequest, MessageOperation, Operation, ReadingAnchor, Topic, TurnAccepted } from '../api/types';
+import type { AnnotationList, AnswerRevision, Attachment, AttachmentList, Branch, BranchTree, TreeLayoutResponse, Conversation, ForkAnchor, ForkResult, Message, MessageGenerationRequest, MessageOperation, Operation, ReadingAnchor, Topic, TurnAccepted } from '../api/types';
 
 export function newCommandId(): string {
   const webCrypto = globalThis.crypto;
@@ -71,6 +71,29 @@ export function cancelOperation(operationId: string): Promise<Operation> {
   return api.post<Operation>(`/operations/${operationId}/cancel`, { commandId: newCommandId() });
 }
 
+/** 契约 §6.3：整条/选文分叉（冻结快照 + 溯源）。anchor 为 null 即整条分叉；选文分叉的
+ * hash 须为 quote 的小写十六进制 SHA-256（lib/digest.ts，与共享域 codec 同算法）。
+ * 带 question 时原子接受首问，响应 bootstrap.rootBranch 即新建子分支。 */
+export function forkBranch(input: {
+  branchId: string;
+  sourceMessageId: string;
+  sourceRevisionId: string;
+  anchor?: ForkAnchor | null;
+  question?: string | null;
+  model?: string | null;
+  thinkingEnabled?: boolean | null;
+}): Promise<ForkResult> {
+  return api.post<ForkResult>(`/branches/${input.branchId}/forks`, {
+    commandId: newCommandId(),
+    sourceMessageId: input.sourceMessageId,
+    sourceRevisionId: input.sourceRevisionId,
+    anchor: input.anchor ?? null,
+    question: input.question ?? null,
+    model: input.model ?? null,
+    thinkingEnabled: input.thinkingEnabled ?? null,
+  });
+}
+
 export function retryMessage(messageId: string, input: { model: string; thinkingEnabled: boolean }): Promise<{ message: Message; operation: Operation }> {
   return api.post<{ message: Message; operation: Operation }>(`/messages/${messageId}/retry`, { commandId: newCommandId(), model: input.model, thinkingEnabled: input.thinkingEnabled });
 }
@@ -104,9 +127,9 @@ export function selectRevision(messageId: string, revisionId: string): Promise<A
   return api.post<AnswerRevision>(`/messages/${messageId}/revisions/${revisionId}/select`, { commandId: newCommandId() });
 }
 
-/** 契约 §6.5（T-052 切片）：启动 MESSAGE_TRANSLATION 派生，返回 operation（订阅 SSE 到终态）。 */
-export function startTranslation(revisionId: string): Promise<Operation> {
-  return api.post<Operation>('/derived', { commandId: newCommandId(), kind: 'MESSAGE_TRANSLATION', scopeId: revisionId });
+/** 契约 §6.5（T-052 切片）：启动 MESSAGE_TRANSLATION 派生，返回 operation（订阅 SSE 到终态）。scopeId 为 messageId，basedOnRevisionId 单独传递。 */
+export function startTranslation(messageId: string, revisionId: string): Promise<Operation> {
+  return api.post<Operation>('/derived', { commandId: newCommandId(), kind: 'MESSAGE_TRANSLATION', scopeId: messageId, basedOnRevisionId: revisionId });
 }
 
 /** 契约 §6.5：读取派生产物（payload 为解析后的 JSON；stale 为基线判定结果）。 */
