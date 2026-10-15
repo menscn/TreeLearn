@@ -1,0 +1,48 @@
+{
+  "_comment": [
+    "1:1 量测仪器的屏档案。判定算法不在这里，这里只放「哪张图、按哪个扫描窗口量、两种制式各允许跳过哪一节」。",
+    "窗口沿用 2026-09-27 对话页复刻方案里实测过的同一批数字，逐字未改；改这些数字等于改判据，必须在任务里显式记录并重跑同一张图。",
+    "shot_kind: design=真机/设计截图（无滚动条占位、无 clip 取整左移）; render=无头浏览器渲染图（右侧被 ::-webkit-scrollbar 占掉 4 逻辑 px、整图左移 2 逻辑 px）。",
+    "require_sections 用打印出来的节标题前缀匹配（不用中文全名，避免标题措辞漂移把判据一起改掉）；缺节即判 1，因为「什么都没量却打 PASS」是本仓库失败案例库里的既有形态。",
+    "render_skip_allowed 只列「按方案 §10 声明在渲染图上本就不成立」的节（AppBar 制式不同 → §2 整体跳过），其余节在两种制式下都必须出数。"
+  ],
+  "defaults": {
+    "scale_physical_per_logical": 2,
+    "right_scrollbar_logical_px": 4,
+    "left_clip_shift_logical_px": 2,
+    "out_dir": "artifacts/evidence"
+  },
+  "screens": {
+    "chat": {
+      "title": "对话页",
+      "shot_kind": "design",
+      "sample_shot": "artifacts/fixtures/parity/chat-design-2026-09-27.png",
+      "sample_shot_provenance": "2026-09-27 那张对话页截图原先只存在于本机剪贴板目录（旧脚本把它写成默认路径的绝对值，因此换机器或清理剪贴板后仪器就跑不动）。T-2026-10-15-003 把同一个文件（字节相同，源文件名 clipboard-2026-09-27T08-04-23-395Z-c2393438.png）复制到仓库里，只挪位置、没有重采样或转码。它的 sha256 与字节数不写在这里：由证据文件在每次运行时现场算并打印，抄进正文就成了第二个来源。",
+      "record_reference": "artifacts/evidence/ux-chat-1to1-measure-2026-09-27.txt",
+      "render_shot": "artifacts/evidence/ux-chat-1to1-render-top-2026-09-27.png",
+      "prototype": {
+        "html": "Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html",
+        "clicks": [".demo-link", ".topic-card"],
+        "wait_for": ".msg-user",
+        "dom_checks": ["body-bg", "grid-period", "user-bubble", "body-pitch", "action-pitch", "pill-inset"]
+      },
+      "sections": {
+        "appbar": { "div_y": [150, 260], "title_y": [90, 190] },
+        "user_bubble": { "row_y": [150, 700], "min_span_px": 300, "corner_dy": [0, 40, 2], "corner_r_px": [8, 100] },
+        "body_rows": { "y": [340, 830], "x": [40, 790], "body_row_slice": [1, 6] },
+        "action_row": { "min_cluster_px": 10 },
+        "pills": { "y": [840, null], "x": [40, 420], "min_px_in_row": 100, "min_height_px": 40 }
+      },
+      "ink_zones": [
+        { "label": "✦ 星形图标", "box": [44, 71, 378, 406], "ref": [22, 64, 39], "ref_name": "green-deep #164027" },
+        { "label": "「知芽」文字", "box": [72, 119, 378, 406], "ref": [22, 64, 39], "ref_name": "green-deep #164027" },
+        { "label": "正文文字", "box": [45, 770, 465, 480], "ref": [22, 36, 28], "ref_name": "ink #16241C" },
+        { "label": "动作行图标", "box": [43, 71, 768, 800], "ref": [98, 112, 103], "ref_name": "ink3 #627067" },
+        { "label": "胶囊内分叉图标", "box": [352, 380, 875, 935], "ref": [98, 112, 103], "ref_name": "ink3 #627067" },
+        { "label": "用户气泡", "box": [300, 400, 260, 280], "ref": [43, 110, 69], "ref_name": "green #2B6E45" }
+      ],
+      "require_sections": ["== 1.", "== 2.", "== 3.", "== 4.", "== 5.", "== 6.", "== 7."],
+      "render_skip_allowed": ["== 2."]
+    }
+  }
+}

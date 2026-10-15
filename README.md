@@ -20,9 +20,9 @@
 
 TreeLearn 的做法是：**把对话变成一棵树**。从一个根问题开始，你可以在任意一个"稳定回答"上长出一条独立分支，分支拥有自己的隔离上下文；探索完再回到来源位置继续读。每条分支还可以继续分叉，形成真正反映你思考路径的结构。
 
-它同时是一款 **local-first（本地优先）** 应用：没有后端、没有账号、没有云同步。所有数据都在你自己手机的 SQLite 里，DeepSeek API Key 只经过 Android Keystore 加密保存。
+它同时是一款 **local-first（本地优先）** 应用：所有数据都在你自己手机的 SQLite 里，DeepSeek API Key 只经过 Android Keystore 加密保存；不做云端账号、云同步或远程遥测。规划中的 `backend/` 是**仅监听本机环回地址**的桌面服务，为 PC 端 Web 界面提供数据与密钥代理，不是远程服务器（范围与边界见 `Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md`）。
 
-> **项目状态：早期开发中（WIP）。** 领域层 `:core` 已落地 17 个核心类型，`:app` 与 `:data` 处于骨架阶段，`:ai` 与 `:tree-layout` 尚未填入源码。请勿作为可用产品期待。
+> **项目状态：早期开发中（WIP）。** 五个模块 `:core`、`:data`、`:ai`、`:tree-layout`、`:app` 均已填入源码并构建出可安装 APK（schema 版本见 `android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java` 的 `DATABASE_VERSION`）；界面与功能仍在按用户反馈迭代，请勿当作成熟产品期待。
 
 ---
 
@@ -150,7 +150,7 @@ Treelearn/
 - `.trae/tasks/` —— 任务契约文件，机械校验器 `.trae/scripts/validate_tasks.py`
 - `artifacts/evidence/` —— 每次守门与验收的执行证据（自带命令行与退出码）
 - `.agents/skills/` —— 仓库级技能，Codex 自动发现；当前含 `figma-build`、`figma-codegen`（从 figwright 0.5.0 原样迁移）
-- 设计协作 —— Figma 通过 figwright MCP 接入：一次性配置写进用户级 `~/.codex/config.toml`，Figma 桌面端导入插件 manifest；连接自检 `node .trae/scripts/dev/probe_figwright_mcp.mjs`，设计 token 三方一致性守门 `python .trae/scripts/dev/check_design_tokens.py`。约定与故障速查见 [`.trae/rules/ux-design.md`](.trae/rules/ux-design.md)
+- 设计协作 —— Figma 通过 figwright MCP 接入：一次性配置写进用户级 `~/.codex/config.toml`，Figma 桌面端导入插件 manifest；连接自检 `node .trae/scripts/dev/probe_figwright_mcp.mjs`，设计 token 四方一致性守门 `python .trae/scripts/dev/check_design_tokens.py`，前端 CSS 变量由生成器产出 `python .trae/scripts/dev/gen_design_tokens_css.py`。约定与故障速查见 [`.trae/rules/ux-design.md`](.trae/rules/ux-design.md)
 
 ---
 

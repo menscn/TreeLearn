@@ -20,7 +20,7 @@
 ## 关键约束
 
 - Java-only：不写 Kotlin 源码，不加 Kotlin Gradle 插件，不引 `org.jetbrains.kotlin` 或 `-ktx` 坐标。
-- 无服务端：不做账号、同步、共享、云备份、远程遥测；`frontend/` 与 `backend/` 目录目前不存在。
+- 无远程服务端：不做账号、同步、共享、云备份、远程遥测。Web 线（用户 2026-10-15 拍板，见 `Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md`）规划新建 `frontend/` 与仅监听本机环回地址的 `backend/`；两目录尚未创建，且不改变「数据只留本机、密钥不进服务与浏览器」的边界。
 - 时间：落库与对外传输统一用 UTC epoch 毫秒。
 - 触屏热区不小于 44dp。
 - 单人开发：所有流程都必须假设没有第二个人做复核。

@@ -1,0 +1,380 @@
+# T-2026-10-15-003 GREEN - 1:1 量测仪器（Python 侧）收编后的判定证据
+# Generated: 2026-10-15T11:34:26Z  (UTC)
+# Generator: artifacts/tmp/gen-003-green.sh   重跑：bash artifacts/tmp/gen-003-green.sh
+# 本文件覆盖的调用形态：
+#   python -X utf8 .trae/scripts/dev/parity/measure_screen.py --screen chat [--kind design|render] [--shot <png>] [--profile <json>]
+#   python -X utf8 .trae/scripts/dev/parity/measure_screen.py --selftest
+# 范围：两支 Node 工具（verify_1to1.mjs / cdp_shot.mjs）不在本文件，由 T-2026-10-15-006 收编。
+# 显示规则：每块打印该命令 stdout 的前若干行与后 16 行，中间省略的行数会显式写成一行标记；
+#           块 01–03 保留表头，因为「相对路径解析根」「本次扣除量」和 19 条自检用例名只出现在前若干行。
+#           每块的 WANT_TEXT 判据始终比对**完整捕获**（脚本内的 $full 文件），不只看显示出来的部分。
+#           完整捕获里命中每条 WANT_TEXT 的那一行，还会被单独回显成「witness line」段落，
+#           所以「判过」在这份文件里必然同时「看得见」；块 22 再把这条性质读回本文件本身做守卫。
+# 被核文件指纹（判定前的读数；块 20 判定后重取并比对）：
+#   .trae/scripts/dev/parity/measure_screen.py  bytes=28279  lines=543  sha256=c99a3236963d84bbe331110cb2d3824cf24f57968978f93ef4e0c84a35674c3a
+#   .trae/scripts/dev/parity/parity_selftest.py  bytes=13858  lines=279  sha256=5ceacf8dc24ef2027dfac27303ce6d12ebdad0e31d18068840a9b671a5f92709
+#   .trae/scripts/dev/parity/png_probe.py  bytes=3525  lines=106  sha256=456d64f38c502d371fdfbe557654ba6b5e31950f2b302219caf00a135b12a3ea
+#   .trae/scripts/dev/parity/screens.json  bytes=3679  lines=48  sha256=f85fc4342f701b5ce1f27fd78230de6af348a5d5630d8ad7d0e2eb33335fdeaa
+#   artifacts/fixtures/parity/chat-design-2026-09-27.png  bytes=143429  lines=458  sha256=9d53f6754fc5bb30e7cfce7857857db6de4adf53f0555cb398e89b55d21eee28
+
+===== block 01 - selftest over every detection branch (positive and negative pairs) =====
+$ python -X utf8 .trae/scripts/dev/parity/measure_screen.py --selftest
+CASE pos-design                     rc=0   want=0   ok                     
+CASE pos-render                     rc=0   want=0   ok                     
+CASE offset-reproduces-gutter       rc=0   want=0   ok                     
+CASE pos-allowance-exercised        rc=0   want=0   ok                     
+CASE neg-image-missing              rc=3   want=3   ok                     
+CASE neg-profile-missing            rc=3   want=3   ok                     
+CASE neg-profile-not-json           rc=3   want=3   ok                     
+CASE neg-unknown-screen             rc=3   want=3   ok                     
+CASE neg-unknown-kind               rc=3   want=3   ok                     
+CASE neg-window-missing             rc=3   want=3   ok                     
+CASE neg-ink-zones-empty            rc=3   want=3   ok                     
+CASE neg-require-sections-empty     rc=3   want=3   ok                     
+CASE neg-offset-constant-deleted    rc=1   want=1   ok                     
+CASE neg-offset-constant-zero       rc=1   want=1   ok                     
+CASE neg-design-kind-on-render-image rc=1   want=1   ok                     
+CASE neg-render-kind-on-design-image rc=1   want=1   ok                     
+CASE neg-required-section-silent    rc=1   want=1   ok                     
+CASE neg-flat-image-crashes-to-3    rc=3   want=3   ok                     
+CASE neg-waste-counter-counted      rc=1   want=1   ok                     
+19 case(s) executed, expectation table says 19, 0 failure(s)
+VERDICT: PASS (19 cases, positive and negative for every branch)
+EXITCODE=0
+longest scratch path in this run = 101 chars (Windows rejects beyond 259; kept under 240 so a longer product name cannot push it over)
+  witness lines this block judged (each is the line the WANT_TEXT needle matched, echoed from the complete capture so a reviewer can read it):
+    capture line 21: VERDICT: PASS (19 cases, positive and negative for every branch)
+    capture line 20: 19 case(s) executed, expectation table says 19, 0 failure(s)
+    capture line 1: CASE pos-design                     rc=0   want=0   ok                     
+    capture line 2: CASE pos-render                     rc=0   want=0   ok                     
+    capture line 3: CASE offset-reproduces-gutter       rc=0   want=0   ok                     
+    capture line 4: CASE pos-allowance-exercised        rc=0   want=0   ok                     
+    capture line 5: CASE neg-image-missing              rc=3   want=3   ok                     
+    capture line 6: CASE neg-profile-missing            rc=3   want=3   ok                     
+    capture line 7: CASE neg-profile-not-json           rc=3   want=3   ok                     
+----- exit code: 0 (want 0) -----
+
+===== block 02 - design shot (relocated fixture) measures clean =====
+$ python -X utf8 .trae/scripts/dev/parity/measure_screen.py --screen chat
+# 对话页 1:1 复刻 — 截图实测证据
+# 生成时间: 2026-10-15 19:34:36
+# 被测对象: D:\Project\Android\Treelearn\artifacts\fixtures\parity\chat-design-2026-09-27.png
+# 复现命令: python .trae/scripts/dev/parity/measure_screen.py --screen chat --kind design --shot "artifacts/fixtures/parity/chat-design-2026-09-27.png"  （EXITCODE 由脚本自己按本次产物派生，不再由外层 echo 追加）
+# 判据: 逻辑坐标 = 物理坐标 / 2（由 defaults.scale_physical_per_logical 给出，不是写死的 2）
+# 相对路径解析根 = D:\Project\Android\Treelearn（上溯找到 .git；按脚本自身位置上溯，与当前工作目录无关）
+# 偏移常量: scale=2 right_scrollbar_logical_px=4 left_clip_shift_logical_px=2 shot_kind=design → 右缘本次扣除量=0
+# 适用范围: §2 的 y 判据按「iPhone 灵动岛制式 AppBar」标定；原型渲染图（AndroidFrame 32px 状态栏）
+… 85 line(s) of this block's stdout omitted here; the WANT_TEXT witnesses below are the lines that fell in that gap or would otherwise scroll off …
+  首胶囊左边缘 20.0 逻辑  [原型 --gutter 20px]
+  首胶囊文字/图标墨迹 37.0..189.0 逻辑 → 左内边距 17.0  [原型 s4 16px]
+  动作行（逻辑）385.5..398.0 → 首胶囊顶 430.5
+  动作行按钮盒底 = 图标中心 391.8 + 22 = 413.8 → 首胶囊顶距 16.8 逻辑  [原型 .sugg-block margin-top s4(16px)]
+
+== 8. 判定与退出码（本次运行新增的一段；2026-09-27 的记录里没有，因此不影响上面各节的可比性）==
+  OK 小节 '== 1.' 出了数（该节 5 行、无跳过标记）
+  OK 小节 '== 2.' 出了数（该节 9 行、无跳过标记）
+  OK 小节 '== 3.' 出了数（该节 25 行、无跳过标记）
+  OK 小节 '== 4.' 出了数（该节 7 行、无跳过标记）
+  OK 小节 '== 5.' 出了数（该节 13 行、无跳过标记）
+  OK 小节 '== 6.' 出了数（该节 8 行、无跳过标记）
+  OK 小节 '== 7.' 出了数（该节 10 行、无跳过标记）
+  COUNT 判据行 = 0；废图自检命中 = 0；本段新增判定 = 0
+  VERDICT: 本次运行的每条判据行都成立，且必需节都出了数
+EXITCODE=0
+  witness lines this block judged (each is the line the WANT_TEXT needle matched, echoed from the complete capture so a reviewer can read it):
+    capture line 7: # 偏移常量: scale=2 right_scrollbar_logical_px=4 left_clip_shift_logical_px=2 shot_kind=design → 右缘本次扣除量=0
+    capture line 7: # 偏移常量: scale=2 right_scrollbar_logical_px=4 left_clip_shift_logical_px=2 shot_kind=design → 右缘本次扣除量=0
+    capture line 109: EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 03 - render shot (closed loop) measures clean with both corrections applied =====
+$ python -X utf8 .trae/scripts/dev/parity/measure_screen.py --screen chat --kind render
+# 对话页 1:1 复刻 — 截图实测证据
+# 生成时间: 2026-10-15 19:34:38
+# 被测对象: D:\Project\Android\Treelearn\artifacts\evidence\ux-chat-1to1-render-top-2026-09-27.png
+# 复现命令: python .trae/scripts/dev/parity/measure_screen.py --screen chat --kind render --shot "artifacts/evidence/ux-chat-1to1-render-top-2026-09-27.png"  （EXITCODE 由脚本自己按本次产物派生，不再由外层 echo 追加）
+# 判据: 逻辑坐标 = 物理坐标 / 2（由 defaults.scale_physical_per_logical 给出，不是写死的 2）
+# 相对路径解析根 = D:\Project\Android\Treelearn（上溯找到 .git；按脚本自身位置上溯，与当前工作目录无关）
+# 偏移常量: scale=2 right_scrollbar_logical_px=4 left_clip_shift_logical_px=2 shot_kind=render → 右缘本次扣除量=4
+# 适用范围: §2 的 y 判据按「iPhone 灵动岛制式 AppBar」标定；原型渲染图（AndroidFrame 32px 状态栏）
+… 81 line(s) of this block's stdout omitted here; the WANT_TEXT witnesses below are the lines that fell in that gap or would otherwise scroll off …
+  首胶囊左边缘 22.0 逻辑  [原型 --gutter 20px]
+  首胶囊文字/图标墨迹 0.0..227.0 逻辑 → 左内边距 -22.0  [原型 s4 16px]
+  动作行（逻辑）411.0..411.5 → 首胶囊顶 594.0
+  动作行按钮盒底 = 图标中心 411.2 + 22 = 433.2 → 首胶囊顶距 160.8 逻辑  [原型 .sugg-block margin-top s4(16px)]
+
+== 8. 判定与退出码（本次运行新增的一段；2026-09-27 的记录里没有，因此不影响上面各节的可比性）==
+  OK 小节 '== 1.' 出了数（该节 5 行、无跳过标记）
+  OK 小节 '== 2.' 出了数（该节 8 行、无跳过标记）
+  OK 小节 '== 3.' 出了数（该节 25 行、无跳过标记）
+  OK 小节 '== 4.' 出了数（该节 7 行、无跳过标记）
+  OK 小节 '== 5.' 出了数（该节 15 行、无跳过标记）
+  OK 小节 '== 6.' 出了数（该节 3 行、无跳过标记）
+  OK 小节 '== 7.' 出了数（该节 9 行、无跳过标记）
+  COUNT 判据行 = 0；废图自检命中 = 0；本段新增判定 = 0
+  VERDICT: 本次运行的每条判据行都成立，且必需节都出了数
+EXITCODE=0
+  witness lines this block judged (each is the line the WANT_TEXT needle matched, echoed from the complete capture so a reviewer can read it):
+    capture line 7: # 偏移常量: scale=2 right_scrollbar_logical_px=4 left_clip_shift_logical_px=2 shot_kind=render → 右缘本次扣除量=4
+    capture line 37:   （校正）距屏右 原始 22.0 → 减右缘滚动条 4（defaults.right_scrollbar_logical_px=4，shot_kind=render：渲染图的 ::-webkit-scrollbar 占 4px 布局宽、真机 overlay 不占）、加左移回填 2.0 → 校正后 20.0 逻辑（复刻方案 §10.1 规定的两条偏移，扣在脚本里而不是扣在读的人心里）
+    capture line 105: EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 04 - archived record vs this re-run: judgement lines must be identical =====
+$ python -X utf8 artifacts/tmp/_t003_compare.py artifacts/evidence/ux-chat-1to1-measure-2026-09-27.txt artifacts/tmp/_g003/design.out.txt
+CASE 0 comparison-is-legal         shot_kind=design on both sides -> ok
+CASE 1 readings-identical        kept_lines=87 -> ok
+CASE 2 added-shapes-known          new_cats=['added-correction', 'exitcode-tail', 'header', 'judgement-block'] record_cats=['exitcode-tail', 'header'] added=2
+CASE 3 exitcode-discipline         record=['EXITCODE=0', 'EXITCODE=0'] new=['EXITCODE=0'] verdict_lines=1
+kept=87 record_dropped=9 new_dropped=22 mismatches=0
+EXITCODE=0
+  witness lines this block judged (each is the line the WANT_TEXT needle matched, echoed from the complete capture so a reviewer can read it):
+    capture line 2: CASE 1 readings-identical        kept_lines=87 -> ok
+    capture line 5: kept=87 record_dropped=9 new_dropped=22 mismatches=0
+----- exit code: 0 (want 0) -----
+
+===== block 05 - unrecognised flag is a usage error, not a judgement =====
+$ python -X utf8 .trae/scripts/dev/parity/measure_screen.py --screen chat --bogus x
+usage: measure_screen.py [-h] [--screen SCREEN] [--shot SHOT] [--kind KIND]
+                         [--profile PROFILE] [--selftest]
+measure_screen.py: error: unrecognized arguments: --bogus x
+  witness lines this block judged (each is the line the WANT_TEXT needle matched, echoed from the complete capture so a reviewer can read it):
+    capture line 3: measure_screen.py: error: unrecognized arguments: --bogus x
+----- exit code: 2 (want 2) -----
+
+===== block 06 - missing input image is an instrument fault, not a judgement =====
+$ python -X utf8 .trae/scripts/dev/parity/measure_screen.py --screen chat --shot artifacts/fixtures/parity/nope.png
+INSTRUMENT FAULT: input image not found: D:\Project\Android\Treelearn\artifacts\fixtures\parity\nope.png (a missing fixture is an instrument fault, not a judgement)
+EXITCODE=3
+  witness lines this block judged (each is the line the WANT_TEXT needle matched, echoed from the complete capture so a reviewer can read it):
+    capture line 1: INSTRUMENT FAULT: input image not found: D:\Project\Android\Treelearn\artifacts\fixtures\parity\nope.png (a missing fixture is an instrument fault, not a judgement)
+    capture line 2: EXITCODE=3
+----- exit code: 3 (want 3) -----
+
+===== block 07 - missing profile file is an instrument fault =====
+$ python -X utf8 .trae/scripts/dev/parity/measure_screen.py --screen chat --profile .trae/scripts/dev/parity/nope.json
+INSTRUMENT FAULT: profile not found: .trae/scripts/dev/parity/nope.json
+EXITCODE=3
+  witness lines this block judged (each is the line the WANT_TEXT needle matched, echoed from the complete capture so a reviewer can read it):
+    capture line 1: INSTRUMENT FAULT: profile not found: .trae/scripts/dev/parity/nope.json
+    capture line 2: EXITCODE=3
+----- exit code: 3 (want 3) -----
+
+===== block 08 - unknown screen name is an instrument fault and lists the known ones =====
+$ python -X utf8 .trae/scripts/dev/parity/measure_screen.py --screen nosuchscreen
+INSTRUMENT FAULT: screen profile 'nosuchscreen' is not in screens.json; known=['chat']
+EXITCODE=3
+  witness lines this block judged (each is the line the WANT_TEXT needle matched, echoed from the complete capture so a reviewer can read it):
+    capture line 1: INSTRUMENT FAULT: screen profile 'nosuchscreen' is not in screens.json; known=['chat']
+    capture line 1: INSTRUMENT FAULT: screen profile 'nosuchscreen' is not in screens.json; known=['chat']
+    capture line 2: EXITCODE=3
+----- exit code: 3 (want 3) -----
+
+===== block 09 - unknown shot kind is an instrument fault (refuses to guess which corrections apply) =====
+$ python -X utf8 .trae/scripts/dev/parity/measure_screen.py --screen chat --kind tablet
+INSTRUMENT FAULT: shot kind 'tablet' is neither design nor render; refusing to guess which offset corrections apply
+EXITCODE=3
+  witness lines this block judged (each is the line the WANT_TEXT needle matched, echoed from the complete capture so a reviewer can read it):
+    capture line 1: INSTRUMENT FAULT: shot kind 'tablet' is neither design nor render; refusing to guess which offset corrections apply
+    capture line 1: INSTRUMENT FAULT: shot kind 'tablet' is neither design nor render; refusing to guess which offset corrections apply
+    capture line 2: EXITCODE=3
+----- exit code: 3 (want 3) -----
+
+===== block 10 - offset constant deleted must be judged FAIL, never silently treated as 0 =====
+$ python -X utf8 .trae/scripts/dev/parity/measure_screen.py --screen chat --profile artifacts/tmp/_g003/no-offset.json
+FAIL offset constant missing or not a positive number: defaults.right_scrollbar_logical_px = None
+EXITCODE=1
+  witness lines this block judged (each is the line the WANT_TEXT needle matched, echoed from the complete capture so a reviewer can read it):
+    capture line 1: FAIL offset constant missing or not a positive number: defaults.right_scrollbar_logical_px = None
+    capture line 2: EXITCODE=1
+----- exit code: 1 (want 1) -----
+
+===== block 11 - offset constant zeroed must be judged FAIL (a zeroed correction reads as compliance) =====
+$ python -X utf8 .trae/scripts/dev/parity/measure_screen.py --screen chat --profile artifacts/tmp/_g003/zero-offset.json
+FAIL offset constant missing or not a positive number: defaults.right_scrollbar_logical_px = 0
+EXITCODE=1
+  witness lines this block judged (each is the line the WANT_TEXT needle matched, echoed from the complete capture so a reviewer can read it):
+    capture line 1: FAIL offset constant missing or not a positive number: defaults.right_scrollbar_logical_px = 0
+    capture line 2: EXITCODE=1
+----- exit code: 1 (want 1) -----
+
+===== block 12 - mutation: with the required-section list emptied the selftest itself must turn red =====
+$ python -X utf8 artifacts/tmp/_mut003/measure_screen.py --selftest
+… 7 line(s) of this block's stdout omitted here; the WANT_TEXT witnesses below are the lines that fell in that gap or would otherwise scroll off …
+CASE neg-unknown-screen             rc=3   want=3   ok                     
+CASE neg-unknown-kind               rc=3   want=3   ok                     
+CASE neg-window-missing             rc=3   want=3   ok                     
+CASE neg-ink-zones-empty            rc=3   want=3   ok                     
+CASE neg-require-sections-empty     rc=3   want=3   ok                     
+CASE neg-offset-constant-deleted    rc=1   want=1   ok                     
+CASE neg-offset-constant-zero       rc=1   want=1   ok                     
+CASE neg-design-kind-on-render-image rc=3   want=1   RC-MISMATCH            judgement lines: ['FAIL shot_kind=design 但实测左缘深色带 4 物理 px 非 0：这张图不是真机/设计截图，档案标错了制式', "INSTRUMENT FAU
+CASE neg-render-kind-on-design-image rc=3   want=1   RC-MISMATCH            judgement lines: ['FAIL 左缘偏移实测 0.0 逻辑 ≠ 档案常量 defaults.left_clip_shift_logical_px=2.0（render 图的 CDP c
+CASE neg-required-section-silent    rc=3   want=1   BAD-INJECTION          witness "FAIL 小节 '== 7.' 未出数" absent - the fault never executed; first judgement lines: ["INSTRUMENT
+CASE neg-flat-image-crashes-to-3    rc=3   want=3   ok                     
+CASE neg-waste-counter-counted      rc=3   want=1   BAD-INJECTION          witness '废图自检命中 = 1' absent - the fault never executed; first judgement lines: ["INSTRUMENT FAULT: s
+19 case(s) executed, expectation table says 19, 8 failure(s)
+VERDICT: FAIL
+EXITCODE=1
+longest scratch path in this run = 101 chars (Windows rejects beyond 259; kept under 240 so a longer product name cannot push it over)
+  witness lines this block judged (each is the line the WANT_TEXT needle matched, echoed from the complete capture so a reviewer can read it):
+    capture line 3: CASE offset-reproduces-gutter       rc=3   want=0   POSITIVE-CONTROL-FAULT judgement lines: ["INSTRUMENT FAULT: screen profile 'chat' has an empty require_sections: a required
+    capture line 3: CASE offset-reproduces-gutter       rc=3   want=0   POSITIVE-CONTROL-FAULT judgement lines: ["INSTRUMENT FAULT: screen profile 'chat' has an empty require_sections: a required
+    capture line 21: VERDICT: FAIL
+----- exit code: 1 (want 1) -----
+
+===== block 13 - rename proof: git pairs old and new paths at -M40%, and the index carries the move =====
+$ python -X utf8 artifacts/tmp/_g003/rename_proof.py
+… 1 line(s) of this block's stdout omitted here; the WANT_TEXT witnesses below are the lines that fell in that gap or would otherwise scroll off …
+    rename {artifacts/tmp => .trae/scripts/dev/parity}/png_probe.py (100%)
+-M40%: 2 rename row(s)
+    rename artifacts/tmp/measure_chat_1to1.py => .trae/scripts/dev/parity/measure_screen.py (45%)
+    rename {artifacts/tmp => .trae/scripts/dev/parity}/png_probe.py (100%)
+the default 50% threshold does NOT pair them: the measurer was rewritten in place, so a
+plain 'git log --follow' on the new path would stop at the commit boundary. The score that
+does pair them is printed above and recorded here, together with 'git mv' leaving the
+rename in the index (git status --porcelain shows R/RM for these paths).
+index/worktree states for the new paths: 5 row(s)
+distinct index/worktree state codes over those rows: 4  codeset='A ','AM','R ','RM'
+   RM artifacts/tmp/measure_chat_1to1.py -> .trae/scripts/dev/parity/measure_screen.py
+   AM .trae/scripts/dev/parity/parity_selftest.py
+   R  artifacts/tmp/png_probe.py -> .trae/scripts/dev/parity/png_probe.py
+   AM .trae/scripts/dev/parity/screens.json
+   A  artifacts/fixtures/parity/chat-design-2026-09-27.png
+EXITCODE=0
+  witness lines this block judged (each is the line the WANT_TEXT needle matched, echoed from the complete capture so a reviewer can read it):
+    capture line 11: distinct index/worktree state codes over those rows: 4  codeset='A ','AM','R ','RM'
+    capture line 17: EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 14 - history proof: the moved file has a committable history to carry (checked again post-commit) =====
+$ python -X utf8 artifacts/tmp/_g003/follow_proof.py
+git log --follow on the OLD path (the history the instrument actually has): 1 commit(s)
+   30abb8d feat(android,ux): 首页视觉复刻与对话页 1:1、V1.1 高保真原型，入库本批证据
+git log --follow on the NEW path right now: 0 commit(s) - expected 0 while the rename is still uncommitted; re-run this block after the slice commit and it must become 1
+EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 15 - documentation reverse-search: current-state surfaces clean, dated record marked =====
+$ python -X utf8 artifacts/tmp/_g003/paths_checked.py Docs/04-ux-design/知芽-TreeLearn-对话页1比1复刻方案-V1.0.md 路径变更（2026-10-15
+reverse-search pattern: artifacts/tmp/measure_chat_1to1 | artifacts/tmp/png_probe | artifacts/tmp/verify_1to1 | artifacts/tmp/cdp_shot
+dated record under check: Docs/04-ux-design/知芽-TreeLearn-对话页1比1复刻方案-V1.0.md
+.trae/README.md                                          hits=0 (clean)
+AGENTS.md                                                hits=0 (clean)
+.trae/ROADMAP.md                                         hits=0 (clean)
+.trae/context/project-brief.md                           hits=0 (clean)
+Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md       hits=0 (clean)
+dated record (the 2026-09-27 replication plan) still naming the old paths: 3 line(s)
+   line 293: | `artifacts/tmp/measure_chat_1to1.py` | 像素实测脚本（可传图路径；含废图自检、左缘偏移
+   line 294: | `artifacts/tmp/verify_1to1.mjs` | DOM/计算样式闭环量测（零依赖，Edge headle
+   line 295: | `artifacts/tmp/cdp_shot.mjs` | 原型渲染截图（Edge headless + CDP，2x） 
+relocation marker lines in that document (marker = 路径变更（2026-10-15): 1
+PATHS checked: 5 current-state file(s) must be clean + 1 dated record must be marked
+EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 16 - sizing: new files counted in full (profile + selftest companion) =====
+$ python -X utf8 .trae/scripts/dev/count_production_lines.py .trae/scripts/dev/parity/screens.json .trae/scripts/dev/parity/parity_selftest.py
+    48  .trae/scripts/dev/parity/screens.json
+   241  .trae/scripts/dev/parity/parity_selftest.py
+   289  TOTAL (non-blank, non-comment, production files only)
+----- exit code: 0 (want 0) -----
+
+===== block 17 - sizing: the moved file counted whole (its added-line face is block 18) =====
+$ python -X utf8 .trae/scripts/dev/count_production_lines.py .trae/scripts/dev/parity/measure_screen.py
+   491  .trae/scripts/dev/parity/measure_screen.py
+   491  TOTAL (non-blank, non-comment, production files only)
+----- exit code: 0 (want 0) -----
+
+===== block 18 - change face: rename-aware numstat, whitespace check, untracked list =====
+$ python -X utf8 artifacts/tmp/_g003/sizing_delta.py
+rename-aware numstat (added / deleted / path):
+   288	37	artifacts/tmp/measure_chat_1to1.py => .trae/scripts/dev/parity/measure_screen.py
+   279	0	.trae/scripts/dev/parity/parity_selftest.py
+   0	0	{artifacts/tmp => .trae/scripts/dev/parity}/png_probe.py
+   48	0	.trae/scripts/dev/parity/screens.json
+diff --check over the new paths and the docs: rc=0 judgement_lines=0
+note: 'diff --check' warnings (CRLF) are counted separately from whitespace judgement lines.
+untracked files under the new paths: 0  []
+SIZING face checked: 4 paths in numstat, whitespace, untracked list
+EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 19 - judged size: moved file counted by this slice's added lines only, profile counted whole =====
+$ python -X utf8 .trae/scripts/dev/count_production_lines.py artifacts/tmp/_g003/moved-added.py .trae/scripts/dev/parity/screens.json
+   256  artifacts/tmp/_g003/moved-added.py
+    48  .trae/scripts/dev/parity/screens.json
+   304  TOTAL (non-blank, non-comment, production files only)
+  witness lines this block judged (each is the line the WANT_TEXT needle matched, echoed from the complete capture so a reviewer can read it):
+    capture line 3:    304  TOTAL (non-blank, non-comment, production files only)
+----- exit code: 0 (want 0) -----
+
+===== block 20 - production fingerprints re-taken after all judgements =====
+$ python -X utf8 <the same fingerprint snippet as the header> .trae/scripts/dev/parity/measure_screen.py .trae/scripts/dev/parity/parity_selftest.py .trae/scripts/dev/parity/png_probe.py .trae/scripts/dev/parity/screens.json artifacts/fixtures/parity/chat-design-2026-09-27.png
+fingerprints identical before/after all judgements: yes (pre rc=0 post rc=0)
+----- exit code: 0 (want 0) -----
+
+===== block 21 - encoding gate over every text file this slice changed or created =====
+$ python -X utf8 artifacts/tmp/_g003/utf8_gate.py .trae/scripts/dev/parity/measure_screen.py .trae/scripts/dev/parity/parity_selftest.py .trae/scripts/dev/parity/screens.json Docs/04-ux-design/知芽-TreeLearn-对话页1比1复刻方案-V1.0.md Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md artifacts/evidence/T-2026-10-15-003-green.txt artifacts/tmp/gen-003-green.sh
+GATE SELFTEST ok: known-broken byte string is rejected
+GATE SELFTEST ok: a lossy decode leaves a detectable U+FFFD
+ok .trae/scripts/dev/parity/measure_screen.py bytes=28279 replacement=0
+ok .trae/scripts/dev/parity/parity_selftest.py bytes=13858 replacement=0
+ok .trae/scripts/dev/parity/screens.json bytes=3679 replacement=0
+ok Docs/04-ux-design/知芽-TreeLearn-对话页1比1复刻方案-V1.0.md bytes=34360 replacement=0
+ok Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md bytes=23834 replacement=0
+ok artifacts/evidence/T-2026-10-15-003-green.txt bytes=26194 replacement=0
+ok artifacts/tmp/gen-003-green.sh bytes=31107 replacement=0
+GATE failures=0 over 7 file(s)
+  witness lines this block judged (each is the line the WANT_TEXT needle matched, echoed from the complete capture so a reviewer can read it):
+    capture line 1: GATE SELFTEST ok: known-broken byte string is rejected
+    capture line 10: GATE failures=0 over 7 file(s)
+----- exit code: 0 (want 0) -----
+
+===== block 22 - read-back guard: every judged witness must also be readable in this evidence file =====
+$ python -X utf8 artifacts/tmp/_g003/visible_guard.py artifacts/evidence/T-2026-10-15-003-green.txt artifacts/tmp/_g003
+evidence file under read-back: artifacts/evidence/T-2026-10-15-003-green.txt (bytes=27404)
+needle files produced by run(): 15
+stale needle files = 0 (must be 0)
+needles judged=40 missing-from-evidence=0 (must be 0)
+selftest case lines in block 01's complete capture=19 ; each of them must also be readable in this evidence file
+selftest case lines readable somewhere in this evidence file (all blocks counted)=35
+hidden from block 01 = 0 (must be 0)
+EXITCODE=0
+  witness lines this block judged (each is the line the WANT_TEXT needle matched, echoed from the complete capture so a reviewer can read it):
+    capture line 4: needles judged=40 missing-from-evidence=0 (must be 0)
+    capture line 4: needles judged=40 missing-from-evidence=0 (must be 0)
+    capture line 7: hidden from block 01 = 0 (must be 0)
+    capture line 3: stale needle files = 0 (must be 0)
+----- exit code: 0 (want 0) -----
+
+===== TOTAL (derived, ASCII-only tail) =====
+block count floor (bare integer literal, asserted against this script's own source line):
+  blocks=22 expectation_entries=22 floor=22 -> ok
+unexpected count = 0
+expectation table (want/got per block):
+  block 01: want=0 got=0 label=selftest over every detection branch (positive and negative pairs)
+  block 02: want=0 got=0 label=design shot (relocated fixture) measures clean
+  block 03: want=0 got=0 label=render shot (closed loop) measures clean with both corrections applied
+  block 04: want=0 got=0 label=archived record vs this re-run: judgement lines must be identical
+  block 05: want=2 got=2 label=unrecognised flag is a usage error, not a judgement
+  block 06: want=3 got=3 label=missing input image is an instrument fault, not a judgement
+  block 07: want=3 got=3 label=missing profile file is an instrument fault
+  block 08: want=3 got=3 label=unknown screen name is an instrument fault and lists the known ones
+  block 09: want=3 got=3 label=unknown shot kind is an instrument fault (refuses to guess which corrections apply)
+  block 10: want=1 got=1 label=offset constant deleted must be judged FAIL, never silently treated as 0
+  block 11: want=1 got=1 label=offset constant zeroed must be judged FAIL (a zeroed correction reads as compliance)
+  block 12: want=1 got=1 label=mutation: with the required-section list emptied the selftest itself must turn red
+  block 13: want=0 got=0 label=rename proof: git pairs old and new paths at -M40%, and the index carries the move
+  block 14: want=0 got=0 label=history proof: the moved file has a committable history to carry (checked again post-commit)
+  block 15: want=0 got=0 label=documentation reverse-search: current-state surfaces clean, dated record marked
+  block 16: want=0 got=0 label=sizing: new files counted in full (profile + selftest companion)
+  block 17: want=0 got=0 label=sizing: the moved file counted whole (its added-line face is block 18)
+  block 18: want=0 got=0 label=change face: rename-aware numstat, whitespace check, untracked list
+  block 19: want=0 got=0 label=judged size: moved file counted by this slice's added lines only, profile counted whole
+  block 20: want=0 got=0 label=production fingerprints identical before and after every judgement
+  block 21: want=0 got=0 label=encoding gate over every text file this slice changed or created
+  block 22: want=0 got=0 label=read-back guard: every judged witness must also be readable in this evidence file
+ascii tail: bytes=2490 non-ascii=0 (must be 0)
+OVERALL_EXITCODE=0
+DECODE ok file bytes=30866

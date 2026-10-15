@@ -1,0 +1,116 @@
+# T-2026-10-15-005 RED - 屏幕清单生成器收编前的失败证据
+# Generated: 2026-10-15T17:06:19Z  (UTC)
+# Generator: artifacts/tmp/gen-005-red.sh   重跑：bash artifacts/tmp/gen-005-red.sh
+# 本文件覆盖的调用形态：
+#   python -X utf8 .trae/scripts/dev/screen_inventory_selftest.py                  （正反自检全套；用例数由产物自己打印，本脚本不钉数）
+#   python -X utf8 .trae/scripts/dev/gen_screen_inventory.py --no-write        （清单生成器本体）
+#   python -X utf8 artifacts/tmp/_red005/window005.py      （块 02：单进程挪开-读数-还原窗口）
+#   python -X utf8 artifacts/tmp/_red005/revert005.py      （块 03：同深度副本的退出码层碰撞量测）
+# 判据面：块 01/04/05/06 全程不动工作树；块 02 只在一个进程的 try/finally 内挪仪器，
+#   起点不在场即拒绝；块 03 只写 artifacts/tmp/_r005 下的副本，生产字节只读不写。
+# 被核文件指纹（判定前读数；块 01 在窗口之后再复核是否相同）：
+#   .trae/scripts/dev/gen_screen_inventory.py  bytes=16373  lines=349  sha256=e531110b4be80f9c71820f8840e0a3fbe17383c4a2b9cbd936ec52021412fc30
+#   .trae/scripts/dev/screen_inventory_selftest.py  bytes=23561  lines=511  sha256=50461302fbcbc5635d5416b7984e663b631fc903ce271ed85131c97ae6016bbf
+#   .trae/scripts/dev/gen_parity_ledger.py  bytes=16931  lines=329  sha256=32d98ebc6daeef3366fbf792c2cb39aebe3af19e605b412dbf8fe3e7b2ee75b3
+#   .trae/scripts/dev/parity_ledger_selftest.py  bytes=20752  lines=463  sha256=027a74fcbf22a45b75e718041ddef868010d0d8ca36bd4dce41f042f7a607f64
+#   Docs/04-ux-design/parity/screen-inventory.json  bytes=20364  lines=946  sha256=4bfcb8a72f4ec553fbac0029320b589c43af32cef36f0f92ceb7325377404d74
+
+===== block 1 - keep-behaviour premise: no android/ file is touched and the instruments' pre-window bytes are recorded =====
+$ python -X utf8 artifacts/tmp/_red005/precheck.py
+android files changed by the working tree = 0
+recorded 5 pre-window fingerprint(s)
+PRE ok
+----- exit code: 0 (want 0) -----
+
+===== block 2 - instrument absent for real: tier 3 at three entries with one shared channel, the floor token loses its only emitter, restore is byte-exact =====
+$ python -X utf8 artifacts/tmp/_red005/window005.py
+A absent selftest rc=3
+A names the missing instrument: True
+A does not report a case mismatch: True
+A prints its own exit-code line: True
+A instrument-fault lines=1
+A fault reading=INSTRUMENT FAULT: gen_screen_inventory.py is not importable next to this script (No module named 'gen_screen_inventory'); no case can run
+B absent generator rc=2
+B python says it cannot open the file: True
+C token carriers before=2 aside=1 after=2
+C carriers aside: ['screen_inventory_selftest.py']
+C generator was one of the before carriers: True
+C aside carriers are asserters only: True
+D ledger generator rc=3 fault=True names the sibling: True no ledger printed: True
+D ledger selftest rc=3 fault=True names the sibling: True no CASE lines: True
+D same tier at both consumer entries: True
+D same tier as the 005 selftest: True
+RESTORE equals_pre=True equals_after_len=16373/16373 parses=True
+WINDOW ok
+----- exit code: 0 (want 0) -----
+
+===== block 3 - measured exit-tier collision: the same absence without the guard lands on the case-mismatch tier, byte-identical to a forced false judgement, while the shipped guard answers 3 =====
+$ python -X utf8 artifacts/tmp/_red005/revert005.py
+guard anchor hits in the production selftest=1
+reverted bytes=23007 production bytes=23561 differ=True
+R1 no guard, instrument absent: rc=1 stdout-bytes=0 ModuleNotFoundError=True
+R1 has no CASE line=True no EXITCODE line=True
+R2 one judgement forced false: rc=1 failing=['neg-screens-below-floor', 'pos-real-tree']
+R3 guard as shipped: rc=3 names the instrument=True no CASE line=True ends EXITCODE=3=True
+COLLISION rc(R1)==rc(R2) is True - both are the tier a case mismatch uses
+RESOLVED rc(R3)!=rc(R1) is True, rc(R3)=3
+pre-run fingerprint match .trae/scripts/dev/screen_inventory_selftest.py -> True
+pre-run fingerprint match .trae/scripts/dev/gen_screen_inventory.py -> True
+REVERT ok
+----- exit code: 0 (want 0) -----
+
+===== block 4 - control arm: the same fixture returns 0 with every case running, tiers 0/1/3 all reached, and the generator prints measured counts beside the spec's own claim =====
+$ python -X utf8 artifacts/tmp/_red005/control005.py
+CONTROL executed=19 expected=19 equal=True failures=0 tier3-by-design=6
+CONTROL tiers seen=[0, 1, 3] instrument-fault-lines=0 verdict-pass=True last-line-exitcode0=True rc=0
+CONTROL generator rc=0 measured=('14', '5') spec-claim line=True floor ok=True
+CONTROL ok
+----- exit code: 0 (want 0) -----
+
+===== block 5 - nothing this slice produces exists in git history yet (commits=0 and untracked for all three artefacts) =====
+$ python -X utf8 artifacts/tmp/_red005/no_history.py
+history .trae/scripts/dev/gen_screen_inventory.py commits=0 tracked=False
+history .trae/scripts/dev/screen_inventory_selftest.py commits=0 tracked=False
+history Docs/04-ux-design/parity/screen-inventory.json commits=0 tracked=False
+info    artifacts/parity/ledger.md                                 commits=0 (007's artefact, printed not judged)
+NOHISTORY ok
+----- exit code: 0 (want 0) -----
+
+===== block 6 - task contract: 005's declared judged value shows up as its own size-band warning and every error is the missing RED record, nothing else =====
+$ python -X utf8 artifacts/tmp/_red005/contract005.py
+declared band: size-warning count=1 text=['estimated production lines 311 exceeds soft limit 20']
+this task: WARNING count=1 (band=1 other=0) ERROR count=5 (RED-family=5 other=0)
+note: repo-wide readings are errors=21 warnings=12 and are NOT judged here.
+CONTRACT ok
+----- exit code: 0 (want 0) -----
+
+===== block 7 - encoding gate over the instruments this slice adds, the filed inventory and this generator's own source, self-probed both ways =====
+$ python -X utf8 artifacts/tmp/_red005/utf8_gate.py .trae/scripts/dev/gen_screen_inventory.py .trae/scripts/dev/screen_inventory_selftest.py .trae/scripts/dev/gen_parity_ledger.py .trae/scripts/dev/parity_ledger_selftest.py Docs/04-ux-design/parity/screen-inventory.json artifacts/tmp/gen-005-red.sh .trae/tasks/T-2026-10-15-screen-inventory-parity-ledger-005.md
+GATE SELFTEST ok: a known-broken byte string is rejected
+ok   .trae/scripts/dev/gen_screen_inventory.py                  bytes=16373
+ok   .trae/scripts/dev/screen_inventory_selftest.py             bytes=23561
+ok   .trae/scripts/dev/gen_parity_ledger.py                     bytes=16931
+ok   .trae/scripts/dev/parity_ledger_selftest.py                bytes=20752
+ok   Docs/04-ux-design/parity/screen-inventory.json             bytes=20364
+ok   artifacts/tmp/gen-005-red.sh                               bytes=37928
+ok   .trae/tasks/T-2026-10-15-screen-inventory-parity-ledger-005.md bytes=28447
+gate covered 7 file(s)
+EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== TOTAL (derived, ASCII-only tail) =====
+block count floor (bare integer literal, asserted against this script's own source line):
+  blocks=7 expectation_entries=7 floor=7
+  -> ok
+unexpected count = 0
+expectation table (want/got per block):
+  block 1: want=0 got=0 label=keep-behaviour premise: no android/ file is touched and the instruments' pre-window bytes are recorded
+  block 2: want=0 got=0 label=instrument absent for real: tier 3 at three entries with one shared channel, the floor token loses its only emitter, restore is byte-exact
+  block 3: want=0 got=0 label=measured exit-tier collision: the same absence without the guard lands on the case-mismatch tier, byte-identical to a forced false judgement, while the shipped guard answers 3
+  block 4: want=0 got=0 label=control arm: the same fixture returns 0 with every case running, tiers 0/1/3 all reached, and the generator prints measured counts beside the spec's own claim
+  block 5: want=0 got=0 label=nothing this slice produces exists in git history yet (commits=0 and untracked for all three artefacts)
+  block 6: want=0 got=0 label=task contract: 005's declared judged value shows up as its own size-band warning and every error is the missing RED record, nothing else
+  block 7: want=0 got=0 label=encoding gate over the instruments this slice adds, the filed inventory and this generator's own source, self-probed both ways
+ascii tail: bytes=1400 non-ascii=0 (must be 0)
+OVERALL_EXITCODE=0
+DECODE ok file bytes=8487

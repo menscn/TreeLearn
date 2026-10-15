@@ -165,7 +165,7 @@ status: accepted
 - **疑虑 2：思考预算在 DeepSeek / OpenAI 兼容参数上的映射**
   - 冲突/问题：RikkaHub 事实（出处 F5/F6）显示两件事：档位是离散 effort 字符串而非 token 数；参数形态按 host 分派——DeepSeek 官方域名发 `thinking` 开关对象 + `reasoning_effort`，未知 host 缺省发 `reasoning_effort`，部分服务发布尔开关。而「用 max_tokens 限定思考长度」在 RikkaHub 源码中没有对应做法。
   - 建议：知芽沿用现有 `JsonChatRequestBody` 的显式 `thinking` 开关（project-brief「思考模式开关每次请求显式传」约束不变），在其上叠加离散 `reasoning_effort` 档位（低/中/高）；DeepSeek 官方基址与未知基址统一走 `reasoning_effort`，不实现 per-host 分派表，也不做 max_tokens 映射。档位集合取五档（见 Interface plan），RikkaHub 的超高/最大两档不进首版。
-  - 理由：离散档位跨服务兼容性最好；per-host 分派表维护成本高、与知芽「无服务端、单人维护」现实不符；max_tokens 映射在兼容服务上语义不可靠。
+  - 理由：离散档位跨服务兼容性最好；per-host 分派表维护成本高、与知芽「本地优先、单人维护」现实不符；max_tokens 映射在兼容服务上语义不可靠。〔2026-10-15 更新〕该条约束已由 `Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md` 从「无服务端」收窄为「无**远程**服务端」；本条推理依赖的是单人维护，不依赖有没有本机服务，结论不变。
   - 代价：个别服务的专有思考参数（如布尔 enable_thinking 型）覆盖不到，该类服务思考开关可能不生效，届时按疑虑 1 的「后补」路径立项。
   - 谁拍板：用户。
 - **疑虑 3：聊天建议开关与现有 Recommendation 体系（T-046 派生推荐）合并还是并存**

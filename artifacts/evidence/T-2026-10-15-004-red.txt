@@ -1,0 +1,162 @@
+# T-2026-10-15-004 RED - CSS token 生成链与前端裸色值守门：实现前的失败证据
+# Generated: 2026-10-15T09:45:29Z  (UTC)
+# Generator: artifacts/tmp/gen-004-red.sh   重跑：bash artifacts/tmp/gen-004-red.sh
+# 本文件覆盖的调用形态：
+#   git cat-file -e HEAD:<路径>                （第 4 消费者与生成器在 HEAD 是否存在）
+#   python -X utf8 <HEAD 版守门> [--selftest]   （旧守门在合成仓库里的真实判决）
+#   python -X utf8 artifacts/tmp/_t004/redstate-check_design_tokens.py --selftest
+# RED 的两个层次：① 新判据在实现前根本无法触发（缺符号、缺文件、元数不符、脚本不存在）；
+#   ② 旧守门在第 4 消费者已经落盘的情况下仍打 EXITCODE=0，且输出里 0 次提到 tokens.css —— 那是
+#   假绿而不是「没跑成」，因为同一份文件换到新守门下会立刻被逐字节判红（见 GREEN 证据块 10）。
+# 合成仓库 artifacts/tmp/_r004/repo-head 的全部内容由 git show HEAD:<路径> 取出，基线不取自本次运行的工作树读数。
+# 被核文件指纹（判定前的逐文件读数；末段只比对前后是否相同）：
+#   .trae/scripts/dev/gen_design_tokens_css.py  bytes=14734  lines=323  sha256=8f90eebb4b865aaafe466fc6b00effcabd5393246235b770f27914ba387ba654
+#   .trae/scripts/dev/check_design_tokens.py  bytes=27968  lines=518  sha256=2ef01cb7c286b3dca4d8a083b0f19b5eef6dfbcca82a54565836e7e02a96390c
+#   frontend/src/styles/tokens.css  bytes=1446  lines=52  sha256=ef4813b709c670700d4f028833e1cc12888889fa427f8acc084892b98554f68f
+#   Docs/04-ux-design/design-system/tokens.json  bytes=6408  lines=193  sha256=7b6664f2947b15c5124c8b2449f92a0d78ebac191e095d783b95f952aaf363b7
+
+===== block 01 - HEAD has no generator at the production path =====
+$ git cat-file -e HEAD:.trae/scripts/dev/gen_design_tokens_css.py
+fatal: path '.trae/scripts/dev/gen_design_tokens_css.py' exists on disk, but not in 'HEAD'
+----- exit code: 128 (want 128) -----
+
+===== block 02 - HEAD has no generated CSS at the production path (so there was no 4th consumer at all) =====
+$ git cat-file -e HEAD:frontend/src/styles/tokens.css
+fatal: path 'frontend/src/styles/tokens.css' exists on disk, but not in 'HEAD'
+----- exit code: 128 (want 128) -----
+
+===== block 03 - HEAD guard source has no 4th-consumer vocabulary at all (render_css / BARE_HEX_RE / tokens.css) =====
+$ python -X utf8 artifacts/tmp/_r004/head_grep.py render_css|BARE_HEX_RE|tokens\.css .trae/scripts/dev/check_design_tokens.py
+pattern='render_css|BARE_HEX_RE|tokens\\.css' file=.trae/scripts/dev/check_design_tokens.py hits=0 lines=[]
+VOCAB ABSENT AT HEAD (absence measured, not assumed)
+----- exit code: 0 (want 0) -----
+
+===== block 04 - HEAD guard compare() takes 3 arguments, so a 4-consumer call cannot even be made =====
+$ sh -c git show HEAD:.trae/scripts/dev/check_design_tokens.py | grep -n 'def compare'
+81:def compare(root_tokens, tokens, colors):
+----- exit code: 0 (want 0) -----
+
+===== block 05 - HEAD guard has no SKIPPED concept: a branch that never ran used to be indistinguishable from a pass =====
+$ python -X utf8 artifacts/tmp/_r004/head_grep.py SKIPPED|tally .trae/scripts/dev/check_design_tokens.py
+pattern='SKIPPED|tally' file=.trae/scripts/dev/check_design_tokens.py hits=0 lines=[]
+VOCAB ABSENT AT HEAD (absence measured, not assumed)
+----- exit code: 0 (want 0) -----
+
+===== block 06 - the test-first file is HEAD guard plus added judgements only (baseline not hand-rewritten) =====
+$ python -X utf8 artifacts/tmp/_r004/redstate_shape.py artifacts/tmp/_t004/redstate-check_design_tokens.py
+test-first file vs HEAD guard: added=51 removed=0
+names the added cases reference: ['bare_hex_checks', 'compare', 'render_css', 'scan_bare_hex']
+REDSTATE shape ok: HEAD bytes preserved, only new judgements appended
+EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 07 - test-first selftest against the pre-slice guard dies on the 4-consumer call =====
+$ python -X utf8 artifacts/tmp/_t004/redstate-check_design_tokens.py --selftest
+OK   selftest: colors.xml 多资源必须 FAIL
+OK   selftest: colors.xml 数值漂移必须 FAIL
+OK   selftest: 全无色值（解析退化）必须 FAIL
+OK   selftest: :root 缺失必须 FAIL
+OK   selftest: 解析器能读同一行多条声明
+Traceback (most recent call last):
+  File "D:\Project\Android\Treelearn\artifacts\tmp\_t004\redstate-check_design_tokens.py", line 271, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "D:\Project\Android\Treelearn\artifacts\tmp\_t004\redstate-check_design_tokens.py", line 240, in main
+    return selftest(Checks("check_design_tokens --selftest")).finish()
+           ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\Android\Treelearn\artifacts\tmp\_t004\redstate-check_design_tokens.py", line 186, in selftest
+    c.check(compare(root, tokens, colors, css) == [], "selftest: 四方一致必须 PASS")
+            ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: compare() takes 3 positional arguments but 4 were given
+----- exit code: 1 (want 1) -----
+
+===== block 08 - isolated probe: all four new symbols absent at HEAD, so the RED has more than one cause =====
+$ python -X utf8 artifacts/tmp/_r004/missing_symbols.py artifacts/tmp/_r004/repo-head/.trae/scripts/dev/check_design_tokens.py
+HEAD guard lacks 4 of the 4 names the new cases call: missing=['render_css', 'scan_bare_hex', 'bare_hex_checks', 'regeneration_problems']
+MISSING=4
+HEAD compare arity=3 params=['root_tokens', 'tokens', 'colors']
+EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 09 - the pre-slice guard stays green with the generated CSS on disk, naming only three consumers =====
+$ python -X utf8 artifacts/tmp/_r004/old_guard_blind.py artifacts/tmp/_r004/repo-head/.trae/scripts/dev/check_design_tokens.py
+old guard run against a tree that DOES contain the generated CSS: rc=0 tokens_css_mentions=0
+   OK   file exists: Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html
+   OK   file exists: Docs/04-ux-design/design-system/tokens.json
+   OK   file exists: android/app/src/main/res/values/colors.xml
+   OK   tokens.json token 名唯一 — measured_dupes=[]
+   OK   原型 :root 解析出 >= 40 个 token — measured=44
+   OK   tokens.json 解析出 >= 40 个 token — measured=44
+   OK   colors.xml 解析出 >= 1 个资源 — measured=16
+   OK   三方一致（原型 :root ↔ tokens.json ↔ colors.xml） — measured_tokens=44 measured_resources=16
+   check_design_tokens: 0 check(s) failed
+   EXITCODE=0
+VERDICT: old guard prints OK while the 4th consumer sits unjudged (blindness reproduced)
+EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 10 - the pre-slice selftest baseline that the keep-behaviour criterion is measured against =====
+$ python -X utf8 artifacts/tmp/_r004/head_case_count.py artifacts/tmp/_r004/repo-head/.trae/scripts/dev/check_design_tokens.py
+pre-slice selftest: rc=0 ok=10 fail=0
+BASELINE ok=10 - this is how many cases the criterion says must still hold unchanged
+HEAD selftest baseline ok
+EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 11 - at HEAD the current-state docs still promise a three-way guard (so the write-back was owed) =====
+$ python -X utf8 artifacts/tmp/_r004/docs_claim_three_way.py
+README.md                                      hits=1 [(153, '三方一致')]
+README_EN.md                                   hits=0 []
+AGENTS.md                                      hits=0 []
+.trae/rules/ux-design.md                       hits=2 [(10, '三处一致'), (13, '三方逐值')]
+.trae/ROADMAP.md                               hits=1 [(36, '三方比对')]
+Docs/04-ux-design/design-system/tokens.json    hits=1 [(12, '对齐三处')]
+Docs/04-ux-design/design-system/README.md      hits=5 [(13, '三方比对'), (15, '三处一致'), (56, '三处一致')]
+.trae/scripts/dev/check_design_tokens.py       hits=5 [(1, '三方一致'), (82, '三方一致'), (146, '三方一致')]
+LIVE THREE-WAY CLAIMS AT HEAD across the current-state surfaces = 15 (surfaces = 8)
+docs write-back obligation reproduced
+EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 12 - with no generator on disk the drift check was unexpressible: python cannot open the script (tier 2, not a judged FAIL) =====
+$ python -X utf8 artifacts/tmp/_r004/repo-head/.trae/scripts/dev/gen_design_tokens_css.py --check
+D:\Environment\Python\python.exe: can't open file 'D:\\Project\\Android\\Treelearn\\artifacts\\tmp\\_r004\\repo-head\\.trae\\scripts\\dev\\gen_design_tokens_css.py': [Errno 2] No such file or directory
+----- exit code: 2 (want 2) -----
+
+===== block 13 - encoding gate over every file this RED run depends on (self-probed against a known-broken string) =====
+$ python -X utf8 artifacts/tmp/_r004/utf8_gate.py artifacts/tmp/_t004/redstate-check_design_tokens.py artifacts/tmp/_r004/repo-head/.trae/scripts/dev/check_design_tokens.py artifacts/tmp/_r004/repo-head/.trae/scripts/harness_check_lib.py artifacts/tmp/_r004/repo-head/Docs/04-ux-design/design-system/tokens.json
+GATE SELFTEST ok: a known-broken byte string is rejected
+ok   artifacts/tmp/_t004/redstate-check_design_tokens.py bytes=12695
+ok   artifacts/tmp/_r004/repo-head/.trae/scripts/dev/check_design_tokens.py bytes=9472
+ok   artifacts/tmp/_r004/repo-head/.trae/scripts/harness_check_lib.py bytes=6685
+ok   artifacts/tmp/_r004/repo-head/Docs/04-ux-design/design-system/tokens.json bytes=6165
+UTF-8 gate over the files this RED run depends on: 4 file(s)
+EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== fingerprints re-taken after all judgements (unnumbered judgement段, see header note) =====
+$ python -X utf8 <the same fingerprint snippet as the header> .trae/scripts/dev/gen_design_tokens_css.py .trae/scripts/dev/check_design_tokens.py frontend/src/styles/tokens.css Docs/04-ux-design/design-system/tokens.json
+fingerprints identical before/after all judgements: yes (pre rc=0 post rc=0)
+
+===== TOTAL (derived, ASCII-only tail) =====
+block count floor (bare integer literal, asserted against this script's own source line):
+  blocks=13 expectation_entries=13 floor=13
+  -> ok
+unexpected count = 0
+expectation table (want/got per block):
+  block 01: want=128 got=128 label=HEAD has no generator at the production path
+  block 02: want=128 got=128 label=HEAD has no generated CSS at the production path (so there was no 4th consumer at all)
+  block 03: want=0 got=0 label=HEAD guard source has no 4th-consumer vocabulary at all (render_css / BARE_HEX_RE / tokens.css)
+  block 04: want=0 got=0 label=HEAD guard compare() takes 3 arguments, so a 4-consumer call cannot even be made
+  block 05: want=0 got=0 label=HEAD guard has no SKIPPED concept: a branch that never ran used to be indistinguishable from a pass
+  block 06: want=0 got=0 label=the test-first file is HEAD guard plus added judgements only (baseline not hand-rewritten)
+  block 07: want=1 got=1 label=test-first selftest against the pre-slice guard dies on the 4-consumer call
+  block 08: want=0 got=0 label=isolated probe: all four new symbols absent at HEAD, so the RED has more than one cause
+  block 09: want=0 got=0 label=the pre-slice guard stays green with the generated CSS on disk, naming only three consumers
+  block 10: want=0 got=0 label=the pre-slice selftest baseline that the keep-behaviour criterion is measured against
+  block 11: want=0 got=0 label=at HEAD the current-state docs still promise a three-way guard (so the write-back was owed)
+  block 12: want=2 got=2 label=with no generator on disk the drift check was unexpressible: python cannot open the script (tier 2, not a judged FAIL)
+  block 13: want=0 got=0 label=encoding gate over every file this RED run depends on (self-probed against a known-broken string)
+ascii tail: bytes=1810 non-ascii=0 (must be 0)
+OVERALL_EXITCODE=0
+DECODE ok file bytes=11869

@@ -1,0 +1,19 @@
+Generated: 2026-10-15 16:06:00 by the same run that wrote the evidence file
+Command: bash artifacts/tmp/gen-002-green.sh
+Evidence file it witnesses: T-2026-10-15-002-green.txt
+Purpose: carry the one check that cannot live inside the file it verifies. DECODE #4 strictly
+         decodes the evidence file AFTER its last byte (the OVERALL line) was written, so its
+         result cannot be folded into that file without changing the bytes it judges.
+         Everything else is folded: OVERALL_EXITCODE in the evidence file counts unexpected-rc,
+         DECODE #1, #2, #3 and the measured non-ascii counts of every appended section.
+
+DECODE #3 ok: 72035 bytes = 69300 (block-21 sample) + 498 (block 21 section) + 1472 (tail) + 765 (judgement block); decomposition residual = 0
+DECODE_3_RC=0   (folded into the evidence file's OVERALL_EXITCODE)
+DECODE #4 ok: 72054 bytes = 69300 (block-21 sample) + 498 (block 21 section) + 1472 (tail) + 765 (judgement block) + 19 (OVERALL line); residual = 0
+DECODE_4_RC=0
+folded into OVERALL_EXITCODE: unexpected-rc=0, decode1=0, decode2=0, decode3=0, ascii_tail=0, ascii_final=0
+NOT foldable into the evidence file (self-reference), witnessed here instead: decode4, ascii_last=0
+OVERALL_EXITCODE_AS_WRITTEN=0
+evidence bytes at DECODE #4 time: 72054
+note: this file is deliberately ASCII-only; the count is measured before it is copied into
+      artifacts/evidence (see CON_ASCII measurement printed on stdout), not asserted.

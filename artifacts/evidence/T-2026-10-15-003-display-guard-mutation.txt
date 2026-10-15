@@ -1,0 +1,137 @@
+# T-2026-10-15-003 - display-guard mutation witness
+# Generated: 2026-10-15T11:37:09Z  (UTC)
+# Generator: bash artifacts/tmp/gen-003-guard-mutation.sh
+# Object under mutation: artifacts/tmp/gen-003-green.sh
+#   fingerprint before: bytes=31107 lines=599 sha256=b2121769c958e6cbc50a9dfe154445890d690ffc7c0d5c0fa2219ffc833255ec
+# What is proved here:
+#   control copy  = paths redirected, display rule untouched  -> whole run must stay green
+#   mutated copy  = same paths, display rule reverted to pure tail-16 -> block 22 must be red
+# Nothing outside artifacts/tmp/_guardmut003 is written except this evidence file itself; the real GREEN evidence file
+#   (artifacts/evidence/T-2026-10-15-003-green.txt) is only ever named by the source copy, and block 08
+#   proves neither built copy still names it. The generator under test is copied, never edited.
+
+===== block 01 - build both copies of the generator from the live source =====
+$ python -X utf8 artifacts/tmp/_guardmut003/build_copies.py artifacts/tmp/gen-003-green.sh artifacts/tmp/_guardmut003
+copies built: control (display rule intact), mutated (display rule = pure tail-16)
+PINS ok: all four path lines matched exactly once
+----- exit code: 0 (want 0) -----
+  witness lines this block judged (matched inside the complete capture, echoed so a reviewer can read them):
+    capture line 1: copies built: control (display rule intact), mutated (display rule = pure tail-16)
+    capture line 2: PINS ok: all four path lines matched exactly once
+
+===== block 02 - both copies must parse (a copy that cannot parse proves nothing) =====
+$ bash -c bash -n artifacts/tmp/_guardmut003/gen-control.sh && bash -n artifacts/tmp/_guardmut003/gen-mutated.sh && echo PARSE ok
+PARSE ok
+----- exit code: 0 (want 0) -----
+
+===== block 03 - control copy (display rule intact) - whole battery must stay green =====
+$ bash artifacts/tmp/_guardmut003/gen-control.sh
+header stderr bytes=0
+header stderr bytes=0
+DECODE ok file bytes=31056
+final rc before decode was 0; decode rc=0
+OVERALL_EXITCODE=0
+----- exit code: 0 (want 0) -----
+  witness lines this block judged (matched inside the complete capture, echoed so a reviewer can read them):
+    capture line 5: OVERALL_EXITCODE=0
+
+===== block 04 - control evidence body: guard block ran and nothing was expected-red =====
+$ grep -E blocks=22|unexpected count = 0|read-back guard artifacts/tmp/_guardmut003/control-evidence.txt
+===== block 22 - read-back guard: every judged witness must also be readable in this evidence file =====
+  blocks=22 expectation_entries=22 floor=22 -> ok
+unexpected count = 0
+  block 22: want=0 got=0 label=read-back guard: every judged witness must also be readable in this evidence file
+----- exit code: 0 (want 0) -----
+  witness lines this block judged (matched inside the complete capture, echoed so a reviewer can read them):
+    capture line 3: unexpected count = 0
+    capture line 1: ===== block 22 - read-back guard: every judged witness must also be readable in this evidence file =====
+
+===== block 05 - mutated copy (display back to pure tail-16) - battery must go red =====
+$ bash artifacts/tmp/_guardmut003/gen-mutated.sh
+header stderr bytes=0
+UNEXPECTED rc for block 22: got 1 want 0 (read-back guard: every judged witness must also be readable in this evidence file)
+MISSING WITNESS in block 22: [missing-from-evidence=0 (must be 0)] [hidden from block 01 = 0 (must be 0)] - a required judgement line is absent from the complete capture (that run exited 1)
+header stderr bytes=0
+UNEXPECTED rc for block 22: got 1 want 0 (read-back guard: every judged witness must also be readable in this evidence file)
+MISSING WITNESS in block 22: [missing-from-evidence=0 (must be 0)] [hidden from block 01 = 0 (must be 0)] - a required judgement line is absent from the complete capture (that run exited 1)
+DECODE ok file bytes=22526
+final rc before decode was 1; decode rc=0
+OVERALL_EXITCODE=1
+----- exit code: 1 (want 1) -----
+  witness lines this block judged (matched inside the complete capture, echoed so a reviewer can read them):
+    capture line 9: OVERALL_EXITCODE=1
+
+===== block 06 - the red is attributable to block 22, not to any other block =====
+$ grep -E UNEXPECTED rc|MISSING WITNESS|hidden from block 01|missing-from-evidence artifacts/tmp/_guardmut003/mutated-console.txt
+UNEXPECTED rc for block 22: got 1 want 0 (read-back guard: every judged witness must also be readable in this evidence file)
+MISSING WITNESS in block 22: [missing-from-evidence=0 (must be 0)] [hidden from block 01 = 0 (must be 0)] - a required judgement line is absent from the complete capture (that run exited 1)
+----- exit code: 0 (want 0) -----
+  witness lines this block judged (matched inside the complete capture, echoed so a reviewer can read them):
+    capture line 1: UNEXPECTED rc for block 22: got 1 want 0 (read-back guard: every judged witness must also be readable in this evidence file)
+    capture line 2: MISSING WITNESS in block 22: [missing-from-evidence=0 (must be 0)] [hidden from block 01 = 0 (must be 0)] - a required judgement line is absent from the complete capture (that run exited 1)
+    capture line 2: MISSING WITNESS in block 22: [missing-from-evidence=0 (must be 0)] [hidden from block 01 = 0 (must be 0)] - a required judgement line is absent from the complete capture (that run exited 1)
+    capture line 2: MISSING WITNESS in block 22: [missing-from-evidence=0 (must be 0)] [hidden from block 01 = 0 (must be 0)] - a required judgement line is absent from the complete capture (that run exited 1)
+
+===== block 07 - byte-level proof that the reverted display rule hides witnesses =====
+$ python -X utf8 artifacts/tmp/_guardmut003/compare_bodies.py artifacts/tmp/_guardmut003/control-evidence.txt artifacts/tmp/_guardmut003/mutated-evidence.txt
+CASE-name lines readable in the CONTROL evidence body = 31
+CASE-name lines readable in the MUTATED evidence body = 24
+lost by the mutation = 7
+   lost: CASE neg-image-missing              rc=3   want=3   ok
+   lost: CASE neg-profile-missing            rc=3   want=3   ok
+   lost: CASE neg-profile-not-json           rc=3   want=3   ok
+   lost: CASE offset-reproduces-gutter       rc=0   want=0   ok
+   lost: CASE pos-allowance-exercised        rc=0   want=0   ok
+   lost: CASE pos-design                     rc=0   want=0   ok
+   lost: CASE pos-render                     rc=0   want=0   ok
+lost lines printed = 7
+ok the display mutation really did remove judged witnesses from the evidence body
+EXITCODE=0
+----- exit code: 0 (want 0) -----
+  witness lines this block judged (matched inside the complete capture, echoed so a reviewer can read them):
+    capture line 3: lost by the mutation = 7
+    capture line 12: ok the display mutation really did remove judged witnesses from the evidence body
+
+===== block 08 - the live generator and the live evidence file survived the experiment unchanged =====
+$ python -X utf8 artifacts/tmp/_guardmut003/untouched.py b2121769c958e6cbc50a9dfe154445890d690ffc7c0d5c0fa2219ffc833255ec
+generator sha256 after both runs = b2121769c958e6cbc50a9dfe154445890d690ffc7c0d5c0fa2219ffc833255ec
+generator sha256 before the run  = b2121769c958e6cbc50a9dfe154445890d690ffc7c0d5c0fa2219ffc833255ec
+control copy: EV target=artifacts/tmp/_guardmut003/control-evidence.txt under-scratch=True  writable references to the real evidence file=0 (comment-only mentions=1)
+mutated copy: EV target=artifacts/tmp/_guardmut003/mutated-evidence.txt under-scratch=True  writable references to the real evidence file=0 (comment-only mentions=1)
+git status for the real evidence file: ?? artifacts/evidence/T-2026-10-15-003-green.txt
+note: an untracked row means git CANNOT prove that file is unchanged; the writable-reference counts above are what carry that judgement
+EXITCODE=0
+----- exit code: 0 (want 0) -----
+  witness lines this block judged (matched inside the complete capture, echoed so a reviewer can read them):
+    capture line 3: control copy: EV target=artifacts/tmp/_guardmut003/control-evidence.txt under-scratch=True  writable references to the real evidence file=0 (comment-only mentions=1)
+    capture line 6: note: an untracked row means git CANNOT prove that file is unchanged; the writable-reference counts above are what carry that judgement
+
+===== block 09 - read-back guard: every witness this script judged is readable in this evidence file =====
+$ python -X utf8 artifacts/tmp/_guardmut003/self_visible.py artifacts/evidence/T-2026-10-15-003-display-guard-mutation.txt artifacts/tmp/_guardmut003  01 03 04 05 06 07 08
+needle files produced by block(): 7 (this run set WANT_TEXT for 7 block(s): 01 03 04 05 06 07 08)
+needles judged=14 missing-from-evidence=0 (must be 0)
+EXITCODE=0
+----- exit code: 0 (want 0) -----
+  witness lines this block judged (matched inside the complete capture, echoed so a reviewer can read them):
+    capture line 1: needle files produced by block(): 7 (this run set WANT_TEXT for 7 block(s): 01 03 04 05 06 07 08)
+    capture line 1: needle files produced by block(): 7 (this run set WANT_TEXT for 7 block(s): 01 03 04 05 06 07 08)
+    capture line 2: needles judged=14 missing-from-evidence=0 (must be 0)
+    capture line 2: needles judged=14 missing-from-evidence=0 (must be 0)
+
+===== TOTAL (derived, ASCII-only tail) =====
+block count floor (bare integer literal, asserted against this script's own source line):
+  blocks=9 expectation_entries=9 floor=9 -> ok
+unexpected count = 0
+expectation table (want/got per block):
+  block 01: want=0 got=0 label=build both copies of the generator from the live source
+  block 02: want=0 got=0 label=both copies must parse (a copy that cannot parse proves nothing)
+  block 03: want=0 got=0 label=control copy (display rule intact) - whole battery must stay green
+  block 04: want=0 got=0 label=control evidence body: guard block ran and nothing was expected-red
+  block 05: want=1 got=1 label=mutated copy (display back to pure tail-16) - battery must go red
+  block 06: want=0 got=0 label=the red is attributable to block 22, not to any other block
+  block 07: want=0 got=0 label=byte-level proof that the reverted display rule hides witnesses
+  block 08: want=0 got=0 label=the live generator and the live evidence file survived the experiment unchanged
+  block 09: want=0 got=0 label=read-back guard: every witness this script judged is readable in this evidence file
+ascii tail: bytes=1132 non-ascii=0 (must be 0)
+OVERALL_EXITCODE=0
+DECODE ok file bytes=10452

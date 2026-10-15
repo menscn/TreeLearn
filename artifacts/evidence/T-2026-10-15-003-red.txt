@@ -1,0 +1,147 @@
+# T-2026-10-15-003 RED - 1:1 量测仪器收编前的失败证据
+# Generated: 2026-10-15T08:22:38Z  (UTC)
+# Generator: artifacts/tmp/gen-003-red.sh   重跑：bash artifacts/tmp/gen-003-red.sh
+# 本片承诺支持的三种调用形态（现在都不存在）：
+#   python -X utf8 .trae/scripts/dev/parity/measure_screen.py --screen chat
+#   node         .trae/scripts/dev/parity/cdp_shot.mjs --screen chat --out <png>
+#   node         .trae/scripts/dev/parity/verify_1to1.mjs --screen chat
+# 被核文件指纹（由本脚本现场算出，不抄自任何任务正文）：
+#   sha256=12529b9a89f7dd97919bcc3af18f958c50af35412abfd5219e0f677c4cf1d569 bytes=15532 lines=292  artifacts/tmp/measure_chat_1to1.py
+#   sha256=456d64f38c502d371fdfbe557654ba6b5e31950f2b302219caf00a135b12a3ea bytes=3525 lines=106  artifacts/tmp/png_probe.py
+#   sha256=3bc1ab224254764a572fa38e74105abaf785d5ac444f12d3af3062abd8ea5c85 bytes=5769 lines=136  artifacts/tmp/cdp_shot.mjs
+#   sha256=0b44fa999f4ef6810e5580e910ac72002fc978ec09f45813acb6cdc1218f5e07 bytes=11527 lines=207  artifacts/tmp/verify_1to1.mjs
+# 每块给出：命令行、实际输出末 12 行、该次运行自己的退出码与期望值。
+
+===== block 01 - new python measurer path is absent (interpreter cannot open the file) =====
+$ python -X utf8 .trae/scripts/dev/parity/measure_screen.py --screen chat
+D:\Environment\Python\python.exe: can't open file 'D:\\Project\\Android\\Treelearn\\.trae\\scripts\\dev\\parity\\measure_screen.py': [Errno 2] No such file or directory
+----- exit code: 2 (want 2) -----
+
+===== block 02 - new capture tool path is absent =====
+$ node .trae/scripts/dev/parity/cdp_shot.mjs --screen chat --out artifacts/tmp/_red003/absent.png
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1048:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1072:10)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1093:12)
+    at Module._load (node:internal/modules/cjs/loader:1261:25)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v25.9.0
+----- exit code: 1 (want 1) -----
+
+===== block 03 - new DOM probe path is absent =====
+$ node .trae/scripts/dev/parity/verify_1to1.mjs --screen chat
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1048:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1072:10)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1093:12)
+    at Module._load (node:internal/modules/cjs/loader:1261:25)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v25.9.0
+----- exit code: 1 (want 1) -----
+
+===== block 04 - old measurer treats --screen as an image path: traceback, and 1 not 3 =====
+$ python -X utf8 artifacts/tmp/measure_chat_1to1.py --screen chat
+Traceback (most recent call last):
+  File "D:\Project\Android\Treelearn\artifacts\tmp\measure_chat_1to1.py", line 19, in <module>
+    im = Img(SHOT)
+  File "D:\Project\Android\Treelearn\artifacts\tmp\png_probe.py", line 57, in __init__
+    self.w, self.h, self.ch, self.buf = load_png(path)
+                                        ~~~~~~~~^^^^^^
+  File "D:\Project\Android\Treelearn\artifacts\tmp\png_probe.py", line 6, in load_png
+    data = open(path, 'rb').read()
+           ~~~~^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '--screen'
+----- exit code: 1 (want 1) -----
+
+===== block 05 - old measurer on a missing image exits 1, not 3 =====
+$ python -X utf8 artifacts/tmp/measure_chat_1to1.py artifacts/fixtures/parity/nope.png
+Traceback (most recent call last):
+  File "D:\Project\Android\Treelearn\artifacts\tmp\measure_chat_1to1.py", line 19, in <module>
+    im = Img(SHOT)
+  File "D:\Project\Android\Treelearn\artifacts\tmp\png_probe.py", line 57, in __init__
+    self.w, self.h, self.ch, self.buf = load_png(path)
+                                        ~~~~~~~~^^^^^^
+  File "D:\Project\Android\Treelearn\artifacts\tmp\png_probe.py", line 6, in load_png
+    data = open(path, 'rb').read()
+           ~~~~^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'artifacts/fixtures/parity/nope.png'
+----- exit code: 1 (want 1) -----
+
+===== block 06 - no right-scrollbar offset key exists in the old measurer =====
+$ grep -c right_scrollbar_logical_px artifacts/tmp/measure_chat_1to1.py
+0
+----- exit code: 1 (want 1) -----
+
+===== block 07 - no left-clip offset key exists in the old measurer =====
+$ grep -c left_clip_shift_logical_px artifacts/tmp/measure_chat_1to1.py
+0
+----- exit code: 1 (want 1) -----
+
+===== block 08 - old measurer has no screen-name flag at all =====
+$ grep -c -- --screen artifacts/tmp/measure_chat_1to1.py
+0
+----- exit code: 1 (want 1) -----
+
+===== block 09 - old capture tool has no fault exit code (only 0/1/2) =====
+$ grep -c process.exit(3) artifacts/tmp/cdp_shot.mjs
+0
+----- exit code: 1 (want 1) -----
+
+===== block 10 - old DOM probe has no fault exit code (only 0/1/2) =====
+$ grep -c process.exit(3) artifacts/tmp/verify_1to1.mjs
+0
+----- exit code: 1 (want 1) -----
+
+===== block 11 - old measurer ends with an unconditional EXITCODE=0 (grep finds it, so exit 0) =====
+$ grep -n print('EXITCODE=0') artifacts/tmp/measure_chat_1to1.py
+292:print('EXITCODE=0')
+----- exit code: 0 (want 0) -----
+
+===== block 12 - no screen profile file exists at the promised path yet (grep cannot open it) =====
+$ grep -c require_sections .trae/scripts/dev/parity/screens.json
+grep: .trae/scripts/dev/parity/screens.json: No such file or directory
+----- exit code: 2 (want 2) -----
+
+===== block 13 - encoding gate over tools + this evidence file + this generator =====
+$ python -X utf8 artifacts/tmp/_red003/utf8_gate.py <tools> artifacts/evidence/T-2026-10-15-003-red.txt artifacts/tmp/gen-003-red.sh
+GATE SELFTEST ok: known-broken byte string is rejected
+ok artifacts/tmp/measure_chat_1to1.py bytes=15532
+ok artifacts/tmp/png_probe.py bytes=3525
+ok artifacts/tmp/cdp_shot.mjs bytes=5769
+ok artifacts/tmp/verify_1to1.mjs bytes=11527
+ok artifacts/evidence/T-2026-10-15-003-red.txt bytes=6166
+ok artifacts/tmp/gen-003-red.sh bytes=9172
+GATE failures=0 over 6 file(s)
+----- exit code: 0 (want 0) -----
+
+===== TOTAL (derived, ASCII-only tail) =====
+block count floor (bare integer literal, asserted against this script's own source line):
+  blocks=13 expectation_entries=13 floor=13 -> ok
+unexpected count = 0
+expectation table (want/got per block):
+  block 01: want=2 got=2 label=new python measurer path is absent (interpreter cannot open the file)
+  block 02: want=1 got=1 label=new capture tool path is absent
+  block 03: want=1 got=1 label=new DOM probe path is absent
+  block 04: want=1 got=1 label=old measurer treats --screen as an image path: traceback, and 1 not 3
+  block 05: want=1 got=1 label=old measurer on a missing image exits 1, not 3
+  block 06: want=1 got=1 label=no right-scrollbar offset key exists in the old measurer
+  block 07: want=1 got=1 label=no left-clip offset key exists in the old measurer
+  block 08: want=1 got=1 label=old measurer has no screen-name flag at all
+  block 09: want=1 got=1 label=old capture tool has no fault exit code (only 0/1/2)
+  block 10: want=1 got=1 label=old DOM probe has no fault exit code (only 0/1/2)
+  block 11: want=0 got=0 label=old measurer ends with an unconditional EXITCODE=0 (grep finds it, so exit 0)
+  block 12: want=2 got=2 label=no screen profile file exists at the promised path yet (grep cannot open it)
+  block 13: want=0 got=0 label=encoding gate (selftested: the known-broken byte string must be rejected)
+ascii tail: bytes=1381 non-ascii=0 (must be 0 - everything appended after the gate is ASCII)
+OVERALL_EXITCODE=0
+DECODE #2 ok file bytes=8065

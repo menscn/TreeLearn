@@ -66,7 +66,11 @@
 截图为 2x 截图（物理 824×1367 → 逻辑 412×684dp），**逻辑值 = 物理值 / 2**。用纯 Python 解码 PNG 后逐行扫描，按元素类型做颜色聚类与边界测量。所有数字来自证据文件的对应小节，可重跑复核：
 
 ```bash
-python artifacts/tmp/measure_chat_1to1.py > artifacts/evidence/ux-chat-1to1-measure-2026-09-27.txt
+# 2026-10-15 起仪器已入库并可按屏名重跑（当年这条命令跑的是 artifacts/tmp/ 下的同名脚本）。
+# 重跑请写到新文件名：本节下面引用的 ux-chat-1to1-measure-2026-09-27.txt 是当年的实测记录，
+# 覆盖它就等于改写当年的结论。
+python -X utf8 .trae/scripts/dev/parity/measure_screen.py --screen chat \
+    > artifacts/evidence/ux-chat-1to1-measure-2026-10-15.txt
 ```
 
 判断色值是否"被改过"的**对照基线**：同一张图里的正文墨色与图标灰。
@@ -270,7 +274,7 @@ python artifacts/tmp/measure_chat_1to1.py > artifacts/evidence/ux-chat-1to1-meas
 ## 9. 出处索引
 
 - 实测证据：`artifacts/evidence/ux-chat-1to1-measure-2026-09-27.txt`
-- 测量脚本：`artifacts/tmp/measure_chat_1to1.py`、`artifacts/tmp/png_probe.py`（纯 Python PNG 解码，无第三方依赖）
+- 测量脚本：`.trae/scripts/dev/parity/measure_screen.py`（2026-09-27 名为 `measure_chat_1to1.py`，T-2026-10-15-003 收编并泛化）、`.trae/scripts/dev/parity/png_probe.py`（纯 Python PNG 解码，无第三方依赖）
 - 被改文件：`Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html`（`ChatScreen` 第 662–941 行；相关 CSS 第 112、179–233 行）
 - 设计事实源：`Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html` 的 `:root`（第 22–72 行）↔ `Docs/04-ux-design/design-system/tokens.json` ↔ `android/app/src/main/res/values/colors.xml`
 - 守门脚本：`.trae/scripts/dev/check_design_tokens.py`（第 145 行：不透明 hex token 自动映射到 `colors.xml`）
@@ -289,6 +293,13 @@ python artifacts/tmp/measure_chat_1to1.py > artifacts/evidence/ux-chat-1to1-meas
 | `artifacts/tmp/measure_chat_1to1.py` | 像素实测脚本（可传图路径；含废图自检、左缘偏移校正、圆角前向拟合、各节缺数据即跳过） |
 | `artifacts/tmp/verify_1to1.mjs` | DOM/计算样式闭环量测（零依赖，Edge headless + CDP） |
 | `artifacts/tmp/cdp_shot.mjs` | 原型渲染截图（Edge headless + CDP，2x） |
+
+> **路径变更（2026-10-15，阅读前必读）**：上表三行的路径是**2026-09-27 当时**的位置，保留不改写。
+> 现在的权威位置是 `.trae/scripts/dev/parity/`：像素量测脚本已收编为 `measure_screen.py`（可按屏名运行，
+> 偏移校正从同目录 `screens.json` 取并每次打印扣除量，正反双向自检 `--selftest`），`png_probe.py` 一并迁入。
+> 两支 Node 工具（`verify_1to1.mjs`、`cdp_shot.mjs`）仍留在 `artifacts/tmp/`，由 T-2026-10-15-006 收编。
+> 本节的量测结论与判定口径**未变**：收编前后对同一张 2026-09-27 样本重跑，87 行判据逐字相同
+> （见证 `artifacts/evidence/T-2026-10-15-003-green.txt` 的对照块）。
 
 ---
 

@@ -33,9 +33,9 @@
 - **验收方式**：（2026-09-21 按用户决定简化为轻流程）`python .trae/scripts/check_spec_author_agent.py <规格路径>` 退出码 0——只查四件事：文件存在、四节标题齐全、`intent:` 指向真实文件、没有占位符与裸 hex / 临场 px。**不再要求**独立复核轮次、证据文件，以及旧版的「每条检测分支都配一条注入用例」自闸门；规格由人 review 拍板。四类内容（需求规格 / 界面方案 / 技术规格 / 疑虑点）仍是写作要求，见 `.trae/templates/SPEC.md` 与 `.trae/agents/spec-author.md`，只是不再由守门脚本逐条强制。
 - **开源来源**：`https://github.com/openai/skills` → `skills/.curated/notion-spec-to-implementation/SKILL.md`；`https://github.com/anthropics/skills` → `skills/doc-coauthoring/SKILL.md`（2026-09-21 实测 HTTP 200）
 - **交付任务**：`T-2026-09-21-035`（spec-author 角色、SPEC.md 模板与守门，status=verified）；`T-2026-09-21-036`（第一份规格：AI 内置人设，只出需求规格 / 界面方案 / 疑虑点三节，`Technical spec` 记 `DEFERRED:待 B4`）。本条已开工，后续只需等 B4 落地后补技术规格。
-- **执行提示词**：先读 `.trae/templates/INTENT.md`、`.trae/rules/ux-design.md`、`.trae/rules/contracts.md`、`.trae/rules/documentation.md`、`.trae/ROADMAP.md` 五份，再挑一份已 accepted 的意图文件当实例，弄清 intent 的字段契约与现有 UX 政策（设计 token 三方比对脚本在 `.trae/scripts/dev/check_design_tokens.py`，权威数值在 `Docs/04-ux-design/design-system/tokens.json`）之后才动手。再参考上游 `https://github.com/openai/skills` 的 notion-spec-to-implementation 与 `https://github.com/anthropics/skills` 的 doc-coauthoring，取其「规格每条都要能追到来源」与「合作式成稿」的做法并二次优化。在 `.trae/agents/` 下新增 spec-author.md：只读上游、只写规格文件，不改代码、不改 intent、不建任务；在 `.trae/templates/` 下新增 SPEC.md，写清「规格里每一条都必须能追到 intent 条目、代码位置或设计 token」；再写一个纯标准库的**轻量**自检脚本（只查文件存在、四节标题、`intent:` 路径、占位符与裸 hex / 临场 px），跑通即可——本阶段不需要证据文件与自闸门。
+- **执行提示词**：先读 `.trae/templates/INTENT.md`、`.trae/rules/ux-design.md`、`.trae/rules/contracts.md`、`.trae/rules/documentation.md`、`.trae/ROADMAP.md` 五份，再挑一份已 accepted 的意图文件当实例，弄清 intent 的字段契约与现有 UX 政策（设计 token 四方比对脚本在 `.trae/scripts/dev/check_design_tokens.py`，前端 CSS 生成器在 `.trae/scripts/dev/gen_design_tokens_css.py`，权威数值在 `Docs/04-ux-design/design-system/tokens.json`）之后才动手。再参考上游 `https://github.com/openai/skills` 的 notion-spec-to-implementation 与 `https://github.com/anthropics/skills` 的 doc-coauthoring，取其「规格每条都要能追到来源」与「合作式成稿」的做法并二次优化。在 `.trae/agents/` 下新增 spec-author.md：只读上游、只写规格文件，不改代码、不改 intent、不建任务；在 `.trae/templates/` 下新增 SPEC.md，写清「规格里每一条都必须能追到 intent 条目、代码位置或设计 token」；再写一个纯标准库的**轻量**自检脚本（只查文件存在、四节标题、`intent:` 路径、占位符与裸 hex / 临场 px），跑通即可——本阶段不需要证据文件与自闸门。
 
-注意：`.trae/rules/contracts.md` 在 `frontend/**` 与 `backend/**` 都不存在时仍以 Android 侧契约为准，写规格时不要假设有服务端。规格完成后由人 review，接受才交给 requirement-decomposer 拆任务。
+注意：`.trae/rules/contracts.md` 已把 `frontend/**` 与 `backend/**` 分别授权给 `frontend-dev` 与 `backend-dev`，两目录尚未创建；Web 线方向与边界见 `Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md`。写规格时不要把「仅本机环回可达的桌面服务」当成远程服务端，也不要假设横向扩容或多实例。规格完成后由人 review，接受才交给 requirement-decomposer 拆任务。
 
 注意：`Docs/spec/` 是 Stage 2 的产物目录，模板本身要求四类内容齐全；但**第一份规格**（AI 人设，上游为 `Docs/intent/INTENT-2026-09-21-ai-persona-preference.md`）按用户 2026-09-21 的口径**只出需求规格、界面方案、疑虑点三节**，`Technical spec` 一栏写 `DEFERRED:待 B4`，等 B4（codebase-researcher）落地后再补。
 
@@ -143,3 +143,48 @@ Phase C 的条目都不是「现在缺人写」，而是**缺前置事实**：�
 - **验收方式**：`python .trae/scripts/run_release_gate.py` 退出码 0，且逐项打印闸门名与结论；任何一项没有打印判据行即判 FAIL。
 - **开源来源**：`https://github.com/contains-studio/agents` → `project-management/project-shipper.md`、`engineering/devops-automator.md`（2026-09-21 实测 HTTP 200）
 - **执行提示词**：前置条件——B3 已完成，且本机有可用的 Android 设备或模拟器。读 `.trae/rules/startup.md`、`.trae/rules/harness-verification.md`、`.trae/README.md`、`.trae/ROADMAP.md`，再参考上游 `https://github.com/contains-studio/agents` 的 project-shipper 与 devops-automator。在 `.trae/skills/` 下新增 release-gate 技能与 `.trae/scripts/` 下的 run_release_gate.py，闸门项至少包含构建、安装、关键冒烟、版本号与变更记录齐备；每项都要打印判据行，缺判据行即 FAIL，禁止只看退出码；跑通后把输出贴进任务证据。
+
+## 已知欠账（门禁红项，2026-10-15 盘点）
+
+这些不是「还没做的功能」，而是**当前就红着、且每片验收都会被它们绊住**的门禁。它们与本文件 Phase B/C 的区别是：B/C 缺前置条件，这里缺一次对判据本身的裁定。读数取 `T-2026-10-15-web-parity-doc-authority-writeback-002` 的 GREEN 证据块 05/06/07/11 与 `artifacts/evidence/T-2026-10-15-002-guards-baseline.txt`（同一条命令、回写前后逐项相同 → 证明本片没把它们改红，也没顺手改宽）。
+
+### D1 `check_roadmap_and_routing` 的一次性迁移断言永久为红
+
+- 现象：两条 FAIL——`AGENTS.md adds >= 4 routing rows — measured=0`、`new routing rows cover all four triggers — missing=['intent-capturer', 'pm-discovery', 'project-brief', 'ROADMAP']`。
+- 根因：判据写成「读 `git diff -- AGENTS.md`，要求新增行里含 ≥4 条路由表行」。那批路由行早在 2026-09-21 已提交进 AGENTS.md，工作树里不再有这种 diff，于是断言在任何后续片子上都恒为 0——**它验证的是一次历史动作，不是当前状态**。连带后果最重的一条：`checkers_selftest.py` 先跑各守门，遇到红即判 `OVERALL: INCONCLUSIVE` 并以退出码 3 中止，49 个注入用例根本不执行；这就是本仓库「自检跑不出信号」的机制，也是 002 片必须另写一次性驱动复现正控的原因。
+- 修法（二选一，需裁定）：① 把迁移断言改成**当前态**断言（AGENTS.md 路由表里必须存在覆盖四个触发词的行，按正文而非按 diff 判），一次性语义删掉；② 保留一次性语义但把它从常跑守门里移出，并在 `checkers_selftest` 的依赖序里把它排除。
+- 代价：①要重写判据并补正反自检；②要证明「排除的那条不会漏掉它本来要防的缺陷」。
+
+### D2 `check_context_pack` 的两条判据互斥
+
+- 现象：`docs index equals the real Docs/ file set — listed=21 actual=57`。
+- 根因：同脚本另一条判据把 project-brief 限制在 ≤60 行非空非标题行（实测 46），而要把 57 个 Docs 文件全列进索引就不可能只剩一页。**两条判据对同一文件给出互斥要求**，无论怎么改正文都必有一条红——这是 AGENTS.md 失败案例库里「同一条规则写在两个入口」的守门版：不是重复，是互斥。
+- 修法（需裁定）：① 索引改为分目录抽样或只列 `Docs/spec/**` + `Docs/intent/**`（其余由目录级 README 承担），并相应改判据；② 给索引单独开预算（brief 只留指针，索引挪到 `.trae/context/docs-index.md`），brief 仍守一页。
+- 代价：②多一个文件、要同步更新 AGENTS.md 路由与 `README_ENTRIES`；①要接受「索引不再穷尽」这个语义变化并写清哪些目录被排除。
+
+### D3 `validate_tasks.py` 全目录 16 条 ERROR，落在 4 个历史任务文件
+
+- 现象：`SUMMARY files=68 errors=16 warnings=8`；分布为 `T-2026-09-20-independent-harness-verification-019.md`（3 条依赖文件不存在）、`T-2026-09-20-tree-canvas-tablet-ui-017.md`（3 条依赖 + 5 条 RED 键缺失/退出码非整数）、`T-2026-09-28-chat-child-branch-popup-fix-106.md`（1 条 RED/GREEN 命令不一致）、`T-2026-09-28-chat-math-wire-renderer-104.md`（4 条）。
+- 后果：任何人「跑一遍全目录」拿到的都是红，于是这条门禁在成片验收时被跳过——**恒红的门禁等于没有门禁**，与 D1 同病。
+- 修法：4 个文件按 Task v2 契约补键或显式标注为「v2 之前的历史记录，契约不追溯」并加入豁免清单（豁免清单只存一处）。
+- 代价：补键要还原当时的 RED/GREEN 命令，部分已无法重跑，只能如实标注为历史。
+
+### D4 守门正控必须**现场派生**，不得手抄被检文本
+
+- 现象：`.trae/scripts/dev/checkers_selftest.py` 把 `.trae/skills/pm-discovery/SKILL.md` 的原文手抄成 `STOLEN_LONG` / `STOLEN_SHORT` / `STOLEN_TRIM` 三段样本用作「40/60 字重叠阈值确实会抓抄袭」的正控。002 片改写那一行后，三段样本立刻失配。
+- 现症：002 片已把样本重算为改写后文本的精确 60/44 字切片（用守门自己的窗口函数对现文件求命中数：样本长度 89/60/44，60 字档命中 30/1/0，40 字档命中 50/21/5；真实守门的三条 FAIL 判据行由 002 片 GREEN 证据的正控复现块给出），但**这仍是手抄**——下次再改 SKILL.md 会同样失配，而且失配方向是「正控失效、自检仍报绿」，属 fail-open。
+- 修法：正控改为**从被判文件现场切片**（取该行前 N 个归一化字符构造样本），并在自检里加一条断言「样本必须能在被判文本里找到原文」，否则判 FAIL。同一改法适用于所有以被测正文为素材的正控。
+- 代价：改 `checkers_selftest.py` 的构造逻辑并补一条「样本找不到原文必须判 FAIL」的反向用例；因 D1 挡住自检，还得先让自检能跑到底。
+
+### D5 失败案例库的「条目 > 30 → 整理合并去重」与「AGENTS.md 不得出现删除行」互斥
+
+- 现象：AGENTS.md 的失败案例库开头写「条目 > 30 → 整理合并去重」，现 50 条并已在 002 片追加第 51 条；但 `check_roadmap_and_routing.py` 对 AGENTS.md 的改动形状断言里含「不得出现删除行」，而**合并去重必然产生删除行**。因此这条整理指令在当前守门下无法执行——002 片据此只做了纯追加，开头那句「现 50 条」保持原样未改（改它就得删一行）。
+- 后果：一条写着要人做的动作，被另一条门禁拦住，且没人报错。读者按 AGENTS.md 执行会突然得到红，白跑一片。
+- 修法（需裁定）：① 给该守门开一条**显式豁免**——只允许失败案例库小节的删除行走「整理片」，且该片必须同时给出条数前后对账；② 把整理改成纯追加式（新写一份汇总文件、旧条目就地标注「已并入某条」而不删），删掉「合并去重」的字面要求。
+- 代价：①削弱一条已被两次真实缺陷证明有用的门禁，需要正反自检；②留下双份文本，靠标注维持唯一判定点。
+
+### D6 `check_stack_facts` 只钉精确短语，不做反向搜索
+
+- 现象：002 片的**第二轮**反向搜索才找到 `Docs/spec/SPEC-2026-09-23-providers-and-models.md:168` 这条同族主张——第一轮列出的 9 处是凭已知命中列的，守门也只按「文件 + 那一条精确短语」判，所以它**拦不住新出现的、别处的同族主张**。
+- 修法：加一条与清单无关的兜底扫描——对被盘点文件集合之外的 `README*`、`.trae/rules/**`、`.trae/context/**`、`Docs/spec/**` 断言不出现「无服务端 / 不建设.*后端 / 目录不存在」这类**模式**（模式集合只存一处），命中即判 FAIL 并给行号。
+- 代价：模式扫描有假阳性风险（改写后的「不做远程服务端」合法），需要像 002 片那样用精确短语与例外清单平衡，并配正反自检；这与 `check_stack_facts` 现有的「精确串而非关键词」取向是**互补**而非替换，两条判据要各自说明自己挡什么。

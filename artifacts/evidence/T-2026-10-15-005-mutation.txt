@@ -1,0 +1,129 @@
+# T-2026-10-15-005 MUTATION - 屏幕清单生成器每条守卫的退化实测
+# Generated: 2026-10-15T17:06:45Z  (UTC)
+# Generator: artifacts/tmp/gen-005-mutation.sh   重跑：bash artifacts/tmp/gen-005-mutation.sh
+# 变异对象：gen_screen_inventory.py 与 screen_inventory_selftest.py 的**副本**
+#   （artifacts/tmp/_m005/prod/ 下同名同深度路径）；生产字节只在块 05 被读，从不被写。
+# 判据面：M1/M2 两条地板，M3 根布局判据，M4 平板变体列，M5 确定性，M6 方法体不闭合的
+#   fail-closed 分支，M7 隐藏 include 的消费方证明，M8 是不改变任何判定的注释型空变异——它必须
+#   仍然全绿，否则「任何改动都会红」的电池和「守卫消失才红」的电池读起来一模一样。
+# 死 include 那道守卫（raise Fault）的退化**不能**记成用例转红：去掉它之后生成器在同一份夹具上
+#   抛出未捕获的 KeyError，自检因此按「仪器崩了」那一层中止，而不是某条判据不成立。块 04 把这种
+#   「移除后既不静默放行、也无法归因到一条用例」的后果单独量测，所以它不进电池（电池的规则是
+#   变异只许让用例转红，仪器故障必须另说）。
+# 生产文件指纹（判定前读数；块 05 在全部变异之后复核是否仍相同）：
+#   .trae/scripts/dev/gen_screen_inventory.py  bytes=16373  lines=349  sha256=e531110b4be80f9c71820f8840e0a3fbe17383c4a2b9cbd936ec52021412fc30
+#   .trae/scripts/dev/screen_inventory_selftest.py  bytes=23561  lines=511  sha256=50461302fbcbc5635d5416b7984e663b631fc903ce271ed85131c97ae6016bbf
+
+===== block 1 - copy tree: same-depth copy under artifacts/tmp, every copied byte equal to production =====
+$ python -X utf8 artifacts/tmp/_m005g/mkcopy.py
+copy files=325 under artifacts/tmp/_m005/prod
+byte-identical single files=3 mismatches=0
+same-depth .trae/scripts/dev/gen_screen_inventory.py prod=4 copy=4
+same-depth .trae/scripts/dev/screen_inventory_selftest.py prod=4 copy=4
+COPY ok
+----- exit code: 0 (want 0) -----
+
+===== block 2 - measured baseline: the pristine copy suite is green and its failing-case set is recorded for block 03 =====
+$ python -X utf8 artifacts/tmp/_m005g/pristine.py
+BASELINE rc=0 executed=19 expected=19 failures=0 instrument-fault-lines=0
+BASELINE failing-cases=[]
+BASELINE written=artifacts/tmp/_m005g/baseline.json
+BASELINE ok
+----- exit code: 0 (want 0) -----
+
+===== block 3 - battery: each guard degraded turns exactly its own case red, and the no-op control turns nothing red =====
+$ python -X utf8 artifacts/tmp/_m005g/battery.py
+baseline read from the measured file: rc=0 failures=0 failing=[]
+mutations declared=8 floor=8 floor-met=True
+M1-screen-floor-zero rc=1 want-rc=1 baseline=0 caught=True new-red=['neg-screens-below-floor'] expected-new=['neg-screens-below-floor']
+M1-screen-floor-zero new-red==declared: True
+M2-surface-floor-zero rc=1 want-rc=1 baseline=0 caught=True new-red=['neg-surfaces-below-floor'] expected-new=['neg-surfaces-below-floor']
+M2-surface-floor-zero new-red==declared: True
+M3-root-inflate-condition rc=1 want-rc=1 baseline=0 caught=True new-red=['pos-hidden-include-proven', 'pos-renamed-layout-ref-diff', 'pos-self-drawn', 'pos-sw600dp-variant'] expected-new=['pos-hidden-include-proven', 'pos-renamed-layout-ref-diff', 'pos-self-drawn', 'pos-sw600dp-variant']
+M3-root-inflate-condition new-red==declared: True
+M4-sw600dp-column-off rc=1 want-rc=1 baseline=0 caught=True new-red=['pos-sw600dp-variant'] expected-new=['pos-sw600dp-variant']
+M4-sw600dp-column-off new-red==declared: True
+M5-volatile-commit-stamp rc=1 want-rc=1 baseline=0 caught=True new-red=['pos-determinism'] expected-new=['pos-determinism']
+M5-volatile-commit-stamp new-red==declared: True
+M6-unbalanced-body-not-a-fault rc=1 want-rc=1 baseline=0 caught=True new-red=['neg-unbalanced-java-body'] expected-new=['neg-unbalanced-java-body']
+M6-unbalanced-body-not-a-fault new-red==declared: True
+M7-consumer-proof-off rc=1 want-rc=1 baseline=0 caught=True new-red=['pos-hidden-include-unproven'] expected-new=['pos-hidden-include-unproven']
+M7-consumer-proof-off new-red==declared: True
+M8-noop-comment rc=0 want-rc=0 baseline=0 caught=False new-red=[] expected-new=[]
+M8-noop-comment new-red==declared: True
+after-restore copy rc=0 failing=[] counts=('19', '19', '0')
+copy longest path=112 chars (fail-closed at 240)
+BATTERY ok
+----- exit code: 0 (want 0) -----
+
+===== block 4 - the dead-include guard measured on its own channel: removing it aborts the harness naming that case, and the copy returns to green =====
+$ python -X utf8 artifacts/tmp/_m005g/namedfault.py
+guard anchor hits=1 expected 1
+guard-off rc=3 fault-lines=1 names-the-case=True case-verdict-line-printed=False
+guard-off fault reading=INSTRUMENT FAULT in case neg-dead-include: KeyError: 'nope'
+after-restore copy rc=0 counting-line=True
+NAMEDFAULT ok
+----- exit code: 0 (want 0) -----
+
+===== block 5 - independent re-read: production bytes equal the pre-run fingerprints and the copy no longer differs from them =====
+$ python -X utf8 artifacts/tmp/_m005g/recheck.py
+production unchanged .trae/scripts/dev/gen_screen_inventory.py -> True
+copy equals production .trae/scripts/dev/gen_screen_inventory.py -> True
+parses .trae/scripts/dev/gen_screen_inventory.py -> True
+production unchanged .trae/scripts/dev/screen_inventory_selftest.py -> True
+copy equals production .trae/scripts/dev/screen_inventory_selftest.py -> True
+parses .trae/scripts/dev/screen_inventory_selftest.py -> True
+RECHECK ok
+----- exit code: 0 (want 0) -----
+
+===== block 6 - change surface read from git and compared with the run-start snapshot: nothing on a production surface moved during this run =====
+$ python -X utf8 artifacts/tmp/_m005g/scope.py
+command diff ok rc=0
+command ls-files ok rc=0
+production-surface paths snapshot=1 now=1 identical=True
+surface list=['frontend/src/styles/tokens.css']
+SCOPE ok
+----- exit code: 0 (want 0) -----
+
+===== block 7 - cross-file consistency: RED, GREEN and this file report the same case count and the same clean expectation tables =====
+$ python -X utf8 artifacts/tmp/_m005g/consistency.py
+T-2026-10-15-005-red.txt last-line=DECODE ok file bytes=8487
+T-2026-10-15-005-green.txt last-line=DECODE ok file bytes=9508
+T-2026-10-15-005-mutation.txt last-line=$ python -X utf8 artifacts/tmp/_m005g/consistency.py
+this file already carries the battery block (its own TOTAL is written after this check)
+case count green=19 copy-baseline=19 equal=True
+block sections found=['1', '2', '3', '4', '5', '6', '7']
+battery block has no instrument-fault line (the named-fault reading lives in block 4)
+CONSISTENCY ok
+----- exit code: 0 (want 0) -----
+
+===== block 8 - encoding gate over the two judged instruments, this generator and the 005 evidence and task files =====
+$ python -X utf8 artifacts/tmp/_m005g/utf8_gate.py .trae/scripts/dev/gen_screen_inventory.py .trae/scripts/dev/screen_inventory_selftest.py artifacts/tmp/gen-005-mutation.sh artifacts/evidence/T-2026-10-15-005-red.txt artifacts/evidence/T-2026-10-15-005-green.txt .trae/tasks/T-2026-10-15-screen-inventory-parity-ledger-005.md
+GATE SELFTEST ok: a known-broken byte string is rejected
+gate-ok .trae/scripts/dev/gen_screen_inventory.py bytes=16373
+gate-ok .trae/scripts/dev/screen_inventory_selftest.py bytes=23561
+gate-ok artifacts/tmp/gen-005-mutation.sh bytes=37401
+gate-ok artifacts/evidence/T-2026-10-15-005-red.txt bytes=8513
+gate-ok artifacts/evidence/T-2026-10-15-005-green.txt bytes=9534
+gate-ok .trae/tasks/T-2026-10-15-screen-inventory-parity-ledger-005.md bytes=31195
+gate covered 6 file(s)
+EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== TOTAL (derived, ASCII-only tail) =====
+block count floor (bare integer literal, asserted against this script's own source line):
+  blocks=8 expectation_entries=8 floor=8
+  -> ok
+unexpected count = 0
+expectation table (want/got per block):
+  block 1: want=0 got=0 label=copy tree: same-depth copy under artifacts/tmp, every copied byte equal to production
+  block 2: want=0 got=0 label=measured baseline: the pristine copy suite is green and its failing-case set is recorded for block 03
+  block 3: want=0 got=0 label=battery: each guard degraded turns exactly its own case red, and the no-op control turns nothing red
+  block 4: want=0 got=0 label=the dead-include guard measured on its own channel: removing it aborts the harness naming that case, and the copy returns to green
+  block 5: want=0 got=0 label=independent re-read: production bytes equal the pre-run fingerprints and the copy no longer differs from them
+  block 6: want=0 got=0 label=change surface read from git and compared with the run-start snapshot: nothing on a production surface moved during this run
+  block 7: want=0 got=0 label=cross-file consistency: RED, GREEN and this file report the same case count and the same clean expectation tables
+  block 8: want=0 got=0 label=encoding gate over the two judged instruments, this generator and the 005 evidence and task files
+ascii tail: bytes=1352 non-ascii=0 (must be 0)
+OVERALL_EXITCODE=0
+DECODE ok file bytes=9147

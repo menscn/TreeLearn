@@ -1,0 +1,510 @@
+# T-2026-10-15-004 GREEN - CSS token 生成链与前端裸色值守门的判定证据
+# Generated: 2026-10-15T15:06:05Z  (UTC)
+# Generator: artifacts/tmp/gen-004-green.sh   重跑：bash artifacts/tmp/gen-004-green.sh
+# 本文件覆盖的调用形态：
+#   python -X utf8 .trae/scripts/dev/gen_design_tokens_css.py [--selftest|--check]
+#   python -X utf8 .trae/scripts/dev/check_design_tokens.py [--selftest]
+#   python -X utf8 artifacts/tmp/_g004/mutprobe.py <case>   （在合成仓库里跑生产 main()，逐个变异形态）
+#   python -X utf8 artifacts/tmp/_g004/declared_band_mutation.py   块 31：在 .trae/tasks 的副本上跑 validate_tasks，
+#     把本片申报值退回到 150 与顶过 500 各读一次；真实工作树按字节只读，判定后复核哈希未变
+# 判定面分两种：块 01-12 跑在真实仓库上（含一次对已落盘 tokens.css 的最小改动与还原）；
+#   块 13-20 跑在 artifacts/tmp/_g004/repo（由工作树字节复制出来的合成仓库，同深度摆放使被测脚本按自身位置解析出该根），
+#   因为 frontend/ 整体消失、非豁免路径复制等形态在真实工作树上做属于破坏性操作。
+# 被核文件指纹（判定前的逐文件读数；块 28 只比对前后是否相同）：
+#   .trae/scripts/dev/gen_design_tokens_css.py  bytes=14734  lines=323  sha256=8f90eebb4b865aaafe466fc6b00effcabd5393246235b770f27914ba387ba654
+#   .trae/scripts/dev/check_design_tokens.py  bytes=27968  lines=518  sha256=2ef01cb7c286b3dca4d8a083b0f19b5eef6dfbcca82a54565836e7e02a96390c
+#   frontend/src/styles/tokens.css  bytes=1446  lines=52  sha256=ef4813b709c670700d4f028833e1cc12888889fa427f8acc084892b98554f68f
+#   Docs/04-ux-design/design-system/tokens.json  bytes=6408  lines=193  sha256=7b6664f2947b15c5124c8b2449f92a0d78ebac191e095d783b95f952aaf363b7
+#   .trae/rules/ux-design.md  bytes=5312  lines=61  sha256=86231244768d01f35e2af5bacfae4236feef66fc44c687a3bbbff519561f41ea
+#   .trae/rules/frontend.md  bytes=4808  lines=40  sha256=b08d15ce0eba7e3f1462c55c146b60c13faa392e7cc845dec367bfd611248bbf
+#   README.md  bytes=10200  lines=167  sha256=5ebf0c857ac3f35c72cc3ba4310f459098f102bbfb68bfc0bc9bd76d17561c1f
+#   README_EN.md  bytes=10661  lines=163  sha256=b92ed94212642726cbfa6c5cc36def0dd6608148b4d16c4e0da4e4ae59bbd7c6
+#   AGENTS.md  bytes=70931  lines=137  sha256=344c62245e3302559f707803821c098e81fee7887b47807bd49b8bdc19103c42
+#   .trae/ROADMAP.md  bytes=27571  lines=190  sha256=70878453872bc1d6884e588d105ff375d2b21fa3dbd10fca3c914c1b3e317820
+
+===== block 01 - generator bidirectional selftest (production entry, every --check outcome included) =====
+$ python -X utf8 .trae/scripts/dev/gen_design_tokens_css.py --selftest
+OK same input -> same bytes, so the drift check has something to compare against — bytes=1053
+OK output order follows the source order
+OK generated text carries no date-like string
+OK a single changed value moves exactly its own declaration and the header fingerprint — t-0 -> #7A7A7A lost=1 gained=1
+OK dropping a token removes exactly its own declaration — declarations 41 -> 40 lost=1 gained=0
+OK every token becomes exactly one declaration — measured=41 tokens=41
+OK a missing tokens.json raises instead of returning an empty set — tokens.json not found: D:\Project\Android\Treelearn\artifact
+OK production --check accepts a healthy generated CSS — rc=0
+OK production --check flips on a single hex digit — mutation_real=True rc=1
+OK production --check judges a deleted generated CSS as drift, never a skip — rc=1
+OK production entry rejects an unknown flag with a usage error — rc=2
+OK production --check reports an instrument fault when tokens.json is gone — rc=3
+OK scratch path stays clear of the Windows 260 limit — longest=90 margin=170
+OK selftest executed exactly the expected number of cases — measured=13
+SELFTEST cases=13 failures=0
+EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 02 - generator case floor: declared literal == executed count, and floor minus one cannot pass =====
+$ python -X utf8 artifacts/tmp/_g004/case_floor.py .trae/scripts/dev/gen_design_tokens_css.py cases= --selftest
+.trae/scripts/dev/gen_design_tokens_css.py floor literal=13 executed=13 equal=True selftest rc=0
+FLOOR ok
+----- exit code: 0 (want 0) -----
+
+===== block 03 - guard bidirectional selftest (41 counted judgement cases) =====
+$ python -X utf8 .trae/scripts/dev/check_design_tokens.py --selftest
+OK   selftest: var() 引用不得算裸 hex
+OK   selftest: 8 位 hex 必须被扫出
+OK   selftest: 5 位非颜色片段（CSS 不支持）不得误报
+OK   selftest: 注释里的 hex 同样判 FAIL（剥注释会让解析器自证清白）
+OK   selftest: 字符串字面量里的 hex 必须判 FAIL —— React 内联样式 style={{color:'#FFF'}} 就是字符串，豁免字符串等于给守门开主通道
+OK   selftest: 命中必须带真实行号（报 1 行会让按行修的人扑空） — measured=[(1, '#FF0000'), (3, '#00FF00')]
+OK   selftest: 同一内容以字符串与文件字典两种形状喂入必须给出相同命中数
+OK   selftest: frontend 不存在必须记 SKIPPED，不得记 PASS 也不得记 FAIL
+OK   selftest: 前端源码裸 hex 必须 FAIL
+OK   selftest: 生成的 tokens.css 是唯一豁免文件，且它被扣除出扫描数（豁免来自被判对象自身）
+OK   selftest: frontend 里除生成物外没有文件必须 SKIPPED，不得因「零命中」判 PASS
+OK   selftest: 读不出 UTF-8 的前端文件必须判 FAIL（不得静默跳过）
+OK   selftest: 只有真二进制扩展名不读；SVG 是文本且 fill 里就是颜色，必须照扫
+OK   selftest: 执行用例数恰好 = 41（增删判据都要显式改这个数） — measured=41
+selftest judgement cases executed = 41
+
+check_design_tokens --selftest: 0 check(s) failed
+EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 04 - guard case floor: declared literal == executed count, and floor minus one cannot pass =====
+$ python -X utf8 artifacts/tmp/_g004/case_floor.py .trae/scripts/dev/check_design_tokens.py judgement cases executed =  --selftest
+.trae/scripts/dev/check_design_tokens.py floor literal=41 executed=41 equal=True selftest rc=0
+FLOOR ok
+----- exit code: 0 (want 0) -----
+
+===== block 05 - the shipped tokens.css equals a fresh regeneration, byte for byte (real repo) =====
+$ python -X utf8 .trae/scripts/dev/gen_design_tokens_css.py --check
+OK generated CSS matches a fresh regeneration byte-for-byte — frontend/src/styles/tokens.css (D:\Project\Android\Treelearn\frontend\src\styles\tokens.css) bytes=1446 tokens=44
+EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 06 - determinism: same input twice -> same bytes, no date shape, one declaration per token =====
+$ python -X utf8 artifacts/tmp/_g004/determinism.py .trae/scripts/dev/gen_design_tokens_css.py
+two renders byte-identical: True (bytes=1446 tokens=44 declarations=44)
+date-shaped string present: False
+DETERMINISM ok
+----- exit code: 0 (want 0) -----
+
+===== block 07 - real-repo four-way verdict names all four consumers with their own counts =====
+$ python -X utf8 .trae/scripts/dev/check_design_tokens.py
+OK   file exists: Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html
+OK   file exists: Docs/04-ux-design/design-system/tokens.json
+OK   file exists: android/app/src/main/res/values/colors.xml
+OK   tokens.json token 名唯一 — measured_dupes=[]
+OK   原型 :root 解析出 >= 40 个 token — measured=44
+OK   tokens.json 解析出 >= 40 个 token — measured=44
+OK   colors.xml 解析出 >= 1 个资源 — measured=16
+OK   tokens.css 存在且解析出 :root 区块 — measured=44
+OK   四方一致（原型 :root ↔ tokens.json ↔ colors.xml ↔ 生成的 tokens.css，含逐字节重新生成比对） — measured_prototype=44 measured_tokens_json=44 measured_resources=16 measured_css=44
+SKIPPED 前端裸色值守门 — 原因：frontend/src 下除生成物 tokens.css 之外没有可扫描文件，扫描未覆盖任何东西
+        本轮扫描文件数=0（该分支未覆盖任何东西，不计入通过）
+judgement tally: OK=9 FAIL=0 SKIPPED=1
+
+check_design_tokens: 0 check(s) failed
+EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 08 - the bare-colour branch prints SKIPPED (not OK) while frontend/ holds only the generated file =====
+$ python -X utf8 .trae/scripts/dev/check_design_tokens.py
+OK   file exists: Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html
+OK   file exists: Docs/04-ux-design/design-system/tokens.json
+OK   file exists: android/app/src/main/res/values/colors.xml
+OK   tokens.json token 名唯一 — measured_dupes=[]
+OK   原型 :root 解析出 >= 40 个 token — measured=44
+OK   tokens.json 解析出 >= 40 个 token — measured=44
+OK   colors.xml 解析出 >= 1 个资源 — measured=16
+OK   tokens.css 存在且解析出 :root 区块 — measured=44
+OK   四方一致（原型 :root ↔ tokens.json ↔ colors.xml ↔ 生成的 tokens.css，含逐字节重新生成比对） — measured_prototype=44 measured_tokens_json=44 measured_resources=16 measured_css=44
+SKIPPED 前端裸色值守门 — 原因：frontend/src 下除生成物 tokens.css 之外没有可扫描文件，扫描未覆盖任何东西
+        本轮扫描文件数=0（该分支未覆盖任何东西，不计入通过）
+judgement tally: OK=9 FAIL=0 SKIPPED=1
+
+check_design_tokens: 0 check(s) failed
+EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 09 - keep-behaviour: every pre-slice selftest label still present and still green =====
+$ python -X utf8 artifacts/tmp/_g004/keep_behaviour.py
+pre-slice OK labels=10 new OK labels=42 not preserved=0
+KEEP ok: every pre-slice case still reports the same verdict under the same label
+----- exit code: 0 (want 0) -----
+
+===== block 10 - changing one character of the shipped CSS is judged FAIL on the real repo, attributed to that token and line =====
+$ python -X utf8 artifacts/tmp/_g004/real_drift.py
+guard rc=1 expected=1 match=True
+   OK   file exists: Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html
+   OK   file exists: Docs/04-ux-design/design-system/tokens.json
+   OK   file exists: android/app/src/main/res/values/colors.xml
+   OK   tokens.json token 名唯一 — measured_dupes=[]
+   OK   原型 :root 解析出 >= 40 个 token — measured=44
+   OK   tokens.json 解析出 >= 40 个 token — measured=44
+   OK   colors.xml 解析出 >= 1 个资源 — measured=16
+   OK   tokens.css 存在且解析出 :root 区块 — measured=44
+   FAIL 四方一致 — tokens.css 数值与 tokens.json 不一致：['bg: tokens.css=#F4F1E0 tokens.json=#F4F1EB']
+   FAIL 四方一致 — tokens.css 与重新生成的结果不逐字节相同（说明有人手改了生成物）：["第 8 行 已落盘='  --bg: #F4F1E0;' 重新生成='  --bg: #F4F1EB;'"]
+   judgement tally: OK=8 FAIL=2 SKIPPED=1
+   EXITCODE=1
+line numbers reported by the guard: ['8'] ; declared line = 8 ; match=True
+REAL DRIFT -> ok
+restore by regeneration: rc=0 sha256 equal to pre-run=True
+   pre  sha=ef4813b709c67070
+   post sha=ef4813b709c67070
+----- exit code: 0 (want 0) -----
+
+===== block 11 - the real-repo mutation window is closed: the generator's own --check still passes =====
+$ sh -c python -X utf8 .trae/scripts/dev/gen_design_tokens_css.py --check
+OK generated CSS matches a fresh regeneration byte-for-byte — frontend/src/styles/tokens.css (D:\Project\Android\Treelearn\frontend\src\styles\tokens.css) bytes=1446 tokens=44
+EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 12 - after restore the four-way verdict is green again on the real repo (nothing was left mutated) =====
+$ python -X utf8 .trae/scripts/dev/check_design_tokens.py
+OK   file exists: Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html
+OK   file exists: Docs/04-ux-design/design-system/tokens.json
+OK   file exists: android/app/src/main/res/values/colors.xml
+OK   tokens.json token 名唯一 — measured_dupes=[]
+OK   原型 :root 解析出 >= 40 个 token — measured=44
+OK   tokens.json 解析出 >= 40 个 token — measured=44
+OK   colors.xml 解析出 >= 1 个资源 — measured=16
+OK   tokens.css 存在且解析出 :root 区块 — measured=44
+OK   四方一致（原型 :root ↔ tokens.json ↔ colors.xml ↔ 生成的 tokens.css，含逐字节重新生成比对） — measured_prototype=44 measured_tokens_json=44 measured_resources=16 measured_css=44
+SKIPPED 前端裸色值守门 — 原因：frontend/src 下除生成物 tokens.css 之外没有可扫描文件，扫描未覆盖任何东西
+        本轮扫描文件数=0（该分支未覆盖任何东西，不计入通过）
+judgement tally: OK=9 FAIL=0 SKIPPED=1
+
+check_design_tokens: 0 check(s) failed
+EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 13 - mutation in the synthetic repo: one char then restore, then every shipped declaration mutated one by one =====
+$ python -X utf8 artifacts/tmp/_g004/mutprobe.py artifacts/tmp/_g004/repo artifacts/tmp/_g004/css-pristine one-char-drift
+case=one-char-drift guard rc=1 expected=1 match=True
+mutation: one character at offset 290 (shipped bytes=1346 regenerated-differs=True)
+   OK   file exists: Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html
+   OK   file exists: Docs/04-ux-design/design-system/tokens.json
+   OK   file exists: android/app/src/main/res/values/colors.xml
+   OK   tokens.json token 名唯一 — measured_dupes=[]
+   OK   原型 :root 解析出 >= 40 个 token — measured=44
+   OK   tokens.json 解析出 >= 40 个 token — measured=44
+   OK   colors.xml 解析出 >= 1 个资源 — measured=16
+   OK   tokens.css 存在且解析出 :root 区块 — measured=44
+restore by regeneration: rc=0 byte-exact-vs-pristine=True
+regenerating a second time gives the same bytes: True
+guard after restore: rc=0 (must be the same tier as the healthy run)
+sweep every shipped declaration: declarations=44 faults=0 all judged and all attributed=True
+CASE one-char-drift -> ok
+----- exit code: 0 (want 0) -----
+
+===== block 14 - deleting the generated CSS is a judged FAIL, never a SKIP =====
+$ python -X utf8 artifacts/tmp/_g004/mutprobe.py artifacts/tmp/_g004/repo artifacts/tmp/_g004/css-pristine css-deleted
+case=css-deleted guard rc=1 expected=1 match=True
+tally line: judgement tally: OK=7 FAIL=2 SKIPPED=1
+   OK   file exists: Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html
+   OK   file exists: Docs/04-ux-design/design-system/tokens.json
+   OK   file exists: android/app/src/main/res/values/colors.xml
+   OK   tokens.json token 名唯一 — measured_dupes=[]
+   OK   原型 :root 解析出 >= 40 个 token — measured=44
+   OK   tokens.json 解析出 >= 40 个 token — measured=44
+   OK   colors.xml 解析出 >= 1 个资源 — measured=16
+   FAIL tokens.css 存在且解析出 :root 区块 — measured=None
+   FAIL 四方一致 — tokens.css 没有可判内容（文件不存在，或存在但解析不出 :root 区块）
+   SKIPPED 前端裸色值守门 — 原因：frontend/src 下除生成物 tokens.css 之外没有可扫描文件，扫描未覆盖任何东西
+needle witnessed: tokens.css 没有可判内容
+needle witnessed: FAIL tokens.css 存在且解析出 :root 区块
+CASE css-deleted -> ok
+----- exit code: 0 (want 0) -----
+
+===== block 15 - a generated CSS that exists but no longer parses is judged by the degraded-parse branch (file presence is not the gate) =====
+$ python -X utf8 artifacts/tmp/_g004/mutprobe.py artifacts/tmp/_g004/repo artifacts/tmp/_g004/css-pristine css-unparsable
+case=css-unparsable guard rc=1 expected=1 match=True
+tally line: judgement tally: OK=8 FAIL=2 SKIPPED=1
+   OK   file exists: Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html
+   OK   file exists: Docs/04-ux-design/design-system/tokens.json
+   OK   file exists: android/app/src/main/res/values/colors.xml
+   OK   tokens.json token 名唯一 — measured_dupes=[]
+   OK   原型 :root 解析出 >= 40 个 token — measured=44
+   OK   tokens.json 解析出 >= 40 个 token — measured=44
+   OK   colors.xml 解析出 >= 1 个资源 — measured=16
+   OK   tokens.css 存在且解析出 :root 区块 — measured=0
+   FAIL 四方一致 — tokens.css 只解析出 0 个 token（< 40），解析疑似退化
+   FAIL 四方一致 — tokens.css 与重新生成的结果不逐字节相同（说明有人手改了生成物）：["第 1 行 已落盘=':root {' 重新生成='/* 生成文件，不要手改。'", "第 2 行 已落盘='  nonsense' 重新生成='   来源链：原型 :root → tokens.json → 本文件（反向改本文件一律视
+needle witnessed: tokens.css 存在且解析出 :root 区块 — measured=0
+needle witnessed: 解析疑似退化
+needle witnessed: 不逐字节相同
+CASE css-unparsable -> ok
+----- exit code: 0 (want 0) -----
+
+===== block 16 - with frontend/ absent the bare-colour branch prints SKIPPED, adds no OK line, and the missing CSS still fails =====
+$ python -X utf8 artifacts/tmp/_g004/mutprobe.py artifacts/tmp/_g004/repo artifacts/tmp/_g004/css-pristine frontend-absent
+case=frontend-absent guard rc=1 expected=1 match=True
+   OK   file exists: Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html
+   OK   file exists: Docs/04-ux-design/design-system/tokens.json
+   OK   file exists: android/app/src/main/res/values/colors.xml
+   OK   tokens.json token 名唯一 — measured_dupes=[]
+   OK   原型 :root 解析出 >= 40 个 token — measured=44
+   OK   tokens.json 解析出 >= 40 个 token — measured=44
+   OK   colors.xml 解析出 >= 1 个资源 — measured=16
+   FAIL tokens.css 存在且解析出 :root 区块 — measured=None
+   FAIL 四方一致 — tokens.css 没有可判内容（文件不存在，或存在但解析不出 :root 区块）
+   SKIPPED 前端裸色值守门 — 原因：frontend/src 目录不存在（尚未生成 tokens.css），该分支本次未执行
+CASE frontend-absent -> ok
+----- exit code: 0 (want 0) -----
+
+===== block 17 - bare hex in frontend/src is judged: declaration, comment line, and a 5-digit pseudo hex stays unmatched =====
+$ python -X utf8 artifacts/tmp/_g004/mutprobe.py artifacts/tmp/_g004/repo artifacts/tmp/_g004/css-pristine bare-hex
+case=bare-hex guard rc=1 expected=1 match=True
+tally line: judgement tally: OK=9 FAIL=3 SKIPPED=0
+   OK   file exists: Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html
+   OK   file exists: Docs/04-ux-design/design-system/tokens.json
+   OK   file exists: android/app/src/main/res/values/colors.xml
+   OK   tokens.json token 名唯一 — measured_dupes=[]
+   OK   原型 :root 解析出 >= 40 个 token — measured=44
+   OK   tokens.json 解析出 >= 40 个 token — measured=44
+   OK   colors.xml 解析出 >= 1 个资源 — measured=16
+   OK   tokens.css 存在且解析出 :root 区块 — measured=44
+   OK   四方一致（原型 :root ↔ tokens.json ↔ colors.xml ↔ 生成的 tokens.css，含逐字节重新生成比对） — measured_prototype=44 measured_tokens_json=44 measured_resources=16 measured_css=44
+   FAIL 前端无裸色值 — frontend/src/probe.tsx:1 出现裸色值 #FF0000（只能引用 var(--token)）
+needle witnessed: probe.tsx:1 出现裸色值 #FF0000
+needle witnessed: probe.tsx:3 出现裸色值 #00FF00
+needle witnessed: probe.tsx:5 出现裸色值 #0A0B0C
+CASE bare-hex -> ok
+----- exit code: 0 (want 0) -----
+
+===== block 18 - a hex inside a TS string literal is judged (React inline styles are string literals; no exemption) =====
+$ python -X utf8 artifacts/tmp/_g004/mutprobe.py artifacts/tmp/_g004/repo artifacts/tmp/_g004/css-pristine string-literal
+case=string-literal guard rc=1 expected=1 match=True
+tally line: judgement tally: OK=9 FAIL=1 SKIPPED=0
+   OK   file exists: Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html
+   OK   file exists: Docs/04-ux-design/design-system/tokens.json
+   OK   file exists: android/app/src/main/res/values/colors.xml
+   OK   tokens.json token 名唯一 — measured_dupes=[]
+   OK   原型 :root 解析出 >= 40 个 token — measured=44
+   OK   tokens.json 解析出 >= 40 个 token — measured=44
+   OK   colors.xml 解析出 >= 1 个资源 — measured=16
+   OK   tokens.css 存在且解析出 :root 区块 — measured=44
+   OK   四方一致（原型 :root ↔ tokens.json ↔ colors.xml ↔ 生成的 tokens.css，含逐字节重新生成比对） — measured_prototype=44 measured_tokens_json=44 measured_resources=16 measured_css=44
+   FAIL 前端无裸色值 — frontend/src/Style.ts:1 出现裸色值 #FF8800（只能引用 var(--token)）
+needle witnessed: Style.ts:1 出现裸色值 #FF8800
+CASE string-literal -> ok
+----- exit code: 0 (want 0) -----
+
+===== block 19 - the exemption is keyed on the path: a byte-identical copy under another name is judged for every hex =====
+$ python -X utf8 artifacts/tmp/_g004/mutprobe.py artifacts/tmp/_g004/repo artifacts/tmp/_g004/css-pristine non-exempt-copy
+case=non-exempt-copy guard rc=1 expected=1 match=True copy_hits=16
+   OK   file exists: Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html
+   OK   file exists: Docs/04-ux-design/design-system/tokens.json
+   OK   file exists: android/app/src/main/res/values/colors.xml
+   OK   tokens.json token 名唯一 — measured_dupes=[]
+exemption is keyed on the path, not on the content: ok
+CASE non-exempt-copy -> ok
+----- exit code: 0 (want 0) -----
+
+===== block 20 - a token-only frontend file turns the bare-colour branch from SKIPPED into a counted pass =====
+$ python -X utf8 artifacts/tmp/_g004/mutprobe.py artifacts/tmp/_g004/repo artifacts/tmp/_g004/css-pristine clean-probe
+case=clean-probe guard rc=0 expected=0 match=True
+tally line: judgement tally: OK=10 FAIL=0 SKIPPED=0
+   OK   file exists: Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html
+   OK   file exists: Docs/04-ux-design/design-system/tokens.json
+   OK   file exists: android/app/src/main/res/values/colors.xml
+   OK   tokens.json token 名唯一 — measured_dupes=[]
+   OK   原型 :root 解析出 >= 40 个 token — measured=44
+   OK   tokens.json 解析出 >= 40 个 token — measured=44
+   OK   colors.xml 解析出 >= 1 个资源 — measured=16
+   OK   tokens.css 存在且解析出 :root 区块 — measured=44
+   OK   四方一致（原型 :root ↔ tokens.json ↔ colors.xml ↔ 生成的 tokens.css，含逐字节重新生成比对） — measured_prototype=44 measured_tokens_json=44 measured_resources=16 measured_css=44
+   OK   前端无裸色值（frontend/src 全量原文扫描） — measured_files=1 measured_hits=0
+needle witnessed: measured_files=1 measured_hits=0
+needle witnessed: SKIPPED=0
+CASE clean-probe -> ok
+----- exit code: 0 (want 0) -----
+
+===== block 21 - exclusion is by extension, not by sniffing: a .png is not read, an SVG whose fill holds a hex is =====
+$ python -X utf8 artifacts/tmp/_g004/mutprobe.py artifacts/tmp/_g004/repo artifacts/tmp/_g004/css-pristine binary-and-svg
+case=binary-and-svg guard rc=1 expected=1 match=True
+tally line: judgement tally: OK=9 FAIL=1 SKIPPED=0
+   OK   file exists: Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html
+   OK   file exists: Docs/04-ux-design/design-system/tokens.json
+   OK   file exists: android/app/src/main/res/values/colors.xml
+   OK   tokens.json token 名唯一 — measured_dupes=[]
+   OK   原型 :root 解析出 >= 40 个 token — measured=44
+   OK   tokens.json 解析出 >= 40 个 token — measured=44
+   OK   colors.xml 解析出 >= 1 个资源 — measured=16
+   OK   tokens.css 存在且解析出 :root 区块 — measured=44
+   OK   四方一致（原型 :root ↔ tokens.json ↔ colors.xml ↔ 生成的 tokens.css，含逐字节重新生成比对） — measured_prototype=44 measured_tokens_json=44 measured_resources=16 measured_css=44
+   FAIL 前端无裸色值 — frontend/src/mark.svg:1 出现裸色值 #2E7D4F（只能引用 var(--token)）
+needle witnessed: mark.svg:1 出现裸色值 #2E7D4F
+CASE binary-and-svg -> ok
+----- exit code: 0 (want 0) -----
+
+===== block 22 - the two-shapes-must-be-equal assertions really run, and the tally adds up against the printed lines =====
+$ python -X utf8 artifacts/tmp/_g004/shape_and_count.py
+shape/exemption case executed in production selftest: 同一内容以字符串与文件字典两种形状喂入必须给出相同命中数                               True
+shape/exemption case executed in production selftest: 同一内容以 token 字典与生成 CSS 两种形态喂入必须解析相等                         True
+shape/exemption case executed in production selftest: 生成的 tokens.css 是唯一豁免文件                                     True
+tally=judgement tally: OK=9 FAIL=0 SKIPPED=1 ; printed OK lines=9 FAIL lines=0 ; OK+FAIL+SKIPPED=10 (match=True)
+SHAPE+COUNT ok
+----- exit code: 0 (want 0) -----
+
+===== block 23 - the colors.xml subset rule is untouched: 16 resources, each reverse-mapping to a prototype token =====
+$ python -X utf8 artifacts/tmp/_g004/subset_check.py
+resources=16 tokens=44 dupes=[]
+SUBSET ok: every resource reverse-maps to a token and agrees with the prototype
+----- exit code: 0 (want 0) -----
+
+===== block 24 - sibling gate checkers_selftest.py recorded at its true tier with the cause of its failure named =====
+$ python -X utf8 artifacts/tmp/_g004/sibling_checker.py
+checkers_selftest rc=3  FAIL lines=2  references to this slice=0
+   FAIL AGENTS.md adds >= 4 routing rows — measured=0
+   FAIL new routing rows cover all four triggers — missing=['intent-capturer', 'pm-discovery', 'project-brief', 'ROADMAP']
+PRE-EXISTING DEBT (rc=3 instrument-fault tier), with 0 references to check_design_tokens or
+tokens.css: the sibling gate never runs this slice's checker. Recorded, not claimed as green.
+----- exit code: 0 (want 0) -----
+
+===== block 25 - change face: rename-aware numstat plus the untracked list (git diff alone would miss new files) =====
+$ python -X utf8 artifacts/tmp/_g004/change_face.py
+rename-aware numstat rows=11
+   47	2	.trae/ROADMAP.md
+   10	4	.trae/rules/frontend.md
+   10	6	.trae/rules/ux-design.md
+   330	31	.trae/scripts/dev/check_design_tokens.py
+   11	1	AGENTS.md
+   13	6	Docs/04-ux-design/design-system/README.md
+   4	2	Docs/04-ux-design/design-system/tokens.json
+   1	0	Docs/04-ux-design/知芽-Figma新稿迁移方案-V1.0.md
+   1	0	Docs/spec/SPEC-2026-09-22-figma-ia-migration.md
+   3	3	README.md
+   3	3	README_EN.md
+untracked among the slice files=3: ['.trae/scripts/dev/gen_design_tokens_css.py', 'Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md', 'frontend/src/styles/tokens.css']
+diff --check rc=0 warning_lines=0 (counted separately from whitespace judgements)
+CHANGE FACE ok
+----- exit code: 0 (want 0) -----
+
+===== block 26 - sizing: judged value taken from the safe reading, with the repository tool's under-count named =====
+$ python -X utf8 artifacts/tmp/_g004/sizing004.py
+generator .trae/scripts/dev/gen_design_tokens_css.py: selftest lines 145..321 non-blank=159 production(non-blank)=123 tool=277
+guard .trae/scripts/dev/check_design_tokens.py: added non-blank=290 inside-selftest=106 production=184 tool(added-face)=91
+COLLAPSE DETECTED=True (tool=91 vs non-blank production=184): the java-comment stripper eats everything between a /* and a */ that appear inside Python string literals
+readings of the same face (all four produced by the commands above, none hand-typed):
+  A strict  = new-file production 123 + guard added production 184 = 307 (both in-file selftests excluded)
+  B whole   = new file counted whole 282 + guard added production 184 = 466 (the new tool's own selftest is left in)
+  C tool    = count_production_lines.py gives 277 + 91 = 368 (UNDER-count, unsafe direction - see COLLAPSE above)
+  D nothing excluded = 282 + 290 = 572
+JUDGED production value=466 (= the largest rule-conforming reading, B)
+A/B/C all land in the same 200..500 band: True ; only D would cross 500, and D is the reading that counts test code as production
+excluded by rule: the generated frontend/src/styles/tokens.css (a generator product, byte-reproducible), artifacts/tmp/gen-004-*.sh and artifacts/tmp/_g004/* (evidence harness), artifacts/tmp/_t004/redstate-*.py (test fixture)
+WARN band: 200 < judged <= 500 (verifier warning, no exception required)
+SIZING ok
+----- exit code: 0 (want 0) -----
+
+===== block 27 - task contract: validate_tasks.py keeps 004 at PASS with its declared size band visible, and the repo-wide totals are printed not pinned =====
+$ python -X utf8 artifacts/tmp/_g004/task_contract.py
+this task: PASS count=1 WARNING count=1 (size band=1, other=0)
+  line: WARNING T-2026-10-15-css-token-generation-and-bare-color-guard-004.md: estimated production lines 466 exceeds soft limit 200
+  line: PASS T-2026-10-15-css-token-generation-and-bare-color-guard-004.md
+repo baseline: ['SUMMARY files=70 errors=16 warnings=11']
+note: repo-wide readings are errors=16 warnings=11 and are NOT judged here. This slice owns the three per-task lines above; the totals move when unrelated slices declare their own size bands (measured: warnings went 10 -> 11 when the ledger generator was split off as a separate task, and the previous version of this block judged 004 FAIL for that.
+CONTRACT ok
+----- exit code: 0 (want 0) -----
+
+===== block 28 - doc write-back: current-state surfaces clean, dated records still in their own words =====
+$ python -X utf8 artifacts/tmp/_g004/docs_writeback.py
+Docs/04-ux-design/design-system/tokens.json          live-hits=0 dated-hits=0 []
+Docs/04-ux-design/design-system/README.md            live-hits=0 dated-hits=1 [(14, '三方比对')]
+Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md   live-hits=0 dated-hits=0 []
+LIVE three-way claims in current-state surfaces now = 0 (RED recorded 15 at HEAD)
+date-stamped records left untouched = 1 (they are records of their own date)
+dated hits outside 变更记录 without a 2026-10-15 pointer = 0
+Docs/04-ux-design/design-system/README.md            dated-record lines=4 [14, 63, 69, 70]
+android/README.md                                    dated-record lines=1 [509]
+Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.1.html       dated-record lines=1 [440]
+Docs/spec/SPEC-2026-09-22-figma-ia-migration.md      dated-record lines=1 [21]
+Docs/04-ux-design/知芽-Figma新稿迁移方案-V1.0.md             dated-record lines=2 [4, 139]
+DATED records preserved = 9 (they must not be rewritten with today's state)
+guard: production label 四方一致=True ; selftest label 三方一致必须 PASS kept=True ; same label at HEAD=True
+external surface .workbuddy/memory/MEMORY.md    tracked=False 三方-hits=1 -> OUT OF SCOPE (not a repo surface; reported not edited)
+root-block md5 re-checked 知芽-TreeLearn-高保真原型-v1.html got=678dab85b8055b355a2e65137d60feee cited=678dab85b805 match=True
+root-block md5 re-checked 知芽-TreeLearn-高保真原型-v1.1.html got=87d3f40f699a6b92ada08e48c97dd84c cited=87d3f40f699a match=True
+token guard after the doc write-back: rc=0
+WRITEBACK ok
+----- exit code: 0 (want 0) -----
+
+===== block 29 - production fingerprints re-taken after all judgements =====
+$ python -X utf8 <the same fingerprint snippet as the header> .trae/scripts/dev/gen_design_tokens_css.py .trae/scripts/dev/check_design_tokens.py frontend/src/styles/tokens.css Docs/04-ux-design/design-system/tokens.json .trae/rules/ux-design.md .trae/rules/frontend.md README.md README_EN.md AGENTS.md .trae/ROADMAP.md
+fingerprints identical before/after all judgements: yes (pre rc=0 post rc=0)
+----- exit code: 0 (want 0) -----
+
+===== block 30 - encoding gate over every file this slice changed or created, self-probed both ways =====
+$ python -X utf8 artifacts/tmp/_g004/utf8_gate.py .trae/scripts/dev/gen_design_tokens_css.py .trae/scripts/dev/check_design_tokens.py frontend/src/styles/tokens.css Docs/04-ux-design/design-system/tokens.json Docs/04-ux-design/design-system/README.md .trae/rules/ux-design.md .trae/rules/frontend.md README.md README_EN.md AGENTS.md .trae/ROADMAP.md Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md Docs/spec/SPEC-2026-09-22-figma-ia-migration.md Docs/04-ux-design/知芽-Figma新稿迁移方案-V1.0.md Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.1.html artifacts/tmp/gen-004-red.sh artifacts/tmp/gen-004-green.sh artifacts/evidence/T-2026-10-15-004-red.txt .trae/tasks/T-2026-10-15-css-token-generation-and-bare-color-guard-004.md
+ok   Docs/04-ux-design/design-system/tokens.json                      bytes=6408
+ok   Docs/04-ux-design/design-system/README.md                        bytes=19076
+ok   .trae/rules/ux-design.md                                         bytes=5312
+ok   .trae/rules/frontend.md                                          bytes=4808
+ok   README.md                                                        bytes=10200
+ok   README_EN.md                                                     bytes=10661
+ok   AGENTS.md                                                        bytes=70931
+ok   .trae/ROADMAP.md                                                 bytes=27571
+ok   Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md               bytes=23834
+ok   Docs/spec/SPEC-2026-09-22-figma-ia-migration.md                  bytes=15288
+ok   Docs/04-ux-design/知芽-Figma新稿迁移方案-V1.0.md                         bytes=20123
+ok   Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.1.html                   bytes=240528
+ok   artifacts/tmp/gen-004-red.sh                                     bytes=20899
+ok   artifacts/tmp/gen-004-green.sh                                   bytes=62057
+ok   artifacts/evidence/T-2026-10-15-004-red.txt                      bytes=11896
+ok   .trae/tasks/T-2026-10-15-css-token-generation-and-bare-color-guard-004.md bytes=32381
+gate covered 19 file(s)
+EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 31 - sizing lock is load-bearing: hiding the declared value removes the gate's size band, exceeding 500 adds an error, working tree untouched =====
+$ python -X utf8 artifacts/tmp/_g004/declared_band_mutation.py
+MUT pristine   declared=466 -> pass=1 size=1 other=0 err=0 repo errors=16 warnings=11
+MUT undeclared declared=150 -> pass=1 size=0 other=0 err=0 repo errors=16 warnings=10
+MUT over-cap   declared=601 -> pass=0 size=1 other=0 err=1 repo errors=17 warnings=11
+MUT live bytes unchanged=True
+MUTATION ok
+----- exit code: 0 (want 0) -----
+
+===== TOTAL (derived, ASCII-only tail) =====
+block count floor (bare integer literal, asserted against this script's own source line):
+  blocks=31 expectation_entries=31 floor=31
+  -> ok
+unexpected count = 0
+expectation table (want/got per block):
+  block 01: want=0 got=0 label=generator bidirectional selftest (production entry, every --check outcome included)
+  block 02: want=0 got=0 label=generator case floor: declared literal == executed count, and floor minus one cannot pass
+  block 03: want=0 got=0 label=guard bidirectional selftest (41 counted judgement cases)
+  block 04: want=0 got=0 label=guard case floor: declared literal == executed count, and floor minus one cannot pass
+  block 05: want=0 got=0 label=the shipped tokens.css equals a fresh regeneration, byte for byte (real repo)
+  block 06: want=0 got=0 label=determinism: same input twice -> same bytes, no date shape, one declaration per token
+  block 07: want=0 got=0 label=real-repo four-way verdict names all four consumers with their own counts
+  block 08: want=0 got=0 label=the bare-colour branch prints SKIPPED (not OK) while frontend/ holds only the generated file
+  block 09: want=0 got=0 label=keep-behaviour: every pre-slice selftest label still present and still green
+  block 10: want=0 got=0 label=changing one character of the shipped CSS is judged FAIL on the real repo, attributed to that token and line
+  block 11: want=0 got=0 label=the real-repo mutation window is closed: the generator's own --check still passes
+  block 12: want=0 got=0 label=after restore the four-way verdict is green again on the real repo (nothing was left mutated)
+  block 13: want=0 got=0 label=mutation in the synthetic repo: one char then restore, then every shipped declaration mutated one by one
+  block 14: want=0 got=0 label=deleting the generated CSS is a judged FAIL, never a SKIP
+  block 15: want=0 got=0 label=a generated CSS that exists but no longer parses is judged by the degraded-parse branch (file presence is not the gate)
+  block 16: want=0 got=0 label=with frontend/ absent the bare-colour branch prints SKIPPED, adds no OK line, and the missing CSS still fails
+  block 17: want=0 got=0 label=bare hex in frontend/src is judged: declaration, comment line, and a 5-digit pseudo hex stays unmatched
+  block 18: want=0 got=0 label=a hex inside a TS string literal is judged (React inline styles are string literals; no exemption)
+  block 19: want=0 got=0 label=the exemption is keyed on the path: a byte-identical copy under another name is judged for every hex
+  block 20: want=0 got=0 label=a token-only frontend file turns the bare-colour branch from SKIPPED into a counted pass
+  block 21: want=0 got=0 label=exclusion is by extension, not by sniffing: a .png is not read, an SVG whose fill holds a hex is
+  block 22: want=0 got=0 label=the two-shapes-must-be-equal assertions really run, and the tally adds up against the printed lines
+  block 23: want=0 got=0 label=the colors.xml subset rule is untouched: 16 resources, each reverse-mapping to a prototype token
+  block 24: want=0 got=0 label=sibling gate checkers_selftest.py recorded at its true tier with the cause of its failure named
+  block 25: want=0 got=0 label=change face: rename-aware numstat plus the untracked list (git diff alone would miss new files)
+  block 26: want=0 got=0 label=sizing: judged value taken from the safe reading, with the repository tool's under-count named
+  block 27: want=0 got=0 label=task contract: validate_tasks.py keeps 004 at PASS with its declared size band visible, and the repo-wide totals are printed not pinned
+  block 28: want=0 got=0 label=doc write-back: current-state surfaces clean, dated records still in their own words
+  block 29: want=0 got=0 label=fingerprints of every judged and every written-back file are identical before and after
+  block 30: want=0 got=0 label=encoding gate over every file this slice changed or created, self-probed both ways
+  block 31: want=0 got=0 label=sizing lock is load-bearing: hiding the declared value removes the gate's size band, exceeding 500 adds an error, working tree untouched
+ascii tail: bytes=4116 non-ascii=0 (must be 0)
+OVERALL_EXITCODE=0
+DECODE ok file bytes=38774

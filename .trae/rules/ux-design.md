@@ -4,17 +4,21 @@
 
 ## 设计事实源
 
-- 设计系统的**当前态权威**是 `Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html` 的 `:root` 区块（42 个 token）；
+- 设计系统的**当前态权威**是 `Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html` 的 `:root` 区块；
   `Docs/04-ux-design/design-system/tokens.json` 是同一批数值的机器可读镜像；
-  `android/app/src/main/res/values/colors.xml` 是 Android 侧副本（15 个不透明 hex 资源）。
-- 三处一致性只认脚本，不认人眼：
+  `android/app/src/main/res/values/colors.xml` 是 Android 侧副本（只承载不透明 hex 子集）；
+  `frontend/src/styles/tokens.css` 是前端侧副本，**只能生成、不得手抄**。
+  token 与资源的**个数不在本文写死**（此处曾长期留着一个与实测不符的旧数字）——以守门输出的 `measured_*` 为准。
+- 四方一致性只认脚本，不认人眼：
 
   ```bash
-  python .trae/scripts/dev/check_design_tokens.py            # 三方逐值比对
-  python .trae/scripts/dev/check_design_tokens.py --selftest # 守门自身的正反双向自检
+  python .trae/scripts/dev/gen_design_tokens_css.py            # 由 tokens.json 生成/刷新前端 CSS
+  python .trae/scripts/dev/gen_design_tokens_css.py --check     # 只判「已落盘的是否等于重新生成」
+  python .trae/scripts/dev/check_design_tokens.py              # 四方逐值比对 + 前端裸色值守门
+  python .trae/scripts/dev/check_design_tokens.py --selftest    # 守门自身的正反双向自检
   ```
 
-- 改设计的顺序固定：**先改原型 `:root` → 同步 `tokens.json` → 同步 `colors.xml` → 跑守门脚本**。任何一处单独改都会让守门变红。
+- 改设计的顺序固定：**先改原型 `:root` → 同步 `tokens.json` → 同步 `colors.xml` → 重新生成 `tokens.css` → 跑守门脚本**。任何一处单独改都会让守门变红；直接编辑 `tokens.css` 也算单独改。
 - 数值只能引用 token：Figma 节点不得写裸 hex/px，XML 布局不得出现临场数字。档位扩充要先落到原型 `:root`——间距只用 `s1/s2/s3/s4/s6/s8`（4pt 基准），圆角只用 `r-sm/r-md/r-lg/r-full`，阴影只用 `sh-1/sh-2`，字号只用 `fs-*`。
 
 ## Figma 链路（figwright MCP + 两个技能）

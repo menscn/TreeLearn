@@ -7,6 +7,11 @@ author: 用户
 origin: 用户确认的架构方向
 status: accepted
 
+> **归档时序说明（2026-10-15 追加，阅读前必读）**
+> 本文件记录的是 2026-10-01 当时的意图与判定，保持原样不改写。它的后续规格 `Docs/spec/SPEC-2026-10-01-progressive-web-ui.md`（APK 内 WebView 承载路线）已于 2026-10-15 由用户裁定**整份删除**，不再作为任何实现依据。
+> 当前有效方向见 `Docs/intent/INTENT-2026-10-15-web-h5-android-parity.md` 与其规格 `Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md`：新建独立 `frontend/` 工程按 Android 现状 1:1 还原，PC 端由本机 `backend/` 服务承载；WebView 承载路线不启用。
+> 本文件中「不交付浏览器正式客户端」「不新增 Spring Boot、账号、云同步」两条非目标已被 2026-10-15 的决定部分覆盖，引用时以新意图为准。
+
 ## Problem（问题与背景）
 
 - 问题/背景：当前 TreeLearn APK 的页面由 Android XML/View 与 Java 实现。若后续需要网页或其他终端，页面与交互需要另行实现，存在重复开发和两端行为逐渐不一致的风险；该后果是架构推断，尚无实际跨端用户数据。

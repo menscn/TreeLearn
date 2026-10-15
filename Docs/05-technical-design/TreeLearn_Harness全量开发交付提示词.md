@@ -34,7 +34,7 @@
 
 二、必须保持的产品与架构约束
 1. 纯原生 Android、Java-only、minSdk 28、XML/View、五模块 :app/:core/:data/:ai/:tree-layout；禁止 Kotlin 源码、插件、org.jetbrains.kotlin 和 -ktx。
-2. 本地优先模块化单体，无 backend/frontend、账号、云同步、备份或远程遥测。
+2. 本地优先模块化单体：不做云端账号、云同步、备份或远程遥测；Web 线允许新建 `frontend/` 与仅监听本机环回地址的 `backend/`，边界见 `Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md`（2026-10-15 用户裁定，见该规格 §5 与 `.trae/tasks/T-2026-10-15-web-h5-android-parity-requirement-001.md`）。
 3. AnswerRevision 不可变；重试/重置创建新 operation/revision，既有子分支永远引用创建时 sourceRevisionId 与 ContextSnapshot。
 4. reasoning_content 必须流式展示、部分落库、稳定版本持久化、可搜索、复制全文时包含，并通过 ContextPlan + DeepSeekContextEncoder 加入后续上下文。每条思考默认折叠，点击展开，使用可读的次级灰色。
 5. 主回答必须使用 `tl-learning-answer/1.0.0` 自适应学习导师 system；system 恰好一条且第一，当前 user 最后，不进入 ContextPlan/摘要/裁剪。标题、摘要、回答推荐、首页推荐和上下文压缩使用独立 PromptPurpose，禁止复用教学提示词。operation/revision/artifact 只保存用途/版本，不保存 system 正文。

@@ -2,6 +2,7 @@
 
 > 方案性质：**待用户评审**。本文档只做「现状核对 + 差异分类 + 迁移路线 + 待拍板事项」，不创建任何 Harness Task，不改动任何生产代码。
 > 本文档不复制 token 数值清单：设计系统的当前态权威仍是 `知芽-TreeLearn-高保真原型-v1.html` 的 `:root` 区块，机器可读镜像见 `design-system/tokens.json`，三方一致性由 `.trae/scripts/dev/check_design_tokens.py` 判定。文中出现的色值只是**本次迁移的实测判定记录**，不是第二份事实源。
+> 口径更新（2026-10-15，不改动上文 2026-09-22 的结论）：该守门已扩为**四方**比对，第 4 个消费者是 `frontend/src/styles/tokens.css`，它只能由 `.trae/scripts/dev/gen_design_tokens_css.py` 生成；当前链路与命令以 [`design-system/README.md`](design-system/README.md) 与 [`.trae/rules/ux-design.md`](../../.trae/rules/ux-design.md) 为准。
 > 生成时间：2026-09-22
 
 ---

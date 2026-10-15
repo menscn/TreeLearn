@@ -20,7 +20,7 @@
 - 平板横屏优先（tablet landscape first），不假设手机竖屏。
 - SSE 统一用 `@microsoft/fetch-event-source`；认证流不用原生 `EventSource`。
 - 统一 HTTP/API client；不散落临时 axios/fetch 调用；不直连 Python 服务，走后端 Java `/api`。
-- 用户可见文案全部走既有 i18n 资源（`zh-CN`/`en-US` 双键），每次生产前端改动跑 `pnpm check:user-copy-i18n`。
+- 用户可见文案全部走 i18n 资源并按 key 读取（判定口径只在 `.trae/rules/frontend.md` 的 user-copy guard，此处不复述），每次生产前端改动跑 `pnpm check:user-copy-i18n`。
 - 用户可见时间按设备时区经共享时间模块格式化；状态层保留原始时间点。
 - 遵守依赖方向 `pages → layouts → components → hooks → store → api → platform → utils`，不反向、不越层。
 - 完成前自跑 `cd frontend && pnpm lint`（及命中的专项校验），并按需补启动证据。

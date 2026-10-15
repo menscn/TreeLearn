@@ -1,0 +1,1133 @@
+generated: 2026-10-15T16:05:42+08:00
+cwd: /d/Project/Android/Treelearn
+git HEAD: f1757fc
+mode: full（每条命令完整捕获，退出码紧跟产生它的那条命令）
+note: T-2026-10-15-web-parity-doc-authority-writeback-002 的 GREEN 证据（第二轮返工后重生成）。
+note: 结论段由本脚本从捕获文件 grep/sed 派生，不手写数字。
+note: 上一版证据文件因块内使用 git diff --stat 而成为非法 UTF-8；本版改用 --numstat，
+      并把两个证据文件与本脚本自身纳入收尾闸门（块 21）在同一运行内复检。
+note: 覆盖链（第三轮 verifier 指出旧说法把「尾注 ASCII-only」当成由构造消失的盲区、且它给的
+      字节差 1024 实测不成立，据此改写；第四轮 verifier 又指出 #3 当时只在行尾接了一条
+      退出码兜底（exit 1），OVERALL 早已写死，于是「解码结果并入 OVERALL」对 #3 是假的——
+      现在总判定块先落盘、
+      #3 覆盖它并把 rc 折叠进 OVERALL，写盘后只剩纯数字的末行）：块 21 的取样只覆盖到
+      size_before_21；其后追加的四段（块 21 自有回显段、总判定尾注、总判定块、OVERALL 末行）
+      每段都机械测出非 ASCII 字节数，前三段各由紧随其后的严格解码 #1/#2/#3 覆盖并把 rc 并入
+      OVERALL_EXITCODE；末行只能由写盘后的 #4 覆盖，其字节分解与残差落在同一次运行写出的
+      <evidence>-console.txt 见证文件里（把 #4 的结果写回本文件会改变 #4 所判定的字节）。
+      ASCII-only 在这里是实测数字而不是口头构造：闸门会回显它检查的路径，路径含中文时该段即非
+      ASCII-only（本次块 21 只查 3 个 ASCII 路径，实测该段非 ASCII 字节 = 0）。
+header stderr bytes=0 (0 = every header note line landed in the evidence file)
+
+### python .trae/scripts/dev/check_stack_facts.py   # 与 RED 同一条命令
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+
+check_stack_facts: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+
+### python .trae/scripts/dev/check_stack_facts.py --selftest
+BASELINE (healthy copy must PASS)
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+
+check_stack_facts: 0 check(s) failed
+EXITCODE=0
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+FAIL no superseded stack claim survives — measured=1 hits=['README.md:170::没有后端']
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE inject-stale README.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+FAIL every inventoried file points at the authoritative spec — measured=1 missing_pointer=['README.md']
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE drop-pointer README.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+FAIL no superseded stack claim survives — measured=1 hits=['README_EN.md:166::no backend']
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE inject-stale README_EN.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+FAIL every inventoried file points at the authoritative spec — measured=1 missing_pointer=['README_EN.md']
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE drop-pointer README_EN.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+FAIL no superseded stack claim survives — measured=1 hits=['.trae/context/project-brief.md:69::目录目前不存在']
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE inject-stale .trae/context/project-brief.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+FAIL every inventoried file points at the authoritative spec — measured=1 missing_pointer=['.trae/context/project-brief.md']
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE drop-pointer .trae/context/project-brief.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+FAIL no superseded stack claim survives — measured=1 hits=['.trae/ROADMAP.md:193::不要假设有服务端']
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE inject-stale .trae/ROADMAP.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+FAIL every inventoried file points at the authoritative spec — measured=1 missing_pointer=['.trae/ROADMAP.md']
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE drop-pointer .trae/ROADMAP.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+FAIL no superseded stack claim survives — measured=1 hits=['Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md:375::不建设 Spring Boot、React']
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE inject-stale Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+FAIL every inventoried file points at the authoritative spec — measured=1 missing_pointer=['Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md']
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE drop-pointer Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+FAIL no superseded stack claim survives — measured=1 hits=['Docs/05-technical-design/TreeLearn_Harness全量开发交付提示词.md:76::无 backend/frontend']
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE inject-stale Docs/05-technical-design/TreeLearn_Harness全量开发交付提示词.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+FAIL every inventoried file points at the authoritative spec — measured=1 missing_pointer=['Docs/05-technical-design/TreeLearn_Harness全量开发交付提示词.md']
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE drop-pointer Docs/05-technical-design/TreeLearn_Harness全量开发交付提示词.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+FAIL no superseded stack claim survives — measured=1 hits=['.trae/rules/shared-state.md:30::无服务端实例']
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE inject-stale .trae/rules/shared-state.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+FAIL every inventoried file points at the authoritative spec — measured=1 missing_pointer=['.trae/rules/shared-state.md']
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE drop-pointer .trae/rules/shared-state.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+FAIL no superseded stack claim survives — measured=1 hits=['.trae/rules/observability.md:39::无服务端、无后端统一日志基础设施']
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE inject-stale .trae/rules/observability.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+FAIL every inventoried file points at the authoritative spec — measured=1 missing_pointer=['.trae/rules/observability.md']
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE drop-pointer .trae/rules/observability.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+FAIL no superseded stack claim survives — measured=1 hits=['.trae/skills/pm-discovery/SKILL.md:142::本地优先、无服务端']
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE inject-stale .trae/skills/pm-discovery/SKILL.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+FAIL every inventoried file points at the authoritative spec — measured=1 missing_pointer=['.trae/skills/pm-discovery/SKILL.md']
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE drop-pointer .trae/skills/pm-discovery/SKILL.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+FAIL no superseded stack claim survives — measured=1 hits=['Docs/spec/SPEC-2026-09-23-providers-and-models.md:194::无服务端、单人维护']
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE inject-stale Docs/spec/SPEC-2026-09-23-providers-and-models.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+FAIL every inventoried file points at the authoritative spec — measured=1 missing_pointer=['Docs/spec/SPEC-2026-09-23-providers-and-models.md']
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE drop-pointer Docs/spec/SPEC-2026-09-23-providers-and-models.md: rc=1 -> ok
+
+FAIL inventory floor met — measured=0 floor=10
+OK   every inventoried current-state file is present — measured=0 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE empty-inventory: rc=1 -> ok
+
+check_stack_facts --selftest: 22 case(s), 0 mismatch(es), expected=22
+EXITCODE=0
+EXITCODE=0
+
+### python .trae/scripts/check_pm_discovery_skill.py
+OK   file exists: .trae/skills/pm-discovery/SKILL.md
+OK   front matter declares name: pm-discovery
+OK   front matter declares a non-empty description
+OK   convergence section exists: 有价值吗
+OK     有价值吗 has >= 3 judgements — measured=4
+OK   convergence section exists: 值得做吗
+OK     值得做吗 has >= 3 judgements — measured=4
+OK   convergence section exists: 可以做吗
+OK     可以做吗 has >= 3 judgements — measured=5
+OK   section exists: 建议不做
+OK     建议不做 has >= 3 items — measured=6
+OK   section exists: 反模式
+OK     反模式 has >= 4 items — measured=6
+OK   checklist section and clarification field list are both readable — fields_parsed=13
+OK   checklist covers every clarification field — measured=13; missing=[]
+OK   project adaptation section exists
+OK   adaptation section names >= 4 Treelearn constraints — measured=7 found=['本地优先', 'Java-only', '200 行', '单人开发', '44dp', '平板横屏', '冻结']
+OK   provenance section exists
+OK   provenance cites a concrete upstream location
+OK   provenance records the access date
+OK   shares at most 2 runs of 60 chars with its sources — measured_hits=0 sources=['.trae/rules/harness-clarification.md', 'C:/Users/23745/.agents/skills/brainstorming/SKILL.md'] sample=[]
+OK   no placeholder tokens — measured=[]
+
+check_pm_discovery_skill: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+
+### python .trae/scripts/check_intent_capturer_agent.py
+OK   file exists: .trae/agents/intent-capturer.md
+OK   file exists: .trae/agents/verifier.md
+OK   file exists: .trae/templates/INTENT.md
+OK   file exists: .trae/skills/pm-discovery/SKILL.md
+OK   required sections present — measured=6; missing=[]
+OK   section set covers .trae/agents/verifier.md — reference=4; uncovered=[]
+OK   permission section is readable
+OK   declares writable scope Docs/intent/**
+OK   declares read-only scopes — missing=[]
+OK   prerequisite-reading section is readable
+OK   names all 3 prerequisite files — missing=[]
+OK   prerequisite path exists on disk: .trae/context/project-brief.md
+OK   prerequisite path exists on disk: .trae/skills/pm-discovery/SKILL.md
+OK   prerequisite path exists on disk: .trae/templates/INTENT.md
+OK   both field markers are readable — template=15 agent=15
+OK   agent output field set equals the template FIELDS marker — agent=15 template=15 diff=[]
+OK   output-format section is readable
+OK   every template field appears backticked in the output-format section — measured=15; missing=[]
+OK   listed body sections equal the template ## titles — template=9 agent=9 diff=[]
+OK   handles terminal state: accepted
+OK   handles terminal state: rejected
+OK   handles terminal state: needs-more-info
+OK   accepted branch produces a handoff checklist
+OK   handoff target is requirement-decomposer
+OK   rejected branch keeps the intent file
+OK   background-gap escalation is written as a prohibition in one clause — measured=- 背景缺口上报：当 `.trae/context/**` 与 `Docs/**` 合起来也回答不了某个产品事实时，把它登记为「未知项」并显式报告缺口，**不得凭印象补一个看起来合理的答案**。
+OK   background-gap escalation keeps the canonical prohibition clause — measured=True
+OK   no line in the agent file negates or exempts the background-gap rule — measured=no negation marker
+OK   no placeholder tokens — measured=[]
+OK   shares at most 1 run(s) of 60 chars with pm-discovery — measured_hits=0 sample=[]
+OK   shares at most 0 run(s) of 40 chars with pm-discovery — measured_hits=0 sample=[]
+
+check_intent_capturer_agent: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+
+### python .trae/scripts/check_context_pack.py   # 基线即红 2 条，本片只要求未退化
+OK   file exists: .trae/context/project-brief.md
+OK   file exists: .trae/context/domain-glossary.md
+OK   brief is one page (non-empty, non-header lines <= 60) — measured=46
+OK   brief has the six required sections — measured=6; missing=[]
+FAIL docs index equals the real Docs/ file set — listed=21 actual=57 missing=['Docs/04-ux-design/知芽-Figma新稿迁移方案-V1.0.md', 'Docs/04-ux-design/知芽-TreeLearn-对话页1比1复刻方案-V1.0.md', 'Docs/04-ux-design/知芽-TreeLearn-对话页文本高亮与批注方案-V1.0.md', 'Docs/04-ux-design/知芽-TreeLearn-设置入口与按钮反馈更新-2026-10-09.md', 'Docs/04-ux-design/知芽-TreeLearn-设置页重设计-交互稿-V1.0.html', 'Docs/04-ux-design/知芽-TreeLearn-设置页重设计方案-V1.0.md', 'Docs/04-ux-design/知芽-TreeLearn-高亮批注交互Demo-V1.1.html', 'Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.1.html', 'Docs/04-ux-design/知芽-对话页动作行与附件批注处理方案-V1.0.md', 'Docs/04-ux-design/知芽（TreeLearn）对话页视觉重做规格_V1.0.md', 'Docs/04a-ux-cross-review/RikkaHub交互基准笔记.md', 'Docs/04a-ux-cross-review/知芽-TRELEARN-PRD截图对齐分析_2026-09-27.md', 'Docs/04a-ux-cross-review/知芽（TreeLearn）UI交互评审报告_2026-09-27.md', 'Docs/05-technical-design/知芽（TreeLearn）DeepSeek自适应学习导师提示词设计_V1.1.md', 'Docs/05-technical-design/知芽（TreeLearn）RikkaHub功能吸收矩阵_V1.0.md', 'Docs/05-technical-design/知芽（TreeLearn）RikkaHub开源方案吸收评估_V0.1.md', 'Docs/05-technical-design/知芽（TreeLearn）SSE流解析边界clean-room规格_V1.0.md', 'Docs/05-technical-design/知芽（TreeLearn）消息分支数据模型clean-room规格_V1.0.md', 'Docs/intent/INTENT-2026-09-22-figma-ia-migration.md', 'Docs/intent/INTENT-2026-09-23-home-drawer-stats-heatmap.md', 'Docs/intent/INTENT-2026-09-23-my-forest.md', 'Docs/intent/INTENT-2026-09-23-rikkahub-settings-center-absorption.md', 'Docs/intent/INTENT-2026-09-29-selection-flow-responsiveness.md', 'Docs/intent/INTENT-2026-10-01-progressive-web-ui.md', 'Docs/intent/INTENT-2026-10-08-harness-autonomous-completion.md', 'Docs/intent/INTENT-2026-10-15-web-h5-android-parity.md', 'Docs/spec/SPEC-2026-09-22-figma-ia-migration.md', 'Docs/spec/SPEC-2026-09-23-file-management.md', 'Docs/spec/SPEC-2026-09-23-search-service.md', 'Docs/spec/SPEC-2026-09-23-voice-tts-stt.md', 'Docs/spec/SPEC-2026-09-27-android-v11-full-screen-fidelity.md', 'Docs/spec/SPEC-2026-09-27-home-drawer-ux.md', 'Docs/spec/SPEC-2026-09-27-home-visual-fidelity.md', 'Docs/spec/SPEC-2026-09-29-selection-flow-responsiveness.md', 'Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md', 'Docs/superpowers/specs/2026-09-29-child-branch-name-design.md'] extra=[]
+OK   every indexed path exists — dead=[]
+OK   glossary has >= 12 terms — measured=15
+OK   every glossary term cites a real path — measured_terms=15 dead_sources=[]
+FAIL brief shares no 40-char run with Docs/ — measured_hits=2 sample=[('Docs/01-demand/结构化需求基准说明书_知芽（TreeLearn）_V3.3增量.md', 'AndroidKeystore（AES-GCM）；明文不进SQLite、日志或备')]
+OK   no placeholder tokens — measured={}
+
+check_context_pack: 2 check(s) failed
+EXITCODE=1
+EXITCODE=1
+
+### python .trae/scripts/check_roadmap_and_routing.py   # 基线即红 2 条，本片只要求未退化
+OK   file exists: .trae/ROADMAP.md
+OK   file exists: AGENTS.md
+OK   file exists: .trae/README.md
+OK   phase section exists: Phase A（已完成）
+OK   phase section exists: Phase B（下一批）
+OK   phase section exists: Phase C（依赖外部条件）
+OK   Phase B（下一批） has >= 7 entries — measured=7
+OK   Phase B（下一批） every entry carries all 8 field names — measured_entries=7 problems=[]
+OK   Phase B（下一批） every 执行提示词 is >= 40 chars — measured_short=[]
+OK   Phase B（下一批） every path inside 执行提示词 exists — measured_dead=[]
+OK   Phase B（下一批） every 开源来源 cites github.com or a skills path — measured_weak=[]
+OK   Phase C（依赖外部条件） has >= 3 entries — measured=3
+OK   Phase C（依赖外部条件） every entry carries all 8 field names — measured_entries=3 problems=[]
+OK   Phase C（依赖外部条件） every 执行提示词 is >= 40 chars — measured_short=[]
+OK   Phase C（依赖外部条件） every path inside 执行提示词 exists — measured_dead=[]
+OK   Phase C（依赖外部条件） every 开源来源 cites github.com or a skills path — measured_weak=[]
+OK   Phase B covers the seven planned capabilities — missing=[]
+OK   Phase C covers the three planned capabilities — missing=[]
+OK   no placeholder tokens in ROADMAP — measured=[]
+OK   git diff AGENTS.md is readable — stderr=warning: in the working copy of 'AGENTS.md', LF will be replaced by CRLF the next time Git touches it
+FAIL AGENTS.md change contains no deletion line — measured_deletions=1 sample=['-- [2026-09-21] [harness] 交付自述里的计数与**证据文件**不同源 → RED 记录写「40 处 `cannot find symbol`、两个测试文件」，实测是 **49 errors、三个测试文件**；GREEN 记录声称证据含退出码，而证据文件既没有命令行也没有退出码行。两个数字都不是编造的，是**凭记忆写的**，且都过了自己的眼睛。规则：任务文件里每个数字都要写成「从哪个文件的哪行得到」（如 `grep -n "errors$" artifacts/evidence/…`），并在**写完之后**用同一命令回读一次；证据文件必须自带命令行与退出码（`EXITCODE=`），否则不能自证。另：**契约改动后必须同步重生成引用它的证据文件**——第六轮实测：任务与 README 都引用 `artifacts/evidence/T-002-guard-selftest.txt` 作为「完整模式 25 例」的证据，而该文件是一次 `-Fast` 运行（23 例、且自述 `CASE 7-8 skipped`），被引用的恰好是它跳过的两个用例。证据文件必须记录**产生它的那条命令与运行模式**，引用方必须核对该模式与自述一致。']
+OK   HEAD revision of AGENTS.md is readable — stderr=
+OK   every pre-existing routing row and case record survives verbatim — measured_head_rows=75 vanished=[]
+FAIL AGENTS.md adds >= 4 routing rows — measured=0
+FAIL new routing rows cover all four triggers — missing=['intent-capturer', 'pm-discovery', 'project-brief', 'ROADMAP']
+OK   every new routing-row target exists — measured_dead=[]
+OK   .trae/README.md has a 目录结构 section
+OK   目录结构 section lists the four new entries — missing=[]
+
+check_roadmap_and_routing: 3 check(s) failed
+EXITCODE=1
+EXITCODE=1
+
+### python .trae/scripts/dev/checkers_selftest.py   # 被 06 的恒红判据拖成 INCONCLUSIVE
+Command: python .trae/scripts/dev/checkers_selftest.py
+Mode: full (49 injected-violation cases + 4 baselines)
+Workspace: C:\Users\23745\AppData\Local\Temp\tlx-selftest-wvriyln3
+Workspace note: longest path 139
+BASELINE OK check_intent_capturer_agent rc=0
+BASELINE FAIL check_roadmap_and_routing rc=1
+是它跳过的两个用例。证据文件必须记录**产生它的那条命令与运行模式**，引用方必须核对该模式与自述一致。']
+OK   HEAD revision of AGENTS.md is readable — stderr=
+OK   every pre-existing routing row and case record survives verbatim — measured_head_rows=75 vanished=[]
+FAIL AGENTS.md adds >= 4 routing rows — measured=0
+FAIL new routing rows cover all four triggers — missing=['intent-capturer', 'pm-discovery', 'project-brief', 'ROADMAP']
+OK   every new routing-row target exists — measured_dead=[]
+OK   .trae/README.md has a 目录结构 section
+OK   目录结构 section lists the four new entries — missing=[]
+
+check_roadmap_and_routing: 3 check(s) failed
+EXITCODE=1
+OVERALL: INCONCLUSIVE
+EXITCODE=3
+EXITCODE=3
+
+### python .trae/scripts/check_spec_author_agent.py Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md
+target: Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md (instance)
+OK   declares the four content classes — sections=4; missing=[]
+OK   front-matter intent points at a real file — intent=Docs/intent/INTENT-2026-10-15-web-h5-android-parity.md
+OK   no placeholder tokens — measured=[]
+OK   no bare hex or ad-hoc px values — hex=[] px=[]
+
+check_spec_author_agent: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+
+### python .trae/scripts/dev/check_intent_replay.py Docs/intent/INTENT-2026-10-15-web-h5-android-parity.md
+OK   file exists: Docs/intent/INTENT-2026-10-15-web-h5-android-parity.md
+OK   front matter has exactly the 6 metadata keys — measured=6 diff=[]
+OK   sections equal the template sections, in order — template=9 instance=9 diff=[]
+OK   every field named by the template marker appears in the instance — measured=15 missing=[]
+OK   verdict pairs a conclusion with evidence: 有价值吗
+OK   verdict pairs a conclusion with evidence: 值得做吗
+OK   verdict pairs a conclusion with evidence: 可以做吗
+OK   decision record states exactly one terminal state — measured=['accepted']
+OK   front matter status equals the decision-record terminal state — status='accepted' measured=['accepted']
+OK   handoff checklist names >= 3 slices — measured=6
+OK   handoff checklist states the dependency order
+OK   handoff checklist states what cannot run in parallel
+OK   no placeholder tokens — measured=[]
+
+check_intent_replay: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+
+### python .trae/scripts/validate_tasks.py .trae/tasks/T-2026-10-15-web-parity-doc-authority-writeback-002.md
+PASS T-2026-10-15-web-parity-doc-authority-writeback-002.md
+SUMMARY files=1 errors=0 warnings=0
+EXITCODE=0
+
+### python .trae/scripts/validate_tasks.py   # 全目录：16 条 ERROR 全落在 4 个历史任务文件
+ERROR T-2026-09-20-independent-harness-verification-019.md: dependency not found: T-2026-09-20-security-release-core-hardening-018.md
+ERROR T-2026-09-20-independent-harness-verification-019.md: dependency not found: T-2026-09-21-real-data-path-wiring-032.md
+ERROR T-2026-09-20-independent-harness-verification-019.md: dependency not found: T-2026-09-21-delivery-report-033.md
+ERROR T-2026-09-20-tree-canvas-tablet-ui-017.md: dependency not found: T-2026-09-20-navigation-archive-delete-014.md
+ERROR T-2026-09-20-tree-canvas-tablet-ui-017.md: dependency not found: T-2026-09-20-search-unread-reading-position-015.md
+ERROR T-2026-09-20-tree-canvas-tablet-ui-017.md: dependency not found: T-2026-09-20-pure-java-tree-layout-016.md
+ERROR T-2026-09-20-tree-canvas-tablet-ui-017.md: RED evidence requires Command
+ERROR T-2026-09-20-tree-canvas-tablet-ui-017.md: RED evidence requires Exit code
+ERROR T-2026-09-20-tree-canvas-tablet-ui-017.md: RED evidence requires Observed failure
+ERROR T-2026-09-20-tree-canvas-tablet-ui-017.md: RED evidence requires Failure reason validated
+ERROR T-2026-09-20-tree-canvas-tablet-ui-017.md: RED exit code must be an integer
+PASS T-2026-09-20-treelearn-v1-android-local-first-001.md
+PASS T-2026-09-21-ai-persona-builtin-034.md
+PASS T-2026-09-22-constraint-code-classification-defect-059.md
+PASS T-2026-09-22-figma-ia-and-visual-migration-049.md
+PASS T-2026-09-23-home-drawer-stats-heatmap-099.md
+PASS T-2026-09-23-rikkahub-settings-capabilities-078.md
+PASS T-2026-09-27-android-v11-branch-navigation-visual-fidelity-015.md
+PASS T-2026-09-27-android-v11-chat-composer-overlays-fidelity-023.md
+PASS T-2026-09-27-android-v11-chat-content-visual-fidelity-022.md
+PASS T-2026-09-27-android-v11-file-manager-visual-fidelity-021.md
+PASS T-2026-09-27-android-v11-full-screen-visual-fidelity-009.md
+PASS T-2026-09-27-android-v11-home-drawer-visual-fidelity-011.md
+PASS T-2026-09-27-android-v11-library-search-visual-fidelity-013.md
+PASS T-2026-09-27-android-v11-model-settings-visual-fidelity-018.md
+PASS T-2026-09-27-android-v11-paper-backdrop-shell-010.md
+PASS T-2026-09-27-android-v11-provider-settings-visual-fidelity-017.md
+PASS T-2026-09-27-android-v11-search-settings-visual-fidelity-019.md
+PASS T-2026-09-27-android-v11-settings-home-visual-fidelity-016.md
+PASS T-2026-09-27-android-v11-stats-month-calendar-012.md
+PASS T-2026-09-27-android-v11-tree-canvas-visual-fidelity-014.md
+PASS T-2026-09-27-android-v11-voice-settings-visual-fidelity-020.md
+PASS T-2026-09-27-home-composer-restyle-004.md
+PASS T-2026-09-27-home-layout-order-hero-003.md
+PASS T-2026-09-27-home-motion-007.md
+PASS T-2026-09-27-home-paper-rule-backdrop-002.md
+PASS T-2026-09-27-home-recommendation-restyle-005.md
+PASS T-2026-09-27-home-topic-card-restyle-006.md
+PASS T-2026-09-27-home-visual-fidelity-001.md
+PASS T-2026-09-27-home-visual-fidelity-verification-008.md
+PASS T-2026-09-28-androidtest-db-fixture-isolation-024.md
+WARNING T-2026-09-28-annot-cell-highlight-028.md: estimated production lines 430 exceeds soft limit 200
+PASS T-2026-09-28-annot-cell-highlight-028.md
+WARNING T-2026-09-28-annot-data-layer-026.md: estimated production lines 460 exceeds soft limit 200
+PASS T-2026-09-28-annot-data-layer-026.md
+WARNING T-2026-09-28-annot-menu-prose-highlight-027.md: estimated production lines 380 exceeds soft limit 200
+PASS T-2026-09-28-annot-menu-prose-highlight-027.md
+WARNING T-2026-09-28-annot-note-fullchain-029.md: estimated production lines 430 exceeds soft limit 200
+PASS T-2026-09-28-annot-note-fullchain-029.md
+PASS T-2026-09-28-chat-child-branch-popup-105.md
+ERROR T-2026-09-28-chat-child-branch-popup-fix-106.md: RED and GREEN must use the same targeted test command
+PASS T-2026-09-28-chat-highlight-annotation-025.md
+PASS T-2026-09-28-chat-math-formula-rendering-100.md
+WARNING T-2026-09-28-chat-math-layout-span-103.md: estimated production lines 369 exceeds soft limit 200
+PASS T-2026-09-28-chat-math-layout-span-103.md
+WARNING T-2026-09-28-chat-math-parse-node-102.md: estimated production lines 378 exceeds soft limit 200
+PASS T-2026-09-28-chat-math-parse-node-102.md
+WARNING T-2026-09-28-chat-math-scan-extract-101.md: estimated production lines 270 exceeds soft limit 200
+PASS T-2026-09-28-chat-math-scan-extract-101.md
+ERROR T-2026-09-28-chat-math-wire-renderer-104.md: RED evidence requires Exit code
+ERROR T-2026-09-28-chat-math-wire-renderer-104.md: RED evidence requires Observed failure
+ERROR T-2026-09-28-chat-math-wire-renderer-104.md: RED exit code must be an integer
+ERROR T-2026-09-28-chat-math-wire-renderer-104.md: RED and GREEN must use the same targeted test command
+PASS T-2026-09-29-apk-versioning-110.md
+PASS T-2026-09-29-child-branch-popup-visual-fix-109.md
+PASS T-2026-09-29-recommendation-fork-auto-send-108.md
+WARNING T-2026-09-29-selection-flow-responsiveness-107.md: estimated production lines 260 exceeds soft limit 200
+PASS T-2026-09-29-selection-flow-responsiveness-107.md
+PASS T-2026-10-01-android-child-branch-back-navigation-115.md
+PASS T-2026-10-01-android-crash-diagnosis-113.md
+PASS T-2026-10-01-android-daily-use-device-regression-matrix-120.md
+PASS T-2026-10-01-android-daily-use-issues-111.md
+PASS T-2026-10-01-android-history-load-performance-diagnosis-119.md
+PASS T-2026-10-01-android-long-answer-scroll-follow-mode-117.md
+PASS T-2026-10-01-android-reasoning-leak-prevention-118.md
+PASS T-2026-10-01-android-responsiveness-recommendation-tap-diagnosis-112.md
+PASS T-2026-10-01-android-send-keyboard-and-message-visibility-114.md
+PASS T-2026-10-01-android-top-controls-system-insets-116.md
+PASS T-2026-10-08-harness-autonomous-completion-121.md
+PASS T-2026-10-08-harness-autonomy-orchestration-122.md
+PASS T-2026-10-09-android-button-feedback-home-settings-entry-001.md
+PASS T-2026-10-09-android-button-feedback-settings-requirement-002.md
+PASS T-2026-10-10-chat-generation-stage-test-flake-008.md
+PASS T-2026-10-15-css-token-generation-and-bare-color-guard-004.md
+PASS T-2026-10-15-parity-measurement-instruments-adoption-003.md
+PASS T-2026-10-15-screen-inventory-parity-ledger-005.md
+PASS T-2026-10-15-web-h5-android-parity-requirement-001.md
+PASS T-2026-10-15-web-parity-doc-authority-writeback-002.md
+SUMMARY files=68 errors=16 warnings=8
+EXITCODE=1
+
+### git status --porcelain   # 本片改动面
+ M .trae/ROADMAP.md
+ M .trae/agents/frontend-dev.md
+ M .trae/context/project-brief.md
+ M .trae/rules/frontend.md
+ M .trae/rules/observability.md
+ M .trae/rules/shared-state.md
+ M .trae/scripts/dev/checkers_selftest.py
+ M .trae/skills/pm-discovery/SKILL.md
+ M AGENTS.md
+ M Docs/05-technical-design/TreeLearn_Harness全量开发交付提示词.md
+ M Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md
+ M Docs/05-technical-design/知芽（TreeLearn）RikkaHub功能吸收矩阵_V1.0.md
+ M Docs/intent/INTENT-2026-10-01-progressive-web-ui.md
+ M Docs/spec/SPEC-2026-09-23-providers-and-models.md
+ D Docs/spec/SPEC-2026-10-01-progressive-web-ui.md
+ M README.md
+ M README_EN.md
+?? .trae/scripts/dev/check_stack_facts.py
+?? .trae/tasks/T-2026-10-15-css-token-generation-and-bare-color-guard-004.md
+?? .trae/tasks/T-2026-10-15-parity-measurement-instruments-adoption-003.md
+?? .trae/tasks/T-2026-10-15-screen-inventory-parity-ledger-005.md
+?? .trae/tasks/T-2026-10-15-web-h5-android-parity-requirement-001.md
+?? .trae/tasks/T-2026-10-15-web-parity-doc-authority-writeback-002.md
+?? Docs/intent/INTENT-2026-10-15-web-h5-android-parity.md
+?? Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md
+?? artifacts/evidence/T-2026-10-15-002-green-console.txt
+?? artifacts/evidence/T-2026-10-15-002-green.txt
+?? artifacts/evidence/T-2026-10-15-002-guards-baseline.txt
+?? artifacts/tmp/_append_agents_case.py
+?? artifacts/tmp/_ctl_slices.txt
+?? artifacts/tmp/_g1.txt
+?? artifacts/tmp/_g10.txt
+?? artifacts/tmp/_g2.txt
+?? artifacts/tmp/_g3.txt
+?? artifacts/tmp/_g4.txt
+?? artifacts/tmp/_g5.txt
+?? artifacts/tmp/_g6.txt
+?? artifacts/tmp/_g7.txt
+?? artifacts/tmp/_g8.txt
+?? artifacts/tmp/_g9.txt
+?? artifacts/tmp/_gen_console.txt
+?? artifacts/tmp/_green_work/
+?? artifacts/tmp/_patch_002_round4.py
+?? artifacts/tmp/_patch_002_task_round4.py
+?? artifacts/tmp/_patch_002_task_round4b.py
+?? artifacts/tmp/_patch_gen_block18.py
+?? artifacts/tmp/_patch_gen_block22.py
+?? artifacts/tmp/_patch_gen_block22b.py
+?? artifacts/tmp/_patch_gen_concl18.py
+?? artifacts/tmp/_patch_gen_tail.py
+?? artifacts/tmp/_patch_gen_tail2.py
+?? artifacts/tmp/_patch_gen_wording.py
+?? artifacts/tmp/_t003_compare.py
+?? artifacts/tmp/_t003_meta_mutations.py
+?? artifacts/tmp/_t003_negatives.py
+?? artifacts/tmp/_t003_transform.py
+?? artifacts/tmp/_verify4/
+?? artifacts/tmp/_verify5/
+?? artifacts/tmp/_verify6/
+?? artifacts/tmp/_verify7/
+?? artifacts/tmp/gen-002-green.sh
+EXITCODE=0
+
+### git -c core.quotepath=false diff --numstat   # 既有文件改动面（不用 --stat：它按列宽截断中文名会切断多字节）
+warning: in the working copy of '.trae/ROADMAP.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.trae/agents/frontend-dev.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.trae/rules/frontend.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.trae/rules/observability.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.trae/rules/shared-state.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.trae/scripts/dev/checkers_selftest.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.trae/skills/pm-discovery/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'AGENTS.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Docs/05-technical-design/TreeLearn_Harness全量开发交付提示词.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Docs/05-technical-design/知芽（TreeLearn）RikkaHub功能吸收矩阵_V1.0.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Docs/spec/SPEC-2026-09-23-providers-and-models.md', LF will be replaced by CRLF the next time Git touches it
+46	1	.trae/ROADMAP.md
+1	1	.trae/agents/frontend-dev.md
+1	1	.trae/context/project-brief.md
+4	4	.trae/rules/frontend.md
+3	2	.trae/rules/observability.md
+3	2	.trae/rules/shared-state.md
+9	6	.trae/scripts/dev/checkers_selftest.py
+1	1	.trae/skills/pm-discovery/SKILL.md
+10	1	AGENTS.md
+1	1	Docs/05-technical-design/TreeLearn_Harness全量开发交付提示词.md
+1	1	Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md
+2	0	Docs/05-technical-design/知芽（TreeLearn）RikkaHub功能吸收矩阵_V1.0.md
+5	0	Docs/intent/INTENT-2026-10-01-progressive-web-ui.md
+1	1	Docs/spec/SPEC-2026-09-23-providers-and-models.md
+0	101	Docs/spec/SPEC-2026-10-01-progressive-web-ui.md
+2	2	README.md
+2	2	README_EN.md
+EXITCODE=0
+
+### git -c core.quotepath=false diff --check   # 空白错误闸门：stdout 才是判据，stderr 只有 CRLF 归一化告警
+--- stderr(CRLF warnings) line count: 12
+--- stdout(whitespace findings) 为空即干净
+EXITCODE=0
+
+### git ls-files --others --exclude-standard | grep -v artifacts/tmp   # 未跟踪的本片新增文件
+.trae/scripts/dev/check_stack_facts.py
+.trae/tasks/T-2026-10-15-css-token-generation-and-bare-color-guard-004.md
+.trae/tasks/T-2026-10-15-parity-measurement-instruments-adoption-003.md
+.trae/tasks/T-2026-10-15-screen-inventory-parity-ledger-005.md
+.trae/tasks/T-2026-10-15-web-h5-android-parity-requirement-001.md
+.trae/tasks/T-2026-10-15-web-parity-doc-authority-writeback-002.md
+Docs/intent/INTENT-2026-10-15-web-h5-android-parity.md
+Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md
+artifacts/evidence/T-2026-10-15-002-green-console.txt
+artifacts/evidence/T-2026-10-15-002-green.txt
+artifacts/evidence/T-2026-10-15-002-guards-baseline.txt
+EXITCODE=0
+
+### python .trae/scripts/dev/count_production_lines.py .trae/scripts/dev/check_stack_facts.py   # 新脚本全文
+   179  .trae/scripts/dev/check_stack_facts.py
+   179  TOTAL (non-blank, non-comment, production files only)
+EXITCODE=0
+
+### python .trae/scripts/dev/check_stack_facts.py --root <副本>   # 注入 3 条旧短语，验行号级判据行
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+FAIL no superseded stack claim survives — measured=3 hits=['README.md:169::没有后端', '.trae/context/project-brief.md:68::目录目前不存在', 'Docs/spec/SPEC-2026-09-23-providers-and-models.md:192::无服务端、单人维护']
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+EXITCODE=1
+
+### python -X utf8 artifacts/tmp/_green_work/overlap_cases.py   # 三条正控 + 结构断言正反 + 拒绝分支探针（驱动源码见下一块）
+Reproduces CASES copied-methodology-* of .trae/scripts/dev/checkers_selftest.py
+against the real guard, because the roadmap baseline is red (INCONCLUSIVE=3) and
+the 49 injected cases never run. Driver is one-off, not a repo script.
+baseline is git HEAD, not this run: agent bytes=6930 sha=637ec9454b971384b1296f709c7ec2488045154c8523866cc2759f9ee84a4d12 | HEAD bytes=6930 sha=637ec9454b971384b1296f709c7ec2488045154c8523866cc2759f9ee84a4d12 | equal=True
+CASE intent:copied-methodology-long     -> ok | rc=1 restored=True fired=["FAIL shares at most 1 run(s) of 60 chars with pm-discovery — measured_hits=30 sample=[('.trae/skills/pm-discovery/SKILL.md', '用户说出来的几乎都是方案（「给我加个导出按钮」），要问的是问题（「你现在怎么把内容带出去，卡在哪一步」）。在至少写下一条')]"]
+CASE intent:copied-methodology-short    -> ok | rc=1 restored=True fired=["FAIL shares at most 0 run(s) of 40 chars with pm-discovery — measured_hits=21 sample=[('.trae/skills/pm-discovery/SKILL.md', '本地优先、无远程服务端**：任何引入云端账号、云同步、云备份、远程服务的方案都属')]"]
+CASE intent:copied-methodology-44-chars -> ok | rc=1 restored=True fired=["FAIL shares at most 0 run(s) of 40 chars with pm-discovery — measured_hits=5 sample=[('.trae/skills/pm-discovery/SKILL.md', '本地优先、无远程服务端**：任何引入云端账号、云同步、云备份、远程服务的方案都属')]"]
+CASE struct:write-inside-try            -> ok | state=True inject_parent='try:' restore_parent='finally:'
+CASE struct:degraded-must-be-caught     -> ok | degraded_state=False inject_parent='for name, payload, label in cases:' restore_parent='finally:' (True here would mean the check is vacuous)
+CASE refuse:baseline-differs-probe      -> ok | rc=1 said_no_mutate=True file_untouched=True
+probe scratch removed: exists=False
+agent sha256 after all cases: 637ec9454b971384b1296f709c7ec2488045154c8523866cc2759f9ee84a4d12 equals_pre=True equals_HEAD=True
+TOTAL=6 CASES=3 RESTORED=True MISMATCHES=0
+EXITCODE=0
+EXITCODE=0
+
+### driver source of block 18（本片一次性驱动，不入 .trae/scripts，避免同一判据两处实现）
+```python
+import hashlib, os, shutil, subprocess, sys, tempfile
+sys.path.insert(0, ".trae/scripts")
+sys.path.insert(0, ".trae/scripts/dev")
+import checkers_selftest as cs
+
+SELF = os.path.abspath(__file__)
+AGENT = os.environ.get("TL_AGENT", ".trae/agents/intent-capturer.md")
+HEAD_FILE = os.environ.get("TL_HEAD", "")
+CHECKER = ".trae/scripts/check_intent_capturer_agent.py"
+
+# 结构断言的锚点：只匹配**语句行**（strip 后以此开头），不匹配这两个常量自己的定义行。
+INJECT_MARK = 'open(AGENT, "wb").write(pre + b"'
+RESTORE_MARK = 'open(AGENT, "wb").write(pre)'
+
+cases = [
+    ("intent:copied-methodology-long", cs.STOLEN_LONG,
+     "shares at most 1 run(s) of 60 chars with pm-discovery"),
+    ("intent:copied-methodology-short", cs.STOLEN_SHORT,
+     "shares at most 0 run(s) of 40 chars with pm-discovery"),
+    ("intent:copied-methodology-44-chars", cs.STOLEN_TRIM,
+     "shares at most 0 run(s) of 40 chars with pm-discovery"),
+]
+
+def read_bytes():
+    return open(AGENT, "rb").read()
+
+def head_bytes():
+    if HEAD_FILE:
+        return open(HEAD_FILE, "rb").read()
+    return subprocess.run(["git", "show", "HEAD:" + AGENT], capture_output=True, check=True).stdout
+
+def parent_header(lines, i):
+    """向上找到第一条缩进更小的非空非注释行——即第 i 行所属的块头。"""
+    ind = len(lines[i]) - len(lines[i].lstrip())
+    for j in range(i - 1, -1, -1):
+        s = lines[j]
+        if not s.strip() or s.lstrip().startswith("#"):
+            continue
+        jind = len(s) - len(s.lstrip())
+        if jind < ind:
+            return s.strip()
+    return None
+
+def try_lock_state(src_text):
+    """注入写必须在 try 内、还原必须在 finally 内。定位不到唯一语句行时返回 None（仪器故障），
+    不得退化成「找不到就算通过」——那正是本仓库规则「匹配集为空必须判 FAIL」的形态。"""
+    lines = src_text.splitlines()
+    inj = [i for i, l in enumerate(lines) if l.strip().startswith(INJECT_MARK)]
+    res = [i for i, l in enumerate(lines) if l.strip().startswith(RESTORE_MARK)]
+    if len(inj) != 1 or len(res) != 1:
+        return None, "inject=%d restore=%d hits, want exactly 1 each" % (len(inj), len(res))
+    ih = parent_header(lines, inj[0])
+    rh = parent_header(lines, res[0])
+    return (ih == "try:" and rh == "finally:"), "inject_parent=%r restore_parent=%r" % (ih, rh)
+
+def dedent_inject(src_text):
+    """从**被判文本现场派生**的降级副本（切片而非字面量）：把注入写退一级缩进，
+    即修复前的形状——写在 try 之外，中间崩溃就把残留留在被跟踪文件里。"""
+    lines = src_text.splitlines()
+    hits = [i for i, l in enumerate(lines) if l.strip().startswith(INJECT_MARK)]
+    if len(hits) != 1:
+        return None
+    i = hits[0]
+    l = lines[i]
+    if not l.startswith("    "):
+        return None
+    out = list(lines)
+    out[i] = l[4:]
+    return "\n".join(out)
+
+def refuse_if_baseline_differs(pre, head):
+    if pre == head:
+        return False
+    print("FAIL agent file differs from git HEAD before injection - either residue from an"
+          " earlier interrupted run or an intentional edit this driver must not carry; refusing to mutate")
+    print("EXITCODE=1")
+    return True
+
+# 基线取自 git HEAD，不取自"本次运行自己的记忆"。旧版驱动只把 before/after 两个哈希相对比，
+# 于是上一次被中断的运行留在文件里的注入残留会被本次运行当成基线、自证清白地通过——
+# 2026-10-15 实测就是这个形状：残留的 89 字抄写样本让**下一次**运行的块 04 才变红。
+pre = read_bytes()
+head = head_bytes()
+print("Reproduces CASES copied-methodology-* of .trae/scripts/dev/checkers_selftest.py")
+print("against the real guard, because the roadmap baseline is red (INCONCLUSIVE=3) and")
+print("the 49 injected cases never run. Driver is one-off, not a repo script.")
+print("baseline is git HEAD, not this run: agent bytes=%d sha=%s | HEAD bytes=%d sha=%s | equal=%s" % (
+    len(pre), hashlib.sha256(pre).hexdigest(), len(head),
+    hashlib.sha256(head).hexdigest(), pre == head))
+if refuse_if_baseline_differs(pre, head):
+    sys.exit(1)
+
+ran = 0
+bad = 0
+
+def report(name, ok, detail):
+    global ran, bad
+    ran += 1
+    bad += 0 if ok else 1
+    print("CASE %-34s -> %s | %s" % (name, "ok" if ok else "MISMATCH", detail))
+
+for name, payload, label in cases:
+    try:
+        open(AGENT, "wb").write(pre + b"\n" + payload.encode("utf-8") + b"\n")
+        proc = subprocess.run([sys.executable, "-X", "utf8", CHECKER],
+                              capture_output=True, text=True, encoding="utf-8")
+        fired = [l for l in (proc.stdout or "").splitlines()
+                 if l.startswith("FAIL ") and label in l]
+    finally:
+        # byte-exact 还原：旧版用文本模式读进 original、再用 newline="" 写回，
+        # 对 CRLF 文件会静默把行尾归一成 LF——还原"成功"而字节已经变了。
+        open(AGENT, "wb").write(pre)
+    restored = read_bytes() == pre
+    ok = bool(fired) and proc.returncode == 1 and restored
+    report(name, ok, "rc=%d restored=%s fired=%s" % (proc.returncode, restored, fired[:1]))
+
+# 结构断言（第五轮 verifier 阻塞 1：任务文件写了这条回归锁，产物里却没有任何东西实现它）。
+own = open(SELF, encoding="utf-8").read()
+prod_state, prod_detail = try_lock_state(own)
+if prod_state is None:
+    # 定位不到语句行 = 这条判据**没有任何被判对象**，与「找到但形状不对」是两种结论。
+    # 第六轮 verifier 的非阻断 1 实测：旧写法把它并进 MISMATCH 走 1，于是「结构断言读不到东西」
+    # 与「结构断言发现违规」同码——正是 ⑫ 刚为 --root 消除的那种档位塌缩。
+    print("INSTRUMENT FAULT: cannot locate exactly one injection and one restore statement - the structural check has nothing to judge")
+    print("EXITCODE=3")
+    sys.exit(3)
+report("struct:write-inside-try", prod_state is True,
+       "state=%s %s" % (prod_state, prod_detail))
+
+# 同一判据的反向用例：注入的违规形状必须被判不过，否则上面那条是空见证。
+deg = dedent_inject(own)
+if deg is None:
+    print("INSTRUMENT FAULT: cannot build the degraded copy - the reverse case never ran")
+    print("EXITCODE=3")
+    sys.exit(3)
+deg_state, deg_detail = try_lock_state(deg)
+if deg_state is None:
+    print("INSTRUMENT FAULT: the degraded copy has no locatable statement either - the reverse case proves nothing")
+    print("EXITCODE=3")
+    sys.exit(3)
+report("struct:degraded-must-be-caught", deg_state is False,
+       "degraded_state=%s %s (True here would mean the check is vacuous)" % (deg_state, deg_detail))
+
+# 拒绝分支的真实执行（第四/五轮 verifier 记为「只能靠读代码确认」）：在系统临时目录里造一份
+# 带残留的副本，用同一份驱动源码跑它——被跟踪文件一个字节都不动，分支本身却是真跑过的。
+if not os.environ.get("TL_PROBE"):
+    scratch = tempfile.mkdtemp(prefix="_tl18_")
+    try:
+        dirty = os.path.join(scratch, "agent.md")
+        headf = os.path.join(scratch, "head.bin")
+        with open(dirty, "wb") as h1:
+            h1.write(head + b"\nRESIDUE-FROM-AN-INTERRUPTED-RUN\n")
+        with open(headf, "wb") as h2:
+            h2.write(head)
+        before = open(dirty, "rb").read()
+        env = dict(os.environ, TL_AGENT=dirty, TL_HEAD=headf, TL_PROBE="1")
+        p = subprocess.run([sys.executable, "-X", "utf8", SELF],
+                           capture_output=True, text=True, encoding="utf-8", env=env)
+        after = open(dirty, "rb").read()
+        ok = (p.returncode == 1 and "refusing to mutate" in (p.stdout or "") and before == after)
+        report("refuse:baseline-differs-probe", ok,
+               "rc=%d said_no_mutate=%s file_untouched=%s" % (
+                   p.returncode, "refusing to mutate" in (p.stdout or ""), before == after))
+    finally:
+        shutil.rmtree(scratch, ignore_errors=True)
+        print("probe scratch removed: exists=%s" % os.path.isdir(scratch))
+
+post = read_bytes()
+same = (post == pre == head)
+if not same:
+    bad += 1
+    print("FAIL file no longer equals git HEAD after all cases")
+print("agent sha256 after all cases: %s equals_pre=%s equals_HEAD=%s" % (
+    hashlib.sha256(post).hexdigest(), post == pre, post == head))
+
+# 用例数下限取**字面量**，不由 cases 长度推导：某个分支被静默跳过后仍打印绿，是本仓库的老形态。
+# 6 = 3 条抄写正控 + 结构断言(正向) + 结构断言(降级反向) + 拒绝分支探针
+EXPECTED_TOTAL = 6
+if ran != EXPECTED_TOTAL:
+    print("INSTRUMENT FAULT: ran %d != expected %d - a branch never executed" % (ran, EXPECTED_TOTAL))
+    print("TOTAL=%d MISMATCHES=%d" % (ran, bad))
+    print("EXITCODE=3")
+    sys.exit(3)
+print("TOTAL=%d CASES=%d RESTORED=%s MISMATCHES=%d" % (ran, len(cases), same, bad))
+print("EXITCODE=%d" % (1 if bad or not same else 0))
+sys.exit(1 if bad or not same else 0)
+```
+
+### python -X utf8 artifacts/tmp/_green_work/selftest_mutation.py   # 对 selftest() 三条修复做变异测试，核对进程退出码
+CASE control-pristine                         rc=0 -> ok
+CASE A-one-branch-never-runs                  rc=3 -> ok [independent exit code 3, not conflated with 1]
+CASE B-baseline-unhealthy                     rc=3 -> ok [independent exit code 3, not conflated with 1]
+CASE B-minus-baseline-abort(pre-fix shape)    rc=1 -> ok [rc=3 -> ok x20, want 20]
+CASE C-fault-after-baseline                   rc=3 -> ok [independent exit code 3, not conflated with 1]
+CASE C-pre-fix-shape(loose ok + no guard)     rc=1 -> ok [rc=3 -> ok x20, want 20]
+CASE restored-control                         rc=0 -> ok
+judged script sha256 before=813261073ea4d5804d70b1edef25b5dc7ca4bfefa67a54d3467f2c249e1c9b79 after=813261073ea4d5804d70b1edef25b5dc7ca4bfefa67a54d3467f2c249e1c9b79 unchanged=True
+mutant copy removed: exists=False
+check_stack_facts --selftest mutation: 7 case(s), 0 mismatch(es)
+EXITCODE=0
+EXITCODE=0
+
+### driver source of block 19（同上，一次性驱动）
+```python
+import hashlib, os, shutil, subprocess, sys
+
+SRC = ".trae/scripts/dev/check_stack_facts.py"
+HOST = "artifacts/tmp/_mut/check_stack_facts.py"
+pristine = open(SRC, encoding="utf-8").read()
+before = hashlib.sha256(open(SRC, "rb").read()).hexdigest()
+
+A_MODE = '            for mode in ("inject-stale", "drop-pointer"):'
+A_MODE_DROP = '            for mode in ("inject-stale",):'
+R_DEF = "def run(root):\n"
+R_ALWAYS = "def run(root):\n    return 3  # MUTATION: instrument always broken\n"
+R_AFTER = ('CALLS = [0]\n\n\ndef run(root):\n'
+           '    CALLS[0] += 1\n'
+           '    if CALLS[0] > 1:  # MUTATION: broken only after the healthy baseline\n'
+           '        return 3\n')
+B_NO_ABORT = ('            return 3\n        for rel, phrase in STACK_FACTS:',
+              '            bad += 1\n        for rel, phrase in STACK_FACTS:')
+C_NO_GUARD = ('''                    if rc == 3:
+                        print("INSTRUMENT FAULT at CASE {0} {1}: rc=3".format(mode, rel))
+                        return 3
+''', '')
+C_LOOSE = ('                    ok = (rc == 1)',
+           '                    ok = (rc != 0)  # MUTATION: the pre-fix loose expectation')
+
+
+def build(edits):
+    text = pristine
+    for old, new in edits:
+        if text.count(old) != 1:
+            print("ANCHOR DRIFT (count={0}): {1!r}".format(text.count(old), old[:70]))
+            sys.exit(3)
+        text = text.replace(old, new)
+    return text
+
+
+def invoke():
+    proc = subprocess.run([sys.executable, "-X", "utf8", HOST, "--selftest"],
+                          capture_output=True, text=True, encoding="utf-8")
+    return proc.returncode, ((proc.stdout or "") + (proc.stderr or ""))
+
+
+cases = [
+    ("control-pristine", [], 0, ["22 case(s), 0 mismatch(es)"], None),
+    ("A-one-branch-never-runs", [(A_MODE, A_MODE_DROP)], 3,
+     ["case count 12 != expected 22"], None),
+    ("B-baseline-unhealthy", [(R_DEF, R_ALWAYS)], 3,
+     ["healthy baseline copy did not pass (rc=3); aborting"], None),
+    ("B-minus-baseline-abort(pre-fix shape)",
+     [(R_DEF, R_ALWAYS), B_NO_ABORT, C_NO_GUARD, C_LOOSE], 1,
+     ["22 case(s), 2 mismatch(es)"], ("rc=3 -> ok", 20)),
+    ("C-fault-after-baseline", [(R_DEF, R_AFTER)], 3,
+     ["INSTRUMENT FAULT at CASE inject-stale README.md"], None),
+    ("C-pre-fix-shape(loose ok + no guard)",
+     [(R_DEF, R_AFTER), C_NO_GUARD, C_LOOSE], 1, [], ("rc=3 -> ok", 20)),
+    ("restored-control", [], 0, ["22 case(s), 0 mismatch(es)"], None),
+]
+
+bad = 0
+for name, edits, want_rc, needles, tally in cases:
+    open(HOST, "w", encoding="utf-8", newline="").write(build(edits))
+    rc, out = invoke()
+    problems = []
+    if rc != want_rc:
+        problems.append("rc={0} want={1}".format(rc, want_rc))
+    for needle in needles:
+        if needle not in out:
+            problems.append("missing {0!r}".format(needle))
+    shown = ""
+    if tally:
+        token, expect = tally
+        got = out.count(token)
+        shown = " [{0} x{1}, want {2}]".format(token, got, expect)
+        if got != expect:
+            problems.append("tally {0}={1} want={2}".format(token, got, expect))
+    if rc == 3 and want_rc == 3:
+        shown += " [independent exit code 3, not conflated with 1]"
+    bad += 1 if problems else 0
+    print("CASE %-40s rc=%d -> %s%s%s" % (
+        name, rc, "ok" if not problems else "MISMATCH", shown,
+        "" if not problems else " | " + "; ".join(problems)))
+
+digest = hashlib.sha256(open(SRC, "rb").read()).hexdigest()
+shutil.rmtree("artifacts/tmp/_mut", ignore_errors=True)
+print("judged script sha256 before=%s after=%s unchanged=%s" % (before, digest, before == digest))
+print("mutant copy removed: exists=%s" % os.path.exists("artifacts/tmp/_mut"))
+print("check_stack_facts --selftest mutation: %d case(s), %d mismatch(es)" % (len(cases), bad))
+ok = not bad and before == digest and not os.path.exists("artifacts/tmp/_mut")
+print("EXITCODE=%d" % (0 if ok else 1))
+sys.exit(0 if ok else 1)
+```
+
+### python -X utf8 artifacts/tmp/_green_work/fault_exit_mutation.py   # except 拓宽是否承重：同一注入 宽=3 / 窄=1
+CASE post-fix broad except    rc=3 want=3 reached_fault=True -> ok
+CASE pre-fix narrow except    rc=1 want=1 reached_fault=True -> ok
+CASE single judgement entrypoint call_sites=1 want=1 -> ok
+CASE unmutated production guard rc=0 want=0 -> ok
+CASE no mutant left behind    residue_lines=0 -> ok
+5 case(s), 0 mismatch(es)
+EXITCODE=0
+EXITCODE=0
+
+### driver source of block 22（同上，一次性驱动）
+```python
+import io
+import os
+import subprocess
+import sys
+
+SRC = ".trae/scripts/dev/check_stack_facts.py"
+MUT_DIR = os.path.dirname(SRC)           # 与生产同深度：REPO_ROOT 由 __file__ 解析，必须不变
+RAISE_ANCHOR = '        c = Checks("check_stack_facts")'
+EXC_ANCHOR = "    except Exception as exc:"
+
+text = io.open(SRC, encoding="utf-8", newline="\n").read()
+if text.count(RAISE_ANCHOR) != 1:
+    print("FAIL raise anchor hit %d times in %s - the driver's premise is stale" % (
+        text.count(RAISE_ANCHOR), SRC))
+    sys.exit(3)
+if text.count(EXC_ANCHOR) != 1:
+    print("FAIL except anchor hit %d times - P4's fix is not in the judged text any more" % text.count(EXC_ANCHOR))
+    sys.exit(3)
+
+fault = '        raise RuntimeError("synthetic instrument fault (not OSError / not UnicodeError)")'
+post = text.replace(RAISE_ANCHOR, fault)
+pre = post.replace(EXC_ANCHOR, "    except (OSError, UnicodeError) as exc:")
+if pre == post:
+    print("FAIL narrowing the except produced no change - the replacement is not load-bearing")
+    sys.exit(3)
+
+cases = (("post-fix broad except", post, 3), ("pre-fix narrow except", pre, 1))
+EXPECTED_RAN = 5          # 字面量，不由 cases 长度推导：分支被静默跳过时它必须仍然拦住
+ran = 0
+bad = 0
+for name, payload, want in cases:
+    path = os.path.join(MUT_DIR, "_mut22_probe.py")
+    try:
+        io.open(path, "w", encoding="utf-8", newline="\n").write(payload)
+        proc = subprocess.run([sys.executable, "-X", "utf8", path],
+                              capture_output=True, text=True, encoding="utf-8")
+        # 合成故障必须真的被执行到：判据行不得出现任何 OK 计数，否则这条对照什么都没验证。
+        reached = "INSTRUMENT FAULT" in (proc.stdout or "") or "RuntimeError" in (proc.stderr or "")
+        ok = proc.returncode == want and reached
+        bad += 0 if ok else 1
+        ran += 1
+        print("CASE %-24s rc=%d want=%d reached_fault=%s -> %s" % (
+            name, proc.returncode, want, reached, "ok" if ok else "MISMATCH"))
+    finally:
+        if os.path.exists(path):
+            os.remove(path)
+        if os.path.exists(path):
+            print("WARN could not remove mutant %s (left in place, cleanup is a warning not a judgement)" % path)
+
+# 结构断言：判定调用点必须恰好 1 处。上一版 main() 把 run() 的三行内联复写了一份，于是「故障 → 3」
+# 只作用在 selftest 内部重跑的那条路径上，直接运行守门的人仍然拿到 1——同一规则写在两个入口的形态。
+sites = text.count("    check_files(root, c)")
+dup_ok = sites == 1
+bad += 0 if dup_ok else 1
+ran += 1
+print("CASE %-24s call_sites=%d want=1 -> %s" % ("single judgement entrypoint", sites, "ok" if dup_ok else "MISMATCH"))
+
+live = subprocess.run([sys.executable, "-X", "utf8", SRC], capture_output=True, text=True, encoding="utf-8")
+live_ok = live.returncode == 0
+bad += 0 if live_ok else 1
+ran += 1
+print("CASE %-24s rc=%d want=0 -> %s" % ("unmutated production guard", live.returncode, "ok" if live_ok else "MISMATCH"))
+
+res = subprocess.run(["git", "status", "--porcelain", MUT_DIR], capture_output=True, text=True, encoding="utf-8").stdout.strip()
+res_lines = [l for l in res.splitlines() if "_mut22_probe.py" in l]
+res_ok = not res_lines
+bad += 0 if res_ok else 1
+ran += 1
+print("CASE %-24s residue_lines=%d -> %s" % ("no mutant left behind", len(res_lines), "ok" if res_ok else "MISMATCH"))
+
+# 三条退出码互斥：ran 与字面下限不符 = 有分支没执行 = 仪器故障（3），不是「用例不符」（1）。
+if ran != EXPECTED_RAN:
+    print("INSTRUMENT FAULT: ran %d != expected %d - a branch never executed" % (ran, EXPECTED_RAN))
+    print("EXITCODE=3")
+    sys.exit(3)
+if bad:
+    print("%d case(s), %d mismatch(es)" % (ran, bad))
+    print("EXITCODE=1")
+    sys.exit(1)
+print("%d case(s), 0 mismatch(es)" % ran)
+print("EXITCODE=0")
+sys.exit(0)
+```
+
+### python -X utf8 .trae/scripts/dev/check_stack_facts.py --root   # 缺值 = 仪器没跑起来 = 3，不得与违规同码
+INSTRUMENT FAULT: --root requires a value
+EXITCODE=3
+
+### 结论（派生，逐条给出取数命令）
+GREEN 判定命令 = 块 01（与 RED 同一条）: rc=0，OK 行 4 条，FAIL 行 0 条
+  取数: grep -c '^OK' / '^FAIL' 于 $TMP/01.out
+  判据行 1: OK   inventory floor met — measured=10 floor=10
+  判据行 2: OK   every inventoried current-state file is present — measured=10 missing=[]
+  旧断言残留 measured=0；缺权威指针 measured=0
+  取数: sed -n 's/.*survives — measured=\([0-9]*\).*/\1/p' 于块 01 捕获
+新守门自检 = 块 02: rc=0，cases=22，mismatches=0；空清单用例: CASE empty-inventory: rc=1 -> ok
+  取数: sed 提取 'check_stack_facts --selftest: N case(s), M mismatch(es)'；用例数 = 2*盘点数+2
+  注: 块 02 的 BASELINE 段在同一脚本上给出 failed=0（健康副本必须为 0）
+行号级命中能力 = 块 17（副本注入 3 条旧短语，必须红）: rc=1，FAIL 行 1 条
+FAIL no superseded stack claim survives — measured=3 hits=['README.md:169::没有后端', '.trae/context/project-brief.md:68::目录目前不存在', 'Docs/spec/SPEC-2026-09-23-providers-and-models.md:192::无服务端、单人维护']
+  取数: 在 $TMP/root 副本上追加旧短语后跑同一守门的 --root；行号来自守门自身枚举
+邻近守门未被本片改红（与 artifacts/evidence/T-2026-10-15-002-guards-baseline.txt 同形）:
+  check_pm_discovery_skill rc=0 / check_intent_capturer_agent rc=0
+  check_context_pack rc=1 failed=2，40 字重叠 hits=2，brief 行数=46，docs 索引 listed=21 actual=57  ← 既有欠账 D2
+  check_roadmap_and_routing rc=1 failed=3：「FAIL AGENTS.md adds >= 4 routing rows — measured=0」/「FAIL new routing rows cover all four triggers — missing=['intent-capturer', 'pm-discovery', 'project-brief', 'ROADMAP']」 ← 既有欠账 D1
+  checkers_selftest rc=3 结论行='INCONCLUSIVE'  ← 既有欠账 D1 拖住，本片正控由块 18 真实复现
+  check_spec_author_agent(本规格) rc=0 OK=4 / check_intent_replay(配对 intent) rc=0 OK=13
+  validate_tasks(本片) rc=0 结论='PASS T-2026-10-15-web-parity-doc-authority-writeback-002.md'；全目录 rc=1 files=68 errors=16 warnings=8，ERROR 行 16 条落在: T-2026-09-20-independent-harness-verification-019.md T-2026-09-20-tree-canvas-tablet-ui-017.md T-2026-09-28-chat-child-branch-popup-fix-106.md T-2026-09-28-chat-math-wire-renderer-104.md ← 既有欠账 D3
+正控复现 = 块 18: rc=0，ok=6/6（抄写正控 3 条 + 结构断言正反 + 拒绝分支探针），RESTORED=True MISMATCHES=0，基线对照取自 git（HEAD bytes=6930，equal=True），不是本次运行的记忆
+  外层独立复验（不依赖驱动自称）: pre==post=637ec9454b971384b1296f709c7ec2488045154c8523866cc2759f9ee84a4d12
+变异测试 = 块 19（对 selftest() 本轮三条修复逐条退化）: rc=0，7 case(s), 0 mismatch(es)，CASE 行 7 条其中 ok=7 条
+  对照一（用例数下限）：删掉一个注入分支 → 进程退出码 3 且打印 case count 12 != expected 22；修复前该形态只打印 EXITCODE=3 却 return 0
+  对照二（修复前整体形态 + 仪器恒坏）：同一注入在修复后判 3、在修复前判 rc=1——「仪器坏了」与「用例不符」共用退出码，正是本轮拆开的两种结论
+退出码拓宽是否承重 = 块 22: rc=0，5 case(s), 0 mismatch(es)；宽映射 rc=3（3=仪器自身故障）、窄映射 rc=1（1=「用例不符」，即修复前那种把仪器坏了认证成如期失败的 fail-open）
+  同一次运行里未变异的生产守门仍 rc=0（拓宽没有把正常路径一起改掉）；变异副本残留行=0（必须为 0——探针留在仓库里，绿就成了探针自己的绿）
+  判定调用点=1（必须恰好 1）：拓宽最初落在 run() 上而 main() 内联复写了同一份判定，直接跑守门的人仍拿 1——本条把「同一规则写在两个入口」钉成判据，而不是靠人回头看
+  修复前把仪器故障认证成 ok 的用例数：基线不健康形态 20 条 / 基线后才坏形态 20 条（各应为 20，即 2N 个负向用例全部失去意义）
+  judged script sha256 before=813261073ea4d5804d70b1edef25b5dc7ca4bfefa67a54d3467f2c249e1c9b79 after=813261073ea4d5804d70b1edef25b5dc7ca4bfefa67a54d3467f2c249e1c9b79 unchanged=True；mutant copy removed: exists=False
+  取数: sed -n 's/^CASE B-minus.*x\([0-9]*\).*/\1/p' 等逐条从 $TMP/19.out 提取；进程退出码由 subprocess.returncode 给出，非脚本自述
+改动面（全部既有文件）: 17 个，add=92 / del=127
+改动面（排除本任务文件后的稳定读数）: 17 个，add=92 / del=127；本任务文件自身那一行为「（本任务文件未被 git diff 跟踪，无行）」
+  为什么要给两个数: 本文件里的数字要从本证据派生，回填那些数字会再改动本文件自身的 numstat；引用 add=92/del=127 才对后续文字回写免疫。
+  取数: git -c core.quotepath=false diff --numstat | grep -c '^[0-9]'；awk -F'\t' 求 \$1/\$2 之和；排除串=.trae/tasks/T-2026-10-15-web-parity-doc-authority-writeback-002.md
+  另: Docs/spec/SPEC-2026-10-01-progressive-web-ui.md 属整片删除（用户裁定），在 numstat 里计为 0/101；未跟踪新增 11 个见块 15
+git diff --check = 块 14: rc=0；stdout 空白判据行数=0（须为 0），stderr CRLF 归一化告警行数=12（不构成失败，但必须与判据分列，否则 12 行告警会被读成 12 个缺陷）
+规模判定值:    179  TOTAL (non-blank, non-comment, production files only)（新脚本全文；本片的 .md 文字改动按口径不计生产行）
+  取数: python -X utf8 .trae/scripts/dev/count_production_lines.py .trae/scripts/dev/check_stack_facts.py
+  注: 该工具只对 .java/.xml 剥注释，.py 的 '#' 行与 docstring 会被计入，故本数是偏保守（偏高）值。
+
+### 本片未消除的既有欠账（已写入 .trae/ROADMAP.md 的「已知欠账」小节，编号对应）
+D1 check_roadmap_and_routing 的一次性 AGENTS.md 迁移断言恒为红 → checkers_selftest 恒 INCONCLUSIVE(3)，49 个注入用例不执行。
+D2 check_context_pack 的 docs 索引判据（listed=21 actual=57）与 brief ≤60 行一页预算互斥（实测 46 行）。
+D3 validate_tasks 全目录 16 条 ERROR，分布在 4 个历史任务文件。
+D4 正控手抄问题：本片改为按现文本切片重算，但根治（现场派生 + 找不到原文即 FAIL）另片。
+D5 AGENTS.md「条目 > 30 → 合并去重」与守门「AGENTS.md 不得出现删除行」互斥，本片只纯追加。
+D6 check_stack_facts 只钉清单里的精确短语，不做反向搜索；第 10 处正是第二轮反向搜索才找到的。
+
+### python -X utf8 artifacts/tmp/_green_work/utf8_gate.py <本片全部被改/新建文件>   # 编码闸门
+GATE SELFTEST ok: a known-broken byte string is rejected
+OK   utf-8 decodable, no BOM: README.md (10110 bytes)
+OK   utf-8 decodable, no BOM: README_EN.md (10563 bytes)
+OK   utf-8 decodable, no BOM: AGENTS.md (70449 bytes)
+OK   utf-8 decodable, no BOM: .trae/context/project-brief.md (5673 bytes)
+OK   utf-8 decodable, no BOM: .trae/ROADMAP.md (27500 bytes)
+OK   utf-8 decodable, no BOM: .trae/rules/shared-state.md (4468 bytes)
+OK   utf-8 decodable, no BOM: .trae/rules/observability.md (6513 bytes)
+OK   utf-8 decodable, no BOM: .trae/rules/frontend.md (3931 bytes)
+OK   utf-8 decodable, no BOM: .trae/agents/frontend-dev.md (2443 bytes)
+OK   utf-8 decodable, no BOM: .trae/skills/pm-discovery/SKILL.md (8746 bytes)
+OK   utf-8 decodable, no BOM: .trae/scripts/dev/checkers_selftest.py (22528 bytes)
+OK   utf-8 decodable, no BOM: .trae/scripts/dev/check_stack_facts.py (9895 bytes)
+OK   utf-8 decodable, no BOM: Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md (33312 bytes)
+OK   utf-8 decodable, no BOM: Docs/05-technical-design/TreeLearn_Harness全量开发交付提示词.md (9650 bytes)
+OK   utf-8 decodable, no BOM: Docs/05-technical-design/知芽（TreeLearn）RikkaHub功能吸收矩阵_V1.0.md (15387 bytes)
+OK   utf-8 decodable, no BOM: Docs/spec/SPEC-2026-09-23-providers-and-models.md (22710 bytes)
+OK   utf-8 decodable, no BOM: Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md (23256 bytes)
+OK   utf-8 decodable, no BOM: Docs/intent/INTENT-2026-10-15-web-h5-android-parity.md (11139 bytes)
+OK   utf-8 decodable, no BOM: Docs/intent/INTENT-2026-10-01-progressive-web-ui.md (8040 bytes)
+OK   utf-8 decodable, no BOM: .trae/tasks/T-2026-10-15-web-parity-doc-authority-writeback-002.md (52083 bytes)
+GATE SCOPE: 20 file(s) checked
+EXITCODE=0
+EXITCODE=0
+
+### python -X utf8 artifacts/tmp/_green_work/utf8_gate.py <evidence + baseline + generator>  # self-recheck, same run
+GATE SELFTEST ok: a known-broken byte string is rejected
+OK   utf-8 decodable, no BOM: artifacts/evidence/T-2026-10-15-002-green.txt (69300 bytes)
+OK   utf-8 decodable, no BOM: artifacts/evidence/T-2026-10-15-002-guards-baseline.txt (5348 bytes)
+OK   utf-8 decodable, no BOM: artifacts/tmp/gen-002-green.sh (56160 bytes)
+GATE SCOPE: 3 file(s) checked
+EXITCODE=0
+EXITCODE=0
+
+### GATES AND COVERAGE CHAIN (ASCII-only section appended after block 21 sampled the file)
+coverage: bytes[0..size_before_21) sampled by block 21's gate. The four sections appended
+          after that sample (block 21's own echo, this tail, the final judgement block, the
+          OVERALL line) each have their non-ascii byte count measured; the first three are
+          covered by a strict decode run after them (#1, #2, #3) whose rc is counted into
+          OVERALL_EXITCODE, and the OVERALL line itself is covered only by #4, whose result
+          therefore lives in <evidence>-console.txt. ascii-only
+          is therefore a measured number here, not a construction claim: the gate echoes the
+          paths it checks, so a Chinese path inside block 21's scope would make that section
+          non-ascii and only DECODE #1 would then be doing the work.
+size_before_21=69300  size_after_21=69798  block21_section=498 bytes, non-ascii in it=0
+decode #1 result (ASCII, therefore safe to carry into this tail): DECODE #1 (covers block 21 own section): ok, 69798 bytes valid utf-8
+encoding gate = block 20: rc=0, OK=20, FAIL=0, GATE SELFTEST ok
+evidence self-check = block 21: rc=0, GATE SCOPE: 3 file(s) checked
+mutation harness = block 19: rc=0, 7 case(s), 0 mismatch(es)
+expectation table: 23 judgement blocks with want/got; unexpected count = 0
+block count floor (bare integer literal, asserted against this file's own source line): measured=23 floor=23 -> ok
+
+### FINAL JUDGEMENT BLOCK (covered by DECODE #3; only the OVERALL line is appended after it)
+block 21 tail section = 1472 bytes, non-ascii bytes in it = 0
+decode #1 result (ASCII, therefore safe to carry into this block): DECODE #1 (covers block 21 own section): ok, 69798 bytes valid utf-8
+decode #2 result (ASCII, therefore safe to carry into this block): DECODE #2 (covers tail): ok, 71270 bytes valid utf-8
+decode #3 runs on this file AFTER these lines are appended, so its own output line cannot be
+         carried here (appending it would change the bytes #3 judges). Its result line and
+         DECODE #4's are written to <evidence>-console.txt by the same run, and its rc IS
+         counted into the OVERALL_EXITCODE line below together with #1 and #2.
+OVERALL_EXITCODE=0

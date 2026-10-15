@@ -1,0 +1,56 @@
+generated: 2026-10-15T12:04:43+08:00
+cwd: /d/Project/Android/Treelearn
+git HEAD: f1757fc
+note: 本片开始前的守门基线；其中红项为既有欠账，非本片造成。
+
+### validate_tasks.py（全目录）
+EXITCODE=1
+ERROR_lines=16
+SUMMARY files=68 errors=16 warnings=8
+
+### python .trae/scripts/check_context_pack.py
+FAIL docs index equals the real Docs/ file set — listed=21 actual=57 missing=['Docs/04-ux-design/知芽-Figma新稿迁移方案-V1.0.md', 'Docs/04-ux-design/知芽-TreeLearn-对话页1比1复刻方案-V1.0.md', 'Docs/04-ux-design/知芽-TreeLearn-对话页文本高亮与批注方案-V1.0.md', 'Docs/04-ux-design/知芽-TreeLearn-设置入口与按钮反馈更新-2026-10-09.md', 'Docs/04-ux-design/知芽-TreeLearn-设置页重设计-交互稿-V1.0.html', 'Docs/04-ux-design/知芽-TreeLearn-设置页重设计方案-V1.0.md', 'Docs/04-ux-design/知芽-TreeLearn-高亮批注交互Demo-V1.1.html', 'Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.1.html', 'Docs/04-ux-design/知芽-对话页动作行与附件批注处理方案-V1.0.md', 'Docs/04-ux-design/知芽（TreeLearn）对话页视觉重做规格_V1.0.md', 'Docs/04a-ux-cross-review/RikkaHub交互基准笔记.md', 'Docs/04a-ux-cross-review/知芽-TRELEARN-PRD截图对齐分析_2026-09-27.md', 'Docs/04a-ux-cross-review/知芽（TreeLearn）UI交互评审报告_2026-09-27.md', 'Docs/05-technical-design/知芽（TreeLearn）DeepSeek自适应学习导师提示词设计_V1.1.md', 'Docs/05-technical-design/知芽（TreeLearn）RikkaHub功能吸收矩阵_V1.0.md', 'Docs/05-technical-design/知芽（TreeLearn）RikkaHub开源方案吸收评估_V0.1.md', 'Docs/05-technical-design/知芽（TreeLearn）SSE流解析边界clean-room规格_V1.0.md', 'Docs/05-technical-design/知芽（TreeLearn）消息分支数据模型clean-room规格_V1.0.md', 'Docs/intent/INTENT-2026-09-22-figma-ia-migration.md', 'Docs/intent/INTENT-2026-09-23-home-drawer-stats-heatmap.md', 'Docs/intent/INTENT-2026-09-23-my-forest.md', 'Docs/intent/INTENT-2026-09-23-rikkahub-settings-center-absorption.md', 'Docs/intent/INTENT-2026-09-29-selection-flow-responsiveness.md', 'Docs/intent/INTENT-2026-10-01-progressive-web-ui.md', 'Docs/intent/INTENT-2026-10-08-harness-autonomous-completion.md', 'Docs/intent/INTENT-2026-10-15-web-h5-android-parity.md', 'Docs/spec/SPEC-2026-09-22-figma-ia-migration.md', 'Docs/spec/SPEC-2026-09-23-file-management.md', 'Docs/spec/SPEC-2026-09-23-search-service.md', 'Docs/spec/SPEC-2026-09-23-voice-tts-stt.md', 'Docs/spec/SPEC-2026-09-27-android-v11-full-screen-fidelity.md', 'Docs/spec/SPEC-2026-09-27-home-drawer-ux.md', 'Docs/spec/SPEC-2026-09-27-home-visual-fidelity.md', 'Docs/spec/SPEC-2026-09-29-selection-flow-responsiveness.md', 'Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md', 'Docs/superpowers/specs/2026-09-29-child-branch-name-design.md'] extra=[]
+FAIL brief shares no 40-char run with Docs/ — measured_hits=2 sample=[('Docs/01-demand/结构化需求基准说明书_知芽（TreeLearn）_V3.3增量.md', 'AndroidKeystore（AES-GCM）；明文不进SQLite、日志或备')]
+
+check_context_pack: 2 check(s) failed
+EXITCODE=1
+EXITCODE=1
+
+### python .trae/scripts/check_roadmap_and_routing.py
+FAIL AGENTS.md adds >= 4 routing rows — measured=0
+FAIL new routing rows cover all four triggers — missing=['intent-capturer', 'pm-discovery', 'project-brief', 'ROADMAP']
+
+check_roadmap_and_routing: 2 check(s) failed
+EXITCODE=1
+EXITCODE=1
+
+### python .trae/scripts/dev/checkers_selftest.py
+FAIL new routing rows cover all four triggers — missing=['intent-capturer', 'pm-discovery', 'project-brief', 'ROADMAP']
+
+check_roadmap_and_routing: 2 check(s) failed
+EXITCODE=1
+OVERALL: INCONCLUSIVE
+EXITCODE=3
+EXITCODE=3
+
+### python .trae/scripts/dev/check_design_tokens.py
+
+check_design_tokens: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+
+### python .trae/scripts/check_spec_author_agent.py
+target: .trae/templates/SPEC.md (template skeleton)
+
+check_spec_author_agent: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+
+### 新守门（尚未回写文档，应为红）：python .trae/scripts/dev/check_stack_facts.py
+OK   every inventoried current-state file is present — measured=9 missing=[]
+FAIL no superseded stack claim survives — measured=9 hits=['README.md::没有后端', 'README_EN.md::no backend', '.trae/context/project-brief.md::目录目前不存在', '.trae/ROADMAP.md::不要假设有服务端', 'Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md::不建设 Spring Boot、React', 'Docs/05-technical-design/TreeLearn_Harness全量开发交付提示词.md::无 backend/frontend', '.trae/rules/shared-state.md::无服务端实例', '.trae/rules/observability.md::无服务端、无后端统一日志基础设施', '.trae/skills/pm-discovery/SKILL.md::本地优先、无服务端']
+FAIL every inventoried file points at the authoritative spec — measured=9 missing_pointer=['README.md', 'README_EN.md', '.trae/context/project-brief.md', '.trae/ROADMAP.md', 'Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md', 'Docs/05-technical-design/TreeLearn_Harness全量开发交付提示词.md', '.trae/rules/shared-state.md', '.trae/rules/observability.md', '.trae/skills/pm-discovery/SKILL.md']
+
+check_stack_facts: 2 check(s) failed
+EXITCODE=1
+EXITCODE=1
