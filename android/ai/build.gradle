@@ -34,12 +34,6 @@ configurations.configureEach {
 // so no other module declares androidTest dependencies.
 dependencies {
     implementation project(':core')
-    // The portable AI protocol core (prompt encoding, SSE framing, gateway) lives in the shared
-    // module web/shared/ai-protocol. api, not implementation: :app references
-    // com.treelearn.ai.{prompt,gateway} types through its dependency on :ai, so those classes
-    // must remain visible to :ai's consumers. The Android-only pieces (ProviderJson,
-    // JsonChatRequestBody, DeepSeekGatewayFactory) stay in this module.
-    api project(':ai-protocol')
 
     testImplementation 'junit:junit:4.13.2'
 }

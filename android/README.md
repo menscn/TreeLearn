@@ -40,16 +40,14 @@ Android `versionCode` 为 `主版本 * 1000000 + 小版本 * 1000 + 修复版本
 
 ```text
 :app          -> :core :data :ai :tree-layout
-:ai           -> :core :ai-protocol
-:data         -> :core
-:ai-protocol  -> :core（纯 JVM，不引用 android.*）
+:data  :ai    -> :core
 :core         -> (无依赖；纯 JVM，不引用 android.*)
 :tree-layout  -> (无依赖；纯 JVM，不引用 android.*)
 ```
 
 `verifyDependencyDirection` 机械化执行该契约：检查所有可承载项目依赖的配置
 （含 `compileOnly` / `runtimeOnly` / `annotationProcessor` / 测试配置），
-并对 `:core` / `:tree-layout` / `:ai-protocol` 做纯净性扫描（`import android.*`、`import androidx.*`
+并对 `:core` / `:tree-layout` 做纯净性扫描（`import android.*`、`import androidx.*`
 以及无 import 的全限定用法如 `android.util.Log`）。
 
 > **覆盖状态（2026-09-21 更新）**：`:core` 已由 T-003（领域身份与不可变版本）、T-007（出生快照与上下文组装）、
@@ -67,31 +65,6 @@ Android `versionCode` 为 `主版本 * 1000000 + 小版本 * 1000 + 修复版本
 | `:data` | SQLite schema/DAO/事务/迁移、搜索、阅读状态、Keystore 密钥 | 不决定业务流程，不调用 DeepSeek |
 | `:ai` | DeepSeek HTTPS/SSE、上下文编码、版本化提示词注册表与请求组装 | 不操作 View/数据库，不接受用户自定义 system 模板 |
 | `:tree-layout` | 树几何、标签避碰、命中测试、视野拟合 | 不读数据库，不持久化像素坐标 |
-
-### 共享模块位置（2026-10-10）
-
-`:core`、`:tree-layout` 与 `:ai-protocol` 的源码已迁入仓库根 `web/shared/`，由 Android 与 Web 两个构建以
-projectDir 引用同一份实现（项目名与 Java 包名不变；不得保留任何副本）：
-
-```text
-:core         -> web/shared/domain
-:tree-layout  -> web/shared/tree-layout
-:ai-protocol  -> web/shared/ai-protocol
-```
-
-- `:ai-protocol`（T-2026-10-10-017）承载可移植的请求/提示词/SSE 纯 Java 能力（`com.treelearn.ai.prompt`、
-  `com.treelearn.ai.gateway`）；`android/ai` 仅保留平台耦合的三个文件（`ProviderJson`（`org.json`）、
-  `JsonChatRequestBody`（`android.util.JsonWriter`）、`DeepSeekGatewayFactory`（`android.util.Log`）并新增
-  `api project(':ai-protocol')`（`api` 而非 `implementation`，因为 `:app`/`:data` 直接引用这些类型）。
-- 引用声明：`android/settings.gradle`（`project(':core').projectDir = file('../web/shared/domain')` 等）。
-- 结构守卫：`web/scripts/check-shared-modules.ps1`（断言模块位置、两端引用、无重复源码副本、
-  共享树无 Kotlin 源文件/声明；`:ai-protocol` 逐类断言只在共享位置而不在 `android/ai`；
-  内置正反自检 12 例，迁移前 FAIL、迁移后 PASS）。
-- 本文件的依赖方向与纯净性扫描（`verifyDependencyDirection`）按 projectDir 解析，无需改动；
-  其覆盖范围不受迁移影响（实测 2026-10-10）。
-- 真实消费者回归：`android/ai` 的 `DeepSeekContextEncoderTest.coreSources()` 已补新源码路径候选；
-  `:core/:tree-layout/:ai/:data` 单测与 Java-only 守门在迁移后全绿（证据见
-  `.trae/tasks/T-2026-10-10-shared-module-relocation-005.md` 与 `artifacts/evidence/T-2026-10-10-005-*`）。
 
 ## 依赖策略（重要）
 

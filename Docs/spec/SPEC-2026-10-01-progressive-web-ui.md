@@ -1,7 +1,5 @@
 # Spec: Android 渐进式迁移到可复用 Web UI
 
-> 范围历史说明（2026-10-10）：本文记录 Android WebView 先行的草案，当时不交付浏览器正式端。用户已另行确认 localhost Web 版、两端不同步与 Web 专注阅读布局，见 [新规格](SPEC-2026-10-10-local-web-edition.md)。不得用本文的旧非目标否决新需求，也不得把旧草案当成已经实现的 Web 工程。
-
 id: SPEC-2026-10-01-progressive-web-ui
 title: Android 渐进式迁移到可复用 Web UI
 date: 2026-10-01

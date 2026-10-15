@@ -1,7 +1,5 @@
 # Intent: Android 渐进式迁移到可复用 Web UI
 
-> 后续范围说明（2026-10-10）：本文保留 Android 内嵌 Web UI 的历史决策。用户现已另行提出并确认 localhost 浏览器正式端，数据与手机独立，见 [新意图](INTENT-2026-10-10-local-web-edition.md)；浏览器交付不再以完成全部 Android 页面迁移为前提。
-
 id: INTENT-2026-10-01-progressive-web-ui
 title: Android 渐进式迁移到可复用 Web UI
 date: 2026-10-01

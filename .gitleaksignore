@@ -1,9 +1,0 @@
-# gitleaks false-positive suppression list (narrow, fingerprint-based).
-#
-# Each entry is an exact `file:rule:line` fingerprint. Never add a path/rule-wide
-# exception here; if a real secret is ever found, remove it from the code instead.
-#
-# 1. JNA singleton handle, not a credential: the `generic-api-key` heuristic fires on
-#    `Advapi32.INSTANCE` inside the Windows credential-manager adapter (the file name and
-#    the variable's use as a Win32 API handle trip the entropy/context heuristic).
-web/backend/src/main/java/com/treelearn/web/credential/WindowsCredentialSecretPort.java:generic-api-key:35

@@ -1,6 +1,0 @@
-=== RED repro (2026-10-11): T-048 seen wiring reverted (markBranchSeen entry call removed) ===
-- Test/scenario: BranchWorkspace > marks the branch seen on entry when it has unread answers
-- Command: cd web/frontend && pnpm test -- src/pages/BranchWorkspace.test.tsx
-- Exit code: 1
-- Observed failure: Tests  1 failed | 174 passed (175) — 「marks the branch seen on entry」超时失败：seen POST never issued（calls 数组无 /branches/*/seen 请求，waitFor 超时）
-- Failure reason validated: 该失败恰由「进入分支未发 seen」单一回退引起（其余 174 例不受影响），证明测试真实观测该行为。

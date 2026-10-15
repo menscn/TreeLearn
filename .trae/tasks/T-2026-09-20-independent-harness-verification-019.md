@@ -13,7 +13,7 @@ owner_lane: verification
 stack: android
 estimated_production_lines: 0
 shared_code_touched: false
-depends_on: []
+depends_on: [T-2026-09-20-security-release-core-hardening-018.md, T-2026-09-21-real-data-path-wiring-032.md, T-2026-09-21-delivery-report-033.md]
 tdd_mode: not-applicable
 
 ## Requirement collaboration brief

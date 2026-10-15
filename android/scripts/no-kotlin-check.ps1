@@ -523,7 +523,7 @@ if (-not $skipStage) {
         $appClasspathRe = '(Compile|Runtime|AnnotationProcessor)Classpath$'
         $buildToolingRe = '^(_internal|detachedConfiguration|classpath$)'
 
-        $modules = @(':app', ':core', ':data', ':ai', ':ai-protocol', ':tree-layout')
+        $modules = @(':app', ':core', ':data', ':ai', ':tree-layout')
         $dependencyTasks = @($modules | ForEach-Object { "$($_):dependencies" })
         $result = Invoke-NativeCaptured $gradlew (@(
                 '-p', $AndroidRoot, '--no-daemon', '--console=plain', '-q') + $dependencyTasks)
