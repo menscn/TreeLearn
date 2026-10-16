@@ -1,11 +1,11 @@
 # T-2026-10-15-007 MUTATION - 台账生成器每条守卫的退化实测
-# Generated: 2026-10-15T17:13:41Z  (UTC)
+# Generated: 2026-10-16T01:26:09Z  (UTC)
 # Generator: artifacts/tmp/gen-007-mutation.sh   重跑：bash artifacts/tmp/gen-007-mutation.sh
 # 变异对象：.trae/scripts/dev/gen_parity_ledger.py 与 parity_ledger_selftest.py 的**副本**
 #   （artifacts/tmp/_m007/prod/ 下同名同深度路径）；生产字节只在块 04 被读，从不被写。
 # 生产文件指纹（判定前读数；块 04 在全部变异之后复核是否仍相同）：
-#   .trae/scripts/dev/gen_parity_ledger.py  bytes=16931  lines=329  sha256=32d98ebc6daeef3366fbf792c2cb39aebe3af19e605b412dbf8fe3e7b2ee75b3
-#   .trae/scripts/dev/parity_ledger_selftest.py  bytes=20752  lines=463  sha256=027a74fcbf22a45b75e718041ddef868010d0d8ca36bd4dce41f042f7a607f64
+#   .trae/scripts/dev/gen_parity_ledger.py  bytes=17796  lines=338  sha256=2b6bec669fb80642c5a1c67147ab8f895ef1d19f5aa194992d4fd0bae6287e2e
+#   .trae/scripts/dev/parity_ledger_selftest.py  bytes=23070  lines=494  sha256=8913218f6f2ac8ad7927532e84cd5cb094aad9d50332d5ef04b60344c959f341
 
 ===== block 1 - copy tree: same-depth copy under artifacts/tmp, every copied byte equal to production =====
 $ python -X utf8 artifacts/tmp/_m007g/mkcopy.py
@@ -29,7 +29,7 @@ $ python -X utf8 artifacts/tmp/_m007g/battery.py
 baseline read from the measured file: rc=0 failures=0 failing=[]
 mutations declared=8 floor=8 floor-met=True
 M1-staleness-guard-off rc=1 want-rc=1 baseline=0 caught=True new-red=['neg-stale-inventory'] expected-new=['neg-stale-inventory']
-M2-claim-comparison-off rc=1 want-rc=1 baseline=0 caught=True new-red=['neg-claim-drift'] expected-new=['neg-claim-drift']
+M2-pointer-comparison-off rc=1 want-rc=1 baseline=0 caught=True new-red=['neg-pointer-drift'] expected-new=['neg-pointer-drift']
 M3-row-floor-zero rc=1 want-rc=1 baseline=0 caught=True new-red=['neg-row-floor'] expected-new=['neg-row-floor']
 M4-visual-always-measured rc=1 want-rc=1 baseline=0 caught=True new-red=['pos-absence-is-a-token-not-a-blank', 'pos-real-tree'] expected-new=['pos-absence-is-a-token-not-a-blank', 'pos-real-tree']
 M5-instrument-always-adopted rc=1 want-rc=1 baseline=0 caught=True new-red=['pos-real-tree'] expected-new=['pos-real-tree']
@@ -55,15 +55,15 @@ RECHECK ok
 $ python -X utf8 artifacts/tmp/_m007g/scope.py
 command diff ok rc=0
 command ls-files ok rc=0
-production-surface paths snapshot=1 now=1 identical=True
-surface list=['frontend/src/styles/tokens.css']
+production-surface paths snapshot=0 now=0 identical=True
+surface list=[]
 SCOPE ok
 ----- exit code: 0 (want 0) -----
 
 ===== block 6 - cross-file consistency: RED, GREEN and this file report the same case count and the same clean expectation tables =====
 $ python -X utf8 artifacts/tmp/_m007g/consistency.py
-T-2026-10-15-007-red.txt last-line=DECODE ok file bytes=6885
-T-2026-10-15-007-green.txt last-line=DECODE ok file bytes=8094
+T-2026-10-15-007-red.txt last-line=DECODE ok file bytes=7272
+T-2026-10-15-007-green.txt last-line=DECODE ok file bytes=8095
 T-2026-10-15-007-mutation.txt last-line=$ python -X utf8 artifacts/tmp/_m007g/consistency.py
 this file already carries the battery block (its own TOTAL is written after this check)
 case count green=17 copy-baseline=17 equal=True
@@ -73,12 +73,12 @@ CONSISTENCY ok
 ===== block 7 - encoding gate over the two judged instruments, this generator and the three 007 evidence files =====
 $ python -X utf8 artifacts/tmp/_m007g/utf8_gate.py .trae/scripts/dev/gen_parity_ledger.py .trae/scripts/dev/parity_ledger_selftest.py artifacts/tmp/gen-007-mutation.sh artifacts/evidence/T-2026-10-15-007-red.txt artifacts/evidence/T-2026-10-15-007-green.txt .trae/tasks/T-2026-10-15-parity-ledger-generator-007.md
 GATE SELFTEST ok: a known-broken byte string is rejected
-gate-ok .trae/scripts/dev/gen_parity_ledger.py bytes=16931
-gate-ok .trae/scripts/dev/parity_ledger_selftest.py bytes=20752
-gate-ok artifacts/tmp/gen-007-mutation.sh bytes=31371
-gate-ok artifacts/evidence/T-2026-10-15-007-red.txt bytes=6911
-gate-ok artifacts/evidence/T-2026-10-15-007-green.txt bytes=8120
-gate-ok .trae/tasks/T-2026-10-15-parity-ledger-generator-007.md bytes=26202
+gate-ok .trae/scripts/dev/gen_parity_ledger.py bytes=17796
+gate-ok .trae/scripts/dev/parity_ledger_selftest.py bytes=23070
+gate-ok artifacts/tmp/gen-007-mutation.sh bytes=31362
+gate-ok artifacts/evidence/T-2026-10-15-007-red.txt bytes=7298
+gate-ok artifacts/evidence/T-2026-10-15-007-green.txt bytes=8121
+gate-ok .trae/tasks/T-2026-10-15-parity-ledger-generator-007.md bytes=36161
 gate covered 6 file(s)
 EXITCODE=0
 ----- exit code: 0 (want 0) -----
@@ -98,4 +98,4 @@ expectation table (want/got per block):
   block 7: want=0 got=0 label=encoding gate over the two judged instruments, this generator and the three 007 evidence files
 ascii tail: bytes=1188 non-ascii=0 (must be 0)
 OVERALL_EXITCODE=0
-DECODE ok file bytes=6936
+DECODE ok file bytes=6910

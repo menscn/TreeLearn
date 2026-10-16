@@ -7,6 +7,11 @@ author: 用户（拍板）与技术架构师（记录）
 origin: 用户确认的架构方向
 status: accepted
 
+> **时效说明（2026-10-16 追加，阅读前必读）**
+> 本文件是 2026-10-15 的采集记录，正文**保持原样不改写**——用后来的实测值覆盖当时写下的估计，读者会把治理时序读错。
+> 但其中「16 屏 + 6 浮层」是盘点仪器建立**之前**的人写估计；仪器建立后实测为 `14 屏 / 16 个浮层 / 其中 5 屏自绘`，用户 2026-10-16 裁定**以实测清单为准**。因此本文件中每一处复述该组数字的地方（现场回读：`grep -nE "16 ?屏|16 ?个屏幕|6 ?浮层|4 ?个.*自绘" Docs/intent/INTENT-2026-10-15-web-h5-android-parity.md`）都按此口径读取，不要当成当前范围。
+> 当前范围权威是 `Docs/04-ux-design/parity/screen-inventory.json` 的 `counts`（由 `python .trae/scripts/dev/gen_screen_inventory.py` 生成，Android 代码一改即重算）；两处差额各自的成因与逐处回写见 `Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md` 末节「修订记录（追加，不回改上文原判定）」，屏一侧的差额**尚未逐条对应**，该文件与 `T-2026-10-15-screen-inventory-parity-ledger-005.md` 的 Gaps 都如实记为未决，不写成已解释。
+
 ## Problem（问题与背景）
 
 - 问题/背景：**观察到的现象**——Web 线曾被完整建立又整体移除（`35bb6ce` 一次删除 842 个文件、92912 行），旧线形态是 `web/`（React 前端 + 本地后端 + 桌面 SQLite）；用户对该线的判定是「交付了一套完全和 Android 不一致的、类似重新开发了一套，重新调整回我想要的那样太麻烦，不如重开」。同时 Android 侧界面是当前唯一可用形态：单 Activity 承载 16 屏 + 6 浮层，声明式 XML 加自绘 View，无 Fragment、无 Navigation 组件、无 RecyclerView。**推测的原因**（与现象分开）——同一视觉规则与同一业务规则同时存在多份实现（高保真原型、旧 web、Android 各一份），且没有任何机械判据约束「web 必须等于 Android」，于是逐片漂移，直到无法回推。

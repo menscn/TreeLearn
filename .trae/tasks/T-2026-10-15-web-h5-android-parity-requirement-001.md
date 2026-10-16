@@ -20,17 +20,17 @@ tdd_mode: not-applicable
 
 - Problem/background: 用户要求启动 Web 版开发，把 Android 现有 XML/View 界面按 H5 方案 1:1 还原，之后再适配 PC 形态；明确这是「适配而非重新开发」。观察到的现象：2026-09 的一条旧 Web 线（`web/**`，React + 本地后端 + 桌面 SQLite）交付了一套与 Android 不一致、形同重新实现的界面，用户判定「调整回来不如重开」，已在 `35bb6ce` 整体移除。推测的原因（现已核实为病因）：同一规则在设计值、SQL/DDL、领域判定、树几何、枚举与错误语义五处各长出第二份实现。
 - Users/scenarios: 单人开发者（用户本人）。阶段一至六在浏览器里看夹具驱动的还原结果；阶段七起在手机导出归档、由本机 `backend/` 服务导入并在 PC 浏览器真实使用。
-- Expected outcome: 16 屏 + 6 浮层逐屏有三层判据（结构/视觉/行为）台账且结论可重跑；Android 改界面时台账守门转红强制同步；PC 端由本机服务真实启动跑通一次导入导出。
+- Expected outcome: 屏幕清单（`Docs/04-ux-design/parity/screen-inventory.json`，条目数以其 `counts` 为准，本文件不复述数字）的每一条目逐屏有三层判据（结构/视觉/行为）台账且结论可重跑；Android 改界面时台账守门转红强制同步；PC 端由本机服务真实启动跑通一次导入导出。
 - Core flow and reversibility: Android 导出单一归档（数据库副本 + 附件目录 + 清单 JSON）→ 服务导入即覆盖 PC 副本 → 浏览器打开本机前端 → 查询/命令/流式事件走 `RuntimePort`。单向搬迁、不回传、不合并；归档格式一经发布为长期契约。界面还原阶段不依赖宿主，可随时停用而不影响 Android。
 - Inputs/outputs: 输入为 Android 侧成对采集的「真机截图 + 状态与几何快照」夹具，以及阶段七的归档文件；输出为 `frontend/` 构建产物、逐屏台账、`backend/` 本机服务。
 - State and exception handling: 每屏必须区分加载中、可用、夹具/数据不可用、服务不可达、Provider 无 Key，以及生成的空闲/提交/推理流/回答流/稳定/失败/中断/取消；异常文案由前端资源表按 key 提供，前端不猜原因。
 - Constraints and trade-offs: Java-only（Android 侧禁 Kotlin，判定以字节码为准）；本地优先，不做远程部署/账号/云同步/远程遥测；API Key 留在手机 Keystore，永不下发浏览器；token 权威链为 Android 实现 → 原型 `:root` → `tokens.json` → 生成的 CSS（第 4 个消费者，禁止手抄）；界面事实以 Android 现状为唯一权威，原型与之冲突时 Android 胜。取舍：接受为「单一来源」改动 Android 生产代码（回归面覆盖生成链路与数据层），而不接受服务侧长第二份网关或第二份建表语句。
 - AI recommendation and rationale: 架构师建议夹具先行（把界面还原与宿主决策解耦）、量测沿用仓库内已验证过的 1:1 方法而非新造仪器、契约用生成类型 + 共享 JSON fixture 双向差分（把「两处实现」变成可证伪的差分测试）。
-- User choice and custom additions: 用户 2026-10-15 拍板四项——阶段一数据用快照夹具驱动、PC 数据与密钥宿主选本地 JVM 服务、首批范围全 16 屏 + 6 浮层、流程采用 Harness；并追加三项裁定——① 允许为单一来源改 Android 生产代码，② 旧 WebView 规格整份删除，③ 删除前端中英双语齐备守门口径。英文本期不做。
+- User choice and custom additions: 用户 2026-10-15 拍板四项——阶段一数据用快照夹具驱动、PC 数据与密钥宿主选本地 JVM 服务、首批范围全 16 屏 + 6 浮层、流程采用 Harness；并追加三项裁定——① 允许为单一来源改 Android 生产代码，② 旧 WebView 规格整份删除，③ 删除前端中英双语齐备守门口径。英文本期不做。其中第三项的「16 屏 + 6 浮层」是盘点仪器建立前的人写估计，**已被用户 2026-10-16 的裁定「以实测清单为准」取代**；此处保留原话是为了不篡改当时的拍板记录，引用范围时以 `screen-inventory.json` 为准。
 - AI-autonomous decisions: 后端采用零框架（JDK 17 `com.sun.net.httpserver` + 桌面 SQLite，不引 Spring Boot）与服务薄壳边界；桌面 SQLite 裁定为本服务生产引擎、不走 MySQL/Flyway；阶段 1 重采一套真机基线截图；目录名用 `frontend/` 与 `backend/`（治理路由表与 lane/stack 取值已内置，自定义目录会落到无 owner 可写的真空）；树几何在阶段一至六只渲染 Android 采集的坐标快照，禁止手抄成 TypeScript。
 - User-confirmation decisions: 上述四项主拍板与三项追加裁定；疑虑 8（1:1 基线取手机档还是平板档）仍待用户在阶段 3 前拍板。
 - Acceptance evidence: 逐屏三层台账与偏差台账（机械派生，不手写数字）、`check_design_tokens.py` 四方一致与正反自检、`validate_tasks.py` 零错误、Android 侧 Java-only 守门与既有套件未退化、阶段七的跨引擎差分与双环境跑测记录。
-- Facts: `:core`（29 文件）与 `:tree-layout`（12 文件）已是 `java-library` 且被 `android/build.gradle:34 pureJvmModules` 守门；`:ai` 21 个文件仅 2 个引用 Android 类型；`TreeLearnSchema.DATABASE_VERSION` 当前为 5；4 个屏（`ModelSettingsScreen`、`SearchServiceSettingsScreen`、`VoiceSettingsScreen`、`FileManagerScreen`）没有布局 XML，是 Java 构建的；`check_design_tokens.py` 当前三方一致 44 token 全绿；三支 1:1 量测工具位于会被清理的 `artifacts/tmp/`。
+- Facts: `:core`（29 文件）与 `:tree-layout`（12 文件）已是 `java-library` 且被 `android/build.gradle:34 pureJvmModules` 守门；`:ai` 21 个文件仅 2 个引用 Android 类型；`TreeLearnSchema.DATABASE_VERSION` 当前为 5；`screen/` 下实测 14 个屏，其中 5 个没有作为自己根视图的布局充气（`FileManagerScreen`、`ModelSettingsScreen`、`SearchServiceSettingsScreen`、`VoiceSettingsScreen` 四个文档原点名项，加 `HomeDrawerScreen`——它调 `inflate()` 但产物是被 `addView` 挂进去的子视图，按「有没有根布局」它没有；此判定与清单的 `self_drawn` 标记双向核对，见 T-2026-10-15-005 的 Implementation notes）；`check_design_tokens.py` 当前三方一致 44 token 全绿；三支 1:1 量测工具位于会被清理的 `artifacts/tmp/`。
 - Assumptions: 高保真原型 v1/v1.1 的样式与 Android 现状基本一致（用户 2026-10-15 提示，并以原型 `:root` 为 token 权威）；工程化后原型冻结、不再作第二份实现维护。
 - Unknowns: 桌面 SQLite JDBC 驱动的版本/许可证/原生库与启动开销未核实；Android 在线备份语义在 minSdk 28 的可用性未核实；ALP-AN00 真机本轮是否可连（阶段 1 采集前提）；后端 Gradle 引用 `android/` 下模块的写法未验证。
 - Risks: 界面再度与 Android 分叉（旧线病因）；schema/SQL 单一来源触碰共享代码区；桌面密钥强度低于 Keystore；量测环境差异导致结论不可比；文档当前态主张与新方向冲突未回写。
@@ -40,13 +40,13 @@ tdd_mode: not-applicable
 
 ## Goal
 
-交付一条与 Android 现状 1:1 对齐、由单一来源纪律约束的 Web（H5）线：`frontend/` 还原 16 屏 + 6 浮层并有可重跑的三层判据台账，`backend/` 本机服务在阶段七接入并跑通一次导出导入。
+交付一条与 Android 现状 1:1 对齐、由单一来源纪律约束的 Web（H5）线：`frontend/` 还原屏幕清单（`Docs/04-ux-design/parity/screen-inventory.json`，条目数只取该文件的 `counts`，本文件不复述）的每一条目并有可重跑的三层判据台账，`backend/` 本机服务在阶段七接入并跑通一次导出导入。
 
 ## Scope
 
 ### In scope
 - 阶段 0：权威链入库、当前态文档回写、量测仪器收编、CSS token 生成链与裸色值守门。
-- 阶段 1：夹具采集仪器与逐屏台账生成器（覆盖 16 屏 + 6 浮层 + 4 个自绘屏）。
+- 阶段 1：夹具采集仪器与逐屏台账生成器（覆盖清单 `counts` 的每一条目，以及清单 `self_drawn` 标记的每一个屏；数字由清单打印，本文件不复述）。
 - 阶段 2–9 按 `Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md` §11 的门禁表逐阶段拆分并另行建片。
 
 ### Out of scope
@@ -75,7 +75,7 @@ Follow [code-document alignment](../rules/documentation.md).
 ## Acceptance criteria
 
 - [ ] 权威链（Android 实现 → 原型 `:root` → `tokens.json` → 生成 CSS → `contracts/` 一份正文 → `:core`/`:tree-layout`/共享 schema 模块）以文字与守门双重落地，且每条规则判定点唯一。
-- [ ] 逐屏三层判据台账覆盖 16 屏 + 6 浮层 + 4 个无布局文件屏，每项结论可由命令回读，偏差项要么达绿要么显式登记为接受。
+- [ ] 逐屏三层判据台账覆盖清单 `counts` 的每一条目与清单 `self_drawn` 标记的每一个屏（无布局文件的自绘屏成员由该标记给出，不由本文件点名或计数），每项结论可由命令回读，偏差项要么达绿要么显式登记为接受。
 - [ ] Android 侧数据、密钥、Java-only 与既有业务规则保持不变，并由既有守门（Java-only dex、依赖方向、`validate_tasks.py`、`checkers_selftest.py`）证明未退化。
 - [ ] PC 端由本机服务真实启动并跑通一次导出导入（阶段 7 出口）；本父需求在此之前不得被报为 verified。
 - [ ] 同一规则在服务侧或 Web 侧不存在第二份实现（设计值、SQL/DDL、领域判定、树几何、枚举与错误语义）。

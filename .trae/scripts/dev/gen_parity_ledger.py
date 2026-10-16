@@ -36,10 +36,13 @@ JUDGEMENT = re.compile(r"^== (\d+)\.", re.M)
 # A floor that is not derived from the checked list: an emptied inventory must not be able to
 # certify itself by shrinking the floor to zero.
 MIN_ROWS = 12
-# The claim is the pair of numbers, not the path they were read from.  Comparing the whole
-# spec_claims dict would turn the ledger red for a checkout living somewhere else - a relocation
-# is not a disagreement between the spec and the inventory.
-CLAIM_KEYS = ("screens", "surfaces")
+# Since the 2026-10-16 ruling the spec carries a pointer to the inventory, not numbers, so the only
+# claim comparable between the filed inventory and a fresh reading is whether that pointer is there.
+# The line numbers of count-shaped restatements are deliberately NOT compared: they move on any edit
+# to the document, so comparing them would turn the ledger red for a rewrite that changed no scope.
+# Comparing the whole dict would also red-flag a checkout living somewhere else - a relocation is
+# not a disagreement between the spec and the inventory.
+LINK_KEYS = ("inventory_cited",)
 
 
 class Fault(Exception):
@@ -89,16 +92,16 @@ def rederive(mod, java, res, spec):
     """Re-run the instrument over the current tree; nothing here trusts the filed inventory."""
     try:
         data = mod.analyse(java, res)
-        claims = mod.spec_claims(spec)
+        link = mod.spec_link(spec)
         commit = mod.source_commit(REPO)
     except mod.Fault as exc:
         raise Fault("the inventory instrument itself faulted: %s" % exc)
-    return {"projection": projection(data), "commit": commit, "claims": claims}
+    return {"projection": projection(data), "commit": commit, "link": link}
 
 
-def claims_disagree(fresh_claims, inv_claims):
-    """Compare only the numbers a claim is made of; where they were read from is not a claim."""
-    return [fresh_claims.get(k) for k in CLAIM_KEYS] != [inv_claims.get(k) for k in CLAIM_KEYS]
+def link_disagree(fresh_link, inv_link):
+    """Compare only the judged part of the pointer; where it was read from is not a claim."""
+    return [fresh_link.get(k) for k in LINK_KEYS] != [inv_link.get(k) for k in LINK_KEYS]
 
 
 def profile_key(row):
@@ -194,8 +197,10 @@ def build(inv, inv_sha, inv_proj, fresh, drift, profile_path, argv):
     lines.append("- 实测面哈希：已落盘 `%s` ／ 当前树重导出 `%s`" % (inv_proj, fresh["projection"]))
     lines.append("- 清单新鲜度：%s" % ("STALE（当前树与已落盘清单的实测面不一致，先重生成清单）"
                                  if stale else "一致（当前树重导出的实测面与已落盘清单同哈希）"))
-    lines.append("- 规格宣称与清单登记宣称：%s" % ("一致" if drift == "MATCH"
-                                       else "不一致 CLAIM-DRIFT（规格已改，清单未重生成）"))
+    lines.append("- 规格指针（规格里不写范围数字，只指向清单）：登记的 %s ／ 现场重读的 %s → %s"
+                 % (inv["spec_link"].get("inventory_cited"),
+                    fresh["link"].get("inventory_cited"),
+                    "一致" if drift == "MATCH" else "不一致 POINTER-DRIFT（规格已改，清单未重生成）"))
     lines.append("- 行为仪器（verify_1to1.mjs）：%s — 未收编时本列只报缺证据，不报通过。" % replay_tool)
     lines.append("- 每格的含义：它说的是**证据在不在**，不是还原对不对。MEASURED 只表示 Android 侧基线"
                  "记录在位且必需节齐全；Web 侧是否等价，要等阶段 3 的比对给出另一份记录。")
@@ -228,10 +233,10 @@ def build(inv, inv_sha, inv_proj, fresh, drift, profile_path, argv):
     lines.append("- sw600dp 变体屏 %d 个" % counts["sw600dp_variants"])
     lines.append("- 未被任何入口引用的屏 = %d；未被引用的布局文件 = %d" % (
         counts["unreached_screens"], counts["unreferenced_layouts"]))
-    lines.append("- 规格宣称 屏 %d / 浮层 %d，清单实测 屏 %d / 浮层 %d，差 %+d / %+d" % (
-        inv["spec_claims"]["screens"], inv["spec_claims"]["surfaces"], counts["screens"],
-        counts["surfaces"], inv["spec_comparison"]["screens_diff"],
-        inv["spec_comparison"]["surfaces_diff"]))
+    lines.append("- 范围条目的权威是本清单的 `counts`：屏 %d ／ 浮层 %d ／ 自绘 %d；规格正文里形如"
+                 "「N 个屏幕」「N 个浮层」「N 个自绘屏」的行：%s（是否为历史引用由人来标注，本行不判）"
+                 % (counts["screens"], counts["surfaces"], counts["self_drawn"],
+                    ", ".join(str(n) for n in inv["spec_link"]["count_shaped_lines"]) or "无"))
     lines.append("")
     return lines, tally
 
@@ -245,7 +250,11 @@ def judgements(inv, rows, inv_proj, fresh, drift):
         bad.append("INVENTORY STALE: the tree re-derives to a different measurement face than the "
                    "filed inventory - regenerate the inventory before trusting this ledger")
     if drift != "MATCH":
-        bad.append("CLAIM DRIFT: the spec and the inventory disagree about the spec's own numbers")
+        bad.append("POINTER DRIFT: the filed inventory and a fresh reading of the spec disagree "
+                   "about whether the spec cites the inventory")
+    if not fresh["link"].get("inventory_cited"):
+        bad.append("SPEC POINTER MISSING: a fresh reading of the spec does not cite this "
+                   "inventory, so nothing states where the range counts come from")
     counts = inv["counts"]
     if counts["screens"] != sum(1 for r in rows if r["kind"] == "SCREEN") or \
        counts["surfaces"] != sum(1 for r in rows if r["kind"] == "SURFACE"):
@@ -284,7 +293,7 @@ def main(argv=None):
         inv_sha = hashlib.sha256(raw).hexdigest()
         inv_proj = projection(inv)
         fresh = rederive(mod, java, res, spec)
-        drift = "DRIFT" if claims_disagree(fresh["claims"], inv["spec_claims"]) else "MATCH"
+        drift = "DRIFT" if link_disagree(fresh["link"], inv["spec_link"]) else "MATCH"
         rows = rows_of(inv)
         lines, tally = build(inv, inv_sha, inv_proj, fresh, drift, opts.profile, argv)
     except Fault as exc:

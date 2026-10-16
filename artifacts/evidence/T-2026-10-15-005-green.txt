@@ -1,5 +1,5 @@
 # T-2026-10-15-005 GREEN - 屏幕清单生成器的判定证据
-# Generated: 2026-10-15T17:06:33Z  (UTC)
+# Generated: 2026-10-16T01:26:47Z  (UTC)
 # Generator: artifacts/tmp/gen-005-green.sh   重跑：bash artifacts/tmp/gen-005-green.sh
 # 本文件覆盖的调用形态：
 #   python -X utf8 .trae/scripts/dev/gen_screen_inventory.py                  （写已落盘清单）
@@ -8,15 +8,15 @@
 # 判定面全部跑在真实仓库上；块 05 只在 artifacts/tmp/_g005c 的副本上动刀，
 #   android/ 源码在整份证据里只读（块 01 实测零改动）。
 # 被核文件指纹（判定前读数；块 01 在全部判定之后复核是否仍相同）：
-#   .trae/scripts/dev/gen_screen_inventory.py  bytes=16373  lines=349  sha256=e531110b4be80f9c71820f8840e0a3fbe17383c4a2b9cbd936ec52021412fc30
-#   .trae/scripts/dev/screen_inventory_selftest.py  bytes=23561  lines=511  sha256=50461302fbcbc5635d5416b7984e663b631fc903ce271ed85131c97ae6016bbf
-#   Docs/04-ux-design/parity/screen-inventory.json  bytes=20364  lines=946  sha256=4bfcb8a72f4ec553fbac0029320b589c43af32cef36f0f92ceb7325377404d74
-#   Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md  bytes=23834  lines=145  sha256=6204179d7629a264c972afa7711280687b4c8ddf91925a16e05cceafacaa335f
+#   .trae/scripts/dev/gen_screen_inventory.py  bytes=20509  lines=415  sha256=7cedbd9a6b1c16d260d0964cac4a78ca784fe88cdf7288cc4b85d6d6aef7f65c
+#   .trae/scripts/dev/screen_inventory_selftest.py  bytes=31308  lines=641  sha256=5ca3458832006c5287ea58ae2c44ed81244fe8c004a182ab1799a47f83671510
+#   Docs/04-ux-design/parity/screen-inventory.json  bytes=21986  lines=1013  sha256=c8b94d8e2de67cf001b6796f20d7fd3b94af9fcac917a3bba617ab24105b0007
+#   Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md  bytes=26968  lines=151  sha256=9b67b2249ee54a3cbba4ded00ac70f351ae99fb5b378a0243e5c5cfa465b32cd
 
 ===== block 1 - keep-behaviour: the generator runs on the real tree, prints its per-screen listing and its own exit code, and no watched file's bytes move =====
 $ python -X utf8 artifacts/tmp/_g005/keep_behaviour.py
 android files changed by the working tree = 0
-production run rc=0 judgement lines=30 last=EXITCODE=0
+production run rc=0 judgement lines=37 last=EXITCODE=0
 unchanged .trae/scripts/dev/gen_screen_inventory.py -> True
 unchanged .trae/scripts/dev/screen_inventory_selftest.py -> True
 unchanged Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md -> True
@@ -25,31 +25,32 @@ KEEP ok
 
 ===== block 2 - selftest suite: every case runs, tiers 0/1/3 exercised by cases and tier 2 reached by a real subprocess, no instrument fault line =====
 $ python -X utf8 artifacts/tmp/_g005/suite005.py
-SUITE executed=19 expected=19 equal=True failures=0 rc=0
+SUITE executed=23 expected=23 equal=True failures=0 rc=0
 SUITE tiers seen=[0, 1, 3] instrument-fault-lines=0
 SUITE verdict line present=True
 USAGE rc=2 no judgement printed=True
 SUITE ok
 ----- exit code: 0 (want 0) -----
 
-===== block 3 - the filed inventory self-describes every entry and every count re-derives from the entry arrays, with the spec's claim kept as a printed comparison only =====
+===== block 3 - the filed inventory self-describes every entry and every count re-derives from the entry arrays, with the spec's pointer re-read from the file it names =====
 $ python -X utf8 artifacts/tmp/_g005/entries.py
-entry counts screens=14 surfaces=10 components=18 layout-files=44
+derived kind vocabulary from the producer: kinds=6 ['alert_dialog', 'code_drawn_host', 'dialog', 'included_hidden', 'popup_menu', 'popup_window']
+entry counts screens=14 surfaces=16 components=18 layout-files=44
 all screens carry an arrival entry: True
 all surfaces carry a producer: True
 recount component_classes filed=18 recomputed=18 same=True
 recount screen_package_files filed=32 recomputed=32 same=True
 recount screens filed=14 recomputed=14 same=True
 recount self_drawn filed=5 recomputed=5 same=True
-recount surfaces filed=10 recomputed=10 same=True
+recount surfaces filed=16 recomputed=16 same=True
 recount sw600dp_variants filed=6 recomputed=6 same=True
 recount unreached_screens filed=0 recomputed=0 same=True
 recount unreferenced_layouts filed=0 recomputed=0 same=True
 recount visible_includes filed=8 recomputed=8 same=True
-recount surfaces_by_kind filed={"code_drawn_host": 1, "dialog": 1, "included_hidden": 1, "popup_window": 7} recomputed={"code_drawn_host": 1, "dialog": 1, "included_hidden": 1, "popup_window": 7} same=True
-claim line claims screens=16 surfaces=6 measured screens=14 surfaces=10
-claim diff self-consistent: True
-strict utf-8 bytes=20364 sha256=64-chars
+recount surfaces_by_kind filed={"alert_dialog": 4, "code_drawn_host": 1, "dialog": 1, "included_hidden": 1, "popup_menu": 2, "popup_window": 7} recomputed={"alert_dialog": 4, "code_drawn_host": 1, "dialog": 1, "included_hidden": 1, "popup_menu": 2, "popup_window": 7} same=True
+pointer row filed cites=True re-read cites=True same=True
+restatements filed lines=[12, 149] re-read lines=[12, 149] same=True
+strict utf-8 bytes=21986 sha256=64-chars
 ENTRIES ok
 ----- exit code: 0 (want 0) -----
 
@@ -83,8 +84,8 @@ REALCOPY ok
 $ python -X utf8 artifacts/tmp/_g005/determinism.py
 two exports byte-identical=True
 measured face equal to the filed inventory=True
-filed vs re-export: bytes=20364/20364 differing top-level keys=[] allowed=['source_commit']
-face sha=337d22309cea1f8c
+filed vs re-export: bytes=21986/21986 differing top-level keys=[] allowed=['source_commit']
+face sha=f2a86a5d2e0ebb8b
 a timestamp-shaped tokens=0
 filed timestamp-shaped tokens=0
 DETERMINISM ok
@@ -106,14 +107,14 @@ SIBLINGS ok
 ===== block 8 - encoding gate over the instruments, the filed inventory, the spec it reads and this generator, self-probed both ways =====
 $ python -X utf8 artifacts/tmp/_g005/utf8_gate.py .trae/scripts/dev/gen_screen_inventory.py .trae/scripts/dev/screen_inventory_selftest.py Docs/04-ux-design/parity/screen-inventory.json Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md artifacts/tmp/gen-005-red.sh artifacts/tmp/gen-005-green.sh artifacts/evidence/T-2026-10-15-005-red.txt .trae/tasks/T-2026-10-15-screen-inventory-parity-ledger-005.md
 GATE SELFTEST ok: a known-broken byte string is rejected
-ok .trae/scripts/dev/gen_screen_inventory.py bytes=16373
-ok .trae/scripts/dev/screen_inventory_selftest.py bytes=23561
-ok Docs/04-ux-design/parity/screen-inventory.json bytes=20364
-ok Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md bytes=23834
-ok artifacts/tmp/gen-005-red.sh bytes=37928
-ok artifacts/tmp/gen-005-green.sh bytes=39821
-ok artifacts/evidence/T-2026-10-15-005-red.txt bytes=8513
-ok .trae/tasks/T-2026-10-15-screen-inventory-parity-ledger-005.md bytes=31195
+ok .trae/scripts/dev/gen_screen_inventory.py bytes=20509
+ok .trae/scripts/dev/screen_inventory_selftest.py bytes=31308
+ok Docs/04-ux-design/parity/screen-inventory.json bytes=21986
+ok Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md bytes=26968
+ok artifacts/tmp/gen-005-red.sh bytes=39075
+ok artifacts/tmp/gen-005-green.sh bytes=41896
+ok artifacts/evidence/T-2026-10-15-005-red.txt bytes=9329
+ok .trae/tasks/T-2026-10-15-screen-inventory-parity-ledger-005.md bytes=49716
 gate covered 8 file(s)
 EXITCODE=0
 ----- exit code: 0 (want 0) -----
@@ -126,12 +127,12 @@ unexpected count = 0
 expectation table (want/got per block):
   block 1: want=0 got=0 label=keep-behaviour: the generator runs on the real tree, prints its per-screen listing and its own exit code, and no watched file's bytes move
   block 2: want=0 got=0 label=selftest suite: every case runs, tiers 0/1/3 exercised by cases and tier 2 reached by a real subprocess, no instrument fault line
-  block 3: want=0 got=0 label=the filed inventory self-describes every entry and every count re-derives from the entry arrays, with the spec's claim kept as a printed comparison only
+  block 3: want=0 got=0 label=the filed inventory self-describes every entry and every count re-derives from the entry arrays, with the spec's pointer re-read from the file it names
   block 4: want=0 got=0 label=the screens that build their view in code are in the inventory because the code says so, and the sw600dp variant column re-derives from the layout census
   block 5: want=0 got=0 label=the real tree copied: rename one layout reference and the inventory moves and prints the orphan; empty the screen package and it fails closed instead of certifying nothing
   block 6: want=0 got=0 label=determinism: two exports are byte-identical, the measured face equals the filed inventory, and any whole-file difference is confined to the commit stamp
   block 7: want=0 got=0 label=sibling gates stay green and the consumer still agrees with the producer, the known rc=3 debt is printed rather than folded into a green claim, and 005's own band is visible
   block 8: want=0 got=0 label=encoding gate over the instruments, the filed inventory, the spec it reads and this generator, self-probed both ways
-ascii tail: bytes=1677 non-ascii=0 (must be 0)
+ascii tail: bytes=1676 non-ascii=0 (must be 0)
 OVERALL_EXITCODE=0
-DECODE ok file bytes=9508
+DECODE ok file bytes=9748

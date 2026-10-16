@@ -56,7 +56,7 @@ F = _load("screen_inventory_selftest")       # reuse the one fixture builder; do
 EXPECTED_CASES = 17                          # bare literal; must not be derived from CASES
 RUN_ROOT = os.path.join(G.REPO, "artifacts", "tmp", "_inv007_run")
 REQUIRED_ATTRS = ("main", "projection", "rederive", "rows_of", "visual_state", "behaviour_state",
-                  "judgements", "instrument_line", "claims_disagree", "Fault")
+                  "judgements", "instrument_line", "link_disagree", "Fault")
 
 CASES = []
 
@@ -140,7 +140,7 @@ def fail_lines(text):
     A FAIL can be the very first line of stdout (that is what --no-write does with a firing
     judgement), so a search for a newline-preceded "FAIL " reports "no complaint" in exactly the
     case it exists to catch.  Measured: a relocated copy tree whose only difference was the path
-    the spec was read from printed FAIL CLAIM DRIFT as line 1 while the old check still passed.
+    the spec was read from printed the drift complaint as line 1 while the old check still passed.
     """
     return [l for l in text.splitlines() if l.startswith("FAIL ")]
 
@@ -148,13 +148,25 @@ def fail_lines(text):
 @case("pos-real-tree", 0)
 def _c_real(root):
     rc, out = ledger([])
+    # The row count and the NO-PROFILE complement are read back from the filed inventory instead of
+    # typed here.  They are the ledger's own arithmetic over whatever the inventory holds, so a
+    # literal would be a second source for a number the inventory already owns - and it went red the
+    # moment two surface kinds were added, while the ledger was correct and only this line was
+    # stale.  That is the restated-contract-number shape this repo has recorded before.
+    inv = json.load(open(G.OUT_DEFAULT, encoding="utf-8"))
+    screens, surfaces = len(inv["screens"]), len(inv["surfaces"])
+    rows = screens + surfaces
+    profiled = 1                       # chat is the only screen carrying a measurement profile
     return rc, [("tier 0 on the filed inventory", rc == 0),
                 ("no FAIL line printed", not fail_lines(out)),
                 ("freshness says the faces agree", "清单新鲜度：一致" in out),
-                ("rows counted from the inventory", "rows=24" in out),
-                ("the measured screen is recognised", '"MEASURED": 1' in out),
-                ("unmeasured screens are counted, not hidden", '"NO-PROFILE": 23' in out),
-                ("the replay spec is recognised", '"REPLAY-SPEC": 1' in out),
+                ("rows counted from the inventory", "rows=%d" % rows in out),
+                ("the row split matches the inventory",
+                 "screens=%d surfaces=%d" % (screens, surfaces) in out),
+                ("the measured screen is recognised", '"MEASURED": %d' % profiled in out),
+                ("unmeasured screens are counted, not hidden",
+                 '"NO-PROFILE": %d' % (rows - profiled) in out),
+                ("the replay spec is recognised", '"REPLAY-SPEC": %d' % profiled in out),
                 ("the un-adopted Node instrument is named", "not-adopted" in out),
                 ("exit code derived from judgements", out.strip().endswith("EXITCODE=0"))]
 
@@ -163,10 +175,11 @@ def _c_real(root):
 def _c_scan(root):
     # A positive control for the check above, shaped like the failure it is meant to catch:
     # --no-write prints its judgement lines before the body, so the complaint leads the output.
-    leading = "FAIL CLAIM DRIFT: the spec and the inventory disagree\n# 1:1 台账\n- 台账条目\n"
+    complaint = ("FAIL POINTER DRIFT: the filed inventory and a fresh reading of the spec "
+                 "disagree about whether the spec cites the inventory")
+    leading = complaint + "\n# 1:1 台账\n- 台账条目\n"
     prose = "# 1:1 台账\n- 说明：本文档 FAIL 于比较，不是判定行\n"
-    return 0, [("a leading FAIL is seen as a judgement line",
-               fail_lines(leading) == ["FAIL CLAIM DRIFT: the spec and the inventory disagree"]),
+    return 0, [("a leading FAIL is seen as a judgement line", fail_lines(leading) == [complaint]),
               ("the adjacency form this replaces missed it", "\nFAIL " not in leading),
               ("a FAIL inside prose is not a judgement line", not fail_lines(prose))]
 
@@ -203,39 +216,57 @@ def _c_stale(root):
                 ("the ledger still reports its rows", "rows=" in out)]
 
 
-@case("neg-claim-drift", 1)
+@case("neg-pointer-drift", 1)
 def _c_drift(root):
-    # The inventory recorded the spec's own numbers; the spec was edited afterwards while the
-    # measured faces stayed put, so CLAIM DRIFT is the only judgement that can fire here.
+    # Two separable firings of the pointer guard, measured so each one is attributable:
+    # (a) the filed inventory disagrees with a fresh reading -> POINTER DRIFT alone;
+    # (b) the spec carries numbers instead of the pointer -> SPEC POINTER MISSING alone.
+    # Doing (b) by editing the filed side is impossible: both sides would read False and the drift
+    # judgement would stay silent, so the missing-pointer half needs an inventory written by a run
+    # that was already red (gen_screen_inventory exits 1 there but still writes the JSON).
     java, res, spec = tree(root)
     inv = inv_file(root, java, res, spec)
-    w(spec, "范围：11 个屏幕与 4 个浮层逐屏还原。\n")
+    data = json.loads(open(inv, "rb").read().decode("utf-8"))
+    data["spec_link"]["inventory_cited"] = False
+    w(inv, json.dumps(data))
     rc, out = ledger(["--inventory", inv, "--profile", profile(root, {}),
                       "--java", java, "--res", res, "--spec", spec])
-    return rc, [("tier 1 for a claim disagreement", rc == 1),
-                ("drift named in words", "CLAIM DRIFT" in out),
-                ("the header marks the disagreement too", "不一致 CLAIM-DRIFT" in out),
+    spec2 = os.path.join(root, "spec-restated.md")
+    w(spec2, "范围：11 个屏幕与 4 个浮层逐屏还原。\n")
+    inv2 = os.path.join(root, "inventory-nosite.json")
+    rc_write, _ = run_inv(["--java", java, "--res", res, "--spec", spec2, "--out", inv2])
+    rc2, out2 = ledger(["--inventory", inv2, "--profile", profile(root, {}),
+                        "--java", java, "--res", res, "--spec", spec2])
+    return rc, [("tier 1 for a pointer disagreement", rc == 1),
+                ("drift named in words", "POINTER DRIFT" in out),
+                ("the header marks the disagreement too", "不一致 POINTER-DRIFT" in out),
+                ("the missing-pointer guard did not fire here", "SPEC POINTER MISSING" not in out),
                 ("nothing else fired, so the red is attributable",
-                 "INVENTORY STALE" not in out and "row floor" not in out)]
+                 "INVENTORY STALE" not in out and "row floor" not in out),
+                ("a spec without the pointer is red at the inventory itself", rc_write == 1),
+                ("tier 1 for a dangling pointer", rc2 == 1),
+                ("the dangling pointer is named", "SPEC POINTER MISSING" in out2),
+                ("and it is not reported as drift", "POINTER DRIFT" not in out2)]
 
 
 @case("pos-drift-ignores-the-source-path", 0)
 def _c_source_path(root):
-    # The claim is the pair of numbers.  Where they were read from is not part of the claim, so a
-    # checkout living at another path (a relocated copy, a second clone) must not be reported as
-    # the spec and the inventory disagreeing.  This case is the regression lock for the form the
-    # battery caught: comparing the whole dict turned every copy tree red.
+    # The claim is whether the spec cites the inventory.  Where it was read from is not part of the
+    # claim, so a checkout living at another path (a relocated copy, a second clone) must not be
+    # reported as the spec and the inventory disagreeing.  This case is the regression lock for the
+    # form the battery caught: comparing the whole dict turned every copy tree red.
     java, res, spec = tree(root)
     inv = inv_file(root, java, res, spec)
     data = json.loads(open(inv, "rb").read().decode("utf-8"))
-    data["spec_claims"]["source"] = "W:/other/checkout/Docs/spec/SPEC-elsewhere.md"
+    data["spec_link"]["source"] = "W:/other/checkout/Docs/spec/SPEC-elsewhere.md"
     w(inv, json.dumps(data))
     rc, out = ledger(["--inventory", inv, "--profile", profile(root, {}),
                       "--java", java, "--res", res, "--spec", spec])
     return rc, [("tier 0 with only the path differing", rc == 0),
-                ("no drift complaint", "CLAIM DRIFT" not in out),
-                ("the header still reports agreement", "规格宣称与清单登记宣称：一致" in out),
-                ("the numbers are still read and printed", "规格宣称 屏" in out)]
+                ("no drift complaint", "POINTER DRIFT" not in out),
+                ("the header still reports agreement", "→ 一致" in out),
+                ("the counts are still read from the inventory and printed",
+                 "范围条目的权威是本清单的 `counts`" in out)]
 
 
 @case("neg-row-floor", 1)

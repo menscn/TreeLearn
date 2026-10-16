@@ -1,5 +1,5 @@
 # T-2026-10-15-007 RED - 1:1 台账生成器收编前的失败证据
-# Generated: 2026-10-15T16:58:01Z  (UTC)
+# Generated: 2026-10-16T01:25:52Z  (UTC)
 # Generator: artifacts/tmp/gen-007-red.sh   重跑：bash artifacts/tmp/gen-007-red.sh
 # 本文件覆盖的调用形态：
 #   python -X utf8 .trae/scripts/dev/parity_ledger_selftest.py                       （正反自检全套；用例数由产物自己打印，本脚本不钉数）
@@ -8,10 +8,10 @@
 # 判据面：块 01/03/04/05/06 全程不动工作树；只有块 02 在一个进程的 try/finally 内挪仪器，
 #   起点不在场即拒绝（残留不会被当基线），还原后按字节复核 sha256 与长度。
 # 被核文件指纹（判定前读数；块 01 在窗口之后再复核是否相同）：
-#   .trae/scripts/dev/gen_parity_ledger.py  bytes=16931  lines=329  sha256=32d98ebc6daeef3366fbf792c2cb39aebe3af19e605b412dbf8fe3e7b2ee75b3
-#   .trae/scripts/dev/parity_ledger_selftest.py  bytes=20752  lines=463  sha256=027a74fcbf22a45b75e718041ddef868010d0d8ca36bd4dce41f042f7a607f64
-#   .trae/scripts/dev/gen_screen_inventory.py  bytes=16373  lines=349  sha256=e531110b4be80f9c71820f8840e0a3fbe17383c4a2b9cbd936ec52021412fc30
-#   artifacts/parity/ledger.md  bytes=6610  lines=54  sha256=3103be2df951d54f00dd02066717661ef3d9633f962cd215af45635bb62c8734
+#   .trae/scripts/dev/gen_parity_ledger.py  bytes=17796  lines=338  sha256=2b6bec669fb80642c5a1c67147ab8f895ef1d19f5aa194992d4fd0bae6287e2e
+#   .trae/scripts/dev/parity_ledger_selftest.py  bytes=23070  lines=494  sha256=8913218f6f2ac8ad7927532e84cd5cb094aad9d50332d5ef04b60344c959f341
+#   .trae/scripts/dev/gen_screen_inventory.py  bytes=20509  lines=415  sha256=7cedbd9a6b1c16d260d0964cac4a78ca784fe88cdf7288cc4b85d6d6aef7f65c
+#   artifacts/parity/ledger.md  bytes=8089  lines=60  sha256=a3cb469ef1b41a257d000da2ff4aff4296799a0347ac063e23303df32526c6a2
 
 ===== block 1 - keep-behaviour premise: no android/ file is touched and the instruments' pre-window bytes are recorded =====
 $ python -X utf8 artifacts/tmp/_red007/precheck.py
@@ -32,7 +32,7 @@ C stale-token carriers before=2 aside=1 after=2
 C carriers aside: ['parity_ledger_selftest.py']
 C generator was one of the before carriers: True
 C aside carriers are asserters only: True
-RESTORE equals_pre=True equals_after_len=16931/16931 parses=True
+RESTORE equals_pre=True equals_after_len=17796/17796 parses=True
 WINDOW ok
 ----- exit code: 0 (want 0) -----
 
@@ -52,18 +52,18 @@ CONTROL verdict=True last-line-exitcode0=True instrument-fault-lines=0 rc=0
 CONTROL ok
 ----- exit code: 0 (want 0) -----
 
-===== block 5 - nothing this slice produces exists in git history yet (commits=0 and untracked for all three artefacts) =====
+===== block 5 - the git state of this slice's artefacts is measured and printed without being judged, because the pre-commit reading is time-expired by construction while blocks 2/3 give the commit-independent reproduction path =====
 $ python -X utf8 artifacts/tmp/_red007/no_history.py
-history .trae/scripts/dev/gen_parity_ledger.py                     commits=0 tracked=False
-history .trae/scripts/dev/parity_ledger_selftest.py                commits=0 tracked=False
-history artifacts/parity/ledger.md                                 commits=0 tracked=False
-NOHISTORY ok
+info .trae/scripts/dev/gen_parity_ledger.py commits=1 tracked=True (printed not judged - blocks 2/3 give the commit-independent reproduction)
+info .trae/scripts/dev/parity_ledger_selftest.py commits=1 tracked=True (printed not judged - blocks 2/3 give the commit-independent reproduction)
+info artifacts/parity/ledger.md commits=1 tracked=True (printed not judged - blocks 2/3 give the commit-independent reproduction)
+NOHISTORY printed (no judgement here)
 ----- exit code: 0 (want 0) -----
 
 ===== block 6 - task contract: 007's declared judged value shows up as its own size-band warning; repo totals printed not pinned =====
 $ python -X utf8 artifacts/tmp/_red007/contract007.py
 this task: PASS count=1 WARNING count=1 (size band=1, other=0) ERROR count=0
-  line: WARNING T-2026-10-15-parity-ledger-generator-007.md: estimated production lines 290 exceeds soft limit 200
+  line: WARNING T-2026-10-15-parity-ledger-generator-007.md: estimated production lines 299 exceeds soft limit 200
   line: PASS T-2026-10-15-parity-ledger-generator-007.md
 note: repo-wide readings are errors=16 warnings=12 and are NOT judged here (see 004 block 27's same-round correction).
 CONTRACT ok
@@ -72,12 +72,12 @@ CONTRACT ok
 ===== block 7 - encoding gate over the instruments this slice adds and this generator's own source, self-probed both ways =====
 $ python -X utf8 artifacts/tmp/_red007/utf8_gate.py .trae/scripts/dev/gen_parity_ledger.py .trae/scripts/dev/parity_ledger_selftest.py .trae/scripts/dev/gen_screen_inventory.py artifacts/parity/ledger.md artifacts/tmp/gen-007-red.sh .trae/tasks/T-2026-10-15-parity-ledger-generator-007.md
 GATE SELFTEST ok: a known-broken byte string is rejected
-ok   .trae/scripts/dev/gen_parity_ledger.py                     bytes=16931
-ok   .trae/scripts/dev/parity_ledger_selftest.py                bytes=20752
-ok   .trae/scripts/dev/gen_screen_inventory.py                  bytes=16373
-ok   artifacts/parity/ledger.md                                 bytes=6610
-ok   artifacts/tmp/gen-007-red.sh                               bytes=24682
-ok   .trae/tasks/T-2026-10-15-parity-ledger-generator-007.md    bytes=24144
+ok   .trae/scripts/dev/gen_parity_ledger.py                     bytes=17796
+ok   .trae/scripts/dev/parity_ledger_selftest.py                bytes=23070
+ok   .trae/scripts/dev/gen_screen_inventory.py                  bytes=20509
+ok   artifacts/parity/ledger.md                                 bytes=8089
+ok   artifacts/tmp/gen-007-red.sh                               bytes=25364
+ok   .trae/tasks/T-2026-10-15-parity-ledger-generator-007.md    bytes=36161
 gate covered 6 file(s)
 EXITCODE=0
 ----- exit code: 0 (want 0) -----
@@ -92,9 +92,9 @@ expectation table (want/got per block):
   block 2: want=0 got=0 label=instrument absent for real: same fixture falls to tier 3 and names it, the staleness token loses its only emitter, restore is byte-exact
   block 3: want=0 got=0 label=the working tree is exactly what the window started with, read back from bytes not from the driver's own claim
   block 4: want=0 got=0 label=control arm: the same fixture returns 0 with every case running and none on tier 3, so block 02's tier 3 was the absence and nothing else
-  block 5: want=0 got=0 label=nothing this slice produces exists in git history yet (commits=0 and untracked for all three artefacts)
+  block 5: want=0 got=0 label=the git state of this slice's artefacts is measured and printed without being judged, because the pre-commit reading is time-expired by construction while blocks 2/3 give the commit-independent reproduction path
   block 6: want=0 got=0 label=task contract: 007's declared judged value shows up as its own size-band warning; repo totals printed not pinned
   block 7: want=0 got=0 label=encoding gate over the instruments this slice adds and this generator's own source, self-probed both ways
-ascii tail: bytes=1267 non-ascii=0 (must be 0)
+ascii tail: bytes=1375 non-ascii=0 (must be 0)
 OVERALL_EXITCODE=0
-DECODE ok file bytes=6885
+DECODE ok file bytes=7272

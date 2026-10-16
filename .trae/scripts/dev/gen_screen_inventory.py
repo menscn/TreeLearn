@@ -2,15 +2,22 @@
 # -*- coding: utf-8 -*-
 """Derive the Android screen / surface inventory from code reachability.
 
-The reproduction scope used to be a number typed into a specification (16 screens, 6 floating
-surfaces).  A layout-directory census gives a third answer again - 17 files named screen_*.xml, 7
-of them *_body fragments - and misses the 4 screens that build their view tree in code.  Here a
-screen is a class of the screen package that MainActivity reaches, and a surface is something the
-SDK itself floats over the content: PopupWindow, Dialog, an included subtree that starts hidden, a
-subtree addView'd into a host instead of swapped in.  The spec's claim is parsed and printed as a
-comparison line, never used as an expectation, so a drift shows up as a diff instead of being
-resolved by bending one side.  Empty match sets fail closed; the JSON is deterministic (no
-timestamps), so the same tree always gives the same bytes and a hash of it can be cited.
+The reproduction scope used to be a number typed into a specification.  A layout-directory census
+gives a third answer again - files named screen_*.xml plus their *_body fragments - and misses the
+screens that build their view tree in code.  Here a screen is a class of the screen package that
+MainActivity reaches, and a surface is something the SDK itself floats over the content:
+PopupWindow, Dialog, PopupMenu, AlertDialog.Builder, an included subtree that starts hidden, a
+subtree addView'd into a host instead of swapped in.  The first two of those were the whole list
+until a reconciliation against this measurement found that the pattern set had been hand-copied
+from the two constructors someone happened to think of, leaving live floating surfaces out of the
+coverage claim - the empty-match-set failure mode, one pattern short of visible.  Every match is
+additionally required to sit on a line that starts as code, so a javadoc mentioning a constructor
+cannot mint a surface.  The spec is checked for a *pointer* to this file, not for numbers: since the
+2026-10-16 ruling that the inventory is the range authority, a count written into the spec would be
+a second source and would go stale the next time Android changes.  Count-shaped lines in the spec
+are printed with their line numbers and left to a human to label as historical.  Empty match sets
+fail closed; the JSON is deterministic (no timestamps), so the same tree always gives the same bytes
+and a hash of it can be cited.
 
     python .trae/scripts/dev/gen_screen_inventory.py                 analyse, print, write the JSON
     python -X utf8 .trae/scripts/dev/screen_inventory_selftest.py    positive and negative cases
@@ -30,10 +37,29 @@ JAVA_DEFAULT = os.path.join(REPO, "android/app/src/main/java/com/treelearn/app")
 RES_DEFAULT = os.path.join(REPO, "android/app/src/main/res")
 OUT_DEFAULT = os.path.join(REPO, "Docs/04-ux-design/parity/screen-inventory.json")
 SPEC_DEFAULT = os.path.join(REPO, "Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md")
+# Derived from the output path so the pointer test cannot outlive a move of the inventory itself.
+INVENTORY_NAME = os.path.basename(OUT_DEFAULT)
+COUNT_SHAPE = re.compile(r"\d+\s*个?\s*(?:屏幕|浮层|自绘屏)")
 MIN_SCREENS = 8
 MIN_SURFACES = 3
 POPUP_WINDOW = re.compile(r"new\s+PopupWindow\s*\(")
 DIALOG = re.compile(r"new\s+Dialog\s*\(")
+POPUP_MENU = re.compile(r"new\s+PopupMenu\s*\(")
+ALERT_DIALOG = re.compile(r"new\s+AlertDialog\.Builder\s*\(")
+# The kind vocabulary lives here and nowhere else. A consumer that re-lists it (the green evidence's
+# per-entry check did) becomes a second source, so a legitimate new kind reads as "unknown kind" and
+# the tempting fix is to delete the check rather than to extend the copy.
+SURFACE_PATTERNS = (("popup_window", POPUP_WINDOW), ("dialog", DIALOG),
+                    ("popup_menu", POPUP_MENU), ("alert_dialog", ALERT_DIALOG))
+# Kinds not minted by a constructor pattern: a host view added to a container in code, and an
+# <include> whose host layout is hidden. They join the vocabulary so consumers can derive it.
+STRUCTURAL_KINDS = ("code_drawn_host", "included_hidden")
+SURFACE_KINDS = tuple(sorted([k for k, _ in SURFACE_PATTERNS] + list(STRUCTURAL_KINDS)))
+# Kinds whose content is not an inflated R.layout at the call site: a PopupMenu fills itself from
+# getMenu().add(R.string...), a message AlertDialog from setTitle/setMessage. Running the
+# nearest-layout heuristic over them would attribute some unrelated layout to the surface and then
+# derive a sw600dp variant that does not exist.
+LAYOUTLESS_KINDS = ("popup_menu", "alert_dialog")
 LAYOUT_REF = re.compile(r"R\.layout\.(\w+)")
 ROOT_INFLATE = re.compile(r"inflate\(\s*R\.layout\.(\w+)\s*,\s*(?:\([\w.]+\)\s*)?this\s*,\s*true\s*\)")
 FIND_VIEW = re.compile(r"findViewById\(\s*R\.id\.(\w+)")
@@ -88,24 +114,53 @@ def enclosing(spans, pos):
     return name
 
 
+def is_code_line(lines, ln):
+    """Whether the raw line carrying a match is live code rather than documentation.
+
+    Deliberately parser-free: it looks only at what the line itself starts with, so it cannot be
+    talked out of a judgement by comment state elsewhere in the file. A Java comment lexer here
+    would be both the criterion and the exemption for its own misses, which is the shape this
+    repository has already been burned by twice. The residue it does not see - a marker sitting
+    inside a block comment on a line that does not itself start with a comment token - is recorded
+    as an unmeasured gap in the task file rather than claimed to be absent.
+    """
+    if not 1 <= ln <= len(lines):
+        raise Fault("line %d is outside the scanned file (%d line(s))" % (ln, len(lines)))
+    start = lines[ln - 1].lstrip()
+    return not (start.startswith("//") or start.startswith("*") or start.startswith("/*"))
+
+
 def scan_java_file(path, window=40):
     text = read(path)
-    refs = [(m.group(1), line_of(text, m.start())) for m in LAYOUT_REF.finditer(text)]
+    lines = text.split("\n")
+
+    def live(match):
+        return is_code_line(lines, line_of(text, match.start()))
+
+    refs = [(m.group(1), line_of(text, m.start()))
+            for m in LAYOUT_REF.finditer(text) if live(m)]
     root = None
     for m in ROOT_INFLATE.finditer(text):
-        root = (m.group(1), line_of(text, m.start()))
-        break
+        if live(m):
+            root = (m.group(1), line_of(text, m.start()))
+            break
     sites = []
-    for kind, pat in (("popup_window", POPUP_WINDOW), ("dialog", DIALOG)):
+    for kind, pat in SURFACE_PATTERNS:
         for m in pat.finditer(text):
+            if not live(m):
+                continue
             ln = line_of(text, m.start())
+            if kind in LAYOUTLESS_KINDS:
+                sites.append({"kind": kind, "line": ln, "layout": None})
+                continue
             # the layout inflated just above the constructor is the one it shows; only when nothing
             # precedes it inside the window does the next line below count (Dialog + setContentView).
             near = [(0 if rline <= ln else 1, abs(ln - rline), name)
                     for name, rline in refs if abs(ln - rline) <= window]
             near.sort()
             sites.append({"kind": kind, "line": ln, "layout": near[0][2] if near else None})
-    return {"refs": refs, "root": root, "sites": sites, "ids": set(FIND_VIEW.findall(text))}
+    return {"refs": refs, "root": root, "sites": sites,
+            "ids": {m.group(1) for m in FIND_VIEW.finditer(text) if live(m)}}
 
 
 def layout_census(res_root):
@@ -243,14 +298,23 @@ def analyse(java_root, res_root):
             "unreached_screens": unreached, "counts": counts}
 
 
-def spec_claims(spec_path):
+def spec_link(spec_path):
+    """The spec owns a pointer, not a number.
+
+    Until 2026-10-16 this function parsed the counts *out of the spec text* and diffed them against
+    the measurement, which was the right guard while a human wrote the scope by hand - it is what
+    exposed the 6-vs-16 surface gap. Once the inventory became the range authority (user ruling,
+    2026-10-16), parsing numbers from the spec would either force the spec to keep carrying them
+    (a second source, stale the moment Android changes) or fault the instrument every time the spec
+    was written correctly. So: the pointer is judged, count-shaped lines are printed with their line
+    numbers and left to a human to label as historical - "is this restatement marked as history?" is
+    not a judgement this instrument can make without reading intent.
+    """
     text = read(spec_path)
-    m1 = re.search(r"(\d+)\s*个?\s*屏幕", text)
-    m2 = re.search(r"(\d+)\s*个?\s*浮层", text)
-    if not m1 or not m2:
-        raise Fault("could not parse the claimed screen/surface counts from %s" % spec_path)
-    return {"screens": int(m1.group(1)), "surfaces": int(m2.group(1)),
-            "source": spec_path.replace(os.sep, "/")}
+    return {"source": spec_path.replace(os.sep, "/"),
+            "inventory_cited": INVENTORY_NAME in text,
+            "count_shaped_lines": [i for i, l in enumerate(text.splitlines(), 1)
+                                   if COUNT_SHAPE.search(l)]}
 
 
 def source_commit(cwd):
@@ -264,17 +328,15 @@ def source_commit(cwd):
     return p.stdout.strip()
 
 
-def render(data, commit, claims):
+def render(data, commit, link):
     inv = dict(data)
     inv["generated_by"] = "python .trae/scripts/dev/gen_screen_inventory.py"
     inv["source_commit"] = commit
-    inv["spec_claims"] = claims
-    inv["spec_comparison"] = {"screens_diff": data["counts"]["screens"] - claims["screens"],
-                              "surfaces_diff": data["counts"]["surfaces"] - claims["surfaces"]}
+    inv["spec_link"] = link
     return json.dumps(inv, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
-def report_lines(data, claims):
+def report_lines(data, link):
     out = []
     for s in data["screens"]:
         ent = ",".join("%s@%s" % (h["method"], h["line"]) for h in s["reached_by"]) or "-"
@@ -304,10 +366,14 @@ def report_lines(data, claims):
     ok = c["screens"] >= MIN_SCREENS and c["surfaces"] >= MIN_SURFACES
     out.append("FLOOR screens>=%d got=%d surfaces>=%d got=%d ok=%s"
                % (MIN_SCREENS, c["screens"], MIN_SURFACES, c["surfaces"], ok))
-    out.append("SPEC_CLAIM screens=%d surfaces=%d measured screens=%d surfaces=%d diff=%+d/%+d"
-               % (claims["screens"], claims["surfaces"], c["screens"], c["surfaces"],
-                  c["screens"] - claims["screens"], c["surfaces"] - claims["surfaces"]))
-    return out, ok
+    pointer = link["inventory_cited"]
+    out.append("SPEC_POINTER cites=%s file=%s judged-into-exit=%s"
+               % (pointer, INVENTORY_NAME, pointer))
+    out.append("SPEC_RESTATED count-shaped=%d lines=%s (printed for a human to label as "
+               "historical - not judged: the numbers belong to this file's counts)"
+               % (len(link["count_shaped_lines"]),
+                  ",".join(str(n) for n in link["count_shaped_lines"]) or "none"))
+    return out, (ok and pointer)
 
 
 def main(argv=None):
@@ -323,13 +389,13 @@ def main(argv=None):
         return 2
     try:
         data = analyse(opts.java, opts.res)
-        claims = spec_claims(opts.spec)
-        text = render(data, source_commit(REPO), claims)
+        link = spec_link(opts.spec)
+        text = render(data, source_commit(REPO), link)
     except Fault as exc:
         print("INSTRUMENT FAULT: %s" % exc)
         print("EXITCODE=3")
         return 3
-    lines, ok = report_lines(data, claims)
+    lines, ok = report_lines(data, link)
     for line in lines:
         print(line)
     raw = text.encode("utf-8")

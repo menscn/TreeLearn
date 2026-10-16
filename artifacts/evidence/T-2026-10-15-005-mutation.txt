@@ -1,18 +1,20 @@
 # T-2026-10-15-005 MUTATION - 屏幕清单生成器每条守卫的退化实测
-# Generated: 2026-10-15T17:06:45Z  (UTC)
+# Generated: 2026-10-16T01:25:20Z  (UTC)
 # Generator: artifacts/tmp/gen-005-mutation.sh   重跑：bash artifacts/tmp/gen-005-mutation.sh
 # 变异对象：gen_screen_inventory.py 与 screen_inventory_selftest.py 的**副本**
 #   （artifacts/tmp/_m005/prod/ 下同名同深度路径）；生产字节只在块 05 被读，从不被写。
 # 判据面：M1/M2 两条地板，M3 根布局判据，M4 平板变体列，M5 确定性，M6 方法体不闭合的
 #   fail-closed 分支，M7 隐藏 include 的消费方证明，M8 是不改变任何判定的注释型空变异——它必须
 #   仍然全绿，否则「任何改动都会红」的电池和「守卫消失才红」的电池读起来一模一样。
+#   M9/M10/M11 锁本轮新增的三条判据（两种浮层模式、注释行排除、无布局浮层不就近取布局）。
+#   它们要挡的缺陷不是崩溃而是「清单少了几行且没人知道」——这种失败在清单内部永远看不见。
 # 死 include 那道守卫（raise Fault）的退化**不能**记成用例转红：去掉它之后生成器在同一份夹具上
 #   抛出未捕获的 KeyError，自检因此按「仪器崩了」那一层中止，而不是某条判据不成立。块 04 把这种
 #   「移除后既不静默放行、也无法归因到一条用例」的后果单独量测，所以它不进电池（电池的规则是
 #   变异只许让用例转红，仪器故障必须另说）。
 # 生产文件指纹（判定前读数；块 05 在全部变异之后复核是否仍相同）：
-#   .trae/scripts/dev/gen_screen_inventory.py  bytes=16373  lines=349  sha256=e531110b4be80f9c71820f8840e0a3fbe17383c4a2b9cbd936ec52021412fc30
-#   .trae/scripts/dev/screen_inventory_selftest.py  bytes=23561  lines=511  sha256=50461302fbcbc5635d5416b7984e663b631fc903ce271ed85131c97ae6016bbf
+#   .trae/scripts/dev/gen_screen_inventory.py  bytes=20509  lines=415  sha256=7cedbd9a6b1c16d260d0964cac4a78ca784fe88cdf7288cc4b85d6d6aef7f65c
+#   .trae/scripts/dev/screen_inventory_selftest.py  bytes=31308  lines=641  sha256=5ca3458832006c5287ea58ae2c44ed81244fe8c004a182ab1799a47f83671510
 
 ===== block 1 - copy tree: same-depth copy under artifacts/tmp, every copied byte equal to production =====
 $ python -X utf8 artifacts/tmp/_m005g/mkcopy.py
@@ -25,7 +27,7 @@ COPY ok
 
 ===== block 2 - measured baseline: the pristine copy suite is green and its failing-case set is recorded for block 03 =====
 $ python -X utf8 artifacts/tmp/_m005g/pristine.py
-BASELINE rc=0 executed=19 expected=19 failures=0 instrument-fault-lines=0
+BASELINE rc=0 executed=23 expected=23 failures=0 instrument-fault-lines=0
 BASELINE failing-cases=[]
 BASELINE written=artifacts/tmp/_m005g/baseline.json
 BASELINE ok
@@ -34,7 +36,7 @@ BASELINE ok
 ===== block 3 - battery: each guard degraded turns exactly its own case red, and the no-op control turns nothing red =====
 $ python -X utf8 artifacts/tmp/_m005g/battery.py
 baseline read from the measured file: rc=0 failures=0 failing=[]
-mutations declared=8 floor=8 floor-met=True
+mutations declared=11 floor=11 floor-met=True
 M1-screen-floor-zero rc=1 want-rc=1 baseline=0 caught=True new-red=['neg-screens-below-floor'] expected-new=['neg-screens-below-floor']
 M1-screen-floor-zero new-red==declared: True
 M2-surface-floor-zero rc=1 want-rc=1 baseline=0 caught=True new-red=['neg-surfaces-below-floor'] expected-new=['neg-surfaces-below-floor']
@@ -51,7 +53,13 @@ M7-consumer-proof-off rc=1 want-rc=1 baseline=0 caught=True new-red=['pos-hidden
 M7-consumer-proof-off new-red==declared: True
 M8-noop-comment rc=0 want-rc=0 baseline=0 caught=False new-red=[] expected-new=[]
 M8-noop-comment new-red==declared: True
-after-restore copy rc=0 failing=[] counts=('19', '19', '0')
+M9-new-patterns-dropped rc=1 want-rc=1 baseline=0 caught=True new-red=['pos-alert-dialog-site', 'pos-comment-line-excluded', 'pos-popup-menu-site', 'pos-real-tree', 'pos-surface-kinds-disjoint'] expected-new=['pos-alert-dialog-site', 'pos-comment-line-excluded', 'pos-popup-menu-site', 'pos-real-tree', 'pos-surface-kinds-disjoint']
+M9-new-patterns-dropped new-red==declared: True
+M10-comment-filter-off rc=1 want-rc=1 baseline=0 caught=True new-red=['pos-comment-line-excluded'] expected-new=['pos-comment-line-excluded']
+M10-comment-filter-off new-red==declared: True
+M11-layoutless-guard-off rc=1 want-rc=1 baseline=0 caught=True new-red=['pos-real-tree', 'pos-surface-kinds-disjoint'] expected-new=['pos-real-tree', 'pos-surface-kinds-disjoint']
+M11-layoutless-guard-off new-red==declared: True
+after-restore copy rc=0 failing=[] counts=('23', '23', '0')
 copy longest path=112 chars (fail-closed at 240)
 BATTERY ok
 ----- exit code: 0 (want 0) -----
@@ -80,18 +88,18 @@ RECHECK ok
 $ python -X utf8 artifacts/tmp/_m005g/scope.py
 command diff ok rc=0
 command ls-files ok rc=0
-production-surface paths snapshot=1 now=1 identical=True
-surface list=['frontend/src/styles/tokens.css']
+production-surface paths snapshot=0 now=0 identical=True
+surface list=[]
 SCOPE ok
 ----- exit code: 0 (want 0) -----
 
 ===== block 7 - cross-file consistency: RED, GREEN and this file report the same case count and the same clean expectation tables =====
 $ python -X utf8 artifacts/tmp/_m005g/consistency.py
-T-2026-10-15-005-red.txt last-line=DECODE ok file bytes=8487
-T-2026-10-15-005-green.txt last-line=DECODE ok file bytes=9508
+T-2026-10-15-005-red.txt last-line=DECODE ok file bytes=9303
+T-2026-10-15-005-green.txt last-line=DECODE ok file bytes=9748
 T-2026-10-15-005-mutation.txt last-line=$ python -X utf8 artifacts/tmp/_m005g/consistency.py
 this file already carries the battery block (its own TOTAL is written after this check)
-case count green=19 copy-baseline=19 equal=True
+case count green=23 copy-baseline=23 equal=True
 block sections found=['1', '2', '3', '4', '5', '6', '7']
 battery block has no instrument-fault line (the named-fault reading lives in block 4)
 CONSISTENCY ok
@@ -100,12 +108,12 @@ CONSISTENCY ok
 ===== block 8 - encoding gate over the two judged instruments, this generator and the 005 evidence and task files =====
 $ python -X utf8 artifacts/tmp/_m005g/utf8_gate.py .trae/scripts/dev/gen_screen_inventory.py .trae/scripts/dev/screen_inventory_selftest.py artifacts/tmp/gen-005-mutation.sh artifacts/evidence/T-2026-10-15-005-red.txt artifacts/evidence/T-2026-10-15-005-green.txt .trae/tasks/T-2026-10-15-screen-inventory-parity-ledger-005.md
 GATE SELFTEST ok: a known-broken byte string is rejected
-gate-ok .trae/scripts/dev/gen_screen_inventory.py bytes=16373
-gate-ok .trae/scripts/dev/screen_inventory_selftest.py bytes=23561
-gate-ok artifacts/tmp/gen-005-mutation.sh bytes=37401
-gate-ok artifacts/evidence/T-2026-10-15-005-red.txt bytes=8513
-gate-ok artifacts/evidence/T-2026-10-15-005-green.txt bytes=9534
-gate-ok .trae/tasks/T-2026-10-15-screen-inventory-parity-ledger-005.md bytes=31195
+gate-ok .trae/scripts/dev/gen_screen_inventory.py bytes=20509
+gate-ok .trae/scripts/dev/screen_inventory_selftest.py bytes=31308
+gate-ok artifacts/tmp/gen-005-mutation.sh bytes=39713
+gate-ok artifacts/evidence/T-2026-10-15-005-red.txt bytes=9329
+gate-ok artifacts/evidence/T-2026-10-15-005-green.txt bytes=9774
+gate-ok .trae/tasks/T-2026-10-15-screen-inventory-parity-ledger-005.md bytes=49716
 gate covered 6 file(s)
 EXITCODE=0
 ----- exit code: 0 (want 0) -----
@@ -126,4 +134,4 @@ expectation table (want/got per block):
   block 8: want=0 got=0 label=encoding gate over the two judged instruments, this generator and the 005 evidence and task files
 ascii tail: bytes=1352 non-ascii=0 (must be 0)
 OVERALL_EXITCODE=0
-DECODE ok file bytes=9147
+DECODE ok file bytes=10183

@@ -1,5 +1,5 @@
 # T-2026-10-15-007 GREEN - 1:1 台账生成器的判定证据
-# Generated: 2026-10-15T16:58:24Z  (UTC)
+# Generated: 2026-10-16T01:25:58Z  (UTC)
 # Generator: artifacts/tmp/gen-007-green.sh   重跑：bash artifacts/tmp/gen-007-green.sh
 # 本文件覆盖的调用形态：
 #   python -X utf8 .trae/scripts/dev/gen_parity_ledger.py                  （写已落盘台账）
@@ -7,10 +7,10 @@
 #   python -X utf8 .trae/scripts/dev/parity_ledger_selftest.py                  （正反自检全套；用例数由产物打印）
 # 判定面全部跑在真实仓库上；本片只新增工具与产物，块 01 实测 android/ 零改动。
 # 被核文件指纹（判定前读数；块 01 在全部判定之后复核是否仍相同）：
-#   .trae/scripts/dev/gen_parity_ledger.py  bytes=16931  lines=329  sha256=32d98ebc6daeef3366fbf792c2cb39aebe3af19e605b412dbf8fe3e7b2ee75b3
-#   .trae/scripts/dev/parity_ledger_selftest.py  bytes=20752  lines=463  sha256=027a74fcbf22a45b75e718041ddef868010d0d8ca36bd4dce41f042f7a607f64
-#   .trae/scripts/dev/gen_screen_inventory.py  bytes=16373  lines=349  sha256=e531110b4be80f9c71820f8840e0a3fbe17383c4a2b9cbd936ec52021412fc30
-#   Docs/04-ux-design/parity/screen-inventory.json  bytes=20364  lines=946  sha256=4bfcb8a72f4ec553fbac0029320b589c43af32cef36f0f92ceb7325377404d74
+#   .trae/scripts/dev/gen_parity_ledger.py  bytes=17796  lines=338  sha256=2b6bec669fb80642c5a1c67147ab8f895ef1d19f5aa194992d4fd0bae6287e2e
+#   .trae/scripts/dev/parity_ledger_selftest.py  bytes=23070  lines=494  sha256=8913218f6f2ac8ad7927532e84cd5cb094aad9d50332d5ef04b60344c959f341
+#   .trae/scripts/dev/gen_screen_inventory.py  bytes=20509  lines=415  sha256=7cedbd9a6b1c16d260d0964cac4a78ca784fe88cdf7288cc4b85d6d6aef7f65c
+#   Docs/04-ux-design/parity/screen-inventory.json  bytes=21986  lines=1013  sha256=c8b94d8e2de67cf001b6796f20d7fd3b94af9fcac917a3bba617ab24105b0007
 #   .trae/scripts/dev/parity/screens.json  bytes=3679  lines=48  sha256=f85fc4342f701b5ce1f27fd78230de6af348a5d5630d8ad7d0e2eb33335fdeaa
 
 ===== block 1 - keep-behaviour: the generator runs on the filed inventory and no judged file's bytes move =====
@@ -34,9 +34,9 @@ SUITE ok
 
 ===== block 3 - the filed ledger makes absence a counted token: no blank cell, no PASS wording =====
 $ python -X utf8 artifacts/tmp/_g007/absence.py
-table header lines=1 data rows=24 inventory screens+surfaces=24
+table header lines=1 data rows=30 inventory screens+surfaces=30
 empty-cell-count=0
-cell tally: {'根布局 screen_chat / 入口 2 处': 1, 'MEASURED': 1, 'REPLAY-SPEC': 1, '自绘': 5, 'NO-PROFILE': 46, '根布局 screen_home / 入口 2 处': 1, '根布局 screen_library / 入口 2 处': 1, '根布局 screen_navigation / 入口 2 处': 1, '根布局 screen_provider_admin / 入口 2 处': 1, '根布局 screen_settings_key / 入口 2 处': 1, '根布局 screen_settings / 入口 2 处': 1, '根布局 screen_stats_detail / 入口 2 处': 1, '根布局 screen_tree / 入口 2 处': 1, '浮层 panel_search_picker': 1, '浮层 popup_child_branches': 1, '浮层 代码绘制，无布局文件': 3, '浮层 popup_model_picker': 1, '浮层 view_node_popup': 1, '浮层 popup_word_action': 1, '浮层 popup_word_more': 1, '浮层 overlay_fullscreen_editor': 1}
+cell tally: {'根布局 screen_chat / 入口 2 处': 1, 'MEASURED': 1, 'REPLAY-SPEC': 1, '自绘': 5, 'NO-PROFILE': 58, '根布局 screen_home / 入口 2 处': 1, '根布局 screen_library / 入口 2 处': 1, '根布局 screen_navigation / 入口 2 处': 1, '根布局 screen_provider_admin / 入口 2 处': 1, '根布局 screen_settings_key / 入口 2 处': 1, '根布局 screen_settings / 入口 2 处': 1, '根布局 screen_stats_detail / 入口 2 处': 1, '根布局 screen_tree / 入口 2 处': 1, '浮层 panel_search_picker': 1, '浮层 代码绘制，无布局文件': 9, '浮层 popup_child_branches': 1, '浮层 popup_model_picker': 1, '浮层 view_node_popup': 1, '浮层 popup_word_action': 1, '浮层 popup_word_more': 1, '浮层 overlay_fullscreen_editor': 1}
 ABSENCE ok
 ----- exit code: 0 (want 0) -----
 
@@ -56,7 +56,7 @@ $ python -X utf8 artifacts/tmp/_g007/determinism.py
 recorded args differ per invocation: filed=- 本次实际参数：(无，全部走默认路径) a=- 本次实际参数：--out artifacts/tmp/_g007 b=- 本次实际参数：--out artifacts/tmp/_g007 all-distinct=True
 two re-exports byte-identical ignoring the args line=True
 re-export equals the filed artefact on every other byte=True
-bytes a=6618 b=6618 filed=6610
+bytes a=8097 b=8097 filed=8089
 a timestamp-shaped tokens=0
 filed timestamp-shaped tokens=0
 DETERMINISM ok
@@ -77,16 +77,16 @@ SIBLINGS ok
 ===== block 7 - encoding gate over the instruments, the inventory, the written ledger and this generator, self-probed both ways =====
 $ python -X utf8 artifacts/tmp/_g007/utf8_gate.py .trae/scripts/dev/gen_parity_ledger.py .trae/scripts/dev/parity_ledger_selftest.py .trae/scripts/dev/gen_screen_inventory.py Docs/04-ux-design/parity/screen-inventory.json .trae/scripts/dev/parity/screens.json artifacts/parity/ledger.md artifacts/tmp/gen-007-red.sh artifacts/tmp/gen-007-green.sh artifacts/evidence/T-2026-10-15-007-red.txt .trae/tasks/T-2026-10-15-parity-ledger-generator-007.md
 GATE SELFTEST ok: a known-broken byte string is rejected
-ok   .trae/scripts/dev/gen_parity_ledger.py                   bytes=16931
-ok   .trae/scripts/dev/parity_ledger_selftest.py              bytes=20752
-ok   .trae/scripts/dev/gen_screen_inventory.py                bytes=16373
-ok   Docs/04-ux-design/parity/screen-inventory.json           bytes=20364
+ok   .trae/scripts/dev/gen_parity_ledger.py                   bytes=17796
+ok   .trae/scripts/dev/parity_ledger_selftest.py              bytes=23070
+ok   .trae/scripts/dev/gen_screen_inventory.py                bytes=20509
+ok   Docs/04-ux-design/parity/screen-inventory.json           bytes=21986
 ok   .trae/scripts/dev/parity/screens.json                    bytes=3679
-ok   artifacts/parity/ledger.md                               bytes=6610
-ok   artifacts/tmp/gen-007-red.sh                             bytes=24682
+ok   artifacts/parity/ledger.md                               bytes=8089
+ok   artifacts/tmp/gen-007-red.sh                             bytes=25364
 ok   artifacts/tmp/gen-007-green.sh                           bytes=26796
-ok   artifacts/evidence/T-2026-10-15-007-red.txt              bytes=6911
-ok   .trae/tasks/T-2026-10-15-parity-ledger-generator-007.md  bytes=24144
+ok   artifacts/evidence/T-2026-10-15-007-red.txt              bytes=7298
+ok   .trae/tasks/T-2026-10-15-parity-ledger-generator-007.md  bytes=36161
 gate covered 10 file(s)
 EXITCODE=0
 ----- exit code: 0 (want 0) -----
@@ -106,4 +106,4 @@ expectation table (want/got per block):
   block 7: want=0 got=0 label=encoding gate over the instruments, the inventory, the written ledger and this generator, self-probed both ways
 ascii tail: bytes=1198 non-ascii=0 (must be 0)
 OVERALL_EXITCODE=0
-DECODE ok file bytes=8094
+DECODE ok file bytes=8095

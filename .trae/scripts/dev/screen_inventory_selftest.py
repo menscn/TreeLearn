@@ -28,9 +28,9 @@ except ImportError as exc:
     print("EXITCODE=3")
     sys.exit(3)
 
-EXPECTED_CASES = 19                      # bare literal; must not be derived from CASES
+EXPECTED_CASES = 23                      # bare literal; must not be derived from CASES
 RUN_ROOT = os.path.join(G.REPO, "artifacts", "tmp", "_inv005_run")
-REQUIRED_ATTRS = ("analyse", "main", "render", "report_lines", "spec_claims", "layout_census",
+REQUIRED_ATTRS = ("analyse", "main", "render", "report_lines", "spec_link", "layout_census",
                   "arrival_edges", "scan_java_file", "method_spans", "read", "Fault")
 
 CASES = []
@@ -87,6 +87,47 @@ def dialog_java(cls, layout_name):
             ".inflate(R.layout.%s, null, false);\n"
             "        Dialog dialog = new Dialog(context);\n"
             "        dialog.setContentView(content);\n    }\n}\n" % (cls, layout_name))
+
+
+def menu_java(cls):
+    return ("public final class %s {\n"
+            "    public void open(Context context, View anchor) {\n"
+            "        PopupMenu menu = new PopupMenu(context, anchor);\n"
+            "        menu.getMenu().add(Menu.NONE, 1, 1, R.string.app_name);\n"
+            "        menu.show();\n    }\n}\n" % cls)
+
+
+def alert_java(cls):
+    return ("public final class %s {\n"
+            "    public void ask(Context context) {\n"
+            "        new AlertDialog.Builder(context)\n"
+            "                .setTitle(R.string.app_name)\n"
+            "                .setNegativeButton(R.string.cancel, null)\n"
+            "                .show();\n    }\n}\n" % cls)
+
+
+def four_forms_java(cls, layout_name):
+    return ("public final class %s {\n"
+            "    public void all(Context context, View anchor) {\n"
+            "        View content = LayoutInflater.from(context)"
+            ".inflate(R.layout.%s, null, false);\n"
+            "        PopupWindow w = new PopupWindow(content, 1, 2, true);\n"
+            "        Dialog d = new Dialog(context);\n"
+            "        PopupMenu m = new PopupMenu(context, anchor);\n"
+            "        new AlertDialog.Builder(context).setTitle(R.string.app_name).show();\n"
+            "    }\n}\n" % (cls, layout_name))
+
+
+def doc_only_java(cls, orphan_layout):
+    """Mentions a constructor and a layout from javadoc only, then builds one real PopupMenu."""
+    return ("public final class %s {\n"
+            "    /**\n"
+            "     * The retired variant was {@code new PopupWindow(context)} and it inflated\n"
+            "     * R.layout.%s; both are named here purely as documentation.\n"
+            "     */\n"
+            "    public void open(Context context, View anchor) {\n"
+            "        PopupMenu live = new PopupMenu(context, anchor);\n"
+            "        live.show();\n    }\n}\n" % (cls, orphan_layout))
 
 
 def main_activity(names, addview=None, unbalanced=False, field_at_class_level=True):
@@ -185,7 +226,10 @@ def build(root, screens=9, popups=3, variants=1, self_drawn=None, hidden_include
               layout("FrameLayout", "%s_layout_root" % n.lower()))
     spec_path = os.path.join(root, "spec.md")
     if spec is True:
-        w(spec_path, "范围：16 个屏幕与 6 个浮层逐屏还原。\n")
+        # Derived from the producer, not hand-copied: the fixture's job is to look like a spec that
+        # points at the inventory, and a literal file name here would go stale on a move.
+        w(spec_path, "范围：条目数以生成的清单 %s 的 counts 为准，本文不写数字。\n"
+          % G.INVENTORY_NAME)
     elif spec:
         w(spec_path, spec)
     return java, res, spec_path
@@ -219,9 +263,10 @@ def _c_basic(root):
     return rc, [("MEASURED screens=9 present", "MEASURED screens=9 " in out),
                 ("9 SCREEN lines", out.count("SCREEN S") == 9),
                 ("floors hold", "ok=True" in out),
-                ("spec claim parsed from the doc", "SPEC_CLAIM screens=16 surfaces=6 " in out),
-                ("measured side printed beside it", "measured screens=9 surfaces=4" in out),
-                ("diff is derived, not typed", "diff=-7/-2" in out)]
+                ("spec cites the inventory, that is the whole judged claim",
+                 "SPEC_POINTER cites=True " in out),
+                ("restated counts are printed, not judged away",
+                 "SPEC_RESTATED count-shaped=0 lines=none " in out)]
 
 
 @case("pos-self-drawn", 0)
@@ -294,6 +339,66 @@ def _c_dialog(root):
                 ("SURFACES_BY_KIND counts it", '"dialog": 1' in out)]
 
 
+@case("pos-popup-menu-site", 0)
+def _c_menu_site(root):
+    java, res, spec = build(root)
+    w(os.path.join(java, "screen", "RowMenu.java"), menu_java("RowMenu"))
+    rc, out, _ = inv(["--java", java, "--res", res, "--spec", spec, "--no-write"])
+    line = [l for l in out.splitlines() if l.startswith("SURFACE popup_menu")]
+    return rc, [("one popup_menu surface", len(line) == 1),
+                ("producer is the component class", bool(line) and "producer=RowMenu" in line[0]),
+                ("no layout invented for a menu", bool(line) and "layout=-" in line[0]),
+                ("so no sw600dp variant either", bool(line) and "sw600dp=False" in line[0]),
+                ("SURFACES_BY_KIND counts it", '"popup_menu": 1' in out),
+                ("the popup_window total is untouched by the new pattern",
+                 '"popup_window": 3' in out)]
+
+
+@case("pos-alert-dialog-site", 0)
+def _c_alert_site(root):
+    java, res, spec = build(root)
+    w(os.path.join(java, "screen", "DeleteAsk.java"), alert_java("DeleteAsk"))
+    rc, out, _ = inv(["--java", java, "--res", res, "--spec", spec, "--no-write"])
+    line = [l for l in out.splitlines() if l.startswith("SURFACE alert_dialog")]
+    return rc, [("one alert_dialog surface", len(line) == 1),
+                ("producer is the component class", bool(line) and "producer=DeleteAsk" in line[0]),
+                ("a message dialog carries no layout", bool(line) and "layout=-" in line[0]),
+                ("the chained Builder is not also read as new Dialog(", '"dialog": 1' in out),
+                ("SURFACES_BY_KIND counts it", '"alert_dialog": 1' in out)]
+
+
+@case("pos-surface-kinds-disjoint", 0)
+def _c_disjoint(root):
+    java, res, spec = build(root, popups=0, dialog=False)
+    w(os.path.join(java, "screen", "FourForms.java"), four_forms_java("FourForms", "four_chip"))
+    w(os.path.join(res, "layout", "four_chip.xml"), layout("ListView", "four_chip"))
+    rc, out, _ = inv(["--java", java, "--res", res, "--spec", spec, "--no-write"])
+    kinds = sorted(l.split()[1] for l in out.splitlines() if l.startswith("SURFACE "))
+    quiet = [l for l in out.splitlines()
+             if l.startswith("SURFACE popup_menu") or l.startswith("SURFACE alert_dialog")]
+    return rc, [("exactly four surfaces, no duplicates", len(kinds) == 4),
+                ("one of each kind - none cross-matched",
+                 kinds == ["alert_dialog", "dialog", "popup_menu", "popup_window"]),
+                ("the shared layout went to the two view-based kinds",
+                 out.count("layout=four_chip") == 2),
+                ("nothing invented for the menu or the message dialog",
+                 len(quiet) == 2 and all("layout=-" in l for l in quiet))]
+
+
+@case("pos-comment-line-excluded", 0)
+def _c_comment(root):
+    java, res, spec = build(root)
+    w(os.path.join(java, "screen", "DocOnly.java"), doc_only_java("DocOnly", "retired_chip"))
+    w(os.path.join(res, "layout", "retired_chip.xml"), layout("ListView", "retired_chip"))
+    rc, out, _ = inv(["--java", java, "--res", res, "--spec", spec, "--no-write"])
+    return rc, [("the javadoc constructor minted no surface", '"popup_window": 3' in out),
+                ("the live menu in the same file is still counted", '"popup_menu": 1' in out),
+                ("a layout named only inside a comment is not a reference",
+                 "UNREFERENCED_LAYOUT retired_chip" in out),
+                ("that orphan is the only one, so the signal is not drowned",
+                 out.count("UNREFERENCED_LAYOUT") == 1)]
+
+
 @case("pos-determinism", 0)
 def _c_determinism(root):
     java, res, spec = build(root, hidden_include=("s04screen_layout_detail", "S04Screen"))
@@ -341,6 +446,20 @@ def _c_real(root):
     checks.append(("floors hold on the real tree", "ok=True" in out))
     checks.append(("no screen is unreachable", "UNREACHED_SCREEN" not in out))
     checks.append(("counters printed, not hand-written", "MEASURED screens=" in out))
+    menu = [l for l in out.splitlines() if l.startswith("SURFACE popup_menu")]
+    alert = [l for l in out.splitlines() if l.startswith("SURFACE alert_dialog")]
+    checks += [("the real tree does carry PopupMenu surfaces", len(menu) > 0),
+               ("the real tree does carry AlertDialog surfaces", len(alert) > 0),
+               ("the spec's version menu is among them (ChatScreen's PopupMenu)",
+                any("producer=ChatScreen" in l for l in menu)),
+               ("no menu or message dialog was given an invented layout",
+                all("layout=-" in l for l in menu + alert)),
+               # ModelThinkingPicker names R.layout.view_model_chip in javadoc AND inflates it on a
+               # live line; excluding comment lines must keep the live one, so this layout must not
+               # be reported as an orphan. Without the live reference the assertion would only prove
+               # the exclusion is over-broad.
+               ("a layout named in javadoc but inflated on a live line stays referenced",
+                "UNREFERENCED_LAYOUT view_model_chip" not in out)]
     return rc, checks
 
 
@@ -417,12 +536,23 @@ def _c_dead_include(root):
                  "dead include: broken_host refers to missing layout nope" in out)]
 
 
-@case("neg-spec-claim-unparseable", 3)
+@case("neg-spec-pointer-missing", 1)
 def _c_bad_spec(root):
-    java, res, spec = build(root, spec="the spec says nothing countable here\n")
+    # A spec that carries the numbers instead of the pointer: the pointer judgement must not hold
+    # (rc 1 - a judgement, not an instrument fault), and the count-shaped scan must name the lines
+    # so a reader can see which restatements need labelling. The unreadable-input path stays tier 3.
+    java, res, spec = build(root, spec="范围：16 个屏幕与 6 个浮层逐屏还原。\n")
     rc, out, _ = inv(["--java", java, "--res", res, "--spec", spec, "--no-write"])
-    return rc, [("tier 3 fault", rc == 3),
-                ("fault says the claim could not be parsed", "could not parse the claimed" in out)]
+    rc_missing, out_missing, _ = inv(["--java", java, "--res", res,
+                                      "--spec", os.path.join(root, "no-such-spec.md"),
+                                      "--no-write"])
+    return rc, [("pointer absence is a judgement (tier 1), not a fault", rc == 1),
+                ("the pointer line reports it", "SPEC_POINTER cites=False " in out),
+                ("restatements are printed with their line numbers",
+                 "SPEC_RESTATED count-shaped=1 lines=1 " in out),
+                ("an unreadable spec is still a fault (tier 3)", rc_missing == 3),
+                ("the fault names the missing input",
+                 "missing input: " in out_missing and "no-such-spec.md" in out_missing)]
 
 
 @case("pos-renamed-layout-ref-diff", 0)
