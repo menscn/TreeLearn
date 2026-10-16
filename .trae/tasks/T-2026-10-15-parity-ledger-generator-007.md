@@ -136,4 +136,4 @@ Follow [code-document alignment](../rules/documentation.md).
 - Blocker: None.
 - Unblock condition: N/A.
 - Next steps: ① 独立 verifier 只读复跑；② 006 收编两支 Node 仪器后，行为列才可能从「回放规格在不在」升级为本侧记录；③ 阶段 1 采集片按台账行排队取夹具。
-- Watch-outs: ① 别把台账的 `MEASURED` 读成「已还原」——它只说 Android 侧基线记录在位，表头那条「每格的含义」就是为此而写；② 改 005 的清单字段时回跑本片自检（`projection()` 的耦合）；③ 不要为了少几格缺证据去伪造屏档案条目。
+- Watch-outs: ① 别把台账的 `MEASURED` 读成「已还原」——它只说 Android 侧基线记录在位，表头那条「每格的含义」就是为此而写；② 改 005 的清单字段时回跑本片自检（`projection()` 的耦合）；③ 不要为了少几格缺证据去伪造屏档案条目。④ **本片 RED 产物有一块已经过时**：`artifacts/evidence/T-2026-10-15-007-red.txt` 的块 5 判的是「本片三个产物尚未进入 git 历史」（`commits=0 tracked=False`），片提交 `7c12126` 之后三个文件都已被跟踪，重跑 `bash artifacts/tmp/gen-007-red.sh` 会让该块按定义转红——那是时效已到而不是缺陷复发，复核 RED 请读归档产物（`grep -n "block 5" artifacts/evidence/T-2026-10-15-007-red.txt`）；块 2 的移开—还原实验与块 6 的档位对照不受提交状态影响，仍可复现「仪器缺席必须判 3」。

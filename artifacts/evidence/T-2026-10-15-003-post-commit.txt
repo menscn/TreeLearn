@@ -1,0 +1,203 @@
+# T-2026-10-15-003 POST-COMMIT - 验收第 4 条后半的提交后回读（移动而非重写）
+# Generated: 2026-10-15T17:37:05Z  (UTC)
+# Generator: artifacts/tmp/gen-003-post-commit.sh   重跑：bash artifacts/tmp/gen-003-post-commit.sh
+# 前提：本产物只在片提交之后有意义。shipped 的 T-2026-10-15-003-green.txt 里块 13/14 读的是
+#   **提交前**状态（索引里的 R/RM 行、新路径 0 条历史），提交后重跑会变成另一组数——那不属返工，
+#   而是那两块判据的时效已到，因此它们的读数只以当时那份产物为准，本产物承担提交后的那一半。
+# 被核文件指纹（回读仪器 + 本片两支 shipped 仪器；判定前读数，块 06 在变异之后复核是否仍相同）：
+#   artifacts/tmp/_g003post/follow_post_commit.py  bytes=4799  lines=99  sha256=163f7e70dcdaf1df2fc53e43881e0ccf43061c8b512b27b47cee758c22398660
+#   .trae/scripts/dev/parity/measure_screen.py  bytes=28279  lines=543  sha256=c99a3236963d84bbe331110cb2d3824cf24f57968978f93ef4e0c84a35674c3a
+#   .trae/scripts/dev/parity/png_probe.py  bytes=3525  lines=106  sha256=456d64f38c502d371fdfbe557654ba6b5e31950f2b302219caf00a135b12a3ea
+
+===== block 01 - the re-read instrument names no literal commit id, so the reading cannot go falsely red after a rewrite =====
+$ python -X utf8 artifacts/tmp/_g003pc/commitfree.py artifacts/tmp/_g003post/follow_post_commit.py
+commit-shaped tokens in the instrument source: 0 (must be 0) offenders=none
+selftest control (a literal id must be caught): offenders=['deadbeefcafe12345']
+EXITCODE=0
+  witness lines this block judged (echoed from the complete capture so a reviewer can read them):
+    capture line 1: commit-shaped tokens in the instrument source: 0 (must be 0) offenders=none
+    capture line 2: selftest control (a literal id must be caught): offenders=['deadbeefcafe12345']
+    capture line 3: EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 02 - post-commit git log --follow: both moved instruments carry the history the old path owned =====
+$ python -X utf8 artifacts/tmp/_g003post/follow_post_commit.py
+boundary commit (the slice commit that performed the move): 7c12126
+== artifacts/tmp/png_probe.py -> .trae/scripts/dev/parity/png_probe.py
+old path history owned before the move: 1 commit(s) ['30abb8d']
+new path on default (implies -M50%): 2 commit(s); pre-move history carried=1/1 missing=none
+new path on -M40%: 2 commit(s); pre-move history carried=1/1 missing=none
+VERDICT png_probe.py: move, not rewrite (crosses at default (implies -M50%), -M40%)
+== artifacts/tmp/measure_chat_1to1.py -> .trae/scripts/dev/parity/measure_screen.py
+old path history owned before the move: 1 commit(s) ['30abb8d']
+new path on default (implies -M50%): 1 commit(s); pre-move history carried=0/1 missing=['30abb8d']
+new path on -M40%: 2 commit(s); pre-move history carried=1/1 missing=none
+VERDICT measure_screen.py: move, not rewrite (crosses at -M40%)
+EXITCODE=0
+  witness lines this block judged (echoed from the complete capture so a reviewer can read them):
+    capture line 3: old path history owned before the move: 1 commit(s) ['30abb8d']
+    capture line 4: new path on default (implies -M50%): 2 commit(s); pre-move history carried=1/1 missing=none
+    capture line 6: VERDICT png_probe.py: move, not rewrite (crosses at default (implies -M50%), -M40%)
+    capture line 11: VERDICT measure_screen.py: move, not rewrite (crosses at -M40%)
+    capture line 11: VERDICT measure_screen.py: move, not rewrite (crosses at -M40%)
+    capture line 12: EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 03 - selftest: positive pairs pass and the negative control (a new path that was never the old one) is rejected =====
+$ python -X utf8 artifacts/tmp/_g003post/follow_post_commit.py --selftest
+--- selftest: positive pairs must pass ---
+== artifacts/tmp/png_probe.py -> .trae/scripts/dev/parity/png_probe.py
+old path history owned before the move: 1 commit(s) ['30abb8d']
+new path on default (implies -M50%): 2 commit(s); pre-move history carried=1/1 missing=none
+new path on -M40%: 2 commit(s); pre-move history carried=1/1 missing=none
+VERDICT png_probe.py: move, not rewrite (crosses at default (implies -M50%), -M40%)
+== artifacts/tmp/measure_chat_1to1.py -> .trae/scripts/dev/parity/measure_screen.py
+old path history owned before the move: 1 commit(s) ['30abb8d']
+new path on default (implies -M50%): 1 commit(s); pre-move history carried=0/1 missing=['30abb8d']
+new path on -M40%: 2 commit(s); pre-move history carried=1/1 missing=none
+VERDICT measure_screen.py: move, not rewrite (crosses at -M40%)
+--- selftest: negative control must fail ---
+== artifacts/tmp/measure_chat_1to1.py -> .trae/scripts/dev/gen_screen_inventory.py
+old path history owned before the move: 1 commit(s) ['30abb8d']
+new path on default (implies -M50%): 1 commit(s); pre-move history carried=0/1 missing=['30abb8d']
+new path on -M40%: 1 commit(s); pre-move history carried=0/1 missing=['30abb8d']
+  FAIL gen_screen_inventory.py: the new path carries none of the old history at either threshold - 'proven to be a move' is not met
+SELFTEST ok the negative control was rejected as required
+EXITCODE=0
+  witness lines this block judged (echoed from the complete capture so a reviewer can read them):
+    capture line 18: SELFTEST ok the negative control was rejected as required
+    capture line 9: new path on default (implies -M50%): 1 commit(s); pre-move history carried=0/1 missing=['30abb8d']
+    capture line 19: EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 04 - the unmutated copy, run from the scratch directory, still passes - so any red in block 05 is the sed, not the location =====
+$ python -X utf8 artifacts/tmp/_g003pc/mut/control.py --selftest
+--- selftest: positive pairs must pass ---
+== artifacts/tmp/png_probe.py -> .trae/scripts/dev/parity/png_probe.py
+old path history owned before the move: 1 commit(s) ['30abb8d']
+new path on default (implies -M50%): 2 commit(s); pre-move history carried=1/1 missing=none
+new path on -M40%: 2 commit(s); pre-move history carried=1/1 missing=none
+VERDICT png_probe.py: move, not rewrite (crosses at default (implies -M50%), -M40%)
+== artifacts/tmp/measure_chat_1to1.py -> .trae/scripts/dev/parity/measure_screen.py
+old path history owned before the move: 1 commit(s) ['30abb8d']
+new path on default (implies -M50%): 1 commit(s); pre-move history carried=0/1 missing=['30abb8d']
+new path on -M40%: 2 commit(s); pre-move history carried=1/1 missing=none
+VERDICT measure_screen.py: move, not rewrite (crosses at -M40%)
+--- selftest: negative control must fail ---
+== artifacts/tmp/measure_chat_1to1.py -> .trae/scripts/dev/gen_screen_inventory.py
+old path history owned before the move: 1 commit(s) ['30abb8d']
+new path on default (implies -M50%): 1 commit(s); pre-move history carried=0/1 missing=['30abb8d']
+new path on -M40%: 1 commit(s); pre-move history carried=0/1 missing=['30abb8d']
+  FAIL gen_screen_inventory.py: the new path carries none of the old history at either threshold - 'proven to be a move' is not met
+SELFTEST ok the negative control was rejected as required
+EXITCODE=0
+  witness lines this block judged (echoed from the complete capture so a reviewer can read them):
+    capture line 18: SELFTEST ok the negative control was rejected as required
+    capture line 19: EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 05 - mutation: relaxing 'the old history must be carried' to 'any history at all' must make the negative control fire =====
+$ python -X utf8 artifacts/tmp/_g003pc/mut/mutated.py --selftest
+--- selftest: positive pairs must pass ---
+== artifacts/tmp/png_probe.py -> .trae/scripts/dev/parity/png_probe.py
+old path history owned before the move: 1 commit(s) ['30abb8d']
+new path on default (implies -M50%): 2 commit(s); pre-move history carried=1/1 missing=none
+new path on -M40%: 2 commit(s); pre-move history carried=1/1 missing=none
+VERDICT png_probe.py: move, not rewrite (crosses at default (implies -M50%), -M40%)
+== artifacts/tmp/measure_chat_1to1.py -> .trae/scripts/dev/parity/measure_screen.py
+old path history owned before the move: 1 commit(s) ['30abb8d']
+new path on default (implies -M50%): 1 commit(s); pre-move history carried=0/1 missing=['30abb8d']
+new path on -M40%: 2 commit(s); pre-move history carried=1/1 missing=none
+VERDICT measure_screen.py: move, not rewrite (crosses at default (implies -M50%), -M40%)
+--- selftest: negative control must fail ---
+== artifacts/tmp/measure_chat_1to1.py -> .trae/scripts/dev/gen_screen_inventory.py
+old path history owned before the move: 1 commit(s) ['30abb8d']
+new path on default (implies -M50%): 1 commit(s); pre-move history carried=0/1 missing=['30abb8d']
+new path on -M40%: 1 commit(s); pre-move history carried=0/1 missing=['30abb8d']
+VERDICT gen_screen_inventory.py: move, not rewrite (crosses at default (implies -M50%), -M40%)
+SELFTEST FAIL the negative control passed - the judgement accepts a new path that carries none of the old history, so every VERDICT line above is worthless
+EXITCODE=1
+  witness lines this block judged (echoed from the complete capture so a reviewer can read them):
+    capture line 18: SELFTEST FAIL the negative control passed - the judgement accepts a new path that carries none of the old history, so every VERDICT line above is worthless
+    capture line 19: EXITCODE=1
+----- exit code: 1 (want 1) -----
+
+===== block 06 - the instrument and the two shipped 003 instruments are byte-identical after the mutation blocks =====
+$ python -X utf8 artifacts/tmp/_g003pc/unchanged.py artifacts/tmp/_g003pc/inst-before.txt
+unchanged artifacts/tmp/_g003post/follow_post_commit.py
+unchanged .trae/scripts/dev/parity/measure_screen.py
+unchanged .trae/scripts/dev/parity/png_probe.py
+files re-fingerprinted: 3 (must be 3) changed=0 (must be 0)
+EXITCODE=0
+  witness lines this block judged (echoed from the complete capture so a reviewer can read them):
+    capture line 1: unchanged artifacts/tmp/_g003post/follow_post_commit.py
+    capture line 4: files re-fingerprinted: 3 (must be 3) changed=0 (must be 0)
+    capture line 5: EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 07 - read-back guard: every needle this run judged is readable in the finished evidence file =====
+$ python -X utf8 artifacts/tmp/_g003pc/readback.py artifacts/evidence/T-2026-10-15-003-post-commit.txt artifacts/tmp/_g003pc
+needle files produced by run(): 6 (this run registered: 01 02 03 04 05 06)
+stale needle files = 0 (must be 0) none
+needles judged=19 missing-from-evidence=0 (must be 0)
+block sections in the evidence file: 7  exit-code lines: 6
+exit-code lines whose got differs from want: 0 (must be 0) none
+READBACK ok
+  witness lines this block judged (echoed from the complete capture so a reviewer can read them):
+    capture line 1: needle files produced by run(): 6 (this run registered: 01 02 03 04 05 06)
+    capture line 2: stale needle files = 0 (must be 0) none
+    capture line 3: needles judged=19 missing-from-evidence=0 (must be 0)
+    capture line 3: needles judged=19 missing-from-evidence=0 (must be 0)
+    capture line 5: exit-code lines whose got differs from want: 0 (must be 0) none
+    capture line 6: READBACK ok
+----- exit code: 0 (want 0) -----
+
+===== block 08 - the pre-commit block 13/14 readings stay readable in the artefact that recorded them =====
+$ python -X utf8 artifacts/tmp/_g003pc/supersession.py
+prior artefact decodes as UTF-8: artifacts/evidence/T-2026-10-15-003-green.txt bytes=30893
+prior-artefact line count for 'git log --follow on the NEW path right now': 1
+prior-artefact line count for 'index/worktree states for the new paths': 1
+prior artefact block sections: 22 (this file does not re-run them)
+EXITCODE=0
+  witness lines this block judged (echoed from the complete capture so a reviewer can read them):
+    capture line 1: prior artefact decodes as UTF-8: artifacts/evidence/T-2026-10-15-003-green.txt bytes=30893
+    capture line 2: prior-artefact line count for 'git log --follow on the NEW path right now': 1
+    capture line 5: EXITCODE=0
+----- exit code: 0 (want 0) -----
+
+===== block 09 - encoding gate over the instrument, this generator, the prior 003 artefacts and the task file =====
+$ python -X utf8 artifacts/tmp/_g003pc/utf8_gate.py artifacts/tmp/_g003post/follow_post_commit.py artifacts/tmp/gen-003-post-commit.sh artifacts/evidence/T-2026-10-15-003-green.txt artifacts/evidence/T-2026-10-15-003-red.txt .trae/tasks/T-2026-10-15-parity-measurement-instruments-adoption-003.md
+GATE SELFTEST ok: a known-broken byte string is rejected
+gate-ok artifacts/tmp/_g003post/follow_post_commit.py bytes=4799
+gate-ok artifacts/tmp/gen-003-post-commit.sh bytes=19875
+gate-ok artifacts/evidence/T-2026-10-15-003-green.txt bytes=30893
+gate-ok artifacts/evidence/T-2026-10-15-003-red.txt bytes=8094
+gate-ok .trae/tasks/T-2026-10-15-parity-measurement-instruments-adoption-003.md bytes=67790
+gate covered 5 file(s)
+EXITCODE=0
+  witness lines this block judged (echoed from the complete capture so a reviewer can read them):
+    capture line 1: GATE SELFTEST ok: a known-broken byte string is rejected
+    capture line 8: EXITCODE=0
+    capture line 7: gate covered 5 file(s)
+----- exit code: 0 (want 0) -----
+
+===== TOTAL (derived, ASCII-only tail) =====
+scratch longest absolute path = 68 chars (windows limit 260, margin 192)
+  -> ok
+block count floor (bare integer literal, asserted against this script's own source line):
+  blocks=9 expectation_entries=9 floor=6
+  -> ok
+unexpected count = 0
+expectation table (want/got per block):
+  block 01: want=0 got=0 label=the re-read instrument names no literal commit id, so the reading cannot go falsely red after a rewrite
+  block 02: want=0 got=0 label=post-commit git log --follow: both moved instruments carry the history the old path owned
+  block 03: want=0 got=0 label=selftest: positive pairs pass and the negative control (a new path that was never the old one) is rejected
+  block 04: want=0 got=0 label=the unmutated copy, run from the scratch directory, still passes - so any red in block 05 is the sed, not the location
+  block 05: want=1 got=1 label=mutation: relaxing 'the old history must be carried' to 'any history at all' must make the negative control fire
+  block 06: want=0 got=0 label=the instrument and the two shipped 003 instruments are byte-identical after the mutation blocks
+  block 07: want=0 got=0 label=read-back guard: every needle this run judged is readable in the finished evidence file
+  block 08: want=0 got=0 label=the pre-commit block 13/14 readings stay readable in the artefact that recorded them
+  block 09: want=0 got=0 label=encoding gate over the instrument, this generator, the prior 003 artefacts and the task file
+ascii tail: bytes=1500 non-ascii=0 (must be 0)
+OVERALL_EXITCODE=0
+DECODE ok file bytes=14904
