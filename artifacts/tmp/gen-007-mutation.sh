@@ -60,6 +60,7 @@ pre_rc=$?
   echo "#   （artifacts/tmp/_m007/prod/ 下同名同深度路径）；生产字节只在块 04 被读，从不被写。"
   echo "# 生产文件指纹（判定前读数；块 04 在全部变异之后复核是否仍相同）："
   sed 's/^/#   /' "$PRE"
+  echo "# 指纹名单的边界：本运行不写名单里的任何文件（判定与变异全部落在同深度副本上）；要复核当前字节就用 sha256sum 现场读该路径，并与台账里「清单文件哈希」「实测面哈希」两行对同一条命令回读。"
   if [ "$pre_rc" != "0" ]; then
     echo "# FINGERPRINT PRE-RUN rc=${pre_rc} - not every file was readable"
   fi

@@ -55,7 +55,7 @@ for p in sys.argv[1:]:
         print("%s  UNREADABLE %s" % (p, exc)); continue
     print("%s  bytes=%d  lines=%d  sha256=%s" % (p, len(b), b.count(bytes([10])), hashlib.sha256(b).hexdigest()))'
 PROD="$TMP/prod-before.txt"
-python -X utf8 -c "$FP" "$GEN" "$SELF" "$INVDATA" "$SPEC" > "$PROD" 2>&1
+python -X utf8 -c "$FP" "$GEN" "$SELF" "$SPEC" > "$PROD" 2>&1
 prod_rc=$?
 
 {
@@ -71,6 +71,7 @@ prod_rc=$?
   echo "#   「本窗口内没有被移动」由末块的起始—结束增量判定并配 clean->dirty 正控。"
   echo "# 被核文件指纹（判定前读数；块 01 在全部判定之后复核是否仍相同）："
   sed 's/^/#   /' "$PROD"
+  echo "# 指纹名单的边界：本运行会重写 屏幕清单 Docs/04-ux-design/parity/screen-inventory.json，所以它不在名单内，也没有任何一块承诺它的字节未变——它变正是本片在做的事（生成器写它，另一块判它等于重导出）。要复核当前字节就用 sha256sum 现场读该路径，并与台账里「清单文件哈希」「实测面哈希」两行对同一条命令回读。"
   if [ "$prod_rc" != "0" ]; then
     echo "# FINGERPRINT PRE-RUN rc=${prod_rc} - not every file was readable"
   fi

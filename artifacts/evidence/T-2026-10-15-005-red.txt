@@ -1,5 +1,5 @@
 # T-2026-10-15-005 RED - 屏幕清单生成器收编前的失败证据
-# Generated: 2026-10-16T03:53:57Z  (UTC)
+# Generated: 2026-10-16T04:15:57Z  (UTC)
 # Generator: artifacts/tmp/gen-005-red.sh   重跑：bash artifacts/tmp/gen-005-red.sh
 # 本文件覆盖的调用形态：
 #   python -X utf8 .trae/scripts/dev/screen_inventory_selftest.py                  （正反自检全套；用例数由产物自己打印，本脚本不钉数）
@@ -13,7 +13,8 @@
 #   .trae/scripts/dev/screen_inventory_selftest.py  bytes=31986  lines=648  sha256=e35bd9779a97ad7cd0c7abf44d6273192d520b24be317ab68aff83a15cbf5b1e
 #   .trae/scripts/dev/gen_parity_ledger.py  bytes=20273  lines=377  sha256=6524f3b66f7dc89be8e762d70c8cdf9498a897e7e7372ba2d7f64c650012151a
 #   .trae/scripts/dev/parity_ledger_selftest.py  bytes=26737  lines=552  sha256=0e08112862518d8a45b7c59e579952d28dca57ced34c723e88bf05543ef81b58
-#   Docs/04-ux-design/parity/screen-inventory.json  bytes=21986  lines=1013  sha256=b6c06ac5c0857ec769e8d33bcf561cfd2f951b98ef096ff0d13ab1d25b65aaa3
+#   Docs/04-ux-design/parity/screen-inventory.json  bytes=21986  lines=1013  sha256=b3b254cfed7179e554f5671e4a1fb05000d01cb103e300b0be57b506ace7c6cd
+# 指纹名单的边界：本运行不写名单里的任何文件：块 02 只在单进程的 try/finally 窗口里挪开仪器、按字节还原，还原由后续块独立复核；名单中的生成物在这里是只读对象，由同一次运行的窗口之后复核是否位移；但同一支产物的字节会被另一片生成器在它自己的运行里重写，所以本行不是「你今天读到同样字节」的承诺——要复核当前字节就用 sha256sum 现场读该路径，并与台账里「清单文件哈希」「实测面哈希」两行对同一条命令回读。
 
 ===== block 1 - keep-behaviour premise: the instruments' pre-window bytes are recorded and the android/ dirt that predates this run is printed rather than judged =====
 $ python -X utf8 artifacts/tmp/_red005/precheck.py
@@ -75,10 +76,10 @@ CONTROL ok
 ===== block 5 - the git state of this slice's artefacts is measured and printed without being judged, because the pre-commit reading is time-expired by construction while blocks 2/3 give the commit-independent reproduction path =====
 $ python -X utf8 artifacts/tmp/_red005/no_history.py
 captured CR normalised: 4 carriage return(s) removed from block 5 output - the artefact of record is LF-only
-info .trae/scripts/dev/gen_screen_inventory.py commits=2 tracked=True (printed not judged - see blocks 2/3 for the commit-independent reproduction)
-info .trae/scripts/dev/screen_inventory_selftest.py commits=2 tracked=True (printed not judged - see blocks 2/3 for the commit-independent reproduction)
-info Docs/04-ux-design/parity/screen-inventory.json commits=2 tracked=True (printed not judged - see blocks 2/3 for the commit-independent reproduction)
-info artifacts/parity/ledger.md commits=2 (007's artefact)
+info .trae/scripts/dev/gen_screen_inventory.py commits=3 tracked=True (printed not judged - see blocks 2/3 for the commit-independent reproduction)
+info .trae/scripts/dev/screen_inventory_selftest.py commits=3 tracked=True (printed not judged - see blocks 2/3 for the commit-independent reproduction)
+info Docs/04-ux-design/parity/screen-inventory.json commits=3 tracked=True (printed not judged - see blocks 2/3 for the commit-independent reproduction)
+info artifacts/parity/ledger.md commits=3 (007's artefact)
 NOHISTORY printed (no judgement here)
 ----- exit code: 0 (want 0) -----
 
@@ -101,8 +102,8 @@ ok   .trae/scripts/dev/screen_inventory_selftest.py             bytes=31986
 ok   .trae/scripts/dev/gen_parity_ledger.py                     bytes=20273
 ok   .trae/scripts/dev/parity_ledger_selftest.py                bytes=26737
 ok   Docs/04-ux-design/parity/screen-inventory.json             bytes=21986
-ok   artifacts/tmp/gen-005-red.sh                               bytes=39982
-ok   .trae/tasks/T-2026-10-15-screen-inventory-parity-ledger-005.md bytes=58612
+ok   artifacts/tmp/gen-005-red.sh                               bytes=40577
+ok   .trae/tasks/T-2026-10-15-screen-inventory-parity-ledger-005.md bytes=59932
 gate covered 7 file(s)
 EXITCODE=0
 ----- exit code: 0 (want 0) -----

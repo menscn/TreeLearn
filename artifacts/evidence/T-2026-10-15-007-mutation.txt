@@ -1,11 +1,12 @@
 # T-2026-10-15-007 MUTATION - 台账生成器每条守卫的退化实测
-# Generated: 2026-10-16T03:56:00Z  (UTC)
+# Generated: 2026-10-16T04:17:19Z  (UTC)
 # Generator: artifacts/tmp/gen-007-mutation.sh   重跑：bash artifacts/tmp/gen-007-mutation.sh
 # 变异对象：.trae/scripts/dev/gen_parity_ledger.py 与 parity_ledger_selftest.py 的**副本**
 #   （artifacts/tmp/_m007/prod/ 下同名同深度路径）；生产字节只在块 04 被读，从不被写。
 # 生产文件指纹（判定前读数；块 04 在全部变异之后复核是否仍相同）：
 #   .trae/scripts/dev/gen_parity_ledger.py  bytes=20273  lines=377  sha256=6524f3b66f7dc89be8e762d70c8cdf9498a897e7e7372ba2d7f64c650012151a
 #   .trae/scripts/dev/parity_ledger_selftest.py  bytes=26737  lines=552  sha256=0e08112862518d8a45b7c59e579952d28dca57ced34c723e88bf05543ef81b58
+# 指纹名单的边界：本运行不写名单里的任何文件（判定与变异全部落在同深度副本上）；要复核当前字节就用 sha256sum 现场读该路径，并与台账里「清单文件哈希」「实测面哈希」两行对同一条命令回读。
 
 ===== block 1 - copy tree: same-depth copy under artifacts/tmp, every copied byte equal to production =====
 $ python -X utf8 artifacts/tmp/_m007g/mkcopy.py
@@ -96,10 +97,10 @@ captured CR normalised: 8 carriage return(s) removed from block 8 output - the a
 GATE SELFTEST ok: a known-broken byte string is rejected
 gate-ok .trae/scripts/dev/gen_parity_ledger.py bytes=20273
 gate-ok .trae/scripts/dev/parity_ledger_selftest.py bytes=26737
-gate-ok artifacts/tmp/gen-007-mutation.sh bytes=39297
-gate-ok artifacts/evidence/T-2026-10-15-007-red.txt bytes=9476
-gate-ok artifacts/evidence/T-2026-10-15-007-green.txt bytes=9294
-gate-ok .trae/tasks/T-2026-10-15-parity-ledger-generator-007.md bytes=45594
+gate-ok artifacts/tmp/gen-007-mutation.sh bytes=39578
+gate-ok artifacts/evidence/T-2026-10-15-007-red.txt bytes=10062
+gate-ok artifacts/evidence/T-2026-10-15-007-green.txt bytes=9946
+gate-ok .trae/tasks/T-2026-10-15-parity-ledger-generator-007.md bytes=47779
 gate covered 6 file(s)
 EXITCODE=0
 ----- exit code: 0 (want 0) -----

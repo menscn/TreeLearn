@@ -1,5 +1,5 @@
 # T-2026-10-15-007 RED - 1:1 台账生成器收编前的失败证据
-# Generated: 2026-10-16T03:55:27Z  (UTC)
+# Generated: 2026-10-16T04:16:58Z  (UTC)
 # Generator: artifacts/tmp/gen-007-red.sh   重跑：bash artifacts/tmp/gen-007-red.sh
 # 本文件覆盖的调用形态：
 #   python -X utf8 .trae/scripts/dev/parity_ledger_selftest.py                       （正反自检全套；用例数由产物自己打印，本脚本不钉数）
@@ -11,7 +11,8 @@
 #   .trae/scripts/dev/gen_parity_ledger.py  bytes=20273  lines=377  sha256=6524f3b66f7dc89be8e762d70c8cdf9498a897e7e7372ba2d7f64c650012151a
 #   .trae/scripts/dev/parity_ledger_selftest.py  bytes=26737  lines=552  sha256=0e08112862518d8a45b7c59e579952d28dca57ced34c723e88bf05543ef81b58
 #   .trae/scripts/dev/gen_screen_inventory.py  bytes=20787  lines=417  sha256=270db775d3a1d4f650170bd59ca389edb74759993d70d656d5353b15525bc2fc
-#   artifacts/parity/ledger.md  bytes=8089  lines=60  sha256=8f0447cefe84206bba9a5ec980f5857532ee68ee10000abc0180d34635f872c7
+#   artifacts/parity/ledger.md  bytes=8089  lines=60  sha256=e9f8dc649b8b99502b1960ad95f83436044b6e04a43650e1eba0f8ce42fc308a
+# 指纹名单的边界：本运行不写名单里的任何文件：块 02 只在单进程的 try/finally 窗口里挪开仪器、按字节还原，还原由后续块独立复核；名单中的生成物在这里是只读对象，由同一次运行的窗口之后复核是否位移；但同一支产物的字节会被另一片生成器在它自己的运行里重写，所以本行不是「你今天读到同样字节」的承诺——要复核当前字节就用 sha256sum 现场读该路径，并与台账里「清单文件哈希」「实测面哈希」两行对同一条命令回读。
 
 ===== block 1 - keep-behaviour premise: the instruments' pre-window bytes are recorded and the android/ dirt that predates this run is printed rather than judged =====
 $ python -X utf8 artifacts/tmp/_red007/precheck.py
@@ -60,9 +61,9 @@ CONTROL ok
 ===== block 5 - the git state of this slice's artefacts is measured and printed without being judged, because the pre-commit reading is time-expired by construction while blocks 2/3 give the commit-independent reproduction path =====
 $ python -X utf8 artifacts/tmp/_red007/no_history.py
 captured CR normalised: 3 carriage return(s) removed from block 5 output - the artefact of record is LF-only
-info .trae/scripts/dev/gen_parity_ledger.py commits=2 tracked=True (printed not judged - blocks 2/3 give the commit-independent reproduction)
-info .trae/scripts/dev/parity_ledger_selftest.py commits=2 tracked=True (printed not judged - blocks 2/3 give the commit-independent reproduction)
-info artifacts/parity/ledger.md commits=2 tracked=True (printed not judged - blocks 2/3 give the commit-independent reproduction)
+info .trae/scripts/dev/gen_parity_ledger.py commits=3 tracked=True (printed not judged - blocks 2/3 give the commit-independent reproduction)
+info .trae/scripts/dev/parity_ledger_selftest.py commits=3 tracked=True (printed not judged - blocks 2/3 give the commit-independent reproduction)
+info artifacts/parity/ledger.md commits=3 tracked=True (printed not judged - blocks 2/3 give the commit-independent reproduction)
 NOHISTORY printed (no judgement here)
 ----- exit code: 0 (want 0) -----
 
@@ -84,8 +85,8 @@ ok   .trae/scripts/dev/gen_parity_ledger.py                     bytes=20273
 ok   .trae/scripts/dev/parity_ledger_selftest.py                bytes=26737
 ok   .trae/scripts/dev/gen_screen_inventory.py                  bytes=20787
 ok   artifacts/parity/ledger.md                                 bytes=8089
-ok   artifacts/tmp/gen-007-red.sh                               bytes=26372
-ok   .trae/tasks/T-2026-10-15-parity-ledger-generator-007.md    bytes=45594
+ok   artifacts/tmp/gen-007-red.sh                               bytes=26967
+ok   .trae/tasks/T-2026-10-15-parity-ledger-generator-007.md    bytes=47779
 gate covered 6 file(s)
 EXITCODE=0
 ----- exit code: 0 (want 0) -----

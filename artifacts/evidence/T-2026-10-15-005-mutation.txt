@@ -1,5 +1,5 @@
 # T-2026-10-15-005 MUTATION - 屏幕清单生成器每条守卫的退化实测
-# Generated: 2026-10-16T03:54:43Z  (UTC)
+# Generated: 2026-10-16T04:16:23Z  (UTC)
 # Generator: artifacts/tmp/gen-005-mutation.sh   重跑：bash artifacts/tmp/gen-005-mutation.sh
 # 变异对象：gen_screen_inventory.py 与 screen_inventory_selftest.py 的**副本**
 #   （artifacts/tmp/_m005/prod/ 下同名同深度路径）；生产字节只在块 05 被读，从不被写。
@@ -15,6 +15,7 @@
 # 生产文件指纹（判定前读数；块 05 在全部变异之后复核是否仍相同）：
 #   .trae/scripts/dev/gen_screen_inventory.py  bytes=20787  lines=417  sha256=270db775d3a1d4f650170bd59ca389edb74759993d70d656d5353b15525bc2fc
 #   .trae/scripts/dev/screen_inventory_selftest.py  bytes=31986  lines=648  sha256=e35bd9779a97ad7cd0c7abf44d6273192d520b24be317ab68aff83a15cbf5b1e
+# 指纹名单的边界：本运行不写名单里的任何文件（判定与变异全部落在同深度副本上）；要复核当前字节就用 sha256sum 现场读该路径，并与台账里「清单文件哈希」「实测面哈希」两行对同一条命令回读。
 
 ===== block 1 - copy tree: same-depth copy under artifacts/tmp, every copied byte equal to production =====
 $ python -X utf8 artifacts/tmp/_m005g/mkcopy.py
@@ -120,10 +121,10 @@ captured CR normalised: 8 carriage return(s) removed from block 8 output - the a
 GATE SELFTEST ok: a known-broken byte string is rejected
 gate-ok .trae/scripts/dev/gen_screen_inventory.py bytes=20787
 gate-ok .trae/scripts/dev/screen_inventory_selftest.py bytes=31986
-gate-ok artifacts/tmp/gen-005-mutation.sh bytes=40707
-gate-ok artifacts/evidence/T-2026-10-15-005-red.txt bytes=11501
-gate-ok artifacts/evidence/T-2026-10-15-005-green.txt bytes=11084
-gate-ok .trae/tasks/T-2026-10-15-screen-inventory-parity-ledger-005.md bytes=58612
+gate-ok artifacts/tmp/gen-005-mutation.sh bytes=40988
+gate-ok artifacts/evidence/T-2026-10-15-005-red.txt bytes=12087
+gate-ok artifacts/evidence/T-2026-10-15-005-green.txt bytes=11360
+gate-ok .trae/tasks/T-2026-10-15-screen-inventory-parity-ledger-005.md bytes=59932
 gate covered 6 file(s)
 EXITCODE=0
 ----- exit code: 0 (want 0) -----

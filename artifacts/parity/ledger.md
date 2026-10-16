@@ -2,8 +2,8 @@
 
 - 生成命令：`python -X utf8 .trae/scripts/dev/gen_parity_ledger.py`
 - 本次实际参数：(无，全部走默认路径)
-- 清单登记来源提交：754e86331a44fd44bb9c1540b4d0e8f0b34002b0；本行现场读到的 HEAD：754e86331a44fd44bb9c1540b4d0e8f0b34002b0
-- 清单文件哈希（本次读到的字节）：`b6c06ac5c0857ec769e8d33bcf561cfd2f951b98ef096ff0d13ab1d25b65aaa3`
+- 清单登记来源提交：9e9f87b351121e707f323b8ffade49b27ed7250b；本行现场读到的 HEAD：9e9f87b351121e707f323b8ffade49b27ed7250b
+- 清单文件哈希（本次读到的字节）：`b3b254cfed7179e554f5671e4a1fb05000d01cb103e300b0be57b506ace7c6cd`
 - 实测面哈希：已落盘 `1ad50c642f4b1fbeef44df8eaf2589489dff5c37b4b4ae986e243a72c9542374` ／ 当前树重导出 `1ad50c642f4b1fbeef44df8eaf2589489dff5c37b4b4ae986e243a72c9542374`
 - 清单新鲜度：一致（当前树重导出的实测面与已落盘清单同哈希）
 - 规格指针（规格里不写范围数字，只指向清单）：登记的 True ／ 现场重读的 True → 一致
