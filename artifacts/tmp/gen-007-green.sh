@@ -63,7 +63,8 @@ prod_rc=$?
   echo "#   python -X utf8 $GEN                  （写已落盘台账）"
   echo "#   python -X utf8 $GEN --out <副本>      （块 05 的两次重导出，与已落盘逐字节比对）"
   echo "#   python -X utf8 $SELF                  （正反自检全套；用例数由产物打印）"
-  echo "# 判定面全部跑在真实仓库上；本片只新增工具与产物，块 01 实测 android/ 零改动。"
+  echo "# 判定面全部跑在真实仓库上；本片只新增工具与产物。android/ 只读：运行开始时已脏的路径"
+  echo "# 只打印、不判定（共享工作树里那是别片的未提交工作），「本窗口内零位移」由末块增量判定。"
   echo "# 被核文件指纹（判定前读数；块 01 在全部判定之后复核是否仍相同）："
   sed 's/^/#   /' "$PROD"
   if [ "$prod_rc" != "0" ]; then
@@ -97,6 +98,12 @@ run() {
   local out rc
   out=$("$@" 2>&1)
   rc=$?
+  local cr_in
+  cr_in=$(printf '%s' "$out" | tr -cd '\r' | wc -c)
+  if [ "$cr_in" != "0" ]; then
+    out=$(printf '%s' "$out" | tr -d '\r')
+    echo "captured CR normalised: ${cr_in} carriage return(s) removed from block ${n} output - the artefact of record is LF-only" >> "$EV"
+  fi
   local full="$TMP/block-$n.out"
   printf '%s\n' "$out" > "$full"
   printf '%s\n' "$out" | tail -n 20 >> "$EV"
@@ -124,10 +131,12 @@ run() {
 
 # ---- block 01: production run, then fingerprints unchanged ---------------------------------
 cat > "$TMP/keep_behaviour.py" <<'PY'
-"""生产运行一次台账生成，随后复核：android/ 零改动，且判定面文件字节未变。
+"""生产运行一次台账生成，随后复核：判定面文件字节未变；android/ 面按「运行窗口内是否位移」判定
+（块 01 记下起始脏集，末块比对），不要求整棵树对本片干净——共享工作树里别的片可以带着未提交的
+android 改动，把那种脏算成本片缺陷是假指控，而放弃这条判据又等于没有守卫。
 指纹在这里比对而不是只由脚本自称——台账产物本来就是被写出的那个文件，它应当变（由块 05 单独
 判它与重导出是否相同），所以只列入指纹的工具与清单不在写出之列。"""
-import hashlib, os, re, subprocess, sys
+import hashlib, json, os, re, subprocess, sys
 WATCH = [".trae/scripts/dev/gen_parity_ledger.py", ".trae/scripts/dev/parity_ledger_selftest.py",
          ".trae/scripts/dev/gen_screen_inventory.py", "Docs/04-ux-design/parity/screen-inventory.json",
          ".trae/scripts/dev/parity/screens.json"]
@@ -138,12 +147,17 @@ for line in open(pre_path, encoding="utf-8"):
     if m:
         pre[m.group(1)] = m.group(4)
 bad = 0
-r = subprocess.run(["git", "-c", "core.quotepath=false", "diff", "--name-only", "--", "android"],
-                   capture_output=True, text=True, encoding="utf-8", errors="replace")
-touched = [l for l in (r.stdout or "").splitlines() if l.strip()]
-print("android files changed by the working tree = %d" % len(touched))
-if touched:
-    print("FAIL 007 is a tooling slice and must not touch android/ - %s" % touched); bad = 1
+start = {}
+for q in [l for l in (subprocess.run(["git", "-c", "core.quotepath=false", "diff", "--name-only",
+                                      "--", "android"], capture_output=True, text=True,
+                                     encoding="utf-8", errors="replace").stdout
+                      or "").splitlines() if l.strip()]:
+    start[q] = hashlib.sha256(open(q, "rb").read()).hexdigest() if os.path.isfile(q) else "ABSENT"
+open(os.path.join("artifacts", "tmp", "_g007", "android-start.json"), "w",
+     encoding="utf-8").write(json.dumps(start, sort_keys=True))
+print("android/ paths dirty at run start = %d (not judged: another slice may hold uncommitted"
+      " android work in this shared worktree; the judgement is the start-to-end delta in the"
+      " last block, so this run is measured against the tree it inherited)" % len(start))
 run = subprocess.run([sys.executable, "-X", "utf8", ".trae/scripts/dev/gen_parity_ledger.py"],
                      capture_output=True, text=True, encoding="utf-8", errors="replace")
 out = (run.stdout or "") + (run.stderr or "")
@@ -163,7 +177,7 @@ for p in WATCH:
 print("KEEP ok" if not bad else "KEEP FAULT")
 sys.exit(1 if bad else 0)
 PY
-WANT_TEXT="android files changed by the working tree = 0|production run rc=0|unchanged .trae/scripts/dev/gen_parity_ledger.py -> True|unchanged Docs/04-ux-design/parity/screen-inventory.json -> True|KEEP ok"
+WANT_TEXT="android/ paths dirty at run start =|production run rc=0|unchanged .trae/scripts/dev/gen_parity_ledger.py -> True|unchanged Docs/04-ux-design/parity/screen-inventory.json -> True|KEEP ok"
 run 1 0 "keep-behaviour: the generator runs on the filed inventory and no judged file's bytes move" \
   python -X utf8 "$TMP/keep_behaviour.py"
 
@@ -370,7 +384,7 @@ cat > "$TMP/siblings.py" <<'PY'
 """姊妹门保持绿 + 本片的门禁可见性。仓库 validate_tasks 的总数只打印不比对（004 块 27 的同一轮
 教训：别片申报规模带会把总数顶上去，钉住它就是把别人的 paperwork 当自己的结论）。
 checkers_selftest 实测仍是 rc=3，那是 002 治理面的已知债务，本片不把它算进任何「全绿」结论。"""
-import re, subprocess, sys
+import hashlib, json, os, re, subprocess, sys
 GATES = [("005 inventory selftest", ".trae/scripts/dev/screen_inventory_selftest.py"),
          ("003 parity selftest", ".trae/scripts/dev/parity/parity_selftest.py"),
          ("004 design-token guard", ".trae/scripts/dev/check_design_tokens.py")]
@@ -409,14 +423,31 @@ if not m:
     print("FAIL no parsable SUMMARY line - 'cannot read it' is not 'it is fine'"); bad = 1
 a = subprocess.run(["git", "-c", "core.quotepath=false", "diff", "--name-only", "--", "android"],
                    capture_output=True, text=True, encoding="utf-8", errors="replace")
-n = len([l for l in (a.stdout or "").splitlines() if l.strip()])
-print("android diff lines=%d" % n)
-if n:
-    print("FAIL 007 must leave android/ untouched"); bad = 1
+now = {}
+for q in [l for l in (a.stdout or "").splitlines() if l.strip()]:
+    now[q] = hashlib.sha256(open(q, "rb").read()).hexdigest() if os.path.isfile(q) else "ABSENT"
+start = json.load(open(os.path.join("artifacts", "tmp", "_g007", "android-start.json"),
+                       encoding="utf-8"))
+movers = sorted(k for k in set(start) | set(now) if start.get(k) != now.get(k))
+print("android/ dirty at start=%d at end=%d moved during this run=%d movers=%s"
+      % (len(start), len(now), len(movers), movers))
+if movers:
+    print("FAIL android/ moved inside this run's window - while the production surface is being"
+          " written under the run the keep-behaviour claim cannot be certified; re-run this"
+          " generator once the neighbouring writer stops instead of dropping the judgement")
+    bad = 1
+# 正控：「一条本来干净的路径在窗口内变脏」必须被点出，否则这条增量守卫是空见证
+_c_start, _c_end = {}, {"android/app/src/main/java/com/treelearn/app/Fake.java": "deadbeef"}
+_c_moved = sorted(k for k in set(_c_start) | set(_c_end)
+                  if _c_start.get(k) != _c_end.get(k))
+print("positive control clean->dirty named=%s" % (_c_moved == list(_c_end)))
+if _c_moved != list(_c_end):
+    print("FAIL the delta does not see a clean path becoming dirty - the guard has no teeth")
+    bad = 1
 print("SIBLINGS ok" if not bad else "SIBLINGS FAULT")
 sys.exit(1 if bad else 0)
 PY
-WANT_TEXT="sibling-gate 005 inventory selftest rc=0|sibling-gate 003 parity selftest rc=0|sibling-gate 004 design-token guard rc=0|sibling-gate checkers_selftest rc=|known debt, reported not asserted|this task: PASS count=1 WARNING count=1 (size band=1) ERROR count=0|android diff lines=0|SIBLINGS ok"
+WANT_TEXT="sibling-gate 005 inventory selftest rc=0|sibling-gate 003 parity selftest rc=0|sibling-gate 004 design-token guard rc=0|sibling-gate checkers_selftest rc=|known debt, reported not asserted|this task: PASS count=1 WARNING count=1 (size band=1) ERROR count=0|moved during this run=0 movers=[]|positive control clean->dirty named=True|SIBLINGS ok"
 run 6 0 "sibling gates stay green, the known rc=3 debt is reported rather than folded into a green claim, and 007's own size band is visible" \
   python -X utf8 "$TMP/siblings.py"
 
@@ -515,7 +546,11 @@ try:
     raw.decode('utf-8')
 except UnicodeDecodeError as exc:
     print('DECODE FAIL', exc); sys.exit(1)
-print('DECODE ok file bytes=%d' % len(raw))
+cr = raw.count(bytes([13]))
+if cr:
+    print('DECODE FAIL line-ending: %d carriage return(s) present in an artefact pinned to LF' % cr)
+    sys.exit(1)
+print('DECODE ok utf8=True cr=0 (size: wc -c this file)')
 " "$EV" 2>&1)
 decode_rc=$?
 echo "$decode" | tee -a "$EV" >> "$CONSOLE"

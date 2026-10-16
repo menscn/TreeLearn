@@ -9,7 +9,7 @@ status: accepted
 
 > **时效说明（2026-10-16 追加，阅读前必读）**
 > 本文件是 2026-10-15 的采集记录，正文**保持原样不改写**——用后来的实测值覆盖当时写下的估计，读者会把治理时序读错。
-> 但其中「16 屏 + 6 浮层」是盘点仪器建立**之前**的人写估计；仪器建立后实测为 `14 屏 / 16 个浮层 / 其中 5 屏自绘`，用户 2026-10-16 裁定**以实测清单为准**。因此本文件中每一处复述该组数字的地方（现场回读：`grep -nE "16 ?屏|16 ?个屏幕|6 ?浮层|4 ?个.*自绘" Docs/intent/INTENT-2026-10-15-web-h5-android-parity.md`）都按此口径读取，不要当成当前范围。
+> 但其中「16 屏 + 6 浮层」是盘点仪器建立**之前**的人写估计；仪器建立后的实测读数取代了它——读数不抄进本文件（抄进来就会过期），现场回算用 `python -X utf8 .trae/scripts/dev/gen_screen_inventory.py --no-write | grep "^MEASURED"`，用户 2026-10-16 裁定**以实测清单为准**。因此本文件中每一处复述该组数字的地方（现场回读：`grep -nE "16 ?屏|16 ?个屏幕|6 ?浮层|4 ?个.*自绘" Docs/intent/INTENT-2026-10-15-web-h5-android-parity.md`）都按此口径读取，不要当成当前范围。
 > 当前范围权威是 `Docs/04-ux-design/parity/screen-inventory.json` 的 `counts`（由 `python .trae/scripts/dev/gen_screen_inventory.py` 生成，Android 代码一改即重算）；两处差额各自的成因与逐处回写见 `Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md` 末节「修订记录（追加，不回改上文原判定）」，屏一侧的差额**尚未逐条对应**，该文件与 `T-2026-10-15-screen-inventory-parity-ledger-005.md` 的 Gaps 都如实记为未决，不写成已解释。
 
 ## Problem（问题与背景）

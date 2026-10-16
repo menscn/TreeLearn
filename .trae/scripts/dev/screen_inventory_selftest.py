@@ -546,10 +546,17 @@ def _c_bad_spec(root):
     rc_missing, out_missing, _ = inv(["--java", java, "--res", res,
                                       "--spec", os.path.join(root, "no-such-spec.md"),
                                       "--no-write"])
+    # A spec whose only scope-shaped token uses the bare unit: "14 屏" is what a person writes
+    # when they restate a measured count, and the old word list (屏幕/浮层/自绘屏) did not see it.
+    java_b, res_b, spec_b = build(root, spec="范围：现值 14 屏，其中 5 屏自绘。")
+    rc_bare, bare_out, _ = inv(["--java", java_b, "--res", res_b, "--spec", spec_b, "--no-write"])
+    assert rc_bare == 1, "the bare-unit fixture must stay a judgement, got rc=%d" % rc_bare
     return rc, [("pointer absence is a judgement (tier 1), not a fault", rc == 1),
                 ("the pointer line reports it", "SPEC_POINTER cites=False " in out),
                 ("restatements are printed with their line numbers",
                  "SPEC_RESTATED count-shaped=1 lines=1 " in out),
+                ("a bare-屏 restatement is named too (the vocabulary hole that hid 14 屏)",
+                 bare_out is not None and "SPEC_RESTATED count-shaped=1 lines=1 " in bare_out),
                 ("an unreadable spec is still a fault (tier 3)", rc_missing == 3),
                 ("the fault names the missing input",
                  "missing input: " in out_missing and "no-such-spec.md" in out_missing)]

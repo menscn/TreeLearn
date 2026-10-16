@@ -1,14 +1,15 @@
 # T-2026-10-15-007 MUTATION - 台账生成器每条守卫的退化实测
-# Generated: 2026-10-16T01:26:09Z  (UTC)
+# Generated: 2026-10-16T03:56:00Z  (UTC)
 # Generator: artifacts/tmp/gen-007-mutation.sh   重跑：bash artifacts/tmp/gen-007-mutation.sh
 # 变异对象：.trae/scripts/dev/gen_parity_ledger.py 与 parity_ledger_selftest.py 的**副本**
 #   （artifacts/tmp/_m007/prod/ 下同名同深度路径）；生产字节只在块 04 被读，从不被写。
 # 生产文件指纹（判定前读数；块 04 在全部变异之后复核是否仍相同）：
-#   .trae/scripts/dev/gen_parity_ledger.py  bytes=17796  lines=338  sha256=2b6bec669fb80642c5a1c67147ab8f895ef1d19f5aa194992d4fd0bae6287e2e
-#   .trae/scripts/dev/parity_ledger_selftest.py  bytes=23070  lines=494  sha256=8913218f6f2ac8ad7927532e84cd5cb094aad9d50332d5ef04b60344c959f341
+#   .trae/scripts/dev/gen_parity_ledger.py  bytes=20273  lines=377  sha256=6524f3b66f7dc89be8e762d70c8cdf9498a897e7e7372ba2d7f64c650012151a
+#   .trae/scripts/dev/parity_ledger_selftest.py  bytes=26737  lines=552  sha256=0e08112862518d8a45b7c59e579952d28dca57ced34c723e88bf05543ef81b58
 
 ===== block 1 - copy tree: same-depth copy under artifacts/tmp, every copied byte equal to production =====
 $ python -X utf8 artifacts/tmp/_m007g/mkcopy.py
+captured CR normalised: 4 carriage return(s) removed from block 1 output - the artefact of record is LF-only
 copy files=332 under artifacts/tmp/_m007/prod
 byte-identical single files=10 mismatches=0
 same-depth .trae/scripts/dev/gen_parity_ledger.py prod=4 copy=4
@@ -18,7 +19,8 @@ COPY ok
 
 ===== block 2 - measured baseline: the pristine copy suite is green and its failing-case set is recorded for block 03 =====
 $ python -X utf8 artifacts/tmp/_m007g/pristine.py
-BASELINE rc=0 executed=17 expected=17 failures=0 instrument-fault-lines=0
+captured CR normalised: 3 carriage return(s) removed from block 2 output - the artefact of record is LF-only
+BASELINE rc=0 executed=19 expected=19 failures=0 instrument-fault-lines=0
 BASELINE failing-cases=[]
 BASELINE written=artifacts/tmp/_m007g/baseline.json
 BASELINE ok
@@ -26,8 +28,9 @@ BASELINE ok
 
 ===== block 3 - battery: each guard degraded turns exactly its own case red, and the no-op control turns nothing red =====
 $ python -X utf8 artifacts/tmp/_m007g/battery.py
+captured CR normalised: 13 carriage return(s) removed from block 3 output - the artefact of record is LF-only
 baseline read from the measured file: rc=0 failures=0 failing=[]
-mutations declared=8 floor=8 floor-met=True
+mutations declared=10 floor=10 floor-met=True
 M1-staleness-guard-off rc=1 want-rc=1 baseline=0 caught=True new-red=['neg-stale-inventory'] expected-new=['neg-stale-inventory']
 M2-pointer-comparison-off rc=1 want-rc=1 baseline=0 caught=True new-red=['neg-pointer-drift'] expected-new=['neg-pointer-drift']
 M3-row-floor-zero rc=1 want-rc=1 baseline=0 caught=True new-red=['neg-row-floor'] expected-new=['neg-row-floor']
@@ -36,12 +39,25 @@ M5-instrument-always-adopted rc=1 want-rc=1 baseline=0 caught=True new-red=['pos
 M6-adjacency-scan-returns rc=1 want-rc=1 baseline=0 caught=True new-red=['pos-fail-line-scan-catches-a-leading-fail'] expected-new=['pos-fail-line-scan-catches-a-leading-fail']
 M7-noop-comment rc=0 want-rc=0 baseline=0 caught=False new-red=[] expected-new=[]
 M8-sibling-load-outside-guard rc=1 want-rc=1 baseline=0 caught=True new-red=['neg-inventory-instrument-absent'] expected-new=['neg-inventory-instrument-absent']
-after-restore copy rc=0 failing=[] counts=('17', '17', '0')
+M9-crlf-guard-removed rc=1 want-rc=1 baseline=0 caught=True new-red=['neg-inventory-crlf-checkout'] expected-new=['neg-inventory-crlf-checkout']
+M10-selfhash-excludes-tail rc=1 want-rc=1 baseline=0 caught=True new-red=['pos-written-artifact-selfdescribes'] expected-new=['pos-written-artifact-selfdescribes']
+after-restore copy rc=0 failing=[] counts=('19', '19', '0')
 BATTERY ok
 ----- exit code: 0 (want 0) -----
 
-===== block 4 - independent re-read: production bytes equal the pre-run fingerprints and the copy no longer differs from them =====
+===== block 4 - the shape guard measured on its own channel: removal aborts the harness naming that case, and the copy returns to green =====
+$ python -X utf8 artifacts/tmp/_m007g/shapechannel.py
+captured CR normalised: 4 carriage return(s) removed from block 4 output - the artefact of record is LF-only
+guard anchor hits=1 expected 1
+shape-guard-off rc=3 fault-lines=1 names-the-case=True case-verdict-line-printed=False
+shape-guard-off fault reading=INSTRUMENT FAULT in case neg-inventory-shape-drift: KeyError: 'spec_link'
+after-restore copy rc=0 counting-line=True
+SHAPE-CHANNEL ok
+----- exit code: 0 (want 0) -----
+
+===== block 5 - independent re-read: production bytes equal the pre-run fingerprints and the copy no longer differs from them =====
 $ python -X utf8 artifacts/tmp/_m007g/recheck.py
+captured CR normalised: 6 carriage return(s) removed from block 5 output - the artefact of record is LF-only
 production unchanged .trae/scripts/dev/gen_parity_ledger.py -> True
 copy equals production .trae/scripts/dev/gen_parity_ledger.py -> True
 parses .trae/scripts/dev/gen_parity_ledger.py -> True
@@ -51,51 +67,57 @@ parses .trae/scripts/dev/parity_ledger_selftest.py -> True
 RECHECK ok
 ----- exit code: 0 (want 0) -----
 
-===== block 5 - change surface read from git and compared with the run-start snapshot: nothing on a production surface moved during this run =====
+===== block 6 - change surface read from git and compared with the run-start snapshot: nothing on a production surface moved during this run =====
 $ python -X utf8 artifacts/tmp/_m007g/scope.py
+captured CR normalised: 4 carriage return(s) removed from block 6 output - the artefact of record is LF-only
 command diff ok rc=0
 command ls-files ok rc=0
-production-surface paths snapshot=0 now=0 identical=True
-surface list=[]
+production-surface paths snapshot=13 now=13 identical=True
+surface list=['android/README.md', 'android/app/src/androidTest/java/com/treelearn/app/GenerationCoordinatorInstrumentedTest.java', 'android/app/src/main/java/com/treelearn/app/MainActivity.java', 'android/app/src/main/java/com/treelearn/app/generation/GenerationCoordinator.java', 'android/app/src/main/java/com/treelearn/app/generation/LiveAttempt.java', 'android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java', 'android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java', 'android/app/src/main/java/com/treelearn/app/ui/ChatSink.java', 'android/app/src/main/java/com/treelearn/app/wiring/CoordinatorGenerationPort.java', 'android/app/src/main/java/com/treelearn/app/wiring/GenerationPort.java', 'android/app/src/main/java/com/treelearn/app/wiring/HomeWiring.java', 'android/app/src/test/java/com/treelearn/app/wiring/WiringDoubles.java', 'android/data/src/main/java/com/treelearn/data/db/dao/FirstTopicCreation.java']
 SCOPE ok
 ----- exit code: 0 (want 0) -----
 
-===== block 6 - cross-file consistency: RED, GREEN and this file report the same case count and the same clean expectation tables =====
+===== block 7 - cross-file consistency: RED, GREEN and this file report the same case count and the same clean expectation tables, and every instrument-fault line sits in the designed shape channel =====
 $ python -X utf8 artifacts/tmp/_m007g/consistency.py
-T-2026-10-15-007-red.txt last-line=DECODE ok file bytes=7272
-T-2026-10-15-007-green.txt last-line=DECODE ok file bytes=8095
+captured CR normalised: 7 carriage return(s) removed from block 7 output - the artefact of record is LF-only
+T-2026-10-15-007-red.txt last-line=DECODE ok utf8=True cr=0 (size: wc -c this file)
+T-2026-10-15-007-green.txt last-line=DECODE ok utf8=True cr=0 (size: wc -c this file)
 T-2026-10-15-007-mutation.txt last-line=$ python -X utf8 artifacts/tmp/_m007g/consistency.py
 this file already carries the battery block (its own TOTAL is written after this check)
-case count green=17 copy-baseline=17 equal=True
+designed-channel(block4) fault lines=1 outside=0 per-section={'4': 1}
+positive control battery-fault named=True channel-count=1
+case count green=19 copy-baseline=19 equal=True
 CONSISTENCY ok
 ----- exit code: 0 (want 0) -----
 
-===== block 7 - encoding gate over the two judged instruments, this generator and the three 007 evidence files =====
+===== block 8 - encoding gate over the two judged instruments, this generator and the three 007 evidence files =====
 $ python -X utf8 artifacts/tmp/_m007g/utf8_gate.py .trae/scripts/dev/gen_parity_ledger.py .trae/scripts/dev/parity_ledger_selftest.py artifacts/tmp/gen-007-mutation.sh artifacts/evidence/T-2026-10-15-007-red.txt artifacts/evidence/T-2026-10-15-007-green.txt .trae/tasks/T-2026-10-15-parity-ledger-generator-007.md
+captured CR normalised: 8 carriage return(s) removed from block 8 output - the artefact of record is LF-only
 GATE SELFTEST ok: a known-broken byte string is rejected
-gate-ok .trae/scripts/dev/gen_parity_ledger.py bytes=17796
-gate-ok .trae/scripts/dev/parity_ledger_selftest.py bytes=23070
-gate-ok artifacts/tmp/gen-007-mutation.sh bytes=31362
-gate-ok artifacts/evidence/T-2026-10-15-007-red.txt bytes=7298
-gate-ok artifacts/evidence/T-2026-10-15-007-green.txt bytes=8121
-gate-ok .trae/tasks/T-2026-10-15-parity-ledger-generator-007.md bytes=36161
+gate-ok .trae/scripts/dev/gen_parity_ledger.py bytes=20273
+gate-ok .trae/scripts/dev/parity_ledger_selftest.py bytes=26737
+gate-ok artifacts/tmp/gen-007-mutation.sh bytes=39297
+gate-ok artifacts/evidence/T-2026-10-15-007-red.txt bytes=9476
+gate-ok artifacts/evidence/T-2026-10-15-007-green.txt bytes=9294
+gate-ok .trae/tasks/T-2026-10-15-parity-ledger-generator-007.md bytes=45594
 gate covered 6 file(s)
 EXITCODE=0
 ----- exit code: 0 (want 0) -----
 
 ===== TOTAL (derived, ASCII-only tail) =====
 block count floor (bare integer literal, asserted against this script's own source line):
-  blocks=7 expectation_entries=7 floor=7
+  blocks=8 expectation_entries=8 floor=7
   -> ok
 unexpected count = 0
 expectation table (want/got per block):
   block 1: want=0 got=0 label=copy tree: same-depth copy under artifacts/tmp, every copied byte equal to production
   block 2: want=0 got=0 label=measured baseline: the pristine copy suite is green and its failing-case set is recorded for block 03
   block 3: want=0 got=0 label=battery: each guard degraded turns exactly its own case red, and the no-op control turns nothing red
-  block 4: want=0 got=0 label=independent re-read: production bytes equal the pre-run fingerprints and the copy no longer differs from them
-  block 5: want=0 got=0 label=change surface read from git and compared with the run-start snapshot: nothing on a production surface moved during this run
-  block 6: want=0 got=0 label=cross-file consistency: RED, GREEN and this file report the same case count and the same clean expectation tables
-  block 7: want=0 got=0 label=encoding gate over the two judged instruments, this generator and the three 007 evidence files
-ascii tail: bytes=1188 non-ascii=0 (must be 0)
+  block 4: want=0 got=0 label=the shape guard measured on its own channel: removal aborts the harness naming that case, and the copy returns to green
+  block 5: want=0 got=0 label=independent re-read: production bytes equal the pre-run fingerprints and the copy no longer differs from them
+  block 6: want=0 got=0 label=change surface read from git and compared with the run-start snapshot: nothing on a production surface moved during this run
+  block 7: want=0 got=0 label=cross-file consistency: RED, GREEN and this file report the same case count and the same clean expectation tables, and every instrument-fault line sits in the designed shape channel
+  block 8: want=0 got=0 label=encoding gate over the two judged instruments, this generator and the three 007 evidence files
+ascii tail: bytes=1406 non-ascii=0 (must be 0)
 OVERALL_EXITCODE=0
-DECODE ok file bytes=6910
+DECODE ok utf8=True cr=0 (size: wc -c this file)

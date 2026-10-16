@@ -1,5 +1,5 @@
 # T-2026-10-15-005 RED - 屏幕清单生成器收编前的失败证据
-# Generated: 2026-10-16T01:25:10Z  (UTC)
+# Generated: 2026-10-16T03:53:57Z  (UTC)
 # Generator: artifacts/tmp/gen-005-red.sh   重跑：bash artifacts/tmp/gen-005-red.sh
 # 本文件覆盖的调用形态：
 #   python -X utf8 .trae/scripts/dev/screen_inventory_selftest.py                  （正反自检全套；用例数由产物自己打印，本脚本不钉数）
@@ -9,21 +9,24 @@
 # 判据面：块 01/04/05/06 全程不动工作树；块 02 只在一个进程的 try/finally 内挪仪器，
 #   起点不在场即拒绝；块 03 只写 artifacts/tmp/_r005 下的副本，生产字节只读不写。
 # 被核文件指纹（判定前读数；块 01 在窗口之后再复核是否相同）：
-#   .trae/scripts/dev/gen_screen_inventory.py  bytes=20509  lines=415  sha256=7cedbd9a6b1c16d260d0964cac4a78ca784fe88cdf7288cc4b85d6d6aef7f65c
-#   .trae/scripts/dev/screen_inventory_selftest.py  bytes=31308  lines=641  sha256=5ca3458832006c5287ea58ae2c44ed81244fe8c004a182ab1799a47f83671510
-#   .trae/scripts/dev/gen_parity_ledger.py  bytes=17796  lines=338  sha256=2b6bec669fb80642c5a1c67147ab8f895ef1d19f5aa194992d4fd0bae6287e2e
-#   .trae/scripts/dev/parity_ledger_selftest.py  bytes=23070  lines=494  sha256=8913218f6f2ac8ad7927532e84cd5cb094aad9d50332d5ef04b60344c959f341
-#   Docs/04-ux-design/parity/screen-inventory.json  bytes=21986  lines=1013  sha256=c8b94d8e2de67cf001b6796f20d7fd3b94af9fcac917a3bba617ab24105b0007
+#   .trae/scripts/dev/gen_screen_inventory.py  bytes=20787  lines=417  sha256=270db775d3a1d4f650170bd59ca389edb74759993d70d656d5353b15525bc2fc
+#   .trae/scripts/dev/screen_inventory_selftest.py  bytes=31986  lines=648  sha256=e35bd9779a97ad7cd0c7abf44d6273192d520b24be317ab68aff83a15cbf5b1e
+#   .trae/scripts/dev/gen_parity_ledger.py  bytes=20273  lines=377  sha256=6524f3b66f7dc89be8e762d70c8cdf9498a897e7e7372ba2d7f64c650012151a
+#   .trae/scripts/dev/parity_ledger_selftest.py  bytes=26737  lines=552  sha256=0e08112862518d8a45b7c59e579952d28dca57ced34c723e88bf05543ef81b58
+#   Docs/04-ux-design/parity/screen-inventory.json  bytes=21986  lines=1013  sha256=b6c06ac5c0857ec769e8d33bcf561cfd2f951b98ef096ff0d13ab1d25b65aaa3
 
-===== block 1 - keep-behaviour premise: no android/ file is touched and the instruments' pre-window bytes are recorded =====
+===== block 1 - keep-behaviour premise: the instruments' pre-window bytes are recorded and the android/ dirt that predates this run is printed rather than judged =====
 $ python -X utf8 artifacts/tmp/_red005/precheck.py
-android files changed by the working tree = 0
+captured CR normalised: 3 carriage return(s) removed from block 1 output - the artefact of record is LF-only
+android/ paths already dirty at run start = 13 ['android/README.md', 'android/app/src/androidTest/java/com/treelearn/app/GenerationCoordinatorInstrumentedTest.java', 'android/app/src/main/java/com/treelearn/app/MainActivity.java', 'android/app/src/main/java/com/treelearn/app/generation/GenerationCoordinator.java', 'android/app/src/main/java/com/treelearn/app/generation/LiveAttempt.java', 'android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java', 'android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java', 'android/app/src/main/java/com/treelearn/app/ui/ChatSink.java', 'android/app/src/main/java/com/treelearn/app/wiring/CoordinatorGenerationPort.java', 'android/app/src/main/java/com/treelearn/app/wiring/GenerationPort.java', 'android/app/src/main/java/com/treelearn/app/wiring/HomeWiring.java', 'android/app/src/test/java/com/treelearn/app/wiring/WiringDoubles.java', 'android/data/src/main/java/com/treelearn/data/db/dao/FirstTopicCreation.java']
+info: that count is PRINTED, not judged - a shared worktree can hold another slice's uncommitted android work, and judging it here would blame 005 for a neighbouring slice. The claim 'this slice adds no android path' is judged where it is decidable: the commit itself (git show --name-only <this commit> | grep ^android/ must be empty), and the keep-behaviour half is judged in the GREEN run as a start-to-end delta.
 recorded 5 pre-window fingerprint(s)
 PRE ok
 ----- exit code: 0 (want 0) -----
 
 ===== block 2 - instrument absent for real: tier 3 at three entries with one shared channel, the floor token loses its only emitter, restore is byte-exact =====
 $ python -X utf8 artifacts/tmp/_red005/window005.py
+captured CR normalised: 17 carriage return(s) removed from block 2 output - the artefact of record is LF-only
 A absent selftest rc=3
 A names the missing instrument: True
 A does not report a case mismatch: True
@@ -40,14 +43,15 @@ D ledger generator rc=3 fault=True names the sibling: True no ledger printed: Tr
 D ledger selftest rc=3 fault=True names the sibling: True no CASE lines: True
 D same tier at both consumer entries: True
 D same tier as the 005 selftest: True
-RESTORE equals_pre=True equals_after_len=20509/20509 parses=True
+RESTORE equals_pre=True equals_after_len=20787/20787 parses=True
 WINDOW ok
 ----- exit code: 0 (want 0) -----
 
 ===== block 3 - measured exit-tier collision: the same absence without the guard lands on the case-mismatch tier, byte-identical to a forced false judgement, while the shipped guard answers 3 =====
 $ python -X utf8 artifacts/tmp/_red005/revert005.py
+captured CR normalised: 10 carriage return(s) removed from block 3 output - the artefact of record is LF-only
 guard anchor hits in the production selftest=1
-reverted bytes=30754 production bytes=31308 differ=True
+reverted bytes=31432 production bytes=31986 differ=True
 R1 no guard, instrument absent: rc=1 stdout-bytes=0 ModuleNotFoundError=True
 R1 has no CASE line=True no EXITCODE line=True
 R2 one judgement forced false: rc=1 failing=['neg-screens-below-floor', 'pos-real-tree']
@@ -61,6 +65,7 @@ REVERT ok
 
 ===== block 4 - control arm: the same fixture returns 0 with every case running, tiers 0/1/3 all reached, and the generator prints measured counts beside the spec-pointer judgement =====
 $ python -X utf8 artifacts/tmp/_red005/control005.py
+captured CR normalised: 3 carriage return(s) removed from block 4 output - the artefact of record is LF-only
 CONTROL executed=23 expected=23 equal=True failures=0 tier3-by-design=5
 CONTROL tiers seen=[0, 1, 3] instrument-fault-lines=0 verdict-pass=True last-line-exitcode0=True rc=0
 CONTROL generator rc=0 measured=('14', '5') spec-pointer line=True floor ok=True
@@ -69,16 +74,18 @@ CONTROL ok
 
 ===== block 5 - the git state of this slice's artefacts is measured and printed without being judged, because the pre-commit reading is time-expired by construction while blocks 2/3 give the commit-independent reproduction path =====
 $ python -X utf8 artifacts/tmp/_red005/no_history.py
-info .trae/scripts/dev/gen_screen_inventory.py commits=1 tracked=True (printed not judged - see blocks 2/3 for the commit-independent reproduction)
-info .trae/scripts/dev/screen_inventory_selftest.py commits=1 tracked=True (printed not judged - see blocks 2/3 for the commit-independent reproduction)
-info Docs/04-ux-design/parity/screen-inventory.json commits=1 tracked=True (printed not judged - see blocks 2/3 for the commit-independent reproduction)
-info artifacts/parity/ledger.md commits=1 (007's artefact)
+captured CR normalised: 4 carriage return(s) removed from block 5 output - the artefact of record is LF-only
+info .trae/scripts/dev/gen_screen_inventory.py commits=2 tracked=True (printed not judged - see blocks 2/3 for the commit-independent reproduction)
+info .trae/scripts/dev/screen_inventory_selftest.py commits=2 tracked=True (printed not judged - see blocks 2/3 for the commit-independent reproduction)
+info Docs/04-ux-design/parity/screen-inventory.json commits=2 tracked=True (printed not judged - see blocks 2/3 for the commit-independent reproduction)
+info artifacts/parity/ledger.md commits=2 (007's artefact)
 NOHISTORY printed (no judgement here)
 ----- exit code: 0 (want 0) -----
 
 ===== block 6 - task contract: 005's declared judged value shows up as its own size-band warning and no contract error falls outside the RED-record family, while the RED-record count itself is printed rather than judged because it expires the moment the record is filled =====
 $ python -X utf8 artifacts/tmp/_red005/contract005.py
-declared band: size-warning count=1 text=['estimated production lines 371 exceeds soft limit 20']
+captured CR normalised: 4 carriage return(s) removed from block 6 output - the artefact of record is LF-only
+declared band: size-warning count=1 text=['estimated production lines 373 exceeds soft limit 20']
 this task: WARNING count=1 (band=1 other=0) ERROR count=0 (RED-family=0 other=0)
 info: RED-family error count=0 is printed, not judged - it is 1 before the TDD record is filled and 0 after, so judging it would expire on the first re-run
 note: repo-wide readings are errors=16 warnings=12 and are NOT judged here.
@@ -87,14 +94,15 @@ CONTRACT ok
 
 ===== block 7 - encoding gate over the instruments this slice adds, the filed inventory and this generator's own source, self-probed both ways =====
 $ python -X utf8 artifacts/tmp/_red005/utf8_gate.py .trae/scripts/dev/gen_screen_inventory.py .trae/scripts/dev/screen_inventory_selftest.py .trae/scripts/dev/gen_parity_ledger.py .trae/scripts/dev/parity_ledger_selftest.py Docs/04-ux-design/parity/screen-inventory.json artifacts/tmp/gen-005-red.sh .trae/tasks/T-2026-10-15-screen-inventory-parity-ledger-005.md
+captured CR normalised: 9 carriage return(s) removed from block 7 output - the artefact of record is LF-only
 GATE SELFTEST ok: a known-broken byte string is rejected
-ok   .trae/scripts/dev/gen_screen_inventory.py                  bytes=20509
-ok   .trae/scripts/dev/screen_inventory_selftest.py             bytes=31308
-ok   .trae/scripts/dev/gen_parity_ledger.py                     bytes=17796
-ok   .trae/scripts/dev/parity_ledger_selftest.py                bytes=23070
+ok   .trae/scripts/dev/gen_screen_inventory.py                  bytes=20787
+ok   .trae/scripts/dev/screen_inventory_selftest.py             bytes=31986
+ok   .trae/scripts/dev/gen_parity_ledger.py                     bytes=20273
+ok   .trae/scripts/dev/parity_ledger_selftest.py                bytes=26737
 ok   Docs/04-ux-design/parity/screen-inventory.json             bytes=21986
-ok   artifacts/tmp/gen-005-red.sh                               bytes=39075
-ok   .trae/tasks/T-2026-10-15-screen-inventory-parity-ledger-005.md bytes=49716
+ok   artifacts/tmp/gen-005-red.sh                               bytes=39982
+ok   .trae/tasks/T-2026-10-15-screen-inventory-parity-ledger-005.md bytes=58612
 gate covered 7 file(s)
 EXITCODE=0
 ----- exit code: 0 (want 0) -----
@@ -105,13 +113,13 @@ block count floor (bare integer literal, asserted against this script's own sour
   -> ok
 unexpected count = 0
 expectation table (want/got per block):
-  block 1: want=0 got=0 label=keep-behaviour premise: no android/ file is touched and the instruments' pre-window bytes are recorded
+  block 1: want=0 got=0 label=keep-behaviour premise: the instruments' pre-window bytes are recorded and the android/ dirt that predates this run is printed rather than judged
   block 2: want=0 got=0 label=instrument absent for real: tier 3 at three entries with one shared channel, the floor token loses its only emitter, restore is byte-exact
   block 3: want=0 got=0 label=measured exit-tier collision: the same absence without the guard lands on the case-mismatch tier, byte-identical to a forced false judgement, while the shipped guard answers 3
   block 4: want=0 got=0 label=control arm: the same fixture returns 0 with every case running, tiers 0/1/3 all reached, and the generator prints measured counts beside the spec-pointer judgement
   block 5: want=0 got=0 label=the git state of this slice's artefacts is measured and printed without being judged, because the pre-commit reading is time-expired by construction while blocks 2/3 give the commit-independent reproduction path
   block 6: want=0 got=0 label=task contract: 005's declared judged value shows up as its own size-band warning and no contract error falls outside the RED-record family, while the RED-record count itself is printed rather than judged because it expires the moment the record is filled
   block 7: want=0 got=0 label=encoding gate over the instruments this slice adds, the filed inventory and this generator's own source, self-probed both ways
-ascii tail: bytes=1632 non-ascii=0 (must be 0)
+ascii tail: bytes=1675 non-ascii=0 (must be 0)
 OVERALL_EXITCODE=0
-DECODE ok file bytes=9303
+DECODE ok utf8=True cr=0 (size: wc -c this file)

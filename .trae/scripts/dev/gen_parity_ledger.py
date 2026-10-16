@@ -57,10 +57,47 @@ def read_bytes(path):
 
 def load_json(path):
     raw = read_bytes(path)
+    if b"\r" in raw:
+        # The ledger prints the sha256 of exactly these bytes.  A checkout that smudged the filed
+        # inventory to CRLF would therefore file a fingerprint no fresh clone can reproduce (measured:
+        # worktree 22999 B/CRLF versus blob 21986 B/LF for one commit), so the byte pin stops being
+        # evidence.  Losing that precondition is the harness failing, not a coverage claim failing.
+        raise Fault("inventory was checked out with CR line endings (%s): the filed byte-fingerprint"
+                    " cannot be recomputed from these bytes - restore the eol=lf pin in .gitattributes"
+                    " and re-checkout before reading the ledger" % path)
     try:
         return raw, json.loads(raw.decode("utf-8"))
     except (UnicodeDecodeError, ValueError) as exc:
         raise Fault("inventory is not readable JSON: %s (%s)" % (path, exc))
+
+
+INVENTORY_KEYS = ("schema_version", "screens", "surfaces", "components", "layout_census",
+                  "unreferenced_layouts", "unreached_screens", "counts", "source_commit",
+                  "generated_by", "spec_link")
+COUNTS_KEYS = ("screens", "surfaces", "self_drawn", "unreached_screens",
+               "unreferenced_layouts")
+LINK_SHAPE_KEYS = ("inventory_cited", "count_shaped_lines")
+
+
+def require_shape(inv, path):
+    """An inventory written by another version of the instrument is a broken harness, not a red
+    judgement.  The pointer key was renamed in the 2026-10-16 write-back (`spec_claims` ->
+    `spec_link`), and indexing it straight through a stale artefact raised `KeyError` from inside
+    the try, so the ledger exited 1 with empty stdout - the tier that means "a judgement did not
+    hold" - and no reader could tell the harness had failed at all.  Shape is judged once, here.
+    """
+    if not isinstance(inv, dict):
+        raise Fault("inventory is not a JSON object: %s" % path)
+    missing = [k for k in INVENTORY_KEYS if k not in inv]
+    if isinstance(inv.get("counts"), dict):
+        missing += ["counts.%s" % k for k in COUNTS_KEYS if k not in inv["counts"]]
+    if isinstance(inv.get("spec_link"), dict):
+        missing += ["spec_link.%s" % k for k in LINK_SHAPE_KEYS
+                    if k not in inv["spec_link"]]
+    if missing:
+        raise Fault("inventory has the wrong shape: missing %s - it was written by a different "
+                    "version of gen_screen_inventory.py, so regenerate it before reading the "
+                    "ledger (%s)" % (", ".join(missing), path))
 
 
 def inventory_module():
@@ -290,6 +327,7 @@ def main(argv=None):
         res = opts.res if opts.res else mod.RES_DEFAULT
         spec = opts.spec if opts.spec else mod.SPEC_DEFAULT
         raw, inv = load_json(opts.inventory)
+        require_shape(inv, opts.inventory)
         inv_sha = hashlib.sha256(raw).hexdigest()
         inv_proj = projection(inv)
         fresh = rederive(mod, java, res, spec)
@@ -312,9 +350,10 @@ def main(argv=None):
         print("INSTRUMENT FAULT: the ledger bytes are not valid UTF-8: %s" % exc)
         print("EXITCODE=3")
         return 3
-    digest = hashlib.sha256(body).hexdigest()
     exit_code = 0 if not bad else 1
     body += ("EXITCODE=%d\n" % exit_code).encode("ascii")
+    # hashed after the trailing exit-code line so the printed digest equals `sha256sum <file>`
+    digest = hashlib.sha256(body).hexdigest()
     if opts.no_write:
         # printing the body is what makes --no-write usable as a review command; the written
         # artifact and the console then carry the same judgement lines, not two summaries.

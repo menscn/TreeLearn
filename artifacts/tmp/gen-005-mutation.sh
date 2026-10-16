@@ -125,6 +125,12 @@ run() {
   local out rc
   out=$("$@" 2>&1)
   rc=$?
+  local cr_in
+  cr_in=$(printf '%s' "$out" | tr -cd '\r' | wc -c)
+  if [ "$cr_in" != "0" ]; then
+    out=$(printf '%s' "$out" | tr -d '\r')
+    echo "captured CR normalised: ${cr_in} carriage return(s) removed from block ${n} output - the artefact of record is LF-only" >> "$EV"
+  fi
   local full="$TMP/block-$n.out"
   printf '%s\n' "$out" > "$full"
   printf '%s\n' "$out" | tail -n 34 >> "$EV"
@@ -353,9 +359,16 @@ MUTS = [
      # that layout. pos-real-tree asserts every popup_menu/alert_dialog line carries layout=-, so it
      # is the case that sees the same defect on production source rather than on a fixture.
      ["pos-real-tree"]),
+    # M12 locks the word list of the *printed* restatement fallback, the hole that let "现值 14 屏"
+    # sit in the line that forbids restating counts. Patterns are written as encoded str, not byte
+    # literals, because Python 3 rejects non-ASCII in b"...".
+    ("M12-count-shape-vocab-narrowed", GEN,
+     'COUNT_SHAPE = re.compile(r"\\d+\\s*个?\\s*(?:屏幕|浮层|自绘屏|屏)")'.encode("utf-8"),
+     'COUNT_SHAPE = re.compile(r"\\d+\\s*个?\\s*(?:屏幕|浮层|自绘屏)")'.encode("utf-8"),
+     "neg-spec-pointer-missing", []),
 ]
 
-MIN_MUTS = 11
+MIN_MUTS = 12
 pristine = {rel: open(os.path.join(REPO, rel), "rb").read() for rel in (GEN, SELF)}
 base = json.load(open(BASELINE, encoding="utf-8"))
 base_failing = set(base["failing"])
@@ -452,7 +465,7 @@ if longest > 240:
 print("BATTERY ok" if not bad else "BATTERY FAULT")
 sys.exit(1 if bad else 0)
 PY
-WANT_TEXT="baseline read from the measured file: rc=0|mutations declared=11 floor=11 floor-met=True|M1-screen-floor-zero rc=1 want-rc=1 baseline=0 caught=True|M1-screen-floor-zero new-red==declared: True|M2-surface-floor-zero new-red==declared: True|M3-root-inflate-condition new-red==declared: True|M4-sw600dp-column-off new-red==declared: True|M5-volatile-commit-stamp new-red==declared: True|M6-unbalanced-body-not-a-fault new-red==declared: True|M7-consumer-proof-off new-red==declared: True|M8-noop-comment rc=0 want-rc=0 baseline=0 caught=False|M8-noop-comment new-red==declared: True|M9-new-patterns-dropped new-red==declared: True|M10-comment-filter-off new-red==declared: True|M11-layoutless-guard-off new-red==declared: True|after-restore copy rc=0 failing=[]|copy longest path=|BATTERY ok"
+WANT_TEXT="baseline read from the measured file: rc=0|mutations declared=12 floor=12 floor-met=True|M1-screen-floor-zero rc=1 want-rc=1 baseline=0 caught=True|M1-screen-floor-zero new-red==declared: True|M2-surface-floor-zero new-red==declared: True|M3-root-inflate-condition new-red==declared: True|M4-sw600dp-column-off new-red==declared: True|M5-volatile-commit-stamp new-red==declared: True|M6-unbalanced-body-not-a-fault new-red==declared: True|M7-consumer-proof-off new-red==declared: True|M8-noop-comment rc=0 want-rc=0 baseline=0 caught=False|M8-noop-comment new-red==declared: True|M9-new-patterns-dropped new-red==declared: True|M10-comment-filter-off new-red==declared: True|M11-layoutless-guard-off new-red==declared: True|after-restore copy rc=0 failing=[]|copy longest path=|BATTERY ok"
 run 3 0 "battery: each guard degraded turns exactly its own case red, and the no-op control turns nothing red" \
   python -X utf8 "$TMP/battery.py"
 
@@ -820,7 +833,11 @@ try:
 except UnicodeDecodeError as exc:
     print('DECODE FAIL', exc)
     sys.exit(1)
-print('DECODE ok file bytes=%d' % len(raw))
+cr = raw.count(bytes([13]))
+if cr:
+    print('DECODE FAIL line-ending: %d carriage return(s) present in an artefact pinned to LF' % cr)
+    sys.exit(1)
+print('DECODE ok utf8=True cr=0 (size: wc -c this file)')
 " "$EV" 2>&1)
 decode_rc=$?
 echo "$decode" | tee -a "$EV" >> "$TMP/console.txt"

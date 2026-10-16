@@ -39,7 +39,9 @@ OUT_DEFAULT = os.path.join(REPO, "Docs/04-ux-design/parity/screen-inventory.json
 SPEC_DEFAULT = os.path.join(REPO, "Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md")
 # Derived from the output path so the pointer test cannot outlive a move of the inventory itself.
 INVENTORY_NAME = os.path.basename(OUT_DEFAULT)
-COUNT_SHAPE = re.compile(r"\d+\s*个?\s*(?:屏幕|浮层|自绘屏)")
+# 词表要含裸量词「屏」：只列复合词（屏幕/自绘屏）时，「现值 14 屏 / 其中 5 屏自绘」这类写法
+# 完全不被点名，于是"复述只打印给人标注"这条兜底对最像当前值的那种句子失效——与浮层少计同一族。
+COUNT_SHAPE = re.compile(r"\d+\s*个?\s*(?:屏幕|浮层|自绘屏|屏)")
 MIN_SCREENS = 8
 MIN_SURFACES = 3
 POPUP_WINDOW = re.compile(r"new\s+PopupWindow\s*\(")

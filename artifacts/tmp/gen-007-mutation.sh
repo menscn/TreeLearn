@@ -115,6 +115,12 @@ run() {
   local out rc
   out=$("$@" 2>&1)
   rc=$?
+  local cr_in
+  cr_in=$(printf '%s' "$out" | tr -cd '\r' | wc -c)
+  if [ "$cr_in" != "0" ]; then
+    out=$(printf '%s' "$out" | tr -d '\r')
+    echo "captured CR normalised: ${cr_in} carriage return(s) removed from block ${n} output - the artefact of record is LF-only" >> "$EV"
+  fi
   local full="$TMP/block-$n.out"
   printf '%s\n' "$out" > "$full"
   printf '%s\n' "$out" | tail -n 22 >> "$EV"
@@ -318,9 +324,25 @@ MUTS = [
      b"    try:\n        # Loading the sibling instrument has to be inside the fault guard",
      b"    mod = inventory_module()\n    try:\n        # (M8) sibling load hoisted above the guard",
      "neg-inventory-instrument-absent", []),
+    # M9-shape-guard-removed is NOT in this list: measured 2026-10-16, removing require_shape does
+    # not turn any case red - the sibling KeyError aborts the whole suite at tier 3 (rc=3,
+    # new-red=[]), so the consequence lands in the "harness broke" channel and cannot be attributed
+    # to one case here. Block 04 measures it on that channel instead. This is the same shape as 005's
+    # dead-include guard; both halves are filed so the next slice does not inherit "removing a guard
+    # always reddens a case" as a premise.
+    ("M9-crlf-guard-removed", GEN,
+     b'    if b"\\r" in raw:',
+     b'    if False:  # MUTATION: CRLF checkout is no longer a fault',
+     "neg-inventory-crlf-checkout", []),
+    # the pre-fix shape: the console digest excluded the trailing exit-code line, so the printed
+    # fingerprint did not equal sha256 of the bytes filed beside it
+    ("M10-selfhash-excludes-tail", GEN,
+     b"    digest = hashlib.sha256(body).hexdigest()",
+     b'    digest = hashlib.sha256(("\\n".join(lines) + "\\n").encode("utf-8")).hexdigest()',
+     "pos-written-artifact-selfdescribes", []),
 ]
 
-MIN_MUTS = 8
+MIN_MUTS = 10
 
 pristine = {rel: open(os.path.join(REPO, rel), "rb").read() for rel in (GEN, SELF)}
 base = json.load(open(BASELINE, encoding="utf-8"))
@@ -408,11 +430,95 @@ if rc != 0 or failing:
 print("BATTERY ok" if not bad else "BATTERY FAULT")
 sys.exit(1 if bad else 0)
 PY
-WANT_TEXT="baseline read from the measured file: rc=0|mutations declared=8 floor=8 floor-met=True|caught=True new-red=['neg-stale-inventory']|caught=True new-red=['neg-pointer-drift']|caught=True new-red=['neg-row-floor']|caught=True new-red=['pos-absence-is-a-token-not-a-blank', 'pos-real-tree']|caught=True new-red=['pos-real-tree']|caught=True new-red=['pos-fail-line-scan-catches-a-leading-fail']|caught=True new-red=['neg-inventory-instrument-absent']|M7-noop-comment rc=0 want-rc=0 baseline=0 caught=False new-red=[]|after-restore copy rc=0 failing=[]|BATTERY ok"
+WANT_TEXT="baseline read from the measured file: rc=0|mutations declared=10 floor=10 floor-met=True|caught=True new-red=['neg-stale-inventory']|caught=True new-red=['neg-pointer-drift']|caught=True new-red=['neg-row-floor']|caught=True new-red=['pos-absence-is-a-token-not-a-blank', 'pos-real-tree']|caught=True new-red=['pos-real-tree']|caught=True new-red=['pos-fail-line-scan-catches-a-leading-fail']|caught=True new-red=['neg-inventory-instrument-absent']|caught=True new-red=['neg-inventory-crlf-checkout']|caught=True new-red=['pos-written-artifact-selfdescribes']|M7-noop-comment rc=0 want-rc=0 baseline=0 caught=False new-red=[]|after-restore copy rc=0 failing=[]|BATTERY ok"
 run 3 0 "battery: each guard degraded turns exactly its own case red, and the no-op control turns nothing red" \
   python -X utf8 "$TMP/battery.py"
 
-# ---- block 04: independent re-read of the production bytes ----------------------------------
+# ---- block 04: the shape guard, measured on the channel its removal really lands on ---------
+cat > "$TMP/shapechannel.py" <<'PY'
+"""拆掉 require_shape 之后，块 03 的实测读数是 rc=3、new-red=[]：同一份旧口径夹具让自检按「仪器崩了」
+那一层整轮中止，没有任何一条用例转红。因此这条守卫**不能**留在电池里当回归锁——电池的判据是「红集合
+恰好等于声明集合」，把不可归因的守卫写进去，要么把别人的崩算成守卫承重，要么让电池永远判不出来。
+这里按它真实的通道如实断言三件事：崩在**哪一个用例上**必须可读出；不得出现该用例的 CASE 判决行（否则
+这条后果本来就该落在电池里）；还原后同一副本必须重新全绿（否则上面的读数只是副本坏了）。
+与 005 的死 include 守卫同形。两半都留档，是为了不让下一片把「拆守卫一定让某条用例变红」当前提。
+"""
+import os
+import re
+import subprocess
+import sys
+
+REPO = os.path.abspath(".")
+COPY = os.path.join("artifacts", "tmp", "_m007", "prod")
+GEN = os.path.join(".trae", "scripts", "dev", "gen_parity_ledger.py")
+SELF = os.path.join(".trae", "scripts", "dev", "parity_ledger_selftest.py")
+ANCHOR = b"        require_shape(inv, opts.inventory)"
+REPL = b"        # (block 04) shape guard removed"
+CASE = "neg-inventory-shape-drift"
+
+prod = {rel: open(os.path.join(REPO, rel), "rb").read() for rel in (GEN, SELF)}
+bad = 0
+
+
+def suite():
+    r = subprocess.run([sys.executable, "-X", "utf8", os.path.join(COPY, SELF)],
+                       capture_output=True, text=True, encoding="utf-8", errors="replace")
+    return r.returncode, (r.stdout or "") + (r.stderr or "")
+
+
+def restore():
+    for rel, raw in prod.items():
+        open(os.path.join(COPY, rel), "wb").write(raw)
+
+
+try:
+    restore()
+    path = os.path.join(COPY, GEN)
+    raw = open(path, "rb").read()
+    hits = raw.count(ANCHOR)
+    print("guard anchor hits=%d expected 1" % hits)
+    if hits != 1:
+        print("MUTATION FAULT the shape guard is not a single removable statement")
+        sys.exit(3)
+    open(path, "wb").write(raw.replace(ANCHOR, REPL))
+    rc, out = suite()
+    fault = [l for l in out.splitlines() if l.startswith("INSTRUMENT FAULT")]
+    named = [l for l in fault if CASE in l]
+    verdict = [l for l in out.splitlines() if re.match(r"^CASE %s\s" % re.escape(CASE), l)]
+    print("shape-guard-off rc=%d fault-lines=%d names-the-case=%s case-verdict-line-printed=%s"
+          % (rc, len(fault), bool(named), bool(verdict)))
+    print("shape-guard-off fault reading=%s" % (named[0][:120] if named else
+                                               (fault[0][:120] if fault else "(none)")))
+    if rc != 3:
+        print("FAIL removing this guard was expected to break the harness (tier 3), got rc=%d -"
+              " a 0 or 1 here would mean the guard was not load-bearing after all" % rc)
+        bad = 1
+    if not named:
+        print("FAIL the tier-3 reading does not name which case broke, so the consequence cannot be"
+              " attributed to this guard")
+        bad = 1
+    if verdict:
+        print("FAIL a CASE verdict line for %s was printed - that would put this consequence back in"
+              " the battery's channel and make the separate measurement unnecessary" % CASE)
+        bad = 1
+finally:
+    restore()
+
+rc, out = suite()
+print("after-restore copy rc=%d counting-line=%s"
+      % (rc, bool(re.search(r"cases executed=\d+ expected=\d+ failures=0", out))))
+if rc != 0:
+    print("FAIL the copy did not return to green after this measurement; the reading above would be"
+          " a copy defect rather than a guard consequence")
+    bad = 1
+print("SHAPE-CHANNEL %s" % ("ok" if not bad else "FAULT"))
+sys.exit(1 if bad else 0)
+PY
+WANT_TEXT="guard anchor hits=1 expected 1|shape-guard-off rc=3 fault-lines=1 names-the-case=True case-verdict-line-printed=False|after-restore copy rc=0 counting-line=True|SHAPE-CHANNEL ok"
+run 4 0 "the shape guard measured on its own channel: removal aborts the harness naming that case, and the copy returns to green" \
+  python -X utf8 "$TMP/shapechannel.py"
+
+# ---- block 05: independent re-read of the production bytes ----------------------------------
 cat > "$TMP/recheck.py" <<'PY'
 """块 03 自称还原了副本，这里用**另一双眼睛**复算：生产字节等于判定前的指纹，副本字节等于生产字节，
 且两个被判脚本仍然能被 py_compile 解析。变异副本若与生产不同，红就无法归因到某一条守卫。"""
@@ -460,10 +566,10 @@ print("RECHECK ok" if not bad else "RECHECK FAULT")
 sys.exit(1 if bad else 0)
 PY
 WANT_TEXT="production unchanged .trae/scripts/dev/gen_parity_ledger.py -> True|production unchanged .trae/scripts/dev/parity_ledger_selftest.py -> True|copy equals production .trae/scripts/dev/gen_parity_ledger.py -> True|copy equals production .trae/scripts/dev/parity_ledger_selftest.py -> True|parses .trae/scripts/dev/gen_parity_ledger.py -> True|RECHECK ok"
-run 4 0 "independent re-read: production bytes equal the pre-run fingerprints and the copy no longer differs from them" \
+run 5 0 "independent re-read: production bytes equal the pre-run fingerprints and the copy no longer differs from them" \
   python -X utf8 "$TMP/recheck.py"
 
-# ---- block 05: nothing was written outside the copy -----------------------------------------
+# ---- block 06: nothing was written outside the copy -----------------------------------------
 cat > "$TMP/scope.py" <<'PY'
 """改动面：判的是「本次运行期间生产面没有位移」，用 git 现场重读再与运行开始时的快照比对。
 不判「整棵工作树的生产面干净」——那会把别片尚未提交的改动算成本片的缺陷（实测快照里已有
@@ -506,10 +612,10 @@ print("SCOPE ok" if not bad else "SCOPE FAULT")
 sys.exit(1 if bad else 0)
 PY
 WANT_TEXT="command diff ok rc=0|command ls-files ok rc=0|production-surface paths snapshot=|identical=True|SCOPE ok"
-run 5 0 "change surface read from git and compared with the run-start snapshot: nothing on a production surface moved during this run" \
+run 6 0 "change surface read from git and compared with the run-start snapshot: nothing on a production surface moved during this run" \
   python -X utf8 "$TMP/scope.py"
 
-# ---- block 06: the three 007 evidence files agree with each other ---------------------------
+# ---- block 07: the three 007 evidence files agree with each other ---------------------------
 cat > "$TMP/consistency.py" <<'PY'
 """同一件事实在 RED / GREEN / MUTATION 三份产物里必须给同一个读数。用例数不写死，而是从 GREEN 与
 本文件已写入的块 02 输出里现场取；两处对不上就是漂移（本仓库已两次因抄旧读数翻车）。
@@ -542,6 +648,40 @@ if "===== block 3" not in texts[MUT]:
     bad = 1
 else:
     print("this file already carries the battery block (its own TOTAL is written after this check)")
+
+# 仪器故障行按块归位来判，而不是「整个文件里不许出现」：块 04 是把 require_shape 拆掉的**设计通道**，
+# 它的见证正文里必然带一条 INSTRUMENT FAULT。一刀切的全文扫描会把那条设计内的故障当成缺陷（本块上一版
+# 就是这么红的），而更糟的是它也会把「电池里真的崩了」和「自述里引用了这三个词」混成同一种红。
+def fault_sections(text):
+    cur, out = "(header)", {}
+    for line in text.splitlines():
+        mm = re.match(r"===== block (\d+) - ", line)
+        if mm:
+            cur = mm.group(1)
+        if "INSTRUMENT FAULT" in line:
+            out[cur] = out.get(cur, 0) + 1
+    return out
+
+got = fault_sections(texts[MUT])
+inside, outside = got.get("4", 0), sum(v for k, v in got.items() if k != "4")
+print("designed-channel(block4) fault lines=%d outside=%d per-section=%s" % (inside, outside, got))
+if inside != 1:
+    print("FAIL block 04 must carry exactly the one designed instrument-fault reading it counts"
+          " - got %d" % inside)
+    bad = 1
+if outside:
+    print("FAIL an instrument fault landed outside the designed shape channel: %s - that is the"
+          " harness breaking, not a case disagreeing" % {k: v for k, v in got.items() if k != "4"})
+    bad = 1
+# 正控：把「电池块里出现一条仪器故障」这个形状喂给同一段扫描，必须被点名——否则上面那条只是自述
+_control = fault_sections("===== block 3 - battery =====\nx INSTRUMENT FAULT in case y\n"
+                          "===== block 4 - channel =====\nINSTRUMENT FAULT in case z\n")
+print("positive control battery-fault named=%s channel-count=%d"
+      % (_control.get("3", 0) == 1 and sum(v for k, v in _control.items() if k != "4") == 1,
+         _control.get("4", 0)))
+if not (_control.get("3", 0) == 1 and sum(v for k, v in _control.items() if k != "4") == 1):
+    print("FAIL the section scan does not see a fault inside the battery - the guard has no teeth")
+    bad = 1
 g = re.search(r"SUITE executed=(\d+) expected=(\d+)", texts[GREEN])
 m = re.search(r"BASELINE rc=\d+ executed=(\d+) expected=(\d+)", texts[MUT])
 if not g or not m:
@@ -555,17 +695,14 @@ else:
         print("FAIL the production suite and the copy baseline disagree about how many cases exist -"
               " the copy is not the same instrument")
         bad = 1
-if "INSTRUMENT FAULT" in texts[MUT]:
-    print("FAIL the mutation evidence carries an instrument fault line")
-    bad = 1
 print("CONSISTENCY ok" if not bad else "CONSISTENCY FAULT")
 sys.exit(1 if bad else 0)
 PY
-WANT_TEXT="T-2026-10-15-007-red.txt last-line=DECODE ok|T-2026-10-15-007-green.txt last-line=DECODE ok|this file already carries the battery block|copy-baseline=|equal=True|CONSISTENCY ok"
-run 6 0 "cross-file consistency: RED, GREEN and this file report the same case count and the same clean expectation tables" \
+WANT_TEXT="T-2026-10-15-007-red.txt last-line=DECODE ok|T-2026-10-15-007-green.txt last-line=DECODE ok|this file already carries the battery block|copy-baseline=|equal=True|designed-channel(block4) fault lines=1 outside=0|positive control battery-fault named=True channel-count=1|CONSISTENCY ok"
+run 7 0 "cross-file consistency: RED, GREEN and this file report the same case count and the same clean expectation tables, and every instrument-fault line sits in the designed shape channel" \
   python -X utf8 "$TMP/consistency.py"
 
-# ---- block 07: encoding gate, self-probed both ways -----------------------------------------
+# ---- block 08: encoding gate, self-probed both ways -----------------------------------------
 cat > "$TMP/utf8_gate.py" <<'PY'
 """闸门自己正反自检：已知坏字节串必须被拒（正控），本片判过的文件必须通过（负控）。"""
 import sys
@@ -596,7 +733,7 @@ print("EXITCODE=%d" % (1 if bad else 0))
 sys.exit(1 if bad else 0)
 PY
 WANT_TEXT="GATE SELFTEST ok|EXITCODE=0|gate covered 6 file(s)"
-run 7 0 "encoding gate over the two judged instruments, this generator and the three 007 evidence files" \
+run 8 0 "encoding gate over the two judged instruments, this generator and the three 007 evidence files" \
   python -X utf8 "$TMP/utf8_gate.py" .trae/scripts/dev/gen_parity_ledger.py \
   .trae/scripts/dev/parity_ledger_selftest.py artifacts/tmp/gen-007-mutation.sh \
   artifacts/evidence/T-2026-10-15-007-red.txt artifacts/evidence/T-2026-10-15-007-green.txt \
@@ -675,7 +812,11 @@ try:
 except UnicodeDecodeError as exc:
     print('DECODE FAIL', exc)
     sys.exit(1)
-print('DECODE ok file bytes=%d' % len(raw))
+cr = raw.count(bytes([13]))
+if cr:
+    print('DECODE FAIL line-ending: %d carriage return(s) present in an artefact pinned to LF' % cr)
+    sys.exit(1)
+print('DECODE ok utf8=True cr=0 (size: wc -c this file)')
 " "$EV" 2>&1)
 decode_rc=$?
 echo "$decode" | tee -a "$EV" >> "$TMP/console.txt"

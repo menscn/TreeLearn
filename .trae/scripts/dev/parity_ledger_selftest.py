@@ -11,6 +11,7 @@ Exit tiers: 0 all cases matched, 1 a case's judgement did not match, 2 bad usage
 3 instrument fault (fixture could not be built, or fewer cases ran than the literal below).
 """
 import importlib.util
+import hashlib
 import io
 import json
 import os
@@ -53,10 +54,10 @@ def _load(name):
 L = _load("gen_parity_ledger")
 F = _load("screen_inventory_selftest")       # reuse the one fixture builder; do not fork it
 
-EXPECTED_CASES = 17                          # bare literal; must not be derived from CASES
+EXPECTED_CASES = 19                          # bare literal; must not be derived from CASES
 RUN_ROOT = os.path.join(G.REPO, "artifacts", "tmp", "_inv007_run")
 REQUIRED_ATTRS = ("main", "projection", "rederive", "rows_of", "visual_state", "behaviour_state",
-                  "judgements", "instrument_line", "link_disagree", "Fault")
+                  "judgements", "instrument_line", "link_disagree", "require_shape", "Fault")
 
 CASES = []
 
@@ -356,6 +357,11 @@ def _c_written(root):
                 ("source commit in the file", "来源提交" in text),
                 ("inventory hash in the file", "清单文件哈希" in text),
                 ("exit code is the last line", text.rstrip().endswith("EXITCODE=0")),
+                ("the printed byte count is the size of the file",
+                 int(out.split("bytes=")[1].split()[0]) == len(raw)),
+                # the digest used to exclude the trailing exit-code line, so console and disk disagreed
+                ("the printed sha256 is the hash of the written bytes",
+                 "sha256=%s" % hashlib.sha256(raw).hexdigest() in out),
                 ("row tally in the file equals the tally printed",
                  body_rows == int(out.split("rows=")[1].split()[0]))]
 
@@ -383,6 +389,58 @@ def _c_bad_json(root):
     rc, out = ledger(["--inventory", path])
     return rc, [("tier 3", rc == 3), ("fault says it is not readable JSON",
                                       "not readable JSON" in out)]
+
+
+@case("neg-inventory-shape-drift", 3)
+def _c_shape_drift(root):
+    # The 2026-10-16 write-back renamed the pointer key (spec_claims -> spec_link).  A valid JSON
+    # inventory of the previous口径 used to raise KeyError inside main's try, so the ledger exited 1
+    # with empty stdout - the tier that means "a judgement did not hold" - and a reader could not
+    # tell the harness had broken.  Shape is now judged once, as a fault (tier 3), never as red.
+    java, res, spec = tree(root)
+    inv = inv_file(root, java, res, spec)
+    data = json.loads(open(inv, "rb").read().decode("utf-8"))
+    data["spec_claims"] = data.pop("spec_link")
+    w(inv, json.dumps(data))
+    rc, out = ledger(["--inventory", inv, "--profile", profile(root, {}),
+                      "--java", java, "--res", res, "--spec", spec])
+    data = json.loads(open(inv, "rb").read().decode("utf-8"))
+    data["spec_link"] = data.pop("spec_claims")
+    del data["counts"]["screens"]
+    w(inv, json.dumps(data))
+    rc_counts, out_counts = ledger(["--inventory", inv, "--profile", profile(root, {}),
+                                    "--java", java, "--res", res, "--spec", spec])
+    return rc, [("tier 3 for an inventory of another schema", rc == 3),
+                ("the fault names the missing key", "missing spec_link" in out),
+                ("and says what to do about it", "regenerate" in out),
+                ("nothing is reported as a judgement", "FAIL" not in out),
+                ("a missing counts sub-key faults the same way", rc_counts == 3),
+                ("it names the sub-key rather than crashing", "counts.screens" in out_counts)]
+
+
+@case("neg-inventory-crlf-checkout", 3)
+def _c_crlf_checkout(root):
+    # Measured on this machine: one commit of the inventory read as 22999 B/CRLF in the worktree and
+    # 21986 B/LF in the blob, because core.autocrlf smudges `* text=auto`.  The ledger prints the
+    # sha256 of the bytes it read, so that line filed a fingerprint no fresh clone can recompute - a
+    # byte pin that depends on how the file arrived is not evidence.  .gitattributes now pins eol=lf
+    # for the artefact paths; the guard fails closed if the pin is ever lost, as a fault not a red.
+    java, res, spec = tree(root)
+    inv = inv_file(root, java, res, spec)
+    lf = open(inv, "rb").read()
+    rc_ok, out_ok = ledger(["--inventory", inv, "--profile", profile(root, {}),
+                            "--java", java, "--res", res, "--spec", spec])
+    w(inv, lf.replace(b"\n", b"\r\n"))
+    rc, out = ledger(["--inventory", inv, "--profile", profile(root, {}),
+                      "--java", java, "--res", res, "--spec", spec])
+    return rc, [("the same bytes with LF still judge clean", rc_ok == 0),
+                ("LF control prints a byte fingerprint", "清单文件哈希" in out_ok),
+                ("a CR checkout is tier 3, not a judgement", rc == 3),
+                ("the fault says which file and why", "CR line endings" in out
+                 and inv in out),
+                ("it names the pin to restore", ".gitattributes" in out),
+                ("no ledger body is emitted from smudged bytes", "清单文件哈希" not in out),
+                ("nothing is reported as a judgement", "FAIL" not in out)]
 
 
 @case("neg-missing-profile", 3)
