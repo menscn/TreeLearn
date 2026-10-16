@@ -1,5 +1,5 @@
 # T-2026-10-15-007 GREEN - 1:1 台账生成器的判定证据
-# Generated: 2026-10-16T04:17:05Z  (UTC)
+# Generated: 2026-10-16T04:42:42Z  (UTC)
 # Generator: artifacts/tmp/gen-007-green.sh   重跑：bash artifacts/tmp/gen-007-green.sh
 # 本文件覆盖的调用形态：
 #   python -X utf8 .trae/scripts/dev/gen_parity_ledger.py                  （写已落盘台账）
@@ -11,7 +11,7 @@
 #   .trae/scripts/dev/gen_parity_ledger.py  bytes=20273  lines=377  sha256=6524f3b66f7dc89be8e762d70c8cdf9498a897e7e7372ba2d7f64c650012151a
 #   .trae/scripts/dev/parity_ledger_selftest.py  bytes=26737  lines=552  sha256=0e08112862518d8a45b7c59e579952d28dca57ced34c723e88bf05543ef81b58
 #   .trae/scripts/dev/gen_screen_inventory.py  bytes=20787  lines=417  sha256=270db775d3a1d4f650170bd59ca389edb74759993d70d656d5353b15525bc2fc
-#   Docs/04-ux-design/parity/screen-inventory.json  bytes=21986  lines=1013  sha256=b3b254cfed7179e554f5671e4a1fb05000d01cb103e300b0be57b506ace7c6cd
+#   Docs/04-ux-design/parity/screen-inventory.json  bytes=21986  lines=1013  sha256=4b6cc4ca44eccd580a4a011372df2b621bafcceaa464bd4743748ca25b9c6edb
 #   .trae/scripts/dev/parity/screens.json  bytes=3679  lines=48  sha256=f85fc4342f701b5ce1f27fd78230de6af348a5d5630d8ad7d0e2eb33335fdeaa
 # 指纹名单的边界：本运行会重写 台账 artifacts/parity/ledger.md，所以它不在名单内，也没有任何一块承诺它的字节未变——它变正是本片在做的事（生成器写它，另一块判它等于重导出）。名单中的生成物在这里是只读对象，由同一次运行的窗口之后复核是否位移；但同一支产物的字节会被另一片生成器在它自己的运行里重写，所以本行不是「你今天读到同样字节」的承诺——要复核当前字节就用 sha256sum 现场读该路径，并与台账里「清单文件哈希」「实测面哈希」两行对同一条命令回读。
 
