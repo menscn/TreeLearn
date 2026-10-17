@@ -1,0 +1,57 @@
+# T-2026-10-15-006 RED：1:1 闭环量测的 Node 侧仪器收编前跑不动
+# 生成命令：python -X utf8 artifacts/tmp/gen-006-red.py
+# 被核文件（写入本产物之前的字节）：
+#   pre-adoption-cdp_shot.mjs bytes=5769 lines=136 sha256=3bc1ab224254764a572fa38e74105abaf785d5ac444f12d3af3062abd8ea5c85
+#   cdp_shot.mjs(新路径) bytes=15578 lines=254 sha256=e199974afa0e5cf9d604b8bc4277bd5640e205a0aeae809329a2890694010f76
+#   parity_cdp.mjs bytes=16234 lines=382 sha256=4cc4c7d84ee32bb116106d2605a1c78b2514f51589938cf11ffb1c257fc7c977
+# 判读约定：本产物每块 want=0 表示「该缺口已如实复现」；旧仪器自己的读数
+#   （rc=2、rc=1、没有 --screen 等）写在断言文本里。OVERALL_EXITCODE=0 = 缺口复现，
+#   不表示旧仪器可用，也不表示本片实现已绿（绿在 T-2026-10-15-006-green.txt）。
+# 名单边界：本运行只写本产物与它自己的副本，不改任何被判文件；
+#   上面的指纹是「判定前读数」，本运行不重写这三个文件，因此你今天回算应当与它相同；
+#   若不同，说明有别的运行改过仪器，请先重跑本脚本再看结论。
+
+  命令: node artifacts/evidence/T-2026-10-15-006-pre-adoption-cdp_shot.mjs --selftest
+  退出码=2 输出首行=usage: node cdp_shot.mjs <url> <out.png> [clickSelector...]
+===== block 01 - old instrument cannot self-prove =====
+  ok   rc 恰好是 2（没有自检能力，只能落用法分支）
+  ok   输出里没有任何 SELFTEST 判决行（空见证，不是通过）
+  ok   输出里没有 EXITCODE= 行（旧形态从不打印档位）
+  block 01: want=0 got=0
+
+  命令: node artifacts/evidence/T-2026-10-15-006-pre-adoption-cdp_shot.mjs <missing html> <out.png>
+  退出码=1 输出=FAILED: fetch failed
+===== block 02 - instrument fault recorded as judgement failure =====
+  ok   旧形态对「连不上调试端口」退 1（与判据 FAIL 同码，无法归因）
+  ok   没有独立的仪器故障档位 3
+  ok   产物里没有 EXITCODE= 行（复核者拿不到档位约定）
+  block 02: want=0 got=0
+
+  读数: 旧仪器里出现 --screen 的行=0，新仪器=21
+===== block 03 - no profile-driven invocation =====
+  ok   旧仪器完全没有 --screen（0 行）
+  ok   对照：新仪器按 --screen 取档案（>=1 行）
+  block 03: want=0 got=0
+
+  读数: 旧仪器写死 9222=1 行；共享层用端口 0 由浏览器自选=1 行
+===== block 04 - hard-coded debug port =====
+  ok   旧仪器写死了端口常量
+  ok   对照：新链路不再假设固定端口
+  block 04: want=0 got=0
+
+  读数: 旧仪器命中用例数/下限标记=0/3；新仪器=3/3
+===== block 05 - no case-count floor =====
+  ok   旧仪器既没有用例数也没有下限标记
+  ok   对照：新仪器打印 cases= 并设 MIN_CASES 下界
+  block 05: want=0 got=0
+
+===== 汇总 =====
+  blocks=5 expectation_entries=5
+  block 01 old instrument cannot self-prove               want=0 got=0 ok
+  block 02 instrument fault recorded as judgement failure want=0 got=0 ok
+  block 03 no profile-driven invocation                   want=0 got=0 ok
+  block 04 hard-coded debug port                          want=0 got=0 ok
+  block 05 no case-count floor                            want=0 got=0 ok
+  尾行之下的 EXITCODE 由本表派生，不硬写
+OVERALL_EXITCODE=0
+DECODE ok utf8=True cr=0

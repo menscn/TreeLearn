@@ -28,6 +28,7 @@ import org.commonmark.node.Link;
 import org.commonmark.node.ListItem;
 import org.commonmark.node.Node;
 import org.commonmark.node.OrderedList;
+import org.commonmark.node.Paragraph;
 import org.commonmark.node.StrongEmphasis;
 import org.commonmark.node.Text;
 import org.commonmark.node.SoftLineBreak;
@@ -61,10 +62,18 @@ import com.treelearn.app.ui.math.MathSpan;
  * the box goes unbroken. Counting widths in {@code String.length()} made it worse: a CJK glyph is
  * one UTF-16 unit but takes two character cells.
  *
- * <p>So {@link #renderSegments} emits a <em>sequence</em>: prose runs, and tables carrying their
- * rows as data. {@link ChatScreen} lays each table out with real cells, which is the one thing
- * layout is good at. {@link #render(String, OnCodeBlockClick)} stays for reasoning and translation
- * bodies - flat text with no table of their own - and joins the segments back into one string.
+ * <p><strong>A display formula is a view for the same reason</strong> (2026-10-16). A formula never
+ * wraps, so a wide one in that same {@code match_parent} view is cut at both edges while still
+ * looking rendered. {@link #renderSegments} lifts a formula that owns its paragraph out of the text
+ * just as it lifts a table; a formula sharing a line with prose stays a span, because it is sized by
+ * that line.
+ *
+ * <p>So {@link #renderSegments} emits a <em>sequence</em>: prose runs, tables carrying their rows as
+ * data, and display formulas carrying their parsed tree. {@link ChatScreen} lays each table out with
+ * real cells and each formula with a {@link com.treelearn.app.ui.math.MathView}, which is the one
+ * thing layout is good at. {@link #render(String, OnCodeBlockClick)} stays for reasoning and
+ * translation bodies - flat text with neither of their own - and joins the segments back into one
+ * string.
  */
 public final class MarkdownRenderer {
 
@@ -80,13 +89,17 @@ public final class MarkdownRenderer {
     private MarkdownRenderer() {
     }
 
-    /** One piece of a rendered answer: a run of prose, or a table the screen must inflate. */
+    /** One piece of a rendered answer: a run of prose, a table, or one display formula. */
     public static final class Segment {
 
         /** True when {@link #table} is present and {@link #text} is not. */
         public final boolean isTable;
-        /** The prose run; null for a table segment. */
+        /** True when {@link #formula} is present and {@link #text} is not. */
+        public final boolean isFormula;
+        /** The prose run; null for a table or formula segment. */
         public final CharSequence text;
+        /** The display formula, already parsed; null unless {@link #isFormula}. */
+        public final MathNode formula;
         /** The table's rows; null for a prose segment. Every row has the table's column count. */
         public final List<List<CharSequence>> table;
         /** The header spelling of each column, or empty when the source table declared no header. */
@@ -95,21 +108,27 @@ public final class MarkdownRenderer {
         public final boolean hasHeader;
 
         private Segment(CharSequence text, List<List<CharSequence>> table, List<String> header,
-                boolean hasHeader) {
+                boolean hasHeader, MathNode formula) {
             this.text = text;
+            this.formula = formula;
             this.table = table == null ? null : Collections.unmodifiableList(table);
             this.header = header == null ? Collections.<String>emptyList()
                     : Collections.unmodifiableList(header);
             this.hasHeader = hasHeader;
             this.isTable = table != null;
+            this.isFormula = formula != null;
         }
 
         static Segment prose(CharSequence text) {
-            return new Segment(text, null, null, false);
+            return new Segment(text, null, null, false, null);
         }
 
         static Segment table(List<List<CharSequence>> rows, List<String> header, boolean hasHeader) {
-            return new Segment(null, rows, header, hasHeader);
+            return new Segment(null, rows, header, hasHeader, null);
+        }
+
+        static Segment formula(MathNode node) {
+            return new Segment(null, null, null, false, node);
         }
     }
 
@@ -117,16 +136,19 @@ public final class MarkdownRenderer {
         return render(markdown, null);
     }
 
-    /** Flat rendering: tables are joined back into text. For bodies that never show a table. */
+    /** Flat rendering: tables and formulas are joined back into text. For bodies that show neither. */
     public static CharSequence render(String markdown, OnCodeBlockClick codeClick) {
         List<Segment> segments = renderSegments(markdown, codeClick);
-        if (segments.size() == 1 && !segments.get(0).isTable) {
+        if (segments.size() == 1 && segments.get(0).text != null) {
             return segments.get(0).text;
         }
         SpannableStringBuilder joined = new SpannableStringBuilder();
         for (Segment segment : segments) {
             if (segment.isTable) {
                 joined.append(flattenTable(segment));
+            } else if (segment.isFormula) {
+                ensureBlockBreak(joined);
+                joined.append(flattenFormula(segment));
             } else {
                 joined.append(segment.text);
             }
@@ -136,9 +158,10 @@ public final class MarkdownRenderer {
     }
 
     /**
-     * The answer body's rendering: prose runs and table blocks in document order. A table never
-     * reaches a {@code TextView}, so no box character can be mis-wrapped; the caller lays each table
-     * out with real cells.
+     * The answer body's rendering: prose runs, table blocks and display formulas in document order.
+     * A table never reaches a {@code TextView}, so no box character can be mis-wrapped; a formula
+     * alone in its paragraph does not either, because a formula cannot wrap and a wide one would
+     * lose both ends. The caller lays each one out as a view.
      */
     public static List<Segment> renderSegments(String markdown, OnCodeBlockClick codeClick) {
         List<Segment> segments = new ArrayList<Segment>();
@@ -160,6 +183,13 @@ public final class MarkdownRenderer {
                         literalProtection.placeholders));
                 continue;
             }
+            MathNode display = standaloneFormula(child, math.formulas);
+            if (display != null) {
+                applyMath(prose, math.formulas, literalProtection.placeholders);
+                flush(segments, prose);
+                segments.add(Segment.formula(display));
+                continue;
+            }
             renderNode(child, prose, 0, codeClick);
         }
         applyMath(prose, math.formulas, literalProtection.placeholders);
@@ -167,6 +197,30 @@ public final class MarkdownRenderer {
         flush(segments, prose);
         mergeAdjacentProse(segments);
         return segments;
+    }
+
+    /**
+     * The node behind {@code block} when that top-level block is nothing but one display formula.
+     *
+     * <p>Only a formula alone in its paragraph can leave the text. One sharing a line with prose is
+     * sized by that line and would break the sentence in two if it left, and a formula the parser
+     * does not support returns null here so it keeps the monospace source fallback it already has.
+     */
+    private static MathNode standaloneFormula(Node block, List<MathFormula> formulas) {
+        if (!(block instanceof Paragraph)) {
+            return null;
+        }
+        Node only = block.getFirstChild();
+        if (only == null || only.getNext() != null || !(only instanceof Text)) {
+            return null;
+        }
+        String literal = ((Text) only).getLiteral().trim();
+        for (MathFormula formula : formulas) {
+            if (formula.block && formula.placeholder.equals(literal)) {
+                return MathParser.parse(formula.latex);
+            }
+        }
+        return null;
     }
 
     private static void flush(List<Segment> segments, SpannableStringBuilder prose) {
@@ -182,7 +236,7 @@ public final class MarkdownRenderer {
         for (int i = segments.size() - 1; i > 0; i--) {
             Segment previous = segments.get(i - 1);
             Segment current = segments.get(i);
-            if (previous.isTable || current.isTable) {
+            if (isBlock(previous) || isBlock(current)) {
                 continue;
             }
             SpannableStringBuilder merged = new SpannableStringBuilder(previous.text);
@@ -193,6 +247,11 @@ public final class MarkdownRenderer {
             segments.set(i - 1, Segment.prose(merged));
             segments.remove(i);
         }
+    }
+
+    /** A segment that sits in its own box between prose runs, rather than inside a run. */
+    private static boolean isBlock(Segment segment) {
+        return segment.isTable || segment.isFormula;
     }
 
     /** Turns a table node into a segment: rows as data, so the screen can lay them out. */
@@ -255,6 +314,19 @@ public final class MarkdownRenderer {
             }
             out.append('\n');
         }
+        return out;
+    }
+
+    /**
+     * A display formula back into one line of text: the centred span the prose path used to draw it.
+     * Only the flat {@link #render} needs this, since an answer body shows the formula as a view.
+     */
+    private static CharSequence flattenFormula(Segment segment) {
+        SpannableStringBuilder out = new SpannableStringBuilder();
+        out.append('\ufffc');
+        out.setSpan(MathSpan.create(segment.formula, true), 0, 1,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        applyBlockAlignment(out, 0, 1);
         return out;
     }
 

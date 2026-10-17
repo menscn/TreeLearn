@@ -150,6 +150,36 @@ public final class ChatWiring implements ChatData, ChatCommands {
         }
     }
 
+    /**
+     * Derives what this branch's newest stable answer is missing, then asks the reader again only if
+     * the pass produced something.
+     *
+     * <p>Extracted from the worker thread because the thread is a delivery detail and this decision
+     * is the part that needs pinning: {@link HomeDerivedPort#ensureConversationArtifacts} reaches a
+     * real SQLite helper, so the wiring's half - whether a nudge follows - is testable only when a
+     * caller can run it inline.
+     *
+     * <p>The nudge exists because the strip is derived after the answer is stable, and by then the
+     * generation poll has stopped; without it the strip would be written and never read, which is the
+     * state this wiring shipped in (a complete write path and a read that always answered "none").
+     * It is conditional because a nudge means "read again", and the read is what spawns this pass, so
+     * an unconditional one re-arms itself whatever the last pass did - measured on ALP-AN00 as 130
+     * renders a second of pixel-identical output. A pass that found every artifact already stored for
+     * this baseline has nothing for a reader to see.
+     */
+    void runDerivedPass(String branchId, ChatStore.Conversation captured) {
+        boolean wrote = false;
+        try {
+            wrote = derived.ensureConversationArtifacts(captured, GenerationModel.FLASH,
+                    answerSuggestions.getAsBoolean());
+        } finally {
+            derivedInFlight.remove(branchId);
+        }
+        if (wrote) {
+            notifyGenerationListeners(branchId);
+        }
+    }
+
     @Override
     public Snapshot read(String branchId) {
         Guard.id(branchId, "branchId");
@@ -157,20 +187,8 @@ public final class ChatWiring implements ChatData, ChatCommands {
         if (derived != null && keyVault.isConfigured() && hasStableAnswer(conversation)
                 && derivedInFlight.add(branchId)) {
             final ChatStore.Conversation captured = conversation;
-            Thread worker = new Thread(() -> {
-                try {
-                    derived.ensureConversationArtifacts(captured, GenerationModel.FLASH,
-                            this.answerSuggestions.getAsBoolean());
-                } finally {
-                    derivedInFlight.remove(branchId);
-                }
-                // The strip is derived after the answer is stable, and by then the generation poll
-                // has already stopped - without this the strip would be written and never read,
-                // which is exactly the state this wiring shipped in: a complete write path and a
-                // read that always answered "none". One nudge per completion, through the listener
-                // the presenter already registered, so the next read finds the row.
-                notifyGenerationListeners(branchId);
-            }, "treelearn-derived-read");
+            Thread worker = new Thread(() -> runDerivedPass(branchId, captured),
+                    "treelearn-derived-read");
             worker.setDaemon(true);
             worker.start();
         }

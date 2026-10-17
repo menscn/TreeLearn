@@ -38,7 +38,7 @@ import java.util.List;
  *
  * <p><strong>What it decides, and what it deliberately does not.</strong> Ordering (FIFO above the
  * two-slot cap), the write window, dropping events that are no longer the active attempt's, and the
- * accepted-callback protocol of 8 are decided here. The one judgement it must <em>not</em> make is
+ * local-write-before-send rule of 9.2 are decided here. The one judgement it must <em>not</em> make is
  * "this answer is finished": 9.3 allows a revision only when the stream terminated normally
  * <em>and</em> the final answer is non-empty, and both halves belong elsewhere — the first to the
  * gateway's terminal outcome, the second to {@code GenerationOperation.stabilize} and to
@@ -63,10 +63,13 @@ public final class GenerationCoordinator {
         DeepSeekRequest assemble(GenerationCommand command);
     }
 
-    /** The local write the accepted callback performs before the response body is read (8). */
-    public interface AcceptedWrite {
+    /**
+     * The rows an attempt needs that the coordinator cannot write itself, committed before its call is
+     * opened. The first topic's five row groups are the only production user (8).
+     */
+    public interface LocalWrite {
 
-        /** @return true when the rows are durable and reading may continue */
+        /** @return true when the rows are durable and the call may be opened */
         boolean persist(GenerationOperation operation, long now);
     }
 
@@ -162,17 +165,18 @@ public final class GenerationCoordinator {
     }
 
     /**
-     * Submits the first topic of a conversation: no row may exist before the provider accepted the
-     * request (8), so {@code acceptedWrite} runs inside the accepted callback and the body is only
-     * read when it reports success.
+     * Submits an attempt whose topic, branch or answer position do not exist yet.
+     *
+     * <p>{@code localWrite} creates them together with the operation row, in the caller's own
+     * transaction, and it runs <em>before</em> the call is opened — the same order the follow-up path
+     * has always kept. This is a deliberate departure from 8's "the write waits for the provider's 2xx"
+     * (user decision 2026-10-16, after a 401 on a first topic left a branch with no rows and a screen
+     * that could only read it as unreadable): a refusal now leaves a visible question with a failed
+     * answer position that can be retried in place, instead of a dead end. The cost is that a failed
+     * first send leaves an empty topic behind, which is what the home list and the recovery scan are
+     * for.
      */
-    public SubmitOutcome submitFirstTopic(GenerationCommand command, Assembler assembler,
-            AcceptedWrite acceptedWrite) {
-        return submit(command, assembler, require(acceptedWrite, "acceptedWrite"));
-    }
-
-    private SubmitOutcome submit(GenerationCommand command, Assembler assembler,
-            AcceptedWrite acceptedWrite) {
+    public SubmitOutcome submit(GenerationCommand command, Assembler assembler, LocalWrite localWrite) {
         require(command, "command");
         require(assembler, "assembler");
         DeepSeekRequest request;
@@ -194,35 +198,31 @@ public final class GenerationCoordinator {
         List<Runnable> after = new ArrayList<Runnable>();
         SubmitOutcome outcome;
         synchronized (lock) {
-            outcome = admit(command, request, acceptedWrite, after);
+            outcome = admit(command, request, localWrite, after);
         }
         run(after);
         return outcome;
     }
 
     private SubmitOutcome admit(GenerationCommand command, DeepSeekRequest request,
-            AcceptedWrite acceptedWrite, List<Runnable> after) {
+            LocalWrite localWrite, List<Runnable> after) {
         GenerationScheduler.Admission admission = scheduler.admit(command);
         if (admission == GenerationScheduler.Admission.BRANCH_BUSY) {
             return SubmitOutcome.refused(Refusal.BRANCH_BUSY, null);
         }
         GenerationOperation operation = GenerationOperation.start(command, clock.millis());
-        LiveAttempt attempt = new LiveAttempt(command, operation, request, acceptedWrite);
+        LiveAttempt attempt = new LiveAttempt(command, operation, request, localWrite);
         attempts.open(attempt);
-        if (acceptedWrite == null) {
-            try {
-                GenerationOperationDao.insert(helper.getWritableDatabase(), operation);
-                attempt.persisted = true;
-            } catch (SQLiteException refusedByStore) {
-                // A local persistence failure must not spend a remote slot: the slot is given back
-                // and no call is opened, so the caller keeps its input and its position for a manual
-                // retry (8). Handing the slot back is also what starts the oldest waiting command, so
-                // this goes through the same release path every other outcome uses.
-                release(attempt, after);
-                telemetry.record(GenerationTelemetry.Event.STORAGE_REFUSED, null, command.branchId,
-                        0, null);
-                return SubmitOutcome.refused(Refusal.STORAGE, null);
-            }
+        // Nothing is sent before the rows are durable, so every terminal outcome below has a row to
+        // land in. A local persistence failure therefore must not spend a remote slot: the slot is
+        // given back and no call is opened, so the caller keeps its input and its position for a
+        // manual retry. Handing the slot back is also what starts the oldest waiting command, so this
+        // goes through the same release path every other outcome uses.
+        if (!persistLocal(attempt)) {
+            release(attempt, after);
+            telemetry.record(GenerationTelemetry.Event.STORAGE_REFUSED, null, command.branchId, 0,
+                    null);
+            return SubmitOutcome.refused(Refusal.STORAGE, null);
         }
         telemetry.record(GenerationTelemetry.Event.START, operation.id, command.branchId, 0, null);
         after.add(changed(operation.id, command.branchId, operation.state()));
@@ -231,6 +231,27 @@ public final class GenerationCoordinator {
         }
         return SubmitOutcome.accepted(operation.id,
                 admission == GenerationScheduler.Admission.STARTED);
+    }
+
+    /**
+     * Commits what this attempt needs locally, in one decision shared by both entry points.
+     *
+     * <p>{@code false} means "no call may be opened": either the caller's own write refused, or the
+     * store refused the attempt row. The two are reported the same way because the caller's obligation
+     * is identical — give the input back and offer a retry.
+     */
+    private boolean persistLocal(LiveAttempt attempt) {
+        try {
+            if (attempt.localWrite != null) {
+                attempt.persisted = attempt.localWrite.persist(attempt.operation, clock.millis());
+                return attempt.persisted;
+            }
+            GenerationOperationDao.insert(helper.getWritableDatabase(), attempt.operation);
+            attempt.persisted = true;
+            return true;
+        } catch (SQLiteException refusedByStore) {
+            return false;
+        }
     }
 
     /**
@@ -417,12 +438,15 @@ public final class GenerationCoordinator {
         }
     }
 
-    /** @return whether the accepted write went through, which is what decides if the body is read */
+    /**
+     * Records the provider's 2xx on the row the attempt was already written to.
+     *
+     * <p>A row that refuses it has been deleted or frozen underneath us, and reading a body into
+     * nowhere is exactly what the returned false prevents.
+     *
+     * @return whether the progress landed, which is what decides if the body is read
+     */
     private boolean persistAccepted(LiveAttempt attempt) {
-        if (attempt.acceptedWrite != null) {
-            attempt.persisted = attempt.acceptedWrite.persist(attempt.operation, clock.millis());
-            return attempt.persisted;
-        }
         try {
             GenerationOperationDao.recordProgress(helper.getWritableDatabase(),
                     attempt.operation.id, "", "", attempt.operation.state(), clock.millis());

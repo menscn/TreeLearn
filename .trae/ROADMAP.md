@@ -148,6 +148,10 @@ Phase C 的条目都不是「现在缺人写」，而是**缺前置事实**：�
 
 这些不是「还没做的功能」，而是**当前就红着、且每片验收都会被它们绊住**的门禁。它们与本文件 Phase B/C 的区别是：B/C 缺前置条件，这里缺一次对判据本身的裁定。读数取 `T-2026-10-15-web-parity-doc-authority-writeback-002` 的 GREEN 证据块 05/06/07/11 与 `artifacts/evidence/T-2026-10-15-002-guards-baseline.txt`（同一条命令、回写前后逐项相同 → 证明本片没把它们改红，也没顺手改宽）。
 
+〔**2026-10-16 追加 D7 / D8**：这两条的读数**不取上面那份证据**，而取
+`artifacts/evidence/T-2026-10-16-first-topic-401-deadend.txt` 与真机连接结果 XML；每条自己写明回读命令，
+名单与计数一律现场复算、不抄进正文。〕
+
 ### D1 `check_roadmap_and_routing` 的一次性迁移断言永久为红
 
 - 现象：两条 FAIL——`AGENTS.md adds >= 4 routing rows — measured=0`、`new routing rows cover all four triggers — missing=['intent-capturer', 'pm-discovery', 'project-brief', 'ROADMAP']`。
@@ -188,3 +192,52 @@ Phase C 的条目都不是「现在缺人写」，而是**缺前置事实**：�
 - 现象：002 片的**第二轮**反向搜索才找到 `Docs/spec/SPEC-2026-09-23-providers-and-models.md:168` 这条同族主张——第一轮列出的 9 处是凭已知命中列的，守门也只按「文件 + 那一条精确短语」判，所以它**拦不住新出现的、别处的同族主张**。
 - 修法：加一条与清单无关的兜底扫描——对被盘点文件集合之外的 `README*`、`.trae/rules/**`、`.trae/context/**`、`Docs/spec/**` 断言不出现「无服务端 / 不建设.*后端 / 目录不存在」这类**模式**（模式集合只存一处），命中即判 FAIL 并给行号。
 - 代价：模式扫描有假阳性风险（改写后的「不做远程服务端」合法），需要像 002 片那样用精确短语与例外清单平衡，并配正反自检；这与 `check_stack_facts` 现有的「精确串而非关键词」取向是**互补**而非替换，两条判据要各自说明自己挡什么。
+
+### D7 真机仪器套件有 11 例既有红，`connectedDebugAndroidTest` 因此不可能全绿
+
+- 现象：在 `ALP-AN00` / API 33 上整包跑 `:app:connectedDebugAndroidTest` 得 **287 例 / 12 失败**。
+  其中 11 例与 2026-10-16 的首题改动无关：把 12 个代码文件退回 HEAD（备份后 `git checkout HEAD --`，
+  跑完逐文件 sha256 复原）再**隔离跑那 6 个仍失败的类**（该任务不支持 `--tests`，用
+  `-Pandroid.testInstrumentationRunnerArguments.class=...` 过滤），得 11 条失败且**逐条同名**、
+  全部出现在整包里。第 12 例
+  `HomeTopicCardInstrumentedTest.aStoredTopicIsDrawnAsACardWithItsTitleAndMetaAndStillOpensTheConversation`
+  只在整包出现、隔离跑（HEAD 与改动后各一次）都通过，是 10000ms 负载超时。名单与计数现场回读，不抄进本行：
+  用 `python -X utf8` 解析 `android/app/build/outputs/androidTest-results/connected/debug` 下
+  `TEST-ALP-AN00 - 13-_app-.xml` 里带 `<failure>` 的 `<testcase>`；判定与逐块读数见
+  `artifacts/evidence/T-2026-10-16-first-topic-401-deadend.txt` 块 06/07。
+- 后果：每一片要拿设备证据都得先穿过这 11 例红。恒红的门禁等于没有门禁——与 D1/D3 同病，而且这里
+  的代价是**真的会漏**：读者会把「12 失败」读成「本片改坏了」，或者反过来直接跳过整包、让设备侧继续零覆盖。
+- 修法（按失败文案分三类，各需一次裁定；文案由上条命令现场回读）：
+  ① **产品缺陷，优先级最高**：`AttachmentStorageInstrumentedTest` 与 `ProviderModelDaoInstrumentedTest`
+  各一例升级用例，同为 `SQLiteException: table message_annotations already exists (Sqlite code 1)`，
+  发生在 `CREATE TABLE message_annotations` —— 升级路径把已存在的表又建了一遍。
+  ② **首页/列表在真机上从未画出行**：`HomeMotionInstrumentedTest` ×5 与 `BottomTabShellInstrumentedTest` ×3
+  的文案是 `no row arrived in view ... within 10000ms`、`the home never drew 3 card rows`、
+  `the home's first card was never laid out`、`view 2131034244 is missing`。这与 ③ 同一个形状，
+  **不能先归成"测试不稳"**——先要判定真机上首页历史卡到底画不画得出来（隔离跑能过，说明是负载/时序，
+  但那条判据只覆盖 HomeTopicCard 一例）。
+  ③ `TreeCanvasDeviceInstrumentedTest.theRealTouchStreamReachesTheCanvasCallbacks` 的
+  `a drag must reach onPan` 是设备注入手势到 `onPan` 的通路，与前两类不同源。
+- 代价：①要动建表/升级顺序，必须回跑 `db-migration-reviewer` 并在真机与模拟器各验一次（既有
+  「跑测环境是覆盖面维度」的失败案例）；②要先做归因实验再决定改产品还是改等待方式，直接调大超时
+  无效于根因、只消除假红；③可能要换成 `GestureDescription` 之外的注入手段。
+
+### D8 `ChatGenerationStageTest` 有一对既有 flaky，JVM 套件因此不是 831 全绿
+
+- 现象：`:app:testDebugUnitTest` 报 **831 例 / 2 失败**，固定为
+  `ChatGenerationStageTest.aStopRequestTurnsTheTerminalReadIntoTheCanceledStage`（断言文案
+  `the stop the attempt obeyed reads canceled, not failed expected:<CANCELED> but was:<FAILED>`）与
+  `.anAcceptedSendShowsTheSendingStageUntilTheFirstRowArrives`（`expected:<SENDING> but was:<IDLE>`）。
+  这对红在首题改动之前就有：同一轮里把 `ChatPresenter.java` 退回 HEAD、重跑同一任务，两例照旧（读数见
+  `artifacts/evidence/T-2026-10-16-first-topic-401-deadend.txt` 块 05）。名单与文案现场回读：用
+  `python -X utf8` 解析 `android/app/build/test-results/testDebugUnitTest/` 下带 `<failure>` 的 `<testcase>`。
+- 两条失败**症状不同，尚未证实同源**：一条把终态读成 `FAILED` 而非 `CANCELED`，一条在首行到达前读到
+  `IDLE` 而非 `SENDING`。可疑的共同点是呈现层时序——`ChatPresenter` 接受发送后先在后台线程
+  `read()` 再 `publish(...)`，而 `awaitingFirstRow` 这类标志是在 `publish` 里、即读回**之后**才置位的，
+  于是观察窗可能看不到「发送中等首行」这一帧。这只是**假设**：它解释得了第二条、解释不了第一条的
+  `FAILED`/`CANCELED` 取值，所以先别按它动手。
+- 修法：先分别定位——对第一条查「停止被受理后，终态读回时阶段函数拿到的是哪个输入」，对第二条查
+  「首行到达前 `withSending(true)` 那一帧是否已进入过 ViewState」；两条都修完后补一条断言
+  「同一批消息序列只能派生出一种阶段序列」，否则下一轮照样漂回两个入口。
+- 代价：这是呈现层时序的改动，会碰到 T-117 的跟随判定与生成槽位可见性，需要真机复跑一次才能收；
+  本片未做，因为它是既有缺陷、且修它会让首题那半的证据无法归因。

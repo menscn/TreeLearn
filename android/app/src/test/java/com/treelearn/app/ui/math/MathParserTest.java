@@ -260,6 +260,59 @@ public class MathParserTest {
     }
 
     @Test
+    public void escapedBracesAreLiteralBraces() {
+        MathNode node = MathParser.parse("\\{a,b\\}");
+        assertNotNull(node);
+        assertEquals(MathNode.Kind.ROW, node.kind);
+        assertEquals("{", node.children.get(0).text);
+        assertEquals("}", node.children.get(node.children.size() - 1).text);
+    }
+
+    @Test
+    public void escapedPunctuationIsALiteralAndNotItsCommandMeaning() {
+        MathNode percent = MathParser.parse("x \\% y");
+        assertNotNull(percent);
+        assertEquals(MathNode.Kind.ROW, percent.kind);
+        assertEquals("%", percent.children.get(1).text);
+
+        MathNode underscore = MathParser.parse("a\\_b");
+        assertNotNull(underscore);
+        assertEquals("an escaped underscore is a character, not a subscript",
+                MathNode.Kind.ROW, underscore.kind);
+        assertEquals(3, underscore.children.size());
+        assertEquals("_", underscore.children.get(1).text);
+
+        MathNode ampersand = MathParser.parse("A \\& B");
+        assertNotNull(ampersand);
+        assertEquals("&", ampersand.children.get(1).text);
+
+        MathNode hash = MathParser.parse("p \\# q");
+        assertNotNull(hash);
+        assertEquals("#", hash.children.get(1).text);
+
+        MathNode dollar = MathParser.parse("c_1 \\$ d");
+        assertNotNull(dollar);
+        assertEquals(MathNode.Kind.ROW, dollar.kind);
+        assertEquals("$", dollar.children.get(1).text);
+    }
+
+    @Test
+    public void topSuperscriptIsDrawnAsItsOwnGlyph() {
+        MathNode node = MathParser.parse("K^\\top");
+        assertNotNull(node);
+        assertEquals(MathNode.Kind.SCRIPT, node.kind);
+        assertEquals("⊤", node.superscript.text);
+    }
+
+    @Test
+    public void aModelAnsweredAttentionFormulaParses() {
+        assertNotNull(MathParser.parse("\\text{Attention}(q, \\{k_i,v_i\\}) = \\sum_i"
+                + " \\text{softmax}_i!\\left(\\text{score}(q,k_i)\\right)\\cdot v_i"));
+        assertNotNull(MathParser.parse("\\text{Attention}(Q,K,V) = \\text{softmax}\\!"
+                + "\\left(\\frac{QK^\\top}{\\sqrt{d_k}}\\right)V"));
+    }
+
+    @Test
     public void nullInputIsUnsupported() {
         assertNull(MathParser.parse(null));
         assertTrue(MathParser.parse("x") != null);

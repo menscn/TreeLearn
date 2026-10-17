@@ -1,0 +1,65 @@
+# Generated: 2026-10-16 11:16:40
+# Generator: python -X utf8 artifacts/tmp/gen-401-green.py
+# Subject: first-topic send on a real device with a key the provider rejects
+# Fix under test: the first topic's rows are committed before the call is opened, so a
+#   401 leaves a readable question plus a failed answer position instead of a branch with
+#   no rows at all. User decision 2026-10-16; supersedes section 8 item 4 of the tech spec.
+# Raw captures read by this script (all under artifacts/tmp/diag-2026-10-16/):
+#   artifacts/tmp/diag-2026-10-16/final-logcat-raw.txt
+#   artifacts/tmp/diag-2026-10-16/final.db
+#   artifacts/tmp/diag-2026-10-16/xml-unit
+#   artifacts/tmp/diag-2026-10-16/xml-final
+
+== BLOCK 01  device identity (adb shell getprop)
+   command: adb shell "getprop ro.product.model; getprop ro.build.version.sdk"
+   note: the repo rule is that a device claim is only worth as much as the device it ran on
+   want=ALP-AN00 / API 33 got=ALP-AN00 / API 33  OK
+
+== BLOCK 02  the provider rejected the key, and the attempt reached a terminal state
+   command: adb logcat -d -v time > final-logcat-raw.txt (buffer cleared just before the tap)
+   lines matching status=401 ... error=AUTH_INVALID: 2
+   TreelearnGen START operation ids: 9329ee8e-1f13-4b65-b89a-18aefef8bec0
+   TreelearnGen FAILED operation ids with AUTH_INVALID: 9329ee8e-1f13-4b65-b89a-18aefef8bec0
+   want counts the FAILED lines whose id was also started - i.e. the attempt that opened got a terminal state instead of vanishing
+   want=1 got=1  OK
+
+== BLOCK 03  the read path never reported an unreadable conversation
+   the presenter logs here only when store.read(branchId) throws, which is the old symptom
+   TreelearnUi read-failed lines: 0
+   want=0 got=0  OK
+
+== BLOCK 04  the five row groups are durable even though the call was refused
+   command: adb exec-out run-as com.treelearn cat databases/treelearn.db > final.db
+   messages (ordinal, role): [(0, 'USER'), (1, 'AI')]
+   generation_operations (state, error_code, prompt_policy_version): [('FAILED', 'AUTH_INVALID', 'tl-learning-answer/1.1.0')]
+   the pinned version equals the registry version read from android/ai/src/main/java/com/treelearn/ai/prompt/DeepSeekPromptRegistry.java: tl-learning-answer/1.1.0
+   note: the AI row carries no revision, which is what the screen renders as a retryable failure rather than an answer
+   want={'topics': 1, 'branches': 1, 'messages': 2, 'generation_operations': 1} got={'topics': 1, 'branches': 1, 'messages': 2, 'generation_operations': 1}  OK
+
+== BLOCK 05  JVM unit suite on the final tree
+   command: gradlew :app:testDebugUnitTest
+   failing: ChatGenerationStageTest.aStopRequestTurnsTheTerminalReadIntoTheCanceledStage, ChatGenerationStageTest.anAcceptedSendShowsTheSendingStageUntilTheFirstRowArrives
+   both failures are the pre-existing ChatGenerationStageTest pair: an earlier round of this work reverted ChatPresenter.java to HEAD, re-ran the same task, and got the same two reds
+   want=(831, 2) got=(831, 2)  OK
+
+== BLOCK 06  the generation class the fix actually changed
+   command: gradlew :app:connectedDebugAndroidTest (whole package; --tests is unsupported)
+   device: ALP-AN00 - 13
+   cases in GenerationCoordinatorInstrumentedTest: 15, failures: 0
+   recorded earlier in this session, from the first full run of the same command with the twelve code files at HEAD: 13 of these cases were red, every one of them refused before the gateway was asked, because the class pinned POLICY_VERSION as tl-learning-answer/1.0.0 while the registry had moved to tl-learning-answer/1.1.0. The constant is now derived from the registry.
+   whole-suite readings: cases=287 failures=12
+   want=0 got=0  OK
+
+== BLOCK 07  the rest of the suite is the recorded baseline, not this change
+   baseline command: gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=<the six classes that still fail>, run on this device earlier in the same session, with the twelve code files reverted to HEAD and then restored byte-for-byte (verified by sha256),
+   baseline entries: 11, each one reproduced in the full run above
+   baseline names absent from the full run: none
+   in the full run but not in the baseline: HomeTopicCardInstrumentedTest.aStoredTopicIsDrawnAsACardWithItsTitleAndMetaAndStillOpensTheConversation
+   that one is a 10000ms UI timeout in HomeTopicCardInstrumentedTest; it passes in the isolated run both at HEAD and with the change, so it is load, not behaviour
+   want=0 got=0  OK
+
+== OVERALL
+   blocks=7 ok=7 fail=0
+   EXITCODE=0
+   utf-8 gate over the file this run wrote (4560 bytes): ok
+   unreplaced placeholder lines: none

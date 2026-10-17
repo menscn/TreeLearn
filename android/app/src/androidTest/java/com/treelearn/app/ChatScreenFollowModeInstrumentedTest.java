@@ -8,7 +8,7 @@ import android.content.Intent;
 import android.os.SystemClock;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ScrollView;
 
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -59,7 +59,7 @@ public final class ChatScreenFollowModeInstrumentedTest {
                 .withMessages(Collections.singletonList(message))
                 .withFollow(true, 0);
         ScrollView[] scroll = new ScrollView[1];
-        Button[] follow = new Button[1];
+        ImageButton[] follow = new ImageButton[1];
         instrumentation.runOnMainSync(() -> {
             ChatScreen screen = new ChatScreen(activity);
             screen.setActions(recordingActions(new int[1], new int[1]));
@@ -85,7 +85,7 @@ public final class ChatScreenFollowModeInstrumentedTest {
                 recordingActions(pauseCount, new int[1]));
         settleView();
 
-        Button follow = screen.findViewById(R.id.chat_follow);
+        ImageButton follow = screen.findViewById(R.id.chat_follow);
         assertEquals(View.GONE, follow.getVisibility());
         assertEquals(0, pauseCount[0]);
     }
@@ -101,7 +101,7 @@ public final class ChatScreenFollowModeInstrumentedTest {
         ChatScreen screen = launchScreen(state, recordingActions(pauseCount, followCount));
         settleView();
 
-        Button follow = screen.findViewById(R.id.chat_follow);
+        ImageButton follow = screen.findViewById(R.id.chat_follow);
         ScrollView scroll = screen.findViewById(R.id.chat_scroll);
         assertEquals(View.VISIBLE, follow.getVisibility());
         InstrumentationRegistry.getInstrumentation().runOnMainSync(follow::performClick);
@@ -129,7 +129,7 @@ public final class ChatScreenFollowModeInstrumentedTest {
                 recordingActions(pauseCount, new int[1]));
         settleView();
 
-        Button follow = screen.findViewById(R.id.chat_follow);
+        ImageButton follow = screen.findViewById(R.id.chat_follow);
         ScrollView scroll = screen.findViewById(R.id.chat_scroll);
         InstrumentationRegistry.getInstrumentation().runOnMainSync(follow::performClick);
         settleView();
@@ -152,7 +152,7 @@ public final class ChatScreenFollowModeInstrumentedTest {
         ChatScreen screen = launchScreen(state, recordingActions(pauseCount, new int[1]));
         settleView();
 
-        Button follow = screen.findViewById(R.id.chat_follow);
+        ImageButton follow = screen.findViewById(R.id.chat_follow);
         ScrollView scroll = screen.findViewById(R.id.chat_scroll);
         InstrumentationRegistry.getInstrumentation().runOnMainSync(follow::performClick);
         settleView();
@@ -192,6 +192,39 @@ public final class ChatScreenFollowModeInstrumentedTest {
 
         assertEquals("a new branch gets its own overflow pause", 2, pauseCount[0]);
         assertEquals(View.VISIBLE, screen.findViewById(R.id.chat_follow).getVisibility());
+    }
+
+    /**
+     * 2026-10-16 user decision: "有时候没有自动消失，我已经滚到最底部了". A manual scroll that
+     * settles on the newest content is the learner asking for the latest again, so the key re-attaches
+     * by itself. Only the manual pause may do this - an answer taller than the viewport is detached by
+     * design, which the two overflow cases above hold.
+     */
+    @Test
+    public void restingOnTheNewestContentReEngagesFollowWithoutATap() {
+        int[] pauseCount = {0};
+        int[] followCount = {0};
+        ChatScreen screen = launchScreen(state(UUID.randomUUID().toString(),
+                generatingAnswer(UUID.randomUUID().toString(), longAnswer())),
+                recordingActions(pauseCount, followCount));
+        settleView();
+
+        ImageButton follow = screen.findViewById(R.id.chat_follow);
+        ScrollView scroll = screen.findViewById(R.id.chat_scroll);
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(follow::performClick);
+        settleView();
+        sendDragDown(scroll);
+        settleView();
+        assertEquals("the gesture detaches follow", View.VISIBLE, follow.getVisibility());
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                () -> scroll.fullScroll(View.FOCUS_DOWN));
+        settleView();
+
+        assertEquals("resting on the newest content hides the key", View.GONE,
+                screen.<View>findViewById(R.id.chat_follow_slot).getVisibility());
+        assertEquals("and it tells the presenter, exactly as the key itself would",
+                2, followCount[0]);
     }
 
     private static String longAnswer() {

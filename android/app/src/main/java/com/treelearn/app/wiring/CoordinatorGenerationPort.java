@@ -22,10 +22,10 @@ public final class CoordinatorGenerationPort implements GenerationPort {
     }
 
     @Override
-    public GenerationCoordinator.SubmitOutcome submitFirstTopic(GenerationCommand command,
+    public GenerationCoordinator.SubmitOutcome submit(GenerationCommand command,
             GenerationCoordinator.Assembler assembler,
-            GenerationCoordinator.AcceptedWrite acceptedWrite) {
-        return coordinator.submitFirstTopic(command, assembler, acceptedWrite);
+            GenerationCoordinator.LocalWrite localWrite) {
+        return coordinator.submit(command, assembler, localWrite);
     }
 
     @Override

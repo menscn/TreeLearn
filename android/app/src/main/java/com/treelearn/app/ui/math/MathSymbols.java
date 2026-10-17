@@ -26,6 +26,7 @@ public final class MathSymbols {
         "ldots", "…", "cdots", "⋯", "vdots", "⋮", "dots", "…", "prime", "′",
         "angle", "∠", "deg", "°", "perp", "⊥", "parallel", "∥", "star", "⋆",
         "circ", "∘", "oplus", "⊕", "otimes", "⊗", "lfloor", "⌊", "rfloor", "⌋",
+        "top", "⊤",
     };
 
     private static final Map<String, String> MAP = new HashMap<String, String>();

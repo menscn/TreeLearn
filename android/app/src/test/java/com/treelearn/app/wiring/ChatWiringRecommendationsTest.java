@@ -150,6 +150,42 @@ public class ChatWiringRecommendationsTest {
                 derived.asked);
     }
 
+    /**
+     * The hot-loop lock: a derivation pass that wrote no row must not nudge the reader.
+     *
+     * <p>The nudge means "read again", and {@code read} is what spawns the pass, so an unconditional
+     * one arms the next pass whatever this one did. Measured on ALP-AN00 with a conversation already
+     * fully derived: 1155 renders in nine seconds, ~130 a second, every one of them pixel-identical.
+     */
+    @Test
+    public void aDerivationPassThatWroteNothingLeavesTheReaderAlone() {
+        conversationWithStableAnswer();
+        derived.wrote = false;
+        final int[] nudges = new int[1];
+        ChatWiring wiring = wiring();
+        wiring.addGenerationListener(BRANCH_ID, () -> nudges[0]++);
+
+        wiring.runDerivedPass(BRANCH_ID, store.conversation);
+
+        assertEquals("the pass itself must really have run, or this proves nothing", 1, derived.ensured);
+        assertEquals("nothing was written, so nothing is there for a re-read to show", 0, nudges[0]);
+    }
+
+    /** The other half: the strip that lands after the answer stabilised is what earns the nudge. */
+    @Test
+    public void aDerivationPassThatWroteARowNudgesTheReaderOnce() {
+        conversationWithStableAnswer();
+        derived.wrote = true;
+        final int[] nudges = new int[1];
+        ChatWiring wiring = wiring();
+        wiring.addGenerationListener(BRANCH_ID, () -> nudges[0]++);
+
+        wiring.runDerivedPass(BRANCH_ID, store.conversation);
+
+        assertEquals(1, derived.ensured);
+        assertEquals("the reader is asked again exactly once", 1, nudges[0]);
+    }
+
     /** The port under test: a fake that records which revision it was asked for, answers what the
      * test stored. {@code DerivedService} is final, and rightly so - the port is the seam. */
     private static final class FakeDerived implements HomeDerivedPort {
@@ -157,6 +193,16 @@ public class ChatWiringRecommendationsTest {
         List<String> stored = Collections.emptyList();
         boolean asked;
         String askedRevision;
+        /** What {@link #ensureConversationArtifacts} reports, so a case can name the pass's outcome. */
+        boolean wrote;
+        int ensured;
+
+        @Override
+        public boolean ensureConversationArtifacts(ChatStore.Conversation conversation,
+                com.treelearn.core.domain.GenerationModel model, boolean suggestions) {
+            ensured++;
+            return wrote;
+        }
 
         @Override
         public com.treelearn.app.artifact.ArtifactOutcome rootTitle(

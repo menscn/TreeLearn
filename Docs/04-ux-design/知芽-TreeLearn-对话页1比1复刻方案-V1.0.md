@@ -297,7 +297,9 @@ python -X utf8 .trae/scripts/dev/parity/measure_screen.py --screen chat \
 > **路径变更（2026-10-15，阅读前必读）**：上表三行的路径是**2026-09-27 当时**的位置，保留不改写。
 > 现在的权威位置是 `.trae/scripts/dev/parity/`：像素量测脚本已收编为 `measure_screen.py`（可按屏名运行，
 > 偏移校正从同目录 `screens.json` 取并每次打印扣除量，正反双向自检 `--selftest`），`png_probe.py` 一并迁入。
-> 两支 Node 工具（`verify_1to1.mjs`、`cdp_shot.mjs`）仍留在 `artifacts/tmp/`，由 T-2026-10-15-006 收编。
+> 两支 Node 工具里，产图侧 `cdp_shot.mjs` 已由 T-2026-10-15-006 收编进 `.trae/scripts/dev/parity/`
+> （与共享层 `parity_cdp.mjs` 一起：屏档案驱动调用、四档退出码、正反双向自检 `--selftest`）；
+> DOM 侧 `verify_1to1.mjs` 仍在 `artifacts/tmp/`，由 T-2026-10-15-009 收编。
 > 本节的量测结论与判定口径**未变**：收编前后对同一张 2026-09-27 样本重跑，87 行判据逐字相同
 > （见证 `artifacts/evidence/T-2026-10-15-003-green.txt` 的对照块）。
 

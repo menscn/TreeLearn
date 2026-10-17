@@ -83,6 +83,17 @@ public interface ChatSink {
     void close();
 
     /**
+     * Reports a conversation read the store refused, so that a screen the learner can only see as
+     * "unreadable" leaves a line in the device log.
+     *
+     * <p>The presenter is deliberately free of Android types, so it cannot log; this is the one port
+     * that carries the fact to the side that can. What travels is the branch id and the store's own
+     * diagnostic sentence - the read produced no messages, so there is no learner content in it.
+     */
+    default void reportUnreadable(String branchId, String cause) {
+    }
+
+    /**
      * Scrolls the conversation back to a resolved reading position.
      *
      * <p>The presenter decided where the learner was; the screen only has to put that row there. The

@@ -179,7 +179,11 @@ public final class HomeWiring implements HomeData, RootQuestionSubmitter {
                 DeepSeekContextEncoder.encode(new ContextPlan(Collections.<ContextPlan.Entry>emptyList())),
                 currentInput, budget);
 
-        GenerationCoordinator.SubmitOutcome outcome = generation.submitFirstTopic(command, assembler,
+        // The rows land before the call is opened, so the branch this method hands to the screen is
+        // always readable: a 401 or a dead network leaves a question with a failed answer position,
+        // not a conversation that cannot be read. The write is the coordinator's own guard, and a
+        // refusal of it comes back as Refusal.STORAGE below rather than as an accepted dead end.
+        GenerationCoordinator.SubmitOutcome outcome = generation.submit(command, assembler,
                 (operation, acceptedAt) -> store.createFirstTopic(topic, rootBranch, userMessage,
                         aiMessage, operation).isCreated());
 

@@ -17,6 +17,7 @@ import com.treelearn.ai.gateway.GenerationSink;
 import com.treelearn.ai.gateway.StreamOutcome;
 import com.treelearn.ai.prompt.DeepSeekMessage;
 import com.treelearn.ai.prompt.DeepSeekRequest;
+import com.treelearn.ai.prompt.DeepSeekPromptRegistry;
 import com.treelearn.ai.prompt.DeepSeekRequestAssembler;
 import com.treelearn.ai.prompt.PromptBudget;
 import com.treelearn.ai.prompt.PromptBuildException;
@@ -72,8 +73,9 @@ import java.util.List;
  * <p>The gateway is a double, not a mock framework: {@link FakeGateway} records the call and hands
  * back a handle that the test drives by hand, so "two calls are open" is a fact about the
  * coordinator rather than a race the test hopes to win. The double refuses to deliver a delta before
- * the accepted callback returned true, which is how 8's "commit first, read the body second" rule is
- * asserted instead of assumed.
+ * the accepted callback returned true, and the attempt row is already durable by the time the first
+ * call is opened - which is what the 2026-10-16 rewrite of 8's first-topic rule asks both paths to
+ * keep.
  *
  * <p>Three properties get the most attention, because a plausible-looking implementation gets them
  * wrong: the cap and the FIFO order (7), the batching window (7), and the disposal of events that
@@ -85,7 +87,14 @@ import java.util.List;
 public final class GenerationCoordinatorInstrumentedTest {
 
     private static final long T0 = 1_756_000_000_000L;
-    private static final String POLICY_VERSION = "tl-learning-answer/1.0.0";
+    /**
+     * Derived, never pinned: {@link DeepSeekRequestAssembler} copies the registry's version onto the
+     * request and {@code submit} refuses a command whose pinned version disagrees with it, so a literal
+     * here goes stale the moment the registry bumps - and this suite is compiled but not run by
+     * {@code check}, so the staleness has no other witness.
+     */
+    private static final String POLICY_VERSION = DeepSeekPromptRegistry
+            .spec(PromptPurpose.LEARNING_ANSWER).policyVersion;
     private static final int BUDGET_CHARS = 8_000;
     private static final int MIN_ANSWER_CHARS = 512;
 
@@ -383,59 +392,69 @@ public final class GenerationCoordinatorInstrumentedTest {
     }
 
     @Test
-    public void theFirstTopicWriteRunsInsideTheAcceptedCallbackBeforeAnyDelta() {
+    public void theFirstTopicWriteLandsBeforeTheCallIsOpened() {
         Position position = seedPosition();
-        final List<String> acceptedWrites = new ArrayList<String>();
+        final List<String> localWrites = new ArrayList<String>();
 
-        GenerationCoordinator.SubmitOutcome outcome = coordinator.submitFirstTopic(
+        GenerationCoordinator.SubmitOutcome outcome = coordinator.submit(
                 commandFor(position), asking("the first question"),
                 (operation, now) -> {
-                    acceptedWrites.add(operation.promptPolicyVersion);
+                    localWrites.add(operation.promptPolicyVersion);
                     GenerationOperationDao.insert(helper.getWritableDatabase(), operation);
                     return true;
                 });
 
+        // The first topic used to wait for the provider's 2xx before writing anything, which left a
+        // 401 with no rows at all and a screen that could only say the conversation was unreadable
+        // (user decision 2026-10-16: 首话题与追问对称). One entry now, before the call.
+        assertEquals("the write ran once, before anyone was asked", 1, localWrites.size());
+        assertEquals(POLICY_VERSION, localWrites.get(0));
         assertTrue(outcome.isAccepted());
-        assertEquals("8: no row may exist before the provider accepted the request",
-                0, countRows("generation_operations", ""));
-        assertEquals(0, acceptedWrites.size());
+        assertEquals("the call opened beside an already-durable attempt", 1, gateway.openCount());
+        GenerationOperationRow stored = row(outcome.operationId);
+        assertNotNull("9.2 applies to the first topic too", stored);
+        assertEquals("and it carries the version the command pinned", POLICY_VERSION,
+                stored.promptPolicyVersion);
+        assertEquals(GenerationState.STAGED, stored.state);
 
         Handle handle = gateway.handle(0);
         assertTrue(handle.accept());
-
-        assertEquals("the accepted write ran inside the callback", 1, acceptedWrites.size());
-        assertEquals(POLICY_VERSION, acceptedWrites.get(0));
-        GenerationOperationRow stored = row(outcome.operationId);
-        assertNotNull("the row is durable by the time the callback returned", stored);
-        assertEquals("and it carries the version the command pinned", POLICY_VERSION,
-                stored.promptPolicyVersion);
-        assertEquals(GenerationState.SUBMITTING, stored.state);
+        assertEquals("the accepted callback writes onto the row the local write created",
+                GenerationState.SUBMITTING, row(outcome.operationId).state);
 
         handle.delta("thinking", "");
         clock.advance(StreamBatch.MAX_MILLIS);
         handle.delta("", "the answer");
         // The window is 250 ms / 256 characters, so a delta is only observable once it is crossed:
-        // what this pins is that the row the accepted callback created is the one it lands in.
-        assertEquals("the body was read only after that write, so the delta has somewhere to land",
+        // what this pins is that the row the local write created is the one it lands in.
+        assertEquals("the body was read into the row that was already there",
                 "the answer", row(outcome.operationId).partialAnswer);
     }
 
     @Test
-    public void aRefusedAcceptedWriteClosesTheConnectionAndFreesTheSlot() {
+    public void aRefusedLocalWriteOpensNoCallAndFreesTheSlot() {
         Position position = seedPosition();
+        final List<String> localWrites = new ArrayList<String>();
 
-        GenerationCoordinator.SubmitOutcome outcome = coordinator.submitFirstTopic(
-                commandFor(position), asking("the first question"), (operation, now) -> false);
+        GenerationCoordinator.SubmitOutcome outcome = coordinator.submit(
+                commandFor(position), asking("the first question"), (operation, now) -> {
+                    localWrites.add(operation.id);
+                    return false;
+                });
 
-        Handle handle = gateway.handle(0);
-        assertFalse("8: a failed local write closes the connection before the body is read",
-                handle.accept());
+        assertEquals("the refusal is the caller's, and it names the local write", 1,
+                localWrites.size());
+        assertFalse(outcome.isAccepted());
+        assertEquals(GenerationCoordinator.Refusal.STORAGE, outcome.refusal);
+        assertEquals("a local refusal must not spend a remote call", 0, gateway.openCount());
         assertEquals("and the half-written topic leaves nothing behind",
                 0, countRows("generation_operations", ""));
         assertEquals(0, coordinator.activeCount());
         assertEquals("the slot is free for the retry the learner is offered",
                 0, coordinator.waitingCount());
-        assertEquals(1, telemetry.count(GenerationTelemetry.Event.FAILED));
+        assertEquals(1, telemetry.count(GenerationTelemetry.Event.STORAGE_REFUSED));
+        assertEquals("nothing was sent, so no stream ever failed", 0,
+                telemetry.count(GenerationTelemetry.Event.FAILED));
         assertTrue("a retry of the same position starts normally",
                 coordinator.submit(commandFor(position), asking("the question again")).started);
     }

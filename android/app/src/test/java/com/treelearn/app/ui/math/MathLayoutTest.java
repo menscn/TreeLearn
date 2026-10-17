@@ -94,6 +94,34 @@ public class MathLayoutTest {
         assertEquals("single letter is a math variable, slanted", true, l.italic);
     }
 
+    /**
+     * A rule drawn by an enclosed box has to reach the box that paints it. Every composite used to
+     * collect glyphs but pass {@code null} for lines, so a fraction inside {@code \left(} lost its
+     * bar and a radical inside a numerator lost its overline while the measurement stayed correct -
+     * the formula looked sized but incomplete, and no width test could see it.
+     */
+    @Test
+    public void aNestedRuleSurvivesTheBoxThatEnclosesIt() {
+        MathLayout.MathBox plain = layout("\\frac{a}{b}");
+
+        MathLayout.MathBox inDelimiter = layout("\\left(\\frac{a}{b}\\right)");
+        MathLayout.MathBox inScript = layout("x^{\\frac{a}{b}}");
+        MathLayout.MathBox radicalInFrac = layout("\\frac{\\sqrt{a}}{b}");
+
+        assertEquals("the fraction bar must survive inside a delimiter",
+                plain.lines.size(), inDelimiter.lines.size());
+        assertEquals("the fraction bar must survive inside a superscript",
+                plain.lines.size(), inScript.lines.size());
+        assertEquals("a radical's overline must survive inside a fraction, next to its bar",
+                2, radicalInFrac.lines.size());
+
+        MathLayout.HLine moved = inDelimiter.lines.get(0);
+        assertTrue("the copied bar must be re-based into the enclosing box, not left in child "
+                        + "coordinates: child=" + plain.lines.get(0).y + " parent=" + moved.y
+                        + " box=" + inDelimiter.height(),
+                moved.y > plain.lines.get(0).y && moved.y < inDelimiter.height());
+    }
+
     private static MathLayout.Glyph find(MathLayout.MathBox box, String text) {
         for (MathLayout.Glyph g : box.glyphs) {
             if (text.equals(g.text)) {

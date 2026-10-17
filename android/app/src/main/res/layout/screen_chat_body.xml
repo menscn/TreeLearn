@@ -29,7 +29,7 @@
             android:id="@+id/chat_back"
             android:layout_width="@dimen/touch_min"
             android:layout_height="@dimen/touch_min"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:background="@drawable/bg_icon_button"
             android:contentDescription="@string/cd_chat_back"
             android:scaleType="centerInside"
             android:src="@drawable/ic_nav_back"
@@ -51,7 +51,7 @@
             android:id="@+id/chat_nav"
             android:layout_width="@dimen/touch_min"
             android:layout_height="@dimen/touch_min"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:background="@drawable/bg_icon_button"
             android:contentDescription="@string/cd_chat_nav"
             android:scaleType="centerInside"
             android:src="@drawable/ic_nav_tree"
@@ -61,7 +61,7 @@
             android:id="@+id/chat_overview"
             android:layout_width="@dimen/touch_min"
             android:layout_height="@dimen/touch_min"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:background="@drawable/bg_icon_button"
             android:contentDescription="@string/cd_chat_overview"
             android:scaleType="centerInside"
             android:src="@drawable/ic_chat_overview"
@@ -71,14 +71,18 @@
             android:id="@+id/chat_settings"
             android:layout_width="@dimen/touch_min"
             android:layout_height="@dimen/touch_min"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:background="@drawable/bg_icon_button"
             android:contentDescription="@string/cd_chat_settings"
             android:scaleType="centerInside"
             android:src="@drawable/ic_chat_gear"
             android:tint="@color/tl_green_deep" />
     </LinearLayout>
 
-    <!-- The reading-state notice: a write the store refused, hidden until something fails. -->
+    <!--
+      The notice bar: one line for whatever category the presenter reported, hidden until there is
+      something to tell. Its colour is set by NoticeText at draw time, because a note and a failure
+      are not the same colour - so no colour belongs here, where a second one would be a second answer.
+    -->
     <TextView
         android:id="@+id/chat_notice"
         android:layout_width="match_parent"
@@ -86,7 +90,6 @@
         android:layout_marginStart="@dimen/page_gutter"
         android:layout_marginTop="@dimen/space_s2"
         android:layout_marginEnd="@dimen/page_gutter"
-        android:textColor="@color/tl_red"
         android:textSize="@dimen/text_sm"
         android:visibility="gone" />
 
@@ -204,16 +207,51 @@
         </LinearLayout>
         </com.treelearn.app.screen.FollowScrollView>
 
-        <!-- T-075: the follow-latest button (073 §6) - surface pill, green text, 44dp hot zone.
-             Hidden while following; while detached it floats here and names the missed count. -->
-        <Button android:id="@+id/chat_follow" android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:layout_gravity="bottom|center_horizontal"
-            android:layout_marginBottom="@dimen/space_s3" android:background="@drawable/bg_pill"
-            android:backgroundTint="@color/tl_surface" android:elevation="@dimen/space_s1"
-            android:minHeight="@dimen/touch_min" android:paddingStart="@dimen/space_s3"
-            android:paddingEnd="@dimen/space_s3" android:text="@string/chat_back_to_latest"
-            android:textColor="@color/tl_green_deep" android:textSize="@dimen/text_sm"
-            android:visibility="gone" />
+        <!-- T-075: the follow-latest key (073 §6). 2026-10-16 user decision: it was a text pill, so it
+             grew wider every time a missed item joined the label ("这个背景太傻大了", and nothing stays
+             fixed when its own width keeps changing). It is now a fixed 44dp rounded rectangle holding
+             one down chevron, and the count rides a badge in the corner the way the answer row's child
+             entry already does it. The slot is what floats (gravity bottom|center over the scroll
+             region); the key inside never resizes. The slot is also the only visibility switch - the
+             key is always visible inside it, so a hidden key and a hidden slot can never disagree. -->
+        <FrameLayout
+            android:id="@+id/chat_follow_slot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="@dimen/space_s3"
+            android:visibility="gone">
+
+            <ImageButton
+                android:id="@+id/chat_follow"
+                android:layout_width="@dimen/touch_min"
+                android:layout_height="@dimen/touch_min"
+                android:background="@drawable/bg_follow_latest"
+                android:contentDescription="@string/chat_back_to_latest"
+                android:elevation="@dimen/space_s1"
+                android:scaleType="center"
+                android:src="@drawable/ic_chevron_down"
+                android:stateListAnimator="@null"
+                android:tint="@color/tl_action_text" />
+
+            <!-- The missed count, decor: the key's content description already names it, so a screen
+                 reader must not read the number twice. -->
+            <TextView
+                android:id="@+id/chat_follow_count"
+                android:layout_width="wrap_content"
+                android:layout_height="14dp"
+                android:layout_gravity="top|end"
+                android:background="@drawable/bg_count_badge"
+                android:elevation="@dimen/space_s1"
+                android:gravity="center"
+                android:importantForAccessibility="no"
+                android:minWidth="14dp"
+                android:paddingStart="3dp"
+                android:paddingEnd="3dp"
+                android:textColor="@color/tl_surface"
+                android:textSize="9.5sp"
+                android:visibility="gone" />
+        </FrameLayout>
     </FrameLayout>
 
     <!-- The quoted sentence the next question will be asked from. -->
@@ -244,7 +282,7 @@
             android:id="@+id/chat_quote_clear"
             android:layout_width="@dimen/touch_min"
             android:layout_height="@dimen/touch_min"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:background="@drawable/bg_icon_button"
             android:contentDescription="@string/cd_chat_quote_clear"
             android:scaleType="centerInside"
             android:src="@drawable/ic_chat_close"
@@ -280,7 +318,7 @@
             android:id="@+id/chat_attach_clear"
             android:layout_width="@dimen/touch_min"
             android:layout_height="@dimen/touch_min"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:background="@drawable/bg_icon_button"
             android:contentDescription="@string/cd_chat_attachment_remove"
             android:scaleType="centerInside"
             android:src="@drawable/ic_chat_close"
@@ -307,6 +345,11 @@
              chip sends its query as-is (the draft is kept) and the row collapses on send, so the
              frames exist to be tapped once. The visible pill is the model chip's 32dp class; the
              44dp hot zone is the hosting frame, the split ModelThinkingPicker already uses. -->
+        <!-- 2026-10-16 user decision: the chip's hot zone stops drawing its own highlight. The frame
+             is a 44dp box around a 32dp pill, so ?android:attr/selectableItemBackground lit a rectangle
+             noticeably larger than the control the learner aimed at - the oversized background marked
+             out on this round's shot. The frame keeps the click and the touch target; the pill draws
+             the press, clipped to its own shape, by taking the frame's pressed state. -->
         <LinearLayout
             android:id="@+id/chat_ask_chips"
             android:layout_width="match_parent"
@@ -319,7 +362,6 @@
                 android:id="@+id/chat_ask_why"
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/touch_min"
-                android:background="?android:attr/selectableItemBackground"
                 android:contentDescription="@string/cd_chat_ask_why">
 
                 <TextView
@@ -327,6 +369,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:background="@drawable/bg_ask_ai_chip"
+                    android:duplicateParentState="true"
                     android:paddingStart="@dimen/space_s3"
                     android:paddingTop="@dimen/space_s1"
                     android:paddingEnd="@dimen/space_s3"
@@ -341,7 +384,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/touch_min"
                 android:layout_marginStart="@dimen/ask_chip_gap"
-                android:background="?android:attr/selectableItemBackground"
                 android:contentDescription="@string/cd_chat_ask_what">
 
                 <TextView
@@ -349,6 +391,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:background="@drawable/bg_ask_ai_chip"
+                    android:duplicateParentState="true"
                     android:paddingStart="@dimen/space_s3"
                     android:paddingTop="@dimen/space_s1"
                     android:paddingEnd="@dimen/space_s3"
@@ -363,7 +406,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/touch_min"
                 android:layout_marginStart="@dimen/ask_chip_gap"
-                android:background="?android:attr/selectableItemBackground"
                 android:contentDescription="@string/cd_chat_ask_how">
 
                 <TextView
@@ -371,6 +413,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:background="@drawable/bg_ask_ai_chip"
+                    android:duplicateParentState="true"
                     android:paddingStart="@dimen/space_s3"
                     android:paddingTop="@dimen/space_s1"
                     android:paddingEnd="@dimen/space_s3"
@@ -427,7 +470,7 @@
                         android:id="@+id/chat_expand"
                         android:layout_width="@dimen/touch_min"
                         android:layout_height="@dimen/touch_min"
-                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:background="@drawable/bg_icon_button"
                         android:contentDescription="@string/cd_chat_fullscreen_edit"
                         android:scaleType="centerInside"
                         android:src="@drawable/ic_chat_expand"
@@ -454,6 +497,7 @@
                         android:drawableStart="@drawable/ic_chat_attach"
                         android:drawablePadding="@dimen/space_s1"
                         android:drawableTint="@color/tl_ink2"
+                        android:foreground="@drawable/fg_pill_ripple"
                         android:gravity="center"
                         android:paddingStart="@dimen/space_s2"
                         android:paddingEnd="@dimen/space_s2"
@@ -469,6 +513,7 @@
                         android:background="@drawable/bg_pill"
                         android:backgroundTint="@color/tl_surface"
                         android:contentDescription="@string/cd_chat_search_chip"
+                        android:foreground="@drawable/fg_pill_ripple"
                         android:gravity="center"
                         android:minHeight="@dimen/touch_min"
                         android:paddingStart="@dimen/space_s3"
@@ -489,7 +534,7 @@
                         android:layout_width="@dimen/touch_min"
                         android:layout_height="@dimen/touch_min"
                         android:layout_marginStart="@dimen/space_s2"
-                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:background="@drawable/bg_icon_button"
                         android:contentDescription="@string/cd_chat_voice"
                         android:scaleType="centerInside"
                         android:src="@drawable/ic_chat_voice"
@@ -499,7 +544,10 @@
             </LinearLayout>
 
             <!-- The circular send (prototype .send-fab, line 140): the shared oval selector draws
-                 the enabled/pressed/disabled steps, and the screen swaps the send/stop glyph. -->
+                 the enabled/pressed/disabled steps, and the screen swaps the send/stop glyph.
+                 2026-10-16: the Material Button's own elevation animator is off here too - the fab's
+                 pressed step is drawn by its own selector, so the lift only made the key rock on its
+                 axis while the card it sits in stayed flat. -->
             <Button
                 android:id="@+id/chat_send"
                 android:layout_width="@dimen/touch_min"
@@ -512,6 +560,7 @@
                 android:drawableTint="@color/tl_surface"
                 android:paddingStart="10dp"
                 android:paddingEnd="10dp"
+                android:stateListAnimator="@null"
                 android:text=""
                 android:textColor="@color/tl_surface"
                 android:textSize="@dimen/text_sm" />

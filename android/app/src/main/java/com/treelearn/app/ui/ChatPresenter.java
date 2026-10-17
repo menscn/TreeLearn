@@ -230,10 +230,11 @@ public final class ChatPresenter implements ChatActions {
     }
 
     /**
-     * T-103: the chip's model comes from the chat-role assignment, told once per entry. A fallback
-     * (builtin/earliest) or an empty assignment lands as the one-time notice; a clean resolution
-     * swaps the tier silently. The source is null in the legacy path, which then behaves exactly as
-     * before — the settings tier stays and no notice is ever raised.
+     * T-103: the chip's model comes from the chat-role assignment, told once per entry. Only a
+     * substitution — a selection the learner actually made and the store could no longer honour —
+     * lands as the one-time notice; a clean resolution, and the builtin default standing in for a
+     * role that was never picked, swap the tier silently. The source is null in the legacy path,
+     * which then behaves exactly as before — the settings tier stays and no notice is ever raised.
      */
     private void resolveChatRole() {
         if (chatRoleSource == null) {
@@ -251,8 +252,7 @@ public final class ChatPresenter implements ChatActions {
         HomeViewState.Notice notice = null;
         if (assignment.fallback == ModelSettingsPresenter.Fallback.EMPTY) {
             notice = HomeViewState.Notice.NO_MODELS;
-        } else if (assignment.fallback == ModelSettingsPresenter.Fallback.BUILTIN
-                || assignment.fallback == ModelSettingsPresenter.Fallback.EARLIEST) {
+        } else if (assignment.fallback.substituted()) {
             notice = HomeViewState.Notice.CHAT_MODEL_FALLBACK;
         }
         final GenerationModel resolved = modelOf(assignment.modelId);
@@ -317,6 +317,10 @@ public final class ChatPresenter implements ChatActions {
         try {
             snapshot = data.read(branchId);
         } catch (RuntimeException unreadable) {
+            // The learner sees one static sentence and nothing else, so the store's own reason has to
+            // go somewhere a person can read later - otherwise a broken read is undiagnosable.
+            sink.reportUnreadable(branchId, unreadable.getClass().getName() + ": "
+                    + unreadable.getMessage());
             ui.post(() -> render(state.withPhase(ChatViewState.Phase.ERROR)));
             return;
         }

@@ -26,49 +26,59 @@
     android:gravity="center_vertical"
     android:orientation="horizontal">
 
+    <!-- 2026-10-16 user decision: the three glyph leads stop being bare Buttons under an unbounded
+         ripple. Each one now takes @drawable/bg_icon_button, so the press highlight is the rounded
+         rectangle that ends at the control's own edge instead of a ~62dp disc over the neighbours
+         ("这个背景太傻大了"); the tint is tl_glyph, so a lead the store would refuse is drawn grey
+         rather than asking for a tap it will swallow ("点击某些按钮没有任何反应"); and the Material
+         Button's own state list animator is nulled, because lifting an invisible card off the page on
+         press is the motion the user marked as wrong ("按钮的点击和动效也不太对"). -->
     <Button
         android:id="@+id/act_copy"
         android:layout_width="@dimen/touch_min"
         android:layout_height="@dimen/touch_min"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:background="@drawable/bg_icon_button"
         android:contentDescription="@string/cd_act_copy"
         android:drawableStart="@drawable/ic_action_copy"
-        android:drawableTint="@color/tl_ink3"
+        android:drawableTint="@color/tl_glyph"
         android:drawablePadding="0dp"
         android:paddingStart="0dp"
         android:paddingEnd="0dp"
+        android:stateListAnimator="@null"
         android:text=""
-        android:textColor="@color/tl_ink3"
+        android:textColor="@color/tl_glyph"
         android:textSize="@dimen/text_cap" />
 
     <Button
         android:id="@+id/act_reset"
         android:layout_width="@dimen/touch_min"
         android:layout_height="@dimen/touch_min"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:background="@drawable/bg_icon_button"
         android:contentDescription="@string/cd_act_reset"
         android:drawableStart="@drawable/ic_nav_restore"
-        android:drawableTint="@color/tl_ink3"
+        android:drawableTint="@color/tl_glyph"
         android:drawablePadding="0dp"
         android:paddingStart="0dp"
         android:paddingEnd="0dp"
+        android:stateListAnimator="@null"
         android:text=""
-        android:textColor="@color/tl_ink3"
+        android:textColor="@color/tl_glyph"
         android:textSize="@dimen/text_cap" />
 
     <Button
         android:id="@+id/act_fork"
         android:layout_width="@dimen/touch_min"
         android:layout_height="@dimen/touch_min"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:background="@drawable/bg_icon_button"
         android:contentDescription="@string/cd_act_fork"
         android:drawableStart="@drawable/ic_action_fork"
-        android:drawableTint="@color/tl_ink3"
+        android:drawableTint="@color/tl_glyph"
         android:drawablePadding="0dp"
         android:paddingStart="0dp"
         android:paddingEnd="0dp"
+        android:stateListAnimator="@null"
         android:text=""
-        android:textColor="@color/tl_ink3"
+        android:textColor="@color/tl_glyph"
         android:textSize="@dimen/text_cap" />
 
     <!-- Child-branch list (prototype line 1178): the tree glyph with the child count in a green
@@ -81,7 +91,7 @@
         android:id="@+id/act_children"
         android:layout_width="@dimen/touch_min"
         android:layout_height="@dimen/touch_min"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:background="@drawable/bg_icon_button"
         android:focusable="true"
         android:visibility="gone">
 
@@ -92,7 +102,7 @@
             android:duplicateParentState="true"
             android:importantForAccessibility="no"
             android:src="@drawable/ic_nav_tree"
-            android:tint="@color/tl_ink3" />
+            android:tint="@color/tl_glyph" />
 
         <!-- The count rides the glyph's top-right, as in the prototype. It is decor: the number is
              already in the container's contentDescription, so a screen reader must not read it twice. -->

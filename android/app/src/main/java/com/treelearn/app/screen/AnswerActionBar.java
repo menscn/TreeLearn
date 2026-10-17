@@ -1,6 +1,7 @@
 package com.treelearn.app.screen;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.widget.Button;
@@ -91,10 +92,18 @@ public final class AnswerActionBar extends LinearLayout {
         boolean hasChildren = message.hasChildren();
         children.setVisibility(hasChildren ? VISIBLE : GONE);
         children.setEnabled(hasChildren);
-        childrenCount.setText(String.valueOf(message.childBranchCount));
-        children.setContentDescription(hasChildren
+        // 2026-10-16: this row re-renders with every stream batch. A write that changes nothing still
+        // re-measures the row, so each of the three texts is written only when it actually differs.
+        String count = String.valueOf(message.childBranchCount);
+        if (!TextUtils.equals(childrenCount.getText(), count)) {
+            childrenCount.setText(count);
+        }
+        String description = hasChildren
                 ? getContext().getString(R.string.chat_children_title, message.childBranchCount)
-                : getContext().getString(R.string.chat_act_children));
+                : getContext().getString(R.string.chat_act_children);
+        if (!TextUtils.equals(children.getContentDescription(), description)) {
+            children.setContentDescription(description);
+        }
     }
 
     /** The answer the row currently draws; the screen needs it to read a selection. */
@@ -107,8 +116,11 @@ public final class AnswerActionBar extends LinearLayout {
      * streams, so the time appears exactly when the prototype shows it: on a stable answer.
      */
     public void renderTime(long createdAtMs) {
-        time.setText(android.text.format.DateUtils.getRelativeTimeSpanString(createdAtMs,
-                System.currentTimeMillis(), android.text.format.DateUtils.MINUTE_IN_MILLIS));
+        CharSequence next = android.text.format.DateUtils.getRelativeTimeSpanString(createdAtMs,
+                System.currentTimeMillis(), android.text.format.DateUtils.MINUTE_IN_MILLIS);
+        if (!TextUtils.equals(time.getText(), next)) {
+            time.setText(next);
+        }
     }
 
     private void fire(java.util.function.Consumer<Listener> call) {

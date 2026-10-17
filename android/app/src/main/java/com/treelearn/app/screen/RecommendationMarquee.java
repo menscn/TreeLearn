@@ -2,6 +2,7 @@ package com.treelearn.app.screen;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -26,8 +27,11 @@ import java.util.List;
  *   <li>The recommendations are split into two independently moving rows. Each row draws its chip
  *       list twice and loops by one copy's width, so the seam never appears - there is no end to reach.
  *       The first row moves left and the second row moves right.
- *   <li>The drift stops whenever the strip is not on screen, is detached, or is too narrow to scroll.
- *       PRD 6.2.17 exception 4 explicitly does not require the animation to keep running off screen.
+ *   <li>The drift stops whenever the strip is not on screen, is detached, is too narrow to scroll, or
+ *       is drawn where nobody can see it. PRD 6.2.17 exception 4 explicitly does not require the
+ *       animation to keep running off screen.
+ *   <li>It also stops when the system's animator scale is zero, because the drift is a motion like any
+ *       other and {@link ChatMotion} is this app's one reader of that setting (T-2026-09-27-005).
  * </ul>
  *
  * <p>The two rows live inside one {@link EdgeFadeLayout}, which dissolves both of them together at
@@ -49,12 +53,23 @@ public final class RecommendationMarquee extends LinearLayout {
         void onRecommendationTapped(Recommendation recommendation);
     }
 
-    private static final int DRIFT_INTERVAL_MILLIS = 16;
+    /**
+     * The step's interval and the step itself are one decision: 2px every 33ms covers the same ground as
+     * the 1px-per-frame the prototype's rows move at - within three percent - for half the redraws.
+     *
+     * <p>Halving them is what this class owes the tap. The drift runs on the main thread, so every step is
+     * an invalidation of the block standing between the learner's finger and the chip under it; measured on
+     * ALP-AN00 with the home open and nobody touching it, one step per frame cost sixty frames a second and
+     * the high-latency input count rose with it. The reading and the reproduce command are in the dated
+     * entry of android/README.md. A slow sideways drift at thirty steps a second still reads as continuous
+     * motion, so the speed is what stays and the frame rate is what gives.
+     */
+    private static final int DRIFT_INTERVAL_MILLIS = 33;
 
     /** The prototype's own resume delay: long enough to read the chip that was touched. */
     private static final int RESUME_DELAY_MILLIS = 2600;
 
-    private static final int DRIFT_PIXELS = 1;
+    private static final int DRIFT_PIXELS = 2;
 
     /** The block the rows are drawn in, and the only thing that fades. */
     private final EdgeFadeLayout block;
@@ -79,10 +94,15 @@ public final class RecommendationMarquee extends LinearLayout {
     private Listener listener;
     private boolean paused;
 
+    /** Reused by {@link #isWorthDrawing()} so a step costs no allocation. */
+    private final Rect visiblePart = new Rect();
+
     private final Runnable drift = new Runnable() {
         @Override
         public void run() {
-            advance();
+            if (isWorthDrawing()) {
+                advance();
+            }
             if (isAttachedToWindow() && isShown()) {
                 postDelayed(this, DRIFT_INTERVAL_MILLIS);
             }
@@ -204,6 +224,34 @@ public final class RecommendationMarquee extends LinearLayout {
             }
         });
         return chip;
+    }
+
+    /**
+     * Whether the next step has something to show for itself.
+     *
+     * <p>Three gates the old loop did not have, and the reason each is here:
+     *
+     * <ul>
+     *   <li>the window has focus - a dialog, the shade, or another app in front is served frames by the
+     *       same loop that is supposed to be waiting for a tap;
+     *   <li>the block is inside the window's visible area - {@link #isShown()} says nothing about a
+     *       ScrollView, so a strip the learner has scrolled past used to keep redrawing the home from off
+     *       screen. The home is a ScrollView, and the topic cards below the strip are exactly the taps
+     *       that were being delayed;
+     *   <li>the system wants motion - with the animator scale at zero the chips stand still, as they do
+     *       everywhere else in this app.
+     * </ul>
+     *
+     * <p>When a gate closes, the timer keeps running and only the step is skipped: nothing in the view
+     * tree tells this class when the strip scrolls back into view, and a tick that draws nothing costs a
+     * handler wake rather than a frame.
+     */
+    private boolean isWorthDrawing() {
+        if (!isShown() || !hasWindowFocus()
+                || ChatMotion.reduced(getContext().getContentResolver())) {
+            return false;
+        }
+        return getGlobalVisibleRect(visiblePart);
     }
 
     private void advance() {

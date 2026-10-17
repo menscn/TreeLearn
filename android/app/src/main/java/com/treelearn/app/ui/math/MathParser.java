@@ -8,6 +8,12 @@ public final class MathParser {
 
     private static final int MAX_DEPTH = 24;
     private static final String IGNORED = " quad qquad displaystyle limits nolimits space ";
+    /**
+     * A backslash before one of these means the character itself, not the structure it would
+     * otherwise start: `\{` is a brace in the formula, not the opening of a group, and `\_` is a
+     * low line, not a subscript.
+     */
+    private static final String ESCAPED_LITERALS = "{}%#_$&";
     private static final String ACCENTS = " vec bar hat dot tilde ddot check breve acute grave ";
     private static final String FUNCTIONS =
             " lim log ln lg sin cos tan cot sec csc max min sup inf det gcd exp arg deg dim hom ker ";
@@ -72,7 +78,7 @@ public final class MathParser {
 
     private MathNode parseCommand() {
         String name = nextName();
-        if (name.isEmpty()) return null;
+        if (name.isEmpty()) return parseEscapedLiteral();
         if ("frac".equals(name)) {
             MathNode numerator = parseArg();
             MathNode denominator = parseArg();
@@ -100,6 +106,15 @@ public final class MathParser {
         }
         MathNode[] scripts = readScripts();
         return scripts == null ? null : MathNode.bigOp(glyph, scripts[1], scripts[0]);
+    }
+
+    /** Reads the character a backslash escapes, or refuses when that pairing is not one we draw. */
+    private MathNode parseEscapedLiteral() {
+        if (pos >= len) return null;
+        char c = src.charAt(pos);
+        if (ESCAPED_LITERALS.indexOf(c) < 0) return null;
+        pos++;
+        return MathNode.atom(String.valueOf(c), atomKindOf(c));
     }
 
     private MathNode parseSqrt() {

@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 2026-10-16 user decision: an icon button's press feedback is a rounded rectangle that stops at
+     the control's own bounds. It used to be an oval, and every other icon control drew its highlight
+     with ?android:attr/selectableItemBackgroundBorderless, whose ripple is deliberately unbounded -
+     on a 44dp target it spreads a ~62dp disc over the neighbours, which is what read as "背景太傻大".
+     One drawable, one answer: the radius is the r-md token, the ink is the shared control ripple. -->
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
     android:color="@color/ripple_control">
     <item>
-        <shape android:shape="oval">
+        <shape android:shape="rectangle">
             <solid android:color="@android:color/transparent" />
+            <corners android:radius="@dimen/radius_md" />
         </shape>
     </item>
     <item android:id="@android:id/mask">
-        <shape android:shape="oval">
+        <shape android:shape="rectangle">
             <solid android:color="@android:color/white" />
+            <corners android:radius="@dimen/radius_md" />
         </shape>
     </item>
 </ripple>

@@ -1,0 +1,52 @@
+# T-2026-10-15-006 提交后回读：移动而非重写
+# 生成命令：python -X utf8 artifacts/tmp/gen-006-post-commit.py
+# 前置：该片已提交。块 01 检查该前置；不成立判 3（现在还不能认证），
+#   不判 0——把「还没提交」读成「提交过且没问题」是假见证。
+# HEAD 取 `git rev-parse HEAD` 的现场读数（复算同命令），提交号不抄进正文；
+#   因此这里只打印它的**长度**——块 04 的正文扫描会把任何 7 位以上的裸十六进制词判红，
+#   而一条「打印出来给人眼定位」的短前缀正是那种词；没有判据比对它的值，撤下不损失判定。
+  HEAD 读数长度=40 字符（复算：git rev-parse HEAD；值不抄进正文）
+===== block 01 - precondition: the move is in history =====
+  FAIL 新路径在 HEAD 里（git cat-file -e rc=0）
+  FAIL 旧路径已从 HEAD 消失（rc 非 0 才是移动而不是复制）
+  ok   git rev-parse HEAD rc=0
+  block 01: want=0 got=1 <- MISMATCH
+
+  阈值 default  经 follow 得到的提交集合=0 携带=0/1 缺失=1
+  阈值 -M40%    经 follow 得到的提交集合=0 携带=0/1 缺失=1
+  阈值 -M10%    经 follow 得到的提交集合=0 携带=0/1 缺失=1
+  阈值 -M1%     经 follow 得到的提交集合=0 携带=0/1 缺失=1
+  旧路径提交=1 新路径提交（--follow 默认）=0 ；全携带阈值=无 最好阈值=default 携带=0/1
+  移动/删除那次提交的记录=(无) ；替代谱系=['仪器页首写明前身路径', '任务文件把前身路径写成「前身」', '复刻方案仍指向前身路径并注明收编片'] ；副本与移动前字节相同=None
+  归档副本哈希只以复算命令出现（复算：sha256sum artifacts/evidence/T-2026-10-15-006-pre-adoption-cdp_shot.mjs），值不抄进正文
+===== block 02 - history carry measured as set inclusion, threshold named =====
+  ok   旧路径在历史里确有提交（集合非空，否则「包含」是空见证）
+  ok   对旧路径的 git log 跑成（rc=0）
+  FAIL 新路径自身在历史里有提交
+  ok   每个阈值的 --follow 都真的跑成（rc 全为 0，不是空集合冒充 0 携带）
+  FAIL 要么某个阈值全携带（无），要么替代谱系三处齐在——两者都不成立即判红
+  block 02: want=0 got=1 <- MISMATCH
+
+===== block 03 - lineage recorded where git cannot carry it =====
+  FAIL 三处指向前身的面都在位（缺: ['任务文件把前身路径写成「前身」']）
+  ok   替代谱系处数 >= MIN_LINEAGE=3
+  FAIL 归档的前身副本与「移除那次提交的父提交」上的字节逐字节相同=None
+  FAIL 移除那次提交被 git 记为一次改名或删除，且 git 跑成、id 形状为 40 位十六进制（rc=0 命中=False；空集合与跑坏分不开就是假见证）
+  block 03: want=0 got=1 <- MISMATCH
+
+  源码扫描命中=0 ；产物正文命中=0 ；合成正控（40 位）被同一正则命中=True
+===== block 04 - no literal commit id baked in; the scan itself rings =====
+  ok   本文件源码里没有 7 位以上的裸十六进制词（命中: 无）
+  ok   产物正文里也没有 7 位以上的裸十六进制词（哈希与提交号一律只给复算命令）
+  ok   扫描对合成的 40 位提交号形状会响（否则上面两条是空见证）
+  block 04: want=0 got=0
+
+===== 汇总 =====
+  blocks=4 expectation_entries=4 faults=1
+  FAULT 新路径不在 HEAD 里——本片尚未提交，历史判据无法判定（不是缺陷复发）
+  block 01 precondition: the move is in history           want=0 got=1 MISMATCH
+  block 02 history carry measured as set inclusion, thres want=0 got=1 MISMATCH
+  block 03 lineage recorded where git cannot carry it     want=0 got=1 MISMATCH
+  block 04 no literal commit id baked in; the scan itself want=0 got=0 ok
+OVERALL_EXITCODE=3
+DECODE ok utf8=True cr=0

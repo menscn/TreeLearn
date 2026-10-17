@@ -47,10 +47,24 @@ public final class ChatMotionLayoutStabilityTest {
         assertTrue("the follow button must exist", follow >= 0);
         assertTrue("the button belongs to the scroll region, before the composer",
                 scroll >= 0 && follow > scroll && follow < composer);
-        assertTrue("the button must overlay (gravity bottom), not push, the content",
-                elementAround(body, "chat_follow").contains("layout_gravity"));
-        assertTrue("the button must keep the 44dp hot zone",
+        // 2026-10-16 user decision: the key became a fixed 44dp chevron, so the float position is the
+        // slot's and the missed count is a badge. A box that never resizes is the whole point: the
+        // text pill this replaced grew wider every time a stream item joined its label.
+        assertTrue("the slot must overlay (gravity bottom), not push, the content",
+                elementAround(body, "chat_follow_slot").contains("android:layout_gravity=\"bottom"));
+        assertTrue("the key must keep the 44dp hot zone",
                 elementAround(body, "chat_follow").contains("@dimen/touch_min"));
+        assertTrue("the key is an icon button, not a text button",
+                elementAround(body, "chat_follow").startsWith("<ImageButton"));
+        assertTrue("the key draws a down chevron",
+                elementAround(body, "chat_follow").contains("@drawable/ic_chevron_down"));
+        assertTrue("the icon-only key keeps the label as its description",
+                elementAround(body, "chat_follow").contains(
+                        "android:contentDescription=\"@string/chat_back_to_latest\""));
+        assertTrue("the key must carry no text of its own",
+                !elementAround(body, "chat_follow").contains("android:text="));
+        assertTrue("the count must ride a badge, so it cannot resize the key",
+                elementAround(body, "chat_follow_count").contains("@drawable/bg_count_badge"));
     }
 
     @Test

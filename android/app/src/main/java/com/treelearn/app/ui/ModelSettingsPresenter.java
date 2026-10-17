@@ -17,11 +17,16 @@ public final class ModelSettingsPresenter {
         if (kept != null) {
             return new Assignment(kept.providerId, kept.modelId, Fallback.NONE);
         }
+        // Nothing stored is not a lost selection. A learner who never picked has a default, not a
+        // substitution, and must not be told their model went away.
+        boolean neverPicked = providerId == null && modelId == null;
         if (builtinDefault != null) {
-            return new Assignment(builtinDefault.providerId, builtinDefault.modelId, Fallback.BUILTIN);
+            return new Assignment(builtinDefault.providerId, builtinDefault.modelId,
+                    neverPicked ? Fallback.DEFAULTED : Fallback.BUILTIN);
         }
         if (earliest != null) {
-            return new Assignment(earliest.providerId, earliest.modelId, Fallback.EARLIEST);
+            return new Assignment(earliest.providerId, earliest.modelId,
+                    neverPicked ? Fallback.DEFAULTED : Fallback.EARLIEST);
         }
         return Assignment.EMPTY;
     }
@@ -79,14 +84,14 @@ public final class ModelSettingsPresenter {
     }
 
     private void reload() {
-        boolean fallen;
         ArrayList<Option> options = new ArrayList<Option>(this.store.options());
         Assignment chat = this.store.read(Role.CHAT);
         Assignment fast = this.store.read(Role.FAST);
         Assignment translation = this.store.read(Role.TRANSLATION);
         Budget budget = this.store.readBudget();
         boolean suggestions = this.store.readSuggestions();
-        boolean bl = fallen = chat.fallback != Fallback.NONE || fast.fallback != Fallback.NONE || translation.fallback != Fallback.NONE;
+        boolean fallen = chat.fallback.substituted() || fast.fallback.substituted()
+                || translation.fallback.substituted();
         Notice notice = options.isEmpty() ? Notice.NO_MODELS : (fallen ? Notice.FALLEN_BACK : Notice.NONE);
         this.ui.post(() -> this.render(new State(options, chat, fast, translation, budget, suggestions, notice)));
     }
@@ -125,9 +130,16 @@ public final class ModelSettingsPresenter {
 
     public static enum Fallback {
         NONE,
+        /** The role had no stored selection, so the default model is in use by design. */
+        DEFAULTED,
         BUILTIN,
         EARLIEST,
         EMPTY;
+
+        /** True only when a selection the learner actually made could not be honoured. */
+        public boolean substituted() {
+            return this == BUILTIN || this == EARLIEST;
+        }
 
     }
 

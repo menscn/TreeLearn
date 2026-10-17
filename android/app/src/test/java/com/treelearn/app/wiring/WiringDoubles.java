@@ -115,6 +115,11 @@ final class WiringDoubles {
     /**
      * The admission seam: it builds the request through the caller's own assembler, which is what
      * keeps "the request is the real assembler's build" true in a JVM test.
+     *
+     * <p>It also runs a supplied {@code localWrite} before returning, because production writes the
+     * rows before it opens the call and refuses the submission when that write refuses. The two
+     * counters split the admissions by whether rows were written, so a test can tell the first-topic
+     * path from a follow-up without naming the coordinator's private ordering.
      */
     static final class Generations implements GenerationPort {
 
@@ -122,8 +127,6 @@ final class WiringDoubles {
                 GenerationCoordinator.SubmitOutcome.accepted(OPERATION_ID, true);
         GenerationCoordinator.SubmitOutcome firstOutcome =
                 GenerationCoordinator.SubmitOutcome.accepted(OPERATION_ID, true);
-        /** Production runs the accepted write inside the callback; so does this, unless told not to. */
-        boolean runAcceptedWrite = true;
         int submitCalls;
         int firstCalls;
         GenerationCommand lastCommand;
@@ -132,28 +135,26 @@ final class WiringDoubles {
         @Override
         public GenerationCoordinator.SubmitOutcome submit(GenerationCommand command,
                 GenerationCoordinator.Assembler assembler) {
-            submitCalls++;
-            lastCommand = command;
-            lastRequest = assembler.assemble(command);
-            return submitOutcome;
+            return submit(command, assembler, null);
         }
 
         @Override
-        public GenerationCoordinator.SubmitOutcome submitFirstTopic(GenerationCommand command,
+        public GenerationCoordinator.SubmitOutcome submit(GenerationCommand command,
                 GenerationCoordinator.Assembler assembler,
-                GenerationCoordinator.AcceptedWrite acceptedWrite) {
-            firstCalls++;
+                GenerationCoordinator.LocalWrite localWrite) {
+            if (localWrite == null) {
+                submitCalls++;
+            } else {
+                firstCalls++;
+            }
             lastCommand = command;
             lastRequest = assembler.assemble(command);
-            if (firstOutcome.isAccepted() && runAcceptedWrite) {
-                boolean persisted = acceptedWrite.persist(GenerationOperation.start(command, NOW + 1),
-                        NOW + 1);
-                if (!persisted) {
-                    return GenerationCoordinator.SubmitOutcome.refused(
-                            GenerationCoordinator.Refusal.STORAGE, null);
-                }
+            if (localWrite != null && !localWrite.persist(GenerationOperation.start(command, NOW + 1),
+                    NOW + 1)) {
+                return GenerationCoordinator.SubmitOutcome.refused(
+                        GenerationCoordinator.Refusal.STORAGE, null);
             }
-            return firstOutcome;
+            return localWrite == null ? submitOutcome : firstOutcome;
         }
     }
 

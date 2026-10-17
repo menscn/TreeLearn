@@ -1,0 +1,171 @@
+# T-2026-10-15-006 GREEN：产图侧 Node 仪器收编入库
+# 生成命令：python -X utf8 artifacts/tmp/gen-006-green.py
+# 被核文件（本次运行判定前读到的字节；本运行不写这些文件，因此你今天回算应当相同）：
+#   cdp_shot.mjs bytes=12132 lines=196 sha256=90121f117318b6f6c0c00e763c73bb01b8586d9e5bd2f68290a4a136b0acce53
+#   parity_cdp.mjs bytes=17001 lines=395 sha256=e0819d537ee9265bc659f4255d846d8afd247dda725a96a87fa5c50b772c61ff
+#   cdp_shot_selftest.mjs bytes=7537 lines=108 sha256=6fd776f46fd44a2319f123064ef19c85eee253a54dbf768310b5427390ce872d
+#   screens.json bytes=3679 lines=48 sha256=f85fc4342f701b5ce1f27fd78230de6af348a5d5630d8ad7d0e2eb33335fdeaa
+#   measure_screen.py bytes=28279 lines=543 sha256=c99a3236963d84bbe331110cb2d3824cf24f57968978f93ef4e0c84a35674c3a
+#   T-2026-10-15-006-pre-adoption-cdp_shot.mjs bytes=5769 lines=136 sha256=3bc1ab224254764a572fa38e74105abaf785d5ac444f12d3af3062abd8ea5c85
+#   ux-chat-1to1-render-measure-2026-09-27.txt bytes=5541 lines=92 sha256=f6b738173c2fe9963594739daa6f2a512d6e1df0709f269dffd255abe04e56d8
+# 名单边界：本运行只写 artifacts/tmp/_g006/ 下的中间图与本产物；
+#   本产物自己的哈希见末行 DECODE 之后的控制台读数（复算：sha256sum 本文件），
+#   不抄进正文，否则下一行就把它作废。
+# 历史判据（移动而非重写）不在本产物里：它要求那次移动已进 git 历史，
+#   提交前必然红，属时效性状态；提交后由 gen-006-post-commit.py 单独出。
+# 规模口径：判定面 = 移动文件的新增行面 + 新文件全文；伴随测试文件按既有先例排除，
+#   该排除是承重的（块 10 用「judged + companion > 500」量出来），两口径数值都在块 10。
+
+  node --check parity_cdp.mjs rc=0 ; cdp_shot.mjs rc=0 ; cdp_shot_selftest.mjs rc=0
+===== block 01 - all three scripts parse =====
+  ok   共享层 rc=0
+  ok   产图仪器 rc=0
+  ok   伴随电池 rc=0
+  block 01: want=0 got=0
+
+  电池读数: rc=0 cases=17 failures=0 电池判决行=17（ok=17 FAIL=0） 夹具 echo 的 FAIL 见证行=3 tiers=[0, 1, 2, 3]
+    夹具见证（设计内，不判成本片缺陷）: FAIL wait-for-absent .no-such-node 在 1500ms 内没出现（readyState=complete）——页面已加载，属结构不符而非仪器故障
+    夹具见证（设计内，不判成本片缺陷）: FAIL click-target-absent #no-such-click-target
+    夹具见证（设计内，不判成本片缺陷）: FAIL shot-scale-override 本次 scale=1 而档案声明=2；此图不可交给 --kind render（它按 2x 反算逻辑像素），请用默认比例重跑或同步档案
+  观测（不判）: navigation-retry 行=0 WARN user-data-dir 残留行=0
+  伴随文件单独跑: rc=0（经由 cdp_shot.mjs --selftest 时 rc=0）
+  ESM 环夹具: 动态入口 rc=13 stdout=0 字节（告警走 stderr=180 字节）；静态入口 rc=7
+  电池 stderr=1072 字节；仪器正文里的导入形态：静态=True 动态=False
+===== block 02 - selftest battery green and non-empty =====
+  ok   rc 恰好 0
+  ok   打印了 SELFTEST PASS
+  ok   伴随文件单独跑给出同一退出码（两条入口判定一致）
+  ok   电池 stderr 不含 unsettled top-level await（那条告警等于仪器没跑完）
+  ok   仪器委派用静态导入且正文不再有动态 await import（环的成因）
+  ok   环的机理由独立夹具现场量出：动态=13 且 stdout 空、静态=7（不是注释里的口头断言）
+  ok   条数下限 MIN_SELFTEST_CASES=12 达成（与清单内容无关）
+  ok   打印的 cases 与电池 ok-行数一致（条数不是自述）
+  ok   failures=0 且电池自己的判决行里没有 FAIL
+  ok   四个档位 0/1/2/3 都被走到
+  ok   跨工具接缝与故障档用例逐条在位（缺: 无）
+  ok   三条期望 rc=1 的负向用例各自留下页面判据见证（缺: 无）
+  block 02: want=0 got=0
+
+  产图读数: rc=0 判据行数=6
+===== block 03 - real chat render through the profile =====
+  ok   rc 恰好 0
+  ok   VERDICT: PASS 与 EXITCODE=0 都在
+  ok   HTML 路径来自档案且中文路径未坏
+  ok   点击序列来自档案
+  ok   浏览器版本进了证据
+  ok   产图尺寸符合 2x 约定 824x1632
+  ok   滚动条占位与档案声明对上
+  block 03: want=0 got=0
+
+  比对读数: rc=0 compared-lines=74 record-lines=74 identical=True first-diff=(none)
+===== block 04 - keep-behaviour against the 2026-09-27 record =====
+  ok   003 仪器对归档图 rc 恰好 0
+  ok   可比正文行数下限 MIN_COMPARED_LINES=60 达成
+  ok   正文与记录逐行相同
+  block 04: want=0 got=0
+
+  新图量测读数: rc=3 INSTRUMENT FAULT 行=True 有 PASS=False
+===== block 05 - prototype drift fails the pixel gate closed =====
+  ok   对当前原型的渲图，像素仪器判 3（仪器故障档）而不是 0/1
+  ok   产物里有 INSTRUMENT FAULT 行
+  ok   没有任何 VERDICT: PASS（未量完不得报绿）
+  ok   成因在当前原型 HTML 里有据：绿色用户气泡已于 2026-09-28 退役
+  ok   .msg-user 现为 background:transparent（无绿底可量）
+  block 05: want=0 got=0
+
+  兄弟门读数: rc=0 解析=19 case(s) executed, expectation table says 19, 0 failure last=longest scratch path in this run = 101 chars (Windows rejects beyond 259; kept u
+===== block 06 - sibling gate 003 still green with visible lines =====
+  ok   rc 恰好 0
+  ok   打印了 case(s) executed 行（空 stdout 就是空见证）
+  ok   条数下限 MIN_MEASURE_CASES=15 达成
+  ok   执行条数 == 期望表条数
+  ok   failure 数为 0
+  block 06: want=0 got=0
+
+  git grep（全树跟踪文件）rc=0（只许 0 或 1）命中=13
+    命中: .trae/scripts/dev/parity/cdp_shot.mjs:3: * 1:1 闭环量测的「产图侧」仪器（T-2026-10-15-006，前身 artifacts/tmp/cdp_shot.mjs）。
+    命中: .trae/tasks/T-2026-10-15-parity-measurement-instruments-adoption-003.md:33:- Facts: 已核实三支工具存在且均已纳入 git：`artifacts/tmp/measure_chat_1to1.py`（15532 字节）、`artifacts/tmp/verif
+    命中: .trae/tasks/T-2026-10-15-parity-measurement-instruments-adoption-003.md:73:- Producer/consumer/sibling/compatibility paths checked: 反向搜索 `artifacts/tmp/measure_chat_1to1`
+    命中: .trae/tasks/T-2026-10-15-parity-measurement-instruments-adoption-003.md:83:- [x] 受影响入口：文档内旧路径引用清零；`git log --follow` 能证明是移动而非重写。——前半已实测：反向搜索四串（`artifacts/tmp/measure_chat
+    命中: .trae/tasks/T-2026-10-15-parity-node-instruments-adoption-006.md:33:- Facts: 两支文件存在且均已纳入 git（`artifacts/tmp/verify_1to1.mjs`、`artifacts/tmp/cdp_shot.mjs`）；`screens.json` 
+    命中: .trae/tasks/T-2026-10-15-parity-node-instruments-adoption-006.md:69:- Documentation surfaces checked: `Docs/04-ux-design/知芽-TreeLearn-对话页1比1复刻方案-V1.0.md`（工具表 §281–292 仍写着
+    命中: .trae/tasks/T-2026-10-15-parity-node-instruments-adoption-006.md:71:- Producer/consumer/sibling/compatibility paths checked: 反向搜索 `artifacts/tmp/verify_1to1`、`artifacts/t
+    命中: Docs/04-ux-design/知芽-TreeLearn-对话页1比1复刻方案-V1.0.md:295:| `artifacts/tmp/cdp_shot.mjs` | 原型渲染截图（Edge headless + CDP，2x） |
+    命中: artifacts/evidence/T-2026-10-15-003-green.txt:260:reverse-search pattern: artifacts/tmp/measure_chat_1to1 | artifacts/tmp/png_probe | artifacts/tmp/verify_1to1 | artifact
+    命中: artifacts/evidence/T-2026-10-15-003-green.txt:270:   line 295: | `artifacts/tmp/cdp_shot.mjs` | 原型渲染截图（Edge headless + CDP，2x） 
+    命中: artifacts/evidence/T-2026-10-15-003-red.txt:11:#   sha256=3bc1ab224254764a572fa38e74105abaf785d5ac444f12d3af3062abd8ea5c85 bytes=5769 lines=136  artifacts/tmp/cdp_shot.mj
+    命中: artifacts/evidence/T-2026-10-15-003-red.txt:96:$ grep -c process.exit(3) artifacts/tmp/cdp_shot.mjs
+    命中: artifacts/evidence/T-2026-10-15-003-red.txt:120:ok artifacts/tmp/cdp_shot.mjs bytes=5769
+  未跟踪面（只扫 Docs 与 .trae，别人的在飞产物不进本片判据）命中=0
+===== block 07 - old path appears only as history, never as the current location =====
+  ok   git grep rc 属于 {0,1}（>=2 表示 pathspec 打错而不是干净）
+  ok   全树命中非空，说明这条搜索真的扫到了东西（空命中=空见证）
+  ok   除复刻方案外没有把旧路径写成现位置的面（残留: 无）
+  ok   复刻方案仍提及旧路径时，同文件必须给出权威位置那句注记
+  ok   注记已改成「产图侧入库、DOM 侧由 009 收编」，不再写「两支都待 006」
+  ok   SPEC §10 同上：仪器收编条点名 009，且不残留「两支 Node 工具待 006」
+  block 07: want=0 got=0
+
+  被盯集合=625（git ls-files -- android rc=0）窗口内位移=0 movers=[]
+  正控（同一条快照/差分机制，被盯文件在窗口内被改）捕获=['artifacts/tmp/_g006/_watched-control.tmp']
+===== block 08 - run-window delta over the shared work tree =====
+  ok   git 列被盯集合 rc 恰好 0
+  ok   被盯集合非空（下限 MIN_WATCHED=50，空集合让「无位移」成空见证）
+  ok   本片运行期间 android/ 无位移（有则等安静子窗口重跑，不改判据）
+  ok   正控会响：窗口内真改一个被盯文件必须被点名（且只点名它）
+  block 08: want=0 got=0
+
+  基线 base=HEAD window=uncommitted-only 改动面条目=4（下限 4）不可见=[]
+    numstat artifacts/tmp/cdp_shot.mjs added=0 deleted=136
+    numstat .trae/scripts/dev/parity/cdp_shot.mjs added=196 deleted=0
+    未跟踪（git diff 对它失明）.trae/scripts/dev/parity/parity_cdp.mjs
+    未跟踪（git diff 对它失明）.trae/scripts/dev/parity/cdp_shot_selftest.mjs
+  配对对照：--no-renames 行=2 ；-M 行=2 ；-M40% 行=2 ；staged -M 行=1
+    196	0	.trae/scripts/dev/parity/cdp_shot.mjs
+    0	136	artifacts/tmp/cdp_shot.mjs
+    0	0	{artifacts/tmp => .trae/scripts/dev/parity}/cdp_shot.mjs
+  stderr 告警（不计进任何判据）：numstat=1 --check=2 未跟踪=0 行
+===== block 09 - change face visible to git; rename form only observed =====
+  ok   每条 git 调用 rc 属于 {0,1}（>=2 是 git 自己没跑成或 pathspec 错）
+  ok   stdout 不含 warning: 行——两条流分离的证据（合并时这里是 0）
+  ok   FACE 四项逐个被某个 git 视图看到（不可见: 无）
+  ok   改动面条目 >= MIN_ACCOUNTED=4（空集合让「无不可见」变成空见证）
+  ok   两条全新文件在未跟踪清单里（它们尚未经 numstat 可见，缺席即盲区）
+  ok   --check 的 stdout 空白判据行为 0（CRLF 告警走 stderr，不混进这个计数）
+  block 09: want=0 got=0
+
+  新增行原始面=184 条 / 新文件全文=196 行 / numstat 的 added 字段=196
+  时效（打印不判）：HEAD 里还有旧路径=True 且与归档副本逐字节相同=True
+       144  D:\Project\Android\Treelearn\artifacts\tmp\_g006\moved-added.mjs
+       297  .trae/scripts/dev/parity/parity_cdp.mjs
+       441  TOTAL (non-blank, non-comment, production files only)
+        74  .trae/scripts/dev/parity/cdp_shot_selftest.mjs
+        74  TOTAL (non-blank, non-comment, production files only)
+       142  .trae/scripts/dev/parity/cdp_shot.mjs
+       297  .trae/scripts/dev/parity/parity_cdp.mjs
+        74  .trae/scripts/dev/parity/cdp_shot_selftest.mjs
+       513  TOTAL (non-blank, non-comment, production files only)
+===== block 10 - judged size from the repo tool on the delta face =====
+  ok   本块用到的四个文件都在判定前名单里有指纹（缺: 无）
+  ok   面文件行数 == 由归档副本与新文件算出的新增行条数（写进去的就是算出来的）
+  ok   工具给出两条逐文件读数与一条 TOTAL
+  ok   TOTAL 由逐文件读数相加得到（不是第三个手抄的数）
+  ok   判定值 0 < n <= 500 硬上限内（本次 441；越线要再切细或由用户批例外）
+  ok   排除伴随测试文件是**承重的**：judged(441) + companion(74) = 515 > 500，即不分文件就越线
+  ok   判定面取新增行面而不是整文件面（整文件口径本次 513，两个口径都要留档且不混用）
+  block 10: want=0 got=0
+
+===== 汇总 =====
+  blocks=10 expectation_entries=10 faults=0
+  block 01 all three scripts parse                        want=0 got=0 ok
+  block 02 selftest battery green and non-empty           want=0 got=0 ok
+  block 03 real chat render through the profile           want=0 got=0 ok
+  block 04 keep-behaviour against the 2026-09-27 record   want=0 got=0 ok
+  block 05 prototype drift fails the pixel gate closed    want=0 got=0 ok
+  block 06 sibling gate 003 still green with visible line want=0 got=0 ok
+  block 07 old path appears only as history, never as the want=0 got=0 ok
+  block 08 run-window delta over the shared work tree     want=0 got=0 ok
+  block 09 change face visible to git; rename form only o want=0 got=0 ok
+  block 10 judged size from the repo tool on the delta fa want=0 got=0 ok
+OVERALL_EXITCODE=0
+DECODE ok utf8=True cr=0

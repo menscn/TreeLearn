@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.Selection;
 import android.text.Spannable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
 import android.util.AttributeSet;
@@ -19,6 +20,7 @@ import android.view.ViewConfiguration;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TableLayout;
@@ -48,6 +50,8 @@ import com.treelearn.app.ui.Highlighter;
 import com.treelearn.app.ui.Recommendation;
 import com.treelearn.app.ui.SourceCard;
 import com.treelearn.app.ui.TextSelection;
+import com.treelearn.app.ui.math.MathNode;
+import com.treelearn.app.ui.math.MathView;
 import com.treelearn.core.domain.Annotation;
 import com.treelearn.core.domain.AnswerRevision;
 import com.treelearn.core.domain.ReadingAnchor;
@@ -132,8 +136,10 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
     private final ModelThinkingPicker modelChip;
     private final TextView searchChip;
     private final Button send;
-    /** T-075: the follow-latest pill (073 §6); hidden while the view follows on its own. */
-    private final Button followLatest;
+    /** T-075: the follow-latest key (073 §6); hidden while the view follows on its own. */
+    private final View followSlot;
+    private final ImageButton followLatest;
+    private final TextView followCount;
     private final ImageView fullscreenEntry;
     private final View fullscreen;
     private final TextView fullscreenQuote;
@@ -154,6 +160,8 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
     private boolean rendering;
     /** T-076: the send key's face as the last render drew it, so a click stops or sends, not both. */
     private ChatViewState.SendState sendState = ChatViewState.SendState.DISABLED;
+    /** The send key's face as the last render drew it; null until the first render swaps the glyph. */
+    private ChatViewState.SendState renderedSendState;
     private ChatSpeaker speaker;
     private ChatSpeaker.State speakState = ChatSpeaker.State.initial();
     /** Rows are reported to the presenter once per visit, after the first layout that has one. */
@@ -168,6 +176,8 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
     private String renderedTail = "";
     /** T-075: what the last render's follow state was, so a re-attach scrolls exactly once. */
     private boolean renderedFollowing = true;
+    /** The follow key's face as the last render drew it, so a stream render rewrites nothing. */
+    private String renderedFollowFace = "";
     /** T-075: the stage the last render drew, so a transition's fade and sentence fire once. */
     private Stage renderedStage = Stage.IDLE;
     /** Where the learner stopped, as the last settle measured it; null until the view settles once. */
@@ -263,7 +273,9 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         modelChip = findViewById(R.id.chat_model_chip);
         searchChip = findViewById(R.id.chat_search_chip);
         send = findViewById(R.id.chat_send);
+        followSlot = findViewById(R.id.chat_follow_slot);
         followLatest = findViewById(R.id.chat_follow);
+        followCount = findViewById(R.id.chat_follow_count);
 
         fullscreenEntry = findViewById(R.id.chat_expand);
         fullscreen = findViewById(R.id.chat_fullscreen);
@@ -537,6 +549,7 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
      */
     private void reportRowsLaidOut() {
         checkFollowOverflow();
+        dismissFollowWhenRestingAtTheFloor();
         if (rowsReported || rows.isEmpty()) {
             return;
         }
@@ -643,6 +656,7 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             return;
         }
         notice.setText(getContext().getString(NoticeText.of(value)));
+        notice.setTextColor(getContext().getColor(NoticeText.colorResOf(value)));
         notice.setVisibility(VISIBLE);
     }
 
@@ -670,6 +684,28 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         if (!visible.equals(settledVisible)) {
             settledVisible = visible;
             fire(actions -> actions.onViewportChanged(visible));
+        }
+        // 2026-10-16 user decision: a manual scroll that ends on the newest content re-attaches
+        // follow on its own. Until now only the key could do that, so a learner who had scrolled
+        // back to the floor kept a 回到最新 button that was no longer offering anything. This is
+        // gated on the manual pause, never on the overflow pause: an answer taller than the
+        // viewport is detached by design (073 §6), and scrolling it to its own end does not make
+        // its beginning readable.
+        dismissFollowWhenRestingAtTheFloor();
+    }
+
+    /**
+     * The one place that decides a shown key has nothing left to offer: a manual pause whose view is
+     * resting on the floor.
+     *
+     * <p>A settle is not the only way to reach this state. An answer that grows after the last scroll
+     * event - a formula or an image laid out late, a stream that ends - moves the floor without a
+     * scroll, so the settle already happened and will not happen again, and the key would stay up over
+     * the newest content. The row layout pass is where that growth is observable, so it asks here too.
+     */
+    private void dismissFollowWhenRestingAtTheFloor() {
+        if (userPauseActive && atBottom()) {
+            reattachFollowLatest();
         }
     }
 
@@ -817,16 +853,20 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         sendState = state.sendState();
         send.setEnabled(sendState != ChatViewState.SendState.DISABLED);
         // 2026-09-27 user decision: the send control is the circular fab (prototype .send-fab) in
-        // every state - its selector already draws the disabled step, so no rectangular swap here.
-        send.setBackgroundResource(R.drawable.bg_send_fab);
-        send.setContentDescription(getContext().getString(sendState == ChatViewState.SendState.STOP
-                ? R.string.cd_chat_send_stop : R.string.cd_chat_send));
-        int icon = sendState == ChatViewState.SendState.STOP
-                ? R.drawable.ic_chat_stop : R.drawable.ic_chat_send;
-        Drawable drawable = getResources().getDrawable(icon, getContext().getTheme());
-        drawable.setTint(getContext().getColor(sendState == ChatViewState.SendState.DISABLED
-                ? R.color.tl_ink3 : R.color.tl_surface));
-        send.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null);
+        // every state - its selector already draws the disabled step, so the layout's own background
+        // is never swapped. 2026-10-16: the glyph and its tint follow the face, so a stream render
+        // that changes nothing stops inflating a drawable and re-laying-out the composer.
+        if (renderedSendState != sendState) {
+            renderedSendState = sendState;
+            send.setContentDescription(getContext().getString(sendState == ChatViewState.SendState.STOP
+                    ? R.string.cd_chat_send_stop : R.string.cd_chat_send));
+            int icon = sendState == ChatViewState.SendState.STOP
+                    ? R.drawable.ic_chat_stop : R.drawable.ic_chat_send;
+            Drawable drawable = getResources().getDrawable(icon, getContext().getTheme());
+            drawable.setTint(getContext().getColor(sendState == ChatViewState.SendState.DISABLED
+                    ? R.color.tl_ink3 : R.color.tl_surface));
+            send.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null);
+        }
     }
 
     private void renderFullscreen(ChatViewState state) {
@@ -867,16 +907,38 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
     }
 
     /**
-     * T-075: the follow-latest pill (073 §6). Visible only while the learner is detached, and only
-     * on a ready screen; while it counts missed growths the count rides the label.
+     * T-075: the follow-latest key (073 §6). Visible only while the learner is detached, and only
+     * on a ready screen. 2026-10-16 user decision: the key is a fixed 44dp chevron, so the missed
+     * count no longer rides the label - it rides a corner badge and the content description, and the
+     * key keeps the same box and the same place in every state.
      */
     private void renderFollow(ChatViewState state) {
         boolean detached = state.phase == ChatViewState.Phase.READY
                 && (!state.followLatest || overflowPauseActive || userPauseActive);
-        followLatest.setVisibility(detached ? VISIBLE : GONE);
-        followLatest.setText(detached && state.missedCount > 0
-                ? getContext().getString(R.string.chat_back_to_latest_count, state.missedCount)
+        int missed = detached && state.missedCount > 0 ? state.missedCount : 0;
+        followSlot.setVisibility(detached ? VISIBLE : GONE);
+        String face = detached + "/" + missed;
+        if (face.equals(renderedFollowFace)) {
+            return;
+        }
+        renderedFollowFace = face;
+        followCount.setVisibility(missed > 0 ? VISIBLE : GONE);
+        if (missed > 0) {
+            followCount.setText(String.valueOf(missed));
+        }
+        followLatest.setContentDescription(missed > 0
+                ? getContext().getString(R.string.chat_back_to_latest_count, missed)
                 : getContext().getString(R.string.chat_back_to_latest));
+    }
+
+    /** Whether the learner is resting on the newest content, within one grid gap of the floor. */
+    private boolean atBottom() {
+        View content = scroll.getChildAt(0);
+        if (content == null || scroll.getHeight() <= 0) {
+            return false;
+        }
+        int slop = getResources().getDimensionPixelSize(R.dimen.space_s3);
+        return scroll.getScrollY() >= content.getHeight() - scroll.getHeight() - slop;
     }
 
     private void reattachFollowLatest() {
@@ -1197,7 +1259,10 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         private void renderGenerationSlots(ChatViewState state, ChatMessage message, boolean newestRow) {
             boolean reasoning = message.isGenerating() && message.phase() == ChatMessage.Phase.REASONING;
             boolean answering = message.isGenerating() && message.phase() == ChatMessage.Phase.ANSWER;
-            generating.setText(generatingNote(message, state.thinkingEnabled));
+            CharSequence note = generatingNote(message, state.thinkingEnabled);
+            if (!TextUtils.equals(generating.getText(), note)) {
+                generating.setText(note);
+            }
             generating.setVisibility(reasoning ? VISIBLE : GONE);
             caret.setVisibility(answering ? VISIBLE : GONE);
             if (answering && !ChatMotion.reduced(getContext().getContentResolver())
@@ -1213,12 +1278,16 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
 
         private void renderTranslation(ChatViewState state, ChatMessage message) {
             boolean visible = state.translationVisible(message.messageId);
-            translation.setVisibility(visible ? VISIBLE : GONE);
             if (!visible) {
+                if (translation.getVisibility() == GONE) {
+                    return;
+                }
+                translation.setVisibility(GONE);
                 translationHeader.setText("");
                 translationText.setText("");
                 return;
             }
+            translation.setVisibility(VISIBLE);
             if (state.isTranslating(message.messageId)) {
                 translationHeader.setText(R.string.chat_translation_running);
                 translationText.setVisibility(GONE);
@@ -1233,7 +1302,10 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             translationHeader.setText(getContext().getString(
                     expanded ? R.string.chat_translation_collapse : R.string.chat_translation_expand));
             translationText.setVisibility(expanded ? VISIBLE : GONE);
-            translationText.setText(state.translationText(message.messageId));
+            CharSequence next = state.translationText(message.messageId);
+            if (!TextUtils.equals(translationText.getText(), next)) {
+                translationText.setText(next);
+            }
         }
 
         /** The one-shot entry fade a stage transition asked for; static under low motion. */
@@ -1251,8 +1323,8 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         }
 
         /**
-         * Draws the answer as prose runs and table blocks (2026-09-28 user decision: a table is a
-         * view, not text).
+         * Draws the answer as prose runs, table blocks and display formulas (2026-09-28 user
+         * decision: a table is a view, not text; 2026-10-16: so is a formula wider than the measure).
          *
          * <p>The first prose run reuses the layout's own {@code chat_answer} view rather than
          * inflating a copy, so the view a row starts with is the view it keeps when the answer has
@@ -1271,6 +1343,8 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
                     View table = inflateTable(segment);
                     answerTableViews.add(table);
                     answerBody.addView(table);
+                } else if (segment.isFormula) {
+                    answerBody.addView(inflateFormula(segment.formula));
                 } else if (segment.text.length() > 0) {
                     TextView view = answerViews.isEmpty() ? adoptAnswerView() : proseView();
                     view.setText(segment.text, TextView.BufferType.SPANNABLE);
@@ -1464,7 +1538,24 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             }
             return scroll;
         }
+
+        /**
+         * One display formula, as a view that can be wider than the answer.
+         *
+         * <p>It is sized and coloured from the prose it sits beside rather than from a size of its
+         * own, so a formula follows the reader's text setting and the theme like the sentence above
+         * it does.
+         */
+        private View inflateFormula(MathNode node) {
+            View scroll = LayoutInflater.from(getContext())
+                    .inflate(R.layout.item_chat_formula, answerBody, false);
+            MathView formula = scroll.findViewById(R.id.chat_formula);
+            formula.setFormula(node, answer.getTextSize(), answer.getCurrentTextColor());
+            return scroll;
+        }
+
         private void renderQuestion(ChatMessage message) {
+            question.setText(message.text);
             boolean quoted = !message.quote.isEmpty();
             quoteChip.setVisibility(quoted ? VISIBLE : GONE);
             quoteChip.setText(quoted ? getContext().getString(R.string.chat_quoted, message.quote) : "");

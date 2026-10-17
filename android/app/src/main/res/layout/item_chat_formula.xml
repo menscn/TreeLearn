@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  A display formula inside an answer: a view, not a character in a paragraph (2026-10-16).
+
+  Why it is not left in the text: a formula is one unwrapped line, and the answer's TextView is
+  match_parent, so a formula wider than the phone lost both ends while still looking rendered.
+  The same reasoning that made a table a view (2026-09-28) applies to a wide numerator.
+
+  Two layers, each solving one problem the other cannot:
+
+  - HorizontalScrollView: the over-wide part scrolls instead of being cut, and the answer's own
+    measure stays intact - letting the formula push the width would make every paragraph slide.
+  - fillViewport: a formula that fits is stretched to the measure so MathView can centre it, which
+    is what the old centred paragraph did. Without it, the short formulas would jump to the left.
+-->
+<HorizontalScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/chat_formula_scroll"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/space_s4"
+    android:layout_marginBottom="@dimen/space_s4"
+    android:fillViewport="true"
+    android:scrollbars="none">
+
+    <com.treelearn.app.ui.math.MathView
+        android:id="@+id/chat_formula"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+</HorizontalScrollView>

@@ -19,9 +19,14 @@ public interface HomeDerivedPort {
      * <p>Declared here so the conversation's read path can depend on the port rather than on the
      * concrete service: the wiring's decision is what a test needs to pin, and a decision reachable
      * only through a real SQLite helper is a decision no JVM test can make.
+     *
+     * @return whether this pass wrote a row. False means every artifact it was asked to ensure was
+     *     already stored for this baseline (or a call refused to write one), which is the caller's
+     *     signal that nothing worth a re-read has changed.
      */
-    default void ensureConversationArtifacts(ChatStore.Conversation conversation,
+    default boolean ensureConversationArtifacts(ChatStore.Conversation conversation,
             GenerationModel model, boolean answerSuggestions) {
+        return false;
     }
 
     /**

@@ -329,6 +329,7 @@ public final class HomeScreen extends LinearLayout {
             return;
         }
         notice.setText(getContext().getString(NoticeText.of(value)));
+        notice.setTextColor(getContext().getColor(NoticeText.colorResOf(value)));
         notice.setVisibility(VISIBLE);
     }
 }

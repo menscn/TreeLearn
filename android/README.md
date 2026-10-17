@@ -366,8 +366,10 @@ runner **阻止不了**，只能在事后检测到并抛 `IllegalStateException`
   终态之前一定会 flush。
 - 提交顺序：先组装（失败 → `PROMPT_BUILD`，不开连接、不占槽位）→ 校验请求记录的版本与命令钉住的
   版本一致（不一致 → `VERSION_MISMATCH`）→ 占位 → **先写 operation 行再开连接**。
-  首次根问题没有可写的行，走 `submitFirstTopic`：行在 provider 2xx 的 accepted 回调里写，
-  写不成功就关连接、不读正文。
+  首次根问题没有可写的行，因此给同一个入口交一份 `LocalWrite`（`FirstTopicCreation` 的五组行 + operation）：
+  它在**开连接之前**提交，写不成功就不开连接、不占槽位，返回 `STORAGE`。
+  〔2026-10-16 用户拍板：取代原「行在 provider 2xx 的 accepted 回调里写」——那条让 401 留下一个
+  首页已经跳进去、对话页永远读不出来的分支；现在两条路径同形，失败留下可读的 FAILED 回答位〕
 - 启动恢复 `recover()` 在一个事务里扫完：`STAGED` → `CANCELED`（从未到达 provider），
   其余进行中 → `INTERRUPTED`（保留部分内容、可原位重试）；**不自动重发**。
 - 终态唯一：只有「流正常结束且最终回答非空」才可能 STABLE，这条判定属于
@@ -386,10 +388,34 @@ runner **阻止不了**，只能在事后检测到并抛 `IllegalStateException`
   页面、重试与首题建树属后续任务。协调器的可执行证据因此分两层：调度、刷盘、晚到丢弃与恢复判定
   由 JVM 套件证明；端到端路径（真机 SQLite 上「先落库再开连接」、`recover()` 的原子收敛）
   本轮**没有执行**，见下一条。
-- **本轮不使用模拟器**（用户指令 2026-09-21）：`GenerationCoordinatorInstrumentedTest` 只做
+- **本切片当时不使用模拟器**（用户指令 2026-09-21）：`GenerationCoordinatorInstrumentedTest` 只做
   **编译验证**（`:app:assembleDebugAndroidTest`），不运行。凡必须上真机才能证明的验收项，
   一律记为 `deferred — emulator not used this round (user instruction 2026-09-21)`，
   既不算 PASS，也不是「看起来通过」。
+  〔**2026-10-16 更新**：该 defer 已解除——首题先落库的裁定必须在真机上对着 401 验，
+  所以该类现在**在 `ALP-AN00` / API 33 上执行过**，15 例 / 0 失败，整包 287 例 / 12 失败。
+  读数与逐块判定见 `artifacts/evidence/T-2026-10-16-first-topic-401-deadend.txt` 块 06/07。
+  同轮的 `:app:testDebugUnitTest` 是 **831 例 / 2 失败**，那两例是既有 flaky 对（块 05 已如实记为基线），
+  归因与修法只写在[遗留路线](../.trae/ROADMAP.md) 的 D8 一处。
+  **读者注意**：整包跑执行的是 `androidTest` 里的**每一个类**（本次 44 个类 / 287 例），因此本文件
+  其它小节写着「只编译、未执行」的仪器套件，只要落在该 287 例内，**「未执行」这句已经过期**
+  （例如 `AnswerVersionsInstrumentedTest` 10 例、`SqliteSchemaInstrumentedTest` 25 例本轮全绿）。
+  但「用例跑过」不等于「该小节的验收项闭合」——那些靠人看的项（无重叠、字体放大可读、44dp 实测、动效）
+  自动用例里没有判据，defer 对它们仍然成立；要引用哪个结论，按该小节逐条重新对表，不要照抄本节。
+  上一段是当时的记录，不再描述现在。〕
+- **仪器套件曾整类变红，根因是它把契约常量抄成了字面量**（2026-10-16 修复）：该类把
+  `POLICY_VERSION` 钉成 `"tl-learning-answer/1.0.0"`，而 `:ai` 的注册表早已升到
+  `tl-learning-answer/1.1.0`；`submit` 对「命令钉住的版本 ≠ 请求记录的版本」一律拒绝，于是 15 例
+  在**还没碰到网关之前**全部红。现在该常量从 `DeepSeekPromptRegistry.spec(PromptPurpose.LEARNING_ANSWER).policyVersion`
+  派生。这类漂移为什么能活四轮：`.\gradlew.bat check` 是 JVM-only，从不编译 `androidTest`（既有失败案例
+  库 2026-09-22 [guard] 第一条），因此**套件变红在默认门禁里没有任何见证**——要拿这个数必须显式跑
+  `:app:connectedDebugAndroidTest`（该任务不支持 `--tests`，只能整包）。
+- **真机整包仍有 12 例红，其中 11 例与本次改动无关**：把 12 个代码文件退回 HEAD（备份 → `git checkout HEAD --`
+  → 隔离跑那 6 个仍失败的类 → 逐文件 sha256 复原）实测得到同名的 11 条失败；第 12 例
+  `HomeTopicCardInstrumentedTest.aStoredTopicIsDrawnAsACardWithItsTitleAndMetaAndStillOpensTheConversation`
+  只在整包出现、隔离跑（HEAD 与改动后各一次）都通过，是 10000ms 负载超时而非行为。
+  **这 11 例是待办，不是本片的产物**，不要在下一片里当成「已修」；按失败文案的三分归因与裁定选项
+  只写在[遗留路线](../.trae/ROADMAP.md) 的 D7 一处，本节不复述。
 - 稳定化（`GenerationStabilizer` 自己持有事务边界）与位置记账（`settlePosition`）是**两个事务**，
   中间会出现「revision 已落库、位置尚未指向它」的窗口；合并需要一次嵌套提交，故保留并记录。
 - `complete()` 中 stabilizer 抛出存储异常时按失败收敛（释放槽位、不重发），
@@ -466,13 +492,13 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
 | `screen.HomeScreen` / `screen.SettingsScreen` | 两个视图：只转发手势 + 按 ViewState 绘制 | 唯一本地状态是「回填抑制」（渲染自己写进去的文本不再回调 presenter，避免光标跳动）；历史主题区只画最近 3 条（`MAX_RECENT`，快捷面而非全量列表），区头计数只在 `hasTopics()` 时出现、无主题时改画空态句；卡片的可选部位（摘要行、未读点）由 `ui.TopicCard` 的实际字段决定，空摘要不留占位句；卡片的 content description 把未读数一并说出来，不靠那颗蓝点独自承担这个事实。**2026-09-28 设置页重设计：`SettingsScreen` 是纯分组导航列表**（「AI 提供商」「能力」两张 flush 卡 + 行间发丝线，全部入口行用 `ic_chevron_right`），不再承载任何表单；Key 的健康度画在「API KEY · DeepSeek」入口行副标题（掩码 + 判定，读同一个 `SettingsViewState`） |
 | `screen.SettingsKeyScreen` | API KEY 二级页（2026-09-28 设置页重设计自根页迁入）：状态卡（掩码 + 三态 pill + 删除文字链）与替换表单卡（输入框 + 44dp 绿底白勾图标按钮同行） | 原 `SettingsScreen` 的密钥处理规则原样随迁：Key 永不成为 `String`（char[] 缓冲移交 presenter 并擦除）、只见掩码、离开窗口即清输入框；全页唯一实心元素是保存图标（`bg_save_ico`/`ic_check`，带 contentDescription）；删除是红色文字链 + `AlertDialog` 确认，永不与保存同排同权；Key 缺失时删除链接与分隔线同隐 |
 | `screen.ModelThinkingPicker` | 输入框内的模型/思考贴附式弹层 | 锚定当前标识；下方空间不足时向上翻转，始终不遮挡触发它的标识 |
-| `screen.RecommendationMarquee` | 首页推荐区 | 推荐项拆成上下两条独立轨道；每条 chip 画两份并按一份宽度回跳，接缝永不可见；上行向左、下行向右；触摸暂停、离手 2.6 s 恢复；离屏/未附加/窄到不可滚动时停滚；chip 是「类别胶囊 + 文本 + 右箭头」三段，其中**文案与两档底色不在此判定**，只向 `screen.RecommendationTag` 取（T-2026-09-27-005）。**2026-09-28 起两条轨道画在 `screen.EdgeFadeLayout` 里**，由它一次性羽化整块左右边缘；`render(...)` 在同一批 chip 上**不做任何事**（按值比较，`HomeScreen` 每次击键都会把整个 state 交下来，重建轨道会让滚动位置归零并重放首帧） |
+| `screen.RecommendationMarquee` | 首页推荐区 | 推荐项拆成上下两条独立轨道；每条 chip 画两份并按一份宽度回跳，接缝永不可见；上行向左、下行向右；触摸暂停、离手 2.6 s 恢复；离屏/未附加/窄到不可滚动时停滚；chip 是「类别胶囊 + 文本 + 右箭头」三段，其中**文案与两档底色不在此判定**，只向 `screen.RecommendationTag` 取（T-2026-09-27-005）。**2026-09-28 起两条轨道画在 `screen.EdgeFadeLayout` 里**，由它一次性羽化整块左右边缘；`render(...)` 在同一批 chip 上**不做任何事**（按值比较，`HomeScreen` 每次击键都会把整个 state 交下来，重建轨道会让滚动位置归零并重放首帧）。**2026-10-16 性能轮**：步进从 1px/帧改成 2px/33ms（同速、少一半重绘），并加 `isWorthDrawing()` 四道闸（`isShown` / `hasWindowFocus` / `ChatMotion.reduced` / `getGlobalVisibleRect`）——动画缩放为 0 时不漂，因为漂移就是一种动效，而 `ChatMotion` 是本应用读 `ANIMATOR_DURATION_SCALE` 的唯一入口。ALP-AN00 实测：首页空转 10 s = 299 帧（≈30 fps，改前 63 fps 且 `Number High input latency` 读数 2501，改后同窗口 0-2）；`settings put global animator_duration_scale 0` 后同窗口 0 帧。复算：`adb -s <serial> shell dumpsys gfxinfo com.treelearn reset` → 等 10 s → `dumpsys gfxinfo com.treelearn | grep -E "Total frames|High input latency"` |
 | `screen.EdgeFadeLayout` | 会羽化自己左右边缘的纵向容器（2026-09-28，同日两次修正） | 原型的 `mask-image:linear-gradient(90deg,transparent,#000 20px,#000 calc(100% - 20px),transparent)`（挂在 `.rec-row` 每行上）。Android 用 **`DST_IN`** 复刻：`dst_in = dst × src_alpha`，与 CSS mask 的 alpha 语义**一致**，故渐变数组**照抄原型**（两端 `transparent`=隐藏、中间 `#000`=显示），不需要补集。**首版用 `DST_OUT` + 补集数组是真机翻车后修正的**：`DST_OUT`（`dst × (1 − src_alpha)`）在 `drawRect` 上整块生效——source alpha 取自 `Paint`（默认 255）而非 shader，结果整条推荐带被一次擦光，只剩块外边框，实机读数见 `artifacts/evidence/home-fade-fix-2026-09-28.log` 前的截图量测。宽度取 `rec_fade_width`（20dp）。遮罩挂在**包住两行的块**上——这与原型（每行各挂）不同，是有意的偏离：两行一起淡出只需一次离屏绘制，也不会在两行之间留接缝；原型的渐变从**物理左**起算（`90deg` 且 stop 未按逻辑序写），故 RTL 下不对称是**照抄原型**，不是缺陷；宽度 ≤ 两倍羽化宽度时保留硬边而不是整块隐去 |
 | `screen.RecommendationTag` | 推荐类别 → 标签文案与底色档的**唯一判定点**（T-2026-09-27-005） | 三类 `Kind` 全部手写、**无 `default:` 兜底**——新增一类而不给标签是编译错误，而不是悄悄落到「入门」（旧实现正因有这个兜底，评审 M7 读不出「三类是否都接上」）；底色只有两档：品牌档（`green_soft` 底 + `green_deep` 字）只给「顺着你学的」，其余走中性档（`line` 底 + `ink3` 字），全取既有 token；`item_recommendation.xml` 不再自带 `backgroundTint`/`textColor` |
 | `screen.PaperRules` | 全站纸纹与输入框信纸格线的**同一个**画线实现（T-2026-09-27-002/004/010） | 线距、相位与两个派生色（`paper_rule` / `paper_write`）都在这里算；纹理与信纸只有颜色不同，不写第二套线距；两个具名入口 `pageRuleColour` / `writingRuleColour` 是「谁叠在谁上面」的唯一定义点 |
 | `screen.PaperRuleBackdrop` / `screen.RuleEditText` | 外壳全屏纹理装饰层与自绘格线输入框（T-2026-09-27-004/010） | 外壳纹理层是唯一全屏装饰：不可点、不可聚焦、对无障碍隐藏、不拦抽屉与滚动手势；输入框复用 `PaperRules.lineOffsets(...)` 并只换派生色，行距按实测周期标定（`CALIBRATION_STEPS=4`） |
 | `wiring.AndroidSettingsStore` | 真实存储：`SettingsRepository` + `KeystoreSecretStore` | app 层唯一接触密钥材料的地方，且只为生成掩码；`read()` 的缓冲在 `finally` 擦除 |
-| `wiring.HomeWiring` | 首页的**真实**数据路径（T-032）：主题列表 + 首题提交，实现 `HomeData` 与 `RootQuestionSubmitter` | 列表是 `TopicDao.listOverviews` 的一条只读 SQL；首题经 `FirstTopicCreation` 单事务写入、经 `GenerationCoordinator.submitFirstTopic` 受理；缺 Key 时返回可见的 `KEY_MISSING` 且**一行都不写** |
+| `wiring.HomeWiring` | 首页的**真实**数据路径（T-032）：主题列表 + 首题提交，实现 `HomeData` 与 `RootQuestionSubmitter` | 列表是 `TopicDao.listOverviews` 的一条只读 SQL；首题经 `FirstTopicCreation` 单事务写入、经 `GenerationCoordinator.submit(command, assembler, localWrite)` 受理，写入在开连接之前（2026-10-16 裁定，见技术方案 §8 第 4 条）；缺 Key 时返回可见的 `KEY_MISSING` 且**一行都不写** |
 | `wiring.HomeStore` / `wiring.SqliteHomeStore` | 首页的端口与它的 SQLite 实现 | 端口只做存取、不重写判定；`recentTopics()` 不兜底、不造行，空库就是空列表 |
  | `ui.HomeStats` / `ui.HeatmapView` / `ui.HeatmapLayout` | 学习热度的三个层次（T-100/101/102）：聚合结果、自绘 View、纯 Java 布局数学 | 活跃判定在 `data.stats.StatsAggregator` 一处（`HAS_ANY_ANSWER`：当天有过回答修订）；`HeatmapView` 以 XML attrs 支持抽屉标准 7×6 月历网格，详情页由 `MonthCalendarView` 绘制当前月 7 列月历，颜色全走 `R.color` token |
 | `ui.StatsDetailPresenter` / `screen.StatsDetailScreen` | 统计详情页（T-104/012）：累计指标卡 + 当前月份 7 列月历热力卡 | 读**同一**聚合入口（`HomeStore.statsRaw()` → `StatsAggregator`），与抽屉热力图共享判定、不可能出现两套口径；页面只把当前月的 `activeDays` 映射到 7×6 月历，月初/月末/未来日期透明，totals/streak 原样透传不二次计算；历史记录与抽屉窗口不改写；查询失败降级为可见占位（failed 态），空库显示空态；入口由抽屉热力图接线 |
@@ -589,10 +615,16 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
   表单动作在 API KEY 二级页（`screen.SettingsKeyScreen`）；2026-10-09 起不再显示数据边界说明。
 - 切换只影响之后的新生成；已生成回答不被追溯改写。本层的写法就是「写偏好 + 改 ViewState」，
   不触碰任何回答或分支。
-- **对话页 chip 与全局分工的分界（T-103，2026-09-25）**：进入对话页时 `ChatPresenter` 经
+- **对话页 chip 与全局分工的分界（T-103，2026-09-25；2026-10-16 收紧回退语义）**：进入对话页时 `ChatPresenter` 经
   `ChatRoleSource` 读 088 的 `Role.CHAT` 分工解析结果——`modelId` 能映射回内置 tier 则静默换 chip；
-  回落到内置/最早或分工为空则给一次性 `CHAT_MODEL_FALLBACK` / `NO_MODELS` 通知（每次进入对话最多一条，
-  不随每次渲染重复）。chip 上的选择是**会话内覆盖**（只改 ViewState，随 presenter 消亡），
+  **只有学习者真选过、而存储已经给不出的模型**才算回落：判定收敛在 `ModelSettingsPresenter.Fallback.substituted()`
+  一处（`BUILTIN` / `EARLIEST` 为真），设置页的 `FALLEN_BACK` 与对话页的一次性 `CHAT_MODEL_FALLBACK` 都读它，
+  不再有第二个开关。`SharedPreferences` 里没有该分工（新装、清数据、从未进过设置子页）解析为
+  `Fallback.DEFAULTED`，**静默使用内置默认**——旧实现把这一种和「选过的没了」合并成 `BUILTIN`，于是出厂默认
+  被说成「所选聊天模型已不可用」，在真机上是每次新装必现的假警报。分工为空仍是 `NO_MODELS`
+  （每次进入对话最多一条，不随每次渲染重复）。通知条的**颜色**同样只有一处判定：
+  `NoticeText.colorResOf` 按类别返回 `tl_ink3`（提示，没有东西丢失）或 `tl_red`（失败），
+  `chat_notice` / `home_notice` 两条屏不再把文字写死成红色——回落提示此前和「存储拒绝写入」同色，读起来像坏了。chip 上的选择是**会话内覆盖**（只改 ViewState，随 presenter 消亡），
   不再写穿 `SettingsStore`——持久的选择只属于设置子页（088），双写正是两个表面漂移的根源。
   角色解析的 render 一律 `ui.post` 回主线程（真机 `CalledFromWrongThreadException` 实测教训）。
 - **设置子页入口接线（T-096 补齐；2026-09-28 设置页重设计扩展）**：供应商/模型/搜索/语音/文件管理五个子页的入口回调此前
@@ -614,7 +646,8 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
 
 - **首页数据路径已接线（T-032，2026-09-22）**：`TopicDao.listOverviews` 新增一条只读查询，一次取回
   「主题 + 根标题 + 首个问题 + 当前摘要 + 分支数 + 最近使用时间」；`wiring.HomeWiring` 用它画列表，用
-  `FirstTopicCreation` + `GenerationCoordinator.submitFirstTopic` 建首个主题。占位类已整体删除，
+  `FirstTopicCreation` + `GenerationCoordinator.submit(command, assembler, localWrite)` 建首个主题
+  （方法名与写入时机按 2026-10-16 的裁定更新，见下方同日期条目）。占位类已整体删除，
   生产装配里不再有 `NOT_WIRED`。读者要注意的**残留缺口**：
   1. **按历史派生的首页推荐已接入，失败仍回退启动集合**。有主题且已配置 Key 时，
      `HomeWiring.recommendations(hasTopics)` 以主题 outline 触发 `HOME_RECOMMENDATIONS` 派生并读取
@@ -626,10 +659,23 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
      由用户本人装 release APK 实测），`TopicDao.listOverviews` 与 `messages.quoted_text` 的真实 SQLite
      行为记为 `deferred — 用户自行装机验证（user decision 2026-09-21）`，用例已写好并通过编译，
      但本轮没有执行（`artifacts/evidence/T-032-instrumentation-compile.txt`）。
-- **本轮不使用模拟器**（用户指令 2026-09-21）：`:app:assembleDebugAndroidTest` 只做**编译验证**，
-  不安装、不运行；`app/build/outputs/androidTest-results/connected/debug` 保持为空。必须上设备才能
+- **首话题失败会留下一个只有问题的主题（用户裁定 2026-10-16）**：首题的五组行现在在**开连接之前**提交，
+  所以 401/402/网络失败留下的是一条可读的对话——问题在、回答位是 `FAILED`、可原位重试——而不是
+  「一段读不出来的对话」。代价按同一裁定接受：这个主题会出现在首页列表里，直到学习者删掉它或重试成功。
+  它与 PRD BASE-03 禁止的形态不是同一件事：BASE-03 针对「无可用 Key 时仍创建主题或根分支」，而缺 Key
+  的检查仍在写库之前，一行都不写。**该裁定推翻的旧写法**（行在 provider 2xx 的 accepted 回调里写）
+  仍留在历史任务记录与旧证据里，属当时的判定，不再作为当前态引用。
+- **本切片当时不使用模拟器**（用户指令 2026-09-21）：`:app:assembleDebugAndroidTest` 只做**编译验证**，
+  不安装、不运行；连接结果目录当时没有产物。必须上设备才能
   证明的验收项一律记为 `deferred — emulator not used this round (user instruction 2026-09-21)`：
   手机竖屏 / 平板横屏无重叠、字体放大可读、44dp 热区实测、推荐条动效，以及 `AppLaunchInstrumentedTest` 本身。
+  〔**2026-10-16 更新**：连接结果目录现在**非空**——真机整包跑写入了
+  `TEST-ALP-AN00 - 13-_app-.xml`（设备名 `ALP-AN00 - 13`），`artifacts/tmp/diag-2026-10-16/xml-final/`
+  是它的副本，块 06/07 的读数即由该副本算出（见
+  `artifacts/evidence/T-2026-10-16-first-topic-401-deadend.txt`）。上面最后一项
+  **`AppLaunchInstrumentedTest.mainActivityRendersFirstScreenWithoutCrash` 已在该次整包跑里执行并通过**，
+  defer 对它解除；前四项（无重叠 / 字体放大 / 44dp 实测 / 动效）**仍未执行**，因为它们要靠人看，
+  自动用例里没有对应的判据。〕
 - **共享树在 T-012 测量时曾短暂不可编译，现已恢复**：当时 `generation/PositionCommandsTest.java`
   （T-010 的在飞 RED）引用尚不存在的 `PositionCommands`，28 个编译错误出自这一个文件
   （`artifacts/evidence/T-012-in-repo-suite.txt`）。T-012 的 RED/GREEN 因此在仓库外的
@@ -669,7 +715,8 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
   `deferred — 用户自行装机验证（user decision 2026-09-21）`。
 - **归档（导航）页已不在此缺口内**：它已由 T-039 接上真实入口，见「导航页与归档 / 恢复 / 永久删除（T-039）」。
 - **真机结论全部 deferred**：本轮按用户指令（2026-09-21）不使用模拟器/真机，`:app:assembleDebugAndroidTest`
-  只做**编译验证**、不安装不运行，`app/build/outputs/androidTest-results/connected/debug` 保持为空。
+  只做**编译验证**、不安装不运行（本条只说明当时的执行范围；`androidTest-results/connected/debug`
+  现在的状态见「生成协调器（T-008）」小节的 2026-10-16 更新，它已非空）。
   `SearchUnreadReadingInstrumentedTest` 的 10 个用例（中文子串、`%`/`_` 字面量、引号是数据、过期 revision 与
   分叉、归档不可搜、展示顺序、阅读位置四列往返、`ON DELETE SET NULL`、清空）**只编译、未执行**，一律记为
   `deferred — emulator not used this round (user instruction 2026-09-21)`。
@@ -768,7 +815,7 @@ View 自己不持内容。
 | `ui.ChatSink` | 导航、输入法隐藏、剪贴板、子分支列表与版本菜单的出口 | 复制文本交出去即忘：实现只写剪贴板，不落盘、不打印 |
 | `ui.CopyLabels` | 复制文本的两个小标题 | 由 `AppContainer` 从 `strings.xml` 取值注入；presenter 没有 Context，也不内联文案 |
 | `ui.ChatPresenter` | 对话页的全部决策 | 重试/重置/切版只**转发**给 T-010 的用例，UI 层没有任何路径能移动 revision 指针；发送接受后先在后台读回权威消息，再清草稿并请求隐藏输入法 |
-| `screen.ChatScreen` | 列表 + 引用条 + 输入区（含模型/思考入口） | 只转发手势、按 ViewState 绘制 |
+| `screen.ChatScreen` | 列表 + 引用条 + 输入区（含模型/思考入口） | 只转发手势、按 ViewState 绘制；**「回到最新」键**（T-075，2026-10-16 用户拍板改形）是浮在滚动区底部中央的 44dp 圆角矩形 + 向下箭头（`chat_follow_slot` 覆盖 `chat_scroll`，键体 `bg_follow_latest` 自带圆角 ripple、`stateListAnimator="@null"` 去掉按压时的 elevation 动画，漏读条数走角标 `chat_follow_count`，因此键的宽高在所有状态下不变）；显隐**只有一个开关**——`renderFollow` 切 slot，键在 XML 里恒为 VISIBLE：2026-10-17 实测过一次反面后果，`visibility="gone"` 留在键体上而只切 slot 时键**永不出现**（uiautomator 树里没有任何 `chat_follow*` 节点，因此既不显示也点不到），回归锁是 `ChatScreenFollowModeInstrumentedTest` 对 `R.id.chat_follow` 的 `View.VISIBLE` 断言；滚回最新内容时**自动让位消失**由 `dismissFollowWhenRestingAtTheFloor()` 一处判定，settle 与行布局回调两个入口都问它——后者覆盖「最后一次滚动之后内容才长高」（公式/图片晚到、流结束），那种情况下不会再有 settle，键会压在最新内容上；空转与显隐的可复现读数：进入对话后 `adb shell input swipe 600 800 600 2150 600` 再 `uiautomator dump`，期望 `com.treelearn:id/chat_follow` 的 bounds 为 `[528,2080][671,2223]`（143px = 44dp），连续 `input swipe 600 2000 600 700 350` 触底后同一 dump 期望该 id 消失，2026-10-17 在 ALP-AN00 两条均成立；判定过程里的 `scrollY`/内容高/视口高读数由临时 `TLFOLLOW` 日志量得，该探针已删除、不在树里 |
 | `screen.ReasoningDisclosure` | 思考披露：44dp 折叠头 + 正文 | 默认折叠；无 reasoning 且无在跑尝试时整块隐藏；展开态不在这里存 |
 | `screen.AnswerActionBar` | 引用/重置/翻译/朗读/子分支 | 按 `ChatMessage` 谓词启用；复制、新建主题与版本切换入口按当前精简 UI 隐藏；选中文字后的追问与新建主题由应用自绘的划词菜单承载 |
 | `ui.TextSelection` | 一段文字的选区值类型 | 纯 JVM 值类型，不含任何 Android 类型；划词菜单与底部引用读的是同一段平台选区 |
@@ -777,7 +824,7 @@ View 自己不持内容。
 | `screen.WordMenuPopup` | 划词菜单的承载类（`PopupWindow`） | 菜单由它画出并定位到选中句；它只画与套用，判定全部来自 `WordMenu` |
 | `screen.ChildBranchPopup` | 子分支列表弹层（`PopupWindow` + 窗口内避让定位） | 行是**传进来**的，弹层不读库；优先显示在操作栏上方并夹紧到安全边距，只有点行才导航，点外面或按返回只关列表 |
 | `wiring.BranchChildren` | 「这条回答的直接子分支」与「每个位置各有几个子分支」的唯一判定点 | 子 = 非根、带 source message、未归档；chips 与弹层两处读同一份，因此不会出现「数量说有、列表却拿不出」 |
-| `wiring.ChatWiring` | 对话的**真实**数据路径（T-032）：读回 + 五条命令，实现 `ChatData` 与 `ChatCommands` | 读回走 `MessageDao.findByBranch` / `AnswerRevisionDao` / `GenerationOperationDao`；`send`/`retry`/`reset` 装配请求后交协调器、`selectRevision` 直接落库、`fork` 走 `BranchCreation`；每条拒绝都以可见 `Notice` 返回 |
+| `wiring.ChatWiring` | 对话的**真实**数据路径（T-032）：读回 + 五条命令，实现 `ChatData` 与 `ChatCommands` | 读回走 `MessageDao.findByBranch` / `AnswerRevisionDao` / `GenerationOperationDao`；`send`/`retry`/`reset` 装配请求后交协调器、`selectRevision` 直接落库、`fork` 走 `BranchCreation`；每条拒绝都以可见 `Notice` 返回；派生 worker 的**回读提醒只在真写了行时发出**——`runDerivedPass` 按 `HomeDerivedPort.ensureConversationArtifacts` 的布尔返回值决定要不要 `notifyGenerationListeners`，因为提醒的含义是「再读一次」，而读一次又会派生一次，无条件提醒等于自己给自己上弦（2026-10-16 实测：ALP-AN00 上一条已完整派生的对话，9 s 内 `render` 被调用 1155 次≈130 次/秒、输出像素逐帧相同；修法见 `ChatWiring.runDerivedPass`，两条 JVM 回归锁在 `ChatWiringRecommendationsTest`，变异实测「去掉 if」只红那一条负例、「恒不提醒」只红那一条正例）。空转读数用 `adb -s <serial> shell dumpsys gfxinfo com.treelearn reset` 后等 10 s，再 `dumpsys gfxinfo com.treelearn \| grep -E "Total frames\|High input latency"`，修后为 `Total frames rendered: 0`；1155 那个数需要临时在 `ChatScreen.render` 里加一条计数日志才能复现，该探针本轮已删除，不留在树里 |
 | `wiring.ChatStore` / `wiring.SqliteChatStore` | 对话的端口与它的 SQLite 实现 | 端口**委托** T-010 的 `AnswerVersions`/`PositionCommands`，不复制它们的判定；分支标题按 `BranchHeading` 统一读取，子分支在保存标题和首条问题都为空时读取其固定来源修订的回答首句作为临时名称，完全无文本时显示“未命名分支”；`history()` 用编码器自己的 `ContextPlan.Entry` 词汇表达「问题之前的行」——非根分支先经 `ContextSnapshot.fromStored` 读回出生快照、由 `SnapshotHistoryMerger`（T-064，纯 JVM 类型）按 sources 顺序展开成前置 entry，再接本分支行；快照行缺失（根分支）时就是存储的行。快照不可解码或引用的行已不在时经 `ChatStore.SnapshotUnreadable` 拒绝本次请求（STORAGE 提示），不静默丢上游背景 |
 | `wiring.PromptLimits` | 请求预算的两个数字，全应用唯一取值点 | `AppContainer` 用 `PromptLimits.budget()` 构造那一个 `PromptBudget`；数字与理由见 `:app` 首页一节的「请求预算（T-032 的一次决定）」 |
 | `wiring.LogcatTelemetry` | 协调器的遥测出口 | 只记状态与计数，**不记** Key、system prompt、问题、回答或 reasoning 正文 |
@@ -798,6 +845,53 @@ View 自己不持内容。
   `activeRevisionId` 且该行 stable。于是追问之后、生成中、切版之后三种情况都由同一条规则自动隐藏（BASE-16），
   没有第二处判断。
 - **发送接受后即时可见并收起输入法**：命令接受后先在后台从权威存储读回用户问题，再清草稿并请求宿主隐藏软键盘；后续读回继续刷新生成状态，不在 ViewState 乐观追加，避免重复消息。拒绝时保留草稿与既有提示。
+- **学习者气泡画的是落库的那句话（2026-10-16 修复）**：`ChatScreen` 在 `:1121` 取到 `R.id.chat_question`
+  之后，**全文没有任何读取点**（HEAD 同样如此），于是右侧问题气泡永远是空的——`renderQuestion` 只画了
+  引用条与失败位。这一条在四轮里没被看见，是因为 401 让整段对话读不出来、页面根本走不到渲染；
+  首题改成先落库（见「应用层入口索引（`:app`）—— 生成协调器（T-008）」小节同日期裁定）之后失败态也要画问题，空白才浮出来。
+  现在 `renderQuestion` 把 `ChatMessage.text`（注释即写明「the question (learner row) or the answer so far」）
+  写进该视图。真机见证：`artifacts/evidence/T-2026-10-16-first-topic-401-deadend.txt`。
+- **公式渲染补齐「转义字面量」与 `\top`（2026-10-16 修复）**：真机上模型回答的两条注意力公式显示成原始
+  LaTeX。扫描与定界符都是好的（那条回答有 120 个 `$`、8 个 `$$`，没有裸 LaTeX 行），失败点在 `MathParser`：
+  `\{` `\}` `\%` `\_` `\&` `\#` `\$` 是「反斜杠 + 标点」的**字面字符**，不是命令，而 `\top` 缺字形；解析一返回
+  null 就整条降级为等宽源码。现在 `parseEscapedLiteral` 按 `ESCAPED_LITERALS` 这一处清单放行它们（`\\` 换行
+  **仍登记为不支持**——没有生产者就不猜），`MathSymbols` 只补被见证的 `top`。仪器：`MathParserTest` 先红后绿
+  新增 4 例，该轮数学 JVM 套件 52 例全绿（本日下午收尾的读数见下面「数学链路收尾读数」条）；真机见证
+  `artifacts/tmp/diag-2026-10-16c/04-up7.png`。
+- **块级公式改成 `MathView`，超宽部分横向滚动（2026-10-16 拍板并落地）**：一条公式是一个不可断行的整体，
+  而答案的 `TextView` 是 `match_parent`，所以宽于可视区的公式两端出屏、看上去却仍然「渲染成功了」。块级公式因此不再作为段落里的字符排布，而是 `item_chat_formula.xml`
+  里挂在 `HorizontalScrollView` 下的一条 `MathView`（与 2026-09-28 表格走同一套理由）。三个决定各解决
+  另一层解决不了的问题：① 用户在「缩尺 / 横向滚动 / 保持裁切」之间拍板**横向滚动**——缩尺要把可用宽度
+  传进 span，而 `getSize` 拿不到 canvas、宽度只能在构造前知道，首次绑定时 `TextView.getWidth()` 常常
+  还是 0；② `MathView.measureWidth` **拒绝 `AT_MOST`、服从 `EXACTLY`**：前者是滚动视图的可视区，钳到它
+  正是本条要消除的裁切（超出的部分就没有可滚动的东西了），后者是 `fillViewport` 把放得下的公式撑满量程
+  以便居中；③ 居中只在放得下时成立（`centeredOffset`），放不下贴左排——居中的起点会把没人能往回滚到的
+  左端藏起来。几何与绘制只有一份：`MathGeometry` 同时服务行内 `MathSpan` 与块级 `MathView`（`scaleFor`
+  按宿主字号定标度，`draw` 在 `finally` 里还原 strokeWidth / textSize / textSkewX / color），因为一份标度
+  规则写两处就是同一个问题有两个答案。**行内 `$…$` 仍走 span**，理论上宽于一行的行内公式仍会被裁——本次
+  两条见证都是块级，行内未复现，因此不改动行内路径。真机（ALP-AN00）见证：`artifacts/tmp/diag-2026-10-16c/18b-band.png`
+  与 `25b-band.png`，同一条公式在横向拖动前后各自露出的两端。
+- **`MathView.onDraw` 把 ascent 加了两次（2026-10-16 修复）**：`MathLayout` 度量的每个 `Glyph.baselineY`
+  与 `HLine.y` 都**从盒顶往下算**，因此 `MathGeometry.draw` 收的是顶边而不是基线；宿主再传自己的基线等于
+  把 ascent 加两遍，整条公式被推到自身盒子以下。`View` 会把画布裁到自己的边界，所以后果是**静默丢墨**——
+  尺寸读数完全正常，分子或分母各少一半。仪器：`MathViewInstrumentedTest` 的按行墨点断言（先要求整条有墨，
+  否则空白位图会替任何结论作证；再要求上/中/下三段各有墨），变异为「把顶边换回基线」后有且只有该用例转红。
+- **嵌套的规则线被 `MathLayout.shift` 丢掉（2026-10-16 修复）**：六个复合构造（`frac` `sqrt` `script`
+  `bigOp` `accent` `delimited`）把子盒搬进父盒时只搬字形、把子盒的 `HLine` 传成 `null`，于是括号里的分数
+  没有分数线、分数里的根号没有顶线，而**盒子的宽高仍然正确**——除肉眼外没有任何读数会失败。现在 `shift`
+  两个原语一起搬。仪器：`MathLayoutTest.aNestedRuleSurvivesTheBoxThatEnclosesIt`（JVM，比较嵌套前后的
+  `lines` 条数，并断言搬来的线已重基到父盒而不是留在子坐标），两例变异各自转红。
+- **数学链路收尾读数（2026-10-16）**：JVM 套件 53 例全绿（`MathLayoutTest` 6 + `MathParserTest` 29 +
+  `MathScannerTest` 18），命令 `./gradlew :app:testDebugUnitTest --tests "com.treelearn.app.ui.math.*" --rerun`；
+  仪器 12 例全绿（`MathViewInstrumentedTest` 9 + `MathSpanInstrumentedTest` 3），命令 `adb -s emulator-5554
+  shell am instrument -w -e class com.treelearn.app.MathViewInstrumentedTest,com.treelearn.app.MathSpanInstrumentedTest
+  com.treelearn.test/androidx.test.runner.AndroidJUnitRunner`。**仪器跑在无头模拟器上**（真机跑全量仪器测试会
+  卸载应用并清掉本地数据），因此上面的绘制类结论只覆盖「墨点落在盒子的哪一段」，版面观感以同日的真机截图为准。
+- **失败条文案在「一个字符都没流出来」时仍写「以上为部分回答」**（记录，未改）：`chat_failure_text`
+  的文案写死在 `item_chat_message.xml:148`（`@string/chat_failed` = 「生成中断，以上为部分回答，不可作为
+  分支来源。」），`ChatScreen` 只切换它的 `visibility`（`:1210`），全代码库没有第二处读取该字符串——
+  `:926` 只把它当作无障碍播报。于是「有部分内容后失败」是准的，「401 之类一个字符都没到」读起来像话被
+  截断了。要改就得让文案知道这次有没有收到过 delta——属文案分叉，不在本次范围内，登记为待办。
 - **失败保留草稿与引用**：只有 accepted 才清，和首页输入框同一条规则。
 - **引用真正进请求（T-044，2026-09-22）**：`messages.quoted_text` 里的那句话会随请求发给模型——它编进
   **当前问题**的正文（`<treelearn_quote>` 信封、换行、转义后的引文、换行、`</treelearn_quote>`、换行、问题原文），
@@ -890,8 +984,9 @@ View 自己不持内容。
   该值已随本轮新稿同步被 `#627067` 取代；T-013 的原始数字与测量命令见
   `artifacts/evidence/T-013-static-ui-checks.txt` 的 CHECK 3。本轮全部数字、矩阵与测量命令见
   `artifacts/evidence/T-050-design-token-sync.txt`。
-- **本轮不使用模拟器**（用户指令 2026-09-21）：`:app:assembleDebugAndroidTest` 只做**编译验证**，
-  `app/build/outputs/androidTest-results/connected/debug` 保持为空。必须上设备才能证明的验收项一律记为
+- **本切片当时不使用模拟器**（用户指令 2026-09-21）：`:app:assembleDebugAndroidTest` 只做**编译验证**
+  （本条只说明当时的执行范围；`androidTest-results/connected/debug` 现已非空，见「生成协调器（T-008）」
+  小节的 2026-10-16 更新）。必须上设备才能证明的验收项一律记为
   `deferred — emulator not used this round (user instruction 2026-09-21)`：真机上的流式刷新节奏、展开态在
   列表复用下不串行、旋转/切分支后生成继续且无重复消息、手机竖屏与平板横屏无重叠、字体放大可读、44dp 热区
   实测（本轮只有静态计算：16 个可交互元素全部 ≥44dp）。

@@ -2,6 +2,7 @@ package com.treelearn.app;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import android.graphics.Color;
@@ -132,6 +133,64 @@ public final class MarkdownRendererInstrumentedTest {
         assertTrue(cell instanceof Spanned);
         assertFalse(cell.toString().contains("\\frac"));
         assertEquals(1, ((Spanned) cell).getSpans(0, cell.length(), MathSpan.class).length);
+    }
+
+    @Test
+    public void aDisplayFormulaAloneInItsParagraphBecomesItsOwnSegment() {
+        List<MarkdownRenderer.Segment> segments = MarkdownRenderer.renderSegments(
+                "正文。\n\n$$\n\\frac{Q K^{\\top}}{\\sqrt{d_k}}\n$$\n\n续。", null);
+
+        assertEquals(3, segments.size());
+        assertFalse(segments.get(0).isFormula);
+        assertTrue(segments.get(1).isFormula);
+        assertNotNull(segments.get(1).formula);
+        assertFalse(segments.get(2).isFormula);
+        assertEquals(0, spanCount(segments.get(0).text, MathSpan.class));
+        assertEquals(0, spanCount(segments.get(2).text, MathSpan.class));
+        assertTrue(segments.get(0).text.toString().contains("正文"));
+        assertTrue(segments.get(2).text.toString().contains("续"));
+    }
+
+    @Test
+    public void aFormulaSharingALineWithProseStaysInsideTheText() {
+        List<MarkdownRenderer.Segment> segments = MarkdownRenderer.renderSegments(
+                "其中 $$\\frac{1}{2}$$ 成立。", null);
+
+        assertEquals(1, segments.size());
+        assertFalse(segments.get(0).isFormula);
+        assertEquals(1, spanCount(segments.get(0).text, MathSpan.class));
+    }
+
+    @Test
+    public void anUnsupportedDisplayFormulaStaysAsMonospaceSourceInTheText() {
+        List<MarkdownRenderer.Segment> segments = MarkdownRenderer.renderSegments(
+                "矩阵：\n\n$$\\begin{matrix}a\\end{matrix}$$", null);
+
+        assertEquals(1, segments.size());
+        assertFalse(segments.get(0).isFormula);
+        assertEquals(0, spanCount(segments.get(0).text, MathSpan.class));
+        assertTrue(segments.get(0).text.toString().contains("\\begin{matrix}a\\end{matrix}"));
+        assertEquals(1, spanCount(segments.get(0).text, TypefaceSpan.class));
+    }
+
+    @Test
+    public void theFlatRenderKeepsADisplayFormulaOnItsOwnLine() {
+        CharSequence rendered = MarkdownRenderer.render("正文。\n\n$$\\frac{1}{2}$$");
+
+        String text = rendered.toString();
+        assertEquals(1, spanCount(rendered, MathSpan.class));
+        assertEquals(1, spanCount(rendered, AlignmentSpan.Standard.class));
+        assertTrue("the formula must still reach a flat body as a span", text.endsWith("\ufffc"));
+        assertEquals("a lifted formula must not be glued onto the sentence before it",
+                '\n', text.charAt(text.length() - 2));
+    }
+
+    private static int spanCount(CharSequence text, Class<?> kind) {
+        if (!(text instanceof Spanned)) {
+            return 0;
+        }
+        Spanned spanned = (Spanned) text;
+        return spanned.getSpans(0, spanned.length(), kind).length;
     }
 
     @Test

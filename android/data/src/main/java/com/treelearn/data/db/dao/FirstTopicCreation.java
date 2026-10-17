@@ -23,8 +23,11 @@ import com.treelearn.data.db.TreeLearnSchema;
  * operation UUID never landed" are all states the recovery path (T-008) would have to reason about,
  * and §8 removes them by writing {@code topics} + the root {@code branches} row + both
  * {@code messages} positions + the {@code generation_operations} row as a unit. It is the entry point
- * the gateway's accepted callback can wait on synchronously: §8 says the first SSE byte must not be
- * read before this commit and that a failure here is reported as a local persistence error.
+ * the send path hands to the coordinator as its {@code LocalWrite}: since 2026-10-16 the commit runs
+ * <em>before</em> the request is sent, so every remote outcome - a 401 as much as a completed stream -
+ * already has a conversation to land in. The order is the one §9.2 has always required of a follow-up:
+ * the attempt is durable before the call opens. A refusal here is reported as a local persistence
+ * error, and nothing was sent.
  *
  * <p><strong>Order.</strong> Topic, then its root branch, then the learner's question, then the AI
  * position, then the attempt — the order §8 lists, and the order the foreign keys allow (each row
@@ -62,9 +65,10 @@ import com.treelearn.data.db.TreeLearnSchema;
  * unchecked write here would produce.
  *
  * <p><strong>Failures are returned, not thrown.</strong> Every store refusal is reported as an
- * {@link Outcome} carrying a {@link Refusal}, because §8 requires the accepted callback to receive a
- * local persistence error and keep its connection closed rather than to catch an exception from the
- * network layer. Two of the refusals are named facts this write path knows ({@link
+ * {@link Outcome} carrying a {@link Refusal}, because the caller is the coordinator's pre-send write:
+ * it must turn a refusal into {@code Refusal.STORAGE} and give the slot back without ever opening a
+ * connection, rather than catch an exception from inside its own admission. Two of the refusals are
+ * named facts this write path knows ({@link
  * Refusal#TOPIC_ID_ALREADY_EXISTS}, {@link Refusal#SOURCE_MESSAGE_NOT_IN_TOPIC}); anything else the
  * store refuses becomes {@link Refusal#STORAGE_REFUSED} with SQLite's own message kept verbatim in
  * the detail, which is a transport classification and not a business code dressed onto a caller bug.

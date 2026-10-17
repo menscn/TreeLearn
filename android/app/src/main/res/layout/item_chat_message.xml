@@ -170,8 +170,9 @@
                     android:layout_height="@dimen/touch_min"
                     android:background="@drawable/bg_button_ghost"
                     android:minWidth="@dimen/touch_min"
+                    android:stateListAnimator="@null"
                     android:text="@string/chat_retry"
-                    android:textColor="@color/tl_green_deep"
+                    android:textColor="@color/tl_action_text"
                     android:textSize="@dimen/text_sm" />
             </LinearLayout>
         </LinearLayout>
@@ -198,12 +199,16 @@
             android:paddingBottom="@dimen/space_s3"
             android:visibility="gone">
 
+            <!-- 2026-10-16: the header takes the row highlight like the source card's header does.
+                 It is a tap target (fold, and retry after a failed translation) that used to answer a
+                 tap with nothing at all. -->
             <TextView
                 android:id="@+id/chat_translation_header"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/touch_min"
+                android:background="?android:attr/selectableItemBackground"
                 android:gravity="center_vertical"
-                android:textColor="@color/tl_green_deep"
+                android:textColor="@color/tl_action_text"
                 android:textSize="@dimen/text_cap" />
 
             <TextView

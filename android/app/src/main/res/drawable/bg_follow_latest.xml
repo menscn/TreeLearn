@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The follow-latest key (T-075, 073 §6) as the 2026-10-16 user asked for it: a fixed-size rounded
+     rectangle holding one glyph, not a text pill that changes width when the missed count arrives.
+     The surface is the card ink with a hairline, the pressed step is the shared control ripple clipped
+     to the same r-md rectangle - bg_pill alone had no pressed step at all, so the key could be tapped
+     with no feedback whatsoever (2026-10-16 user report: 点击和动效不太对). -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/ripple_primary">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/tl_surface" />
+            <stroke android:width="@dimen/hairline" android:color="@color/tl_line" />
+            <corners android:radius="@dimen/radius_md" />
+        </shape>
+    </item>
+    <item android:id="@android:id/mask">
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/white" />
+            <corners android:radius="@dimen/radius_md" />
+        </shape>
+    </item>
+</ripple>

@@ -169,6 +169,34 @@ public final class ModelSettingsPresenterTest {
         assertEquals("", resolved.label);
     }
 
+    /**
+     * A learner who never picked has no selection to lose, so the builtin default is the designed
+     * starting point and must not be reported as a substitution. Before this rule existed, a fresh
+     * install told every learner that their model「已不可用」.
+     */
+    @Test
+    public void theRuleDefaultsSilentlyWhenNothingWasEverStored() {
+        List<Option> options = Arrays.asList(option("p1", "DeepSeek", "deepseek-chat"));
+
+        Assignment resolved = ModelSettingsPresenter.resolve(null, null, options,
+                option("p0", "DeepSeek", "deepseek-flash"), null);
+
+        assertEquals(Fallback.DEFAULTED, resolved.fallback);
+        assertFalse("a pick never made is not a pick that was lost",
+                resolved.fallback.substituted());
+        assertEquals("p0", resolved.providerId);
+        assertEquals("deepseek-flash", resolved.modelId);
+    }
+
+    @Test
+    public void onlyALostSelectionCountsAsSubstituted() {
+        assertFalse(Fallback.NONE.substituted());
+        assertFalse(Fallback.DEFAULTED.substituted());
+        assertFalse(Fallback.EMPTY.substituted());
+        assertTrue(Fallback.BUILTIN.substituted());
+        assertTrue(Fallback.EARLIEST.substituted());
+    }
+
     private static Option option(String providerId, String providerName, String modelId) {
         return new Option(providerId, providerName, modelId);
     }

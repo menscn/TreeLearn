@@ -18,17 +18,17 @@ final class LiveAttempt {
     final GenerationCommand command;
     final GenerationOperation operation;
     final DeepSeekRequest request;
-    final GenerationCoordinator.AcceptedWrite acceptedWrite;
+    final GenerationCoordinator.LocalWrite localWrite;
     final StreamBatch batch = new StreamBatch();
     GenerationGateway.Stream stream;
     boolean persisted;
     boolean streaming;
 
     LiveAttempt(GenerationCommand command, GenerationOperation operation, DeepSeekRequest request,
-            GenerationCoordinator.AcceptedWrite acceptedWrite) {
+            GenerationCoordinator.LocalWrite localWrite) {
         this.command = command;
         this.operation = operation;
         this.request = request;
-        this.acceptedWrite = acceptedWrite;
+        this.localWrite = localWrite;
     }
 }

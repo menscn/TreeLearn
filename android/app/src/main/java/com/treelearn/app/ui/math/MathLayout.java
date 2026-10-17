@@ -93,9 +93,9 @@ public final class MathLayout {
         float numX = (boxW - num.width) / 2f;
         float denX = (boxW - den.width) / 2f;
         List<Glyph> glyphs = new ArrayList<Glyph>();
-        shift(num, numX, 0f, glyphs, null);
-        shift(den, denX, denTop, glyphs, null);
         List<HLine> lines = new ArrayList<HLine>(1);
+        shift(num, numX, 0f, glyphs, lines);
+        shift(den, denX, denTop, glyphs, lines);
         lines.add(new HLine(0f, barY, boxW, bar));
         return new MathBox(boxW, ascent, descent, glyphs, lines);
     }
@@ -113,9 +113,9 @@ public final class MathLayout {
         float rootY = ascent - root.ascent;
         float overY = radY - pad;
         List<Glyph> glyphs = new ArrayList<Glyph>();
-        shift(root, 0f, rootY, glyphs, null);
-        shift(rad, root.width + gap, radY, glyphs, null);
         List<HLine> lines = new ArrayList<HLine>(1);
+        shift(root, 0f, rootY, glyphs, lines);
+        shift(rad, root.width + gap, radY, glyphs, lines);
         lines.add(new HLine(root.width - gap, overY, rad.width + gap, Math.max(1f, BAR_FACTOR * size)));
         return new MathBox(boxW, ascent, descent, glyphs, lines);
     }
@@ -132,14 +132,15 @@ public final class MathLayout {
         float supBaselineY = sup == null ? ascent : base.ascent - rise;
         float subBaselineY = sub == null ? base.ascent : base.ascent + drop;
         List<Glyph> glyphs = new ArrayList<Glyph>();
-        shift(base, 0f, 0f, glyphs, null);
+        List<HLine> lines = new ArrayList<HLine>();
+        shift(base, 0f, 0f, glyphs, lines);
         if (sup != null) {
-            shift(sup, base.width, supBaselineY - sup.ascent, glyphs, null);
+            shift(sup, base.width, supBaselineY - sup.ascent, glyphs, lines);
         }
         if (sub != null) {
-            shift(sub, base.width, subBaselineY - sub.ascent, glyphs, null);
+            shift(sub, base.width, subBaselineY - sub.ascent, glyphs, lines);
         }
-        return new MathBox(boxW, ascent, descent, glyphs, Collections.<HLine>emptyList());
+        return new MathBox(boxW, ascent, descent, glyphs, lines);
     }
 
     private static MathBox bigOp(MathNode node, float size, MathMetrics m) {
@@ -159,14 +160,15 @@ public final class MathLayout {
         float ascent = opBaseline;
         float descent = total - ascent;
         List<Glyph> glyphs = new ArrayList<Glyph>();
+        List<HLine> lines = new ArrayList<HLine>();
         if (over != null) {
-            shift(over, (boxW - over.width) / 2f, overBaseline - over.ascent, glyphs, null);
+            shift(over, (boxW - over.width) / 2f, overBaseline - over.ascent, glyphs, lines);
         }
-        shift(op, (boxW - op.width) / 2f, opBaseline - op.ascent, glyphs, null);
+        shift(op, (boxW - op.width) / 2f, opBaseline - op.ascent, glyphs, lines);
         if (under != null) {
-            shift(under, (boxW - under.width) / 2f, underBaseline - under.ascent, glyphs, null);
+            shift(under, (boxW - under.width) / 2f, underBaseline - under.ascent, glyphs, lines);
         }
-        return new MathBox(boxW, ascent, descent, glyphs, Collections.<HLine>emptyList());
+        return new MathBox(boxW, ascent, descent, glyphs, lines);
     }
 
     private static MathBox accent(MathNode node, float size, MathMetrics m) {
@@ -179,9 +181,10 @@ public final class MathLayout {
         // place mark baseline just above the base top
         float mkBaseline = base.ascent + lift;
         List<Glyph> glyphs = new ArrayList<Glyph>();
-        shift(base, 0f, 0f, glyphs, null);
-        shift(mk, (base.width - mk.width) / 2f, mkBaseline - mk.ascent, glyphs, null);
-        return new MathBox(base.width, ascent, descent, glyphs, Collections.<HLine>emptyList());
+        List<HLine> lines = new ArrayList<HLine>();
+        shift(base, 0f, 0f, glyphs, lines);
+        shift(mk, (base.width - mk.width) / 2f, mkBaseline - mk.ascent, glyphs, lines);
+        return new MathBox(base.width, ascent, descent, glyphs, lines);
     }
 
     private static MathBox delimited(MathNode node, float size, MathMetrics m) {
@@ -194,10 +197,11 @@ public final class MathLayout {
         float ascent = Math.max(Math.max(left.ascent, right.ascent), content.ascent);
         float descent = Math.max(Math.max(left.descent, right.descent), content.descent);
         List<Glyph> glyphs = new ArrayList<Glyph>();
-        shift(left, 0f, ascent - left.ascent, glyphs, null);
-        shift(content, left.width + gap, ascent - content.ascent, glyphs, null);
-        shift(right, left.width + gap + content.width + gap, ascent - right.ascent, glyphs, null);
-        return new MathBox(boxW, ascent, descent, glyphs, Collections.<HLine>emptyList());
+        List<HLine> lines = new ArrayList<HLine>();
+        shift(left, 0f, ascent - left.ascent, glyphs, lines);
+        shift(content, left.width + gap, ascent - content.ascent, glyphs, lines);
+        shift(right, left.width + gap + content.width + gap, ascent - right.ascent, glyphs, lines);
+        return new MathBox(boxW, ascent, descent, glyphs, lines);
     }
 
     // Stacks boxes left to right, baselines aligned to the tallest ascent.
@@ -221,15 +225,15 @@ public final class MathLayout {
         return new MathBox(cursor, ascent, descent, glyphs, lines);
     }
 
-    // Copies child geometry into the parent frame, offset by (dx, dy).
+    // Copies child geometry into the parent frame, offset by (dx, dy). Both primitives are required:
+    // a box that collects glyphs but not lines erases the fraction bar or the radical's overline of
+    // whatever it nests, and the box still measures the right size, so nothing else notices.
     private static void shift(MathBox box, float dx, float dy, List<Glyph> glyphs, List<HLine> lines) {
         for (Glyph g : box.glyphs) {
             glyphs.add(new Glyph(g.text, dx + g.x, dy + g.baselineY, g.textSize, g.italic));
         }
-        if (lines != null) {
-            for (HLine h : box.lines) {
-                lines.add(new HLine(dx + h.x, dy + h.y, h.width, h.thickness));
-            }
+        for (HLine h : box.lines) {
+            lines.add(new HLine(dx + h.x, dy + h.y, h.width, h.thickness));
         }
     }
 

@@ -1,0 +1,75 @@
+# 输入 artifacts/tmp/gen-006-green.py bytes=37093 sha256=b6874c1b88da53bbcca173552ab849877666ff3f25a9455a5d0dc956bc8518be
+# 输入 artifacts/tmp/_g006/green-selftest.txt bytes=6115 sha256=bd804eac79823c64d586919d4cf4f2d10306da0d7196e316271f374c5b63b678
+# 输入 artifacts/tmp/_g006/green-measure-filed.txt bytes=7073 sha256=1b0044e8c8328652d1419420457d99a24d7470383469bb1d638e69a2cb0b181e
+# 输入 artifacts/evidence/ux-chat-1to1-render-measure-2026-09-27.txt bytes=5541 sha256=f6b738173c2fe9963594739daa6f2a512d6e1df0709f269dffd255abe04e56d8
+# 本电池只读这些捕获文件，不重跑浏览器；因此它可重复，代价是它量的是判据的区分力而不是产图本身
+
+  同一份捕获：旧形态命中=3 新形态命中=0 合成真失败被新形态命中=1
+===== block 01 - M1 battery judgement located by line shape =====
+  ok   旧形态把设计内夹具见证判成本片缺陷（>0 条）——这条判据本次确实在承重
+  ok   新形态对同一输入判绿（0 条）
+  ok   新形态不是把扫描关掉：合成一条电池自己的失败必须被点名
+  ok   夹具见证仍完整可见（只是不判成本片缺陷）
+  block 01: want=0 got=0
+
+  剥离后=74/74 行 identical=True ；不剥离=74/76 行 identical=False 首个不同=第75行 '(缺行)'
+===== block 02 - M2 keep-behaviour comparison strips the capture shell only =====
+  ok   剥离退出码行后与记录逐行相同（本次 GREEN 的事实）
+  ok   不剥离时必须判不同——否则那条剥离只是自称，没有区分力
+  ok   first_diff 必须把「长度不等」也当差异（zip 静默吞掉过一次假 no-diff）
+  ok   正控：真实内容差异在剥离形态下仍然判不同（改一行正文）
+  block 02: want=0 got=0
+
+  带正控入集合=['artifacts/tmp/_g006/_mut-control.tmp'] ；不带正控入同一集合=[]（旧形态的捕获就是这个空值）
+===== block 03 - M3 positive control lives inside the watched set =====
+  ok   被盯集合非空（626 项，下限 50）
+  ok   窗口内真改一个入集合的文件，必须点名且只点名它
+  ok   同一套机制、同一份改动，不入集合就点不出来——正控因此必须进集合
+  ok   未改动时不得点名任何文件（差分不是恒真）
+  block 03: want=0 got=0
+
+  空列表=0 项（rc=0） git 失败 rc=128 ；正常=625 项（rc=0）下限=50
+===== block 04 - floors fire on a collapsed watched set =====
+  ok   被盯集合塌到 0 项时低于下限（下限会响，不是恒真）
+  ok   git 非 0 时「git rc 恰好 0」那条判据会响
+  ok   同一判据在正常输入下不响（625 项 ≥ 50）
+  block 04: want=0 got=0
+
+  本机 --check：stdout 判据行=0 ；若合并两条流=2 行（stderr 告警 2 行）
+  合成一条告警：分离后=0 行 ；合并后=1 行（判据必须只看得见前者）
+===== block 05 - M5 git streams kept apart where the judgement counts =====
+  ok   本机真实 --check 在分离视图下为 0 行（本次 GREEN 的事实）
+  ok   合成告警在分离视图下不计入、在合并视图下会计入（谓词确有区分力）
+  ok   --check 跑成（rc 属于 {0,1}，>=2 是 git 自己没跑成）
+  block 05: want=0 got=0
+
+  谓词读数：真实正文=True ；退回动态导入=False ；删掉导入=False
+===== block 06 - M6 static-delegation predicate discriminates the cycle shape =====
+  ok   真实正文判 True（本片的形状）
+  ok   退回 await import() 的副本必须判 False——否则那条 OK 只是文字匹配
+  ok   删掉导入的副本也必须判 False（谓词不因缺导入而空转）
+  ok   动态形态的副本里确实含动态导入字样（变异真的落进了被测文本）
+  block 06: want=0 got=0
+
+  变异计数读数：n_mut=6 判定块=6 下限=6
+===== block 07 - mutation-count floor measured after all mutations =====
+  ok   变异条数 >= 裸字面量下限 MIN_MUTS=6（截短一条就必须响，不是恒真）
+  ok   本块之前的判定块数（6）与变异条数相等（每块对应一条变异；汇总里的 7 含本块自己）
+  block 07: want=0 got=0
+
+  输入复核（本电池只读不写生产文件）：
+    artifacts/tmp/gen-006-green.py 字节未变=True sha 未变=True
+    artifacts/tmp/_g006/green-selftest.txt 字节未变=True sha 未变=True
+    artifacts/tmp/_g006/green-measure-filed.txt 字节未变=True sha 未变=True
+    artifacts/evidence/ux-chat-1to1-render-measure-2026-09-27.txt 字节未变=True sha 未变=True
+===== 汇总 =====
+  blocks=7 expectation_entries=7 mutations=6 floor=6 floor-met=True
+  block 01 M1 battery judgement located by line shape     want=0 got=0 ok
+  block 02 M2 keep-behaviour comparison strips the captur want=0 got=0 ok
+  block 03 M3 positive control lives inside the watched s want=0 got=0 ok
+  block 04 floors fire on a collapsed watched set         want=0 got=0 ok
+  block 05 M5 git streams kept apart where the judgement  want=0 got=0 ok
+  block 06 M6 static-delegation predicate discriminates t want=0 got=0 ok
+  block 07 mutation-count floor measured after all mutati want=0 got=0 ok
+OVERALL_EXITCODE=0
+DECODE ok utf8=True cr=0

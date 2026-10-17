@@ -4,13 +4,17 @@ import com.treelearn.app.R;
 import com.treelearn.app.ui.HomeViewState;
 
 /**
- * The one place a {@link HomeViewState.Notice} category becomes a sentence.
+ * The one place a {@link HomeViewState.Notice} category becomes a sentence and a colour.
  *
  * <p>The vocabulary is read by every screen that can be told about the same failure - the home page
  * and the conversation - and two switches would be two answers to what one failure is called, which is
  * how the same refusal ends up described two ways. Every category has its own arm, and the default
  * refuses instead of borrowing another category's words: a notice no screen has text for is a build
  * defect, not something to draw as a storage failure.
+ *
+ * <p>The colour is the same question asked once rather than per screen, because both bars used to be
+ * hardcoded red and a note that nothing was lost therefore read with the same alarm as a refused
+ * write.
  */
 final class NoticeText {
 
@@ -54,6 +58,23 @@ final class NoticeText {
                 return R.string.notice_no_models;
             default:
                 throw new IllegalArgumentException("unmapped notice: " + value);
+        }
+    }
+
+    /**
+     * The colour one category is drawn in.
+     *
+     * <p>A note that nothing was lost - the model in use is not the one that was chosen, but the
+     * answer still arrives - is drawn in the quiet ink, because the red bar reads as a failure and
+     * the learner then looks for the thing that broke. Every other category, including one a later
+     * change has not placed here yet, keeps the failure red.
+     */
+    static int colorResOf(HomeViewState.Notice value) {
+        switch (value) {
+            case CHAT_MODEL_FALLBACK:
+                return R.color.tl_ink3;
+            default:
+                return R.color.tl_red;
         }
     }
 }

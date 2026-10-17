@@ -54,12 +54,20 @@ implements HomeDerivedPort {
         return run(request, root.topicId);
     }
 
-    /** Ensures the current stable branch revision has a summary and follow-up questions. */
+    /**
+     * Ensures the current stable revision has its title, summary and follow-up questions, and reports
+     * whether any of them was a write.
+     *
+     * <p>The return value is what lets the read path stay quiet: the caller nudges its listeners on
+     * the strength of this answer, so a pass that found everything already stored must not claim to
+     * have produced something. A nudge in that case re-arms the read that spawned this pass, and the
+     * pair of calls becomes a loop that never converges - the reason it is a boolean rather than void.
+     */
     @Override
-    public void ensureConversationArtifacts(ChatStore.Conversation conversation,
+    public boolean ensureConversationArtifacts(ChatStore.Conversation conversation,
             GenerationModel model, boolean answerSuggestions) {
         if (conversation == null || conversation.branch == null || model == null) {
-            return;
+            return false;
         }
         String revisionId = null;
         String latestAnswer = null;
@@ -77,22 +85,23 @@ implements HomeDerivedPort {
             }
         }
         if (revisionId == null || latestAnswer == null) {
-            return;
+            return false;
         }
+        boolean wrote = false;
         DerivedRequest title = branchTitleRequest(conversation, model, budget);
         if (title != null) {
-            runIfMissing(title, conversation.branch.topicId);
+            wrote = wroteIfMissing(title, conversation.branch.topicId);
         }
         DerivedRequest summary = DerivedRequest.branchSummary(conversation.branch.id, revisionId,
                 Collections.<ContextPlan.Entry>emptyList(), entries, model, budget);
-        runIfMissing(summary, conversation.branch.topicId);
+        wrote |= wroteIfMissing(summary, conversation.branch.topicId);
         if (!answerSuggestions) {
-            return;
+            return wrote;
         }
         DerivedRequest recommendations = DerivedRequest.answerRecommendations(conversation.branch.id,
                 revisionId, latestAnswer, Collections.emptyList(), ANSWER_RECOMMENDATION_LIMIT, model,
                 budget);
-        runIfMissing(recommendations, conversation.branch.topicId);
+        return wrote | wroteIfMissing(recommendations, conversation.branch.topicId);
     }
 
     /** Compresses older history and returns the exact replacement plan, or null on any refusal. */
@@ -225,16 +234,39 @@ implements HomeDerivedPort {
                 new BlockingDerivedCaller(callerGateway), request, clock.millis()).run();
     }
 
-    private ArtifactOutcome runIfMissing(DerivedRequest request, String topicId) {
+    /**
+     * Whether the stored row already answers this exact request.
+     *
+     * <p>The one place the "same kind, same scope, same baseline, same input" test lives: {@link
+     * #runIfMissing} skips the call with it and {@link #wroteIfMissing} skips the nudge with the
+     * same judgement, so a second copy cannot drift and start claiming a write for a row that was
+     * already there.
+     */
+    private boolean alreadyStored(DerivedRequest request) {
         SQLiteDatabase database = helper.getWritableDatabase();
         com.treelearn.data.db.dao.AiArtifactDao.Row existing =
                 com.treelearn.data.db.dao.AiArtifactDao.findByKindAndScope(database,
                         request.kind().wireId, request.scopeId());
-        if (existing != null
+        return existing != null
                 && java.util.Objects.equals(request.basedOnRevisionId(), existing.basedOnRevisionId)
-                && request.inputDigest().equals(existing.inputDigest)) {
+                && request.inputDigest().equals(existing.inputDigest);
+    }
+
+    private ArtifactOutcome runIfMissing(DerivedRequest request, String topicId) {
+        if (alreadyStored(request)) {
             return ArtifactOutcome.APPLIED;
         }
         return run(request, topicId);
+    }
+
+    /**
+     * Runs the request only when nothing answers it yet, and reports whether this call wrote a row.
+     *
+     * <p>{@link ArtifactOutcome#APPLIED} cannot be used for that directly: {@link #runIfMissing}
+     * returns it both for "just wrote it" and for "was already there", which is precisely the
+     * ambiguity the read path needs resolved.
+     */
+    private boolean wroteIfMissing(DerivedRequest request, String topicId) {
+        return !alreadyStored(request) && run(request, topicId) == ArtifactOutcome.APPLIED;
     }
 }
