@@ -1,0 +1,109 @@
+# T-2026-10-15-009 RED：1:1 闭环量测的 DOM 侧仪器收编前跑不动、也判不了
+# 生成命令：python -X utf8 artifacts/tmp/gen-009-red.py
+# 被核文件（写入本产物之前的字节）：
+#   pre-adoption-verify_1to1.mjs bytes=11527 lines=207 sha256=0b44fa999f4ef6810e5580e910ac72002fc978ec09f45813acb6cdc1218f5e07
+#   verify_1to1.mjs(新路径) bytes=35121 lines=506 sha256=7323d088041b59b1aaad9a0fac9e7742dadcbaf4a42c0f1c8bd8288cbff96265
+#   verify_1to1_selftest.mjs bytes=18534 lines=251 sha256=215484411705833c095f049ac09bde39536a328550c28b73301d4deec143ae49
+#   parity_cdp.mjs bytes=17045 lines=396 sha256=36b4ad7aef055d8e14f5a1f2ebe45a3a449c0939bec37ae12d6680621cb3475a
+#   screens.json bytes=3679 lines=48 sha256=f85fc4342f701b5ce1f27fd78230de6af348a5d5630d8ad7d0e2eb33335fdeaa
+#   高保真原型-v1.html bytes=150303 lines=2445 sha256=d4faea4b03d08a2add3985bf1788722d2cc7463ec2a990e88db43176bdff2eb2
+# 判读约定：本产物每块 want=0 表示「该缺口已如实复现」；旧仪器自己的读数
+#   （rc=1、无 SELFTEST 行、无 VERDICT 行）写在断言文本里。OVERALL_EXITCODE=0 = 缺口复现，
+#   不表示旧仪器可用，也不表示本片实现已绿（绿在 T-2026-10-15-009-green.txt；
+#   那份产物的名字由本文件派生，不是笔误）。
+# 名单边界：本运行只写本产物与（仅当缺失时）它自己的归档副本，不改任何被判文件；
+#   上面的指纹是「判定前读数」，本运行不重写这些文件，因此你今天回算应当与它相同；
+#   若不同，说明有别的运行改过仪器，请先重跑本脚本再看结论。复算命令：sha256sum <路径>。
+# 取样来源：前身字节取自归档副本；它由 git show HEAD:artifacts/tmp/verify_1to1.mjs 落盘，
+#   因此不依赖「旧路径仍在 HEAD 里」这个会随本片提交而失效的状态。
+
+  命令: node artifacts/evidence/T-2026-10-15-009-pre-adoption-verify_1to1.mjs --selftest
+  退出码=1 输出首行=FAILED: fetch failed
+===== block 01 - old instrument cannot self-prove =====
+  ok   旧仪器正文里没有任何 selftest 分支（命中行数=0，应为 0）
+  ok   运行它不打印 SELFTEST 判决行（空见证，不是通过）
+  ok   运行它不打印 EXITCODE= 行（旧形态从不打印档位）
+  ok   它不可能给出自检结论：rc 不是 0（本次=1；1=网络分支失败，255=本机等不到）
+  ok   对照：新仪器有 --selftest 分支且静态导入电池文件
+  block 01: want=0 got=0
+
+  读数: 旧仪器 process.exit 取值集合=[0, 1]；无参数运行 rc=1 输出=FAILED: fetch failed
+  两次不同故障（把 --selftest 当 URL / 连 URL 都没给）的退出码=[1, 1]
+===== block 02 - instrument fault indistinguishable from judgement failure =====
+  ok   旧仪器只有 0/1 两档（实测集合=[0, 1]，与「判据 FAIL」同码）
+  ok   旧仪器没有 Usage/Fault 这两个类型（命中=0 才对）
+  ok   同一档位被两种不同故障共用（--selftest 与无参数同码）
+  ok   对照：共享层给出 0/1/2/3 四档常量表
+  ok   对照：共享层有 Usage 与 Fault 两个独立故障类型
+  block 02: want=0 got=0
+
+  读数: 旧仪器 --screen 行=0 档案行=0 写死点击序列行=1
+  档案侧 chat.prototype 现提供: clicks=['.demo-link', '.topic-card'] wait_for=.msg-user（旧仪器一条也接不到）
+===== block 03 - no profile-driven invocation =====
+  ok   旧仪器完全没有 --screen（0 行）
+  ok   旧仪器完全不读屏档案（screens.json / --profile 0 行）
+  ok   点击序列在旧仪器里是写死的一行（恰好 1 处）
+  ok   对照：新仪器按 --screen 取档案（>=1 行）
+  ok   对照：档案确实提供 clicks 与 wait_for（新仪器据此回放）
+  block 03: want=0 got=0
+
+  读数: 旧仪器写死 9222=1 行；共享层端口 0=1 行、DevToolsActivePort=3 行
+  环境竞态（打印不判）：本机 127.0.0.1:9222 此刻可连=False —— 它决定了上面两次运行的 rc 落在哪条失败路径
+===== block 04 - hard-coded debug port =====
+  ok   旧仪器写死了端口常量（恰好 1 行）
+  ok   旧仪器没有任何「让浏览器自选端口」的形状（0 命中）
+  ok   对照：新链路端口由浏览器自选并回读（端口 0 >=1 行、DevToolsActivePort >=1 行）
+  block 04: want=0 got=0
+
+  读数: 旧仪器 token 名单含 --green-bubble=True；原型现在定义它=False；原型里的退役注记=True
+  对照: 词表要求的 token 名单=['--bg', '--fs-body', '--gutter', '--lh-read', '--paper-rule', '--s8']（原型 :root 未定义=无）
+===== block 05 - hard-copied token list keeps a retired name =====
+  ok   旧仪器在探针里抄了一份 token 名单，其中含已退役的 --green-bubble
+  ok   该 token 已不在原型 :root 里定义（读数为空串，而旧仪器不为此出声）
+  ok   退役事实在原型正文里有据（同文件退役注记在位）
+  ok   对照：词表名单非空（空名单让下面两条成为空见证）
+  ok   对照：新仪器词表要求的每个名字都在原型 :root 里真实定义（死名: 无）
+  ok   对照：词表要求的名单里已无退役的 --green-bubble
+  ok   对照：探针不再抄第二份名单，改由 window.__PARITY_TOKEN_KEYS 单点注入
+  block 05: want=0 got=0
+
+  读数: 旧仪器命中判定标记=0/3；词表键（由 node 现场 import 取得 rc=0）=['action-pitch', 'body-bg', 'body-pitch', 'grid-period', 'pill-inset', 'user-bubble']
+  对照: screens.json 的 chat.prototype.dom_checks=['action-pitch', 'body-bg', 'body-pitch', 'grid-period', 'pill-inset', 'user-bubble']
+  对照: 以标签开头的判决正文缺失=无
+  对照: 词表条数=6 与档案点名条数=6 相同=True；import 对照面=ok
+===== block 06 - no machine judgement exists at all =====
+  ok   旧仪器没有任何判定标记（DOM_CHECKS/VERDICT/judgements= 命中=0）
+  ok   旧仪器跑完就退 0：它只做 console.log(JSON) 再 exit(0)
+  ok   对照：词表键集合与档案点名的 dom_checks 集合逐个对得上（缺=无 多=无）
+  ok   对照：档案点名的每一条都有以标签开头的判决正文（缺: 无）
+  ok   对照：import 对照面当场成功（失败时下面两条断言是空证，见上一行读数）
+  ok   对照：新仪器把每条判定经 ledger 记录（ok/fail 两条通道都在正文里）
+  ok   对照：统计行与 VERDICT 由共享层打印，且空见证显式判 FAULT（不在每支仪器里各写一份）
+  block 06: want=0 got=0
+
+  读数: 旧仪器命中下限/计数标记=0/3；新电池=3/3，裸字面量下限声明=[('CASES', '8'), ('MUTS', '8')]
+===== block 07 - no case-count floor =====
+  ok   旧仪器既没有用例数也没有下限标记
+  ok   对照：新电池打印 cases= 并设 MIN_CASES/MIN_MUTS 两条裸字面量下界
+  ok   对照：两条下限是与清单内容无关的字面量（实测值=['8', '8']，都必须 >0）
+  block 07: want=0 got=0
+
+===== block 08 - every file used in a judgement has a pre-run fingerprint =====
+  ok   判定块条数下限 MIN_BLOCKS=6 达成（空表让「全绿」成空见证）
+  ok   本运行判定用过的每个文件都在名单里（缺: 无）
+  ok   名单条目都是三项齐全（bytes= / lines= / sha256= 各命中 6/6 条）
+  block 08: want=0 got=0
+
+===== 汇总 =====
+  blocks=8 expectation_entries=8 faults=0
+  block 01 old instrument cannot self-prove               want=0 got=0 ok
+  block 02 instrument fault indistinguishable from judgem want=0 got=0 ok
+  block 03 no profile-driven invocation                   want=0 got=0 ok
+  block 04 hard-coded debug port                          want=0 got=0 ok
+  block 05 hard-copied token list keeps a retired name    want=0 got=0 ok
+  block 06 no machine judgement exists at all             want=0 got=0 ok
+  block 07 no case-count floor                            want=0 got=0 ok
+  block 08 every file used in a judgement has a pre-run f want=0 got=0 ok
+  尾行之下的 EXITCODE 由本表派生，不硬写
+OVERALL_EXITCODE=0
+DECODE ok utf8=True cr=0

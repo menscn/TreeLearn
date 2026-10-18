@@ -1,8 +1,9 @@
 /**
  * 1:1 闭环量测的共享仪器层（T-2026-10-15-006）。零第三方依赖：Node 内置 fetch / WebSocket
- * 加 Edge headless 的 CDP。两支工具（cdp_shot.mjs 与待收编的 verify_1to1.mjs）共用同一份屏档案、
- * 同一个 CDP 客户端与同一套退出码档位；**判定口径不在这里**，这里只管能不能量、量不到算哪一档。
- * DOM 判据词表属 T-2026-10-15-009（verify_1to1 那半边），本片不预置无人消费的实现。
+ * 加 Edge headless 的 CDP。两支仪器（产图侧 cdp_shot.mjs 与 DOM 侧 verify_1to1.mjs，后者由
+ * T-2026-10-15-009 收编）共用同一份屏档案、同一个 CDP 客户端与同一套退出码档位；
+ * **判定口径不在这里**，这里只管能不能量、量不到算哪一档。
+ * DOM 判据词表在 verify_1to1.mjs 里（T-2026-10-15-009），本片不预置无人消费的实现。
  *
  * 退出码：0=跑完且判据全成立 1=跑完且有判据判 FAIL 2=用法错误 3=仪器自身故障。
  * 「没跑完」与「跑完发现坏了」是两种结论，不得共用退出码。
@@ -381,7 +382,7 @@ export async function mainTool(body) {
     }
     if (e instanceof Fault) {
       console.error(`INSTRUMENT FAULT: ${e.message}`);
-      console.log("FACTOR-check: 仪器故障不写成判据失败，也不写 PASS");
+      console.log("VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS");
       console.log(`EXITCODE=${EXIT.FAULT}`);
       return EXIT.FAULT;
     }

@@ -1,6 +1,6 @@
 /**
  * 高亮/批注交互 Demo 的交付前验证（huashu-design §3 交付前真实点击测试）。
- * 零依赖：Edge headless + CDP（沿用 artifacts/tmp/cdp_shot.mjs 的通道）。
+ * 零依赖：Edge headless + CDP（通道现位于 .trae/scripts/dev/parity/cdp_shot.mjs 与共享层 parity_cdp.mjs）。
  * 通过 window.__demo 驱动与真实点击共用的 handler，断言 DOM 状态 + 收集页面异常。
  *
  * 前置：先启动 Edge headless --remote-debugging-port=9222

@@ -1,5 +1,5 @@
 # T-2026-10-15-007 GREEN - 1:1 台账生成器的判定证据
-# Generated: 2026-10-16T04:42:42Z  (UTC)
+# Generated: 2026-10-17T10:38:32Z  (UTC)
 # Generator: artifacts/tmp/gen-007-green.sh   重跑：bash artifacts/tmp/gen-007-green.sh
 # 本文件覆盖的调用形态：
 #   python -X utf8 .trae/scripts/dev/gen_parity_ledger.py                  （写已落盘台账）
@@ -9,16 +9,16 @@
 # 只打印、不判定（共享工作树里那是别片的未提交工作），「本窗口内零位移」由末块增量判定。
 # 被核文件指纹（判定前读数；块 01 在全部判定之后复核是否仍相同）：
 #   .trae/scripts/dev/gen_parity_ledger.py  bytes=20273  lines=377  sha256=6524f3b66f7dc89be8e762d70c8cdf9498a897e7e7372ba2d7f64c650012151a
-#   .trae/scripts/dev/parity_ledger_selftest.py  bytes=26737  lines=552  sha256=0e08112862518d8a45b7c59e579952d28dca57ced34c723e88bf05543ef81b58
+#   .trae/scripts/dev/parity_ledger_selftest.py  bytes=29968  lines=598  sha256=02a7c0a7435318c07ae15b7b1d5aa9bacc8132071af96b8a50c76cbb8d31bb5d
 #   .trae/scripts/dev/gen_screen_inventory.py  bytes=20787  lines=417  sha256=270db775d3a1d4f650170bd59ca389edb74759993d70d656d5353b15525bc2fc
-#   Docs/04-ux-design/parity/screen-inventory.json  bytes=21986  lines=1013  sha256=4b6cc4ca44eccd580a4a011372df2b621bafcceaa464bd4743748ca25b9c6edb
+#   Docs/04-ux-design/parity/screen-inventory.json  bytes=22175  lines=1022  sha256=4fe9ecd8f7c44876663903939905f6d0a6cd6f210e158f5ddfa8ec073f172ef9
 #   .trae/scripts/dev/parity/screens.json  bytes=3679  lines=48  sha256=f85fc4342f701b5ce1f27fd78230de6af348a5d5630d8ad7d0e2eb33335fdeaa
 # 指纹名单的边界：本运行会重写 台账 artifacts/parity/ledger.md，所以它不在名单内，也没有任何一块承诺它的字节未变——它变正是本片在做的事（生成器写它，另一块判它等于重导出）。名单中的生成物在这里是只读对象，由同一次运行的窗口之后复核是否位移；但同一支产物的字节会被另一片生成器在它自己的运行里重写，所以本行不是「你今天读到同样字节」的承诺——要复核当前字节就用 sha256sum 现场读该路径，并与台账里「清单文件哈希」「实测面哈希」两行对同一条命令回读。
 
 ===== block 1 - keep-behaviour: the generator runs on the filed inventory and no judged file's bytes move =====
 $ python -X utf8 artifacts/tmp/_g007/keep_behaviour.py
 captured CR normalised: 7 carriage return(s) removed from block 1 output - the artefact of record is LF-only
-android/ paths dirty at run start = 13 (not judged: another slice may hold uncommitted android work in this shared worktree; the judgement is the start-to-end delta in the last block, so this run is measured against the tree it inherited)
+android/ paths dirty at run start = 0 (not judged: another slice may hold uncommitted android work in this shared worktree; the judgement is the start-to-end delta in the last block, so this run is measured against the tree it inherited)
 production run rc=0 last line=EXITCODE=0
 unchanged .trae/scripts/dev/gen_parity_ledger.py -> True
 unchanged .trae/scripts/dev/parity_ledger_selftest.py -> True
@@ -31,7 +31,7 @@ KEEP ok
 ===== block 2 - selftest suite: every case runs, all four exit tiers are exercised, no instrument fault line =====
 $ python -X utf8 artifacts/tmp/_g007/suite007.py
 captured CR normalised: 2 carriage return(s) removed from block 2 output - the artefact of record is LF-only
-SUITE executed=19 expected=19 equal=True failures=0 rc=0
+SUITE executed=20 expected=20 equal=True failures=0 rc=0
 SUITE tiers seen=[0, 1, 2, 3] instrument-fault-lines=0
 SUITE ok
 ----- exit code: 0 (want 0) -----
@@ -63,7 +63,7 @@ captured CR normalised: 6 carriage return(s) removed from block 5 output - the a
 recorded args differ per invocation: filed=- 本次实际参数：(无，全部走默认路径) a=- 本次实际参数：--out artifacts/tmp/_g007 b=- 本次实际参数：--out artifacts/tmp/_g007 all-distinct=True
 two re-exports byte-identical ignoring the args line=True
 re-export equals the filed artefact on every other byte=True
-bytes a=8097 b=8097 filed=8089
+bytes a=8063 b=8063 filed=8055
 a timestamp-shaped tokens=0
 filed timestamp-shaped tokens=0
 DETERMINISM ok
@@ -77,8 +77,8 @@ sibling-gate 003 parity selftest rc=0 last=(empty stdout)
 sibling-gate 004 design-token guard rc=0 last=EXITCODE=0
 sibling-gate checkers_selftest rc=3 (known debt, reported not asserted)
 this task: PASS count=1 WARNING count=1 (size band=1) ERROR count=0
-note: repo-wide readings are errors=16 warnings=12 and are NOT judged here
-android/ dirty at start=13 at end=13 moved during this run=0 movers=[]
+note: repo-wide readings are errors=16 warnings=13 and are NOT judged here
+android/ dirty at start=0 at end=0 moved during this run=0 movers=[]
 positive control clean->dirty named=True
 SIBLINGS ok
 ----- exit code: 0 (want 0) -----
@@ -88,14 +88,14 @@ $ python -X utf8 artifacts/tmp/_g007/utf8_gate.py .trae/scripts/dev/gen_parity_l
 captured CR normalised: 12 carriage return(s) removed from block 7 output - the artefact of record is LF-only
 GATE SELFTEST ok: a known-broken byte string is rejected
 ok   .trae/scripts/dev/gen_parity_ledger.py                   bytes=20273
-ok   .trae/scripts/dev/parity_ledger_selftest.py              bytes=26737
+ok   .trae/scripts/dev/parity_ledger_selftest.py              bytes=29968
 ok   .trae/scripts/dev/gen_screen_inventory.py                bytes=20787
-ok   Docs/04-ux-design/parity/screen-inventory.json           bytes=21986
+ok   Docs/04-ux-design/parity/screen-inventory.json           bytes=22175
 ok   .trae/scripts/dev/parity/screens.json                    bytes=3679
-ok   artifacts/parity/ledger.md                               bytes=8089
+ok   artifacts/parity/ledger.md                               bytes=8055
 ok   artifacts/tmp/gen-007-red.sh                             bytes=26967
 ok   artifacts/tmp/gen-007-green.sh                           bytes=30019
-ok   artifacts/evidence/T-2026-10-15-007-red.txt              bytes=10062
+ok   artifacts/evidence/T-2026-10-15-007-red.txt              bytes=9135
 ok   .trae/tasks/T-2026-10-15-parity-ledger-generator-007.md  bytes=47779
 gate covered 10 file(s)
 EXITCODE=0

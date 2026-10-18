@@ -1,17 +1,17 @@
 # T-2026-10-15-007 MUTATION - 台账生成器每条守卫的退化实测
-# Generated: 2026-10-16T04:43:57Z  (UTC)
+# Generated: 2026-10-17T11:22:48Z  (UTC)
 # Generator: artifacts/tmp/gen-007-mutation.sh   重跑：bash artifacts/tmp/gen-007-mutation.sh
 # 变异对象：.trae/scripts/dev/gen_parity_ledger.py 与 parity_ledger_selftest.py 的**副本**
 #   （artifacts/tmp/_m007/prod/ 下同名同深度路径）；生产字节只在块 04 被读，从不被写。
 # 生产文件指纹（判定前读数；块 04 在全部变异之后复核是否仍相同）：
 #   .trae/scripts/dev/gen_parity_ledger.py  bytes=20273  lines=377  sha256=6524f3b66f7dc89be8e762d70c8cdf9498a897e7e7372ba2d7f64c650012151a
-#   .trae/scripts/dev/parity_ledger_selftest.py  bytes=26737  lines=552  sha256=0e08112862518d8a45b7c59e579952d28dca57ced34c723e88bf05543ef81b58
+#   .trae/scripts/dev/parity_ledger_selftest.py  bytes=29968  lines=598  sha256=02a7c0a7435318c07ae15b7b1d5aa9bacc8132071af96b8a50c76cbb8d31bb5d
 # 指纹名单的边界：本运行不写名单里的任何文件（判定与变异全部落在同深度副本上）；要复核当前字节就用 sha256sum 现场读该路径，并与台账里「清单文件哈希」「实测面哈希」两行对同一条命令回读。
 
 ===== block 1 - copy tree: same-depth copy under artifacts/tmp, every copied byte equal to production =====
 $ python -X utf8 artifacts/tmp/_m007g/mkcopy.py
 captured CR normalised: 4 carriage return(s) removed from block 1 output - the artefact of record is LF-only
-copy files=332 under artifacts/tmp/_m007/prod
+copy files=338 under artifacts/tmp/_m007/prod
 byte-identical single files=10 mismatches=0
 same-depth .trae/scripts/dev/gen_parity_ledger.py prod=4 copy=4
 same-depth .trae/scripts/dev/parity_ledger_selftest.py prod=4 copy=4
@@ -21,7 +21,7 @@ COPY ok
 ===== block 2 - measured baseline: the pristine copy suite is green and its failing-case set is recorded for block 03 =====
 $ python -X utf8 artifacts/tmp/_m007g/pristine.py
 captured CR normalised: 3 carriage return(s) removed from block 2 output - the artefact of record is LF-only
-BASELINE rc=0 executed=19 expected=19 failures=0 instrument-fault-lines=0
+BASELINE rc=0 executed=20 expected=20 failures=0 instrument-fault-lines=0
 BASELINE failing-cases=[]
 BASELINE written=artifacts/tmp/_m007g/baseline.json
 BASELINE ok
@@ -29,20 +29,21 @@ BASELINE ok
 
 ===== block 3 - battery: each guard degraded turns exactly its own case red, and the no-op control turns nothing red =====
 $ python -X utf8 artifacts/tmp/_m007g/battery.py
-captured CR normalised: 13 carriage return(s) removed from block 3 output - the artefact of record is LF-only
+captured CR normalised: 14 carriage return(s) removed from block 3 output - the artefact of record is LF-only
 baseline read from the measured file: rc=0 failures=0 failing=[]
-mutations declared=10 floor=10 floor-met=True
+mutations declared=11 floor=11 floor-met=True
 M1-staleness-guard-off rc=1 want-rc=1 baseline=0 caught=True new-red=['neg-stale-inventory'] expected-new=['neg-stale-inventory']
 M2-pointer-comparison-off rc=1 want-rc=1 baseline=0 caught=True new-red=['neg-pointer-drift'] expected-new=['neg-pointer-drift']
 M3-row-floor-zero rc=1 want-rc=1 baseline=0 caught=True new-red=['neg-row-floor'] expected-new=['neg-row-floor']
 M4-visual-always-measured rc=1 want-rc=1 baseline=0 caught=True new-red=['pos-absence-is-a-token-not-a-blank', 'pos-real-tree'] expected-new=['pos-absence-is-a-token-not-a-blank', 'pos-real-tree']
-M5-instrument-always-adopted rc=1 want-rc=1 baseline=0 caught=True new-red=['pos-real-tree'] expected-new=['pos-real-tree']
+M5-instrument-always-adopted rc=1 want-rc=1 baseline=0 caught=True new-red=['pos-instrument-adoption-states'] expected-new=['pos-instrument-adoption-states']
 M6-adjacency-scan-returns rc=1 want-rc=1 baseline=0 caught=True new-red=['pos-fail-line-scan-catches-a-leading-fail'] expected-new=['pos-fail-line-scan-catches-a-leading-fail']
 M7-noop-comment rc=0 want-rc=0 baseline=0 caught=False new-red=[] expected-new=[]
 M8-sibling-load-outside-guard rc=1 want-rc=1 baseline=0 caught=True new-red=['neg-inventory-instrument-absent'] expected-new=['neg-inventory-instrument-absent']
 M9-crlf-guard-removed rc=1 want-rc=1 baseline=0 caught=True new-red=['neg-inventory-crlf-checkout'] expected-new=['neg-inventory-crlf-checkout']
 M10-selfhash-excludes-tail rc=1 want-rc=1 baseline=0 caught=True new-red=['pos-written-artifact-selfdescribes'] expected-new=['pos-written-artifact-selfdescribes']
-after-restore copy rc=0 failing=[] counts=('19', '19', '0')
+M11-adoption-branch-collapsed rc=1 want-rc=1 baseline=0 caught=True new-red=['pos-instrument-adoption-states'] expected-new=['pos-instrument-adoption-states']
+after-restore copy rc=0 failing=[] counts=('20', '20', '0')
 BATTERY ok
 ----- exit code: 0 (want 0) -----
 
@@ -73,8 +74,8 @@ $ python -X utf8 artifacts/tmp/_m007g/scope.py
 captured CR normalised: 4 carriage return(s) removed from block 6 output - the artefact of record is LF-only
 command diff ok rc=0
 command ls-files ok rc=0
-production-surface paths snapshot=13 now=13 identical=True
-surface list=['android/README.md', 'android/app/src/androidTest/java/com/treelearn/app/GenerationCoordinatorInstrumentedTest.java', 'android/app/src/main/java/com/treelearn/app/MainActivity.java', 'android/app/src/main/java/com/treelearn/app/generation/GenerationCoordinator.java', 'android/app/src/main/java/com/treelearn/app/generation/LiveAttempt.java', 'android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java', 'android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java', 'android/app/src/main/java/com/treelearn/app/ui/ChatSink.java', 'android/app/src/main/java/com/treelearn/app/wiring/CoordinatorGenerationPort.java', 'android/app/src/main/java/com/treelearn/app/wiring/GenerationPort.java', 'android/app/src/main/java/com/treelearn/app/wiring/HomeWiring.java', 'android/app/src/test/java/com/treelearn/app/wiring/WiringDoubles.java', 'android/data/src/main/java/com/treelearn/data/db/dao/FirstTopicCreation.java']
+production-surface paths snapshot=0 now=0 identical=True
+surface list=[]
 SCOPE ok
 ----- exit code: 0 (want 0) -----
 
@@ -87,7 +88,7 @@ T-2026-10-15-007-mutation.txt last-line=$ python -X utf8 artifacts/tmp/_m007g/co
 this file already carries the battery block (its own TOTAL is written after this check)
 designed-channel(block4) fault lines=1 outside=0 per-section={'4': 1}
 positive control battery-fault named=True channel-count=1
-case count green=19 copy-baseline=19 equal=True
+case count green=20 copy-baseline=20 equal=True
 CONSISTENCY ok
 ----- exit code: 0 (want 0) -----
 
@@ -96,11 +97,11 @@ $ python -X utf8 artifacts/tmp/_m007g/utf8_gate.py .trae/scripts/dev/gen_parity_
 captured CR normalised: 8 carriage return(s) removed from block 8 output - the artefact of record is LF-only
 GATE SELFTEST ok: a known-broken byte string is rejected
 gate-ok .trae/scripts/dev/gen_parity_ledger.py bytes=20273
-gate-ok .trae/scripts/dev/parity_ledger_selftest.py bytes=26737
-gate-ok artifacts/tmp/gen-007-mutation.sh bytes=39578
-gate-ok artifacts/evidence/T-2026-10-15-007-red.txt bytes=10062
-gate-ok artifacts/evidence/T-2026-10-15-007-green.txt bytes=9946
-gate-ok .trae/tasks/T-2026-10-15-parity-ledger-generator-007.md bytes=47779
+gate-ok .trae/scripts/dev/parity_ledger_selftest.py bytes=29968
+gate-ok artifacts/tmp/gen-007-mutation.sh bytes=41336
+gate-ok artifacts/evidence/T-2026-10-15-007-red.txt bytes=9135
+gate-ok artifacts/evidence/T-2026-10-15-007-green.txt bytes=9942
+gate-ok .trae/tasks/T-2026-10-15-parity-ledger-generator-007.md bytes=52455
 gate covered 6 file(s)
 EXITCODE=0
 ----- exit code: 0 (want 0) -----

@@ -1,5 +1,5 @@
 # T-2026-10-15-007 RED - 1:1 台账生成器收编前的失败证据
-# Generated: 2026-10-16T04:43:11Z  (UTC)
+# Generated: 2026-10-17T10:38:27Z  (UTC)
 # Generator: artifacts/tmp/gen-007-red.sh   重跑：bash artifacts/tmp/gen-007-red.sh
 # 本文件覆盖的调用形态：
 #   python -X utf8 .trae/scripts/dev/parity_ledger_selftest.py                       （正反自检全套；用例数由产物自己打印，本脚本不钉数）
@@ -9,15 +9,15 @@
 #   起点不在场即拒绝（残留不会被当基线），还原后按字节复核 sha256 与长度。
 # 被核文件指纹（判定前读数；块 01 在窗口之后再复核是否相同）：
 #   .trae/scripts/dev/gen_parity_ledger.py  bytes=20273  lines=377  sha256=6524f3b66f7dc89be8e762d70c8cdf9498a897e7e7372ba2d7f64c650012151a
-#   .trae/scripts/dev/parity_ledger_selftest.py  bytes=26737  lines=552  sha256=0e08112862518d8a45b7c59e579952d28dca57ced34c723e88bf05543ef81b58
+#   .trae/scripts/dev/parity_ledger_selftest.py  bytes=29968  lines=598  sha256=02a7c0a7435318c07ae15b7b1d5aa9bacc8132071af96b8a50c76cbb8d31bb5d
 #   .trae/scripts/dev/gen_screen_inventory.py  bytes=20787  lines=417  sha256=270db775d3a1d4f650170bd59ca389edb74759993d70d656d5353b15525bc2fc
-#   artifacts/parity/ledger.md  bytes=8089  lines=60  sha256=22c8f5b1aabd796621a60252a155451d74560c25d5c071933a7ee926ceecb866
+#   artifacts/parity/ledger.md  bytes=8055  lines=60  sha256=728ba7c25cbf678a9bd8f5426348139b6169daef7b3f44612f8e55ef1fe8fdd3
 # 指纹名单的边界：本运行不写名单里的任何文件：块 02 只在单进程的 try/finally 窗口里挪开仪器、按字节还原，还原由后续块独立复核；名单中的生成物在这里是只读对象，由同一次运行的窗口之后复核是否位移；但同一支产物的字节会被另一片生成器在它自己的运行里重写，所以本行不是「你今天读到同样字节」的承诺——要复核当前字节就用 sha256sum 现场读该路径，并与台账里「清单文件哈希」「实测面哈希」两行对同一条命令回读。
 
 ===== block 1 - keep-behaviour premise: the instruments' pre-window bytes are recorded and the android/ dirt that predates this run is printed rather than judged =====
 $ python -X utf8 artifacts/tmp/_red007/precheck.py
 captured CR normalised: 3 carriage return(s) removed from block 1 output - the artefact of record is LF-only
-android/ paths already dirty at run start = 13 ['android/README.md', 'android/app/src/androidTest/java/com/treelearn/app/GenerationCoordinatorInstrumentedTest.java', 'android/app/src/main/java/com/treelearn/app/MainActivity.java', 'android/app/src/main/java/com/treelearn/app/generation/GenerationCoordinator.java', 'android/app/src/main/java/com/treelearn/app/generation/LiveAttempt.java', 'android/app/src/main/java/com/treelearn/app/screen/ChatScreen.java', 'android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java', 'android/app/src/main/java/com/treelearn/app/ui/ChatSink.java', 'android/app/src/main/java/com/treelearn/app/wiring/CoordinatorGenerationPort.java', 'android/app/src/main/java/com/treelearn/app/wiring/GenerationPort.java', 'android/app/src/main/java/com/treelearn/app/wiring/HomeWiring.java', 'android/app/src/test/java/com/treelearn/app/wiring/WiringDoubles.java', 'android/data/src/main/java/com/treelearn/data/db/dao/FirstTopicCreation.java']
+android/ paths already dirty at run start = 0 []
 info: that count is PRINTED, not judged - a shared worktree can hold another slice's uncommitted android work, and judging it here would blame 007 for a neighbouring slice. 'This slice adds no android path' is judged where it is decidable - the commit itself (git show --name-only <this commit> | grep ^android/ must be empty) - and the keep-behaviour half is judged in the GREEN run as a start-to-end delta.
 recorded 4 pre-window fingerprint(s)
 PRE ok
@@ -53,7 +53,7 @@ POST ok
 ===== block 4 - control arm: the same fixture returns 0 with every case running and none on tier 3, so block 02's tier 3 was the absence and nothing else =====
 $ python -X utf8 artifacts/tmp/_red007/control007.py
 captured CR normalised: 2 carriage return(s) removed from block 4 output - the artefact of record is LF-only
-CONTROL executed=19 expected=19 equal=True failures=0 tier3-by-design=6
+CONTROL executed=20 expected=20 equal=True failures=0 tier3-by-design=6
 CONTROL verdict=True last-line-exitcode0=True instrument-fault-lines=0 rc=0
 CONTROL ok
 ----- exit code: 0 (want 0) -----
@@ -63,7 +63,7 @@ $ python -X utf8 artifacts/tmp/_red007/no_history.py
 captured CR normalised: 3 carriage return(s) removed from block 5 output - the artefact of record is LF-only
 info .trae/scripts/dev/gen_parity_ledger.py commits=3 tracked=True (printed not judged - blocks 2/3 give the commit-independent reproduction)
 info .trae/scripts/dev/parity_ledger_selftest.py commits=3 tracked=True (printed not judged - blocks 2/3 give the commit-independent reproduction)
-info artifacts/parity/ledger.md commits=4 tracked=True (printed not judged - blocks 2/3 give the commit-independent reproduction)
+info artifacts/parity/ledger.md commits=5 tracked=True (printed not judged - blocks 2/3 give the commit-independent reproduction)
 NOHISTORY printed (no judgement here)
 ----- exit code: 0 (want 0) -----
 
@@ -73,7 +73,7 @@ captured CR normalised: 4 carriage return(s) removed from block 6 output - the a
 this task: PASS count=1 WARNING count=1 (size band=1, other=0) ERROR count=0
   line: WARNING T-2026-10-15-parity-ledger-generator-007.md: estimated production lines 334 exceeds soft limit 200
   line: PASS T-2026-10-15-parity-ledger-generator-007.md
-note: repo-wide readings are errors=16 warnings=12 and are NOT judged here (see 004 block 27's same-round correction).
+note: repo-wide readings are errors=16 warnings=13 and are NOT judged here (see 004 block 27's same-round correction).
 CONTRACT ok
 ----- exit code: 0 (want 0) -----
 
@@ -82,9 +82,9 @@ $ python -X utf8 artifacts/tmp/_red007/utf8_gate.py .trae/scripts/dev/gen_parity
 captured CR normalised: 8 carriage return(s) removed from block 7 output - the artefact of record is LF-only
 GATE SELFTEST ok: a known-broken byte string is rejected
 ok   .trae/scripts/dev/gen_parity_ledger.py                     bytes=20273
-ok   .trae/scripts/dev/parity_ledger_selftest.py                bytes=26737
+ok   .trae/scripts/dev/parity_ledger_selftest.py                bytes=29968
 ok   .trae/scripts/dev/gen_screen_inventory.py                  bytes=20787
-ok   artifacts/parity/ledger.md                                 bytes=8089
+ok   artifacts/parity/ledger.md                                 bytes=8055
 ok   artifacts/tmp/gen-007-red.sh                               bytes=26967
 ok   .trae/tasks/T-2026-10-15-parity-ledger-generator-007.md    bytes=47779
 gate covered 6 file(s)

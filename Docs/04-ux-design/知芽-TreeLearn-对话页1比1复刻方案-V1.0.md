@@ -299,9 +299,16 @@ python -X utf8 .trae/scripts/dev/parity/measure_screen.py --screen chat \
 > 偏移校正从同目录 `screens.json` 取并每次打印扣除量，正反双向自检 `--selftest`），`png_probe.py` 一并迁入。
 > 两支 Node 工具里，产图侧 `cdp_shot.mjs` 已由 T-2026-10-15-006 收编进 `.trae/scripts/dev/parity/`
 > （与共享层 `parity_cdp.mjs` 一起：屏档案驱动调用、四档退出码、正反双向自检 `--selftest`）；
-> DOM 侧 `verify_1to1.mjs` 仍在 `artifacts/tmp/`，由 T-2026-10-15-009 收编。
-> 本节的量测结论与判定口径**未变**：收编前后对同一张 2026-09-27 样本重跑，87 行判据逐字相同
-> （见证 `artifacts/evidence/T-2026-10-15-003-green.txt` 的对照块）。
+> DOM 侧 `verify_1to1.mjs` 已由 T-2026-10-15-009 收编进同一目录（与 `cdp_shot.mjs` 共用 `parity_cdp.mjs`：
+> 按屏名从 `screens.json` 的 `prototype` 段取 HTML 路径、点击序列、等待选择器与 `dom_checks` 名单，
+> 名单里每一项由仪器内的判据词表实现，档案写不认的名字即判仪器故障 3；`--selftest` 正反双向，
+> 例数与变异条数以该命令自己的末行读数为准，不在本文钉数）。
+> 本节的**读数口径**未变：收编后对对话页重跑，探针输出的键集与上表那份 2026-09-27 JSON 逐键相同
+> （见证 `artifacts/evidence/T-2026-10-15-009-green.txt` 的块 04）。唯一有意差异是 `tokens` 名单——
+> 当年在探针里手抄了 14 个名字（含 2026-09-28 已退役的 `--green-bubble`），现在由词表按检查项现场注入 6 个。
+> 逐项**数值**随原型制式变化（用户气泡已改纯文本），不在「口径未变」之列。
+> 像素侧的口径同一性另有见证：收编前后对同一张 2026-09-27 样本重跑，87 行判据逐字相同
+> （`artifacts/evidence/T-2026-10-15-003-green.txt` 的对照块）。
 
 ---
 

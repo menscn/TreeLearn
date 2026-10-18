@@ -28,7 +28,7 @@ tdd_mode: not-applicable
 - AI recommendation and rationale: 架构师建议夹具先行（把界面还原与宿主决策解耦）、量测沿用仓库内已验证过的 1:1 方法而非新造仪器、契约用生成类型 + 共享 JSON fixture 双向差分（把「两处实现」变成可证伪的差分测试）。
 - User choice and custom additions: 用户 2026-10-15 拍板四项——阶段一数据用快照夹具驱动、PC 数据与密钥宿主选本地 JVM 服务、首批范围全 16 屏 + 6 浮层、流程采用 Harness；并追加三项裁定——① 允许为单一来源改 Android 生产代码，② 旧 WebView 规格整份删除，③ 删除前端中英双语齐备守门口径。英文本期不做。其中第三项的「16 屏 + 6 浮层」是盘点仪器建立前的人写估计，**已被用户 2026-10-16 的裁定「以实测清单为准」取代**；此处保留原话是为了不篡改当时的拍板记录，引用范围时以 `screen-inventory.json` 为准。
 - AI-autonomous decisions: 后端采用零框架（JDK 17 `com.sun.net.httpserver` + 桌面 SQLite，不引 Spring Boot）与服务薄壳边界；桌面 SQLite 裁定为本服务生产引擎、不走 MySQL/Flyway；阶段 1 重采一套真机基线截图；目录名用 `frontend/` 与 `backend/`（治理路由表与 lane/stack 取值已内置，自定义目录会落到无 owner 可写的真空）；树几何在阶段一至六只渲染 Android 采集的坐标快照，禁止手抄成 TypeScript。
-- User-confirmation decisions: 上述四项主拍板与三项追加裁定；疑虑 8（1:1 基线取手机档还是平板档）仍待用户在阶段 3 前拍板。
+- User-confirmation decisions: 上述四项主拍板与三项追加裁定；疑虑 8（1:1 基线取手机档还是平板档）仍待用户在阶段 3 前拍板。【时效（2026-10-17）：该条已由用户裁定为**手机档是本规格 1:1 校正的唯一基线**，判定正文只在 `Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md` 的疑虑 8 一条（§11 阶段 3 行与修订记录各有一句指向它）；本行保留本片验收当时的状态，按「原始发现与处置结果分时可辨」不改写。】
 - Acceptance evidence: 逐屏三层台账与偏差台账（机械派生，不手写数字）、`check_design_tokens.py` 四方一致与正反自检、`validate_tasks.py` 零错误、Android 侧 Java-only 守门与既有套件未退化、阶段七的跨引擎差分与双环境跑测记录。
 - Facts: `:core`（29 文件）与 `:tree-layout`（12 文件）已是 `java-library` 且被 `android/build.gradle:34 pureJvmModules` 守门；`:ai` 21 个文件仅 2 个引用 Android 类型；`TreeLearnSchema.DATABASE_VERSION` 当前为 5；`screen/` 下实测 14 个屏，其中 5 个没有作为自己根视图的布局充气（`FileManagerScreen`、`ModelSettingsScreen`、`SearchServiceSettingsScreen`、`VoiceSettingsScreen` 四个文档原点名项，加 `HomeDrawerScreen`——它调 `inflate()` 但产物是被 `addView` 挂进去的子视图，按「有没有根布局」它没有；此判定与清单的 `self_drawn` 标记双向核对，见 T-2026-10-15-005 的 Implementation notes）；`check_design_tokens.py` 当前三方一致 44 token 全绿；三支 1:1 量测工具位于会被清理的 `artifacts/tmp/`。
 - Assumptions: 高保真原型 v1/v1.1 的样式与 Android 现状基本一致（用户 2026-10-15 提示，并以原型 `:root` 为 token 权威）；工程化后原型冻结、不再作第二份实现维护。
@@ -111,7 +111,7 @@ Follow [code-document alignment](../rules/documentation.md).
 - 权威文档：`Docs/intent/INTENT-2026-10-15-web-h5-android-parity.md`（accepted）与 `Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md`（accepted）。
 - 本任务树的片编号使用连续三位序号，不发明 `NNNb` 式后缀（Task v2 的 `id` 只接受三位数字）。
 - 规模判定一律用 `.trae/scripts/dev/count_production_lines.py`（非空非注释；新增文件计全文、既有文件只计本次改动行），不得手搓过滤；引用他任务规模时取该任务当时的实测值，不按共享目录复算。
-- 待用户拍板的实质决策只剩疑虑 8（1:1 基线取手机档还是平板档），阻塞点是阶段 3 开工，不阻塞阶段 0–1。
+- 待用户拍板的实质决策只剩疑虑 8（1:1 基线取手机档还是平板档），阻塞点是阶段 3 开工，不阻塞阶段 0–1。【时效（2026-10-17）：已裁定为手机档唯一基线，该阻塞点解除；平板档差异复刻改为阶段 3 之后的独立片，前置是平板基线截图采集。出处同上。】
 
 ## Verification report
 

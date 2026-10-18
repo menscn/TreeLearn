@@ -1,0 +1,128 @@
+# T-2026-10-15-009 MUTATION：DOM 侧收编的新判据各自有区分力
+# 生成命令：python -X utf8 artifacts/tmp/gen-009-mutation.py
+# 输入（判定前读数；本电池只读不写这些生产文件，复核见末块）：
+#   artifacts/tmp/gen-009-green.py bytes=43723 sha256=2b90f9adc385119218a7829f279cda136a0c72b9d294382f10d73ee3a5c534cb
+#   artifacts/tmp/_g009/green-selftest.txt bytes=9775 sha256=b77a750e7aca670cb4f8c169845a77b07dfc1d55340b478a2b26364d332c51c0
+#   artifacts/tmp/_g009/green-chat-dom.json bytes=7197 sha256=7b2eaa3c8322202dcc9e808cb9fb257c66d2914e92b1968c2066698adc60c403
+#   artifacts/evidence/ux-chat-1to1-render-dommeasure-2026-09-27.json bytes=7661 sha256=b246dfcc78155f54e301de602b5b6d328c219cbe88f3c683f0c5cdde15a8f5f2
+#   .trae/scripts/dev/parity/parity_cdp.mjs bytes=17045 sha256=36b4ad7aef055d8e14f5a1f2ebe45a3a449c0939bec37ae12d6680621cb3475a
+#   .trae/scripts/dev/parity/verify_1to1.mjs bytes=35121 sha256=7323d088041b59b1aaad9a0fac9e7742dadcbaf4a42c0f1c8bd8288cbff96265
+#   .trae/scripts/dev/parity/verify_1to1_selftest.mjs bytes=18534 sha256=215484411705833c095f049ac09bde39536a328550c28b73301d4deec143ae49
+#   .trae/scripts/dev/parity/screens.json bytes=3679 sha256=f85fc4342f701b5ce1f27fd78230de6af348a5d5630d8ad7d0e2eb33335fdeaa
+# 变异条数不进正文，由末块的裸字面量下限 MIN_MUTS=6 现场量。
+# 副本目录 artifacts/tmp/_mut009{a,b,c,f}/parity 与被判文件同深度，用完即删；
+#   它们只改自己那份副本，被判的生产文件由末块的 sha 复核兜着。
+
+  同一份捕获：旧形态命中=3 新形态命中=0 ；合成真失败：新形态=1 旧形态按 ok/(want= 形状命中=0
+===== block 01 - M1 verdict lines located by shape =====
+  ok   旧形态把设计内的夹具 echo 判成本片缺陷（>0 条）——这条归位确实在承重
+  ok   新形态对同一份捕获判绿（0 条电池失败）
+  ok   新形态不是把扫描关掉：合成的「rc 对上但分支没走到」必须被点名
+  ok   旧形态的 ok-行过滤器看不见那条合成失败（它要求行内出现 (want=）
+  ok   夹具见证仍完整可见（只是不判成本片缺陷）
+  block 01: want=0 got=0
+
+  读数 cases=40 cli=20 muts=18 unit=1 正控=1 旧等式=False 新等式=True ；抹掉那两类见证后新等式=False
+===== block 02 - M2 case accounting names the two extra categories =====
+  ok   真实捕获上旧等式 cases==cli+muts 不成立（它漏了两类）
+  ok   新等式成立且那 2 条各有逐字见证
+  ok   抹掉那 2 条见证后新等式必须失效（不是把 +2 调成恒真）
+  ok   额外两条的条数取自实读而不是写死（unit=1 正控=1，和=2）
+  block 02: want=0 got=0
+
+  真实=[] ；逐条抹掉=[('wait-for-absent', ['wait-for-absent']), ('click-target-absent', ['click-target-absent']), ('page-not-rendered', ['page-not-rendered'])] ；全抹=['wait-for-absent', 'click-target-absent', 'page-not-rendered'] ；旧形态在任何输入=[]
+===== block 03 - M3 witness-presence detector discriminates and isolates =====
+  ok   真实捕获上 3 条见证都在（0 条缺失）
+  ok   抹掉 wait-for-absent 的见证必须只点名它自己（隔离）
+  ok   抹掉 click-target-absent 的见证必须只点名它自己（隔离）
+  ok   抹掉 page-not-rendered 的见证必须只点名它自己（隔离）
+  ok   全部抹掉必须点名全部 3 条，不多不少
+  ok   同一份「抹掉全部见证」的输入：新形态点名 3 条而旧形态点名 0 条（守卫确实承重，不是恒真）
+  block 03: want=0 got=0
+
+  守卫开: rc=1 该用例判决行=['FAIL neg-click-absent rc=1 want=1，但那条分支没走到：输出里没有 FAIL click-target-absent ——同一个 rc 可以由别的分支给出（最后一行回显：FAIL some-other-branch #no-such-click-target']
+  守卫关: rc=0 该用例判决行=['ok   neg-click-absent rc=1 (11.8s, want=1)']
+  副本健康度：守卫开=True 守卫关=True（都要跑到用例循环，且除被盯那条外判决逐字相同）
+===== block 04 - M4 the witness guard is what turns the observed race red =====
+  ok   两次运行共用同一份被变异仪器（点击失败标签都被改名），守卫是唯一差异
+  ok   守卫开着：这条用例必须判红并说出「分支没走到」
+  ok   守卫关掉：同一个输入必须被判绿（这正是 2026-10-17 首跑撞上的假见证形状）
+  ok   除被盯那条以外的判决行逐字相同且非空（变异只影响这一条，隔离）
+  ok   两份副本都没撞上条目下限（否则 A/B 比的是下限不是守卫）
+  block 04: want=0 got=0
+
+  截短副本: rc=3 出声行=['FAIL selftest-floor declared cases=2/8 muts=18/8 —— 清单被截短时判据不能为空见证'] ；真实正文单行声明的用例条数=19 下限=8（与清单无关的裸字面量）
+===== block 05 - M5 declared-case floor fires on a truncated list, not vacuously =====
+  ok   截短后 rc 恰好 3（仪器故障档：判据不能为空见证）
+  ok   出声行点名 declared 与下限两个数字
+  ok   真实清单条数高于下限（下限因此不是恒真）
+  ok   没有跑到浏览器那一步（产物里没有 browser = 行）
+  ok   截短副本确实只留下 2 条（选中集非空见证）
+  block 05: want=0 got=0
+
+  真层空判据: finish rc=3 进程 rc=0 有 FAULT 行=True ；拆掉闸门的副本: finish rc=0 打出 PASS=True
+===== block 06 - M6 empty-ledger gate is the only thing keeping a blank run from PASSing =====
+  ok   两次 node 调用本身都跑完了（进程 rc=0，读数来自 finish 的返回值不是进程码）
+  ok   真层：空判据 finish 恰好返回 3 且打印 FAULT 行
+  ok   真层：不得出现 VERDICT: PASS
+  ok   拆闸门副本：同一输入变成 finish 返回 0 且打 PASS（守卫确实承重）
+  ok   副本的判决与真层确实不同（空变异不算测过）
+  block 06: want=0 got=0
+
+  真实两份读数: 顶层缺=无 嵌套差异=无 ；抹掉 userBubble.css: 新={'userBubble': (['css'], [])} 旧形态=无差异
+===== block 07 - M7 keep-behaviour comparison covers nested key sets =====
+  ok   真实读数在顶层与嵌套键集上都无差异（这就是 GREEN 块 04 那两条 OK 的内容）
+  ok   嵌套键漂移时旧形态全瞎（顶层集合相等即判「无差异」）
+  ok   同一输入 GREEN 那份实现点名 userBubble，且点名的是「归档有、新读数没有」那一半
+  ok   漂移样本确实动了键集（空变异不算测过）
+  ok   块 04 的生产判据调的就是这个函数（不是定义了没被用的第二份形状）
+  block 07: want=0 got=0
+
+  用法错误 rc=2 ；档案空判据 rc=3 ；旧形态(任何非0)对用法输入判=True 新形态(恰好3)判=False
+===== block 08 - M8 exit-code tiers are not interchangeable =====
+  ok   两条都跑到（rc 分别落在 2 与 3）
+  ok   旧形态会把用法错误认证成「故障档见证」——这条判据本次确实在防混码
+  ok   新形态对真正的故障档输入判真，且说出的是没有检查项而不是别的
+  ok   两次调用都没起浏览器（都在浏览器启动之前的分支）
+  block 08: want=0 got=0
+
+  空 #root 桩: 真层 rc=3 ；有内容无 .screen 桩: rc=1 ；同一份空桩喂给拆掉分流的副本: rc=1
+===== block 09 - M9 render-wait splits boot failure from structural mismatch =====
+  ok   真层：空 #root 桩落 3 并点名「被核对象没起来」（仪器故障档）
+  ok   真层：有内容却没有 .screen 的桩仍落 1（结构不符档没被顺手改掉）
+  ok   拆掉分流的副本：同一份空桩从 3 变成 1——2026-10-17 那次 CDN 停顿被读成「结构不符」正是这个形状
+  ok   三条读数各带可分观测量（root= / #root 子元素=），不是只报一个退出码
+  ok   副本的变异锚点确实命中（空变异不算测过）
+  block 09: want=0 got=0
+
+  变异计数读数：N_MUT=9 判定块=9 下限=6
+===== block 10 - mutation-count floor measured after all mutations =====
+  ok   变异条数 >= MIN_MUTS=6（截短一条就必须响）
+  ok   本块之前的判定块数与变异条数相等（每块对应一条变异；汇总里的 10 含本块自己）
+  ok   下限与清单内容无关（它是本文件里的裸字面量，不是 len(MUTS)）
+  block 10: want=0 got=0
+
+  输入复核（本电池只读不写生产文件）：
+    artifacts/tmp/gen-009-green.py 字节与 sha 未变=True
+    artifacts/tmp/_g009/green-selftest.txt 字节与 sha 未变=True
+    artifacts/tmp/_g009/green-chat-dom.json 字节与 sha 未变=True
+    artifacts/evidence/ux-chat-1to1-render-dommeasure-2026-09-27.json 字节与 sha 未变=True
+    .trae/scripts/dev/parity/parity_cdp.mjs 字节与 sha 未变=True
+    .trae/scripts/dev/parity/verify_1to1.mjs 字节与 sha 未变=True
+    .trae/scripts/dev/parity/verify_1to1_selftest.mjs 字节与 sha 未变=True
+    .trae/scripts/dev/parity/screens.json 字节与 sha 未变=True
+===== 汇总 =====
+  blocks=10 mutations=9 floor=6 floor-met=True faults=0
+  block 01 M1 verdict lines located by shape              want=0 got=0 ok
+  block 02 M2 case accounting names the two extra categor want=0 got=0 ok
+  block 03 M3 witness-presence detector discriminates and want=0 got=0 ok
+  block 04 M4 the witness guard is what turns the observe want=0 got=0 ok
+  block 05 M5 declared-case floor fires on a truncated li want=0 got=0 ok
+  block 06 M6 empty-ledger gate is the only thing keeping want=0 got=0 ok
+  block 07 M7 keep-behaviour comparison covers nested key want=0 got=0 ok
+  block 08 M8 exit-code tiers are not interchangeable     want=0 got=0 ok
+  block 09 M9 render-wait splits boot failure from struct want=0 got=0 ok
+  block 10 mutation-count floor measured after all mutati want=0 got=0 ok
+  空变异=0 被判输入位移=0
+OVERALL_EXITCODE=0
+DECODE ok utf8=True cr=0

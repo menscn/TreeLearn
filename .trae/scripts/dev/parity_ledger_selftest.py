@@ -15,6 +15,7 @@ import hashlib
 import io
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -54,7 +55,7 @@ def _load(name):
 L = _load("gen_parity_ledger")
 F = _load("screen_inventory_selftest")       # reuse the one fixture builder; do not fork it
 
-EXPECTED_CASES = 19                          # bare literal; must not be derived from CASES
+EXPECTED_CASES = 20                          # bare literal; must not be derived from CASES
 RUN_ROOT = os.path.join(G.REPO, "artifacts", "tmp", "_inv007_run")
 REQUIRED_ATTRS = ("main", "projection", "rederive", "rows_of", "visual_state", "behaviour_state",
                   "judgements", "instrument_line", "link_disagree", "require_shape", "Fault")
@@ -158,9 +159,19 @@ def _c_real(root):
     screens, surfaces = len(inv["screens"]), len(inv["surfaces"])
     rows = screens + surfaces
     profiled = 1                       # chat is the only screen carrying a measurement profile
+    fresh = "清单新鲜度：一致" in out
+    stale = ("清单新鲜度：STALE" in out) or ("INVENTORY STALE" in out)
+    adopted_row = bool(re.search(r"行为仪器（verify_1to1\.mjs）：adopted\b", out))
+    other_row = bool(re.search(r"行为仪器（verify_1to1\.mjs）：(not-adopted:\S+|absent)", out))
     return rc, [("tier 0 on the filed inventory", rc == 0),
                 ("no FAIL line printed", not fail_lines(out)),
-                ("freshness says the faces agree", "清单新鲜度：一致" in out),
+                # 新鲜度是**维护状态**而不是仪器性质：任何一次 android/ 改动都会让已落盘清单落后，
+                # 直到有人重生成。原先这里判「必须说一致」，于是本套自检在每一个未重生成的窗口里
+                # 都是红的，而红的意思是「该重生成清单」——那是另一件事，且不属于本用例。
+                # 现在判的是两态各自可判、且互不矛盾：一致必须 rc=0，STALE 必须 rc!=0 并自己点名成因。
+                ("freshness and exit code do not contradict each other"
+                 "（本次读数 一致=%s STALE=%s rc=%d）" % (fresh, stale, rc),
+                 (fresh and rc == 0) or (stale and rc != 0)),
                 ("rows counted from the inventory", "rows=%d" % rows in out),
                 ("the row split matches the inventory",
                  "screens=%d surfaces=%d" % (screens, surfaces) in out),
@@ -168,7 +179,13 @@ def _c_real(root):
                 ("unmeasured screens are counted, not hidden",
                  '"NO-PROFILE": %d' % (rows - profiled) in out),
                 ("the replay spec is recognised", '"REPLAY-SPEC": %d' % profiled in out),
-                ("the un-adopted Node instrument is named", "not-adopted" in out),
+                # 「未收编时点名 not-adopted」是一条**会随兄弟片入库而反转**的断言：009 把仪器落到
+                # .trae/scripts/dev/parity/ 之后它就永远为假。真实树上本用例只要求那一行说出三种模板
+                # 取值之一；三条分支是否各自真的会吐对应取值，由 pos-instrument-adoption-states 在
+                # 合成树上量测，不由这一行代劳。
+                ("the behaviour instrument row is present and template-shaped"
+                 "（本次 adopted=%s 其余两态=%s）" % (adopted_row, other_row),
+                 adopted_row != other_row),
                 ("exit code derived from judgements", out.strip().endswith("EXITCODE=0"))]
 
 
@@ -183,6 +200,35 @@ def _c_scan(root):
     return 0, [("a leading FAIL is seen as a judgement line", fail_lines(leading) == [complaint]),
               ("the adjacency form this replaces missed it", "\nFAIL " not in leading),
               ("a FAIL inside prose is not a judgement line", not fail_lines(prose))]
+
+
+@case("pos-instrument-adoption-states", 0)
+def _c_adoption_states(root):
+    # instrument_line() 的三档取值在真实树上只能观察到一个，所以这里把它放到合成根上逐个构造：
+    # 新路径在位=adopted，只有 artifacts/tmp/ 里的前身=not-adopted:<旧路径>，两处都无=absent。
+    # 有了这条，pos-real-tree 就只判「那一行在位且模板合法」，不必再押注某个特定档——那正是
+    # 「将来会反转的断言不是断言」的形状。
+    name = "verify_1to1.mjs"
+    new_rel = os.path.join(".trae", "scripts", "dev", "parity", name)
+    old_rel = os.path.join("artifacts", "tmp", name)
+    saved = L.REPO
+    got = []
+    try:
+        for tag, rels in (("adopted", [new_rel]), ("not-adopted", [old_rel]), ("absent", [])):
+            r = os.path.join(root, tag)
+            for rel in rels:
+                w(os.path.join(r, rel), "// stub\n")
+            L.REPO = r
+            got.append(L.instrument_line(name))
+    finally:
+        L.REPO = saved
+    return 0, [("新路径在位即 adopted（实测 %s）" % got[0], got[0] == "adopted"),
+               ("只有前身时点名旧路径而不是笼统报缺（实测 %s）" % got[1],
+                got[1] == "not-adopted:artifacts/tmp/%s" % name),
+               ("两处都无时是 absent 而不是 adopted（实测 %s）" % got[2], got[2] == "absent"),
+               ("三档互不相同（同一棵树读出两个答案是判据失效）", len(set(got)) == 3),
+               ("用例结束后生产 REPO 已还原（还原=%s，还原后读数=%s）"
+                % (L.REPO == saved, L.instrument_line(name)), L.REPO == saved)]
 
 
 @case("pos-fixture-tree", 0)

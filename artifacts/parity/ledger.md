@@ -2,12 +2,12 @@
 
 - 生成命令：`python -X utf8 .trae/scripts/dev/gen_parity_ledger.py`
 - 本次实际参数：(无，全部走默认路径)
-- 清单登记来源提交：c737616451cc798b8d3737550fcc3a1df0cf5328；本行现场读到的 HEAD：c737616451cc798b8d3737550fcc3a1df0cf5328
-- 清单文件哈希（本次读到的字节）：`4b6cc4ca44eccd580a4a011372df2b621bafcceaa464bd4743748ca25b9c6edb`
-- 实测面哈希：已落盘 `1ad50c642f4b1fbeef44df8eaf2589489dff5c37b4b4ae986e243a72c9542374` ／ 当前树重导出 `1ad50c642f4b1fbeef44df8eaf2589489dff5c37b4b4ae986e243a72c9542374`
+- 清单登记来源提交：e0eade71e8e1a256aa3b572e013f023cfffa375f；本行现场读到的 HEAD：e0eade71e8e1a256aa3b572e013f023cfffa375f
+- 清单文件哈希（本次读到的字节）：`4fe9ecd8f7c44876663903939905f6d0a6cd6f210e158f5ddfa8ec073f172ef9`
+- 实测面哈希：已落盘 `24c6d96e157211e3f3c53343984dd7deee89a3a783f2b8c8d194fdcc3a98373e` ／ 当前树重导出 `24c6d96e157211e3f3c53343984dd7deee89a3a783f2b8c8d194fdcc3a98373e`
 - 清单新鲜度：一致（当前树重导出的实测面与已落盘清单同哈希）
 - 规格指针（规格里不写范围数字，只指向清单）：登记的 True ／ 现场重读的 True → 一致
-- 行为仪器（verify_1to1.mjs）：not-adopted:artifacts/tmp/verify_1to1.mjs — 未收编时本列只报缺证据，不报通过。
+- 行为仪器（verify_1to1.mjs）：adopted — 未收编时本列只报缺证据，不报通过。
 - 每格的含义：它说的是**证据在不在**，不是还原对不对。MEASURED 只表示 Android 侧基线记录在位且必需节齐全；Web 侧是否等价，要等阶段 3 的比对给出另一份记录。
 
 | 条目 | 类别 | 结构层 | 视觉层 | 行为层 |

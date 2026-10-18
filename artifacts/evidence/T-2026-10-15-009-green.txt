@@ -1,0 +1,225 @@
+# T-2026-10-15-009 GREEN：DOM 侧闭环量测仪器收编入库
+# 生成命令：python -X utf8 artifacts/tmp/gen-009-green.py
+# 被核文件（本次运行判定前读到的字节；本运行不写这些文件，因此你今天回算应当相同）：
+#   verify_1to1.mjs bytes=35121 lines=506 sha256=7323d088041b59b1aaad9a0fac9e7742dadcbaf4a42c0f1c8bd8288cbff96265
+#   verify_1to1_selftest.mjs bytes=18534 lines=251 sha256=215484411705833c095f049ac09bde39536a328550c28b73301d4deec143ae49
+#   parity_cdp.mjs bytes=17045 lines=396 sha256=36b4ad7aef055d8e14f5a1f2ebe45a3a449c0939bec37ae12d6680621cb3475a
+#   cdp_shot.mjs bytes=12132 lines=196 sha256=90121f117318b6f6c0c00e763c73bb01b8586d9e5bd2f68290a4a136b0acce53
+#   measure_screen.py bytes=28279 lines=543 sha256=c99a3236963d84bbe331110cb2d3824cf24f57968978f93ef4e0c84a35674c3a
+#   screens.json bytes=3679 lines=48 sha256=f85fc4342f701b5ce1f27fd78230de6af348a5d5630d8ad7d0e2eb33335fdeaa
+#   T-2026-10-15-009-pre-adoption-verify_1to1.mjs bytes=11527 lines=207 sha256=0b44fa999f4ef6810e5580e910ac72002fc978ec09f45813acb6cdc1218f5e07
+#   ux-chat-1to1-render-dommeasure-2026-09-27.json bytes=7661 lines=381 sha256=b246dfcc78155f54e301de602b5b6d328c219cbe88f3c683f0c5cdde15a8f5f2
+#   知芽-TreeLearn-高保真原型-v1.html bytes=150303 lines=2445 sha256=d4faea4b03d08a2add3985bf1788722d2cc7463ec2a990e88db43176bdff2eb2
+#   知芽-TreeLearn-对话页1比1复刻方案-V1.0.md bytes=35355 lines=377 sha256=d9d3955c195a52e9bc6daa4f407cf7b4209cacce95533ed34b5ac480f518bc25
+#   SPEC-2026-10-15-web-h5-android-parity.md bytes=28881 lines=152 sha256=46684e82ed6e206167f0d8fbdd0c1d13c5c7c1590bbee102d463fe0260ad4aa0
+#   artifacts/parity/ledger.md bytes=8055 lines=60 sha256=728ba7c25cbf678a9bd8f5426348139b6169daef7b3f44612f8e55ef1fe8fdd3
+#   gen_parity_ledger.py bytes=20273 lines=377 sha256=6524f3b66f7dc89be8e762d70c8cdf9498a897e7e7372ba2d7f64c650012151a
+# 名单边界：本运行写的是本产物与 artifacts/tmp/_g009/ 下的中间读数与四份档案夹具；
+#   夹具由本运行现场生成（从 screens.json 派生后各改一处），不是手抄的第二份正文。
+#   块 12 断言「每一条判据读过的文件都在这份名单里」，名单本身因此承重、不是装饰。
+#   本产物自己的哈希见末行 DECODE 之后的控制台读数（复算：sha256sum 本文件），
+#   不抄进正文，否则下一行就把它作废。
+# 历史判据（移动而非重写）不在本产物里：它要求那次移动已进 git 历史，提交前必然红，
+#   属时效性状态；提交后由 gen-009-post-commit.py 单独出。
+# 规模口径见块 11：判定面 = 仪器本体（新文件全文），自检伴随文件按「Tests NOT counted」排除，
+#   该排除是**承重的**（judged + companion 越过 500 硬上限），两个口径都留在块 11。
+
+  node --check: verify_1to1=0 verify_1to1_selftest=0 parity_cdp=0
+===== block 01 - all three scripts parse and delegation is static =====
+  ok   仪器本体 rc=0
+  ok   自检伴随文件 rc=0
+  ok   共享层 rc=0
+  ok   仪器静态导入电池且正文无动态 await import（环的成因）
+  ok   电池反向不导入仪器（避免环的另一半）
+  block 01: want=0 got=0
+
+  电池读数: rc=0 汇总行=SELFTEST PASS cases=40 cli=20 muts=18 failures=0 ok-cli=20 unit=1 ok-mut=18 FAIL行(电池)=0 夹具 echo 的 FAIL 见证行=3 tiers=[0, 1, 2, 3] stderr=1706 字节
+    夹具见证（设计内，不判成本片缺陷）: FAIL wait-for-absent .no-such-node 在 1500ms 内没出现（readyState=complete）——页面已加载，属结构不符而非仪器故障
+    夹具见证（设计内，不判成本片缺陷）: FAIL click-target-absent #no-such-click-target
+    夹具见证（设计内，不判成本片缺陷）: FAIL page-not-rendered .screen 在 60s 内没出现（readyState=complete #root 子元素=1 nodes=7 href=file:///D:/Project/Android/Treelearn/artifacts/tmp/_verify1to1-
+===== block 02 - battery green, non-empty, and tier-complete =====
+  ok   rc 恰好 0
+  ok   打印了 SELFTEST PASS 汇总行（空 stdout 就是空见证）
+  ok   打印的 cli/muts 与按形状归位的判决行数一致（条数不是自述）
+  ok   cases = cli+muts+2，且那 2 条各有见证（unit 空判据 + 词表层正控）
+  ok   failures=0 且电池自己的判决行里没有 FAIL
+  ok   用例总数下限 MIN_CLI_CASES=8 与 MIN_MUT_CASES=8 达成（与清单内容无关）
+  ok   四个档位 0/1/2/3 都被 CLI 层走到（实测 [0, 1, 2, 3]）
+  ok   跨档用例逐条在位（缺: 无）
+  ok   三条期望 rc=1 的用例各自留下页面判据见证（缺: 无）
+  ok   「等不到 .screen」的见证行带上 #root 读数（1 条），成因因此可分
+  ok   该见证判据在电池源码里落地而不是只写在注释里（witness: 声明 3 条且循环真的截 console.log）
+  ok   stderr 不含 unsettled top-level await（那条告警等于仪器没跑完）
+  block 02: want=0 got=0
+
+  命令: node .trae/scripts/dev/parity/verify_1to1.mjs --screen chat --out artifacts/tmp/_g009/green-chat-dom.json
+  读数: rc=0 judgements=12 failed=0 每条检查都打了字=全部在位 token 回读=tokens = 现场回读 6 个（词表要求 6 个
+===== block 03 - one real closed loop through the profile =====
+  ok   rc 恰好 0
+  ok   VERDICT: PASS 与 EXITCODE=0 都在
+  ok   判据统计行存在且 failed=0
+  ok   判据条数下限 MIN_JUDGEMENTS=10 达成（实测 12）
+  ok   档案点名的每条检查各自打了一条判决（缺: 无）
+  ok   汇总行把「档案名单」原样打出来（防止加了第六项而仪器没测）
+  ok   HTML 路径来自档案且中文路径未坏
+  ok   点击序列来自档案
+  ok   浏览器版本进了证据
+  ok   token 是现场回读且与词表要求同数
+  ok   读数 JSON 真的落盘且非空
+  block 03: want=0 got=0
+
+  键集对账: 顶层 归档=32 新=32 缺=无；嵌套有差异的键=无（嵌套已比对字典=14）
+  tokens 面（唯一有意差异）: 归档名单=['--bg', '--fs-body', '--fs-cap', '--fs-sm', '--green', '--green-bubble', '--green-deep', '--ink', '--ink3', '--lh-read', '--r-md', '--r-sm', '--s3', '--s4']
+  tokens 面: 新名单=['--bg', '--fs-body', '--gutter', '--lh-read', '--paper-rule', '--s8']
+  代表值（只打印不判，值随原型制式变化）: 用户消息底色 归档=rgb(63, 108, 73) 新=rgba(0, 0, 0, 0)；格线周期 归档=repeating-linear-gradient(rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0) 31px, rgba(30, 43, 35, 0.027) 31px, rgba(30, 43, 35, 0.027) 32px) 新=repeating-linear-gradient(rgba(0, 0, 0, 
+===== block 04 - keep-behaviour: probe output keys match the 2026-09-27 archive =====
+  ok   归档顶层键在新读数里一个不缺（缺: 无）
+  ok   除 tokens 外每个嵌套字典的键集也与归档相同（差异: 无）
+  ok   新读数的 tokens 键集 == 词表要求的名单（漂移即点名）
+  ok   tokens 差异是有据的：归档名单含已退役的 --green-bubble，新名单不含
+  ok   新名单非空（空名单让上面两条成空见证）
+  ok   嵌套比对面非空（已比对 14 个顶层字典，否则上面那条嵌套判据是空见证）
+  block 04: want=0 got=0
+
+  夹具 derived-unchanged.json   rc=0 末两行=VERDICT: PASS | EXITCODE=0
+  夹具 empty-checks.json        rc=3 末两行=EXITCODE=3 | INSTRUMENT FAULT: 屏 "chat" 的 prototype 段没有 dom_checks——没有检查项就没有见证
+  夹具 no-checks.json           rc=3 末两行=EXITCODE=3 | INSTRUMENT FAULT: 屏 "chat" 的 prototype 段没有 dom_checks——没有检查项就没有见证
+  夹具 unknown-name.json        rc=3 末两行=EXITCODE=3 | INSTRUMENT FAULT: 档案里的 DOM 检查名不在词表内: nope-not-in-vocab（词表现有: body-bg, grid-period, user-bubble, body-pitch, action-pitch, pill-inset）
+  夹具 no-prototype.json        rc=3 末两行=EXITCODE=3 | INSTRUMENT FAULT: 屏 "chat" 的档案没有 prototype 回放段
+===== block 05 - profile-side fail-closed with a positive control =====
+  ok   夹具条数下限 MIN_PROFILE_FIXTURES=4 达成（负向夹具，不含正控）
+  ok   正控：同一套夹具流水线、未改动的那份必须退 0（实测 0）
+  ok   四份负向夹具全部退 3（实测 [3, 3, 3, 3]）
+  ok   每份负向夹具都打印了档位行 EXITCODE=3（缺: 无）
+  ok   没有任何一份负向夹具打出 VERDICT: PASS（有: 无）
+  ok   每份负向夹具都有 INSTRUMENT FAULT 行（属仪器故障档而非判据 FAIL）
+  ok   四条负向各自点名了不同的成因（缺: 无）
+  block 05: want=0 got=0
+
+  用法 连 --screen 都没给         argv=(空) rc=2 末行=USAGE ERROR: usage: node .trae/scripts/dev/parity/verify_1to1.mjs --screen <名> [--out <json>] [--profile <json>] [--brow
+  用法 屏名不在档案里                argv=--screen nope rc=2 末行=USAGE ERROR: 屏档案里没有 "nope"；可用: chat
+  用法 --wait-ms 非正整数         argv=--screen chat --wait-ms 0 rc=2 末行=USAGE ERROR: --wait-ms 必须是正整数毫秒，收到 0
+  用法 未知选项                   argv=--bogus 1 rc=2 末行=USAGE ERROR: 未知选项 --bogus（可用: --screen --out --profile --browser --attach --url --wait-ms）
+===== block 06 - usage tier measured through the real CLI =====
+  ok   用法用例条数下限 MIN_USAGE_CASES=4 达成
+  ok   四条全部退 2（实测 [2, 2, 2, 2]）
+  ok   四条都打印了 EXITCODE=2 档位行（复核者拿得到约定）
+  ok   四条都没有 VERDICT: PASS 也没有判据行
+  ok   四条都没有起浏览器（没有 browser = 行）——用法错误不该有副作用
+  block 06: want=0 got=0
+
+  产图侧: rc=0 SELFTEST PASS cases=17；像素仪器: rc=0 19 case(s) executed, expectation table says 19, 0 failure
+===== block 07 - sibling gates still green after the shared-layer edit =====
+  ok   cdp_shot.mjs --selftest rc 恰好 0
+  ok   它打印了 SELFTEST PASS cases=N（退出码 0 但没有判决行就是空见证）
+  ok   measure_screen.py --selftest rc 恰好 0
+  ok   它打印了 case(s) executed 行且执行数==期望表条数、failure=0
+  block 07: want=0 got=0
+
+===== block 08 - shared-layer wording matches the current state =====
+  ok   共享层头注不再写「待收编的 verify_1to1.mjs」
+  ok   头注改成现况并点名本片（DOM 侧仪器已入库）
+  ok   stray 标签 FACTOR-check 全仓命中为 0（git grep rc 属于 {0,1}）
+  ok   Fault 路径实测打印了命名一致的见证行（夹具里命中 4/4 份）
+  ok   该见证行不与判据混码：这些夹具的 rc 仍是 3（不是 0/1）
+  block 08: want=0 got=0
+
+  被盯集合=24（git ls-files rc=0）窗口内位移=0 movers=[]
+  正控（同一条快照/差分机制，被盯文件在窗口内被改）捕获=['artifacts/tmp/_g009/_watched-control.tmp']
+===== block 09 - run-window delta over the shared work tree =====
+  ok   git 列被盯集合 rc 恰好 0
+  ok   被盯集合非空（下限 MIN_WATCHED=15，空集合让「无位移」成空见证）
+  ok   本片运行期间被盯目录无位移（有则等安静子窗口重跑，不改判据）
+  ok   正控会响：窗口内真改一个被盯文件必须被点名（且只点名它）
+  block 09: want=0 got=0
+
+  全新文件被 git 看见=3/3 位置={'.trae/scripts/dev/parity/verify_1to1.mjs': 'diff HEAD (A/M)', '.trae/scripts/dev/parity/verify_1to1_selftest.mjs': 'diff HEAD (A/M)', 'artifacts/evidence/T-2026-10-15-009-pre-adoption-verify_1to1.mjs': 'diff HEAD (A/M)'}
+  基线 base=HEAD window=uncommitted-only 改动面条目=5（下限 4）不可见=[]
+    numstat artifacts/tmp/verify_1to1.mjs added=0 deleted=207
+    numstat .trae/scripts/dev/parity/verify_1to1.mjs added=506 deleted=0
+    numstat .trae/scripts/dev/parity/verify_1to1_selftest.mjs added=251 deleted=0
+    numstat .trae/scripts/dev/parity/parity_cdp.mjs added=5 deleted=4
+    numstat artifacts/evidence/T-2026-10-15-009-pre-adoption-verify_1to1.mjs added=207 deleted=0
+  配对对照（只打印不判）：--no-renames 行=5 ；-M 行=4
+    5	4	.trae/scripts/dev/parity/parity_cdp.mjs
+    506	0	.trae/scripts/dev/parity/verify_1to1.mjs
+    251	0	.trae/scripts/dev/parity/verify_1to1_selftest.mjs
+    0	0	artifacts/{tmp/verify_1to1.mjs => evidence/T-2026-10-15-009-pre-adoption-verify_1to1.mjs}
+  生成器现场读数（只打印不判：清单面受别人在飞工作影响，重生成要等安静子窗口） rc=0 现场那行=- 行为仪器（verify_1to1.mjs）：adopted — 未收编时本列只报缺证据，不报通过。 是否报清单STALE=False
+  反向检索 artifacts/tmp/verify_1to1: rc=0 命中=19 其中非历史面=1（手写残留=0 台账生成行=0）
+    命中: .trae/scripts/dev/parity/verify_1to1.mjs:3: * 1:1 闭环量测的「DOM / 计算样式侧」仪器（T-2026-10-15-009，前身 artifacts/tmp/verify_1to1.mjs）。
+    命中: .trae/tasks/T-2026-10-15-parity-ledger-generator-007.md:121:- 变异电池跑在副本上而不是跑在生产文件上：`.trae/scripts/dev/` 深度为四，副本沿用**同样的相对路径段数**（`artifacts/tmp/_m007/prod/.trae/scripts/dev/
+    命中: .trae/tasks/T-2026-10-15-parity-measurement-instruments-adoption-003.md:33:- Facts: 已核实三支工具存在且均已纳入 git：`artifacts/tmp/measure_chat_1to1.py`（15532 字节）、`artifacts/tmp/verif
+    命中: .trae/tasks/T-2026-10-15-parity-measurement-instruments-adoption-003.md:73:- Producer/consumer/sibling/compatibility paths checked: 反向搜索 `artifacts/tmp/measure_chat_1to1`
+    命中: .trae/tasks/T-2026-10-15-parity-measurement-instruments-adoption-003.md:83:- [x] 受影响入口：文档内旧路径引用清零；`git log --follow` 能证明是移动而非重写。——前半已实测：反向搜索四串（`artifacts/tmp/measure_chat
+    命中: .trae/tasks/T-2026-10-15-parity-node-instruments-adoption-006.md:23:- 交付面校正（执行期决定，如实登记）: 本片实际交付的是**产图侧一支**——`artifacts/tmp/cdp_shot.mjs`（前身路径，现为 `.trae/scripts/dev/parity
+    命中: .trae/tasks/T-2026-10-15-parity-node-instruments-adoption-006.md:34:- Facts: 两支文件存在且均已纳入 git（`artifacts/tmp/verify_1to1.mjs`、`artifacts/tmp/cdp_shot.mjs`）；`screens.json` 
+    命中: .trae/tasks/T-2026-10-15-parity-node-instruments-adoption-006.md:70:- Documentation surfaces checked: `Docs/04-ux-design/知芽-TreeLearn-对话页1比1复刻方案-V1.0.md`（工具表 §281–292 仍写着
+    命中: .trae/tasks/T-2026-10-15-parity-node-instruments-adoption-006.md:72:- Producer/consumer/sibling/compatibility paths checked: 反向搜索 `artifacts/tmp/verify_1to1`、`artifacts/t
+    命中: Docs/04-ux-design/知芽-TreeLearn-对话页1比1复刻方案-V1.0.md:294:| `artifacts/tmp/verify_1to1.mjs` | DOM/计算样式闭环量测（零依赖，Edge headless + CDP） |
+    命中: artifacts/evidence/T-2026-10-15-003-green.txt:260:reverse-search pattern: artifacts/tmp/measure_chat_1to1 | artifacts/tmp/png_probe | artifacts/tmp/verify_1to1 | artifact
+    命中: artifacts/evidence/T-2026-10-15-003-green.txt:269:   line 294: | `artifacts/tmp/verify_1to1.mjs` | DOM/计算样式闭环量测（零依赖，Edge headle
+    命中: artifacts/evidence/T-2026-10-15-003-red.txt:12:#   sha256=0b44fa999f4ef6810e5580e910ac72002fc978ec09f45813acb6cdc1218f5e07 bytes=11527 lines=207  artifacts/tmp/verify_1to
+    命中: artifacts/evidence/T-2026-10-15-003-red.txt:101:$ grep -c process.exit(3) artifacts/tmp/verify_1to1.mjs
+    命中: artifacts/evidence/T-2026-10-15-003-red.txt:121:ok artifacts/tmp/verify_1to1.mjs bytes=11527
+    命中: artifacts/evidence/T-2026-10-15-006-green.txt:90:    命中: .trae/tasks/T-2026-10-15-parity-node-instruments-adoption-006.md:33:- Facts: 两支文件存在且均已纳入 git（`artifacts/tmp/verif
+    命中: artifacts/evidence/T-2026-10-15-006-green.txt:92:    命中: .trae/tasks/T-2026-10-15-parity-node-instruments-adoption-006.md:71:- Producer/consumer/sibling/compatibility pat
+    命中: artifacts/evidence/T-2026-10-15-006-green.txt:94:    命中: artifacts/evidence/T-2026-10-15-003-green.txt:260:reverse-search pattern: artifacts/tmp/measure_chat_1to1 | artif
+    命中: artifacts/tmp/gen-007-mutation.sh:173:    "artifacts/tmp/verify_1to1.mjs",
+===== block 10 - change face visible to git; old path only as history =====
+  ok   每条 git 调用 rc 属于 {0,1}（>=2 表示 pathspec 打错而不是干净）
+  ok   FACE 五项逐个被某个 git 视图看到（不可见: 无）
+  ok   改动面条目 >= MIN_ACCOUNTED=4（空集合让「无不可见」成空见证）
+  ok   三条全新文件被 git 看见：在 diff HEAD 增量或未跟踪清单之一（缺: 无）
+  ok   全树命中非空（空命中=空见证，说明这条搜索从没扫到东西）
+  ok   除复刻方案与台账生成行外没有把旧路径写成现位置的面（残留: 无）
+  ok   台账的旧路径命中要么是恰好一条生成器派生行（过渡态），要么归零且台账自述 adopted（自愈态）——两态互斥且必居其一（实测命中=0 模板形状=0 adopted行=True）
+  ok   台账自述是生成物、且生成器优先认新路径（重生成即自愈，不是手写漂移）
+  ok   复刻方案仍提旧路径时同文件必须给出权威位置注记
+  ok   SPEC §10 的 carve-out 已改成「DOM 侧一支已于 009 入库」，不残留「仍是位置参数形态」
+  block 10: want=0 got=0
+
+  读数: 仪器本体=369 共享层新增行面=5（原始 5 条）判定值=374 电池=180 两文件合计=549 物理行=506
+         5  artifacts/tmp/_g009/layer-added.txt
+         5  TOTAL (non-blank, non-comment, production files only)
+       369  .trae/scripts/dev/parity/verify_1to1.mjs
+       180  .trae/scripts/dev/parity/verify_1to1_selftest.mjs
+       549  TOTAL (non-blank, non-comment, production files only)
+       369  .trae/scripts/dev/parity/verify_1to1.mjs
+       369  TOTAL (non-blank, non-comment, production files only)
+===== block 11 - judged size from the repo tool, exclusion is load-bearing =====
+  ok   三条 count 调用 rc 全为 0
+  ok   面文件行数 == 由 HEAD 副本与当前字节算出的新增行条数（写进去的就是算出来的）
+  ok   两文件口径给出两条逐文件读数且 TOTAL 由它们相加得到
+  ok   判定值 0 < n <= 500 硬上限内（本次 374 = 仪器 369 + 共享层新增行面 5）
+  ok   排除自检伴随文件是**承重的**：judged(374) + battery(180) = 554 > 500，不分文件就越线
+  ok   判定面（非空非注释）小于物理行数（374 < 506），两口径不混用
+  block 11: want=0 got=0
+
+  判定面读过=13 名单条目=13（下限 10）未登记=[]
+===== block 12 - roster covers every file a judgement reads =====
+  ok   名单条目下限 MIN_FINGER=10 达成（与 FINGER 内容无关）
+  ok   每条名单都三项齐全（bytes= / lines= / sha256= 各命中 13/13 条）
+  ok   判定面读过的每个文件都在名单里（缺: 无）
+  ok   FINGER 与 JUDGED 两个清单互等（谁被加了没人通知，这里就响）
+  ok   名单里的路径全部真实存在（否则指纹是量在空文件上）
+  ok   listed 集合与 FINGER 同源（头注每条都能反解出路径，不是纯文本装饰）
+  block 12: want=0 got=0
+
+===== 汇总 =====
+  blocks=12 expectation_entries=12 faults=0
+  block 01 all three scripts parse and delegation is stat want=0 got=0 ok
+  block 02 battery green, non-empty, and tier-complete    want=0 got=0 ok
+  block 03 one real closed loop through the profile       want=0 got=0 ok
+  block 04 keep-behaviour: probe output keys match the 20 want=0 got=0 ok
+  block 05 profile-side fail-closed with a positive contr want=0 got=0 ok
+  block 06 usage tier measured through the real CLI       want=0 got=0 ok
+  block 07 sibling gates still green after the shared-lay want=0 got=0 ok
+  block 08 shared-layer wording matches the current state want=0 got=0 ok
+  block 09 run-window delta over the shared work tree     want=0 got=0 ok
+  block 10 change face visible to git; old path only as h want=0 got=0 ok
+  block 11 judged size from the repo tool, exclusion is l want=0 got=0 ok
+  block 12 roster covers every file a judgement reads     want=0 got=0 ok
+  尾行之下的 EXITCODE 由本表派生，不硬写
+OVERALL_EXITCODE=0
+DECODE ok utf8=True cr=0

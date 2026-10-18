@@ -170,7 +170,10 @@ FILES = [
     "Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md",
     "artifacts/evidence/ux-chat-1to1-measure-2026-09-27.txt",
     "artifacts/fixtures/parity/chat-design-2026-09-27.png",
-    "artifacts/tmp/verify_1to1.mjs",
+    # 009 把仪器从 artifacts/tmp/ 收编进 .trae/scripts/dev/parity/ 之后，前身路径已不存在；
+    # 副本树要复制的是**当前**那一支，否则 instrument_line() 在副本里读到 absent 而不是 adopted，
+    # 块 01 会因为「必需副本源缺失」判 FAIL（实测本次 rc=1、COPY FAULT）。
+    os.path.join(DEV, "parity", "verify_1to1.mjs"),
 ]
 TREES = ["android/app/src/main/java", "android/app/src/main/res"]
 
@@ -311,8 +314,12 @@ MUTS = [
     ("M4-visual-always-measured", GEN, b"def visual_state(key, entry):",
      b'def visual_state(key, entry):\n    return "MEASURED", "mutation M4"',
      "pos-absence-is-a-token-not-a-blank", ["pos-real-tree"]),
+    # 009 之前这条压成恒 adopted 会让 pos-real-tree 转红，因为那一条判的是「点名 not-adopted」；
+    # 009 把它改成状态无关（只要求那一行说出三档模板之一）之后，红落到了真正覆盖三档分支的
+    # pos-instrument-adoption-states 上。这不是守卫变弱，而是归位：押注真实树档位的断言本来就会
+    # 随兄弟片入库反转（本仓库登记过的那族），承担覆盖的必须是合成树那条。
     ("M5-instrument-always-adopted", GEN, b"def instrument_line(name):",
-     b'def instrument_line(name):\n    return "adopted"', "pos-real-tree", []),
+     b'def instrument_line(name):\n    return "adopted"', "pos-instrument-adoption-states", []),
     ("M6-adjacency-scan-returns", SELF,
      b'    return [l for l in text.splitlines() if l.startswith("FAIL ")]',
      b'    return [l for l in text.splitlines() if "\\nFAIL " in l]',
@@ -341,9 +348,16 @@ MUTS = [
      b"    digest = hashlib.sha256(body).hexdigest()",
      b'    digest = hashlib.sha256(("\\n".join(lines) + "\\n").encode("utf-8")).hexdigest()',
      "pos-written-artifact-selfdescribes", []),
+    # 009 入库之后新增的那条三档用例（pos-instrument-adoption-states）：把 instrument_line 的
+    # 两档裁定压成恒 absent，必须且只让这一条转红。它不押注真实树的档位，所以兄弟片入库不会
+    # 让它变成空见证——这正是被替换掉的那条「点名 not-adopted」断言所缺的性质。
+    ("M11-adoption-branch-collapsed", GEN,
+     b'            return "adopted" if rel.startswith(".trae") else "not-adopted:%s" % rel',
+     b'            return "absent"  # MUTATION: both adoption states collapse into absence',
+     "pos-instrument-adoption-states", []),
 ]
 
-MIN_MUTS = 10
+MIN_MUTS = 11
 
 pristine = {rel: open(os.path.join(REPO, rel), "rb").read() for rel in (GEN, SELF)}
 base = json.load(open(BASELINE, encoding="utf-8"))
@@ -431,7 +445,7 @@ if rc != 0 or failing:
 print("BATTERY ok" if not bad else "BATTERY FAULT")
 sys.exit(1 if bad else 0)
 PY
-WANT_TEXT="baseline read from the measured file: rc=0|mutations declared=10 floor=10 floor-met=True|caught=True new-red=['neg-stale-inventory']|caught=True new-red=['neg-pointer-drift']|caught=True new-red=['neg-row-floor']|caught=True new-red=['pos-absence-is-a-token-not-a-blank', 'pos-real-tree']|caught=True new-red=['pos-real-tree']|caught=True new-red=['pos-fail-line-scan-catches-a-leading-fail']|caught=True new-red=['neg-inventory-instrument-absent']|caught=True new-red=['neg-inventory-crlf-checkout']|caught=True new-red=['pos-written-artifact-selfdescribes']|M7-noop-comment rc=0 want-rc=0 baseline=0 caught=False new-red=[]|after-restore copy rc=0 failing=[]|BATTERY ok"
+WANT_TEXT="baseline read from the measured file: rc=0|mutations declared=11 floor=11 floor-met=True|caught=True new-red=['neg-stale-inventory']|caught=True new-red=['neg-pointer-drift']|caught=True new-red=['neg-row-floor']|caught=True new-red=['pos-absence-is-a-token-not-a-blank', 'pos-real-tree']|M5-instrument-always-adopted rc=1 want-rc=1 baseline=0 caught=True new-red=['pos-instrument-adoption-states'] expected-new=['pos-instrument-adoption-states']|M11-adoption-branch-collapsed rc=1 want-rc=1 baseline=0 caught=True new-red=['pos-instrument-adoption-states'] expected-new=['pos-instrument-adoption-states']|caught=True new-red=['pos-fail-line-scan-catches-a-leading-fail']|caught=True new-red=['neg-inventory-instrument-absent']|caught=True new-red=['neg-inventory-crlf-checkout']|caught=True new-red=['pos-written-artifact-selfdescribes']|M7-noop-comment rc=0 want-rc=0 baseline=0 caught=False new-red=[]|after-restore copy rc=0 failing=[]|BATTERY ok"
 run 3 0 "battery: each guard degraded turns exactly its own case red, and the no-op control turns nothing red" \
   python -X utf8 "$TMP/battery.py"
 
