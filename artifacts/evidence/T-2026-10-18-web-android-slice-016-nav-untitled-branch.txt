@@ -1,0 +1,116 @@
+# T-2026-10-18-016 分支导航读不出（未命名子分支）— 真机前后与判据证据
+
+设备：AWSS013807000356（Honor，Android 12 级，1200x2652）
+安装方式：`adb install -r android/app/build/outputs/apk/debug/app-debug.apk`（全程只用 `-r`，不跑全量仪器测试，避免清空本机数据与 API Key）
+
+## block 01 — BEFORE：真机停在故障屏（旧构建 19:47:05 安装态）
+
+```
+adb exec-out "uiautomator dump /sdcard/ui.xml" && adb exec-out "cat /sdcard/ui.xml"
+'分支导航' | 195 169 847 256
+'本机数据读不出来，列表保持上一次的样子，可以直接重试。' | 0 284 1200 422
+'这棵树暂时读不出来，稍后重试即可。' | 0 422 1200 609
+```
+
+截图：`artifacts/evidence/T-2026-10-18-nav-before-branch-unreadable.png`
+
+同轮日志（旧构建的静默 catch）：
+
+```
+$ adb logcat -d -s TreelearnUi
+（空）
+```
+
+判读：故障屏上没有任何一行日志留下原因——这正是「读不出来但说不出为什么」的形态。
+
+## block 02 — RED：JVM 用例先复现同一形状
+
+命令：`./gradlew :app:testDebugUnitTest --tests "com.treelearn.app.navigation.NavigationPresenterTest" --offline -q`
+
+```
+23 tests completed, 2 failed
+aBranchNotYetNamedIsStillReadableAndStaysInTheList | java.lang.IllegalArgumentException: title must not be null
+anUnreadableStoreNamesTheCauseToTheSinkAndNotOnlyToTheScreen | java.lang.AssertionError: the cause must reach the diagnostics port exactly once per failed read expected:<1> but was:<0>
+```
+
+判读：第一条就是真机故障的机器可读形状——`NavigationData.Node` 要求标题非空，而 `Branch.child(...)` 造的子分支按设计就没有标题；
+第二条证明原因在 catch 处被丢弃。两条都红在真实缺陷上，不是断言写错。
+
+## block 03 — GREEN：还原态 JVM 全绿
+
+命令：`./gradlew :app:testDebugUnitTest --tests "com.treelearn.app.navigation.NavigationPresenterTest" --offline -q`
+
+```
+NavigationPresenterTest tests/skipped/failures/errors: ('23', '0', '0', '0')
+```
+
+画布侧同判据（`TreeCanvasDoubles.FakeSink.reports`）：
+
+```
+anUnreadableStoreKeepsTheLastCanvasAndSaysWhy 断言 sink.reports 恰有一条且点名 IllegalStateException → 通过
+```
+
+## block 04 — 全模块套件（含本片改动）
+
+命令：`./gradlew :app:testDebugUnitTest --offline -q`
+
+```
+846 tests completed, 2 failed
+```
+
+两条失败全部落在 `ChatGenerationStageTest`（`anAcceptedSendShowsTheSendingStageUntilTheFirstRowArrives`、
+`aStopRequestTurnsTheTerminalReadIntoTheCanceledStage`），即 ROADMAP **D8** 登记的既有用例时序缺陷：
+单独跑该文件稳定 2 红、整树跑时红 1～2 条，与本片改动无因果关系（本片未触碰 chat 路径）。
+本片不把它写成 PASS，登记为 D8 的下一片工作。
+
+## block 05 — Java-only（no-kotlin）守门
+
+```
+$ find . -name "*.kt" -o -name "*.kts" | grep -v "/build/"      → 空
+$ grep -rln "org.jetbrains.kotlin\|kotlin-gradle-plugin" --include=*.gradle --include=*.toml --include=*.properties . → 空
+```
+
+判读：PASS——本片只改 Java 源与 Java 测试。
+
+## block 06 — AFTER：同一台机器、同一入口、同一数据
+
+安装：`adb install -r ...` → `Success`，`lastUpdateTime=2026-10-18 22:20:30`
+产物内含新日志串：`dex has new log line: classes16.dex`（`read failed scope=`）
+
+路径：主页 → 历史主题「系统理解 Transformer 的注意力机制」→ 对话页 → 分支导航
+
+```
+分支导航标题下渲染：根分支卡片「系统理解 Transfor…」+「根分支 · 不可归档」+「折叠」+ AI 总结全文
+分支列表：
+  系统理解 Transformer 的注…   当前 · 1 子分支   ⋯
+  （空标题行）                                0 子分支   ⋯
+```
+
+截图：
+- `artifacts/evidence/T-2026-10-18-nav-after-branch-list.png`（导航页顶部，无错误提示）
+- `artifacts/evidence/T-2026-10-18-nav-after-untitled-branch-listed.png`（分支列表两行：根分支 + 未命名子分支）
+
+同轮日志：`adb logcat -d -s TreelearnUi` → 空。判读：读成功，所以没有诊断行——
+诊断行只在真的读失败时出现，这条「空」是成功证据而不是缺证。
+
+## 汇总对账（want/got）
+
+| # | want | got | 判定 |
+|---|---|---|---|
+| 01 | 旧构建在真机上可复现故障且无日志 | 三条文案 + `logcat -s TreelearnUi` 空 | ok |
+| 02 | JVM 用例先红并点名真实原因 | `IllegalArgumentException: title must not be null` + `expected:<1> but was:<0>` | ok |
+| 03 | 修复后导航用例 23 条全绿 | `('23','0','0','0')` | ok |
+| 04 | 全模块套件红只来自既有 D8 | `846 tests completed, 2 failed`，两条均在 ChatGenerationStageTest | ok（D8 如实登记） |
+| 05 | Java-only 守门 PASS | 三类 Kotlin 命中均为 0 | ok |
+| 06 | 同一入口渲染分支列表，未命名子分支在列 | 两张截图 + 列表两行 | ok |
+
+want=6 got=6 mismatch=0
+
+OVERALL_EXITCODE=0
+
+## 未覆盖项（如实登记）
+
+1. 未命名分支在列表里是一行空标签——与画布/子分支弹层的既有约定一致，但「空标签是否算可用」属产品判断，本片不擅自新增文案。
+2. D8 两条既有用例仍红，套件信号因此不完全可用；下一片处理。
+3. 未跑 `connectedDebugAndroidTest`（会卸载应用并清空本机数据），真机证据全部走 `install -r` + 截图 + logcat。
+4. 归档/删除等写路径的静默 catch 仍有多处未接诊断口（本片只覆盖读路径的 3+2 处）。

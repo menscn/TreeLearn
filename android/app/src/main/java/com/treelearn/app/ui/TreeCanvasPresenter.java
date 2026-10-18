@@ -99,6 +99,11 @@ public final class TreeCanvasPresenter implements TreeCanvasActions {
         background.execute(this::read);
     }
 
+    /** The one place a refused read or fold leaves a trace the learner cannot see. */
+    private void report(String scope, RuntimeException cause) {
+        sink.reportUnreadable(scope, cause.getClass().getName() + ": " + cause.getMessage());
+    }
+
     private void read() {
         final String topicId;
         final TreeSnapshot built;
@@ -110,6 +115,7 @@ public final class TreeCanvasPresenter implements TreeCanvasActions {
             }
             built = snapshotOf(data.load(topicId));
         } catch (RuntimeException unreadable) {
+            report(requestedBranchId, unreadable);
             ui.post(() -> render(state.withPhase(TreeCanvasViewState.Phase.ERROR)
                     .withNotice(HomeViewState.Notice.STORAGE)));
             return;
@@ -305,6 +311,7 @@ public final class TreeCanvasPresenter implements TreeCanvasActions {
             try {
                 result = commands.setCollapsed(branchId, fold, System.currentTimeMillis());
             } catch (RuntimeException refused) {
+                report(branchId, refused);
                 ui.post(() -> render(state.withNotice(HomeViewState.Notice.STORAGE)));
                 return;
             }

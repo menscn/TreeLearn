@@ -189,6 +189,7 @@ public final class NavigationPresenter implements NavigationActions {
             try {
                 read = data.summary(branchId);
             } catch (RuntimeException unreadable) {
+                report(branchId, unreadable);
                 failed = true;
             }
             final NavigationData.Summary summary = read;
@@ -197,11 +198,23 @@ public final class NavigationPresenter implements NavigationActions {
         });
     }
 
+    /**
+     * The one place a failed read leaves a trace.
+     *
+     * <p>The screen can only show a static sentence, so without this the store's own reason is
+     * dropped at the catch site and 「本机数据读不出来」 becomes undiagnosable on a device the developer
+     * cannot attach to. Same port shape as {@code ChatPresenter}'s {@code reportUnreadable}.
+     */
+    private void report(String scope, RuntimeException unreadable) {
+        sink.reportUnreadable(scope, unreadable.getClass().getName() + ": " + unreadable.getMessage());
+    }
+
     private void loadTree(long token, String topicId, String wanted) {
         final NavigationData.Snapshot tree;
         try {
             tree = data.load(topicId);
         } catch (RuntimeException unreadable) {
+            report(topicId, unreadable);
             post(token, current -> current.withPhase(NavigationViewState.Phase.ERROR)
                     .withNotice(NavigationViewState.Notice.STORE_UNREADABLE));
             return;
@@ -217,6 +230,7 @@ public final class NavigationPresenter implements NavigationActions {
         try {
             read = data.summary(selected);
         } catch (RuntimeException unreadable) {
+            report(selected, unreadable);
             failed = true;
         }
         final NavigationData.Summary summary = read;

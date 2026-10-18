@@ -594,14 +594,15 @@ public final class MainActivity extends Activity
     }
 
     /**
-     * A conversation the store refused to read. The learner already sees the one static sentence the
-     * screen owns, so this is the line that makes the failure diagnosable afterwards: it carries the
-     * branch id and the store's own reason, and the read that failed produced no messages, so it can
-     * carry no learner content.
+     * A read or a write a screen refused to explain. {@code ChatSink}, {@code NavigationSink} and
+     * {@code TreeCanvasSink} share this one-port shape, so a single implementation covers all three:
+     * the learner already sees the static sentence each screen owns, and this is the line that makes
+     * the failure diagnosable afterwards. The scope is an id, never learner content - the reads that
+     * fail here produced nothing to carry.
      */
     @Override
-    public void reportUnreadable(String branchId, String cause) {
-        android.util.Log.w("TreelearnUi", "read failed branch=" + branchId + " cause=" + cause);
+    public void reportUnreadable(String scope, String cause) {
+        android.util.Log.w("TreelearnUi", "read failed scope=" + scope + " cause=" + cause);
     }
 
     /** Closing a root conversation restores the screen that opened the chat. */

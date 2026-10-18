@@ -119,6 +119,9 @@ public final class TreeCanvasPresenterTest {
         assertEquals(HomeViewState.Notice.STORAGE, sink.last.notice);
         assertEquals("the last drawable canvas survives the failed read", branches, sink.last.branches);
         assertEquals(scale, sink.last.transform.scale, EPS);
+        assertEquals("the refused read must name its cause somewhere a developer can read later",
+                1, sink.reports.size());
+        assertTrue(sink.reports.get(0).contains("IllegalStateException"));
     }
 
     @Test

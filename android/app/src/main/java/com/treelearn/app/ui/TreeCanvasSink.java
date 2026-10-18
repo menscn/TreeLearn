@@ -25,4 +25,15 @@ public interface TreeCanvasSink {
 
     /** Leaves the canvas, back to the topic list. */
     void leaveTree();
+
+    /**
+     * A read or a write the learner was told about, with the cause kept for the log.
+     *
+     * <p>The screen shows one static notice and cannot show a reason; without this port the exception
+     * is dropped at the catch site. Same shape and same reason as {@code ChatSink.reportUnreadable}
+     * and {@code NavigationSink.reportUnreadable}, which {@code MainActivity} implements once for all
+     * three. A default no-op keeps a JVM double from having to care.
+     */
+    default void reportUnreadable(String scope, String cause) {
+    }
 }

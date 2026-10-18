@@ -39,6 +39,7 @@ public final class NavigationPresenterTest {
     private static final String SIBLING = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
     private static final String ORPHAN = "99999999-9999-4999-8999-999999999999";
     private static final String ABSENT_PARENT = "00000000-0000-4000-8000-000000000000";
+    private static final String UNTITLED = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
 
     private FakeStore store;
     private RecordingSink sink;
@@ -337,6 +338,35 @@ public final class NavigationPresenterTest {
     }
 
     @Test
+    public void aBranchNotYetNamedIsStillReadableAndStaysInTheList() {
+        // 手机上的真实形状：child branch 出生时没有标题，标题要等派生工件写回（Branch.child 不收标题）。
+        // 画布早已按空标题画出这类节点，分支导航不能因为同一个形状把整棵树读成「本机数据读不出来」。
+        store.nodes.add(new NavigationData.Node(UNTITLED, BRANCH_A, null, false));
+        presenter.start();
+        background.drain();
+
+        assertEquals(NavigationViewState.Phase.READY, sink.last().phase);
+        assertNull("a readable tree draws no error notice", sink.last().notice);
+        assertTrue("an unnamed branch is still a branch", shows(sink.last().visible, UNTITLED));
+        assertEquals("an unnamed branch reads as an empty label, not as a crash",
+                "", rowOf(sink.last().visible, UNTITLED).title);
+    }
+
+    @Test
+    public void anUnreadableStoreNamesTheCauseToTheSinkAndNotOnlyToTheScreen() {
+        settle();
+        store.loadThrows = true;
+        presenter.onResumed();
+        background.drain();
+
+        assertEquals(NavigationViewState.Notice.STORE_UNREADABLE, sink.last().notice);
+        assertEquals("the cause must reach the diagnostics port exactly once per failed read",
+                1, sink.unreadable.size());
+        assertTrue("the report names the exception class, so a log line identifies the failure",
+                sink.unreadable.get(0).contains("IllegalStateException"));
+    }
+
+    @Test
     public void foldingAGroupHidesItsDescendantsButKeepsTheGroupItself() {
         settle();
         assertEquals("the seed tree starts unfolded", Collections.<String>emptyList(),
@@ -395,6 +425,16 @@ public final class NavigationPresenterTest {
         background.drain();
     }
 
+    private static NavigationViewState.Row rowOf(List<NavigationViewState.Row> rows,
+            String branchId) {
+        for (NavigationViewState.Row row : rows) {
+            if (row.branchId.equals(branchId)) {
+                return row;
+            }
+        }
+        throw new AssertionError("no row for " + branchId);
+    }
+
     private static boolean shows(List<NavigationViewState.Row> rows, String branchId) {
         for (NavigationViewState.Row row : rows) {
             if (row.branchId.equals(branchId)) {
@@ -407,7 +447,13 @@ public final class NavigationPresenterTest {
     private static final class RecordingSink implements NavigationSink {
 
         final List<NavigationViewState> states = new ArrayList<NavigationViewState>();
+        final List<String> unreadable = new ArrayList<String>();
         int left;
+
+        @Override
+        public void reportUnreadable(String scope, String cause) {
+            unreadable.add(scope + " <- " + cause);
+        }
 
         @Override
         public void render(NavigationViewState state) {

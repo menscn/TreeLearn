@@ -150,7 +150,13 @@ final class TreeCanvasDoubles {
         final List<String> opened = new ArrayList<>();
         boolean leftTree;
         final List<String> navigationsOpened = new ArrayList<>();
+        final List<String> reports = new ArrayList<>();
         int renders;
+
+        @Override
+        public void reportUnreadable(String scope, String cause) {
+            reports.add(scope + " <- " + cause);
+        }
 
         @Override
         public void render(TreeCanvasViewState state) {

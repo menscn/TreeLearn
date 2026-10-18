@@ -31,13 +31,23 @@ public interface NavigationData {
         public final String branchId;
         /** Null exactly for a topic's single root branch. */
         public final String parentBranchId;
+        /**
+         * The branch's own title, or "" while it has none yet.
+         *
+         * <p>A child branch is born unnamed — {@code Branch.child} takes no title and the derived
+         * title artifact writes one later, if it ever arrives — so a null here is a designed state,
+         * not a corrupt row. The canvas already draws such a node ({@code LayoutNode} normalizes the
+         * same way, and {@code TreeCanvasViewState} renders "" for a missing title), so the list must
+         * read it too rather than lose the whole tree over one unnamed branch. This mirrors
+         * {@code ChildBranch}, the third place that names a branch for display.
+         */
         public final String title;
         public final boolean archived;
 
         public Node(String branchId, String parentBranchId, String title, boolean archived) {
             this.branchId = Guard.id(branchId, "branchId");
             this.parentBranchId = Guard.idOrNull(parentBranchId, "parentBranchId");
-            this.title = Guard.text(title, "title");
+            this.title = title == null ? "" : title.trim();
             this.archived = archived;
         }
 
