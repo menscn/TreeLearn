@@ -97,6 +97,8 @@ public final class ChatPresenter implements ChatActions {
     private final Runnable generationChanged = this::onGenerationChanged;
     /** T-075: the learner's stop request, consumed by the terminal read it explains. */
     private boolean stopRequested;
+    /** D8: the failed row that stop request was credited to, so re-reading it cannot flip to failed. */
+    private String canceledRowId = "";
     /** T-075: an accepted send whose rows no read has brought back yet; it reads as sending. */
     private boolean awaitingFirstRow;
     /** T-075: the newest row's id and content sizes, so a growth while detached is one count. */
@@ -391,8 +393,21 @@ public final class ChatPresenter implements ChatActions {
         awaitingFirstRow = awaitingFirstRow && messages.isEmpty();
         boolean terminal = stage == Stage.STABLE || stage == Stage.FAILED
                 || stage == Stage.CANCELED;
-        stopRequested = stopRequested && !terminal;
+        if (terminal) {
+            canceledRowId = stage == Stage.CANCELED ? newestId(messages) : "";
+            stopRequested = false;
+        } else {
+            // A live attempt ends the previous stop's say, even when the row is the same one: retry
+            // and reset regenerate in place, so the next failure of that row is not the stop that
+            // explained the last one.
+            canceledRowId = "";
+        }
         return reattached.withStage(stage);
+    }
+
+    /** The row a stop request was credited to, so re-reading that same terminal cannot flip it. */
+    private static String newestId(List<ChatMessage> messages) {
+        return messages.isEmpty() ? "" : messages.get(messages.size() - 1).messageId;
     }
 
     /**
@@ -406,7 +421,10 @@ public final class ChatPresenter implements ChatActions {
         if (newest.isGenerating()) {
             return newest.phase() == ChatMessage.Phase.REASONING ? Stage.REASONING : Stage.ANSWERING;
         }
-        if (newest.isFailed()) { return stopRequested ? Stage.CANCELED : Stage.FAILED; }
+        if (newest.isFailed()) {
+            return stopRequested || newest.messageId.equals(canceledRowId)
+                    ? Stage.CANCELED : Stage.FAILED;
+        }
         return newest.isStable() ? Stage.STABLE : Stage.IDLE;
     }
 
@@ -610,6 +628,12 @@ public final class ChatPresenter implements ChatActions {
         // T-075: a new turn re-attaches the follow - the learner asked, so they want to see. The
         // chips collapse with every send (2026-09-28: one tap, one query, then they are gone).
         stopRequested = false;
+        canceledRowId = "";
+        // The send reads the store before it publishes, so the wait-for-first-row flag has to be
+        // armed here: armed only in the publish callback it was set after that read had already
+        // derived IDLE from the empty conversation, and the SENDING frame then depended on whether
+        // the generation poller happened to slip a second read in.
+        awaitingFirstRow = true;
         if (speaker != null) {
             speaker.interrupt();
         }
@@ -1129,7 +1153,6 @@ public final class ChatPresenter implements ChatActions {
                             state.model, state.thinkingEnabled));
                 }
                 if (clearDraft || clearQuote) {
-                    awaitingFirstRow = true;
                     startGenerationPolling();
                 }
             } else {
@@ -1149,13 +1172,17 @@ public final class ChatPresenter implements ChatActions {
         Thread poller = new Thread(() -> {
             long deadline = System.currentTimeMillis() + 180_000L;
             while (polling.get() && System.currentTimeMillis() < deadline) {
-                background.execute(this::read);
+                // Wait first, then read. The command that started this poll had already read the
+                // store, so a read at t=0 was a duplicate - and since it was queued from another
+                // thread, a caller that drives its executor by hand could catch it or miss it, which
+                // made the derived stage depend on thread scheduling instead of on the stored rows.
                 try {
                     Thread.sleep(200L);
                 } catch (InterruptedException interrupted) {
                     Thread.currentThread().interrupt();
                     break;
                 }
+                background.execute(this::read);
             }
             polling.set(false);
         }, "treelearn-chat-poll");

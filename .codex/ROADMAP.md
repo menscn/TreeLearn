@@ -229,7 +229,7 @@ Phase C 的条目都不是「现在缺人写」，而是**缺前置事实**：�
   「跑测环境是覆盖面维度」的失败案例）；②要先做归因实验再决定改产品还是改等待方式，直接调大超时
   无效于根因、只消除假红；③可能要换成 `GestureDescription` 之外的注入手段。
 
-### D8 `ChatGenerationStageTest` 有一对既有 flaky，JVM 套件因此不是 831 全绿
+### D8 `ChatGenerationStageTest` 有一对既有 flaky，JVM 套件因此不是 831 全绿（2026-10-18 已闭合，见处置）
 
 - 现象：`:app:testDebugUnitTest` 报 **831 例 / 2 失败**，固定为
   `ChatGenerationStageTest.aStopRequestTurnsTheTerminalReadIntoTheCanceledStage`（断言文案
@@ -248,3 +248,14 @@ Phase C 的条目都不是「现在缺人写」，而是**缺前置事实**：�
   「同一批消息序列只能派生出一种阶段序列」，否则下一轮照样漂回两个入口。
 - 代价：这是呈现层时序的改动，会碰到 T-117 的跟随判定与生成槽位可见性，需要真机复跑一次才能收；
   本片未做，因为它是既有缺陷、且修它会让首题那半的证据无法归因。
+- 处置（2026-10-18，片 `T-2026-10-18-android-chat-stage-determinism-018.md`）：上面那条**假设成立了一半**——
+  `awaitingFirstRow` 确实在读回之后才置位，但两条红真正同源的不是「观察窗看不到一帧」，而是**阶段是第几次读的函数**：
+  `startGenerationPolling()` 起的真实线程在 t=0 立刻排一次 `read()`，这条读能否被手工驱动的执行器捞到全看线程调度；
+  捞到就补出 `SENDING` 帧（否则 `IDLE`），落在第二次 drain 里就把同一批终态行读两次、第一次消费掉停止意图（于是 `FAILED`）。
+  修法不是放宽超时，而是把状态归位：标志移到 `send()` 里读之前、重复读挪到 200ms 之后、`CANCELED` 绑定到它解释的那条
+  终态行 id 并在任何非终态读上释放（`retry`/`reset` 走 `replace(messageId, …)` 原地复用同一 id，因此这一条必须有判据）。
+  修法要求的「同一批消息序列只能派生出一种阶段序列」已落成三条断言，两路变异各自验红。回读命令
+  `./gradlew :app:testDebugUnitTest`（在 `android/` 下），读数从 846 例 / 2 失败变为 **848 例 / 0 失败 / 0 错误**，
+  证据 `artifacts/evidence/T-2026-10-18-web-android-slice-018-d8-stage-determinism.txt`。
+  **未闭合的一半**：在线真实发送一次的 SENDING→REASONING→ANSWERING 观感仍未实测（会消耗学习者 API 额度并写入真实
+  主题数据，需授权后单独做），所以本条闭合的是「门禁可判」，不是「生成流已验证」。

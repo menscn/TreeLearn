@@ -1,0 +1,145 @@
+EVIDENCE — T-2026-10-18-018 · ROADMAP D8：对话生成阶段机不再依赖线程调度
+Date: 2026-10-18 · Device: AWSS013807000356（Honor，1200x2652）· Stack: :app JVM 单测 + 真机
+Repo HEAD at start: 06a74ab · Gradle 命令统一在 android/ 目录下执行 · 计数一律现场回读，不抄正文
+
+================================================================================
+块 01 — BEFORE：既有两条红（生产码与测试码都是改动前版本）
+================================================================================
+$ ./gradlew :app:testDebugUnitTest --tests "com.treelearn.app.ui.ChatGenerationStageTest"
+rc=1
+> Task :app:testDebugUnitTest FAILED
+ChatGenerationStageTest > aStopRequestTurnsTheTerminalReadIntoTheCanceledStage FAILED
+    java.lang.AssertionError at ChatGenerationStageTest.java:132
+ChatGenerationStageTest > anAcceptedSendShowsTheSendingStageUntilTheFirstRowArrives FAILED
+    java.lang.AssertionError at ChatGenerationStageTest.java:75
+9 tests completed, 2 failed
+
+与 .codex/ROADMAP.md §D8 记的两条同名、同断言行；本轮复现稳定（固定这两条，不是随机一条）。
+
+================================================================================
+块 02 — 根因（读码定位，非猜测）
+================================================================================
+两条红同源于一件事：阶段是「第几次读」的函数，而不是「存了什么行」的函数。
+
+① SENDING 帧：ChatPresenter.send() 先 render(withStage(SENDING))，再在后台任务里 read() →
+   publish()。awaitingFirstRow 原本只在 publish 的 accepted 分支里置位（旧 :1132），即在 read
+   之后。空会话那次 read 于是把 awaitingFirstRow=false 读成 IDLE，随后 publish 只 withSending(false)，
+   阶段仍是 IDLE。平时能过是因为 startGenerationPolling() 起的真实线程在 t=0 立刻
+   background.execute(this::read)，这条额外读被 QueueingExecutor.drain() 捞到才补回 SENDING。
+   捞不捞得到 = 红或绿。
+
+② CANCELED 帧：同一条线程的额外读若落在第二次 drain() 里，终态行被读两次；旧判据
+   stopRequested = stopRequested && !terminal（旧 :394）让第一次读消费掉停止意图，
+   第二次读派生成 FAILED。即同一批消息序列派生出两种阶段序列。
+
+测试类旧注释（:19-20「the generation poller's first read cannot race…」）本身是错的：
+轮询线程不受注入的 Executor 控制，手工驱动 drain 挡不住它。
+
+================================================================================
+块 03 — 改动（生产码 1 个文件 5 处；测试 1 个文件）
+================================================================================
+1) send()：awaitingFirstRow = true 与 canceledRowId = "" 移到 read 之前（与 stopRequested 复位同处）。
+2) publish()：删掉 accepted 分支里那行重复置位——这个标志只有一个所有者。
+3) startGenerationPolling()：先 sleep(200) 再 execute(read)。发起本次轮询的那条命令刚读过存储，
+   t=0 那次是重复读；挪开之后，手工驱动执行器的调用方不再被线程调度决定结果。
+4) withGenerationState()：CANCELED 绑定到它解释的那条终态行 id；非终态读（含同一行的重生成）清空它。
+5) stageOf()：newest.isFailed() 时 stopRequested || newest.messageId.equals(canceledRowId) → CANCELED。
+测试：新增 assertStageSurvivesMoreReads()（再 drain 两次断言阶段不动）、
+  theTerminalRowAStopExplainedKeepsReadingCanceledOnEveryLaterRead()、
+  aRetryOfTheCanceledRowThatFailsAgainReadsFailedNotCanceled()（retry/reset 原地重生成，
+  同一行第二次失败不得沿用上一次停止的解释）。
+
+================================================================================
+块 04 — RED 校验 ①：新断言对着改动前的 ChatPresenter 跑
+================================================================================
+备份本片改完的 ChatPresenter.java，然后
+$ git checkout HEAD -- android/app/src/main/java/com/treelearn/app/ui/ChatPresenter.java
+$ ./gradlew :app:testDebugUnitTest --tests "com.treelearn.app.ui.ChatGenerationStageTest"
+rc=1
+10 tests completed, 3 failed
+  aStopRequestTurnsTheTerminalReadIntoTheCanceledStage
+      java.lang.AssertionError: the stop the attempt obeyed reads canceled, not failed
+      expected:<CANCELED> but was:<FAILED>
+  theTerminalRowAStopExplainedKeepsReadingCanceledOnEveryLaterRead
+      java.lang.AssertionError: expected:<CANCELED> but was:<FAILED>
+  anAcceptedSendShowsTheSendingStageUntilTheFirstRowArrives
+      java.lang.AssertionError: expected:<SENDING> but was:<IDLE>
+→ 本片新增断言在缺陷存在时确实为红，不是恒绿。随后恢复改动版。
+
+================================================================================
+块 05 — RED 校验 ②：删掉「非终态清空 canceledRowId」这一支
+================================================================================
+$ python 备份 sha256 43f7211e…3b48b，把 if (terminal) {…} else { canceledRowId = ""; } 的
+  else 分支删掉后重跑同一条定向命令
+rc=1
+11 tests completed, 1 failed
+  aRetryOfTheCanceledRowThatFailsAgainReadsFailedNotCanceled
+      java.lang.AssertionError: the same row failing again is a new attempt, not the old stop
+      expected:<FAILED> but was…
+→ 该支有独立判据。恢复后 sha256 与备份一致（43f7211e…3b48b）。
+
+================================================================================
+块 06 — GREEN：同一条定向命令
+================================================================================
+$ ./gradlew :app:testDebugUnitTest --tests "com.treelearn.app.ui.ChatGenerationStageTest"
+rc=0  BUILD SUCCESSFUL
+python 回读 test-results/testDebugUnitTest/*ChatGenerationStageTest.xml
+{'tests': '11', 'skipped': '0', 'failures': '0', 'errors': '0'}
+
+================================================================================
+块 07 — 全量 JVM 门禁（D8 要的就是这条能判绿）
+================================================================================
+$ ./gradlew :app:testDebugUnitTest
+rc=0  BUILD SUCCESSFUL
+python 回读 test-results/testDebugUnitTest/*.xml：94 个结果文件，mtime 22:45:22（本轮）
+tests 848 skipped 0 failures 0 errors []
+
+对照 §D8 旧读数 831/2 与块 01 前的 846/2：这是 :app 套件第一次零红。
+
+================================================================================
+块 08 — Java-only guard
+================================================================================
+android/build.gradle:15  apply from: 'gradle/verify-no-kotlin.gradle'
+—— 块 04/05/06/07 与 assembleDebug 共 5 次 Gradle 调用都在应用该脚本的前提下完成；
+   它是构建期断言，不是事后 grep。
+$ git diff HEAD --name-only | grep -Ei "\.kt$|\.kts$"   → 命中 0
+本片只改 1 个 .java 生产文件 + 1 个 .java 测试文件。
+
+================================================================================
+块 09 — 真机：安装与对话页渲染（最终 APK，含块 05 恢复后的代码）
+================================================================================
+$ ./gradlew :app:assembleDebug   → BUILD SUCCESSFUL
+$ adb -s AWSS013807000356 install -r app/build/outputs/apk/debug/app-debug.apk
+Performing Streamed Install
+Success
+$ adb shell dumpsys package com.treelearn | grep lastUpdateTime → 2026-10-18 22:45:37
+（只用 install -r；未跑 connectedDebugAndroidTest，避免卸载应用清空本机数据与 API Key）
+
+python 回读 APK：dex has canceledRowId: ['classes10.dex']
+设备上 unzip -p base.apk classes*.dex | strings | grep -c canceledRowId → 1
+
+force-stop → logcat -c → monkey 启动 → 点「系统理解 Transformer 的注意力机制」：
+主页渲染知芽标识、根问题输入卡、猜你想学轮播、历史主题 2 个；
+对话页渲染完整正文 + 5 条追问建议 + 复制/重试/分叉/批注/分享(1) 动作行 +
+「在当前分支继续追问…」输入区，无错误态。这条路径正是 withGenerationState() 的
+STABLE 分支（终态且非 CANCELED → canceledRowId 复位），阶段机未被改坏。
+截图：artifacts/evidence/T-2026-10-18-d8-chat-stable-after-fix.png（22:46）
+
+$ adb logcat -d -s TreelearnUi → 空（无读失败行）
+$ adb logcat -d -s System.err  → 有 NullPointerException，但 pid 20557 = com.dragon.read
+  （番茄小说），与本应用无关；本应用进程无崩溃行。
+
+未覆盖：真实发送一次提问以观察 SENDING→REASONING→ANSWERING 的在线流。它会花学习者的
+API 额度并往本机真实主题里写数据，本片不擅自触发；SENDING 帧的判据由块 04/06 承担。
+
+================================================================================
+want / got
+================================================================================
+want: 改动前两条红可复现                       got: 块 01 9 例 2 红，同名同断言行        ✓
+want: 新断言在缺陷存在时为红（两路变异）         got: 块 04 10 例 3 红 / 块 05 11 例 1 红  ✓
+want: 同一条定向命令转绿                        got: 块 06 tests=11 failures=0 rc=0       ✓
+want: :app JVM 门禁零红                         got: 块 07 94 文件 tests=848 failures=0   ✓
+want: Java-only 不破                            got: 块 08 verify-no-kotlin 随 5 次构建通过 ✓
+want: 真机 install -r 后对话页仍正常             got: 块 09 Success + 渲染 + 无本应用异常  ✓
+
+6/6 对应。

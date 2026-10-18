@@ -30,7 +30,7 @@ tdd_mode: not-applicable
 - AI-autonomous decisions: ① 本卡作为 Android 手机线的父需求，与 Web 线 005 分开，避免两条线互相把对方的范围吞进来；② 诊断口沿用 sink default 方法而不是新增 Android 类型依赖；③ D7 的真机仪器红按「先读代码/证据判性质、再决定是否本片修」的顺序处理，不为凑绿而降低断言。
 - User-confirmation decisions: Harness 执行、一站到底、提交到本地（不推送）。
 - Acceptance evidence: 每片一份证据 txt（want/got 表 + `OVERALL_EXITCODE=`）＋ 真机前后截图；Java-only guard PASS；卡片命令与实际执行逐字一致。
-- Facts: 016 修复前 `NavigationPresenterTest` 23 例中 2 例红（`IllegalArgumentException: title must not be null`）；修复后 23/23 绿；同一设备重跑，分支列表出现标题为空的那条子分支且 `logcat -s TreelearnUi` 为空。`:app` 全量 `846 tests completed, 2 failed`，两条失败即 §D8 记载的 `ChatGenerationStageTest`。
+- Facts: 016 修复前 `NavigationPresenterTest` 23 例中 2 例红（`IllegalArgumentException: title must not be null`）；修复后 23/23 绿；同一设备重跑，分支列表出现标题为空的那条子分支且 `logcat -s TreelearnUi` 为空。018 之前 `:app` 全量 `846 tests completed, 2 failed`（两条即 §D8 的 `ChatGenerationStageTest`）；018 之后同一条命令 `848 / 0 / 0`。
 - Assumptions: §D8 的两条红源于时序假设而非生产逻辑缺陷；若读码后判定为真实缺陷，改片的目标随之改为修缺陷而不是修测试。
 - Unknowns: D7 的 11 例真机既有红里有多少属于同一根因；本轮只按 `connectedDebugAndroidTest` 的历史读数登记，未重跑（重跑会卸载应用）。
 - Risks: 放宽不变量会让「字段缺失」在别处更隐蔽——缓解是同一改动必带诊断口；flaky 清零若靠放宽超时完成，则只是把问题藏起来。
@@ -46,7 +46,7 @@ tdd_mode: not-applicable
 
 ### In scope
 - 子片 016（分支导航未命名子分支 + 读失败诊断口）。
-- 待立片：§D8 `ChatGenerationStageTest` 两条既有红；§D7 真机仪器既有红的定性。
+- 子片 018（§D8 生成阶段机不再依赖线程调度，已交付）。待立片：§D7 真机仪器既有红的定性。
 - 证据统一落 `artifacts/evidence/T-2026-10-18-web-android-slice-<NNN>-*.txt`，前后截图同目录。
 
 ### Out of scope
@@ -73,7 +73,7 @@ tdd_mode: not-applicable
 
 - [x] 真机上唯一多分支主题的「分支导航」不再整屏读不出，未命名子分支照常列出（016 前后截图 + `logcat` 空）。
 - [x] 每一次导航/画布读失败都在日志里留下一行可判定原因（016 的 sink 断言 + dex 内新日志行存在性）。
-- [ ] `./gradlew :app:testDebugUnitTest` 无本线引入的红，且 §D8 既有两条红清零，门禁可判绿。
+- [x] `./gradlew :app:testDebugUnitTest` 无本线引入的红，且 §D8 既有两条红清零，门禁可判绿（片 018：848 例 / 0 失败）。
 - [ ] §D7 真机仪器既有红完成定性：确认为环境/时序假设的记录判据，确认是真实缺陷的立片修复。
 - [ ] Java-only guard 对每片 PASS。
 
@@ -118,9 +118,9 @@ tdd_mode: not-applicable
 
 ## Handoff notes
 
-- Completed: 016 一片交付（修复 + 诊断口 + 真机前后证据），卡片与证据齐备。
-- In progress: D8 定性尚未开始。
+- Completed: 016 一片交付（修复 + 诊断口 + 真机前后证据）；018 闭合 §D8，`:app` JVM 门禁 848/0 首次全绿。
+- In progress: 无。
 - Blocker: 无。
 - Unblock condition: 无。
-- Next steps: D8（`ChatGenerationStageTest` 两条时序红）→ D7 其余真机红的定性 → 与 Web 线阶段一夹具采集并行推进。
+- Next steps: D7 其余真机红的定性 → 与 Web 线阶段一夹具采集并行推进；在线真实发送一次的生成流观测需用户授权（花额度、写真实数据）。
 - Watch-outs: ① 真机验证只用 `adb install -r`，全量仪器套件会卸载应用并清空本地数据与 API Key；② `uiautomator dump` 在有轮播动画的界面会返回过期 dump，判据以 `screencap` 截图为准；③ 任何写进卡片的命令必须与实际执行逐字相同；④ 本工作树 Web 线与本线同时在飞，提交按片但需核对 `git diff --name-only`。
