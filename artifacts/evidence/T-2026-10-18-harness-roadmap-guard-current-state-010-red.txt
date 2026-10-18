@@ -1,0 +1,46 @@
+# T-2026-10-18-010 RED：修复前的守门在今天的树上不可满足，且它拖住整条自检电池
+# 生成命令：python -X utf8 artifacts/tmp/gen-010-d1-red.py
+# 前置：修复前的守门与共享库已归档为本片自己的 pre-fix 副本（字节入库）。
+# 复算归档出处：git log --format=%H -- .trae/scripts/check_roadmap_and_routing.py 的最新那条的父提交里的该路径字节；该值随提交移动，因此只写命令不写值。
+
+===== block 01 - the pre-fix instrument is archived as bytes in the repo =====
+  归档存在=True（复算：ls 两个 T-2026-10-18-010-pre-fix-* 路径）
+  归档与当前字节不同=True；只在归档里出现的旧标签=['AGENTS.md adds >= ', 'new routing rows cover all four triggers', 'every new routing-row target exists']；只在当前文件里的新标签=['AGENTS.md routing table currently has >=', 'current routing rows cover all four triggers', 'every current routing-row target exists']
+  三处旧标签都只在归档里=True；三处新标签都只在当前文件里=True
+  扫描对合成的 20 位十六进制词会响=True（否则本块与块 04 都是空见证）
+  block 01: want=0 got=0
+
+===== block 02 - the archived one-shot predicate is unsatisfiable on today's tree =====
+  shim 目录深度使 REPO_ROOT 回到真仓库根=True（相对路径=artifacts/_010lib，与生产的两级同深）
+  归档守门 rc=1（复算：PYTHONPATH=<shim 目录> python -X utf8 <归档守门路径>）
+  导入失败行=0、仓库根错位行=0（两者都必须为 0，否则 rc=1 不是判据红）
+  错位探测器正控=1?True、对 OK 孪生行不误响=1?True（否则会响的扫描与空扫描同形）
+  FAIL AGENTS.md adds >= 4 routing rows — measured=0
+  FAIL new routing rows cover all four triggers — missing=['intent-capturer', 'pm-discovery', 'project-brief', 'ROADMAP']
+  OK   every new routing-row target exists — measured_dead=[]
+  新增行读数确为零=True；四个触发词确为全缺=True
+  第三条判据在零命中下仍打印 OK=True（这就是「匹配集为空必须判 FAIL」的增量式形态）
+  block 02: want=0 got=0
+
+===== block 03 - the archived gate drags the self-test battery to the instrument-fault tier =====
+  镜像盘建成=True（最长路径读数经 scrub：longest path 137）
+  镜像里跑真实电池 rc=3；BASELINE FAIL 行=1；CASE 行=0；结论行=INCONCLUSIVE?True
+  BASELINE FAIL check_roadmap_and_routing rc=1
+  tail| EXITCODE=1
+  tail| OVERALL: INCONCLUSIVE
+  tail| EXITCODE=3
+  block 03: want=0 got=0
+
+===== block 04 - this file's own source carries no commit-shaped token =====
+  源码扫描命中=0（命中项=[]）
+  合成正控（7 位十六进制词，由代码构造、源码里没有裸词）被同一正则命中=True
+  block 04: want=0 got=0
+
+===== 汇总 =====
+  blocks=4 floor=4 expectation_entries=4 faults=0
+  block 01 want=0 got=0 ok
+  block 02 want=0 got=0 ok
+  block 03 want=0 got=0 ok
+  block 04 want=0 got=0 ok
+OVERALL_EXITCODE=0
+DECODE ok utf8=True cr=0 commit-shaped-tokens=0

@@ -384,7 +384,9 @@ run 5 0 "determinism: two re-exports and the filed artefact are byte-identical e
 cat > "$TMP/siblings.py" <<'PY'
 """姊妹门保持绿 + 本片的门禁可见性。仓库 validate_tasks 的总数只打印不比对（004 块 27 的同一轮
 教训：别片申报规模带会把总数顶上去，钉住它就是把别人的 paperwork 当自己的结论）。
-checkers_selftest 实测仍是 rc=3，那是 002 治理面的已知债务，本片不把它算进任何「全绿」结论。"""
+checkers_selftest 的档位一律**现场读、只打印不断言**：D1（ROADMAP 的已知欠账）之前它恒为 rc=3
+（守门基线红拖住基线段，注入用例不执行），2026-10-18 按修法 ① 闭合后为 rc=0。两个方向都不由本片认证成
+任何一种结论，因此这里不写死值。"""
 import hashlib, json, os, re, subprocess, sys
 GATES = [("005 inventory selftest", ".trae/scripts/dev/screen_inventory_selftest.py"),
          ("003 parity selftest", ".trae/scripts/dev/parity/parity_selftest.py"),
@@ -402,7 +404,7 @@ for label, script in GATES:
         print("FAIL %s is not green; 007 must not land on top of a broken sibling" % label); bad = 1
 r = subprocess.run([sys.executable, "-X", "utf8", ".trae/scripts/dev/checkers_selftest.py"],
                    capture_output=True, text=True, encoding="utf-8", errors="replace")
-print("sibling-gate checkers_selftest rc=%d (known debt, reported not asserted)" % r.returncode)
+print("sibling-gate checkers_selftest rc=%d (tier read live, reported not asserted)" % r.returncode)
 SLUG = "parity-ledger-generator-007"
 v = subprocess.run([sys.executable, "-X", "utf8", ".trae/scripts/validate_tasks.py"],
                    capture_output=True, text=True, encoding="utf-8", errors="replace")
@@ -448,7 +450,7 @@ if _c_moved != list(_c_end):
 print("SIBLINGS ok" if not bad else "SIBLINGS FAULT")
 sys.exit(1 if bad else 0)
 PY
-WANT_TEXT="sibling-gate 005 inventory selftest rc=0|sibling-gate 003 parity selftest rc=0|sibling-gate 004 design-token guard rc=0|sibling-gate checkers_selftest rc=|known debt, reported not asserted|this task: PASS count=1 WARNING count=1 (size band=1) ERROR count=0|moved during this run=0 movers=[]|positive control clean->dirty named=True|SIBLINGS ok"
+WANT_TEXT="sibling-gate 005 inventory selftest rc=0|sibling-gate 003 parity selftest rc=0|sibling-gate 004 design-token guard rc=0|sibling-gate checkers_selftest rc=|tier read live, reported not asserted|this task: PASS count=1 WARNING count=1 (size band=1) ERROR count=0|moved during this run=0 movers=[]|positive control clean->dirty named=True|SIBLINGS ok"
 run 6 0 "sibling gates stay green, the known rc=3 debt is reported rather than folded into a green claim, and 007's own size band is visible" \
   python -X utf8 "$TMP/siblings.py"
 

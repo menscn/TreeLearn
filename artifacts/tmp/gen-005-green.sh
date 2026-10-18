@@ -649,8 +649,9 @@ run 6 0 "determinism: two exports are byte-identical, the measured face equals t
 cat > "$TMP/siblings.py" <<'PY'
 """姊妹门保持绿 + 本片的门禁可见性。仓库 validate_tasks 的总数只打印不比对（004 块 27 的同一轮
 教训：别片申报规模带会把总数顶上去，钉住总数就是把别人的 paperwork 当自己的结论）。
-checkers_selftest 实测是 rc=3，那是 002 治理面的已知债务，本片不把它折进任何「全绿」结论——
-它作为 Gaps 打印出来，而不是当作满足。"""
+checkers_selftest 的档位一律**现场读、只打印不断言**：D1（ROADMAP 的已知欠账）之前它恒为 rc=3
+（守门基线红拖住基线段，注入用例根本不执行），2026-10-18 按修法 ① 闭合后为 rc=0。两个方向都不由本片
+认证成任何一种结论，所以这里不写死值——写死就是「把只在某个 git 状态下成立的读数当永久判据」的复发。"""
 import hashlib, json, os, re, subprocess, sys
 GATES = [("007 ledger selftest", ".trae/scripts/dev/parity_ledger_selftest.py"),
          ("007 ledger generator", ".trae/scripts/dev/gen_parity_ledger.py"),
@@ -674,7 +675,7 @@ for label, script in GATES:
               " disagreeing - the consumer no longer agrees with the producer"); bad = 1
 r = subprocess.run([sys.executable, "-X", "utf8", ".trae/scripts/dev/checkers_selftest.py"],
                    capture_output=True, text=True, encoding="utf-8", errors="replace")
-print("sibling-gate checkers_selftest rc=%d (known debt, printed not asserted)" % r.returncode)
+print("sibling-gate checkers_selftest rc=%d (tier read live, printed not asserted)" % r.returncode)
 SLUG = "screen-inventory-parity-ledger-005"
 v = subprocess.run([sys.executable, "-X", "utf8", ".trae/scripts/validate_tasks.py"],
                    capture_output=True, text=True, encoding="utf-8", errors="replace")
@@ -720,7 +721,7 @@ if _c_moved != list(_c_end):
 print("SIBLINGS ok" if not bad else "SIBLINGS FAULT")
 sys.exit(1 if bad else 0)
 PY
-WANT_TEXT="sibling-gate 007 ledger selftest rc=0|sibling-gate 007 ledger generator rc=0|sibling-gate 003 parity selftest rc=0|sibling-gate 004 design-token guard rc=0|sibling-gate checkers_selftest rc=|known debt, printed not asserted|this task: PASS count=1 WARNING count=1 (size band=1) ERROR count=0|moved during this run=0 movers=[]|positive control clean->dirty named=True|SIBLINGS ok"
+WANT_TEXT="sibling-gate 007 ledger selftest rc=0|sibling-gate 007 ledger generator rc=0|sibling-gate 003 parity selftest rc=0|sibling-gate 004 design-token guard rc=0|sibling-gate checkers_selftest rc=|tier read live, printed not asserted|this task: PASS count=1 WARNING count=1 (size band=1) ERROR count=0|moved during this run=0 movers=[]|positive control clean->dirty named=True|SIBLINGS ok"
 run 7 0 "sibling gates stay green and the consumer still agrees with the producer, the known rc=3 debt is printed rather than folded into a green claim, and 005's own band is visible" \
   python -X utf8 "$TMP/siblings.py"
 

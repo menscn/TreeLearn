@@ -212,6 +212,14 @@ class Checks(object):
         self.failures.append(label)
         print("FAIL {0}{1}".format(label, " — " + detail if detail else ""))
 
+    def note(self, label, detail=""):
+        """只打印、不参与判定的行（前置条件不成立、或语义上已降级为观测）。
+
+        它存在的理由与既有的「前置条件缺失不得算 PASS」同源：
+        没有可判对象时打 OK，读者会把「无从认证」读成「认证通过」。
+        """
+        print("NOTE {0}{1}".format(label, " — " + detail if detail else ""))
+
     def check(self, cond, label, detail=""):
         if cond:
             self.ok(label, detail)

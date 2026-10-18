@@ -5,6 +5,10 @@
 
 条目数、字段名、路径存在性、AGENTS.md 的改动形状全部按正文与 git 实测，
 不接收任务文件里的自述。
+
+AGENTS.md 的路由判定按**当前文件全文**（行数下限 + 四个触发词覆盖 + 链接目标存在），
+不按 git 增量；「本次改动新增了几行路由」只在增量窗口内成立，因此降级为打印，
+并写明基线与窗口。理由见 AGENTS.md 失败案例库 [2026-10-16] [guard] 与 ROADMAP 的 D1。
 """
 
 import os
@@ -33,8 +37,12 @@ PHASE_B_KEYWORDS = ["spec-author", "code-reviewer", "REVIEW.md", "eval-keeper", 
 PHASE_C_KEYWORDS = ["loop-watcher", "事实源", "release-gate"]
 
 README_ENTRIES = [".trae/context/", ".trae/templates/", ".trae/ROADMAP.md", "Docs/intent/"]
-MIN_NEW_ROUTES = 4
 ROUTE_KEYWORDS = ["intent-capturer", "pm-discovery", "project-brief", "ROADMAP"]
+
+# 当前态下限，写在与那张表无关的裸字面量上（实测 20 行，留纯追加的余量）。
+# 用「发现行数」推导自己的下限等于没有下限——见 AGENTS.md 失败案例库
+# 「用被检清单算自己的下限」；把下限改成 len(rows) 之后，删空整张表仍是绿。
+MIN_ROUTE_ROWS = 12
 
 ENTRY_HEAD_RE = re.compile(r"^###\s+(\S+)")
 FIELD_LINE_RE = re.compile(r"^-\s*\*\*([^*]+)\*\*\s*[：:]\s*(.*)$")
@@ -94,6 +102,15 @@ def git(*args):
     return subprocess.run(["git", "-c", "core.quotepath=false"] + list(args),
                           cwd=REPO_ROOT, capture_output=True, text=True,
                           encoding="utf-8", errors="replace")
+
+
+def routing_rows(text):
+    """路由表里带链接的行：表头与分隔行不含 ](，天然被排除。
+
+    取材必须是整份文件而不是 git 增量——增量在提交后必然为空，
+    用它当判据等于给一条只在「尚未提交」窗口内可成立的断言挂永久门禁。
+    """
+    return [l for l in text.splitlines() if l.startswith("|") and "](" in l]
 
 
 def main():
@@ -160,6 +177,22 @@ def main():
     ph = placeholder_hits(text)
     c.check(not ph, "no placeholder tokens in ROADMAP", "measured={0}".format(ph))
 
+    work_text = read_text(AGENTS)
+    rows = routing_rows(work_text)
+    targets = sorted({t for l in rows for t in LINK_RE.findall(l)})
+    c.check(len(rows) >= MIN_ROUTE_ROWS,
+            "AGENTS.md routing table currently has >= {0} linked rows".format(MIN_ROUTE_ROWS),
+            "measured={0}".format(len(rows)))
+    missing_kw = [k for k in ROUTE_KEYWORDS if not any(k in l for l in rows)]
+    c.check(not missing_kw, "current routing rows cover all four triggers",
+            "measured_rows={0} missing={1}".format(len(rows), missing_kw))
+    dead = [t for t in targets if not exists(t)]
+    c.check(bool(targets) and not dead, "every current routing-row target exists",
+            "measured_targets={0} dead={1}".format(len(targets), dead))
+
+    # 下面量的是「本次未提交改动」的形状，只在增量窗口内可成立，因此不再当判据：
+    # 空窗口打 OK 会把「无从认证」读成「认证通过」，所以打 SKIPPED；
+    # 永久强制力由上面三条当前态判据承担，总退出码不需要为它单独开一档。
     diff = git("diff", "--unified=0", "--", AGENTS)
     if c.check(diff.returncode == 0, "git diff AGENTS.md is readable",
                "stderr={0}".format(diff.stderr.strip()[:200])):
@@ -167,10 +200,16 @@ def main():
                  if l.startswith("+") and not l.startswith("+++")]
         removed = [l for l in diff.stdout.splitlines()
                    if l.startswith("-") and not l.startswith("---")]
-        c.check(not removed, "AGENTS.md change contains no deletion line",
-                "measured_deletions={0} sample={1}".format(len(removed), removed[:2]))
+        base = git("rev-parse", "--verify", "HEAD")
+        base_id = base.stdout.strip()[:12] if base.returncode == 0 else "unreadable"
+        if not added and not removed:
+            c.note("SKIPPED append-only guard has no uncommitted AGENTS.md increment",
+                   "base={0} window=uncommitted-only added=0 deletions=0".format(base_id))
+        else:
+            c.check(not removed, "AGENTS.md change contains no deletion line",
+                    "base={0} window=uncommitted-only added={1} deletions={2} sample={3}".format(
+                        base_id, len(added), len(removed), removed[:2]))
 
-        work_text = read_text(AGENTS)
         head = git("show", "HEAD:" + AGENTS)
         if c.check(head.returncode == 0, "HEAD revision of AGENTS.md is readable",
                    "stderr={0}".format(head.stderr.strip()[:200])):
@@ -179,21 +218,17 @@ def main():
             vanished = [l for l in head_rows if l.strip() and l not in work_text]
             c.check(not vanished,
                     "every pre-existing routing row and case record survives verbatim",
-                    "measured_head_rows={0} vanished={1}".format(
-                        len(head_rows), vanished[:2]))
+                    "measured_head_rows={0} base={1} vanished={2}".format(
+                        len(head_rows), base_id, vanished[:2]))
 
-        new_routes = [l for l in added if l.startswith("|") and "](" in l]
-        c.check(len(new_routes) >= MIN_NEW_ROUTES,
-                "AGENTS.md adds >= {0} routing rows".format(MIN_NEW_ROUTES),
-                "measured={0}".format(len(new_routes)))
-        hit = [k for k in ROUTE_KEYWORDS if any(k in l for l in new_routes)]
-        c.check(len(hit) == len(ROUTE_KEYWORDS),
-                "new routing rows cover all four triggers",
-                "missing={0}".format([k for k in ROUTE_KEYWORDS if k not in hit]))
-        dead_routes = sorted({t for l in new_routes for t in LINK_RE.findall(l)
-                              if not exists(t)})
-        c.check(not dead_routes, "every new routing-row target exists",
-                "measured_dead={0}".format(dead_routes))
+        added_rows = routing_rows("\n".join(added))
+        c.note("routing-row increment is printed, not judged",
+               "base={0} window=uncommitted-only added_rows={1} added_missing_triggers={2} "
+               "added_dead_targets={3}".format(
+                   base_id, len(added_rows),
+                   [k for k in ROUTE_KEYWORDS if not any(k in l for l in added_rows)],
+                   sorted({t for l in added_rows for t in LINK_RE.findall(l)
+                           if not exists(t)})))
 
     readme = read_text(TRAE_README)
     tree = section_body(readme, "目录结构")

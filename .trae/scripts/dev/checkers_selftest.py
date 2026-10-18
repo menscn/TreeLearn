@@ -5,7 +5,9 @@
 
 做法：把守门真正需要的那部分（.trae/、AGENTS.md、Docs/）拷进一个临时目录，
 在副本上注入一条违规，跑副本里的守门脚本，断言「该违规必须被判 FAIL」（反向），
-随后还原文件；开始时先跑一次未注入的基线，断言两个守门都绿（正向）。全程不动工作区。
+随后还原文件；开始时先跑一次未注入的基线，断言每条守门都绿（正向——D1 之后这条
+覆盖的正是「路由已入库、工作树无增量」这一形状，旧版在该形状下恒 INCONCLUSIVE）。
+全程不动工作区。
 
 退出码：0 = 全部用例符合预期；1 = 有用例不符合预期；3 = 自检自身故障（结论不可信）。
 「自检自身故障」与「用例不符合预期」必须分开：前者是「没跑完」，后者是「跑完发现坏了」。
@@ -170,9 +172,21 @@ CASES = [
      "| `android/**` | [Android](.trae/rules/android.md) | 分析、修改前；完成前执行 Java-only guard |\n",
      "",
      "every pre-existing routing row and case record survives verbatim", "replace"),
-    ("roadmap:agents-additions-reverted", CHECK_ROADMAP, AGENTS,
-     None, None,
-     "AGENTS.md adds >= 4 routing rows", "git_checkout"),
+    # D1 之后，路由判据读的是 AGENTS.md 全文而不是 git 增量，因此每条当前态判据
+    # 各配一条注入用例。注意这些用例都是**多因**的：改一行路由会同时让
+    # 「HEAD 的每行逐字幸存」与「不得出现删除行」转红，所以期望标签只押自己要证的那条。
+    ("roadmap:routing-floor-load-bearing", CHECK_ROADMAP, CHECK_ROADMAP,
+     "MIN_ROUTE_ROWS = 12", "MIN_ROUTE_ROWS = 999",
+     "AGENTS.md routing table currently has >=", "replace"),
+    ("roadmap:routing-table-truncated", CHECK_ROADMAP, AGENTS,
+     "](.trae/rules/", None,
+     "AGENTS.md routing table currently has >=", "drop_matching"),
+    ("roadmap:routing-trigger-lost", CHECK_ROADMAP, AGENTS,
+     "](.trae/agents/intent-capturer.md)", "](.trae/agents/verifier.md)",
+     "current routing rows cover all four triggers", "replace"),
+    ("roadmap:routing-target-dead", CHECK_ROADMAP, AGENTS,
+     "](.trae/rules/android.md)", "](.trae/rules/androidx.md)",
+     "every current routing-row target exists", "replace"),
     ("roadmap:readme-entry-removed", CHECK_ROADMAP, TRAE_README,
      ".trae/templates/", ".trae/template/",
      "目录结构 section lists the four new entries", "replace"),
@@ -250,8 +264,9 @@ def build_workspace(root):
                     ignore=shutil.ignore_patterns("__pycache__"))
     shutil.copytree(os.path.join(REPO_ROOT, "Docs"), os.path.join(root, "Docs"),
                     ignore=shutil.ignore_patterns("__pycache__"))
-    # 基线提交必须用 HEAD 版本的 AGENTS.md，而不是工作区版本：
-    # 否则「本次新增了 4 行路由」这条断言在副本里永远无差可分（实测报 measured=0）。
+    # 基线提交用 HEAD 版本的 AGENTS.md，提交后再把工作区版本摆回去：
+    # 这样副本里的「未提交增量」与真实仓库同形，删除行判据与「HEAD 每行逐字幸存」
+    # 判据在副本里量到的东西才和在外面直跑时一致（两者读的都是 HEAD ↔ 工作树这一对）。
     head = subprocess.run(["git", "show", "HEAD:" + AGENTS], cwd=REPO_ROOT,
                           capture_output=True, text=True,
                           encoding="utf-8", errors="replace")
@@ -297,12 +312,14 @@ def run_case(root, case):
             os.remove(path)
         elif op == "append":
             write_text(path, original + new)
-        elif op == "git_checkout":
-            proc = subprocess.run(["git", "checkout", "--", target], cwd=root,
-                                  capture_output=True, text=True,
-                                  encoding="utf-8", errors="replace")
-            if proc.returncode != 0:
-                return "HARNESS", "git checkout failed: " + (proc.stderr or "").strip()[:160]
+        elif op == "drop_matching":
+            if original is None:
+                return "HARNESS", "target file does not exist: " + target
+            lines = original.split("\n")
+            kept = [l for l in lines if old not in l]
+            if len(kept) == len(lines):
+                return "HARNESS", "drop anchor matched no line: {0!r}".format(old)
+            write_text(path, "\n".join(kept))
         elif op in ("replace", "replace_all", "replace_line"):
             if original is None:
                 return "HARNESS", "target file does not exist: " + target

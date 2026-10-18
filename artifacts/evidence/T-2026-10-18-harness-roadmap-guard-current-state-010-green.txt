@@ -1,0 +1,98 @@
+# T-2026-10-18-010 GREEN：路由判据改判当前态，文档类守门自检首次跑完并绿
+# 生成命令：python -X utf8 artifacts/tmp/gen-010-d1-green.py
+# 判读约定：总退出码由 want/got 表派生；前置不成立与归因不落一律 3。
+# 复算归档出处：git log --format=%H -- .trae/scripts/check_roadmap_and_routing.py 最新那条的父提交里的该路径字节（该值随提交移动，故只写命令不写值）。
+
+===== block 01 - the three current-state predicates are green with non-empty match sets =====
+  守门 rc=0 结论行=0
+  OK   AGENTS.md routing table currently has >= 12 linked rows — measured=20
+  OK   current routing rows cover all four triggers — measured_rows=20 missing=[]
+  OK   every current routing-row target exists — measured_targets=19 dead=[]
+  三条当前态判据各打一条 OK=True；下限是源里的裸字面量=True
+  匹配集非空三件：路由行 20 >= 下限 12、触发词缺失集 []、链接目标 19 个且死链 []
+  block 01: want=0 got=0
+
+===== block 02 - the row floor is a bare literal and is load-bearing =====
+  赋值行=1，其中整行等于「常量 = 数字」=1（必须各 1）；不合规形状=[]
+  形状判据正控：字面量被认=True、派生式不被认=True（否则会响的扫描与空扫描同形；早先用 \s*=\s*[^0-9] 找派生式会在合法行上也响，因为 \s 能吃掉等号后的空格）
+  镜像里把下限抬到 999：rc=1 该条判红=True 读数=20（真树同文件读数=20）
+  FAIL AGENTS.md routing table currently has >= 999 linked rows — measured=20
+  另外两条当前态判据在该次运行仍 OK=True（红只归因于下限，不是整表失效）
+  block 02: want=0 got=0
+
+===== block 03 - the uncommitted-window predicates land in their own tier per shape =====
+  档 1 无增量：rc=0；NOTE SKIPPED 行=1（必须 1）；被判决的 no-deletion 行=0（必须 0：空窗口打 OK 就是把「无从认证」读成「认证通过」）
+  NOTE SKIPPED append-only guard has no uncommitted AGENTS.md increment — base=<hex-redacted> window=uncommitted-only added=0 deletions=0
+  档 2 只新增：rc=0；no-deletion 判 OK=True；逐字存活判 OK=True；增量打印行=1
+  OK   AGENTS.md change contains no deletion line — base=<hex-redacted> window=uncommitted-only added=1 deletions=0 sample=[]
+  NOTE routing-row increment is printed, not judged — base=<hex-redacted> window=uncommitted-only added_rows=1 added_missing_triggers=['intent-capturer', 'pm-discovery', 'project-brief', 'ROADMAP'] added_dead_targets=[]
+  档 3 删一行（锚点命中=1）：rc=1；no-deletion 判红=True；逐字存活判红=True；三条当前态判据仍全 OK=True（红只归因于窗口形状，不是整表失效）
+  FAIL AGENTS.md change contains no deletion line — base=<hex-redacted> window=uncommitted-only added=1 deletions=1 sample=['-| `android/**` | [Android](.trae/rules/android.md) | 分析、修改前；完成前执行 Java-only guard |']
+  FAIL every pre-existing routing row and case record survives verbatim — measured_head_rows=87 base=<hex-redacted> vanished=['| `android/**` | [Android](.trae/rules/android.md) | 分析、修改前；完成前执行 Java-only guard |']
+  block 03: want=0 got=0
+
+===== block 04 - the doc-gate battery runs to completion and the four new cases fire =====
+  电池 rc=0 汇总行=SELFTEST cases=52 ok=52 mismatch=0 harness_errors=0 skipped=0 基线绿=4 OVERALL:PASS=1 末条退出码行=0
+  roadmap:routing-floor-load-bearing 的 OK 判决行=1
+  roadmap:routing-table-truncated 的 OK 判决行=1
+  roadmap:routing-trigger-lost 的 OK 判决行=1
+  roadmap:routing-target-dead 的 OK 判决行=1
+  按行形状归位的判决行=52（须与自述 cases=52 相等，条数不能只由汇总行自称）；汇总行五字段=['52', '52', '0', '0', '0']（后四字段须恰好 全等条数/0/0/0）
+  条数下限（与本清单无关的裸字面量）=50 达成=True
+  block 04: want=0 got=0
+
+===== block 05 - consumers pin the tier not a value, and the increment labels have no live refs =====
+  探测器正控：钉档位行必被点名=True、中性行必被认=True、无中性标记行必不被认=True
+  artifacts/tmp/gen-004-green.sh：提到本电池的 WANT_TEXT 行=1，其中钉死档位=0、含中性标记=1
+  artifacts/tmp/gen-005-green.sh：提到本电池的 WANT_TEXT 行=1，其中钉死档位=0、含中性标记=1
+  artifacts/tmp/gen-007-green.sh：提到本电池的 WANT_TEXT 行=1，其中钉死档位=0、含中性标记=1
+  生产脚本里旧增量标签/常量的活动引用：{'.trae/scripts/check_roadmap_and_routing.py': {'MIN_NEW_ROUTES': 0, 'AGENTS.md adds >= ': 0, 'new routing rows cover all four triggers': 0}, '.trae/scripts/dev/checkers_selftest.py': {'MIN_NEW_ROUTES': 0, 'AGENTS.md adds >= ': 0, 'new routing rows cover all four triggers': 0}, '.trae/scripts/harness_check_lib.py': {'MIN_NEW_ROUTES': 0, 'AGENTS.md adds >= ': 0, 'new routing rows cover all four triggers': 0}}
+  同一计数对合成样本会响=True（三词各命中一次：3/3）
+  block 05: want=0 got=0
+
+===== block 06 - ROADMAP records the D1 closure with recompute commands only =====
+  D1 小节正文=10 行（切到下一个标题为止）；闭合标题=1；处置行=1；回读行=1；回读行写明现场读=1
+  ### D1 `check_roadmap_and_routing` 的一次性迁移断言永久为红（2026-10-18 已按修法 ① 闭合）
+  - 处置（2026-10-18，选 ①）：上面那两条 FAIL 标签连同 `every new routing-row target exists` 一起从判据里删除，路由改判**当前文件全文**的三条——行数下限（`MIN_ROUTE_ROWS` 写在与那张表无关的裸字面量上，改成由表推导等于没有下限）、四个触发词在现行里的覆盖、每条链接目标存在。「本次新增了 N 行路由」不删证据而是降级为打印行，并写明基线与窗口；增量为零时打 `S
+  - 回读：守门 `python -X utf8 .trae/scripts/check_roadmap_and_routing.py`、自检电池 `python -X utf8 .trae/scripts/dev/checkers_selftest.py`；两者的退出码与用例条数都按命令现场读，本条不抄值（抄了就过期——D1 本身就是这个教训的产物）。承重实测是自检里的四条注入用例，逐条标签见 `checkers_selftest.py
+  闭合三行里抄了判定值（measured=N / EXITCODE=）的行=0
+  ROADMAP 占位符=[]
+  切片形状对照：同样逻辑对合成两小节正文只取本小节那条=1（必须 1）；整文件子串扫描对同一输入给 2（必须 2，否则切片与不扫同形）
+  block 06: want=0 got=0
+
+===== block 07 - this slice's task card is mechanically valid and contributes no errors =====
+  本片行=1（PASS=1 ERROR=0）；校验器 rc=1（只打印：它的档位由别人那 16 条预存债务决定，钉死 rc 就是本片要消灭的「只在某个 git 状态下成立」同形缺陷）
+  PASS T-2026-10-18-harness-roadmap-guard-current-state-010.md
+  全局汇总只打印不判：SUMMARY files=72 errors=16 warnings=13
+  点名探测器对合成的本片 ERROR 行会响=True
+  block 07: want=0 got=0
+
+===== block 08 - sizing is adjudicated by the repo counter over archived-byte diffs =====
+  判定值（仓库自带计数器读「归档字节 -> 当前字节」的本次新增行片段）=[('.trae/scripts/check_roadmap_and_routing.py', 47), ('.trae/scripts/harness_check_lib.py', 6), ('.trae/scripts/dev/checkers_selftest.py', 29)] 合计=82
+  同一片段按非空行数=[('check_roadmap_and_routing.py', 47), ('harness_check_lib.py', 6), ('checkers_selftest.py', 29)]（两口径相等说明该脚本对 .py 只做非空行统计、没有额外剥掉任何东西；它只剥 // 与 星斜杠 块，Python 的 # 注释两种口径都保留）
+  整文件对照（同一计数器读整文件 / 非空行数）=[('check_roadmap_and_routing.py', 205, 205), ('harness_check_lib.py', 175, 175), ('checkers_selftest.py', 401, 401)]
+  差分计数正控（加一行必须记 1）=True
+  硬上限 500 未越=True；每文件都有位移=True
+  block 08: want=0 got=0
+
+===== block 09 - pre-run fingerprints of read-only inputs, plus the shape control =====
+  名单条目=12（复算：sha256sum 逐个路径）；缺失=[]
+  名单边界：本运行写出的产物不进名单——即 artifacts/evidence/T-2026-10-18-harness-roadmap-guard-current-state-010-green.txt；它的当前值由本文件自身承载。
+  同窗口位移=0 movers=[]
+  位移计算的正控（缺席->出现必须点名）=True
+  形状对照：整段 64 位哈希被扫描命中=0、12 位前缀命中=1（因此本产物只打印整段，不打印前缀；前缀会被 scrub）
+  block 09: want=0 got=0
+
+===== 汇总 =====
+  blocks=9 floor=9 expectation_entries=9 faults=0
+  block 01 want=0 got=0 ok
+  block 02 want=0 got=0 ok
+  block 03 want=0 got=0 ok
+  block 04 want=0 got=0 ok
+  block 05 want=0 got=0 ok
+  block 06 want=0 got=0 ok
+  block 07 want=0 got=0 ok
+  block 08 want=0 got=0 ok
+  block 09 want=0 got=0 ok
+OVERALL_EXITCODE=0
+DECODE ok utf8=True cr=0 commit-shaped-tokens=0
