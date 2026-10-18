@@ -89,7 +89,7 @@ status: accepted
   - 新稿的「简约高级」观感主要来自配色、字形、图标与克制的描边，而不是底部标签栏本身。
   - 底部标签栏是设计稿不可退让的部分，决定了首页的瘦身形态。
 - 未知项：
-  - Vector Drawable 这类 XML 资源是否计入生产代码行预算——需按 `.trae/scripts/dev/count_production_lines.py` 的实际口径确认，不凭猜。
+  - Vector Drawable 这类 XML 资源是否计入生产代码行预算——需按 `.codex/scripts/dev/count_production_lines.py` 的实际口径确认，不凭猜。
 
 ## Convergence verdict（收敛判定）
 

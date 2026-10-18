@@ -43,7 +43,7 @@ status: accepted
   - 知芽输入栏与草稿持久化基座（T-076 已 verified）：`android\app\src\main\java\com\treelearn\app\ui\ChatDraftStore.java`、`ChatViewState.java`；引用行（quote row）形态为 T-076 交付面。
   - 知芽 data 层为 SQLiteOpenHelper + DAO 模式：`android\data\src\main\java\com\treelearn\data\db\TreeLearnDatabaseHelper.java`、`TreeLearnSchema.java`、`dao\MessageDao.java`。
   - 知芽上下文快照只存引用不存内容：`android\core\src\main\java\com\treelearn\core\domain\ContextSnapshot.java`（SourceKind 为 USER_MESSAGE/STABLE_REVISION/SUMMARY 三种引用）。
-  - 知芽子树删除复用单一 Plan 实现、单事务级联：`.trae\tasks\T-2026-09-22-library-archived-list-and-subtree-delete-053.md` Implementation notes。
+  - 知芽子树删除复用单一 Plan 实现、单事务级联：`.codex\tasks\T-2026-09-22-library-archived-list-and-subtree-delete-053.md` Implementation notes。
 - **假设**：
   - RikkaHub 的文件管理页本身未展示占用统计（`countChatFiles()` 存在于 FilesManager.kt 但该页未见调用）；本 spec 的占用统计是知芽侧任务 096 的明确要求，交互形态为知芽自行设计而非照搬。
 - **未知项**（保持未知，不得在实现时悄悄升级为事实）：
@@ -51,7 +51,7 @@ status: accepted
   - PDF 文本层抽取在各真机文档上的质量差异（任务 097 Unknowns 原文）。
   - 大量附件时引用扫描的耗时上限（任务 098 Unknowns 原文）。
 
-- 来源：Docs/intent/INTENT-2026-09-23-rikkahub-settings-center-absorption.md（核心流程/状态与异常/约束与权衡偏好/Decision record）；.trae/tasks/T-2026-09-23-attachment-storage-file-manager-096.md、T-2026-09-23-attachment-picking-parsing-097.md、T-2026-09-23-attachment-orphan-cleanup-098.md。
+- 来源：Docs/intent/INTENT-2026-09-23-rikkahub-settings-center-absorption.md（核心流程/状态与异常/约束与权衡偏好/Decision record）；.codex/tasks/T-2026-09-23-attachment-storage-file-manager-096.md、T-2026-09-23-attachment-picking-parsing-097.md、T-2026-09-23-attachment-orphan-cleanup-098.md。
 
 ## Interface plan（界面方案）
 
@@ -141,7 +141,7 @@ status: accepted
 - 幂等：清理动作对已删文件、已删记录重复执行不报错（任务 098 状态与异常）。
 - 与删除链路的关系：子树删除/归档复用 T-053 的单一 Plan 实现与单事务语义，附件扫描是新增旁路，不改动删除链路本身（任务 098 Behavior impact）。
 
-- 来源：RikkaHub `FilesManager.kt`、`ManagedFileEntity.kt`、`ChatService.kt`、`ConversationRepository.kt`、`Message.kt`（路径见上文）；知芽 `android\data\...\db\`（DAO 模式）、`android\core\...\domain\ContextSnapshot.java`、`android\app\...\ui\ChatDraftStore.java`；`.trae\ROADMAP.md` 条目 T-2026-09-23-096/097/098、T-076、T-053（任务文件路径见 `.trae\tasks\`）。
+- 来源：RikkaHub `FilesManager.kt`、`ManagedFileEntity.kt`、`ChatService.kt`、`ConversationRepository.kt`、`Message.kt`（路径见上文）；知芽 `android\data\...\db\`（DAO 模式）、`android\core\...\domain\ContextSnapshot.java`、`android\app\...\ui\ChatDraftStore.java`；`.codex\ROADMAP.md` 条目 T-2026-09-23-096/097/098、T-076、T-053（任务文件路径见 `.codex\tasks\`）。
 
 ## Doubts（疑虑点）
 

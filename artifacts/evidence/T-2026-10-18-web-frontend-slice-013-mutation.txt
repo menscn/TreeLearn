@@ -1,0 +1,27 @@
+基线: selftest rc=0 fail=0 production rc=0
+解析器自我见证: 两行FAIL解析出2名=True 绿输出解析出0名=True ok=True
+
+===== M1-exempt-never-matches - 把豁免名换成一个树里不存在的路径（豁免常量被打穿的形状） =====
+selftest rc=1 new-fail=['共享模块自身豁免且仍计入 scanned', '单源声明的派生关系逐字一致', '违规存在判 1 且标签指向绕过', '去掉违规后同一棵树判通过（反向对照）'] declared=['共享模块自身豁免且仍计入 scanned', '单源声明的派生关系逐字一致', '违规存在判 1 且标签指向绕过', '去掉违规后同一棵树判通过（反向对照）'] new-fail==declared:True
+production rc=3 want=3 label-found=True
+restored byte-exact=True 复算命令=sha256sum frontend/scripts/check_device_time.mjs
+MUT M1-exempt-never-matches: OK
+
+===== M2-timeZone-rule-neutered - 把「时区参数写死」那条正则退化成永不匹配（形状判据失效） =====
+selftest rc=1 new-fail=['违规样本被点名（Intl 与时区写死）'] declared=['违规样本被点名（Intl 与时区写死）'] new-fail==declared:True
+production: 未运行（该变异不改生产可见结论）
+restored byte-exact=True 复算命令=sha256sum frontend/scripts/check_device_time.mjs
+MUT M2-timeZone-rule-neutered: OK
+
+===== M3-floor-zero - 把可判文件下限退化为 0（零集合又被读成通过） =====
+selftest rc=1 new-fail=['可判文件为空判 3 并点名下限'] declared=['可判文件为空判 3 并点名下限'] new-fail==declared:True
+production: 未运行（该变异不改生产可见结论）
+restored byte-exact=True 复算命令=sha256sum frontend/scripts/check_device_time.mjs
+MUT M3-floor-zero: OK
+
+还原后复跑: selftest rc=0 production rc=0 byte-identical=True
+
+===== 汇总 =====
+mutations declared=3 floor=3 unattributed=[]
+failing=[] instrument-faults=[]
+OVERALL_EXITCODE=0

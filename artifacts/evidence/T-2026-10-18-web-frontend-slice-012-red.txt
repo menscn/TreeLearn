@@ -1,0 +1,56 @@
+Generated: 2026-10-18T19:32:45+0800
+Command: python -X utf8 artifacts/tmp/gen-012-red.py
+移开前快照：files=3 names=['FixtureRuntimeAdapter.ts', 'RuntimePort.ts', 'runtime.ts']
+移开后目录存在=True 还原后目录存在=True
+还原 byte-exact=True files=3
+
+===== block 01 - 被测实现移开后，同一条命令必须转红 =====
+$ pnpm --dir frontend test（src/platform 已移开）
+
+ RUN  v5.0.5 D:/Project/Android/Treelearn/frontend
+
+ ❯ test/platform/FixtureRuntimeAdapter.test.ts (0 test)
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  19:32:44
+   Duration  145ms (worker 95%, environment 5%)
+
+[ELIFECYCLE] Test failed. See above for more details.
+$ vitest run
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/platform/FixtureRuntimeAdapter.test.ts [ test/platform/FixtureRuntimeAdapter.test.ts ]
+Error: Cannot find module '../../src/platform/FixtureRuntimeAdapter' imported from D:/Project/Android/Treelearn/frontend/test/platform/FixtureRuntimeAdapter.test.ts
+ ❯ test/platform/FixtureRuntimeAdapter.test.ts:2:1
+      1| import { describe, expect, it } from "vitest";
+      2| import { FixtureRuntimeAdapter, createMockRuntime, memoryFixtureSource…
+       | ^
+      3| import type { FixtureSource } from "../../src/platform/FixtureRuntimeA…
+      4| import type { SnapshotFailure, SnapshotResult } from "../../src/platfo…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+rc=1 want=1 missing=[]
+BLOCK 01: OK
+
+===== block 02 - 按字节还原后同一条命令必须转绿 =====
+$ pnpm --dir frontend test（已还原）
+
+ RUN  v5.0.5 D:/Project/Android/Treelearn/frontend
+
+ ✓ test/platform/FixtureRuntimeAdapter.test.ts (11 tests) 6ms
+
+ Test Files  1 passed (1)
+      Tests  11 passed (11)
+   Start at  19:32:45
+   Duration  175ms (transform 56%, import 28%, tests 11%, worker 6%)
+
+$ vitest run
+rc=0 want=0 missing=[]
+BLOCK 02: OK
+
+===== 汇总 =====
+blocks=2 floor=2 failing=[]
+want/got: [{"block": 1, "want": 1, "got": 1}, {"block": 2, "want": 0, "got": 0}]
+OVERALL_EXITCODE=0

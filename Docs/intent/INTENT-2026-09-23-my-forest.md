@@ -103,7 +103,7 @@ status: accepted
 
 ### 移交清单
 
-- 切片 0：森林页交互设计规格（UX 设计师视角，轻流程自检 `.trae/scripts/check_spec_author_agent.py`；用 figwright MCP 把设计落到本项目 Figma 画布，`get_screenshot` 证据落 `artifacts/evidence/`；数值只引 token，人 review 通过后实现任务才开工）。
+- 切片 0：森林页交互设计规格（UX 设计师视角，轻流程自检 `.codex/scripts/check_spec_author_agent.py`；用 figwright MCP 把设计落到本项目 Figma 画布，`get_screenshot` 证据落 `artifacts/evidence/`；数值只引 token，人 review 通过后实现任务才开工）。
 - 切片 1：森林页骨架与全量主题树绘制（`android/**`，复用 `:tree-layout` 布局能力；含归档树同样式呈现、空态「去种第一棵树」、点击树进主题的导航；design token 守门 `check_design_tokens.py` 必过）。
 - 切片 2：抽屉扩展位「我的森林」入口与跳转（`android/**`，落在 T-103 已建的抽屉扩展位骨架上，入口跳转全屏森林页）。
 - 切片 3：森林页成长统计卡（`android/**` + `:data` 只读消费，复用 T-100 StatsDao/StatsAggregator 同一查询入口，含空态；禁止新增统计口径）。

@@ -396,7 +396,7 @@ runner **阻止不了**，只能在事后检测到并抛 `IllegalStateException`
   所以该类现在**在 `ALP-AN00` / API 33 上执行过**，15 例 / 0 失败，整包 287 例 / 12 失败。
   读数与逐块判定见 `artifacts/evidence/T-2026-10-16-first-topic-401-deadend.txt` 块 06/07。
   同轮的 `:app:testDebugUnitTest` 是 **831 例 / 2 失败**，那两例是既有 flaky 对（块 05 已如实记为基线），
-  归因与修法只写在[遗留路线](../.trae/ROADMAP.md) 的 D8 一处。
+  归因与修法只写在[遗留路线](../.codex/ROADMAP.md) 的 D8 一处。
   **读者注意**：整包跑执行的是 `androidTest` 里的**每一个类**（本次 44 个类 / 287 例），因此本文件
   其它小节写着「只编译、未执行」的仪器套件，只要落在该 287 例内，**「未执行」这句已经过期**
   （例如 `AnswerVersionsInstrumentedTest` 10 例、`SqliteSchemaInstrumentedTest` 25 例本轮全绿）。
@@ -415,7 +415,7 @@ runner **阻止不了**，只能在事后检测到并抛 `IllegalStateException`
   `HomeTopicCardInstrumentedTest.aStoredTopicIsDrawnAsACardWithItsTitleAndMetaAndStillOpensTheConversation`
   只在整包出现、隔离跑（HEAD 与改动后各一次）都通过，是 10000ms 负载超时而非行为。
   **这 11 例是待办，不是本片的产物**，不要在下一片里当成「已修」；按失败文案的三分归因与裁定选项
-  只写在[遗留路线](../.trae/ROADMAP.md) 的 D7 一处，本节不复述。
+  只写在[遗留路线](../.codex/ROADMAP.md) 的 D7 一处，本节不复述。
 - 稳定化（`GenerationStabilizer` 自己持有事务边界）与位置记账（`settlePosition`）是**两个事务**，
   中间会出现「revision 已落库、位置尚未指向它」的窗口；合并需要一次嵌套提交，故保留并记录。
 - `complete()` 中 stabilizer 抛出存储异常时按失败收敛（释放槽位、不重发），
@@ -454,7 +454,7 @@ runner **阻止不了**，只能在事后检测到并抛 `IllegalStateException`
 `REASONING_OMITTED`（**不以删掉 reasoning 降级**）；解析失败/空 summary 为 `SUMMARY_EMPTY`；压缩结果不小于
 它要替换的内容为 `OVER_WINDOW`。三种失败都不写库、都保留旧 artifact，并把结论交给调用方去关闭本轮主回答。
 `OVER_WINDOW` 的判据是「summary 字符数 >= 被压缩轮次的 问题+reasoning+answer 字符数之和」（T-011 的解释，
-见 `.trae/tasks/T-2026-09-20-derived-ai-artifacts-011.md` 的 Implementation notes）。
+见 `.codex/tasks/T-2026-09-20-derived-ai-artifacts-011.md` 的 Implementation notes）。
 
 - **本轮不使用模拟器**（用户指令 2026-09-21）：本层的 SQLite 路径**没有执行**——
   `SqliteDerivedStore` 只做**编译验证**，其 `liveBaseline` 的折叠与 `write` 的 insert/replace 选择
@@ -531,7 +531,7 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
   消费；形状与新颜色仍取既有资源名。同期入库的 `green-bubble` / `tl_green_bubble`（`colors.xml` +1 行）
   **属对话页线**，不是首页线的产物；该 token 已于 **2026-09-28 随用户气泡退役而删除**（`colors.xml` −1 行，
   见 `Docs/04-ux-design/design-system/README.md` 变更记录）。
-  守门现状：**43 token / 15 资源 / 0 failed**（命令见 `.trae/scripts/dev/check_design_tokens.py`）；
+  守门现状：**43 token / 15 资源 / 0 failed**（命令见 `.codex/scripts/dev/check_design_tokens.py`）；
   三方一致性成立，此前本节「不改 tokens.json、不新增 token」的表述与事实不符，已更正。
   2026-09-28 同日第三次变更：新增 `rec_fade_width`（20dp，推荐块左右羽化宽度），**不进三方守门**——
   它不是原型 `:root` 的变量，而是原型 `mask-image` 里的字面量（`20px`），故 `tokens.json` 与
@@ -960,7 +960,7 @@ View 自己不持内容。
      版本」的 AI 位置新建主题，与 `ChatMessage.canFork()` 同条件。
 - **T-041 的规模超了 500 行硬上限**：本切片 **544 非空非注释生产行**（新增 9 个文件 502 行 + 既有文件改动 42 行，
   判定值以外的物理行为 727 行；命令与逐文件明细见 `artifacts/evidence/T-041-sizing.txt`）。口径按
-  `.trae/rules/harness-tasks.md` 第 45 行「新增文件按全部非空非注释行，既有文件只按本次改动行」。
+  `.codex/rules/harness-tasks.md` 第 45 行「新增文件按全部非空非注释行，既有文件只按本次改动行」。
   **没有用户批准的规模例外**，属待裁定偏差，不得当成已批准例外引用。
 - **设备侧观感与像素证据未取得（T-041）**：菜单落点、弹层在窄屏是否被裁切、与平台工具条并存的观感，
   本轮一律记为 `deferred — 用户自行装机验证（user decision 2026-09-21）`。
@@ -1045,7 +1045,7 @@ View 自己不持内容。
   标题/摘要回落到既有兜底（首问、空摘要）——这是设计内行为，不是缺陷。
 - **大主题的一次性布局耗时未在真机测过**：`load(topicId)` 一次读全部枝干、一次算完整几何，这是有意的取舍
   （分批读会让画面在补数据时跳动），耗时风险记为未验证。
-- **规模与验证证据**：见 `.trae/tasks/T-2026-09-21-tree-canvas-production-wiring-038.md` 的 TDD 执行记录与
+- **规模与验证证据**：见 `.codex/tasks/T-2026-09-21-tree-canvas-production-wiring-038.md` 的 TDD 执行记录与
   验收报告（`artifacts/evidence/T-038-*.txt`）。
 
 ## 应用层入口索引（`:app`）—— 导航页与归档 / 恢复 / 永久删除（T-039）

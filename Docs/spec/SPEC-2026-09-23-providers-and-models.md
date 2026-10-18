@@ -54,7 +54,7 @@ status: accepted
    - 修订 V3.0 第 87 行：「首版仅支持 DeepSeek API」→「支持 OpenAI 兼容协议的多供应商接入，预置 DeepSeek」。
    - 废止 V3.1 第 76 行非目标；BASE-23 的「模型范围限定」改写为「提供商可配置，思考模式开关每次请求仍显式传」。
    - 新增一条 BASE 条目登记「提供商管理与模型分工」（以本规格的 Requirement spec 为正文来源）。
-4. **project-brief.md 回写清单**（`.trae/context/project-brief.md`）：
+4. **project-brief.md 回写清单**（`.codex/context/project-brief.md`）：
    - 第 7 行：「业务数据与 DeepSeek Key 都只留在本机」→ 改「业务数据与各家提供商 Key 都只留在本机」。
    - 第 17 行：「网络与模型：……只用 DeepSeek，思考模式开关每次请求显式传」→ 改「……OpenAI 兼容多供应商，思考模式开关每次请求显式传」。
    - 第 41 行是提示词设计文档的索引标题，含「DeepSeek」字样但非约束，不改。

@@ -6,7 +6,7 @@
 | 日期 | 2026-09-20 |
 | 存储引擎 | Android 设备本地 SQLite（`SQLiteOpenHelper` + 显式 DAO） |
 | 权威来源 | 技术方案 V1.0 §5（领域模型）、§6.1/§6.2（七张逻辑表与入场记录）、§10/§11（防旧写回、未读与阅读位置） |
-| 规则依据 | `.trae/rules/sql.md`「Permanent table admission guard」与「建表审批边界」 |
+| 规则依据 | `.codex/rules/sql.md`「Permanent table admission guard」与「建表审批边界」 |
 | 表数量 | 11（V1 七张 + 083 两张 + 096 两张，见 §5；新增表仍须回到本清单确认） |
 
 ## 1. 备选方案分析（为什么不是单表 JSON）

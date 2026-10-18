@@ -63,7 +63,7 @@ status: accepted
 ### 有价值吗
 
 结论：是
-证据：用户明确反馈 Harness 运行时需要自己参与多轮流程，构成持续的使用成本；Treelearn 的调度技能明确要求在子代理重试失败后停下并请用户介入（`.trae/skills/harness-run/SKILL.md`）。
+证据：用户明确反馈 Harness 运行时需要自己参与多轮流程，构成持续的使用成本；Treelearn 的调度技能明确要求在子代理重试失败后停下并请用户介入（`.codex/skills/harness-run/SKILL.md`）。
 
 ### 值得做吗
 

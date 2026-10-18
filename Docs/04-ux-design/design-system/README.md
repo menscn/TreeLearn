@@ -9,17 +9,17 @@
 | [`../知芽-TreeLearn-高保真原型-v1.html`](../知芽-TreeLearn-高保真原型-v1.html) 的 `:root` 区块（第 22–75 行） | **权威**：设计系统的当前态定义，44 个 token 的数值出处 |
 | `tokens.json`（本目录） | **镜像**：同一批 token 的分组 + 用途注释，供 Figma 变量与后续工具读取 |
 | [`../../../android/app/src/main/res/values/colors.xml`](../../../android/app/src/main/res/values/colors.xml) | **副本**：Android 侧落地的不透明 hex 子集（16 个 `tl_*` 资源） |
-| `frontend/src/styles/tokens.css` | **生成物**：前端侧全量副本（44 个 CSS 变量），由 `.trae/scripts/dev/gen_design_tokens_css.py` 从 `tokens.json` 生成，**禁止手抄/手改**（2026-10-15 起新增） |
+| `frontend/src/styles/tokens.css` | **生成物**：前端侧全量副本（44 个 CSS 变量），由 `.codex/scripts/dev/gen_design_tokens_css.py` 从 `tokens.json` 生成，**禁止手抄/手改**（2026-10-15 起新增） |
 
 > **增量原型 `-v1.1.html` 不构成第二个权威源（2026-09-27 登记）**：`Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.1.html` 的 `:root` 区块与 v1 **逐字节相同**（两文件该区块 md5 同为 `87d3f40f699a6b92ada08e48c97dd84c`，token 数 44/44），它在 `:root` **之外**新增的界面层没有引入任何基线之外的新颜色值。因此本表第 1 行的权威源**仍是 v1**：守门脚本按路径硬编码校验 v1，V1.1 不参与三方比对；V1.1 只作为「同一套 token 之上的增量界面稿」存在。判定与本版三项自检的原始输出见 `artifacts/evidence/ux-v11-prototype-2026-09-27.txt`，版本内容与四项范围裁决的记录见 V1.1 文件头部注释与左侧走查清单。**（2026-10-15 补充：该守门已由三方扩为四方比对，新增的第 4 个消费者是生成的 `tokens.css`；「按路径硬编码只校验 v1、V1.1 不参与比对」这一条不变。同日再核：上面那句「两文件该区块 md5 同为 `87d3f40f…`」自 2026-09-28 起已不成立——实测 v1 该区块 md5 为 `678dab85b8055b355a2e65137d60feee`（44 token，含 `--yellow-highlight`），V1.1 仍为 `87d3f40f699a6b92ada08e48c97dd84c`（44 token，含已于 2026-09-28 退役的 `--green-bubble`、不含 `--yellow-highlight`）；两边都数得出 44 只是巧合，差额是 2026-09-28 那次「`green-bubble` 退役 + `yellow-highlight` 新增」只改 v1、未回写 V1.1 留下的。这是 V1.1 增量稿自身过期，不改变守门口径；V1.1 要同步还是退役待用户拍板，本片不动它。）**
 
 数值**不允许**在本目录被重新定义：这里只镜像原型。四方一致性由脚本判定，不靠人眼：
 
 ```bash
-python .trae/scripts/dev/gen_design_tokens_css.py            # 由 tokens.json 生成/刷新 tokens.css
-python .trae/scripts/dev/gen_design_tokens_css.py --check     # 只判「已落盘的是否逐字节等于重新生成」
-python .trae/scripts/dev/check_design_tokens.py              # 校验真实文件（四方 + 前端裸色值）
-python .trae/scripts/dev/check_design_tokens.py --selftest    # 守门自身的正反双向自检
+python .codex/scripts/dev/gen_design_tokens_css.py            # 由 tokens.json 生成/刷新 tokens.css
+python .codex/scripts/dev/gen_design_tokens_css.py --check     # 只判「已落盘的是否逐字节等于重新生成」
+python .codex/scripts/dev/check_design_tokens.py              # 校验真实文件（四方 + 前端裸色值）
+python .codex/scripts/dev/check_design_tokens.py --selftest    # 守门自身的正反双向自检
 ```
 
 生成物只有一条变更路径：改 `tokens.json`（而 `tokens.json` 又要先改原型 `:root`）→ 重新生成 → 跑守门。手工编辑 `tokens.css` 会被逐字节漂移校验拦红，这是设计意图而不是不便。
@@ -47,7 +47,7 @@ python .trae/scripts/dev/check_design_tokens.py --selftest    # 守门自身的�
 
 ## 变更记录
 
-- **2026-10-15 · token 链新增第 4 个消费者：`tokens.css` 改为生成物**：Web/H5 线开工，前端若手抄一份设计数值就会让「同一事实出现第二份实现」这条旧线病因复活。因此新增生成器 `.trae/scripts/dev/gen_design_tokens_css.py`（只读 `tokens.json`，输出确定性文本：文件头写 token 数与内容 sha256，**不含时间戳**——带时间戳就无法用「逐字节相同」判漂移），并由它落出 `frontend/src/styles/tokens.css`（44 个变量）。`check_design_tokens.py` 同步由三方扩为四方：比中原型 `:root` ↔ `tokens.json` ↔ `colors.xml` ↔ 生成 CSS 的取值集合，外加一条「重新生成后与已落盘内容必须逐字节相同」的漂移校验；同时新增 `frontend/src/**` 裸 hex 扫描（**注释与字符串字面量都不豁免**：React 内联样式正是字符串字面量，豁免它等于给缺陷开门；唯一豁免是按路径排除生成的 `tokens.css` 本身，而该豁免由逐字节重新生成校验反向托底）。`frontend/` 尚不存在时该扫描打印 `SKIPPED` 并说明原因，从通过计数里扣除，不计为 PASS。四方逐值判据、既有的 `colors.xml` 子集规则与原有 `--selftest` 用例结论均未改动。证据：`artifacts/evidence/T-2026-10-15-004-red.txt` / `-green.txt`。
+- **2026-10-15 · token 链新增第 4 个消费者：`tokens.css` 改为生成物**：Web/H5 线开工，前端若手抄一份设计数值就会让「同一事实出现第二份实现」这条旧线病因复活。因此新增生成器 `.codex/scripts/dev/gen_design_tokens_css.py`（只读 `tokens.json`，输出确定性文本：文件头写 token 数与内容 sha256，**不含时间戳**——带时间戳就无法用「逐字节相同」判漂移），并由它落出 `frontend/src/styles/tokens.css`（44 个变量）。`check_design_tokens.py` 同步由三方扩为四方：比中原型 `:root` ↔ `tokens.json` ↔ `colors.xml` ↔ 生成 CSS 的取值集合，外加一条「重新生成后与已落盘内容必须逐字节相同」的漂移校验；同时新增 `frontend/src/**` 裸 hex 扫描（**注释与字符串字面量都不豁免**：React 内联样式正是字符串字面量，豁免它等于给缺陷开门；唯一豁免是按路径排除生成的 `tokens.css` 本身，而该豁免由逐字节重新生成校验反向托底）。`frontend/` 尚不存在时该扫描打印 `SKIPPED` 并说明原因，从通过计数里扣除，不计为 PASS。四方逐值判据、既有的 `colors.xml` 子集规则与原有 `--selftest` 用例结论均未改动。证据：`artifacts/evidence/T-2026-10-15-004-red.txt` / `-green.txt`。
 - **2026-10-09 · 设置导航移出底栏**：设置不再与学习库并列为一级 tab，而由首页右上角齿轮打开；2026-09-28 下方关于“两页同属一级 tab”的记录仅代表当时状态。当前 UI 决定见[设置入口与按钮反馈更新](../知芽-TreeLearn-设置入口与按钮反馈更新-2026-10-09.md)。本次没有修改设计 token。
 - **2026-09-28 · 新增 `yellow-highlight`（对话页高亮批注 T-B「菜单 6 格 + prose 高亮」，用户拍板 D）**：正文高亮动作的底色 `#FFF3B0`（柔和暖黄）。按固定顺序三处落地：原型 `:root` 增 `--yellow-highlight`（区块变为第 22–75 行）→ `tokens.json` 增 `color.yellow-highlight` → `colors.xml` 增 `tl_yellow_highlight`（Android 资源 15→16）。`check_design_tokens.py` 判定 `measured_tokens=44 measured_resources=16`，0 failure。消费处：`Highlighter` 往 prose 段 flush 的黄色 `BackgroundColorSpan`（对话页文本高亮，方案 V1.1 §2.2）。
 - **2026-09-28 · 学习库页头补返回箭头（用户拍板，真机走查发现两页不对称）**：走查真机截图发现学习库页头没有返回控件、设置页头有，两页同属一级 tab 却读成两种样式。裁决为**学习库也画真返回箭头，与设置同形制**（`ic_nav_back` + `tl_green_deep` tint + borderless + `-8dp` start），上一轮补的 `touch_min` 空占位 `View` 退役。箭头行为 = 系统返回的同一请求：**有搜索词时先退出搜索态并恢复本页列表，无搜索词时回主页 tab**。

@@ -25,13 +25,13 @@
 
 - 产品事实（需求边界、功能规则、技术方案）：`Docs/01-demand`、`Docs/03-prd-draft`、`Docs/05-technical-design`。
 - 变更意图与收敛过程：`Docs/intent`（本目录）。
-- Harness 任务状态、TDD 证据与验收结论：`.trae/tasks`。
-- 工程约束与守门规则：`.trae/rules`。
+- Harness 任务状态、TDD 证据与验收结论：`.codex/tasks`。
+- 工程约束与守门规则：`.codex/rules`。
 
 ## 交接
 
-- 模板：`.trae/templates/INTENT.md`
-- 产出角色：`intent-capturer`（定义在 `.trae/agents/`）
-- 收敛判据：`pm-discovery`（定义在 `.trae/skills/`）
-- 下游：`requirement-decomposer`（定义在 `.trae/agents/`），它要求已有确认的父 requirement；`status: accepted` 的 intent 就是它的输入。
-- 交付后：按 `.trae/rules/documentation.md` 把结论回写到 `Docs/03-prd-draft` 等当前态文档。
+- 模板：`.codex/templates/INTENT.md`
+- 产出角色：`intent-capturer`（定义在 `.codex/agents/`）
+- 收敛判据：`pm-discovery`（定义在 `.codex/skills/`）
+- 下游：`requirement-decomposer`（定义在 `.codex/agents/`），它要求已有确认的父 requirement；`status: accepted` 的 intent 就是它的输入。
+- 交付后：按 `.codex/rules/documentation.md` 把结论回写到 `Docs/03-prd-draft` 等当前态文档。

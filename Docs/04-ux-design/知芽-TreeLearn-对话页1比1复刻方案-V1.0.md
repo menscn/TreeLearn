@@ -41,7 +41,7 @@
 | 设计 token | `Docs/04-ux-design/design-system/tokens.json` | `green-bubble` 条目 |
 | Android 资源 | `android/app/src/main/res/values/colors.xml` | `<color name="tl_green_bubble">#3F6C49</color>` |
 
-**守门结果**：`python .trae/scripts/dev/check_design_tokens.py` → `measured_tokens=44 measured_resources=16`、`0 check(s) failed`、`EXITCODE=0`。
+**守门结果**：`python .codex/scripts/dev/check_design_tokens.py` → `measured_tokens=44 measured_resources=16`、`0 check(s) failed`、`EXITCODE=0`。
 （资源数 15 → 16 是新增 `green-bubble` 的必然结果，`README.md` 变更日志已记录并给出理由；`tokens.json` 里「本轮不改动 15 个资源」是 2026-09-22 那一次的变更边界，不是永久约束。）
 
 **未改动的部分**：`.msg-user` 的气泡高度、内边距、字号、行高；`.ai-tag` 全部属性；所有按钮的增删（结论仍是**一个都不用动**，见 §5）。
@@ -69,7 +69,7 @@
 # 2026-10-15 起仪器已入库并可按屏名重跑（当年这条命令跑的是 artifacts/tmp/ 下的同名脚本）。
 # 重跑请写到新文件名：本节下面引用的 ux-chat-1to1-measure-2026-09-27.txt 是当年的实测记录，
 # 覆盖它就等于改写当年的结论。
-python -X utf8 .trae/scripts/dev/parity/measure_screen.py --screen chat \
+python -X utf8 .codex/scripts/dev/parity/measure_screen.py --screen chat \
     > artifacts/evidence/ux-chat-1to1-measure-2026-10-15.txt
 ```
 
@@ -131,7 +131,7 @@ python -X utf8 .trae/scripts/dev/parity/measure_screen.py --screen chat \
 
 **理由**：`--green` 是「生长绿」动作色，服务于发送键、主按钮、锚点下划线、生成中圆点、叶芽标记等**小面积、需要"跳"出来**的元素。气泡是**大面积底色**，设计上本就可以用一档更柔和的绿来降低压迫感——截图正是这么做的。把两者分开，才能既对齐截图、又不让按钮一起变灰。
 
-**代价**：新增 1 个不透明 hex token，守门脚本（`.trae/scripts/dev/check_design_tokens.py` 第 145 行按不透明 hex 自动映射）会要求 `colors.xml` 同步新增 1 个资源 → **15 → 16 个**。这与 `tokens.json` 中 `green-soft` 条目写明的「本轮不允许改动它的 15 个资源名与数量」冲突，**需要你明确放宽该约定**。
+**代价**：新增 1 个不透明 hex token，守门脚本（`.codex/scripts/dev/check_design_tokens.py` 第 145 行按不透明 hex 自动映射）会要求 `colors.xml` 同步新增 1 个资源 → **15 → 16 个**。这与 `tokens.json` 中 `green-soft` 条目写明的「本轮不允许改动它的 15 个资源名与数量」冲突，**需要你明确放宽该约定**。
 
 **备选（若不接受放宽约定）**：把 `--green` 的值直接改成 `#3F6C49`。这样资源数量不变（只改 `tl_green` 的值），守门照样绿；代价是所有绿色元素一起变浅——但这些元素截图里看不到，改完后**无法验证它们变浅是否还合适**。
 
@@ -248,7 +248,7 @@ python -X utf8 .trae/scripts/dev/parity/measure_screen.py --screen chat \
 |---|---|---|---|
 | 1 | 改原型 CSS：`.msg-user` 底色（B）、圆角（C）、`.screen` 字体（A） | diff 可逐个指出 | ✅ 已完成（差异 4 判定不改） |
 | 2 | 原型 `:root` 新增 `--green-bubble` → 同步 `design-system/tokens.json` → 同步 `colors.xml` | 三处同值 | ✅ 已完成 |
-| 3 | 跑守门 | `python .trae/scripts/dev/check_design_tokens.py` → `EXITCODE=0`，0 check failed | ✅ `measured_tokens=44 measured_resources=16`，`0 check(s) failed` |
+| 3 | 跑守门 | `python .codex/scripts/dev/check_design_tokens.py` → `EXITCODE=0`，0 check failed | ✅ `measured_tokens=44 measured_resources=16`，`0 check(s) failed` |
 | 4 | **渲染原型对话页，用同一套判据量一遍** | 逐项对照表 | ✅ 已完成，见 §10 |
 | 5 | 同步文档：`知芽（TreeLearn）对话页视觉重做规格_V1.0.md`（§3.3 作废、§10 拍板项 A 结案） | 见 §8 | ✅ 已完成 |
 | 6 | 同步 `design-system/README.md` 的 token 表与变更日志 | 15 → 16 资源有据可查 | ✅ 已完成 |
@@ -274,10 +274,10 @@ python -X utf8 .trae/scripts/dev/parity/measure_screen.py --screen chat \
 ## 9. 出处索引
 
 - 实测证据：`artifacts/evidence/ux-chat-1to1-measure-2026-09-27.txt`
-- 测量脚本：`.trae/scripts/dev/parity/measure_screen.py`（2026-09-27 名为 `measure_chat_1to1.py`，T-2026-10-15-003 收编并泛化）、`.trae/scripts/dev/parity/png_probe.py`（纯 Python PNG 解码，无第三方依赖）
+- 测量脚本：`.codex/scripts/dev/parity/measure_screen.py`（2026-09-27 名为 `measure_chat_1to1.py`，T-2026-10-15-003 收编并泛化）、`.codex/scripts/dev/parity/png_probe.py`（纯 Python PNG 解码，无第三方依赖）
 - 被改文件：`Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html`（`ChatScreen` 第 662–941 行；相关 CSS 第 112、179–233 行）
 - 设计事实源：`Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html` 的 `:root`（第 22–72 行）↔ `Docs/04-ux-design/design-system/tokens.json` ↔ `android/app/src/main/res/values/colors.xml`
-- 守门脚本：`.trae/scripts/dev/check_design_tokens.py`（第 145 行：不透明 hex token 自动映射到 `colors.xml`）
+- 守门脚本：`.codex/scripts/dev/check_design_tokens.py`（第 145 行：不透明 hex token 自动映射到 `colors.xml`）
 - 生产字体事实：`android/app/src/main/res/values/themes.xml:11`
 - 相关规格：`Docs/04-ux-design/知芽（TreeLearn）对话页视觉重做规格_V1.0.md`（draft，§3.3 / §5 / §10）
 - 按钮与图标定义：原型第 423–458 行图标集（`ICopy` / `IRefresh` / `IFork` / `ITree` / `IMap` / `ISpark`）
@@ -295,9 +295,9 @@ python -X utf8 .trae/scripts/dev/parity/measure_screen.py --screen chat \
 | `artifacts/tmp/cdp_shot.mjs` | 原型渲染截图（Edge headless + CDP，2x） |
 
 > **路径变更（2026-10-15，阅读前必读）**：上表三行的路径是**2026-09-27 当时**的位置，保留不改写。
-> 现在的权威位置是 `.trae/scripts/dev/parity/`：像素量测脚本已收编为 `measure_screen.py`（可按屏名运行，
+> 现在的权威位置是 `.codex/scripts/dev/parity/`：像素量测脚本已收编为 `measure_screen.py`（可按屏名运行，
 > 偏移校正从同目录 `screens.json` 取并每次打印扣除量，正反双向自检 `--selftest`），`png_probe.py` 一并迁入。
-> 两支 Node 工具里，产图侧 `cdp_shot.mjs` 已由 T-2026-10-15-006 收编进 `.trae/scripts/dev/parity/`
+> 两支 Node 工具里，产图侧 `cdp_shot.mjs` 已由 T-2026-10-15-006 收编进 `.codex/scripts/dev/parity/`
 > （与共享层 `parity_cdp.mjs` 一起：屏档案驱动调用、四档退出码、正反双向自检 `--selftest`）；
 > DOM 侧 `verify_1to1.mjs` 已由 T-2026-10-15-009 收编进同一目录（与 `cdp_shot.mjs` 共用 `parity_cdp.mjs`：
 > 按屏名从 `screens.json` 的 `prototype` 段取 HTML 路径、点击序列、等待选择器与 `dom_checks` 名单，

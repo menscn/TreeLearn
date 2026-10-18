@@ -23,7 +23,7 @@ status: accepted
   - 事实：Android `TextToSpeech` 与 `SpeechRecognizer`（含 `RECORD_AUDIO` 权限）均为平台 API，零新依赖；知芽动作条/草稿/输入栏现状见上述代码路径；T-093/094/095 三个实现任务已按「系统 TTS + 系统 STT」拆分并等待本规格。
   - 假设：目标设备装有可用的系统 TTS 引擎（中文）与识别服务（T-081 Assumptions 行）；语速/音调第一批用系统默认值（T-093 已记录该决策）。
   - 未知：各厂商 ROM 的 `SpeechRecognizer` 离线可用性与识别质量差异——真机项，标记为未知，不在本规格给结论（T-081 Unknowns 行）。
-- 来源：`Docs/intent/INTENT-2026-09-23-rikkahub-settings-center-absorption.md`（预期结果、核心流程、状态与异常、约束与非目标、决策记录各节）；实现任务 `.trae/tasks/T-2026-09-23-system-tts-settings-093.md`、`T-2026-09-23-message-read-aloud-094.md`、`T-2026-09-23-speech-input-095.md`。
+- 来源：`Docs/intent/INTENT-2026-09-23-rikkahub-settings-center-absorption.md`（预期结果、核心流程、状态与异常、约束与非目标、决策记录各节）；实现任务 `.codex/tasks/T-2026-09-23-system-tts-settings-093.md`、`T-2026-09-23-message-read-aloud-094.md`、`T-2026-09-23-speech-input-095.md`。
 
 ## Interface plan（界面方案）
 
@@ -60,12 +60,12 @@ status: accepted
 - 识别结果入草稿：识别文本追加到现有草稿末尾（必要时间隔一个空格），走既有 `ChatViewState.withDraft` + `ChatDraftStore.save` 链路；**不**调用 `clear`（该契约只允许 accepted send 触发，见 `ChatDraftStore.java` 注释），**不**触发发送（T-076 实现注记：草稿是用户输入，任何路径不得未经规格允许清空它）。
 - 权限申请时机：`RECORD_AUDIO` 仅在用户长按语音键的当刻检查并申请；不在启动时、不在进入对话页时、不在无入口时预弹（T-081 Watch-outs 行）。TTS 无需运行时权限。
 - 无新依赖原则：TTS 与 STT 均为 Android 平台 API，本批不新增任何第三方库（对应 intent「能力真实优先于数量」与 T-081 约束行）。
-- 来源：RikkaHub 事实——`speech/src/main/java/me/rerere/tts/provider/providers/SystemTTSProvider.kt`（TextToSpeech 初始化/setLanguage/speak 类调用/UtteranceProgressListener/shutdown 生命周期）、`speech/src/main/java/me/rerere/tts/controller/TtsController.kt`（flush 打断、stop/dispose、错误流）、`ui/pages/setting/SettingSpeechPage.kt`、`ui/components/message/ChatMessageActions.kt`；知芽事实——`screen/AnswerActionBar.java`、`ui/ChatDraftStore.java`、`ui/ChatViewState.java`、`res/layout/screen_chat_body.xml`、`.trae/tasks/T-2026-09-23-*.md`（074/075/076/093/094/095）。无 DEFERRED 项：本节各机制前置条目均已落地或在本批任务内交付。
+- 来源：RikkaHub 事实——`speech/src/main/java/me/rerere/tts/provider/providers/SystemTTSProvider.kt`（TextToSpeech 初始化/setLanguage/speak 类调用/UtteranceProgressListener/shutdown 生命周期）、`speech/src/main/java/me/rerere/tts/controller/TtsController.kt`（flush 打断、stop/dispose、错误流）、`ui/pages/setting/SettingSpeechPage.kt`、`ui/components/message/ChatMessageActions.kt`；知芽事实——`screen/AnswerActionBar.java`、`ui/ChatDraftStore.java`、`ui/ChatViewState.java`、`res/layout/screen_chat_body.xml`、`.codex/tasks/T-2026-09-23-*.md`（074/075/076/093/094/095）。无 DEFERRED 项：本节各机制前置条目均已落地或在本批任务内交付。
 
 ## Doubts（疑虑点）
 
 - 疑虑 1：**是否本期纳入云 TTS 提供商**。RikkaHub 有 OpenAI/Gemini/MiniMax 等十余种云 TTS（`speech/src/main/java/me/rerere/tts/provider/TTSProviderSetting.kt`），而 intent 预期结果只写「TTS 调用本机系统 TTS」，两者范围不一致。（冲突对象：intent 预期结果节 vs RikkaHub 提供商事实；两种走法：A 第一批只做系统 TTS，按本规格 / B 第一批同时做提供商抽象与至少一个云 TTS；建议 A——用户原话「文本转语音能调用本机的 TTS」已被系统 TTS 满足，零费用零依赖，且 T-093/094/095 已按 A 拆分；代价：音色少、无自然度调节，学习场景影响有限；谁拍板：用户）
-- 疑虑 2：**朗读时是否自动滚动跟随**。跟随需要「朗读进度 ↔ 可视行」映射，且与 T-075 既有滚动跟随/脱离状态机叠加。（冲突对象：`.trae/tasks/T-2026-09-23-generation-motion-scroll-states-075.md` 的滚动策略与低动效取向；两种走法：A 不跟随，朗读纯音频 / B 朗读行高亮并随进度滚动；建议 A——低动效友好、不引入朗读↔滚动状态联动的新回归面；代价：长文朗读需手动定位当前句；谁拍板：用户）
+- 疑虑 2：**朗读时是否自动滚动跟随**。跟随需要「朗读进度 ↔ 可视行」映射，且与 T-075 既有滚动跟随/脱离状态机叠加。（冲突对象：`.codex/tasks/T-2026-09-23-generation-motion-scroll-states-075.md` 的滚动策略与低动效取向；两种走法：A 不跟随，朗读纯音频 / B 朗读行高亮并随进度滚动；建议 A——低动效友好、不引入朗读↔滚动状态联动的新回归面；代价：长文朗读需手动定位当前句；谁拍板：用户）
 - 疑虑 3：**语音键位置**。（冲突对象：`res/layout/screen_chat_body.xml` 输入栏空间 vs 44dp 热区底线（T-076 实现注记）；两种走法：A 输入栏内、与发送键并列 / B 放到全屏编辑器或动作条等次要位置；建议 A——口语提问是高频替代打字的路径，应在拇指热区一眼可见，T-095 已按 A 拆分；代价：键盘区更挤，窄屏上 44dp 热区与 `radius.r-lg` 输入框空间有竞争，需实现者微调排布；谁拍板：用户）
 
 ### 拍板记录（2026-09-23 08:05 用户回复「按照建议采纳」）

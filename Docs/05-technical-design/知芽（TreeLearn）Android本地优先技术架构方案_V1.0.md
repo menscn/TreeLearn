@@ -369,4 +369,4 @@ DeepSeek 官方文档说明：未携带 tools 的请求会忽略历史消息专�
 6. 纯 Java 树布局与 Canvas UI。
 7. 平板适配、安全、集成测试与 release APK 验收。
 
-对应可执行拆分以 `.trae/tasks/T-*.md` 为准，其中提示词策略由 T-020 独立实现；每个实现任务均须先 RED 后 GREEN，并在完成前通过独立 verifier 与 Android Java-only guard。
+对应可执行拆分以 `.codex/tasks/T-*.md` 为准，其中提示词策略由 T-020 独立实现；每个实现任务均须先 RED 后 GREEN，并在完成前通过独立 verifier 与 Android Java-only guard。

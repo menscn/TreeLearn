@@ -1,0 +1,44 @@
+Generated: 2026-10-18T19:35:28+0800
+Command: gen-fe-gate.py --slice 011
+Python: 3.13.12  CWD: D:\Project\Android\Treelearn
+Generator sha256: 1296c2c8540787628a903942c451a50a78d1cb3b1afa049aef246a7bebdce816
+只读名单边界：本运行写出的产物（含本文件）不进名单；名单文件的复算命令为 `python -X utf8 -c "import hashlib,pathlib;print(hashlib.sha256(pathlib.Path(r'<path>').read_bytes()).hexdigest())"`
+名单条目=12
+
+===== block 01 - frontend build（骨架与生产构建） =====
+$ pnpm --dir frontend build
+vite v8.3.4 building client environment for production...
+transforming...
+✓ 16 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.38 kB │ gzip:  0.26 kB
+dist/assets/style-BAw_b0cW.css    1.26 kB │ gzip:  0.70 kB
+dist/assets/index-95e8TOOG.js   219.25 kB │ gzip: 68.45 kB
+
+✓ built in 389ms
+$ tsc --noEmit && vite build
+rc=0 want=0 judgement-lines-found=1 missing=[]
+BLOCK 01: OK
+
+===== block 02 - frontend lint（类型检查） =====
+$ pnpm --dir frontend lint
+$ tsc --noEmit
+rc=0 want=0 judgement-lines-found=1 missing=[]
+BLOCK 02: OK
+
+===== block 03 - 字节卫生（纯 LF + 严格 UTF-8，双向样本） =====
+$ (internal byte-hygiene witness，无外部命令)
+control: cr-found=True utf8-found=True findings=2 ok=True
+tree: scanned=9 roots=3 flagged=[]
+rc=0 want=0 judgement-lines-found=3 missing=[]
+BLOCK 03: OK
+
+===== 位移检测（本运行声称只读的文件）=====
+moved during this run=0 movers=[]
+
+===== 汇总 =====
+blocks=3 floor=2 failing=[]
+want/got: [{"block": 1, "want": 0, "got": 0}, {"block": 2, "want": 0, "got": 0}, {"block": 3, "want": 0, "got": 0}]
+OVERALL_EXITCODE=0
+DECODE ok utf8=True cr=0 commit-shaped-tokens=0

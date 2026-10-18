@@ -53,7 +53,7 @@ status: draft
   - 呈现密度：列表项一行标题加一行次要信息；长文本单行截断，不换行撑高。
   - 圆角、间距、字号、阴影一律取 `radius_*`、`space_*`、`page_gutter`、`text_*` 档位；触达用 `touch_min`；平板列宽用 `content_measure`。本规格不复写具体数值。
 - 来源：
-  - 设计 token 名与分组见 `Docs/04-ux-design/design-system/tokens.json`；一致性由 `.trae/scripts/dev/check_design_tokens.py` 判定。
+  - 设计 token 名与分组见 `Docs/04-ux-design/design-system/tokens.json`；一致性由 `.codex/scripts/dev/check_design_tokens.py` 判定。
   - 新稿对应小节：来源 `src/index.css` 的 `:root` 区块（设计 token）与 `src/App.tsx`（标签栏与换屏）、`src/screens/HomeScreen.tsx`、`src/screens/ArchiveScreen.tsx`、`src/screens/NavScreen.tsx`、`src/screens/CanvasScreen.tsx`。
   - 迁移方案与差异分类见 `Docs/04-ux-design/知芽-Figma新稿迁移方案-V1.0.md`。
 
@@ -82,7 +82,7 @@ status: draft
   - `android/data/src/main/java/com/treelearn/data/db/dao/SearchDao.java`
   - `android/core/src/main/java/com/treelearn/core/domain/`
   - `android/README.md`（UI 约定、对比度记录、尺寸令牌表）
-  - `.trae/ROADMAP.md`（Stage 2–6 未交付事项）
+  - `.codex/ROADMAP.md`（Stage 2–6 未交付事项）
 
 ## Doubts（疑虑点）
 
@@ -105,7 +105,7 @@ status: draft
 - 疑虑 2：**已完成区的分组方式。**（冲突对象：新稿把所有归档分支平铺，而 PRD 第 469 行要求每条结果显示祖先路径及归档状态；两种走法：A 平铺但每条显示祖先路径与归档状态；B 按主题分组、组内平铺，祖先路径退化为主题名；谁拍板：用户）
 - 疑虑 3：**独立搜索屏的处置。**（冲突对象：`android/app/src/main/java/com/treelearn/app/screen/SearchScreen.java`、`res/layout/screen_search_body.xml`、`res/layout/item_search_hit.xml`、`res/layout-sw600dp/screen_search.xml`，以及 8 个搜索相关测试文件——`SearchPresenterTest`、`SearchPageTest`、`SearchJumpTest`、`HomeSearchEntryTest`、`SearchHitTest`、`SearchQueryTest`、`SearchDaoStatementTest`、`SearchUnreadReadingInstrumentedTest`；两种走法：A 删除视图层与仅服务于独立屏的测试，检索栈与领域类型保留；B 文件保留但不再被路由；谁拍板：用户——删除属于本次「保功能」边界外的一次清理，需明确授权）
 - 疑虑 4：**画布控制条的处置。**（冲突对象：`res/layout/screen_tree_body.xml` 的现有控制条（折叠 / 进入 / 适应）与新稿画布右上角的缩放工具栏（适应 / 放大 / 缩小 / 定位）；两种走法：A 用新工具栏替换现有控制条；B 保留现有控制条，只叠加点阵网格背景；谁拍板：用户——两种走法对已验收的画布测试影响不同）
-- 疑虑 5：**已按证据结案——Vector Drawable 计入生产代码行预算。**（依据：`.trae/scripts/dev/count_production_lines.py` 第 30 行对 `.xml` 走 `strip_xml`，所以 XML 资源与 Java 同样计入。影响：约 28 个图标的 XML 很可能超过单任务 200 行的软上限，拆解时要么切成两片，要么按契约记录一条软上限警告；实际行数在拆解时用该脚本实测，不预估。）
+- 疑虑 5：**已按证据结案——Vector Drawable 计入生产代码行预算。**（依据：`.codex/scripts/dev/count_production_lines.py` 第 30 行对 `.xml` 走 `strip_xml`，所以 XML 资源与 Java 同样计入。影响：约 28 个图标的 XML 很可能超过单任务 200 行的软上限，拆解时要么切成两片，要么按契约记录一条软上限警告；实际行数在拆解时用该脚本实测，不预估。）
 - 疑虑 6：**品牌字的衬线回退栈在中文设备上观感不一致。**（冲突对象：已决的「本轮不打包字体」；两种走法：接受各厂商 ROM 的衬线差异，或后续追加一次子集化字体内嵌；谁拍板：用户——本轮按接受处理，此处只登记残余风险）
 - 疑虑 7（落盘时新发现）：**推荐区形态是否跟着新稿改。**（冲突对象：PRD 第 228 行 F17【P0】「弹幕滚动展示」与第 978 行验收口径「双行反向滚动，交互时暂停」，对上新稿的「一张重点卡 + 三条列表项」；两种走法：A 按新稿改为重点卡 + 列表；B 保留弹幕只换皮；谁拍板：用户——**采 B**。此外 PRD 第 49、96、228、978 行的同源表述一并保留。）
 - 疑虑 8（悬空引用归位）：**对话页内的设置入口保留还是收敛到标签栏。**（原条目写在本规格「入口位置」一节但未在疑虑点清单中出现，属悬空引用；谁拍板：AI 按「保持现状、不动」结案，理由为该入口属已验收行为，删除它要牵动对话屏与其测试却零功能收益。）

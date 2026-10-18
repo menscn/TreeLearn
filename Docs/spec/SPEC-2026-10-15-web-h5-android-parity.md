@@ -9,7 +9,7 @@ status: accepted
 
 ## Requirement spec（需求规格）
 
-- 范围：新建 `frontend/`（可构建的 Web 界面工程）与 `backend/`（仅本机可达的 Java 服务），把 Android 当前界面逐屏还原为 H5 形态；还原以 Android 现状为唯一界面事实权威，高保真原型作为 token 与视觉意图来源并作为一次性提取源。**首批范围 = 屏幕清单的每一条目**，条目数不在本文复述：唯一权威是生成的 `Docs/04-ux-design/parity/screen-inventory.json` 的 `counts`，Android 代码一改、重跑 `python .trae/scripts/dev/gen_screen_inventory.py` 即随之更新，本文不需要跟着改。2026-10-15 拍板时写的是「全部 16 屏 + 6 浮层」，那是盘点仪器建立之前的人写估计；用户 2026-10-16 裁定「以实测清单为准」。两处差额成因不同，均已登记在 `T-2026-10-15-screen-inventory-parity-ledger-005.md`：浮层一侧是仪器的模式词表手抄导致**少计**（已修，因此 6→16 是把漏的补回来，不是范围扩张）；屏一侧的差额**已于 2026-10-16 逐条对应，且不需要等阶段 1**：清单 `screens` 的类名集合与 `android/app/src/main/java/com/treelearn/app/screen/` 下全部 `*Screen.java` 的基名集合是同一集合，且清单的不可达屏数为 0，因此不存在漏屏；多出的两个名字是入口别名而不是屏——`MainActivity.openOverview` 只是 `showTree(branchId)` 的委托，落点是树画布屏，「版本」入口 `MainActivity.openVersions` 委托 `ChatScreen.showVersions`、后者就地 `new PopupMenu(...)` 弹菜单，已经算在浮层一侧（回算命令与集合比对记在 `T-2026-10-15-screen-inventory-parity-ledger-005.md` 的 Gaps ①；被检文件的行号一律不写进本文，它随任何 Android 改动位移）。阶段一到阶段六不依赖任何宿主：界面由「快照夹具」驱动，夹具是从 Android 侧成对采集的真机截图与状态/几何快照。阶段七才接入 `backend/`。
+- 范围：新建 `frontend/`（可构建的 Web 界面工程）与 `backend/`（仅本机可达的 Java 服务），把 Android 当前界面逐屏还原为 H5 形态；还原以 Android 现状为唯一界面事实权威，高保真原型作为 token 与视觉意图来源并作为一次性提取源。**首批范围 = 屏幕清单的每一条目**，条目数不在本文复述：唯一权威是生成的 `Docs/04-ux-design/parity/screen-inventory.json` 的 `counts`，Android 代码一改、重跑 `python .codex/scripts/dev/gen_screen_inventory.py` 即随之更新，本文不需要跟着改。2026-10-15 拍板时写的是「全部 16 屏 + 6 浮层」，那是盘点仪器建立之前的人写估计；用户 2026-10-16 裁定「以实测清单为准」。两处差额成因不同，均已登记在 `T-2026-10-15-screen-inventory-parity-ledger-005.md`：浮层一侧是仪器的模式词表手抄导致**少计**（已修，因此 6→16 是把漏的补回来，不是范围扩张）；屏一侧的差额**已于 2026-10-16 逐条对应，且不需要等阶段 1**：清单 `screens` 的类名集合与 `android/app/src/main/java/com/treelearn/app/screen/` 下全部 `*Screen.java` 的基名集合是同一集合，且清单的不可达屏数为 0，因此不存在漏屏；多出的两个名字是入口别名而不是屏——`MainActivity.openOverview` 只是 `showTree(branchId)` 的委托，落点是树画布屏，「版本」入口 `MainActivity.openVersions` 委托 `ChatScreen.showVersions`、后者就地 `new PopupMenu(...)` 弹菜单，已经算在浮层一侧（回算命令与集合比对记在 `T-2026-10-15-screen-inventory-parity-ledger-005.md` 的 Gaps ①；被检文件的行号一律不写进本文，它随任何 Android 改动位移）。阶段一到阶段六不依赖任何宿主：界面由「快照夹具」驱动，夹具是从 Android 侧成对采集的真机截图与状态/几何快照。阶段七才接入 `backend/`。
 - 验收方向：① 逐屏有三层判据台账（结构 / 视觉 / 行为）且每项结论可重跑；② 达绿或已被显式登记为接受的偏差，二者必居其一，不允许沉默；③ PC 端由本地服务真实启动并跑通一次导出导入；④ Android 侧数据、密钥、Java-only 与既有业务规则保持不变，并被守门证明；⑤ 同一规则在 Web 或服务侧不存在第二份实现（设计值、SQL/DDL、领域判定、树几何、枚举与错误语义）。
 - 非目标：不做双活编辑与冲突合并；不做 iOS 或其它平台包；不做远程部署、多租户、云端账号或远程遥测；本期不新增英文文案；不替换或删除 Android 原生界面；不复用被移除的旧线（`35bb6ce` 之前的 `web/**`）任何代码；不把 SQLite、密钥保管或生成/流式的权威实现搬进 JavaScript。
 - 来源：intent 的 Problem、Expected outcome、Core flow、Constraints and non-goals、Decision record（终态 accepted，2026-10-15 四项拍板）；界面资产盘点取自 `android/app/src/main/**`；旧线病因取自 `35bb6ce` 的提交说明与用户 2026-10-15 陈述。
@@ -20,7 +20,7 @@ status: accepted
 - 入口位置：全部入口按 Android 现有导航图 1:1 落位——主页（抽屉键 → 统计详情、齿轮 → 设置根、提交问题、最近学习卡、推荐项）、学习库（分段与顶部搜索框、命中结果定位跳转）、对话页（总览、导航、划词浮条、子分支浮层、版本菜单、联网检索选择、模型与思考选择、全屏编辑、语音与附件）、画布（节点弹卡、导航、打开）、设置根的五条子入口（KEY 房 → 供应商 / 模型 / 搜索服务 / 语音 / 文件管理）。
 - 状态与异常：每屏必须实现并可视化以下状态类别，且彼此不可混同——加载中、可用、夹具/数据不可用、服务不可达、Provider 无 Key、生成空闲/提交/推理流/回答流/稳定/失败/中断/取消。异常文案由前端资源表提供稳定 key，业务状态只由数据侧给出，前端不得自行猜测原因。
 - 数量与呈现方式：「范围」条所指清单的每一条目必须各有台账条目——屏数、浮层数、自绘屏数一律从 `counts` 读取，本文与任务文件都不复述这些数字（复述即第二份正文，必然过期）；视觉数值一律引用 token 名（`bg`/`surface`/`ink`/`ink2`/`ink3`/`line`/`hairline`/`green`/`green-deep`/`green-soft`/`green-faint`/`blue`/`amber`/`amber-soft`/`red`/`red-soft`/`yellow-highlight`、间距 `s1`–`s8` 与 `gutter`、圆角 `r-sm`/`r-md`/`r-lg`/`r-full`、字号 `fs-display`/`fs-brand`/`fs-h1`/`fs-h2`/`fs-body`/`fs-sm`/`fs-cap`、阴影 `sh-1`/`sh-2`、纸感 `paper-rule`/`paper-write` 与阅读行高 `lh-read`），触控热区下限引用 `touch_min` 这一 Android 尺寸定义；本文不出现新设计数值。形状档位只允许三档：手机基线档、平板档（复刻 `layout-sw600dp` 与 `values-sw600dp` 已存在的差异）、PC 档（阶段八新增，且只改外壳）。
-- 来源：`Docs/04-ux-design/design-system/tokens.json`（其权威为高保真原型 `:root` 区块）、`Docs/04-ux-design/parity/screen-inventory.json`（范围条目数的唯一权威，由 `.trae/scripts/dev/gen_screen_inventory.py` 生成）、`android/app/src/main/res/values/dimens.xml` 与 `colors.xml`、`Docs/04-ux-design/知芽-TreeLearn-对话页1比1复刻方案-V1.0.md` 的逐项对照表与偏差判定。
+- 来源：`Docs/04-ux-design/design-system/tokens.json`（其权威为高保真原型 `:root` 区块）、`Docs/04-ux-design/parity/screen-inventory.json`（范围条目数的唯一权威，由 `.codex/scripts/dev/gen_screen_inventory.py` 生成）、`android/app/src/main/res/values/dimens.xml` 与 `colors.xml`、`Docs/04-ux-design/知芽-TreeLearn-对话页1比1复刻方案-V1.0.md` 的逐项对照表与偏差判定。
 
 ## Technical spec（技术规格）
 
@@ -30,7 +30,7 @@ status: accepted
 Android 当前实现           ← 界面事实唯一权威（1:1 的「原物」）
 高保真原型 v1/v1.1         ← 设计 token 与视觉意图权威；结构与此冲突时 Android 胜；工程化后即冻结
 Docs/.../tokens.json       ← 原型 :root 的机器镜像
-frontend CSS 变量          ← 生成物，由 `.trae/scripts/dev/gen_design_tokens_css.py` 从 tokens.json 产出，禁止手抄（token 链的第 4 个消费者，落点 `frontend/src/styles/tokens.css`）
+frontend CSS 变量          ← 生成物，由 `.codex/scripts/dev/gen_design_tokens_css.py` 从 tokens.json 产出，禁止手抄（token 链的第 4 个消费者，落点 `frontend/src/styles/tokens.css`）
 contracts/ 一份正文         ← DTO / 枚举 / 事件 / 错误语义唯一正文 → 代码生成 TypeScript 类型
 `:core` / `:tree-layout`    ← 领域判定与树几何唯一实现
 共享 schema 与 SQL 文本模块  ← DDL 与语句文本唯一实现，Android 与服务共用、驱动各一份
@@ -40,9 +40,9 @@ contracts/ 一份正文         ← DTO / 枚举 / 事件 / 错误语义唯一�
 
 ### 2. 目录与分层
 
-- `frontend/src/` 依赖方向固定为 `pages → layouts → components → hooks → store → api → platform → utils`（沿用 `.trae/rules/frontend.md` 既有约束，反向 import 由 lint 判 FAIL）。
-- `backend/` 依赖方向固定为 `controller → service → repository → entity`（沿用 `.trae/HARNESS.md` 三栈水流方向）。
-- 顶层目录名用 `frontend/` 与 `backend/`，**不用 `web/`**：治理体系已把 `frontend/**` 与 `backend/**` 分别授权给 `frontend-dev` 与 `backend-dev`（`.trae/rules/contracts.md` 路由表），`validate_tasks.py` 的 lane 与 stack 取值也已内置；自定义目录会落入无 owner 可写的真空。
+- `frontend/src/` 依赖方向固定为 `pages → layouts → components → hooks → store → api → platform → utils`（沿用 `.codex/rules/frontend.md` 既有约束，反向 import 由 lint 判 FAIL）。
+- `backend/` 依赖方向固定为 `controller → service → repository → entity`（沿用 `.codex/HARNESS.md` 三栈水流方向）。
+- 顶层目录名用 `frontend/` 与 `backend/`，**不用 `web/`**：治理体系已把 `frontend/**` 与 `backend/**` 分别授权给 `frontend-dev` 与 `backend-dev`（`.codex/rules/contracts.md` 路由表），`validate_tasks.py` 的 lane 与 stack 取值也已内置；自定义目录会落入无 owner 可写的真空。
 
 ### 3. 前端工程
 
@@ -62,7 +62,7 @@ React + TypeScript + Vite + pnpm；构建产物可离线打开；**不得经外�
 
 ### 5. 契约与代码生成
 
-`contracts/` 下唯一正文定义：DTO 字段与单位、枚举取值、流式事件名与序号语义、错误码与是否可重试。DTO 只允许无平台类型的 JSON 值（字符串 ID、有限枚举、布尔、epoch 毫秒、列表、对象）；时间遵守 `.trae/rules/contracts.md` 的时间字段契约。Java 与 TypeScript 各自实现解析与类型，但**类型由契约生成**，并**共用同一组 JSON fixture 做双向差分测试**——同一条 fixture 分别喂给 Java 与 TypeScript 的实现，逐字段比对解析结果、错误码与是否可重试；只允许存在一份 fixture 正文，任何一侧自造的样例数据都不算这条判据的证据。该原则是本规格自带的判据，不引用任何已删除的旧规格。生成产物不进入手工维护；README 只指向该正文，不复制字段表。
+`contracts/` 下唯一正文定义：DTO 字段与单位、枚举取值、流式事件名与序号语义、错误码与是否可重试。DTO 只允许无平台类型的 JSON 值（字符串 ID、有限枚举、布尔、epoch 毫秒、列表、对象）；时间遵守 `.codex/rules/contracts.md` 的时间字段契约。Java 与 TypeScript 各自实现解析与类型，但**类型由契约生成**，并**共用同一组 JSON fixture 做双向差分测试**——同一条 fixture 分别喂给 Java 与 TypeScript 的实现，逐字段比对解析结果、错误码与是否可重试；只允许存在一份 fixture 正文，任何一侧自造的样例数据都不算这条判据的证据。该原则是本规格自带的判据，不引用任何已删除的旧规格。生成产物不进入手工维护；README 只指向该正文，不复制字段表。
 
 ### 6. 后端形态（架构师决策，依据「高可维护性与扩展性」）
 
@@ -73,7 +73,7 @@ React + TypeScript + Vite + pnpm；构建产物可离线打开；**不得经外�
 服务约束：
 
 1. **薄壳**：服务不得实现分叉、归档、稳定回答、未读口径、阅读位置等领域判定；这些只存在于 `:core`。服务侧出现同名规则即视为缺陷。
-2. **引擎裁定**：本服务的生产数据库引擎是**桌面 SQLite**，不是 MySQL，不使用 Flyway；`.trae/rules/sql.md` 的「按实际生产引擎验证」判据必须显式记下这一裁定，否则会把桌面 SQLite 的迁移错误地送去 MySQL 验证（此坑已被记录）。
+2. **引擎裁定**：本服务的生产数据库引擎是**桌面 SQLite**，不是 MySQL，不使用 Flyway；`.codex/rules/sql.md` 的「按实际生产引擎验证」判据必须显式记下这一裁定，否则会把桌面 SQLite 的迁移错误地送去 MySQL 验证（此坑已被记录）。
 3. **网络边界**：仅绑定环回地址、随机化会话令牌、严格同源与 CORS 策略；不监听公网接口，不做远程部署。
 4. **可观测**：只记录操作 ID、状态、错误类别与耗时，不记录问题、回答、推理、提示词或密钥。
 
@@ -95,7 +95,7 @@ Android 侧当前**没有任何导出实现**，这是本次净新增交付物�
 
 沿用仓库内已验证过一轮的方法（`知芽-TreeLearn-对话页1比1复刻方案-V1.0.md` 的实测方法与闭环验证小节），并把它从「单页手工对照」升级为「逐屏机械台账」：
 
-- **仪器收编**：像素量测与 PNG 解码两支已于 2026-10-15 迁入 `.trae/scripts/dev/parity/`（`measure_screen.py`、`png_probe.py`，加同目录屏档案 `screens.json`），可按屏名运行并自带正反双向自检；无头渲染截图一支（`cdp_shot.mjs`）与它的共享层（`parity_cdp.mjs`）已于 T-2026-10-15-006 迁入同一目录，改为档案驱动调用、四档退出码、`--selftest` 正反双向；只剩 DOM 闭环量测（`verify_1to1.mjs`）已于 T-2026-10-15-009 迁入同一目录：按屏名从 `screens.json` 的 `prototype` 段取 HTML 路径、点击序列、等待选择器与 `dom_checks` 名单，档案点名而词表不认的名字判仪器故障（3），`--selftest` 正反双向。仪器留在会被清理的目录里，后续所有绿色结论都不成立——这条对四支已全部解除。
+- **仪器收编**：像素量测与 PNG 解码两支已于 2026-10-15 迁入 `.codex/scripts/dev/parity/`（`measure_screen.py`、`png_probe.py`，加同目录屏档案 `screens.json`），可按屏名运行并自带正反双向自检；无头渲染截图一支（`cdp_shot.mjs`）与它的共享层（`parity_cdp.mjs`）已于 T-2026-10-15-006 迁入同一目录，改为档案驱动调用、四档退出码、`--selftest` 正反双向；只剩 DOM 闭环量测（`verify_1to1.mjs`）已于 T-2026-10-15-009 迁入同一目录：按屏名从 `screens.json` 的 `prototype` 段取 HTML 路径、点击序列、等待选择器与 `dom_checks` 名单，档案点名而词表不认的名字判仪器故障（3），`--selftest` 正反双向。仪器留在会被清理的目录里，后续所有绿色结论都不成立——这条对四支已全部解除。
 - **偏移校正内置**：已记录的两处量测偏移（无头渲染滚动条占位、截图裁剪原点取整）必须作为脚本常量并每次打印扣除量，否则每屏重踩。Python 侧已按此落地：三个常量从屏档案 `defaults` 读取，每次运行在头注打印本次实际扣除量，任一常量缺失、非数或被置成非正数即判 FAIL（不是默默当 0）；产图侧已把同一批常量从屏档案读取，并在每次运行时把「本次用的比例」「渲染侧滚动条占位」与档案声明比对，不符即判 FAIL 或仪器故障（比例被覆盖时那张图不可交给 `--kind render`）；DOM 闭环那一支（T-2026-10-15-009）**不用脚本常量**：它在页面里现场量 `.body-scroll` 的 `offsetWidth - clientWidth` 当渲染侧占位，并在 `user-bubble` 判据里要求「距屏右 = `--gutter` + 该现场读数」，读数取不到即判该项不成立——因此这一支没有可被置成 0 的常量，屏档案声明的占位只在产图侧做交叉核对。
 - **判据分工**：结构层比对 DOM 树与 Android 视图树（元素集合、层级、顺序、文案 key）；视觉层比对真机截图与 Web 渲染截图，字体类项目按「字体族 + 字重」验收而不做逐像素判定（既有裁定理由：渲染侧字形不可能逐像素相同）；行为层用夹具回放导航、返回栈、流式事件、未读口径与阅读位置。
 - **台账由构造派生**：台账条目与结论全部从捕获输出机械生成，不手写数字；条目覆盖以代码可达性为源，确保无根布局充气的自绘屏不被漏掉（成员由清单的 `self_drawn` 标记给出，不由本文点名）。
@@ -117,7 +117,7 @@ Android 侧当前**没有任何导出实现**，这是本次净新增交付物�
 | 8 | PC 外壳适配 | 改动面不得触碰组件层（机械检查） | 4–6 |
 | 9 | 收口回归与文档 | 无未登记的红色条目 | 3–4 |
 
-合计 54–79 片。每片按 `.trae/rules/harness-tasks.md` 的规模目标（不超两百生产行，超五百需用户逐项批准规模例外并如实记录批准时点）；执行采用 Harness 任务流程（用户 2026-10-15 拍板），任务统一落在 `.trae/tasks/`。
+合计 54–79 片。每片按 `.codex/rules/harness-tasks.md` 的规模目标（不超两百生产行，超五百需用户逐项批准规模例外并如实记录批准时点）；执行采用 Harness 任务流程（用户 2026-10-15 拍板），任务统一落在 `.codex/tasks/`。
 
 ### 12. 风险登记
 
@@ -131,18 +131,18 @@ Android 侧当前**没有任何导出实现**，这是本次净新增交付物�
 | 新增依赖未核实 | 实现任务先核实许可证/版本/字节码再固定；Java-only 判定以构件字节码为准 |
 | 后端 Gradle 引用 Android 目录下模块的写法未验证 | 阶段 7 前置核实项，失败则改为把共享模块提升为顶层独立模块并记录影响 |
 
-- 来源：`android/app/src/main/**` 屏幕与资源盘点、`android/build.gradle` 的模块方向与纯 JVM 守门、`android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java` 与 `:data`/`:ai` 的 Android 依赖计数、`Docs/04-ux-design/design-system/tokens.json` 及其权威原型 `:root` 区块、`Docs/04-ux-design/知芽-TreeLearn-对话页1比1复刻方案-V1.0.md` 的实测方法与闭环判据、`.trae/rules/frontend.md`、`.trae/rules/backend.md`、`.trae/rules/sql.md`、`.trae/rules/contracts.md`、`.trae/rules/harness-tasks.md`。
+- 来源：`android/app/src/main/**` 屏幕与资源盘点、`android/build.gradle` 的模块方向与纯 JVM 守门、`android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java` 与 `:data`/`:ai` 的 Android 依赖计数、`Docs/04-ux-design/design-system/tokens.json` 及其权威原型 `:root` 区块、`Docs/04-ux-design/知芽-TreeLearn-对话页1比1复刻方案-V1.0.md` 的实测方法与闭环判据、`.codex/rules/frontend.md`、`.codex/rules/backend.md`、`.codex/rules/sql.md`、`.codex/rules/contracts.md`、`.codex/rules/harness-tasks.md`。
 
 ## Doubts（疑虑点）
 
-- 疑虑 1（已裁定 2026-10-15 并已于 `T-2026-10-15-002` 回写完成）：当前态权威文档曾主张「不建设 Spring Boot、React」与「无前后端目录」，与本规格直接冲突。冲突点第一轮盘点 9 个文件，GREEN 收尾的第二轮反向搜索又补入第 10 个：根 `README.md` 与 `README_EN.md`、`.trae/context/project-brief.md`、`.trae/ROADMAP.md`、`Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md`、`Docs/05-technical-design/TreeLearn_Harness全量开发交付提示词.md`、`.trae/rules/shared-state.md`、`.trae/rules/observability.md`、`.trae/skills/pm-discovery/SKILL.md`、`Docs/spec/SPEC-2026-09-23-providers-and-models.md`（把 project-brief 的旧约束当理由引用）。落法：每处改写为「不做**远程**服务端」并指向本规格，历史技术方案保留其原叙事且显式标注「与规格冲突处以本规格为准」，不改写历史；复活旧断言、盘点清单塌陷或删除权威指针由 `.trae/scripts/dev/check_stack_facts.py` 三条判据长期守住（该脚本含条目下限、行号级命中输出与 22 例正反双向自检）。PRD 基准 `Docs/01-demand/结构化需求基准说明书_知芽（TreeLearn）_V3.3增量.md:26` 与 `..._V3.0.md:70` 仍保留「不做后端/前端」类主张，属冻结基线、不随本规格回写，改它要走基线变更流程；本条把那两处显式登记为与本规格的已知差异，不留静默冲突。原「维持旧边界并否决本规格」的走法已由用户裁定否决。
-- 疑虑 2：Android 侧新增导出能力会触碰生产数据层与「本地优先、首版不建同步」的既有裁定，且归档格式是长期契约（冲突对象：`Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md` 的未来扩展表述与 `.trae/rules/sql.md`；两种走法：把导出限定为一次性单向搬迁并冻结格式版本，或改为服务侧只读接入而放弃 PC 可写；谁拍板：用户）。
-- 疑虑 3（已裁定 2026-10-15，用户批准「为单一来源改动 Android 生产代码」）：`:ai` 升为 `java-library` 并加入 `pureJvmModules`、DDL 与 SQL 文本外提到共享 JVM 模块，两者都要改 Android 生产代码，回归面覆盖生成链路与数据层。落法：这两片各自独立成任务、串行执行、叠加 `db-migration-reviewer` 与 `android-no-kotlin-guard`，并按 `.trae/rules/regression.md` 先写影响面；服务侧出现第二份网关或第二份建表语句即视为缺陷（旧线病因）。原「保留 Android 现状、服务侧另写一份」的走法已否决。
-- 疑虑 4（已裁定 2026-10-15，用户选择「删除」而非改写口径）：`.trae/rules/frontend.md` 的 user-copy guard 不再要求任何第二语言齐备，判定口径只存在于该 guard 一处；`.trae/agents/frontend-dev.md` 原先复述「`zh-CN`/`en-US` 双键」的那条已改为指向该规则，不做复述。同一段里「该命令也是 Android 构建入口的一部分」描述的是已删除旧线的接线方式，已按新线事实改写为前端 dev/lint/build 入口、不进 Android 构建。保留不变的判据：文案必须按 key 从资源表读取、生产代码不得硬编码用户可见文案、`i18n-ignore` 例外机制与 decrement-only 基线。
+- 疑虑 1（已裁定 2026-10-15 并已于 `T-2026-10-15-002` 回写完成）：当前态权威文档曾主张「不建设 Spring Boot、React」与「无前后端目录」，与本规格直接冲突。冲突点第一轮盘点 9 个文件，GREEN 收尾的第二轮反向搜索又补入第 10 个：根 `README.md` 与 `README_EN.md`、`.codex/context/project-brief.md`、`.codex/ROADMAP.md`、`Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md`、`Docs/05-technical-design/TreeLearn_Harness全量开发交付提示词.md`、`.codex/rules/shared-state.md`、`.codex/rules/observability.md`、`.codex/skills/pm-discovery/SKILL.md`、`Docs/spec/SPEC-2026-09-23-providers-and-models.md`（把 project-brief 的旧约束当理由引用）。落法：每处改写为「不做**远程**服务端」并指向本规格，历史技术方案保留其原叙事且显式标注「与规格冲突处以本规格为准」，不改写历史；复活旧断言、盘点清单塌陷或删除权威指针由 `.codex/scripts/dev/check_stack_facts.py` 三条判据长期守住（该脚本含条目下限、行号级命中输出与 22 例正反双向自检）。PRD 基准 `Docs/01-demand/结构化需求基准说明书_知芽（TreeLearn）_V3.3增量.md:26` 与 `..._V3.0.md:70` 仍保留「不做后端/前端」类主张，属冻结基线、不随本规格回写，改它要走基线变更流程；本条把那两处显式登记为与本规格的已知差异，不留静默冲突。原「维持旧边界并否决本规格」的走法已由用户裁定否决。
+- 疑虑 2：Android 侧新增导出能力会触碰生产数据层与「本地优先、首版不建同步」的既有裁定，且归档格式是长期契约（冲突对象：`Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md` 的未来扩展表述与 `.codex/rules/sql.md`；两种走法：把导出限定为一次性单向搬迁并冻结格式版本，或改为服务侧只读接入而放弃 PC 可写；谁拍板：用户）。
+- 疑虑 3（已裁定 2026-10-15，用户批准「为单一来源改动 Android 生产代码」）：`:ai` 升为 `java-library` 并加入 `pureJvmModules`、DDL 与 SQL 文本外提到共享 JVM 模块，两者都要改 Android 生产代码，回归面覆盖生成链路与数据层。落法：这两片各自独立成任务、串行执行、叠加 `db-migration-reviewer` 与 `android-no-kotlin-guard`，并按 `.codex/rules/regression.md` 先写影响面；服务侧出现第二份网关或第二份建表语句即视为缺陷（旧线病因）。原「保留 Android 现状、服务侧另写一份」的走法已否决。
+- 疑虑 4（已裁定 2026-10-15，用户选择「删除」而非改写口径）：`.codex/rules/frontend.md` 的 user-copy guard 不再要求任何第二语言齐备，判定口径只存在于该 guard 一处；`.codex/agents/frontend-dev.md` 原先复述「`zh-CN`/`en-US` 双键」的那条已改为指向该规则，不做复述。同一段里「该命令也是 Android 构建入口的一部分」描述的是已删除旧线的接线方式，已按新线事实改写为前端 dev/lint/build 入口、不进 Android 构建。保留不变的判据：文案必须按 key 从资源表读取、生产代码不得硬编码用户可见文案、`i18n-ignore` 例外机制与 decrement-only 基线。
 - 疑虑 5（已裁定 2026-10-15，用户选择「全部删除」）：`Docs/spec/SPEC-2026-10-01-progressive-web-ui.md` 已整份删除，APK 内 WebView 承载路线在仓库内不再存在任何现存规格文本，读者不会把它误读成当前方向。配对意图 `Docs/intent/INTENT-2026-10-01-progressive-web-ui.md` 按 `Docs/intent/README.md` 的约定保留原判定不改写历史，并在页首加「归档时序说明（阅读前必读）」指向本规格与被删事实。原建议的「标 superseded 后保留」方案已按用户裁定作废；fixture 双测与桥安全原则已内联进 §5，全文不留对该文件的悬空引用。
-- 疑虑 6：桌面 SQLite 作为后端生产引擎与 `backend/` 规则正文里默认的 MySQL/Flyway 假设不一致，而守门要求执行证据来自真实生产引擎（冲突对象：`.trae/rules/sql.md`、`.trae/rules/backend.md`；两种走法：在规则正文里为本地服务显式裁定桌面 SQLite，或改用 MySQL——后者与本地优先和单机安装冲突；谁拍板：架构师提出、用户确认，确认后只在一处正文落判据）。
+- 疑虑 6：桌面 SQLite 作为后端生产引擎与 `backend/` 规则正文里默认的 MySQL/Flyway 假设不一致，而守门要求执行证据来自真实生产引擎（冲突对象：`.codex/rules/sql.md`、`.codex/rules/backend.md`；两种走法：在规则正文里为本地服务显式裁定桌面 SQLite，或改用 MySQL——后者与本地优先和单机安装冲突；谁拍板：架构师提出、用户确认，确认后只在一处正文落判据）。
 - 疑虑 7：量测台账以真机截图为基线，而仓库内既有截图覆盖不全（主页、学习库、设置、对话、抽屉有，画布、导航、统计、供应商、KEY 房子页缺），且原型渲染图与真机截图存在已记录的信息架构差异（冲突对象：`artifacts/` 既有截图与高保真原型 v1.1 的底部标签叙事；两种走法：阶段 1 重新完整采集一套真机基线并以此为准，或复用既有截图快速起步；谁拍板：架构师建议前者，代价是首轮采集耗时）。**架构师已按前者决定，2026-10-15 写入 §10 与阶段 1 门禁。**
-- 疑虑 8（**已裁定 2026-10-17，用户选择建议走法**）：`.trae/rules/frontend.md` 的 frontend-dev 职责写着「平板横屏优先，不假设手机竖屏」，而本规格的 1:1 校正基线是**手机档**——Android 侧真机基线截图取自手机，且平板差异只存在于少量 `layout-sw600dp`/`values-sw600dp` 文件。两种走法：把该条解释为设计评审的注意力顺序、1:1 校正以手机档为唯一基线并在阶段 3 之后另出平板档差异片（建议，代价是「平板优先」的字面读感需要读者接受解释），或要求阶段 3 以平板档为 1:1 基线（代价是平板基线截图当前不存在，必须先补一轮采集与采集脚本适配）。谁拍板：用户。不裁定的后果是同一屏可能出现两个互斥基线，台账绿色结论不可比。**裁定落法**：手机档是本规格 1:1 校正的**唯一**基线，判据口径只在本条；`frontend.md` 那句读作设计评审的注意力顺序而不是量测基线，因此**不改写该规则正文**（改它会把「评审看什么」与「量什么」两件事合并成一条判定，正是本仓库「同一条规则写在两个入口」那族的成因）。平板档差异复刻在阶段 3 之后独立成片，其前置是平板基线截图的采集片（当前不存在）。原「阶段 3 以平板档为 1:1 基线」的走法已由用户裁定否决。
+- 疑虑 8（**已裁定 2026-10-17，用户选择建议走法**）：`.codex/rules/frontend.md` 的 frontend-dev 职责写着「平板横屏优先，不假设手机竖屏」，而本规格的 1:1 校正基线是**手机档**——Android 侧真机基线截图取自手机，且平板差异只存在于少量 `layout-sw600dp`/`values-sw600dp` 文件。两种走法：把该条解释为设计评审的注意力顺序、1:1 校正以手机档为唯一基线并在阶段 3 之后另出平板档差异片（建议，代价是「平板优先」的字面读感需要读者接受解释），或要求阶段 3 以平板档为 1:1 基线（代价是平板基线截图当前不存在，必须先补一轮采集与采集脚本适配）。谁拍板：用户。不裁定的后果是同一屏可能出现两个互斥基线，台账绿色结论不可比。**裁定落法**：手机档是本规格 1:1 校正的**唯一**基线，判据口径只在本条；`frontend.md` 那句读作设计评审的注意力顺序而不是量测基线，因此**不改写该规则正文**（改它会把「评审看什么」与「量什么」两件事合并成一条判定，正是本仓库「同一条规则写在两个入口」那族的成因）。平板档差异复刻在阶段 3 之后独立成片，其前置是平板基线截图的采集片（当前不存在）。原「阶段 3 以平板档为 1:1 基线」的走法已由用户裁定否决。
 
 ## 修订记录（追加，不回改上文原判定）
 
@@ -150,5 +150,5 @@ Android 侧当前**没有任何导出实现**，这是本次净新增交付物�
 - 2026-10-16｜两处差额的成因**不同且各只有一半已解释**，本节不做统一归因：浮层 6→16 是**修正**（守门的模式词表靠手抄，漏了 `new PopupMenu(` 2 处与 `new AlertDialog.Builder(` 4 处，实测计数由 `T-2026-10-15-screen-inventory-parity-ledger-005.md` 的 GREEN 证据托底）；屏 16→14 **未解释**，规格里没有屏清单可核对，因此不写成结论、只在「范围」条登记为待阶段 1 逐屏对照的事项。反向搜索命中并同步改写的复述位置：本文 5 处、`Docs/intent/INTENT-2026-10-15-web-h5-android-parity.md` 与父需求 `T-2026-10-15-web-h5-android-parity-requirement-001.md`（这两处为按日归档的采集记录，处理方式见该两条的下一行）。
 - 2026-10-16｜intent 与父需求**不改写历史正文**，只在页首加指向本节与清单的时效说明：按 AGENTS.md 归档条目的规则，「原始发现与处置结果必须分时可辨」，用现在的实测值去覆盖当时写下的估计，读者会把治理时序读错。
 - 2026-10-16｜§10「仪器收编」与「偏移校正内置」两条按 T-2026-10-15-006 的实际交付面改写：产图侧已入库，剩 DOM 闭环一支改由 T-2026-10-15-009 收编。理由：006 按可交付物切细后只含产图侧（两支 Node 工具一起收编会越过 500 行硬上限），若本文仍写「两支都待 006」，下一片会据此起一个与既有产物重叠的收编任务。同一时点同步回写 `Docs/04-ux-design/知芽-TreeLearn-对话页1比1复刻方案-V1.0.md` 的路径变更说明；任务文件与 `artifacts/evidence/` 内的旧路径**不改写**（历史与证据按当时状态归档）。
-- 2026-10-17｜承上行，DOM 闭环一支已由 `T-2026-10-15-009` 收编进 `.trae/scripts/dev/parity/`，本文 §10 两条与上述方案文档同点回写；四支仪器的「留在会被清理的目录里」那条风险因此全部解除。方案文档里那句自检例数（写作 38 例）在同一次回读中实测为 40，已按本文既有口径改为**不在文档钉数、以命令末行为准**——这是「复述即第二份正文」在覆盖计数上的形态，与范围条目数同一处置。
-- 2026-10-17｜疑虑 8 由用户裁定为**手机档是本规格 1:1 校正的唯一基线**，判据口径写入该条本身而不另立一处；§11 阶段 3 行就地加一句指向该条（阶段表是读者最先落的地方，只改疑虑清单会让人以为阶段 3 还没定）。`.trae/rules/frontend.md` 的「平板横屏优先」**不改写**：那条说的是设计评审的注意力顺序，把它改成量测基线就等于让一处正文同时承担两件事的判定。平板档差异复刻登记为阶段 3 之后的独立片，前置是平板基线截图采集（当前仓库内不存在）。同步的反向检索命中三处并逐处按「不改写历史、只加时效指向」处理：本文、`T-2026-10-15-web-h5-android-parity-requirement-001.md`（两处仍写「待拍板」，各追一条 dated 指针）、`T-2026-10-15-web-parity-doc-authority-writeback-002.md` 的 Next steps ③（同）。
+- 2026-10-17｜承上行，DOM 闭环一支已由 `T-2026-10-15-009` 收编进 `.codex/scripts/dev/parity/`，本文 §10 两条与上述方案文档同点回写；四支仪器的「留在会被清理的目录里」那条风险因此全部解除。方案文档里那句自检例数（写作 38 例）在同一次回读中实测为 40，已按本文既有口径改为**不在文档钉数、以命令末行为准**——这是「复述即第二份正文」在覆盖计数上的形态，与范围条目数同一处置。
+- 2026-10-17｜疑虑 8 由用户裁定为**手机档是本规格 1:1 校正的唯一基线**，判据口径写入该条本身而不另立一处；§11 阶段 3 行就地加一句指向该条（阶段表是读者最先落的地方，只改疑虑清单会让人以为阶段 3 还没定）。`.codex/rules/frontend.md` 的「平板横屏优先」**不改写**：那条说的是设计评审的注意力顺序，把它改成量测基线就等于让一处正文同时承担两件事的判定。平板档差异复刻登记为阶段 3 之后的独立片，前置是平板基线截图采集（当前仓库内不存在）。同步的反向检索命中三处并逐处按「不改写历史、只加时效指向」处理：本文、`T-2026-10-15-web-h5-android-parity-requirement-001.md`（两处仍写「待拍板」，各追一条 dated 指针）、`T-2026-10-15-web-parity-doc-authority-writeback-002.md` 的 Next steps ③（同）。

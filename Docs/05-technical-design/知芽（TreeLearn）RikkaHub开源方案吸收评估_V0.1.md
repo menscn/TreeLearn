@@ -12,7 +12,7 @@
 不可行的原因（三条硬冲突，均有可核查依据）：
 
 1. **许可证冲突**：RikkaHub 采用 AGPL-3.0（`rikkahub-master/LICENSE` 首行、`README.md` License 节）。一旦把它的代码复制进知芽并分发 APK，知芽整个应用必须按 AGPL-3.0 开源并提供完整源码。知芽是否接受这一义务是上游决定，未确认前不能复制任何代码。
-2. **技术栈冲突**：RikkaHub 是 Kotlin + Jetpack Compose + Koin + Room + DataStore + Okhttp（`README.md` Development 节，settings.gradle.kts 共 13 个模块）。知芽是 Java-only 硬约束（`.trae/context/project-brief.md`「关键约束」：不写 Kotlin 源码、不加 Kotlin 插件、不引 Kotlin 坐标），且已有 207 个 Java 生产文件、5 个模块（`:app`/`:core`/`:data`/`:ai`/`:tree-layout`）和《Android本地优先技术架构方案_V1.0》。整库吸收等于推翻已交付的 V1。
+2. **技术栈冲突**：RikkaHub 是 Kotlin + Jetpack Compose + Koin + Room + DataStore + Okhttp（`README.md` Development 节，settings.gradle.kts 共 13 个模块）。知芽是 Java-only 硬约束（`.codex/context/project-brief.md`「关键约束」：不写 Kotlin 源码、不加 Kotlin 插件、不引 Kotlin 坐标），且已有 207 个 Java 生产文件、5 个模块（`:app`/`:core`/`:data`/`:ai`/`:tree-layout`）和《Android本地优先技术架构方案_V1.0》。整库吸收等于推翻已交付的 V1。
 3. **产品形态冲突**：RikkaHub 是线性会话的通用 LLM 聊天客户端（多 Provider、云生态、依赖 google-services.json 构建）。知芽的核心差异化是树状学习分支与本地优先（数据与 Key 只留本机）。拿通用聊天骨架做基座，核心差异化反而要塞进别人的骨架里重做。
 
 ## 二、RikkaHub 资产盘点（实测）
@@ -71,5 +71,5 @@
 - rikkahub 技术栈与功能：`D:\Project\Android\rikkahub-master\README.md`（Features、Development 节）。
 - 模块清单：`D:\Project\Android\rikkahub-master\settings.gradle.kts`（13 个 include）。
 - 代码规模：`find app/src/main/java -name "*.kt" | wc -l` = 404；`find ai/src/main/java -name "*.kt" | wc -l` = 38（2026-09-23 实测）。
-- 知芽约束：`.trae/context/project-brief.md`「关键约束」「当前阶段与技术栈」节。
+- 知芽约束：`.codex/context/project-brief.md`「关键约束」「当前阶段与技术栈」节。
 - 知芽现状：`find android -name "*.java" -path "*main*"` = 207（2026-09-23 实测）；模块见 project-brief。

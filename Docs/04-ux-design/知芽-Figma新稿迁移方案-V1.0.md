@@ -1,8 +1,8 @@
 # 知芽（TreeLearn）Figma 新稿迁移方案 V1.0
 
 > 方案性质：**待用户评审**。本文档只做「现状核对 + 差异分类 + 迁移路线 + 待拍板事项」，不创建任何 Harness Task，不改动任何生产代码。
-> 本文档不复制 token 数值清单：设计系统的当前态权威仍是 `知芽-TreeLearn-高保真原型-v1.html` 的 `:root` 区块，机器可读镜像见 `design-system/tokens.json`，三方一致性由 `.trae/scripts/dev/check_design_tokens.py` 判定。文中出现的色值只是**本次迁移的实测判定记录**，不是第二份事实源。
-> 口径更新（2026-10-15，不改动上文 2026-09-22 的结论）：该守门已扩为**四方**比对，第 4 个消费者是 `frontend/src/styles/tokens.css`，它只能由 `.trae/scripts/dev/gen_design_tokens_css.py` 生成；当前链路与命令以 [`design-system/README.md`](design-system/README.md) 与 [`.trae/rules/ux-design.md`](../../.trae/rules/ux-design.md) 为准。
+> 本文档不复制 token 数值清单：设计系统的当前态权威仍是 `知芽-TreeLearn-高保真原型-v1.html` 的 `:root` 区块，机器可读镜像见 `design-system/tokens.json`，三方一致性由 `.codex/scripts/dev/check_design_tokens.py` 判定。文中出现的色值只是**本次迁移的实测判定记录**，不是第二份事实源。
+> 口径更新（2026-10-15，不改动上文 2026-09-22 的结论）：该守门已扩为**四方**比对，第 4 个消费者是 `frontend/src/styles/tokens.css`，它只能由 `.codex/scripts/dev/gen_design_tokens_css.py` 生成；当前链路与命令以 [`design-system/README.md`](design-system/README.md) 与 [`.codex/rules/ux-design.md`](../../.codex/rules/ux-design.md) 为准。
 > 生成时间：2026-09-22
 
 ---
@@ -136,7 +136,7 @@
 | 目标 | 全 App 换上新配色与度量，交互行为一字不改 |
 | 可写路径 | `Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html`（`:root`）、`Docs/04-ux-design/design-system/tokens.json`、`android/app/src/main/res/values/colors.xml`、`android/app/src/main/res/values/dimens.xml` |
 | 前置 | **先落地 §2 A 类的 2 处对比度修正**（`ink3` → `#627067`，`amber` → `#B05108`） |
-| 验证 | `python .trae/scripts/dev/check_design_tokens.py`（三方逐值比对）0 failure + `--selftest` 正反自检通过；`android/README.md` 的对比度条目同步更新 |
+| 验证 | `python .codex/scripts/dev/check_design_tokens.py`（三方逐值比对）0 failure + `--selftest` 正反自检通过；`android/README.md` 的对比度条目同步更新 |
 | 风险 | 低。唯一硬约束是「三处必须同步，顺序固定」 |
 
 **这一层做完，整个 App 的观感就已经迭代到新稿了。**
@@ -164,7 +164,7 @@
 
 ## 4. 切片建议与流程风险
 
-**最大流程性风险：单 task 500 行硬预算**（`.trae/skills/line-budget/line-budget.ps1`）。对照现状：
+**最大流程性风险：单 task 500 行硬预算**（`.codex/skills/line-budget/line-budget.ps1`）。对照现状：
 
 | 屏幕 | 现有体量 | 能否单 task 完成 |
 | :--- | ---: | :--- |

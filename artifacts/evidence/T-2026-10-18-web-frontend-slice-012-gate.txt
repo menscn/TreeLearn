@@ -1,0 +1,62 @@
+Generated: 2026-10-18T19:35:22+0800
+Command: gen-fe-gate.py --slice 012
+Python: 3.13.12  CWD: D:\Project\Android\Treelearn
+Generator sha256: 1296c2c8540787628a903942c451a50a78d1cb3b1afa049aef246a7bebdce816
+只读名单边界：本运行写出的产物（含本文件）不进名单；名单文件的复算命令为 `python -X utf8 -c "import hashlib,pathlib;print(hashlib.sha256(pathlib.Path(r'<path>').read_bytes()).hexdigest())"`
+名单条目=12
+
+===== block 01 - 运行时端口的单元与契约用例（11 例） =====
+$ pnpm --dir frontend test
+
+ RUN  v5.0.5 D:/Project/Android/Treelearn/frontend
+
+ ✓ test/platform/FixtureRuntimeAdapter.test.ts (11 tests) 5ms
+
+ Test Files  1 passed (1)
+      Tests  11 passed (11)
+   Start at  19:35:23
+   Duration  144ms (transform 41%, import 36%, tests 13%, worker 10%)
+
+$ vitest run
+rc=0 want=0 judgement-lines-found=2 missing=[]
+BLOCK 01: OK
+
+===== block 02 - 前端类型检查（端口与适配器纳入 tsc） =====
+$ pnpm --dir frontend lint
+$ tsc --noEmit
+rc=0 want=0 judgement-lines-found=1 missing=[]
+BLOCK 02: OK
+
+===== block 03 - 承重实测：逐条拆掉端口守卫必须让对应用例转红 =====
+$ python -X utf8 artifacts/tmp/gen-012-mutation.py
+parser self-witness: 两行 FAIL 解析出 2 名=True 绿输出解析出 0 名=True ok=True
+baseline bytes FixtureRuntimeAdapter.ts: cr=0 lf=61 bytes=2202 复算命令=sha256sum frontend/src/platform/FixtureRuntimeAdapter.ts
+baseline bytes RuntimePort.ts: cr=0 lf=89 bytes=3332 复算命令=sha256sum frontend/src/platform/RuntimePort.ts
+baseline suite rc=0 want=0
+M1 (取消「时间点只接受 epoch 毫秒」这条守卫): rc=1 red=1 declared=1 new-red==declared:True reds=['时间点写成无 offset 的本地串判 malformed']
+M1 还原 byte-exact=True
+M2 (把「列出来却读不到」降级成「不存在」): rc=1 red=2 declared=2 new-red==declared:True reds=['三类失败互不混同：同一组输入逐条比对判决各不相同', '在名单里却取不到文本判 unreadable，不得降级成 unknown-screen']
+M2 还原 byte-exact=True
+M3 (取消必需字段存在性检查（类型检查会顺带拒掉三个，payload 无人拒）): rc=1 red=1 declared=1 new-red==declared:True reds=['缺任一必需字段都判 malformed 且明细说出缺哪个']
+M3 还原 byte-exact=True
+restored suite rc=0 want=0
+mutations declared=3 floor=3 unattributed=[] instrument-faults=0
+OVERALL_EXITCODE=0
+rc=0 want=0 judgement-lines-found=5 missing=[]
+BLOCK 03: OK
+
+===== block 04 - 字节卫生（纯 LF + 严格 UTF-8，双向样本） =====
+$ (internal byte-hygiene witness，无外部命令)
+control: cr-found=True utf8-found=True findings=2 ok=True
+tree: scanned=9 roots=3 flagged=[]
+rc=0 want=0 judgement-lines-found=3 missing=[]
+BLOCK 04: OK
+
+===== 位移检测（本运行声称只读的文件）=====
+moved during this run=0 movers=[]
+
+===== 汇总 =====
+blocks=4 floor=2 failing=[]
+want/got: [{"block": 1, "want": 0, "got": 0}, {"block": 2, "want": 0, "got": 0}, {"block": 3, "want": 0, "got": 0}, {"block": 4, "want": 0, "got": 0}]
+OVERALL_EXITCODE=0
+DECODE ok utf8=True cr=0 commit-shaped-tokens=0

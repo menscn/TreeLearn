@@ -1,57 +1,111 @@
 # 知芽 TreeLearn
 
-> **本地优先的树状 AI 学习助手 —— 让每一次追问都长在它该在的位置。**
->
-> 简体中文 | [English](README_EN.md)
+> **把 AI 对话长成一棵树的学习助手。** 每一次追问，都有它该在的位置。
 
-[![Platform](https://img.shields.io/badge/platform-Android%20API%2028%2B-3DDC84?style=flat-square)](android/)
-[![Language](https://img.shields.io/badge/language-Java%2017-orange?style=flat-square)](android/)
-[![License](https://img.shields.io/badge/license-Proprietary%20/%20All%20Rights%20Reserved-red?style=flat-square)](LICENSE)
+![知芽 · 对话页：一条回答下面长出三条推荐追问，每条都能单独分叉](assets/readme/hero-chat.png)
 
----
+> **个人独立项目** —— 产品定义（PRD）、UX 设计、技术架构与研发，全部由本人一人完成。
 
-## 这是什么
-
-在普通 AI 聊天工具里学习一个陌生领域时，你大概遇到过这个情况：
-
-> 提出 q1，读到回答 a1，产生疑问 q2；顺着 q2 一路探究下去，回过神来 a1 已经被挤到很远的上面去了，再也找不到当时的阅读位置。
-
-线性会话会把不同回答衍生的追问按时间混排，主线学习与临时探索互相打断，上下文也不再专一。
-
-TreeLearn 的做法是：**把对话变成一棵树**。从一个根问题开始，你可以在任意一个"稳定回答"上长出一条独立分支，分支拥有自己的隔离上下文；探索完再回到来源位置继续读。每条分支还可以继续分叉，形成真正反映你思考路径的结构。
-
-它同时是一款 **local-first（本地优先）** 应用：所有数据都在你自己手机的 SQLite 里，DeepSeek API Key 只经过 Android Keystore 加密保存；不做云端账号、云同步或远程遥测。规划中的 `backend/` 是**仅监听本机环回地址**的桌面服务，为 PC 端 Web 界面提供数据与密钥代理，不是远程服务器（范围与边界见 `Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md`）。
-
-> **项目状态：早期开发中（WIP）。** 五个模块 `:core`、`:data`、`:ai`、`:tree-layout`、`:app` 均已填入源码并构建出可安装 APK（schema 版本见 `android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java` 的 `DATABASE_VERSION`）；界面与功能仍在按用户反馈迭代，请勿当作成熟产品期待。
+- 📱 **[下载 APK 直接体验](https://github.com/menscn/TreeLearn/releases/latest)** —— 约 1.1 MB（2026-10-18 实测），Android 9 及以上，无需注册账号
+- 📄 **[产品需求文档 PRD](Docs/03-prd-draft/V3.2-知芽（TreeLearn）产品需求文档（PRD）.md)** —— 想了解"为什么做成这样"，从这里开始
+- 🎨 **[高保真交互原型](Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.1.html)** —— 浏览器直接打开，可点
+- 🌐 **[English](README_EN.md)**
 
 ---
 
-## 核心概念
+## 30 秒看懂：它解决什么
 
-| 概念 | 含义 |
+用普通 AI 聊天工具学一个陌生领域时，你大概遇到过这个情况：
+
+> 问了 q1，读到回答 a1，心里冒出疑问 q2；顺着 q2 一路追问下去，回过神来 a1 已经被挤到很远的上面，再也找不到当时读到哪一行。
+
+线性会话会把**不同回答衍生的追问按时间混排**，主线学习和临时探索互相打断，上下文也不再专一。
+
+知芽的做法是：**把对话变成一棵树**。从一个根问题开始，你可以在任意一条"已经生成完的回答"上分叉出一条独立分支——分支有自己的隔离上下文，父分支后来新增的内容不会回头污染它。探索完，回到来源位置继续读。分支还能继续分叉，最后长成的形状就是你思考过程的形状。
+
+它同时是一款 **local-first（本地优先）** 应用：数据全在你自己手机里，不注册账号、不云端同步、不上传使用记录。
+
+---
+
+## 你可以
+
+- **在任意一条回答上分叉独立追问** —— 分支拥有隔离上下文，主线阅读不被打断；分支还能继续分叉。
+- **回到主线继续阅读** —— 读到哪一行、哪个分支还没看完，下次打开还在原地；未读分支会被标出来。
+- **划选回答里的一句话，直接引用它追问** —— 追问带着这段原文的锚点，不是重新描述一遍。
+- **让 AI 给整条分支写一份总结** —— 分支导航页顶部就是这条分支的 AI 摘要。
+- **归档没用的分支** —— 探索跑偏了可以整条收起来，主线保持干净。
+- **搜索全部主题、问题与回答** —— 学习库按主题聚合，能按"进行中 / 已完成"筛选。
+- **在首页直接开一个根问题** —— 不确定问什么时，"猜你想学"会滚动推荐切入点。
+- **换模型、开关思考模式** —— 思考内容默认折叠，但会一并保存并计入后续上下文。
+- **断网或生成失败时原地重试** —— 已经读到的内容不丢，界面保持上一次的样子。
+
+---
+
+## 界面一览
+
+<table>
+  <tr>
+    <td align="center"><img src="assets/readme/screen-home.png" width="240" alt="首页：根问题输入框与猜你想学"><br><b>首页</b><br>输入根问题，或从推荐里挑一个</td>
+    <td align="center"><img src="assets/readme/screen-branch-nav.png" width="240" alt="分支导航：分支 AI 总结与分支列表"><br><b>分支导航</b><br>这条分支讲了什么、有哪些子分支</td>
+    <td align="center"><img src="assets/readme/screen-library.png" width="240" alt="学习库：主题列表与搜索"><br><b>学习库</b><br>全部主题、搜索与进度筛选</td>
+  </tr>
+</table>
+
+除这四屏之外，还有一块**树状总览画布**：把整棵对话树画成可以缩放、拖拽、一键适配视图的图形，枝干长度随该分支的对话轮数增长，用来回答"我到底问出去了多远"。
+
+---
+
+## 5 分钟装上体验
+
+1. 到 **[Releases](https://github.com/menscn/TreeLearn/releases/latest)** 下载 `app-release.apk`（约 1.1 MB）。
+2. 传到手机后点开安装；系统提示"未知来源"时允许即可。
+3. 打开 App → 右上角设置 → 填入你自己的 [DeepSeek API Key](https://platform.deepseek.com/api_keys)。
+4. 回到首页，输入一个你真正想搞懂的问题，回车。
+5. 读到想追问的地方，点回答下方的分叉图标 —— 树就开始长了。
+
+Key 只保存在本机（Android Keystore 加密），所有请求由手机直连 DeepSeek，不经过任何第三方服务器。
+
+<details>
+<summary><b>从源码构建</b>（需要 JDK 17 与 Android SDK）</summary>
+
+```bash
+export JAVA_HOME=/path/to/jdk17
+echo "sdk.dir=/path/to/Android/SDK" > android/local.properties
+cd android
+./gradlew :app:assembleDebug     # 产物在 app/build/outputs/apk/debug/
+./gradlew check                  # 含依赖方向守门与 dex 级 Java-only 校验
+```
+
+APK 版本号统一维护在 `android/version.properties`；`./scripts/version.ps1 patch|minor|major` 递增，`./gradlew :app:printVersion` 查看 Gradle 实际注入的版本。
+Release 签名的 keystore 存放在仓库之外，凭据只从进程环境变量读取（`TREELEARN_KEYSTORE_PATH` 等），其次读取已被 gitignore 的 `android/keystore.properties`。
+
+</details>
+
+---
+
+## 技术选择
+
+**一句话：Android 客户端主代码只用 Java，零第三方依赖。**
+
+这不是复古偏好，而是给自己设的硬约束，理由是 APK 体积与运行期可预测性。当前 release 包约 1.1 MB、单个 dex 文件（2026-10-18 实测），主代码零第三方依赖、零 Kotlin 字节码。
+
+约束靠机器守，不靠自觉：静态扫描 + Gradle 依赖报告 + **直接解析构建产物 APK 的 dex 字符串表**。
+
+之所以要做到 dex 级别，是因为这个坑踩过一次：`androidx.test:monitor:1.6.1` 的 POM **完全不声明**任何 Kotlin 依赖，依赖图看起来干净，但它的 `OutputDirCalculator` 等 2 个类确实是 Kotlin 编译产物，设备上直接抛 `ClassNotFoundException: kotlin.jvm.internal.Lambda`。只看依赖图发现不了。
+
+同理，主代码避开了 AndroidX —— `appcompat`、`core`、`test` 系列都会传递引入 `kotlin-stdlib`，所以界面层直接用平台 API 手写。
+
+| 项 | 值 |
 | :--- | :--- |
-| **主题（Topic）** | 一棵完整的对话树。主题的显示身份直接复用**根分支标题**，不额外维护主题名——同一棵树永远只有一套名字。 |
-| **分支（Branch）** | 树上的一条独立对话路径。根分支不可归档；非根分支可以整体归档或删除。 |
-| **稳定回答（Stable Answer）** | 生成完成的回答版本。**只有稳定回答可以作为分叉来源**，部分回答只读，不可分叉。 |
-| **创建快照（Context Snapshot）** | 分支诞生时被冻结的那段上下文背景。此后父分支的新内容**不会**回流污染子分支。 |
-| **思考模式（Thinking Mode）** | DeepSeek 推理内容默认折叠展示、一并持久化，并计入后续上下文。 |
+| Gradle / AGP | 8.14.3 / 8.13.2 |
+| JDK | 17 |
+| compileSdk / targetSdk / minSdk | 36 / 36 / 28 |
+| 语言 | **Java-only**（主代码） |
+| 第三方依赖（主代码） | **零** |
+| 数据存储 | 手机本地 SQLite |
 
----
-
-## 功能范围
-
-当前共 21 项 P0 功能（F01–F21），全部来自已冻结的需求基准，详见 [PRD V3.1](Docs/03-prd-draft/V3.1-知芽（TreeLearn）产品需求文档（PRD）.md)。
-
-| 分组 | 功能 |
-| :--- | :--- |
-| **树的形成与身份** | 多主题生命周期与首次创建原子性 · 根标题即主题身份 · 以稳定回答为来源的独立对话树 · 分层上下文与创建快照 |
-| **树的浏览与找回** | 聚焦阅读与现场恢复 · 移动端逐层导航 · 树状总览画布（枝长随对话轮数增长）· 标题/摘要/搜索 · 未读状态 · 非根子树归档与删除 |
-| **AI 与容错** | 生成状态与分叉资格 · 结合树轮廓的推荐问题 · 本机数据与 DeepSeek 配置 · AI 与网络失败可恢复 · AI 辅助生成降级 |
-| **V3.1 新增** | 首页信息架构统一 · AI 推荐学习主题（弹幕滚动）· 模型选择与思考模式 · 划词操作集与引用追问 · 回答内容级操作与 AI 总结 · 自适应学习导师提示词 |
-
----
-
-## 技术架构
+<details>
+<summary><b>模块划分</b></summary>
 
 ```text
 :app          ->  Activity / XML 视图 / 导航 / 依赖装配
@@ -68,51 +122,30 @@ TreeLearn 的做法是：**把对话变成一棵树**。从一个根问题开始
 | `:ai` | DeepSeek HTTPS/SSE、上下文编码、版本化提示词注册表 | 不操作 View / 数据库 |
 | `:tree-layout` | 树几何、标签避碰、命中测试、视野拟合 | 不读数据库，不持久化像素坐标 |
 
-### 工具链与约束
+</details>
 
-| 项 | 值 |
+<details>
+<summary><b>核心概念</b></summary>
+
+| 概念 | 含义 |
 | :--- | :--- |
-| Gradle / AGP | 8.14.3 / 8.13.2 |
-| JDK | 17（源码与字节码级别同为目标 17） |
-| compileSdk / targetSdk | 36 |
-| minSdk | 28 |
-| 语言 | **Java-only** |
-| 第三方依赖（主代码） | **零** |
+| **主题（Topic）** | 一棵完整的对话树。主题的显示身份直接复用**根分支标题**，不额外维护主题名——同一棵树永远只有一套名字。 |
+| **分支（Branch）** | 树上的一条独立对话路径。根分支不可归档；非根分支可以整体归档或删除。 |
+| **稳定回答（Stable Answer）** | 生成完成的回答版本。**只有稳定回答可以作为分叉来源**，部分回答只读、不可分叉。 |
+| **创建快照（Context Snapshot）** | 分支诞生时被冻结的那段上下文背景。此后父分支的新内容**不会**回流污染子分支。 |
+| **思考模式（Thinking Mode）** | 推理内容默认折叠展示、一并持久化，并计入后续上下文。 |
 
-**为什么是 Java-only —— 这不是偏好，是硬约束。** 团队约定 App 主代码不引入任何 Kotlin 字节码，理由是 APK 体积与运行期可预测性。为此项目自带机械化守门：静态扫描 + Gradle 依赖报告 + **直接扫描构建产物 APK 的 dex 字符串表**。
-
-之所以要做到 dex 级别，是因为这个坑装过一次：`androidx.test:monitor:1.6.1` 的 POM **完全不声明**任何 Kotlin 依赖，依赖图是干净的，但它的 `OutputDirCalculator` 等 2 个类确实是 Kotlin 编译产物，设备上会直接抛 `ClassNotFoundException: kotlin.jvm.internal.Lambda`。只看依赖图发现不了。
-
-同理，主代码也避开了 AndroidX：`appcompat`、`core`、`test` 系列都会传递引入 `kotlin-stdlib`，因此主代码直接使用平台 API。实测 `app-debug.apk` 约 70 KB、3 个 dex、零第三方依赖、零 Kotlin 字节码。
-
-约束的最终依据是硬件实测而非文档声明，验证方式见 [`android/README.md`](android/README.md)。
+</details>
 
 ---
 
-## 快速开始
+## 当前边界
 
-```bash
-# 1. 指定 JDK 17（Gradle 启动 JVM 可用 17 或 21，编译固定用 Java 17 toolchain）
-export JAVA_HOME=/path/to/jdk17
+项目仍在早期迭代，界面与交互按真实使用反馈持续调整。以下边界是刻意设计，不是遗漏：
 
-# 2. 配置 Android SDK 路径
-echo "sdk.dir=/path/to/Android/SDK" > android/local.properties
-
-# 3. 构建
-cd android
-./gradlew :app:assembleDebug
-
-# 4. 全部检查（含依赖方向守门与 dex 级 Java-only 校验）
-./gradlew check
-```
-
-APK 版本号统一维护在 `android/version.properties`，从 `1.0.0` 开始；Bug 修复执行
-`./scripts/version.ps1 patch`，小特性执行 `minor`，大特性或大版本更新执行 `major`。
-查看 Gradle 实际注入的 APK 版本可运行 `./gradlew :app:printVersion`。
-
-Android 常用命令、Release 签名与 DeepSeek 密钥配置见 [`android/README.md`](android/README.md)。
-
-> **Release 签名说明**：keystore 存放于仓库之外，凭据只从进程环境变量读取（`TREELEARN_KEYSTORE_PATH` 等），其次读取已被 gitignore 的 `android/keystore.properties`。密钥与口令不进入仓库、日志、APK 或交付报告。
+- **AI 供应商目前只接了 DeepSeek**。多 Provider 是已冻结的增量需求，规格见 [`Docs/spec/SPEC-2026-09-23-providers-and-models.md`](Docs/spec/SPEC-2026-09-23-providers-and-models.md)。
+- **不做云端账号、云同步与远程遥测**。规划中的 `backend/` 是**仅监听本机环回地址**的桌面服务，为 PC 端 Web 界面提供数据与密钥代理，不是远程服务器；范围与边界见 [`Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md`](Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md)。
+- **Web/H5 端正在按"与 Android 逐屏等价"的方向复刻**，同一份规格约束两端，判据可机械复算。
 
 ---
 
@@ -120,37 +153,60 @@ Android 常用命令、Release 签名与 DeepSeek 密钥配置见 [`android/READ
 
 ```text
 Treelearn/
-├─ android/               Android 客户端（Gradle 多模块工程）
+├─ android/               Android 客户端（Gradle 多模块工程，Java-only）
 │  ├─ app/                UI 层
 │  ├─ core/               领域层（纯 JVM）
 │  ├─ data/               本地持久化
 │  ├─ ai/                 DeepSeek 网关
 │  ├─ tree-layout/        树布局计算
 │  └─ scripts/            守门与开发脚本
-├─ Docs/                  需求 / PRD / UX / 技术设计文档
+├─ frontend/              Web / H5 端（React + TypeScript + Vite）
+├─ Docs/                  需求 / PRD / UX 设计 / 技术设计 / 已交付规格
+├─ assets/readme/         本README截图
 ├─ artifacts/             守门与验收证据
-└─ .trae/                 Harness 工程规则、角色与任务
+└─ .codex/                工程规则、角色与任务契约（AI 辅助研发流程入口）
 ```
+
+<details>
+<summary><b>文档索引</b></summary>
 
 | 文档 | 内容 |
 | :--- | :--- |
-| [`Docs/01-demand/`](Docs/01-demand) | 结构化需求基准说明书 V3.0 / V3.1 增量 |
-| [`Docs/03-prd-draft/`](Docs/03-prd-draft) | 产品需求文档 V3.1 |
-| [`Docs/04-ux-design/`](Docs/04-ux-design) | 高保真 UX 原型 + [设计系统 token](Docs/04-ux-design/design-system)（Figma 与 Android 共用同一份数值） |
-| [`Docs/05-technical-design/`](Docs/05-technical-design) | 本地优先技术架构、提示词设计、SQLite 方案 |
-| [`android/README.md`](android/README.md) | 构建、守门、模块契约、常用命令 |
+| [`Docs/01-demand/`](Docs/01-demand) | 结构化需求基准说明书 V3.0，以及 V3.1 / V3.3 增量 |
+| [`Docs/03-prd-draft/`](Docs/03-prd-draft) | 产品需求文档 V3.2（当前基准）与 V3.3 多 Provider 增量 |
+| [`Docs/04-ux-design/`](Docs/04-ux-design) | [高保真原型](Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.1.html)、[设计系统 token](Docs/04-ux-design/design-system)（Figma 与 Android 共用同一份数值）、逐屏清单 |
+| [`Docs/05-technical-design/`](Docs/05-technical-design) | 本地优先技术架构、提示词设计、SQLite 建表确认 |
+| [`Docs/spec/`](Docs/spec) | 已 accepted 并交付完成的功能规格 |
+| [`android/README.md`](android/README.md) | 构建、守门、模块契约、常用命令与真机验证方式 |
+
+</details>
 
 ---
 
 ## 工程方法
 
-本仓库采用 **Harness** 工程流程（`AGENTS.md` + `.trae/`）：需求先澄清确认并冻结边界，再按 <= 400 行预算拆任务，实施强制 TDD 与"RED → GREEN"证据留痕，最后由独立 verifier 按专项 guard 验收。
+这个仓库是**一个人带一组 AI 代理做完的**，所以流程必须能被机器检查，否则第二天就散了。
 
-- `.trae/rules/` —— 按栈划分的规则与底线（Android / 后端 / SQL / 契约 / 共享状态 / 可观测性）
-- `.trae/tasks/` —— 任务契约文件，机械校验器 `.trae/scripts/validate_tasks.py`
-- `artifacts/evidence/` —— 每次守门与验收的执行证据（自带命令行与退出码）
-- `.agents/skills/` —— 仓库级技能，Codex 自动发现；当前含 `figma-build`、`figma-codegen`（从 figwright 0.5.0 原样迁移）
-- 设计协作 —— Figma 通过 figwright MCP 接入：一次性配置写进用户级 `~/.codex/config.toml`，Figma 桌面端导入插件 manifest；连接自检 `node .trae/scripts/dev/probe_figwright_mcp.mjs`，设计 token 四方一致性守门 `python .trae/scripts/dev/check_design_tokens.py`，前端 CSS 变量由生成器产出 `python .trae/scripts/dev/gen_design_tokens_css.py`。约定与故障速查见 [`.trae/rules/ux-design.md`](.trae/rules/ux-design.md)
+`AGENTS.md` + `.codex/` 是本仓库的研发流程入口：需求先澄清并冻结边界，再按 ≤ 400 行预算拆成任务契约，实施强制 TDD 并留下 "RED → GREEN" 证据，最后由独立 verifier 按专项 guard 验收。
+
+- `.codex/rules/` —— 按栈划分的规则与底线（Android / 前端 / SQL / 契约 / 共享状态 / 可观测性 / 可维护性）
+- `.codex/tasks/` —— 任务契约文件，机械校验器 `.codex/scripts/validate_tasks.py`
+- `.codex/scripts/` —— 项目专属守门脚本：Java-only dex 校验、设计 token 四方一致性、文档与代码事实对齐、逐屏清单
+- `artifacts/evidence/` —— 每次守门与验收的执行证据，自带命令行与退出码
+- 提交历史按 Conventional Commits 书写，`fix / feat / test / docs` 前缀带作用域，可以直接读
+
+<details>
+<summary><b>为什么文档也要写守门脚本</b></summary>
+
+因为"当前有哪些技术栈"这类句子是**契约**，不是修辞——下一位实现者（人或 AI）会照着它决定要不要建目录。本仓库出现过 README 写着某个目录不存在、而该目录其实已经在跑的情况。
+
+所以现在有一条机械判据：盘点清单不得被清空或截断（条目有下限）、已作废的方向短语不得残留（命中给到行号）、每个被盘点文件必须指向权威规格。跑法：
+
+```bash
+python -X utf8 .codex/scripts/dev/check_stack_facts.py
+```
+
+</details>
 
 ---
 
@@ -158,7 +214,7 @@ Treelearn/
 
 > **本项目不是开源项目，未授予任何开源许可证。**
 
-代码受版权保护，未经书面许可不得使用、复制、修改、分发或用于商业用途。仓库的公开或私有状态**不构成**默示授权。完整条款见 [`LICENSE`](LICENSE)。
+代码受版权保护，未经书面许可不得使用、复制、修改、分发或用于商业用途。仓库公开可读**不构成**默示授权。完整条款见 [`LICENSE`](LICENSE)。
 
 第三方依赖仍受其各自许可证管辖，本声明不覆盖这些组件。
 

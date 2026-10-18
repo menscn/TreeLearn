@@ -41,7 +41,7 @@ status: draft
   - 间距只取 4pt 档位：按钮与弹窗行内上下 `s2`，卡片内 `s4`，卡片之间 `s3`，小节之间 `s6`；页面左右留 `gutter`。
   - 圆角只取 `r-md`（卡片、示例区）与 `r-full`（chip 与胶囊类元素）；卡片底 `surface`、描边 `line`、页面底 `bg`；阴影只用 `sh-1`。
   - 可点区域不小于 44×44 dp（沿用项目约束里的触屏热区）。
-- 来源：token 名取自 `Docs/04-ux-design/design-system/tokens.json` 的 `bg`、`surface`、`ink2`、`ink3`、`line`、`green-deep`、`green-faint`、`s2`、`s3`、`s4`、`s6`、`gutter`、`r-md`、`r-full`、`fs-cap`、`fs-h1`、`fs-h2`、`fs-body`、`fs-sm`、`sh-1`；界面模式取自原型 `Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html` 的 `.composer-tools` 与 `.model-chip`（第 223-227 行、第 351-353 行）、`.sheet` 区块（第 309-315 行）、`.popover-*` 区块（第 356-372 行）、`.switch` 开关（第 379-382 行）、`set-section` / `set-card` / `set-row` 区块（第 290-296 行）与 `renderSettings`（第 2273 行起）；底线规则取自 `.trae/rules/ux-design.md` 的「设计质量底线」与「可点击区域不小于 44×44 dp」。
+- 来源：token 名取自 `Docs/04-ux-design/design-system/tokens.json` 的 `bg`、`surface`、`ink2`、`ink3`、`line`、`green-deep`、`green-faint`、`s2`、`s3`、`s4`、`s6`、`gutter`、`r-md`、`r-full`、`fs-cap`、`fs-h1`、`fs-h2`、`fs-body`、`fs-sm`、`sh-1`；界面模式取自原型 `Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html` 的 `.composer-tools` 与 `.model-chip`（第 223-227 行、第 351-353 行）、`.sheet` 区块（第 309-315 行）、`.popover-*` 区块（第 356-372 行）、`.switch` 开关（第 379-382 行）、`set-section` / `set-card` / `set-row` 区块（第 290-296 行）与 `renderSettings`（第 2273 行起）；底线规则取自 `.codex/rules/ux-design.md` 的「设计质量底线」与「可点击区域不小于 44×44 dp」。
 
 ## Technical spec（技术规格）
 
@@ -49,13 +49,13 @@ DEFERRED:待 B4（codebase-researcher）。
 
 - 待补内容（B4 落地后按四栏补齐）：接口——人设枚举与主题读写的调用面；数据结构——主题表新增列与前向迁移、回答记录上的人设身份；状态迁移——切换人设与既有生成、重试流程的相互作用；错误语义——未知档位的处置。
 - 已经确定的口径（后续任何一版技术规格都必须守住）：人设是与提示词版本同构的稳定枚举；注册表只接受枚举，不接受模板名、系统提示词或任意插值；system 消息恰好一条且位于第一位，当前输入位于最后一条；派生用途的提示词不含人设段；日志、测试报告与遥测不得记录提示词正文，只记录用途与版本号。
-- 来源：`.trae/ROADMAP.md` 的 B0 与 B4 条目；`Docs/intent/INTENT-2026-09-21-ai-persona-preference.md` 的「Decision record」可机械验证清单与「Constraints and non-goals」。
+- 来源：`.codex/ROADMAP.md` 的 B0 与 B4 条目；`Docs/intent/INTENT-2026-09-21-ai-persona-preference.md` 的「Decision record」可机械验证清单与「Constraints and non-goals」。
 
 ## Doubts（疑虑点）
 
 - 无未决疑虑：本轮提出的疑虑全部已由用户拍板，清单见下。
 - 已拍板（2026-09-21，用户本人）：
-  - 最高规则的落点（原疑虑 1，走 A）：正文写进 `Docs/01-demand/结构化需求基准说明书_知芽（TreeLearn）_V3.1增量.md` 新增一条，`AGENTS.md` 只留一句指针并形成需求准入闸门，正文不复制。事实依据：全仓检索「宗旨」「最高规则」「最高原则」「北极星」，除两份人设 intent 与本规格引用这四个词的那一句外零命中，即这条规则目前没有产品正文锚点；而 `.trae/context/project-brief.md` 的「事实源（SoT）声明」把产品事实归 `Docs/**`、工程约束归 `.trae/rules/**`。理由：这条规则既是产品口径又是需求准入闸门，而权威正文只能有一份（把同一条规则写成两个入口，本仓已经发生过两次漂移）；`AGENTS.md` 自身声明是「索引摘要」，把正文放那里与它自己的定位冲突。代价：只读 `AGENTS.md` 的人要点开链接才看到全文。措辞定为「这个需求是否让用户学得下去、学得会」，不用「学习效率」——情绪价值档改善的是坚持率与体验，只写「效率」会把本次需求自己挡在门外。落点与本 intent 的 Decision record 一致。
+  - 最高规则的落点（原疑虑 1，走 A）：正文写进 `Docs/01-demand/结构化需求基准说明书_知芽（TreeLearn）_V3.1增量.md` 新增一条，`AGENTS.md` 只留一句指针并形成需求准入闸门，正文不复制。事实依据：全仓检索「宗旨」「最高规则」「最高原则」「北极星」，除两份人设 intent 与本规格引用这四个词的那一句外零命中，即这条规则目前没有产品正文锚点；而 `.codex/context/project-brief.md` 的「事实源（SoT）声明」把产品事实归 `Docs/**`、工程约束归 `.codex/rules/**`。理由：这条规则既是产品口径又是需求准入闸门，而权威正文只能有一份（把同一条规则写成两个入口，本仓已经发生过两次漂移）；`AGENTS.md` 自身声明是「索引摘要」，把正文放那里与它自己的定位冲突。代价：只读 `AGENTS.md` 的人要点开链接才看到全文。措辞定为「这个需求是否让用户学得下去、学得会」，不用「学习效率」——情绪价值档改善的是坚持率与体验，只写「效率」会把本次需求自己挡在门外。落点与本 intent 的 Decision record 一致。
   - 介绍页本期不放可点的增删改查按钮，只留一句「自建人设将来在这里管理」。
   - 7 档的入口是输入框那一行里、模型按钮旁边的人设按钮；不塞进模型弹窗，也不用底部滑板。
   - 回答上一律不出现人设标注。

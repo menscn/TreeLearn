@@ -105,7 +105,7 @@ adb install -r android/app/build/outputs/apk/release/app-release.apk
 | 对话页长按划词四项菜单（追问 / 新建分支 / 复制 / 全选）与「子分支」列表弹层〔2026-09-22 更新，T-041〕 | `screen/WordMenuPopup` 由 `ChatScreen.Row` 的 `OnLongClickListener` 构造；`screen/ChildBranchPopup` 由 `MainActivity.openChildren` 构造，行由 `wiring/BranchChildren` 判定 |
 | 对话页「总览」进入树画布（缩放、平移、折叠、节点弹层、从弹层进入该分支对话） | `MainActivity.showTree`（`screen/TreeCanvasScreen` 的唯一生产构造点） |
 | 导航页：分支列表、归档 / 恢复、永久删除确认〔2026-09-22 更新，T-039〕 | 三条入口实测存在：首页「归档」→ `HomeScreen.java:115`（`screen_home_body.xml:46` 已无 `enabled="false"`）、对话页 `chat_nav` → `ChatScreen.java:127`、画布 `tree_nav` → `TreeCanvasScreen.java:78`；宿主 `MainActivity.showNavigation` / `enterNavigation`；产物 dex 内 `NavigationScreen` 23 次。**但该页的「分支级 AI 总结」栏位读 `BRANCH_SUMMARY` 派生产物，其生产者不存在 → 栏位恒空**，属下面「不能用」表的派生接线缺口（T-045） |
-| 划词追问的**引用文本进入发给模型的请求**〔2026-09-22 更新，T-044〕 | `ChatWiring.java:252` 把存储的引用交给 `DeepSeekContextEncoder.currentInput(input, quote)`，由后者包成 `<treelearn_quote>…</treelearn_quote>` 前置在问题正文之前；判定脚本 `.trae/scripts/dev/review_quote_path.py` 从代码推导该结论（证据文件第 6 节 `CHECK quote-reaches-prompt: PASS`）。**T-044 仍为 `verifying`，独立 verifier 尚未判定通过** |
+| 划词追问的**引用文本进入发给模型的请求**〔2026-09-22 更新，T-044〕 | `ChatWiring.java:252` 把存储的引用交给 `DeepSeekContextEncoder.currentInput(input, quote)`，由后者包成 `<treelearn_quote>…</treelearn_quote>` 前置在问题正文之前；判定脚本 `.codex/scripts/dev/review_quote_path.py` 从代码推导该结论（证据文件第 6 节 `CHECK quote-reaches-prompt: PASS`）。**T-044 仍为 `verifying`，独立 verifier 尚未判定通过** |
 | 阅读位置恢复与「看过即清未读」〔2026-09-22 更新，T-042〕 | `MainActivity.showChat(String, ReadingAnchor)`（`MainActivity.java:459`，行号取 `artifacts/evidence/T-042-fix1-source-scan.txt` 的扫描实测值——旧引用 `:383` 已被并行 T-040 lane 挪走）在打开分支时经 `container.readingStore()` 恢复位置、离开时经同一 port 保存；`screen/ChatScreen` 只上报滚动事实（`onRowsLaidOut` / `onViewportChanged` / `onLeaving`），读写库一律走 `AppContainer.background()`。原文扫描 `artifacts/evidence/T-042-source-scan.txt`（首轮）与 `artifacts/evidence/T-042-fix1-source-scan.txt`（2026-09-22 修复轮）证明 `ReadingStore` / `ReadingSession` 已有生产消费者；修复轮另补齐两处：写失败的可见 notice `notice_reading_position`（唯一映射 `screen/NoticeText`）与首帧布局完成后的可见集上报（判定仍是同一处 `ViewportSeen`）。**设备侧滚动观感与像素定位仍 `deferred — 用户自行装机验证（user decision 2026-09-21）`** |
 
 不能用（入口不可达；下表每一项都是 PRD 标注 P0 的条目）：
@@ -126,7 +126,7 @@ adb install -r android/app/build/outputs/apk/release/app-release.apk
 | 判据 | 命令 | 结果 | 证据文件 |
 | :--- | :--- | :--- | :--- |
 | 全模块检查 | `.\gradlew.bat check --no-daemon --console=plain`（在 `android/`） | `BUILD SUCCESSFUL`，`EXITCODE=0` | `artifacts/evidence/leader-full-check-2026-09-21.txt` |
-| JVM 测试 | `.\gradlew.bat test --rerun-tasks --no-build-cache --no-daemon --console=plain`（在 `android/`；**强制全部重跑**，`UP-TO-DATE` 与 `FROM-CACHE` 不算证据） | 〔2026-09-22 03:30 **T-039 落盘后复测**；**口径已写明**〕`BUILD SUCCESSFUL`，`124 actionable tasks: 124 executed`。**读法 A（每模块只计一个变体）**：`:app` 334、`:core` 197、`:ai` 76、`:data` 26、`:tree-layout` 34 → **667 例 / 65 份套件报告**。**读法 B（Android 模块的 debug 与 release 两个变体都计；同一批类各跑一次）**：`:app` 668、`:core` 197、`:ai` 152、`:data` 52、`:tree-layout` 34 → **1103 例 / 108 份套件报告**（分项之和与总数一致：668+197+152+52+34=1103）。两读法均 **0 failures / 0 errors / 0 skipped**。含 T-039 新增的 `navigation/NavigationRootGateTest`（5 例全通过）。旧版此处写作「98 个测试类 / 1011 例」而**未写口径**，那是更早一次读法 B 的快照。 | `artifacts/evidence/T-REV-2026-09-22-jvm-tests-after-T039.txt`（头部含命令与 cwd，正文含本次强制重跑的原始输出、`EXITCODE=0`，末段是 `.trae/scripts/dev/count_jvm_tests.py` 的逐模块清单）；更早快照见 `artifacts/evidence/T-REV-2026-09-22-jvm-test-count.txt` 与 `artifacts/evidence/T-032-checks.txt` |
+| JVM 测试 | `.\gradlew.bat test --rerun-tasks --no-build-cache --no-daemon --console=plain`（在 `android/`；**强制全部重跑**，`UP-TO-DATE` 与 `FROM-CACHE` 不算证据） | 〔2026-09-22 03:30 **T-039 落盘后复测**；**口径已写明**〕`BUILD SUCCESSFUL`，`124 actionable tasks: 124 executed`。**读法 A（每模块只计一个变体）**：`:app` 334、`:core` 197、`:ai` 76、`:data` 26、`:tree-layout` 34 → **667 例 / 65 份套件报告**。**读法 B（Android 模块的 debug 与 release 两个变体都计；同一批类各跑一次）**：`:app` 668、`:core` 197、`:ai` 152、`:data` 52、`:tree-layout` 34 → **1103 例 / 108 份套件报告**（分项之和与总数一致：668+197+152+52+34=1103）。两读法均 **0 failures / 0 errors / 0 skipped**。含 T-039 新增的 `navigation/NavigationRootGateTest`（5 例全通过）。旧版此处写作「98 个测试类 / 1011 例」而**未写口径**，那是更早一次读法 B 的快照。 | `artifacts/evidence/T-REV-2026-09-22-jvm-tests-after-T039.txt`（头部含命令与 cwd，正文含本次强制重跑的原始输出、`EXITCODE=0`，末段是 `.codex/scripts/dev/count_jvm_tests.py` 的逐模块清单）；更早快照见 `artifacts/evidence/T-REV-2026-09-22-jvm-test-count.txt` 与 `artifacts/evidence/T-032-checks.txt` |
 | Java-only guard | `powershell -ExecutionPolicy Bypass -File android/scripts/no-kotlin-check.ps1`（仓库根） | `VERDICT: PASS (13 OK line(s))`，退出码 0；3 个 APK 均无 Kotlin 运行时字节码 | 命令与结论见 `artifacts/evidence/` 对应 guard 证据 |
 | lint | `check` 内含 | **0 error**；warning：`:app` 28、`:data` 1 | `android/*/build/reports/lint-results-*.xml` |
 | instrumentation **源码可编译** | `.\gradlew.bat :app:assembleDebugAndroidTest --no-daemon --console=plain` | `BUILD SUCCESSFUL` | 本报告生成时的构建输出 |
@@ -177,7 +177,7 @@ adb install -r android/app/build/outputs/apk/release/app-release.apk
 > `ChatWiring.java:252` 把存储的引用交给 `DeepSeekContextEncoder.currentInput(input, quote)`，由后者包成
 > `<treelearn_quote>…</treelearn_quote>` 前置在问题正文之前（只转义引用、不转义问题）。
 > 当前权威是 `android/ai/src/main/java/com/treelearn/ai/prompt/DeepSeekContextEncoder.java:83-90`；
-> 机械判据是 `.trae/scripts/dev/review_quote_path.py`（从代码推导结论，不是写死的），证据文件第 6 节
+> 机械判据是 `.codex/scripts/dev/review_quote_path.py`（从代码推导结论，不是写死的），证据文件第 6 节
 > `CHECK quote-reaches-prompt: PASS`。下表与下面的结论保留为**当时的记录**；其中「进请求」「历史」「领域类型」
 > 「提示词包」四行的读法已过期——线格式定稿后不再需要 `ContextPlan.Entry` 携带引用。
 > **T-044 仍为 `verifying`：contract-guardian 只判 PARTIAL（代码面 PASS、文档面未同步），本报告不把它记作已验收。**
@@ -234,7 +234,7 @@ adb install -r android/app/build/outputs/apk/release/app-release.apk
 
 T-041 的口径（〔2026-09-24 更正〕唯一判定值，来源 `T-041-sizing.txt` 与 verifier 独立复算）：9 个新文件 502 + 改动 42 = **544**。初稿的「496+38=534 / 511+38=549」两套读数与任务证据不同源（文件数 5 vs 9 亦不符），按 harness-tasks.md「同一任务不得两套口径」废弃。
 差异来自 XML 注释行的剥离方式，两种口径都超 500 硬上限，故按区间记录，不取单点。
-T-039 已写完；独立 verifier 判定 **`FAIL`**（唯一原因就是本表这一行），任务随之置为 `blocked` 而不是 `verifying`——它的五条验收标准与六道门禁全过，没有代码缺陷可修。`646` 是实现者用 `.trae/scripts/dev/count_production_lines.py` 实测的两项之和
+T-039 已写完；独立 verifier 判定 **`FAIL`**（唯一原因就是本表这一行），任务随之置为 `blocked` 而不是 `verifying`——它的五条验收标准与六道门禁全过，没有代码缺陷可修。`646` 是实现者用 `.codex/scripts/dev/count_production_lines.py` 实测的两项之和
 （新增 6 文件 531 + 改动 19 文件 115 = 646，见 `artifacts/evidence/T-039-sizing-final.txt`）；此前的 `≈695` 是开工前的预估，已作废。判定全文见 `artifacts/evidence/T-039-independent-verification.txt`。
 **代码已落盘但例外未获批**——实现者未自行追认，用户亦未表态（见第 10 节第 1 条）。
 
