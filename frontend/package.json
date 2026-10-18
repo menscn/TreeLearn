@@ -6,10 +6,15 @@
   "packageManager": "pnpm@11.5.2",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "lint": "tsc --noEmit",
+    "build": "tsc --noEmit && vite build && node scripts/check_offline_bundle.mjs",
+    "lint": "tsc --noEmit && node scripts/check_dependency_direction.mjs && node scripts/check_device_time.mjs && node scripts/check_user_copy_i18n.mjs",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "check:dependency-direction": "node scripts/check_dependency_direction.mjs",
+    "check:device-time": "node scripts/check_device_time.mjs",
+    "check:offline": "node scripts/check_offline_bundle.mjs",
+    "check:user-copy-i18n": "node scripts/check_user_copy_i18n.mjs",
+    "verify": "node scripts/verify.mjs"
   },
   "dependencies": {
     "react": "19.3.1",

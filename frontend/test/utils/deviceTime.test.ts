@@ -25,6 +25,14 @@ describe("设备时间展示", () => {
     expect(summer.startsWith("2026-07-12 08:00:00")).toBe(true);
   });
 
+  it("下午时刻输出 24 小时制，不退化成 12 小时制", () => {
+    // 只断言上午时刻无法区分 h23 与 h12：15:00 必须仍读作 15，而不是 03（AM/PM 分量根本不参与输出）。
+    const afternoon = formatDateTime(Date.UTC(2026, 2, 7, 15, 4, 9), { timeZone: "UTC" });
+    expect(afternoon).toBe("2026-03-07 15:04:09");
+    expect(afternoon.slice(11, 13)).toBe("15");
+    expect(afternoon).not.toMatch(/上午|下午|AM|PM/);
+  });
+
   it("时间点不合法时拒绝展示，而不是退回某个固定时区", () => {
     for (const bad of [0, -1, Number.NaN, 1_700_000_000_000.5]) {
       expect(() => formatDateTime(bad, { timeZone: "UTC" })).toThrow(RangeError);

@@ -50,30 +50,30 @@ export function parseEnvelope(text: string, screen: ScreenName): SnapshotResult 
   try {
     raw = JSON.parse(text);
   } catch (exc) {
-    return failure("malformed-fixture", `${screen}: 不是合法 JSON（${String(exc)}）`);
+    return failure("malformed-fixture", `${screen}: 不是合法 JSON（${String(exc)}）`);  // i18n-ignore: 诊断 detail，只进日志与测试断言，不渲染到 UI（UI 状态文案走 src/copy）
   }
   if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
-    return failure("malformed-fixture", `${screen}: 顶层必须是对象`);
+    return failure("malformed-fixture", `${screen}: 顶层必须是对象`);  // i18n-ignore: 诊断 detail，只进日志与测试断言，不渲染到 UI（UI 状态文案走 src/copy）
   }
   const o = raw as Record<string, unknown>;
   for (const field of ["schema_version", "screen", "source_commit", "captured_at_ms", "device", "payload"]) {
-    if (!(field in o)) return failure("malformed-fixture", `${screen}: 缺少必需字段 ${field}`);
+    if (!(field in o)) return failure("malformed-fixture", `${screen}: 缺少必需字段 ${field}`);  // i18n-ignore: 诊断 detail，只进日志与测试断言，不渲染到 UI（UI 状态文案走 src/copy）
   }
   if (!Number.isInteger(o.schema_version) || (o.schema_version as number) < 1) {
-    return failure("malformed-fixture", `${screen}: schema_version 必须是正整数`);
+    return failure("malformed-fixture", `${screen}: schema_version 必须是正整数`);  // i18n-ignore: 诊断 detail，只进日志与测试断言，不渲染到 UI（UI 状态文案走 src/copy）
   }
   if (o.screen !== screen) {
-    return failure("malformed-fixture", `${screen}: screen 字段与文件名不一致（读到 ${String(o.screen)}）`);
+    return failure("malformed-fixture", `${screen}: screen 字段与文件名不一致（读到 ${String(o.screen)}）`);  // i18n-ignore: 诊断 detail，只进日志与测试断言，不渲染到 UI（UI 状态文案走 src/copy）
   }
   if (typeof o.source_commit !== "string" || !SOURCE_COMMIT.test(o.source_commit)) {
-    return failure("malformed-fixture", `${screen}: source_commit 必须是 40 位小写十六进制提交号`);
+    return failure("malformed-fixture", `${screen}: source_commit 必须是 40 位小写十六进制提交号`);  // i18n-ignore: 诊断 detail，只进日志与测试断言，不渲染到 UI（UI 状态文案走 src/copy）
   }
   // 时间点只接受 epoch 毫秒：无 offset 的本地串会随时区漂移（.codex/rules/contracts.md 时间字段契约）。
   if (!Number.isSafeInteger(o.captured_at_ms) || (o.captured_at_ms as number) <= 0) {
-    return failure("malformed-fixture", `${screen}: captured_at_ms 必须是正的 epoch 毫秒整数`);
+    return failure("malformed-fixture", `${screen}: captured_at_ms 必须是正的 epoch 毫秒整数`);  // i18n-ignore: 诊断 detail，只进日志与测试断言，不渲染到 UI（UI 状态文案走 src/copy）
   }
   if (typeof o.device !== "string" || o.device.length === 0) {
-    return failure("malformed-fixture", `${screen}: device 必须是非空字符串（采集环境是覆盖面的一个维度）`);
+    return failure("malformed-fixture", `${screen}: device 必须是非空字符串（采集环境是覆盖面的一个维度）`);  // i18n-ignore: 诊断 detail，只进日志与测试断言，不渲染到 UI（UI 状态文案走 src/copy）
   }
   return {
     ok: true,

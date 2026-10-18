@@ -32,16 +32,16 @@ export class FixtureRuntimeAdapter implements RuntimePort {
   async snapshot(screen: ScreenName): Promise<SnapshotResult> {
     const names = await this.source.list();
     if (!names.includes(screen)) {
-      return { ok: false, kind: "unknown-screen", detail: `夹具里没有条目 ${screen}` };
+      return { ok: false, kind: "unknown-screen", detail: `夹具里没有条目 ${screen}` };  // i18n-ignore: 诊断 detail，只进日志与测试断言，不渲染到 UI（UI 状态文案走 src/copy）
     }
     let text: string | null;
     try {
       text = await this.source.read(screen);
     } catch (exc) {
-      return { ok: false, kind: "unreadable", detail: `${screen}: 读取失败（${String(exc)}）` };
+      return { ok: false, kind: "unreadable", detail: `${screen}: 读取失败（${String(exc)}）` };  // i18n-ignore: 诊断 detail，只进日志与测试断言，不渲染到 UI（UI 状态文案走 src/copy）
     }
     if (text === null) {
-      return { ok: false, kind: "unreadable", detail: `${screen}: 在名单里却取不到文本` };
+      return { ok: false, kind: "unreadable", detail: `${screen}: 在名单里却取不到文本` };  // i18n-ignore: 诊断 detail，只进日志与测试断言，不渲染到 UI（UI 状态文案走 src/copy）
     }
     return parseEnvelope(text, screen);
   }

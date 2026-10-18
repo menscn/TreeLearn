@@ -1,0 +1,122 @@
+# T-2026-10-18-013 补登轮：小时进制判据缺口（变异实验）
+
+Generated: 2026-10-18 22:08 +0800（本机 Windows，node v24.18.0，vitest 5.0.5）
+说明：013 片既有门禁见同目录 `T-2026-10-18-web-frontend-slice-013-gate.txt`（7 块，OVERALL_EXITCODE=0，未改写）。
+本文件只记录补登卡片这一轮**新发现并新修掉**的判据缺口，不重复旧证据。
+
+## block 01 — 基线：两个被测文件（变异前）
+
+```
+744ffb374dbd38b836d2b18f2bcb6f183ec06fd932f1bbabda3d970a0c14a719 *frontend/src/utils/deviceTime.ts
+c24dd8935ea35405e8f642ac68c3545c2c1a6e223387ecf6f804c7d83b324382 *frontend/src/copy/index.ts
+```
+
+备份副本与校验文件：`artifacts/tmp/card013/`（该目录被 `.gitignore:30` 排除，不入库）
+
+## block 02 — RED：双向变异（hasCopy 恒真 + hourCycle 改 h12）
+
+命令：`npx vitest run test/copy/copy.test.ts test/utils/deviceTime.test.ts`（工作目录 `frontend/`）
+
+```
+ ❯ test/copy/copy.test.ts (3 tests | 1 failed) 9ms
+     ✓ 每个键都取到非空文案，且文案不等于键名 3ms
+     × 缺键时大声失败并在消息里点名该键 4ms
+     ✓ 界面语言只有一个，本期不做第二语言齐备 0ms
+ ✓ test/utils/deviceTime.test.ts (5 tests) 19ms
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 7 passed (8)
+```
+
+同轮守门（仍为变异态）：
+
+```
+device-time scan root=D:\Project\Android\Treelearn\frontend\src scanned=9 exempt=utils/deviceTime.ts exempt-in-tree=true findings=0
+device time ok — 时间展示只经 src/utils/deviceTime.ts 一处
+guard rc=0
+```
+
+结论：copy 侧的破坏被抓住；deviceTime 侧的小时进制破坏**没有任何判据能发现**（5 例全绿 + 守门 rc=0）。
+原因：原有 5 例取的全是上午时刻，h12 下 `pick("hour")` 仍被 `pad()` 补成两位，而 dayPeriod 分量从不参与输出，
+所以 `15:04` 与 `03:04` 在既有断言里同形。
+
+## block 03 — 新增承重断言后，重跑同一变异证明断言生效
+
+新增断言：`frontend/test/utils/deviceTime.test.ts`「下午时刻输出 24 小时制，不退化成 12 小时制」
+
+再次把 `hourCycle: "h23"` 改为 `"h12"` 后：
+
+```
+     × 下午时刻输出 24 小时制，不退化成 12 小时制 4ms
+AssertionError: expected '2026-03-07 03:04:09' to be '2026-03-07 15:04:09' // Object.is equality
+      Tests  1 failed | 5 passed (6)
+```
+
+还原（`cp artifacts/tmp/card013/deviceTime.ts` 与 `index.ts`）后校验：
+
+```
+frontend/src/utils/deviceTime.ts: OK
+frontend/src/copy/index.ts: OK
+```
+
+## block 04 — GREEN：还原态全绿
+
+```
+Test Files  2 passed (2)
+      Tests  9 passed (9)
+vitest rc=0
+```
+
+```
+device-time scan root=... scanned=9 exempt=utils/deviceTime.ts exempt-in-tree=true findings=0
+device time ok — 时间展示只经 src/utils/deviceTime.ts 一处
+SELFTEST cases=11 floor=8 fail=0
+```
+
+汇总入口（还原态重跑，非沿用旧产物）：
+
+```
+verify steps=11 ok=11 bad=0 fault=0
+VERIFY PASS
+OVERALL_EXITCODE=0
+```
+
+## block 05 — 规模判定值
+
+命令：`python -X utf8 .codex/scripts/dev/count_production_lines.py frontend/src/copy/index.ts frontend/src/copy/zh-CN.ts frontend/src/utils/deviceTime.ts`
+
+```
+    21  frontend/src/copy/index.ts
+    16  frontend/src/copy/zh-CN.ts
+    39  frontend/src/utils/deviceTime.ts
+    76  TOTAL
+```
+
+## block 06 — 与 Android strings.xml 的键/文差分（本轮实测，尚无机械守门）
+
+```
+fe=14 ax=401 only_fe=['state_fixture_unavailable', 'state_service_unreachable'] only_ax=389
+text-mismatch on shared keys: []
+```
+
+判读：同名 12 键逐字一致；2 个 Web 独有状态键与 `zh-CN.ts` 头部注释相符；389 个 Android 键在 Web 侧还没有对应物（阶段 3 逐屏迁入）。
+
+## 汇总对账（want/got）
+
+| # | want | got | 判定 |
+|---|---|---|---|
+| 01 | 变异前两份校验和可复现 | `sha256sum -c` 两行 OK | ok |
+| 02 | copy 破坏被点名、deviceTime 破坏无人点名 | `Tests 1 failed \| 7 passed (8)`，guard `findings=0 rc=0` | ok（缺口如实记录） |
+| 03 | 新增断言在 h12 变异下判红 | `expected '2026-03-07 03:04:09' to be '2026-03-07 15:04:09'` | ok |
+| 04 | 还原态 9 例全绿、守门与自检与 verify 全 rc=0 | `Tests 9 passed (9)` / `SELFTEST cases=11 floor=8 fail=0` / `VERIFY PASS` | ok |
+| 05 | 规模 ≤ 200 目标 | 76 | ok |
+| 06 | 键差分给出可核对的三元组 | `fe=14 ax=401 only_ax=389`，同名键零失配 | ok |
+
+want=6 got=6 mismatch=0
+
+OVERALL_EXITCODE=0
+
+## 未覆盖项（如实登记）
+
+1. `strings.xml` 键/文差分只跑过一次手工脚本，未固化为 `.codex/scripts/` 或 `frontend/scripts/` 下的守门；阶段 3 逐屏前必须固化。
+2. `check_device_time.mjs` 判定「谁调用时间 API」，不判定输出格式；小时进制判据本轮由单测承担。
+3. 独立 verifier 轮未跑，013 卡 Verdict 保持 PENDING。

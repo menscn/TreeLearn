@@ -26,7 +26,7 @@ function pad(value: string): string {
 /** epoch 毫秒 → `YYYY-MM-DD HH:mm:ss`（设备时区、界面语言）。 */
 export function formatDateTime(epochMs: number, override: DeviceZoneOverride = {}): string {
   if (!Number.isSafeInteger(epochMs) || epochMs <= 0) {
-    throw new RangeError(`时间点只接受正的 epoch 毫秒，收到 ${String(epochMs)}`);
+    throw new RangeError(`时间点只接受正的 epoch 毫秒，收到 ${String(epochMs)}`);  // i18n-ignore: 诊断 detail，只进日志与测试断言，不渲染到 UI（UI 状态文案走 src/copy）
   }
   const parts = new Intl.DateTimeFormat(interfaceLocale, {
     timeZone: override.timeZone ?? deviceTimeZone(),
@@ -40,7 +40,7 @@ export function formatDateTime(epochMs: number, override: DeviceZoneOverride = {
   }).formatToParts(new Date(epochMs));
   const pick = (type: Intl.DateTimeFormatPartTypes): string => {
     const found = parts.find((p) => p.type === type);
-    if (found === undefined) throw new RangeError(`时区 ${override.timeZone ?? deviceTimeZone()} 未给出 ${type} 分量`);
+    if (found === undefined) throw new RangeError(`时区 ${override.timeZone ?? deviceTimeZone()} 未给出 ${type} 分量`);  // i18n-ignore: 诊断 detail，只进日志与测试断言，不渲染到 UI（UI 状态文案走 src/copy）
     return found.value;
   };
   return `${pick("year")}-${pad(pick("month"))}-${pad(pick("day"))} `
@@ -50,7 +50,7 @@ export function formatDateTime(epochMs: number, override: DeviceZoneOverride = {
 /** date-only 值保持原日期，不做任何时区换算（同一条规则的另外半边）。 */
 export function formatDateOnly(value: string): string {
   if (!DATE_ONLY.test(value)) {
-    throw new RangeError(`date-only 值必须是 YYYY-MM-DD，收到 ${value}`);
+    throw new RangeError(`date-only 值必须是 YYYY-MM-DD，收到 ${value}`);  // i18n-ignore: 诊断 detail，只进日志与测试断言，不渲染到 UI（UI 状态文案走 src/copy）
   }
   return value;
 }
