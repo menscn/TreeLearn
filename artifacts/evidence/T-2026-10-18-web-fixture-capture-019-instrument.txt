@@ -1,0 +1,122 @@
+# 块 01 capture_screen.py --all（真机重采 13 屏，逐屏判据）
+# command: python -X utf8 .codex/scripts/dev/parity/capture_screen.py --all
+CAPTURED screen=chat nodes=46 text=9 json=artifacts\fixtures\parity\chat-android.json bytes=22233 png_bytes=515069
+CAPTURED screen=filemanager nodes=10 text=3 json=artifacts\fixtures\parity\filemanager-android.json bytes=4169 png_bytes=64747
+CAPTURED screen=home nodes=60 text=17 json=artifacts\fixtures\parity\home-android.json bytes=21297 png_bytes=318010
+CAPTURED screen=homedrawer nodes=79 text=30 json=artifacts\fixtures\parity\homedrawer-android.json bytes=27713 png_bytes=164677
+CAPTURED screen=library nodes=28 text=12 json=artifacts\fixtures\parity\library-android.json bytes=10797 png_bytes=245702
+CAPTURED screen=modelsettings nodes=27 text=15 json=artifacts\fixtures\parity\modelsettings-android.json bytes=9431 png_bytes=138692
+CAPTURED screen=navigation nodes=27 text=9 json=artifacts\fixtures\parity\navigation-android.json bytes=11711 png_bytes=671376
+CAPTURED screen=provideradmin nodes=16 text=5 json=artifacts\fixtures\parity\provideradmin-android.json bytes=6088 png_bytes=72078
+CAPTURED screen=searchservicesettings nodes=28 text=16 json=artifacts\fixtures\parity\searchservicesettings-android.json bytes=9756 png_bytes=167904
+CAPTURED screen=settings nodes=35 text=15 json=artifacts\fixtures\parity\settings-android.json bytes=12346 png_bytes=139388
+CAPTURED screen=settingskey nodes=18 text=8 json=artifacts\fixtures\parity\settingskey-android.json bytes=6977 png_bytes=132735
+CAPTURED screen=treecanvas nodes=22 text=2 json=artifacts\fixtures\parity\treecanvas-android.json bytes=8135 png_bytes=82706
+CAPTURED screen=voicesettings nodes=16 text=8 json=artifacts\fixtures\parity\voicesettings-android.json bytes=6078 png_bytes=112211
+CAPTURE_TOTAL=13 BAD=0 out_dir=artifacts\fixtures\parity
+EXITCODE=0
+ANIMATION_SCALES_RESTORED animator_duration_scale=0, transition_animation_scale=0, window_animation_scale=0
+
+# 块 02 capture_screen.py --selftest（仪器自身的 11 条判据，不碰设备）
+# command: python -X utf8 .codex/scripts/dev/parity/capture_screen.py --selftest
+PASS == 1. 节点保留条件 — 布局壳（无 id 无文本不可点）被剔除，got=2 want=2
+PASS == 2. dp 归一 — 115px 在 3.25 密度下读作 35.38 dp
+PASS == 3. 父链沿用最近的有 id 节点 — parent='home_root' depth=3
+PASS == 4. inset 现场算 — {'status_bar_dp': 35.38, 'nav_bar_dp': 35.39}
+PASS == 5. 定位不到即 FAIL（不猜坐标） — 当前屏找不到 id='nope'（能定位的节点：2 个）
+PASS == 6. 被保留节点的包围盒不合格即 FAIL — 节点包围盒不合格：'[0,0]'（class=）
+PASS == 7. 空层级返回空表，由 min_nodes 当场判 FAIL — got=0（空表不抛异常，判定权在采集侧的下限校验）
+PASS == 8. 合格信封无问题 — []
+PASS == 9. screen 与文件名不一致被抓 — ["screen='home' 与文件名 'chat' 不一致"]
+PASS == 10. 缺必需字段被抓 — ['缺字段 source_commit', 'source_commit 不是 40 位十六进制']
+PASS == 11. 空 nodes 判 FAIL — 空集合不得读成通过
+SECTIONS=11 PASS=11 FAIL=0
+SELFTEST_AT=2026-10-18T16:41:01.874969+00:00
+EXITCODE=0
+=== 块 03 :app JVM 门禁读数（本次会话未改 Android 树，取结果 XML 的真实计数）===
+command: ./gradlew :app:testDebugUnitTest -> BUILD SUCCESSFUL in 1s, 54 actionable tasks: 54 up-to-date
+results files=94 tests=848 skipped=0 failures=0 errors=0
+=== 块 04 夹具信封实读（13 屏，schema/device/payload 字段）===
+source_commit(全部一致，等于采集时的 HEAD)= 2b4aa6f533d32c9d86a50b66b9b3f6e01c09f786
+chat-android.json          schema=1 nodes= 46 root=chat_root              shot=chat-android.png             vp=[369.23, 816.0] insets={'status_bar_dp': 0.0, 'nav_bar_dp': 35.38} sha=8be08c9d857d
+filemanager-android.json   schema=1 nodes= 10 root=                       shot=filemanager-android.png      vp=[369.23, 816.0] insets={'status_bar_dp': 0.0, 'nav_bar_dp': 35.39} sha=c3c414658d15
+home-android.json          schema=1 nodes= 60 root=home_root              shot=home-android.png             vp=[369.23, 816.0] insets={'status_bar_dp': 0.0, 'nav_bar_dp': 35.38} sha=93fb1d16127d
+homedrawer-android.json    schema=1 nodes= 79 root=                       shot=homedrawer-android.png       vp=[369.23, 816.0] insets={'status_bar_dp': 0.0, 'nav_bar_dp': 35.38} sha=0ab9887e749d
+library-android.json       schema=1 nodes= 28 root=library_root           shot=library-android.png          vp=[369.23, 816.0] insets={'status_bar_dp': 0.0, 'nav_bar_dp': 35.38} sha=66bc8a88757b
+modelsettings-android.json schema=1 nodes= 27 root=                       shot=modelsettings-android.png    vp=[369.23, 816.0] insets={'status_bar_dp': 0.0, 'nav_bar_dp': 35.39} sha=dadc3483caa2
+navigation-android.json    schema=1 nodes= 27 root=navigation_root        shot=navigation-android.png       vp=[369.23, 816.0] insets={'status_bar_dp': 0.0, 'nav_bar_dp': 35.38} sha=69da1e3063ea
+provideradmin-android.json schema=1 nodes= 16 root=providers_root         shot=provideradmin-android.png    vp=[369.23, 816.0] insets={'status_bar_dp': 0.0, 'nav_bar_dp': 35.39} sha=3021c0ba11be
+searchservicesettings-android.json schema=1 nodes= 28 root=                       shot=searchservicesettings-android.png vp=[369.23, 816.0] insets={'status_bar_dp': 0.0, 'nav_bar_dp': 35.39} sha=8be7df04d2e4
+settings-android.json      schema=1 nodes= 35 root=settings_root          shot=settings-android.png         vp=[369.23, 816.0] insets={'status_bar_dp': 0.0, 'nav_bar_dp': 35.39} sha=8f6fb937f813
+settingskey-android.json   schema=1 nodes= 18 root=settings_key_root      shot=settingskey-android.png      vp=[369.23, 816.0] insets={'status_bar_dp': 0.0, 'nav_bar_dp': 35.39} sha=b50bc36da494
+treecanvas-android.json    schema=1 nodes= 22 root=tree_root              shot=treecanvas-android.png       vp=[369.23, 816.0] insets={'status_bar_dp': 0.0, 'nav_bar_dp': 35.39} sha=46d89efaaed6
+voicesettings-android.json schema=1 nodes= 16 root=                       shot=voicesettings-android.png    vp=[369.23, 816.0] insets={'status_bar_dp': 0.0, 'nav_bar_dp': 35.39} sha=dc3374dca788
+
+# 块 05 重采后包内副本与权威侧失配（真实运行，命令逐字如下；这台机器的相对日期会随采集日变，所以每次重采必然失配）
+# command: cd frontend && node scripts/sync_fixtures.mjs
+DRIFT settings-android.json 包内副本与权威侧（脱敏后）字节不同
+DRIFT settingskey-android.json 包内副本与权威侧（脱敏后）字节不同
+DRIFT treecanvas-android.json 包内副本与权威侧（脱敏后）字节不同
+DRIFT voicesettings-android.json 包内副本与权威侧（脱敏后）字节不同
+COPIED provideradmin-android.json bytes=6094 redacted_urls=1
+SYNC WRITE src=13 dst=13 bad=0 redacted=1 dir=frontend\src\platform\fixtures
+SYNC CHECK ok
+EXITCODE=0
+（同上 13 条 DRIFT 与 13 条 COPIED 的完整读数见会话记录：DRIFT 覆盖全部 13 屏，redacted=1 落在 provideradmin 的端点文本上）
+=== 块 06 脱敏+漂移守门的变异（现在就能复现：改包内副本一个字节） ===
+mutation: 包内 home 副本 node_count 60 -> 61（权威侧不动）
+DRIFT home-android.json 包内副本与权威侧（脱敏后）字节不同
+SYNC CHECK src=13 dst=13 bad=1 redacted=0 dir=frontend\src\platform\fixtures
+SYNC CHECK FAIL
+EXITCODE=1
+（上一条经 tee 管道，shell rc 被吞；块 07 用不带管道的命令重跑并记真实退出码）
+SYNC WRITE src=13 dst=13 bad=0 redacted=1 dir=frontend\src\platform\fixtures
+SYNC CHECK ok
+EXITCODE=0
+SYNC CHECK src=13 dst=13 bad=0 redacted=0 dir=frontend\src\platform\fixtures
+SYNC CHECK ok
+EXITCODE=0
+=== 块 07 同一条变异重跑，记 shell 真实退出码 ===
+# command: cd frontend && node scripts/sync_fixtures.mjs --check
+DRIFT home-android.json 包内副本与权威侧（脱敏后）字节不同
+SYNC CHECK src=13 dst=13 bad=1 redacted=0 dir=frontend\src\platform\fixtures
+SYNC CHECK FAIL
+EXITCODE=1
+shell rc=1
+PASS == 7. 不含 URL 时逐字节不动 — "{\"nodes\":[{\"text\":\"设置\"}]}"
+PASS == 8. 原样照搬（未脱敏）的包内副本判漂移 — ["url-android.json"]
+SELFTEST cases=8 bad=0 floor=1
+EXITCODE=0
+SYNC WRITE src=13 dst=13 bad=0 redacted=1 dir=frontend\src\platform\fixtures
+SYNC CHECK ok
+EXITCODE=0
+
+# 块 08 采集前提：设备上跑的是当前构建的 APK（只用 install -r，绝不跑全量仪器套件——它会卸载应用并清掉学习者本地数据与 KEY）
+# command: adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+Performing Streamed Install
+Success
+# command: adb shell dumpsys package com.treelearn | grep -E 'versionName|lastUpdateTime'
+    versionName=1.0.0
+    lastUpdateTime=2026-10-19 00:44:42
+# command: python -X utf8 .codex/scripts/dev/parity/capture_screen.py --probe
+PROBE model=ALP-AN00 1200x2652@520 nodes=21
+  content                  FrameLayout                                         [0.0, 0.0, 369.23, 780.62]
+  launcher_root_view       FrameLayout                                         [0.0, 0.0, 369.23, 780.62]
+# command: adb shell monkey -p com.treelearn -c android.intent.category.LAUNCHER 1
+/sdcard/MonkeyEvent.txt 清除成功
+// Monkey finished
+screenshot -> artifacts/evidence/T-2026-10-18-device-home-019.png bytes=54928
+
+# 块 08b 更正上一条：上面那次 --probe 是在桌面启动器上取的（21 节点、launcher_root_view），monkey 也没把应用带到前台；改用显式组件启动后重取
+# command: adb shell am start -n com.treelearn/com.treelearn.app.MainActivity
+Starting: Intent { cmp=com.treelearn/.app.MainActivity }
+# command: python -X utf8 .codex/scripts/dev/parity/capture_screen.py --probe
+PROBE model=ALP-AN00 1200x2652@520 nodes=60
+  content                  FrameLayout                                         [0.0, 35.38, 369.23, 745.23]
+  main_drawer_root         FrameLayout                                         [0.0, 35.38, 369.23, 745.23]
+  shell_backdrop           View                                                [0.0, 35.38, 369.23, 745.23]
+  main_root                LinearLayout                                        [0.0, 35.38, 369.23, 745.23]
+  shell_host               FrameLayout                                         [0.0, 35.38, 369.23, 720.62]
+  home_screen              FrameLayout                                         [0.0, 35.38, 369.23, 720.62]
+  home_root                ScrollView                                          [0.0, 35.38, 369.23, 720.62]
+screenshot(覆盖上一条) -> artifacts/evidence/T-2026-10-18-device-home-019.png bytes=318100

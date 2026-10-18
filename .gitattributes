@@ -37,3 +37,12 @@ artifacts/evidence/*.mjs text eol=lf
 # 所以上面这些行不必挪；但 `.md` 从来没有被设过 `eol`，在 autocrlf=true 的机器上仍会检出成 CRLF，指纹照样复算不出来。
 Docs/spec/*.md text eol=lf
 .trae/tasks/*.md text eol=lf
+
+# 阶段一夹具是「采集到的字节」，不是可编辑源码：capture_screen.py 用文本模式写盘，Windows 上
+# 产出的就是 CRLF，而 019 证据里钉的 `bytes=`（chat=22233、home=21297…）与 sync_fixtures.mjs
+# 的「包内副本与权威逐字节同源」判的都是工作树字节。这一类不锁 eol 的话，非 Windows 克隆会检出成
+# LF（chat 变 21401 B），钉住的读数在新克隆上复算不出来——和上面那条教训是同一个缺口。
+# 这里选 eol=crlf 而不是把生成器改成 newline="\n" 后重采：重采会连带改掉 13 张 PNG 的哈希与
+# 「3天前」这类相对日期，整条 019 证据链要重跑；夹具的消费方只有 JSON.parse，行尾无语义。
+artifacts/fixtures/parity/*.json text eol=crlf
+frontend/src/platform/fixtures/*.json text eol=crlf

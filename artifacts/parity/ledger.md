@@ -1,10 +1,10 @@
 # 1:1 台账（生成物，勿手改）
 
-- 生成命令：`python -X utf8 .trae/scripts/dev/gen_parity_ledger.py`
+- 生成命令：`python -X utf8 .codex/scripts/dev/gen_parity_ledger.py`
 - 本次实际参数：(无，全部走默认路径)
-- 清单登记来源提交：e0eade71e8e1a256aa3b572e013f023cfffa375f；本行现场读到的 HEAD：e0eade71e8e1a256aa3b572e013f023cfffa375f
-- 清单文件哈希（本次读到的字节）：`4fe9ecd8f7c44876663903939905f6d0a6cd6f210e158f5ddfa8ec073f172ef9`
-- 实测面哈希：已落盘 `24c6d96e157211e3f3c53343984dd7deee89a3a783f2b8c8d194fdcc3a98373e` ／ 当前树重导出 `24c6d96e157211e3f3c53343984dd7deee89a3a783f2b8c8d194fdcc3a98373e`
+- 清单登记来源提交：2b4aa6f533d32c9d86a50b66b9b3f6e01c09f786；本行现场读到的 HEAD：2b4aa6f533d32c9d86a50b66b9b3f6e01c09f786
+- 清单文件哈希（本次读到的字节）：`02627489403bf51a6159b09d16a9a014963011e7492d85fe5dadaec7d8093a9a`
+- 实测面哈希：已落盘 `1bcc706e80550e0a0b76531d38e6d622f2970e1eaa43201e3014cbdca4234ce0` ／ 当前树重导出 `1bcc706e80550e0a0b76531d38e6d622f2970e1eaa43201e3014cbdca4234ce0`
 - 清单新鲜度：一致（当前树重导出的实测面与已落盘清单同哈希）
 - 规格指针（规格里不写范围数字，只指向清单）：登记的 True ／ 现场重读的 True → 一致
 - 行为仪器（verify_1to1.mjs）：adopted — 未收编时本列只报缺证据，不报通过。

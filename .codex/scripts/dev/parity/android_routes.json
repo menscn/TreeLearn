@@ -1,0 +1,121 @@
+{
+  "_comment": [
+    "Android 真机的「怎么走到这一屏」路由表，供 capture_screen.py 使用；判据不在这里，这里只放定位方式与到达证据。",
+    "每一步都在**当前这次** uiautomator dump 里按 resource-id 找节点再点它的中心；表里不写像素坐标，坐标每次由实测包围盒换算（写死坐标就等于把一次读数冒充成判据）。",
+    "optional=true 只允许用在「把起点归一」的步上：force-stop 后 App 恢复的是上次离开时那屏，所以进 chat 前要点 tab_home（在主页上它是无操作，在对话页上它不存在），这类「可能本来就在」的步才允许找不到就跳过。",
+    "expect_root 是到达判据：本次 dump 的 id 集合里没有它就判 FAIL。自绘屏没有根布局 id，改为点名它自己画出来的那个控件 id（下表逐条给出）。",
+    "min_nodes 是下限裸字面量：一次采到 0 个节点或一小撮壳节点，属「没采到被核对象」，不许留成一份看起来完整的夹具。",
+    "键名沿用台账的 profile_key 推导（类名去掉 Screen 后缀转小写），这样 gen_parity_ledger.py 以后按同一个键就能找到这里的条目。"
+  ],
+  "package": "com.treelearn",
+  "presets": {
+    "ensure_home": [
+      { "by": "id", "value": "tab_home", "optional": true },
+      { "by": "id", "value": "chat_back", "optional": true },
+      { "by": "id", "value": "navigation_back", "optional": true },
+      { "by": "id", "value": "settings_back", "optional": true }
+    ],
+    "into_chat": [
+      { "by": "id", "value": "home_topic_card" }
+    ],
+    "into_settings": [
+      { "by": "id", "value": "home_settings_button" }
+    ]
+  },
+  "screens": {
+    "home": {
+      "title": "主页",
+      "uses": [],
+      "steps": [
+        { "by": "id", "value": "tab_home", "optional": true },
+        { "by": "id", "value": "chat_back", "optional": true }
+      ],
+      "expect_root": "home_root",
+      "min_nodes": 30
+    },
+    "library": {
+      "title": "学习库",
+      "uses": ["ensure_home"],
+      "steps": [{ "by": "id", "value": "tab_library" }],
+      "expect_root": "library_root",
+      "min_nodes": 12
+    },
+    "chat": {
+      "title": "对话页",
+      "uses": ["ensure_home", "into_chat"],
+      "steps": [],
+      "expect_root": "chat_root",
+      "min_nodes": 20
+    },
+    "navigation": {
+      "title": "分支导航",
+      "uses": ["ensure_home", "into_chat"],
+      "steps": [{ "by": "id", "value": "chat_nav" }],
+      "expect_root": "navigation_root",
+      "min_nodes": 15
+    },
+    "treecanvas": {
+      "title": "谱系画布",
+      "uses": ["ensure_home", "into_chat"],
+      "steps": [{ "by": "id", "value": "chat_overview" }],
+      "expect_root": "tree_root",
+      "min_nodes": 8
+    },
+    "settings": {
+      "title": "设置",
+      "uses": ["ensure_home", "into_settings"],
+      "steps": [],
+      "expect_root": "settings_root",
+      "min_nodes": 12
+    },
+    "settingskey": {
+      "title": "密钥设置",
+      "uses": ["ensure_home", "into_settings"],
+      "steps": [{ "by": "id", "value": "settings_key_entry" }],
+      "expect_root": "settings_key_root",
+      "min_nodes": 8
+    },
+    "provideradmin": {
+      "title": "服务商管理",
+      "uses": ["ensure_home", "into_settings"],
+      "steps": [{ "by": "id", "value": "settings_providers_entry" }],
+      "expect_root": "providers_root",
+      "min_nodes": 8
+    },
+    "modelsettings": {
+      "title": "模型设置（自绘屏）",
+      "uses": ["ensure_home", "into_settings"],
+      "steps": [{ "by": "id", "value": "settings_models_entry" }],
+      "expect_root": "",
+      "min_nodes": 8
+    },
+    "searchservicesettings": {
+      "title": "检索服务设置（自绘屏）",
+      "uses": ["ensure_home", "into_settings"],
+      "steps": [{ "by": "id", "value": "settings_search_entry" }],
+      "expect_root": "",
+      "min_nodes": 6
+    },
+    "voicesettings": {
+      "title": "语音设置（自绘屏）",
+      "uses": ["ensure_home", "into_settings"],
+      "steps": [{ "by": "id", "value": "settings_voice_entry" }],
+      "expect_root": "",
+      "min_nodes": 6
+    },
+    "filemanager": {
+      "title": "文件管理（自绘屏）",
+      "uses": ["ensure_home", "into_settings"],
+      "steps": [{ "by": "id", "value": "settings_files_entry" }],
+      "expect_root": "",
+      "min_nodes": 6
+    },
+    "homedrawer": {
+      "title": "主页抽屉（自绘浮层屏）",
+      "uses": ["ensure_home"],
+      "steps": [{ "by": "id", "value": "home_drawer_button" }],
+      "expect_root": "",
+      "min_nodes": 8
+    }
+  }
+}
