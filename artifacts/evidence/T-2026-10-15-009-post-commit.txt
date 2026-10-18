@@ -1,0 +1,107 @@
+# T-2026-10-15-009 提交后回读：DOM 侧仪器的谱系承受到哪一步
+# 生成命令：python -X utf8 artifacts/tmp/gen-009-post-commit.py
+# 前置：该片已提交。块 01 检查该前置；不成立判 3（现在还不能认证），不判 0——
+#   把「还没提交」读成「提交过且没问题」是假见证。
+# HEAD 取 git rev-parse HEAD 的现场读数（复算同命令），提交号不抄进正文；
+#   因此这里只打印它的长度——块 04 扫本文件源码、块 09 扫写完的正文，两处都会把任何 7 位以上的裸十六进制词判红。
+  HEAD 读数长度=40 字符（复算：git rev-parse HEAD；值不抄进正文）
+# 指纹名单的边界：本运行只写本产物，因此本产物不在任何判定前名单里；其余被核对象各自由
+#   块 05（仪器与自检、已落盘台账）、块 03（前身归档副本字节）、块 06（HEAD 里的改动面）、
+#   块 08（三份同片证据）现场复核。要核对某个当前字节就用 sha256sum 该路径。
+===== block 01 - precondition: the adoption is in history =====
+  ok   新仪器路径在 HEAD 里（git cat-file -e rc=0）
+  ok   自检脚本也在 HEAD 里（它是被提交的仪器的一部分，不是临时件）
+  ok   前身归档副本在 HEAD 里（删除必须留下可回算的出处，而不是只删）
+  ok   旧路径已从 HEAD 消失（rc 非 0 才是移动而不是复制）
+  ok   git rev-parse HEAD rc=0
+  block 01: want=0 got=0
+
+  旧路径（artifacts/tmp/verify_1to1.mjs）在历史里拥有的提交=2
+  artifacts/evidence/T-2026-10-15-009-pre-adoption-verify_1to1.mjs         阈值 default  follow 集合=2 携带=2/2 缺失=0 rc=0
+  artifacts/evidence/T-2026-10-15-009-pre-adoption-verify_1to1.mjs         阈值 -M40%    follow 集合=2 携带=2/2 缺失=0 rc=0
+  artifacts/evidence/T-2026-10-15-009-pre-adoption-verify_1to1.mjs         阈值 -M10%    follow 集合=2 携带=2/2 缺失=0 rc=0
+  artifacts/evidence/T-2026-10-15-009-pre-adoption-verify_1to1.mjs         阈值 -M1%     follow 集合=4 携带=2/2 缺失=0 rc=0
+  .trae/scripts/dev/parity/verify_1to1.mjs                                 阈值 default  follow 集合=1 携带=1/2 缺失=1 rc=0
+  .trae/scripts/dev/parity/verify_1to1.mjs                                 阈值 -M40%    follow 集合=1 携带=1/2 缺失=1 rc=0
+  .trae/scripts/dev/parity/verify_1to1.mjs                                 阈值 -M10%    follow 集合=2 携带=2/2 缺失=0 rc=0
+  .trae/scripts/dev/parity/verify_1to1.mjs                                 阈值 -M1%     follow 集合=4 携带=2/2 缺失=0 rc=0
+  旧路径提交切分：移动前=1 移动/删除那次=1（按角色切，不写死提交号）
+  反向对照（同片新增的自检脚本，默认阈值）携带移动前提交=0/1 —— 必须为 0，否则「携带」这条判据只是在说「这条路径有历史」
+  同一对照按未切分口径命中=1（必须 >0：把判据退回「有任何历史」时这里就是假过）
+  新仪器路径由 git 全携带的阈值=['-M10%', '-M1%']（本机=.trae/scripts/dev/parity/verify_1to1.mjs）。**这一条只打印、不当判据**：上面逐条阈值行显示 git 对「这一半有没有前身」的答复随阈值改变，而一条会随阈值或内容反转的读数当判据就是拿时效性状态当判据。git 承不了的那一半由两处替代覆盖承重：块 02 的反向对照（同片新增的无关文件必须**不**携带移动前提交）与块 03 的字节级归档出处 + 四处正文。
+===== block 02 - history carry measured as set inclusion, threshold named =====
+  ok   旧路径在历史里确有提交（集合非空，否则「包含」是空见证）
+  ok   对旧路径的 git log 跑成（rc=0）
+  ok   每个阈值对归档副本与新路径各自的 --follow 都真的跑成（rc 全为 0，空集合不冒充 0 携带）
+  ok   归档那一半在某个写明阈值下**全携带**旧路径的每条提交（命中阈值=['default', '-M40%', '-M10%', '-M1%']）
+  ok   反向对照为 0 携带，且移动前集合非空（自检脚本 1 条，移动前=1，命中=0）
+  ok   同一对照按未切分口径会有命中（=1，>0）——它证明上面那条押的是「移动前那一半」，不是「这条路径有没有历史」
+  block 02: want=0 got=0
+
+  移动/删除那次提交的记录行=['D\tartifacts/tmp/verify_1to1.mjs']（只打印形状，提交号不抄）
+  归档副本哈希只以复算命令出现（复算：sha256sum artifacts/evidence/T-2026-10-15-009-pre-adoption-verify_1to1.mjs 与 git show <移除那次提交>^:artifacts/tmp/verify_1to1.mjs）
+===== block 03 - lineage recorded where git cannot carry it =====
+  ok   四处指向前身的面都在位（缺: 无）
+  ok   替代谱系处数 >= MIN_LINEAGE=3（实测 4）
+  ok   归档的前身副本与「移除那次提交的父提交」上的字节逐字节相同=True
+  ok   同一比较挪到「移除那次提交本身」上必须为假=False（两条答案不同才说明上面那条押的是移动前的字节，而不是一条恒真的哈希比较）
+  ok   移除那次提交被 git 记为改名或删除，且 git 跑成、id 形状为 40 位十六进制（rc=0 命中=True；空集合与跑坏分不开就是假见证）
+  block 03: want=0 got=0
+
+  源码扫描命中=0 ；合成正控（40 位形状）被同一正则命中=True
+===== block 04 - no literal commit id baked in; the scan itself rings =====
+  ok   本文件源码里没有 7 位以上的裸十六进制词（命中: 无）
+  ok   扫描对合成的 40 位提交号形状会响（否则本条与块 09 都是空见证）
+  block 04: want=0 got=0
+
+  自检读数（只打印，例数与变异条数不抄进正文，复算同命令的末行）：SELFTEST PASS cases=40 cli=20 muts=18 failures=0
+===== block 05 - the instrument still runs after the move =====
+  ok   node 自检 rc=0 且打印 SELFTEST PASS 与 failures=0
+  ok   台账生成器现场读到的行为仪器那一行是 adopted（随树自愈，不是人写的现位置声明）
+  ok   已落盘台账里那一行也写 adopted（磁盘字节与生成器一致=True）
+  ok   清单新鲜度与退出码互不矛盾（一致=True STALE=False rc=0；新鲜度是维护状态，两态各自可判）
+  block 05: want=0 got=0
+
+  落片那次提交改动面=27 个路径；其中应用生产路径=0 []
+===== block 06 - the landing commit touches no application production path =====
+  ok   新增该仪器的那次提交被 git 找到（rc=0 且 id 形状为 40 位十六进制）
+  ok   改动面读到了路径（非空集合，否则下面两条是空见证）
+  ok   改动面不含 android/、backend/、frontend/ 任何路径（命中: 无）
+  ok   改动面确实包含仪器、自检、三份证据与归档副本
+  block 06: want=0 got=0
+
+  起始脏集=0 结束脏集=0 movers=[] 正控=True
+===== block 07 - production surface did not move during this run =====
+  ok   本次运行窗口内生产面没有位移（movers=[]）
+  ok   本来干净的路径在窗口内变脏必须被点名（内存正控命中=True，否则增量是空守卫）
+  block 07: want=0 got=0
+
+  T-2026-10-15-009-red.txt                 utf8=True cr=0 尾读=OVERALL_EXITCODE=0 其后 1 行（须全是闸门行）
+  T-2026-10-15-009-green.txt               utf8=True cr=0 尾读=OVERALL_EXITCODE=0 其后 1 行（须全是闸门行）
+  T-2026-10-15-009-mutation.txt            utf8=True cr=0 尾读=OVERALL_EXITCODE=0 其后 1 行（须全是闸门行）
+===== block 08 - the three 009 artefacts still end green and LF-only =====
+  ok   三份证据各自最后一条 OVERALL_EXITCODE= 行都是 0，且其后只出现编码闸门行（缺: 无）
+  ok   三份证据都可严格 UTF-8 解码（缺: 无）
+  ok   三份证据的 carriage return 计数都是 0（.gitattributes 已把它们钉成 LF）
+  block 08: want=0 got=0
+
+  已写出正文行数=87 下限=40 命中=0 ；注入真实提交号后新增命中=1（必须 ≥1，否则本扫描是空见证）
+===== block 09 - the judgement blocks' body carries no commit-shaped token =====
+  ok   正文确实写到了下限（行数=87，MIN_BODY_LINES=40）——扫一份空正文不算通过
+  ok   块 01-08 的正文里没有 7 位以上的裸十六进制词（命中: 无；汇总段由收尾闸门覆盖）
+  ok   同一扫描对注入的真实移动/删除那次提交号会响（新增命中=1）
+  block 09: want=0 got=0
+
+===== 汇总 =====
+  blocks=9 floor=9 expectation_entries=9 faults=0
+  block 01 precondition: the adoption is in history       want=0 got=0 ok
+  block 02 history carry measured as set inclusion, thres want=0 got=0 ok
+  block 03 lineage recorded where git cannot carry it     want=0 got=0 ok
+  block 04 no literal commit id baked in; the scan itself want=0 got=0 ok
+  block 05 the instrument still runs after the move       want=0 got=0 ok
+  block 06 the landing commit touches no application prod want=0 got=0 ok
+  block 07 production surface did not move during this ru want=0 got=0 ok
+  block 08 the three 009 artefacts still end green and LF want=0 got=0 ok
+  block 09 the judgement blocks' body carries no commit-s want=0 got=0 ok
+OVERALL_EXITCODE=0
+DECODE ok utf8=True cr=0 commit-shaped-tokens=0

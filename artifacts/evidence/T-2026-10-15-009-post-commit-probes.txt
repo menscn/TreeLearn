@@ -1,0 +1,43 @@
+# T-2026-10-15-009 提交后回读的承重实测（退化实验跑在副本上，不碰生产文件）
+# 生成命令：bash artifacts/tmp/gen-009-post-commit-probes.sh
+# 被核脚本：artifacts/tmp/gen-009-post-commit.py（改前改后哈希比对见末块；值不抄进正文，复算 sha256sum artifacts/tmp/gen-009-post-commit.py）
+# 副本深度：全部落在 artifacts/tmp/，与生产文件同级
+# 期望表：每条退化都要**当场**转红；副本跑不红就说明那条守卫从未承重
+
+--- P0 基线：只改 OUT、正文逐字不动，副本必须仍然全绿——否则下面每一块的红都可能是「副本本来就红」
+  p0 want-rc=0 got-rc=0 见证行命中=1
+     见证串：blocks=9 floor=9 expectation_entries=9 faults=0
+DECODE gate utf8=True cr=0
+  block p0: want=0 got=0
+
+--- P1 把「对照文件必须不携带移动前提交」退回「有任何历史即可」（003 的实测缺陷形状）：块 02 必须转红
+  p1 want-rc=1 got-rc=1 见证行命中=1
+     见证串：FAIL 反向对照为 0 携带
+DECODE gate utf8=True cr=0
+  block p1: want=0 got=0
+
+--- P2 把归档字节的出处从「移除那次提交的父提交」挪到那次提交本身（那里路径已不存在）：块 03 必须转红。锚点与变异串都带上赋值左端，因为副本里本来就有一条形状相同的对照调用（same_at_move），不带左端时变异串命中 2 行、apply 判 MUTATION FAULT——那是第一次实跑实测到的
+  p2 want-rc=1 got-rc=1 见证行命中=1
+     见证串：FAIL 归档的前身副本与「移除那次提交的父提交」上的字节逐字节相同
+DECODE gate utf8=True cr=0
+  block p2: want=0 got=0
+
+--- P3 让提交号形状的扫描匹配不到 7~40 位：块 04 与块 09 的两条正控必须同时失效（否则「没有裸提交号」只是没在扫）
+  p3 want-rc=1 got-rc=1 见证行命中=1
+     见证串：FAIL 扫描对合成的 40 位提交号形状会响
+DECODE gate utf8=True cr=0
+  block p3: want=0 got=0
+
+--- P4 判定块下限抬一条：必须走独立的中止通道 rc=3，不能与「用例不符」的 rc=1 同码
+  p4 want-rc=3 got-rc=3 见证行命中=1
+     见证串：FLOOR FAULT
+DECODE gate utf8=True cr=0
+  block p4: want=0 got=0
+
+===== 生产文件未被改动 =====
+  ok   artifacts/tmp/gen-009-post-commit.py 跑前跑后哈希相同（复算：sha256sum artifacts/tmp/gen-009-post-commit.py）
+
+===== 汇总 =====
+  entries=6（由期望表条目数现场得出，不是手抄） mismatch=0
+OVERALL_EXITCODE=0
+DECODE ok utf8=True cr=0 bad-byte-control-rejected=True
