@@ -29,5 +29,17 @@ build-*/
 # parity / screen_inventory 脚本把这里当输出目录用，所以文件必须留在磁盘上，但不进版本库。
 artifacts/tmp/
 
+# Web 走查仪器每次运行覆盖的逐屏截图与 DOM 快照：判据在 stdout 与 artifacts/fixtures/parity/ 里，
+# 图只作人眼复核；要留证据的图按片复制进 artifacts/evidence/，不把整个输出目录当交付物。
+artifacts/web-shots/
+artifacts/web-shots-dist/
+artifacts/web-shots-file/
+artifacts/web-shots-offline/
+
+# 前端构建产物：dist/ 由 vite 产出，dist-offline/ 由 inline_offline.mjs 从 dist/ 再导出，
+# 两者都可由 `pnpm --dir frontend build` 重建，入库只会让门禁读到一份过期字节。
+frontend/dist/
+frontend/dist-offline/
+
 # 反编译恢复产物（含第三方工具 cfr.jar），只作一次性排查参考，不是仓库交付物。
 artifacts/recovery/
