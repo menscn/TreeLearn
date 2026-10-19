@@ -156,6 +156,13 @@ Phase C 的条目都不是「现在缺人写」，而是**缺前置事实**：�
 不是今天的门禁状态——D1 已在该日之后闭合。此后每条欠账的现状只取**它自己那条回读命令**；
 把某个时点的捕获当成现状，正是 D1 的成因本身。〕
 
+〔**2026-10-19 状态回写**：D4、D6 已实施（片 `T-2026-10-19-harness-guard-judgements-d4-d6-021.md`，
+正反双向见 `artifacts/evidence/T-2026-10-19-harness-guards-d4-d6.txt`）；D2、D3、D5 经复核**已不在当前树里成立**，
+各自的闭合方式写在该条的「处置」行（D2 = 判据改为合法子集，D3 = 被检集合随 `.trae/` 删除而换位，
+D5 = 互斥的两边同时消失），都是「复核后如实回写」而不是「本片修好的」，别把这三条算进 021 的交付。
+同日登记 D9（过期指针）。标题里的「门禁红项」从此应读作「盘点台账」：**每条的红绿只由它自己的回读命令决定**，
+今天重跑本节的每一条命令，得到的可能全是绿——那不是本节过期，而是它按设计工作。〕
+
 ### D1 `check_roadmap_and_routing` 的一次性迁移断言永久为红（2026-10-18 已按修法 ① 闭合）
 
 - 现象：两条 FAIL——`AGENTS.md adds >= 4 routing rows — measured=0`、`new routing rows cover all four triggers — missing=['intent-capturer', 'pm-discovery', 'project-brief', 'ROADMAP']`。
@@ -172,6 +179,14 @@ Phase C 的条目都不是「现在缺人写」，而是**缺前置事实**：�
 - 根因：同脚本另一条判据把 project-brief 限制在 ≤60 行非空非标题行（实测 46），而要把 57 个 Docs 文件全列进索引就不可能只剩一页。**两条判据对同一文件给出互斥要求**，无论怎么改正文都必有一条红——这是 AGENTS.md 失败案例库里「同一条规则写在两个入口」的守门版：不是重复，是互斥。
 - 修法（需裁定）：① 索引改为分目录抽样或只列 `Docs/spec/**` + `Docs/intent/**`（其余由目录级 README 承担），并相应改判据；② 给索引单独开预算（brief 只留指针，索引挪到 `.codex/context/docs-index.md`），brief 仍守一页。
 - 代价：②多一个文件、要同步更新 AGENTS.md 路由与 `README_ENTRIES`；①要接受「索引不再穷尽」这个语义变化并写清哪些目录被排除。
+- 处置（2026-10-19 复核，按 ① 的语义闭合，非本片所做）：判据标签已从 `docs index equals the real Docs/ file set` 改成
+  `docs index is a valid curated subset of the real Docs/ file set`，实现只要求「索引非空 ∧ 每条列出的路径真实存在 ∧
+  listed ≤ actual」（`.codex/scripts/check_context_pack.py:56`），互斥由此消解：一页预算与穷尽不再同时被要求。
+  「哪些目录被排除」没有写成白名单，而是把差额**打印成 `unlisted=[...]`**——排除是可见的观测而不是隐藏的宽免，
+  与 D1 里「增量降级为打印行」同一处理。入库记录：commit `57198af`。
+- 回读：`python -X utf8 .codex/scripts/check_context_pack.py`；`listed/actual/unlisted` 三个读数按该命令现场取，
+  本条不抄值。承重判据是紧随其后的 `every indexed path exists — dead=[]`：子集化只放松「全不全」，不放松「指不指得到」。
+  注意这条与 D9 无关：本条正文里「AGENTS.md 失败案例库」那个说法已经过期。
 
 ### D3 `validate_tasks.py` 全目录 16 条 ERROR，落在 4 个历史任务文件
 
@@ -179,6 +194,16 @@ Phase C 的条目都不是「现在缺人写」，而是**缺前置事实**：�
 - 后果：任何人「跑一遍全目录」拿到的都是红，于是这条门禁在成片验收时被跳过——**恒红的门禁等于没有门禁**，与 D1 同病。
 - 修法：4 个文件按 Task v2 契约补键或显式标注为「v2 之前的历史记录，契约不追溯」并加入豁免清单（豁免清单只存一处）。
 - 代价：补键要还原当时的 RED/GREEN 命令，部分已无法重跑，只能如实标注为历史。
+- 处置（2026-10-19 复核，闭合方式为**换位而不是补键**）：这 16 条 ERROR 落在 `.trae/tasks/` 的 68 张旧卡上，
+  而 `validate_tasks.py` 只扫 `.codex/tasks/*.md`（`.codex/scripts/validate_tasks.py:322`）。流程迁移把整棵
+  `.trae/` 按用户授权删除（commit `57198af`），被检集合因此换成迁移后的卡片全集，恒红随之消失。
+  如实写明三点：①**没有**给那 4 个文件补键，也没有建立豁免清单——它们不在本仓库历史里，无从补证；
+  ②上面那些读数（`files=68 errors=16 warnings=8`）是 2026-10-15 的盘点时点，今天复算不出同一形状，
+  这与 D1 的「把某时点的捕获当成现状」是同一个陷阱，故此条只留命令不留值；
+  ③本条真正要防的是「恒红的门禁在成片验收时被跳过」，那个风险对**当前**卡片集同样成立，
+  所以回读命令必须每次成片验收现场跑，而不是引用本条历史。
+- 回读：`python -X utf8 .codex/scripts/validate_tasks.py` 的 `SUMMARY files=… errors=… warnings=…` 行；
+  `errors` 必须为 0，任何非 0 都是本片窗口的待修项而不是「历史噪音」。
 
 ### D4 守门正控必须**现场派生**，不得手抄被检文本
 
@@ -186,6 +211,22 @@ Phase C 的条目都不是「现在缺人写」，而是**缺前置事实**：�
 - 现症：002 片已把样本重算为改写后文本的精确 60/44 字切片（用守门自己的窗口函数对现文件求命中数：样本长度 89/60/44，60 字档命中 30/1/0，40 字档命中 50/21/5；真实守门的三条 FAIL 判据行由 002 片 GREEN 证据的正控复现块给出），但**这仍是手抄**——下次再改 SKILL.md 会同样失配，而且失配方向是「正控失效、自检仍报绿」，属 fail-open。
 - 修法：正控改为**从被判文件现场切片**（取该行前 N 个归一化字符构造样本），并在自检里加一条断言「样本必须能在被判文本里找到原文」，否则判 FAIL。同一改法适用于所有以被测正文为素材的正控。
 - 代价：改 `checkers_selftest.py` 的构造逻辑并补一条「样本找不到原文必须判 FAIL」的反向用例；因 D1 挡住自检，还得先让自检能跑到底。〔2026-10-18：后半条前置已满足——D1 闭合后基线段四条守门全绿、注入用例真正执行；用例条数与结论取 `python -X utf8 .codex/scripts/dev/checkers_selftest.py` 的 Mode 行与末两行，本条不抄值。〕
+- 处置（2026-10-19，片 `T-2026-10-19-harness-guard-judgements-d4-d6-021.md`）：三段手抄常量
+  （`STOLEN_LONG` / `STOLEN_SHORT` / `STOLEN_TRIM`）已从脚本里**删除**，代之以 `derive_sample()`：
+  在 `normalize` 后的 pm-discovery 现文上逐窗口滑动取样，样本必须同时满足三条——① 逐字存在于现文
+  （就是上面要求的「找不到原文即失效」），② 不含路径片段与占位符词（否则 `mask_paths` 与
+  「no placeholder tokens」两条判据会掺进命中数），③ 落在预期档位（`fire60` 要求 60 字档命中 > 1，
+  `quiet60` 要求 ≤ 1，两档都要求 40 字档至少 1 命中）。取不到样本时 `run_case` 返回 HARNESS，
+  聚合为 `OVERALL: INCONCLUSIVE` / rc=3，即「没跑完」而不是「用例通过」。
+  **另加一层本条原文没要求的防护**：不在运行时断言样本内容（派生自现文，查了恒真、等于没查），
+  改为在 `main()` 开头断言**用例形状**——三条 `intent:copied-methodology*` 的操作必须是 `append_sample`，
+  一旦有人把它改回写死文本，电池在建副本之前就 rc=3。阈值本身一位未动（60/40 字档、允许命中 1/0），
+  样本长度沿用历史实测的 89/60/44，避免把「阈值改宽」混进「样本改派生」。
+- 回读：`python -X utf8 .codex/scripts/dev/checkers_selftest.py`（末三行给用例数与结论；三条抄检用例的
+  样本串与命中数打在各自 CASE 行的 FAIL 文本里，可直接与现文对读）；变异实测见
+  `artifacts/evidence/T-2026-10-19-harness-guards-d4-d6.txt` 块 05（改回字面量 → rc=3）与块 00 B 段
+  （改写正文 → 旧电池 3 条 MISMATCH、新电池全绿）。同一批驱动脚本在 gitignore 的 `artifacts/tmp/`，
+  长期可复算的部分是上面那条命令与脚本内的闸门，不是那块一次性对照。
 
 ### D5 失败案例库的「条目 > 30 → 整理合并去重」与「AGENTS.md 不得出现删除行」互斥
 
@@ -193,12 +234,43 @@ Phase C 的条目都不是「现在缺人写」，而是**缺前置事实**：�
 - 后果：一条写着要人做的动作，被另一条门禁拦住，且没人报错。读者按 AGENTS.md 执行会突然得到红，白跑一片。
 - 修法（需裁定）：① 给该守门开一条**显式豁免**——只允许失败案例库小节的删除行走「整理片」，且该片必须同时给出条数前后对账；② 把整理改成纯追加式（新写一份汇总文件、旧条目就地标注「已并入某条」而不删），删掉「合并去重」的字面要求。
 - 代价：①削弱一条已被两次真实缺陷证明有用的门禁，需要正反自检；②留下双份文本，靠标注维持唯一判定点。
+- 处置（2026-10-19 复核，**互斥的两边都不再存在**，因此无需裁定）：
+  ① AGENTS.md 里已经没有「失败案例库」小节，也没有「条目 > 30 → 整理合并去重」这句要求
+  （用户按当前工作树为准删除了那两节，见 D9；现行历史案例的归属地是 `.codex/references/regression-cases.md`）；
+  ② `check_roadmap_and_routing.py` 里「AGENTS.md 改动不得出现删除行」这条形状断言已随 D1 的修法降级为
+  `c.note` 打印行（`.codex/scripts/check_roadmap_and_routing.py:193-215`：增量只在窗口内成立，故不当判据），
+  自检里对应的两条用例 `roadmap:agents-row-deleted` / `roadmap:agents-existing-row-vanished` 也已从
+  `CASES` 中退役。两侧同时消失 ⇒ 本条描述的「写着要人做、却被另一条门禁拦住」在当前树里无从发生。
+  这条**不是**被修复成「允许删除行」，而是被检文本与被检形状各自换了归属；保留本条正文是为了留住成因形状。
+- 回读：`grep -n 失败案例 AGENTS.md`（退出码 1 = 无命中）与
+  `python -X utf8 .codex/scripts/check_roadmap_and_routing.py`（看 `SKIPPED`/`NOTE` 行而非删除线判据）；
+  若将来把案例库放回 AGENTS.md，必须连同②一起重新裁定，不要只恢复文本。
 
 ### D6 `check_stack_facts` 只钉精确短语，不做反向搜索
 
 - 现象：002 片的**第二轮**反向搜索才找到 `Docs/spec/SPEC-2026-09-23-providers-and-models.md:168` 这条同族主张——第一轮列出的 9 处是凭已知命中列的，守门也只按「文件 + 那一条精确短语」判，所以它**拦不住新出现的、别处的同族主张**。
 - 修法：加一条与清单无关的兜底扫描——对被盘点文件集合之外的 `README*`、`.codex/rules/**`、`.codex/context/**`、`Docs/spec/**` 断言不出现「无服务端 / 不建设.*后端 / 目录不存在」这类**模式**（模式集合只存一处），命中即判 FAIL 并给行号。
 - 代价：模式扫描有假阳性风险（改写后的「不做远程服务端」合法），需要像 002 片那样用精确短语与例外清单平衡，并配正反自检；这与 `check_stack_facts` 现有的「精确串而非关键词」取向是**互补**而非替换，两条判据要各自说明自己挡什么。
+- 处置（2026-10-19，片 `T-2026-10-19-harness-guard-judgements-d4-d6-021.md`）：按上面那条修法落地，判据由四条增至六条。
+  ① `STALE_PATTERNS`（8 条，短语与正则混排，模式集合只存这一处）+ 裸字面量下限 `MIN_PATTERNS = 6`——
+  与 `MIN_INVENTORY` 同一理由：被检集合不能给自己定下限，写成 `len(STALE_PATTERNS)` 就等于「清空模式表也照样绿」。
+  ② 扫描集按**前缀**取（`PATTERN_SCAN_PREFIXES = README* / .codex/rules/** / .codex/context/** / Docs/spec/**`），
+  与 `STACK_FACTS` 那份十条枚举**刻意不同源**——复用清单就等于这条判据不存在。
+  ③ 命中不直接判红：同一行含权威规格名（`AUTHORITY`）算「引用历史」，计入 `attributed` 观测；
+  不带指针才算「把旧方向当现状」并给到 `文件:行号`。权威规格自身所在文件整体豁免，因为它是这条事实的定义处、
+  必然要引用被它取代的旧主张。这条区分是刻意的：若凡提及即红，唯一变绿办法是删掉纠正性引用，
+  等于让守门逼人销毁证据——所以自检必须同时配「裸命中判红」与「带指针判绿」两条用例（`pattern-bare` /
+  `pattern-attributed`），只配前者可以靠「更宽的守门」蒙过自检。
+  ④ 自检夹具额外拷入一份**清单外**文件（`PATTERN_SCAN_SAMPLE = .codex/rules/sql.md`）：没有它，
+  这条判据在自检里只被清单内文件证到，恰好没证到它要防的那件事。用例数断言随之从 `2N+2` 改为 `2N+5`，
+  少跑一个分支即判 rc=3。
+- 回读：`python -X utf8 .codex/scripts/dev/check_stack_facts.py`（六行判据，末两行是本条新增的两条）与
+  `python -X utf8 .codex/scripts/dev/check_stack_facts.py --selftest`（用例数与 `expected=` 对读）；
+  缺陷复现的一次性对照见 `artifacts/evidence/T-2026-10-19-harness-guards-d4-d6.txt` 块 00
+  （同一份副本、同一注入行：改前脚本 rc=0 看不见，改后脚本 rc=1）与块 03（真实树上的注入→判红→字节级还原→判绿）。
+- 覆盖面边界（写在这里，免得下一位把它当成穷尽）：扫描集四个前缀**之外**新写出的同族句子（例如
+  `Docs/05-technical-design/**` 里）不在兜底范围内，那类文件由精确串那条管；两条判据各挡一件事，
+  合并成一条会让 002 片的第 10 处命中重新变成看不见。
 
 ### D7 真机仪器套件有 11 例既有红，`connectedDebugAndroidTest` 因此不可能全绿
 
@@ -259,3 +331,22 @@ Phase C 的条目都不是「现在缺人写」，而是**缺前置事实**：�
   证据 `artifacts/evidence/T-2026-10-18-web-android-slice-018-d8-stage-determinism.txt`。
   **未闭合的一半**：在线真实发送一次的 SENDING→REASONING→ANSWERING 观感仍未实测（会消耗学习者 API 额度并写入真实
   主题数据，需授权后单独做），所以本条闭合的是「门禁可判」，不是「生成流已验证」。
+
+### D9 「AGENTS.md 失败案例库」这个指针指向一个当前树里不存在的章节（2026-10-19 登记）
+
+- 现象：`.codex/` 里有若干处正文把某条理由写成「见 AGENTS.md 失败案例库 …」，而 AGENTS.md 现在只在一处提到
+  历史案例，且明确把归属地指给 `.codex/references/`（`AGENTS.md:65`：「`.codex/references/` 只保存迁移映射和历史案例」）。
+  现行案例文件是 `.codex/references/regression-cases.md`，其开头还写着「历史参考与学习材料，不是新增门禁或当前运行契约；
+  现行要求见[防回归规则](.codex/rules/regression.md)」。落点本身还不止一种写法：其中一处写的是
+  「`.cursor/AGENTS.md` 失败案例库」，而 `.cursor/` 在当前树里也不承担规则职责（AGENTS.md 开头就说明了这点）。
+- 后果：按指针去读的人（或 AI）在 AGENTS.md 里找不到那一节，于是一条**真实存在过的成因**变成无法回读的说法——
+  与 D1 同源，只是这里过期的是指针而不是读数。它不影响判据红绿，所以没有任何门禁会替我报出来，只能靠盘点。
+- 修法（不需要裁定，属措辞修正）：把这些指针的落点从「AGENTS.md 失败案例库」改成
+  `.codex/references/regression-cases.md`（要写「现行要求」时改指 `.codex/rules/regression.md`），一次改完，
+  不改任何判据逻辑。历史任务卡与各 D 条目正文里的旧说法**不回改**（那是当时的写法，回改等于改写历史捕获）。
+- 代价：涉及脚本 docstring 与规则正文的行，会让 `--help` 式说明文字变化；因此这片必须与任何判据改动分开提交，
+  或者与 B3（`run_all_guards`）合并——B3 本来就要动这些脚本的入口说明。
+- 回读：`grep -rnI "AGENTS.md 失败案例" .codex/scripts .codex/skills .codex/rules`——这几处是**活指针**
+  （脚本注释与技能正文里的「理由见 …」），命中清零即闭合；ROADMAP 各 D 条目正文与任务卡里的旧说法不计入，
+  那是当时的写法。同时 `grep -n 失败案例 AGENTS.md` 应保持无命中（见 D5）。命中条数现场读，本条不抄值。
+- 归属：登记于 2026-10-19（片 `T-2026-10-19-harness-guard-judgements-d4-d6-021.md` 的盘点副产品），不在该片实施。

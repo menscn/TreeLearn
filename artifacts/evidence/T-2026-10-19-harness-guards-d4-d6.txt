@@ -1,0 +1,508 @@
+Treelearn 证据文件 —— 片 T-2026-10-19-harness-guard-judgements-d4-d6-021
+任务：`.codex/tasks/T-2026-10-19-harness-guard-judgements-d4-d6-021.md`
+日期：2026-10-19（捕获跨 2026-10-18 深夜至 10-19 上午，同一连续工作会话）
+范围：ROADMAP 已知欠账 D6（`check_stack_facts` 只钉精确短语、不做反向搜索）与
+      D4（`checkers_selftest` 的抄袭正控样本是手抄文本，改一处正文即失效）。
+运行环境：Windows 10.0.26200 / x64 / Python（`sys.executable`，-X utf8）/ Git Bash。
+本文件所有输出均为**原样粘贴**，没有事后编辑；每块开头写明产生它的命令行。
+读法：块 00 是本片的核心判据（同一份副本、两版脚本各跑一次）；块 01–05 是生产态与
+      仪器自身的正反双向；块 06 是给 D2/D3/D5 的当前态读数（本片不动它们，只回写现状）。
+
+〔块 00〕RED/GREEN 驱动：同一份副本上跑「改前脚本」与「改后脚本」
+
+# command: python -X utf8 artifacts/tmp/gen-021-redgreen.py
+Command: python -X utf8 artifacts/tmp/gen-021-redgreen.py
+Fixture roots are created under C:\Users\23745\AppData\Local\Temp and deleted; the worktree is never mutated.
+HEAD 取出的旧脚本：.codex/scripts/dev/check_stack_facts.py（199 行）、.codex/scripts/dev/checkers_selftest.py（441 行）
+
+========================================================================
+块 A / D6：盘点清单之外的裸旧主张——旧版看不见，新版必须判红
+========================================================================
+注入行（在盘点清单之外的 .codex/rules/sql.md）：本仓库无服务端，也不做后端。
+--- 改前 .codex/scripts/dev/check_stack_facts_head.py -> rc=0
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+
+check_stack_facts: 0 check(s) failed
+EXITCODE=0
+  判据行：['check_stack_facts: 0 check(s) failed']
+--- 改后 .codex/scripts/dev/check_stack_facts.py -> rc=1
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+OK   pattern backstop floor met — measured=8 floor=6
+FAIL every stale-shape line in the scan set carries the authority pointer — measured=1 attributed=3 hits=['.codex/rules/sql.md:72']
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+  判据行：["FAIL every stale-shape line in the scan set carries the authority pointer — measured=1 attributed=3 hits=['.codex/rules/sql.md:72']", 'check_stack_facts: 1 check(s) failed']
+ASSERT D6: old_rc=0（期望 0＝盲区复现） new_rc=1（期望 1） -> ok
+
+========================================================================
+块 B / D4：正控样本改为从被判文本现场切片——改正文不再需要重抄样本
+========================================================================
+已把 .codex/skills/pm-discovery/SKILL.md 的正文逐字 +1 码点改写（长度 3710 -> 3710 字，与任何手抄样本再无 40 字重叠）
+旧版手抄 STOLEN_LONG   长度=89   在改写后文本中的重叠命中：60 字档=0 40 字档=0 → 正控已失效（再也证不到抄袭）
+旧版手抄 STOLEN_SHORT  长度=60   在改写后文本中的重叠命中：60 字档=0 40 字档=0 → 正控已失效（再也证不到抄袭）
+旧版手抄 STOLEN_TRIM   长度=44   在改写后文本中的重叠命中：60 字档=0 40 字档=0 → 正控已失效（再也证不到抄袭）
+--- 改前 checkers_selftest -> rc=1
+    CASE 19 MISMATCH  intent:copied-methodology-long - expected FAIL label, rc=0, seen=[]
+    CASE 20 MISMATCH  intent:copied-methodology-short - expected FAIL label, rc=0, seen=[]
+    CASE 21 MISMATCH  intent:copied-methodology-44-chars - expected FAIL label, rc=0, seen=[]
+    Mode: full (50 injected-violation cases + 4 baselines)
+    SELFTEST cases=50 ok=47 mismatch=3 harness_errors=0 skipped=0
+    OVERALL: FAIL
+    EXITCODE=1
+--- 改后 checkers_selftest -> rc=0
+    CASE 19 OK        intent:copied-methodology-long - rc=1, FAIL shares at most 1 run(s) of 60 chars with pm-discovery — measured_hits=30 sample=[('.codex/skills/pm-discovery/SKILL.md', '---obnf;qn.ejtdpwfszeftdsjqujpo;亨哂叒玱
+    CASE 20 OK        intent:copied-methodology-short - rc=1, FAIL shares at most 0 run(s) of 40 chars with pm-discovery — measured_hits=21 sample=[('.codex/skills/pm-discovery/SKILL.md', '---obnf;qn.ejtdpwfszeftdsjqujpo;亨哂叒
+    CASE 21 OK        intent:copied-methodology-44-chars - rc=1, FAIL shares at most 0 run(s) of 40 chars with pm-discovery — measured_hits=5 sample=[('.codex/skills/pm-discovery/SKILL.md', '---obnf;qn.ejtdpwfszeftdsjqujpo;亨
+    Mode: full (50 injected-violation cases + 4 baselines)
+    SELFTEST cases=50 ok=50 mismatch=0 harness_errors=0 skipped=0
+    OVERALL: PASS
+    EXITCODE=0
+ASSERT D4: 改后正文时旧电池 MISMATCH 条数=3（期望 >0，缺陷复现），新电池 MISMATCH=0 且 OVERALL PASS rc=0（期望 0） -> ok
+
+========================================================================
+汇总
+========================================================================
+D6 块 rc=0  D4 块 rc=0
+EXITCODE=0
+
+
+〔块 01〕生产态：真实工作树上的 check_stack_facts 六条判据
+
+# command: python -X utf8 .codex/scripts/dev/check_stack_facts.py
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+OK   pattern backstop floor met — measured=8 floor=6
+OK   every stale-shape line in the scan set carries the authority pointer — measured=0 attributed=3 hits=[]
+
+check_stack_facts: 0 check(s) failed
+EXITCODE=0
+
+
+〔块 02〕仪器自检：check_stack_facts --selftest（25 例，含模式兜底三例）
+
+# command: python -X utf8 .codex/scripts/dev/check_stack_facts.py --selftest
+BASELINE (healthy copy must PASS)
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+OK   pattern backstop floor met — measured=8 floor=6
+OK   every stale-shape line in the scan set carries the authority pointer — measured=0 attributed=3 hits=[]
+
+check_stack_facts: 0 check(s) failed
+EXITCODE=0
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+FAIL no superseded stack claim survives — measured=1 hits=['README.md:226::没有后端']
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+OK   pattern backstop floor met — measured=8 floor=6
+FAIL every stale-shape line in the scan set carries the authority pointer — measured=1 attributed=3 hits=['README.md:226']
+
+check_stack_facts: 2 check(s) failed
+EXITCODE=1
+CASE inject-stale README.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+FAIL every inventoried file points at the authoritative spec — measured=1 missing_pointer=['README.md']
+OK   pattern backstop floor met — measured=8 floor=6
+FAIL every stale-shape line in the scan set carries the authority pointer — measured=1 attributed=2 hits=['README.md:201']
+
+check_stack_facts: 2 check(s) failed
+EXITCODE=1
+CASE drop-pointer README.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+FAIL no superseded stack claim survives — measured=1 hits=['README_EN.md:226::no backend']
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+OK   pattern backstop floor met — measured=8 floor=6
+FAIL every stale-shape line in the scan set carries the authority pointer — measured=1 attributed=3 hits=['README_EN.md:226']
+
+check_stack_facts: 2 check(s) failed
+EXITCODE=1
+CASE inject-stale README_EN.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+FAIL every inventoried file points at the authoritative spec — measured=1 missing_pointer=['README_EN.md']
+OK   pattern backstop floor met — measured=8 floor=6
+OK   every stale-shape line in the scan set carries the authority pointer — measured=0 attributed=3 hits=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE drop-pointer README_EN.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+FAIL no superseded stack claim survives — measured=1 hits=['.codex/context/project-brief.md:69::目录目前不存在']
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+OK   pattern backstop floor met — measured=8 floor=6
+OK   every stale-shape line in the scan set carries the authority pointer — measured=0 attributed=3 hits=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE inject-stale .codex/context/project-brief.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+FAIL every inventoried file points at the authoritative spec — measured=1 missing_pointer=['.codex/context/project-brief.md']
+OK   pattern backstop floor met — measured=8 floor=6
+FAIL every stale-shape line in the scan set carries the authority pointer — measured=1 attributed=2 hits=['.codex/context/project-brief.md:23']
+
+check_stack_facts: 2 check(s) failed
+EXITCODE=1
+CASE drop-pointer .codex/context/project-brief.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+FAIL no superseded stack claim survives — measured=1 hits=['.codex/ROADMAP.md:355::不要假设有服务端']
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+OK   pattern backstop floor met — measured=8 floor=6
+OK   every stale-shape line in the scan set carries the authority pointer — measured=0 attributed=3 hits=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE inject-stale .codex/ROADMAP.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+FAIL every inventoried file points at the authoritative spec — measured=1 missing_pointer=['.codex/ROADMAP.md']
+OK   pattern backstop floor met — measured=8 floor=6
+OK   every stale-shape line in the scan set carries the authority pointer — measured=0 attributed=3 hits=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE drop-pointer .codex/ROADMAP.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+FAIL no superseded stack claim survives — measured=1 hits=['Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md:375::不建设 Spring Boot、React']
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+OK   pattern backstop floor met — measured=8 floor=6
+OK   every stale-shape line in the scan set carries the authority pointer — measured=0 attributed=3 hits=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE inject-stale Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+FAIL every inventoried file points at the authoritative spec — measured=1 missing_pointer=['Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md']
+OK   pattern backstop floor met — measured=8 floor=6
+OK   every stale-shape line in the scan set carries the authority pointer — measured=0 attributed=3 hits=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE drop-pointer Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+FAIL no superseded stack claim survives — measured=1 hits=['Docs/05-technical-design/TreeLearn_Harness全量开发交付提示词.md:76::无 backend/frontend']
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+OK   pattern backstop floor met — measured=8 floor=6
+OK   every stale-shape line in the scan set carries the authority pointer — measured=0 attributed=3 hits=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE inject-stale Docs/05-technical-design/TreeLearn_Harness全量开发交付提示词.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+FAIL every inventoried file points at the authoritative spec — measured=1 missing_pointer=['Docs/05-technical-design/TreeLearn_Harness全量开发交付提示词.md']
+OK   pattern backstop floor met — measured=8 floor=6
+OK   every stale-shape line in the scan set carries the authority pointer — measured=0 attributed=3 hits=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE drop-pointer Docs/05-technical-design/TreeLearn_Harness全量开发交付提示词.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+FAIL no superseded stack claim survives — measured=1 hits=['.codex/rules/shared-state.md:30::无服务端实例']
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+OK   pattern backstop floor met — measured=8 floor=6
+FAIL every stale-shape line in the scan set carries the authority pointer — measured=1 attributed=3 hits=['.codex/rules/shared-state.md:30']
+
+check_stack_facts: 2 check(s) failed
+EXITCODE=1
+CASE inject-stale .codex/rules/shared-state.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+FAIL every inventoried file points at the authoritative spec — measured=1 missing_pointer=['.codex/rules/shared-state.md']
+OK   pattern backstop floor met — measured=8 floor=6
+OK   every stale-shape line in the scan set carries the authority pointer — measured=0 attributed=3 hits=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE drop-pointer .codex/rules/shared-state.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+FAIL no superseded stack claim survives — measured=1 hits=['.codex/rules/observability.md:39::无服务端、无后端统一日志基础设施']
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+OK   pattern backstop floor met — measured=8 floor=6
+FAIL every stale-shape line in the scan set carries the authority pointer — measured=1 attributed=3 hits=['.codex/rules/observability.md:39']
+
+check_stack_facts: 2 check(s) failed
+EXITCODE=1
+CASE inject-stale .codex/rules/observability.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+FAIL every inventoried file points at the authoritative spec — measured=1 missing_pointer=['.codex/rules/observability.md']
+OK   pattern backstop floor met — measured=8 floor=6
+OK   every stale-shape line in the scan set carries the authority pointer — measured=0 attributed=3 hits=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE drop-pointer .codex/rules/observability.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+FAIL no superseded stack claim survives — measured=1 hits=['.codex/skills/pm-discovery/SKILL.md:142::本地优先、无服务端']
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+OK   pattern backstop floor met — measured=8 floor=6
+OK   every stale-shape line in the scan set carries the authority pointer — measured=0 attributed=3 hits=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE inject-stale .codex/skills/pm-discovery/SKILL.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+FAIL every inventoried file points at the authoritative spec — measured=1 missing_pointer=['.codex/skills/pm-discovery/SKILL.md']
+OK   pattern backstop floor met — measured=8 floor=6
+OK   every stale-shape line in the scan set carries the authority pointer — measured=0 attributed=3 hits=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE drop-pointer .codex/skills/pm-discovery/SKILL.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+FAIL no superseded stack claim survives — measured=1 hits=['Docs/spec/SPEC-2026-09-23-providers-and-models.md:194::无服务端、单人维护']
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+OK   pattern backstop floor met — measured=8 floor=6
+FAIL every stale-shape line in the scan set carries the authority pointer — measured=1 attributed=3 hits=['Docs/spec/SPEC-2026-09-23-providers-and-models.md:194']
+
+check_stack_facts: 2 check(s) failed
+EXITCODE=1
+CASE inject-stale Docs/spec/SPEC-2026-09-23-providers-and-models.md: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+FAIL every inventoried file points at the authoritative spec — measured=1 missing_pointer=['Docs/spec/SPEC-2026-09-23-providers-and-models.md']
+OK   pattern backstop floor met — measured=8 floor=6
+FAIL every stale-shape line in the scan set carries the authority pointer — measured=1 attributed=2 hits=['Docs/spec/SPEC-2026-09-23-providers-and-models.md:168']
+
+check_stack_facts: 2 check(s) failed
+EXITCODE=1
+CASE drop-pointer Docs/spec/SPEC-2026-09-23-providers-and-models.md: rc=1 -> ok
+
+FAIL inventory floor met — measured=0 floor=10
+OK   every inventoried current-state file is present — measured=0 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+OK   pattern backstop floor met — measured=8 floor=6
+OK   every stale-shape line in the scan set carries the authority pointer — measured=0 attributed=3 hits=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE empty-inventory: rc=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+OK   pattern backstop floor met — measured=8 floor=6
+FAIL every stale-shape line in the scan set carries the authority pointer — measured=1 attributed=3 hits=['.codex/rules/sql.md:72']
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE pattern-bare: rc=1 expect=1 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+OK   pattern backstop floor met — measured=8 floor=6
+OK   every stale-shape line in the scan set carries the authority pointer — measured=0 attributed=4 hits=[]
+
+check_stack_facts: 0 check(s) failed
+EXITCODE=0
+CASE pattern-attributed: rc=0 expect=0 -> ok
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+FAIL pattern backstop floor met — measured=0 floor=6
+OK   every stale-shape line in the scan set carries the authority pointer — measured=0 attributed=0 hits=[]
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+CASE empty-patterns: rc=1 -> ok
+
+check_stack_facts --selftest: 25 case(s), 0 mismatch(es), expected=25
+EXITCODE=0
+
+
+〔块 03〕真实树上的注入—还原对（RED 注入 / GREEN 还原），含字节级复原证明
+
+# command: python -X utf8 artifacts/tmp/d46-inject-real.py
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+OK   pattern backstop floor met — measured=8 floor=6
+FAIL every stale-shape line in the scan set carries the authority pointer — measured=1 attributed=3 hits=['.codex/rules/sql.md:72']
+
+check_stack_facts: 1 check(s) failed
+EXITCODE=1
+RED rc=1
+OK   inventory floor met — measured=10 floor=10
+OK   every inventoried current-state file is present — measured=10 missing=[]
+OK   no superseded stack claim survives — measured=0 hits=[]
+OK   every inventoried file points at the authoritative spec — measured=0 missing_pointer=[]
+OK   pattern backstop floor met — measured=8 floor=6
+OK   every stale-shape line in the scan set carries the authority pointer — measured=0 attributed=3 hits=[]
+
+check_stack_facts: 0 check(s) failed
+EXITCODE=0
+GREEN rc=0
+RESTORE sha b644079527ff -> b644079527ff equal=True
+
+
+〔块 04〕整块电池：checkers_selftest（50 例注入 + 4 条基线），生产树只读
+
+# command: python -X utf8 .codex/scripts/dev/checkers_selftest.py
+Command: python .codex/scripts/dev/checkers_selftest.py
+Mode: full (50 injected-violation cases + 4 baselines)
+Workspace: C:\Users\23745\AppData\Local\Temp\tlx-selftest-8t_jpdyo
+Workspace note: longest path 126
+BASELINE OK check_intent_capturer_agent rc=0
+BASELINE OK check_roadmap_and_routing rc=0
+BASELINE OK check_intent_template rc=0
+BASELINE OK check_spec_author_agent rc=0
+CASE 01 OK        intent:agent-file-missing - rc=1, FAIL file exists: .codex/agents/intent-capturer.md
+CASE 02 OK        intent:prerequisite-file-gone - rc=1, FAIL prerequisite path exists on disk: .codex/context/project-brief.md
+CASE 03 OK        intent:field-marker-unreadable - rc=1, FAIL both field markers are readable — template=15 agent=None
+CASE 04 OK        intent:field-set-drift - rc=1, FAIL agent output field set equals the template FIELDS marker — agent=15 template=15 diff=['id', 'idX']
+CASE 05 OK        intent:field-not-backticked - rc=1, FAIL every template field appears backticked in the output-format section — measured=15; missing=['id']
+CASE 06 OK        intent:section-list-drift - rc=1, FAIL listed body sections equal the template ## titles — template=9 agent=9 diff=['Core flow（核心流程）', 'Coreflow（核心流程）']
+CASE 07 OK        intent:required-section-missing - rc=1, FAIL required sections present — measured=6; missing=['禁区']
+CASE 08 OK        intent:verifier-section-uncovered - rc=1, FAIL section set covers .codex/agents/verifier.md — reference=2; uncovered=['附加要求']
+CASE 09 OK        intent:writable-scope-lost - rc=1, FAIL declares writable scope Docs/intent/**
+CASE 10 OK        intent:readonly-scope-lost - rc=1, FAIL declares read-only scopes — missing=['.codex/tasks/**']
+CASE 11 OK        intent:prerequisite-name-missing - rc=1, FAIL names all 3 prerequisite files — missing=['.codex/context/project-brief.md']
+CASE 12 OK        intent:terminal-state-lost - rc=1, FAIL handles terminal state: needs-more-info
+CASE 13 OK        intent:handoff-checklist-lost - rc=1, FAIL accepted branch produces a handoff checklist
+CASE 14 OK        intent:handoff-target-lost - rc=1, FAIL handoff target is requirement-decomposer
+CASE 15 OK        intent:rejected-branch-lost - rc=1, FAIL rejected branch keeps the intent file
+CASE 16 OK        intent:gap-escalation-lost - rc=1, FAIL background-gap escalation is written as a prohibition in one clause — measured=None
+CASE 17 OK        intent:gap-semantics-reversed - rc=1, FAIL background-gap escalation is written as a prohibition in one clause — measured=None
+CASE 18 OK        intent:placeholder-injected - rc=1, FAIL no placeholder tokens — measured=['TODO']
+CASE 19 OK        intent:copied-methodology-long - rc=1, FAIL shares at most 1 run(s) of 60 chars with pm-discovery — measured_hits=30 sample=[('.codex/skills/pm-discovery/SKILL.md', '#pm-discovery——产品发现与需求收敛>定位：把脑子里的模糊想法，收敛成一份可以立刻拿去拆分的需求。>铁律：*')]
+CASE 20 OK        intent:copied-methodology-short - rc=1, FAIL shares at most 0 run(s) of 40 chars with pm-discovery — measured_hits=21 sample=[('.codex/skills/pm-discovery/SKILL.md', '#pm-discovery——产品发现与需求收敛>定位：把脑子里的模糊想法，收敛')]
+CASE 21 OK        intent:copied-methodology-44-chars - rc=1, FAIL shares at most 0 run(s) of 40 chars with pm-discovery — measured_hits=5 sample=[('.codex/skills/pm-discovery/SKILL.md', '#pm-discovery——产品发现与需求收敛>定位：把脑子里的模糊想法，收敛')]
+CASE 22 OK        roadmap:file-missing - rc=1, FAIL file exists: .codex/ROADMAP.md
+CASE 23 OK        roadmap:phase-section-renamed - rc=1, FAIL phase section exists: Phase C（依赖外部条件）
+CASE 24 OK        roadmap:entries-unreadable - rc=1, FAIL Phase B（下一批） has >= 7 entries — measured=0
+CASE 25 OK        roadmap:field-renamed - rc=1, FAIL Phase B（下一批） every entry carries all 8 field names — measured_entries=7 problems=[('B1 code-reviewer 角色与 REVIEW.md 报告模板', ['依赖'])]
+CASE 26 OK        roadmap:prompt-too-short - rc=1, FAIL Phase B（下一批） every 执行提示词 is >= 40 chars — measured_short=[('B1', 10)]
+CASE 27 OK        roadmap:prompt-dead-path - rc=1, FAIL Phase B（下一批） every path inside 执行提示词 exists — measured_dead=[('B1', '.codex/HARNES.md')]
+CASE 28 OK        roadmap:vague-source - rc=1, FAIL Phase B（下一批） every 开源来源 cites github.com or a skills path — measured_weak=['B1']
+CASE 29 OK        roadmap:phase-b-capability-lost - rc=1, FAIL Phase B covers the seven planned capabilities — missing=['eval-keeper']
+CASE 30 OK        roadmap:phase-b-spec-author-lost - rc=1, FAIL Phase B covers the seven planned capabilities — missing=['spec-author']
+CASE 31 OK        roadmap:phase-c-capability-lost - rc=1, FAIL Phase C covers the three planned capabilities — missing=['release-gate']
+CASE 32 OK        roadmap:placeholder-injected - rc=1, FAIL no placeholder tokens in ROADMAP — measured=['TBD']
+CASE 33 OK        roadmap:routing-floor-load-bearing - rc=1, FAIL AGENTS.md routing table currently has >= 999 linked rows — measured=19
+CASE 34 OK        roadmap:routing-table-truncated - rc=1, FAIL AGENTS.md routing table currently has >= 12 linked rows — measured=4
+CASE 35 OK        roadmap:routing-trigger-lost - rc=1, FAIL current routing rows cover all four triggers — measured_rows=19 missing=['project-brief']
+CASE 36 OK        roadmap:routing-target-dead - rc=1, FAIL every current routing-row target exists — measured_targets=22 dead=['.codex/rules/androidx.md']
+CASE 37 OK        roadmap:readme-entry-removed - rc=1, FAIL 目录结构 section lists the four new entries — missing=['.codex/templates/']
+CASE 38 OK        replay:template-is-not-an-instance - rc=1, FAIL decision record states exactly one terminal state — measured=['accepted / rejected / needs-more-info']
+CASE 39 OK        intent:gap-prohibition-negated - rc=1, FAIL background-gap escalation keeps the canonical prohibition clause — measured=False
+CASE 40 OK        intent:gap-prohibition-hedged - rc=1, FAIL no line in the agent file negates or exempts the background-gap rule — measured=['- 背景缺口上报：当 `.codex/context/**` 与 `Docs/**` 合起来也回答不了某个产品事实时，把它登记为「未知项」并显式报告缺口，**不得凭印象补一个看起来合理的答案**，与其它约定冲突时不再适用。']
+CASE 41 OK        intent:gap-prohibition-synonym - rc=1, FAIL no line in the agent file negates or exempts the background-gap rule — measured=['- 背景缺口上报：当 `.codex/context/**` 与 `Docs/**` 合起来也回答不了某个产品事实时，把它登记为「未知项」并显式报告缺口，不得凭印象补一个看起来合理的答案——该要求已作废。']
+CASE 42 OK        intent:gap-prohibition-crossline - rc=1, FAIL no line in the agent file negates or exempts the background-gap rule — measured=['- 上述背景缺口要求在赶工期时可以忽略。']
+CASE 43 OK        intent:gap-waiver-uncoupled-line - rc=1, FAIL no line in the agent file negates or exempts the background-gap rule — measured=['- 上述规则于赶工期时作废。']
+CASE 44 OK        template:marker-vs-section-drift - rc=1, FAIL FIELDS marker equals the template own metadata keys + ## titles — marker=15 derived=14 diff=['Core flow（核心流程）']
+CASE 45 OK        template:required-section-dropped - rc=1, FAIL template body has exactly the 9 required ## sections — measured=8 missing=['Core flow（核心流程）'] extra=[]
+CASE 46 OK        replay:terminal-value-on-next-line - rc=1, FAIL decision record states exactly one terminal state — measured=[]
+CASE 47 OK        spec:file-missing - rc=1, FAIL spec file exists — missing: .codex/templates/SPEC.md
+CASE 48 OK        spec:content-class-lost - rc=1, FAIL declares the four content classes — sections=4; missing=['界面方案']
+CASE 49 OK        spec:placeholder-injected - rc=1, FAIL no placeholder tokens — measured=['TODO']
+CASE 50 OK        spec:bare-px-injected - rc=1, FAIL no bare hex or ad-hoc px values — hex=[] px=['14px']
+SELFTEST cases=50 ok=50 mismatch=0 harness_errors=0 skipped=0
+OVERALL: PASS
+EXITCODE=0
+
+
+〔块 05〕D4 结构闸门变异：把任一正控用例改回手抄字面量必须判仪器故障（rc=3）
+
+# command: python -X utf8 artifacts/tmp/d46-mutate-guard.py
+SELFTEST harness error: 抄检用例又带回字面量样本（D4 复发）：['intent:copied-methodology-long']
+OVERALL: INCONCLUSIVE
+EXITCODE=3
+MUTATED_RC=3 (expect 3)
+
+
+〔块 06〕D2 / D3 / D5 / D9 的当前态读数（本片只回写现状，不改这些判据）
+
+# command: python -X utf8 artifacts/tmp/d46-readings.py
+# command: python -X utf8 .codex/scripts/check_context_pack.py
+OK   no placeholder tokens — measured={}
+
+check_context_pack: 0 check(s) failed
+EXITCODE=0
+# command: python -X utf8 .codex/scripts/check_roadmap_and_routing.py
+OK   目录结构 section lists the four new entries — missing=[]
+
+check_roadmap_and_routing: 0 check(s) failed
+EXITCODE=0
+# command: python -X utf8 .codex/scripts/validate_tasks.py
+PASS T-2026-10-19-harness-guard-judgements-d4-d6-021.md
+SUMMARY files=16 errors=0 warnings=3
+# command: grep -n 失败案例 AGENTS.md
+
+# command: ls .codex/tasks | grep -c T-2026-09
+0
+# command: grep -rnI "AGENTS.md 失败案例" .codex/scripts .codex/skills .codex/rules
+.codex/scripts/check_roadmap_and_routing.py:11:并写明基线与窗口。理由见 AGENTS.md 失败案例库 [2026-10-16] [guard] 与 ROADMAP 的 D1。
+.codex/scripts/check_roadmap_and_routing.py:43:# 用「发现行数」推导自己的下限等于没有下限——见 AGENTS.md 失败案例库
+.codex/scripts/harness_check_lib.py:5:  （见 AGENTS.md 失败案例库：dev 脚本的默认路径不得按 CWD 解析）。
+.codex/skills/secret-scan/SKILL.md:70:  3. 如已 push：立即吊销该凭据 + 用 git filter-repo / BFG 清 history（参考 .cursor/AGENTS.md 失败案例库）。
+
+〔块 07〕两条写进本片的教训（不是抄来的，是这两天的执行里踩到的）
+
+1) 撤注入**不得用 `git checkout --`**。块 03 第一次跑完后用 `git checkout -- .codex/rules/sql.md`
+   还原，结果 sha 由 `b644079527ff` 变成 `d0e27a3c9c89`：这台机器 `core.autocrlf=true` 且工作树
+   里该文件是 CRLF，checkout 会按 smudge 规则重写行尾，于是「内容相同、字节不同」。
+   正确做法是在同一个 Python 进程里先把原字节读出、注入、跑完、再用那份字节原样写回，
+   末尾打印前后 sha256 相等作为证明（块 03 最后一行 `RESTORE sha … equal=True`）。
+   这条与 019 片钉夹具字节、`.gitattributes` 锁 `eol=crlf` 是同一个缺口的三面：
+   证据钉的是字节，还原就必须回到字节。
+
+2) 重定向控制台输出时必须带 `-X utf8`。同一行中文读数，直接管道给文件时按系统代码页
+   （GBK）写出，汉字变问号；`python -X utf8 … > 文件` 才与原始终版一致。
+
+〔块 08〕覆盖边界——这些是本片**没有**证的
+
+- 块 00 的 B 部分把 pm-discovery 正文逐字符 +1 码点（长度不变）来制造「改写后文本」，
+  它是**结构上**的新文本，不是人写的新 prose。它证的是「正控跟着被判文件走、不再靠手抄」，
+  不证「真实改写后的措辞仍能被抓到」——后者的实测由块 04 在现网文本上给出（命中数 30/21/5，
+  与历史手抄样本的命中数一致，说明档位关系没被改坏）。
+- D6 的模式兜底只扫 `README*`、`.codex/rules/**`、`.codex/context/**`、`Docs/spec/**` 四个前缀，
+  且豁免权威规格自身所在的行。扫描集之外的旧主张（例如 `Docs/05-technical-design/**` 里
+  新长出的同族句子）仍不在它的覆盖面内——那类文件在盘点清单里，由精确短语那条判据管。
+- 四个驱动脚本（`gen-021-redgreen.py`、`d46-inject-real.py`、`d46-mutate-guard.py`、
+  `d46-readings.py`，外加把本文件拼起来的 `asm-021.py`）留在
+  **gitignore 的 `artifacts/tmp/`**，不入库，因此在别的克隆上复算不出来。本片把「可复算」的部分
+  全部搬进了已入库的仪器：D6 由 `check_stack_facts.py --selftest` 的 `pattern-bare` /
+  `pattern-attributed` / `empty-patterns` 三例长期守着，D4 由 `checkers_selftest.py` 开头的形状
+  闸门长期守着（用例一回到手抄字面量即 rc=3，块 05 就是那条闸门的实测）。
+  块 00 的「旧版看不见」是**一次性的缺陷复现**——旧版脚本已被本片替换，之后跑不出同一对照；
+  能长期复算的是另一半：注入裸主张判红、同行带权威指针判绿、改正文后电池仍全绿且样本来自现文。
+- 本片不动 D2/D3/D5/D7 的判据，块 06 只是读数；ROADMAP 里那几条的处置另见对应小节。
+- 没有跑 Android/前端任何测试：本片改动面全部在 `.codex/scripts/dev/**` 与 README 叙述段，
+  不含生产代码、不含布局、不含数据。

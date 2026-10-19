@@ -22,6 +22,9 @@ import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
+# 样本派生必须走被判脚本同一套归一化/屏蔽/窗口函数，否则「自检以为会命中的样本」与
+# 「守门真正看到的文本」又是两份实现（D4 的成因）。
+sys.path.insert(0, os.path.join(REPO_ROOT, ".codex", "scripts"))
 
 INTENT_AGENT = ".codex/agents/intent-capturer.md"
 VERIFIER_AGENT = ".codex/agents/verifier.md"
@@ -48,22 +51,44 @@ ARGS_BY_CASE = {
     "replay:terminal-value-on-next-line": ["{target}"],
 }
 
-# 三段都是 pm-discovery 的原文，长度刻意选在「一档能挡、一档挡不住」的位置（命中数
-# 由 normalize 后的字符数与阈值推出，实测见 T-2026-10-15-002-green 证据）：
-# STOLEN_LONG 89 字 → 60 字档 30 命中（>1 即 FAIL）；
-# STOLEN_SHORT 恰好 60 字 → 60 字档 1 命中（落在 ≤1 的允许范围内），40 字档 21 命中。
-STOLEN_LONG = (
-    "用户说出来的几乎都是方案（「给我加个导出按钮」），"
-    "要问的是问题（「你现在怎么把内容带出去，卡在哪一步」）。"
-    "在至少写下一条**不做会怎样**的具体后果之前，不要进入下面的收敛判定。"
-)
-STOLEN_SHORT = (
-    "本地优先、无远程服务端**：任何引入云端账号、云同步、云备份、远程服务的方案都属于新需求，"
-    "必须回到需求澄清，不能夹带进现"
-)
-# 只有 44 字（实测 normalize 后 44 字符），用来钉住 40 字档的阈值：
-# 实测 60 字档 0 命中（不足以触发），40 字档 5 命中（必须触发）。
-STOLEN_TRIM = "本地优先、无远程服务端**：任何引入云端账号、云同步、云备份、远程服务的方案都属于新需求"
+# D4：正控样本一律**从被判文件现场切片**，不再手抄。
+# 手抄的三段样本（旧 STOLEN_LONG/SHORT/TRIM）在 002 片改写 pm-discovery 那一行后立刻失配，
+# 而且失配方向是「正控失效、自检仍报绿」——fail-open。现在每条样本都要同时满足：
+# ① 它确实是 pm-discovery 归一化文本里的连续片段（找不到原文即仪器故障，不是「用例通过」）；
+# ② 它不含路径片段与占位符词，免得 mask_paths 与「no placeholder tokens」两条判据掺进来；
+# ③ 它落在预期的阈值档位上（60 字档响/不响、40 字档响），档位关系是断言出来的而不是注释里说的。
+PM_SKILL = ".codex/skills/pm-discovery/SKILL.md"
+SAMPLE_SPEC_LONG = ("long", 89, "fire60")      # 60 字档必须响（>1 命中）
+SAMPLE_SPEC_EXACT = ("exact60", 60, "quiet60")  # 60 字档恰好 1 命中（允许），40 字档必须响
+SAMPLE_SPEC_TRIM = ("trim", 44, "quiet60")      # 60 字档 0 命中（够不到窗口），40 字档必须响
+
+
+def derive_sample(skill_text, length, tier):
+    """从 pm-discovery 现文里取第一段满足档位关系的样本；取不到就返回 None（判仪器故障）。"""
+    from harness_check_lib import PLACEHOLDERS, PATH_RE, normalize, overlap_hits
+    flat = normalize(skill_text)
+    # 从正文起扫：文件头那段 YAML 前置元数据虽然也是「原文」，但拿它当抄袭样本证不到
+    # 「抄方法论正文」这件事，读证据的人会以为正控在模拟整句照抄。
+    if skill_text.startswith("---"):
+        end = skill_text.find("\n---", 3)
+        if end != -1:
+            flat = flat[len(normalize(skill_text[:end + 4])):]
+    for i in range(0, max(0, len(flat) - length) + 1):
+        candidate = flat[i:i + length]
+        if PATH_RE.search(candidate) or any(p in candidate for p in PLACEHOLDERS):
+            continue
+        if candidate not in flat:  # ①「样本必须能在被判文本里找到原文」
+            continue
+        hits60 = len(overlap_hits(candidate, skill_text, 60))
+        hits40 = len(overlap_hits(candidate, skill_text, 40))
+        if hits40 < 1:
+            continue
+        if tier == "fire60" and hits60 > 1:
+            return candidate
+        if tier == "quiet60" and hits60 <= 1:
+            return candidate
+    return None
+
 
 # (用例名, 守门脚本, 目标文件, 原串, 新串, 期望出现的 FAIL 标签, 操作)
 CASES = [
@@ -122,14 +147,14 @@ CASES = [
      None, "\nTODO\n",
      "no placeholder tokens", "append"),
     ("intent:copied-methodology-long", CHECK_INTENT, INTENT_AGENT,
-     None, "\n" + STOLEN_LONG + "\n",
-     "shares at most 1 run(s) of 60 chars with pm-discovery", "append"),
+     None, SAMPLE_SPEC_LONG,
+     "shares at most 1 run(s) of 60 chars with pm-discovery", "append_sample"),
     ("intent:copied-methodology-short", CHECK_INTENT, INTENT_AGENT,
-     None, "\n" + STOLEN_SHORT + "\n",
-     "shares at most 0 run(s) of 40 chars with pm-discovery", "append"),
+     None, SAMPLE_SPEC_EXACT,
+     "shares at most 0 run(s) of 40 chars with pm-discovery", "append_sample"),
     ("intent:copied-methodology-44-chars", CHECK_INTENT, INTENT_AGENT,
-     None, "\n" + STOLEN_TRIM + "\n",
-     "shares at most 0 run(s) of 40 chars with pm-discovery", "append"),
+     None, SAMPLE_SPEC_TRIM,
+     "shares at most 0 run(s) of 40 chars with pm-discovery", "append_sample"),
     ("roadmap:file-missing", CHECK_ROADMAP, ROADMAP, None, None,
      "file exists: .codex/ROADMAP.md", "delete"),
     ("roadmap:phase-section-renamed", CHECK_ROADMAP, ROADMAP,
@@ -319,6 +344,16 @@ def run_case(root, case):
             os.remove(path)
         elif op == "append":
             write_text(path, original + new)
+        elif op == "append_sample":
+            skill_path = os.path.join(root, PM_SKILL.replace("/", os.sep))
+            sample = derive_sample(read_text(skill_path), new[1], new[2])
+            if sample is None:
+                # 取不到样本 = 正控失效。它必须以「没跑完」的身份出现（rc=3），
+                # 而不是悄悄少跑一条用例继续报绿——那正是 D4 记的 fail-open 形态。
+                return "HARNESS", (
+                    "no derivable 正控 sample for tier {0} (length {1}) from {2}: "
+                    "the judged text changed".format(new[2], new[1], PM_SKILL))
+            write_text(path, original + "\n" + sample + "\n")
         elif op == "drop_matching":
             if original is None:
                 return "HARNESS", "target file does not exist: " + target
@@ -369,6 +404,18 @@ def main():
         sys.stdout.reconfigure(encoding="utf-8")
     except Exception:
         pass
+
+    # D4 的复发防护：抄样本这件事一旦回到「用例里写死一段文本」就重新变成 fail-open，
+    # 而那时每条用例照样会绿。所以这里不检查样本本身（派生自现文，天然对得上，查了等于没查），
+    # 而是检查**形状**——三条抄检用例必须走 append_sample，出现字面量样本即判仪器故障。
+    literal_copy_cases = [c[0] for c in CASES
+                          if c[0].startswith("intent:copied-methodology") and c[6] != "append_sample"]
+    if literal_copy_cases:
+        print("SELFTEST harness error: 抄检用例又带回字面量样本（D4 复发）：{0}".format(
+            literal_copy_cases))
+        print("OVERALL: INCONCLUSIVE")
+        print("EXITCODE=3")
+        return 3
 
     print("Command: python .codex/scripts/dev/checkers_selftest.py")
     print("Mode: full ({0} injected-violation cases + {1} baselines)".format(
