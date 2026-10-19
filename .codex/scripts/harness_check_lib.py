@@ -155,6 +155,22 @@ def backticked_paths(text):
     return out
 
 
+def citable_paths(text):
+    """角色正文里反引号引出的、能判定在场性的仓库路径。
+
+    通配写法（`android/**`）指的是「这一类路径」而不是某一个文件，无法用 exists() 判，
+    所以跳过——它由 `check_stack_facts.py` 那类按目录内容的守门管。
+    两份角色守门（B4、B5）都要这一份筛选，各写一遍就成了本仓库要消掉的第二份实现。
+    """
+    out = []
+    for raw in backticked_paths(text):
+        token = raw.strip().rstrip("/")
+        if "*" in token or "?" in token:
+            continue
+        out.append(token)
+    return out
+
+
 def field_names_from_marker(text, marker="FIELDS:"):
     """读取 <!-- FIELDS: a | b | c --> 注解除列的字段名集合。"""
     m = re.search(r"<!--\s*" + re.escape(marker) + r"(.*?)-->", text, re.S)

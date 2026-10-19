@@ -1,0 +1,273 @@
+Task evidence T-2026-10-19-027 — code-simplifier 角色、判据面禁令与成对守门
+环境：Windows 10.0.26200 / x64 / Python 3.13.12 / Git Bash；所有 Python 命令带 -X utf8。
+判据行逐字粘贴、不截断；块 05 与片 024/026 证据比对时在 174 字前缀上对齐，因为那两份旧证据把长行截到该宽度再加省略号。
+
+===============================================================================================================================================================================
+块 01 — 守门本体：python -X utf8 .codex/scripts/check_code_simplifier_agent.py（19 条判据逐字）
+===============================================================================================================================================================================
+OK   the six inputs exist — missing=[]
+OK   reference role exposes a usable set of section names — measured=9 floor=6 names=['identity', 'source', 'contract', 'rules', '触发时机', '职责清单', '输出格式', '交接', '禁区']
+OK   agent section names cover the reference role — reference_sections=9 missing=[]
+OK   agent names a measurement point on both sides of the change — before_hits=6 floor=2 after_hits=5 floor=2
+OK   agent requires one and the same suite/command on both sides — hits=8 floor=2
+OK   agent requires that suite to be green on both sides — hits=3 floor=2
+OK   agent forbids touching the judgement surface to get green — measured=3 floor=2
+OK   agent obliges deleting 无生产者/不可达 code — measured=3 floor=2
+OK   agent forbids keeping dead code as comments — measured=2 floor=1
+OK   task template still declares the REFACTOR subsection — title='REFACTOR — optional'
+OK   agent names the template REFACTOR subsection verbatim — title='REFACTOR — optional' named=True
+OK   agent declares its only writable landing is that subsection — landing_lines=1 all_named=True
+OK   agent defers acceptance and code quality to the existing roles — verifier_refs=3 floor=2 reviewer_refs=3 floor=2
+OK   agent cites >= 4 checkable repo paths — measured=6 floor=4 cited=['.codex/agents/code-reviewer.md', '.codex/agents/codebase-researcher.md', '.codex/agents/verifier.md', '.codex/rules/android.md', '.codex/rules/maintainability.md', '.codex/rules/regression.md']
+OK   every path cited by the role exists on disk — dead=[] cited=6
+OK   role text does not restate the rules it cites — measured_hits=0 sample=[]
+OK   role text carries no placeholder tokens — hits=[]
+OK   agent .toml declares name and description — name=True description=True
+OK   agent .toml body equals the agent markdown verbatim — toml_chars=3183 md_chars=3183 equal=True
+
+check_code_simplifier_agent: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+
+===============================================================================================================================================================================
+块 02 — 同一条命令的 RED / GREEN：角色正文与打包不在场即转红，字节级摆回即转绿
+===============================================================================================================================================================================
+driver=artifacts/tmp/b027-redgreen.py
+targets=.codex/agents/code-simplifier.md .codex/agents/code-simplifier.toml
+sha256-12 before=0c2e522819d5,4b5f6c5a8b35
+
+### RED（角色正文与打包不在场） rc=1
+FAIL the six inputs exist — missing=['.codex/agents/code-simplifier.md', '.codex/agents/code-simplifier.toml']
+check_code_simplifier_agent: 1 check(s) failed
+
+### GREEN（现文摆回） rc=0
+check_code_simplifier_agent: 0 check(s) failed
+
+sha256-12 after=0c2e522819d5,4b5f6c5a8b35 identical=True
+VERDICT: PASS
+EXITCODE=0
+
+读法：RED 与 GREEN 跑的是同一条命令（脚本内 CHECKER 常量），差别只在两份被检产物是否在场。
+还原用原始字节读写而不是 `git checkout --`：本工作树 core.autocrlf=true，checkout 会按 smudge
+重写行尾，sha 会变而内容相同——那样「字节相同」就无从证明。
+
+===============================================================================================================================================================================
+块 03 — 注入自检：末态 110 例 + 8 条基线；其中本片 24 例 simplify:* 逐字。先给第一次整轮的 MISMATCH 原始读数（那条下限不承重），再给末态
+===============================================================================================================================================================================
+### 第一次整轮（MIN_ROLE_SECTIONS 仍为 4）——逐字
+CASE 89 MISMATCH  simplify:reference-sections-drained - expected FAIL label, rc=0, seen=[]
+SELFTEST cases=110 ok=109 mismatch=1 harness_errors=0 skipped=0
+OVERALL: FAIL
+EXITCODE=1
+EXITCODE=1
+
+### 末态整轮（下限改 6 之后）——概览
+Mode: full (110 injected-violation cases + 8 baselines)
+SELFTEST cases=110 ok=110 mismatch=0 harness_errors=0 skipped=0
+OVERALL: PASS
+EXITCODE=0
+
+### 8 条基线
+BASELINE OK check_intent_capturer_agent rc=0
+BASELINE OK check_roadmap_and_routing rc=0
+BASELINE OK check_intent_template rc=0
+BASELINE OK check_spec_author_agent rc=0
+BASELINE OK check_code_reviewer_agent rc=0
+BASELINE OK check_context_pack rc=0
+BASELINE OK check_codebase_researcher_agent rc=0
+BASELINE OK check_code_simplifier_agent rc=0
+
+### 本片 24 例 simplify:*（CASE 87–110）逐字
+CASE 87 OK        simplify:agent-file-missing - rc=1, FAIL the six inputs exist — missing=['.codex/agents/code-simplifier.md']
+CASE 88 OK        simplify:task-template-gone - rc=1, FAIL the six inputs exist — missing=['.codex/tasks/_TEMPLATE.md']
+CASE 89 OK        simplify:reference-sections-drained - rc=1, FAIL reference role exposes a usable set of section names — measured=5 floor=6 names=['触发时机', '职责清单', '输出格式', '交接', '禁区']
+CASE 90 OK        simplify:reference-section-uncovered - rc=1, FAIL agent section names cover the reference role — reference_sections=10 missing=['附加要求']
+CASE 91 OK        simplify:before-dropped - rc=1, FAIL agent names a measurement point on both sides of the change — before_hits=0 floor=2 after_hits=5 floor=2
+CASE 92 OK        simplify:after-dropped - rc=1, FAIL agent names a measurement point on both sides of the change — before_hits=6 floor=2 after_hits=0 floor=2
+CASE 93 OK        simplify:same-suite-dropped - rc=1, FAIL agent requires one and the same suite/command on both sides — hits=0 floor=2
+CASE 94 OK        simplify:green-dropped - rc=1, FAIL agent requires that suite to be green on both sides — hits=0 floor=2
+CASE 95 OK        simplify:loosen-permitted - rc=1, FAIL agent forbids touching the judgement surface to get green — measured=1 floor=2
+CASE 96 OK        simplify:dead-code-kept - rc=1, FAIL agent obliges deleting 无生产者/不可达 code — measured=0 floor=2
+CASE 97 OK        simplify:comment-preservation-allowed - rc=1, FAIL agent forbids keeping dead code as comments — measured=0 floor=1
+CASE 98 OK        simplify:template-subsection-gone - rc=1, FAIL task template still declares the REFACTOR subsection — title=None
+CASE 99 OK        simplify:template-heading-renamed - rc=1, FAIL agent names the template REFACTOR subsection verbatim — title='REFACTORIZE — optional' named=False
+CASE 100 OK        simplify:landing-dropped - rc=1, FAIL agent names the template REFACTOR subsection verbatim — title='REFACTOR — optional' named=False
+CASE 101 OK        simplify:landing-not-a-section - rc=1, FAIL agent declares its only writable landing is that subsection — landing_lines=1 all_named=False
+CASE 102 OK        simplify:verifier-unreferenced - rc=1, FAIL agent defers acceptance and code quality to the existing roles — verifier_refs=0 floor=2 reviewer_refs=3 floor=2
+CASE 103 OK        simplify:reviewer-unreferenced - rc=1, FAIL agent defers acceptance and code quality to the existing roles — verifier_refs=3 floor=2 reviewer_refs=0 floor=2
+CASE 104 OK        simplify:cites-drained - rc=1, FAIL agent cites >= 4 checkable repo paths — measured=0 floor=4 cited=[]
+CASE 105 OK        simplify:dead-path-cited - rc=1, FAIL every path cited by the role exists on disk — dead=['.codex/rules/nonexistent-simplify-rule.md'] cited=7
+CASE 106 OK        simplify:rules-restated - rc=1, FAIL role text does not restate the rules it cites — measured_hits=1 sample=[('.codex/rules/maintainability.md', '#可维护性与修改成本增量治理读取时机：新增或修改人工维护的生产代码、重构、拆分，触碰大文件、高复杂度文件及函数，或涉及热')]
+CASE 107 OK        simplify:placeholder-injected - rc=1, FAIL role text carries no placeholder tokens — hits=['TODO']
+CASE 108 OK        simplify:toml-md-drift - rc=1, FAIL agent .toml body equals the agent markdown verbatim — toml_chars=3183 md_chars=3217 equal=False
+CASE 109 OK        simplify:toml-name-missing - rc=1, FAIL agent .toml declares name and description — name=False description=True
+CASE 110 OK        simplify:toml-unparsable - rc=1, FAIL agent .toml parses as a Codex agent file — TOMLDecodeError('Invalid value (at end of document)')
+
+===============================================================================================================================================================================
+块 04 — core 档整跑、注册表读数与任务契约门禁
+===============================================================================================================================================================================
+ROSTER entries=34 core=28 precommit=6
+core           validate_tasks                         "SUMMARY files="
+core           check_context_pack                     "check(s) failed"
+core           check_code_reviewer_agent              "check(s) failed"
+core           check_codebase_researcher_agent        "check(s) failed"
+core           check_code_simplifier_agent            "check(s) failed"
+core           check_intent_capturer_agent            "check(s) failed"
+core           check_intent_template                  "check(s) failed"
+core           check_pm_discovery_skill               "check(s) failed"
+core           check_roadmap_and_routing              "check(s) failed"
+core           check_spec_author_agent                "check(s) failed"
+core           check_stack_facts                      "check(s) failed"
+core           check_design_tokens                    "check(s) failed"
+core           check_androidtest_schema_expectations  "VERDICT:"
+core           checkers_selftest                      "OVERALL:"
+core           parity_ledger_selftest                 "VERDICT:"
+core           screen_inventory_selftest              "VERDICT:"
+core           measure_screen --selftest              "VERDICT:"
+core           verify_1to1_selftest                   "cases="
+core           cdp_shot_selftest                      "cases="
+core           web_walk --selftest                    "SELFTEST cases="
+core           check_dependency_direction             "dependency scan root="
+core           check_dependency_direction --selftest  "SELFTEST cases="
+core           check_user_copy_i18n                   "user-copy scan root="
+core           check_user_copy_i18n --selftest        "SELFTEST cases="
+core           check_device_time                      "device-time scan root="
+core           check_device_time --selftest           "SELFTEST cases="
+core           sync_fixtures --check                  "SYNC CHECK"
+core           sync_fixtures --selftest               "SELFTEST cases="
+precommit      check_offline_bundle                   "offline scan root="
+precommit      check_offline_bundle --selftest        "SELFTEST cases="
+precommit      frontend verify                        "verify steps="
+precommit      line-budget                            "业务变更行:" "[line-budget] 错误"
+precommit      no-kotlin-check                        "VERDICT:"
+precommit      guard-selftest -Fast                   "OVERALL ="
+EXITCODE=0
+EXITCODE=0
+
+### --tier core（本片末态整跑，逐字取 GUARD/VERDICT 行）
+VERDICT: PASS (all 28 selected guard(s) printed a judgement line and returned green)
+…（完整整跑留在 artifacts/tmp/run034-core.txt，gitignore 内）
+
+### validate_tasks
+WARNING T-2026-10-18-web-parity-fixture-capture-instrument-019.md: estimated production lines 775 exceeds soft limit 200
+WARNING T-2026-10-18-web-render-wiring-walk-instrument-020.md: estimated production lines 1576 exceeds soft limit 200
+WARNING T-2026-10-18-web-user-copy-guard-and-verify-entry-015.md: estimated production lines 245 exceeds soft limit 200
+WARNING T-2026-10-19-guard-runner-one-command-roster-023.md: estimated production lines 332 exceeds soft limit 200
+SUMMARY files=22 errors=0 warnings=4
+### check_roadmap_and_routing（B5 回写后）
+OK   phase section exists: Phase B（下一批）
+OK   Phase B（下一批） has >= 7 entries — measured=7
+OK   Phase B（下一批） every entry carries all 8 field names — measured_entries=7 problems=[]
+OK   Phase B（下一批） every 执行提示词 is >= 40 chars — measured_short=[]
+OK   Phase B（下一批） every path inside 执行提示词 exists — measured_dead=[]
+OK   Phase B（下一批） every 开源来源 cites github.com or a skills path — measured_weak=[]
+OK   Phase B covers the seven planned capabilities — missing=[]
+check_roadmap_and_routing: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+
+===============================================================================================================================================================================
+块 05 — 共享派生的收口：citable_paths() 上收 harness_check_lib 后 B4/B1 两支守门未变行为
+===============================================================================================================================================================================
+B4 check_codebase_researcher_agent: old=16 new=16 identical=True
+B1 check_code_reviewer_agent: old=15 new=15 identical=True
+EXITCODE=0
+
+读法：old 取自片 026 / 片 024 证据文件的块 01（那是那两片末态的逐字判据行），new 是本片末态直跑两支守门的判据行；
+两侧都在 174 字前缀上比，因为证据文件把长行截到该宽度再加省略号（实测该行 len=175）。identical=True 意味着共享派生没有改变任何一条判定。
+
+===============================================================================================================================================================================
+块 06 — 指针复算与消费面末态：49 条 `文件:行` 全活；本片造成的第四轮漂移已按现值校正
+===============================================================================================================================================================================
+driver=artifacts/tmp/b027-pointers.py
+assertion: 锚点子串必须至少出现在被声称的行区间内一次
+OK       .codex/scripts/dev/checkers_selftest.py:44-62 anchor='BASELINES = (CHECK_INTENT' hits=[61] total_lines=749  (片 024/025/027)
+OK       .codex/scripts/dev/checkers_selftest.py:347-358 anchor='context:stale-absent-claim' hits=[349] total_lines=749  (片 025)
+OK       .codex/scripts/dev/checkers_selftest.py:347-358 anchor='context:dir-cites-drained' hits=[356] total_lines=749  (片 025)
+OK       .codex/scripts/dev/checkers_selftest.py:49-62 anchor='CHECK_CONTEXT = ' hits=[49] total_lines=749  (片 025)
+OK       .codex/scripts/dev/checkers_selftest.py:76-81 anchor='SAMPLE_SPEC_LONG' hits=[80, 175] total_lines=749  (片 026)
+OK       .codex/scripts/dev/checkers_selftest.py:359-421 anchor='research:agent-file-missing' hits=[360] total_lines=749  (片 026)
+OK       .codex/scripts/dev/checkers_selftest.py:359-421 anchor='research:toml-unparsable' hits=[419] total_lines=749  (片 026)
+OK       .codex/scripts/dev/checkers_selftest.py:524-532 anchor='for nm in sorted(os.listdir(REPO_ROOT))' hits=[527] total_lines=749  (片 025)
+OK       .codex/scripts/dev/checkers_selftest.py:570-589 anchor='def run_dir_case' hits=[570] total_lines=749  (片 024)
+OK       .codex/scripts/dev/checkers_selftest.py:570-589 anchor='shutil.copytree(src, path' hits=[589] total_lines=749  (片 024)
+OK       .codex/scripts/dev/checkers_selftest.py:597-598 anchor='op == "delete_dir"' hits=[597] total_lines=749  (片 024)
+OK       .codex/scripts/dev/checkers_selftest.py:700-702 anchor='tag = os.path.splitext' hits=[702] total_lines=749  (片 025)
+OK       .codex/scripts/dev/checkers_selftest.py:55-58 anchor='CHECK_SIMPLIFY = ' hits=[58] total_lines=749  (片 027)
+OK       .codex/scripts/dev/checkers_selftest.py:88-88 anchor='SAMPLE_SPEC_MAINTAINABILITY = (' hits=[88] total_lines=749  (片 027)
+OK       .codex/scripts/dev/checkers_selftest.py:423-498 anchor='simplify:agent-file-missing' hits=[423] total_lines=749  (片 027)
+OK       .codex/scripts/dev/checkers_selftest.py:423-498 anchor='simplify:toml-unparsable' hits=[496] total_lines=749  (片 027)
+OK       .codex/scripts/dev/checkers_selftest.py:672-672 anchor='simplify:rules-restated' hits=[484, 672] total_lines=749  (片 027 D4 形状门禁)
+OK       .codex/scripts/run_all_guards.py:81-164 anchor='GUARDS = [' hits=[81] total_lines=395  (片 024)
+OK       .codex/scripts/run_all_guards.py:87-88 anchor='check_code_reviewer_agent' hits=[87] total_lines=395  (片 024)
+OK       .codex/scripts/run_all_guards.py:89-91 anchor='check_codebase_researcher_agent' hits=[89, 90] total_lines=395  (片 026)
+OK       .codex/scripts/run_all_guards.py:92-94 anchor='check_code_simplifier_agent' hits=[92, 93] total_lines=395  (片 027)
+OK       .codex/scripts/check_code_reviewer_agent.py:45-50 anchor='MIN_TASK_FIELDS = 4' hits=[50] total_lines=170  (片 024)
+OK       .codex/scripts/check_code_reviewer_agent.py:79-167 anchor='def main():' hits=[79] total_lines=170  (片 024)
+OK       .codex/scripts/check_code_reviewer_agent.py:1-21 anchor='为什么需要这支脚本' hits=[6] total_lines=170  (片 024)
+OK       .codex/scripts/check_context_pack.py:38-41 anchor='MIN_CITED_DIRS = 2' hits=[41] total_lines=127  (片 025)
+OK       .codex/scripts/check_context_pack.py:68-68 anchor='docs index is a valid curated subset' hits=[68] total_lines=127  (片 025 D5 行)
+OK       .codex/scripts/check_context_pack.py:75-95 anchor='no dir is claimed' hits=[88] total_lines=127  (片 025)
+OK       .codex/scripts/check_codebase_researcher_agent.py:47-66 anchor='MIN_CITED_PATHS = 5' hits=[64] total_lines=182  (片 026)
+OK       .codex/scripts/check_codebase_researcher_agent.py:84-179 anchor='def main():' hits=[84] total_lines=182  (片 026 修正 99-196)
+OK       .codex/scripts/check_code_simplifier_agent.py:32-68 anchor='MIN_ROLE_SECTIONS = 6' hits=[46] total_lines=216  (片 027)
+OK       .codex/scripts/check_code_simplifier_agent.py:70-81 anchor='REFACTOR_HEAD_RE = ' hits=[81] total_lines=216  (片 027)
+OK       .codex/scripts/check_code_simplifier_agent.py:103-212 anchor='def main():' hits=[103] total_lines=216  (片 027)
+OK       .codex/scripts/harness_check_lib.py:158-172 anchor='def citable_paths(text):' hits=[158] total_lines=261  (片 027)
+OK       .codex/agents/codebase-researcher.md:8-11 anchor='<identity>' hits=[8] total_lines=96  (片 026)
+OK       .codex/agents/codebase-researcher.md:22-34 anchor='READONLY' hits=[24] total_lines=96  (片 026)
+OK       .codex/agents/code-simplifier.md:1-93 anchor='code-simplifier' hits=[1, 9] total_lines=93  (片 027)
+OK       .codex/scripts/check_roadmap_and_routing.py:36-36 anchor='"codebase-researcher", "code-simplifier"' hits=[36] total_lines=231  (片 026 反查)
+OK       .codex/scripts/check_roadmap_and_routing.py:170-170 anchor='miss_b = [k for k in PHASE_B_KEYWORDS' hits=[170] total_lines=231  (片 026 反查)
+OK       Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48-48 anchor='DEFERRED:待 B4（codebase-researcher）' hits=[48] total_lines=62  (片 026 反查)
+OK       .codex/HARNESS.md:10-10 anchor='code-simplifier' hits=[10] total_lines=25  (片 027 第 4 步)
+OK       AGENTS.md:62-62 anchor='.codex/agents/*.toml' hits=[62] total_lines=66  (片 027 路由面)
+OK       .codex/ROADMAP.md:96-96 anchor='harness_check_lib.py' hits=[89, 96, 371] total_lines=426  (片 027 范围补齐)
+OK       .codex/ROADMAP.md:99-99 anchor='checkers_selftest.py' hits=[30, 46, 49, 83, 86, 88] total_lines=426  (片 027 验收方式条数措辞)
+OK       .codex/ROADMAP.md:102-102 anchor='measured=5 floor=6' hits=[102] total_lines=426  (片 027 下限教训)
+OK       .codex/agents/code-simplifier.md:22-31 anchor='<contract>' hits=[22] total_lines=93  (片 027 契约段)
+OK       .codex/agents/code-simplifier.md:69-72 anchor='REFACTOR' hits=[6, 69] total_lines=93  (片 027 落点段)
+OK       .codex/scripts/harness_check_lib.py:158-171 anchor='return out' hits=[155, 171] total_lines=261  (片 027 共享函数)
+OK       .codex/scripts/check_code_simplifier_agent.py:46-46 anchor='MIN_ROLE_SECTIONS = 6' hits=[46] total_lines=216  (片 027 下限校正)
+OK       .codex/scripts/check_code_simplifier_agent.py:74-75 anchor='只能删' hits=[12, 56, 75] total_lines=216  (片 027 同句判定)
+POINTERS checked=49 stale=0
+VERDICT: PASS
+EXITCODE=0
+
+### 消费面反查（逐字）
+== grep -rnI code-simplifier .codex Docs
+31
+     12 .codex/tasks/T-2026-10-19-code-simplifier-role-027.md
+      4 .codex/scripts/dev/checkers_selftest.py
+      4 .codex/ROADMAP.md
+      3 .codex/scripts/check_code_simplifier_agent.py
+      2 .codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md
+      2 .codex/agents/code-simplifier.toml
+      2 .codex/agents/code-simplifier.md
+      1 .codex/scripts/check_roadmap_and_routing.py
+      1 .codex/HARNESS.md
+== grep -rnI check_code_simplifier_agent .codex Docs
+22
+      3 .codex/ROADMAP.md
+      2 .codex/scripts/check_code_simplifier_agent.py
+      1 .codex/scripts/dev/checkers_selftest.py
+      2 .codex/scripts/run_all_guards.py
+     14 .codex/tasks/T-2026-10-19-code-simplifier-role-027.md
+== HEAD 侧 code-simplifier 命中
+HEAD:.codex/ROADMAP.md:3
+HEAD:.codex/scripts/check_roadmap_and_routing.py:1
+HEAD:.codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md:2
+== grep -rnI REFACTOR .codex Docs
+53
+
+读法：`hits=` 是锚点在被引文件里出现的全部行号，`STALE` 表示被声称的区间内没有该锚点；本片第一次跑报 stale=1（checkers_selftest.py 的顶层目录名镜像我写成 :440-448，实测 :524-532）。
+
+===============================================================================================================================================================================
+块 07 — 本片没覆盖之物（不要把「没写」当成「没问题」）
+===============================================================================================================================================================================
+① 角色从未真的删掉一处第二份实现：本片交付的是判据与角色正文，「按这套契约收敛一处重复」的首次真实执行没有读数可贴。
+② .toml 是否真被 Codex 运行时加载：没有运行时证据，只有「正文与 .md 逐字相同」这条静态判据。
+③ 中文计数判据（改前/改后/同一/全绿）对英文同义改写不设防：把 <contract> 整段译成英文会直接判红，反过来若将来正文允许英文，这四处下限要一起重做——本片没做。
+④ D11 未闭合：--tier core 里 cdp_shot_selftest 的间歇转红。本片末态整跑 28 条全绿（块 04），所以没有新增一次复发读数；但那条「整跑读数不打印失败用例名」的缺陷本身仍在 ROADMAP 上。
+⑤ check_spec_author_agent.py 仍自建 repo_path/read_text/section_titles/front_matter 四份同形工具，本片没有合并（超出本片声明的可写路径）。它是本角色第一次真实使用时的现成候选。
+⑥ 角色正文的可写边界（「代码改动只允许发生在被分配任务那条 lane 的可写路径内」）只由正文与判据的形状约束，没有任何真实一次派工去证伪它。

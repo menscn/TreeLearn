@@ -34,7 +34,7 @@ import tomllib
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from harness_check_lib import (  # noqa: E402
-    Checks, agent_section_names, backticked_paths, enable_utf8_stdout, exists,
+    Checks, agent_section_names, citable_paths, enable_utf8_stdout, exists,
     max_overlap_with_files, placeholder_hits, read_text, repo_path, section_body)
 
 AGENT_MD = ".codex/agents/codebase-researcher.md"
@@ -79,21 +79,6 @@ def impact_fields(template_text):
         return None
     return [m.group(1).strip() for m in
             (IMPACT_FIELD_RE.match(l) for l in body.splitlines()) if m]
-
-
-def cited_paths(text):
-    """角色正文里反引号引出的、能判定在场性的仓库路径。
-
-    通配写法（`android/**`）指的是「这一类路径」而不是某一个文件，无法用 exists() 判，
-    所以跳过——它由 `check_stack_facts.py` 那类按目录内容的守门管。
-    """
-    out = []
-    for raw in backticked_paths(text):
-        token = raw.strip().rstrip("/")
-        if "*" in token or "?" in token:
-            continue
-        out.append(token)
-    return out
 
 
 def main():
@@ -155,7 +140,7 @@ def main():
                 "READONLY" in agent, len(landing),
                 bool(landing) and all("Behavior impact" in l for l in landing)))
 
-    cited = sorted(set(cited_paths(agent)))
+    cited = sorted(set(citable_paths(agent)))
     if not c.check(len(cited) >= MIN_CITED_PATHS,
                    "agent cites >= {0} checkable repo paths".format(MIN_CITED_PATHS),
                    "measured={0} floor={1} cited={2}".format(len(cited), MIN_CITED_PATHS, cited)):

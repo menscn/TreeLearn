@@ -121,22 +121,27 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
 - Authoritative code/config/migration evidence: `.codex/agents/codebase-researcher.md:8-11`（identity）、
   `:22-34`（contract：命令 + `文件:行`、「未找到」、实测/推测、单一可写落点）、
   `.codex/scripts/check_codebase_researcher_agent.py:47-66`（7 条裸下限/阈值常量）、
-  `:99-196`（15 条判定与 6 处早退）、
+  `:84-179`（15 条判定与 6 处早退；027 把 `cited_paths()` 上收成共享的 `citable_paths()` 后本文件又从 197 行短到 182 行）、
   `.codex/scripts/harness_check_lib.py` 的 `agent_section_names()`（新函数，紧接 `section_titles` 之后）、
-  `.codex/scripts/dev/checkers_selftest.py:76-81`（含取样来源的样本形状）、`:353-412`（19 例 `research:*`）、
-  `:440-448`（顶层目录名镜像，未变）、`:513-514`（`delete_dir` 分派，未变）、
-  `.codex/scripts/run_all_guards.py:89-90`（core 档新行；整表 `:81-161`）。
+  `.codex/scripts/dev/checkers_selftest.py:76-81`（含取样来源的样本形状）、`:359-421`（19 例 `research:*`）、
+  `:524-532`（顶层目录名镜像）、`:597-598`（`delete_dir` 分派），
+  `.codex/scripts/run_all_guards.py:89-91`（core 档新行；整表 `:81-164`）。
+  本片写下的这些行号在片 027 之后重测过一次：027 又往 `checkers_selftest.py` 与 `run_all_guards.py` 里加了内容，
+  并把 `check_codebase_researcher_agent.py` 缩短 15 行（B4 自带的 `cited_paths()` 上收成共享的 `citable_paths()`），
+  原引 `:99-196` / `:353-412` / `:440-448` / `:513-514` / `:89-90` / `:81-161` 在被引用当时是对的，之后成为活指针。
+  条数与用例数以片 027 卡片与其现场读数为准，本卡不复述。
 - Documentation surfaces checked: `.codex/ROADMAP.md`（B4 条目与 B0 的「依赖 B4」两处）、
   `.codex/HARNESS.md`（六步流程）、`.codex/README.md`（权威边界一句，未新增落点故未改）、
   `.codex/tasks/_TEMPLATE.md`（四个字段名与 `### Behavior impact` 标题）、`.codex/agents/verifier.md`、
   `.codex/agents/code-reviewer.md`（结论不互相冒充的措辞对齐）、`.codex/rules/regression.md`、
   `.codex/rules/documentation.md`、`AGENTS.md`（路由表不逐脚本登记，故不需新行）。
 - Documentation files updated: `.codex/ROADMAP.md`（B4 四行）、`.codex/HARNESS.md`（第 3 步一句）、
-  `.codex/tasks/T-2026-10-19-code-reviewer-role-and-review-template-024.md`（本片再次位移的行号区间：
-  `:44-57` / `:486-505` / `:513-514` / `run_all_guards.py:81-161` / `check_code_reviewer_agent.py:45-50` 与 `:79-167`，
-  并把「三处早退」校正为实测的 6 处）、
-  `.codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md`（`:342-351` / `:440-448` / `:615-618`、
-  `:49-57`，以及卡片正文的块号引用与 Gaps ⑤）。
+  `.codex/tasks/T-2026-10-19-code-reviewer-role-and-review-template-024.md`（本片按当时实测位移了它的
+  `checkers_selftest.py` 常量/基线区间与 `run_dir_case`、`delete_dir` 分派区间，并把「三处早退」校正为实测的 6 处；
+  片 027 又把这些区间整体下推一次，现值以 `artifacts/tmp/b027-pointers.py` 的读数为准）、
+  `.codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md`（同样是本片位移、027 再位移，
+  涉及 3 例 `context:*`、顶层目录名镜像、tag 派生与 `CHECK_CONTEXT` 常量区间，
+  以及卡片正文的块号引用与 Gaps ⑤）。
 - Producer/consumer/sibling/compatibility paths checked: 反查「谁引用本角色的落点」——
   `grep -rnI "Behavior impact" .codex Docs` 命中 `_TEMPLATE.md`、`regression.md`、各任务卡与本片新文件；
   `grep -rnI "codebase-researcher" .codex Docs` 实测 32 行 / 11 个文件：角色两份、守门、自检、注册表、

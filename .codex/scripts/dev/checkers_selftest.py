@@ -52,10 +52,14 @@ CODE_RESEARCHER_TOML = ".codex/agents/codebase-researcher.toml"
 TASK_TEMPLATE = ".codex/tasks/_TEMPLATE.md"
 REGRESSION_RULE = ".codex/rules/regression.md"
 CHECK_RESEARCH = ".codex/scripts/check_codebase_researcher_agent.py"
+CODE_SIMPLIFIER_MD = ".codex/agents/code-simplifier.md"
+CODE_SIMPLIFIER_TOML = ".codex/agents/code-simplifier.toml"
+MAINTAINABILITY_RULE = ".codex/rules/maintainability.md"
+CHECK_SIMPLIFY = ".codex/scripts/check_code_simplifier_agent.py"
 
 # 先跑一遍「未注入」的基线：守门对健康的副本必须转绿，否则下面的反向用例没有意义。
 BASELINES = (CHECK_INTENT, CHECK_ROADMAP, CHECK_TEMPLATE, CHECK_SPEC, CHECK_REVIEW,
-             CHECK_CONTEXT, CHECK_RESEARCH)
+             CHECK_CONTEXT, CHECK_RESEARCH, CHECK_SIMPLIFY)
 
 # 需要「把目标文件当参数传给守门」的用例（回放校验器读的是参数指定的实例文件）。
 ARGS_BY_CASE = {
@@ -79,6 +83,9 @@ SAMPLE_SPEC_TRIM = ("trim", PM_SKILL, 44, "quiet60")      # 60 字档 0 命中�
 # 0 容忍那一侧只需要「unique 的一段」：candidate 本身就是现文切片，60 字档必然命中 1 次，
 # 而 1 次就足够让 total==0 这条判据转红。
 SAMPLE_SPEC_REGRESSION = ("regression60", REGRESSION_RULE, 60, "quiet60")
+# B5 的抄检对象是两份规则正文，取样来源换成 maintainability.md：同一个 0 容忍判据，
+# 换一个来源证一次。
+SAMPLE_SPEC_MAINTAINABILITY = ("maintainability60", MAINTAINABILITY_RULE, 60, "quiet60")
 
 
 def derive_sample(skill_text, length, tier):
@@ -412,6 +419,83 @@ CASES = [
     ("research:toml-unparsable", CHECK_RESEARCH, CODE_RESEARCHER_TOML,
      None, "\nbroken = [\n",
      "agent .toml parses as a Codex agent file", "append"),
+    # ── code-simplifier（B5）：行为不变的两侧读数 + 判据面不许动 + 死代码只能删 ──
+    ("simplify:agent-file-missing", CHECK_SIMPLIFY, CODE_SIMPLIFIER_MD, None, None,
+     "the six inputs exist", "delete"),
+    # 同一个标签、不同病因：被派生的任务模板消失时也必须 fail-closed，而不是「无话可判」地报绿。
+    ("simplify:task-template-gone", CHECK_SIMPLIFY, TASK_TEMPLATE, None, None,
+     "the six inputs exist", "delete"),
+    ("simplify:reference-sections-drained", CHECK_SIMPLIFY, CODE_REVIEWER_MD,
+     "<", "[",
+     "reference role exposes a usable set of section names", "replace_all"),
+    ("simplify:reference-section-uncovered", CHECK_SIMPLIFY, CODE_REVIEWER_MD,
+     "## 职责清单", "## 附加要求\n\n- 占位。\n\n## 职责清单",
+     "agent section names cover the reference role", "replace"),
+    # 「改前 / 改后」是同一句话的两半，各注入一次：只数一侧时另一侧删空仍然报绿。
+    ("simplify:before-dropped", CHECK_SIMPLIFY, CODE_SIMPLIFIER_MD,
+     "改前", "改动之前",
+     "agent names a measurement point on both sides of the change", "replace_all"),
+    ("simplify:after-dropped", CHECK_SIMPLIFY, CODE_SIMPLIFIER_MD,
+     "改后", "改动之后",
+     "agent names a measurement point on both sides of the change", "replace_all"),
+    ("simplify:same-suite-dropped", CHECK_SIMPLIFY, CODE_SIMPLIFIER_MD,
+     "同一", "同样",
+     "agent requires one and the same suite/command on both sides", "replace_all"),
+    ("simplify:green-dropped", CHECK_SIMPLIFY, CODE_SIMPLIFIER_MD,
+     "全绿", "都通过",
+     "agent requires that suite to be green on both sides", "replace_all"),
+    # 这条是 B5 存在的理由：把「为了让判据变绿而动判据」写成许可，判据面禁令行数掉到下限以下。
+    ("simplify:loosen-permitted", CHECK_SIMPLIFY, CODE_SIMPLIFIER_MD,
+     "不得", "可以",
+     "agent forbids touching the judgement surface to get green", "replace_all"),
+    ("simplify:dead-code-kept", CHECK_SIMPLIFY, CODE_SIMPLIFIER_MD,
+     "只能删", "可以留",
+     "agent obliges deleting 无生产者/不可达 code", "replace_all"),
+    ("simplify:comment-preservation-allowed", CHECK_SIMPLIFY, CODE_SIMPLIFIER_MD,
+     "注释", "说明",
+     "agent forbids keeping dead code as comments", "replace_all"),
+    ("simplify:template-subsection-gone", CHECK_SIMPLIFY, TASK_TEMPLATE,
+     "### REFACTOR — optional", None,
+     "task template still declares the REFACTOR subsection", "drop_matching"),
+    ("simplify:template-heading-renamed", CHECK_SIMPLIFY, TASK_TEMPLATE,
+     "### REFACTOR — optional", "### REFACTORIZE — optional",
+     "agent names the template REFACTOR subsection verbatim", "replace"),
+    ("simplify:landing-dropped", CHECK_SIMPLIFY, CODE_SIMPLIFIER_MD,
+     "`### REFACTOR — optional`", "该小节",
+     "agent names the template REFACTOR subsection verbatim", "replace_all"),
+    ("simplify:landing-not-a-section", CHECK_SIMPLIFY, CODE_SIMPLIFIER_MD,
+     "收敛记录只写当前任务卡的 `### REFACTOR — optional` 小节",
+     "收敛记录只写仓库根目录的散记文件",
+     "agent declares its only writable landing is that subsection", "replace"),
+    # 角色名带反引号才计数：只剩一条路径引用 `.codex/agents/verifier.md` 时，分工句虽已删光，
+    # 裸子串判定仍会放行——所以下面两例只替换反引号里那份，路径引用保持在场。
+    ("simplify:verifier-unreferenced", CHECK_SIMPLIFY, CODE_SIMPLIFIER_MD,
+     "`verifier`", "`验收人`",
+     "agent defers acceptance and code quality to the existing roles", "replace_all"),
+    ("simplify:reviewer-unreferenced", CHECK_SIMPLIFY, CODE_SIMPLIFIER_MD,
+     "`code-reviewer`", "`复核人`",
+     "agent defers acceptance and code quality to the existing roles", "replace_all"),
+    ("simplify:cites-drained", CHECK_SIMPLIFY, CODE_SIMPLIFIER_MD,
+     ".codex/", None,
+     "agent cites >= 4 checkable repo paths", "drop_matching"),
+    ("simplify:dead-path-cited", CHECK_SIMPLIFY, CODE_SIMPLIFIER_MD,
+     None, "\n另见 `.codex/rules/nonexistent-simplify-rule.md`。\n",
+     "every path cited by the role exists on disk", "append"),
+    ("simplify:rules-restated", CHECK_SIMPLIFY, CODE_SIMPLIFIER_MD,
+     None, SAMPLE_SPEC_MAINTAINABILITY,
+     "role text does not restate the rules it cites", "append_sample"),
+    ("simplify:placeholder-injected", CHECK_SIMPLIFY, CODE_SIMPLIFIER_MD,
+     None, "\nTODO\n",
+     "role text carries no placeholder tokens", "append"),
+    ("simplify:toml-md-drift", CHECK_SIMPLIFY, CODE_SIMPLIFIER_MD,
+     None, "\n本段只写在 markdown 里，用来证明打包正文不是逐字拷贝。\n",
+     "agent .toml body equals the agent markdown verbatim", "append"),
+    ("simplify:toml-name-missing", CHECK_SIMPLIFY, CODE_SIMPLIFIER_TOML,
+     'name = "code-simplifier"', 'owner = "code-simplifier"',
+     "agent .toml declares name and description", "replace"),
+    ("simplify:toml-unparsable", CHECK_SIMPLIFY, CODE_SIMPLIFIER_TOML,
+     None, "\nbroken = [\n",
+     "agent .toml parses as a Codex agent file", "append"),
 ]
 
 
@@ -585,7 +669,7 @@ def main():
     # D4 的复发防护：抄样本这件事一旦回到「用例里写死一段文本」就重新变成 fail-open，
     # 而那时每条用例照样会绿。所以这里不检查样本本身（派生自现文，天然对得上，查了等于没查），
     # 而是检查**形状**——每条抄检用例都必须走 append_sample，出现字面量样本即判仪器故障。
-    copy_check_prefixes = ("intent:copied-methodology", "research:rules-restated")
+    copy_check_prefixes = ("intent:copied-methodology", "research:rules-restated", "simplify:rules-restated")
     literal_copy_cases = [c[0] for c in CASES
                           if c[0].startswith(copy_check_prefixes) and c[6] != "append_sample"]
     if literal_copy_cases:

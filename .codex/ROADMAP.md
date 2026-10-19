@@ -93,11 +93,13 @@
 
 - **ID**：B5
 - **目标**：在行为不变的前提下定期收敛重复实现与多余抽象。单人项目最容易长出「第二份实现」，这条角色是专门用来消掉它的。
-- **范围（可写路径）**：`.codex/agents/code-simplifier.md`、`.codex/scripts/check_code_simplifier_agent.py`
+- **范围（可写路径）**：`.codex/agents/code-simplifier.md`、`.codex/agents/code-simplifier.toml`、`.codex/scripts/check_code_simplifier_agent.py`、`.codex/scripts/harness_check_lib.py`、`.codex/scripts/check_codebase_researcher_agent.py`（本片按 B5 的「消第二份实现」要求把 B4 自带的 `cited_paths()` 上收）、`.codex/scripts/dev/checkers_selftest.py`、`.codex/scripts/run_all_guards.py`、`.codex/HARNESS.md`
 - **依赖**：`.codex/agents/code-reviewer.md`（B1 已于 `T-2026-10-19-024` 交付：本条角色的只读契约与报告字段边界都沿它对齐，简化角色不得再另立一套验收措辞）、`.codex/rules/regression.md`
 - **owner_lane**：harness
-- **验收方式**：`python .codex/scripts/check_code_simplifier_agent.py` 退出码 0；脚本断言角色强制「改前先跑测试、改后同一套测试必须全绿」，且禁止把无生产者代码写成注释保留。
+- **验收方式**：`python -X utf8 .codex/scripts/check_code_simplifier_agent.py` 退出码 0；脚本断言角色小节名覆盖 `.codex/agents/code-reviewer.md` 现文、「改前/改后」两个测量点各有一条裸计数下限、两侧必须是**同一套**命令且都必须**全绿**、禁令必须落在判据面上（同一行里既有禁止措辞又有测试/断言/下限/白名单词汇）、「无生产者/不可达」代码必须与「只能删」同句出现、注释保留被单独禁止、可写落点从 `_TEMPLATE.md` 的 `### REFACTOR — optional` 标题现场派生且所有「只写」行都必须点名它、分工只用反引号里的角色名计数（`.codex/agents/verifier.md` 这种路径引用不算分工）、引用的仓库路径全部在场、正文不与 `maintainability.md`/`regression.md` 重叠成段、无占位符、`.toml` 正文与 `.md` 逐字相同。判据条数与注入用例条数以 `python -X utf8 .codex/scripts/dev/checkers_selftest.py` 现场取，不写进本条。
 - **开源来源**：`https://github.com/obra/superpowers` → `skills/test-driven-development/SKILL.md`、`skills/finishing-a-development-branch/SKILL.md`（2026-09-21 实测 HTTP 200）
+- **交付任务**：`T-2026-10-19-027`（`.codex/agents/code-simplifier.md` + 同名 `.toml` 包装、`check_code_simplifier_agent.py` 的 19 条判据与其 `simplify:*` 注入用例、该守门升为 `checkers_selftest.py` 的第 8 条基线并登记 core 档、`.codex/HARNESS.md` 第 4 步加一句；status=verifying）。执行提示词点名的两件事（行为不变的判据是同一条测试命令改前改后都绿、无生产者代码必须删除不许注释保留）都各自有一条判据与至少一条注入用例；**没有**照它的隐含假设只做 `.md`——沿用本仓库 `.md` 权威 + `.toml` 运行时包装的既有约定。
+- **实现要点（交付后回写，不是验收方式的替代）**：这条角色是前面三个只读角色里唯一**会动代码**的，所以判据的重心不在「有没有写简化」而在「行为不变的声称能不能被复算」：改前/改后各一条计数下限（只数一侧时另一侧删空仍报绿）、「同一」一条（两侧不是同一套时各自绿也证不了不变）、「全绿」一条。禁令判据数的是**行形状**（禁止措辞 × 判据面词汇同行）而不是某个名词出现，因为「不要改坏代码」这种禁令谁都满足，而「不得为了让测试变绿而改测试」才能被一条 `replace_all` 抽干。「无生产者/不可达」必须与「只能删」同句出现——只数名词的话，把删除义务改成「可以留」而名词全留仍然绿。落点小节标题从 `_TEMPLATE.md` 现场派生（与 B4 的四个字段名同一形状）。分工判据只数反引号里的 `verifier`/`code-reviewer`：路径引用 `.codex/agents/verifier.md` 里也含这个名字，裸子串判定会让「删光分工句」仍然报绿。**下限取值的形状教训（片 027 现场校正）**：`code-reviewer.md` 的 9 个小节名是 4 个 `<tag>` 小节 + 5 个 `## ` 标题两种形状拼起来的，下限取 4 时把其中任一整形状抽干（`<`→`[`）剩下的仍 ≥ 4，那条「裸下限承重」的正控根本不会响——整轮注入自检以 `CASE 89 MISMATCH … rc=0` 抓到这件事，下限改成 6（高于任一单独形状）后同一例转红 `measured=5 floor=6`。**这条角色自己带的第二份实现先被它自己消掉**：B4 的 `cited_paths()` 上收成 `harness_check_lib.citable_paths()`，B4 与 B5 两支守门共用一份。
 - **执行提示词**：读 `.codex/rules/regression.md`、`.codex/rules/documentation.md`、`.codex/agents/verifier.md`、`.codex/ROADMAP.md`，再参考上游 `https://github.com/obra/superpowers` 的 test-driven-development 与 finishing-a-development-branch。在 `.codex/agents/` 下新增 code-simplifier.md，写清两件事：行为不变的判据是「同一套测试改前改后都绿」；无生产者、不可达的代码必须删除，不许加注释保留。配套纯标准库校验脚本并跑通，输出贴进任务证据。
 
 ### B6 metrics-reporter 角色

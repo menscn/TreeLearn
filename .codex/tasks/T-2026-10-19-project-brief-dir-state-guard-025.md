@@ -100,9 +100,10 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
 - Authoritative code/config/migration evidence: `ls -d frontend backend`（frontend 存在、backend 不存在）、
   `.codex/scripts/check_context_pack.py:38-41`（三条新常量 `ABSENT_CLAIM` / `DIR_CITE_RE` / `MIN_CITED_DIRS`）、
   `:75-95`（两条判定 + 一处早退）、
-  `.codex/scripts/dev/checkers_selftest.py:49-57`（`CHECK_CONTEXT` 常量与第 6 条基线；026 之后该元组已含第 7 条）、
-  `:342-351`（3 例 `context:*`）、`:440-448`（顶层目录名镜像）、`:615-618`（tag 派生）。
-  区间在片 026 之后重测过一次：026 又往同一个文件加了 19 例与 4 个常量，原引 `:328-339` / `:365-374` / `:537-541` 成为活指针。
+  `.codex/scripts/dev/checkers_selftest.py:49-62`（`CHECK_CONTEXT` 常量与基线元组；026 之后该元组已含第 7 条、027 含第 8 条）、
+  `:347-358`（3 例 `context:*`）、`:524-532`（顶层目录名镜像）、`:700-702`（tag 派生）。
+  区间在片 026、片 027 之后各重测过一次：026 往同一个文件加了 19 例与 4 个常量、027 又加了 23 例与 4 个常量，
+  原引 `:328-339` / `:365-374` / `:537-541`、再到 `:342-351` / `:440-448` / `:615-618` 都在被引用当时是对的，之后成了活指针。
 - Documentation surfaces checked: `AGENTS.md`（Treelearn 当前事实一节已写「`backend/` 目录尚未落地」，与新正文同向）、
   `.codex/ROADMAP.md`（B0 注记已写「`frontend/` 已落地」）、`Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md`、
   `.codex/agents/intent-capturer.md`、`.codex/agents/spec-author.md`、`.codex/context/domain-glossary.md`。
