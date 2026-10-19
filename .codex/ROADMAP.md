@@ -80,11 +80,13 @@
 
 - **ID**：B4
 - **目标**：动手之前先摸清「这次改动会牵动谁」——producer、consumer、调用链、既有约束与证据，输出一份可复核的影响面清单，避免凭记忆改代码。
-- **范围（可写路径）**：`.codex/agents/codebase-researcher.md`、`.codex/scripts/check_codebase_researcher_agent.py`
+- **范围（可写路径）**：`.codex/agents/codebase-researcher.md`、`.codex/agents/codebase-researcher.toml`、`.codex/scripts/check_codebase_researcher_agent.py`、`.codex/scripts/dev/checkers_selftest.py`、`.codex/scripts/run_all_guards.py`、`.codex/HARNESS.md`
 - **依赖**：`.codex/context/project-brief.md`、`.codex/rules/documentation.md`、`.codex/rules/regression.md`
 - **owner_lane**：harness
-- **验收方式**：`python .codex/scripts/check_codebase_researcher_agent.py` 退出码 0；脚本断言角色要求每条结论写成「命令 + 文件:行」，并规定找不到时必须显式写「未找到」而不是略过。
+- **验收方式**：`python -X utf8 .codex/scripts/check_codebase_researcher_agent.py` 退出码 0；脚本断言角色小节名覆盖 `.codex/agents/verifier.md` 现文、逐条点名 `.codex/tasks/_TEMPLATE.md` 的 `### Behavior impact` 四个字段、要求每条结论写成「命令 + `文件:行`」（两侧各一条裸计数下限）、查不到时显式写「未找到」、`实测`/`推测`/`证实` 三者齐备、只声明一个可写落点且声明 READONLY、引用的仓库路径全部在场、正文不与被引规则重叠成段、无占位符、`.toml` 正文与 `.md` 逐字相同。判据条数与注入用例条数以 `python -X utf8 .codex/scripts/dev/checkers_selftest.py` 现场取，不写进本条。
 - **开源来源**：`https://github.com/obra/superpowers` → `skills/dispatching-parallel-agents/SKILL.md`、`skills/subagent-driven-development/SKILL.md`（2026-09-21 实测 HTTP 200）
+- **交付任务**：`T-2026-10-19-026`（`.codex/agents/codebase-researcher.md` + 同名 `.toml` 包装、`check_codebase_researcher_agent.py` 的 15 条判据与其 `research:*` 注入用例、该守门升为 `checkers_selftest.py` 的第 7 条基线并登记 core 档、`.codex/HARNESS.md` 第 3 步加一行；status=verifying）。执行提示词里的三件事（命令 + 行号、显式「未找到」、实测与推测分开）全部照做并各配注入用例；**没有**照它的隐含假设只做 `.md`——沿用本仓库 `.md` 权威 + `.toml` 运行时包装的既有约定，代价与 B1 相同：同一份正文两份拷贝，由一条逐字判据钉住。
+- **实现要点（交付后回写，不是验收方式的替代）**：这个角色的产物**不落新文件**，只落进被分配任务卡的 `### Behavior impact` 四个字段——所以那四个字段名从 `_TEMPLATE.md` 现场派生（剥掉 `(code evidence)` 这类注脚后缀再比对），模板改名而角色没跟就是死指针，这条由判据而不是靠自觉。两条裸下限各自承重：模板字段被删到 3 个时「角色点名了模板字段」会空集通过；角色引用路径被删到 4 条时「引用全部在场」同样空集通过。「命令 + `文件:行`」拆成两侧各一条计数下限并各配一例注入，因为只查一侧时另一侧删空仍然报绿。**同一小节名的派生只留一份**：`agent_section_names()` 上收 `.codex/scripts/harness_check_lib.py`，B1 的检查脚本改用它——两份同形的小节集推导正是本项目 D 类欠账要消的东西。抄检正控样本改为随用例声明取样来源（`(档位, 来源, 长度, 档位)` 四元组）：写死 pm-discovery 的话，`research:rules-restated` 就只能拿错文件派生样本，而那是 D4 记过的 fail-open 形态。
 - **执行提示词**：读 `.codex/context/project-brief.md`、`.codex/rules/documentation.md`、`.codex/rules/regression.md`、`.codex/agents/verifier.md`，再参考上游 `https://github.com/obra/superpowers` 的 dispatching-parallel-agents。在 `.codex/agents/` 下新增 codebase-researcher.md：每条影响面结论都必须写成「哪条命令 + 哪个文件第几行」，查不到时显式写「未找到」，并区分「实测到的」与「推测的」；配套一个纯标准库校验脚本，跑通后贴证据。
 
 ### B5 code-simplifier 角色
@@ -171,6 +173,9 @@ D5 = 互斥的两边同时消失），都是「复核后如实回写」而不是
 同日登记并闭合 **D10**（androidTest 用裸字面量标注历史 schema 版本，使静态门禁在当前树恒红），
 实施片 `T-2026-10-19-androidtest-derived-schema-version-022.md`。D1–D8 未因这两片变动判据。〕
 
+〔**2026-10-19 第三批**：登记 **D11**（core 档整跑里一条 Web 侧仪器间歇转红，且整跑读数把失败用例名吞掉了），
+**未闭合**；同批把 B4 交付回写进 Phase B（片 `T-2026-10-19-codebase-researcher-impact-role-026.md`）。〕
+
 ### D1 `check_roadmap_and_routing` 的一次性迁移断言永久为红（2026-10-18 已按修法 ① 闭合）
 
 - 现象：两条 FAIL——`AGENTS.md adds >= 4 routing rows — measured=0`、`new routing rows cover all four triggers — missing=['intent-capturer', 'pm-discovery', 'project-brief', 'ROADMAP']`。
@@ -189,7 +194,7 @@ D5 = 互斥的两边同时消失），都是「复核后如实回写」而不是
 - 代价：②多一个文件、要同步更新 AGENTS.md 路由与 `README_ENTRIES`；①要接受「索引不再穷尽」这个语义变化并写清哪些目录被排除。
 - 处置（2026-10-19 复核，按 ① 的语义闭合，非本片所做）：判据标签已从 `docs index equals the real Docs/ file set` 改成
   `docs index is a valid curated subset of the real Docs/ file set`，实现只要求「索引非空 ∧ 每条列出的路径真实存在 ∧
-  listed ≤ actual」（`.codex/scripts/check_context_pack.py:56`），互斥由此消解：一页预算与穷尽不再同时被要求。
+  listed ≤ actual」（`.codex/scripts/check_context_pack.py:68`），互斥由此消解：一页预算与穷尽不再同时被要求。
   「哪些目录被排除」没有写成白名单，而是把差额**打印成 `unlisted=[...]`**——排除是可见的观测而不是隐藏的宽免，
   与 D1 里「增量降级为打印行」同一处理。入库记录：commit `57198af`。
 - 回读：`python -X utf8 .codex/scripts/check_context_pack.py`；`listed/actual/unlisted` 三个读数按该命令现场取，
@@ -393,3 +398,27 @@ D5 = 互斥的两边同时消失），都是「复核后如实回写」而不是
   本片证明的是「表达式可用且由 schema 派生」，不证明「设备上的 onUpgrade 仍成立」——后者沿用 T-2026-09-23-083 的真机运行。
 - 归属：登记并闭合于 2026-10-19（片 022），发现路径是 B3 把这条守门收进 `run_all_guards.py` core 档时的整跑读数——
   在此之前它的红只出现在单跑里，没有汇总面会把它和其他 30 条一起摆出来。
+
+### D11 core 档整跑里 `cdp_shot_selftest` 间歇转红，而整跑读数不打印失败的用例名（2026-10-19 登记，未闭合）
+
+- 现象：2026-10-19 片 026 收口时 `python -X utf8 .codex/scripts/run_all_guards.py --tier core` 第一次给出
+  `FAIL         cdp_shot_selftest                      rc=1 123.3s` / `> SELFTEST FAIL cases=17 failures=1`，
+  汇总行 `RUN-ALL-GUARDS pass=26 fail=1 inconclusive=0 fault=0`、`VERDICT: FAIL`、退出码 1。
+  紧随其后的两次复算都是绿：单跑 `.codex/scripts/dev/parity/cdp_shot_selftest.mjs` →
+  `SELFTEST PASS cases=17 failures=0` / 退出码 0；再跑同一条 `--tier core` → `pass=27 fail=0` / 退出码 0。
+  17 例的正控与反控一次未少（`cases=17` 在红绿两次读数里相同），所以红不是「少判」造成的。
+- 后果（不修的话）：一条会自己变红的 core 档守门会让「整跑全绿」失去意义——下一次它红时，没人能分辨
+  那是真回归还是这台机器的时序，于是倾向于重跑一次拿绿，这正是 D8 那族 flaky 的处理方式里最坏的一种。
+  而这一次连重跑定位都做不到：`run_all_guards.py` 对失败的条目只打印被 needle 命中的那一行
+  （这里是 `SELFTEST FAIL cases=17 failures=1`），子进程自己的逐用例输出被丢弃，
+  所以「哪一例红」这个问题在整跑读数里根本没有答案，必须再单独跑那条命令才知道。
+- 修法（不需要裁定，属既有先例的复用）：① `run_all_guards.py` 在 `rc!=0` 时把这 N 行原始输出末尾若干行
+  一并打印（片 016「给每次读失败留下一行原因」的同一诉求，落在汇总面上）；② 给 `cdp_shot_selftest`
+  那条时序敏感的用例一个可判的等待上界而不是固定墙钟（它与 `verify_1to1_selftest` 在同一轮里紧挨着跑，
+  后者单条就 254.5s，机器此刻仍在启动 Chrome）；③ 若 ① 之后仍抓不到稳定复现，就把它移出 core 档
+  并在本节写明它由哪条单跑命令负责——移出汇总面比留一条会自己红的判据更诚实，但不能只移不记。
+- 回读：`python -X utf8 .codex/scripts/run_all_guards.py --tier core`（连续 ≥3 次全绿且红时能打印出用例名）
+  与 `node .codex/scripts/dev/parity/cdp_shot_selftest.mjs`。捕获留在 gitignore 的 `artifacts/tmp/`：
+  本轮三份读数分别是 `run029-core.txt`（红）、`run029-cdp.txt`（单跑绿）、`run030-core.txt`（重跑绿）。
+- 归属：片 026 收口时发现；本片没有动 Web 侧任何代码或判据（`.codex/` 之外的文件一行未改，
+  见该卡块 04 的 `git diff --stat HEAD` 口径与 core 档 27 条读数），所以这条红不归因于 B4，只归因于台账。

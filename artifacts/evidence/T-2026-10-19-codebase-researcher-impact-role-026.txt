@@ -1,0 +1,258 @@
+Command: python -X utf8 artifacts/tmp/gen-025-026-evidence.py
+Generated: 2026-10-19 11:03:27
+Slice: T-2026-10-19-026（ROADMAP B4：codebase-researcher 角色 + 成对守门）
+Environment: Windows 26200 / nt / Python 3.13.12 / D:\Environment\Python\python.exe
+纪律: 每条读数都取自一次真实执行；捕获文件留在 gitignore 的 artifacts/tmp/；
+      所有命令均带 -X utf8，否则 Windows 控制台按系统代码页输出，中文判据行在证据里不可读。
+
+===============================================================================================================================================================================
+块 01 — 守门本体：python -X utf8 .codex/scripts/check_codebase_researcher_agent.py（15 条判据逐字）
+===============================================================================================================================================================================
+$ python -X utf8 .codex/scripts/check_codebase_researcher_agent.py
+OK   the seven inputs exist — missing=[]
+OK   verifier.md exposes a usable set of section names — measured=5 floor=4 names=['identity', 'source', 'contract', 'rules', '职责清单']
+OK   agent section names cover verifier.md — verifier_sections=5 missing=[]
+OK   task template declares the four impact fields — measured=4 floor=4 names=['Intended change and old behavior to preserve', 'Producer/consumer/sibling entrypoints and plat…
+OK   agent names every impact field from the task template — template_fields=4 missing=[]
+OK   agent requires each conclusion as command + file:line — location_hits=2 floor=2 command_hits=16 floor=3
+OK   agent requires an explicit 未找到 instead of silence — hits=8 floor=2
+OK   agent separates 实测 from 推测 and demands proof for 推测 — missing=[]
+OK   agent declares READONLY with one writable landing — readonly=True landing_lines=1 named=True
+OK   agent cites >= 5 checkable repo paths — measured=6 floor=5 cited=['.codex/agents/verifier.md', '.codex/context/project-brief.md', '.codex/rules/documentation.md', '.code…
+OK   every path cited by the role exists on disk — dead=[] cited=6
+OK   role text does not restate the rules it cites — measured_hits=0 sample=[]
+OK   role text carries no placeholder tokens — hits=[]
+OK   agent .toml declares name and description — name=True description=True
+OK   agent .toml body equals the agent markdown verbatim — toml_chars=3798 md_chars=3798 equal=True
+
+check_codebase_researcher_agent: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+说明: 本末态读数与开发中途的 run027-checkresearch.txt 逐字相同（diff 无输出），
+重跑只发生在卡片正文两处反查结论改写之后——那两处不进判据面，读数确实没变。
+
+===============================================================================================================================================================================
+块 02 — 同一条命令的 RED / GREEN：角色正文与打包不在场即转红，字节级摆回即转绿
+===============================================================================================================================================================================
+$ python -X utf8 artifacts/tmp/b026-redgreen.py
+driver=artifacts/tmp/b026-redgreen.py
+targets=.codex/agents/codebase-researcher.md .codex/agents/codebase-researcher.toml
+sha256-12 before=5329c1268c8d,e0dd3e753c1e
+
+### RED（角色正文与打包不在场） rc=1
+FAIL the seven inputs exist — missing=['.codex/agents/codebase-researcher.md', '.codex/agents/codebase-researcher.toml']
+check_codebase_researcher_agent: 1 check(s) failed
+
+### GREEN（现文摆回） rc=0
+check_codebase_researcher_agent: 0 check(s) failed
+
+sha256-12 after=5329c1268c8d,e0dd3e753c1e identical=True
+VERDICT: PASS
+rc=0
+
+===============================================================================================================================================================================
+块 03 — 注入自检（片 026 末态）：86 例 + 7 条基线，其中 research:* 19 例逐字
+===============================================================================================================================================================================
+$ python -X utf8 .codex/scripts/dev/checkers_selftest.py
+Command: python .codex/scripts/dev/checkers_selftest.py
+Mode: full (86 injected-violation cases + 7 baselines)
+Workspace: C:\Users\23745\AppData\Local\Temp\tlx-selftest-bbnyl7o0
+BASELINE OK check_intent_capturer_agent rc=0
+BASELINE OK check_roadmap_and_routing rc=0
+BASELINE OK check_intent_template rc=0
+BASELINE OK check_spec_author_agent rc=0
+BASELINE OK check_code_reviewer_agent rc=0
+BASELINE OK check_context_pack rc=0
+BASELINE OK check_codebase_researcher_agent rc=0
+── research:* 19 例 ──
+CASE 68 OK        research:agent-file-missing - rc=1, FAIL the seven inputs exist — missing=['.codex/agents/codebase-researcher.md']
+CASE 69 OK        research:task-template-gone - rc=1, FAIL the seven inputs exist — missing=['.codex/tasks/_TEMPLATE.md']
+CASE 70 OK        research:verifier-sections-drained - rc=1, FAIL verifier.md exposes a usable set of section names — measured=1 floor=4 names=['职责清单']
+CASE 71 OK        research:verifier-section-uncovered - rc=1, FAIL agent section names cover verifier.md — verifier_sections=6 missing=['附加要求']
+CASE 72 OK        research:impact-field-renamed - rc=1, FAIL agent names every impact field from the task template — template_fields=4 missing=['Producer/consumer/sibling ent…
+CASE 73 OK        research:impact-fields-drained - rc=1, FAIL task template declares the four impact fields — measured=3 floor=4 names=['Producer/consumer/sibling entrypoints…
+CASE 74 OK        research:location-dropped - rc=1, FAIL agent requires each conclusion as command + file:line — location_hits=0 floor=2 command_hits=16 floor=3
+CASE 75 OK        research:command-dropped - rc=1, FAIL agent requires each conclusion as command + file:line — location_hits=2 floor=2 command_hits=0 floor=3
+CASE 76 OK        research:absent-claim-dropped - rc=1, FAIL agent requires an explicit 未找到 instead of silence — hits=0 floor=2
+CASE 77 OK        research:provenance-merged - rc=1, FAIL agent separates 实测 from 推测 and demands proof for 推测 — missing=['推测']
+CASE 78 OK        research:landing-not-a-section - rc=1, FAIL agent declares READONLY with one writable landing — readonly=True landing_lines=1 named=False
+CASE 79 OK        research:readonly-dropped - rc=1, FAIL agent declares READONLY with one writable landing — readonly=False landing_lines=1 named=True
+CASE 80 OK        research:dead-path-cited - rc=1, FAIL every path cited by the role exists on disk — dead=['.codex/rules/nonexistent-rule.md'] cited=7
+CASE 81 OK        research:cites-drained - rc=1, FAIL agent cites >= 5 checkable repo paths — measured=4 floor=5 cited=['.codex/agents/verifier.md', '.codex/context/project-b…
+CASE 82 OK        research:rules-restated - rc=1, FAIL role text does not restate the rules it cites — measured_hits=1 sample=[('.codex/rules/regression.md', '#防回归与行为证据读取时机：行…
+CASE 83 OK        research:placeholder-injected - rc=1, FAIL role text carries no placeholder tokens — hits=['TODO']
+CASE 84 OK        research:toml-md-drift - rc=1, FAIL agent .toml body equals the agent markdown verbatim — toml_chars=3798 md_chars=3832 equal=False
+CASE 85 OK        research:toml-name-missing - rc=1, FAIL agent .toml declares name and description — name=False description=True
+CASE 86 OK        research:toml-unparsable - rc=1, FAIL agent .toml parses as a Codex agent file — TOMLDecodeError('Invalid value (at end of document)')
+── 抄检正控样本的派生来源（不是手抄，D4 的规矩） ──
+CASE 82 OK        research:rules-restated - rc=1, FAIL role text does not restate the rules it cites — measured_hits=1 sample=[('.codex/rules/regression.md', '#防回归与行为证据读取时机：行…
+SELFTEST cases=86 ok=86 mismatch=0 harness_errors=0 skipped=0
+OVERALL: PASS
+EXITCODE=0
+rc=0
+
+===============================================================================================================================================================================
+块 04 — core 档整跑、注册表读数与任务契约门禁
+===============================================================================================================================================================================
+$ python -X utf8 .codex/scripts/run_all_guards.py --list
+ROSTER entries=33 core=27 precommit=6
+core           check_codebase_researcher_agent        "check(s) failed"
+
+$ python -X utf8 .codex/scripts/run_all_guards.py --tier core
+RUN-ALL-GUARDS tier=core selected=27/33 subset=no
+PASS         check_codebase_researcher_agent        rc=0 0.1s
+             > check_codebase_researcher_agent: 0 check(s) failed
+RUN-ALL-GUARDS pass=27 fail=0 inconclusive=0 fault=0
+VERDICT: PASS (all 27 selected guard(s) printed a judgement line and returned green)
+EXITCODE=0
+rc=0
+
+$ python -X utf8 .codex/scripts/validate_tasks.py
+PASS T-2026-10-19-codebase-researcher-impact-role-026.md
+SUMMARY files=21 errors=0 warnings=4
+
+$ python -X utf8 .codex/scripts/check_roadmap_and_routing.py
+OK   Phase B（下一批） has >= 7 entries — measured=7
+OK   Phase B（下一批） every entry carries all 8 field names — measured_entries=7 problems=[]
+OK   Phase B（下一批） every 执行提示词 is >= 40 chars — measured_short=[]
+OK   Phase B（下一批） every path inside 执行提示词 exists — measured_dead=[]
+OK   Phase B（下一批） every 开源来源 cites github.com or a skills path — measured_weak=[]
+OK   Phase B covers the seven planned capabilities — missing=[]
+OK   no placeholder tokens in ROADMAP — measured=[]
+EXITCODE=0
+
+===============================================================================================================================================================================
+块 05 — 共享派生的收口：agent_section_names() 上收 harness_check_lib 后 B1 守门未变行为
+===============================================================================================================================================================================
+$ python -X utf8 .codex/scripts/check_code_reviewer_agent.py
+OK   the five inputs exist — missing=[]
+OK   verifier.md exposes a usable set of section names — measured=5 floor=4 names=['identity', 'source', 'contract', 'rules', '职责清单']
+OK   agent section names cover verifier.md — verifier_sections=5 missing=[]
+OK   agent names the four review dimensions — missing=[]
+OK   review template declares an archive path — dir=True pattern=True section=True
+OK   the declared archive directory exists on disk — dir=Docs\reviews
+OK   report separates blocking from non-blocking — missing=[]
+OK   every finding must carry a file:line location — hits=3
+OK   review template declares its own field list — measured=12 floor=6
+OK   task template still defines the Verification report fields — measured=5 floor=4 names=['Verdict', 'Evidence', 'Changed/deleted assertion rationale and equivalent behavio…
+OK   report fields do not redefine task-card verification fields — review_fields=12 task_fields=5 overlap=[]
+OK   role text and report skeleton carry no placeholder tokens — hits=[]
+OK   agent .toml declares name and description — name=True description=True
+OK   agent .toml body equals the agent markdown verbatim — toml_chars=3957 md_chars=3957 equal=True
+
+check_code_reviewer_agent: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+读法: 上收前后同一命令的 14 行判据逐字相同（改前读数逐字见片 024 证据文件 T-2026-10-19-code-reviewer-role-and-review-template-024.txt 的块 01），
+差别只有行数：删掉本文件里的 verifier_section_names() 与一处内联的 `## ` 标题重算，
+两处推导合并为 harness_check_lib.agent_section_names() 一份。
+
+===============================================================================================================================================================================
+块 06 — 指针复算与反查末态：24 条 `文件:行` 全活；两处消费方是本片之前就在场的
+===============================================================================================================================================================================
+$ git -c core.pager=cat diff --no-color -U1 HEAD -- ".codex/tasks/T-2026-10-19-code-reviewer-role-and-review-template-024.md" ".codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md"
+-  `Docs/REVIEW.md:7-11`（归档位置）。登记面：`.codex/scripts/run_all_guards.py:87-88`（core 档新行，整表 `:81-158`）、
+-  `.codex/scripts/dev/checkers_selftest.py:44-51`（常量与第 5 条基线）、`:389-408`（目录型注入的 `delete_dir` 分支）。
++  `Docs/REVIEW.md:7-11`（归档位置）。登记面：`.codex/scripts/run_all_guards.py:87-88`（core 档新行仍是这两行；整表 `:81-161`，026 在其后新增了 3 行）、
++  `.codex/scripts/dev/checkers_selftest.py:44-57`（常量与基线元组，本片加的是第 5 条）、`:486-505`（目录型注入的
++  `run_dir_case`，在 `:513-514` 分派）。行号是 2026-10-19 片 025 与片 026 之后各重测一次：这两片都往同一个文件里
+读法: HEAD 里是片 024 写下这些区间时的样子，工作树里是 025 与 026 两轮加行之后的样子——
+同一条 `checkers_selftest.py` 区间被推了两次（`:44-51` → `:44-52` → `:44-57`）。
+025 那轮的差分逐字见片 025 证据文件块 05；这里只证 026 末态已按实测校正过。
+
+$ python -X utf8 artifacts/tmp/b026-pointers.py
+driver=artifacts/tmp/b026-pointers.py
+assertion: 锚点子串必须至少出现在被声称的行区间内一次
+OK       .codex/scripts/dev/checkers_selftest.py:44-57 anchor='BASELINES = (CHECK_INTENT' hits=[57] total_lines=665  (片 024/025)
+OK       .codex/scripts/dev/checkers_selftest.py:342-351 anchor='context:stale-absent-claim' hits=[342] total_lines=665  (片 025)
+OK       .codex/scripts/dev/checkers_selftest.py:342-351 anchor='context:dir-cites-drained' hits=[349] total_lines=665  (片 025)
+OK       .codex/scripts/dev/checkers_selftest.py:440-448 anchor='for nm in sorted(os.listdir(REPO_ROOT))' hits=[443] total_lines=665  (片 025)
+OK       .codex/scripts/dev/checkers_selftest.py:486-505 anchor='def run_dir_case' hits=[486] total_lines=665  (片 024)
+OK       .codex/scripts/dev/checkers_selftest.py:486-505 anchor='shutil.copytree(src, path' hits=[505] total_lines=665  (片 024)
+OK       .codex/scripts/dev/checkers_selftest.py:513-514 anchor='op == "delete_dir"' hits=[513] total_lines=665  (片 024)
+OK       .codex/scripts/dev/checkers_selftest.py:615-618 anchor='tag = os.path.splitext' hits=[618] total_lines=665  (片 025)
+OK       .codex/scripts/check_context_pack.py:38-41 anchor='MIN_CITED_DIRS = 2' hits=[41] total_lines=127  (片 025)
+OK       .codex/scripts/check_context_pack.py:68-68 anchor='docs index is a valid curated subset' hits=[68] total_lines=127  (片 025 D5 行)
+OK       .codex/scripts/check_context_pack.py:75-95 anchor='no dir is claimed' hits=[88] total_lines=127  (片 025)
+OK       .codex/scripts/check_code_reviewer_agent.py:45-50 anchor='MIN_TASK_FIELDS = 4' hits=[50] total_lines=170  (片 024)
+OK       .codex/scripts/check_code_reviewer_agent.py:79-167 anchor='def main():' hits=[79] total_lines=170  (片 024)
+OK       .codex/scripts/check_code_reviewer_agent.py:1-21 anchor='为什么需要这支脚本' hits=[6] total_lines=170  (片 024)
+OK       .codex/scripts/run_all_guards.py:81-161 anchor='GUARDS = [' hits=[81] total_lines=392  (片 024)
+OK       .codex/scripts/run_all_guards.py:87-88 anchor='check_code_reviewer_agent' hits=[87] total_lines=392  (片 024)
+OK       .codex/scripts/run_all_guards.py:89-90 anchor='check_codebase_researcher_agent' hits=[89, 90] total_lines=392  (片 026)
+OK       .codex/agents/codebase-researcher.md:8-11 anchor='<identity>' hits=[8] total_lines=96  (片 026)
+OK       .codex/agents/codebase-researcher.md:22-34 anchor='READONLY' hits=[24] total_lines=96  (片 026)
+OK       .codex/scripts/check_codebase_researcher_agent.py:47-66 anchor='MIN_CITED_PATHS = 5' hits=[64] total_lines=197  (片 026)
+OK       .codex/scripts/check_codebase_researcher_agent.py:99-196 anchor='def main():' hits=[99] total_lines=197  (片 026)
+OK       .codex/scripts/check_roadmap_and_routing.py:36-36 anchor='"codebase-researcher", "code-simplifier"' hits=[36] total_lines=231  (片 026 反查)
+OK       .codex/scripts/check_roadmap_and_routing.py:170-170 anchor='miss_b = [k for k in PHASE_B_KEYWORDS' hits=[170] total_lines=231  (片 026 反查)
+OK       Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48-48 anchor='DEFERRED:待 B4（codebase-researcher）' hits=[48] total_lines=62  (片 026 反查)
+POINTERS checked=24 stale=0
+VERDICT: PASS
+读法: 驱动把卡片里每条 `文件:行` 当断言复算：锚点子串必须落在声称区间内，否则 STALE。
+第一次跑报 stale=2，两处是我写卡片时猜的行号（`<identity>`、`READONLY`）；改成先实测再落笔。
+末态 24 条 = 卡片原有的 21 条 + 收口时补的三条反查消费方（见下方两个 grep）。
+
+$ grep -rnI "codebase-researcher" .codex Docs   # 末态：32 行 / 11 个文件
+.codex/agents/codebase-researcher.md:1:# codebase-researcher —— 动手之前的影响面清查入口
+.codex/agents/codebase-researcher.md:9:You are `codebase-researcher`, a project-specific read-only impact investigator for
+.codex/agents/codebase-researcher.toml:2:name = "codebase-researcher"
+.codex/agents/codebase-researcher.toml:6:developer_instructions = "# codebase-researcher —— 动手之前的影响面清查入口\n\n> 定位：Treelearn Harness 里唯一**只管「这次改动牵动谁」**的清查角色。派工前把生产者、消费者、调用链、\n>…
+.codex/HARNESS.md:9:3. 派工前读取 [负责人及专项 guard 路由](rules/contracts.md#route-table)，只加载实际使用的 agent；按根入口叠加命中的规则。影响面清查由 `codebase-researcher` 只读完成：结论逐条写成「命令 + `文件:行`」，查不到要显式写「未找到」，`…
+.codex/ROADMAP.md:31:- **依赖**：无前置条目即可开工需求规格与界面方案两部分。技术规格部分建议 B4（codebase-researcher）先落地，否则规格会脱离代码现状。
+.codex/ROADMAP.md:40:注意：`Docs/spec/` 是 Stage 2 的产物目录，模板本身要求四类内容齐全；但**第一份规格**（AI 人设，上游为 `Docs/intent/INTENT-2026-09-21-ai-persona-preference.md`）按用户 2026-09-21 的口径**只出需求规格、界面方…
+.codex/ROADMAP.md:79:### B4 codebase-researcher 角色
+.codex/ROADMAP.md:83:- **范围（可写路径）**：`.codex/agents/codebase-researcher.md`、`.codex/agents/codebase-researcher.toml`、`.codex/scripts/check_codebase_researcher_agent.py`、`.code…
+.codex/ROADMAP.md:88:- **交付任务**：`T-2026-10-19-026`（`.codex/agents/codebase-researcher.md` + 同名 `.toml` 包装、`check_codebase_researcher_agent.py` 的 15 条判据与其 `research:*` 注入用例、该守…
+.codex/ROADMAP.md:90:- **执行提示词**：读 `.codex/context/project-brief.md`、`.codex/rules/documentation.md`、`.codex/rules/regression.md`、`.codex/agents/verifier.md`，再参考上游 `https://g…
+.codex/scripts/check_codebase_researcher_agent.py:1:"""codebase-researcher 角色的成对检查（ROADMAP B4）。
+.codex/scripts/check_codebase_researcher_agent.py:40:AGENT_MD = ".codex/agents/codebase-researcher.md"
+.codex/scripts/check_codebase_researcher_agent.py:41:AGENT_TOML = ".codex/agents/codebase-researcher.toml"
+.codex/scripts/check_roadmap_and_routing.py:36:                    "codebase-researcher", "code-simplifier", "metrics-reporter"]
+.codex/scripts/dev/checkers_selftest.py:50:CODE_RESEARCHER_MD = ".codex/agents/codebase-researcher.md"
+.codex/scripts/dev/checkers_selftest.py:51:CODE_RESEARCHER_TOML = ".codex/agents/codebase-researcher.toml"
+.codex/scripts/dev/checkers_selftest.py:74:# pm-discovery 的角色卡有一处（允许 1 段 60 字重合），codebase-researcher 对规则正文是 0 容忍。
+.codex/scripts/dev/checkers_selftest.py:352:    # ── codebase-researcher（B4）：角色正文 + 打包 + 被引对象，每条判据一例 ──
+.codex/scripts/dev/checkers_selftest.py:410:     'name = "codebase-researcher"', 'owner = "codebase-researcher"',
+.codex/tasks/T-2026-10-19-code-reviewer-role-and-review-template-024.md:260:- Next steps: 按 ROADMAP 顺序取 B4（`codebase-researcher`）——B0 的技术规格节在等它；本片留下的「角色未跑过真实 diff」
+.codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md:4:title: codebase-researcher 角色、影响面清单落点与成对守门
+.codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md:30:- Expected outcome: 一个只读角色（`.codex/agents/codebase-researcher.md` + 同名 `.toml`）、一支 15 条判据的
+.codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md:34:  `.codex/agents/codebase-researcher.md`/`.toml`、`.codex/scripts/check_codebase_researcher_agent.py`、
+.codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md:78:`.codex/agents/codebase-researcher.md` 与同名 `.toml` 成对在场且正文逐字相同，
+.codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md:85:- `.codex/agents/codebase-researcher.md` + `.codex/agents/codebase-researcher.toml`（运行时包装）。
+.codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md:121:- Authoritative code/config/migration evidence: `.codex/agents/codebase-researcher.md:8-11`（identity）、
+.codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md:142:  `grep -rnI "codebase-researcher" .codex Docs` 命中角色两份、守门、自检、注册表、`HARNESS.md`、
+.codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md:182:- Observed failure: `FAIL the seven inputs exist — missing=['.codex/agents/codebase-researcher.md', '.cod…
+.codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md:244:- Evidence: `artifacts/evidence/T-2026-10-19-codebase-researcher-impact-role-026.txt`
+.codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md:220:- Next steps: 回到 B4（`codebase-researcher`）——本片的起因就是为它读 L0 时发现正文过期；
+Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48:DEFERRED:待 B4（codebase-researcher）。
+
+$ git -c core.pager=cat grep -n "codebase-researcher" HEAD -- .codex Docs   # 本片之前：8 行
+HEAD:.codex/ROADMAP.md:31:- **依赖**：无前置条目即可开工需求规格与界面方案两部分。技术规格部分建议 B4（codebase-researcher）先落地，否则规格会脱离代码现状。
+HEAD:.codex/ROADMAP.md:40:注意：`Docs/spec/` 是 Stage 2 的产物目录，模板本身要求四类内容齐全；但**第一份规格**（AI 人设，上游为 `Docs/intent/INTENT-2026-09-21-ai-persona-preference.md`）按用户 2026-09-21 的口径**只出需求规…
+HEAD:.codex/ROADMAP.md:79:### B4 codebase-researcher 角色
+HEAD:.codex/ROADMAP.md:83:- **范围（可写路径）**：`.codex/agents/codebase-researcher.md`、`.codex/scripts/check_codebase_researcher_agent.py`
+HEAD:.codex/ROADMAP.md:88:- **执行提示词**：读 `.codex/context/project-brief.md`、`.codex/rules/documentation.md`、`.codex/rules/regression.md`、`.codex/agents/verifier.md`，再参考上游 `http…
+HEAD:.codex/scripts/check_roadmap_and_routing.py:36:                    "codebase-researcher", "code-simplifier", "metrics-reporter"]
+HEAD:.codex/tasks/T-2026-10-19-code-reviewer-role-and-review-template-024.md:257:- Next steps: 按 ROADMAP 顺序取 B4（`codebase-researcher`）——B0 的技术规格节在等它；本片留下的「角色未跑过真实 diff」
+HEAD:Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48:DEFERRED:待 B4（codebase-researcher）。
+读法: 这两份读数纠正了卡片初稿里两处不实——① 反查消费方列漏了两个本片之前就在场的：
+check_roadmap_and_routing.py:36 的 PHASE_B_KEYWORDS（:170 要求 Phase B 正文含每个关键词，
+所以删掉 ROADMAP 里这个角色名会立刻转红），和 Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48
+的 `DEFERRED:待 B4（codebase-researcher）`（那句的改写属 B0 那片）；
+② 卡片声称 check_codebase_researcher_agent 在本片之前零命中，HEAD 侧实测 2 处
+（ROADMAP.md:83 范围行、:86 验收方式行），两处都已被本片按新判据面改写。
+
+===============================================================================================================================================================================
+块 07 — 本片没覆盖的东西（与任务卡 Gaps 同口径）
+===============================================================================================================================================================================
+① 角色从未真的产出一份 Behavior impact 清单：块 01–04 只证明「产物成对、判据会响」，
+   不证明按这套字段真能查出一片代码的影响面。第一次真实清查要落在下一片（B0 技术规格补全）。
+② `checkable repo paths` 只认 `backticked_paths()` 的已知前缀（Docs/.codex/android/artifacts/README），
+   所以 `frontend/` 这类顶层目录引用不在死指针判定内；背景包那一条由 check_context_pack.py 管。
+③ verifier.md 小节集那条裸下限（MIN_VERIFIER_SECTIONS）只有 drained 用例在角色侧证伪；
+   把 verifier.md 本身删到 3 个小节以下没有单独用例——它与片 024 的同名下限同形，未再补一份。
+④ `.toml` 是否真被 Codex 运行时加载没有运行时证据；判据只保证它与 `.md` 逐字相同。
+⑤ 无独立 verifier 轮次（用户要求一站到底）。
+
+⑥ 收口那轮 `--tier core` 出现过一次 `FAIL cdp_shot_selftest rc=1 123.3s` /   `> SELFTEST FAIL cases=17 failures=1`（`pass=26 fail=1`），随后单跑该仪器得   `SELFTEST PASS cases=17 failures=0`、再跑整跑得 `pass=27 fail=0`。本片未据此改宽任何判据，   也没有定位到具体用例——`run_all_guards.py:238` 只打印被 needle 命中的行，失败条目的逐用例输出   被丢弃。已登记 ROADMAP D11（未闭合），三条回读见该条。

@@ -28,7 +28,8 @@ import tomllib
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from harness_check_lib import (  # noqa: E402
-    Checks, enable_utf8_stdout, exists, placeholder_hits, read_text, repo_path, section_body)
+    Checks, agent_section_names, enable_utf8_stdout, exists, placeholder_hits, read_text, repo_path,
+    section_body)
 
 AGENT_MD = ".codex/agents/code-reviewer.md"
 AGENT_TOML = ".codex/agents/code-reviewer.toml"
@@ -62,13 +63,6 @@ REVIEW_FIELD_RE = re.compile(r"^\s*-\s*\*\*([^*]+)\*\*[：:]")
 TASK_FIELD_RE = re.compile(r"^-\s*([A-Za-z][A-Za-z/ ()\-]*?):(?:\s|$)")
 
 
-def verifier_section_names(text):
-    """从 verifier.md 现文里取它自己声明的小节名（尖括号块 + 二级标题）。"""
-    tags = re.findall(r"^<([a-z]+)>$", text, re.M)
-    titles = [l[3:].strip() for l in text.splitlines() if l.startswith("## ")]
-    return tags + titles
-
-
 def review_fields(text):
     return [m.group(1).strip() for m in
             (REVIEW_FIELD_RE.match(l) for l in text.splitlines()) if m]
@@ -97,15 +91,14 @@ def main():
     review = read_text(REVIEW_TEMPLATE)
     task = read_text(TASK_TEMPLATE)
 
-    needed = verifier_section_names(verifier)
+    needed = agent_section_names(verifier)
     if not c.check(len(needed) >= MIN_VERIFIER_SECTIONS,
                    "verifier.md exposes a usable set of section names",
                    "measured={0} floor={1} names={2}".format(len(needed), MIN_VERIFIER_SECTIONS,
                                                               needed)):
         return c.finish()
-    missing = [n for n in needed if not re.search(r"^<%s>$" % re.escape(n), agent, re.M)
-                and not any(n == t for t in
-                            [l[3:].strip() for l in agent.splitlines() if l.startswith("## ")])]
+    have = set(agent_section_names(agent))
+    missing = [n for n in needed if n not in have]
     c.check(not missing, "agent section names cover verifier.md",
             "verifier_sections={0} missing={1}".format(len(needed), missing))
 

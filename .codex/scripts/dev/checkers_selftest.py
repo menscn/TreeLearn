@@ -46,9 +46,16 @@ CODE_REVIEWER_TOML = ".codex/agents/code-reviewer.toml"
 REVIEW_TEMPLATE = "Docs/REVIEW.md"
 REVIEW_ARCHIVE_DIR = "Docs/reviews"
 CHECK_REVIEW = ".codex/scripts/check_code_reviewer_agent.py"
+CHECK_CONTEXT = ".codex/scripts/check_context_pack.py"
+CODE_RESEARCHER_MD = ".codex/agents/codebase-researcher.md"
+CODE_RESEARCHER_TOML = ".codex/agents/codebase-researcher.toml"
+TASK_TEMPLATE = ".codex/tasks/_TEMPLATE.md"
+REGRESSION_RULE = ".codex/rules/regression.md"
+CHECK_RESEARCH = ".codex/scripts/check_codebase_researcher_agent.py"
 
 # 先跑一遍「未注入」的基线：守门对健康的副本必须转绿，否则下面的反向用例没有意义。
-BASELINES = (CHECK_INTENT, CHECK_ROADMAP, CHECK_TEMPLATE, CHECK_SPEC, CHECK_REVIEW)
+BASELINES = (CHECK_INTENT, CHECK_ROADMAP, CHECK_TEMPLATE, CHECK_SPEC, CHECK_REVIEW,
+             CHECK_CONTEXT, CHECK_RESEARCH)
 
 # 需要「把目标文件当参数传给守门」的用例（回放校验器读的是参数指定的实例文件）。
 ARGS_BY_CASE = {
@@ -63,9 +70,15 @@ ARGS_BY_CASE = {
 # ② 它不含路径片段与占位符词，免得 mask_paths 与「no placeholder tokens」两条判据掺进来；
 # ③ 它落在预期的阈值档位上（60 字档响/不响、40 字档响），档位关系是断言出来的而不是注释里说的。
 PM_SKILL = ".codex/skills/pm-discovery/SKILL.md"
-SAMPLE_SPEC_LONG = ("long", 89, "fire60")      # 60 字档必须响（>1 命中）
-SAMPLE_SPEC_EXACT = ("exact60", 60, "quiet60")  # 60 字档恰好 1 命中（允许），40 字档必须响
-SAMPLE_SPEC_TRIM = ("trim", 44, "quiet60")      # 60 字档 0 命中（够不到窗口），40 字档必须响
+# 形状 = (档位名, 取样来源, 长度, 档位)。来源进元组是因为抄检判据不止一处：
+# pm-discovery 的角色卡有一处（允许 1 段 60 字重合），codebase-researcher 对规则正文是 0 容忍。
+# 把来源写死成 pm-discovery 的话，第二处抄检只能用错的文件派生正控——那正是 D4 记的失效形态。
+SAMPLE_SPEC_LONG = ("long", PM_SKILL, 89, "fire60")      # 60 字档必须响（>1 命中）
+SAMPLE_SPEC_EXACT = ("exact60", PM_SKILL, 60, "quiet60")  # 60 字档恰好 1 命中（允许），40 字档必须响
+SAMPLE_SPEC_TRIM = ("trim", PM_SKILL, 44, "quiet60")      # 60 字档 0 命中（够不到窗口），40 字档必须响
+# 0 容忍那一侧只需要「unique 的一段」：candidate 本身就是现文切片，60 字档必然命中 1 次，
+# 而 1 次就足够让 total==0 这条判据转红。
+SAMPLE_SPEC_REGRESSION = ("regression60", REGRESSION_RULE, 60, "quiet60")
 
 
 def derive_sample(skill_text, length, tier):
@@ -324,6 +337,81 @@ CASES = [
     ("review:toml-unparsable", CHECK_REVIEW, CODE_REVIEWER_TOML,
      None, "\nbroken = [\n",
      "agent .toml parses as a Codex agent file", "append"),
+    # 背景包（L0 常驻入口）的目录现状主张。2026-10-19 的实测事故就是这一条：frontend/ 已按 Web 线
+    # 落地，正文仍写「两目录尚未创建」，读它的人于是去别处找这份「还不存在」的代码。
+    ("context:stale-absent-claim", CHECK_CONTEXT, PROJECT_BRIEF,
+     "`frontend/` 是并行的", "`frontend/` 尚未创建，是并行的",
+     "no dir is claimed `尚未创建` while present on disk", "replace_all"),
+    ("context:dead-dir-cite", CHECK_CONTEXT, PROJECT_BRIEF,
+     "`frontend/` 是并行的", "`fronten/` 是并行的",
+     "every other cited dir exists on disk", "replace_all"),
+    # 裸下限承重：把两处目录引用一起删掉，上面两条判据都会因为「没有可判的引用」而空集通过。
+    ("context:dir-cites-drained", CHECK_CONTEXT, PROJECT_BRIEF,
+     "逐屏对齐", None,
+     "brief cites >= 2 top-level dirs", "drop_matching"),
+    # ── codebase-researcher（B4）：角色正文 + 打包 + 被引对象，每条判据一例 ──
+    ("research:agent-file-missing", CHECK_RESEARCH, CODE_RESEARCHER_MD, None, None,
+     "the seven inputs exist", "delete"),
+    # 同一个标签、不同病因：删掉被引的任务模板也要 fail-closed，否则「输入齐全」这条
+    # 其实只在盯角色文件自己。
+    ("research:task-template-gone", CHECK_RESEARCH, TASK_TEMPLATE, None, None,
+     "the seven inputs exist", "delete"),
+    # 裸下限承重：把 verifier.md 的尖括号小节全部改形，比对对象消失——此时「角色覆盖了
+    # verifier 的骨架」会空集通过，只有下限能认出「没东西可比」不是绿。
+    ("research:verifier-sections-drained", CHECK_RESEARCH, VERIFIER_AGENT,
+     "<", "[",
+     "verifier.md exposes a usable set of section names", "replace_all"),
+    ("research:verifier-section-uncovered", CHECK_RESEARCH, VERIFIER_AGENT,
+     "## 职责清单", "## 附加要求\n\n- 占位。\n\n## 职责清单",
+     "agent section names cover verifier.md", "replace"),
+    ("research:impact-field-renamed", CHECK_RESEARCH, TASK_TEMPLATE,
+     "platform branches (code evidence)", "platform surfaces (code evidence)",
+     "agent names every impact field from the task template", "replace"),
+    ("research:impact-fields-drained", CHECK_RESEARCH, TASK_TEMPLATE,
+     "- Intended change", None,
+     "task template declares the four impact fields", "drop_matching"),
+    # 「命令 + 文件:行」是两半，各注入一次：只查一侧的话，另一侧删空仍然报绿。
+    ("research:location-dropped", CHECK_RESEARCH, CODE_RESEARCHER_MD,
+     "文件:行", "某处",
+     "agent requires each conclusion as command + file:line", "replace_all"),
+    ("research:command-dropped", CHECK_RESEARCH, CODE_RESEARCHER_MD,
+     "命令", "指令",
+     "agent requires each conclusion as command + file:line", "replace_all"),
+    ("research:absent-claim-dropped", CHECK_RESEARCH, CODE_RESEARCHER_MD,
+     "未找到", "没有",
+     "agent requires an explicit 未找到 instead of silence", "replace_all"),
+    ("research:provenance-merged", CHECK_RESEARCH, CODE_RESEARCHER_MD,
+     "推测", "判断",
+     "agent separates 实测 from 推测 and demands proof for 推测", "replace_all"),
+    ("research:landing-not-a-section", CHECK_RESEARCH, CODE_RESEARCHER_MD,
+     "里的 `### Behavior impact` 那四个字段", "里的其它小节",
+     "agent declares READONLY with one writable landing", "replace"),
+    ("research:readonly-dropped", CHECK_RESEARCH, CODE_RESEARCHER_MD,
+     "- READONLY: refuse edits to code, tests, rules, templates and specs.",
+     "- 可以按需修改代码、测试、规则与模板。",
+     "agent declares READONLY with one writable landing", "replace"),
+    ("research:dead-path-cited", CHECK_RESEARCH, CODE_RESEARCHER_MD,
+     None, "\n另见 `.codex/rules/nonexistent-rule.md`。\n",
+     "every path cited by the role exists on disk", "append"),
+    ("research:cites-drained", CHECK_RESEARCH, CODE_RESEARCHER_MD,
+     ".codex/rules/", None,
+     "agent cites >= 5 checkable repo paths", "drop_matching"),
+    # 正控样本照 D4 的规矩从**被判规则现文**里切片，不手抄：抄一段不存在的文字证明不了这条判据承重。
+    ("research:rules-restated", CHECK_RESEARCH, CODE_RESEARCHER_MD,
+     None, SAMPLE_SPEC_REGRESSION,
+     "role text does not restate the rules it cites", "append_sample"),
+    ("research:placeholder-injected", CHECK_RESEARCH, CODE_RESEARCHER_MD,
+     None, "\nTODO\n",
+     "role text carries no placeholder tokens", "append"),
+    ("research:toml-md-drift", CHECK_RESEARCH, CODE_RESEARCHER_MD,
+     None, "\n本段只写在 markdown 里，用来证明打包正文不是逐字拷贝。\n",
+     "agent .toml body equals the agent markdown verbatim", "append"),
+    ("research:toml-name-missing", CHECK_RESEARCH, CODE_RESEARCHER_TOML,
+     'name = "codebase-researcher"', 'owner = "codebase-researcher"',
+     "agent .toml declares name and description", "replace"),
+    ("research:toml-unparsable", CHECK_RESEARCH, CODE_RESEARCHER_TOML,
+     None, "\nbroken = [\n",
+     "agent .toml parses as a Codex agent file", "append"),
 ]
 
 
@@ -349,6 +437,15 @@ def build_workspace(root):
                     ignore=shutil.ignore_patterns("__pycache__"))
     shutil.copytree(os.path.join(REPO_ROOT, "Docs"), os.path.join(root, "Docs"),
                     ignore=shutil.ignore_patterns("__pycache__"))
+    # 顶层目录的「在场性」本身也是被检事实（背景包会说某个目录尚未创建 / 已落地）。副本只带正文，
+    # 不带这些目录，判据就会把真仓库里存在的 frontend/ 读成不存在。这里只镜像目录名、不复制内容：
+    # 空壳足以让 os.path.isdir 在副本里给出和真仓库一致的答案（隐藏目录跳过，避免撞上 .git）。
+    for nm in sorted(os.listdir(REPO_ROOT)):
+        src = os.path.join(REPO_ROOT, nm)
+        if nm.startswith("."):
+            continue
+        if os.path.isdir(src) and not os.path.exists(os.path.join(root, nm)):
+            os.makedirs(os.path.join(root, nm))
     # 基线提交用 HEAD 版本的 AGENTS.md，提交后再把工作区版本摆回去：
     # 这样副本里的「未提交增量」与真实仓库同形，删除行判据与「HEAD 每行逐字幸存」
     # 判据在副本里量到的东西才和在外面直跑时一致（两者读的都是 HEAD ↔ 工作树这一对）。
@@ -424,14 +521,15 @@ def run_case(root, case):
         elif op == "append":
             write_text(path, original + new)
         elif op == "append_sample":
-            skill_path = os.path.join(root, PM_SKILL.replace("/", os.sep))
-            sample = derive_sample(read_text(skill_path), new[1], new[2])
+            source = new[1]
+            source_path = os.path.join(root, source.replace("/", os.sep))
+            sample = derive_sample(read_text(source_path), new[2], new[3])
             if sample is None:
                 # 取不到样本 = 正控失效。它必须以「没跑完」的身份出现（rc=3），
                 # 而不是悄悄少跑一条用例继续报绿——那正是 D4 记的 fail-open 形态。
                 return "HARNESS", (
                     "no derivable 正控 sample for tier {0} (length {1}) from {2}: "
-                    "the judged text changed".format(new[2], new[1], PM_SKILL))
+                    "the judged text changed".format(new[3], new[2], source))
             write_text(path, original + "\n" + sample + "\n")
         elif op == "drop_matching":
             if original is None:
@@ -486,9 +584,10 @@ def main():
 
     # D4 的复发防护：抄样本这件事一旦回到「用例里写死一段文本」就重新变成 fail-open，
     # 而那时每条用例照样会绿。所以这里不检查样本本身（派生自现文，天然对得上，查了等于没查），
-    # 而是检查**形状**——三条抄检用例必须走 append_sample，出现字面量样本即判仪器故障。
+    # 而是检查**形状**——每条抄检用例都必须走 append_sample，出现字面量样本即判仪器故障。
+    copy_check_prefixes = ("intent:copied-methodology", "research:rules-restated")
     literal_copy_cases = [c[0] for c in CASES
-                          if c[0].startswith("intent:copied-methodology") and c[6] != "append_sample"]
+                          if c[0].startswith(copy_check_prefixes) and c[6] != "append_sample"]
     if literal_copy_cases:
         print("SELFTEST harness error: 抄检用例又带回字面量样本（D4 复发）：{0}".format(
             literal_copy_cases))
@@ -514,11 +613,9 @@ def main():
 
         for checker in BASELINES:
             proc = run_checker(root, checker)
-            tag = {CHECK_INTENT: "check_intent_capturer_agent",
-                   CHECK_ROADMAP: "check_roadmap_and_routing",
-                   CHECK_TEMPLATE: "check_intent_template",
-                   CHECK_SPEC: "check_spec_author_agent",
-                   CHECK_REVIEW: "check_code_reviewer_agent"}[checker]
+            # tag 直接取自脚本文件名：这张手写的 {路径: 名字} 表曾经加一条基线就要补一行，
+            # 漏加时整轮以 KeyError 收场（仪器故障，不是「用例通过」）。派生掉它，少一个会漂移的地方。
+            tag = os.path.splitext(os.path.basename(checker))[0]
             if proc.returncode != 0:
                 print("BASELINE FAIL {0} rc={1}".format(tag, proc.returncode))
                 print((proc.stdout or "").strip()[-600:])

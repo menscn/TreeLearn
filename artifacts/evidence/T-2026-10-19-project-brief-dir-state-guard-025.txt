@@ -1,0 +1,158 @@
+Command: python -X utf8 artifacts/tmp/gen-025-026-evidence.py
+Generated: 2026-10-19 11:03:27
+Slice: T-2026-10-19-025（背景包 L0 目录现状主张 + 双向门禁）
+Environment: Windows 26200 / nt / Python 3.13.12 / D:\Environment\Python\python.exe
+纪律: 每条读数都取自一次真实执行；捕获文件留在 gitignore 的 artifacts/tmp/；
+      所有命令均带 -X utf8，否则 Windows 控制台按系统代码页输出，中文判据行在证据里不可读。
+
+===============================================================================================================================================================================
+块 01 — 守门本体：python -X utf8 .codex/scripts/check_context_pack.py（末态逐字）
+===============================================================================================================================================================================
+$ python -X utf8 .codex/scripts/check_context_pack.py
+OK   file exists: .codex/context/project-brief.md
+OK   file exists: .codex/context/domain-glossary.md
+OK   brief is one page (non-empty, non-header lines <= 60) — measured=46
+OK   brief has the six required sections — measured=6; missing=[]
+OK   docs index is a valid curated subset of the real Docs/ file set — listed=21 actual=60 missing=[] unlisted=['Docs/04-ux-design/parity/screen-inventory.json', 'Docs/04-ux-…
+OK   every indexed path exists — dead=[]
+OK   brief cites >= 2 top-level dirs — measured=2 floor=2 cited=['backend', 'frontend']
+OK   no dir is claimed `尚未创建` while present on disk — claimed_absent=['backend'] stale=[] cited=['backend', 'frontend']
+OK   every other cited dir exists on disk — dead=[] cited=['backend', 'frontend']
+OK   glossary has >= 12 terms — measured=15
+OK   every glossary term cites a real path — measured_terms=15 dead_sources=[]
+OK   brief shares no 80-char run with Docs/ — measured_hits=0 sample=[]
+OK   no placeholder tokens — measured={}
+
+check_context_pack: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+
+===============================================================================================================================================================================
+块 02 — 同一条命令的 RED / GREEN：把旧现状主张摆回背景包即转红，字节级还原后转绿
+===============================================================================================================================================================================
+$ python -X utf8 artifacts/tmp/b025-redgreen.py
+driver=artifacts/tmp/b025-redgreen.py
+target=.codex/context/project-brief.md
+sha256-12 before=1112cb30d956
+
+### RED（把 2026-10-15 的旧现状主张摆回去） rc=1
+OK   brief cites >= 2 top-level dirs — measured=2 floor=2 cited=['backend', 'frontend']
+FAIL no dir is claimed `尚未创建` while present on disk — claimed_absent=['backend', 'frontend'] stale=['frontend'] cited=['backend', 'frontend']
+OK   every other cited dir exists on disk — dead=[] cited=['backend', 'frontend']
+check_context_pack: 1 check(s) failed
+
+### GREEN（当前背景包正文） rc=0
+OK   brief cites >= 2 top-level dirs — measured=2 floor=2 cited=['backend', 'frontend']
+OK   no dir is claimed `尚未创建` while present on disk — claimed_absent=['backend'] stale=[] cited=['backend', 'frontend']
+OK   every other cited dir exists on disk — dead=[] cited=['backend', 'frontend']
+check_context_pack: 0 check(s) failed
+
+sha256-12 after=1112cb30d956 identical=True
+
+===============================================================================================================================================================================
+块 03 — 注入自检（片 025 末态）：67 例 + 6 条基线，其中 context:* 三条逐字
+===============================================================================================================================================================================
+$ python -X utf8 .codex/scripts/dev/checkers_selftest.py
+Command: python .codex/scripts/dev/checkers_selftest.py
+Mode: full (67 injected-violation cases + 6 baselines)
+Workspace: C:\Users\23745\AppData\Local\Temp\tlx-selftest-tugdp5r2
+BASELINE OK check_intent_capturer_agent rc=0
+BASELINE OK check_roadmap_and_routing rc=0
+BASELINE OK check_intent_template rc=0
+BASELINE OK check_spec_author_agent rc=0
+BASELINE OK check_code_reviewer_agent rc=0
+BASELINE OK check_context_pack rc=0
+── context:* 3 例 ──
+CASE 65 OK        context:stale-absent-claim - rc=1, FAIL no dir is claimed `尚未创建` while present on disk — claimed_absent=['backend', 'frontend'] stale=['frontend'] cited=['b…
+CASE 66 OK        context:dead-dir-cite - rc=1, FAIL every other cited dir exists on disk — dead=['fronten'] cited=['backend', 'fronten']
+CASE 67 OK        context:dir-cites-drained - rc=1, FAIL brief cites >= 2 top-level dirs — measured=0 floor=2 cited=[]
+SELFTEST cases=67 ok=67 mismatch=0 harness_errors=0 skipped=0
+OVERALL: PASS
+EXITCODE=0
+EXITCODE=0
+
+===============================================================================================================================================================================
+块 04 — core 档整跑与任务契约门禁
+===============================================================================================================================================================================
+$ python -X utf8 .codex/scripts/run_all_guards.py --tier core
+RUN-ALL-GUARDS tier=core selected=26/32 subset=no
+PASS         validate_tasks                         rc=0 0.1s
+PASS         check_context_pack                     rc=0 0.3s
+PASS         check_code_reviewer_agent              rc=0 0.1s
+PASS         check_intent_capturer_agent            rc=0 0.1s
+PASS         check_intent_template                  rc=0 0.0s
+PASS         check_pm_discovery_skill               rc=0 0.1s
+PASS         check_roadmap_and_routing              rc=0 0.1s
+PASS         check_spec_author_agent                rc=0 0.0s
+PASS         check_stack_facts                      rc=0 0.3s
+PASS         check_design_tokens                    rc=0 0.1s
+PASS         check_androidtest_schema_expectations  rc=0 0.1s
+PASS         checkers_selftest                      rc=0 7.9s
+PASS         parity_ledger_selftest                 rc=0 1.6s
+PASS         screen_inventory_selftest              rc=0 1.3s
+PASS         measure_screen --selftest              rc=0 7.7s
+PASS         verify_1to1_selftest                   rc=0 265.1s
+PASS         cdp_shot_selftest                      rc=0 94.7s
+PASS         web_walk --selftest                    rc=0 0.1s
+PASS         check_dependency_direction             rc=0 0.1s
+PASS         check_dependency_direction --selftest  rc=0 0.1s
+PASS         check_user_copy_i18n                   rc=0 0.1s
+PASS         check_user_copy_i18n --selftest        rc=0 0.1s
+PASS         check_device_time                      rc=0 0.1s
+PASS         check_device_time --selftest           rc=0 0.1s
+PASS         sync_fixtures --check                  rc=0 0.1s
+PASS         sync_fixtures --selftest               rc=0 0.1s
+RUN-ALL-GUARDS pass=26 fail=0 inconclusive=0 fault=0
+VERDICT: PASS (all 26 selected guard(s) printed a judgement line and returned green)
+EXITCODE=0
+rc=0
+
+$ python -X utf8 .codex/scripts/validate_tasks.py
+PASS T-2026-10-19-project-brief-dir-state-guard-025.md
+SUMMARY files=20 errors=0 warnings=4
+rc=0
+时序说明: `--tier core` 这一轮发生在背景包正文、守门与注入用例全部落定之后，但在本卡最后几处
+纯文字回写（Assumptions / Gaps ⑤ / 块 06 引用）之前；那几处只动卡片正文，其判据面由紧随其后
+单独复算的 validate_tasks（同一命令、末态字节，errors=0）覆盖。
+
+===============================================================================================================================================================================
+块 05 — 本片位移的两处行号指针：HEAD → 工作树的逐字差分
+===============================================================================================================================================================================
+$ git -c core.pager=cat diff --no-color -U1 HEAD -- .codex/ROADMAP.md ".codex/tasks/T-2026-10-19-code-reviewer-role-and-review-template-024.md"
+-  listed ≤ actual」（`.codex/scripts/check_context_pack.py:56`），互斥由此消解：一页预算与穷尽不再同时被要求。
++  listed ≤ actual」（`.codex/scripts/check_context_pack.py:68`），互斥由此消解：一页预算与穷尽不再同时被要求。
+-  `.codex/scripts/dev/checkers_selftest.py:44-51`（常量与第 5 条基线）、`:389-408`（目录型注入的 `delete_dir` 分支）。
++  `.codex/scripts/dev/checkers_selftest.py:44-52`（常量与基线元组，本片加的是第 5 条）、`:411-430`（目录型注入的
++  `run_dir_case`，在 `:438-439` 分派）。行号是 2026-10-19 片 025 之后重测的：025 往同一个文件里加了用例与常量，
++  把这些区间整体下推，原引 `:44-51` / `:389-408` 已成活指针——这正是 D9 登记的同一类缺陷，发现即校正。
+读法: 本片往 check_context_pack.py 与 checkers_selftest.py 里加了内容，两处引用它们的行号指针
+随之整体下推。原引 `check_context_pack.py:56` 与 `:44-51` / `:389-408` 在被写下时是准的，
+到本片末态已成活指针——D9 登记的同一类缺陷，发现即校正。片 026 又量了一次，见片 026 证据块 06。
+
+===============================================================================================================================================================================
+块 06 — 「纯 Android」反查在改前/改后的两次复算（纠正卡片里写早了的结论）
+===============================================================================================================================================================================
+$ grep -rnI "纯 Android" .codex Docs AGENTS.md
+.codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md:24:  ①「形态：纯 Android 原生」——`frontend/` 早已按 Web 线落地（React + TypeScript + Vite，阶段 2 骨架 011–015、
+.codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md:54:- Assumptions: 「纯 Android 原生」这句除背景包外没有别处重复（已反查，见 Documentation impact）。
+.codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md:107:- Producer/consumer/sibling/compatibility paths checked: 反查「纯 Android 原生」——
+.codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md:108:  `grep -rnI "纯 Android" .codex Docs AGENTS.md` 只命中背景包自己（块 05），所以这一句改正不需要连带改规则；
+.codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md:115:- [x] 背景包「形态」行不再说「纯 Android 原生」，并写明 `frontend/` 是并行的 Web/H5 复刻线。
+.codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md:142:- Implementation: 背景包两行改成当前态（形态行去掉「纯 Android 原生」、写明 `frontend/` 是并行的 Web/H5 复刻线；
+.codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md:189:  块 05（两处行号指针校正与「纯 Android 原生」反查读数）。环境：Windows 10.0.26200 / x64 /
+Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md:12:| 终端 | 纯 Android 原生应用，手机竖屏优先，兼容平板横屏 |
+读法: 卡片初稿把「除背景包外没有别处重复」写在改动之前——那是预测不是读数。改后复算：背景包
+自己不再命中，命中变成 7 行，其中 6 行是本卡片在引用被删的那句，另有 1 行是
+Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md:12「终端 | 纯 Android 原生应用」。
+那句在同一文件 :29 的〔2026-10-15 更新〕范围声明之内（该文件只描述 Android 单机架构，与 Web
+规格冲突处以规格为准），在它自己的口径中不算过期，故本片不连带改它——改它要动整份历史技术方案。
+
+===============================================================================================================================================================================
+块 07 — 本片没覆盖的东西（与任务卡 Gaps 同口径）
+===============================================================================================================================================================================
+① 只认反引号里的 `` `name/` `` 一层目录写法；正文若写「前端目录还没建」这类无标记措辞，判据看不见。
+② `backend/` 落地那天要人改背景包：判据此刻只判「说尚未创建 ⇒ 真不在场」这个方向的反面。
+③ 沙箱只镜像顶层目录名，任何按目录**内容**分支的将来判据都不能靠这套副本复算。
+④ 无独立 verifier 轮次（用户要求一站到底）。
+⑤ 块 02 的一次性对照靠 gitignore 内的驱动 b025-redgreen.py；但三条 context:* 用例已入库，
+   下限被改坏或判定被删窄都会在电池里留下响动，复现不依赖这个驱动。

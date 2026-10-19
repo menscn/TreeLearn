@@ -61,6 +61,17 @@ def section_titles(text, level=2):
     return [l[len(prefix):].strip() for l in text.splitlines() if l.startswith(prefix)]
 
 
+def agent_section_names(text):
+    """取一个 agent 文件自己声明的小节名（`<tag>` 块 + 二级标题）。
+
+    两个角色成对检查（`check_code_reviewer_agent.py`、`check_codebase_researcher_agent.py`）
+    都要拿 verifier.md 的小节集当比对对象。写两份就会一份改了另一份没跟，
+    于是「沿用 verifier 骨架」这条判据本身成了第二份实现。
+    """
+    tags = re.findall(r"^<([a-z]+)>$", text, re.M)
+    return tags + [l[3:].strip() for l in text.splitlines() if l.startswith("## ")]
+
+
 def section_body(text, title, level=2):
     lines = text.splitlines()
     prefix = "#" * level + " "

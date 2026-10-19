@@ -114,10 +114,13 @@ tdd_mode: required
 
 - Changed runtime facts: 未改产品运行事实；新增流程角色、报告骨架、归档目录与一条 core 档守门。
 - Authoritative code/config/migration evidence: `.codex/scripts/check_code_reviewer_agent.py:1-21`（判据的权威说明写在
-  docstring）、`:44-49`（三条裸下限 `MIN_VERIFIER_SECTIONS` / `MIN_REVIEW_FIELDS` / `MIN_TASK_FIELDS`）、
-  `:85-173`（14 条判定与三处早退）；`.codex/agents/code-reviewer.md:19-41`（只读契约与 Java-only 属阻塞项）、
-  `Docs/REVIEW.md:7-11`（归档位置）。登记面：`.codex/scripts/run_all_guards.py:87-88`（core 档新行，整表 `:81-158`）、
-  `.codex/scripts/dev/checkers_selftest.py:44-51`（常量与第 5 条基线）、`:389-408`（目录型注入的 `delete_dir` 分支）。
+  docstring）、`:45-50`（三条裸下限 `MIN_VERIFIER_SECTIONS` / `MIN_REVIEW_FIELDS` / `MIN_TASK_FIELDS`）、
+  `:79-167`（14 条判定与 6 处 fail-closed 早退；片 026 把小节名派生上收进 `harness_check_lib.py` 后本文件短了 6 行）；`.codex/agents/code-reviewer.md:19-41`（只读契约与 Java-only 属阻塞项）、
+  `Docs/REVIEW.md:7-11`（归档位置）。登记面：`.codex/scripts/run_all_guards.py:87-88`（core 档新行仍是这两行；整表 `:81-161`，026 在其后新增了 3 行）、
+  `.codex/scripts/dev/checkers_selftest.py:44-57`（常量与基线元组，本片加的是第 5 条）、`:486-505`（目录型注入的
+  `run_dir_case`，在 `:513-514` 分派）。行号是 2026-10-19 片 025 与片 026 之后各重测一次：这两片都往同一个文件里
+  各加了用例与常量，把这些区间整体下推；原引 `:44-51` / `:389-408` 在被引用当时是对的，
+  到本片末态已成活指针——这正是 D9 登记的同一类缺陷，发现即校正。
 - Documentation surfaces checked: `.codex/ROADMAP.md`（B1/B3 条目）、`.codex/HARNESS.md`、`.codex/README.md`、
   `.codex/rules/communication.md`、`.codex/rules/harness-verification.md`、`.codex/rules/contracts.md`（owner→guard 路由表
   不按脚本名枚举，故不需登记）、`AGENTS.md`（第 62 行 glob 已覆盖）。
