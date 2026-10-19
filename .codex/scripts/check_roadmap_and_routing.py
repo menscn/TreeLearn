@@ -36,7 +36,11 @@ PHASE_B_KEYWORDS = ["spec-author", "code-reviewer", "REVIEW.md", "eval-keeper", 
                     "codebase-researcher", "code-simplifier", "metrics-reporter"]
 PHASE_C_KEYWORDS = ["loop-watcher", "事实源", "release-gate"]
 
-README_ENTRIES = [".codex/context/", ".codex/templates/", ".codex/ROADMAP.md", "Docs/intent/"]
+README_ENTRIES = [".codex/context/", ".codex/templates/", ".codex/ROADMAP.md", "Docs/intent/",
+                  ".codex/evals/"]
+# 这张清单自己也要有下限：清单被删到只剩一项时「逐条点名」照样绿（同一族的「集合给自己定下限」）。
+# 实测 5 项，下限取 4，删到 3 项立刻转红；单项删除属规范变更，由代码复核看 diff，不由这里冒充判据。
+MIN_README_ENTRIES = 4
 ROUTE_KEYWORDS = ["intent-capturer", "pm-discovery", "project-brief", "ROADMAP"]
 
 # 当前态下限，写在与那张表无关的裸字面量上（实测 20 行，留纯追加的余量）。
@@ -219,8 +223,11 @@ def main():
     readme = read_text(TRAE_README)
     tree = section_body(readme, "目录结构")
     if c.check(tree is not None, ".codex/README.md has a 目录结构 section"):
+        c.check(len(README_ENTRIES) >= MIN_README_ENTRIES,
+                "registered-entry list is not drained below its floor",
+                "entries={0} floor={1}".format(len(README_ENTRIES), MIN_README_ENTRIES))
         miss = [k for k in README_ENTRIES if k not in tree]
-        c.check(not miss, "目录结构 section lists the four new entries",
+        c.check(not miss, "目录结构 section lists every registered entry",
                 "missing={0}".format(miss))
 
     return c.finish()

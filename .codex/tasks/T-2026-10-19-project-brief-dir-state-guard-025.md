@@ -53,7 +53,7 @@ tdd_mode: required
   块 06（改后「纯 Android」反查复算，用来纠正 Assumptions 里那句写早了的结论）。
 - Facts: `frontend/` 与 `backend/` 的在场性由 `ls -d` 实测；背景包旧正文两条原样留在块 02 的 RED 里。
 - Assumptions: 起初假设「纯 Android 原生」这句除背景包外没有别处重复——这个假设是错的，改正后的反查读数
-  见 Documentation impact：`Docs/05-technical-design/…技术架构方案_V1.0.md:12` 也有一句，但它由同文件
+  见 Documentation impact：`Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md:12` 也有一句，但它由同文件
   `:29` 的〔2026-10-15 更新〕范围声明兜住（该文件只描述 Android 单机架构），在它的口径内不算过期。
 - Unknowns: 无。
 - Risks: 行内形状判定对「换一种说法」不设防（例如写成「还没建」），这类只能靠注入用例覆盖不到而承认；
@@ -100,9 +100,10 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
 - Authoritative code/config/migration evidence: `ls -d frontend backend`（frontend 存在、backend 不存在）、
   `.codex/scripts/check_context_pack.py:38-41`（三条新常量 `ABSENT_CLAIM` / `DIR_CITE_RE` / `MIN_CITED_DIRS`）、
   `:75-95`（两条判定 + 一处早退）、
-  `.codex/scripts/dev/checkers_selftest.py:49-62`（`CHECK_CONTEXT` 常量与基线元组；026 之后该元组已含第 7 条、027 含第 8 条）、
-  `:347-358`（3 例 `context:*`）、`:524-532`（顶层目录名镜像）、`:700-702`（tag 派生）。
-  区间在片 026、片 027 之后各重测过一次：026 往同一个文件加了 19 例与 4 个常量、027 又加了 23 例与 4 个常量，
+  `.codex/scripts/dev/checkers_selftest.py:49-67`（`CHECK_CONTEXT` 常量与基线元组；026 之后该元组已含第 7 条、027 含第 8 条、028 含第 9 条）、
+  `:362-371`（3 例 `context:*`）、`:578-585`（顶层目录名镜像）、`:753-756`（tag 派生）。
+  区间在片 026、片 027、片 028 之后各重测过一次：026 往同一个文件加了 19 例与 4 个常量、027 又加了 24 例与 4 个常量、
+  028 加了 5 个常量与 14 例 `evals:*`，
   原引 `:328-339` / `:365-374` / `:537-541`、再到 `:342-351` / `:440-448` / `:615-618` 都在被引用当时是对的，之后成了活指针。
 - Documentation surfaces checked: `AGENTS.md`（Treelearn 当前事实一节已写「`backend/` 目录尚未落地」，与新正文同向）、
   `.codex/ROADMAP.md`（B0 注记已写「`frontend/` 已落地」）、`Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md`、

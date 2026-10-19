@@ -99,7 +99,7 @@ tdd_mode: required
   要保留的旧行为是「`verifier` 仍是唯一的任务验收入口」——本片只新增一个并列的、不宣布验收的复核角色。
 - Producer/consumer/sibling entrypoints and platform branches (code evidence): 生产者=`.codex/agents/code-reviewer.md`
   与 `Docs/REVIEW.md`（人/agent 读）；`.toml` 的生产者是 Codex 运行时加载面；守门
-  `.codex/scripts/check_code_reviewer_agent.py:85-173` 的消费者是
+  `.codex/scripts/check_code_reviewer_agent.py:85-166` 的消费者是
   `.codex/scripts/run_all_guards.py:87-88`（core 档）与 `checkers_selftest.py` 的基线+用例；
   兄弟入口 `.codex/agents/verifier.md`（形状对齐对象，本片未改）与 `Docs/reviews/README.md`（只写归档规矩、不复述字段）。
   平台分支：无产品平台分支；仪器面 Windows 上 `os.path.isdir(repo_path("Docs"+os.sep+"reviews"))` 与
@@ -115,10 +115,10 @@ tdd_mode: required
 - Changed runtime facts: 未改产品运行事实；新增流程角色、报告骨架、归档目录与一条 core 档守门。
 - Authoritative code/config/migration evidence: `.codex/scripts/check_code_reviewer_agent.py:1-21`（判据的权威说明写在
   docstring）、`:45-50`（三条裸下限 `MIN_VERIFIER_SECTIONS` / `MIN_REVIEW_FIELDS` / `MIN_TASK_FIELDS`）、
-  `:79-167`（14 条判定与 6 处 fail-closed 早退；片 026 把小节名派生上收进 `harness_check_lib.py` 后本文件短了 6 行）；`.codex/agents/code-reviewer.md:19-41`（只读契约与 Java-only 属阻塞项）、
-  `Docs/REVIEW.md:7-11`（归档位置）。登记面：`.codex/scripts/run_all_guards.py:87-88`（core 档新行仍是这两行；整表 `:81-164`，026/027 各在其后新增了 3 行）、
-  `.codex/scripts/dev/checkers_selftest.py:44-62`（常量与基线元组，本片加的是第 5 条）、`:570-589`（目录型注入的
-  `run_dir_case`，在 `:597-598` 分派）。行号是 2026-10-19 片 025、片 026、片 027 之后各重测一次：这三片都往同一个文件里
+  `:79-166`（14 条判定与 6 处 fail-closed 早退；片 026 把小节名派生上收进 `harness_check_lib.py` 后本文件短了 6 行）；`.codex/agents/code-reviewer.md:19-41`（只读契约与 Java-only 属阻塞项）、
+  `Docs/REVIEW.md:7-11`（归档位置）。登记面：`.codex/scripts/run_all_guards.py:87-88`（core 档新行仍是这两行；整表 `:81-166`，026/027/028 各在其后新增了 3/3/2 行）、
+  `.codex/scripts/dev/checkers_selftest.py:44-67`（常量与基线元组，本片加的是第 5 条）、`:623-642`（目录型注入的
+  `run_dir_case`，在 `:650-651` 分派）。行号是 2026-10-19 片 025、片 026、片 027、片 028 之后各重测一次：这四片都往同一个文件里
   各加了用例与常量，把这些区间整体下推；原引 `:44-51` / `:389-408`、再到 `:44-57` / `:486-505` 在被引用当时都是对的，
   到后一片末态已成活指针——这正是 D9 登记的同一类缺陷，发现即校正；`artifacts/tmp/b027-pointers.py` 把这三张卡的指针
   全部当成断言逐条复算（条数由该驱动现场打印），不再靠人记。

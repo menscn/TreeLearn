@@ -25,6 +25,7 @@
 ├── tasks/                 # Task v2 状态文件
 ├── skills/                # 项目技能与机械守门
 ├── scripts/               # 任务、设计和 Android/前端守门脚本
+├── .codex/evals/          # AI 产物的基线评测集（跑法见该目录 README.md）
 └── tests/                 # 流程工具自测
 ```
 

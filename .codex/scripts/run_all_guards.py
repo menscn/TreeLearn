@@ -92,6 +92,8 @@ GUARDS = [
     E("check_code_simplifier_agent", PY,
       [".codex/scripts/check_code_simplifier_agent.py"],
       [CHECKS_NEEDLE], ["core"]),
+    E("run_evals", PY, [".codex/scripts/run_evals.py"],
+      [CHECKS_NEEDLE], ["core"]),
     E("check_intent_capturer_agent", PY, [".codex/scripts/check_intent_capturer_agent.py"],
       [CHECKS_NEEDLE], ["core"]),
     E("check_intent_template", PY, [".codex/scripts/check_intent_template.py"],

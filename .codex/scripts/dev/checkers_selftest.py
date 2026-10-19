@@ -56,10 +56,15 @@ CODE_SIMPLIFIER_MD = ".codex/agents/code-simplifier.md"
 CODE_SIMPLIFIER_TOML = ".codex/agents/code-simplifier.toml"
 MAINTAINABILITY_RULE = ".codex/rules/maintainability.md"
 CHECK_SIMPLIFY = ".codex/scripts/check_code_simplifier_agent.py"
+RUN_EVALS = ".codex/scripts/run_evals.py"
+EVALS_CASES = ".codex/evals/cases"
+EVALS_CASE = ".codex/evals/cases/001-impact-inventory"
+EVALS_PRODUCT = EVALS_CASE + "/product.md"
+EVALS_EXPECTED = EVALS_CASE + "/expected.md"
 
 # 先跑一遍「未注入」的基线：守门对健康的副本必须转绿，否则下面的反向用例没有意义。
 BASELINES = (CHECK_INTENT, CHECK_ROADMAP, CHECK_TEMPLATE, CHECK_SPEC, CHECK_REVIEW,
-             CHECK_CONTEXT, CHECK_RESEARCH, CHECK_SIMPLIFY)
+             CHECK_CONTEXT, CHECK_RESEARCH, CHECK_SIMPLIFY, RUN_EVALS)
 
 # 需要「把目标文件当参数传给守门」的用例（回放校验器读的是参数指定的实例文件）。
 ARGS_BY_CASE = {
@@ -239,7 +244,15 @@ CASES = [
      "every current routing-row target exists", "replace"),
     ("roadmap:readme-entry-removed", CHECK_ROADMAP, TRAE_README,
      ".codex/templates/", ".codex/template/",
-     "目录结构 section lists the four new entries", "replace"),
+     "目录结构 section lists every registered entry", "replace"),
+    ("roadmap:evals-entry-removed", CHECK_ROADMAP, TRAE_README,
+     ".codex/evals/", ".codex/eval/",
+     "目录结构 section lists every registered entry", "replace"),
+    # 清单自己那条下限判的是「脚本里那份字面量」，所以目标文件是被检脚本自身——
+    # 删掉两项目录条目后剩下的仍然都在 README 里，miss 判据不会响，只有这条下限会响。
+    ("roadmap:readme-entries-drained", CHECK_ROADMAP, CHECK_ROADMAP,
+     'README_ENTRIES = [".codex/context/", ".codex/templates/",', 'README_ENTRIES = [',
+     "registered-entry list is not drained below its floor", "replace"),
     # 回放校验器的负向对照：模板本身不是一份可用实例（它的「终态」一栏并列三种取值），
     # 因此必须被判 FAIL。这条用来证明该脚本不是「对什么都说 OK」。
     ("replay:template-is-not-an-instance", CHECK_REPLAY, TEMPLATE, None, None,
@@ -496,6 +509,46 @@ CASES = [
     ("simplify:toml-unparsable", CHECK_SIMPLIFY, CODE_SIMPLIFIER_TOML,
      None, "\nbroken = [\n",
      "agent .toml parses as a Codex agent file", "append"),
+
+    # ── 评测集运行器（B2 片 028）：判的是「AI 产物 vs 基线期望」，五条形制各配正控 ──
+    ("evals:cases-dir-deleted", RUN_EVALS, EVALS_CASES, None, None,
+     "eval cases directory exists", "delete_dir"),
+    ("evals:case-dir-deleted", RUN_EVALS, EVALS_CASE, None, None,
+     "cases/ holds at least MIN_CASES case dirs", "delete_dir"),
+    ("evals:product-removed", RUN_EVALS, EVALS_PRODUCT, None, None,
+     "case 001-impact-inventory ships input+expected+product", "delete"),
+    ("evals:expected-removed", RUN_EVALS, EVALS_EXPECTED, None, None,
+     "case 001-impact-inventory ships input+expected+product", "delete"),
+    ("evals:product-blanked", RUN_EVALS, EVALS_PRODUCT, " ", "",
+     "case 001-impact-inventory assets are all non-empty", "drop_matching"),
+    # 认不出的期望行不会判定任何东西：静默跳过等于期望被悄悄删掉，所以它必须转红。
+    ("evals:unknown-expectation-line", RUN_EVALS, EVALS_EXPECTED,
+     None, "\n- 这条大概是好的，看一眼就知道。\n",
+     "case 001-impact-inventory expectations all parse", "append"),
+    ("evals:expected-emptied", RUN_EVALS, EVALS_EXPECTED, "- ", "",
+     "case 001-impact-inventory declares at least MIN_EXPECTATIONS expectations",
+     "drop_matching"),
+    # >=0 的期望恒真：它看起来是一条判据，实际什么都判不了。
+    ("evals:threshold-zero", RUN_EVALS, EVALS_EXPECTED,
+     "- must: (code evidence) >= 1", "- must: (code evidence) >= 0",
+     "case 001-impact-inventory thresholds are all >= 1", "replace"),
+    # 删一条期望既不破条数下限也不破形状覆盖——它唯一的暴露方式是让某条产物条目失钉。
+    ("evals:bullet-unpinned", RUN_EVALS, EVALS_EXPECTED, "逐字读数", "",
+     "case 001-impact-inventory pins every product bullet", "drop_matching"),
+    ("evals:shape-kind-dropped", RUN_EVALS, EVALS_EXPECTED, "shape:", "",
+     "every expectation kind is exercised by some case", "drop_matching"),
+    ("evals:shape-token-lost", RUN_EVALS, EVALS_PRODUCT,
+     "同级入口 = ", "入口 = ",
+     "case 001-impact-inventory shape: 生产者 & 消费者 & 同级入口", "replace"),
+    ("evals:forbid-hit", RUN_EVALS, EVALS_PRODUCT, None, "待填\n",
+     "case 001-impact-inventory forbid: 待填", "append"),
+    ("evals:pointer-stale", RUN_EVALS, EVALS_PRODUCT,
+     ".codex/scripts/dev/checkers_selftest.py:67",
+     ".codex/scripts/dev/checkers_selftest.py:99999",
+     "case 001-impact-inventory pointers-alive", "replace"),
+    ("evals:path-dead", RUN_EVALS, EVALS_PRODUCT,
+     ".codex/HARNESS.md", ".codex/HARNESX.md",
+     "case 001-impact-inventory paths-exist", "replace"),
 ]
 
 

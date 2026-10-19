@@ -56,12 +56,13 @@
 
 - **ID**：B2
 - **目标**：给提示词、AI 产物和守门规则建立可重跑的评测集，让每次改动都能证明「没变差」，而不是靠肉眼看一遍。
-- **范围（可写路径）**：`.codex/agents/eval-keeper.md`、`.codex/scripts/check_eval_keeper_agent.py`，以及 `.codex/` 下新增的 `evals/` 评测目录
+- **范围（可写路径）**：`.codex/agents/eval-keeper.md`、`.codex/agents/eval-keeper.toml`、`.codex/evals/`（`README.md` 与 `cases/<编号>-<名>/{input.md,expected.md,product.md}` 三件套）、`.codex/scripts/run_evals.py`、`.codex/scripts/check_eval_keeper_agent.py`、`.codex/scripts/harness_check_lib.py`（新增 `path_line_citations()` / `citation_problems()`）、`.codex/scripts/check_roadmap_and_routing.py`、`.codex/README.md`、`.codex/scripts/dev/checkers_selftest.py`、`.codex/scripts/run_all_guards.py`、`.codex/HARNESS.md`、`.codex/ROADMAP.md`
 - **依赖**：`.codex/agents/verifier.md`、`.codex/rules/regression.md`
 - **owner_lane**：harness
-- **验收方式**：`python .codex/scripts/check_eval_keeper_agent.py` 退出码 0；脚本断言评测目录至少含一份样例输入、一份基线期望，且跑法是一条可以照抄的命令。
+- **验收方式**：两条命令都是退出码 0。`python -X utf8 .codex/scripts/run_evals.py` 断言评测目录的 case 三件套齐全、期望可解析且形状全被用到、阈值都 >= 1、产物每条条目都被正向期望钉住、`路径:行` 引用与仓库相对路径在当前工作树可复算；`python -X utf8 .codex/scripts/check_eval_keeper_agent.py` 断言角色小节名覆盖 `.codex/agents/verifier.md` 现文、只声明一个可写落点且声明 READONLY、跑法那一行是仓库里真存在的脚本、评测目录已登记进 `.codex/README.md` 的目录结构、无占位符、`.toml` 正文与 `.md` 逐字相同。判据条数与注入用例条数以 `python -X utf8 .codex/scripts/dev/checkers_selftest.py` 现场取，不写进本条。
 - **开源来源**：`https://github.com/anthropics/skills` → `skills/skill-creator/SKILL.md`；`https://github.com/contains-studio/agents` → `testing/test-results-analyzer.md`（2026-09-21 实测 HTTP 200）
 - **执行提示词**：读 `.codex/agents/verifier.md`、`.codex/rules/regression.md`、`.codex/rules/observability.md`、`.codex/ROADMAP.md`，再参考上游 `https://github.com/anthropics/skills` 的 skill-creator 里「给技能写评测」的章节和 `https://github.com/contains-studio/agents` 的 test-results-analyzer。在 `.codex/agents/` 下新增 eval-keeper.md，并建立评测目录（样例输入 + 期望输出 + 跑法说明），再写一个纯标准库校验脚本并跑通，输出贴进任务证据。
+- **交付任务**：分两片。片 028（`T-2026-10-19-evals-inventory-and-runner-028`）交付评测目录本身与运行器：`.codex/evals/` 三件套一型、`run_evals.py`、`.codex/README.md` 目录条目与 `check_roadmap_and_routing.py` 的登记判据、`evals:*` 注入用例与第 9 条基线、core 档注册。片 029 交付 `eval-keeper` 角色两份与 `check_eval_keeper_agent.py`，并把跑法接进 `.codex/HARNESS.md`。B2 在片 029 之前不算交付完成。
 
 ### B3 守门自动化（全部只读守门一键跑）
 

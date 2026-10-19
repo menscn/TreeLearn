@@ -171,6 +171,42 @@ def citable_paths(text):
     return out
 
 
+CITATION_RE = re.compile(
+    r"`((?:Docs|\.codex|android|frontend|artifacts|README)[^\s:`（），、；]+?):(\d+)"
+    r"(?:\s*[-–]\s*(\d+))?`")
+
+
+def path_line_citations(text):
+    """把 `路径:行` / `路径:起-止` 形态的引用解析成 (rel, lo, hi) 三元组（按出现顺序）。
+
+    只认带仓库相对前缀的路径：裸文件名 `run_all_guards.py:89` 到底指哪一个文件无法确定，
+    按 basename 全库搜索会把「重名即命中」当成真话，所以这里不认——需要复算时写全路径。
+    """
+    out = []
+    for m in CITATION_RE.finditer(text):
+        rel, lo, hi = m.group(1), int(m.group(2)), m.group(3)
+        out.append((rel, lo, int(hi) if hi else lo))
+    return out
+
+
+def citation_problems(citations):
+    """返回 [(citation, 原因)]：路径不在场、行号超出该文件实际行数、起止倒置。"""
+    problems = []
+    counts = {}
+    for rel, lo, hi in citations:
+        if not exists(rel):
+            problems.append(((rel, lo, hi), "file absent"))
+            continue
+        if rel not in counts:
+            counts[rel] = len(read_text(rel).splitlines())
+        n = counts[rel]
+        if lo > hi:
+            problems.append(((rel, lo, hi), "range reversed"))
+        elif hi > n:
+            problems.append(((rel, lo, hi), "line beyond eof={0}".format(n)))
+    return problems
+
+
 def field_names_from_marker(text, marker="FIELDS:"):
     """读取 <!-- FIELDS: a | b | c --> 注解除列的字段名集合。"""
     m = re.search(r"<!--\s*" + re.escape(marker) + r"(.*?)-->", text, re.S)

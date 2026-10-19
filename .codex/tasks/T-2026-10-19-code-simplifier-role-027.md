@@ -114,7 +114,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `identical=True`）、`run_all_guards.py` 其余 31 条注册项、`HARNESS.md` 第 1/2/3/5/6 步原文（接线只做在一句之内）、
   `checkers_selftest.py` 原有 86 例与 7 条基线一字未改。
 - Producer/consumer/sibling entrypoints and platform branches (code evidence): 生产者 = 角色正文与守门脚本；
-  消费者 = `run_all_guards.py:92-94`（core 档）、`checkers_selftest.py:61-62`（第 8 条基线）、`.codex/HARNESS.md:10`
+  消费者 = `run_all_guards.py:92-94`（core 档）、`checkers_selftest.py:66-67`（第 8 条基线）、`.codex/HARNESS.md:10`
   （派工/实现阶段的第 4 步）。同级入口 = `check_codebase_researcher_agent.py`，它与本片共用
   `harness_check_lib.citable_paths()`（同一筛选两份的那一处已合并）。
   另有两个**本片之前就在场**的消费方：`check_roadmap_and_routing.py:36` 把 `code-simplifier` 列进
@@ -137,7 +137,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `:70-81`（11 条判定形状的正则）、`:103-212`（19 条判定与 4 处早退）、
   `.codex/scripts/harness_check_lib.py:158-171`（`citable_paths()`）、
   `.codex/scripts/check_codebase_researcher_agent.py:84-179`（改用共享派生后的 `main()`）、
-  `.codex/scripts/dev/checkers_selftest.py:55-58` / `:61-62` / `:88` / `:423-498` / `:672`、
+  `.codex/scripts/dev/checkers_selftest.py:55-58` / `:66-67` / `:93` / `:436-511` / `:725`、
   `.codex/scripts/run_all_guards.py:92-94`、`.codex/HARNESS.md:10`。
   行号是先实测再落笔的：`artifacts/tmp/b027-pointers.py` 把本片与片 024/025/026 的 49 条引用逐条复算，
   末态 `POINTERS checked=49 stale=0`。
