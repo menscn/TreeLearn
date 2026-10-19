@@ -1,0 +1,324 @@
+Treelearn 证据文件 —— 片 T-2026-10-19-guard-runner-one-command-roster-023
+任务：`.codex/tasks/T-2026-10-19-guard-runner-one-command-roster-023.md`
+日期：2026-10-19
+范围：ROADMAP B3（把仓库现存只读守门收成一条命令，并杜绝「退出码 0 但什么都没判」）；
+      同片闭合 D9（四处过期指针的措辞修正，不改任何判据逻辑）。
+运行环境：Windows 10.0.26200 / x64 / Python（`sys.executable`，一律 -X utf8）/ Git Bash /
+      node / powershell.exe（`-NoProfile -ExecutionPolicy Bypass`）。
+本文件的命令输出由 `artifacts/tmp/gen-023-evidence.py` 从捕获文件逐字节缩进生成，
+prose 与命令行写在生成器里；捕获文件本身留在 `artifacts/tmp/`（gitignore 内）。
+读法：块 01 是交付面（core 档逐条读数）；块 02 是本片的核心判据（注入后电池必须转红）；
+      块 03 是电池全量 26 例；块 04 是 all 档 31 条；块 05 是真实注册表上的一条真红；
+      块 06 是「一条都没选中」的失败方向；块 07 是全局门禁当前读数；块 08 是 D9 的两条回读。
+
+〔块 01〕core 档整跑：25 条逐条读数（交付面）
+
+# command: python -X utf8 .codex/scripts/run_all_guards.py --tier core > artifacts/tmp/run023-core.txt 2>&1; 驱动自身 rc=0
+    RUN-ALL-GUARDS tier=core selected=25/31 subset=no
+    PASS         validate_tasks                         rc=0 0.1s
+                 > SUMMARY files=17 errors=0 warnings=3
+    PASS         check_context_pack                     rc=0 0.3s
+                 > check_context_pack: 0 check(s) failed
+    PASS         check_intent_capturer_agent            rc=0 0.1s
+                 > check_intent_capturer_agent: 0 check(s) failed
+    PASS         check_intent_template                  rc=0 0.1s
+                 > check_intent_template: 0 check(s) failed
+    PASS         check_pm_discovery_skill               rc=0 0.1s
+                 > check_pm_discovery_skill: 0 check(s) failed
+    PASS         check_roadmap_and_routing              rc=0 0.1s
+                 > check_roadmap_and_routing: 0 check(s) failed
+    PASS         check_spec_author_agent                rc=0 0.1s
+                 > check_spec_author_agent: 0 check(s) failed
+    PASS         check_stack_facts                      rc=0 0.3s
+                 > check_stack_facts: 0 check(s) failed
+    PASS         check_design_tokens                    rc=0 0.1s
+                 > check_design_tokens: 0 check(s) failed
+    PASS         check_androidtest_schema_expectations  rc=0 0.2s
+                 > VERDICT: PASS
+    PASS         checkers_selftest                      rc=0 7.4s
+                 > OVERALL: PASS
+    PASS         parity_ledger_selftest                 rc=0 1.9s
+                 > VERDICT: PASS
+    PASS         screen_inventory_selftest              rc=0 1.6s
+                 > VERDICT: PASS
+    PASS         measure_screen --selftest              rc=0 8.8s
+                 > VERDICT: PASS (19 cases, positive and negative for every branch)
+    PASS         verify_1to1_selftest                   rc=0 229.8s
+                 > SELFTEST PASS cases=40 cli=20 muts=18 failures=0
+    PASS         cdp_shot_selftest                      rc=0 80.9s
+                 > SELFTEST PASS cases=17 failures=0
+    PASS         web_walk --selftest                    rc=0 0.1s
+                 > SELFTEST cases=6 bad=0
+    PASS         check_dependency_direction             rc=0 0.1s
+                 > dependency scan root=src layers=9 scanned=23 findings=0
+    PASS         check_dependency_direction --selftest  rc=0 0.1s
+                 > SELFTEST cases=10 floor=8 fail=0
+    PASS         check_user_copy_i18n                   rc=0 0.1s
+                 > user-copy scan root=src scanned=23 copy-dir-exempt-seen=true cjk-lines=0 files=0 baseline-entries=0 baseline-covered=0
+    PASS         check_user_copy_i18n --selftest        rc=0 0.1s
+                 > SELFTEST cases=15 floor=10 fail=0
+    PASS         check_device_time                      rc=0 0.1s
+                 > device-time scan root=D:\Project\Android\Treelearn\frontend\src scanned=23 exempt=utils/deviceTime.ts exempt-in-tree=true findings=0
+    PASS         check_device_time --selftest           rc=0 0.1s
+                 > SELFTEST cases=11 floor=8 fail=0
+    PASS         sync_fixtures --check                  rc=0 0.1s
+                 > SYNC CHECK src=13 dst=13 bad=0 redacted=0 dir=frontend\src\platform\fixtures
+    PASS         sync_fixtures --selftest               rc=0 0.1s
+                 > SELFTEST cases=8 bad=0 floor=1
+    RUN-ALL-GUARDS pass=25 fail=0 inconclusive=0 fault=0
+    VERDICT: PASS (all 25 selected guard(s) printed a judgement line and returned green)
+    EXITCODE=0
+
+每条两行：判决行（状态 + 名字 + 退出码 + 耗时）与 `>` 打头的那行是**该守门自己打的判据行**。注册表里没有一条是靠「没输出」蒙过去的：末两行 `RUN-ALL-GUARDS pass=25 fail=0 inconclusive=0 fault=0` 与 `VERDICT: PASS (all 25 selected guard(s) printed a judgement line and returned green)` 一起才是结论。
+
+〔块 02〕核心判据的 RED/GREEN：把「没判据行就算 FAIL」改成「算 PASS」，电池必须转红
+
+# command: python -X utf8 artifacts/tmp/b3-redgreen.py > artifacts/tmp/run023-redgreen.txt 2>&1; 驱动自身 rc=0
+    SAVED run_all_guards.py sha=95644f21aecf
+
+    == GREEN（当前实现：没有判据行就算 FAIL） ==
+    # command: python -X utf8 .codex/scripts/check_run_all_guards.py
+    CASE rc=0 但一个字都不打 → FAIL（B3 的核心要求）                        expected=1 actual=1  Ok
+    CASE 一条绿 + 一条哑：总体判红，但两条都要打印出来                             expected=1 actual=1  Ok
+    SELFTEST cases=26 executed=26 floor=20 broken=0
+    OVERALL: PASS
+    EXITCODE=0
+
+    == 注入：把「没判据行 → FAIL」改成「→ PASS」 ==
+    APPLIED=1 (期望 1) sha=cf0db878d02d
+
+    == RED（同一条命令，注入后必须判红） ==
+    # command: python -X utf8 .codex/scripts/check_run_all_guards.py
+    CASE rc=0 但一个字都不打 → FAIL（B3 的核心要求）                        expected=1 actual=0  BROKEN
+    CASE 一条绿 + 一条哑：总体判红，但两条都要打印出来                             expected=1 actual=0  BROKEN
+    SELFTEST cases=26 executed=26 floor=20 broken=2
+      - rc=0 但一个字都不打 → FAIL（B3 的核心要求） — rc want=1 got=0 missing=['no judgement line printed', 'VERDICT: FAIL'] forbidden=['VERDICT: PASS']
+      - 一条绿 + 一条哑：总体判红，但两条都要打印出来 — rc want=1 got=0 missing=['fail=1', 'VERDICT: FAIL'] forbidden=['VERDICT: PASS']
+    OVERALL: FAIL
+    EXITCODE=1
+
+    == 复原并证明字节相同 ==
+    RESTORED run_all_guards.py sha=95644f21aecf
+
+    == GREEN（复原后再次判绿） ==
+    # command: python -X utf8 .codex/scripts/check_run_all_guards.py
+    CASE rc=0 但一个字都不打 → FAIL（B3 的核心要求）                        expected=1 actual=1  Ok
+    CASE 一条绿 + 一条哑：总体判红，但两条都要打印出来                             expected=1 actual=1  Ok
+    SELFTEST cases=26 executed=26 floor=20 broken=0
+    OVERALL: PASS
+    EXITCODE=0
+
+    SUMMARY green_before=0 red=1 green_after=0 byte-identical-restore=True
+
+同一条命令 `python -X utf8 .codex/scripts/check_run_all_guards.py` 跑了三次：注入前绿、注入后红（broken=2）、按 raw bytes 复原后再次绿。注入的是 `.codex/scripts/run_all_guards.py` 的 judge() 一条分支返回值，没有删用例、没有改 `MIN_CASES`/`MIN_ROSTER`/`MIN_CORE` 任何下限（改下限等于仪器给自己开后门，D4 同族）。复原后 sha 与注入前同为 `95644f21aecf`——不用 `git checkout`，本工作树 `core.autocrlf=true` 会重新 smudge 行尾。
+
+〔块 03〕注入电池全量：26 例，覆盖汇总器的每条检测分支
+
+# command: python -X utf8 .codex/scripts/check_run_all_guards.py > artifacts/tmp/run023-battery.txt 2>&1; rc=0
+    CASE 判绿的守门被认下来                                            expected=0 actual=0  Ok
+    CASE rc=0 但一个字都不打 → FAIL（B3 的核心要求）                        expected=1 actual=1  Ok
+    CASE rc=1 且打了判据行 → FAIL                                   expected=1 actual=1  Ok
+    CASE 判据行只出现在 stderr 也算数                                   expected=0 actual=0  Ok
+    CASE rc=2（既不是判绿也不是判红的集合）→ 无从认证                            expected=3 actual=3  Ok
+    CASE 注册的脚本文件不在场 → FAULT，不能当成通过                            expected=3 actual=3  Ok
+    CASE 解释器起不来 → FAULT                                       expected=3 actual=3  Ok
+    CASE 子进程输出不是合法 UTF-8 → FAULT（乱码不能算判据行）                    expected=3 actual=3  Ok
+    CASE 守门挂住不回 → FAIL 并写明超时                                  expected=1 actual=1  Ok
+    CASE 一条绿 + 一条哑：总体判红，但两条都要打印出来                             expected=1 actual=1  Ok
+    CASE 一条判红 + 一条起不来：故障压过判红，退出码 3                            expected=3 actual=3  Ok
+    CASE 空注册表 → 注册表故障                                         expected=3 actual=3  Ok
+    CASE core 档被挪空 → 注册表故障（不许把守门降档来凑绿）                        expected=3 actual=3  Ok
+    CASE 重名条目 → 注册表故障                                         expected=3 actual=3  Ok
+    CASE 判据行了 = 没有判据行 → 注册表故障                                 expected=3 actual=3  Ok
+    CASE 档位名写错 → 注册表故障                                        expected=3 actual=3  Ok
+    CASE pass_codes 不含 0 → 注册表故障                              expected=3 actual=3  Ok
+    CASE 判绿码与判红码重叠 → 注册表故障                                    expected=3 actual=3  Ok
+    CASE 超时写成非正数 → 注册表故障                                      expected=3 actual=3  Ok
+    CASE --only 一个字都没选中 → 无从认证                                expected=3 actual=3  Ok
+    CASE --only 只跑子集：绿话必须写明是子集                                expected=0 actual=0  Ok
+    CASE --tier precommit 而该档为空 → 无从认证                        expected=3 actual=3  Ok
+    CASE --list 打印整表且不运行任何守门                                  expected=0 actual=0  Ok
+    CASE 认不出的参数 → 用法错误，退出码 3                                  expected=3 actual=3  Ok
+    CASE 真实注册表：形状合法、声明的脚本都在场、没用逃生口                            expected=0 actual=entries=31 core=25 problems=0 missing=0 escape=0  Ok
+    CASE core 档仍覆盖那几支关键守门（删条目就会在这里断）                          expected=0 actual=core-keys=4/4 missing=[]  Ok
+    SELFTEST cases=26 executed=26 floor=20 broken=0
+    OVERALL: PASS
+    EXITCODE=0
+
+每例的期望是三元组（退出码 + 必须出现的判决行 + 必须不出现的措辞）。`forbidden` 那半是这支电池存在的理由：「没跑」「只跑了一部分」「跑完但什么都没判」都曾被写成绿。`floor=20` 是裸下限，用例数由 `len(CASES)` 自己数就等于没有下限；末两条 `expected=0 actual=entries=… / core-keys=4/4` 是不跑子进程的两条真表探针——它们查的是「那张表还值不值得相信」。
+
+〔块 04〕all 档整跑：31 条逐条读数（含依赖构建产物与 git 增量的 6 条 precommit）
+
+# command: python -X utf8 .codex/scripts/run_all_guards.py --tier all > artifacts/tmp/run023-all.txt 2>&1; 驱动自身 rc=0
+    RUN-ALL-GUARDS tier=all selected=31/31 subset=no
+    PASS         validate_tasks                         rc=0 0.1s
+                 > SUMMARY files=17 errors=0 warnings=3
+    PASS         check_context_pack                     rc=0 0.3s
+                 > check_context_pack: 0 check(s) failed
+    PASS         check_intent_capturer_agent            rc=0 0.1s
+                 > check_intent_capturer_agent: 0 check(s) failed
+    PASS         check_intent_template                  rc=0 0.1s
+                 > check_intent_template: 0 check(s) failed
+    PASS         check_pm_discovery_skill               rc=0 0.1s
+                 > check_pm_discovery_skill: 0 check(s) failed
+    PASS         check_roadmap_and_routing              rc=0 0.1s
+                 > check_roadmap_and_routing: 0 check(s) failed
+    PASS         check_spec_author_agent                rc=0 0.0s
+                 > check_spec_author_agent: 0 check(s) failed
+    PASS         check_stack_facts                      rc=0 0.3s
+                 > check_stack_facts: 0 check(s) failed
+    PASS         check_design_tokens                    rc=0 0.1s
+                 > check_design_tokens: 0 check(s) failed
+    PASS         check_androidtest_schema_expectations  rc=0 0.2s
+                 > VERDICT: PASS
+    PASS         checkers_selftest                      rc=0 6.1s
+                 > OVERALL: PASS
+    PASS         parity_ledger_selftest                 rc=0 1.4s
+                 > VERDICT: PASS
+    PASS         screen_inventory_selftest              rc=0 1.1s
+                 > VERDICT: PASS
+    PASS         measure_screen --selftest              rc=0 7.7s
+                 > VERDICT: PASS (19 cases, positive and negative for every branch)
+    PASS         verify_1to1_selftest                   rc=0 247.5s
+                 > SELFTEST PASS cases=40 cli=20 muts=18 failures=0
+    PASS         cdp_shot_selftest                      rc=0 72.8s
+                 > SELFTEST PASS cases=17 failures=0
+    PASS         web_walk --selftest                    rc=0 0.1s
+                 > SELFTEST cases=6 bad=0
+    PASS         check_dependency_direction             rc=0 0.1s
+                 > dependency scan root=src layers=9 scanned=23 findings=0
+    PASS         check_dependency_direction --selftest  rc=0 0.1s
+                 > SELFTEST cases=10 floor=8 fail=0
+    PASS         check_user_copy_i18n                   rc=0 0.1s
+                 > user-copy scan root=src scanned=23 copy-dir-exempt-seen=true cjk-lines=0 files=0 baseline-entries=0 baseline-covered=0
+    PASS         check_user_copy_i18n --selftest        rc=0 0.1s
+                 > SELFTEST cases=15 floor=10 fail=0
+    PASS         check_device_time                      rc=0 0.1s
+                 > device-time scan root=D:\Project\Android\Treelearn\frontend\src scanned=23 exempt=utils/deviceTime.ts exempt-in-tree=true findings=0
+    PASS         check_device_time --selftest           rc=0 0.1s
+                 > SELFTEST cases=11 floor=8 fail=0
+    PASS         sync_fixtures --check                  rc=0 0.1s
+                 > SYNC CHECK src=13 dst=13 bad=0 redacted=0 dir=frontend\src\platform\fixtures
+    PASS         sync_fixtures --selftest               rc=0 0.1s
+                 > SELFTEST cases=8 bad=0 floor=1
+    PASS         check_offline_bundle                   rc=0 0.1s
+                 > offline scan root=dist assets=2 allowed-non-load-urls=20 violations=0
+    PASS         check_offline_bundle --selftest        rc=0 0.1s
+                 > SELFTEST cases=6 ok=6 fail=0
+    PASS         frontend verify                        rc=0 4.9s
+                 > verify steps=16 ok=16 bad=0 fault=0
+    PASS         line-budget                            rc=0 0.4s
+                 > 业务变更行: 31 (已跟踪 新增+删除 与 未跟踪 全部行；已排除生成/迁移/文档/证据 837 行；扫描业务文件 2 个，其中未跟踪 4 个)
+    PASS         no-kotlin-check                        rc=0 26.3s
+                 > VERDICT: PASS (13 OK line(s))
+    PASS         guard-selftest -Fast                   rc=0 184.7s
+                 > OVERALL = SELFTEST PASS (38 case(s))
+    RUN-ALL-GUARDS pass=31 fail=0 inconclusive=0 fault=0
+    VERDICT: PASS (all 31 selected guard(s) printed a judgement line and returned green)
+    EXITCODE=0
+
+这一跑是在 `execute()` 改成「Popen + 带 deadline 的 communicate + 裸字节解码」之后重跑的：之前那次跑的是改前代码，不能拿旧捕获给新实现背书。`frontend verify` 这次 4.9s（上一次 26.5s）是构建产物已在位的缓存效果，不是少跑了一步：它的判据行 `verify steps=16 ok=16 bad=0 fault=0` 仍是 16 步。`line-budget` 那行的计数是当时的未提交增量，会随提交变化，所以本条留在 precommit 档而不是 core 档。
+
+〔块 05〕真实注册表上的一条真红：片 022 的注入态由汇总器判 FAIL
+
+# command: python -X utf8 artifacts/tmp/b3-rendred.py > artifacts/tmp/run023-rendred.txt 2>&1; 驱动自身 rc=0
+    SAVED AnnotationDaoInstrumentedTest.java=39d31aec49a0 AttachmentStorageInstrumentedTest.java=f1337ae04169
+
+    == 注入片 022 的四处（派生常量 → 裸字面量） ==
+    APPLIED=4 (期望 4)
+
+    == 汇总器在真实注册表上的读数（必须 FAIL，且打印那条守门自己的判据行） ==
+    # command: python -X utf8 .codex/scripts/run_all_guards.py --tier core --only check_androidtest_schema_expectations
+    RUN-ALL-GUARDS tier=core selected=1/31 subset=yes
+
+    FAIL         check_androidtest_schema_expectations  rc=1 0.1s
+
+                 > VERDICT: FAIL (4 problem(s))
+
+    NOTE         filtered-out                           未选中：24 条不在本次判定面内，整表绿不由此声明
+
+    RUN-ALL-GUARDS pass=0 fail=1 inconclusive=0 fault=0
+
+    VERDICT: FAIL (1 guard(s) red or silent)
+
+    EXITCODE=1
+
+    == 复原 ==
+    RESTORED AnnotationDaoInstrumentedTest.java sha=39d31aec49a0
+    RESTORED AttachmentStorageInstrumentedTest.java sha=f1337ae04169
+
+    == 复原后同一命令再次整跑 ==
+    # command: python -X utf8 .codex/scripts/run_all_guards.py --tier core --only check_androidtest_schema_expectations
+    RUN-ALL-GUARDS tier=core selected=1/31 subset=yes
+
+    PASS         check_androidtest_schema_expectations  rc=0 0.1s
+
+                 > VERDICT: PASS
+
+    NOTE         filtered-out                           未选中：24 条不在本次判定面内，整表绿不由此声明
+
+    RUN-ALL-GUARDS pass=1 fail=0 inconclusive=0 fault=0
+
+    VERDICT: PASS (subset only — 1/31 entry(ies) judged, not the whole roster)
+
+    EXITCODE=0
+
+    SUMMARY red_rc=1 green_rc=0 byte-identical-restore=True
+
+块 03 的合成注册表证明「检测分支会响」，这块证明「今天的树里若真有一条守门是红的，整跑面会把它报成 FAIL 而不是绿」，并且汇总器把该守门自己的判据行（`VERDICT: FAIL (4 problem(s))`）原样摘出来。`subset=yes` 与 `VERDICT: PASS (subset only — 1/31 …)` 是刻意的：子集运行永远不许声明整表绿。
+
+〔块 06〕失败方向的一条实测：一条守门都没选中时不能报绿
+
+# command: python -X utf8 .codex/scripts/run_all_guards.py --tier core --only nonexistent-guard; rc=3
+    NO-SELECTION tier=core filters=['nonexistent-guard'] — 一条守门都没选中，本次无从认证
+    VERDICT: INCONCLUSIVE
+    EXITCODE=3
+
+「没有 FAIL」不等于「判过了」。选中零条时打 `NO-SELECTION` + `VERDICT: INCONCLUSIVE` + `EXITCODE=3`，而不是退出码 0。这条与电池里的 `--only 一个字都没选中` 用例同源，区别是这里跑的是真实注册表。
+
+〔块 07〕全局门禁当前读数（本片不动判据，只加一条入口）
+
+    # command: python -X utf8 .codex/scripts/validate_tasks.py
+    rc=0
+       PASS T-2026-10-19-androidtest-derived-schema-version-022.md
+       PASS T-2026-10-19-guard-runner-one-command-roster-023.md
+       PASS T-2026-10-19-harness-guard-judgements-d4-d6-021.md
+       SUMMARY files=18 errors=0 warnings=4
+
+    # command: python -X utf8 .codex/scripts/check_roadmap_and_routing.py
+    rc=0
+       NOTE routing-row increment is printed, not judged — base=bdb0e852fecf window=uncommitted-only added_rows=0 added_missing_triggers=['intent-capturer', 'pm-discovery', 'project-brief', 'ROADMAP'] added_dead_targets=[]
+       OK   .codex/README.md has a 目录结构 section
+       OK   目录结构 section lists the four new entries — missing=[]
+       check_roadmap_and_routing: 0 check(s) failed
+       EXITCODE=0
+
+    # command: python -X utf8 .codex/scripts/dev/checkers_selftest.py
+    rc=0
+       SELFTEST cases=50 ok=50 mismatch=0 harness_errors=0 skipped=0
+       OVERALL: PASS
+       EXITCODE=0
+
+    # command: python -X utf8 .codex/scripts/run_all_guards.py --tier core --only check_roadmap_and_routing
+    rc=0
+       RUN-ALL-GUARDS tier=core selected=1/31 subset=yes
+       PASS         check_roadmap_and_routing            rc=0 0.2s
+                    > check_roadmap_and_routing: 0 check(s) failed
+       NOTE         filtered-out                           未选中：24 条不在本次判定面内，整表绿不由此声明
+       RUN-ALL-GUARDS pass=1 fail=0 inconclusive=0 fault=0
+       VERDICT: PASS (subset only — 1/31 entry(ies) judged, not the whole roster)
+       EXITCODE=0
+
+    `validate_tasks` 的 warnings=4 含本片那一条（估算 332 行 > 软上限 200，见卡片 Facts 的行数口径）；
+    `check_roadmap_and_routing` 的 `added_rows=0` 是 D1 闭合后的设计：增量只打印、不判。
+
+〔块 08〕D9 的两条回读命令（本片闭合，落点见 ROADMAP 的 D9 处置行）
+
+# command: grep -rnI "AGENTS.md 失败案例" .codex/scripts .codex/skills .codex/rules ；grep -n 失败案例 AGENTS.md
+    $ grep -rnI "AGENTS.md 失败案例" .codex/scripts .codex/skills .codex/rules
+    (无输出；grep 退出码=1)
+
+    $ grep -n 失败案例 AGENTS.md
+    (无输出；grep 退出码=1)
+
+两条都无命中（命令自身退出码 1＝grep 没找到）。ROADMAP 各 D 条目正文与历史任务卡里的旧说法不计入——那是当时的写法，回改等于改写历史捕获。D9 原修法要求把落点改指 `.codex/references/regression-cases.md`，实测那段内容不在那里，因此落点改为「正文里现在真的有这段话的地方」，改判理由写在该条处置行。

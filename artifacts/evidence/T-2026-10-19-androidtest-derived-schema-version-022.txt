@@ -1,0 +1,146 @@
+Treelearn 证据文件 —— 片 T-2026-10-19-androidtest-derived-schema-version-022
+任务：`.codex/tasks/T-2026-10-19-androidtest-derived-schema-version-022.md`
+日期：2026-10-19
+范围：ROADMAP 已知欠账 D10 —— 两支 androidTest 用**裸字面量**标注它们模拟的历史 schema 版本，
+      使唯一会静态检查这件事的门禁 `check_androidtest_schema_expectations.py` 在当前树判红。
+运行环境：Windows 10.0.26200 / x64 / Python（`sys.executable`，-X utf8）/ Git Bash /
+      `android/gradlew.bat --offline`。
+本文件所有输出均为**原样粘贴**，没有事后编辑；每块开头写明产生它的命令行。
+读法：块 01 是本片的核心判据（同一条命令在注入态判红、在派生态判绿，且复原按字节相同）；
+      块 02 证明判定集合没被放宽；块 03 证明派生表达式在 androidTest 的编译期真可用；
+      块 04 是 Android 侧静态守门的当前读数；块 05 写明本片**没有**覆盖什么。
+
+〔块 01〕RED/GREEN 驱动：同一份字节上的「改前形态」与「本片实现」
+
+# command: python -X utf8 artifacts/tmp/d10-redgreen.py
+驱动脚本做四件事：按 raw bytes 存两份文件并记 sha256 → 把 4 处派生常量退回裸字面量 →
+跑守门 → 按字节复原再跑一次。**不用 `git checkout`**：本工作树 `core.autocrlf=true`，
+checkout 会重新 smudge 行尾，那样对比的就不是同一份字节。
+
+    SAVED AnnotationDaoInstrumentedTest.java sha=39d31aec49a0
+    SAVED AttachmentStorageInstrumentedTest.java sha=f1337ae04169
+
+    == GREEN（当前工作树：两处都是派生常量）==
+    OK   judged 19 PRAGMA user_version expectation(s) in androidTest
+    OK   schema declares 8 trigger constant(s); suite references 8
+    OK   no hardcoded schema version literal in androidTest
+    OK   no restated trigger/column name literals in androidTest
+    OK   EXPECTED_TRIGGERS is derived from expectedTriggers()
+    OK   the fail-closed case uses the derived unregistered pair
+    VERDICT: PASS
+    EXITCODE=0
+
+    == 注入：把派生常量退回裸字面量 ==
+    APPLIED=4 (期望 4)
+
+    == RED（同一条命令，注入后必须判红）==
+    VERDICT: FAIL (4 problem(s))
+      - android\app\src\androidTest\java\com\treelearn\app\AnnotationDaoInstrumentedTest.java: a PRAGMA user_version expectation does not name a constant (expected expression: "PRAGMA user_version = 4")
+      - android\app\src\androidTest\java\com\treelearn\app\AnnotationDaoInstrumentedTest.java: a PRAGMA user_version expectation does not name a constant (expected expression: 4)
+      - android\app\src\androidTest\java\com\treelearn\app\AttachmentStorageInstrumentedTest.java: a PRAGMA user_version expectation does not name a constant (expected expression: "PRAGMA user_version = 3")
+      - android\app\src\androidTest\java\com\treelearn\app\AttachmentStorageInstrumentedTest.java: a PRAGMA user_version expectation does not name a constant (expected expression: 3)
+    EXITCODE=1
+
+    == 复原并证明字节相同 ==
+    RESTORED AnnotationDaoInstrumentedTest.java sha=39d31aec49a0
+    RESTORED AttachmentStorageInstrumentedTest.java sha=f1337ae04169
+
+    == GREEN（复原后同一条命令再次判绿）==
+    OK   judged 19 PRAGMA user_version expectation(s) in androidTest
+    OK   schema declares 8 trigger constant(s); suite references 8
+    OK   no hardcoded schema version literal in androidTest
+    OK   no restated trigger/column name literals in androidTest
+    OK   EXPECTED_TRIGGERS is derived from expectedTriggers()
+    OK   the fail-closed case uses the derived unregistered pair
+    VERDICT: PASS
+    EXITCODE=0
+
+    BYTE-IDENTICAL-RESTORE=True red_exitcode=1
+驱动自身退出码 0（它断言 `same and red_code==1 and code==0`）。
+判绿/判红用的是**同一条命令** `python -X utf8 .codex/scripts/dev/check_androidtest_schema_expectations.py`，
+且两次判绿都打印 `judged 19 PRAGMA user_version expectation(s)`：判定次数没变，
+说明绿不是「少判了几处」换来的。
+
+〔块 02〕守门自身的正反双向：判定集合一个字节都没放宽
+
+# command: python -X utf8 .codex/scripts/dev/check_androidtest_schema_expectations.py --selftest
+    CASE baseline (unmodified tree) must PASS                 expected=0 actual=0  Ok
+    CASE hardcoded user_version literal must FAIL             expected=1 actual=1  Ok
+    CASE a SECOND hardcoded user_version expectation adjacent to a legitimate one must FAIL expected=1 actual=1  Ok
+    CASE a SECOND derived user_version expectation adjacent to a legitimate one must PASS expected=0 actual=0  Ok
+    CASE an execSQL user_version assignment by literal must FAIL expected=1 actual=1  Ok
+    CASE a user_version expectation outside any judged call must FAIL expected=1 actual=1  Ok
+    CASE a user_version expectation whose assertion arity cannot be judged must FAIL expected=1 actual=1  Ok
+    CASE restated trigger name literal must FAIL              expected=1 actual=1  Ok
+    CASE restated quote column literal must FAIL              expected=1 actual=1  Ok
+    CASE unreferenced schema trigger constant must FAIL       expected=1 actual=1  Ok
+    CASE inline EXPECTED_TRIGGERS literal must FAIL           expected=1 actual=1  Ok
+    CASE hardcoded migration pair must FAIL                   expected=1 actual=1  Ok
+    CASE missing androidTest tree must be INCONCLUSIVE        expected=2 actual=2  Ok
+    OVERALL PASS (13 case(s), 0 broken)
+本片没有改动这支守门（`git status` 里它不在修改清单中）。三种退出码 0/1/2 各被一条用例钉住，
+所以「白名单里只有那三个名字」这件事仍然是可判红的，而不是靠本片自证。
+
+〔块 03〕派生表达式在 androidTest 编译期可用（改前形态与本片实现各编译一次）
+
+# command: python -X utf8 artifacts/tmp/d10-compile.py
+先在注入态（裸字面量）编译，复原后再在派生态编译，使末态就是工作树要提交的那份字节：
+    SAVED AnnotationDaoInstrumentedTest.java=39d31aec49a0 AttachmentStorageInstrumentedTest.java=f1337ae04169
+    == 注入：把派生常量退回裸字面量 ==
+    APPLIED=4 (期望 4)
+    == 改前形态（裸字面量）编译 ==
+    # command: android/gradlew.bat :app:compileDebugAndroidTestJavaWithJavac --offline --console=plain --no-daemon
+    BUILD SUCCESSFUL in 13s
+    EXITCODE=0
+    == 复原并证明字节相同 ==
+    RESTORED AnnotationDaoInstrumentedTest.java sha=39d31aec49a0
+    RESTORED AttachmentStorageInstrumentedTest.java sha=f1337ae04169
+    BYTE-IDENTICAL-RESTORE=True
+    == 本片实现（派生常量）编译，工作树末态 ==
+    # command: android/gradlew.bat :app:compileDebugAndroidTestJavaWithJavac --offline --console=plain --no-daemon
+    BUILD SUCCESSFUL in 12s
+    EXITCODE=0
+    SUMMARY literal_rc=0 derived_rc=0 restored=True
+
+上面那两次只打印了含 BUILD/UP-TO-DATE 的行，因此看不出目标任务到底跑没跑。补一次强制重跑，
+把任务行本身留在证据里：
+
+# command: android/gradlew.bat :app:compileDebugAndroidTestJavaWithJavac --offline --console=plain --rerun-tasks
+    > Task :app:compileDebugAndroidTestJavaWithJavac
+    BUILD SUCCESSFUL in 18s
+    rc=0
+`> Task :app:compileDebugAndroidTestJavaWithJavac` 后面**没有** `UP-TO-DATE`，说明它这次真的执行了；
+`--offline` 下 BUILD SUCCESSFUL，说明 `TreeLearnSchema.FORWARD_MIGRATIONS … .fromVersion()`
+（`Migration` 是公开接口）在 androidTest 源集里可编译，不需要为它放宽任何可见性。
+
+〔块 04〕Android 侧静态守门的当前读数（本片只动 androidTest 源）
+
+# command: powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "[Console]::OutputEncoding=[System.Text.Encoding]::UTF8; & 'android/scripts/no-kotlin-check.ps1'"
+    OK   verifyNoKotlinDex: PASS (3 APK(s) inspected across app/build/outputs/apk, no Kotlin runtime bytecode)
+    OK   no built APK contains Kotlin runtime bytecode (3 APK(s) inspected, 5 judgement line(s))
+
+    == Result ==
+    NOTICE verifyNoKotlinDex: NOTICE (accepted) [app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk] contains Kotlin-compiled annotation classes without runtime linkage ([classes.dex -> Lkotlin/Metadata;]); no Kotlin runtime library is required on device. Kotlin type descriptors in this APK (8): [...]
+    VERDICT: PASS (13 OK line(s))
+退出码 0。androidTest APK 里那批 `Lkotlin/…` 注解类是既有已知形态，守门自己把它标成
+NOTICE(accepted) 并说明「设备上不需要 Kotlin 运行库」，不是本片引入的。
+
+〔块 05〕覆盖边界：本片证明了什么、没证明什么
+
+证明到的：
+  1. 当前树里 `check_androidtest_schema_expectations.py` 判绿（块 01 首末两次 GREEN，rc=0）。
+  2. 那条绿可以被复算成红：同一条命令、4 处退回裸字面量、rc=1、四条问题逐条点名（块 01）。
+  3. 判定集合未放宽：守门 13 条自检用例（含「裸字面量必须判红」「execSQL 赋值用字面量必须判红」）
+     与三种退出码各自仍被钉住（块 02）。
+  4. 派生表达式在 androidTest 编译期可用（块 03，任务行无 UP-TO-DATE 且 BUILD SUCCESSFUL）。
+
+没证明的（写在这里而不是含糊过去）：
+  1. **没有在真机重跑** `AnnotationDaoInstrumentedTest` 与 `AttachmentStorageInstrumentedTest`。
+     整包 `connectedDebugAndroidTest` 会卸载应用并清掉学习者本机数据与 API Key，属不可回退的
+     用户代价，不在无人值守范围内；单独跑这两支同样需要设备在场。因此「设备上 onUpgrade
+     仍按预期迁移」这件事的证据仍停在 T-2026-09-23-083 那一次真机运行，本片只改了测试侧的
+     期望表达式来源，没改任何生产 SQL、helper 或数据库版本常量。
+  2. 没有覆盖 `D7` 里那 11 例既有仪器红——本片不碰它们的病因，只把「静态门禁本身是红的」
+     这条去掉。D7 的闭合仍归 C4/D7 自己的条目。
+  3. 没有把「白名单里的名字必须在 androidTest 里真有派生 initializer」做成新判据（记在卡片的
+     Deferred；那是**新增判据**，不属于消红线）。

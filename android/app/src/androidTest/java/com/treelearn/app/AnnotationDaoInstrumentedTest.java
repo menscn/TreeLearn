@@ -31,7 +31,8 @@ import java.util.List;
  *
  * <p>Two install paths, one schema. The fresh-install path runs the production {@code onCreate}
  * through the real helper; the upgrade path hand-builds a genuine V4 database — the current
- * production DDL minus exactly the objects V5 introduces — stamps it {@code user_version = 4},
+ * production DDL minus exactly the objects V5 introduces — stamps it {@code user_version =
+ * PREVIOUS_SCHEMA_VERSION},
  * and lets the production helper run the real {@code onUpgrade} over it. Neither path is replayed
  * by hand, because a hand replay proves the SQL text is well-formed, not that the helper runs it.
  *
@@ -60,6 +61,15 @@ public final class AnnotationDaoInstrumentedTest {
 
     private static final String DIGEST_A = "digest-alpha";
     private static final String DIGEST_B = "digest-beta";
+
+    /**
+     * The version the upgrade fixture is stamped with: the {@code fromVersion} of the last
+     * registered forward migration, derived from the schema instead of retyped. A literal here
+     * would go stale on the next version bump and quietly turn this upgrade test into a
+     * fresh-install test that still prints PASS.
+     */
+    private static final int PREVIOUS_SCHEMA_VERSION = TreeLearnSchema.FORWARD_MIGRATIONS
+            .get(TreeLearnSchema.FORWARD_MIGRATIONS.size() - 1).fromVersion();
 
     private Context context;
     private TreeLearnDatabaseHelper helper;
@@ -123,8 +133,8 @@ public final class AnnotationDaoInstrumentedTest {
             seedBranch(v4, "b-v4-root", "t-v4", null);
             seedMessage(v4, uuid("m-v4"), "b-v4-root", 0, "USER");
             seedRevision(v4, "r-v4", uuid("m-v4"));
-            v4.execSQL("PRAGMA user_version = 4");
-            assertEquals(4, rawInt(v4, "PRAGMA user_version"));
+            v4.execSQL("PRAGMA user_version = " + PREVIOUS_SCHEMA_VERSION);
+            assertEquals(PREVIOUS_SCHEMA_VERSION, rawInt(v4, "PRAGMA user_version"));
             assertFalse("a V4 database must not yet have the annotation table",
                     actualTables(v4).contains(TreeLearnSchema.Annotations.TABLE));
 

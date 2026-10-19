@@ -7,7 +7,9 @@
 1. 先读根 `AGENTS.md`，按路径和行为读取命中的规则。
 2. 小改动直接执行；大型或跨栈需求在用户选择 Harness 后进入 `.codex/HARNESS.md`。
 3. Harness 任务写入 `.codex/tasks/`，由对应 owner 实现，独立 verifier 只读验收。
-4. 任务、规则和脚本只记录可复核的命令、结果和缺口；不自动提交或推送。
+4. 提交前整跑只读守门并留证据：`python -X utf8 .codex/scripts/run_all_guards.py --tier core`（每片都要跑），
+   提交动作前再跑 `--tier precommit`；判定规则与「怎么加一条守门」见 `.codex/skills/guard-runner/SKILL.md`。
+5. 任务、规则和脚本只记录可复核的命令、结果和缺口；不自动提交或推送。
 
 ## 目录结构
 
@@ -26,4 +28,4 @@
 └── tests/                 # 流程工具自测
 ```
 
-权威边界：产品事实在 `Docs/**`，意图在 `Docs/intent/**`，任务状态在 `.codex/tasks/**`，工程约束在 `.codex/rules/**`。源项目专属 HClaw、Core-Python、CSPfix 和 APK 中转流程不属于 Treelearn 当前运行面。
+权威边界：产品事实在 `Docs/**`，意图在 `Docs/intent/**`，代码复核报告在 `Docs/reviews/**`，任务状态在 `.codex/tasks/**`，工程约束在 `.codex/rules/**`。源项目专属 HClaw、Core-Python、CSPfix 和 APK 中转流程不属于 Treelearn 当前运行面。

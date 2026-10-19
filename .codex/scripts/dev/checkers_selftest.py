@@ -41,9 +41,14 @@ TEMPLATE = ".codex/templates/INTENT.md"
 SPEC_AGENT = ".codex/agents/spec-author.md"
 SPEC_TEMPLATE = ".codex/templates/SPEC.md"
 CHECK_SPEC = ".codex/scripts/check_spec_author_agent.py"
+CODE_REVIEWER_MD = ".codex/agents/code-reviewer.md"
+CODE_REVIEWER_TOML = ".codex/agents/code-reviewer.toml"
+REVIEW_TEMPLATE = "Docs/REVIEW.md"
+REVIEW_ARCHIVE_DIR = "Docs/reviews"
+CHECK_REVIEW = ".codex/scripts/check_code_reviewer_agent.py"
 
 # 先跑一遍「未注入」的基线：守门对健康的副本必须转绿，否则下面的反向用例没有意义。
-BASELINES = (CHECK_INTENT, CHECK_ROADMAP, CHECK_TEMPLATE, CHECK_SPEC)
+BASELINES = (CHECK_INTENT, CHECK_ROADMAP, CHECK_TEMPLATE, CHECK_SPEC, CHECK_REVIEW)
 
 # 需要「把目标文件当参数传给守门」的用例（回放校验器读的是参数指定的实例文件）。
 ARGS_BY_CASE = {
@@ -172,7 +177,7 @@ CASES = [
      "Phase B（下一批） every 执行提示词 is >= 40 chars", "replace_line"),
     ("roadmap:prompt-dead-path", CHECK_ROADMAP, ROADMAP,
      ".codex/HARNESS.md", ".codex/HARNES.md",
-     "Phase B（下一批） every path inside 执行提示词 exists", "replace"),
+     "Phase B（下一批） every path inside 执行提示词 exists", "replace_all"),
     ("roadmap:vague-source", CHECK_ROADMAP, ROADMAP,
      "- **开源来源**：`https://github.com/obra/superpowers` → `skills/requesting-code-review",
      "- **开源来源**：网上找的，细节回头再补。",
@@ -271,6 +276,54 @@ CASES = [
     ("spec:bare-px-injected", CHECK_SPEC, SPEC_TEMPLATE,
      None, "\n按 14px 排\n",
      "no bare hex or ad-hoc px values", "append"),
+    # B1（ROADMAP）：code-reviewer 角色与 Docs/REVIEW.md 骨架成对存在。每条判据各配一条
+    # 注入用例——这套判据里凡是「两边现场派生再比对」的，都必须在单边被改动时转红。
+    ("review:agent-file-missing", CHECK_REVIEW, CODE_REVIEWER_MD, None, None,
+     "the five inputs exist", "delete"),
+    ("review:template-file-missing", CHECK_REVIEW, REVIEW_TEMPLATE, None, None,
+     "the five inputs exist", "delete"),
+    ("review:verifier-section-uncovered", CHECK_REVIEW, CODE_REVIEWER_MD,
+     "<rules>", "<scope>",
+     "agent section names cover verifier.md", "replace"),
+    # 「测试充分性」在角色正文里出现两处（职责清单与输出格式的小节清单），所以这条必须
+    # 全替——只替第一处时第二处仍让子串判定放行，那正是要防的「一处措辞撑起一条判据」。
+    ("review:dimension-dropped", CHECK_REVIEW, CODE_REVIEWER_MD,
+     "测试充分性", "测试覆盖度",
+     "agent names the four review dimensions", "replace_all"),
+    ("review:archive-path-missing", CHECK_REVIEW, REVIEW_TEMPLATE,
+     "Docs/reviews/", "Docs/notes/",
+     "review template declares an archive path", "replace_all"),
+    # 声明了落点却没这个目录 = 死指针：角色第一次写报告时才发现目录不在场，那已经是运行时事故。
+    ("review:archive-dir-missing", CHECK_REVIEW, REVIEW_ARCHIVE_DIR, None, None,
+     "the declared archive directory exists on disk", "delete_dir"),
+    ("review:severity-merged", CHECK_REVIEW, REVIEW_TEMPLATE,
+     "## 非阻塞建议", "## 建议",
+     "report separates blocking from non-blocking", "replace"),
+    ("review:location-dropped", CHECK_REVIEW, REVIEW_TEMPLATE,
+     "文件:行", "某处",
+     "every finding must carry a file:line location", "replace_all"),
+    # 两条裸下限各自承重：抽干骨架字段、抽干任务卡 Verification report 字段，
+    # 都会让「两边不重名」这条自动成立——只有下限能挡住这种协同缩表。
+    ("review:field-list-drained", CHECK_REVIEW, REVIEW_TEMPLATE,
+     "- **", None,
+     "review template declares its own field list", "drop_matching"),
+    ("review:task-fields-drained", CHECK_REVIEW, ".codex/tasks/_TEMPLATE.md",
+     "- Gaps:\n- Risks:\n", "",
+     "task template still defines the Verification report fields", "replace"),
+    ("review:field-collision-injected", CHECK_REVIEW, REVIEW_TEMPLATE,
+     None, "\n- **Gaps**：\n",
+     "report fields do not redefine task-card verification fields", "append"),
+    ("review:placeholder-injected", CHECK_REVIEW, REVIEW_TEMPLATE,
+     None, "\nTODO\n",
+     "role text and report skeleton carry no placeholder tokens", "append"),
+    # .md 与 .toml 是同一份角色正文的两份拷贝：只改一处必须被判红，否则「加载的角色」
+    # 与「读的角色说明」各说各话而无人报警。
+    ("review:toml-md-drift", CHECK_REVIEW, CODE_REVIEWER_MD,
+     None, "\n本段只写在 markdown 里，用来证明打包正文不是逐字拷贝。\n",
+     "agent .toml body equals the agent markdown verbatim", "append"),
+    ("review:toml-unparsable", CHECK_REVIEW, CODE_REVIEWER_TOML,
+     None, "\nbroken = [\n",
+     "agent .toml parses as a Codex agent file", "append"),
 ]
 
 
@@ -333,9 +386,35 @@ def run_checker(root, checker, extra=()):
                           encoding="utf-8", errors="replace")
 
 
+def run_dir_case(root, checker, path, target, label):
+    """目录型注入：删掉整个目录，断言「该目录必须在场」这条判据转红，随后按现文还原。"""
+    if not os.path.isdir(path):
+        return "HARNESS", "target directory does not exist: " + target
+    shutil.rmtree(path)
+    try:
+        proc = run_checker(root, checker)
+        out = proc.stdout or ""
+        fired = [l for l in out.splitlines() if l.startswith("FAIL ") and label in l]
+        if not fired:
+            seen = [l for l in out.splitlines() if l.startswith("FAIL ")]
+            return "MISMATCH", "expected FAIL label, rc={0}, seen={1}".format(
+                proc.returncode, seen[:3])
+        if proc.returncode != 1:
+            return "MISMATCH", "FAIL line printed but exit code is {0}".format(proc.returncode)
+        return "OK", "rc=1, " + fired[0].strip()
+    finally:
+        src = os.path.join(REPO_ROOT, target.replace("/", os.sep))
+        if os.path.isdir(src):
+            shutil.copytree(src, path, ignore=shutil.ignore_patterns("__pycache__"))
+
+
 def run_case(root, case):
     name, checker, target, old, new, label, op = case
     path = os.path.join(root, target.replace("/", os.sep))
+    # 目录型目标没有「原文」可读（read_text 在目录上会抛 IsADirectoryError，那会被记成
+    # 仪器故障），所以它走自己的还原路径：按 REPO_ROOT 现文把目录与其内容摆回去。
+    if op == "delete_dir":
+        return run_dir_case(root, checker, path, target, label)
     original = read_text(path) if os.path.exists(path) else None
     try:
         if op == "none":
@@ -438,7 +517,8 @@ def main():
             tag = {CHECK_INTENT: "check_intent_capturer_agent",
                    CHECK_ROADMAP: "check_roadmap_and_routing",
                    CHECK_TEMPLATE: "check_intent_template",
-                   CHECK_SPEC: "check_spec_author_agent"}[checker]
+                   CHECK_SPEC: "check_spec_author_agent",
+                   CHECK_REVIEW: "check_code_reviewer_agent"}[checker]
             if proc.returncode != 0:
                 print("BASELINE FAIL {0} rc={1}".format(tag, proc.returncode))
                 print((proc.stdout or "").strip()[-600:])

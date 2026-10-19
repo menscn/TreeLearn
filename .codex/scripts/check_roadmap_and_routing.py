@@ -8,7 +8,7 @@
 
 AGENTS.md 的路由判定按**当前文件全文**（行数下限 + 四个触发词覆盖 + 链接目标存在），
 不按 git 增量；「本次改动新增了几行路由」只在增量窗口内成立，因此降级为打印，
-并写明基线与窗口。理由见 AGENTS.md 失败案例库 [2026-10-16] [guard] 与 ROADMAP 的 D1。
+并写明基线与窗口。这条改判的来龙去脉记在 ROADMAP 的 D1（含 2026-10-16 的 guard 案例）。
 """
 
 import os
@@ -40,8 +40,8 @@ README_ENTRIES = [".codex/context/", ".codex/templates/", ".codex/ROADMAP.md", "
 ROUTE_KEYWORDS = ["intent-capturer", "pm-discovery", "project-brief", "ROADMAP"]
 
 # 当前态下限，写在与那张表无关的裸字面量上（实测 20 行，留纯追加的余量）。
-# 用「发现行数」推导自己的下限等于没有下限——见 AGENTS.md 失败案例库
-# 「用被检清单算自己的下限」；把下限改成 len(rows) 之后，删空整张表仍是绿。
+# 用「发现行数」推导自己的下限等于没有下限（ROADMAP D1 的同一族成因）：
+# 把下限改成 len(rows) 之后，删空整张表仍是绿。
 MIN_ROUTE_ROWS = 12
 
 ENTRY_HEAD_RE = re.compile(r"^###\s+(\S+)")

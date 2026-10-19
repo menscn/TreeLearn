@@ -55,6 +55,16 @@ public final class AttachmentStorageInstrumentedTest {
     private static final byte[] FILE_BYTES =
             "SYNTHETIC-ATTACHMENT-CONTENT-FOR-T-096".getBytes(StandardCharsets.UTF_8);
 
+    /**
+     * The version the V3 -> V4 upgrade fixture is stamped with: the {@code fromVersion} of the
+     * migration exercised by {@code versionThreeCreateStatements()}, which is the second-to-last
+     * registered forward migration. Derived from the schema, not retyped, so the next version bump
+     * cannot leave this fixture stamped for a version whose DDL the test no longer builds — that
+     * mismatch fails loudly instead of quietly judging a different upgrade.
+     */
+    private static final int PREVIOUS_SCHEMA_VERSION = TreeLearnSchema.FORWARD_MIGRATIONS
+            .get(TreeLearnSchema.FORWARD_MIGRATIONS.size() - 2).fromVersion();
+
     private final Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
     private TreeLearnDatabaseHelper helper;
@@ -206,8 +216,9 @@ public final class AttachmentStorageInstrumentedTest {
             // recreate the deleted database at the current version, and the fixture would prove
             // nothing about the upgrade.
             seedTopicWithRootAndMessage(v3);
-            v3.execSQL("PRAGMA user_version = 3");
-            assertEquals("the fixture must look like V3", 3, rawInt(v3, "PRAGMA user_version"));
+            v3.execSQL("PRAGMA user_version = " + PREVIOUS_SCHEMA_VERSION);
+            assertEquals("the fixture must look like V3", PREVIOUS_SCHEMA_VERSION,
+                    rawInt(v3, "PRAGMA user_version"));
             assertTrue("a V3 database must not yet have the attachments table",
                     !tables(v3).contains(TreeLearnSchema.Attachments.TABLE));
         } finally {

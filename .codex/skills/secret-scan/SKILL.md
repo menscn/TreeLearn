@@ -67,7 +67,7 @@ gitleaks detect --redact --verbose
 修复指令：
   1. 把真实值移到 .env（已在 .gitignore），代码里改读 process.env / pydantic-settings / @Value。
   2. 如已 commit 但未 push：git reset HEAD~1，重新 commit 不带敏感内容。
-  3. 如已 push：立即吊销该凭据 + 用 git filter-repo / BFG 清 history（参考 .cursor/AGENTS.md 失败案例库）。
+  3. 如已 push：立即吊销该凭据 + 用 git filter-repo / BFG 清 history（顺序不可颠倒：先吊销，再改写历史）。
   4. 重跑 secret-scan 直到 PASS 才能 commit。
 ```
 

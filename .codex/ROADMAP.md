@@ -43,11 +43,13 @@
 
 - **ID**：B1
 - **目标**：把「写完自检」和「独立复核」分开。verifier 管任务验收，code-reviewer 管代码本身——可读性、边界、错误处理、测试充分性，并产出一份可以归档的复核报告。
-- **范围（可写路径）**：`.codex/agents/code-reviewer.md`、`Docs/REVIEW.md`、`.codex/scripts/check_code_reviewer_agent.py`
+- **范围（可写路径）**：`.codex/agents/code-reviewer.md`、`.codex/agents/code-reviewer.toml`、`Docs/REVIEW.md`、`Docs/reviews/`、`.codex/scripts/check_code_reviewer_agent.py`、`.codex/scripts/dev/checkers_selftest.py`、`.codex/scripts/run_all_guards.py`、`.codex/HARNESS.md`、`.codex/README.md`
 - **依赖**：`.codex/agents/verifier.md`、`.codex/rules/harness-verification.md`
 - **owner_lane**：harness
-- **验收方式**：`python .codex/scripts/check_code_reviewer_agent.py` 退出码 0；脚本断言小节名覆盖 `.codex/agents/verifier.md`、复核报告含模板与归档路径、且报告字段不与任务文件的 Verification report 重复定义。
+- **验收方式**：`python -X utf8 .codex/scripts/check_code_reviewer_agent.py` 退出码 0；脚本断言角色小节名覆盖 `.codex/agents/verifier.md` 现文并点名四个复核维度、报告骨架有归档位置且该目录在场、区分阻塞与非阻塞、每条 finding 要 `文件:行`、报告字段不与任务文件的 Verification report 重复定义、无占位符、`.toml` 正文与 `.md` 逐字相同。判据条数与注入用例条数以 `python -X utf8 .codex/scripts/dev/checkers_selftest.py` 的现场读数为准，本条不复述。
 - **开源来源**：`https://github.com/obra/superpowers` → `skills/requesting-code-review/SKILL.md`、`skills/receiving-code-review/SKILL.md`（2026-09-21 实测 HTTP 200）
+- **交付任务**：`T-2026-10-19-024`（`.codex/agents/code-reviewer.md` + 同名 `.toml` 运行时包装、`Docs/REVIEW.md` 骨架、`Docs/reviews/` 归档目录、`check_code_reviewer_agent.py` 与其 `review:*` 注入用例，并登记进 `run_all_guards.py` 的 core 档；status=verifying）。执行提示词里「检查无占位符」照做了，但**没有**照它只做三件事：小节覆盖改成对 verifier.md 现文现场派生（抄来的清单会随 verifier 演化而失真），并补了归档目录在场、阻塞/非阻塞二分、每条 finding 给 `文件:行`、`.toml` 与 `.md` 逐字相同四条——都是本片交付后真实会坏的形态。
+- **实现要点（交付后回写，不是验收方式的替代）**：两个角色的**字段名不能重叠**，所以「报告骨架字段」与「任务卡 Verification report 字段」都从各自文件现场派生再比对，两侧各配一条裸下限（`MIN_REVIEW_FIELDS` / `MIN_TASK_FIELDS`）：只有下限能挡住「两边一起删到只剩一个字段，于是重叠判定自动成立」这种协同缩表。`.md` 是权威正文、`.toml` 是 Codex 运行时包装，本仓库没有生成器，所以这条重复由判据钉住（逐字相同）而不是由脚本消除。**注入用例必须覆盖被改词的全部出现处**：把「测试充分性」只替换第一处时判据仍放行，因为角色正文的输出格式小节里还有第二处——该用例因此改成全替。同一类漂移在交付后回写时又发生了一次：B1 的 `范围` 行新增了 `.codex/HARNESS.md`，抢走了 `roadmap:prompt-dead-path` 用例里"只替换第一处"的目标（`范围` 不是被判字段，于是注入变成空操作、判据 rc=0），改成全替后注入落回 `执行提示词`，用例恢复可复算。**判据字段之外的文本也会挪动注入的落点**，所以这两条都归到同一条规矩：用全替，或把 old 串锚到被判字段上。
 - **执行提示词**：先读 `.codex/agents/verifier.md`、`.codex/rules/harness-verification.md`、`.codex/HARNESS.md`、`.codex/ROADMAP.md` 四份，弄清现有验收角色的小节结构与只读约束；再读上游 `https://github.com/obra/superpowers` 的 requesting-code-review 与 receiving-code-review 两份 SKILL.md，取其「复核要具体到行、要区分阻塞与非阻塞」的做法并二次优化。在 `.codex/agents/` 下新增 code-reviewer.md，在仓库根 Docs 下新增 REVIEW.md 报告模板，再写一个纯标准库校验脚本检查小节覆盖、报告字段完整与无占位符；跑通后把脚本输出贴进任务证据。
 
 ### B2 eval-keeper 角色与评测资产
@@ -70,6 +72,8 @@
 - **owner_lane**：harness
 - **验收方式**：`python .codex/scripts/run_all_guards.py` 退出码 0，且逐条打印每个守门的名字和结论；任何守门没有打印判据行即判 FAIL，不允许只凭退出码 0 报通过。
 - **开源来源**：`https://github.com/obra/superpowers` → `skills/verification-before-completion/SKILL.md`、`skills/systematic-debugging/SKILL.md`（2026-09-21 实测 HTTP 200）
+- **交付任务**：`T-2026-10-19-023`（`run_all_guards.py` 汇总器 + `check_run_all_guards.py` 26 例注入电池 + `.codex/skills/guard-runner/SKILL.md`，status=verifying）。与 B0 同样只加这行、条目本身留在 Phase B，因为**注册表会过期**：条目里的表是 2026-09-21 的设想，实际那张表的条数随每一片交付变化，读数一律用 `python -X utf8 .codex/scripts/run_all_guards.py --list` 现场取。同片闭合 D9。
+- **实现要点（交付后回写，不是验收方式的替代）**：判定用**两个条件**——退出码在该条的判绿集合里 **且** 输出里有它自己的判据行；只满足退出码的那条守门算「哑」并判 FAIL，两个都不满足而「根本没跑起来」（解释器缺失、脚本不在场、输出非 UTF-8）算 FAULT 并把总退出码压到 3，因为仪器坏了比判红更该被看见。子进程一律 Popen + 带 deadline 的 `communicate`，且先收裸字节再自己解码：Windows 上 `subprocess.run` 超时后会无限等管道（守门的孙进程握着管道时汇总器跟着挂死），而其读取线程会把解码异常吞成「没有输出」，于是「乱码」被读成「这条没判据」——两个病因不能混在一条 FAIL 里。
 - **执行提示词**：读 `.codex/HARNESS.md`、`.codex/rules/harness-verification.md`、`.codex/scripts/validate_tasks.py`、`.codex/README.md`，把仓库里现存的全部守门脚本列成一张表。按上游 `https://github.com/obra/superpowers` 的 verification-before-completion 里「先有证据再宣布完成」的次序，在 `.codex/scripts/` 下新增 run_all_guards.py 与配套校验脚本，硬要求是「判据必须有证据存在性断言」：子进程没打印判据行就算失败，并且给每条检测分支补一条注入违规必须判 FAIL 的自检用例；跑通后把输出贴进任务证据。
 
 ### B4 codebase-researcher 角色
@@ -88,7 +92,7 @@
 - **ID**：B5
 - **目标**：在行为不变的前提下定期收敛重复实现与多余抽象。单人项目最容易长出「第二份实现」，这条角色是专门用来消掉它的。
 - **范围（可写路径）**：`.codex/agents/code-simplifier.md`、`.codex/scripts/check_code_simplifier_agent.py`
-- **依赖**：`.codex/agents/code-reviewer.md`（B1 未完成时本条的验收标准无处安放）、`.codex/rules/regression.md`
+- **依赖**：`.codex/agents/code-reviewer.md`（B1 已于 `T-2026-10-19-024` 交付：本条角色的只读契约与报告字段边界都沿它对齐，简化角色不得再另立一套验收措辞）、`.codex/rules/regression.md`
 - **owner_lane**：harness
 - **验收方式**：`python .codex/scripts/check_code_simplifier_agent.py` 退出码 0；脚本断言角色强制「改前先跑测试、改后同一套测试必须全绿」，且禁止把无生产者代码写成注释保留。
 - **开源来源**：`https://github.com/obra/superpowers` → `skills/test-driven-development/SKILL.md`、`skills/finishing-a-development-branch/SKILL.md`（2026-09-21 实测 HTTP 200）
@@ -162,6 +166,10 @@ Phase C 的条目都不是「现在缺人写」，而是**缺前置事实**：�
 D5 = 互斥的两边同时消失），都是「复核后如实回写」而不是「本片修好的」，别把这三条算进 021 的交付。
 同日登记 D9（过期指针）。标题里的「门禁红项」从此应读作「盘点台账」：**每条的红绿只由它自己的回读命令决定**，
 今天重跑本节的每一条命令，得到的可能全是绿——那不是本节过期，而是它按设计工作。〕
+
+〔**2026-10-19 第二批**：D9 随片 023 闭合（落点改为「正文里真的有那段话的地方」，见该条处置）；
+同日登记并闭合 **D10**（androidTest 用裸字面量标注历史 schema 版本，使静态门禁在当前树恒红），
+实施片 `T-2026-10-19-androidtest-derived-schema-version-022.md`。D1–D8 未因这两片变动判据。〕
 
 ### D1 `check_roadmap_and_routing` 的一次性迁移断言永久为红（2026-10-18 已按修法 ① 闭合）
 
@@ -332,7 +340,7 @@ D5 = 互斥的两边同时消失），都是「复核后如实回写」而不是
   **未闭合的一半**：在线真实发送一次的 SENDING→REASONING→ANSWERING 观感仍未实测（会消耗学习者 API 额度并写入真实
   主题数据，需授权后单独做），所以本条闭合的是「门禁可判」，不是「生成流已验证」。
 
-### D9 「AGENTS.md 失败案例库」这个指针指向一个当前树里不存在的章节（2026-10-19 登记）
+### D9 「AGENTS.md 失败案例库」这个指针指向一个当前树里不存在的章节（2026-10-19 已按「改指活正文」闭合，见处置）
 
 - 现象：`.codex/` 里有若干处正文把某条理由写成「见 AGENTS.md 失败案例库 …」，而 AGENTS.md 现在只在一处提到
   历史案例，且明确把归属地指给 `.codex/references/`（`AGENTS.md:65`：「`.codex/references/` 只保存迁移映射和历史案例」）。
@@ -350,3 +358,38 @@ D5 = 互斥的两边同时消失），都是「复核后如实回写」而不是
   （脚本注释与技能正文里的「理由见 …」），命中清零即闭合；ROADMAP 各 D 条目正文与任务卡里的旧说法不计入，
   那是当时的写法。同时 `grep -n 失败案例 AGENTS.md` 应保持无命中（见 D5）。命中条数现场读，本条不抄值。
 - 归属：登记于 2026-10-19（片 `T-2026-10-19-harness-guard-judgements-d4-d6-021.md` 的盘点副产品），不在该片实施。
+- 处置（2026-10-19 闭合，随片 `T-2026-10-19-guard-runner-one-command-roster-023.md` 提交）：活指针四处改完，但**落点不是原修法写的
+  `.codex/references/regression-cases.md`**——逐条回读后确认那几处所指的成因并不在那份历史案例里，把它们改指过去等于
+  用一个新的空指针替换旧的空指针。实际落点改成「正文里现在真的有这段话的地方」：`check_roadmap_and_routing.py` 的改判说明
+  指回 ROADMAP 的 D1 本体，`harness_check_lib.py` 的自检纪律写成「权威正文就是本文件，rules 与 references 不复述它」，
+  `secret-scan/SKILL.md` 把「见失败案例库」整句删掉、只留下顺序要求本身（先吊销再改写历史）。判据逻辑一个字节没动。
+- 回读结果：上面两条回读命令当前均为 0 命中（`.codex/scripts`、`.codex/skills`、`.codex/rules` 三处活指针清零，
+  `AGENTS.md` 里 `失败案例` 也无命中，与 D5 一致）。命中条数仍按回读命令现场读，本条不代它保持有效。
+
+### D10 androidTest 用裸字面量标注历史 schema 版本，使静态门禁在当前树恒红（2026-10-19 登记并闭合）
+
+- 现象：`python -X utf8 .codex/scripts/dev/check_androidtest_schema_expectations.py` 在 2026-10-19 的树上直接
+  `VERDICT: FAIL`，四条问题分别指向 `AnnotationDaoInstrumentedTest`（写 `4`）与 `AttachmentStorageInstrumentedTest`
+  （写 `3`）各自的 `PRAGMA user_version` 建库语句与回读断言。
+- 根因：V5 落地时新增这两支升级测试，把它们各自模拟的历史版本当**常量**抄进了测试，而不是从
+  `TreeLearnSchema.FORWARD_MIGRATIONS` 派生。这与 T-2026-09-23-037 那次病因同形：`DATABASE_VERSION` 每往上跳一次，
+  这类 fixture 就安静地变成「名字说升级、实际按当前版本建库」的测试，**而它照样打印通过**。
+  同一棵树里 `ProviderModelDaoInstrumentedTest` 已用派生常量避开同一坑，所以修法不需要新发明。
+- 后果（不修的话）：门禁本身是红的，跨不过去只会被绕开——要么有人给它加白名单名字（每加一个名字就少一个失败点，
+  正是 D4 那族「仪器给自己开后门」），要么有人把它当噪音略过，而下一次 schema 升版真的不会有人报。
+- 修法（不需要裁定，属既有先例的复用）：两处改用各类内私有的 `PREVIOUS_SCHEMA_VERSION`，表达式由
+  `FORWARD_MIGRATIONS` 派生（AnnotationDao 取最后一条的 `fromVersion()`，AttachmentStorage 取倒数第二条的，
+  即它所演示那一步的起点），复用守门白名单 `ALLOWED_USER_VERSION_EXPRESSIONS` 里已有的名字。
+  代价是同名常量在不同类里各指一个版本，换来的是**判定集合一个字节都没放宽**。
+- 处置（2026-10-19，片 `T-2026-10-19-androidtest-derived-schema-version-022.md`）：两处按上面落地，类级 javadoc 里
+  「stamps it user_version = 4」同步改述为引用该常量；不动守门、不动白名单、不动 `TreeLearnSchema` 与 helper。
+- 回读：`python -X utf8 .codex/scripts/dev/check_androidtest_schema_expectations.py`（判绿时仍打印
+  `judged 19 PRAGMA user_version expectation(s)`，次数与注入态相同 → 绿不是少判换来的）、
+  其 `--selftest`（13 例正反双向，含「裸字面量必须判红」两条），以及
+  `android/gradlew.bat :app:compileDebugAndroidTestJavaWithJavac --offline`（证派生式在 androidTest 编译期可用）。
+  证据 `artifacts/evidence/T-2026-10-19-androidtest-derived-schema-version-022.txt` 块 01–05。
+- 未闭合的一半（写明，不含糊过去）：**没有在真机重跑这两支 instrumented 测试**。整包 `connectedDebugAndroidTest`
+  会卸载应用并清掉学习者本机数据与 API Key，属不可回退的用户代价，须由用户在场时单独跑那两支。
+  本片证明的是「表达式可用且由 schema 派生」，不证明「设备上的 onUpgrade 仍成立」——后者沿用 T-2026-09-23-083 的真机运行。
+- 归属：登记并闭合于 2026-10-19（片 022），发现路径是 B3 把这条守门收进 `run_all_guards.py` core 档时的整跑读数——
+  在此之前它的红只出现在单跑里，没有汇总面会把它和其他 30 条一起摆出来。

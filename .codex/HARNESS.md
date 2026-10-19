@@ -9,6 +9,7 @@
 3. 派工前读取 [负责人及专项 guard 路由](rules/contracts.md#route-table)，只加载实际使用的 agent；按根入口叠加命中的规则。
 4. 实现保持在分配的 lane 内；主会话不越界修改其它 owner 的业务路径。执行证据写入当前 Task。
 5. 验收前读取 [验收规则](rules/harness-verification.md)，由独立只读 verifier 复核任务、路径、契约、测试和证据。
+6. 代码本身的质量由 `code-reviewer` 只读复核，维度、产物格式与归档位置以 `.codex/agents/code-reviewer.md` 和 `Docs/REVIEW.md` 为准，报告落在 `Docs/reviews/**`。两个结论不互相冒充：该角色不宣布任务验收，verifier 不替它评代码质量。
 
 ## Treelearn lanes
 

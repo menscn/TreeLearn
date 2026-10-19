@@ -1,0 +1,275 @@
+Command: python -X utf8 artifacts/tmp/gen-024-evidence.py
+Generated: 2026-10-19 10:02:10
+Slice: T-2026-10-19-024（ROADMAP B1：code-reviewer 角色 + Docs/REVIEW.md 骨架 + 成对守门）
+Environment: Windows 26200 / nt / Python 3.13.12 / D:\Environment\Python\python.exe
+纪律: 每条读数都取自一次真实执行；捕获文件留在 gitignore 的 artifacts/tmp/；
+      所有命令均带 -X utf8，否则 Windows 控制台按系统代码页输出，中文判据行在证据里不可读。
+
+===============================================================================================================================================================================
+块 01 — 守门本体：python -X utf8 .codex/scripts/check_code_reviewer_agent.py（14 条判据，逐字）
+===============================================================================================================================================================================
+$ python -X utf8 .codex/scripts/check_code_reviewer_agent.py
+OK   the five inputs exist — missing=[]
+OK   verifier.md exposes a usable set of section names — measured=5 floor=4 names=['identity', 'source', 'contract', 'rules', '职责清单']
+OK   agent section names cover verifier.md — verifier_sections=5 missing=[]
+OK   agent names the four review dimensions — missing=[]
+OK   review template declares an archive path — dir=True pattern=True section=True
+OK   the declared archive directory exists on disk — dir=Docs\reviews
+OK   report separates blocking from non-blocking — missing=[]
+OK   every finding must carry a file:line location — hits=3
+OK   review template declares its own field list — measured=12 floor=6
+OK   task template still defines the Verification report fields — measured=5 floor=4 names=['Verdict', 'Evidence', 'Changed/deleted assertion rationale and equivalent behavio…
+OK   report fields do not redefine task-card verification fields — review_fields=12 task_fields=5 overlap=[]
+OK   role text and report skeleton carry no placeholder tokens — hits=[]
+OK   agent .toml declares name and description — name=True description=True
+OK   agent .toml body equals the agent markdown verbatim — toml_chars=3957 md_chars=3957 equal=True
+
+check_code_reviewer_agent: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+
+===============================================================================================================================================================================
+块 02 — 开发中途的真实红灯：注入只替换第一处时判据仍放行（这条用例因此改成 replace_all）
+===============================================================================================================================================================================
+Mode: full (62 injected-violation cases + 5 baselines)
+CASE 54 OK        review:dimension-dropped - rc=1, FAIL agent names the four review dimensions — missing=['测试充分性']
+SELFTEST cases=62 ok=62 mismatch=0 harness_errors=0 skipped=0
+OVERALL: PASS
+EXITCODE=0
+说明: CASE 54 期望的 FAIL 标签是「agent names the four review dimensions」，实际打出的是「逐字相同」那条
+——因为角色正文里「测试充分性」出现两处，单点替换后子串判定仍然放行。这条判据本就是子串式，
+注入面必须覆盖全部出现处；改成 replace_all 后见块 04 的 CASE 54 读数。
+
+===============================================================================================================================================================================
+块 03 — 注入落点漂移被电池测出一次：B1 回写把 .codex/HARNESS.md 加进 `范围` 行，抢走了「只替换第一处」的目标
+===============================================================================================================================================================================
+$ python -X utf8 artifacts/tmp/b1-opdrift.py
+driver=artifacts/tmp/b1-opdrift.py
+target=.codex/scripts/dev/checkers_selftest.py
+sha256-12 before=ea471c11e581
+
+### mutated (op=replace, injection lands on 范围) rc=1
+CASE 27 MISMATCH  roadmap:prompt-dead-path - expected FAIL label, rc=0, seen=[]
+SELFTEST cases=64 ok=63 mismatch=1 harness_errors=0 skipped=0
+OVERALL: FAIL
+
+### restored (op=replace_all) rc=0
+SELFTEST cases=64 ok=64 mismatch=0 harness_errors=0 skipped=0
+OVERALL: PASS
+
+sha256-12 after=ea471c11e581 identical=True
+读法: 两条 Command 逐字相同（都是 .codex/scripts/dev/checkers_selftest.py），
+差别只在 roadmap:prompt-dead-path 这一例的算子。算子退回 replace 时注入落到 `范围` 行——
+那不是我判的字段，用例静默变成空操作（rc=0、seen=[]），电池报 MISMATCH；
+算子为 replace_all 时注入落回 `执行提示词`（measured_dead 列出 B1 与 B3），用例重新承重。
+块 02 与这块是同一课的两遍：单点替换挡不住「同一词还有别处」，也挡不住「文档演化把首处挪出被判字段」。
+
+===============================================================================================================================================================================
+块 04 — 最终注入自检：python -X utf8 .codex/scripts/dev/checkers_selftest.py（64 例 + 5 基线，未改动任何判据）
+===============================================================================================================================================================================
+$ python -X utf8 .codex/scripts/dev/checkers_selftest.py
+Command: python .codex/scripts/dev/checkers_selftest.py
+Mode: full (64 injected-violation cases + 5 baselines)
+Workspace: C:\Users\23745\AppData\Local\Temp\tlx-selftest-m574lx5s
+BASELINE OK check_intent_capturer_agent rc=0
+BASELINE OK check_roadmap_and_routing rc=0
+BASELINE OK check_intent_template rc=0
+BASELINE OK check_spec_author_agent rc=0
+BASELINE OK check_code_reviewer_agent rc=0
+── review:* 14 例逐条 ──
+CASE 51 OK        review:agent-file-missing - rc=1, FAIL the five inputs exist — missing=['.codex/agents/code-reviewer.md']
+CASE 52 OK        review:template-file-missing - rc=1, FAIL the five inputs exist — missing=['Docs/REVIEW.md']
+CASE 53 OK        review:verifier-section-uncovered - rc=1, FAIL agent section names cover verifier.md — verifier_sections=5 missing=['rules']
+CASE 54 OK        review:dimension-dropped - rc=1, FAIL agent names the four review dimensions — missing=['测试充分性']
+CASE 55 OK        review:archive-path-missing - rc=1, FAIL review template declares an archive path — dir=False pattern=True section=True
+CASE 56 OK        review:archive-dir-missing - rc=1, FAIL the declared archive directory exists on disk — dir=Docs\reviews
+CASE 57 OK        review:severity-merged - rc=1, FAIL report separates blocking from non-blocking — missing=['非阻塞建议']
+CASE 58 OK        review:location-dropped - rc=1, FAIL every finding must carry a file:line location — hits=0
+CASE 59 OK        review:field-list-drained - rc=1, FAIL review template declares its own field list — measured=0 floor=6
+CASE 60 OK        review:task-fields-drained - rc=1, FAIL task template still defines the Verification report fields — measured=3 floor=4 names=['Verdict', 'Evidence', 'Chang…
+CASE 61 OK        review:field-collision-injected - rc=1, FAIL report fields do not redefine task-card verification fields — review_fields=13 task_fields=5 overlap=['Gaps']
+CASE 62 OK        review:placeholder-injected - rc=1, FAIL role text and report skeleton carry no placeholder tokens — hits=['TODO']
+CASE 63 OK        review:toml-md-drift - rc=1, FAIL agent .toml body equals the agent markdown verbatim — toml_chars=3957 md_chars=3991 equal=False
+CASE 64 OK        review:toml-unparsable - rc=1, FAIL agent .toml parses as a Codex agent file — TOMLDecodeError('Invalid value (at end of document)')
+── CASE 27（roadmap:prompt-dead-path）改算子后的读数 ──
+CASE 27 OK        roadmap:prompt-dead-path - rc=1, FAIL Phase B（下一批） every path inside 执行提示词 exists — measured_dead=[('B1', '.codex/HARNES.md'), ('B3', '.codex/HARNES.md')]
+── 其余各例（intent/roadmap/template/replay/spec）与本片无直接关系，只列末态与总话术 ──
+SELFTEST cases=64 ok=64 mismatch=0 harness_errors=0 skipped=0
+OVERALL: PASS
+EXITCODE=0
+EXITCODE=0
+
+===============================================================================================================================================================================
+块 05 — 裸下限承重被现场证伪一次（同一文件、同一条命令，字节级还原）
+===============================================================================================================================================================================
+$ python -X utf8 artifacts/tmp/b1-redgreen.py
+before sha256-12 = f663ca23506e, anchor hits = 1
+=== RED (floor weakened to 0) rc=1
+    | Mode: full (64 injected-violation cases + 5 baselines)
+    | CASE 51 OK        review:agent-file-missing - rc=1, FAIL the five inputs exist — missing=['.codex/agents/code-reviewer.md']
+    | CASE 52 OK        review:template-file-missing - rc=1, FAIL the five inputs exist — missing=['Docs/REVIEW.md']
+    | CASE 53 OK        review:verifier-section-uncovered - rc=1, FAIL agent section names cover verifier.md — verifier_sections=5 missing=['rules']
+    | CASE 54 OK        review:dimension-dropped - rc=1, FAIL agent names the four review dimensions — missing=['测试充分性']
+    | CASE 55 OK        review:archive-path-missing - rc=1, FAIL review template declares an archive path — dir=False pattern=True section=True
+    | CASE 56 OK        review:archive-dir-missing - rc=1, FAIL the declared archive directory exists on disk — dir=Docs\reviews
+    | CASE 57 OK        review:severity-merged - rc=1, FAIL report separates blocking from non-blocking — missing=['非阻塞建议']
+    | CASE 58 OK        review:location-dropped - rc=1, FAIL every finding must carry a file:line location — hits=0
+    | CASE 59 OK        review:field-list-drained - rc=1, FAIL review template declares its own field list — measured=0 floor=6
+    | CASE 60 MISMATCH  review:task-fields-drained - expected FAIL label, rc=0, seen=[]
+    | CASE 61 OK        review:field-collision-injected - rc=1, FAIL report fields do not redefine task-card verification fields — review_fields=13 task_fields=5 overlap=['Ga…
+    | CASE 62 OK        review:placeholder-injected - rc=1, FAIL role text and report skeleton carry no placeholder tokens — hits=['TODO']
+    | CASE 63 OK        review:toml-md-drift - rc=1, FAIL agent .toml body equals the agent markdown verbatim — toml_chars=3957 md_chars=3991 equal=False
+    | CASE 64 OK        review:toml-unparsable - rc=1, FAIL agent .toml parses as a Codex agent file — TOMLDecodeError('Invalid value (at end of document)')
+    | SELFTEST cases=64 ok=63 mismatch=1 harness_errors=0 skipped=0
+    | OVERALL: FAIL
+after restore sha256-12 = f663ca23506e  identical=True
+=== GREEN (floor restored) rc=0
+    | Mode: full (64 injected-violation cases + 5 baselines)
+    | CASE 51 OK        review:agent-file-missing - rc=1, FAIL the five inputs exist — missing=['.codex/agents/code-reviewer.md']
+    | CASE 52 OK        review:template-file-missing - rc=1, FAIL the five inputs exist — missing=['Docs/REVIEW.md']
+    | CASE 53 OK        review:verifier-section-uncovered - rc=1, FAIL agent section names cover verifier.md — verifier_sections=5 missing=['rules']
+    | CASE 54 OK        review:dimension-dropped - rc=1, FAIL agent names the four review dimensions — missing=['测试充分性']
+    | CASE 55 OK        review:archive-path-missing - rc=1, FAIL review template declares an archive path — dir=False pattern=True section=True
+    | CASE 56 OK        review:archive-dir-missing - rc=1, FAIL the declared archive directory exists on disk — dir=Docs\reviews
+    | CASE 57 OK        review:severity-merged - rc=1, FAIL report separates blocking from non-blocking — missing=['非阻塞建议']
+    | CASE 58 OK        review:location-dropped - rc=1, FAIL every finding must carry a file:line location — hits=0
+    | CASE 59 OK        review:field-list-drained - rc=1, FAIL review template declares its own field list — measured=0 floor=6
+    | CASE 60 OK        review:task-fields-drained - rc=1, FAIL task template still defines the Verification report fields — measured=3 floor=4 names=['Verdict', 'Evidence', …
+    | CASE 61 OK        review:field-collision-injected - rc=1, FAIL report fields do not redefine task-card verification fields — review_fields=13 task_fields=5 overlap=['Ga…
+    | CASE 62 OK        review:placeholder-injected - rc=1, FAIL role text and report skeleton carry no placeholder tokens — hits=['TODO']
+    | CASE 63 OK        review:toml-md-drift - rc=1, FAIL agent .toml body equals the agent markdown verbatim — toml_chars=3957 md_chars=3991 equal=False
+    | CASE 64 OK        review:toml-unparsable - rc=1, FAIL agent .toml parses as a Codex agent file — TOMLDecodeError('Invalid value (at end of document)')
+    | SELFTEST cases=64 ok=64 mismatch=0 harness_errors=0 skipped=0
+    | OVERALL: PASS
+SUMMARY red_rc=1 green_rc=0 restored_identical=True
+driver_rc=0
+读法: RED 与 GREEN 的 Command 逐字相同，都是 .codex/scripts/dev/checkers_selftest.py；
+差别只在 check_code_reviewer_agent.py 的 MIN_TASK_FIELDS 由 4 改成 0（其余字节不动）。
+还原后 sha256-12 与注入前相同 ⇒ 这条下限确实挡着「两边协同缩表让重叠判定自动成立」那种改法。
+
+===============================================================================================================================================================================
+块 06 — core 档整跑与全局门禁：新守门已进册，其余条目判据未动
+===============================================================================================================================================================================
+$ python -X utf8 .codex/scripts/run_all_guards.py --list
+ROSTER entries=32 core=26 precommit=6
+
+$ python -X utf8 .codex/scripts/run_all_guards.py --tier core
+RUN-ALL-GUARDS tier=core selected=26/32 subset=no
+PASS         validate_tasks                         rc=0 0.1s
+             > SUMMARY files=19 errors=0 warnings=4
+PASS         check_context_pack                     rc=0 0.3s
+             > check_context_pack: 0 check(s) failed
+PASS         check_code_reviewer_agent              rc=0 0.1s
+             > check_code_reviewer_agent: 0 check(s) failed
+PASS         check_intent_capturer_agent            rc=0 0.1s
+             > check_intent_capturer_agent: 0 check(s) failed
+PASS         check_intent_template                  rc=0 0.0s
+             > check_intent_template: 0 check(s) failed
+PASS         check_pm_discovery_skill               rc=0 0.0s
+             > check_pm_discovery_skill: 0 check(s) failed
+PASS         check_roadmap_and_routing              rc=0 0.1s
+             > check_roadmap_and_routing: 0 check(s) failed
+PASS         check_spec_author_agent                rc=0 0.0s
+             > check_spec_author_agent: 0 check(s) failed
+PASS         check_stack_facts                      rc=0 0.3s
+             > check_stack_facts: 0 check(s) failed
+PASS         check_design_tokens                    rc=0 0.1s
+             > check_design_tokens: 0 check(s) failed
+PASS         check_androidtest_schema_expectations  rc=0 0.1s
+             > VERDICT: PASS
+PASS         checkers_selftest                      rc=0 6.7s
+             > OVERALL: PASS
+PASS         parity_ledger_selftest                 rc=0 1.4s
+             > VERDICT: PASS
+PASS         screen_inventory_selftest              rc=0 1.2s
+             > VERDICT: PASS
+PASS         measure_screen --selftest              rc=0 7.3s
+             > VERDICT: PASS (19 cases, positive and negative for every branch)
+PASS         verify_1to1_selftest                   rc=0 233.4s
+             > SELFTEST PASS cases=40 cli=20 muts=18 failures=0
+PASS         cdp_shot_selftest                      rc=0 75.6s
+             > SELFTEST PASS cases=17 failures=0
+PASS         web_walk --selftest                    rc=0 0.1s
+             > SELFTEST cases=6 bad=0
+PASS         check_dependency_direction             rc=0 0.1s
+             > dependency scan root=src layers=9 scanned=23 findings=0
+PASS         check_dependency_direction --selftest  rc=0 0.1s
+             > SELFTEST cases=10 floor=8 fail=0
+PASS         check_user_copy_i18n                   rc=0 0.1s
+             > user-copy scan root=src scanned=23 copy-dir-exempt-seen=true cjk-lines=0 files=0 baseline-entries=0 baseline-covered=0
+PASS         check_user_copy_i18n --selftest        rc=0 0.1s
+             > SELFTEST cases=15 floor=10 fail=0
+PASS         check_device_time                      rc=0 0.1s
+             > device-time scan root=D:\Project\Android\Treelearn\frontend\src scanned=23 exempt=utils/deviceTime.ts exempt-in-tree=true findings=0
+PASS         check_device_time --selftest           rc=0 0.1s
+             > SELFTEST cases=11 floor=8 fail=0
+PASS         sync_fixtures --check                  rc=0 0.1s
+             > SYNC CHECK src=13 dst=13 bad=0 redacted=0 dir=frontend\src\platform\fixtures
+PASS         sync_fixtures --selftest               rc=0 0.1s
+             > SELFTEST cases=8 bad=0 floor=1
+RUN-ALL-GUARDS pass=26 fail=0 inconclusive=0 fault=0
+VERDICT: PASS (all 26 selected guard(s) printed a judgement line and returned green)
+EXITCODE=0
+EXITCODE=0
+
+$ python -X utf8 .codex/scripts/validate_tasks.py
+PASS T-2026-10-19-code-reviewer-role-and-review-template-024.md
+SUMMARY files=19 errors=0 warnings=4
+EXITCODE=0
+
+$ python -X utf8 .codex/scripts/check_roadmap_and_routing.py
+OK   Phase B（下一批） has >= 7 entries — measured=7
+OK   Phase B（下一批） every entry carries all 8 field names — measured_entries=7 problems=[]
+OK   Phase B（下一批） every 执行提示词 is >= 40 chars — measured_short=[]
+OK   Phase B（下一批） every path inside 执行提示词 exists — measured_dead=[]
+OK   Phase B（下一批） every 开源来源 cites github.com or a skills path — measured_weak=[]
+OK   Phase B covers the seven planned capabilities — missing=[]
+OK   no placeholder tokens in ROADMAP — measured=[]
+check_roadmap_and_routing: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+时序说明: `--tier core` 这一次整跑发生在最后几处纯文字回写（ROADMAP 实现要点、本卡的 REFACTOR/Evidence/Gaps）之前；
+那几处只动文档正文，其判据面由紧随其后的 validate_tasks 与 check_roadmap_and_routing 两条独立复算覆盖（均为末态字节）。
+
+===============================================================================================================================================================================
+块 07 — 新产物的活指针清点（除本卡外，所有引用都指向已存在的路径）
+===============================================================================================================================================================================
+$ grep -rn "agents/code-reviewer\.md" .codex Docs
+.codex/HARNESS.md:12:6. 代码本身的质量由 `code-reviewer` 只读复核，维度、产物格式与归档位置以 `.codex/agents/code-reviewer.md` 和 `Docs/REVIEW.md` 为准，报告落在 `Docs/reviews/**`。两个结论不互相冒充：该角色不宣布任务验收，verifie…
+.codex/ROADMAP.md:46:- **范围（可写路径）**：`.codex/agents/code-reviewer.md`、`.codex/agents/code-reviewer.toml`、`Docs/REVIEW.md`、`Docs/reviews/`、`.codex/scripts/check_code_reviewer_a…
+.codex/ROADMAP.md:51:- **交付任务**：`T-2026-10-19-024`（`.codex/agents/code-reviewer.md` + 同名 `.toml` 运行时包装、`Docs/REVIEW.md` 骨架、`Docs/reviews/` 归档目录、`check_code_reviewer_agent.py`…
+.codex/ROADMAP.md:95:- **依赖**：`.codex/agents/code-reviewer.md`（B1 已于 `T-2026-10-19-024` 交付：本条角色的只读契约与报告字段边界都沿它对齐，简化角色不得再另立一套验收措辞）、`.codex/rules/regression.md`
+.codex/scripts/check_code_reviewer_agent.py:33:AGENT_MD = ".codex/agents/code-reviewer.md"
+.codex/scripts/dev/checkers_selftest.py:44:CODE_REVIEWER_MD = ".codex/agents/code-reviewer.md"
+Docs/REVIEW.md:3:> 本文件是 `Docs/reviews/**` 报告的**唯一骨架**。角色正文见 `.codex/agents/code-reviewer.md`；
+GREP_RC=0
+
+$ grep -rnI "Docs/reviews/" .codex Docs
+.codex/agents/code-reviewer.md:6:> 权限：只写 `Docs/reviews/**`（一份报告一个文件）；其余一律只读。
+.codex/agents/code-reviewer.md:22:  under `Docs/reviews/`.
+.codex/agents/code-reviewer.md:67:产物：`Docs/reviews/REVIEW-YYYY-MM-DD-<kebab-case>.md`，一次复核一个文件，不复用、不覆盖旧报告。
+.codex/agents/code-reviewer.md:78:- 移交物：一份 `Docs/reviews/REVIEW-*.md`。
+.codex/agents/code-reviewer.toml:3:description = "Independent read-only code review for Docs/reviews/ (task acceptance stays with verifier)."
+.codex/agents/code-reviewer.toml:6:developer_instructions = "# code-reviewer —— 代码本身的独立复核入口\n\n> 定位：Treelearn Harness 里唯一**只管代码好坏**的复核角色。verifier 管「这片任务验收了吗」，\n> 本角色管「这段代码本身经…
+.codex/HARNESS.md:12:6. 代码本身的质量由 `code-reviewer` 只读复核，维度、产物格式与归档位置以 `.codex/agents/code-reviewer.md` 和 `Docs/REVIEW.md` 为准，报告落在 `Docs/reviews/**`。两个结论不互相冒充：该角色不宣布任务验收，verifie…
+.codex/README.md:31:权威边界：产品事实在 `Docs/**`，意图在 `Docs/intent/**`，代码复核报告在 `Docs/reviews/**`，任务状态在 `.codex/tasks/**`，工程约束在 `.codex/rules/**`。源项目专属 HClaw、Core-Python、CSPfix 和 APK 中…
+.codex/ROADMAP.md:46:- **范围（可写路径）**：`.codex/agents/code-reviewer.md`、`.codex/agents/code-reviewer.toml`、`Docs/REVIEW.md`、`Docs/reviews/`、`.codex/scripts/check_code_reviewer_a…
+.codex/ROADMAP.md:51:- **交付任务**：`T-2026-10-19-024`（`.codex/agents/code-reviewer.md` + 同名 `.toml` 运行时包装、`Docs/REVIEW.md` 骨架、`Docs/reviews/` 归档目录、`check_code_reviewer_agent.py`…
+.codex/scripts/check_code_reviewer_agent.py:39:# 所以这一条同时钉住 Docs/reviews/README.md 那份落点说明还在。
+.codex/scripts/check_code_reviewer_agent.py:56:ARCHIVE_DIR = "Docs/reviews/"
+.codex/scripts/dev/checkers_selftest.py:294:     "Docs/reviews/", "Docs/notes/",
+Docs/REVIEW.md:3:> 本文件是 `Docs/reviews/**` 报告的**唯一骨架**。角色正文见 `.codex/agents/code-reviewer.md`；
+Docs/REVIEW.md:9:- 一份复核一个文件：`Docs/reviews/REVIEW-YYYY-MM-DD-<kebab-case>.md`。
+GREP_RC=0
+
+===============================================================================================================================================================================
+块 08 — 本片没覆盖的东西（与任务卡 Gaps 同口径）
+===============================================================================================================================================================================
+① code-reviewer 从未在真实 diff 上产出过一份报告：Docs/reviews/ 目前只有 README；
+   块 01–07 只证明「产物成对、判据会响」，不证明「按这份骨架真能审出一片代码」。
+② 没有独立 verifier 轮次（用户要求一站到底）。
+③ 块 03 与块 05 的一次性对照靠 gitignore 内的驱动（b1-opdrift.py / b1-redgreen.py），
+   别的克隆复现不了这两块，但 64 例自检本身已入库：下限被改坏会被 CASE 60 抓住，
+   算子被改回 replace 会被 CASE 27 抓住——两处失效都会在电池里留下响动，不需要驱动。
+④ .toml 是否真被 Codex 运行时加载没有运行时证据；判据只保证它与 .md 逐字相同。
+⑤ .codex/rules/communication.md 的阶段→角色表仍不列 code-reviewer（片卡 Deferred）。
