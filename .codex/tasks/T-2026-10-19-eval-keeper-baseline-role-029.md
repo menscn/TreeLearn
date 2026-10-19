@@ -37,7 +37,7 @@ tdd_mode: required
   `.codex/HARNESS.md` 第 5 步接线一句 + 快照刷新（`product.md` 重转录，零差异）+ `derive_sample()` 的
   掩码空间修复。
 - Core flow and reversibility: 新增两份角色正文与一支守门，改四处既有条目（注册表、基线元组、抄检来源、
-  HARNESS 一句），刷新一个快照，修一处仪器判定缺陷。回退方式：删角色两份与守门脚本、撤 `run_all_guards.py:97-98`、
+  HARNESS 一句），刷新一个快照，修一处仪器判定缺陷。回退方式：删角色两份与守门脚本、撤 `run_all_guards.py:100-101`、
   撤 `checkers_selftest.py` 的 29 例与第 10 条基线与 `SAMPLE_SPEC_GRAMMAR`、还原 HARNESS 那半句，
   即回到片 028 末态；快照刷新与 `derive_sample()` 修复**不属**该回退面（前者是复算出来的事实，后者是仪器加固）。
 - Inputs/outputs: 输入 = 角色正文与它引用的六份事实源（`verifier.md` 小节骨架、评测目录 README、运行器、
@@ -113,7 +113,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `run_all_guards.py` 其余 34 条注册项、`HARNESS.md` 第 1/2/3/4/6 步原文（接线只做在第 5 步那一句之内）、
   `checkers_selftest.py` 原有 126 例与 9 条基线一字未改（只追加）。
 - Producer/consumer/sibling entrypoints and platform branches (code evidence): 生产者 = 角色正文两份与守门脚本；
-  消费者 = `run_all_guards.py:97-98`（core 档）、`checkers_selftest.py:78-80`（第 10 条基线所在元组；片 030 在其上又插了 4 个常量并把元组撑到三行、片 031 再插 4 个常量并把第 12 条基线接进去）、
+  消费者 = `run_all_guards.py:100-101`（core 档）、`checkers_selftest.py:82-84`（第 10 条基线所在元组；片 030 在其上又插了 4 个常量并把元组撑到三行、片 031 再插 4 个常量并把第 12 条基线接进去）、
   `.codex/HARNESS.md:11`（验收阶段的第 5 步）。同级入口 = `check_code_reviewer_agent.py` /
   `check_codebase_researcher_agent.py` / `check_code_simplifier_agent.py`，四者共用
   `harness_check_lib.agent_section_names()` 与 `citable_paths()`；本片把它们共用的抄检取样器
@@ -138,7 +138,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `:84-212`（23 条判据与 3 处 fail-closed 早退 `:91` / `:101` / `:112`）、`:94-104`（从运行器现场派生期望语法）、
   `.codex/scripts/dev/checkers_selftest.py:64-67`（3 个常量）/ `:79-80`（10 条基线所在元组的后两行）/ `:110`（第 4 份抄检来源）/
   `:116-147`（`derive_sample()` 掩码空间修复）/ `:585-671`（29 例 `keeper:*`）/ `:1028-1030`（4 条抄检前缀）、
-  `.codex/scripts/run_all_guards.py:97-98`、`.codex/HARNESS.md:11`、`.codex/ROADMAP.md:66-67`（被片 032 在 B0 加的一行推下去）、
+  `.codex/scripts/run_all_guards.py:100-101`、`.codex/HARNESS.md:11`、`.codex/ROADMAP.md:66-67`（被片 032 在 B0 加的一行推下去）、
   `.codex/evals/cases/001-impact-inventory/product.md:1-13`（刷新后的快照，`:5` 是被推下去的那条指针）。
   行号是先实测再落笔的：`artifacts/tmp/b029-pointers.py` 把本片与片 021/024/025/026/027/028 的 99 条引用逐条复算，
   末态 `POINTERS checked=99 stale=0`（表本身有 `MIN_POINTERS = 80` 的裸下限，抽干即红）。
@@ -242,7 +242,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
 - Implementation: `.codex/agents/eval-keeper.md`（92 行，`<identity>` `:7` / `<source>` `:14` /
   `<contract>` `:21-34` / `<rules>` `:36-48` / `## 触发时机` `:50` / `## 职责清单` `:58` /
   `## 输出格式` `:67` / `## 交接` `:78` / `## 禁区` `:86`）与由 `artifacts/tmp/gen_agent_toml.py` 生成的
-  逐字相同 `.toml`；core 档注册 `run_all_guards.py:97-98`；`.codex/HARNESS.md:11` 的第 5 步接线。
+  逐字相同 `.toml`；core 档注册 `run_all_guards.py:100-101`；`.codex/HARNESS.md:11` 的第 5 步接线。
 - Command: `python -X utf8 .codex/scripts/check_eval_keeper_agent.py`
 - Exit code: 0
 - Passing evidence: 块 00 的 23 行逐字（含 `kinds=5 assets=3`、`scripts=[…run_evals.py] missing=[]`、

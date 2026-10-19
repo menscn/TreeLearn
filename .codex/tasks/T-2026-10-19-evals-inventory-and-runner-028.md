@@ -37,7 +37,7 @@ tdd_mode: required
   `check_roadmap_and_routing.py` 把 `.codex/evals/` 登记进 `README_ENTRIES` 并给这张清单本身加裸下限 +
   `checkers_selftest.py` 14 例 `evals:*` 与第 9 条基线。
 - Core flow and reversibility: 新增两个目录与两份脚本改动、一处注册、两处文档。回退方式：删 `.codex/evals/`、
-  删 `run_evals.py`、撤 `run_all_guards.py:95-96`、撤 `checkers_selftest.py` 的 14 例与第 9 条基线、
+  删 `run_evals.py`、撤 `run_all_guards.py:98-99`、撤 `checkers_selftest.py` 的 14 例与第 9 条基线、
   还原 `README_ENTRIES` 那行与 `.codex/README.md` 那一行，即回到本片之前；上收进 `harness_check_lib.py` 的
   两个函数回退方式是搬回 `run_evals.py` 本地（判据读数不变，但那正是片 027 立誓要消灭的形状）。
 - Inputs/outputs: 输入 = `cases/*/` 三份资产（期望文件由人写、产物快照由脚本转录自任务卡小节）；
@@ -113,8 +113,8 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   模块级函数的签名与语义（本片只 +2，未改任何既有函数）、片 024/025/026/027 四支配对守门的判据读数、
   `checkers_selftest.py` 原有 112 例与 8 条基线一字未改。
 - Producer/consumer/sibling entrypoints and platform branches (code evidence): 生产者 = `.codex/evals/cases/*/`
-  三份资产（由人或 029 角色写）；消费者 = `.codex/scripts/run_all_guards.py:95-96`（core 档）、
-  `.codex/scripts/dev/checkers_selftest.py:78-80`（第 9 条基线所在元组；片 029 在其上插了 3 个常量、片 030 又插了 4 个
+  三份资产（由人或 029 角色写）；消费者 = `.codex/scripts/run_all_guards.py:98-99`（core 档）、
+  `.codex/scripts/dev/checkers_selftest.py:82-84`（第 9 条基线所在元组；片 029 在其上插了 3 个常量、片 030 又插了 4 个
   并把元组撑到三行，行号由 `:66-67` 经 `:70-71` 下推到这里，片 030 复算）、`.codex/evals/README.md:11`（跑法那行）。
   同级入口 = `check_code_simplifier_agent.py` 与 `check_codebase_researcher_agent.py`，三者共用
   `harness_check_lib.citable_paths()`；本片把「`文件:行` 区间解析」也上收到同一库，正是为了避免第四份实现。
@@ -137,7 +137,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `.codex/scripts/check_roadmap_and_routing.py:39-44` / `:226-231`、
   `.codex/scripts/dev/checkers_selftest.py:59-64` / `:79-80` / `:282-285` / `:544-581`（后三条由片 029 复算、片 030 再复算：
   029 新增 3 个常量、29 例 `keeper:*` 和 4 条抄检前缀，030 又新增 4 个常量与 19 例 `metrics:*`，031 再新增 4 个常量、1 份抄检样本规格与 35 例 `reporter:*`，把这三处整体下推）、
-  `.codex/scripts/run_all_guards.py:95-96`、`.codex/evals/cases/001-impact-inventory/product.md:1-13`。
+  `.codex/scripts/run_all_guards.py:98-99`、`.codex/evals/cases/001-impact-inventory/product.md:1-13`。
   行号是先实测再落笔的：`artifacts/tmp/b028-pointers.py` 把本片与片 021/024/025/026/027 的 55 条引用逐条复算，
   末态 `POINTERS checked=55 stale=0`；本片同时修掉那五张卡里 26 处**本片之前就已漂**的区间（块 04）。
   片 029 之后该驱动已被 `artifacts/tmp/b029-pointers.py` 取代（同一形状，把本片造成的漂移与 029 自己的

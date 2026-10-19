@@ -117,7 +117,7 @@ tdd_mode: required
   docstring）、`:45-50`（三条裸下限 `MIN_VERIFIER_SECTIONS` / `MIN_REVIEW_FIELDS` / `MIN_TASK_FIELDS`）、
   `:79-166`（14 条判定与 6 处 fail-closed 早退；片 026 把小节名派生上收进 `harness_check_lib.py` 后本文件短了 6 行）；`.codex/agents/code-reviewer.md:19-41`（只读契约与 Java-only 属阻塞项）、
   `Docs/REVIEW.md:7-11`（归档位置）。登记面：`.codex/scripts/run_all_guards.py:87-88`（core 档新行仍是这两行；整表 `:81-173`，026/027/028/029/030/031 各在其后新增了 3/3/2/2/2/3 行）、
-  `.codex/scripts/dev/checkers_selftest.py:44-80`（常量与基线元组，本片加的是第 5 条）、`:926-945`（目录型注入的
+  `.codex/scripts/dev/checkers_selftest.py:44-84`（常量与基线元组，本片加的是第 5 条）、`:926-945`（目录型注入的
   `run_dir_case`，在 `:953-954` 分派）。行号是 2026-10-19 片 025、片 026、片 027、片 028、片 029、片 030、片 031 之后各重测一次：这七片都往同一个文件里
   各加了用例与常量，把这些区间整体下推；原引 `:44-51` / `:389-408`、再到 `:44-57` / `:486-505` 在被引用当时都是对的，
   到后一片末态已成活指针——这正是 D9 登记的同一类缺陷，发现即校正；`artifacts/tmp/b027-pointers.py` 把这三张卡的指针

@@ -1,0 +1,1019 @@
+Task evidence T-2026-10-20-033 — loop-watcher 角色、成对守门与本片自己造成的指针漂移
+环境：Windows 10.0.26200 / x64 / Python 3.13.12 / Git Bash；所有 Python 命令带 -X utf8。
+判据行逐字粘贴、不截断。块 00/03 里标了「当场重跑」的条目由本装配驱动现场执行只读命令，
+其余每一行都取自 artifacts/tmp/run*.txt 的在场捕获（该目录 gitignore，号段 run202–run258 都在）。
+本片末态三条是 run255（core）/ run256（precommit）/ run257（全轮 244 例 + 13 基线），串行单独跑；
+此后卡片只改过引用号段与措辞，卡片正文唯一的读者 validate_tasks 由块 03 当场重跑 + `run258` 收口。
+
+================================================================================================================================================================
+块 00 — 角色守门本体：python -X utf8 .codex/scripts/check_loop_watcher_agent.py（24 条判据逐字）
+================================================================================================================================================================
+### capture=artifacts/tmp/run222-watch-checker.txt
+OK   the ten inputs exist — missing=[]
+OK   reference role exposes a usable set of section names — measured=9 floor=6 names=['identity', 'source', 'contract', 'rules', '触发时机', '职责清单', '输出格式', '交接', '禁区']
+OK   agent section names cover the reference role — reference_sections=9 missing=[]
+OK   agent states a parseable repeat threshold within a supervisable range — lines=2 floor=2 values=[2] sane=[2] max=5
+OK   agent defines a failure identity from command, judgement line and reading — measured=5 floor=2
+OK   agent keeps 没判 (timeout/absent script) out of the repeat count — measured=3 floor=2
+OK   agent lists at least 5 distinct stop conditions — measured=5 floor=5
+OK   task template still declares the LOOP subsection — title='LOOP — optional'
+OK   the LOOP subsection declares its report fields — measured=4 floor=4 fields=['Command and rounds', 'Failure identity and repeat count', 'Stop condition hit', 'Handoff']
+OK   agent names every report field from the template verbatim — fields=4 missing=[]
+OK   agent ties any convergence claim to a printed reading — measured=5 floor=2
+OK   agent forbids declaring convergence without evidence — measured=2 floor=1
+OK   agent pastes readings verbatim instead of paraphrasing them — measured=3 floor=2
+OK   a round requires its own judgement line and exit code — round_lines=4 floor=2 exitcode_hits=4
+OK   agent forbids pasting bodies or credentials into the report — measured=2 floor=1
+OK   agent declares itself read-only over code and judgement assets — measured=2 floor=1
+OK   agent declares its only writable landing is that subsection — landing_lines=1 all_named=True
+OK   agent defers acceptance, review and consolidation to the existing roles — verifier_refs=4 reviewer_refs=3 simplifier_refs=3 floor=2
+OK   agent cites >= 6 checkable repo paths — measured=7 floor=6 cited=['.codex/agents/code-reviewer.md', '.codex/agents/code-simplifier.md', '.codex/agents/verifier.md', '.codex/rules/harness-verification.md', '.codex/rules/observability.md', '.codex/rules/regression.md', '.codex/tasks/_TEMPLATE.md']
+OK   every path cited by the role exists on disk — dead=[] cited=7
+OK   role text does not restate the rules it cites — measured_hits=0 sample=[]
+OK   role text carries no placeholder tokens — hits=[]
+OK   agent .toml declares name and description — name=True description=True
+OK   agent .toml body equals the agent markdown verbatim — toml_chars=4688 md_chars=4688 equal=True
+
+check_loop_watcher_agent: 0 check(s) failed
+EXITCODE=0
+
+### 当场重跑（同一命令，本文件写出前的最后一次）
+OK   the ten inputs exist — missing=[]
+OK   reference role exposes a usable set of section names — measured=9 floor=6 names=['identity', 'source', 'contract', 'rules', '触发时机', '职责清单', '输出格式', '交接', '禁区']
+OK   agent section names cover the reference role — reference_sections=9 missing=[]
+OK   agent states a parseable repeat threshold within a supervisable range — lines=2 floor=2 values=[2] sane=[2] max=5
+OK   agent defines a failure identity from command, judgement line and reading — measured=5 floor=2
+OK   agent keeps 没判 (timeout/absent script) out of the repeat count — measured=3 floor=2
+OK   agent lists at least 5 distinct stop conditions — measured=5 floor=5
+OK   task template still declares the LOOP subsection — title='LOOP — optional'
+OK   the LOOP subsection declares its report fields — measured=4 floor=4 fields=['Command and rounds', 'Failure identity and repeat count', 'Stop condition hit', 'Handoff']
+OK   agent names every report field from the template verbatim — fields=4 missing=[]
+OK   agent ties any convergence claim to a printed reading — measured=5 floor=2
+OK   agent forbids declaring convergence without evidence — measured=2 floor=1
+OK   agent pastes readings verbatim instead of paraphrasing them — measured=3 floor=2
+OK   a round requires its own judgement line and exit code — round_lines=4 floor=2 exitcode_hits=4
+OK   agent forbids pasting bodies or credentials into the report — measured=2 floor=1
+OK   agent declares itself read-only over code and judgement assets — measured=2 floor=1
+OK   agent declares its only writable landing is that subsection — landing_lines=1 all_named=True
+OK   agent defers acceptance, review and consolidation to the existing roles — verifier_refs=4 reviewer_refs=3 simplifier_refs=3 floor=2
+OK   agent cites >= 6 checkable repo paths — measured=7 floor=6 cited=['.codex/agents/code-reviewer.md', '.codex/agents/code-simplifier.md', '.codex/agents/verifier.md', '.codex/rules/harness-verification.md', '.codex/rules/observability.md', '.codex/rules/regression.md', '.codex/tasks/_TEMPLATE.md']
+OK   every path cited by the role exists on disk — dead=[] cited=7
+OK   role text does not restate the rules it cites — measured_hits=0 sample=[]
+OK   role text carries no placeholder tokens — hits=[]
+OK   agent .toml declares name and description — name=True description=True
+OK   agent .toml body equals the agent markdown verbatim — toml_chars=4688 md_chars=4688 equal=True
+
+check_loop_watcher_agent: 0 check(s) failed
+EXITCODE=0
+
+================================================================================================================================================================
+块 01 — 同一条命令的 RED / GREEN：四种 RED 状态 + 字节还原 + 落点被挪必响（driver=artifacts/tmp/b033-redgreen.py，capture=run223-redgreen.txt）
+================================================================================================================================================================
+### 末态逐字
+
+GREEN-0 (副本初始态): rc=0 OK=24 FAIL=0
+
+RED-1 (角色 .md/.toml 缺席): rc=1 OK=0 FAIL=1
+   FAIL the ten inputs exist — missing=['.codex/agents/loop-watcher.md', '.codex/agents/loop-watcher.toml']
+   expected-label 'the ten inputs exist' fired=True
+
+GREEN-1 (还原后): rc=0 OK=24 FAIL=0
+   restore .md identical=True 3bb6f95df68e
+   restore .toml identical=True 4e817dd52b60
+
+RED-2 (阈值不可解析): rc=1 OK=22 FAIL=2
+   FAIL agent states a parseable repeat threshold within a supervisable range — lines=0 floor=2 values=[] sane=[] max=5
+   FAIL agent .toml body equals the agent markdown verbatim — toml_chars=4688 md_chars=4686 equal=False
+
+RED-3 (抽干 没判): rc=1 OK=21 FAIL=3
+   FAIL agent keeps 没判 (timeout/absent script) out of the repeat count — measured=0 floor=2
+   FAIL agent lists at least 5 distinct stop conditions — measured=4 floor=5
+   FAIL agent .toml body equals the agent markdown verbatim — toml_chars=4688 md_chars=4387 equal=False
+
+RED-4 (模板小节标题被改): rc=1 OK=23 FAIL=1
+   FAIL agent declares its only writable landing is that subsection — landing_lines=1 all_named=False
+
+GREEN-END (全部还原): rc=0 OK=24 FAIL=0
+   final .codex/agents/loop-watcher.md identical=True 3bb6f95df68e / 3bb6f95df68e
+   final .codex/agents/loop-watcher.toml identical=True 4e817dd52b60 / 4e817dd52b60
+   final .codex/tasks/_TEMPLATE.md identical=True 1fdd772b1813 / 1fdd772b1813
+   final .codex/scripts/check_loop_watcher_agent.py identical=True 4b395fbbdafa / 4b395fbbdafa
+
+VERDICT: PASS
+
+================================================================================================================================================================
+块 02 — 注入自检：35 例 `watch:*` 单族 + 整轮 244 例 / 13 基线
+================================================================================================================================================================
+### python -X utf8 .codex/scripts/dev/checkers_selftest.py 单族（capture=run210-watch-cases.txt，由 artifacts/tmp/c033-watch-only.py 过滤 CASES 与 BASELINES）
+watch cases: 35
+Command: python .codex/scripts/dev/checkers_selftest.py
+Mode: full (35 injected-violation cases + 1 baselines)
+Workspace: C:\Users\23745\AppData\Local\Temp\tlx-selftest-aa_tolf3
+Workspace note: longest path 127
+BASELINE OK check_loop_watcher_agent rc=0
+CASE 01 OK        watch:agent-file-missing - rc=1, FAIL the ten inputs exist — missing=['.codex/agents/loop-watcher.md']
+CASE 02 OK        watch:toml-file-missing - rc=1, FAIL the ten inputs exist — missing=['.codex/agents/loop-watcher.toml']
+CASE 03 OK        watch:template-gone - rc=1, FAIL the ten inputs exist — missing=['.codex/tasks/_TEMPLATE.md']
+CASE 04 OK        watch:observability-rule-gone - rc=1, FAIL the ten inputs exist — missing=['.codex/rules/observability.md']
+CASE 05 OK        watch:roster-gone - rc=1, FAIL the ten inputs exist — missing=['.codex/scripts/run_all_guards.py']
+CASE 06 OK        watch:reference-sections-drained - rc=1, FAIL reference role exposes a usable set of section names — measured=5 floor=6 names=['触发时机', '职责清单', '输出格式', '交接', '禁区']
+CASE 07 OK        watch:section-uncovered - rc=1, FAIL agent section names cover the reference role — reference_sections=9 missing=['输出格式']
+CASE 08 OK        watch:threshold-vague - rc=1, FAIL agent states a parseable repeat threshold within a supervisable range — lines=0 floor=2 values=[] sane=[] max=5
+CASE 09 OK        watch:threshold-single-place - rc=1, FAIL agent states a parseable repeat threshold within a supervisable range — lines=1 floor=2 values=[2] sane=[2] max=5
+CASE 10 OK        watch:threshold-too-high - rc=1, FAIL agent states a parseable repeat threshold within a supervisable range — lines=2 floor=2 values=[40] sane=[] max=5
+CASE 11 OK        watch:identity-dropped - rc=1, FAIL agent defines a failure identity from command, judgement line and reading — measured=0 floor=2
+CASE 12 OK        watch:notjudged-word-gone - rc=1, FAIL agent keeps 没判 (timeout/absent script) out of the repeat count — measured=0 floor=2
+CASE 13 OK        watch:notjudged-timeout-shape-gone - rc=1, FAIL agent keeps 没判 (timeout/absent script) out of the repeat count — measured=1 floor=2
+CASE 14 OK        watch:stop-item-judgement-surface-demoted - rc=1, FAIL agent lists at least 5 distinct stop conditions — measured=4 floor=5
+CASE 15 OK        watch:stop-item-user-facts-demoted - rc=1, FAIL agent lists at least 5 distinct stop conditions — measured=4 floor=5
+CASE 16 OK        watch:template-loop-gone - rc=1, FAIL task template still declares the LOOP subsection — title=None
+CASE 17 OK        watch:loop-fields-drained - rc=1, FAIL the LOOP subsection declares its report fields — measured=3 floor=4 fields=['Failure identity and repeat count', 'Stop condition hit', 'Handoff']
+CASE 18 OK        watch:loop-field-renamed - rc=1, FAIL agent names every report field from the template verbatim — fields=4 missing=['Command and passes']
+CASE 19 OK        watch:convergence-evidence-drained - rc=1, FAIL agent ties any convergence claim to a printed reading — measured=0 floor=2
+CASE 20 OK        watch:evidence-free-convergence-allowed - rc=1, FAIL agent forbids declaring convergence without evidence — measured=0 floor=1
+CASE 21 OK        watch:verbatim-drained - rc=1, FAIL agent pastes readings verbatim instead of paraphrasing them — measured=0 floor=2
+CASE 22 OK        watch:round-shape-drained - rc=1, FAIL a round requires its own judgement line and exit code — round_lines=0 floor=2 exitcode_hits=4
+CASE 23 OK        watch:privacy-drained - rc=1, FAIL agent forbids pasting bodies or credentials into the report — measured=0 floor=1
+CASE 24 OK        watch:readonly-flipped - rc=1, FAIL agent declares itself read-only over code and judgement assets — measured=0 floor=1
+CASE 25 OK        watch:landing-moved - rc=1, FAIL agent declares its only writable landing is that subsection — landing_lines=1 all_named=False
+CASE 26 OK        watch:verifier-unreferenced - rc=1, FAIL agent defers acceptance, review and consolidation to the existing roles — verifier_refs=0 reviewer_refs=3 simplifier_refs=3 floor=2
+CASE 27 OK        watch:reviewer-unreferenced - rc=1, FAIL agent defers acceptance, review and consolidation to the existing roles — verifier_refs=4 reviewer_refs=0 simplifier_refs=3 floor=2
+CASE 28 OK        watch:simplifier-unreferenced - rc=1, FAIL agent defers acceptance, review and consolidation to the existing roles — verifier_refs=4 reviewer_refs=3 simplifier_refs=0 floor=2
+CASE 29 OK        watch:cites-drained - rc=1, FAIL agent cites >= 6 checkable repo paths — measured=0 floor=6 cited=[]
+CASE 30 OK        watch:dead-path-cited - rc=1, FAIL every path cited by the role exists on disk — dead=['.codex/rules/nonexistent-loop-rule.md'] cited=8
+CASE 31 OK        watch:rules-restated - rc=1, FAIL role text does not restate the rules it cites — measured_hits=1 sample=[('.codex/rules/observability.md', '#日志与行为遥测读取时机：新增或改造处理流程、用户功能或遥测改动前。仅加载本任务命中的规则；正文约束沿用原适用范围，不因')]
+CASE 32 OK        watch:placeholder-injected - rc=1, FAIL role text carries no placeholder tokens — hits=['TODO']
+CASE 33 OK        watch:toml-md-drift - rc=1, FAIL agent .toml body equals the agent markdown verbatim — toml_chars=4688 md_chars=4722 equal=False
+CASE 34 OK        watch:toml-name-missing - rc=1, FAIL agent .toml declares name and description — name=False description=True
+CASE 35 OK        watch:toml-unparsable - rc=1, FAIL agent .toml parses as a Codex agent file — TOMLDecodeError('Invalid value (at end of document)')
+SELFTEST cases=35 ok=35 mismatch=0 harness_errors=0 skipped=0
+OVERALL: PASS
+EXITCODE=0
+
+### 末态整轮（capture=run257-selftest-full.txt）的模式行与汇总
+Mode: full (244 injected-violation cases + 13 baselines)
+SELFTEST cases=244 ok=244 mismatch=0 harness_errors=0 skipped=0
+OVERALL: PASS
+EXITCODE=0
+SELFTEST_RC=0
+
+### 13 条基线逐字（本片把 `check_loop_watcher_agent` 升为第 13 条）
+BASELINE OK check_intent_capturer_agent rc=0
+BASELINE OK check_roadmap_and_routing rc=0
+BASELINE OK check_intent_template rc=0
+BASELINE OK check_spec_author_agent rc=0
+BASELINE OK check_code_reviewer_agent rc=0
+BASELINE OK check_context_pack rc=0
+BASELINE OK check_codebase_researcher_agent rc=0
+BASELINE OK check_code_simplifier_agent rc=0
+BASELINE OK run_evals rc=0
+BASELINE OK check_eval_keeper_agent rc=0
+BASELINE OK metrics_report rc=0
+BASELINE OK check_metrics_reporter_agent rc=0
+BASELINE OK check_loop_watcher_agent rc=0
+
+### 修 needle 之前（run229）与之后（run239）的同形状读数——三条都在，证明卡片加长与 needle 改写都不改变用例计数
+run229: Mode: full (244 injected-violation cases + 13 baselines)
+SELFTEST cases=244 ok=244 mismatch=0 harness_errors=0 skipped=0
+OVERALL: PASS
+run239: Mode: full (244 injected-violation cases + 13 baselines)
+SELFTEST cases=244 ok=244 mismatch=0 harness_errors=0 skipped=0
+OVERALL: PASS
+
+### 被修的那一族单独重验（capture=run238-metrics-cases.txt，由 artifacts/tmp/c033-metrics-only.py 过滤）
+metrics cases: 19
+Command: python .codex/scripts/dev/checkers_selftest.py
+Mode: full (19 injected-violation cases + 1 baselines)
+Workspace: C:\Users\23745\AppData\Local\Temp\tlx-selftest-gg5djj4f
+Workspace note: longest path 127
+BASELINE OK metrics_report rc=0
+CASE 01 OK        metrics:report-dir-deleted - rc=1, FAIL the report landing directory exists — dir=artifacts/metrics/
+CASE 02 OK        metrics:report-deleted - rc=1, FAIL metrics report file exists — path=artifacts/metrics/report.md
+CASE 03 OK        metrics:metric-source-deleted - rc=1, FAIL every metric source is present — missing=['.codex/references/regression-cases.md']
+CASE 04 OK        metrics:roadmap-family-dropped - rc=1, FAIL metric families derive from the ROADMAP B6 goal sentence — derived=3 floor=4 families=['交付节奏', '退回次数', '失败案例库增量']
+CASE 05 OK        metrics:registry-floor-raised - rc=1, FAIL registered metric list is not drained below its floor — registered=12 floor=99
+CASE 06 OK        metrics:report-line-renamed - rc=1, FAIL the report holds exactly one line per registered metric — lines=12 duplicated=[] hand_added=['library-entrys'] missing_from_report=['library-entries']
+CASE 07 OK        metrics:report-line-dropped - rc=1, FAIL the report holds exactly one line per registered metric — lines=11 duplicated=[] hand_added=[] missing_from_report=['baseline-checkers']
+CASE 08 OK        metrics:field-renamed - rc=1, FAIL every metric line carries exactly the six required fields — bad=['tasks-status-counts']
+CASE 09 OK        metrics:unit-duplicated - rc=1, FAIL every metric line declares one unit, never two — duplicated_fields=[['total-commits', ['口径']]]
+CASE 10 OK        metrics:family-renamed-in-report - rc=1, FAIL every family required by the roadmap appears in the report — required=4 missing=['交付节奏']
+CASE 11 OK        metrics:command-blanked - rc=1, FAIL every metric line names a command — blank=['total-commits']
+CASE 12 OK        metrics:history-command-faked - rc=1, FAIL history readings are read from a real git command — not_git=['total-commits']
+CASE 13 OK        metrics:recheck-label-swapped - rc=1, FAIL each line declares the recheck class its registry entry really has — disagree=[('cards-by-file-date', '否')]
+CASE 14 OK        metrics:recheck-all-flipped - rc=1, FAIL enough metric lines are declared machine-recheckable — measured=0 floor=6
+CASE 15 OK        metrics:print-command-drifted - rc=1, FAIL every line prints the command the generator would print — wrong=[['library-entries', 'python -X utf8 .codex/scripts/metrics_report.py --read library-entrys']]
+CASE 16 OK        metrics:hand-copied-reading - rc=1, FAIL each machine-recheckable reading is produced by running the command on its own line — checked=10 mismatch=[['library-entries', 'rows=13;headings=6;total=20', 'rows=13;headings=6;total=19']]
+CASE 17 OK        metrics:source-drifted-under-report - rc=1, FAIL each machine-recheckable reading is produced by running the command on its own line — checked=9 mismatch=[['library-entries', 'rows=13;headings=6;total=19', 'rows=14;headings=6;total=20']]
+CASE 18 OK        metrics:placeholder-injected - rc=1, FAIL no metric reading is left as a placeholder — hits=['待填'] scanned=readings+header
+CASE 19 OK        metrics:write-command-drifted - rc=1, FAIL report header names the command that writes it — needle=python -X utf8 .codex/scripts/metrics_report.py --write present=False
+SELFTEST cases=19 ok=19 mismatch=0 harness_errors=0 skipped=0
+OVERALL: PASS
+EXITCODE=0
+
+================================================================================================================================================================
+块 03 — 两档整跑与快门禁
+================================================================================================================================================================
+### python -X utf8 .codex/scripts/run_all_guards.py --tier core（capture=run255-tiers-core.txt）的总读数与本角色的注册行
+RUN-ALL-GUARDS tier=core selected=33/39 subset=no
+PASS         validate_tasks                         rc=0 0.1s
+PASS         check_loop_watcher_agent               rc=0 0.1s
+             > check_loop_watcher_agent: 0 check(s) failed
+RUN-ALL-GUARDS pass=33 fail=0 inconclusive=0 fault=0
+VERDICT: PASS (all 33 selected guard(s) printed a judgement line and returned green)
+CORE_RC=0
+
+### python -X utf8 .codex/scripts/run_all_guards.py --tier precommit（capture=run256-tiers-precommit.txt）的总读数
+RUN-ALL-GUARDS tier=precommit selected=6/39 subset=no
+RUN-ALL-GUARDS pass=6 fail=0 inconclusive=0 fault=0
+VERDICT: PASS (all 6 selected guard(s) printed a judgement line and returned green)
+PRECOMMIT_RC=0
+
+### 中途那轮真红（capture=run236-tiers-core.txt）——`inconclusive=1` 不是产物变差，是「没判」；它下面紧跟直跑 selftest 的复现（capture=run237-selftest-diag.txt）
+RUN-ALL-GUARDS tier=core selected=33/39 subset=no
+RUN-ALL-GUARDS pass=32 fail=0 inconclusive=1 fault=0
+VERDICT: INCONCLUSIVE (a guard returned an unjudged exit code)
+---
+CASE 173 HARNESS   metrics:placeholder-in-reading - anchor not found: '读数=8 | 复算=值'
+OVERALL: INCONCLUSIVE
+EXITCODE=3
+EXITCODE=3
+
+### python -X utf8 .codex/scripts/validate_tasks.py（capture=run258-postcard.txt）与当场重跑
+WARNING T-2026-10-20-loop-watcher-role-033.md: estimated production lines 214 exceeds soft limit 200
+PASS T-2026-10-20-loop-watcher-role-033.md
+SUMMARY files=28 errors=0 warnings=6
+--- 当场重跑
+WARNING T-2026-10-20-loop-watcher-role-033.md: estimated production lines 214 exceeds soft limit 200
+PASS T-2026-10-20-loop-watcher-role-033.md
+SUMMARY files=28 errors=0 warnings=6
+
+### python -X utf8 .codex/scripts/check_roadmap_and_routing.py（当场重跑，只读）
+OK   file exists: .codex/ROADMAP.md
+OK   file exists: AGENTS.md
+OK   file exists: .codex/README.md
+OK   phase section exists: Phase A（已完成）
+OK   phase section exists: Phase B（下一批）
+OK   phase section exists: Phase C（依赖外部条件）
+OK   Phase B（下一批） has >= 7 entries — measured=7
+OK   Phase B（下一批） every entry carries all 8 field names — measured_entries=7 problems=[]
+OK   Phase B（下一批） every 执行提示词 is >= 40 chars — measured_short=[]
+OK   Phase B（下一批） every path inside 执行提示词 exists — measured_dead=[]
+OK   Phase B（下一批） every 开源来源 cites github.com or a skills path — measured_weak=[]
+OK   Phase C（依赖外部条件） has >= 3 entries — measured=3
+OK   Phase C（依赖外部条件） every entry carries all 8 field names — measured_entries=3 problems=[]
+OK   Phase C（依赖外部条件） every 执行提示词 is >= 40 chars — measured_short=[]
+OK   Phase C（依赖外部条件） every path inside 执行提示词 exists — measured_dead=[]
+OK   Phase C（依赖外部条件） every 开源来源 cites github.com or a skills path — measured_weak=[]
+OK   Phase B covers the seven planned capabilities — missing=[]
+OK   Phase C covers the three planned capabilities — missing=[]
+OK   no placeholder tokens in ROADMAP — measured=[]
+OK   AGENTS.md routing table currently has >= 12 linked rows — measured=19
+OK   current routing rows cover all four triggers — measured_rows=19 missing=[]
+OK   every current routing-row target exists — measured_targets=22 dead=[]
+OK   git diff AGENTS.md is readable — stderr=
+NOTE AGENTS.md migration diff is empty — base=b5d4195a365c
+OK   HEAD revision of AGENTS.md is readable — stderr=
+NOTE routing-row increment is printed, not judged — base=b5d4195a365c window=uncommitted-only added_rows=0 added_missing_triggers=['intent-capturer', 'pm-discovery', 'project-brief', 'ROADMAP'] added_dead_targets=[]
+OK   .codex/README.md has a 目录结构 section
+OK   registered-entry list is not drained below its floor — entries=6 floor=4
+OK   目录结构 section lists every registered entry — missing=[]
+
+check_roadmap_and_routing: 0 check(s) failed
+EXITCODE=0
+
+================================================================================================================================================================
+块 04 — `文件:行` 活指针复算（driver=artifacts/tmp/b033-pointer-fix.py 脚本面、b033-pointer-fix2.py 文档面、b033-cite-scan.py 全库扫描面）
+================================================================================================================================================================
+### 脚本面：`--apply` 那轮逐字（capture=run217-pointer-fix.txt）
+.codex/scripts/dev/checkers_selftest.py: HEAD lines=1108 now lines=1240
+.codex/scripts/run_all_guards.py: HEAD lines=405 now lines=408
+
+==== 每条声称区间的映射（旧块与新块逐行比对；不一致就试锚点候选，仍不一致标 REVIEW）
+
+checkers_selftest.py [MOVED/diff-map(subseq,就地改=[('RUN_METRICS, CHECK_REPORTER)', 'RUN_METRICS, CHECK_REPORTER, CHECK_WATCH')])] :44-80 -> :44-84  sites=1
+   old_first='CODE_REVIEWER_MD = ".codex/agents/code-reviewer.md"'
+   new_first='CODE_REVIEWER_MD = ".codex/agents/code-reviewer.md"'
+   old_last ='RUN_METRICS, CHECK_REPORTER)'
+   new_last ='RUN_METRICS, CHECK_REPORTER, CHECK_WATCH)'
+
+checkers_selftest.py [SAME/diff-map] :55-58 -> :55-58  sites=1
+   old_first='CODE_SIMPLIFIER_MD = ".codex/agents/code-simplifier.md"'
+   new_first='CODE_SIMPLIFIER_MD = ".codex/agents/code-simplifier.md"'
+   old_last ='CHECK_SIMPLIFY = ".codex/scripts/check_code_simplifier_a'
+   new_last ='CHECK_SIMPLIFY = ".codex/scripts/check_code_simplifier_a'
+
+checkers_selftest.py [SAME/diff-map] :57-57 -> :57-57  sites=1
+   old_first='MAINTAINABILITY_RULE = ".codex/rules/maintainability.md"'
+   new_first='MAINTAINABILITY_RULE = ".codex/rules/maintainability.md"'
+   old_last ='MAINTAINABILITY_RULE = ".codex/rules/maintainability.md"'
+   new_last ='MAINTAINABILITY_RULE = ".codex/rules/maintainability.md"'
+
+checkers_selftest.py [SAME/diff-map] :59-64 -> :59-64  sites=1
+   old_first='RUN_EVALS = ".codex/scripts/run_evals.py"'
+   new_first='RUN_EVALS = ".codex/scripts/run_evals.py"'
+   old_last ='EVALS_README_DOC = ".codex/evals/README.md"'
+   new_last ='EVALS_README_DOC = ".codex/evals/README.md"'
+
+checkers_selftest.py [SAME/diff-map] :64-67 -> :64-67  sites=1
+   old_first='EVALS_README_DOC = ".codex/evals/README.md"'
+   new_first='EVALS_README_DOC = ".codex/evals/README.md"'
+   old_last ='CHECK_KEEPER = ".codex/scripts/check_eval_keeper_agent.p'
+   new_last ='CHECK_KEEPER = ".codex/scripts/check_eval_keeper_agent.p'
+
+checkers_selftest.py [SAME/diff-map] :68-71 -> :68-71  sites=2
+   old_first='RUN_METRICS = ".codex/scripts/metrics_report.py"'
+   new_first='RUN_METRICS = ".codex/scripts/metrics_report.py"'
+   old_last ='METRICS_REPORT = "artifacts/metrics/report.md"'
+   new_last ='METRICS_REPORT = "artifacts/metrics/report.md"'
+
+checkers_selftest.py [SAME/diff-map] :71-71 -> :71-71  sites=1
+   old_first='METRICS_REPORT = "artifacts/metrics/report.md"'
+   new_first='METRICS_REPORT = "artifacts/metrics/report.md"'
+   old_last ='METRICS_REPORT = "artifacts/metrics/report.md"'
+   new_last ='METRICS_REPORT = "artifacts/metrics/report.md"'
+
+checkers_selftest.py [SAME/diff-map] :72-75 -> :72-75  sites=1
+   old_first='METRICS_REPORTER_MD = ".codex/agents/metrics-reporter.md'
+   new_first='METRICS_REPORTER_MD = ".codex/agents/metrics-reporter.md'
+   old_last ='RUN_ROSTER = ".codex/scripts/run_all_guards.py"'
+   new_last ='RUN_ROSTER = ".codex/scripts/run_all_guards.py"'
+
+checkers_selftest.py [MOVED/anchor] :74-76 -> :74-75  sites=1
+   old_first='CHECK_REPORTER = ".codex/scripts/check_metrics_reporter_'
+   new_first='CHECK_REPORTER = ".codex/scripts/check_metrics_reporter_'
+   old_last ='RUN_ROSTER = ".codex/scripts/run_all_guards.py"'
+   new_last ='RUN_ROSTER = ".codex/scripts/run_all_guards.py"'
+
+checkers_selftest.py [MOVED/diff-map(subseq,就地改=[('RUN_METRICS, CHECK_REPORTER)', 'RUN_METRICS, CHECK_REPORTER, CHECK_WATCH')])] :78-80 -> :82-84  sites=9
+   old_first='BASELINES = (CHECK_INTENT, CHECK_ROADMAP, CHECK_TEMPLATE'
+   new_first='BASELINES = (CHECK_INTENT, CHECK_ROADMAP, CHECK_TEMPLATE'
+   old_last ='RUN_METRICS, CHECK_REPORTER)'
+   new_last ='RUN_METRICS, CHECK_REPORTER, CHECK_WATCH)'
+
+checkers_selftest.py [MOVED/diff-map] :98-100 -> :102-104  sites=1
+   old_first='SAMPLE_SPEC_LONG = ("long", PM_SKILL, 89, "fire60")     '
+   new_first='SAMPLE_SPEC_LONG = ("long", PM_SKILL, 89, "fire60")     '
+   old_last ='SAMPLE_SPEC_TRIM = ("trim", PM_SKILL, 44, "quiet60")    '
+   new_last ='SAMPLE_SPEC_TRIM = ("trim", PM_SKILL, 44, "quiet60")    '
+
+checkers_selftest.py [MOVED/diff-map] :98-113 -> :102-117  sites=1
+   old_first='SAMPLE_SPEC_LONG = ("long", PM_SKILL, 89, "fire60")     '
+   new_first='SAMPLE_SPEC_LONG = ("long", PM_SKILL, 89, "fire60")     '
+   old_last ='SAMPLE_SPEC_METRICS_SRC = ("metricsSource60", RUN_METRIC'
+   new_last ='SAMPLE_SPEC_METRICS_SRC = ("metricsSource60", RUN_METRIC'
+
+run_all_guards.py [SAME/diff-map] :1-24 -> :1-24  sites=1
+   old_first='#!/usr/bin/env python3'
+   new_first='#!/usr/bin/env python3'
+   old_last ='"""'
+   new_last ='"""'
+
+run_all_guards.py [SAME/diff-map] :42-42 -> :42-42  sites=1
+   old_first='DEFAULT_TIMEOUT = 300'
+   new_first='DEFAULT_TIMEOUT = 300'
+   old_last ='DEFAULT_TIMEOUT = 300'
+   new_last ='DEFAULT_TIMEOUT = 300'
+
+run_all_guards.py [SAME/diff-map] :60-60 -> :60-60  sites=1
+   old_first='fail_codes=(1,), timeout=DEFAULT_TIMEOUT, rc_labels=None'
+   new_first='fail_codes=(1,), timeout=DEFAULT_TIMEOUT, rc_labels=None'
+   old_last ='fail_codes=(1,), timeout=DEFAULT_TIMEOUT, rc_labels=None'
+   new_last ='fail_codes=(1,), timeout=DEFAULT_TIMEOUT, rc_labels=None'
+
+run_all_guards.py [MOVED/diff-map(subseq,就地改=[])] :81-156 -> :81-159  sites=1
+   old_first='GUARDS = ['
+   new_first='GUARDS = ['
+   old_last ='E("sync_fixtures --selftest", NODE, ["frontend/scripts/s'
+   new_last ='E("sync_fixtures --selftest", NODE, ["frontend/scripts/s'
+
+run_all_guards.py [MOVED/diff-map(subseq,就地改=[])] :81-173 -> :81-176  sites=1
+   old_first='GUARDS = ['
+   new_first='GUARDS = ['
+   old_last =']'
+   new_last =']'
+
+run_all_guards.py [SAME/diff-map] :87-88 -> :87-88  sites=2
+   old_first='E("check_code_reviewer_agent", PY, [".codex/scripts/chec'
+   new_first='E("check_code_reviewer_agent", PY, [".codex/scripts/chec'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [SAME/diff-map] :89-90 -> :89-90  sites=1
+   old_first='E("check_codebase_researcher_agent", PY,'
+   new_first='E("check_codebase_researcher_agent", PY,'
+   old_last ='[".codex/scripts/check_codebase_researcher_agent.py"],'
+   new_last ='[".codex/scripts/check_codebase_researcher_agent.py"],'
+
+run_all_guards.py [SAME/diff-map] :89-91 -> :89-91  sites=3
+   old_first='E("check_codebase_researcher_agent", PY,'
+   new_first='E("check_codebase_researcher_agent", PY,'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [SAME/anchor+span] :92-94 -> :92-94  sites=3
+   old_first='E("check_code_simplifier_agent", PY,'
+   new_first='E("check_code_simplifier_agent", PY,'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [MOVED/diff-map] :95-96 -> :98-99  sites=3
+   old_first='E("run_evals", PY, [".codex/scripts/run_evals.py"],'
+   new_first='E("run_evals", PY, [".codex/scripts/run_evals.py"],'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [MOVED/diff-map] :97-98 -> :100-101  sites=4
+   old_first='E("check_eval_keeper_agent", PY, [".codex/scripts/check_'
+   new_first='E("check_eval_keeper_agent", PY, [".codex/scripts/check_'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [MOVED/diff-map] :99-100 -> :102-103  sites=4
+   old_first='E("metrics_report", PY, [".codex/scripts/metrics_report.'
+   new_first='E("metrics_report", PY, [".codex/scripts/metrics_report.'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [MOVED/diff-map] :101-103 -> :104-106  sites=5
+   old_first='E("check_metrics_reporter_agent", PY,'
+   new_first='E("check_metrics_reporter_agent", PY,'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [MOVED/diff-map] :119-119 -> :122-122  sites=1
+   old_first='E("check_androidtest_schema_expectations", PY,'
+   new_first='E("check_androidtest_schema_expectations", PY,'
+   old_last ='E("check_androidtest_schema_expectations", PY,'
+   new_last ='E("check_androidtest_schema_expectations", PY,'
+
+run_all_guards.py [MOVED/diff-map] :132-132 -> :135-135  sites=1
+   old_first='E("verify_1to1_selftest", NODE, [".codex/scripts/dev/par'
+   new_first='E("verify_1to1_selftest", NODE, [".codex/scripts/dev/par'
+   old_last ='E("verify_1to1_selftest", NODE, [".codex/scripts/dev/par'
+   new_last ='E("verify_1to1_selftest", NODE, [".codex/scripts/dev/par'
+FIX .codex/ROADMAP.md:443 run_all_guards.py:132!r -> 'run_all_guards.py:135'
+FIX .codex/evals/cases/001-impact-inventory/product.md:5 dev/checkers_selftest.py:78-80!r -> 'dev/checkers_selftest.py:82-84'
+FIX .codex/tasks/T-2026-10-19-code-reviewer-role-and-review-template-024.md:120 dev/checkers_selftest.py:44-80!r -> 'dev/checkers_selftest.py:44-84'
+FIX .codex/tasks/T-2026-10-19-code-simplifier-role-027.md:117 checkers_selftest.py:78-80!r -> 'checkers_selftest.py:82-84'
+FIX .codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md:108 dev/checkers_selftest.py:78-80!r -> 'dev/checkers_selftest.py:82-84'
+FIX .codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md:126 dev/checkers_selftest.py:98-113!r -> 'dev/checkers_selftest.py:102-117'
+FIX .codex/tasks/T-2026-10-19-eval-keeper-baseline-role-029.md:40 run_all_guards.py:97-98!r -> 'run_all_guards.py:100-101'
+FIX .codex/tasks/T-2026-10-19-eval-keeper-baseline-role-029.md:116 run_all_guards.py:97-98!r -> 'run_all_guards.py:100-101'
+FIX .codex/tasks/T-2026-10-19-eval-keeper-baseline-role-029.md:116 checkers_selftest.py:78-80!r -> 'checkers_selftest.py:82-84'
+FIX .codex/tasks/T-2026-10-19-eval-keeper-baseline-role-029.md:141 run_all_guards.py:97-98!r -> 'run_all_guards.py:100-101'
+FIX .codex/tasks/T-2026-10-19-eval-keeper-baseline-role-029.md:245 run_all_guards.py:97-98!r -> 'run_all_guards.py:100-101'
+FIX .codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md:40 run_all_guards.py:95-96!r -> 'run_all_guards.py:98-99'
+FIX .codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md:116 run_all_guards.py:95-96!r -> 'run_all_guards.py:98-99'
+FIX .codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md:117 dev/checkers_selftest.py:78-80!r -> 'dev/checkers_selftest.py:82-84'
+FIX .codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md:140 run_all_guards.py:95-96!r -> 'run_all_guards.py:98-99'
+FIX .codex/tasks/T-2026-10-19-guard-runner-one-command-roster-023.md:60 run_all_guards.py:81-173!r -> 'run_all_guards.py:81-176'
+FIX .codex/tasks/T-2026-10-19-harness-guard-judgements-d4-d6-021.md:68 dev/checkers_selftest.py:98-100!r -> 'dev/checkers_selftest.py:102-104'
+FIX .codex/tasks/T-2026-10-19-metrics-report-generator-030.md:42 run_all_guards.py:99-100!r -> 'run_all_guards.py:102-103'
+FIX .codex/tasks/T-2026-10-19-metrics-report-generator-030.md:132 run_all_guards.py:99-100!r -> 'run_all_guards.py:102-103'
+FIX .codex/tasks/T-2026-10-19-metrics-report-generator-030.md:132 checkers_selftest.py:78-80!r -> 'checkers_selftest.py:82-84'
+FIX .codex/tasks/T-2026-10-19-metrics-report-generator-030.md:158 run_all_guards.py:99-100!r -> 'run_all_guards.py:102-103'
+FIX .codex/tasks/T-2026-10-19-metrics-report-generator-030.md:263 run_all_guards.py:99-100!r -> 'run_all_guards.py:102-103'
+FIX .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md:44 run_all_guards.py:101-103!r -> 'run_all_guards.py:104-106'
+FIX .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md:45 run_all_guards.py:101-103!r -> 'run_all_guards.py:104-106'
+FIX .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md:152 run_all_guards.py:101-103!r -> 'run_all_guards.py:104-106'
+FIX .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md:152 checkers_selftest.py:78-80!r -> 'checkers_selftest.py:82-84'
+FIX .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md:190 run_all_guards.py:101-103!r -> 'run_all_guards.py:104-106'
+FIX .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md:216 checkers_selftest.py:74-76!r -> 'checkers_selftest.py:74-75'
+FIX .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md:218 run_all_guards.py:81-156!r -> 'run_all_guards.py:81-159'
+FIX .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md:282 checkers_selftest.py:78-80!r -> 'checkers_selftest.py:82-84'
+FIX .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md:330 run_all_guards.py:101-103!r -> 'run_all_guards.py:104-106'
+FIX .codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md:103 dev/checkers_selftest.py:78-80!r -> 'dev/checkers_selftest.py:82-84'
+FIX Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:79 run_all_guards.py:119!r -> 'run_all_guards.py:122'
+
+EDITS applied=33
+VERDICT: PASS
+
+### 脚本面在它之前的四轮是「REVIEW 挡住不写」的过程读数（capture=run213/run214/run215/run216-pointer-map.txt），末两轮原样贴出——REVIEW 不是修辞，它真的挡住过 `--apply`
+--- run215 (NO-CANDIDATE 轮)
+.codex/scripts/dev/checkers_selftest.py: HEAD lines=1108 now lines=1240
+.codex/scripts/run_all_guards.py: HEAD lines=405 now lines=408
+
+==== 每条声称区间的映射（旧块与新块逐行比对；不一致就试锚点候选，仍不一致标 REVIEW）
+
+checkers_selftest.py [MOVED/NO-CANDIDATE-MATCHES] :44-80 -> :44-84  sites=1
+   old_first='CODE_REVIEWER_MD = ".codex/agents/code-reviewer.md"'
+   new_first='CODE_REVIEWER_MD = ".codex/agents/code-reviewer.md"'
+   old_last ='RUN_METRICS, CHECK_REPORTER)'
+   new_last ='RUN_METRICS, CHECK_REPORTER, CHECK_WATCH)'
+
+checkers_selftest.py [SAME/diff-map] :55-58 -> :55-58  sites=1
+   old_first='CODE_SIMPLIFIER_MD = ".codex/agents/code-simplifier.md"'
+   new_first='CODE_SIMPLIFIER_MD = ".codex/agents/code-simplifier.md"'
+   old_last ='CHECK_SIMPLIFY = ".codex/scripts/check_code_simplifier_a'
+   new_last ='CHECK_SIMPLIFY = ".codex/scripts/check_code_simplifier_a'
+
+checkers_selftest.py [SAME/diff-map] :57-57 -> :57-57  sites=1
+   old_first='MAINTAINABILITY_RULE = ".codex/rules/maintainability.md"'
+   new_first='MAINTAINABILITY_RULE = ".codex/rules/maintainability.md"'
+   old_last ='MAINTAINABILITY_RULE = ".codex/rules/maintainability.md"'
+   new_last ='MAINTAINABILITY_RULE = ".codex/rules/maintainability.md"'
+
+checkers_selftest.py [SAME/diff-map] :59-64 -> :59-64  sites=1
+   old_first='RUN_EVALS = ".codex/scripts/run_evals.py"'
+   new_first='RUN_EVALS = ".codex/scripts/run_evals.py"'
+   old_last ='EVALS_README_DOC = ".codex/evals/README.md"'
+   new_last ='EVALS_README_DOC = ".codex/evals/README.md"'
+
+checkers_selftest.py [SAME/diff-map] :64-67 -> :64-67  sites=1
+   old_first='EVALS_README_DOC = ".codex/evals/README.md"'
+   new_first='EVALS_README_DOC = ".codex/evals/README.md"'
+   old_last ='CHECK_KEEPER = ".codex/scripts/check_eval_keeper_agent.p'
+   new_last ='CHECK_KEEPER = ".codex/scripts/check_eval_keeper_agent.p'
+
+checkers_selftest.py [SAME/diff-map] :68-71 -> :68-71  sites=2
+   old_first='RUN_METRICS = ".codex/scripts/metrics_report.py"'
+   new_first='RUN_METRICS = ".codex/scripts/metrics_report.py"'
+   old_last ='METRICS_REPORT = "artifacts/metrics/report.md"'
+   new_last ='METRICS_REPORT = "artifacts/metrics/report.md"'
+
+checkers_selftest.py [SAME/diff-map] :71-71 -> :71-71  sites=1
+   old_first='METRICS_REPORT = "artifacts/metrics/report.md"'
+   new_first='METRICS_REPORT = "artifacts/metrics/report.md"'
+   old_last ='METRICS_REPORT = "artifacts/metrics/report.md"'
+   new_last ='METRICS_REPORT = "artifacts/metrics/report.md"'
+
+checkers_selftest.py [SAME/diff-map] :72-75 -> :72-75  sites=1
+   old_first='METRICS_REPORTER_MD = ".codex/agents/metrics-reporter.md'
+   new_first='METRICS_REPORTER_MD = ".codex/agents/metrics-reporter.md'
+   old_last ='RUN_ROSTER = ".codex/scripts/run_all_guards.py"'
+   new_last ='RUN_ROSTER = ".codex/scripts/run_all_guards.py"'
+
+checkers_selftest.py [MOVED/anchor] :74-76 -> :74-75  sites=1
+   old_first='CHECK_REPORTER = ".codex/scripts/check_metrics_reporter_'
+   new_first='CHECK_REPORTER = ".codex/scripts/check_metrics_reporter_'
+   old_last ='RUN_ROSTER = ".codex/scripts/run_all_guards.py"'
+   new_last ='RUN_ROSTER = ".codex/scripts/run_all_guards.py"'
+
+checkers_selftest.py [MOVED/NO-CANDIDATE-MATCHES] :78-80 -> :82-84  sites=9
+   old_first='BASELINES = (CHECK_INTENT, CHECK_ROADMAP, CHECK_TEMPLATE'
+   new_first='BASELINES = (CHECK_INTENT, CHECK_ROADMAP, CHECK_TEMPLATE'
+   old_last ='RUN_METRICS, CHECK_REPORTER)'
+   new_last ='RUN_METRICS, CHECK_REPORTER, CHECK_WATCH)'
+
+checkers_selftest.py [MOVED/diff-map] :98-100 -> :102-104  sites=1
+   old_first='SAMPLE_SPEC_LONG = ("long", PM_SKILL, 89, "fire60")     '
+   new_first='SAMPLE_SPEC_LONG = ("long", PM_SKILL, 89, "fire60")     '
+   old_last ='SAMPLE_SPEC_TRIM = ("trim", PM_SKILL, 44, "quiet60")    '
+   new_last ='SAMPLE_SPEC_TRIM = ("trim", PM_SKILL, 44, "quiet60")    '
+
+checkers_selftest.py [MOVED/diff-map] :98-113 -> :102-117  sites=1
+   old_first='SAMPLE_SPEC_LONG = ("long", PM_SKILL, 89, "fire60")     '
+   new_first='SAMPLE_SPEC_LONG = ("long", PM_SKILL, 89, "fire60")     '
+   old_last ='SAMPLE_SPEC_METRICS_SRC = ("metricsSource60", RUN_METRIC'
+   new_last ='SAMPLE_SPEC_METRICS_SRC = ("metricsSource60", RUN_METRIC'
+
+run_all_guards.py [SAME/diff-map] :1-24 -> :1-24  sites=1
+   old_first='#!/usr/bin/env python3'
+   new_first='#!/usr/bin/env python3'
+   old_last ='"""'
+   new_last ='"""'
+
+run_all_guards.py [SAME/diff-map] :42-42 -> :42-42  sites=1
+   old_first='DEFAULT_TIMEOUT = 300'
+   new_first='DEFAULT_TIMEOUT = 300'
+   old_last ='DEFAULT_TIMEOUT = 300'
+   new_last ='DEFAULT_TIMEOUT = 300'
+
+run_all_guards.py [SAME/diff-map] :60-60 -> :60-60  sites=1
+   old_first='fail_codes=(1,), timeout=DEFAULT_TIMEOUT, rc_labels=None'
+   new_first='fail_codes=(1,), timeout=DEFAULT_TIMEOUT, rc_labels=None'
+   old_last ='fail_codes=(1,), timeout=DEFAULT_TIMEOUT, rc_labels=None'
+   new_last ='fail_codes=(1,), timeout=DEFAULT_TIMEOUT, rc_labels=None'
+
+run_all_guards.py [MOVED/NO-CANDIDATE-MATCHES] :81-156 -> :81-159  sites=1
+   old_first='GUARDS = ['
+   new_first='GUARDS = ['
+   old_last ='E("sync_fixtures --selftest", NODE, ["frontend/scripts/s'
+   new_last ='E("sync_fixtures --selftest", NODE, ["frontend/scripts/s'
+
+run_all_guards.py [MOVED/NO-CANDIDATE-MATCHES] :81-173 -> :81-176  sites=1
+   old_first='GUARDS = ['
+   new_first='GUARDS = ['
+   old_last =']'
+   new_last =']'
+
+run_all_guards.py [SAME/diff-map] :87-88 -> :87-88  sites=2
+   old_first='E("check_code_reviewer_agent", PY, [".codex/scripts/chec'
+   new_first='E("check_code_reviewer_agent", PY, [".codex/scripts/chec'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [SAME/diff-map] :89-90 -> :89-90  sites=1
+   old_first='E("check_codebase_researcher_agent", PY,'
+   new_first='E("check_codebase_researcher_agent", PY,'
+   old_last ='[".codex/scripts/check_codebase_researcher_agent.py"],'
+   new_last ='[".codex/scripts/check_codebase_researcher_agent.py"],'
+
+run_all_guards.py [SAME/diff-map] :89-91 -> :89-91  sites=3
+   old_first='E("check_codebase_researcher_agent", PY,'
+   new_first='E("check_codebase_researcher_agent", PY,'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [SAME/anchor+span] :92-94 -> :92-94  sites=3
+   old_first='E("check_code_simplifier_agent", PY,'
+   new_first='E("check_code_simplifier_agent", PY,'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [MOVED/diff-map] :95-96 -> :98-99  sites=3
+   old_first='E("run_evals", PY, [".codex/scripts/run_evals.py"],'
+   new_first='E("run_evals", PY, [".codex/scripts/run_evals.py"],'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [MOVED/diff-map] :97-98 -> :100-101  sites=4
+   old_first='E("check_eval_keeper_agent", PY, [".codex/scripts/check_'
+   new_first='E("check_eval_keeper_agent", PY, [".codex/scripts/check_'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [MOVED/diff-map] :99-100 -> :102-103  sites=4
+   old_first='E("metrics_report", PY, [".codex/scripts/metrics_report.'
+   new_first='E("metrics_report", PY, [".codex/scripts/metrics_report.'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [MOVED/diff-map] :101-103 -> :104-106  sites=5
+   old_first='E("check_metrics_reporter_agent", PY,'
+   new_first='E("check_metrics_reporter_agent", PY,'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [MOVED/diff-map] :119-119 -> :122-122  sites=1
+   old_first='E("check_androidtest_schema_expectations", PY,'
+   new_first='E("check_androidtest_schema_expectations", PY,'
+   old_last ='E("check_androidtest_schema_expectations", PY,'
+   new_last ='E("check_androidtest_schema_expectations", PY,'
+
+run_all_guards.py [MOVED/diff-map] :132-132 -> :135-135  sites=1
+   old_first='E("verify_1to1_selftest", NODE, [".codex/scripts/dev/par'
+   new_first='E("verify_1to1_selftest", NODE, [".codex/scripts/dev/par'
+   old_last ='E("verify_1to1_selftest", NODE, [".codex/scripts/dev/par'
+   new_last ='E("verify_1to1_selftest", NODE, [".codex/scripts/dev/par'
+
+REVIEW needed=4（候选都对不上内容，先人工看再 --apply）
+   checkers_selftest.py:44-80 -> 44-84
+   checkers_selftest.py:78-80 -> 82-84
+   run_all_guards.py:81-156 -> 81-159
+   run_all_guards.py:81-173 -> 81-176
+--- run216 (候选全对上、可 --apply 轮)
+.codex/scripts/dev/checkers_selftest.py: HEAD lines=1108 now lines=1240
+.codex/scripts/run_all_guards.py: HEAD lines=405 now lines=408
+
+==== 每条声称区间的映射（旧块与新块逐行比对；不一致就试锚点候选，仍不一致标 REVIEW）
+
+checkers_selftest.py [MOVED/diff-map(subseq,就地改=[('RUN_METRICS, CHECK_REPORTER)', 'RUN_METRICS, CHECK_REPORTER, CHECK_WATCH')])] :44-80 -> :44-84  sites=1
+   old_first='CODE_REVIEWER_MD = ".codex/agents/code-reviewer.md"'
+   new_first='CODE_REVIEWER_MD = ".codex/agents/code-reviewer.md"'
+   old_last ='RUN_METRICS, CHECK_REPORTER)'
+   new_last ='RUN_METRICS, CHECK_REPORTER, CHECK_WATCH)'
+
+checkers_selftest.py [SAME/diff-map] :55-58 -> :55-58  sites=1
+   old_first='CODE_SIMPLIFIER_MD = ".codex/agents/code-simplifier.md"'
+   new_first='CODE_SIMPLIFIER_MD = ".codex/agents/code-simplifier.md"'
+   old_last ='CHECK_SIMPLIFY = ".codex/scripts/check_code_simplifier_a'
+   new_last ='CHECK_SIMPLIFY = ".codex/scripts/check_code_simplifier_a'
+
+checkers_selftest.py [SAME/diff-map] :57-57 -> :57-57  sites=1
+   old_first='MAINTAINABILITY_RULE = ".codex/rules/maintainability.md"'
+   new_first='MAINTAINABILITY_RULE = ".codex/rules/maintainability.md"'
+   old_last ='MAINTAINABILITY_RULE = ".codex/rules/maintainability.md"'
+   new_last ='MAINTAINABILITY_RULE = ".codex/rules/maintainability.md"'
+
+checkers_selftest.py [SAME/diff-map] :59-64 -> :59-64  sites=1
+   old_first='RUN_EVALS = ".codex/scripts/run_evals.py"'
+   new_first='RUN_EVALS = ".codex/scripts/run_evals.py"'
+   old_last ='EVALS_README_DOC = ".codex/evals/README.md"'
+   new_last ='EVALS_README_DOC = ".codex/evals/README.md"'
+
+checkers_selftest.py [SAME/diff-map] :64-67 -> :64-67  sites=1
+   old_first='EVALS_README_DOC = ".codex/evals/README.md"'
+   new_first='EVALS_README_DOC = ".codex/evals/README.md"'
+   old_last ='CHECK_KEEPER = ".codex/scripts/check_eval_keeper_agent.p'
+   new_last ='CHECK_KEEPER = ".codex/scripts/check_eval_keeper_agent.p'
+
+checkers_selftest.py [SAME/diff-map] :68-71 -> :68-71  sites=2
+   old_first='RUN_METRICS = ".codex/scripts/metrics_report.py"'
+   new_first='RUN_METRICS = ".codex/scripts/metrics_report.py"'
+   old_last ='METRICS_REPORT = "artifacts/metrics/report.md"'
+   new_last ='METRICS_REPORT = "artifacts/metrics/report.md"'
+
+checkers_selftest.py [SAME/diff-map] :71-71 -> :71-71  sites=1
+   old_first='METRICS_REPORT = "artifacts/metrics/report.md"'
+   new_first='METRICS_REPORT = "artifacts/metrics/report.md"'
+   old_last ='METRICS_REPORT = "artifacts/metrics/report.md"'
+   new_last ='METRICS_REPORT = "artifacts/metrics/report.md"'
+
+checkers_selftest.py [SAME/diff-map] :72-75 -> :72-75  sites=1
+   old_first='METRICS_REPORTER_MD = ".codex/agents/metrics-reporter.md'
+   new_first='METRICS_REPORTER_MD = ".codex/agents/metrics-reporter.md'
+   old_last ='RUN_ROSTER = ".codex/scripts/run_all_guards.py"'
+   new_last ='RUN_ROSTER = ".codex/scripts/run_all_guards.py"'
+
+checkers_selftest.py [MOVED/anchor] :74-76 -> :74-75  sites=1
+   old_first='CHECK_REPORTER = ".codex/scripts/check_metrics_reporter_'
+   new_first='CHECK_REPORTER = ".codex/scripts/check_metrics_reporter_'
+   old_last ='RUN_ROSTER = ".codex/scripts/run_all_guards.py"'
+   new_last ='RUN_ROSTER = ".codex/scripts/run_all_guards.py"'
+
+checkers_selftest.py [MOVED/diff-map(subseq,就地改=[('RUN_METRICS, CHECK_REPORTER)', 'RUN_METRICS, CHECK_REPORTER, CHECK_WATCH')])] :78-80 -> :82-84  sites=9
+   old_first='BASELINES = (CHECK_INTENT, CHECK_ROADMAP, CHECK_TEMPLATE'
+   new_first='BASELINES = (CHECK_INTENT, CHECK_ROADMAP, CHECK_TEMPLATE'
+   old_last ='RUN_METRICS, CHECK_REPORTER)'
+   new_last ='RUN_METRICS, CHECK_REPORTER, CHECK_WATCH)'
+
+checkers_selftest.py [MOVED/diff-map] :98-100 -> :102-104  sites=1
+   old_first='SAMPLE_SPEC_LONG = ("long", PM_SKILL, 89, "fire60")     '
+   new_first='SAMPLE_SPEC_LONG = ("long", PM_SKILL, 89, "fire60")     '
+   old_last ='SAMPLE_SPEC_TRIM = ("trim", PM_SKILL, 44, "quiet60")    '
+   new_last ='SAMPLE_SPEC_TRIM = ("trim", PM_SKILL, 44, "quiet60")    '
+
+checkers_selftest.py [MOVED/diff-map] :98-113 -> :102-117  sites=1
+   old_first='SAMPLE_SPEC_LONG = ("long", PM_SKILL, 89, "fire60")     '
+   new_first='SAMPLE_SPEC_LONG = ("long", PM_SKILL, 89, "fire60")     '
+   old_last ='SAMPLE_SPEC_METRICS_SRC = ("metricsSource60", RUN_METRIC'
+   new_last ='SAMPLE_SPEC_METRICS_SRC = ("metricsSource60", RUN_METRIC'
+
+run_all_guards.py [SAME/diff-map] :1-24 -> :1-24  sites=1
+   old_first='#!/usr/bin/env python3'
+   new_first='#!/usr/bin/env python3'
+   old_last ='"""'
+   new_last ='"""'
+
+run_all_guards.py [SAME/diff-map] :42-42 -> :42-42  sites=1
+   old_first='DEFAULT_TIMEOUT = 300'
+   new_first='DEFAULT_TIMEOUT = 300'
+   old_last ='DEFAULT_TIMEOUT = 300'
+   new_last ='DEFAULT_TIMEOUT = 300'
+
+run_all_guards.py [SAME/diff-map] :60-60 -> :60-60  sites=1
+   old_first='fail_codes=(1,), timeout=DEFAULT_TIMEOUT, rc_labels=None'
+   new_first='fail_codes=(1,), timeout=DEFAULT_TIMEOUT, rc_labels=None'
+   old_last ='fail_codes=(1,), timeout=DEFAULT_TIMEOUT, rc_labels=None'
+   new_last ='fail_codes=(1,), timeout=DEFAULT_TIMEOUT, rc_labels=None'
+
+run_all_guards.py [MOVED/diff-map(subseq,就地改=[])] :81-156 -> :81-159  sites=1
+   old_first='GUARDS = ['
+   new_first='GUARDS = ['
+   old_last ='E("sync_fixtures --selftest", NODE, ["frontend/scripts/s'
+   new_last ='E("sync_fixtures --selftest", NODE, ["frontend/scripts/s'
+
+run_all_guards.py [MOVED/diff-map(subseq,就地改=[])] :81-173 -> :81-176  sites=1
+   old_first='GUARDS = ['
+   new_first='GUARDS = ['
+   old_last =']'
+   new_last =']'
+
+run_all_guards.py [SAME/diff-map] :87-88 -> :87-88  sites=2
+   old_first='E("check_code_reviewer_agent", PY, [".codex/scripts/chec'
+   new_first='E("check_code_reviewer_agent", PY, [".codex/scripts/chec'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [SAME/diff-map] :89-90 -> :89-90  sites=1
+   old_first='E("check_codebase_researcher_agent", PY,'
+   new_first='E("check_codebase_researcher_agent", PY,'
+   old_last ='[".codex/scripts/check_codebase_researcher_agent.py"],'
+   new_last ='[".codex/scripts/check_codebase_researcher_agent.py"],'
+
+run_all_guards.py [SAME/diff-map] :89-91 -> :89-91  sites=3
+   old_first='E("check_codebase_researcher_agent", PY,'
+   new_first='E("check_codebase_researcher_agent", PY,'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [SAME/anchor+span] :92-94 -> :92-94  sites=3
+   old_first='E("check_code_simplifier_agent", PY,'
+   new_first='E("check_code_simplifier_agent", PY,'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [MOVED/diff-map] :95-96 -> :98-99  sites=3
+   old_first='E("run_evals", PY, [".codex/scripts/run_evals.py"],'
+   new_first='E("run_evals", PY, [".codex/scripts/run_evals.py"],'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [MOVED/diff-map] :97-98 -> :100-101  sites=4
+   old_first='E("check_eval_keeper_agent", PY, [".codex/scripts/check_'
+   new_first='E("check_eval_keeper_agent", PY, [".codex/scripts/check_'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [MOVED/diff-map] :99-100 -> :102-103  sites=4
+   old_first='E("metrics_report", PY, [".codex/scripts/metrics_report.'
+   new_first='E("metrics_report", PY, [".codex/scripts/metrics_report.'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [MOVED/diff-map] :101-103 -> :104-106  sites=5
+   old_first='E("check_metrics_reporter_agent", PY,'
+   new_first='E("check_metrics_reporter_agent", PY,'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [MOVED/diff-map] :119-119 -> :122-122  sites=1
+   old_first='E("check_androidtest_schema_expectations", PY,'
+   new_first='E("check_androidtest_schema_expectations", PY,'
+   old_last ='E("check_androidtest_schema_expectations", PY,'
+   new_last ='E("check_androidtest_schema_expectations", PY,'
+
+run_all_guards.py [MOVED/diff-map] :132-132 -> :135-135  sites=1
+   old_first='E("verify_1to1_selftest", NODE, [".codex/scripts/dev/par'
+   new_first='E("verify_1to1_selftest", NODE, [".codex/scripts/dev/par'
+   old_last ='E("verify_1to1_selftest", NODE, [".codex/scripts/dev/par'
+   new_last ='E("verify_1to1_selftest", NODE, [".codex/scripts/dev/par'
+
+VERDICT: DRY RUN (pass --apply to write)
+
+### 文档面干跑（capture=run219-pointer-docs-dry.txt）：`声称条目数=10 站点数=23 MOVED=0 SAME=10`——这一支的结论是文档侧不需要写任何行
+ROADMAP.md (.codex/ROADMAP.md): HEAD lines=459 now lines=461
+_TEMPLATE.md (.codex/tasks/_TEMPLATE.md): HEAD lines=126 now lines=132
+HARNESS.md (.codex/HARNESS.md): HEAD lines=27 now lines=27
+
+==== 声称条目数=10 站点数=23
+
+MOVED 声称=0 SAME 声称=10
+
+VERDICT: DRY RUN (pass --apply to write)
+
+### 全库扫描面的两次计数对照（run226 是卡片写出前 53 处、run254 是卡片在场后 60 处，两轮都无 `SHORT`；区间越界会打 `SHORT`，所以这一条同时是「卡片自己那 7 处引用也在同一口径下复算过」的读数）
+== .codex/scripts/dev/checkers_selftest.py total_lines=1240
+== .codex/scripts/run_all_guards.py total_lines=408
+citations=53
+---
+== validate_tasks
+== roadmap_routing
+== context_pack
+== metrics judge
+== dup-scan
+== watch checker
+== cite-scan
+== .codex/scripts/dev/checkers_selftest.py total_lines=1240
+== .codex/scripts/run_all_guards.py total_lines=408
+citations=60
+
+### 片 032 的锚点表跟随本片漂移后的现状（capture=run232-b032-pointers.txt）：`stale=0`
+table floor: facts=93 floor=80
+measured=93 stale=0
+POINTERS-B0 problems=0
+VERDICT: PASS
+
+### 两张冻结表登记退役、不回填（capture=run232-b028-pointers.txt、run225-b031-pointers.txt）
+POINTERS checked=55 stale=20
+VERDICT: FAIL
+---
+POINTERS checked=214 stale=41
+VERDICT: FAIL
+
+================================================================================================================================================================
+块 05 — 指标面：报告过期如何先红给你看，以及重生成后的读数
+================================================================================================================================================================
+### 第一次整轮 INCONCLUSIVE（capture=run227-selftest-full.txt）——`BASELINE FAIL metrics_report rc=1` 把整轮收在 rc=3，这就是 D12 说的「FAIL ≠ 产物变差」
+BASELINE FAIL metrics_report rc=1
+check_metrics_report: 1 check(s) failed
+EXITCODE=1
+OVERALL: INCONCLUSIVE
+EXITCODE=3
+EXITCODE=3
+---
+18;review=14;evals=14;spec=4;context=3;replay=2;template=2', 'reporter=35;watch=35;keeper=29;intent=26;simplify=24;research=19;metrics=19;roadmap=18;review=14;evals=14;spec=4;context=3;replay=2;template=2'], ['guard-roster-by-tier', 'entries=38;core=32;precommit=6', 'entries=39;core=33;precommit=6'], ['baseline-checkers', '12', '13']]
+
+### 设计好的动作是 `--write` 重生成（capture=run228-metrics-refresh.txt）
+WROTE artifacts/metrics/report.md lines=20 metrics=12
+EXITCODE=0
+EXITCODE=0
+check_metrics_report: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+
+### 卡片在场后的指标面（capture=run235-post-card.txt）
+WROTE artifacts/metrics/report.md lines=20 metrics=12
+EXITCODE=0
+check_metrics_report: 0 check(s) failed
+EXITCODE=0
+check_context_pack: 0 check(s) failed
+EXITCODE=0
+
+================================================================================================================================================================
+块 06 — 重复短语扫描（driver=artifacts/tmp/b031-dup-scan.py，本片沿用不新建）
+================================================================================================================================================================
+### 本片第一次跑（capture=run224-dupscan.txt）
+driver=artifacts/tmp/b031-dup-scan.py
+assertion: 正文里不许出现紧邻重复 8-24 字且含 >= 6 个汉字的子串
+scanned_files=143 scanned_lines=19268
+raw_hits=166 cjk_prose_hits=0 non_prose_hits=166
+known_old_dup hits=0 floor=0
+positive_control fired=True unit='第 10 条基线所在元组；' (an unarmed detector is not a judgement)
+DUP-SCAN problems=0
+VERDICT: PASS
+
+### 末态（capture=run258-postcard.txt 的 dup-scan 段）
+raw_hits=166 cjk_prose_hits=0 non_prose_hits=166
+known_old_dup hits=0 floor=0
+positive_control fired=True unit='第 10 条基线所在元组；' (an unarmed detector is not a judgement)
+DUP-SCAN problems=0
+VERDICT: PASS
+
+================================================================================================================================================================
+块 07 — C2 依赖句从推测变成读数：`android/` 构建入口实跑
+================================================================================================================================================================
+### 上一轮整跑（capture=run221-gradle-rerun.txt，`--rerun-tasks`）的末四行与 rc
+BUILD SUCCESSFUL in 23s
+GRADLE_RC=0
+
+### 证据文件写出前又跑了一遍，并把**只算本轮新写 XML** 的合计贴在一起（capture=run248-gradle-xml.txt；`START_EPOCH` 之前的旧 XML 不算本轮证据）
+BUILD SUCCESSFUL in 14s
+GRADLE_RC=0
+GRADLE_RC=0
+reading=only-XMLs-written-after-START_EPOCH start=1792433686 now=1792433701
+AGGREGATE suites=114 tests=1004 failures=0 errors=0 skipped=0
+floors suites>=40 tests>=800 failures==0 errors==0 met=True
+VERDICT: PASS
+XML_RC=0
+
+================================================================================================================================================================
+块 08 — 产量口径与改动面
+================================================================================================================================================================
+### 尺寸驱动（driver=artifacts/tmp/b033-sizing.py，沿用片 029/030/031 的同一个 `added_lines()`/`docstring_spans()`，capture=run234-sizing.txt）
+.codex/scripts/check_loop_watcher_agent.py added_code=211 added_docstring=22 added_comment=16
+.codex/scripts/run_all_guards.py added_code=3 added_docstring=0 added_comment=0
+driver=artifacts/tmp/b033-sizing.py
+PRODUCTION_LINES total=214
+not-counted-as-code .codex/agents/loop-watcher.md present_lines=114
+not-counted-as-code .codex/agents/loop-watcher.toml present_lines=7
+not-counted-as-code .codex/scripts/dev/checkers_selftest.py present_lines=1240
+not-counted-as-code .codex/tasks/_TEMPLATE.md present_lines=132
+not-counted-as-code .codex/HARNESS.md present_lines=27
+not-counted-as-code .codex/ROADMAP.md present_lines=461
+not-counted-as-code artifacts/metrics/report.md present_lines=21
+excluded by contract: checkers_selftest.py（35 例注入，自测面）、角色正文两份（角色资产，由守门判形状而非由行数判）、_TEMPLATE/HARNESS/ROADMAP/卡片（文档）、report.md（生成产物）
+VERDICT: PASS
+
+### 业务代码零命中 + 改动面（`git diff --numstat HEAD -- android frontend` 空即零命中；下面附当场 `git status --porcelain`）
+(无输出：android/** 与 frontend/** 零命中)
+ M .codex/HARNESS.md
+ M .codex/ROADMAP.md
+ M .codex/evals/cases/001-impact-inventory/product.md
+ M .codex/scripts/dev/checkers_selftest.py
+ M .codex/scripts/run_all_guards.py
+ M .codex/tasks/T-2026-10-19-code-reviewer-role-and-review-template-024.md
+ M .codex/tasks/T-2026-10-19-code-simplifier-role-027.md
+ M .codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md
+ M .codex/tasks/T-2026-10-19-eval-keeper-baseline-role-029.md
+ M .codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md
+ M .codex/tasks/T-2026-10-19-guard-runner-one-command-roster-023.md
+ M .codex/tasks/T-2026-10-19-harness-guard-judgements-d4-d6-021.md
+ M .codex/tasks/T-2026-10-19-metrics-report-generator-030.md
+ M .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md
+ M .codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md
+ M .codex/tasks/_TEMPLATE.md
+ M Docs/spec/SPEC-2026-09-21-ai-persona-preference.md
+ M artifacts/metrics/report.md
+?? .codex/agents/loop-watcher.md
+?? .codex/agents/loop-watcher.toml
+?? .codex/scripts/check_loop_watcher_agent.py
+?? .codex/tasks/T-2026-10-20-loop-watcher-role-033.md
+
+### `git diff --stat HEAD`（当场重跑，只读；`core.autocrlf=true` 的换行警告一并留在读数里）
+ .codex/HARNESS.md                                  |   2 +-
+ .codex/ROADMAP.md                                  |   6 +-
+ .codex/evals/cases/001-impact-inventory/product.md |   2 +-
+ .codex/scripts/dev/checkers_selftest.py            | 146 ++++++++++++++++++++-
+ .codex/scripts/run_all_guards.py                   |   3 +
+ ...9-code-reviewer-role-and-review-template-024.md |   2 +-
+ .../tasks/T-2026-10-19-code-simplifier-role-027.md |   2 +-
+ ...26-10-19-codebase-researcher-impact-role-026.md |   4 +-
+ .../T-2026-10-19-eval-keeper-baseline-role-029.md  |   8 +-
+ .../T-2026-10-19-evals-inventory-and-runner-028.md |   8 +-
+ ...26-10-19-guard-runner-one-command-roster-023.md |   2 +-
+ ...026-10-19-harness-guard-judgements-d4-d6-021.md |   2 +-
+ .../T-2026-10-19-metrics-report-generator-030.md   |   8 +-
+ .../T-2026-10-19-metrics-reporter-role-031.md      |  16 +--
+ ...2026-10-19-project-brief-dir-state-guard-025.md |   2 +-
+ .codex/tasks/_TEMPLATE.md                          |   6 +
+ Docs/spec/SPEC-2026-09-21-ai-persona-preference.md |   2 +-
+ artifacts/metrics/report.md                        |  14 +-
+ 18 files changed, 189 insertions(+), 46 deletions(-)
+warning: in the working copy of '.codex/HARNESS.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/ROADMAP.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/evals/cases/001-impact-inventory/product.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-code-reviewer-role-and-review-template-024.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-code-simplifier-role-027.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-eval-keeper-baseline-role-029.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-guard-runner-one-command-roster-023.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-harness-guard-judgements-d4-d6-021.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-metrics-report-generator-030.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-metrics-reporter-role-031.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/_TEMPLATE.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'artifacts/metrics/report.md', LF will be replaced by CRLF the next time Git touches it
+

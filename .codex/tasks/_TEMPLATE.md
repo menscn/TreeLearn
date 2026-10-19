@@ -97,6 +97,12 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
 - Cleanup:
 - Regression evidence:
 
+### LOOP — optional
+- Command and rounds:
+- Failure identity and repeat count:
+- Stop condition hit:
+- Handoff:
+
 ### TDD or sizing exception — only with prior user approval
 - Exception type:
 - Reason:

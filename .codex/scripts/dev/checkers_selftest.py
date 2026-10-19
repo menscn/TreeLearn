@@ -73,11 +73,15 @@ METRICS_REPORTER_MD = ".codex/agents/metrics-reporter.md"
 METRICS_REPORTER_TOML = ".codex/agents/metrics-reporter.toml"
 CHECK_REPORTER = ".codex/scripts/check_metrics_reporter_agent.py"
 RUN_ROSTER = ".codex/scripts/run_all_guards.py"
+LOOP_WATCHER_MD = ".codex/agents/loop-watcher.md"
+LOOP_WATCHER_TOML = ".codex/agents/loop-watcher.toml"
+OBSERVABILITY_RULE = ".codex/rules/observability.md"
+CHECK_WATCH = ".codex/scripts/check_loop_watcher_agent.py"
 
 # 先跑一遍「未注入」的基线：守门对健康的副本必须转绿，否则下面的反向用例没有意义。
 BASELINES = (CHECK_INTENT, CHECK_ROADMAP, CHECK_TEMPLATE, CHECK_SPEC, CHECK_REVIEW,
              CHECK_CONTEXT, CHECK_RESEARCH, CHECK_SIMPLIFY, RUN_EVALS, CHECK_KEEPER,
-             RUN_METRICS, CHECK_REPORTER)
+             RUN_METRICS, CHECK_REPORTER, CHECK_WATCH)
 
 # 需要「把目标文件当参数传给守门」的用例（回放校验器读的是参数指定的实例文件）。
 ARGS_BY_CASE = {
@@ -111,6 +115,10 @@ SAMPLE_SPEC_GRAMMAR = ("grammar60", EVALS_README_DOC, 60, "quiet60")
 # B6 的 metrics-reporter 抄检对象是「生成器正文 + ROADMAP 的 B6 条目」。这里取生成器那一侧做正控：
 # 它和 ROADMAP 都是派生源，删掉任何一侧的比较对象都会让另一侧的抄检悄悄失效。
 SAMPLE_SPEC_METRICS_SRC = ("metricsSource60", RUN_METRICS, 60, "quiet60")
+# C2 的 loop-watcher 抄检对象是三份规则正文（防回归 / 验收 / 日志遥测）。这里取 observability.md
+# 那一侧做正控：另外两侧已由 research:/simplify: 用各自来源证过，缺这一侧时
+# max_overlap_with_files 的第三个文件坏了没人知道。
+SAMPLE_SPEC_OBSERVABILITY = ("observability60", OBSERVABILITY_RULE, 60, "quiet60")
 
 
 def derive_sample(skill_text, length, tier):
@@ -573,7 +581,7 @@ CASES = [
     ("evals:forbid-hit", RUN_EVALS, EVALS_PRODUCT, None, "待填\n",
      "case 001-impact-inventory forbid: 待填", "append"),
     ("evals:pointer-stale", RUN_EVALS, EVALS_PRODUCT,
-     ".codex/scripts/dev/checkers_selftest.py:78-80",
+     ".codex/scripts/dev/checkers_selftest.py:82-84",
      ".codex/scripts/dev/checkers_selftest.py:99999",
      "case 001-impact-inventory pointers-alive", "replace"),
     ("evals:path-dead", RUN_EVALS, EVALS_PRODUCT,
@@ -720,16 +728,16 @@ CASES = [
      "--read library-entries", "--read library-entrys",
      "every line prints the command the generator would print", "replace"),
     ("metrics:hand-copied-reading", RUN_METRICS, METRICS_REPORT,
-     "total=19", "total=20",
+     None, "\n- 指标=library-entries | 家族=失败案例库增量 | 口径=注入用，与真行同名只差一个读数 | 命令=python -X utf8 .codex/scripts/metrics_report.py --read library-entries | 读数=rows=13;headings=6;total=20 | 复算=值\n",
      "each machine-recheckable reading is produced by running the command on its own line",
-     "replace"),
+     "append"),
     # 源文件加了一行而报告没重生成：这是最常见的过期形状，它必须由同一条命令响，而不是靠人记得。
     ("metrics:source-drifted-under-report", RUN_METRICS, REGRESSION_CASES,
      None, "\n| 追加行 | 只用于证「源变了而报告没重生成」这一形状 |\n",
      "each machine-recheckable reading is produced by running the command on its own line",
      "append"),
-    ("metrics:placeholder-in-reading", RUN_METRICS, METRICS_REPORT,
-     "读数=8 | 复算=值", "读数=待填 | 复算=值",
+    ("metrics:placeholder-injected", RUN_METRICS, METRICS_REPORT,
+     "--read <指标名>", "--read 待填",
      "no metric reading is left as a placeholder", "replace"),
     ("metrics:write-command-drifted", RUN_METRICS, METRICS_REPORT,
      "生成命令=python -X utf8 .codex/scripts/metrics_report.py --write",
@@ -841,6 +849,130 @@ CASES = [
      'name = "metrics-reporter"', 'owner = "metrics-reporter"',
      "agent .toml declares name and description", "replace"),
     ("reporter:toml-unparsable", CHECK_REPORTER, METRICS_REPORTER_TOML,
+     None, "\nbroken = [\n",
+     "agent .toml parses as a Codex agent file", "append"),
+    # ── loop-watcher（C2）：回路监督的四件真会坏的事 ──
+    # 阈值、失败身份、「没判」不入计数、收敛必须带读数——这四条各自被注入证一次。
+    ("watch:agent-file-missing", CHECK_WATCH, LOOP_WATCHER_MD, None, None,
+     "the ten inputs exist", "delete"),
+    ("watch:toml-file-missing", CHECK_WATCH, LOOP_WATCHER_TOML, None, None,
+     "the ten inputs exist", "delete"),
+    # 上报落点的小节定义消失：角色逐字命名的字段没有可比对象，必须 fail-closed 而不是「无话可判」。
+    ("watch:template-gone", CHECK_WATCH, TASK_TEMPLATE, None, None,
+     "the ten inputs exist", "delete"),
+    # 十条输入里任何一条不在场都是仪器坏：C2 新加的这条（日志与遥测规则）尤其，
+    # 它是隐私边界的正文来源，删掉它等于把「不贴 prompt」的比较对象抹掉。
+    ("watch:observability-rule-gone", CHECK_WATCH, OBSERVABILITY_RULE, None, None,
+     "the ten inputs exist", "delete"),
+    ("watch:roster-gone", CHECK_WATCH, RUN_ROSTER, None, None,
+     "the ten inputs exist", "delete"),
+    ("watch:reference-sections-drained", CHECK_WATCH, CODE_REVIEWER_MD,
+     "<", "[",
+     "reference role exposes a usable set of section names", "replace_all"),
+    ("watch:section-uncovered", CHECK_WATCH, LOOP_WATCHER_MD,
+     "## 输出格式", "## 输出形态",
+     "agent section names cover the reference role", "replace"),
+    # 阈值写成「连续若干次」= 没有阈值：THRESHOLD_RE 要求整数，派生集合空即响。
+    ("watch:threshold-vague", CHECK_WATCH, LOOP_WATCHER_MD,
+     "连续 2 次", "连续若干次",
+     "agent states a parseable repeat threshold within a supervisable range", "replace_all"),
+    # 同一个整数必须两处各自承重（契约一条 + 停止条件一条）：只留一处时另一处删空仍然绿。
+    ("watch:threshold-single-place", CHECK_WATCH, LOOP_WATCHER_MD,
+     "  1. 同一失败身份连续 2 次；", "  1. 同一失败身份重复即停；",
+     "agent states a parseable repeat threshold within a supervisable range", "replace_line"),
+    # 阈值合法但大到没人监督（40 次）：这条证 MAX_THRESHOLD_VALUE 有牙，
+    # 否则「把阈值写成 999 次」就是本角色存在的反面。
+    ("watch:threshold-too-high", CHECK_WATCH, LOOP_WATCHER_MD,
+     "连续 2 次", "连续 40 次",
+     "agent states a parseable repeat threshold within a supervisable range", "replace_all"),
+    # 计数挂在水泵次数而不是失败身份上：换个用例红会被读成「还在收敛」，正是 C2 要拦的形状。
+    ("watch:identity-dropped", CHECK_WATCH, LOOP_WATCHER_MD,
+     "失败身份", "同类失败",
+     "agent defines a failure identity from command, judgement line and reading", "replace_all"),
+    # 「没判」的两条病因各证一次：结论词整块消失，以及超时这一形状不再被点名。
+    # 两者都会顺带打掉停止条件第 5 条（它就写在那几行里），所以每例同时响两条判据——
+    # 期望标签仍锁「没判不进重复计数」这一条。
+    ("watch:notjudged-word-gone", CHECK_WATCH, LOOP_WATCHER_MD,
+     "没判", None,
+     "agent keeps 没判 (timeout/absent script) out of the repeat count", "drop_matching"),
+    ("watch:notjudged-timeout-shape-gone", CHECK_WATCH, LOOP_WATCHER_MD,
+     "超时", None,
+     "agent keeps 没判 (timeout/absent script) out of the repeat count", "drop_matching"),
+    # 停止条件清单的第 3、4 条各自独立承重：判据面被动过要停（B5 的反面），
+    # 需要用户独有事实要停（会清本地数据的整包仪器跑）。抽掉任一条，清单读起来仍然像话。
+    ("watch:stop-item-judgement-surface-demoted", CHECK_WATCH, LOOP_WATCHER_MD,
+     "  3. 判据面被动过", "  判据面被动过的形状只作背景说明，不作为停止条件；",
+     "agent lists at least 5 distinct stop conditions", "replace_line"),
+    ("watch:stop-item-user-facts-demoted", CHECK_WATCH, LOOP_WATCHER_MD,
+     "  4. 需要用户独有", "  需要用户独有的事实时由实现者自行判断，不因此停；",
+     "agent lists at least 5 distinct stop conditions", "replace_line"),
+    ("watch:template-loop-gone", CHECK_WATCH, TASK_TEMPLATE,
+     "### LOOP — optional", None,
+     "task template still declares the LOOP subsection", "drop_matching"),
+    ("watch:loop-fields-drained", CHECK_WATCH, TASK_TEMPLATE,
+     "- Command and rounds:", None,
+     "the LOOP subsection declares its report fields", "drop_matching"),
+    # 模板把字段改名而角色没跟：落点变成写进没人读的小节，回路记录静默丢失。
+    ("watch:loop-field-renamed", CHECK_WATCH, TASK_TEMPLATE,
+     "- Command and rounds:", "- Command and passes:",
+     "agent names every report field from the template verbatim", "replace"),
+    # 收敛结论与读数解耦：「收敛」这个词还在，但不再有任何一行同时给出证据词。
+    ("watch:convergence-evidence-drained", CHECK_WATCH, LOOP_WATCHER_MD,
+     "收敛", "完成",
+     "agent ties any convergence claim to a printed reading", "replace_all"),
+    # 把禁令软成许可：没有读数也可以宣布收敛——这条是 C2 存在的理由之一。
+    # 措辞换成「可以」而不是删行，好让其它判据留在原位（实测只有禁令判据转红）。
+    ("watch:evidence-free-convergence-allowed", CHECK_WATCH, LOOP_WATCHER_MD,
+     "禁止", "可以",
+     "agent forbids declaring convergence without evidence", "replace_all"),
+    ("watch:verbatim-drained", CHECK_WATCH, LOOP_WATCHER_MD,
+     "逐字", "大概",
+     "agent pastes readings verbatim instead of paraphrasing them", "replace_all"),
+    # 「一轮」的定义被换掉：没有判据行的执行也能算一轮，退出码判据跟着失去对象。
+    ("watch:round-shape-drained", CHECK_WATCH, LOOP_WATCHER_MD,
+     "一轮", "本次",
+     "a round requires its own judgement line and exit code", "replace_all"),
+    ("watch:privacy-drained", CHECK_WATCH, LOOP_WATCHER_MD,
+     "prompt", None,
+     "agent forbids pasting bodies or credentials into the report", "drop_matching"),
+    # 角色自称可写：回路监督变成亲自下场改判据。
+    ("watch:readonly-flipped", CHECK_WATCH, LOOP_WATCHER_MD,
+     "只读", "可写",
+     "agent declares itself read-only over code and judgement assets", "replace_all"),
+    ("watch:landing-moved", CHECK_WATCH, LOOP_WATCHER_MD,
+     "回路记录只写当前任务卡的 `### LOOP — optional` 小节",
+     "回路记录只写仓库根目录的散记文件",
+     "agent declares its only writable landing is that subsection", "replace"),
+    # 三个既有角色各去掉反引号那一份引用：只剩裸名字或路径引用时，分工句虽已删光，
+    # 裸子串判定仍会放行——所以只替换反引号里那份。
+    ("watch:verifier-unreferenced", CHECK_WATCH, LOOP_WATCHER_MD,
+     "`verifier`", "`验收人`",
+     "agent defers acceptance, review and consolidation to the existing roles", "replace_all"),
+    ("watch:reviewer-unreferenced", CHECK_WATCH, LOOP_WATCHER_MD,
+     "`code-reviewer`", "`复核人`",
+     "agent defers acceptance, review and consolidation to the existing roles", "replace_all"),
+    ("watch:simplifier-unreferenced", CHECK_WATCH, LOOP_WATCHER_MD,
+     "`code-simplifier`", "`收敛人`",
+     "agent defers acceptance, review and consolidation to the existing roles", "replace_all"),
+    ("watch:cites-drained", CHECK_WATCH, LOOP_WATCHER_MD,
+     ".codex/", None,
+     "agent cites >= 6 checkable repo paths", "drop_matching"),
+    ("watch:dead-path-cited", CHECK_WATCH, LOOP_WATCHER_MD,
+     None, "\n另见 `.codex/rules/nonexistent-loop-rule.md`。\n",
+     "every path cited by the role exists on disk", "append"),
+    ("watch:rules-restated", CHECK_WATCH, LOOP_WATCHER_MD,
+     None, SAMPLE_SPEC_OBSERVABILITY,
+     "role text does not restate the rules it cites", "append_sample"),
+    ("watch:placeholder-injected", CHECK_WATCH, LOOP_WATCHER_MD,
+     None, "\nTODO\n",
+     "role text carries no placeholder tokens", "append"),
+    ("watch:toml-md-drift", CHECK_WATCH, LOOP_WATCHER_MD,
+     None, "\n本段只写在 markdown 里，用来证明打包正文不是逐字拷贝。\n",
+     "agent .toml body equals the agent markdown verbatim", "append"),
+    ("watch:toml-name-missing", CHECK_WATCH, LOOP_WATCHER_TOML,
+     'name = "loop-watcher"', 'owner = "loop-watcher"',
+     "agent .toml declares name and description", "replace"),
+    ("watch:toml-unparsable", CHECK_WATCH, LOOP_WATCHER_TOML,
      None, "\nbroken = [\n",
      "agent .toml parses as a Codex agent file", "append"),
 ]
@@ -1027,7 +1159,7 @@ def main():
     # 而是检查**形状**——每条抄检用例都必须走 append_sample，出现字面量样本即判仪器故障。
     copy_check_prefixes = ("intent:copied-methodology", "research:rules-restated",
                            "simplify:rules-restated", "keeper:grammar-table-restated",
-                           "reporter:generator-text-restated")
+                           "reporter:generator-text-restated", "watch:rules-restated")
     literal_copy_cases = [c[0] for c in CASES
                           if c[0].startswith(copy_check_prefixes) and c[6] != "append_sample"]
     if literal_copy_cases:

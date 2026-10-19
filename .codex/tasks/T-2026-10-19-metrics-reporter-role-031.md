@@ -41,8 +41,8 @@ tdd_mode: required
   `checkers_selftest.py` 的 35 例 `reporter:*`、第 12 条基线与第 5 份抄检来源 + core 档注册三行 +
   `.codex/HARNESS.md` 第 7 步接线一句 + 九张卡片的指针复算 + B2 基线快照重转录（零差异）。
 - Core flow and reversibility: 新增两份角色正文与一支守门，改四处既有条目（自检常量与基线元组、抄检来源与前缀
-  闸门、`run_all_guards.py:101-103` 注册、`HARNESS.md:13` 一句），回写 ROADMAP B6 三节，重转录一份快照并跟随
-  它的注入锚点，按现值改写九张卡片的区间引用。回退方式：删角色两份与守门脚本、撤 `run_all_guards.py:101-103`、
+  闸门、`run_all_guards.py:104-106` 注册、`HARNESS.md:13` 一句），回写 ROADMAP B6 三节，重转录一份快照并跟随
+  它的注入锚点，按现值改写九张卡片的区间引用。回退方式：删角色两份与守门脚本、撤 `run_all_guards.py:104-106`、
   撤 `checkers_selftest.py` 的 35 例 + 第 12 条基线 + 4 个常量 + 第 5 份抄检来源 + 前缀闸门那一项、还原
   `HARNESS.md:13` 那一行，即回到片 030 末态；快照重转录与九张卡片的指针改写**不属**该回退面（前者是当前树
   复算出来的事实，后者是把已被片 030/031 加行推歪的引用改回现值）。
@@ -149,7 +149,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `HARNESS.md` 第 1–6 步原文（接线只做在第 7 步那一条之内）、`checkers_selftest.py` 原有 174 例与 11 条基线
   一字未改（只追加）、九张卡片除区间行号之外的全部正文。
 - Producer/consumer/sibling entrypoints and platform branches (code evidence): 生产者 = 角色正文两份与守门脚本；
-  消费者 = `run_all_guards.py:101-103`（core 档）、`checkers_selftest.py:78-80`（12 条基线所在元组的末行
+  消费者 = `run_all_guards.py:104-106`（core 档）、`checkers_selftest.py:82-84`（12 条基线所在元组的末行
   `RUN_METRICS, CHECK_REPORTER)`）、`:741-845`（35 例起点与末点）、`:1028-1030`（抄检前缀闸门）、
   `.codex/HARNESS.md:13`（验收阶段之后的第 7 步）。同级入口 = `check_code_reviewer_agent.py` /
   `check_codebase_researcher_agent.py` / `check_code_simplifier_agent.py` / `check_eval_keeper_agent.py`，
@@ -187,7 +187,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `.codex/scripts/dev/checkers_selftest.py:72-75`（4 个常量）/ `:78-80`（12 条基线所在元组的后两行）/
   `:111-113`（5 份抄检取样来源，本片新增 `SAMPLE_SPEC_METRICS_SRC` 在 `:113`）/ `:741-845`（35 例 `reporter:*`）/
   `:575-578`（`evals:pointer-stale` 锚点，本片把它跟随快照改成 `:78-80`）/ `:1028-1030`（抄检前缀闸门），
-  `.codex/scripts/run_all_guards.py:101-103`、`.codex/HARNESS.md:13`、`.codex/ROADMAP.md:108-119`（B6 条目，片 032 加行后下移一位，
+  `.codex/scripts/run_all_guards.py:104-106`、`.codex/HARNESS.md:13`、`.codex/ROADMAP.md:108-119`（B6 条目，片 032 加行后下移一位，
   本片改 `验收方式` `:114` / `交付任务` `:117` / `实现要点` `:118`）、
   `.codex/evals/cases/001-impact-inventory/product.md:1-13`（刷新后的快照，`:5` 就是被推下去的那条指针）。
   行号是先实测再落笔的：`artifacts/tmp/b031-pointer-fix.py --apply` 打印 `EDITS applied=46 bad=0 files=9`，
@@ -213,9 +213,9 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `check_roadmap_and_routing.py`）；`grep -rlI "metrics_report" .codex Docs` 末态命中更多，含本片卡片自身。
   **行数含卡片自身，卡片加长就会漂，所以这里只登记文件集，行数写命令让人现场取（片 023 定的规矩）**。
   `.codex/README.md` 的目录结构节登记行现值 `:32`（`artifacts/metrics/`），由块 01 RED-4 当作抽离对象验证过。
-- Superseded phrases/examples reverse-searched: 被本片改写的旧句是九张卡片里 `checkers_selftest.py:74-76`（4 处，
+- Superseded phrases/examples reverse-searched: 被本片改写的旧句是九张卡片里 `checkers_selftest.py:74-75`（4 处，
   基线元组区间）、`:913`、`:811-830`、`:385-394`、`:768-773`、`:942-944`、`:81-170` 等区间引用与
-  `run_all_guards.py:81-156`；块 04 逐条按现值改写（`:78-80`、`:1028-1030`、`:926-945`、`:392-401`、`:883-888`、
+  `run_all_guards.py:81-159`；块 04 逐条按现值改写（`:78-80`、`:1028-1030`、`:926-945`、`:392-401`、`:883-888`、
   `:1058-1060`、`:81-173`、`81-173`）并标注是被哪一片推下去的。ROADMAP B6 的 `交付任务` 原文把角色面写成
   「片 031 交付……B6 在片 031 之前不算交付完成」的**未来式**，现改为已交付读数并把条数措辞留在「以现场读数取，
   不写进本条」。旧句已完全替换：`grep -rn "B2 在片 029 之前不算交付完成\|B6 在片 031 之前不算交付完成" .codex Docs`
@@ -279,7 +279,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
       equal=False`（`fails=1` 这条本身就是判据不撞车的证据）。
 - [x] 快照刷新后 `run_evals` 仍绿且复算的是新位置：刷新前 `changed_lines=[5] zero_diff_with_source=False`，
       刷新后 `bytes=1745 sha256_12=2e0d1cbef721 zero_diff_with_source=True`，快照 `:5` 现值是
-      `checkers_selftest.py:78-80`，同轮把 `evals:pointer-stale` 的锚点（`:575-578`）改到同一行，否则整轮会报
+      `checkers_selftest.py:82-84`，同轮把 `evals:pointer-stale` 的锚点（`:575-578`）改到同一行，否则整轮会报
       `HARNESS — anchor not found`（块 03 / 块 06）。
 - [x] `run_all_guards.py --list` 读数 `entries=38 core=32 precommit=6`，`--tier core` 整跑
       `pass=32 fail=0 inconclusive=0 fault=0` / `VERDICT: PASS`，`--tier precommit` 整跑 `pass=6 fail=0`，
@@ -327,7 +327,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
 - Implementation: `.codex/agents/metrics-reporter.md`（113 行内容；`<identity>` `:8` / `<source>` `:16` /
   `<contract>` `:23-43` / `<rules>` `:45-64` / `## 触发时机` `:66` / `## 职责清单` `:74` / `## 输出格式` `:87` /
   `## 交接` `:97` / `## 禁区` `:106`）与由 `artifacts/tmp/gen_agent_toml.py` 生成的逐字相同 `.toml`（6 行）；
-  core 档注册 `run_all_guards.py:101-103`；`.codex/HARNESS.md:13` 的第 7 步接线；
+  core 档注册 `run_all_guards.py:104-106`；`.codex/HARNESS.md:13` 的第 7 步接线；
   `checkers_selftest.py` 的 4 个常量 `:72-75`、第 12 条基线 `:78-80`、第 5 份抄检来源 `:113`、
   35 例 `reporter:*` `:741-845`、前缀闸门 `:1028-1030`。
 - Command: `python -X utf8 .codex/scripts/check_metrics_reporter_agent.py`

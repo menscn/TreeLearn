@@ -114,7 +114,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `identical=True`）、`run_all_guards.py` 其余 31 条注册项、`HARNESS.md` 第 1/2/3/5/6 步原文（接线只做在一句之内）、
   `checkers_selftest.py` 原有 86 例与 7 条基线一字未改。
 - Producer/consumer/sibling entrypoints and platform branches (code evidence): 生产者 = 角色正文与守门脚本；
-  消费者 = `run_all_guards.py:92-94`（core 档）、`checkers_selftest.py:78-80`（第 8 条基线所在元组；片 029 在其上插了
+  消费者 = `run_all_guards.py:92-94`（core 档）、`checkers_selftest.py:82-84`（第 8 条基线所在元组；片 029 在其上插了
   3 个常量、片 030 又插了 4 个并把元组撑到三行，行号从 `:66-67` 经 `:70-71` 挪到这里，由片 030 复算）、`.codex/HARNESS.md:10`
   （派工/实现阶段的第 4 步）。同级入口 = `check_codebase_researcher_agent.py`，它与本片共用
   `harness_check_lib.citable_paths()`（同一筛选两份的那一处已合并）。

@@ -57,7 +57,7 @@ tdd_mode: required
 
 ### Behavior impact — applicable surfaces only
 - Intended change and old behavior to preserve: 无运行时产品行为变化（改的是流程工具面）。要保留的旧行为是「各守门单独跑时读数不变」——本片不 import 也不改写它们，只以子进程调用。
-- Producer/consumer/sibling entrypoints and platform branches (code evidence): 生产者=注册表 `.codex/scripts/run_all_guards.py:81-173`（`GUARDS`）；消费者=.codex/skills/guard-runner/SKILL.md 与 ROADMAP B3 条目的验收方式；兄弟入口 `.codex/skills/lint-all/SKILL.md`（按变更路径选检查）与汇总面（整跑）互补，技能正文显式指向它而不复述其内容。平台分支：`resolve()` 对 PY/NODE/PS 三种解释器各一条路径，PS 那条必须先把控制台切成 UTF-8，否则判据行按系统代码页落进管道而不可读。根 `AGENTS.md` 的路由表未新增触发词（本片不是一条新规则，而是既有「完成结论必须匹配证据」的执行工具），因此 `check_roadmap_and_routing` 的当前态路由判据不受影响。
+- Producer/consumer/sibling entrypoints and platform branches (code evidence): 生产者=注册表 `.codex/scripts/run_all_guards.py:81-176`（`GUARDS`）；消费者=.codex/skills/guard-runner/SKILL.md 与 ROADMAP B3 条目的验收方式；兄弟入口 `.codex/skills/lint-all/SKILL.md`（按变更路径选检查）与汇总面（整跑）互补，技能正文显式指向它而不复述其内容。平台分支：`resolve()` 对 PY/NODE/PS 三种解释器各一条路径，PS 那条必须先把控制台切成 UTF-8，否则判据行按系统代码页落进管道而不可读。根 `AGENTS.md` 的路由表未新增触发词（本片不是一条新规则，而是既有「完成结论必须匹配证据」的执行工具），因此 `check_roadmap_and_routing` 的当前态路由判据不受影响。
 - Native bridge or independent-client compatibility/update requirements: 无。
 - Behavior-neutral non-applicability reason, if applicable: 不适用——本片确实新增了一条会被每片调用的门禁入口。
 

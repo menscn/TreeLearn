@@ -128,12 +128,14 @@ Phase C 的条目都不是「现在缺人写」，而是**缺前置事实**：�
 
 - **ID**：C2
 - **目标**：给自动化回路配一个监督者：盯着「跑—失败—修—再跑」的循环是否在收敛，重复同一失败超过阈值就停下来上报，而不是无限重试烧时间。
-- **范围（可写路径）**：`.codex/agents/loop-watcher.md`、`.codex/scripts/check_loop_watcher_agent.py`
+- **范围（可写路径）**：`.codex/agents/loop-watcher.md`、`.codex/agents/loop-watcher.toml`、`.codex/scripts/check_loop_watcher_agent.py`、`.codex/scripts/dev/checkers_selftest.py`、`.codex/scripts/run_all_guards.py`、`.codex/tasks/_TEMPLATE.md`（`### LOOP — optional` 小节）、`.codex/HARNESS.md`
 - **依赖**：B3（守门自动化）先落地，否则没有可被监督的回路；同时需要真实的构建入口（`android/` 下的 Gradle 任务）已经可用。
 - **owner_lane**：harness
 - **验收方式**：`python .codex/scripts/check_loop_watcher_agent.py` 退出码 0；脚本断言角色给出重复失败的判定阈值、停止条件与上报格式，且禁止在无证据时宣布收敛。
 - **开源来源**：`https://github.com/obra/superpowers` → `skills/executing-plans/SKILL.md`；`https://github.com/openai/skills` → `skills/.curated/gh-fix-ci/SKILL.md`（2026-09-21 实测 HTTP 200）
 - **执行提示词**：前置条件——B3 已完成，且 `android/` 下的构建入口能跑通。读 `.codex/HARNESS.md`、`.codex/rules/observability.md`、`.codex/ROADMAP.md`、`.codex/scripts/validate_tasks.py`，再参考上游 `https://github.com/obra/superpowers` 的 executing-plans 与 `https://github.com/openai/skills` 的 gh-fix-ci。在 `.codex/agents/` 下新增 loop-watcher.md，写明循环的收敛判据、重复失败的阈值、必须停下来上报的条件，以及每条结论要附哪次运行的证据；配套纯标准库校验脚本并跑通。
+- **交付任务**：片 033（`T-2026-10-20-loop-watcher-role-033`）交付 `.codex/agents/loop-watcher.md` + 逐字相同的 `.toml` 包装、成对守门 `check_loop_watcher_agent.py` 及其 `watch:*` 注入用例、该守门升为 `checkers_selftest.py` 的第 13 条基线并登记 core 档、`.codex/tasks/_TEMPLATE.md` 的 `### LOOP — optional` 小节、`.codex/HARNESS.md` 第 4 步接线一句；status=verifying。**没有**照执行提示词的隐含假设只做 `.md`——沿用本仓库 `.md` 权威 + `.toml` 运行时包装的既有约定。依赖句里「`android/` 下的构建入口已经可用」在本片从推测变成读数：卡片记了实跑的 Gradle 命令与结果。判据条数与注入用例条数以 `python -X utf8 .codex/scripts/dev/checkers_selftest.py` 现场取，不写进本条。
+- **实现要点（交付后回写，不是验收方式的替代）**：本条的验收句只给了三个名词（阈值、停止条件、上报格式）加一条禁令，所以判据的重心全在「能不能被单个注入证伪」上。**阈值判据数的是 `连续 N 次` 这个形状并且带上限**：目标句写的是「超过阈值就停下来上报，而不是无限重试烧时间」，把阈值写成几十仍然满足「给出了阈值」这个字面而把目标毁掉，所以 `watch:threshold-too-high` 与 `watch:threshold-vague`（换成「连续若干次」）各判一种走法；阈值还必须在多处出现（`MIN_THRESHOLD_LINES`），只在一条停止项里出现过一次的数字不构成回路判据。**「同一失败」要有一个可复算的身份**：身份判据数的是部件同时在场，把 `失败身份` 换成 `同类失败` 会转红——后者没定义按什么算同类，重复计数就没法被第二个人复算。**「没判」与「失败」必须分开**：`FAIL ≠ 产物变差`（D12 的教训）写进正文，判据要求形状行与处置词（不进/不算/先修）同时满足下限，`watch:notjudged-word-gone`、`watch:notjudged-timeout-shape-gone` 各抽干一种形状都判红；这两例同时会抽干停止条件第 5 项，属于一条主张在两处承重，不是两条重复判据。**停止条件按条目形状计数**（缩进编号行）而不是数名词：泛化掉「判据面被动过」或「需要用户独有事实」任一项各判一红，因为这两项钉住「不许靠改判据让回路收敛」和「这条角色的出口是上报不是裁决」——它们是回路唯一的外出口，能被一句含糊的话替换掉就等于没有闸门。「禁止在无证据时宣布收敛」写成**禁止措辞 × 逐字/判据行的合取**，只把 `禁止` 换成 `可以` 即红；只数「收敛」这个名词时，正文里夸一句收敛很快也能满足。**落点小节标题从 `_TEMPLATE.md` 现场派生**（与 B4 的四个字段、B5 的 `### REFACTOR — optional` 同一形状），所以给模板加 `### LOOP — optional` 与写守门是同一次改动，`watch:landing-moved` 判记录被挪去散记文件。**回路记录里不许带 prompt 等原文**，这条来自 `observability.md`；抄写守卫 `watch:rules-restated` 用 `append_sample` 从该规则文件现场派生正控片段（D4：派不出来算 `HARNESS` 错，绝不静默放过）。**角色只读、只监督回路本身**：与 `verifier`/`code-reviewer`/`code-simplifier` 的分工只按反引号里的角色名计数，三个各有下限，删光分工句即红；它不写 Verdict 也不宣布任务验收。**本片自己造出的指针漂移按机械重定位收掉**：往 `checkers_selftest.py` 追加用例与第 13 条基线、往 `run_all_guards.py` 的 core 档插条目，会让仓库里所有指向这两个文件的 `文件:行` 声明整体位移；difflib 的 HEAD→工作树映射要过内容核验（逐字命中优先，其次允许就地改写的子序列），无候选即进 REVIEW 并挡住 `--apply`。**与 `evals:pointer-stale` 耦合的那处必须一起搬**：评测快照 `product.md` 里被引用的正是注入用例自己的 needle 字符串，用例清单一变、锚点就指向一个不再存在的形状，而 core 档的 `pointers-alive` 只查路径在场、查不出行号腐烂。**注入 needle 里不抄会被生成物改动的值**（本片同一晚两次撞上）：`metrics:placeholder-in-reading` 抄了某个读数 `读数=8`，报告一重生成该串就不在场，全轮以 `HARNESS anchor not found` 收在 rc=3 `INCONCLUSIVE`——这不是判据红，是「没判」，修的方向是换指针串（`--read <指标名>`）或改成追加合成行，而不是把报告改回那个旧值；同族的 `metrics:hand-copied-reading` 抄的是案例库行数 `total=19`，同理会迟早炸掉整轮，一并换成合成行形状。两条都只动注入串，判据、下限与期望标签一字未动。**卡片正文自己也是指标的分母**：卡片 Verdict 一行由挂起改成通过，就会让 `pending-verdict-cards` 那条读数当场过期（`run249` 打 `mismatch=[['pending-verdict-cards', '9', '8']]`），所以正文写完必须再 `--write` 重生成一次、并把末态三条（全轮 + 两档）串行重收，不能引用正文改动之前那轮充数。
 
 ### C3 事实源（SoT）全量声明
 
@@ -440,7 +442,7 @@ D5 = 互斥的两边同时消失），都是「复核后如实回写」而不是
   `b032-*` 脚本并发跑，同一条变成 `FAIL verify_1to1_selftest timeout after 300s, so nothing was judged`、
   汇总 `RUN-ALL-GUARDS pass=31 fail=1 inconclusive=0 fault=0` / `VERDICT: FAIL` / 退出码 1
   （`artifacts/tmp/run186-tiers.txt`）。这一条用的正是 `run_all_guards.py:42` 的 `DEFAULT_TIMEOUT = 300`
-  ——条目定义在 `run_all_guards.py:132`，没有单独传 `timeout=`；262.4s 对 300s 只剩约 12% 余量。
+  ——条目定义在 `run_all_guards.py:135`，没有单独传 `timeout=`；262.4s 对 300s 只剩约 12% 余量。
   D11 记下的 254.5s 与本轮的 262.4s 是同一件事的两次读数。
 - 后果（不修的话）：这条红不代表产物变差，代表**没判**——打印自己就写着 `nothing was judged`。而它的触发条件是
   「旁边有人跑别的脚本」，恰好是交付收尾时最常见的姿势。拿这种轮次当结论只有两种走法，都坏：重跑到绿
