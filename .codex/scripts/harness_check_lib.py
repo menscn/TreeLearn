@@ -5,6 +5,9 @@
   （这条要求的权威正文就是本文件；.codex/rules 与 references 不复述它）。
 - 所有函数只读，不写任何文件。
 - 纯标准库实现。
+- `repo_path/exists/read_text` 可选 `root` 参数：默认解析到真仓库，传入别的根就读那棵树。
+  判据必须在**被判的那棵树**里读文件，否则守门没法在副本里证「每条判据都会响」——
+  写死 REPO_ROOT 的守门只能对着真树跑，它的反向用例就只剩下「改真树」这一种做法。
 """
 
 import io
@@ -27,16 +30,17 @@ def enable_utf8_stdout():
         pass
 
 
-def repo_path(rel):
-    return os.path.join(REPO_ROOT, rel.replace("/", os.sep))
+def repo_path(rel, root=None):
+    base = root or REPO_ROOT
+    return os.path.join(base, rel.replace("/", os.sep))
 
 
-def exists(rel):
-    return os.path.exists(repo_path(rel))
+def exists(rel, root=None):
+    return os.path.exists(repo_path(rel, root))
 
 
-def read_text(rel):
-    with io.open(repo_path(rel), encoding="utf-8") as f:
+def read_text(rel, root=None):
+    with io.open(repo_path(rel, root), encoding="utf-8") as f:
         return f.read()
 
 
@@ -172,7 +176,7 @@ def citable_paths(text):
 
 
 CITATION_RE = re.compile(
-    r"`((?:Docs|\.codex|android|frontend|artifacts|README)[^\s:`（），、；]+?):(\d+)"
+    r"`((?:Docs|\.codex|android|frontend|artifacts|README|AGENTS)[^\s:`]+?):(\d+)"
     r"(?:\s*[-–]\s*(\d+))?`")
 
 
@@ -181,6 +185,12 @@ def path_line_citations(text):
 
     只认带仓库相对前缀的路径：裸文件名 `run_all_guards.py:89` 到底指哪一个文件无法确定，
     按 basename 全库搜索会把「重名即命中」当成真话，所以这里不认——需要复算时写全路径。
+    前缀表里 `AGENTS` 与 `README` 是根级入口文件本身（清单与 ROADMAP 直接写 `AGENTS.md:34`），
+    它们没有目录分隔，但全仓库只有一个同名文件，指认不歧义。
+    路径体只排除空白与反引号：反引号成对已经把一条声称关在一个 token 里，体内的全角
+    括号、逗号、顿号、分号都是合法文件名字符——`Docs/01-demand/…（TreeLearn）_V3.0.md:70`
+    这类中文名引用曾经被旧字符类（多排除了 `（），、；`）整条吞掉，而「不被计入的引用改错了
+    不会有任何命令变红」正是本片要消掉的那件事（`ROADMAP.md` D5 那条回写记过同形事故）。
     """
     out = []
     for m in CITATION_RE.finditer(text):
@@ -189,22 +199,46 @@ def path_line_citations(text):
     return out
 
 
-def citation_problems(citations):
-    """返回 [(citation, 原因)]：路径不在场、行号超出该文件实际行数、起止倒置。"""
+def citation_problems(citations, root=None):
+    """返回 [(citation, 原因)]：路径不在场、行号超出该文件实际行数、起止倒置。
+
+    只判形状（指没指到、越没越界、反没反序），不判语义——「行号还在但那一行已经不是当初
+    说的那件事」要对着 diff 复算，那是 `.codex/scripts/dev/remap_pointers.py` 的活。
+    """
     problems = []
     counts = {}
     for rel, lo, hi in citations:
-        if not exists(rel):
+        if not exists(rel, root):
             problems.append(((rel, lo, hi), "file absent"))
             continue
         if rel not in counts:
-            counts[rel] = len(read_text(rel).splitlines())
+            counts[rel] = len(read_text(rel, root).splitlines())
         n = counts[rel]
         if lo > hi:
             problems.append(((rel, lo, hi), "range reversed"))
         elif hi > n:
             problems.append(((rel, lo, hi), "line beyond eof={0}".format(n)))
     return problems
+
+
+def blank_landings(citations, root=None):
+    """返回落在空行上的声称：读者按行号到达时看到的是一段空白。
+
+    `citation_problems` 判不出这一类——行号在文件范围内，形状完全合法，但那一行没有正文。
+    片 034 的形状扫描实测到它（当前态 0 处、历史面 7 处），这里升成常驻判据。
+    """
+    bad = []
+    counts = {}
+    for rel, lo, _hi in citations:
+        if not exists(rel, root):
+            continue
+        if rel not in counts:
+            counts[rel] = read_text(rel, root).splitlines()
+        lines = counts[rel]
+        if 1 <= lo <= len(lines) and not lines[lo - 1].strip():
+            bad.append((rel, lo, _hi))
+    return bad
+
 
 
 def field_names_from_marker(text, marker="FIELDS:"):

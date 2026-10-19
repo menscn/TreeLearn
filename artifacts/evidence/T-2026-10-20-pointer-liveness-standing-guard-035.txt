@@ -1,0 +1,836 @@
+Task evidence T-2026-10-20-035 — 活指针形状守门、指针复算器常驻化与本片自己被抓到的一条号段
+环境：Windows 10.0.26200 / x64 / Python 3.13.12 / Git Bash；所有 Python 命令带 -X utf8。
+判据行逐字粘贴、不截断。块 00/03/04/05/07 里标了「当场重跑」的条目由本装配驱动现场执行只读命令，
+其余每一行都取自 artifacts/tmp/run*.txt 的在场捕获（该目录 gitignore，号段 run286–run325 都在）。
+本片末态两档整跑是 run315（core，卡片与重生成后的报告都在场）与 run316（precommit），按 D12 串行单独跑、不与任何命令并发；run309/run310 是它们前一次同口径读数，其中 run309 只落了末 20 行（当时刻意 `tail -20`，没有全量落盘），这一点在块 07 里点名而不是补一份不存在的文件。
+块 08 记的是这两轮之后发生的事：证据文件与卡片写出、报告重生成是字节 no-op（所以那两轮判到的报告字节仍然有效）、九条只读判据加复算器完整干跑的当场复跑，以及第一次尝试那份被自己的 `tail -12` 截断的作废读数。
+================================================================================================================================================================
+块 00 — 判据本体：python -X utf8 .codex/scripts/check_pointer_liveness.py
+================================================================================================================================================================
+### 放宽解析之前的首跑（capture=artifacts/tmp/run287-guard-direct.txt，读数 68 文件 / 101 声称 / 15 清单声称 / 204 历史声称）
+OK   the current-state scan surface holds >= 40 files — measured=68 floor=40
+OK   the claim parser found >= 40 `路径:行` claims on that surface — measured=101 floor=40 holders=3
+OK   every claimed path exists in the tree it was written in — dead=[]
+OK   every claimed line is inside the file it names — beyond_eof=[]
+OK   no claimed range runs backwards — reversed=[]
+OK   every claimed line lands on content, not on a blank line — landing_blank=[]
+OK   the fact index's own claims are inside the judged set — measured=15 floor=6 index_present=True
+OK   the history face is counted, not silently dropped — measured=204 floor=20 files=110
+NOTE historical claims are reported, never judged — citations=204 dead=3 beyond_eof=1 reversed=0 landing_blank=2
+holders=3 citations=101 judged_dead=0 judged_beyond=0 judged_reversed=0 judged_blank=0 index_claims=15 hist_citations=204
+
+check_pointer_liveness: 0 check(s) failed
+EXITCODE=0
+
+### 放宽解析之后的末态（capture=artifacts/tmp/run293-guard-after-widen.txt，同面 110 声称 / 17 清单声称 / 215 历史声称）
+OK   the current-state scan surface holds >= 40 files — measured=68 floor=40
+OK   the claim parser found >= 40 `路径:行` claims on that surface — measured=109 floor=40 holders=4
+OK   every claimed path exists in the tree it was written in — dead=[]
+OK   every claimed line is inside the file it names — beyond_eof=[]
+OK   no claimed range runs backwards — reversed=[]
+OK   every claimed line lands on content, not on a blank line — landing_blank=[]
+OK   the fact index's own claims are inside the judged set — measured=16 floor=6 index_present=True
+OK   the history face is counted, not silently dropped — measured=215 floor=20 files=110
+NOTE historical claims are reported, never judged — citations=215 dead=3 beyond_eof=3 reversed=0 landing_blank=2
+holders=4 citations=109 judged_dead=0 judged_beyond=0 judged_reversed=0 judged_blank=0 index_claims=16 hist_citations=215
+
+check_pointer_liveness: 0 check(s) failed
+EXITCODE=0
+
+### 当场重跑（同一命令，本文件写出前的最后一次）
+OK   the current-state scan surface holds >= 40 files — measured=68 floor=40
+OK   the claim parser found >= 40 `路径:行` claims on that surface — measured=110 floor=40 holders=4
+OK   every claimed path exists in the tree it was written in — dead=[]
+OK   every claimed line is inside the file it names — beyond_eof=[]
+OK   no claimed range runs backwards — reversed=[]
+OK   every claimed line lands on content, not on a blank line — landing_blank=[]
+OK   the fact index's own claims are inside the judged set — measured=17 floor=6 index_present=True
+OK   the history face is counted, not silently dropped — measured=220 floor=20 files=111
+NOTE historical claims are reported, never judged — citations=220 dead=3 beyond_eof=5 reversed=0 landing_blank=2
+holders=4 citations=110 judged_dead=0 judged_beyond=0 judged_reversed=0 judged_blank=0 index_claims=17 hist_citations=220
+
+check_pointer_liveness: 0 check(s) failed
+EXITCODE=0
+
+================================================================================================================================================================
+块 01 — RED：常驻仪器不在场的两种证明（一次性驱动的量 + 同一条死声称问旧仪器）
+================================================================================================================================================================
+### 一次性指针驱动普查（capture=artifacts/tmp/run298-driver-census.txt；命令逐字写在 ROADMAP D13 的回读行）
+pointer_drivers=13 lines=2660
+    artifacts/tmp\b026-pointers.py
+    artifacts/tmp\b027-pointers.py
+    artifacts/tmp\b028-pointers.py
+    artifacts/tmp\b029-pointers.py
+    artifacts/tmp\b030-pointers.py
+    artifacts/tmp\b031-pointer-fix.py
+    artifacts/tmp\b031-pointers.py
+    artifacts/tmp\b032-pointer-fix.py
+    artifacts/tmp\b032-pointers.py
+    artifacts/tmp\b033-pointer-fix.py
+    artifacts/tmp\b033-pointer-fix2.py
+    artifacts/tmp\b034-pointer-fix.py
+    artifacts/tmp\b034-pointer-fix2.py
+
+### 对照第一次尝试（capture=artifacts/tmp/run312-red.txt）：副本只拷 `.codex`+`Docs`，本片判据在**未注入**时即 rc=1、`judged_dead=78`——缺的是 `android/**`，是夹具的毛病；该驱动按自己的规则判 INSTRUMENT FAULT 并以 3 结束，没有把「前置条件缺失」当成任何一侧的结论
+Workspace: C:\Users\23745\AppData\Local\Temp\tl-red-035-w4uyth1a
+injected target Docs/spec/SPEC-2026-09-21-ai-persona-preference.md lines=110 claimed_line=9999 (越界，不是靠文件缺席)
+
+==== 基线：副本未注入时三支都必须绿
+BASELINE 旧：事实源清单守门 check_source_of_truth.py: rc=0 -> ok
+BASELINE 旧：评测资产 runner run_evals.py: rc=1 -> MISMATCH
+BASELINE 新：活指针形状守门 check_pointer_liveness.py: rc=1 -> MISMATCH
+INSTRUMENT FAULT: 未注入的副本已经不绿，后面的对照证明不了任何事
+RED-OVERALL: INCONCLUSIVE
+EXITCODE=3
+
+### 同一次尝试的诊断输出（capture=artifacts/tmp/run313-red-diag.txt）
+Workspace: C:\Users\23745\AppData\Local\Temp\tl-red-035-576_o7ks
+injected target Docs/spec/SPEC-2026-09-21-ai-persona-preference.md lines=110 claimed_line=9999 (越界，不是靠文件缺席)
+
+==== 基线：副本未注入时三支都必须绿
+BASELINE 旧：事实源清单守门 check_source_of_truth.py: rc=0 -> ok
+BASELINE 旧：评测资产 runner run_evals.py: rc=1 -> MISMATCH
+      | FAIL case 001-impact-inventory paths-exist — cited=5 floor=3 dead=['android']
+      | NOTE case and expectation inventory is printed, not judged — EVALS cases=1 expectations=9
+BASELINE 新：活指针形状守门 check_pointer_liveness.py: rc=1 -> MISMATCH
+      | FAIL every claimed path exists in the tree it was written in — dead=['android/app/src/main/java/com/treelearn/app/screen/RecommendationTag.java:56-56 (file abse
+      | NOTE historical claims are reported, never judged — citations=120 dead=9 beyond_eof=0 reversed=0 landing_blank=2
+      | holders=4 citations=110 judged_dead=78 judged_beyond=0 judged_reversed=0 judged_blank=0 index_claims=17 hist_citations=120
+INSTRUMENT FAULT: 未注入的副本已经不绿，后面的对照证明不了任何事
+RED-OVERALL: INCONCLUSIVE
+EXITCODE=3
+
+### 末态对照（driver=artifacts/tmp/b035-red.py，capture=run314-red.txt）：整树副本里基线三支全绿，注入一条越界声称后旧的两支 rc=0、本片新判据 rc=1 并点名被声称文件
+Workspace: C:\Users\23745\AppData\Local\Temp\tl-red-035-cbvyw9yk copied_files=21663
+injected target Docs/spec/SPEC-2026-09-21-ai-persona-preference.md lines=110 claimed_line=9999 (越界，不是靠文件缺席)
+
+==== 基线：副本未注入时三支都必须绿
+BASELINE 旧：事实源清单守门 check_source_of_truth.py: rc=0 -> ok
+BASELINE 旧：评测资产 runner run_evals.py: rc=0 -> ok
+BASELINE 新：活指针形状守门 check_pointer_liveness.py: rc=0 -> ok
+
+==== 注入一条越界的 `文件:行` 声称到 .codex/HARNESS.md
+INJECTED 旧：事实源清单守门 check_source_of_truth.py: rc=0 expect=0 -> ok
+      | check_source_of_truth: 0 check(s) failed
+INJECTED 旧：评测资产 runner run_evals.py: rc=0 expect=0 -> ok
+      | run_evals: 0 check(s) failed
+INJECTED 新：活指针形状守门 check_pointer_liveness.py: rc=1 expect=1 -> ok
+      | FAIL every claimed line is inside the file it names — beyond_eof=['Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:9999-9999 (line beyond eof=110)'
+      | holders=5 citations=111 judged_dead=0 judged_beyond=1 judged_reversed=0 judged_blank=0 index_claims=17 hist_citations=170
+      | check_pointer_liveness: 1 check(s) failed
+
+对照读法：旧的两支对同一条死声称 rc=0（它们判的是别的面），新的 rc=1 并点名越界。
+这就是本片要消掉的缺口——在它存在之前，当前态面的死指针不会让任何命令变红。
+driver=artifacts/tmp/b035-red.py
+RED-OVERALL: PASS
+EXITCODE=0
+
+================================================================================================================================================================
+块 02 — 自检：--selftest 的十例正反双向（夹具不健康即判仪器故障）
+================================================================================================================================================================
+### 放宽解析之前（capture=artifacts/tmp/run288-selftest.txt）
+Command: python -X utf8 .codex/scripts/check_pointer_liveness.py --selftest
+Workspace: C:\Users\23745\AppData\Local\Temp\tl-pointer-liveness-gmfwrk38
+BASELINE fixture rc=0 checks_failed=0
+CASE 01 path-absent              rc=1 expect=1 -> ok
+CASE 02 beyond-eof               rc=1 expect=1 -> ok
+CASE 03 reversed-range           rc=1 expect=1 -> ok
+CASE 04 landing-blank            rc=1 expect=1 -> ok
+CASE 05 scan-drained             rc=1 expect=1 -> ok
+CASE 06 matcher-drained          rc=1 expect=1 -> ok
+CASE 07 index-claims-drained     rc=1 expect=1 -> ok
+CASE 08 history-drained          rc=1 expect=1 -> ok
+CASE 09 stackframe-is-not-a-claim rc=0 expect=0 -> ok
+CASE 10 history-defect-not-judged rc=0 expect=0 -> ok
+SELFTEST cases=10 mismatch=0 expected=10
+OVERALL: PASS
+EXITCODE=0
+
+### 末态（capture=artifacts/tmp/run294-selftest-after-widen.txt）
+Command: python -X utf8 .codex/scripts/check_pointer_liveness.py --selftest
+Workspace: C:\Users\23745\AppData\Local\Temp\tl-pointer-liveness-dacjhe5d
+BASELINE fixture rc=0 checks_failed=0
+CASE 01 path-absent              rc=1 expect=1 -> ok
+CASE 02 beyond-eof               rc=1 expect=1 -> ok
+CASE 03 reversed-range           rc=1 expect=1 -> ok
+CASE 04 landing-blank            rc=1 expect=1 -> ok
+CASE 05 scan-drained             rc=1 expect=1 -> ok
+CASE 06 matcher-drained          rc=1 expect=1 -> ok
+CASE 07 index-claims-drained     rc=1 expect=1 -> ok
+CASE 08 history-drained          rc=1 expect=1 -> ok
+CASE 09 stackframe-is-not-a-claim rc=0 expect=0 -> ok
+CASE 10 history-defect-not-judged rc=0 expect=0 -> ok
+SELFTEST cases=10 mismatch=0 expected=10
+OVERALL: PASS
+EXITCODE=0
+
+### 当场重跑（同一命令；用例总数由它自己打印的 `expected=` 给出，卡片与证据都不手抄）
+Command: python -X utf8 .codex/scripts/check_pointer_liveness.py --selftest
+Workspace: C:\Users\23745\AppData\Local\Temp\tl-pointer-liveness-5lcgwf81
+BASELINE fixture rc=0 checks_failed=0
+CASE 01 path-absent              rc=1 expect=1 -> ok
+CASE 02 beyond-eof               rc=1 expect=1 -> ok
+CASE 03 reversed-range           rc=1 expect=1 -> ok
+CASE 04 landing-blank            rc=1 expect=1 -> ok
+CASE 05 scan-drained             rc=1 expect=1 -> ok
+CASE 06 matcher-drained          rc=1 expect=1 -> ok
+CASE 07 index-claims-drained     rc=1 expect=1 -> ok
+CASE 08 history-drained          rc=1 expect=1 -> ok
+CASE 09 stackframe-is-not-a-claim rc=0 expect=0 -> ok
+CASE 10 history-defect-not-judged rc=0 expect=0 -> ok
+SELFTEST cases=10 mismatch=0 expected=10
+OVERALL: PASS
+EXITCODE=0
+
+================================================================================================================================================================
+块 03 — 复算器：搬对本片造成的漂移、幂等、以及三类拒绝各自附带被拒的东西
+================================================================================================================================================================
+### 注册 core 档之前的干跑（capture=artifacts/tmp/run289-remap-dry1.txt）
+holders=68 changed_files=1 targets=['.codex/scripts/harness_check_lib.py']
+target .codex/scripts/harness_check_lib.py: HEAD lines=298 now lines=326
+
+==== 不按映射搬的行（本片对着现树写的，搬了就是把对的改成错的）
+
+==== 声称条目数=1 站点数=1
+
+.codex/scripts/harness_check_lib.py [diff-map] :174-174 -> :178-178  sites=1
+     at Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48
+   old_first='CITATION_RE = re.compile('
+   new_first='CITATION_RE = re.compile('
+   old_last ='CITATION_RE = re.compile('
+   new_last ='CITATION_RE = re.compile('
+
+MOVED 声称=1 SAME 声称=0 SKIP-FRESH 行=0 SKIP-RULES 行=0
+alias_unresolved=6（裸文件名声称，lib 口径不认，不复算也不改写）
+
+VERDICT: DRY RUN (pass --apply to write)
+EXITCODE=0
+
+### 注册之后的干跑（capture=artifacts/tmp/run290-remap-dry2.txt）：一条 `[MOVED/diff-map] :124 -> :129` 是注册本身造出来的漂移
+holders=68 changed_files=3 targets=['.codex/ROADMAP.md', '.codex/scripts/harness_check_lib.py', '.codex/scripts/run_all_guards.py']
+target .codex/ROADMAP.md: HEAD lines=463 now lines=463
+target .codex/scripts/harness_check_lib.py: HEAD lines=298 now lines=328
+target .codex/scripts/run_all_guards.py: HEAD lines=410 now lines=415
+
+==== 不按映射搬的行（本片对着现树写的，搬了就是把对的改成错的）
+SKIP-FRESH .codex/ROADMAP.md:446 `.codex/scripts/run_all_guards.py:42` — 该行是本片新写/改写过的
+SKIP-FRESH .codex/ROADMAP.md:447 `.codex/scripts/run_all_guards.py:137` — 该行是本片新写/改写过的
+SKIP-FRESH .codex/ROADMAP.md:454 `.codex/scripts/run_all_guards.py:60` — 该行是本片新写/改写过的
+SKIP-FRESH .codex/ROADMAP.md:454 `.codex/scripts/run_all_guards.py:69` — 该行是本片新写/改写过的
+
+==== 声称条目数=4 站点数=4
+
+.codex/scripts/harness_check_lib.py [diff-map] :174-174 -> :178-178  sites=1
+     at Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48
+   old_first='CITATION_RE = re.compile('
+   new_first='CITATION_RE = re.compile('
+   old_last ='CITATION_RE = re.compile('
+   new_last ='CITATION_RE = re.compile('
+
+.codex/scripts/run_all_guards.py [diff-map] :124-124 -> :129-129  sites=1
+     at Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:79
+   old_first='E("check_androidtest_schema_expectations", PY,'
+   new_first='E("check_androidtest_schema_expectations", PY,'
+   old_last ='E("check_androidtest_schema_expectations", PY,'
+   new_last ='E("check_androidtest_schema_expectations", PY,'
+
+MOVED 声称=2 SAME 声称=2 SKIP-FRESH 行=4 SKIP-RULES 行=0
+alias_unresolved=3（裸文件名声称，lib 口径不认，不复算也不改写）
+
+VERDICT: DRY RUN (pass --apply to write)
+EXITCODE=0
+
+### 写入轮（capture=artifacts/tmp/run291-remap-apply.txt）：`EDITS applied=2` + `VERDICT: PASS`
+holders=68 changed_files=3 targets=['.codex/ROADMAP.md', '.codex/scripts/harness_check_lib.py', '.codex/scripts/run_all_guards.py']
+target .codex/ROADMAP.md: HEAD lines=463 now lines=463
+target .codex/scripts/harness_check_lib.py: HEAD lines=298 now lines=328
+target .codex/scripts/run_all_guards.py: HEAD lines=410 now lines=415
+
+==== 不按映射搬的行（本片对着现树写的，搬了就是把对的改成错的）
+SKIP-FRESH .codex/ROADMAP.md:446 `.codex/scripts/run_all_guards.py:42` — 该行是本片新写/改写过的
+SKIP-FRESH .codex/ROADMAP.md:447 `.codex/scripts/run_all_guards.py:142` — 该行是本片新写/改写过的
+SKIP-FRESH .codex/ROADMAP.md:454 `.codex/scripts/run_all_guards.py:60` — 该行是本片新写/改写过的
+SKIP-FRESH .codex/ROADMAP.md:454 `.codex/scripts/run_all_guards.py:69` — 该行是本片新写/改写过的
+
+==== 声称条目数=4 站点数=4
+
+.codex/scripts/harness_check_lib.py [diff-map] :174-174 -> :178-178  sites=1
+     at Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48
+   old_first='CITATION_RE = re.compile('
+   new_first='CITATION_RE = re.compile('
+   old_last ='CITATION_RE = re.compile('
+   new_last ='CITATION_RE = re.compile('
+
+.codex/scripts/run_all_guards.py [diff-map] :124-124 -> :129-129  sites=1
+     at Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:79
+   old_first='E("check_androidtest_schema_expectations", PY,'
+   new_first='E("check_androidtest_schema_expectations", PY,'
+   old_last ='E("check_androidtest_schema_expectations", PY,'
+   new_last ='E("check_androidtest_schema_expectations", PY,'
+
+MOVED 声称=2 SAME 声称=2 SKIP-FRESH 行=4 SKIP-RULES 行=0
+alias_unresolved=3（裸文件名声称，lib 口径不认，不复算也不改写）
+FIX Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48 '`.codex/scripts/harness_check_lib.py:174`' -> '`.codex/scripts/harness_check_lib.py:178`'
+FIX Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:79 '`.codex/scripts/run_all_guards.py:124`' -> '`.codex/scripts/run_all_guards.py:129`'
+
+EDITS applied=2
+VERDICT: PASS
+EXITCODE=0
+
+### 幂等复跑（capture=artifacts/tmp/run297-remap-dry3.txt 与 run299-remap-dry4.txt）：`MOVED 声称=0`
+holders=68 changed_files=5 targets=['.codex/ROADMAP.md', '.codex/scripts/harness_check_lib.py', '.codex/scripts/run_all_guards.py']
+target .codex/ROADMAP.md: HEAD lines=463 now lines=463
+target .codex/scripts/harness_check_lib.py: HEAD lines=298 now lines=332
+target .codex/scripts/run_all_guards.py: HEAD lines=410 now lines=415
+
+==== 不按映射搬的行（本片对着现树写的，搬了就是把对的改成错的）
+SKIP-FRESH .codex/ROADMAP.md:446 `.codex/scripts/run_all_guards.py:42` — 该行是本片新写/改写过的
+SKIP-FRESH .codex/ROADMAP.md:447 `.codex/scripts/run_all_guards.py:142` — 该行是本片新写/改写过的
+SKIP-FRESH .codex/ROADMAP.md:454 `.codex/scripts/run_all_guards.py:60` — 该行是本片新写/改写过的
+SKIP-FRESH .codex/ROADMAP.md:454 `.codex/scripts/run_all_guards.py:69` — 该行是本片新写/改写过的
+SKIP-FRESH Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48 `.codex/scripts/harness_check_lib.py:178` — 该行是本片新写/改写过的
+SKIP-FRESH Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:79 `.codex/scripts/run_all_guards.py:129` — 该行是本片新写/改写过的
+
+==== 声称条目数=2 站点数=2
+
+MOVED 声称=0 SAME 声称=2 SKIP-FRESH 行=6 SKIP-RULES 行=0
+alias_unresolved=3（裸文件名声称，lib 口径不认，不复算也不改写）
+
+VERDICT: DRY RUN (pass --apply to write)
+EXITCODE=0
+
+holders=68 changed_files=6 targets=['.codex/ROADMAP.md', '.codex/scripts/harness_check_lib.py', '.codex/scripts/run_all_guards.py']
+target .codex/ROADMAP.md: HEAD lines=463 now lines=506
+target .codex/scripts/harness_check_lib.py: HEAD lines=298 now lines=332
+target .codex/scripts/run_all_guards.py: HEAD lines=410 now lines=415
+
+==== 不按映射搬的行（本片对着现树写的，搬了就是把对的改成错的）
+SKIP-FRESH .codex/ROADMAP.md:446 `.codex/scripts/run_all_guards.py:42` — 该行是本片新写/改写过的
+SKIP-FRESH .codex/ROADMAP.md:447 `.codex/scripts/run_all_guards.py:142` — 该行是本片新写/改写过的
+SKIP-FRESH .codex/ROADMAP.md:454 `.codex/scripts/run_all_guards.py:60` — 该行是本片新写/改写过的
+SKIP-FRESH .codex/ROADMAP.md:454 `.codex/scripts/run_all_guards.py:69` — 该行是本片新写/改写过的
+SKIP-FRESH Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48 `.codex/scripts/harness_check_lib.py:178` — 该行是本片新写/改写过的
+SKIP-FRESH Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:79 `.codex/scripts/run_all_guards.py:129` — 该行是本片新写/改写过的
+
+==== 声称条目数=2 站点数=2
+
+MOVED 声称=0 SAME 声称=2 SKIP-FRESH 行=6 SKIP-RULES 行=0
+alias_unresolved=4（裸文件名声称，lib 口径不认，不复算也不改写）
+
+VERDICT: DRY RUN (pass --apply to write)
+EXITCODE=0
+
+### `SKIP-FRESH` 带上落点内容之后的第一轮（capture=artifacts/tmp/run305-remap-landed.txt）：六行拒绝每一行都能看见「那行现在写着什么」
+holders=68 changed_files=7 targets=['.codex/ROADMAP.md', '.codex/scripts/harness_check_lib.py', '.codex/scripts/run_all_guards.py']
+target .codex/ROADMAP.md: HEAD lines=463 now lines=507
+target .codex/scripts/harness_check_lib.py: HEAD lines=298 now lines=332
+target .codex/scripts/run_all_guards.py: HEAD lines=410 now lines=415
+
+==== 不按映射搬的行（本片对着现树写的，搬了就是把对的改成错的）
+SKIP-FRESH .codex/ROADMAP.md:446 `.codex/scripts/run_all_guards.py:42` — 该行是本片新写/改写过的 落点内容=.codex/scripts/run_all_guards.py:42 'DEFAULT_TIMEOUT = 300'
+SKIP-FRESH .codex/ROADMAP.md:447 `.codex/scripts/run_all_guards.py:142` — 该行是本片新写/改写过的 落点内容=.codex/scripts/run_all_guards.py:142 'E("verify_1to1_selftest", NODE, [".codex/scripts/dev/par'
+SKIP-FRESH .codex/ROADMAP.md:454 `.codex/scripts/run_all_guards.py:60` — 该行是本片新写/改写过的 落点内容=.codex/scripts/run_all_guards.py:60 'fail_codes=(1,), timeout=DEFAULT_TIMEOUT, rc_labels=None'
+SKIP-FRESH .codex/ROADMAP.md:454 `.codex/scripts/run_all_guards.py:69` — 该行是本片新写/改写过的 落点内容=.codex/scripts/run_all_guards.py:69 'self.timeout = timeout'
+SKIP-FRESH Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48 `.codex/scripts/harness_check_lib.py:178` — 该行是本片新写/改写过的 落点内容=.codex/scripts/harness_check_lib.py:178 'CITATION_RE = re.compile('
+SKIP-FRESH Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:79 `.codex/scripts/run_all_guards.py:129` — 该行是本片新写/改写过的 落点内容=.codex/scripts/run_all_guards.py:129 'E("check_androidtest_schema_expectations", PY,'
+
+==== 声称条目数=2 站点数=2
+
+MOVED 声称=0 SAME 声称=2 SKIP-FRESH 行=6 SKIP-RULES 行=0
+alias_unresolved=3（裸文件名声称，lib 口径不认，不复算也不改写）
+
+VERDICT: DRY RUN (pass --apply to write)
+EXITCODE=0
+
+### `VERIFY-FRESH-TARGET` 上线后当场抓到的一条过期号段（capture=artifacts/tmp/run306-verify-fresh-target.txt）：清单第 131 行声称 `check_pointer_liveness.py:58`，落点内容却是 `MIN_SCAN_FILES = 40`——这是本片自己在同一片内加一行造成的，形状判据与清单判据都不会响（见卡片 Gaps ①）
+holders=68 changed_files=7 targets=['.codex/ROADMAP.md', '.codex/scripts/harness_check_lib.py', '.codex/scripts/run_all_guards.py']
+
+==== 指向本片新建文件的声称（无 HEAD 版本可映射，逐条人工核对落点内容）
+VERIFY-FRESH-TARGET .codex/context/source-of-truth.md:131 — 落点内容=.codex/scripts/check_pointer_liveness.py:58 'MIN_SCAN_FILES = 40'
+VERIFY-FRESH-TARGET claims=1
+target .codex/ROADMAP.md: HEAD lines=463 now lines=507
+target .codex/scripts/harness_check_lib.py: HEAD lines=298 now lines=332
+target .codex/scripts/run_all_guards.py: HEAD lines=410 now lines=415
+
+==== 不按映射搬的行（本片对着现树写的，搬了就是把对的改成错的）
+SKIP-FRESH .codex/ROADMAP.md:446 `.codex/scripts/run_all_guards.py:42` — 该行是本片新写/改写过的 落点内容=.codex/scripts/run_all_guards.py:42 'DEFAULT_TIMEOUT = 300'
+SKIP-FRESH .codex/ROADMAP.md:447 `.codex/scripts/run_all_guards.py:142` — 该行是本片新写/改写过的 落点内容=.codex/scripts/run_all_guards.py:142 'E("verify_1to1_selftest", NODE, [".codex/scripts/dev/par'
+SKIP-FRESH .codex/ROADMAP.md:454 `.codex/scripts/run_all_guards.py:60` — 该行是本片新写/改写过的 落点内容=.codex/scripts/run_all_guards.py:60 'fail_codes=(1,), timeout=DEFAULT_TIMEOUT, rc_labels=None'
+SKIP-FRESH .codex/ROADMAP.md:454 `.codex/scripts/run_all_guards.py:69` — 该行是本片新写/改写过的 落点内容=.codex/scripts/run_all_guards.py:69 'self.timeout = timeout'
+SKIP-FRESH Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48 `.codex/scripts/harness_check_lib.py:178` — 该行是本片新写/改写过的 落点内容=.codex/scripts/harness_check_lib.py:178 'CITATION_RE = re.compile('
+SKIP-FRESH Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:79 `.codex/scripts/run_all_guards.py:129` — 该行是本片新写/改写过的 落点内容=.codex/scripts/run_all_guards.py:129 'E("check_androidtest_schema_expectations", PY,'
+
+==== 声称条目数=2 站点数=2
+
+MOVED 声称=0 SAME 声称=2 SKIP-FRESH 行=6 SKIP-RULES 行=0
+alias_unresolved=3（裸文件名声称，lib 口径不认，不复算也不改写）
+
+VERDICT: DRY RUN (pass --apply to write)
+EXITCODE=0
+
+### 改正为 `:59` 之后复跑（capture=artifacts/tmp/run307-verify-fixed.txt）：同一行的落点内容变成 `MIN_CITATIONS = 40`
+VERIFY-FRESH-TARGET .codex/context/source-of-truth.md:131 — 落点内容=.codex/scripts/check_pointer_liveness.py:59 'MIN_CITATIONS = 40'
+VERIFY-FRESH-TARGET claims=1
+
+### 当场干跑（只读，不写）
+holders=68 changed_files=7 targets=['.codex/ROADMAP.md', '.codex/scripts/harness_check_lib.py', '.codex/scripts/run_all_guards.py']
+
+==== 指向本片新建文件的声称（无 HEAD 版本可映射，逐条人工核对落点内容）
+VERIFY-FRESH-TARGET .codex/context/source-of-truth.md:131 — 落点内容=.codex/scripts/check_pointer_liveness.py:59 'MIN_CITATIONS = 40'
+VERIFY-FRESH-TARGET claims=1
+target .codex/ROADMAP.md: HEAD lines=463 now lines=507
+target .codex/scripts/harness_check_lib.py: HEAD lines=298 now lines=332
+target .codex/scripts/run_all_guards.py: HEAD lines=410 now lines=415
+
+==== 不按映射搬的行（本片对着现树写的，搬了就是把对的改成错的）
+SKIP-FRESH .codex/ROADMAP.md:446 `.codex/scripts/run_all_guards.py:42` — 该行是本片新写/改写过的 落点内容=.codex/scripts/run_all_guards.py:42 'DEFAULT_TIMEOUT = 300'
+SKIP-FRESH .codex/ROADMAP.md:447 `.codex/scripts/run_all_guards.py:142` — 该行是本片新写/改写过的 落点内容=.codex/scripts/run_all_guards.py:142 'E("verify_1to1_selftest", NODE, [".codex/scripts/dev/par'
+SKIP-FRESH .codex/ROADMAP.md:454 `.codex/scripts/run_all_guards.py:60` — 该行是本片新写/改写过的 落点内容=.codex/scripts/run_all_guards.py:60 'fail_codes=(1,), timeout=DEFAULT_TIMEOUT, rc_labels=None'
+SKIP-FRESH .codex/ROADMAP.md:454 `.codex/scripts/run_all_guards.py:69` — 该行是本片新写/改写过的 落点内容=.codex/scripts/run_all_guards.py:69 'self.timeout = timeout'
+SKIP-FRESH Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48 `.codex/scripts/harness_check_lib.py:178` — 该行是本片新写/改写过的 落点内容=.codex/scripts/harness_check_lib.py:178 'CITATION_RE = re.compile('
+SKIP-FRESH Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:79 `.codex/scripts/run_all_guards.py:129` — 该行是本片新写/改写过的 落点内容=.codex/scripts/run_all_guards.py:129 'E("check_androidtest_schema_expectations", PY,'
+
+==== 声称条目数=2 站点数=2
+
+MOVED 声称=0 SAME 声称=2 SKIP-FRESH 行=6 SKIP-RULES 行=0
+alias_unresolved=3（裸文件名声称，lib 口径不认，不复算也不改写）
+
+VERDICT: DRY RUN (pass --apply to write)
+EXITCODE=0
+
+================================================================================================================================================================
+块 04 — 解析口径是一份：两面探靶、放宽前后的差量、同族守门同时复跑
+================================================================================================================================================================
+### 探靶（driver=artifacts/tmp/b035-probe.py，capture=artifacts/tmp/run286-probe.txt）：当前态 101 条声称 0 缺陷；历史面 160 条 4 缺陷 + 2 处落点空行
+== face=cur md_files=68 files_with_citations=3 citations=101
+   problems=0 by_reason=[]
+   top_files=[('Docs/spec/SPEC-2026-09-21-ai-persona-preference.md', 82), ('.codex/context/source-of-truth.md', 15), ('.codex/ROADMAP.md', 4)]
+== face=hist md_files=72 files_with_citations=25 citations=160
+   problems=4 by_reason=[('file absent', 3), ('line beyond', 1)]
+   PROBLEM holder=artifacts/evidence/T-004-verification-verifier.md cite=android/core/.../BranchSource.java:44-44 reason=file absent
+   PROBLEM holder=artifacts/evidence/T-022-verification-db-review-round2.md cite=Docs/.../技术架构方案_V1.0.md:112-112 reason=file absent
+   PROBLEM holder=artifacts/evidence/T-022-verification-db-review.md cite=android/core/.../BranchAnchor.java:33-35 reason=file absent
+   PROBLEM holder=artifacts/evidence/T-022-verification-db-review.md cite=README.md:217-230 reason=line beyond eof=223
+   BLANK holder=.codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md cite=.codex/scripts/check_codebase_researcher_agent.py:47-66
+   BLANK holder=.codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md cite=.codex/ROADMAP.md:83-83
+   top_files=[('.codex/tasks/T-2026-10-19-metrics-reporter-role-031.md', 14), ('.codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md', 13), ('.codex/tasks/T-2026-10-19-eval-keeper-baseline-role-029.md', 12), ('.codex/tasks/T-2026-10-19-metrics-report-generator-030.md', 12), ('.codex/tasks/T-2026-10-20-source-of-truth-inventory-034.md', 11), ('artifacts/evidence/T-004-verification-verifier.md', 11), ('.codex/tasks/T-2026-10-19-code-simplifier-role-027.md', 10), ('.codex/tasks/T-2026-10-19-spec-author-technical-section-032.md', 10)]
+probe=artifacts/tmp/b035-probe.py
+
+### 吞句普查改前（capture=artifacts/tmp/run292-paren-probe.txt）：`strict_citations=96`，被全角括号/逗号字符类整条吞掉的声称 0 条——该驱动当时按「有前缀且以 `:N` 结尾的 token」比对，漏掉了带括号的那两条，下面的当场重读才是那两条的真实清单
+strict_citations=96
+lost_to_paren_or_shape=0
+probe=artifacts/tmp/b035-paren-probe.py
+
+### 当场重读：放宽后进入被判集合的、路径体含全角标点的那几条
+WIDENED holder=Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md cite=Docs/01-demand/结构化需求基准说明书_知芽（TreeLearn）_V3.3增量.md:26-26
+WIDENED holder=Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md cite=Docs/01-demand/结构化需求基准说明书_知芽（TreeLearn）_V3.0.md:70-70
+total_paren_punct_citations= 2
+
+### 同族守门（capture=artifacts/tmp/run295-siblings.txt）：`check_source_of_truth` / `run_evals` / `check_roadmap_and_routing` 三条共用同一份解析，放宽后双双 rc=0
+===== check_source_of_truth =====
+OK   the 覆盖面 table is readable and names each root once — rows=7 roots=['.codex/', '.codex/agents/', '.codex/context/', '.codex/rules/', '.codex/scripts/', 'AGENTS.md', 'Docs/']
+OK   the 覆盖面 counts equal the recomputed per-root entry counts — declared={'.codex/': 2, '.codex/agents/': 1, '.codex/context/': 2, '.codex/rules/': 4, '.codex/scripts/': 3, 'AGENTS.md': 1, 'Docs/': 3} measured={'.codex/': 2, 'AGENTS.md': 1, '.codex/context/': 2, '.codex/rules/': 4, 'Docs/': 3, '.codex/scripts/': 3, '.codex/agents/': 1}
+OK   the index restates no authority body (>= 60-char run) — measured_hits=0 sample=[]
+OK   the index carries no placeholder tokens — hits=[]
+scanned_files=67 entries=16 kinds={'声明型': 14, '生成型': 2} authority_files=15
+
+check_source_of_truth: 0 check(s) failed
+EXITCODE=0
+===== run_evals =====
+OK   case 001-impact-inventory pointers-alive — citations=2 floor=2 problems=[]
+OK   case 001-impact-inventory paths-exist — cited=5 floor=3 dead=[]
+OK   case 001-impact-inventory pins every product bullet — unpinned=[] bullets=4
+OK   every expectation kind is exercised by some case — missing=[] seen=['forbid', 'must', 'paths-exist', 'pointers-alive', 'shape']
+NOTE case and expectation inventory is printed, not judged — EVALS cases=1 expectations=9
+
+run_evals: 0 check(s) failed
+EXITCODE=0
+===== check_roadmap_and_routing =====
+OK   HEAD revision of AGENTS.md is readable — stderr=
+NOTE routing-row increment is printed, not judged — base=eab95b03afce window=uncommitted-only added_rows=0 added_missing_triggers=['intent-capturer', 'pm-discovery', 'project-brief', 'ROADMAP'] added_dead_targets=[]
+OK   .codex/README.md has a 目录结构 section
+OK   registered-entry list is not drained below its floor — entries=6 floor=4
+OK   目录结构 section lists every registered entry — missing=[]
+
+check_roadmap_and_routing: 0 check(s) failed
+EXITCODE=0
+
+================================================================================================================================================================
+块 05 — 清单条目与流程接线
+================================================================================================================================================================
+### 清单守门末态（capture=artifacts/tmp/run296-sot-after-entry.txt）：`entries=17`、`kinds={'声明型': 14, '生成型': 3}`、覆盖面 `.codex/scripts/` = 4
+OK   inventory exists — path=.codex/context/source-of-truth.md
+OK   the L0 entry that must route here exists — path=.codex/context/project-brief.md
+OK   the current-state scan surface holds >= 40 files — measured=67 floor=40
+OK   the inventory declares its field names in a FIELDS marker — found=True
+OK   inventory has >= 12 fact entries — measured=17 floor=12
+OK   every fact id is declared once — entries=17 duplicated=[]
+OK   every entry declares each field exactly once, with a known 类型 — fields=['类型', '唯一权威', '更新时机', '漂移检查', '锚点', '归属标记'] malformed=[]
+OK   every entry names exactly one authority, and the index is never its own authority — measured=17 bad=[]
+OK   every authority path exists and the cited line is inside it — dead=[]
+OK   no authority is a historical record — hit=[]
+OK   every anchor is a bounded, compilable pattern that fires on the cited authority line — bad=[]
+OK   every entry states an update trigger of >= 8 chars — bad=[]
+OK   every drift check is a runnable command, and generated counts are owned by a script with a bare floor — bad=[]
+OK   no entry was dropped by the per-entry checks — entries=17 usable=17 dropped=0 bad_kinds={'声明型': 14, '生成型': 3}
+OK   at least 2 entries are generated-count facts — measured=3 floor=2 kinds={'声明型': 14, '生成型': 3}
+OK   no fact is defined a second time without an attribution pointer — scanned_files=67 unattributed=0 hits=[]
+OK   no generated count is written into prose anywhere on the scan surface — measured=0 hits=[]
+OK   the 覆盖面 table is readable and names each root once — rows=7 roots=['.codex/', '.codex/agents/', '.codex/context/', '.codex/rules/', '.codex/scripts/', 'AGENTS.md', 'Docs/']
+OK   the 覆盖面 counts equal the recomputed per-root entry counts — declared={'.codex/': 2, '.codex/agents/': 1, '.codex/context/': 2, '.codex/rules/': 4, '.codex/scripts/': 4, 'AGENTS.md': 1, 'Docs/': 3} measured={'.codex/': 2, 'AGENTS.md': 1, '.codex/context/': 2, '.codex/rules/': 4, 'Docs/': 3, '.codex/scripts/': 4, '.codex/agents/': 1}
+OK   the index restates no authority body (>= 60-char run) — measured_hits=0 sample=[]
+OK   the index carries no placeholder tokens — hits=[]
+scanned_files=67 entries=17 kinds={'声明型': 14, '生成型': 3} authority_files=16
+
+check_source_of_truth: 0 check(s) failed
+EXITCODE=0
+
+### 当场重跑清单守门
+OK   inventory exists — path=.codex/context/source-of-truth.md
+OK   the L0 entry that must route here exists — path=.codex/context/project-brief.md
+OK   the current-state scan surface holds >= 40 files — measured=67 floor=40
+OK   the inventory declares its field names in a FIELDS marker — found=True
+OK   inventory has >= 12 fact entries — measured=17 floor=12
+OK   every fact id is declared once — entries=17 duplicated=[]
+OK   every entry declares each field exactly once, with a known 类型 — fields=['类型', '唯一权威', '更新时机', '漂移检查', '锚点', '归属标记'] malformed=[]
+OK   every entry names exactly one authority, and the index is never its own authority — measured=17 bad=[]
+OK   every authority path exists and the cited line is inside it — dead=[]
+OK   no authority is a historical record — hit=[]
+OK   every anchor is a bounded, compilable pattern that fires on the cited authority line — bad=[]
+OK   every entry states an update trigger of >= 8 chars — bad=[]
+OK   every drift check is a runnable command, and generated counts are owned by a script with a bare floor — bad=[]
+OK   no entry was dropped by the per-entry checks — entries=17 usable=17 dropped=0 bad_kinds={'声明型': 14, '生成型': 3}
+OK   at least 2 entries are generated-count facts — measured=3 floor=2 kinds={'声明型': 14, '生成型': 3}
+OK   no fact is defined a second time without an attribution pointer — scanned_files=67 unattributed=0 hits=[]
+OK   no generated count is written into prose anywhere on the scan surface — measured=0 hits=[]
+OK   the 覆盖面 table is readable and names each root once — rows=7 roots=['.codex/', '.codex/agents/', '.codex/context/', '.codex/rules/', '.codex/scripts/', 'AGENTS.md', 'Docs/']
+OK   the 覆盖面 counts equal the recomputed per-root entry counts — declared={'.codex/': 2, '.codex/agents/': 1, '.codex/context/': 2, '.codex/rules/': 4, '.codex/scripts/': 4, 'AGENTS.md': 1, 'Docs/': 3} measured={'.codex/': 2, 'AGENTS.md': 1, '.codex/context/': 2, '.codex/rules/': 4, 'Docs/': 3, '.codex/scripts/': 4, '.codex/agents/': 1}
+OK   the index restates no authority body (>= 60-char run) — measured_hits=0 sample=[]
+OK   the index carries no placeholder tokens — hits=[]
+scanned_files=67 entries=17 kinds={'声明型': 14, '生成型': 3} authority_files=16
+
+check_source_of_truth: 0 check(s) failed
+EXITCODE=0
+
+### `.codex/HARNESS.md` 第 8 步接线后的那一行（当场读，只判在场与内容，不含任何手抄数字）
+8. 改任何「会被当成现状读」的正文（`AGENTS.md`、`.codex/**` 的入口/规则/技能、`Docs/spec/**`、`Docs/05-technical-design/**`、各端 README）之前，先查 [事实源清单](context/source-of-truth.md)：那条事实已有权威正文时，本处只允许写指针或带归属标记的引用；脚本产出的数字一律不写进散文。改完复跑 `python -X utf8 .codex/scripts/check_source_of_truth.py`，它判每条事实的权威路径真实在场、同一事实出现第二处裸定义即红、生成数被写死即红。同一批改动若给**被引用的文件**加了行，那些 `路径:行` 声称就整体位移：先跑 `python -X utf8 .codex/scripts/dev/remap_pointers.py`（默认干跑；打印 `REVIEW` 表示有声称的内容在候选里对不上，须人工看过再加 `--apply`），再跑 `python -X utf8 .codex/scripts/check_pointer_liveness.py` 判形状——路径不在场、行号越界（含区间倒置）、落点是空行这三类各判一条红，历史面的记录只报不判。
+
+================================================================================================================================================================
+块 06 — 尺寸口径与重复短语
+================================================================================================================================================================
+### 尺寸（driver=artifacts/tmp/b035-sizing.py，沿用片 029/030/031/034 的同一个 `added_lines()`/`docstring_spans()`；capture=run308-sizing.txt）：`judgement_and_lib_and_roster=391` 是卡片申报值，`selftest_face=149` 按 `.codex/rules/harness-tasks.md:47` 那句「Tests… do not count」排除，合计 540 同场打印不隐藏
+.codex/scripts/check_pointer_liveness.py selftest_boundary_line=159
+.codex/scripts/check_pointer_liveness.py seg=code added_code=99 added_docstring=24 added_comment=10
+.codex/scripts/check_pointer_liveness.py seg=selftest added_code=149 added_docstring=7 added_comment=8
+.codex/scripts/dev/remap_pointers.py seg=code added_code=264 added_docstring=51 added_comment=3
+.codex/scripts/harness_check_lib.py seg=code added_code=23 added_docstring=17 added_comment=0
+.codex/scripts/run_all_guards.py seg=code added_code=5 added_docstring=0 added_comment=0
+driver=artifacts/tmp/b035-sizing.py
+PRODUCTION_LINES judgement_and_lib_and_roster=391 selftest_face=149 combined=540
+not-counted-as-code .codex/context/source-of-truth.md present_lines=168 wc_l=167
+not-counted-as-code .codex/scripts/dev/checkers_selftest.py present_lines=1342 wc_l=1341
+not-counted-as-code .codex/HARNESS.md present_lines=28 wc_l=27
+not-counted-as-code .codex/ROADMAP.md present_lines=507 wc_l=506
+not-counted-as-code AGENTS.md present_lines=68 wc_l=67
+not-counted-as-code README.md present_lines=224 wc_l=223
+not-counted-as-code Docs/spec/SPEC-2026-09-21-ai-persona-preference.md present_lines=111 wc_l=110
+not-counted-as-code Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md present_lines=159 wc_l=158
+not-counted-as-code artifacts/metrics/report.md present_lines=21 wc_l=20
+excluded by contract: source-of-truth.md（清单本体=文档资产，由守门判形状）、HARNESS/ROADMAP/AGENTS 与 Docs/spec 被搬过行号的散文（文档面）、report.md（生成产物）、artifacts/tmp/**（gitignore 探针，非交付物）
+VERDICT: PASS
+
+### 同一次测量的前一轮（capture=artifacts/tmp/run301-sizing.txt，`remap_pointers.py` 加上落点输出之前）
+.codex/scripts/check_pointer_liveness.py selftest_boundary_line=158
+.codex/scripts/check_pointer_liveness.py seg=code added_code=99 added_docstring=23 added_comment=10
+.codex/scripts/check_pointer_liveness.py seg=selftest added_code=149 added_docstring=7 added_comment=8
+.codex/scripts/dev/remap_pointers.py seg=code added_code=244 added_docstring=37 added_comment=3
+.codex/scripts/harness_check_lib.py seg=code added_code=23 added_docstring=17 added_comment=0
+.codex/scripts/run_all_guards.py seg=code added_code=5 added_docstring=0 added_comment=0
+PRODUCTION_LINES judgement_and_lib_and_roster=371 selftest_face=149 combined=520
+
+### 重复短语（driver=artifacts/tmp/b031-dup-scan.py，capture=artifacts/tmp/run302-dupscan.txt）
+driver=artifacts/tmp/b031-dup-scan.py
+assertion: 正文里不许出现紧邻重复 8-24 字且含 >= 6 个汉字的子串
+scanned_files=146 scanned_lines=20146
+raw_hits=166 cjk_prose_hits=0 non_prose_hits=166
+known_old_dup hits=0 floor=0
+positive_control fired=True unit='第 10 条基线所在元组；' (an unarmed detector is not a judgement)
+DUP-SCAN problems=0
+VERDICT: PASS
+
+### 申报口径的来源行（`.codex/rules/harness-tasks.md:47`，当场逐行读出第 47 行本身）
+The sizing target is at most 200 changed production-code lines. Tests, documentation, and generated files do not count toward this estimate. More than 200 lines is a verifier warning; more than 500 lines is a failure unless the task records a user-approved sizing exception. Semantic boundaries remain mandatory even below the line limit.
+
+================================================================================================================================================================
+块 07 — 档位整跑、卡片在场后的复跑与改动面
+================================================================================================================================================================
+### core 档末态（capture=artifacts/tmp/run315-core.txt，卡片与重生成后的报告都在场，串行单独跑）
+RUN-ALL-GUARDS tier=core selected=36/42 subset=no
+PASS         check_pointer_liveness                 rc=0 0.2s
+PASS         check_pointer_liveness --selftest      rc=0 1.8s
+RUN-ALL-GUARDS pass=36 fail=0 inconclusive=0 fault=0
+VERDICT: PASS (all 36 selected guard(s) printed a judgement line and returned green)
+EXITCODE=0
+
+### precommit 档末态（capture=artifacts/tmp/run316-precommit.txt，同一姿势）
+RUN-ALL-GUARDS tier=precommit selected=6/42 subset=no
+RUN-ALL-GUARDS pass=6 fail=0 inconclusive=0 fault=0
+VERDICT: PASS (all 6 selected guard(s) printed a judgement line and returned green)
+EXITCODE=0
+
+### 这两档的前一次读数（capture=run309-core-tail.txt / run310-precommit.txt）。**run309 只落了末 20 行**——当时刻意 `tail -20`，全量捕获不存在于任何文件，末态以 run315 为准，这里不补一份不存在的文件名（capture=artifacts/tmp/run309-core-tail.txt）
+             > SELFTEST cases=6 bad=0
+PASS         check_dependency_direction             rc=0 0.1s
+             > dependency scan root=src layers=9 scanned=23 findings=0
+PASS         check_dependency_direction --selftest  rc=0 0.1s
+             > SELFTEST cases=10 floor=8 fail=0
+PASS         check_user_copy_i18n                   rc=0 0.1s
+             > user-copy scan root=src scanned=23 copy-dir-exempt-seen=true cjk-lines=0 files=0 baseline-entries=0 baseline-covered=0
+PASS         check_user_copy_i18n --selftest        rc=0 0.1s
+             > SELFTEST cases=15 floor=10 fail=0
+PASS         check_device_time                      rc=0 0.1s
+             > device-time scan root=D:\Project\Android\Treelearn\frontend\src scanned=23 exempt=utils/deviceTime.ts exempt-in-tree=true findings=0
+PASS         check_device_time --selftest           rc=0 0.1s
+             > SELFTEST cases=11 floor=8 fail=0
+PASS         sync_fixtures --check                  rc=0 0.1s
+             > SYNC CHECK src=13 dst=13 bad=0 redacted=0 dir=frontend\src\platform\fixtures
+PASS         sync_fixtures --selftest               rc=0 0.1s
+             > SELFTEST cases=8 bad=0 floor=1
+RUN-ALL-GUARDS pass=36 fail=0 inconclusive=0 fault=0
+VERDICT: PASS (all 36 selected guard(s) printed a judgement line and returned green)
+EXITCODE=0
+
+RUN-ALL-GUARDS tier=precommit selected=6/42 subset=no
+PASS         check_offline_bundle                   rc=0 0.2s
+             > offline scan root=dist assets=2 allowed-non-load-urls=20 violations=0
+PASS         check_offline_bundle --selftest        rc=0 0.2s
+             > SELFTEST cases=6 ok=6 fail=0
+PASS         frontend verify                        rc=0 24.7s
+             > verify steps=16 ok=16 bad=0 fault=0
+PASS         line-budget                            rc=0 0.6s
+             > 业务变更行: 0 (已跟踪 新增+删除 与 未跟踪 全部行；已排除生成/迁移/文档/证据 853 行；扫描业务文件 0 个，其中未跟踪 2 个)
+PASS         no-kotlin-check                        rc=0 57.8s
+             > VERDICT: PASS (13 OK line(s))
+PASS         guard-selftest -Fast                   rc=0 207.4s
+             > OVERALL = SELFTEST PASS (38 case(s))
+RUN-ALL-GUARDS pass=6 fail=0 inconclusive=0 fault=0
+VERDICT: PASS (all 6 selected guard(s) printed a judgement line and returned green)
+EXITCODE=0
+
+### 本片两条新条目经 runner 的子集复跑（capture=artifacts/tmp/run311-guard-subset.txt）：`selected=10/42 subset=yes` + `pass=10 fail=0`
+RUN-ALL-GUARDS tier=core selected=10/42 subset=yes
+PASS         check_pointer_liveness                 rc=0 0.2s
+PASS         check_pointer_liveness --selftest      rc=0 2.1s
+NOTE         filtered-out                           未选中：26 条不在本次判定面内，整表绿不由此声明
+RUN-ALL-GUARDS pass=10 fail=0 inconclusive=0 fault=0
+VERDICT: PASS (subset only — 10/42 entry(ies) judged, not the whole roster)
+EXITCODE=0
+
+### `--only` 直取两条新条目（capture=artifacts/tmp/run303-only-new.txt）：注册当天第一次确认可被 runner 跑到
+RUN-ALL-GUARDS tier=core selected=2/42 subset=yes
+PASS         check_pointer_liveness                 rc=0 0.2s
+             > check_pointer_liveness: 0 check(s) failed
+PASS         check_pointer_liveness --selftest      rc=0 1.3s
+             > SELFTEST cases=10 mismatch=0 expected=10
+NOTE         filtered-out                           未选中：34 条不在本次判定面内，整表绿不由此声明
+RUN-ALL-GUARDS pass=2 fail=0 inconclusive=0 fault=0
+VERDICT: PASS (subset only — 2/42 entry(ies) judged, not the whole roster)
+EXITCODE=0
+
+### 指标报告重生成（卡片在场后，capture=artifacts/tmp/run319-metrics-write2.txt；前一次 run300）
+WROTE artifacts/metrics/report.md lines=20 metrics=12
+EXITCODE=0
+
+WROTE artifacts/metrics/report.md lines=20 metrics=12
+EXITCODE=0
+
+### 卡片在场、证据文件写出前的只读复跑：`validate_tasks.py`
+PASS T-2026-10-18-android-chat-stage-determinism-018.md
+PASS T-2026-10-18-android-nav-untitled-branch-016.md
+PASS T-2026-10-18-android-phone-usability-requirement-017.md
+PASS T-2026-10-18-process-asset-copy-002.md
+PASS T-2026-10-18-process-validation-004.md
+PASS T-2026-10-18-treelearn-process-migration-001.md
+PASS T-2026-10-18-web-copy-table-and-device-time-013.md
+PASS T-2026-10-18-web-dependency-direction-guard-014.md
+PASS T-2026-10-18-web-frontend-skeleton-build-entry-011.md
+PASS T-2026-10-18-web-h5-android-parity-requirement-005.md
+WARNING T-2026-10-18-web-parity-fixture-capture-instrument-019.md: estimated production lines 775 exceeds soft limit 200
+PASS T-2026-10-18-web-parity-fixture-capture-instrument-019.md
+WARNING T-2026-10-18-web-render-wiring-walk-instrument-020.md: estimated production lines 1576 exceeds soft limit 200
+PASS T-2026-10-18-web-render-wiring-walk-instrument-020.md
+PASS T-2026-10-18-web-runtime-port-fixture-adapter-012.md
+PASS T-2026-10-18-web-stack-adaptation-003.md
+WARNING T-2026-10-18-web-user-copy-guard-and-verify-entry-015.md: estimated production lines 245 exceeds soft limit 200
+PASS T-2026-10-18-web-user-copy-guard-and-verify-entry-015.md
+PASS T-2026-10-19-androidtest-derived-schema-version-022.md
+PASS T-2026-10-19-code-reviewer-role-and-review-template-024.md
+PASS T-2026-10-19-code-simplifier-role-027.md
+PASS T-2026-10-19-codebase-researcher-impact-role-026.md
+PASS T-2026-10-19-eval-keeper-baseline-role-029.md
+PASS T-2026-10-19-evals-inventory-and-runner-028.md
+WARNING T-2026-10-19-guard-runner-one-command-roster-023.md: estimated production lines 332 exceeds soft limit 200
+PASS T-2026-10-19-guard-runner-one-command-roster-023.md
+PASS T-2026-10-19-harness-guard-judgements-d4-d6-021.md
+WARNING T-2026-10-19-metrics-report-generator-030.md: estimated production lines 317 exceeds soft limit 200
+PASS T-2026-10-19-metrics-report-generator-030.md
+PASS T-2026-10-19-metrics-reporter-role-031.md
+PASS T-2026-10-19-project-brief-dir-state-guard-025.md
+PASS T-2026-10-19-spec-author-technical-section-032.md
+WARNING T-2026-10-20-loop-watcher-role-033.md: estimated production lines 214 exceeds soft limit 200
+PASS T-2026-10-20-loop-watcher-role-033.md
+WARNING T-2026-10-20-pointer-liveness-standing-guard-035.md: estimated production lines 391 exceeds soft limit 200
+PASS T-2026-10-20-pointer-liveness-standing-guard-035.md
+WARNING T-2026-10-20-source-of-truth-inventory-034.md: estimated production lines 261 exceeds soft limit 200
+PASS T-2026-10-20-source-of-truth-inventory-034.md
+SUMMARY files=30 errors=0 warnings=8
+
+### 业务代码零命中 + 改动面（`git diff --numstat HEAD -- android frontend` 空即零命中；下面附当场 `git status --porcelain`）
+(无输出：android/** 与 frontend/** 零命中)
+ M .codex/HARNESS.md
+ M .codex/ROADMAP.md
+ M .codex/context/source-of-truth.md
+ M .codex/scripts/harness_check_lib.py
+ M .codex/scripts/run_all_guards.py
+ M Docs/spec/SPEC-2026-09-21-ai-persona-preference.md
+ M artifacts/metrics/report.md
+?? .codex/scripts/check_pointer_liveness.py
+?? .codex/scripts/dev/remap_pointers.py
+?? .codex/tasks/T-2026-10-20-pointer-liveness-standing-guard-035.md
+?? artifacts/evidence/T-2026-10-20-pointer-liveness-standing-guard-035.txt
+
+### `git diff --stat HEAD`（当场重跑，只读；`core.autocrlf=true` 的换行警告一并留在读数里）
+ .codex/HARNESS.md                                  |  2 +-
+ .codex/ROADMAP.md                                  | 50 +++++++++++++++++--
+ .codex/context/source-of-truth.md                  | 10 +++-
+ .codex/scripts/harness_check_lib.py                | 56 +++++++++++++++++-----
+ .codex/scripts/run_all_guards.py                   |  5 ++
+ Docs/spec/SPEC-2026-09-21-ai-persona-preference.md |  4 +-
+ artifacts/metrics/report.md                        | 10 ++--
+ 7 files changed, 114 insertions(+), 23 deletions(-)
+warning: in the working copy of '.codex/HARNESS.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/ROADMAP.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/context/source-of-truth.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'artifacts/metrics/report.md', LF will be replaced by CRLF the next time Git touches it
+
+================================================================================================================================================================
+块 08 — 卡片与证据写出之后（这一段没有再整跑，只重跑会读它们的判据）
+================================================================================================================================================================
+### 卡片与证据文件写出之后的完整复跑（capture=artifacts/tmp/run324-postcard-recheck-full.txt，串行单独跑，九条命令同场）：`validate_tasks` / `metrics_report`（只判）/ `check_metrics_reporter_agent` / `check_source_of_truth` / `check_pointer_liveness` / `check_roadmap_and_routing` / `check_context_pack` / `run_evals` / `b031-dup-scan` 九条 rc=0，再加复算器一次完整干跑；末段 `VERIFY-FRESH-TARGET claims=1` 的落点内容当场显示 `.codex/scripts/check_pointer_liveness.py:59 'MIN_CITATIONS = 40'`——Gaps ① 的「生成型权威行号没人核内容」这一半，从一句转述变成一行能重跑的输出
+=== python -X utf8 .codex/scripts/validate_tasks.py ===
+SUMMARY files=30 errors=0 warnings=8
+=== python -X utf8 .codex/scripts/metrics_report.py ===
+check_metrics_report: 0 check(s) failed
+EXITCODE=0
+=== python -X utf8 .codex/scripts/check_metrics_reporter_agent.py ===
+check_metrics_reporter_agent: 0 check(s) failed
+EXITCODE=0
+=== python -X utf8 .codex/scripts/check_source_of_truth.py ===
+scanned_files=67 entries=17 kinds={'声明型': 14, '生成型': 3} authority_files=16
+check_source_of_truth: 0 check(s) failed
+EXITCODE=0
+=== python -X utf8 .codex/scripts/check_pointer_liveness.py ===
+holders=4 citations=110 judged_dead=0 judged_beyond=0 judged_reversed=0 judged_blank=0 index_claims=17 hist_citations=219
+check_pointer_liveness: 0 check(s) failed
+EXITCODE=0
+=== python -X utf8 .codex/scripts/check_roadmap_and_routing.py ===
+check_roadmap_and_routing: 0 check(s) failed
+EXITCODE=0
+=== python -X utf8 .codex/scripts/check_context_pack.py ===
+check_context_pack: 0 check(s) failed
+EXITCODE=0
+=== python -X utf8 .codex/scripts/run_evals.py ===
+run_evals: 0 check(s) failed
+EXITCODE=0
+=== python -X utf8 artifacts/tmp/b031-dup-scan.py ===
+scanned_files=147 scanned_lines=20435
+known_old_dup hits=0 floor=0
+DUP-SCAN problems=0
+VERDICT: PASS
+=== python -X utf8 .codex/scripts/dev/remap_pointers.py ===
+VERIFY-FRESH-TARGET .codex/context/source-of-truth.md:131 — 落点内容=.codex/scripts/check_pointer_liveness.py:59 'MIN_CITATIONS = 40'
+VERIFY-FRESH-TARGET claims=1
+MOVED 声称=0 SAME 声称=2 SKIP-FRESH 行=6 SKIP-RULES 行=0
+alias_unresolved=3（裸文件名声称，lib 口径不认，不复算也不改写）
+VERDICT: DRY RUN (pass --apply to write)
+EXITCODE=0
+
+### 同口径的前一次七条（缺 `run_evals` 与重复短语扫描；capture=artifacts/tmp/run322-postcard-recheck.txt）：那七条的读数与上面逐字一致，这一份留着是为了说明补跑不是重跑一遍凑数
+=== python -X utf8 .codex/scripts/validate_tasks.py ===
+=== python -X utf8 .codex/scripts/metrics_report.py ===
+EXITCODE=0
+=== python -X utf8 .codex/scripts/check_metrics_reporter_agent.py ===
+EXITCODE=0
+=== python -X utf8 .codex/scripts/check_source_of_truth.py ===
+EXITCODE=0
+=== python -X utf8 .codex/scripts/check_pointer_liveness.py ===
+EXITCODE=0
+=== python -X utf8 .codex/scripts/check_roadmap_and_routing.py ===
+EXITCODE=0
+=== python -X utf8 .codex/scripts/check_context_pack.py ===
+EXITCODE=0
+=== python -X utf8 .codex/scripts/dev/remap_pointers.py ===
+VERIFY-FRESH-TARGET claims=1
+EXITCODE=0
+
+### 指标报告在证据文件在场后的重生成（capture=artifacts/tmp/run320-metrics-write3.txt）与「再重生成一次是字节 no-op」的对照（capture=artifacts/tmp/run323-report-idempotence.txt）：`report_bytes_identical_after_second_write=True` 说明 run315 那轮 core 整跑判到的报告字节就是当前树上的字节，所以这一段不需要再整跑一次（不靠这句话蒙过去——上面两份捕获就是它的复算面）
+WROTE artifacts/metrics/report.md lines=20 metrics=12
+EXITCODE=0
+
+WROTE artifacts/metrics/report.md lines=20 metrics=12
+EXITCODE=0
+report_bytes_identical_after_second_write= True
+
+### 卡片把自己那三处 `beyond_eof=1` 改回 `run293` 的读数、并新增一条引用之后同口径的复跑（capture=artifacts/tmp/run325-postcard-recheck-after-fixes.txt）：九条仍全 rc=0，而 `hist_citations` 从 219 变成 220——卡片 Facts 里那句「每多写一次这种引用，这两个数就再各加一」当场兑现，历史面因此只报不判（判的话下一位实现者要改的是上一片的卡片）
+=== python -X utf8 .codex/scripts/validate_tasks.py ===
+SUMMARY files=30 errors=0 warnings=8
+=== python -X utf8 .codex/scripts/metrics_report.py ===
+check_metrics_report: 0 check(s) failed
+EXITCODE=0
+=== python -X utf8 .codex/scripts/check_metrics_reporter_agent.py ===
+check_metrics_reporter_agent: 0 check(s) failed
+EXITCODE=0
+=== python -X utf8 .codex/scripts/check_source_of_truth.py ===
+check_source_of_truth: 0 check(s) failed
+EXITCODE=0
+=== python -X utf8 .codex/scripts/check_pointer_liveness.py ===
+holders=4 citations=110 judged_dead=0 judged_beyond=0 judged_reversed=0 judged_blank=0 index_claims=17 hist_citations=220
+check_pointer_liveness: 0 check(s) failed
+EXITCODE=0
+=== python -X utf8 .codex/scripts/check_roadmap_and_routing.py ===
+check_roadmap_and_routing: 0 check(s) failed
+EXITCODE=0
+=== python -X utf8 .codex/scripts/check_context_pack.py ===
+check_context_pack: 0 check(s) failed
+EXITCODE=0
+=== python -X utf8 .codex/scripts/run_evals.py ===
+run_evals: 0 check(s) failed
+EXITCODE=0
+=== python -X utf8 artifacts/tmp/b031-dup-scan.py ===
+DUP-SCAN problems=0
+VERDICT: PASS
+=== python -X utf8 .codex/scripts/dev/remap_pointers.py ===
+alias_unresolved=3（裸文件名声称，lib 口径不认，不复算也不改写）
+VERDICT: DRY RUN (pass --apply to write)
+EXITCODE=0
+
+### 第一次尝试的那一份（capture=artifacts/tmp/run321-postcard-recheck.txt）**当场作废**：装配它的命令里带了 `tail -12`，把复算器输出最上面的 `VERIFY-FRESH-TARGET` 三行截掉了，还写错了一个不存在的脚本名 `check_metrics_report.py`（真正的只判入口是 `metrics_report.py` 不带 `--write`，`check_metrics_reporter_agent.py` 判的是角色文件）。截断的读数留着不改写，是因为「拿一份被自己截短的输出当末态」正是本片要防的动作本身（capture=artifacts/tmp/run321-postcard-recheck.txt）
+=== python -X utf8 .codex/scripts/validate_tasks.py ===
+=== python -X utf8 .codex/scripts/check_metrics_report.py ===
+=== python -X utf8 .codex/scripts/check_source_of_truth.py ===
+EXITCODE=0
+=== python -X utf8 .codex/scripts/check_pointer_liveness.py ===
+EXITCODE=0
+=== python -X utf8 .codex/scripts/check_roadmap_and_routing.py ===
+EXITCODE=0
+=== python -X utf8 .codex/scripts/check_context_pack.py ===
+EXITCODE=0
+=== python -X utf8 .codex/scripts/dev/remap_pointers.py ===
+SKIP-FRESH .codex/ROADMAP.md:454 `.codex/scripts/run_all_guards.py:60` — 该行是本片新写/改写过的 落点内容=.codex/scripts/run_all_guards.py:60 'fail_codes=(1,), timeout=DEFAULT_TIMEOUT, rc_labels=None'
+SKIP-FRESH .codex/ROADMAP.md:454 `.codex/scripts/run_all_guards.py:69` — 该行是本片新写/改写过的 落点内容=.codex/scripts/run_all_guards.py:69 'self.timeout = timeout'
+SKIP-FRESH Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48 `.codex/scripts/harness_check_lib.py:178` — 该行是本片新写/改写过的 落点内容=.codex/scripts/harness_check_lib.py:178 'CITATION_RE = re.compile('
+SKIP-FRESH Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:79 `.codex/scripts/run_all_guards.py:129` — 该行是本片新写/改写过的 落点内容=.codex/scripts/run_all_guards.py:129 'E("check_androidtest_schema_expectations", PY,'
+MOVED 声称=0 SAME 声称=2 SKIP-FRESH 行=6 SKIP-RULES 行=0
+VERDICT: DRY RUN (pass --apply to write)
+EXITCODE=0
+

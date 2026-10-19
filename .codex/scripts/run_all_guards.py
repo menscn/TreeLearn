@@ -120,6 +120,11 @@ GUARDS = [
       [CHECKS_NEEDLE], ["core"]),
     E("check_design_tokens", PY, [".codex/scripts/dev/check_design_tokens.py"],
       [CHECKS_NEEDLE], ["core"]),
+    E("check_pointer_liveness", PY, [".codex/scripts/check_pointer_liveness.py"],
+      [CHECKS_NEEDLE], ["core"]),
+    E("check_pointer_liveness --selftest", PY,
+      [".codex/scripts/check_pointer_liveness.py", "--selftest"],
+      [SELFTEST_NEEDLE], ["core"]),
     # ── Android 静态契约与判据自检（快、确定性、无设备）──
     E("check_androidtest_schema_expectations", PY,
       [".codex/scripts/dev/check_androidtest_schema_expectations.py"],

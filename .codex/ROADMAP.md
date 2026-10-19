@@ -443,15 +443,15 @@ D5 = 互斥的两边同时消失），都是「复核后如实回写」而不是
   `PASS verify_1to1_selftest rc=0 262.4s`（`artifacts/tmp/run168-core.txt`）；片 032 收尾时同一条命令与几支
   `b032-*` 脚本并发跑，同一条变成 `FAIL verify_1to1_selftest timeout after 300s, so nothing was judged`、
   汇总 `RUN-ALL-GUARDS pass=31 fail=1 inconclusive=0 fault=0` / `VERDICT: FAIL` / 退出码 1
-  （`artifacts/tmp/run186-tiers.txt`）。这一条用的正是 `run_all_guards.py:42` 的 `DEFAULT_TIMEOUT = 300`
-  ——条目定义在 `run_all_guards.py:137`，没有单独传 `timeout=`；262.4s 对 300s 只剩约 12% 余量。
+  （`artifacts/tmp/run186-tiers.txt`）。这一条用的正是 `.codex/scripts/run_all_guards.py:42` 的 `DEFAULT_TIMEOUT = 300`
+  ——条目定义在 `.codex/scripts/run_all_guards.py:142`，没有单独传 `timeout=`；262.4s 对 300s 只剩约 12% 余量。
   D11 记下的 254.5s 与本轮的 262.4s 是同一件事的两次读数。
 - 后果（不修的话）：这条红不代表产物变差，代表**没判**——打印自己就写着 `nothing was judged`。而它的触发条件是
   「旁边有人跑别的脚本」，恰好是交付收尾时最常见的姿势。拿这种轮次当结论只有两种走法，都坏：重跑到绿
   （D8/D11 那一族里最坏的处理方式），或给这条放宽上限/加 `fail_codes` 消音（每放宽一次就少一个失败点，正是 D4
   那族「仪器给自己开后门」）。反过来，一个不知情的实现片会花半天去归因一条根本不存在的回归。
 - 修法（不需要裁定，属既有先例的复用）：① 给这一条单独传按实测定的 `timeout=`——`Guard` 早已有这个参数
-  （`run_all_guards.py:60`、`:69`），只是这条没用上；数值要有依据，先在串行与并发两种姿势下各跑几轮取耗时分布，
+  （`.codex/scripts/run_all_guards.py:60`、`.codex/scripts/run_all_guards.py:69`），只是这条没用上；数值要有依据，先在串行与并发两种姿势下各跑几轮取耗时分布，
   不能凭感觉拍一个 900。② 汇总面已有 `inconclusive` 这一档，可考虑把「超时」从 `fail` 里分出单独计数并打印
   「本轮未判」，让「没判」不再借用在告假红上的那个词——但这是判据语义变动，落地前要在 B3 的卡里写明。
   ③ 流程侧立刻可用且本片已用：末态守门轮串行单跑、不与任何命令并发。
@@ -460,3 +460,47 @@ D5 = 互斥的两边同时消失），都是「复核后如实回写」而不是
   捕获留 gitignore 的 `artifacts/tmp/`：`run168-core.txt`（串行绿）、`run186-tiers.txt`（并发假红）、`run204-tiers.txt`（片 032 末态串行轮）。
 - 归属：片 032（B0，纯文档）收尾时发现；这条不归因于 B0——判据与它的 300s 上限都在 `run_all_guards.py` 里，
   本片一行未动，只登记。
+
+### D13 「给活指针复算行号」每片现写一支 gitignore 里的一次性驱动，从未升成常驻仪器（2026-10-20 登记并闭合）
+
+- 现象：文档里的 `路径:行` 声称被加行推歪之后要复算，这件事从片 026 起每片都新写一支脚本。登记时点普查
+  `artifacts/tmp/` 下名字含 pointer 的驱动得 13 支、合计 2,660 行（读数与命令见下），**没有一支**在
+  `.codex/scripts/` 里，也就没有任何一支会被 `run_all_guards.py` 或下一位实现者跑到。13 支各写各的：
+  difflib 的 HEAD→工作树映射在片 033 与片 034 各有一份；「这一行是本片照着现树新写的，不该按历史号段搬」
+  这条规则（`SKIP-FRESH`）只在片 034 出现过，其余各片都默认所有声称都写着历史号段。
+- 根因：这类活计一直被当成**收尾动作**而不是**仪器**。它的判据形状（一条会响的命令）与 B3 那条「一条命令跑完
+  全部守门」是同一件事，但每片都只在本轮里用完就丢，于是同一个缺陷类第三次登记：D9（过期指针，闭合于片 023）、
+  片 032 那句「文档自身的结构行号也是指针，别只给代码配锚点」、片 034 的 Risks 行「下一片若给
+  `checkers_selftest.py` 或 `run_all_guards.py` 加行而不跑指针驱动，就会留下一批活指针」。
+- 后果（不修的话）：两个方向都咬人，且都没有命令替人兜着。① **加行不搬**：读者按行号到达时看到的是另一段，
+  形状合法、语义已死，而当时全仓库没有任何常驻判据会为此转红；② **搬过头**：把本片对着现树写的正确行号
+  当历史号段搬歪——片 034 的 `run272` 就是这一种，`run_evals.py` 的 `pointers-alive` 判据当场抓到。
+  两种都得靠人在收尾时**想起来**跑一支不在版本库里的脚本，想不起来就静默过去。
+- 边界（这一条决定了判据只判什么）：形状可判、语义不可判。「路径不在场 / 行号越界（含区间倒置）/ 落点是空行」
+  三种死法能机械判定；「行号还在但那一行已经不是当初说的那件事」必须对着 diff 复算，把它塞进判据的唯一办法是
+  逼人把权威正文抄进文档——那与 C3 清单的「本文件只写指针、锚点与检查方式」直接冲突。所以本片把两半分成
+  两个东西：判据只管形状，复算器只管语义，二者共用同一份解析与同一个扫描面。
+- 处置（2026-10-20，片 `T-2026-10-20-pointer-liveness-standing-guard-035.md`）：
+  ① 常驻形状判据 `.codex/scripts/check_pointer_liveness.py`，当前态面判红、历史面（`.codex/tasks/**`、
+  `artifacts/**`、`.codex/references/**` 等）只报不判（沿用片 034 的裁定：历史记录不该被后来的重构改写）；
+  它自带正反双向自检，判据与自检各注册进 core 档一条。
+  ② 常驻复算器 `.codex/scripts/dev/remap_pointers.py`，默认干跑、`--apply` 才写；其持有者集合 **import 自判据的
+  `scan_files`**——修复器必须和判据对同一个面动手，否则一边搬了另一边还判红。`SKIP-FRESH`、内容核验与
+  「映射算不出即 REVIEW 且不写」都收进这一支，`artifacts/tmp/` 里那 13 支不再有人复用。
+  ③ 解析口径保持单点：`.codex/scripts/harness_check_lib.py` 的 `path_line_citations` 是全仓库唯一的
+  「什么算一条声称」，本片顺手修掉它的一个吞句缺陷——路径字符类原先排除全角括号与逗号顿号分号，
+  于是 `Docs/01-demand/` 下中文名文件带行号的引用整条不被计入（实测 2 处，`b035-paren-probe.py`）；
+  放宽为只排除空白与反引号后这些声称进入被判集合，当前态判红仍为零。
+  ④ 本片把 D12 里三处只写文件名的声称补成完整相对路径（读的是同一件事，补全后复算器才搬得动它们）；
+  剩下的裸文件名写法由复算器打印 `alias_unresolved=` 报数而不静默吞掉，其中有两条是**故意写出的反例**
+  （教读者「这样写不算引用」），按片 032 那条回写纪律不进反引号、也不改写成全路径。
+- 回读：`python -X utf8 .codex/scripts/check_pointer_liveness.py`（每条判据逐项 OK，末行
+  `check_pointer_liveness: 0 check(s) failed`）、`python -X utf8 .codex/scripts/check_pointer_liveness.py --selftest`
+  （末三行给出用例总数与 `EXITCODE=0`，用例数由它自己打印，不抄进本行）、
+  `python -X utf8 .codex/scripts/dev/remap_pointers.py`（干跑打印 `VERDICT: DRY RUN`；有候选对不上内容时打
+  `REVIEW needed=N` 并以退出码 1 拒绝写入）。
+  驱动普查用 `python -X utf8 -c "import glob,io;fs=sorted(glob.glob('artifacts/tmp/*pointer*.py'));print(len(fs),sum(len(io.open(f,encoding='utf-8',errors='replace').read().split(chr(10))) for f in fs))"`，
+  登记时点读数在 `artifacts/tmp/run298-driver-census.txt`；该目录 gitignore，此数只在登记时点取一次，
+  清理后读到 0 不等于欠账消失——真正的回读是上面那三条命令。
+- 归属：登记并闭合于 2026-10-20（片 035）。本片新增两个常驻脚本、放宽一处解析字符类，不动那 13 支 gitignore
+  驱动（它们是历史记录，删掉只会让上面的普查读数失去出处）。

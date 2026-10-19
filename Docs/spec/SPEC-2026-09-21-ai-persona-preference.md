@@ -45,7 +45,7 @@ status: draft
 
 ## Technical spec（技术规格）
 
-口径说明：**「现状」= 生产代码实测事实**，每条给 `路径:行`（由 `artifacts/tmp/b032-pointers.py` 的锚点唯一命中现场给出，行号能被 `.codex/scripts/harness_check_lib.py:174` 的 `CITATION_RE` 复算）；**「规格」= 本规格为新增物定的口径**，等人 review，不是事实。计数（「共 4 列」「已 8 项」）不抄自任何文档，由 `artifacts/tmp/b032-counts.py` 现场数出。
+口径说明：**「现状」= 生产代码实测事实**，每条给 `路径:行`（由 `artifacts/tmp/b032-pointers.py` 的锚点唯一命中现场给出，行号能被 `.codex/scripts/harness_check_lib.py:178` 的 `CITATION_RE` 复算）；**「规格」= 本规格为新增物定的口径**，等人 review，不是事实。计数（「共 4 列」「已 8 项」）不抄自任何文档，由 `artifacts/tmp/b032-counts.py` 现场数出。
 
 引用一律写全路径，不写「…TreeLearnSchema.java:47」这类简写、也不写「:47」这类续写：`CITATION_RE` 只认以 Docs、.codex、android、frontend、artifacts、README 开头的反引号路径，简写与续写**根本不被计成引用**，改错了不会有任何命令变红——`problems=0` 于是可以是假安心。本节读起来啰嗦是这条规则的代价，值得付。
 
@@ -76,7 +76,7 @@ status: draft
 - 现状·回答记录：`answer_revisions` 现有 9 列（`android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:416-433`），其中的可复现身份是 `model`、`thinking_enabled`（带 CHECK 的先例，`android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:430`）、`prompt_policy_version`（`android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:432`）三列；它**没有** `prompt_purpose` 列，口径写在注释里——用途能从版本前缀反查（`android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:145`）。生成中的操作行现有 14 列（`android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:436-455`）。
 - 规格：`answer_revisions.persona` 与 `generation_operations.persona` 各加一列存 `wireId`。这一列不可省：版本前缀反查得出用途、反查不出人设，因为人设是叠加在同一版本上的第二个维度；intent 的「每条成功生成的回答记录带当时的人设身份、旧回答可复现」因此只能由列承载。它不触犯「任何列都不得存放 system 提示词正文」那条边界（`android/data/src/main/java/com/treelearn/data/db/TreeLearnSchema.java:55`）——存的是身份，不是正文。
 - 规格·写侧：定稿时从操作行拷贝身份的路径只有一条（`android/data/src/main/java/com/treelearn/data/db/dao/GenerationStabilizer.java:126`），人设沿用它写入，不在第二处重新决定值。
-- 规格·门禁面：主题列与回答记录列一改，`.codex/scripts/run_all_guards.py:124` 那条 schema 守门就要求 androidTest 的期望同步；`.codex/rules/maintainability.md:8` 的 800 有效行硬门禁则限制了这些改动往哪个文件放。本规格把它两条记成边界，不是提醒。
+- 规格·门禁面：主题列与回答记录列一改，`.codex/scripts/run_all_guards.py:129` 那条 schema 守门就要求 androidTest 的期望同步；`.codex/rules/maintainability.md:8` 的 800 有效行硬门禁则限制了这些改动往哪个文件放。本规格把它两条记成边界，不是提醒。
 
 ### 状态迁移（切换人设与既有生成、重试流程的相互作用）
 

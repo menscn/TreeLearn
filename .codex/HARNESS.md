@@ -11,7 +11,7 @@
 5. 验收前读取 [验收规则](rules/harness-verification.md)，由独立只读 verifier 复核任务、路径、契约、测试和证据。改动是否让 AI 产物变差由 `eval-keeper` 的评测集判：跑法只有 `python -X utf8 .codex/scripts/run_evals.py` 一条，基线是 `.codex/evals/cases/**/product.md` 的逐字快照而不是手抄，刷新快照后必须整轮重跑注入自检；该角色只交逐字读数，不宣布任务验收（`.codex/agents/eval-keeper.md`）。
 6. 代码本身的质量由 `code-reviewer` 只读复核，维度、产物格式与归档位置以 `.codex/agents/code-reviewer.md` 和 `Docs/REVIEW.md` 为准，报告落在 `Docs/reviews/**`。两个结论不互相冒充：该角色不宣布任务验收，verifier 不替它评代码质量。
 7. 交付本身被量成了什么由 `metrics-reporter` 看守：报告只落在 `artifacts/metrics/report.md`，引用任何数字前先跑 `python -X utf8 .codex/scripts/metrics_report.py --write` 重生成，单个指标用同支脚本的 `--read <指标名>` 复算，重生成后整跑 `python -X utf8 .codex/scripts/run_all_guards.py --tier core`；指标行只能逐字转录不许手抄，家族与指标的增加删改属判据改动要另开一片。该角色只交报告与逐字读数，不宣布任务验收（`.codex/agents/metrics-reporter.md`）。
-8. 改任何「会被当成现状读」的正文（`AGENTS.md`、`.codex/**` 的入口/规则/技能、`Docs/spec/**`、`Docs/05-technical-design/**`、各端 README）之前，先查 [事实源清单](context/source-of-truth.md)：那条事实已有权威正文时，本处只允许写指针或带归属标记的引用；脚本产出的数字一律不写进散文。改完复跑 `python -X utf8 .codex/scripts/check_source_of_truth.py`，它判每条事实的权威路径真实在场、同一事实出现第二处裸定义即红、生成数被写死即红。
+8. 改任何「会被当成现状读」的正文（`AGENTS.md`、`.codex/**` 的入口/规则/技能、`Docs/spec/**`、`Docs/05-technical-design/**`、各端 README）之前，先查 [事实源清单](context/source-of-truth.md)：那条事实已有权威正文时，本处只允许写指针或带归属标记的引用；脚本产出的数字一律不写进散文。改完复跑 `python -X utf8 .codex/scripts/check_source_of_truth.py`，它判每条事实的权威路径真实在场、同一事实出现第二处裸定义即红、生成数被写死即红。同一批改动若给**被引用的文件**加了行，那些 `路径:行` 声称就整体位移：先跑 `python -X utf8 .codex/scripts/dev/remap_pointers.py`（默认干跑；打印 `REVIEW` 表示有声称的内容在候选里对不上，须人工看过再加 `--apply`），再跑 `python -X utf8 .codex/scripts/check_pointer_liveness.py` 判形状——路径不在场、行号越界（含区间倒置）、落点是空行这三类各判一条红，历史面的记录只报不判。
 
 ## Treelearn lanes
 
