@@ -114,7 +114,8 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `checkers_selftest.py` 原有 112 例与 8 条基线一字未改。
 - Producer/consumer/sibling entrypoints and platform branches (code evidence): 生产者 = `.codex/evals/cases/*/`
   三份资产（由人或 029 角色写）；消费者 = `.codex/scripts/run_all_guards.py:95-96`（core 档）、
-  `.codex/scripts/dev/checkers_selftest.py:66-67`（第 9 条基线）、`.codex/evals/README.md:11`（跑法那行）。
+  `.codex/scripts/dev/checkers_selftest.py:70-71`（第 9 条基线；片 029 在其上插了 3 个常量，行号由 `:66-67` 下推到
+  这里，片 029 复算）、`.codex/evals/README.md:11`（跑法那行）。
   同级入口 = `check_code_simplifier_agent.py` 与 `check_codebase_researcher_agent.py`，三者共用
   `harness_check_lib.citable_paths()`；本片把「`文件:行` 区间解析」也上收到同一库，正是为了避免第四份实现。
   另有一个**本片之前就在场**的消费方：`check_roadmap_and_routing.py` 的 `README_ENTRIES`
@@ -134,10 +135,13 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `parse_expectations()`，逻辑判定单元而不是物理行）、`:92-181`（18 条判据与 4 处早退）、
   `.codex/scripts/harness_check_lib.py:174-207`（`path_line_citations()` / `citation_problems()`）、
   `.codex/scripts/check_roadmap_and_routing.py:39-43` / `:226-231`、
-  `.codex/scripts/dev/checkers_selftest.py:59-63` / `:66-67` / `:248-255` / `:513-552`、
+  `.codex/scripts/dev/checkers_selftest.py:59-63` / `:70-71` / `:268-270` / `:528-566`（后三条由片 029 复算：
+  那一片新增 3 个常量、29 例 `keeper:*` 和 4 条抄检前缀，把这三处整体下推）、
   `.codex/scripts/run_all_guards.py:95-96`、`.codex/evals/cases/001-impact-inventory/product.md:1-13`。
   行号是先实测再落笔的：`artifacts/tmp/b028-pointers.py` 把本片与片 021/024/025/026/027 的 55 条引用逐条复算，
   末态 `POINTERS checked=55 stale=0`；本片同时修掉那五张卡里 26 处**本片之前就已漂**的区间（块 04）。
+  片 029 之后该驱动已被 `artifacts/tmp/b029-pointers.py` 取代（同一形状，把本片造成的漂移与 029 自己的
+  新增区间一起复算），旧驱动不再重跑，其 55 条读数只算本片当时的现场证据。
 - Documentation surfaces checked: `.codex/ROADMAP.md`（B2 条目 + D1/D9 记账）、`.codex/README.md`（目录结构节）、
   `.codex/HARNESS.md`（第 5 步验收，未新增落点故未改）、`.codex/tasks/_TEMPLATE.md`（`## Acceptance criteria`
   与 `### Behavior impact` 标题，快照的转录对象）、`.codex/rules/regression.md` 与
@@ -271,6 +275,10 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `OVERALL: INCONCLUSIVE`（不是判据红，是仪器找不到注入点）。锚点改成 `:67` 后同一轮 `ok=126 harness_errors=0`。
   这条留在这里而不是悄悄修掉：**基线快照里的字符串也是活引用**，注入用例锚在快照原文上就会跟着快照漂，
   下一次刷新快照时必须连着复算所有 `evals:*` 的锚点。
+  ⑥′ 这条预言在下一片就兑现了：片 029 给 `checkers_selftest.py` 顶部插了 3 个常量，把基线元组从 `:67`
+  推到 `:71`，片 026 卡片随之改写，快照必须重生成（`artifacts/tmp/b029-refresh-snapshot.py`，
+  `changed_lines=[5]`、`zero_diff_with_source=True`），`evals:pointer-stale` 的锚点同步改成 `:71`，
+  然后整轮自检重跑（片 029 块 02）。这就是 B2 角色面把「刷新快照 → 整轮重跑」写进合同的理由。
 - Regression evidence: 块 02 的 126 例必须含 113–126 这 14 条 `evals:*` 且 9 条基线全 `OK`；
   块 05 覆盖 ①；块 00 的 `paths-exist cited=5 dead=[]` 覆盖 ②；块 00 末态 19 行覆盖 ③；
   块 06 覆盖 ④；块 04 覆盖 ⑤；块 02 里 CASE 125 的两次读数（`HARNESS anchor not found` → `OK`）覆盖 ⑥。

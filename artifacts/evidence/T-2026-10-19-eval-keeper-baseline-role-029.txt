@@ -1,0 +1,574 @@
+Task evidence T-2026-10-19-029 — eval-keeper 角色、成对守门与基线快照刷新
+环境：Windows 10.0.26200 / x64 / Python 3.13.12 / Git Bash；所有 Python 命令带 -X utf8。
+判据行逐字粘贴、不截断。块 04 的旧值→新值取自 `git diff HEAD -U0 -- .codex/tasks`。
+
+================================================================================================================================================================
+块 00 — 角色守门本体：python -X utf8 .codex/scripts/check_eval_keeper_agent.py（23 条判据逐字）
+================================================================================================================================================================
+OK   the seven inputs exist — missing=[]
+OK   expectation grammar derives from the runner — kinds=5 assets=3 evals_dir=.codex/evals/
+OK   reference role exposes a usable set of section names — measured=5 floor=5 names=['identity', 'source', 'contract', 'rules', '职责清单']
+OK   agent section names cover the reference role — reference_sections=5 missing=[]
+OK   agent names the runnable evaluation command — measured=4 floor=2
+OK   every command in the role points at a script that exists — scripts=['.codex/scripts/dev/checkers_selftest.py', '.codex/scripts/run_evals.py'] floor=2 missing=[]
+OK   agent obliges a full selftest re-run after refreshing a snapshot — measured=3 floor=2
+OK   agent names the selftest target verbatim — named=True floor=1
+OK   agent forbids touching the judgement surface to get green — measured=2 floor=2
+OK   agent forbids hand-copying the product snapshot — measured=6 floor=2
+OK   agent requires verbatim readings instead of a summary — measured=4 floor=2
+OK   agent refuses to be the one that declares acceptance — measured=3 floor=2
+OK   agent declares its only writable landing is the evals directory — landing_lines=1 all_named=True landing=.codex/evals/
+OK   agent declares everything else READONLY — measured=2 floor=2
+OK   agent names every expectation kind the runner accepts — kinds=5 missing=[]
+OK   agent names the three files a case must ship — assets=3 missing=[]
+OK   evals directory is registered in the harness README — registered=True path=.codex/evals/
+OK   agent cites >= 4 checkable repo paths — measured=6 floor=4 cited=['.codex/README.md', '.codex/agents/verifier.md', '.codex/evals', '.codex/evals/README.md', '.codex/evals/cases', '.codex/rules/regression.md']
+OK   every path cited by the role exists on disk — dead=[] cited=6
+OK   role text does not restate the grammar table or the rules it cites — measured_hits=0 sample=[]
+OK   role text carries no placeholder tokens — hits=[]
+OK   agent .toml declares name and description — name=True description=True
+OK   agent .toml body equals the agent markdown verbatim — toml_chars=3770 md_chars=3770 equal=True
+
+check_eval_keeper_agent: 0 check(s) failed
+EXITCODE=0
+
+================================================================================================================================================================
+块 01 — 同一条命令的 RED / GREEN + 两半不重叠对照（driver=artifacts/tmp/b029-redgreen.py）
+================================================================================================================================================================
+driver=artifacts/tmp/b029-redgreen.py
+baseline digests: .codex/README.md=ff5175ffbabc, .codex/agents/eval-keeper.md=815e0395ef89, .codex/agents/eval-keeper.toml=f9c76d193615
+OK  RED-1 role files absent -> rc=1 FAIL=FAIL the seven inputs exist — missing=['.codex/agents/eval-keeper.md', '.codex/agents/eval-keeper.toml']
+restore .codex/agents/eval-keeper.md sha12=815e0395ef89 identical=True
+restore .codex/agents/eval-keeper.toml sha12=f9c76d193615 identical=True
+OK  GREEN restored -> rc=0 ['check_eval_keeper_agent: 0 check(s) failed']
+OK  PRE condition: exactly one README line cites .codex/evals/ — hits=[28] lines=['├── .codex/evals/          # AI 产物的基线评测集（跑法见该目录 README.md）']
+OK  RED-2 registration drained -> guard rc=1 FAIL=FAIL evals directory is registered in the harness README — registered=False path=.codex/evals/ | runner rc=0 (两半不重叠)
+restore .codex/README.md sha12=ff5175ffbabc identical=True
+OK  POST restored -> guard rc=0 runner rc=0
+RED/GREEN assertions=4 bad=0
+VERDICT: PASS
+EXITCODE=0
+### 末态复算（证明捕获仍对应当前工作树）
+815e0395ef89 .codex/agents/eval-keeper.md
+f9c76d193615 .codex/agents/eval-keeper.toml
+ff5175ffbabc .codex/README.md
+3fa3ca04a394 .codex/evals/cases/001-impact-inventory/product.md
+
+================================================================================================================================================================
+块 02 — 注入自检整轮：python -X utf8 .codex/scripts/dev/checkers_selftest.py
+================================================================================================================================================================
+### 末态（run069）：10 条基线 + 本片 29 例 `keeper:*`（CASE 127-155）+ 总读数
+BASELINE OK check_intent_capturer_agent rc=0
+BASELINE OK check_roadmap_and_routing rc=0
+BASELINE OK check_intent_template rc=0
+BASELINE OK check_spec_author_agent rc=0
+BASELINE OK check_code_reviewer_agent rc=0
+BASELINE OK check_context_pack rc=0
+BASELINE OK check_codebase_researcher_agent rc=0
+BASELINE OK check_code_simplifier_agent rc=0
+BASELINE OK run_evals rc=0
+BASELINE OK check_eval_keeper_agent rc=0
+CASE 127 OK        keeper:agent-file-missing - rc=1, FAIL the seven inputs exist — missing=['.codex/agents/eval-keeper.md']
+CASE 128 OK        keeper:toml-file-missing - rc=1, FAIL the seven inputs exist — missing=['.codex/agents/eval-keeper.toml']
+CASE 129 OK        keeper:runner-gone - rc=1, FAIL the seven inputs exist — missing=['.codex/scripts/run_evals.py']
+CASE 130 OK        keeper:evals-readme-gone - rc=1, FAIL the seven inputs exist — missing=['.codex/evals/README.md']
+CASE 131 OK        keeper:codex-readme-gone - rc=1, FAIL the seven inputs exist — missing=['.codex/README.md']
+CASE 132 OK        keeper:reference-role-gone - rc=1, FAIL the seven inputs exist — missing=['.codex/agents/verifier.md']
+CASE 133 OK        keeper:grammar-drained - rc=1, FAIL expectation grammar derives from the runner — kinds=0 assets=3 evals_dir=.codex/evals/
+CASE 134 OK        keeper:reference-sections-drained - rc=1, FAIL reference role exposes a usable set of section names — measured=1 floor=5 names=['职责清单']
+CASE 135 OK        keeper:section-uncovered - rc=1, FAIL agent section names cover the reference role — reference_sections=5 missing=['职责清单']
+CASE 136 OK        keeper:run-command-swapped - rc=1, FAIL agent names the runnable evaluation command — measured=0 floor=2
+CASE 137 OK        keeper:command-dead-script - rc=1, FAIL every command in the role points at a script that exists — scripts=['.codex/scripts/dev/checkers_selftest.py', '.codex/scripts/nonexistent-eval-runner.py', '.codex/scripts/run_evals.py'] floor=2 missing=['.codex/scripts/nonexistent-eval-runner.py']
+CASE 138 OK        keeper:rerun-obligation-dropped - rc=1, FAIL agent obliges a full selftest re-run after refreshing a snapshot — measured=0 floor=2
+CASE 139 OK        keeper:selftest-target-renamed - rc=1, FAIL agent names the selftest target verbatim — named=False floor=1
+CASE 140 OK        keeper:loosen-permitted - rc=1, FAIL agent forbids touching the judgement surface to get green — measured=1 floor=2
+CASE 141 OK        keeper:handcopy-allowed - rc=1, FAIL agent forbids hand-copying the product snapshot — measured=0 floor=2
+CASE 142 OK        keeper:summary-only-allowed - rc=1, FAIL agent requires verbatim readings instead of a summary — measured=0 floor=2
+CASE 143 OK        keeper:acceptance-claimed - rc=1, FAIL agent refuses to be the one that declares acceptance — measured=1 floor=2
+CASE 144 OK        keeper:landing-not-evals - rc=1, FAIL agent declares its only writable landing is the evals directory — landing_lines=1 all_named=False landing=.codex/evals/
+CASE 145 OK        keeper:readonly-dropped - rc=1, FAIL agent declares everything else READONLY — measured=0 floor=2
+CASE 146 OK        keeper:kind-unnamed - rc=1, FAIL agent names every expectation kind the runner accepts — kinds=5 missing=['forbid']
+CASE 147 OK        keeper:asset-unnamed - rc=1, FAIL agent names the three files a case must ship — assets=3 missing=['input.md']
+CASE 148 OK        keeper:evals-dir-unregistered - rc=1, FAIL evals directory is registered in the harness README — registered=False path=.codex/evals/
+CASE 149 OK        keeper:cites-drained - rc=1, FAIL agent cites >= 4 checkable repo paths — measured=0 floor=4 cited=[]
+CASE 150 OK        keeper:dead-path-cited - rc=1, FAIL every path cited by the role exists on disk — dead=['.codex/evals/nonexistent-grammar.md'] cited=7
+CASE 151 OK        keeper:grammar-table-restated - rc=1, FAIL role text does not restate the grammar table or the rules it cites — measured_hits=1 sample=[('.codex/evals/README.md', '`）>这里放的是「AI产物vs基线期望」的可重跑判定。规则、角色正文、守门脚本各有只读守门，>本目录补的是最后一块：产物')]
+CASE 152 OK        keeper:placeholder-injected - rc=1, FAIL role text carries no placeholder tokens — hits=['TODO']
+CASE 153 OK        keeper:toml-md-drift - rc=1, FAIL agent .toml body equals the agent markdown verbatim — toml_chars=3770 md_chars=3804 equal=False
+CASE 154 OK        keeper:toml-name-missing - rc=1, FAIL agent .toml declares name and description — name=False description=True
+CASE 155 OK        keeper:toml-unparsable - rc=1, FAIL agent .toml parses as a Codex agent file — TOMLDecodeError('Invalid value (at end of document)')
+Mode: full (155 injected-violation cases + 10 baselines)
+SELFTEST cases=155 ok=155 mismatch=0 harness_errors=0 skipped=0
+OVERALL: PASS
+EXITCODE=0
+### 快照刷新后、卡片入表前那一轮（run051，同一批 155 例读数）
+SELFTEST cases=155 ok=155 mismatch=0 harness_errors=0 skipped=0
+OVERALL: PASS
+### 仪器缺陷那轮（run048：`derive_sample()` 在未掩码空间校验样本 → 抄检正控静默失效，被新增的 CASE 151 逼出）
+CASE 151 MISMATCH  keeper:grammar-table-restated - expected FAIL label, rc=1, seen=['FAIL agent .toml body equals the agent markdown verbatim — toml_chars=3770 md_chars=3832 equal=False']
+SELFTEST cases=155 ok=154 mismatch=1 harness_errors=0 skipped=0
+OVERALL: FAIL
+
+================================================================================================================================================================
+块 03 — 运行器未受影响、注册表、core 档整跑、任务校验与 ROADMAP 守门
+================================================================================================================================================================
+### python -X utf8 .codex/scripts/run_evals.py
+OK   eval cases directory exists — path=.codex/evals/cases
+OK   cases/ holds at least MIN_CASES case dirs — measured=1 floor=1 cases=['001-impact-inventory']
+OK   case 001-impact-inventory ships input+expected+product — missing=[]
+OK   case 001-impact-inventory assets are all non-empty — empty=[]
+OK   case 001-impact-inventory expectations all parse — unknown=[] parsed=9
+OK   case 001-impact-inventory declares at least MIN_EXPECTATIONS expectations — measured=9 floor=5
+OK   case 001-impact-inventory thresholds are all >= 1 — 恒真期望（>=0）不该被允许: []
+OK   case 001-impact-inventory must: (code evidence) — bullets=1 floor=1
+OK   case 001-impact-inventory must: 平台分支 — bullets=1 floor=1
+OK   case 001-impact-inventory must: 逐字读数 — bullets=2 floor=1
+OK   case 001-impact-inventory shape: 生产者 & 消费者 & 同级入口 — bullets=1 floor=1 tokens=3
+OK   case 001-impact-inventory shape: 不适用 & 一行未改 — bullets=1 floor=1 tokens=2
+OK   case 001-impact-inventory shape: 理由 & 命令 — bullets=1 floor=1 tokens=2
+OK   case 001-impact-inventory forbid: 待填 — bullets=0 expected=0
+OK   case 001-impact-inventory pointers-alive — citations=2 floor=2 problems=[]
+OK   case 001-impact-inventory paths-exist — cited=5 floor=3 dead=[]
+OK   case 001-impact-inventory pins every product bullet — unpinned=[] bullets=4
+OK   every expectation kind is exercised by some case — missing=[] seen=['forbid', 'must', 'paths-exist', 'pointers-alive', 'shape']
+NOTE case and expectation inventory is printed, not judged — EVALS cases=1 expectations=9
+
+run_evals: 0 check(s) failed
+EXITCODE=0
+### python -X utf8 .codex/scripts/run_all_guards.py --list
+ROSTER entries=36 core=30 precommit=6
+core           validate_tasks                         "SUMMARY files="
+core           check_context_pack                     "check(s) failed"
+core           check_code_reviewer_agent              "check(s) failed"
+core           check_codebase_researcher_agent        "check(s) failed"
+core           check_code_simplifier_agent            "check(s) failed"
+core           run_evals                              "check(s) failed"
+core           check_eval_keeper_agent                "check(s) failed"
+core           check_intent_capturer_agent            "check(s) failed"
+core           check_intent_template                  "check(s) failed"
+core           check_pm_discovery_skill               "check(s) failed"
+core           check_roadmap_and_routing              "check(s) failed"
+core           check_spec_author_agent                "check(s) failed"
+core           check_stack_facts                      "check(s) failed"
+core           check_design_tokens                    "check(s) failed"
+core           check_androidtest_schema_expectations  "VERDICT:"
+core           checkers_selftest                      "OVERALL:"
+core           parity_ledger_selftest                 "VERDICT:"
+core           screen_inventory_selftest              "VERDICT:"
+core           measure_screen --selftest              "VERDICT:"
+core           verify_1to1_selftest                   "cases="
+core           cdp_shot_selftest                      "cases="
+core           web_walk --selftest                    "SELFTEST cases="
+core           check_dependency_direction             "dependency scan root="
+core           check_dependency_direction --selftest  "SELFTEST cases="
+core           check_user_copy_i18n                   "user-copy scan root="
+core           check_user_copy_i18n --selftest        "SELFTEST cases="
+core           check_device_time                      "device-time scan root="
+core           check_device_time --selftest           "SELFTEST cases="
+core           sync_fixtures --check                  "SYNC CHECK"
+core           sync_fixtures --selftest               "SELFTEST cases="
+precommit      check_offline_bundle                   "offline scan root="
+precommit      check_offline_bundle --selftest        "SELFTEST cases="
+precommit      frontend verify                        "verify steps="
+precommit      line-budget                            "业务变更行:" "[line-budget] 错误"
+precommit      no-kotlin-check                        "VERDICT:"
+precommit      guard-selftest -Fast                   "OVERALL ="
+EXITCODE=0
+### python -X utf8 .codex/scripts/run_all_guards.py --tier core（无并发）
+RUN-ALL-GUARDS tier=core selected=30/36 subset=no
+PASS         validate_tasks                         rc=0 0.1s
+             > SUMMARY files=23 errors=0 warnings=4
+PASS         check_context_pack                     rc=0 0.3s
+             > check_context_pack: 0 check(s) failed
+PASS         check_code_reviewer_agent              rc=0 0.1s
+             > check_code_reviewer_agent: 0 check(s) failed
+PASS         check_codebase_researcher_agent        rc=0 0.1s
+             > check_codebase_researcher_agent: 0 check(s) failed
+PASS         check_code_simplifier_agent            rc=0 0.1s
+             > check_code_simplifier_agent: 0 check(s) failed
+PASS         run_evals                              rc=0 0.1s
+             > run_evals: 0 check(s) failed
+PASS         check_eval_keeper_agent                rc=0 0.1s
+             > check_eval_keeper_agent: 0 check(s) failed
+PASS         check_intent_capturer_agent            rc=0 0.1s
+             > check_intent_capturer_agent: 0 check(s) failed
+PASS         check_intent_template                  rc=0 0.1s
+             > check_intent_template: 0 check(s) failed
+PASS         check_pm_discovery_skill               rc=0 0.1s
+             > check_pm_discovery_skill: 0 check(s) failed
+PASS         check_roadmap_and_routing              rc=0 0.1s
+             > check_roadmap_and_routing: 0 check(s) failed
+PASS         check_spec_author_agent                rc=0 0.1s
+             > check_spec_author_agent: 0 check(s) failed
+PASS         check_stack_facts                      rc=0 0.4s
+             > check_stack_facts: 0 check(s) failed
+PASS         check_design_tokens                    rc=0 0.1s
+             > check_design_tokens: 0 check(s) failed
+PASS         check_androidtest_schema_expectations  rc=0 0.2s
+             > VERDICT: PASS
+PASS         checkers_selftest                      rc=0 16.5s
+             > OVERALL: PASS
+PASS         parity_ledger_selftest                 rc=0 1.7s
+             > VERDICT: PASS
+PASS         screen_inventory_selftest              rc=0 1.5s
+             > VERDICT: PASS
+PASS         measure_screen --selftest              rc=0 8.1s
+             > VERDICT: PASS (19 cases, positive and negative for every branch)
+PASS         verify_1to1_selftest                   rc=0 229.0s
+             > SELFTEST PASS cases=40 cli=20 muts=18 failures=0
+PASS         cdp_shot_selftest                      rc=0 60.1s
+             > SELFTEST PASS cases=17 failures=0
+PASS         web_walk --selftest                    rc=0 0.1s
+             > SELFTEST cases=6 bad=0
+PASS         check_dependency_direction             rc=0 0.1s
+             > dependency scan root=src layers=9 scanned=23 findings=0
+PASS         check_dependency_direction --selftest  rc=0 0.1s
+             > SELFTEST cases=10 floor=8 fail=0
+PASS         check_user_copy_i18n                   rc=0 0.1s
+             > user-copy scan root=src scanned=23 copy-dir-exempt-seen=true cjk-lines=0 files=0 baseline-entries=0 baseline-covered=0
+PASS         check_user_copy_i18n --selftest        rc=0 0.1s
+             > SELFTEST cases=15 floor=10 fail=0
+PASS         check_device_time                      rc=0 0.1s
+             > device-time scan root=D:\Project\Android\Treelearn\frontend\src scanned=23 exempt=utils/deviceTime.ts exempt-in-tree=true findings=0
+PASS         check_device_time --selftest           rc=0 0.1s
+             > SELFTEST cases=11 floor=8 fail=0
+PASS         sync_fixtures --check                  rc=0 0.1s
+             > SYNC CHECK src=13 dst=13 bad=0 redacted=0 dir=frontend\src\platform\fixtures
+PASS         sync_fixtures --selftest               rc=0 0.1s
+             > SELFTEST cases=8 bad=0 floor=1
+RUN-ALL-GUARDS pass=30 fail=0 inconclusive=0 fault=0
+VERDICT: PASS (all 30 selected guard(s) printed a judgement line and returned green)
+EXITCODE=0
+### python -X utf8 .codex/scripts/validate_tasks.py
+PASS T-2026-10-18-android-chat-stage-determinism-018.md
+PASS T-2026-10-18-android-nav-untitled-branch-016.md
+PASS T-2026-10-18-android-phone-usability-requirement-017.md
+PASS T-2026-10-18-process-asset-copy-002.md
+PASS T-2026-10-18-process-validation-004.md
+PASS T-2026-10-18-treelearn-process-migration-001.md
+PASS T-2026-10-18-web-copy-table-and-device-time-013.md
+PASS T-2026-10-18-web-dependency-direction-guard-014.md
+PASS T-2026-10-18-web-frontend-skeleton-build-entry-011.md
+PASS T-2026-10-18-web-h5-android-parity-requirement-005.md
+WARNING T-2026-10-18-web-parity-fixture-capture-instrument-019.md: estimated production lines 775 exceeds soft limit 200
+PASS T-2026-10-18-web-parity-fixture-capture-instrument-019.md
+WARNING T-2026-10-18-web-render-wiring-walk-instrument-020.md: estimated production lines 1576 exceeds soft limit 200
+PASS T-2026-10-18-web-render-wiring-walk-instrument-020.md
+PASS T-2026-10-18-web-runtime-port-fixture-adapter-012.md
+PASS T-2026-10-18-web-stack-adaptation-003.md
+WARNING T-2026-10-18-web-user-copy-guard-and-verify-entry-015.md: estimated production lines 245 exceeds soft limit 200
+PASS T-2026-10-18-web-user-copy-guard-and-verify-entry-015.md
+PASS T-2026-10-19-androidtest-derived-schema-version-022.md
+PASS T-2026-10-19-code-reviewer-role-and-review-template-024.md
+PASS T-2026-10-19-code-simplifier-role-027.md
+PASS T-2026-10-19-codebase-researcher-impact-role-026.md
+PASS T-2026-10-19-eval-keeper-baseline-role-029.md
+PASS T-2026-10-19-evals-inventory-and-runner-028.md
+WARNING T-2026-10-19-guard-runner-one-command-roster-023.md: estimated production lines 332 exceeds soft limit 200
+PASS T-2026-10-19-guard-runner-one-command-roster-023.md
+PASS T-2026-10-19-harness-guard-judgements-d4-d6-021.md
+PASS T-2026-10-19-project-brief-dir-state-guard-025.md
+SUMMARY files=24 errors=0 warnings=4
+### python -X utf8 .codex/scripts/check_roadmap_and_routing.py
+OK   file exists: .codex/ROADMAP.md
+OK   file exists: AGENTS.md
+OK   file exists: .codex/README.md
+OK   phase section exists: Phase A（已完成）
+OK   phase section exists: Phase B（下一批）
+OK   phase section exists: Phase C（依赖外部条件）
+OK   Phase B（下一批） has >= 7 entries — measured=7
+OK   Phase B（下一批） every entry carries all 8 field names — measured_entries=7 problems=[]
+OK   Phase B（下一批） every 执行提示词 is >= 40 chars — measured_short=[]
+OK   Phase B（下一批） every path inside 执行提示词 exists — measured_dead=[]
+OK   Phase B（下一批） every 开源来源 cites github.com or a skills path — measured_weak=[]
+OK   Phase C（依赖外部条件） has >= 3 entries — measured=3
+OK   Phase C（依赖外部条件） every entry carries all 8 field names — measured_entries=3 problems=[]
+OK   Phase C（依赖外部条件） every 执行提示词 is >= 40 chars — measured_short=[]
+OK   Phase C（依赖外部条件） every path inside 执行提示词 exists — measured_dead=[]
+OK   Phase C（依赖外部条件） every 开源来源 cites github.com or a skills path — measured_weak=[]
+OK   Phase B covers the seven planned capabilities — missing=[]
+OK   Phase C covers the three planned capabilities — missing=[]
+OK   no placeholder tokens in ROADMAP — measured=[]
+OK   AGENTS.md routing table currently has >= 12 linked rows — measured=19
+OK   current routing rows cover all four triggers — measured_rows=19 missing=[]
+OK   every current routing-row target exists — measured_targets=22 dead=[]
+OK   git diff AGENTS.md is readable — stderr=
+NOTE AGENTS.md migration diff is empty — base=da9fa5630959
+OK   HEAD revision of AGENTS.md is readable — stderr=
+NOTE routing-row increment is printed, not judged — base=da9fa5630959 window=uncommitted-only added_rows=0 added_missing_triggers=['intent-capturer', 'pm-discovery', 'project-brief', 'ROADMAP'] added_dead_targets=[]
+OK   .codex/README.md has a 目录结构 section
+OK   registered-entry list is not drained below its floor — entries=5 floor=4
+OK   目录结构 section lists every registered entry — missing=[]
+
+check_roadmap_and_routing: 0 check(s) failed
+EXITCODE=0
+
+================================================================================================================================================================
+块 04 — `文件:行` 活指针复算（driver=artifacts/tmp/b029-pointers.py，99 条锚点断言、下限 80）
+================================================================================================================================================================
+driver=artifacts/tmp/b029-pointers.py
+assertion: 锚点子串必须至少出现在被声称的行区间内一次
+table floor: measured=99 floor=80
+OK       .codex/scripts/dev/checkers_selftest.py:89-91 anchor='SAMPLE_SPEC_LONG' hits=[89, 195] total_lines=908  (片 021)
+OK       .codex/scripts/dev/checkers_selftest.py:104-135 anchor='def derive_sample' hits=[104] total_lines=908  (片 021/029)
+OK       .codex/scripts/dev/checkers_selftest.py:765-775 anchor='op == "append_sample"' hits=[765] total_lines=908  (片 021/029)
+OK       .codex/scripts/dev/checkers_selftest.py:830-833 anchor='copy_check_prefixes' hits=[830, 833] total_lines=908  (片 021/029)
+OK       .codex/scripts/check_code_reviewer_agent.py:85-166 anchor='c.check(same, "agent .toml body equals' hits=[163] total_lines=170  (片 024)
+OK       .codex/scripts/run_all_guards.py:87-88 anchor='check_code_reviewer_agent' hits=[87] total_lines=399  (片 024)
+OK       .codex/scripts/dev/checkers_selftest.py:69-71 anchor='BASELINES = (CHECK_INTENT' hits=[70] total_lines=908  (片 024/025/026/027/028/029)
+OK       .codex/scripts/dev/checkers_selftest.py:728-747 anchor='def run_dir_case' hits=[728] total_lines=908  (片 024)
+OK       .codex/scripts/dev/checkers_selftest.py:728-747 anchor='shutil.copytree(src, path' hits=[747] total_lines=908  (片 024)
+OK       .codex/scripts/dev/checkers_selftest.py:755-756 anchor='op == "delete_dir"' hits=[755] total_lines=908  (片 024)
+OK       .codex/scripts/check_code_reviewer_agent.py:45-50 anchor='MIN_TASK_FIELDS = 4' hits=[50] total_lines=170  (片 024)
+OK       .codex/scripts/check_code_reviewer_agent.py:1-21 anchor='为什么需要这支脚本' hits=[6] total_lines=170  (片 024)
+OK       .codex/scripts/run_all_guards.py:81-168 anchor='GUARDS = [' hits=[81] total_lines=399  (片 024/028/029)
+OK       .codex/scripts/dev/checkers_selftest.py:375-386 anchor='context:stale-absent-claim' hits=[377] total_lines=908  (片 025)
+OK       .codex/scripts/dev/checkers_selftest.py:375-386 anchor='context:dir-cites-drained' hits=[384] total_lines=908  (片 025)
+OK       .codex/scripts/dev/checkers_selftest.py:682-690 anchor='for nm in sorted(os.listdir(REPO_ROOT))' hits=[685] total_lines=908  (片 025)
+OK       .codex/scripts/dev/checkers_selftest.py:859-861 anchor='tag = os.path.splitext' hits=[861] total_lines=908  (片 025)
+OK       .codex/scripts/check_context_pack.py:38-41 anchor='MIN_CITED_DIRS = 2' hits=[41] total_lines=127  (片 025)
+OK       .codex/scripts/check_context_pack.py:68-68 anchor='docs index is a valid curated subset' hits=[68] total_lines=127  (片 025 D5 行)
+OK       .codex/scripts/check_context_pack.py:75-95 anchor='no dir is claimed' hits=[88] total_lines=127  (片 025)
+OK       .codex/scripts/run_all_guards.py:89-91 anchor='check_codebase_researcher_agent' hits=[89, 90] total_lines=399  (片 026/028)
+OK       .codex/scripts/dev/checkers_selftest.py:70-71 anchor='CHECK_CONTEXT, CHECK_RESEARCH, CHECK_SIMPLIFY' hits=[71] total_lines=908  (片 026/028/029)
+OK       .codex/agents/codebase-researcher.md:8-11 anchor='<identity>' hits=[8] total_lines=96  (片 026)
+OK       .codex/agents/codebase-researcher.md:22-34 anchor='READONLY' hits=[24] total_lines=96  (片 026)
+OK       .codex/scripts/check_codebase_researcher_agent.py:47-66 anchor='MIN_CITED_PATHS = 5' hits=[64] total_lines=182  (片 026)
+OK       .codex/scripts/check_codebase_researcher_agent.py:84-179 anchor='def main():' hits=[84] total_lines=182  (片 026/027)
+OK       .codex/scripts/check_roadmap_and_routing.py:36-36 anchor='"codebase-researcher", "code-simplifier"' hits=[36] total_lines=238  (片 026)
+OK       .codex/scripts/check_roadmap_and_routing.py:174-174 anchor='miss_b = [k for k in PHASE_B_KEYWORDS' hits=[174] total_lines=238  (片 026)
+OK       Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48-48 anchor='DEFERRED:待 B4（codebase-researcher）' hits=[48] total_lines=62  (片 026)
+OK       .codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md:108-108 anchor='run_all_guards.py:89-91' hits=[108, 128] total_lines=299  (片 028 校正)
+OK       .codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md:108-108 anchor='checkers_selftest.py:71' hits=[108] total_lines=299  (片 029 校正（基线快照的源头）)
+OK       .codex/evals/cases/001-impact-inventory/product.md:5-5 anchor='checkers_selftest.py:71' hits=[5] total_lines=13  (片 029 刷新后的快照)
+OK       .codex/scripts/check_code_simplifier_agent.py:32-68 anchor='MIN_ROLE_SECTIONS = 6' hits=[46] total_lines=216  (片 027)
+OK       .codex/scripts/check_code_simplifier_agent.py:70-81 anchor='BEFORE_RE = re.compile' hits=[70] total_lines=216  (片 027)
+OK       .codex/scripts/check_code_simplifier_agent.py:103-212 anchor='def main():' hits=[103] total_lines=216  (片 027)
+OK       .codex/scripts/run_all_guards.py:92-94 anchor='check_code_simplifier_agent' hits=[92, 93] total_lines=399  (片 027)
+OK       .codex/scripts/dev/checkers_selftest.py:377-436 anchor='research:absent-claim-dropped' hits=[415] total_lines=908  (片 026/027)
+OK       .codex/scripts/dev/checkers_selftest.py:450-526 anchor='simplify:toml-unparsable' hits=[524] total_lines=908  (片 027/029)
+OK       .codex/scripts/harness_check_lib.py:158-171 anchor='def citable_paths' hits=[158] total_lines=297  (片 027)
+OK       .codex/agents/code-simplifier.md:1-93 anchor='code-simplifier' hits=[1, 9] total_lines=93  (片 027)
+OK       .codex/agents/code-simplifier.md:22-31 anchor='<contract>' hits=[22] total_lines=93  (片 027)
+OK       .codex/agents/code-simplifier.md:69-72 anchor='REFACTOR' hits=[6, 69] total_lines=93  (片 027)
+OK       .codex/HARNESS.md:9-9 anchor='codebase-researcher' hits=[9] total_lines=25  (片 026 第 3 步)
+OK       .codex/HARNESS.md:10-10 anchor='code-simplifier' hits=[10] total_lines=25  (片 027 第 4 步)
+OK       .codex/tasks/T-2026-10-19-code-simplifier-role-027.md:117-118 anchor='checkers_selftest.py:70-71' hits=[117] total_lines=364  (片 029 校正)
+OK       .codex/tasks/T-2026-10-19-code-simplifier-role-027.md:141-141 anchor=':450-526' hits=[141] total_lines=364  (片 029 校正)
+OK       .codex/scripts/run_evals.py:33-49 anchor='MIN_EXPECTATIONS = 5' hits=[39] total_lines=183  (片 028)
+OK       .codex/scripts/run_evals.py:52-89 anchor='def judged_units' hits=[52] total_lines=183  (片 028)
+OK       .codex/scripts/run_evals.py:92-181 anchor='def main():' hits=[92] total_lines=183  (片 028)
+OK       .codex/scripts/harness_check_lib.py:174-207 anchor='def path_line_citations' hits=[179] total_lines=297  (片 028)
+OK       .codex/scripts/harness_check_lib.py:174-207 anchor='def citation_problems' hits=[192] total_lines=297  (片 028)
+OK       .codex/scripts/check_roadmap_and_routing.py:39-43 anchor='MIN_README_ENTRIES = 4' hits=[43] total_lines=238  (片 028)
+OK       .codex/scripts/check_roadmap_and_routing.py:226-231 anchor='registered-entry list is not drained' hits=[227] total_lines=238  (片 028)
+OK       .codex/scripts/dev/checkers_selftest.py:59-63 anchor='RUN_EVALS = ' hits=[59] total_lines=908  (片 028)
+OK       .codex/scripts/dev/checkers_selftest.py:268-270 anchor='roadmap:readme-entries-drained' hits=[268] total_lines=908  (片 028/029)
+OK       .codex/scripts/dev/checkers_selftest.py:528-566 anchor='evals:cases-dir-deleted' hits=[529] total_lines=908  (片 028/029)
+OK       .codex/scripts/run_all_guards.py:95-96 anchor='E("run_evals"' hits=[95] total_lines=399  (片 028)
+OK       .codex/evals/cases/001-impact-inventory/product.md:1-13 anchor='(code evidence)' hits=[4] total_lines=13  (片 028 快照)
+OK       .codex/evals/README.md:1-52 anchor='run_evals.py' hits=[11] total_lines=52  (片 028)
+OK       .codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md:117-118 anchor='checkers_selftest.py:70-71' hits=[117] total_lines=370  (片 029 校正)
+OK       .codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md:138-138 anchor=':268-270' hits=[138] total_lines=370  (片 029 校正)
+OK       .codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md:138-138 anchor=':528-566' hits=[138] total_lines=370  (片 029 校正)
+OK       .codex/scripts/check_eval_keeper_agent.py:31-41 anchor='INPUTS = (' hits=[40] total_lines=216  (片 029)
+OK       .codex/scripts/check_eval_keeper_agent.py:43-76 anchor='MIN_ROLE_SECTIONS = 5' hits=[46] total_lines=216  (片 029)
+OK       .codex/scripts/check_eval_keeper_agent.py:43-76 anchor='OVERLAP_RUNS = 60' hits=[65] total_lines=216  (片 029)
+OK       .codex/scripts/check_eval_keeper_agent.py:67-76 anchor='RUN_CMD_RE = re.compile' hits=[67] total_lines=216  (片 029)
+OK       .codex/scripts/check_eval_keeper_agent.py:79-82 anchor='def lines_matching' hits=[79] total_lines=216  (片 029)
+OK       .codex/scripts/check_eval_keeper_agent.py:84-212 anchor='def main():' hits=[84] total_lines=216  (片 029)
+OK       .codex/scripts/check_eval_keeper_agent.py:94-104 anchor='import run_evals' hits=[95] total_lines=216  (片 029 单一权威派生)
+OK       .codex/scripts/check_eval_keeper_agent.py:1-28 anchor='为什么需要这支脚本' hits=[6] total_lines=216  (片 029)
+OK       .codex/scripts/check_eval_keeper_agent.py:88-91 anchor='the seven inputs exist' hits=[89] total_lines=216  (片 029 早退 ①)
+OK       .codex/scripts/check_eval_keeper_agent.py:99-101 anchor='c.fail("expectation grammar derives from the runner"' hits=[100] total_lines=216  (片 029 早退 ②)
+OK       .codex/scripts/check_eval_keeper_agent.py:109-112 anchor='"reference role exposes a usable set of section names"' hits=[110] total_lines=216  (片 029 早退 ③)
+OK       .codex/agents/eval-keeper.md:7-7 anchor='<identity>' hits=[7] total_lines=92  (片 029)
+OK       .codex/agents/eval-keeper.md:14-14 anchor='<source>' hits=[14] total_lines=92  (片 029)
+OK       .codex/agents/eval-keeper.md:50-50 anchor='## 触发时机' hits=[50] total_lines=92  (片 029)
+OK       .codex/agents/eval-keeper.md:67-67 anchor='## 输出格式' hits=[67] total_lines=92  (片 029)
+OK       .codex/agents/eval-keeper.md:78-78 anchor='## 交接' hits=[78] total_lines=92  (片 029)
+OK       .codex/agents/eval-keeper.md:1-92 anchor='<identity>' hits=[7] total_lines=92  (片 029)
+OK       .codex/agents/eval-keeper.md:21-34 anchor='<contract>' hits=[21] total_lines=92  (片 029)
+OK       .codex/agents/eval-keeper.md:21-34 anchor='只写' hits=[23] total_lines=92  (片 029 唯一落点)
+OK       .codex/agents/eval-keeper.md:36-48 anchor='<rules>' hits=[36] total_lines=92  (片 029)
+OK       .codex/agents/eval-keeper.md:58-66 anchor='## 职责清单' hits=[58] total_lines=92  (片 029)
+OK       .codex/agents/eval-keeper.md:86-92 anchor='## 禁区' hits=[86] total_lines=92  (片 029)
+OK       .codex/scripts/dev/checkers_selftest.py:64-67 anchor='EVAL_KEEPER_MD = ' hits=[65] total_lines=908  (片 029)
+OK       .codex/scripts/dev/checkers_selftest.py:64-67 anchor='CHECK_KEEPER = ' hits=[67] total_lines=908  (片 029)
+OK       .codex/scripts/dev/checkers_selftest.py:101-101 anchor='SAMPLE_SPEC_GRAMMAR' hits=[101, 643] total_lines=908  (片 029 第四份抄检来源)
+OK       .codex/scripts/dev/checkers_selftest.py:568-656 anchor='keeper:agent-file-missing' hits=[570] total_lines=908  (片 029)
+OK       .codex/scripts/dev/checkers_selftest.py:568-656 anchor='keeper:toml-unparsable' hits=[654] total_lines=908  (片 029)
+OK       .codex/scripts/dev/checkers_selftest.py:560-563 anchor='checkers_selftest.py:71' hits=[561] total_lines=908  (片 029 锚点跟随快照)
+OK       .codex/scripts/dev/checkers_selftest.py:104-135 anchor='flat_masked' hits=[120, 125] total_lines=908  (片 029 掩码空间修复)
+OK       .codex/scripts/run_all_guards.py:97-98 anchor='check_eval_keeper_agent' hits=[97] total_lines=399  (片 029 core 档注册)
+OK       .codex/HARNESS.md:11-11 anchor='eval-keeper' hits=[11] total_lines=25  (片 029 第 5 步接线)
+OK       .codex/ROADMAP.md:65-65 anchor='T-2026-10-19-eval-keeper-baseline-role-029' hits=[65] total_lines=428  (片 029)
+OK       .codex/README.md:28-28 anchor='.codex/evals/' hits=[28] total_lines=32  (片 028 登记、片 029 复算)
+OK       .codex/scripts/check_roadmap_and_routing.py:35-36 anchor='"eval-keeper"' hits=[35] total_lines=238  (片 029 Phase B 关键词)
+OK       .codex/tasks/T-2026-10-19-eval-keeper-baseline-role-029.md:116-117 anchor='run_all_guards.py:97-98' hits=[40, 116, 141, 242] total_lines=359  (片 029 卡片)
+OK       .codex/tasks/T-2026-10-19-eval-keeper-baseline-role-029.md:136-137 anchor='check_eval_keeper_agent.py:31-41' hits=[136] total_lines=359  (片 029 卡片)
+OK       .codex/tasks/T-2026-10-19-eval-keeper-baseline-role-029.md:139-142 anchor='checkers_selftest.py:64-67' hits=[139] total_lines=359  (片 029 卡片)
+POINTERS checked=99 stale=0
+VERDICT: PASS
+### 本片改回现值的卡片区间（`git diff HEAD -U0 -- .codex/tasks`）
+diff --git a/.codex/tasks/T-2026-10-19-code-reviewer-role-and-review-template-024.md b/.codex/tasks/T-2026-10-19-code-reviewer-role-and-review-template-024.md
+index f74c498..1513245 100644
+--- a/.codex/tasks/T-2026-10-19-code-reviewer-role-and-review-template-024.md
++++ b/.codex/tasks/T-2026-10-19-code-reviewer-role-and-review-template-024.md
+@@ -119,3 +119,3 @@ tdd_mode: required
+-  `Docs/REVIEW.md:7-11`（归档位置）。登记面：`.codex/scripts/run_all_guards.py:87-88`（core 档新行仍是这两行；整表 `:81-166`，026/027/028 各在其后新增了 3/3/2 行）、
+-  `.codex/scripts/dev/checkers_selftest.py:44-67`（常量与基线元组，本片加的是第 5 条）、`:623-642`（目录型注入的
+-  `run_dir_case`，在 `:650-651` 分派）。行号是 2026-10-19 片 025、片 026、片 027、片 028 之后各重测一次：这四片都往同一个文件里
++  `Docs/REVIEW.md:7-11`（归档位置）。登记面：`.codex/scripts/run_all_guards.py:87-88`（core 档新行仍是这两行；整表 `:81-168`，026/027/028/029 各在其后新增了 3/3/2/2 行）、
++  `.codex/scripts/dev/checkers_selftest.py:44-71`（常量与基线元组，本片加的是第 5 条）、`:728-747`（目录型注入的
++  `run_dir_case`，在 `:755-756` 分派）。行号是 2026-10-19 片 025、片 026、片 027、片 028、片 029 之后各重测一次：这五片都往同一个文件里
+diff --git a/.codex/tasks/T-2026-10-19-code-simplifier-role-027.md b/.codex/tasks/T-2026-10-19-code-simplifier-role-027.md
+index 9f12535..1682f45 100644
+--- a/.codex/tasks/T-2026-10-19-code-simplifier-role-027.md
++++ b/.codex/tasks/T-2026-10-19-code-simplifier-role-027.md
+@@ -117 +117,2 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
+-  消费者 = `run_all_guards.py:92-94`（core 档）、`checkers_selftest.py:66-67`（第 8 条基线）、`.codex/HARNESS.md:10`
++  消费者 = `run_all_guards.py:92-94`（core 档）、`checkers_selftest.py:70-71`（第 8 条基线；片 029 在这两行之上插了
++  3 个常量，行号从 `:66-67` 挪到这里，由片 029 复算）、`.codex/HARNESS.md:10`
+@@ -140 +141 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
+-  `.codex/scripts/dev/checkers_selftest.py:55-58` / `:66-67` / `:93` / `:436-511` / `:725`、
++  `.codex/scripts/dev/checkers_selftest.py:55-58` / `:70-71` / `:97` / `:450-526` / `:830`、
+@@ -143 +144,2 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
+-  末态 `POINTERS checked=49 stale=0`。
++  末态 `POINTERS checked=49 stale=0`；片 029 交付后由 `b029-pointers.py` 再复算一次并改成本页的读数
++  （那一片往同一文件插了 3 个常量、10 条基线之一和 29 例 `keeper:*`，把这里的行号整体下推）。
+diff --git a/.codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md b/.codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md
+index f5de0ef..6e9fd58 100644
+--- a/.codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md
++++ b/.codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md
+@@ -108 +108 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
+-  消费者 = `.codex/scripts/run_all_guards.py:89-91`（core 档）、`.codex/scripts/dev/checkers_selftest.py:67`（第 7 条基线）、
++  消费者 = `.codex/scripts/run_all_guards.py:89-91`（core 档）、`.codex/scripts/dev/checkers_selftest.py:71`（第 7 条基线）、
+@@ -126,4 +126,4 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
+-  `.codex/scripts/dev/checkers_selftest.py:85-93`（含取样来源的样本形状）、`:373-432`（19 例 `research:*`）、
+-  `:578-585`（顶层目录名镜像）、`:650-651`（`delete_dir` 分派），
+-  `.codex/scripts/run_all_guards.py:89-91`（core 档新行；整表 `:81-166`）。
+-  本片写下的这些行号在片 027、片 028 之后各重测过一次：027 与 028 都往 `checkers_selftest.py` 与 `run_all_guards.py` 里加了内容，
++  `.codex/scripts/dev/checkers_selftest.py:86-101`（含取样来源的样本形状）、`:387-449`（19 例 `research:*`）、
++  `:682-690`（顶层目录名镜像）、`:755-756`（`delete_dir` 分派），
++  `.codex/scripts/run_all_guards.py:89-91`（core 档新行；整表 `:81-168`）。
++  本片写下的这些行号在片 027、片 028、片 029 之后各重测过一次：027 与 028 都往 `checkers_selftest.py` 与 `run_all_guards.py` 里加了内容，
+diff --git a/.codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md b/.codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md
+index 44da045..c9f285b 100644
+--- a/.codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md
++++ b/.codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md
+@@ -117 +117,2 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
+-  `.codex/scripts/dev/checkers_selftest.py:66-67`（第 9 条基线）、`.codex/evals/README.md:11`（跑法那行）。
++  `.codex/scripts/dev/checkers_selftest.py:70-71`（第 9 条基线；片 029 在其上插了 3 个常量，行号由 `:66-67` 下推到
++  这里，片 029 复算）、`.codex/evals/README.md:11`（跑法那行）。
+@@ -137 +138,2 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
+-  `.codex/scripts/dev/checkers_selftest.py:59-63` / `:66-67` / `:248-255` / `:513-552`、
++  `.codex/scripts/dev/checkers_selftest.py:59-63` / `:70-71` / `:268-270` / `:528-566`（后三条由片 029 复算：
++  那一片新增 3 个常量、29 例 `keeper:*` 和 4 条抄检前缀，把这三处整体下推）、
+@@ -140,0 +143,2 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
++  片 029 之后该驱动已被 `artifacts/tmp/b029-pointers.py` 取代（同一形状，把本片造成的漂移与 029 自己的
++  新增区间一起复算），旧驱动不再重跑，其 55 条读数只算本片当时的现场证据。
+@@ -273,0 +278,4 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
++  ⑥′ 这条预言在下一片就兑现了：片 029 给 `checkers_selftest.py` 顶部插了 3 个常量，把基线元组从 `:67`
++  推到 `:71`，片 026 卡片随之改写，快照必须重生成（`artifacts/tmp/b029-refresh-snapshot.py`，
++  `changed_lines=[5]`、`zero_diff_with_source=True`），`evals:pointer-stale` 的锚点同步改成 `:71`，
++  然后整轮自检重跑（片 029 块 02）。这就是 B2 角色面把「刷新快照 → 整轮重跑」写进合同的理由。
+diff --git a/.codex/tasks/T-2026-10-19-harness-guard-judgements-d4-d6-021.md b/.codex/tasks/T-2026-10-19-harness-guard-judgements-d4-d6-021.md
+index fe37e2d..c6efc42 100644
+--- a/.codex/tasks/T-2026-10-19-harness-guard-judgements-d4-d6-021.md
++++ b/.codex/tasks/T-2026-10-19-harness-guard-judgements-d4-d6-021.md
+@@ -68,2 +68,2 @@ tdd_mode: required
+-- Authoritative code/config/migration evidence: `.codex/scripts/dev/check_stack_facts.py:60-75`（模式表与扫描集）、`:91-108`（`pattern_scan`，同行指针豁免在此）、`:141-147`（两条新判据）；`.codex/scripts/dev/checkers_selftest.py:85-87`（三份样本规格）、`:96-120`（`derive_sample`）、`:660-670`（`append_sample`）、`:725-733`（形状闸门）。
+-  这四条行号是 2026-10-19 片 028 复算时改写的：片 025/026/027/028 依次往同一个文件加常量与用例，把原引的
++- Authoritative code/config/migration evidence: `.codex/scripts/dev/check_stack_facts.py:60-75`（模式表与扫描集）、`:91-108`（`pattern_scan`，同行指针豁免在此）、`:141-147`（两条新判据）；`.codex/scripts/dev/checkers_selftest.py:89-91`（三份样本规格）、`:104-135`（`derive_sample`）、`:765-775`（`append_sample`）、`:830-833`（形状闸门）。
++  这四条行号是 2026-10-19 片 028 复算、片 029 再复算的：片 025/026/027/028/029 依次往同一个文件加常量与用例，把原引的
+diff --git a/.codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md b/.codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md
+index 0f3a4f4..9fce621 100644
+--- a/.codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md
++++ b/.codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md
+@@ -103,4 +103,4 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
+-  `.codex/scripts/dev/checkers_selftest.py:49-67`（`CHECK_CONTEXT` 常量与基线元组；026 之后该元组已含第 7 条、027 含第 8 条、028 含第 9 条）、
+-  `:362-371`（3 例 `context:*`）、`:578-585`（顶层目录名镜像）、`:753-756`（tag 派生）。
+-  区间在片 026、片 027、片 028 之后各重测过一次：026 往同一个文件加了 19 例与 4 个常量、027 又加了 24 例与 4 个常量、
+-  028 加了 5 个常量与 14 例 `evals:*`，
++  `.codex/scripts/dev/checkers_selftest.py:49-71`（`CHECK_CONTEXT` 常量与基线元组；026 之后该元组已含第 7 条、027 含第 8 条、028 含第 9 条）、
++  `:375-386`（3 例 `context:*`）、`:682-690`（顶层目录名镜像）、`:859-861`（tag 派生）。
++  区间在片 026、片 027、片 028、片 029 之后各重测过一次：026 往同一个文件加了 19 例与 4 个常量、027 又加了 24 例与 4 个常量、
++  028 加了 5 个常量与 14 例 `evals:*`、029 加了 4 个常量与 29 例 `keeper:*`，
+warning: in the working copy of '.codex/tasks/T-2026-10-19-code-reviewer-role-and-review-template-024.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-code-simplifier-role-027.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-harness-guard-judgements-d4-d6-021.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md', LF will be replaced by CRLF the next time Git touches it
+### 卡片改动规模
+3	3	.codex/tasks/T-2026-10-19-code-reviewer-role-and-review-template-024.md
+5	3	.codex/tasks/T-2026-10-19-code-simplifier-role-027.md
+5	5	.codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md
+10	2	.codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md
+2	2	.codex/tasks/T-2026-10-19-harness-guard-judgements-d4-d6-021.md
+4	4	.codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md
+warning: in the working copy of '.codex/tasks/T-2026-10-19-code-reviewer-role-and-review-template-024.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-code-simplifier-role-027.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-harness-guard-judgements-d4-d6-021.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md', LF will be replaced by CRLF the next time Git touches it
+
+================================================================================================================================================================
+块 05 — 全库活引用扫描（driver=artifacts/tmp/b028-citations.py：.codex/**.md、Docs/**.md、AGENTS.md）
+================================================================================================================================================================
+driver=artifacts/tmp/b028-citations.py
+scanned_dirs=['.codex', 'Docs'] + ['AGENTS.md', 'README.md']
+files_with_citations=15 citations=78
+CITATIONS problems=0
+VERDICT: PASS
+说明：条数含本片卡片自身（卡片加长就会漂），所以卡片里只登记 `problems=0` 这一判定读数。
+
+================================================================================================================================================================
+块 06 — 快照刷新、生产行尺寸与本片的可写面
+================================================================================================================================================================
+### 写入那一轮（driver=artifacts/tmp/b029-refresh-snapshot.py --write --diff）
+before  lines=13 sha12=883d28923e7e
+changed_lines=[5]
+  -   消费者 = `.codex/scripts/run_all_guards.py:89-91`（core 档）、`.codex/scripts/dev/checkers_selftest.py:67`（第 7 条基线）、
+  +   消费者 = `.codex/scripts/run_all_guards.py:89-91`（core 档）、`.codex/scripts/dev/checkers_selftest.py:71`（第 7 条基线）、
+after   lines=13 sha12=3fa3ca04a394
+zero_diff_with_source=True
+### 同一条事实的机器侧读数（`git diff HEAD -U0 -- .codex/evals`：上面「写入那一轮」的终端读数与这份逐字一致；终端那半没有落进捕获文件，所以这里补一份能从当前树重算的对照）
+diff --git a/.codex/evals/cases/001-impact-inventory/product.md b/.codex/evals/cases/001-impact-inventory/product.md
+index 9beabe4..bfda737 100644
+--- a/.codex/evals/cases/001-impact-inventory/product.md
++++ b/.codex/evals/cases/001-impact-inventory/product.md
+@@ -5 +5 @@
+-  消费者 = `.codex/scripts/run_all_guards.py:89-91`（core 档）、`.codex/scripts/dev/checkers_selftest.py:67`（第 7 条基线）、
++  消费者 = `.codex/scripts/run_all_guards.py:89-91`（core 档）、`.codex/scripts/dev/checkers_selftest.py:71`（第 7 条基线）、
+
+### 幂等复算（再跑一次：派生结果与在场的快照一字不差）
+driver=artifacts/tmp/b029-refresh-snapshot.py
+source=.codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md derived_lines=13 derived_sha12=3fa3ca04a394
+before  lines=13 sha12=3fa3ca04a394
+changed_lines=[]
+### 尺寸驱动
+.codex/scripts/check_eval_keeper_agent.py added_code=156 added_docstring=15 added_comment=10
+.codex/scripts/run_all_guards.py added_code=2 added_docstring=0 added_comment=0
+PRODUCTION_LINES total=158
+excluded by contract: .codex/agents/eval-keeper.{md,toml} 与 .codex/evals/** 与 .codex/README.md 与 .codex/HARNESS.md 与 .codex/ROADMAP.md（文档）、.codex/scripts/dev/checkers_selftest.py（自测用例）
+### 业务代码零命中
+### git status --porcelain（`artifacts/**` 在 gitignore 内，不出现在这里）
+ M .codex/HARNESS.md
+ M .codex/ROADMAP.md
+ M .codex/evals/cases/001-impact-inventory/product.md
+ M .codex/scripts/dev/checkers_selftest.py
+ M .codex/scripts/run_all_guards.py
+ M .codex/tasks/T-2026-10-19-code-reviewer-role-and-review-template-024.md
+ M .codex/tasks/T-2026-10-19-code-simplifier-role-027.md
+ M .codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md
+ M .codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md
+ M .codex/tasks/T-2026-10-19-harness-guard-judgements-d4-d6-021.md
+ M .codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md
+?? .codex/agents/eval-keeper.md
+?? .codex/agents/eval-keeper.toml
+?? .codex/scripts/check_eval_keeper_agent.py
+?? .codex/tasks/T-2026-10-19-eval-keeper-baseline-role-029.md
+

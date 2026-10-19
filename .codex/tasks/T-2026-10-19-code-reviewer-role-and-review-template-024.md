@@ -116,9 +116,9 @@ tdd_mode: required
 - Authoritative code/config/migration evidence: `.codex/scripts/check_code_reviewer_agent.py:1-21`（判据的权威说明写在
   docstring）、`:45-50`（三条裸下限 `MIN_VERIFIER_SECTIONS` / `MIN_REVIEW_FIELDS` / `MIN_TASK_FIELDS`）、
   `:79-166`（14 条判定与 6 处 fail-closed 早退；片 026 把小节名派生上收进 `harness_check_lib.py` 后本文件短了 6 行）；`.codex/agents/code-reviewer.md:19-41`（只读契约与 Java-only 属阻塞项）、
-  `Docs/REVIEW.md:7-11`（归档位置）。登记面：`.codex/scripts/run_all_guards.py:87-88`（core 档新行仍是这两行；整表 `:81-166`，026/027/028 各在其后新增了 3/3/2 行）、
-  `.codex/scripts/dev/checkers_selftest.py:44-67`（常量与基线元组，本片加的是第 5 条）、`:623-642`（目录型注入的
-  `run_dir_case`，在 `:650-651` 分派）。行号是 2026-10-19 片 025、片 026、片 027、片 028 之后各重测一次：这四片都往同一个文件里
+  `Docs/REVIEW.md:7-11`（归档位置）。登记面：`.codex/scripts/run_all_guards.py:87-88`（core 档新行仍是这两行；整表 `:81-168`，026/027/028/029 各在其后新增了 3/3/2/2 行）、
+  `.codex/scripts/dev/checkers_selftest.py:44-71`（常量与基线元组，本片加的是第 5 条）、`:728-747`（目录型注入的
+  `run_dir_case`，在 `:755-756` 分派）。行号是 2026-10-19 片 025、片 026、片 027、片 028、片 029 之后各重测一次：这五片都往同一个文件里
   各加了用例与常量，把这些区间整体下推；原引 `:44-51` / `:389-408`、再到 `:44-57` / `:486-505` 在被引用当时都是对的，
   到后一片末态已成活指针——这正是 D9 登记的同一类缺陷，发现即校正；`artifacts/tmp/b027-pointers.py` 把这三张卡的指针
   全部当成断言逐条复算（条数由该驱动现场打印），不再靠人记。

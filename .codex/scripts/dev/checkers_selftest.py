@@ -61,10 +61,14 @@ EVALS_CASES = ".codex/evals/cases"
 EVALS_CASE = ".codex/evals/cases/001-impact-inventory"
 EVALS_PRODUCT = EVALS_CASE + "/product.md"
 EVALS_EXPECTED = EVALS_CASE + "/expected.md"
+EVALS_README_DOC = ".codex/evals/README.md"
+EVAL_KEEPER_MD = ".codex/agents/eval-keeper.md"
+EVAL_KEEPER_TOML = ".codex/agents/eval-keeper.toml"
+CHECK_KEEPER = ".codex/scripts/check_eval_keeper_agent.py"
 
 # 先跑一遍「未注入」的基线：守门对健康的副本必须转绿，否则下面的反向用例没有意义。
 BASELINES = (CHECK_INTENT, CHECK_ROADMAP, CHECK_TEMPLATE, CHECK_SPEC, CHECK_REVIEW,
-             CHECK_CONTEXT, CHECK_RESEARCH, CHECK_SIMPLIFY, RUN_EVALS)
+             CHECK_CONTEXT, CHECK_RESEARCH, CHECK_SIMPLIFY, RUN_EVALS, CHECK_KEEPER)
 
 # 需要「把目标文件当参数传给守门」的用例（回放校验器读的是参数指定的实例文件）。
 ARGS_BY_CASE = {
@@ -91,23 +95,34 @@ SAMPLE_SPEC_REGRESSION = ("regression60", REGRESSION_RULE, 60, "quiet60")
 # B5 的抄检对象是两份规则正文，取样来源换成 maintainability.md：同一个 0 容忍判据，
 # 换一个来源证一次。
 SAMPLE_SPEC_MAINTAINABILITY = ("maintainability60", MAINTAINABILITY_RULE, 60, "quiet60")
+# B2 的 eval-keeper 抄检对象是「评测目录 README 的期望语法表 + 防回归规则」两个文件。
+# regression.md 那一侧已由 research:rules-restated 证过，这里补另一个来源，
+# 否则 max_overlap_with_files 的第二个文件坏了没人知道。
+SAMPLE_SPEC_GRAMMAR = ("grammar60", EVALS_README_DOC, 60, "quiet60")
 
 
 def derive_sample(skill_text, length, tier):
     """从 pm-discovery 现文里取第一段满足档位关系的样本；取不到就返回 None（判仪器故障）。"""
-    from harness_check_lib import PLACEHOLDERS, PATH_RE, normalize, overlap_hits
-    flat = normalize(skill_text)
+    from harness_check_lib import PLACEHOLDERS, PATH_RE, mask_paths, normalize, overlap_hits
+    body = skill_text
     # 从正文起扫：文件头那段 YAML 前置元数据虽然也是「原文」，但拿它当抄袭样本证不到
     # 「抄方法论正文」这件事，读证据的人会以为正控在模拟整句照抄。
     if skill_text.startswith("---"):
         end = skill_text.find("\n---", 3)
         if end != -1:
-            flat = flat[len(normalize(skill_text[:end + 4])):]
+            body = skill_text[end + 4:]
+    flat = normalize(body)
+    # ①「样本能在被判文本里找得到原文」必须在**守门真正比较的那个空间**里判：被检正文与源文件
+    # 都要先屏蔽路径再比。按原始文本找得到是不够的——窗口左边缘切进路径中间时（片 029 实测：
+    # 样本以 `codex/evals/`）开头，缺了句点的它过得了 PATH_RE 过滤，而源文件里那一处被当成
+    # 路径屏蔽掉了），派生出的「正控」根本不会命中抄检判据，用例于是静默失效。
+    mapping = {}
+    flat_masked = normalize(mask_paths(body, mapping))
     for i in range(0, max(0, len(flat) - length) + 1):
         candidate = flat[i:i + length]
         if PATH_RE.search(candidate) or any(p in candidate for p in PLACEHOLDERS):
             continue
-        if candidate not in flat:  # ①「样本必须能在被判文本里找到原文」
+        if normalize(mask_paths(candidate, mapping)) not in flat_masked:
             continue
         hits60 = len(overlap_hits(candidate, skill_text, 60))
         hits40 = len(overlap_hits(candidate, skill_text, 40))
@@ -543,12 +558,102 @@ CASES = [
     ("evals:forbid-hit", RUN_EVALS, EVALS_PRODUCT, None, "待填\n",
      "case 001-impact-inventory forbid: 待填", "append"),
     ("evals:pointer-stale", RUN_EVALS, EVALS_PRODUCT,
-     ".codex/scripts/dev/checkers_selftest.py:67",
+     ".codex/scripts/dev/checkers_selftest.py:71",
      ".codex/scripts/dev/checkers_selftest.py:99999",
      "case 001-impact-inventory pointers-alive", "replace"),
     ("evals:path-dead", RUN_EVALS, EVALS_PRODUCT,
      ".codex/HARNESS.md", ".codex/HARNESX.md",
      "case 001-impact-inventory paths-exist", "replace"),
+
+    # ── eval-keeper 角色（B2 片 029 的角色面）：跑法指向真脚本、快照逐字转录、刷新后整轮重跑、
+    #    判据面不许动、唯一落点只能是评测目录、期望语法只有一份权威 ──
+    ("keeper:agent-file-missing", CHECK_KEEPER, EVAL_KEEPER_MD, None, None,
+     "the seven inputs exist", "delete"),
+    ("keeper:toml-file-missing", CHECK_KEEPER, EVAL_KEEPER_TOML, None, None,
+     "the seven inputs exist", "delete"),
+    ("keeper:runner-gone", CHECK_KEEPER, RUN_EVALS, None, None,
+     "the seven inputs exist", "delete"),
+    ("keeper:evals-readme-gone", CHECK_KEEPER, EVALS_README_DOC, None, None,
+     "the seven inputs exist", "delete"),
+    ("keeper:codex-readme-gone", CHECK_KEEPER, TRAE_README, None, None,
+     "the seven inputs exist", "delete"),
+    ("keeper:reference-role-gone", CHECK_KEEPER, VERIFIER_AGENT, None, None,
+     "the seven inputs exist", "delete"),
+    # 期望形状与三件套的权威在运行器里：运行器把形状抽干时，角色那条「点名五种形状」的判据
+    # 必须先认出「没有可比对象」，而不是拿空集合比出个通过。
+    ("keeper:grammar-drained", CHECK_KEEPER, RUN_EVALS,
+     'KINDS = ("must", "shape", "forbid", "pointers-alive", "paths-exist")',
+     'KINDS = ()',
+     "expectation grammar derives from the runner", "replace"),
+    ("keeper:reference-sections-drained", CHECK_KEEPER, VERIFIER_AGENT,
+     "<", "[",
+     "reference role exposes a usable set of section names", "replace_all"),
+    ("keeper:section-uncovered", CHECK_KEEPER, EVAL_KEEPER_MD,
+     "## 职责清单", "## 干什么",
+     "agent section names cover the reference role", "replace"),
+    ("keeper:run-command-swapped", CHECK_KEEPER, EVAL_KEEPER_MD,
+     "python -X utf8 .codex/scripts/run_evals.py",
+     "python -X utf8 .codex/scripts/validate_tasks.py",
+     "agent names the runnable evaluation command", "replace_all"),
+    # 命令指向不存在的脚本：脚本不在场是仪器坏，不是评测通过。这条只加一行裸命令（不带反引号），
+    # 好让「死脚本」与「死引用路径」两条判据各自单独转红。
+    ("keeper:command-dead-script", CHECK_KEEPER, EVAL_KEEPER_MD,
+     None, "\n跑法补充：python -X utf8 .codex/scripts/nonexistent-eval-runner.py\n",
+     "every command in the role points at a script that exists", "append"),
+    ("keeper:rerun-obligation-dropped", CHECK_KEEPER, EVAL_KEEPER_MD,
+     "整轮", "",
+     "agent obliges a full selftest re-run after refreshing a snapshot", "drop_matching"),
+    ("keeper:selftest-target-renamed", CHECK_KEEPER, EVAL_KEEPER_MD,
+     "dev/checkers_selftest.py", "validate_tasks.py",
+     "agent names the selftest target verbatim", "replace_all"),
+    ("keeper:loosen-permitted", CHECK_KEEPER, EVAL_KEEPER_MD,
+     "不得为了让评测变绿而下调期望阈值", "为了让评测变绿可以下调期望阈值",
+     "agent forbids touching the judgement surface to get green", "replace"),
+    ("keeper:handcopy-allowed", CHECK_KEEPER, EVAL_KEEPER_MD,
+     "快照", "基线记录",
+     "agent forbids hand-copying the product snapshot", "replace_all"),
+    ("keeper:summary-only-allowed", CHECK_KEEPER, EVAL_KEEPER_MD,
+     "逐字", "大致",
+     "agent requires verbatim readings instead of a summary", "replace_all"),
+    ("keeper:acceptance-claimed", CHECK_KEEPER, EVAL_KEEPER_MD,
+     "不宣布", "宣布",
+     "agent refuses to be the one that declares acceptance", "replace_all"),
+    ("keeper:landing-not-evals", CHECK_KEEPER, EVAL_KEEPER_MD,
+     "可写面只写一处：`.codex/evals/**`", "可写面只写一处：`.codex/scripts/**`",
+     "agent declares its only writable landing is the evals directory", "replace"),
+    ("keeper:readonly-dropped", CHECK_KEEPER, EVAL_KEEPER_MD,
+     "READONLY", "可写",
+     "agent declares everything else READONLY", "replace_all"),
+    ("keeper:kind-unnamed", CHECK_KEEPER, EVAL_KEEPER_MD,
+     "forbid", "禁止项",
+     "agent names every expectation kind the runner accepts", "replace_all"),
+    ("keeper:asset-unnamed", CHECK_KEEPER, EVAL_KEEPER_MD,
+     "input.md", "任务.md",
+     "agent names the three files a case must ship", "replace_all"),
+    ("keeper:evals-dir-unregistered", CHECK_KEEPER, TRAE_README,
+     ".codex/evals/", "",
+     "evals directory is registered in the harness README", "drop_matching"),
+    ("keeper:cites-drained", CHECK_KEEPER, EVAL_KEEPER_MD,
+     ".codex/", "",
+     "agent cites >= 4 checkable repo paths", "drop_matching"),
+    ("keeper:dead-path-cited", CHECK_KEEPER, EVAL_KEEPER_MD,
+     None, "\n另见 `.codex/evals/nonexistent-grammar.md`。\n",
+     "every path cited by the role exists on disk", "append"),
+    ("keeper:grammar-table-restated", CHECK_KEEPER, EVAL_KEEPER_MD,
+     None, SAMPLE_SPEC_GRAMMAR,
+     "role text does not restate the grammar table or the rules it cites", "append_sample"),
+    ("keeper:placeholder-injected", CHECK_KEEPER, EVAL_KEEPER_MD,
+     None, "\nTODO\n",
+     "role text carries no placeholder tokens", "append"),
+    ("keeper:toml-md-drift", CHECK_KEEPER, EVAL_KEEPER_MD,
+     None, "\n本段只写在 markdown 里，用来证明打包正文不是逐字拷贝。\n",
+     "agent .toml body equals the agent markdown verbatim", "append"),
+    ("keeper:toml-name-missing", CHECK_KEEPER, EVAL_KEEPER_TOML,
+     'name = "eval-keeper"', 'owner = "eval-keeper"',
+     "agent .toml declares name and description", "replace"),
+    ("keeper:toml-unparsable", CHECK_KEEPER, EVAL_KEEPER_TOML,
+     None, "\nbroken = [\n",
+     "agent .toml parses as a Codex agent file", "append"),
 ]
 
 
@@ -722,7 +827,8 @@ def main():
     # D4 的复发防护：抄样本这件事一旦回到「用例里写死一段文本」就重新变成 fail-open，
     # 而那时每条用例照样会绿。所以这里不检查样本本身（派生自现文，天然对得上，查了等于没查），
     # 而是检查**形状**——每条抄检用例都必须走 append_sample，出现字面量样本即判仪器故障。
-    copy_check_prefixes = ("intent:copied-methodology", "research:rules-restated", "simplify:rules-restated")
+    copy_check_prefixes = ("intent:copied-methodology", "research:rules-restated",
+                           "simplify:rules-restated", "keeper:grammar-table-restated")
     literal_copy_cases = [c[0] for c in CASES
                           if c[0].startswith(copy_check_prefixes) and c[6] != "append_sample"]
     if literal_copy_cases:

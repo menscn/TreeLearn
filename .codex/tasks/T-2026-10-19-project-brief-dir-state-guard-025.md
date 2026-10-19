@@ -100,10 +100,10 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
 - Authoritative code/config/migration evidence: `ls -d frontend backend`（frontend 存在、backend 不存在）、
   `.codex/scripts/check_context_pack.py:38-41`（三条新常量 `ABSENT_CLAIM` / `DIR_CITE_RE` / `MIN_CITED_DIRS`）、
   `:75-95`（两条判定 + 一处早退）、
-  `.codex/scripts/dev/checkers_selftest.py:49-67`（`CHECK_CONTEXT` 常量与基线元组；026 之后该元组已含第 7 条、027 含第 8 条、028 含第 9 条）、
-  `:362-371`（3 例 `context:*`）、`:578-585`（顶层目录名镜像）、`:753-756`（tag 派生）。
-  区间在片 026、片 027、片 028 之后各重测过一次：026 往同一个文件加了 19 例与 4 个常量、027 又加了 24 例与 4 个常量、
-  028 加了 5 个常量与 14 例 `evals:*`，
+  `.codex/scripts/dev/checkers_selftest.py:49-71`（`CHECK_CONTEXT` 常量与基线元组；026 之后该元组已含第 7 条、027 含第 8 条、028 含第 9 条）、
+  `:375-386`（3 例 `context:*`）、`:682-690`（顶层目录名镜像）、`:859-861`（tag 派生）。
+  区间在片 026、片 027、片 028、片 029 之后各重测过一次：026 往同一个文件加了 19 例与 4 个常量、027 又加了 24 例与 4 个常量、
+  028 加了 5 个常量与 14 例 `evals:*`、029 加了 4 个常量与 29 例 `keeper:*`，
   原引 `:328-339` / `:365-374` / `:537-541`、再到 `:342-351` / `:440-448` / `:615-618` 都在被引用当时是对的，之后成了活指针。
 - Documentation surfaces checked: `AGENTS.md`（Treelearn 当前事实一节已写「`backend/` 目录尚未落地」，与新正文同向）、
   `.codex/ROADMAP.md`（B0 注记已写「`frontend/` 已落地」）、`Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md`、
