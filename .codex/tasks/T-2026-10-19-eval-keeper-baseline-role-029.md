@@ -113,7 +113,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `run_all_guards.py` 其余 34 条注册项、`HARNESS.md` 第 1/2/3/4/6 步原文（接线只做在第 5 步那一句之内）、
   `checkers_selftest.py` 原有 126 例与 9 条基线一字未改（只追加）。
 - Producer/consumer/sibling entrypoints and platform branches (code evidence): 生产者 = 角色正文两份与守门脚本；
-  消费者 = `run_all_guards.py:97-98`（core 档）、`checkers_selftest.py:71`（第 10 条基线）、
+  消费者 = `run_all_guards.py:97-98`（core 档）、`checkers_selftest.py:74-76`（第 10 条基线所在元组；片 030 在其上又插了 4 个常量并把元组撑到三行）、
   `.codex/HARNESS.md:11`（验收阶段的第 5 步）。同级入口 = `check_code_reviewer_agent.py` /
   `check_codebase_researcher_agent.py` / `check_code_simplifier_agent.py`，四者共用
   `harness_check_lib.agent_section_names()` 与 `citable_paths()`；本片把它们共用的抄检取样器
@@ -136,12 +136,14 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `.codex/scripts/check_eval_keeper_agent.py:31-41`（七份输入路径）、`:43-76`（13 条裸下限与 10 条判定形状，
   含 `MIN_ROLE_SECTIONS = 5` 与 `OVERLAP_RUNS = 60`）、`:79-82`（`lines_matching()`）、
   `:84-212`（23 条判据与 3 处 fail-closed 早退 `:91` / `:101` / `:112`）、`:94-104`（从运行器现场派生期望语法）、
-  `.codex/scripts/dev/checkers_selftest.py:64-67`（3 个常量）/ `:70-71`（10 条基线）/ `:101`（第 4 份抄检来源）/
-  `:104-135`（`derive_sample()` 掩码空间修复）/ `:568-656`（29 例 `keeper:*`）/ `:830-831`（4 条抄检前缀）、
+  `.codex/scripts/dev/checkers_selftest.py:64-67`（3 个常量）/ `:75-76`（10 条基线所在元组的后两行）/ `:106`（第 4 份抄检来源）/
+  `:109-140`（`derive_sample()` 掩码空间修复）/ `:578-666`（29 例 `keeper:*`）/ `:913-914`（4 条抄检前缀）、
   `.codex/scripts/run_all_guards.py:97-98`、`.codex/HARNESS.md:11`、`.codex/ROADMAP.md:65-66`、
   `.codex/evals/cases/001-impact-inventory/product.md:1-13`（刷新后的快照，`:5` 是被推下去的那条指针）。
   行号是先实测再落笔的：`artifacts/tmp/b029-pointers.py` 把本片与片 021/024/025/026/027/028 的 99 条引用逐条复算，
   末态 `POINTERS checked=99 stale=0`（表本身有 `MIN_POINTERS = 80` 的裸下限，抽干即红）。
+  上面这五行区间在片 030 之后又漂了一次——那一片给同一文件插了 4 个常量、第 11 条基线和 19 例 `metrics:*`，
+  本页读数由 `artifacts/tmp/b030-pointers.py` 复算后改写；片 029 当时写下的 `:70-71` / `:101` / `:104-135` / `:568-656` / `:830-831` 在那一刻是真的。
 - Documentation surfaces checked: `.codex/ROADMAP.md`（B2 条目全节 + D9/D11 记账）、`.codex/HARNESS.md`（六步流程）、
   `.codex/README.md`（目录结构节一行）、`.codex/evals/README.md`（期望语法权威正文，未改）、
   `.codex/agents/verifier.md`（骨架小节集与只读边界措辞）、`.codex/agents/code-reviewer.md` /
@@ -209,7 +211,8 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
       `CASE 151 MISMATCH keeper:grammar-table-restated … seen=['FAIL agent .toml body equals …']` /
       `ok=154 mismatch=1` / `OVERALL: FAIL`；改成掩码空间比对后同一轮 `155/155`（块 02 两侧读数都在）。
 - [x] 快照刷新后 `run_evals` 仍绿且复算的是新位置：`pointers-alive citations=2 problems=[]`，
-      快照 `:5` 现在是 `checkers_selftest.py:71`（块 03 / 块 06）。
+      快照 `:5` 当时是 `checkers_selftest.py:71`（块 03 / 块 06）。片 030 给该文件顶部又插了 4 个常量并把基线元组
+      撑到 `:74-76`，快照随之再刷新一次——这条正是 029 角色合同要管的形状。
 - [x] `run_all_guards.py --list` 读数 `entries=36 core=30 precommit=6`，`--tier core` 整跑
       `pass=30 fail=0 inconclusive=0 fault=0` / `VERDICT: PASS`，且 `check_eval_keeper_agent` 打印自己的判据行（块 03）。
 - [x] `validate_tasks.py` → `SUMMARY files=24 errors=0 warnings=4`（四条 WARNING 全是本片之前就已超预算的历史卡片，

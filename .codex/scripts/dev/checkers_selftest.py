@@ -65,10 +65,15 @@ EVALS_README_DOC = ".codex/evals/README.md"
 EVAL_KEEPER_MD = ".codex/agents/eval-keeper.md"
 EVAL_KEEPER_TOML = ".codex/agents/eval-keeper.toml"
 CHECK_KEEPER = ".codex/scripts/check_eval_keeper_agent.py"
+RUN_METRICS = ".codex/scripts/metrics_report.py"
+REGRESSION_CASES = ".codex/references/regression-cases.md"
+METRICS_REPORT_DIR = "artifacts/metrics/"
+METRICS_REPORT = "artifacts/metrics/report.md"
 
 # 先跑一遍「未注入」的基线：守门对健康的副本必须转绿，否则下面的反向用例没有意义。
 BASELINES = (CHECK_INTENT, CHECK_ROADMAP, CHECK_TEMPLATE, CHECK_SPEC, CHECK_REVIEW,
-             CHECK_CONTEXT, CHECK_RESEARCH, CHECK_SIMPLIFY, RUN_EVALS, CHECK_KEEPER)
+             CHECK_CONTEXT, CHECK_RESEARCH, CHECK_SIMPLIFY, RUN_EVALS, CHECK_KEEPER,
+             RUN_METRICS)
 
 # 需要「把目标文件当参数传给守门」的用例（回放校验器读的是参数指定的实例文件）。
 ARGS_BY_CASE = {
@@ -264,9 +269,12 @@ CASES = [
      ".codex/evals/", ".codex/eval/",
      "目录结构 section lists every registered entry", "replace"),
     # 清单自己那条下限判的是「脚本里那份字面量」，所以目标文件是被检脚本自身——
-    # 删掉两项目录条目后剩下的仍然都在 README 里，miss 判据不会响，只有这条下限会响。
+    # 剩下的条目仍然都在 README 里，miss 判据不会响，只有这条下限会响。锚点写全整行：
+    # 清单再加条目时这条用例会以「anchor not found」（仪器响）的身份暴露，而不是悄悄失去牙齿。
+    # 片 030 加第 6 项时正好撞上这件事——旧锚点只删两项，剩下的仍 ≥ 下限，用例当场报 MISMATCH。
     ("roadmap:readme-entries-drained", CHECK_ROADMAP, CHECK_ROADMAP,
-     'README_ENTRIES = [".codex/context/", ".codex/templates/",', 'README_ENTRIES = [',
+     'README_ENTRIES = [".codex/context/", ".codex/templates/", ".codex/ROADMAP.md", "Docs/intent/",',
+     'README_ENTRIES = [',
      "registered-entry list is not drained below its floor", "replace"),
     # 回放校验器的负向对照：模板本身不是一份可用实例（它的「终态」一栏并列三种取值），
     # 因此必须被判 FAIL。这条用来证明该脚本不是「对什么都说 OK」。
@@ -558,7 +566,7 @@ CASES = [
     ("evals:forbid-hit", RUN_EVALS, EVALS_PRODUCT, None, "待填\n",
      "case 001-impact-inventory forbid: 待填", "append"),
     ("evals:pointer-stale", RUN_EVALS, EVALS_PRODUCT,
-     ".codex/scripts/dev/checkers_selftest.py:71",
+     ".codex/scripts/dev/checkers_selftest.py:74-76",
      ".codex/scripts/dev/checkers_selftest.py:99999",
      "case 001-impact-inventory pointers-alive", "replace"),
     ("evals:path-dead", RUN_EVALS, EVALS_PRODUCT,
@@ -654,6 +662,72 @@ CASES = [
     ("keeper:toml-unparsable", CHECK_KEEPER, EVAL_KEEPER_TOML,
      None, "\nbroken = [\n",
      "agent .toml parses as a Codex agent file", "append"),
+
+    # ── 交付指标报告（B6 片 030 的指标面）：判的是「报告里每个数字都能被它自己那一行声明的命令重跑出来」。
+    #    落点目录、报告正文、指标源、家族派生、字段形状、复算档位、手抄数字各有各的用例，互不顶替 ──
+    ("metrics:report-dir-deleted", RUN_METRICS, METRICS_REPORT_DIR, None, None,
+     "the report landing directory exists", "delete_dir"),
+    ("metrics:report-deleted", RUN_METRICS, METRICS_REPORT, None, None,
+     "metrics report file exists", "delete"),
+    ("metrics:metric-source-deleted", RUN_METRICS, REGRESSION_CASES,
+     None, None, "every metric source is present", "delete"),
+    # 四类家族的权威在 ROADMAP 的 B6 目标句里：那里删掉一项，报告就必须跟不上。
+    ("metrics:roadmap-family-dropped", RUN_METRICS, ROADMAP,
+     "、守门命中分布、失败案例库增量汇总", "、失败案例库增量汇总",
+     "metric families derive from the ROADMAP B6 goal sentence", "replace"),
+    # 裸下限时时刻刻能被改回来：这条用例证明「注册表被抽干」确实由那个字面量接住，而不是由条数自证。
+    ("metrics:registry-floor-raised", RUN_METRICS, RUN_METRICS,
+     "MIN_METRICS = 8", "MIN_METRICS = 99",
+     "registered metric list is not drained below its floor", "replace"),
+    ("metrics:report-line-renamed", RUN_METRICS, METRICS_REPORT,
+     "- 指标=library-entries", "- 指标=library-entrys",
+     "the report holds exactly one line per registered metric", "replace"),
+    ("metrics:report-line-dropped", RUN_METRICS, METRICS_REPORT,
+     "- 指标=baseline-checkers", "",
+     "the report holds exactly one line per registered metric", "drop_matching"),
+    ("metrics:field-renamed", RUN_METRICS, METRICS_REPORT,
+     "家族=退回次数", "家族X=退回次数",
+     "every metric line carries exactly the six required fields", "replace"),
+    # 去重口径是 ROADMAP 执行提示词点名的那件事：同一行声明两个口径，报告就不止在算一种东西。
+    ("metrics:unit-duplicated", RUN_METRICS, METRICS_REPORT,
+     "口径=提交数（HEAD 可达的全部提交，不数行数）", "口径=提交数 | 口径=行数",
+     "every metric line declares one unit, never two", "replace"),
+    ("metrics:family-renamed-in-report", RUN_METRICS, METRICS_REPORT,
+     "家族=交付节奏", "家族=进度节奏",
+     "every family required by the roadmap appears in the report", "replace_all"),
+    ("metrics:command-blanked", RUN_METRICS, METRICS_REPORT,
+     "命令=git rev-list --count HEAD", "命令=",
+     "every metric line names a command", "replace"),
+    # 「复算=否」是留给仓库历史读数的档位，它必须真的挂在那条 git 命令上，不能挂在回忆上。
+    ("metrics:history-command-faked", RUN_METRICS, METRICS_REPORT,
+     "命令=git rev-list --count HEAD", "命令=我记得是八十余个提交",
+     "history readings are read from a real git command", "replace"),
+    ("metrics:recheck-label-swapped", RUN_METRICS, METRICS_REPORT,
+     "| 复算=值", "| 复算=否",
+     "each line declares the recheck class its registry entry really has", "replace"),
+    ("metrics:recheck-all-flipped", RUN_METRICS, METRICS_REPORT,
+     "| 复算=值", "| 复算=否",
+     "enough metric lines are declared machine-recheckable", "replace_all"),
+    # 行上的命令被打错一个字符就不该再算「这条命令读出了这个数」。
+    ("metrics:print-command-drifted", RUN_METRICS, METRICS_REPORT,
+     "--read library-entries", "--read library-entrys",
+     "every line prints the command the generator would print", "replace"),
+    ("metrics:hand-copied-reading", RUN_METRICS, METRICS_REPORT,
+     "total=19", "total=20",
+     "each machine-recheckable reading is produced by running the command on its own line",
+     "replace"),
+    # 源文件加了一行而报告没重生成：这是最常见的过期形状，它必须由同一条命令响，而不是靠人记得。
+    ("metrics:source-drifted-under-report", RUN_METRICS, REGRESSION_CASES,
+     None, "\n| 追加行 | 只用于证「源变了而报告没重生成」这一形状 |\n",
+     "each machine-recheckable reading is produced by running the command on its own line",
+     "append"),
+    ("metrics:placeholder-in-reading", RUN_METRICS, METRICS_REPORT,
+     "读数=8 | 复算=值", "读数=待填 | 复算=值",
+     "no metric reading is left as a placeholder", "replace"),
+    ("metrics:write-command-drifted", RUN_METRICS, METRICS_REPORT,
+     "生成命令=python -X utf8 .codex/scripts/metrics_report.py --write",
+     "生成命令=python -X utf8 .codex/scripts/metrics_report.py --writ",
+     "report header names the command that writes it", "replace"),
 ]
 
 
@@ -679,6 +753,15 @@ def build_workspace(root):
                     ignore=shutil.ignore_patterns("__pycache__"))
     shutil.copytree(os.path.join(REPO_ROOT, "Docs"), os.path.join(root, "Docs"),
                     ignore=shutil.ignore_patterns("__pycache__"))
+    # 交付指标报告的落点在仓库根 `artifacts/` 下，而下面那段顶层目录镜像只建空壳不拷正文：
+    # metrics_report 判的就是报告正文，副本里缺它会把「仪器坏」读成「判据红」。
+    # 只拷这一个子目录：artifacts/evidence/ 有上千个历史文件、artifacts/tmp/ 是 gitignore 的运行期暂存，
+    # 把它们拖进每轮自检只会让副本更像临时目录而不像仓库。
+    for rel in (METRICS_REPORT_DIR.rstrip("/"),):
+        src = os.path.join(REPO_ROOT, rel.replace("/", os.sep))
+        dst = os.path.join(root, rel.replace("/", os.sep))
+        if os.path.isdir(src) and not os.path.exists(dst):
+            shutil.copytree(src, dst)
     # 顶层目录的「在场性」本身也是被检事实（背景包会说某个目录尚未创建 / 已落地）。副本只带正文，
     # 不带这些目录，判据就会把真仓库里存在的 frontend/ 读成不存在。这里只镜像目录名、不复制内容：
     # 空壳足以让 os.path.isdir 在副本里给出和真仓库一致的答案（隐藏目录跳过，避免撞上 .git）。

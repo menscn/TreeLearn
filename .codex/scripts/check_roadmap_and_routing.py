@@ -37,9 +37,10 @@ PHASE_B_KEYWORDS = ["spec-author", "code-reviewer", "REVIEW.md", "eval-keeper", 
 PHASE_C_KEYWORDS = ["loop-watcher", "事实源", "release-gate"]
 
 README_ENTRIES = [".codex/context/", ".codex/templates/", ".codex/ROADMAP.md", "Docs/intent/",
-                  ".codex/evals/"]
+                  ".codex/evals/", "artifacts/metrics/"]
 # 这张清单自己也要有下限：清单被删到只剩一项时「逐条点名」照样绿（同一族的「集合给自己定下限」）。
-# 实测 5 项，下限取 4，删到 3 项立刻转红；单项删除属规范变更，由代码复核看 diff，不由这里冒充判据。
+# 实测条数现场读（`grep -c` 这段字面量会把计数写死成第二个会漂的地方），下限取 4，删到 3 项立刻转红；
+# 单项删除属规范变更，由代码复核看 diff，不由这里冒充判据。
 MIN_README_ENTRIES = 4
 ROUTE_KEYWORDS = ["intent-capturer", "pm-discovery", "project-brief", "ROADMAP"]
 

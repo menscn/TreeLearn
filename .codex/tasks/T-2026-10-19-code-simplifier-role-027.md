@@ -114,8 +114,8 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `identical=True`）、`run_all_guards.py` 其余 31 条注册项、`HARNESS.md` 第 1/2/3/5/6 步原文（接线只做在一句之内）、
   `checkers_selftest.py` 原有 86 例与 7 条基线一字未改。
 - Producer/consumer/sibling entrypoints and platform branches (code evidence): 生产者 = 角色正文与守门脚本；
-  消费者 = `run_all_guards.py:92-94`（core 档）、`checkers_selftest.py:70-71`（第 8 条基线；片 029 在这两行之上插了
-  3 个常量，行号从 `:66-67` 挪到这里，由片 029 复算）、`.codex/HARNESS.md:10`
+  消费者 = `run_all_guards.py:92-94`（core 档）、`checkers_selftest.py:74-76`（第 8 条基线所在元组；片 029 在其上插了
+  3 个常量、片 030 又插了 4 个并把元组撑到三行，行号从 `:66-67` 经 `:70-71` 挪到这里，由片 030 复算）、`.codex/HARNESS.md:10`
   （派工/实现阶段的第 4 步）。同级入口 = `check_codebase_researcher_agent.py`，它与本片共用
   `harness_check_lib.citable_paths()`（同一筛选两份的那一处已合并）。
   另有两个**本片之前就在场**的消费方：`check_roadmap_and_routing.py:36` 把 `code-simplifier` 列进
@@ -138,11 +138,12 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `:70-81`（11 条判定形状的正则）、`:103-212`（19 条判定与 4 处早退）、
   `.codex/scripts/harness_check_lib.py:158-171`（`citable_paths()`）、
   `.codex/scripts/check_codebase_researcher_agent.py:84-179`（改用共享派生后的 `main()`）、
-  `.codex/scripts/dev/checkers_selftest.py:55-58` / `:70-71` / `:97` / `:450-526` / `:830`、
+  `.codex/scripts/dev/checkers_selftest.py:55-58` / `:75-76` / `:99` / `:459-535` / `:913`、
   `.codex/scripts/run_all_guards.py:92-94`、`.codex/HARNESS.md:10`。
   行号是先实测再落笔的：`artifacts/tmp/b027-pointers.py` 把本片与片 024/025/026 的 49 条引用逐条复算，
   末态 `POINTERS checked=49 stale=0`；片 029 交付后由 `b029-pointers.py` 再复算一次并改成本页的读数
-  （那一片往同一文件插了 3 个常量、10 条基线之一和 29 例 `keeper:*`，把这里的行号整体下推）。
+  （那一片往同一文件插了 3 个常量、10 条基线之一和 29 例 `keeper:*`，把这里的行号整体下推）；
+  片 030 又插了 4 个常量、第 11 条基线和 19 例 `metrics:*`，本页的五处区间由 `b030-pointers.py` 第三次复算后改写。
 - Documentation surfaces checked: `.codex/ROADMAP.md`（B5 条目与 B1/B4 的依赖关系两处）、
   `.codex/HARNESS.md`（六步流程）、`.codex/tasks/_TEMPLATE.md`（`### REFACTOR — optional` 标题与两条字段名）、
   `.codex/agents/code-reviewer.md`（小节集与「结论不互相冒充」的措辞对齐）、`.codex/agents/verifier.md`、

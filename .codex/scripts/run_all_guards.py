@@ -96,6 +96,8 @@ GUARDS = [
       [CHECKS_NEEDLE], ["core"]),
     E("check_eval_keeper_agent", PY, [".codex/scripts/check_eval_keeper_agent.py"],
       [CHECKS_NEEDLE], ["core"]),
+    E("metrics_report", PY, [".codex/scripts/metrics_report.py"],
+      [CHECKS_NEEDLE], ["core"]),
     E("check_intent_capturer_agent", PY, [".codex/scripts/check_intent_capturer_agent.py"],
       [CHECKS_NEEDLE], ["core"]),
     E("check_intent_template", PY, [".codex/scripts/check_intent_template.py"],
