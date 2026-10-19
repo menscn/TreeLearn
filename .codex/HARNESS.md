@@ -10,6 +10,7 @@
 4. 实现保持在分配的 lane 内；主会话不越界修改其它 owner 的业务路径。执行证据写入当前 Task。行为不变前提下的收敛（消掉第二份实现、拆掉只剩一个实现的抽象层、删除无生产者代码）由 `code-simplifier` 做，判据是同一条测试命令改前改后都全绿，它只能删不能注释保留，记录只落在当前任务卡的 `### REFACTOR — optional` 小节（`.codex/agents/code-simplifier.md`）。
 5. 验收前读取 [验收规则](rules/harness-verification.md)，由独立只读 verifier 复核任务、路径、契约、测试和证据。改动是否让 AI 产物变差由 `eval-keeper` 的评测集判：跑法只有 `python -X utf8 .codex/scripts/run_evals.py` 一条，基线是 `.codex/evals/cases/**/product.md` 的逐字快照而不是手抄，刷新快照后必须整轮重跑注入自检；该角色只交逐字读数，不宣布任务验收（`.codex/agents/eval-keeper.md`）。
 6. 代码本身的质量由 `code-reviewer` 只读复核，维度、产物格式与归档位置以 `.codex/agents/code-reviewer.md` 和 `Docs/REVIEW.md` 为准，报告落在 `Docs/reviews/**`。两个结论不互相冒充：该角色不宣布任务验收，verifier 不替它评代码质量。
+7. 交付本身被量成了什么由 `metrics-reporter` 看守：报告只落在 `artifacts/metrics/report.md`，引用任何数字前先跑 `python -X utf8 .codex/scripts/metrics_report.py --write` 重生成，单个指标用同支脚本的 `--read <指标名>` 复算，重生成后整跑 `python -X utf8 .codex/scripts/run_all_guards.py --tier core`；指标行只能逐字转录不许手抄，家族与指标的增加删改属判据改动要另开一片。该角色只交报告与逐字读数，不宣布任务验收（`.codex/agents/metrics-reporter.md`）。
 
 ## Treelearn lanes
 

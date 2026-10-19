@@ -113,7 +113,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `run_all_guards.py` 其余 34 条注册项、`HARNESS.md` 第 1/2/3/4/6 步原文（接线只做在第 5 步那一句之内）、
   `checkers_selftest.py` 原有 126 例与 9 条基线一字未改（只追加）。
 - Producer/consumer/sibling entrypoints and platform branches (code evidence): 生产者 = 角色正文两份与守门脚本；
-  消费者 = `run_all_guards.py:97-98`（core 档）、`checkers_selftest.py:74-76`（第 10 条基线所在元组；片 030 在其上又插了 4 个常量并把元组撑到三行）、
+  消费者 = `run_all_guards.py:97-98`（core 档）、`checkers_selftest.py:78-80`（第 10 条基线所在元组；片 030 在其上又插了 4 个常量并把元组撑到三行、片 031 再插 4 个常量并把第 12 条基线接进去）、
   `.codex/HARNESS.md:11`（验收阶段的第 5 步）。同级入口 = `check_code_reviewer_agent.py` /
   `check_codebase_researcher_agent.py` / `check_code_simplifier_agent.py`，四者共用
   `harness_check_lib.agent_section_names()` 与 `citable_paths()`；本片把它们共用的抄检取样器
@@ -136,8 +136,8 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `.codex/scripts/check_eval_keeper_agent.py:31-41`（七份输入路径）、`:43-76`（13 条裸下限与 10 条判定形状，
   含 `MIN_ROLE_SECTIONS = 5` 与 `OVERLAP_RUNS = 60`）、`:79-82`（`lines_matching()`）、
   `:84-212`（23 条判据与 3 处 fail-closed 早退 `:91` / `:101` / `:112`）、`:94-104`（从运行器现场派生期望语法）、
-  `.codex/scripts/dev/checkers_selftest.py:64-67`（3 个常量）/ `:75-76`（10 条基线所在元组的后两行）/ `:106`（第 4 份抄检来源）/
-  `:109-140`（`derive_sample()` 掩码空间修复）/ `:578-666`（29 例 `keeper:*`）/ `:913-914`（4 条抄检前缀）、
+  `.codex/scripts/dev/checkers_selftest.py:64-67`（3 个常量）/ `:79-80`（10 条基线所在元组的后两行）/ `:110`（第 4 份抄检来源）/
+  `:116-147`（`derive_sample()` 掩码空间修复）/ `:585-671`（29 例 `keeper:*`）/ `:1028-1030`（4 条抄检前缀）、
   `.codex/scripts/run_all_guards.py:97-98`、`.codex/HARNESS.md:11`、`.codex/ROADMAP.md:65-66`、
   `.codex/evals/cases/001-impact-inventory/product.md:1-13`（刷新后的快照，`:5` 是被推下去的那条指针）。
   行号是先实测再落笔的：`artifacts/tmp/b029-pointers.py` 把本片与片 021/024/025/026/027/028 的 99 条引用逐条复算，

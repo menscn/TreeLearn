@@ -69,11 +69,15 @@ RUN_METRICS = ".codex/scripts/metrics_report.py"
 REGRESSION_CASES = ".codex/references/regression-cases.md"
 METRICS_REPORT_DIR = "artifacts/metrics/"
 METRICS_REPORT = "artifacts/metrics/report.md"
+METRICS_REPORTER_MD = ".codex/agents/metrics-reporter.md"
+METRICS_REPORTER_TOML = ".codex/agents/metrics-reporter.toml"
+CHECK_REPORTER = ".codex/scripts/check_metrics_reporter_agent.py"
+RUN_ROSTER = ".codex/scripts/run_all_guards.py"
 
 # 先跑一遍「未注入」的基线：守门对健康的副本必须转绿，否则下面的反向用例没有意义。
 BASELINES = (CHECK_INTENT, CHECK_ROADMAP, CHECK_TEMPLATE, CHECK_SPEC, CHECK_REVIEW,
              CHECK_CONTEXT, CHECK_RESEARCH, CHECK_SIMPLIFY, RUN_EVALS, CHECK_KEEPER,
-             RUN_METRICS)
+             RUN_METRICS, CHECK_REPORTER)
 
 # 需要「把目标文件当参数传给守门」的用例（回放校验器读的是参数指定的实例文件）。
 ARGS_BY_CASE = {
@@ -104,6 +108,9 @@ SAMPLE_SPEC_MAINTAINABILITY = ("maintainability60", MAINTAINABILITY_RULE, 60, "q
 # regression.md 那一侧已由 research:rules-restated 证过，这里补另一个来源，
 # 否则 max_overlap_with_files 的第二个文件坏了没人知道。
 SAMPLE_SPEC_GRAMMAR = ("grammar60", EVALS_README_DOC, 60, "quiet60")
+# B6 的 metrics-reporter 抄检对象是「生成器正文 + ROADMAP 的 B6 条目」。这里取生成器那一侧做正控：
+# 它和 ROADMAP 都是派生源，删掉任何一侧的比较对象都会让另一侧的抄检悄悄失效。
+SAMPLE_SPEC_METRICS_SRC = ("metricsSource60", RUN_METRICS, 60, "quiet60")
 
 
 def derive_sample(skill_text, length, tier):
@@ -566,7 +573,7 @@ CASES = [
     ("evals:forbid-hit", RUN_EVALS, EVALS_PRODUCT, None, "待填\n",
      "case 001-impact-inventory forbid: 待填", "append"),
     ("evals:pointer-stale", RUN_EVALS, EVALS_PRODUCT,
-     ".codex/scripts/dev/checkers_selftest.py:74-76",
+     ".codex/scripts/dev/checkers_selftest.py:78-80",
      ".codex/scripts/dev/checkers_selftest.py:99999",
      "case 001-impact-inventory pointers-alive", "replace"),
     ("evals:path-dead", RUN_EVALS, EVALS_PRODUCT,
@@ -728,6 +735,114 @@ CASES = [
      "生成命令=python -X utf8 .codex/scripts/metrics_report.py --write",
      "生成命令=python -X utf8 .codex/scripts/metrics_report.py --writ",
      "report header names the command that writes it", "replace"),
+
+    # ── metrics-reporter 角色（B6 片 031 的角色面）：跑法指向真脚本、引用前先重生成、重生成后整跑 core、
+    #    六个字段逐字转录、判据面不许动、唯一落点只能是报告目录、家族与落点只能从生成器派生 ──
+    ("reporter:agent-file-missing", CHECK_REPORTER, METRICS_REPORTER_MD, None, None,
+     "the seven inputs exist", "delete"),
+    ("reporter:toml-file-missing", CHECK_REPORTER, METRICS_REPORTER_TOML, None, None,
+     "the seven inputs exist", "delete"),
+    ("reporter:generator-gone", CHECK_REPORTER, RUN_METRICS, None, None,
+     "the seven inputs exist", "delete"),
+    ("reporter:roadmap-gone", CHECK_REPORTER, ROADMAP, None, None,
+     "the seven inputs exist", "delete"),
+    ("reporter:codex-readme-gone", CHECK_REPORTER, TRAE_README, None, None,
+     "the seven inputs exist", "delete"),
+    ("reporter:reference-role-gone", CHECK_REPORTER, VERIFIER_AGENT, None, None,
+     "the seven inputs exist", "delete"),
+    ("reporter:roster-gone", CHECK_REPORTER, RUN_ROSTER, None, None,
+     "the seven inputs exist", "delete"),
+    # 四族与落点的权威在生成器派生的那一边：ROADMAP 的 B6 目标句被删剩一项时，角色那条判据必须先
+    # 认出「没有可比对象」，而不是拿一项当四族继续比。
+    ("reporter:families-drained", CHECK_REPORTER, ROADMAP,
+     "、退回次数、守门命中分布、失败案例库增量", "",
+     "metric families and the report landing derive from the generator", "replace"),
+    ("reporter:landing-drained", CHECK_REPORTER, RUN_METRICS,
+     'REPORT_DIR = "artifacts/metrics/"', 'REPORT_DIR = ""',
+     "metric families and the report landing derive from the generator", "replace"),
+    ("reporter:reference-sections-drained", CHECK_REPORTER, VERIFIER_AGENT,
+     "<", "[",
+     "reference role exposes a usable set of section names", "replace_all"),
+    ("reporter:section-uncovered", CHECK_REPORTER, METRICS_REPORTER_MD,
+     "## 职责清单", "## 干什么",
+     "agent section names cover the reference role", "replace"),
+    ("reporter:generator-command-swapped", CHECK_REPORTER, METRICS_REPORTER_MD,
+     ".codex/scripts/metrics_report.py", ".codex/scripts/validate_tasks.py",
+     "agent names the runnable metric command", "replace_all"),
+    ("reporter:write-command-drifted", CHECK_REPORTER, METRICS_REPORTER_MD,
+     "python -X utf8 .codex/scripts/metrics_report.py --write",
+     "python -X utf8 .codex/scripts/metrics_report.py 生成",
+     "agent carries the generator's write command verbatim", "replace_all"),
+    ("reporter:read-command-drifted", CHECK_REPORTER, METRICS_REPORTER_MD,
+     "python -X utf8 .codex/scripts/metrics_report.py --read <指标名>",
+     "python -X utf8 .codex/scripts/metrics_report.py --read 指标",
+     "agent carries the generator's single-metric recheck command verbatim", "replace_all"),
+    # 命令指向不存在的脚本：脚本不在场是仪器坏，不是角色写对了。这条只加一行裸命令（不带反引号），
+    # 好让「死脚本」与「死引用路径」两条判据各自单独转红。
+    ("reporter:command-dead-script", CHECK_REPORTER, METRICS_REPORTER_MD,
+     None, "\n跑法补充：python -X utf8 .codex/scripts/nonexistent-metrics-runner.py\n",
+     "every command in the role points at a script that exists", "append"),
+    ("reporter:recheck-flag-dropped", CHECK_REPORTER, METRICS_REPORTER_MD,
+     "--read", "",
+     "agent requires single-metric rechecks instead of mental arithmetic", "drop_matching"),
+    ("reporter:rerun-obligation-dropped", CHECK_REPORTER, METRICS_REPORTER_MD,
+     "整跑", "",
+     "agent obliges a full core-battery re-run after regenerating", "drop_matching"),
+    ("reporter:handcopy-allowed", CHECK_REPORTER, METRICS_REPORTER_MD,
+     "字段", "列",
+     "agent forbids hand-copying the report readings", "replace_all"),
+    ("reporter:shape-only-denied", CHECK_REPORTER, METRICS_REPORTER_MD,
+     "只判形状", "判值",
+     "agent says out loud that history readings are judged by shape only", "replace_all"),
+    ("reporter:floor-tampering-allowed", CHECK_REPORTER, METRICS_REPORTER_MD,
+     "裸下限", "",
+     "agent forbids touching the judgement surface to get green", "drop_matching"),
+    ("reporter:split-obligation-dropped", CHECK_REPORTER, METRICS_REPORTER_MD,
+     "另开一片", "",
+     "agent sends family or metric changes to a separate slice with injected cases",
+     "drop_matching"),
+    ("reporter:summary-only-allowed", CHECK_REPORTER, METRICS_REPORTER_MD,
+     "逐字", "大致",
+     "agent requires verbatim readings instead of a summary", "replace_all"),
+    ("reporter:acceptance-claimed", CHECK_REPORTER, METRICS_REPORTER_MD,
+     "不宣布", "宣布",
+     "agent refuses to be the one that declares acceptance", "replace_all"),
+    ("reporter:landing-not-metrics", CHECK_REPORTER, METRICS_REPORTER_MD,
+     "可写面只写一处：`artifacts/metrics/**`", "可写面只写一处：`.codex/tasks/**`",
+     "agent declares its only writable landing is the report directory", "replace"),
+    ("reporter:readonly-dropped", CHECK_REPORTER, METRICS_REPORTER_MD,
+     "READONLY", "可写",
+     "agent declares everything else READONLY", "replace_all"),
+    ("reporter:family-unnamed", CHECK_REPORTER, METRICS_REPORTER_MD,
+     "交付节奏", "进度节奏",
+     "agent names every family derived from the roadmap goal sentence", "replace_all"),
+    ("reporter:report-file-unnamed", CHECK_REPORTER, METRICS_REPORTER_MD,
+     "artifacts/metrics/report.md", "artifacts/metrics/metrics.md",
+     "agent names the report file the generator writes", "replace_all"),
+    ("reporter:landing-unregistered", CHECK_REPORTER, TRAE_README,
+     "artifacts/metrics/", "",
+     "report directory is registered in the harness README", "drop_matching"),
+    ("reporter:cites-drained", CHECK_REPORTER, METRICS_REPORTER_MD,
+     ".codex/", "",
+     "agent cites >= 4 checkable repo paths", "drop_matching"),
+    ("reporter:dead-path-cited", CHECK_REPORTER, METRICS_REPORTER_MD,
+     None, "\n另见 `.codex/scripts/nonexistent-metrics-judge.py`。\n",
+     "every path cited by the role exists on disk", "append"),
+    ("reporter:generator-text-restated", CHECK_REPORTER, METRICS_REPORTER_MD,
+     None, SAMPLE_SPEC_METRICS_SRC,
+     "role text does not restate the generator docstring or the roadmap entry", "append_sample"),
+    ("reporter:placeholder-injected", CHECK_REPORTER, METRICS_REPORTER_MD,
+     None, "\nTODO\n",
+     "role text carries no placeholder tokens", "append"),
+    ("reporter:toml-md-drift", CHECK_REPORTER, METRICS_REPORTER_MD,
+     None, "\n本段只写在 markdown 里，用来证明打包正文不是逐字拷贝。\n",
+     "agent .toml body equals the agent markdown verbatim", "append"),
+    ("reporter:toml-name-missing", CHECK_REPORTER, METRICS_REPORTER_TOML,
+     'name = "metrics-reporter"', 'owner = "metrics-reporter"',
+     "agent .toml declares name and description", "replace"),
+    ("reporter:toml-unparsable", CHECK_REPORTER, METRICS_REPORTER_TOML,
+     None, "\nbroken = [\n",
+     "agent .toml parses as a Codex agent file", "append"),
 ]
 
 
@@ -911,7 +1026,8 @@ def main():
     # 而那时每条用例照样会绿。所以这里不检查样本本身（派生自现文，天然对得上，查了等于没查），
     # 而是检查**形状**——每条抄检用例都必须走 append_sample，出现字面量样本即判仪器故障。
     copy_check_prefixes = ("intent:copied-methodology", "research:rules-restated",
-                           "simplify:rules-restated", "keeper:grammar-table-restated")
+                           "simplify:rules-restated", "keeper:grammar-table-restated",
+                           "reporter:generator-text-restated")
     literal_copy_cases = [c[0] for c in CASES
                           if c[0].startswith(copy_check_prefixes) and c[6] != "append_sample"]
     if literal_copy_cases:

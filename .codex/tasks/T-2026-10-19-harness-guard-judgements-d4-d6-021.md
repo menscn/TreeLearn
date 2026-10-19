@@ -65,8 +65,8 @@ tdd_mode: required
 ## Documentation impact record
 
 - Changed runtime facts: 无运行时代码变化。变化的是「文档一致性守门」的覆盖面：旧方向主张现在会被扫描集内任意一行触发。
-- Authoritative code/config/migration evidence: `.codex/scripts/dev/check_stack_facts.py:60-75`（模式表与扫描集）、`:91-108`（`pattern_scan`，同行指针豁免在此）、`:141-147`（两条新判据）；`.codex/scripts/dev/checkers_selftest.py:94-96`（三份样本规格）、`:109-140`（`derive_sample`）、`:848-858`（`append_sample`）、`:913-916`（形状闸门）。
-  这四条行号是 2026-10-19 片 028 复算、片 029 再复算、片 030 第三次复算的：片 025/026/027/028/029/030 依次往同一个文件加常量与用例，把原引的
+- Authoritative code/config/migration evidence: `.codex/scripts/dev/check_stack_facts.py:60-75`（模式表与扫描集）、`:91-108`（`pattern_scan`，同行指针豁免在此）、`:141-147`（两条新判据）；`.codex/scripts/dev/checkers_selftest.py:98-100`（三份样本规格）、`:116-147`（`derive_sample`）、`:963-973`（`append_sample`）、`:1028-1030`（形状闸门）。
+  这四条行号是 2026-10-19 片 028 复算、片 029 再复算、片 030 第三次、片 031 第四次复算的：片 025/026/027/028/029/030/031 依次往同一个文件加常量与用例，把原引的
   `:60-63` / `:66-90` / `:347-356` / `:408-418` 整体下推——本卡当时写下它们是对的，之后没人重测就成了活指针（D9 同类）。
 - Documentation surfaces checked: `README.md`、`README_EN.md`、`.codex/ROADMAP.md`、`.codex/context/project-brief.md`、`.codex/rules/**`、`.codex/skills/pm-discovery/SKILL.md`、`Docs/spec/**`、`Docs/05-technical-design/**`（块 02 的 20 例注入即逐文件反向搜索的机器版）。
 - Documentation files updated: `README.md`（补当前权威指向 + 判据由三条改四条）、`.codex/ROADMAP.md`（D2/D3/D4/D5/D6 处置与 D9 登记）。

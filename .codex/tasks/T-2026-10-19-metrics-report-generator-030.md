@@ -129,7 +129,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `run_all_guards.py` 其余注册项（条数随每片变化，读数由块 03 现场取）、`HARNESS.md` 第 1/2/3/4/5/6 步原文
   （本片没有接任何线）、`checkers_selftest.py` 原有 155 例与 10 条基线一字未改（只追加，另两条锚点跟随现状）。
 - Producer/consumer/sibling entrypoints and platform branches (code evidence): 生产者 = 指标注册表与
-  `build()`；消费者 = `run_all_guards.py:99-100`（core 档）、`checkers_selftest.py:74-76`（第 11 条基线所在元组）、
+  `build()`；消费者 = `run_all_guards.py:99-100`（core 档）、`checkers_selftest.py:78-80`（第 11 条基线所在元组）、
   `artifacts/metrics/report.md`（人读的那一页）；同级入口 = `check_eval_keeper_agent.py` /
   `check_code_reviewer_agent.py`，它们与本片共用 `harness_check_lib` 的在场性与占位符判定，但指标注册表是
   本片独有的第二份「集合」——所以家族不另写一份，从 ROADMAP 目标句派生。两个**本片之前就在场**的消费方：
@@ -153,9 +153,9 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `:241-260`（`parse()`：把报告读回结构化行，判据面读它而不是读内存里的登记表）、
   `:261-277`（`fresh_reading()` 与 `run_printed_command()`：执行印出的命令）、
   `:278-390`（18 条判据）、`:391-417`（三模式入口）；
-  `.codex/scripts/dev/checkers_selftest.py:68-71`（4 个常量）/ `:74-76`（11 条基线元组）/
-  `:668-730`（19 例 `metrics:*`）/ `:760-764`（副本定点带报告正文）/ `:275-279`（抽干锚点跟随清单形状）/
-  `:568-571`（`evals:pointer-stale` 锚点跟随快照）；`.codex/scripts/run_all_guards.py:99-100`、
+  `.codex/scripts/dev/checkers_selftest.py:68-71`（4 个常量）/ `:78-80`（11 条基线元组）/
+  `:675-737`（19 例 `metrics:*`）/ `:875-879`（副本定点带报告正文）/ `:282-285`（抽干锚点跟随清单形状）/
+  `:575-578`（`evals:pointer-stale` 锚点跟随快照）；`.codex/scripts/run_all_guards.py:99-100`、
   `.codex/scripts/check_roadmap_and_routing.py:39-44`、`.codex/README.md:32`、
   `.codex/ROADMAP.md:111-118`（B6 五行回写）、`artifacts/metrics/report.md:1-20`、
   `.codex/evals/cases/001-impact-inventory/product.md:1-13`（重转录后的快照，`:5` 仍是那条会漂的指针）。
@@ -261,7 +261,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `:84-155` 12 个读数函数、`:161-200` 登记表、`:202-213` `metric_command()`、`:214-240` `build()`、
   `:241-260` `parse()`、`:261-277` 执行印出的命令、`:278-390` 18 条判据、`:391-417` 三模式入口）+
   `artifacts/metrics/report.md`（由 `--write` 生成，20 行）；core 档注册 `run_all_guards.py:99-100`；
-  `checkers_selftest.py:68-71` 常量与 `:74-76` 第 11 条基线；`README_ENTRIES` 第 6 项与 `.codex/README.md:32`。
+  `checkers_selftest.py:68-71` 常量与 `:78-80` 第 11 条基线；`README_ENTRIES` 第 6 项与 `.codex/README.md:32`。
 - Command: `python -X utf8 .codex/scripts/metrics_report.py`
 - Exit code: 0
 - Passing evidence: 块 00 的 18 行逐字（含 `registered=12 floor=8`、`derived=4 floor=4`、`checked=9 mismatch=[]`、

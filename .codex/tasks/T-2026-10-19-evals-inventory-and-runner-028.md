@@ -114,7 +114,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `checkers_selftest.py` 原有 112 例与 8 条基线一字未改。
 - Producer/consumer/sibling entrypoints and platform branches (code evidence): 生产者 = `.codex/evals/cases/*/`
   三份资产（由人或 029 角色写）；消费者 = `.codex/scripts/run_all_guards.py:95-96`（core 档）、
-  `.codex/scripts/dev/checkers_selftest.py:74-76`（第 9 条基线所在元组；片 029 在其上插了 3 个常量、片 030 又插了 4 个
+  `.codex/scripts/dev/checkers_selftest.py:78-80`（第 9 条基线所在元组；片 029 在其上插了 3 个常量、片 030 又插了 4 个
   并把元组撑到三行，行号由 `:66-67` 经 `:70-71` 下推到这里，片 030 复算）、`.codex/evals/README.md:11`（跑法那行）。
   同级入口 = `check_code_simplifier_agent.py` 与 `check_codebase_researcher_agent.py`，三者共用
   `harness_check_lib.citable_paths()`；本片把「`文件:行` 区间解析」也上收到同一库，正是为了避免第四份实现。
@@ -135,8 +135,8 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `parse_expectations()`，逻辑判定单元而不是物理行）、`:92-181`（18 条判据与 4 处早退）、
   `.codex/scripts/harness_check_lib.py:179-208`（`path_line_citations()` / `citation_problems()`）、
   `.codex/scripts/check_roadmap_and_routing.py:39-44` / `:226-231`、
-  `.codex/scripts/dev/checkers_selftest.py:59-64` / `:75-76` / `:275-279` / `:537-576`（后三条由片 029 复算、片 030 再复算：
-  029 新增 3 个常量、29 例 `keeper:*` 和 4 条抄检前缀，030 又新增 4 个常量与 19 例 `metrics:*`，把这三处整体下推）、
+  `.codex/scripts/dev/checkers_selftest.py:59-64` / `:79-80` / `:282-285` / `:544-581`（后三条由片 029 复算、片 030 再复算：
+  029 新增 3 个常量、29 例 `keeper:*` 和 4 条抄检前缀，030 又新增 4 个常量与 19 例 `metrics:*`，031 再新增 4 个常量、1 份抄检样本规格与 35 例 `reporter:*`，把这三处整体下推）、
   `.codex/scripts/run_all_guards.py:95-96`、`.codex/evals/cases/001-impact-inventory/product.md:1-13`。
   行号是先实测再落笔的：`artifacts/tmp/b028-pointers.py` 把本片与片 021/024/025/026/027 的 55 条引用逐条复算，
   末态 `POINTERS checked=55 stale=0`；本片同时修掉那五张卡里 26 处**本片之前就已漂**的区间（块 04）。
