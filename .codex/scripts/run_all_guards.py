@@ -95,6 +95,8 @@ GUARDS = [
     E("check_loop_watcher_agent", PY,
       [".codex/scripts/check_loop_watcher_agent.py"],
       [CHECKS_NEEDLE], ["core"]),
+    E("check_source_of_truth", PY, [".codex/scripts/check_source_of_truth.py"],
+      [CHECKS_NEEDLE], ["core"]),
     E("run_evals", PY, [".codex/scripts/run_evals.py"],
       [CHECKS_NEEDLE], ["core"]),
     E("check_eval_keeper_agent", PY, [".codex/scripts/check_eval_keeper_agent.py"],

@@ -13,7 +13,7 @@
 | compileSdk / targetSdk | 36 |
 | minSdk | 28 |
 | build-tools | 36.0.0 |
-| 语言 | Java-only（禁止 Kotlin 源码、插件、`org.jetbrains.kotlin`、`-ktx`） |
+| 语言 | Java-only（禁止 Kotlin 源码、插件、`org.jetbrains.kotlin`、`-ktx`；权威正文 `.codex/rules/android.md`） |
 
 `AGP 9.x` 被刻意排除：它内置 Kotlin 支持，与 Java-only 守门直接冲突。
 
@@ -241,7 +241,7 @@ androidTest APK 的 `classes.dex` 含 Kotlin 描述符（无 `kotlin/jvm/interna
 
 | 类型 | 职责 | 关键不变量 |
 | :--- | :--- | :--- |
-| `TreeLearnSchema` | 十二张永久表的唯一 DDL 常量源：表名/列名常量、`CREATE_STATEMENTS`、索引、触发器、前向迁移注册表 | DDL 由列常量拼出（改名不会漂移）；时间列一律 `INTEGER` UTC epoch millis，禁用 SQLite 时钟；`DATABASE_VERSION` 与迁移链一致；T-096 起含附件双表（`attachments` 一文件一物理记录、`content_hash` UNIQUE 幂等去重；`message_attachments` 引用挂消息 ID、`message_id` ON DELETE CASCADE，`attachment_id` 为非强制 FK 的语义引用——附件记录不随任何消息删除，删除由 098 双确认链路负责）；T-026 起含标记表 `message_annotations`（`container` 哨兵列 PROSE/CELL 互斥 CHECK、`kind` 入唯一锚索引（同区间允许高亮+批注并存）、HIGHLIGHT 恒空 body 等 5 条 CHECK、`message_id` ON DELETE CASCADE；fresh 建表与 V4→V5 迁移共用同一 DDL 常量，防两路漂移） |
+| `TreeLearnSchema` | 十二张永久表的唯一 DDL 常量源：表名/列名常量、`CREATE_STATEMENTS`、索引、触发器、前向迁移注册表 | DDL 由列常量拼出（改名不会漂移）；时间列一律 `INTEGER` UTC epoch millis，禁用 SQLite 时钟（时间口径权威 `.codex/rules/sql.md`）；`DATABASE_VERSION` 与迁移链一致；T-096 起含附件双表（`attachments` 一文件一物理记录、`content_hash` UNIQUE 幂等去重；`message_attachments` 引用挂消息 ID、`message_id` ON DELETE CASCADE，`attachment_id` 为非强制 FK 的语义引用——附件记录不随任何消息删除，删除由 098 双确认链路负责）；T-026 起含标记表 `message_annotations`（`container` 哨兵列 PROSE/CELL 互斥 CHECK、`kind` 入唯一锚索引（同区间允许高亮+批注并存）、HIGHLIGHT 恒空 body 等 5 条 CHECK、`message_id` ON DELETE CASCADE；fresh 建表与 V4→V5 迁移共用同一 DDL 常量，防两路漂移） |
 | `TreeLearnDatabaseHelper` | 唯一可建库/升级的入口：`onCreate` 执行 `CREATE_STATEMENTS`，`onUpgrade` 走前向迁移，`onConfigure` 开启外键 | 每次打开都**回读** `PRAGMA foreign_keys` 并要求为 `1`，否则 fail closed；拒绝降级（`onDowngrade` 抛异常而不是带着半懂的 schema 跑） |
 | `DatabaseTransactionRunner` | 唯一的显式事务边界 | 嵌套开启被拒绝（`IllegalStateException`），不静默并入外层事务；失败整体回滚并原样向上抛；**工作体若自行结束事务，runner 事后抛错——但那次提交已经生效**（检测而非阻止，见下） |
 

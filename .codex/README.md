@@ -29,4 +29,6 @@
 └── tests/                 # 流程工具自测
 ```
 
-权威边界：产品事实在 `Docs/**`，意图在 `Docs/intent/**`，代码复核报告在 `Docs/reviews/**`，任务状态在 `.codex/tasks/**`，工程约束在 `.codex/rules/**`，交付指标报告在 `artifacts/metrics/`（跑法见 `.codex/scripts/metrics_report.py` 的模块 docstring）。源项目专属 HClaw、Core-Python、CSPfix 和 APK 中转流程不属于 Treelearn 当前运行面。
+本节之外还登记着三个条目：`Docs/intent/**`（未成形的意图）、`Docs/reviews/**`（代码复核报告，归档口径见 `.codex/agents/code-reviewer.md`）、`artifacts/metrics/`（交付指标报告，跑法见 `.codex/scripts/metrics_report.py`）。
+
+权威边界按域写在 `.codex/context/project-brief.md` 的「事实源（SoT）声明」，逐条事实的权威落点、更新时机与漂移检查命令在 `.codex/context/source-of-truth.md`；本文件不再自己枚举一遍——那份枚举已经与两处正文漂过。源项目专属 HClaw、Core-Python、CSPfix 和 APK 中转流程不属于 Treelearn 当前运行面。

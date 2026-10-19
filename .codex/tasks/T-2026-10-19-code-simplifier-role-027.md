@@ -114,7 +114,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `identical=True`）、`run_all_guards.py` 其余 31 条注册项、`HARNESS.md` 第 1/2/3/5/6 步原文（接线只做在一句之内）、
   `checkers_selftest.py` 原有 86 例与 7 条基线一字未改。
 - Producer/consumer/sibling entrypoints and platform branches (code evidence): 生产者 = 角色正文与守门脚本；
-  消费者 = `run_all_guards.py:92-94`（core 档）、`checkers_selftest.py:82-84`（第 8 条基线所在元组；片 029 在其上插了
+  消费者 = `run_all_guards.py:92-94`（core 档）、`checkers_selftest.py:87-89`（第 8 条基线所在元组；片 029 在其上插了
   3 个常量、片 030 又插了 4 个并把元组撑到三行，行号从 `:66-67` 经 `:70-71` 挪到这里，由片 030 复算）、`.codex/HARNESS.md:10`
   （派工/实现阶段的第 4 步）。同级入口 = `check_codebase_researcher_agent.py`，它与本片共用
   `harness_check_lib.citable_paths()`（同一筛选两份的那一处已合并）。
@@ -163,7 +163,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `PHASE_B_KEYWORDS`（`:170` 逐关键词判定），HEAD 侧另两处是 `ROADMAP.md` 的 B5 条目与片 026 卡的两处提及
   （`git -c core.pager=cat grep -c "code-simplifier" HEAD -- .codex Docs` → 3 / 1 / 2）。
   `grep -rnI "REFACTOR" .codex Docs` 实测 53 行：绝大多数是各任务卡自带的 `### REFACTOR — optional` 小节，
-  本片没有新增落点目录。规则正文与 `AGENTS.md` 路由表不按脚本名枚举守门（`AGENTS.md:62` 的
+  本片没有新增落点目录。规则正文与 `AGENTS.md` 路由表不按脚本名枚举守门（`AGENTS.md:63` 的
   `.codex/agents/*.toml` glob 已覆盖本角色），所以新守门只需进注册表与 ROADMAP，不需新增规则条目
   （与片 024/026 同一结论，本片复算一次）。
 - Superseded phrases/examples reverse-searched: 被本片改写的旧句是 B5 的 `范围` 一行（原文漏列

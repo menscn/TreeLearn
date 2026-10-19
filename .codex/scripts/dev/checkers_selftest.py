@@ -77,11 +77,16 @@ LOOP_WATCHER_MD = ".codex/agents/loop-watcher.md"
 LOOP_WATCHER_TOML = ".codex/agents/loop-watcher.toml"
 OBSERVABILITY_RULE = ".codex/rules/observability.md"
 CHECK_WATCH = ".codex/scripts/check_loop_watcher_agent.py"
+SOT_INVENTORY = ".codex/context/source-of-truth.md"
+CHECK_SOT = ".codex/scripts/check_source_of_truth.py"
+ANDROID_RULE = ".codex/rules/android.md"
+HARNESS_DOC = ".codex/HARNESS.md"
+CHECK_DESIGN_TOKENS = ".codex/scripts/dev/check_design_tokens.py"
 
 # 先跑一遍「未注入」的基线：守门对健康的副本必须转绿，否则下面的反向用例没有意义。
 BASELINES = (CHECK_INTENT, CHECK_ROADMAP, CHECK_TEMPLATE, CHECK_SPEC, CHECK_REVIEW,
              CHECK_CONTEXT, CHECK_RESEARCH, CHECK_SIMPLIFY, RUN_EVALS, CHECK_KEEPER,
-             RUN_METRICS, CHECK_REPORTER, CHECK_WATCH)
+             RUN_METRICS, CHECK_REPORTER, CHECK_WATCH, CHECK_SOT)
 
 # 需要「把目标文件当参数传给守门」的用例（回放校验器读的是参数指定的实例文件）。
 ARGS_BY_CASE = {
@@ -119,6 +124,10 @@ SAMPLE_SPEC_METRICS_SRC = ("metricsSource60", RUN_METRICS, 60, "quiet60")
 # 那一侧做正控：另外两侧已由 research:/simplify: 用各自来源证过，缺这一侧时
 # max_overlap_with_files 的第三个文件坏了没人知道。
 SAMPLE_SPEC_OBSERVABILITY = ("observability60", OBSERVABILITY_RULE, 60, "quiet60")
+# C3 的抄检对象是「全部 15 个权威文件」这一整面，不是某一份规则正文。取 Java-only 的权威
+# （`.codex/rules/android.md`，被两条条目指向）做正控：索引抄到它 60 字就必须响，
+# 而比较对象被挪空（authority_files 变 0）时这条用例也会以「取不到样本」的身份判仪器故障。
+SAMPLE_SPEC_SOT = ("sotAuthority60", ANDROID_RULE, 60, "quiet60")
 
 
 def derive_sample(skill_text, length, tier):
@@ -581,7 +590,7 @@ CASES = [
     ("evals:forbid-hit", RUN_EVALS, EVALS_PRODUCT, None, "待填\n",
      "case 001-impact-inventory forbid: 待填", "append"),
     ("evals:pointer-stale", RUN_EVALS, EVALS_PRODUCT,
-     ".codex/scripts/dev/checkers_selftest.py:82-84",
+     ".codex/scripts/dev/checkers_selftest.py:87-89",
      ".codex/scripts/dev/checkers_selftest.py:99999",
      "case 001-impact-inventory pointers-alive", "replace"),
     ("evals:path-dead", RUN_EVALS, EVALS_PRODUCT,
@@ -975,6 +984,98 @@ CASES = [
     ("watch:toml-unparsable", CHECK_WATCH, LOOP_WATCHER_TOML,
      None, "\nbroken = [\n",
      "agent .toml parses as a Codex agent file", "append"),
+    # ---- C3 事实源清单 ----
+    # 清单不在场与「必须路由到它的 L0 入口不在场」都判红：后者证的是路由不是文件在场。
+    ("sot:inventory-missing", CHECK_SOT, SOT_INVENTORY, None, None,
+     "inventory exists", "delete"),
+    ("sot:l0-router-missing", CHECK_SOT, PROJECT_BRIEF, None, None,
+     "the L0 entry that must route here exists", "delete"),
+    # 扫描面匹配器被挪空（这里用「后缀写错」模拟）→ 空集合必须自己响，不能报「无事实可判」。
+    ("sot:scan-matcher-drained", CHECK_SOT, CHECK_SOT,
+     'if not name.endswith(".md"):', 'if not name.endswith(".md9"):',
+     "the current-state scan surface holds >= 40 files", "replace"),
+    ("sot:fields-marker-unreadable", CHECK_SOT, SOT_INVENTORY,
+     "<!-- FIELDS:", "<!-- FIELDSX:",
+     "the inventory declares its field names in a FIELDS marker", "replace"),
+    ("sot:entries-drained", CHECK_SOT, SOT_INVENTORY, "### ", None,
+     "inventory has >= 12 fact entries", "drop_matching"),
+    # 同一个字段在一个条目里写两遍＝清单内部自己造了第二处定义；读代码的人会看到后一份，
+    # 前一份静默失效。字段值必须留在列表里而不是被覆盖。
+    ("sot:field-duplicated", CHECK_SOT, SOT_INVENTORY, None,
+     "\n- **类型**：声明型\n",
+     "every entry declares each field exactly once, with a known 类型", "append"),
+    ("sot:kind-unknown", CHECK_SOT, SOT_INVENTORY,
+     "- **类型**：声明型", "- **类型**：传闻型",
+     "every entry declares each field exactly once, with a known 类型", "replace"),
+    # 同一条事实出现第二个条目：两条权威互相冲突时没有任何命令会响，所以条目 id 唯一也承重。
+    ("sot:fact-id-duplicated", CHECK_SOT, SOT_INVENTORY, None,
+     "\n### 复核报告归档位置\n- **类型**：声明型\n"
+     "- **唯一权威**：`.codex/agents/code-reviewer.md:6`\n"
+     "- **更新时机**：复核归档目录或命名口径改动时\n"
+     "- **漂移检查**：`python -X utf8 .codex/scripts/check_code_reviewer_agent.py`\n"
+     "- **锚点**：`Docs/reviews/\\*\\*`\n- **归属标记**：`code-reviewer\\.md`\n",
+     "every fact id is declared once", "append"),
+    # 索引把自己写成权威：那之后「改权威先查清单」就没有可查的对象了。
+    ("sot:index-as-own-authority", CHECK_SOT, SOT_INVENTORY,
+     "- **唯一权威**：`AGENTS.md:34`",
+     "- **唯一权威**：`.codex/context/source-of-truth.md:13`",
+     "every entry names exactly one authority, and the index is never its own authority",
+     "replace_line"),
+    ("sot:authority-dead-path", CHECK_SOT, SOT_INVENTORY,
+     "`.codex/rules/android.md:8`", "`.codex/rules/androidX.md:8`",
+     "every authority path exists and the cited line is inside it", "replace"),
+    ("sot:authority-beyond-eof", CHECK_SOT, SOT_INVENTORY,
+     "`AGENTS.md:34`", "`AGENTS.md:9999`",
+     "every authority path exists and the cited line is inside it", "replace"),
+    # 权威落在任务卡上：那里的句子是历史，会把下一位实现者指导成「照旧稿做」。
+    ("sot:authority-on-history-plane", CHECK_SOT, SOT_INVENTORY,
+     "- **唯一权威**：`Docs/04-ux-design/design-system/README.md:9`",
+     "- **唯一权威**：`.codex/tasks/_TEMPLATE.md:1`",
+     "no authority is a historical record", "replace_line"),
+    ("sot:anchor-silent-on-authority", CHECK_SOT, SOT_INVENTORY,
+     "定义与出处冲突时以出处为准", "定义与出处永不冲突",
+     "every anchor is a bounded, compilable pattern that fires on the cited authority line",
+     "replace"),
+    ("sot:anchor-uncompilable", CHECK_SOT, SOT_INVENTORY,
+     "artifacts/metrics/report\\.md", "artifacts/metrics/report\\.(md",
+     "every anchor is a bounded, compilable pattern that fires on the cited authority line",
+     "replace"),
+    # 锚点长到能装下一整句权威正文＝清单变成第二权威，长度上限就是为此存在的。
+    ("sot:anchor-copies-authority", CHECK_SOT, SOT_INVENTORY,
+     "唯一的 AI 研发流程入口",
+     "Java-only：不写 Kotlin 源码，不加 Kotlin Gradle 插件，不引 org.jetbrains.kotlin 或 "
+     "-ktx 坐标；权威正文在 .codex/rules/android.md 第 8 行，其它位置只能带归属标记引用它。",
+     "every anchor is a bounded, compilable pattern that fires on the cited authority line",
+     "replace"),
+    ("sot:update-trigger-vague", CHECK_SOT, SOT_INVENTORY,
+     "新增或退役 token 时由守门读数体现，散文里不写死", "随时",
+     "every entry states an update trigger of >= 8 chars", "replace"),
+    ("sot:drift-command-dead", CHECK_SOT, SOT_INVENTORY,
+     ".codex/scripts/check_context_pack.py", ".codex/scripts/check_context_packX.py",
+     "every drift check is a runnable command, and generated counts are owned by a script "
+     "with a bare floor", "replace"),
+    # 生成数的下限常量被抽掉后，「以实测为准」又变成一句主张：没有裸下限的脚本不配当 owner。
+    ("sot:generated-floor-drained", CHECK_SOT, CHECK_DESIGN_TOKENS, "MIN_", None,
+     "every drift check is a runnable command, and generated counts are owned by a script "
+     "with a bare floor", "drop_matching"),
+    # 散文里写死一个生成数：它和守门读数迟早分叉，而分叉那天没有任何命令会响。
+    ("sot:generated-count-in-prose", CHECK_SOT, HARNESS_DOC, None,
+     "\n设计系统当前有 44 个 token，前端 tokens.css 同步 44 个 CSS 变量。\n",
+     "no generated count is written into prose anywhere on the scan surface", "append"),
+    # 别处裸写一条同形状的约束＝另立权威；带归属标记的引用不算。
+    ("sot:second-definition-bare", CHECK_SOT, HARNESS_DOC, None,
+     "\n- Android 侧禁止 Kotlin 源码、Kotlin Gradle 插件和 org.jetbrains.kotlin 依赖。\n",
+     "no fact is defined a second time without an attribution pointer", "append"),
+    ("sot:coverage-count-drift", CHECK_SOT, SOT_INVENTORY,
+     "| `.codex/rules/` | 4 |", "| `.codex/rules/` | 9 |",
+     "the 覆盖面 counts equal the recomputed per-root entry counts", "replace"),
+    ("sot:coverage-root-duplicated", CHECK_SOT, SOT_INVENTORY, None,
+     "\n| `.codex/rules/` | 4 |\n",
+     "the 覆盖面 table is readable and names each root once", "append"),
+    ("sot:index-restates-authority", CHECK_SOT, SOT_INVENTORY, None, SAMPLE_SPEC_SOT,
+     "the index restates no authority body (>= 60-char run)", "append_sample"),
+    ("sot:placeholder-in-index", CHECK_SOT, SOT_INVENTORY, None, "\nTBD\n",
+     "the index carries no placeholder tokens", "append"),
 ]
 
 
@@ -1159,7 +1260,8 @@ def main():
     # 而是检查**形状**——每条抄检用例都必须走 append_sample，出现字面量样本即判仪器故障。
     copy_check_prefixes = ("intent:copied-methodology", "research:rules-restated",
                            "simplify:rules-restated", "keeper:grammar-table-restated",
-                           "reporter:generator-text-restated", "watch:rules-restated")
+                           "reporter:generator-text-restated", "watch:rules-restated",
+                           "sot:index-restates-authority")
     literal_copy_cases = [c[0] for c in CASES
                           if c[0].startswith(copy_check_prefixes) and c[6] != "append_sample"]
     if literal_copy_cases:

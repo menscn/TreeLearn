@@ -1,6 +1,6 @@
 ---
 name: line-budget
-description: 500 行硬预算检查。用 PowerShell 脚本 git diff --numstat HEAD 统计未提交业务变更行，排除生成 / 迁移 / 文档目录；>500 判 FAIL 并提示拆 task，>200 提示警告。当 task 声称完成、verifier 验收、或用「budget / 行数 / 预算」检查变更大小时触发。
+description: 500 行硬预算检查（口径权威正文 `.codex/rules/harness-tasks.md`）。用 PowerShell 脚本 git diff --numstat HEAD 统计未提交业务变更行，排除生成 / 迁移 / 文档目录；>500 判 FAIL 并提示拆 task，>200 提示警告。当 task 声称完成、verifier 验收、或用「budget / 行数 / 预算」检查变更大小时触发。
 ---
 
 # line-budget —— 500 行硬预算检查

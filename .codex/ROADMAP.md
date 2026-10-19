@@ -110,7 +110,7 @@
 - **ID**：B6
 - **目标**：定期把交付节奏、退回次数、守门命中分布、失败案例库增量汇总成一页报告，让单人项目也看得见自己是在变快还是变慢。
 - **范围（可写路径）**：`.codex/scripts/metrics_report.py`、`artifacts/metrics/`（报告落点，本片新建）、`.codex/scripts/dev/checkers_selftest.py`、`.codex/scripts/run_all_guards.py`、`.codex/scripts/check_roadmap_and_routing.py`、`.codex/README.md`、`.codex/ROADMAP.md`；只读输入是 `.codex/tasks/`、`.codex/references/regression-cases.md`、`.codex/scripts/run_all_guards.py` 与 git 历史。角色面（片 031）另加 `.codex/agents/metrics-reporter.md`、`.codex/agents/metrics-reporter.toml`、`.codex/scripts/check_metrics_reporter_agent.py`、`.codex/HARNESS.md`
-- **依赖**：`.codex/tasks/`、`.codex/references/regression-cases.md`（失败案例库现在就住在这里，`AGENTS.md` 只做路由、不存案例正文）、`git log`。原条目写的 `artifacts/evidence/` **不是**依赖：那是逐片提交的证据文本（`.gitignore` 只忽略其中的 `.captures/`），没有稳定的机器可读形状，把指标建在它上面得到的数没法用同一条命令复算；报告落点 `artifacts/metrics/report.md` 反过来**必须**提交，否则新克隆上 core 档会红在「报告文件在场」那条判据上
+- **依赖**：`.codex/tasks/`、`.codex/references/regression-cases.md`（失败案例库现在就住在这里，`AGENTS.md` 只做路由、不存案例正文）、`git log`。原条目写的 `artifacts/evidence/` **不是**依赖：那是逐片提交的证据文本（`.gitignore` 只忽略其中的 `.captures/`），没有稳定的机器可读形状，把指标建在它上面得到的数没法用同一条命令复算；报告落点 `artifacts/metrics/report.md`（落点口径在 `.codex/scripts/metrics_report.py`）反过来**必须**提交，否则新克隆上 core 档会红在「报告文件在场」那条判据上
 - **owner_lane**：harness
 - **验收方式**：`python -X utf8 .codex/scripts/metrics_report.py` 退出码 0（同一支脚本默认只读判定，所以它能直接当基线跑；`--write` 重生成报告，`--read <key>` 复算单个指标）。脚本断言：每个指标源在场、四个家族从 B6 目标句现场派生而不是另抄一份、指标登记表与报告行数互相钉住、每行六个字段齐且单位唯一、每行都印命令、声明 `复算=值` 的读数必须由**执行它自己那一行印出的命令**复现（手抄数字在这里转红）、`复算=` 标签与注册表里的真实类别一致、历史类读数确实带 git 命令、无占位符。角色面另有 `python -X utf8 .codex/scripts/check_metrics_reporter_agent.py` 退出码 0，判的是角色正文里那套动作是否还在场：引用任何数字前先 `--write` 重生成、重生成后整跑 core、单个指标用 `--read` 复算而不是心算、六个字段逐字转录不许手抄、判据面不许为了让报告好看而动、唯一可写落点只在 `artifacts/metrics/`、不写 Verdict 也不宣布验收；家族、报告落点与两条命令一律从 `import metrics_report` 现场派生，守门里不重抄第二份。判据条数与注入用例条数以 `python -X utf8 .codex/scripts/dev/checkers_selftest.py` 现场取，不写进本条。
 - **开源来源**：`https://github.com/contains-studio/agents` → `studio-operations/analytics-reporter.md`、`project-management/experiment-tracker.md`（2026-09-21 实测 HTTP 200）
@@ -141,12 +141,14 @@ Phase C 的条目都不是「现在缺人写」，而是**缺前置事实**：�
 
 - **ID**：C3
 - **目标**：把「同一个事实只在一个地方有权威版本」落成全仓库级别的清单，逐条写清权威文件、更新时机与同步检查方式，消掉当前分散在 `AGENTS.md`、规则、`Docs/**` 与任务文件里的重复表述。
-- **范围（可写路径）**：`.codex/context/source-of-truth.md`、`.codex/scripts/check_source_of_truth.py`
+- **范围（可写路径）**：`.codex/context/source-of-truth.md`、`.codex/scripts/check_source_of_truth.py`、`.codex/context/project-brief.md`、`.codex/README.md`、`AGENTS.md`、`.codex/HARNESS.md`、`.codex/scripts/dev/checkers_selftest.py`、`.codex/scripts/run_all_guards.py`、`.codex/rules/**` 与 `.codex/skills/**`（只改重复表述与指针）、`Docs/spec/**` 与 `Docs/05-technical-design/**`（同上）、`Docs/04-ux-design/design-system/README.md`、`android/README.md`
 - **依赖**：需要先有足够多的产物边界稳定下来（Stage 3–5 的规格、评测、报告至少各落地一份），否则清单会随产出形态反复重写；当前可参考 `.codex/context/project-brief.md` 已有的 SoT 声明章节。
 - **owner_lane**：harness
 - **验收方式**：`python .codex/scripts/check_source_of_truth.py` 退出码 0；脚本断言每条事实都有唯一权威路径、且该路径在仓库中真实存在，并对同一事实出现第二处定义时报 FAIL。
 - **开源来源**：`https://github.com/anthropics/skills` → `skills/doc-coauthoring/SKILL.md`；`https://github.com/openai/skills` → `skills/.curated/notion-knowledge-capture/SKILL.md`（2026-09-21 实测 HTTP 200）
 - **执行提示词**：前置条件——`.codex/context/project-brief.md` 里的 SoT 声明已被实际使用过至少一轮。读 `.codex/context/project-brief.md`、`.codex/rules/documentation.md`、`.codex/README.md`、`AGENTS.md`，再参考上游 `https://github.com/openai/skills` 的 notion-knowledge-capture。在 `.codex/context/` 下新增 source-of-truth.md，逐条写「事实 / 唯一权威路径 / 更新时机 / 漂移检查方式」，并写一个纯标准库校验脚本：权威路径必须存在，同一事实出现第二处定义即判 FAIL；跑通后贴证据。
+- **交付任务**：片 034（`T-2026-10-20-source-of-truth-inventory-034`）交付 `.codex/context/source-of-truth.md`（逐条六个字段：类型 / 唯一权威 / 更新时机 / 漂移检查 / 锚点 / 归属标记；字段名由文件里的 `FIELDS` 注释声明，由守门现场读取比对）、纯标准库守门 `.codex/scripts/check_source_of_truth.py`、它的 `sot:*` 注入用例（升为 `checkers_selftest.py` 的第 14 条基线）与 core 档注册、`.codex/HARNESS.md` 第 8 步接线，以及 `AGENTS.md`、`.codex/README.md`、`.codex/context/project-brief.md` 三处路由；status=verifying。条目数、扫描面文件数与注入用例条数一律以命令现场读数为准（守门末行、自检首行），本条不复述——把它们抄进 ROADMAP 正是这片要消灭的那种第二处定义。范围比执行提示词点名的两个路径宽：守门第一次跑就把散文里既有的重复表述与写死数字判红，只交付清单与脚本会留下一片已知红；为此把 `.codex/rules/**`、`.codex/skills/**`、`Docs/spec/**`、`Docs/05-technical-design/**`、`Docs/04-ux-design/design-system/README.md`、`android/README.md` 里的那些句子收成带归属标记的指针或删掉写死的数。**没有为了变绿改动任何判据或下限。**
+- **实现要点（交付后回写，不是验收方式的替代）**：验收句只点了三件事（唯一权威、路径真实存在、第二处定义即 FAIL），所以判据的重心是「每一类坏法都要能被单个注入证伪」。**两类事实分开判，因为失效形状不同**：声明型允许「同一行带归属标记」的引用存在（纠正性引用「已由某处收窄」本身就是证据，把它判红只会逼人删证据来变绿），生成型则要求扫描面零命中并要求它的漂移检查指向一支**带裸 `MIN_` 下限常量**的脚本——否则「以实测为准」又是一句没有牙的主张（`sot:generated-count-in-prose`、`sot:generated-floor-drained` 各判一边）。**合取锚点必须写成行级形状** `^(?=.*A)(?=.*B).*(?:C|D)`：第一版用裸 `(?=…)` 起头，`re.search` 的前视只能看见当前位置右侧，导致关键词在前的行被静默漏掉（实测漏 2 处，表现为「整表绿而漏判」）。为此把 `MAX_ANCHOR_CHARS` 从 80 抬到 96 并在常量注释里记下原因；抬上限的同时由 60 字抄检窗口兜住「把权威正文抄进清单」，两条一宽一严成对。**清单自己不豁免**：覆盖面表的数字由守门现场复算条目数比对（`sot:coverage-count-drift`、`sot:coverage-root-duplicated`）、权威指向本文件即红、权威落在历史面（任务卡、`artifacts/`、`Docs/01-demand/**` 等）即红、六字段在同一条目里写两遍即红——最后一判是因为字段值若被覆盖成后一份，第二处定义就被藏起来了。**匹配集自己也有下限**：`MIN_SCAN_FILES` 防的是本仓库登记过多次的「集合给自己定下限」，`sot:scan-matcher-drained` 用「把后缀 `.md` 写错」模拟空集来证它会响，而不是靠删条目来证。**首跑即报出的存量**（写进这里而不是抄进散文）：二十余处裸第二定义与六处写死的生成数，逐条改为指针或删除；锚点形状收紧过一次——「同一行同时出现两个阈值数字」会把 `android/README.md` 里逐片如实记录的越界证据也算成第二定义，收紧后要求同时出现规定性措辞，判据、下限与期望标签一字未动。**删重复正文前要先查有没有判据在数它**：`.codex/README.md` 那句权威边界枚举同时是 `check_roadmap_and_routing` 的「目录结构小节列出每个登记条目」的载体，把它整句删掉让 core 档基线当场转红；收下来的写法是保留目录事实、只把权威主张换成指针。**本片自己造出的指针漂移**按机械重定位收掉（同 C2 那段）：追加注入用例与基线、往 core 档插条目，会让仓库里指向这两个文件的 `文件:行` 声明整体位移；末态再 `metrics_report.py --write` 重生成一次，因为卡片正文自己也是指标分母。
 
 ### C4 发布闸门 release-gate
 
@@ -360,7 +362,7 @@ D5 = 互斥的两边同时消失），都是「复核后如实回写」而不是
 ### D9 「AGENTS.md 失败案例库」这个指针指向一个当前树里不存在的章节（2026-10-19 已按「改指活正文」闭合，见处置）
 
 - 现象：`.codex/` 里有若干处正文把某条理由写成「见 AGENTS.md 失败案例库 …」，而 AGENTS.md 现在只在一处提到
-  历史案例，且明确把归属地指给 `.codex/references/`（`AGENTS.md:65`：「`.codex/references/` 只保存迁移映射和历史案例」）。
+  历史案例，且明确把归属地指给 `.codex/references/`（`AGENTS.md:66`：「`.codex/references/` 只保存迁移映射和历史案例」）。
   现行案例文件是 `.codex/references/regression-cases.md`，其开头还写着「历史参考与学习材料，不是新增门禁或当前运行契约；
   现行要求见[防回归规则](.codex/rules/regression.md)」。落点本身还不止一种写法：其中一处写的是
   「`.cursor/AGENTS.md` 失败案例库」，而 `.cursor/` 在当前树里也不承担规则职责（AGENTS.md 开头就说明了这点）。
@@ -442,7 +444,7 @@ D5 = 互斥的两边同时消失），都是「复核后如实回写」而不是
   `b032-*` 脚本并发跑，同一条变成 `FAIL verify_1to1_selftest timeout after 300s, so nothing was judged`、
   汇总 `RUN-ALL-GUARDS pass=31 fail=1 inconclusive=0 fault=0` / `VERDICT: FAIL` / 退出码 1
   （`artifacts/tmp/run186-tiers.txt`）。这一条用的正是 `run_all_guards.py:42` 的 `DEFAULT_TIMEOUT = 300`
-  ——条目定义在 `run_all_guards.py:135`，没有单独传 `timeout=`；262.4s 对 300s 只剩约 12% 余量。
+  ——条目定义在 `run_all_guards.py:137`，没有单独传 `timeout=`；262.4s 对 300s 只剩约 12% 余量。
   D11 记下的 254.5s 与本轮的 262.4s 是同一件事的两次读数。
 - 后果（不修的话）：这条红不代表产物变差，代表**没判**——打印自己就写着 `nothing was judged`。而它的触发条件是
   「旁边有人跑别的脚本」，恰好是交付收尾时最常见的姿势。拿这种轮次当结论只有两种走法，都坏：重跑到绿

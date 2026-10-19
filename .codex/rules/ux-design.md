@@ -4,7 +4,7 @@
 
 ## 设计事实源
 
-- 设计系统的**当前态权威**是 `Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html` 的 `:root` 区块；
+- 设计系统的**当前态权威**是 `Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html` 的 `:root` 区块（这条链的权威定义在 `Docs/04-ux-design/design-system/README.md`）；
   `Docs/04-ux-design/design-system/tokens.json` 是同一批数值的机器可读镜像；
   `android/app/src/main/res/values/colors.xml` 是 Android 侧副本（只承载不透明 hex 子集）；
   `frontend/src/styles/tokens.css` 是前端侧副本，**只能生成、不得手抄**。

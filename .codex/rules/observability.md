@@ -10,7 +10,7 @@
 - 仍然适用的部分：
   1. 「可排障日志」段：每个生成操作与派生 AI 任务记录脱敏的 `start / accepted / streaming / stable / failed / interrupted / canceled` 与 `start / applied / stale_discarded / failed`，含 operation/branch ID、模型档位、思考开关、字符计数、耗时、错误分类、input digest 前 8 位；禁止记录问题正文、回答正文、推理内容、prompt、quote、快照 JSON、响应原文与 API Key（技术方案 §14、§15）。
   2. Cross-cutting telemetry guard 的**决策记录**义务：技术方案 §14 规定 release 不发送远程行为遥测、`TelemetrySink` 为 no-op，因此每个新的面向用户功能仍须在任务或 PR 中明确记录「不发射遥测」或 debug 本地事件的范围与理由；release 默认降低日志级别并禁止正文输出。
-- 若将来引入**远程**后端服务或远程遥测管道，或本机服务出现多实例与集中日志，本规则全文重新启用，并在同一任务内补齐统一 trace 接入、边界测试与门禁。仅监听本机环回地址的单进程 `backend/`（阶段 7 规划）**不触发本句**——它与本节第二条「适用性判定」是同一个判定，不得两处各给一个结论。
+- 若将来引入**远程**后端服务或远程遥测管道，或本机服务出现多实例与集中日志，本规则全文重新启用，并在同一任务内补齐统一 trace 接入、边界测试与门禁。仅监听本机环回地址的单进程 `backend/`（阶段 7 规划）**不触发本句**——它与本节第二条「适用性判定」是同一个判定，不得两处各给一个结论（环回口径权威：`Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md`）。
 
 ## 可排障日志
 

@@ -20,8 +20,8 @@ description: 一条命令整跑仓库全部只读守门，并把「退出码 0�
 python .codex/scripts/run_all_guards.py [--tier core|precommit|all] [--only 子串] [--list]
 ```
 
-- `core`（默认）：只读、确定性、不依赖构建产物或 git 增量的 25 条。任何一片提交前都要整跑。
-- `precommit`：依赖未提交增量、`frontend/dist` 或 Gradle 的 6 条（`line-budget`、`no-kotlin-check`、
+- `core`（默认）：只读、确定性、不依赖构建产物或 git 增量的那档守门；条数不写在这里，`--list` 现场打印。任何一片提交前都要整跑。
+- `precommit`：依赖未提交增量、`frontend/dist` 或 Gradle 的那档（名单与条数同样只看 `--list`）：`line-budget`、`no-kotlin-check`、
   `guard-selftest -Fast`、`frontend verify`、`check_offline_bundle` 及其自检）。
 - `--list`：打印注册表（档位、守门名、要找的判据行片段），不运行任何东西。
 - `--only 子串`：只跑名字含该子串的条目。跑出来的绿话会写明 `subset only`——
@@ -65,7 +65,7 @@ python .codex/scripts/run_all_guards.py [--tier core|precommit|all] [--only 子�
 python .codex/scripts/check_run_all_guards.py
 ```
 
-26 条用例，在合成注册表上逐条注入违规并核对判决（跑的是临时子进程，真实仓库文件一个都不改）：
+用例条数由该脚本自己打印（`SELFTEST cases=…`），这里不写死；它在合成注册表上逐条注入违规并核对判决（跑的是临时子进程，真实仓库文件一个都不改）：
 rc=0 但静默 → FAIL、rc 落在判绿/判红集合外 → 无从认证、脚本缺失/解释器起不来/输出乱码 → 故障、
 挂住不回 → 超时判红、空表与被挪空的 core 档 → 注册表故障、子集绿话必须写明 `subset only` 等。
 改过 `run_all_guards.py` 的任何判定分支，都必须整跑这支自检并留输出。

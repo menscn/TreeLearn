@@ -1,0 +1,1153 @@
+Task evidence T-2026-10-20-034 — 事实源（SoT）全量清单、成对守门与本仓库散文面的去重
+环境：Windows 10.0.26200 / x64 / Python 3.13.12 / Git Bash；所有 Python 命令带 -X utf8。
+判据行逐字粘贴、不截断。块 00/03/06 里标了「当场重跑」的条目由本装配驱动现场执行只读命令，
+其余每一行都取自 artifacts/tmp/run*.txt 的在场捕获（该目录 gitignore，号段 run259–run285 都在）。
+本片末态三条是 run278（core）/ run279（precommit）/ run275（全轮 268 例 + 14 基线），按 D12 串行单独跑；此后卡片正文改过引用号段、REFACTOR 的改前读数与 Verdict 措辞，唯一会读卡片正文的 `validate_tasks` 与另外五条只读判据由 `run285-postcard-recheck.txt` 收口。
+
+================================================================================================================================================================
+块 00 — 守门本体：python -X utf8 .codex/scripts/check_source_of_truth.py（21 条判据逐字）
+================================================================================================================================================================
+### capture=artifacts/tmp/run273-sot-checker.txt
+OK   inventory exists — path=.codex/context/source-of-truth.md
+OK   the L0 entry that must route here exists — path=.codex/context/project-brief.md
+OK   the current-state scan surface holds >= 40 files — measured=67 floor=40
+OK   the inventory declares its field names in a FIELDS marker — found=True
+OK   inventory has >= 12 fact entries — measured=16 floor=12
+OK   every fact id is declared once — entries=16 duplicated=[]
+OK   every entry declares each field exactly once, with a known 类型 — fields=['类型', '唯一权威', '更新时机', '漂移检查', '锚点', '归属标记'] malformed=[]
+OK   every entry names exactly one authority, and the index is never its own authority — measured=16 bad=[]
+OK   every authority path exists and the cited line is inside it — dead=[]
+OK   no authority is a historical record — hit=[]
+OK   every anchor is a bounded, compilable pattern that fires on the cited authority line — bad=[]
+OK   every entry states an update trigger of >= 8 chars — bad=[]
+OK   every drift check is a runnable command, and generated counts are owned by a script with a bare floor — bad=[]
+OK   no entry was dropped by the per-entry checks — entries=16 usable=16 dropped=0 bad_kinds={'声明型': 14, '生成型': 2}
+OK   at least 2 entries are generated-count facts — measured=2 floor=2 kinds={'声明型': 14, '生成型': 2}
+OK   no fact is defined a second time without an attribution pointer — scanned_files=67 unattributed=0 hits=[]
+OK   no generated count is written into prose anywhere on the scan surface — measured=0 hits=[]
+OK   the 覆盖面 table is readable and names each root once — rows=7 roots=['.codex/', '.codex/agents/', '.codex/context/', '.codex/rules/', '.codex/scripts/', 'AGENTS.md', 'Docs/']
+OK   the 覆盖面 counts equal the recomputed per-root entry counts — declared={'.codex/': 2, '.codex/agents/': 1, '.codex/context/': 2, '.codex/rules/': 4, '.codex/scripts/': 3, 'AGENTS.md': 1, 'Docs/': 3} measured={'.codex/': 2, 'AGENTS.md': 1, '.codex/context/': 2, '.codex/rules/': 4, 'Docs/': 3, '.codex/scripts/': 3, '.codex/agents/': 1}
+OK   the index restates no authority body (>= 60-char run) — measured_hits=0 sample=[]
+OK   the index carries no placeholder tokens — hits=[]
+scanned_files=67 entries=16 kinds={'声明型': 14, '生成型': 2} authority_files=15
+
+check_source_of_truth: 0 check(s) failed
+EXITCODE=0
+
+### 当场重跑（同一命令，本文件写出前的最后一次）
+OK   inventory exists — path=.codex/context/source-of-truth.md
+OK   the L0 entry that must route here exists — path=.codex/context/project-brief.md
+OK   the current-state scan surface holds >= 40 files — measured=67 floor=40
+OK   the inventory declares its field names in a FIELDS marker — found=True
+OK   inventory has >= 12 fact entries — measured=16 floor=12
+OK   every fact id is declared once — entries=16 duplicated=[]
+OK   every entry declares each field exactly once, with a known 类型 — fields=['类型', '唯一权威', '更新时机', '漂移检查', '锚点', '归属标记'] malformed=[]
+OK   every entry names exactly one authority, and the index is never its own authority — measured=16 bad=[]
+OK   every authority path exists and the cited line is inside it — dead=[]
+OK   no authority is a historical record — hit=[]
+OK   every anchor is a bounded, compilable pattern that fires on the cited authority line — bad=[]
+OK   every entry states an update trigger of >= 8 chars — bad=[]
+OK   every drift check is a runnable command, and generated counts are owned by a script with a bare floor — bad=[]
+OK   no entry was dropped by the per-entry checks — entries=16 usable=16 dropped=0 bad_kinds={'声明型': 14, '生成型': 2}
+OK   at least 2 entries are generated-count facts — measured=2 floor=2 kinds={'声明型': 14, '生成型': 2}
+OK   no fact is defined a second time without an attribution pointer — scanned_files=67 unattributed=0 hits=[]
+OK   no generated count is written into prose anywhere on the scan surface — measured=0 hits=[]
+OK   the 覆盖面 table is readable and names each root once — rows=7 roots=['.codex/', '.codex/agents/', '.codex/context/', '.codex/rules/', '.codex/scripts/', 'AGENTS.md', 'Docs/']
+OK   the 覆盖面 counts equal the recomputed per-root entry counts — declared={'.codex/': 2, '.codex/agents/': 1, '.codex/context/': 2, '.codex/rules/': 4, '.codex/scripts/': 3, 'AGENTS.md': 1, 'Docs/': 3} measured={'.codex/': 2, 'AGENTS.md': 1, '.codex/context/': 2, '.codex/rules/': 4, 'Docs/': 3, '.codex/scripts/': 3, '.codex/agents/': 1}
+OK   the index restates no authority body (>= 60-char run) — measured_hits=0 sample=[]
+OK   the index carries no placeholder tokens — hits=[]
+scanned_files=67 entries=16 kinds={'声明型': 14, '生成型': 2} authority_files=15
+
+check_source_of_truth: 0 check(s) failed
+EXITCODE=0
+
+================================================================================================================================================================
+块 01 — 同一条命令的 RED / GREEN：三种 RED 状态 + 真树未被改写的字节核验（driver=artifacts/tmp/b034-redgreen.py，capture=run274-redgreen.txt）
+================================================================================================================================================================
+### 末态逐字
+worktree before: entries=38
+RED-2 会还原的文档面 files=33
+Workspace: C:\Users\23745\AppData\Local\Temp\tlx-034-redgreen-jbwunc1h  note: longest path 131
+
+===== GREEN 现树原样（副本）
+Command: python -X utf8 .codex/scripts/check_source_of_truth.py
+Exit code: 0
+  scanned_files=64 entries=16 kinds={'声明型': 14, '生成型': 2} authority_files=15
+  check_source_of_truth: 0 check(s) failed
+  EXITCODE=0
+
+===== RED-1 被检产物缺席（清单被删）
+Command: python -X utf8 .codex/scripts/check_source_of_truth.py
+Exit code: 1
+  FAIL inventory exists — path=.codex/context/source-of-truth.md
+  check_source_of_truth: 1 check(s) failed
+  EXITCODE=1
+  还原后同一条命令: rc=0 FAIL=0
+
+===== RED-2 文档面=HEAD（去重之前的现状）
+Command: python -X utf8 .codex/scripts/check_source_of_truth.py
+Exit code: 1
+  FAIL every anchor is a bounded, compilable pattern that fires on the cited authority line — bad=["同一事实只允许一处权威::anchor does not fire on the cited line .codex/context/project-brief.md:61 line='## 阅读顺序'"]
+  FAIL no fact is defined a second time without an attribution pointer — scanned_files=65 unattributed=25 hits=['流程入口唯一 <- AGENTS.md:3', '同一事实只允许一处权威 <- AGENTS.md:33', 'Java-only 约束 <- .codex/context/project-brief.md:22', 'Java-only 约束 <- Docs/05-technical-design/TreeLearn_Harness全量开发交付提示词.md:36', 'Ja
+  FAIL no generated count is written into prose anywhere on the scan surface — measured=6 hits=['设计 token 个数 <- Docs/04-ux-design/design-system/README.md:9', '设计 token 个数 <- Docs/04-ux-design/design-system/README.md:11', '设计 token 个数 <- Docs/04-ux-design/design-system/README.md:12', '守门档位条数 <- .codex/
+  scanned_files=65 entries=16 kinds={'声明型': 14, '生成型': 2} authority_files=15
+  check_source_of_truth: 3 check(s) failed
+  EXITCODE=1
+  unattributed/generated-count 读数: ('25', '6')
+  还原本片文档面后同一条命令: rc=0 FAIL=0（与 GREEN 同读数=True）
+
+===== RED-3 权威行号搬到 eof 之外（34 -> 468）
+Command: python -X utf8 .codex/scripts/check_source_of_truth.py
+Exit code: 1
+  FAIL every authority path exists and the cited line is inside it — dead=['任务状态唯一可写目录::AGENTS.md:468 beyond eof=67']
+  FAIL no entry was dropped by the per-entry checks — entries=16 usable=15 dropped=1 bad_kinds={'声明型': 14, '生成型': 2}
+  FAIL the 覆盖面 counts equal the recomputed per-root entry counts — declared={'.codex/': 2, '.codex/agents/': 1, '.codex/context/': 2, '.codex/rules/': 4, '.codex/scripts/': 3, 'AGENTS.md': 1, 'Docs/': 3} measured={'.codex/': 2, '.codex/context/': 2, '.codex/rules/': 4, 'Docs/': 3, '.codex/scripts/': 3
+  scanned_files=65 entries=15 kinds={'声明型': 14, '生成型': 2} authority_files=14
+  check_source_of_truth: 3 check(s) failed
+  EXITCODE=1
+  还原后同一条命令: rc=0
+
+===== 真树未被 RED 改写的证据
+worktree after: entries=38 identical=True
+   .codex/scripts/check_source_of_truth.py workspace_copy_equals_worktree=True
+   .codex/context/source-of-truth.md workspace_copy_equals_worktree=True
+
+GREEN FAIL=0 RED-2 FAIL=3
+
+### RED-2 的可复算口径：`changed_md()` 从 `git diff --name-only HEAD` 现取，把本片改过的 33 份文档面还原成 HEAD 再跑同一条命令——这条不是修辞，是「本片到底改了什么」的读数
+RED-2 会还原的文档面 files=33
+
+================================================================================================================================================================
+块 02 — 注入自检：24 例 `sot:*` 单族 + 整轮 268 例 / 14 基线
+================================================================================================================================================================
+### 单族（capture=run262-sot-cases.txt，由 artifacts/tmp/c034-sot-only.py 过滤 CASES 与 BASELINES）
+sot cases: 24
+Command: python .codex/scripts/dev/checkers_selftest.py
+Mode: full (24 injected-violation cases + 1 baselines)
+Workspace: C:\Users\23745\AppData\Local\Temp\tlx-selftest-hinrwbly
+Workspace note: longest path 127
+BASELINE OK check_source_of_truth rc=0
+CASE 01 OK        sot:inventory-missing - rc=1, FAIL inventory exists — path=.codex/context/source-of-truth.md
+CASE 02 OK        sot:l0-router-missing - rc=1, FAIL the L0 entry that must route here exists — path=.codex/context/project-brief.md
+CASE 03 OK        sot:scan-matcher-drained - rc=1, FAIL the current-state scan surface holds >= 40 files — measured=0 floor=40
+CASE 04 OK        sot:fields-marker-unreadable - rc=1, FAIL the inventory declares its field names in a FIELDS marker — found=False
+CASE 05 OK        sot:entries-drained - rc=1, FAIL inventory has >= 12 fact entries — measured=0 floor=12
+CASE 06 OK        sot:field-duplicated - rc=1, FAIL every entry declares each field exactly once, with a known 类型 — fields=['类型', '唯一权威', '更新时机', '漂移检查', '锚点', '归属标记'] malformed=["复核报告归档位置::duplicated_fields={'类型': 2}"]
+CASE 07 OK        sot:kind-unknown - rc=1, FAIL every entry declares each field exactly once, with a known 类型 — fields=['类型', '唯一权威', '更新时机', '漂移检查', '锚点', '归属标记'] malformed=["流程入口唯一::kind='传闻型'"]
+CASE 08 OK        sot:fact-id-duplicated - rc=1, FAIL every fact id is declared once — entries=17 duplicated=['复核报告归档位置']
+CASE 09 OK        sot:index-as-own-authority - rc=1, FAIL every entry names exactly one authority, and the index is never its own authority — measured=15 bad=['任务状态唯一可写目录::the index cites itself as its own authority']
+CASE 10 OK        sot:authority-dead-path - rc=1, FAIL every authority path exists and the cited line is inside it — dead=['Java-only 约束::.codex/rules/androidX.md:8']
+CASE 11 OK        sot:authority-beyond-eof - rc=1, FAIL every authority path exists and the cited line is inside it — dead=['任务状态唯一可写目录::AGENTS.md:9999 beyond eof=67']
+CASE 12 OK        sot:authority-on-history-plane - rc=1, FAIL no authority is a historical record — hit=['设计 token 权威链::.codex/tasks/_TEMPLATE.md']
+CASE 13 OK        sot:anchor-silent-on-authority - rc=1, FAIL every anchor is a bounded, compilable pattern that fires on the cited authority line — bad=["领域术语索引::anchor does not fire on the cited line .codex/context/domain-glossary.md:3 line='> 用途：让角色在不读完整 PRD 的前提下对齐术语。每条都给出权威出处；定义与出处冲突时以出处为准。'"]
+CASE 14 OK        sot:anchor-uncompilable - rc=1, FAIL every anchor is a bounded, compilable pattern that fires on the cited authority line — bad=['交付指标报告的落点::uncompilable=missing ), unterminated subpattern at position 26']
+CASE 15 OK        sot:anchor-copies-authority - rc=1, FAIL every anchor is a bounded, compilable pattern that fires on the cited authority line — bad=['流程入口唯一::len=128 max=96']
+CASE 16 OK        sot:update-trigger-vague - rc=1, FAIL every entry states an update trigger of >= 8 chars — bad=['设计 token 个数::len=2']
+CASE 17 OK        sot:drift-command-dead - rc=1, FAIL every drift check is a runnable command, and generated counts are owned by a script with a bare floor — bad=["领域术语索引::cmd='`python -X utf8 .codex/scripts/check_context_pac' runnable_py_found=True"]
+CASE 18 OK        sot:generated-floor-drained - rc=1, FAIL every drift check is a runnable command, and generated counts are owned by a script with a bare floor — bad=['设计 token 个数::drift script .codex/scripts/dev/check_design_tokens.py declares no bare MIN_ floor so the generated count has no owner']
+CASE 19 OK        sot:generated-count-in-prose - rc=1, FAIL no generated count is written into prose anywhere on the scan surface — measured=1 hits=['设计 token 个数 <- .codex/HARNESS.md:29']
+CASE 20 OK        sot:second-definition-bare - rc=1, FAIL no fact is defined a second time without an attribution pointer — scanned_files=64 unattributed=1 hits=['Java-only 约束 <- .codex/HARNESS.md:29']
+CASE 21 OK        sot:coverage-count-drift - rc=1, FAIL the 覆盖面 counts equal the recomputed per-root entry counts — declared={'.codex/': 2, '.codex/agents/': 1, '.codex/context/': 2, '.codex/rules/': 9, '.codex/scripts/': 3, 'AGENTS.md': 1, 'Docs/': 3} measured={'.codex/': 2, 'AGENTS.md': 1, '.codex/context/': 2, '.codex/rules/': 4, 'Docs/': 3, '.codex/scripts/': 3, '.codex/agents/': 1}
+CASE 22 OK        sot:coverage-root-duplicated - rc=1, FAIL the 覆盖面 table is readable and names each root once — rows=8 roots=['.codex/', '.codex/agents/', '.codex/context/', '.codex/rules/', '.codex/scripts/', 'AGENTS.md', 'Docs/']
+CASE 23 OK        sot:index-restates-authority - rc=1, FAIL the index restates no authority body (>= 60-char run) — measured_hits=1 sample=[('.codex/rules/android.md', '#Android栈与Java-onlyguard读取时机：android分析、修改或复核前。仅加载本任务命中的规则；正文')]
+CASE 24 OK        sot:placeholder-in-index - rc=1, FAIL the index carries no placeholder tokens — hits=['TBD']
+SELFTEST cases=24 ok=24 mismatch=0 harness_errors=0 skipped=0
+OVERALL: PASS
+EXITCODE=0
+
+### 末态整轮（capture=run275-selftest-full.txt）的模式行与汇总
+Mode: full (268 injected-violation cases + 14 baselines)
+SELFTEST cases=268 ok=268 mismatch=0 harness_errors=0 skipped=0
+OVERALL: PASS
+EXITCODE=0
+
+### 14 条基线逐字（本片把 `check_source_of_truth` 升为第 14 条）
+BASELINE OK check_intent_capturer_agent rc=0
+BASELINE OK check_roadmap_and_routing rc=0
+BASELINE OK check_intent_template rc=0
+BASELINE OK check_spec_author_agent rc=0
+BASELINE OK check_code_reviewer_agent rc=0
+BASELINE OK check_context_pack rc=0
+BASELINE OK check_codebase_researcher_agent rc=0
+BASELINE OK check_code_simplifier_agent rc=0
+BASELINE OK run_evals rc=0
+BASELINE OK check_eval_keeper_agent rc=0
+BASELINE OK metrics_report rc=0
+BASELINE OK check_metrics_reporter_agent rc=0
+BASELINE OK check_loop_watcher_agent rc=0
+BASELINE OK check_source_of_truth rc=0
+
+### 第一次整轮（capture=run263-selftest-full.txt）红在 `metrics_report` 基线——报告过期不是判据红，下面贴它的差量三元组
+BASELINE FAIL metrics_report rc=1
+EXITCODE=1
+OVERALL: INCONCLUSIVE
+EXITCODE=3
+---
+ew=14;evals=14;spec=4;context=3;replay=2;template=2', 'reporter=35;watch=35;keeper=29;intent=26;simplify=24;sot=24;research=19;metrics=19;roadmap=18;review=14;evals=14;spec=4;context=3;replay=2;template=2'], ['guard-roster-by-tier', 'entries=39;core=33;precommit=6', 'entries=40;core=34;precommit=6'], ['baseline-checkers', '13', '14']]
+
+================================================================================================================================================================
+块 03 — 两档整跑与快门禁
+================================================================================================================================================================
+### python -X utf8 .codex/scripts/run_all_guards.py --tier core（capture=run278-tiers-core.txt）的总读数与本片的注册行
+RUN-ALL-GUARDS tier=core selected=34/40 subset=no
+PASS         validate_tasks                         rc=0 0.4s
+PASS         check_source_of_truth                  rc=0 0.4s
+             > check_source_of_truth: 0 check(s) failed
+RUN-ALL-GUARDS pass=34 fail=0 inconclusive=0 fault=0
+VERDICT: PASS (all 34 selected guard(s) printed a judgement line and returned green)
+
+### python -X utf8 .codex/scripts/run_all_guards.py --tier precommit（capture=run279-tiers-precommit.txt）的总读数
+RUN-ALL-GUARDS tier=precommit selected=6/40 subset=no
+RUN-ALL-GUARDS pass=6 fail=0 inconclusive=0 fault=0
+VERDICT: PASS (all 6 selected guard(s) printed a judgement line and returned green)
+
+### 第一次 core 档那一轮红在 `cdp_shot_selftest`（capture=run276-tiers-core.txt）。单独重跑同一条命令（capture=run277-cdp-alone.txt）打 `SELFTEST PASS cases=17 failures=0`，红的那条是 `--scale 1` 的负控在 241 秒的 `verify_1to1_selftest` 之后抢不到浏览器时序——按 C2 角色的口径这是「上一片刚注册的回路过紧」，不是本片的产物变差，所以处置是串行重收而不是改超时
+RUN-ALL-GUARDS tier=core selected=34/40 subset=no
+RUN-ALL-GUARDS pass=33 fail=1 inconclusive=0 fault=0
+VERDICT: FAIL (1 guard(s) red or silent)
+---
+FAIL         cdp_shot_selftest                      rc=1 120.3s
+             > SELFTEST FAIL cases=17 failures=1
+---
+EXITCODE=0
+EXITCODE=0
+EXITCODE=2
+EXITCODE=2
+EXITCODE=2
+EXITCODE=2
+EXITCODE=3
+EXITCODE=3
+EXITCODE=3
+EXITCODE=3
+EXITCODE=3
+EXITCODE=3
+EXITCODE=3
+EXITCODE=1
+EXITCODE=1
+EXITCODE=1
+EXITCODE=3
+SELFTEST PASS cases=17 failures=0
+EXITCODE=0
+
+### python -X utf8 .codex/scripts/validate_tasks.py（capture=run283-postcard.txt）与当场重跑
+WARNING T-2026-10-20-loop-watcher-role-033.md: estimated production lines 214 exceeds soft limit 200
+PASS T-2026-10-20-loop-watcher-role-033.md
+WARNING T-2026-10-20-source-of-truth-inventory-034.md: estimated production lines 261 exceeds soft limit 200
+PASS T-2026-10-20-source-of-truth-inventory-034.md
+SUMMARY files=29 errors=0 warnings=7
+--- 当场重跑
+WARNING T-2026-10-20-loop-watcher-role-033.md: estimated production lines 214 exceeds soft limit 200
+PASS T-2026-10-20-loop-watcher-role-033.md
+WARNING T-2026-10-20-source-of-truth-inventory-034.md: estimated production lines 261 exceeds soft limit 200
+PASS T-2026-10-20-source-of-truth-inventory-034.md
+SUMMARY files=29 errors=0 warnings=7
+
+### python -X utf8 .codex/scripts/check_roadmap_and_routing.py（当场重跑，只读）
+OK   file exists: .codex/ROADMAP.md
+OK   file exists: AGENTS.md
+OK   file exists: .codex/README.md
+OK   phase section exists: Phase A（已完成）
+OK   phase section exists: Phase B（下一批）
+OK   phase section exists: Phase C（依赖外部条件）
+OK   Phase B（下一批） has >= 7 entries — measured=7
+OK   Phase B（下一批） every entry carries all 8 field names — measured_entries=7 problems=[]
+OK   Phase B（下一批） every 执行提示词 is >= 40 chars — measured_short=[]
+OK   Phase B（下一批） every path inside 执行提示词 exists — measured_dead=[]
+OK   Phase B（下一批） every 开源来源 cites github.com or a skills path — measured_weak=[]
+OK   Phase C（依赖外部条件） has >= 3 entries — measured=3
+OK   Phase C（依赖外部条件） every entry carries all 8 field names — measured_entries=3 problems=[]
+OK   Phase C（依赖外部条件） every 执行提示词 is >= 40 chars — measured_short=[]
+OK   Phase C（依赖外部条件） every path inside 执行提示词 exists — measured_dead=[]
+OK   Phase C（依赖外部条件） every 开源来源 cites github.com or a skills path — measured_weak=[]
+OK   Phase B covers the seven planned capabilities — missing=[]
+OK   Phase C covers the three planned capabilities — missing=[]
+OK   no placeholder tokens in ROADMAP — measured=[]
+OK   AGENTS.md routing table currently has >= 12 linked rows — measured=20
+OK   current routing rows cover all four triggers — measured_rows=20 missing=[]
+OK   every current routing-row target exists — measured_targets=23 dead=[]
+OK   git diff AGENTS.md is readable — stderr=warning: in the working copy of 'AGENTS.md', LF will be replaced by CRLF the next time Git touches it
+NOTE AGENTS.md migration diff is authorized; current-state routing rows are authoritative — base=bf0b2bf911b8 window=uncommitted-only
+OK   HEAD revision of AGENTS.md is readable — stderr=
+NOTE routing-row increment is printed, not judged — base=bf0b2bf911b8 window=uncommitted-only added_rows=1 added_missing_triggers=['intent-capturer', 'pm-discovery', 'project-brief', 'ROADMAP'] added_dead_targets=[]
+OK   .codex/README.md has a 目录结构 section
+OK   registered-entry list is not drained below its floor — entries=6 floor=4
+OK   目录结构 section lists every registered entry — missing=[]
+
+check_roadmap_and_routing: 0 check(s) failed
+EXITCODE=0
+
+### 卡片正文在 run283 之后又改过四处，这一段是改完之后重跑的六条只读判据（capture=run285-postcard-recheck.txt）——卡片文字唯一的读者是 validate_tasks，拿改之前的整跑充数就是片 033 那个角色登记过的动作
+===== python -X utf8 .codex/scripts/validate_tasks.py
+PASS T-2026-10-18-android-chat-stage-determinism-018.md
+PASS T-2026-10-18-android-nav-untitled-branch-016.md
+PASS T-2026-10-18-android-phone-usability-requirement-017.md
+PASS T-2026-10-18-process-asset-copy-002.md
+PASS T-2026-10-18-process-validation-004.md
+PASS T-2026-10-18-treelearn-process-migration-001.md
+PASS T-2026-10-18-web-copy-table-and-device-time-013.md
+PASS T-2026-10-18-web-dependency-direction-guard-014.md
+PASS T-2026-10-18-web-frontend-skeleton-build-entry-011.md
+PASS T-2026-10-18-web-h5-android-parity-requirement-005.md
+WARNING T-2026-10-18-web-parity-fixture-capture-instrument-019.md: estimated production lines 775 exceeds soft limit 200
+PASS T-2026-10-18-web-parity-fixture-capture-instrument-019.md
+WARNING T-2026-10-18-web-render-wiring-walk-instrument-020.md: estimated production lines 1576 exceeds soft limit 200
+PASS T-2026-10-18-web-render-wiring-walk-instrument-020.md
+PASS T-2026-10-18-web-runtime-port-fixture-adapter-012.md
+PASS T-2026-10-18-web-stack-adaptation-003.md
+WARNING T-2026-10-18-web-user-copy-guard-and-verify-entry-015.md: estimated production lines 245 exceeds soft limit 200
+PASS T-2026-10-18-web-user-copy-guard-and-verify-entry-015.md
+PASS T-2026-10-19-androidtest-derived-schema-version-022.md
+PASS T-2026-10-19-code-reviewer-role-and-review-template-024.md
+PASS T-2026-10-19-code-simplifier-role-027.md
+PASS T-2026-10-19-codebase-researcher-impact-role-026.md
+PASS T-2026-10-19-eval-keeper-baseline-role-029.md
+PASS T-2026-10-19-evals-inventory-and-runner-028.md
+WARNING T-2026-10-19-guard-runner-one-command-roster-023.md: estimated production lines 332 exceeds soft limit 200
+PASS T-2026-10-19-guard-runner-one-command-roster-023.md
+PASS T-2026-10-19-harness-guard-judgements-d4-d6-021.md
+WARNING T-2026-10-19-metrics-report-generator-030.md: estimated production lines 317 exceeds soft limit 200
+PASS T-2026-10-19-metrics-report-generator-030.md
+PASS T-2026-10-19-metrics-reporter-role-031.md
+PASS T-2026-10-19-project-brief-dir-state-guard-025.md
+PASS T-2026-10-19-spec-author-technical-section-032.md
+WARNING T-2026-10-20-loop-watcher-role-033.md: estimated production lines 214 exceeds soft limit 200
+PASS T-2026-10-20-loop-watcher-role-033.md
+WARNING T-2026-10-20-source-of-truth-inventory-034.md: estimated production lines 261 exceeds soft limit 200
+PASS T-2026-10-20-source-of-truth-inventory-034.md
+SUMMARY files=29 errors=0 warnings=7
+EXITCODE=0
+===== python -X utf8 .codex/scripts/metrics_report.py
+OK   every metric source is present — missing=[]
+OK   metric families derive from the ROADMAP B6 goal sentence — derived=4 floor=4 families=['交付节奏', '退回次数', '守门命中分布', '失败案例库增量']
+OK   registered metric list is not drained below its floor — registered=12 floor=8
+OK   the report landing directory exists — dir=artifacts/metrics/
+OK   metrics report file exists — path=artifacts/metrics/report.md
+OK   the report holds exactly one line per registered metric — lines=12 duplicated=[] hand_added=[] missing_from_report=[]
+OK   every metric line carries exactly the six required fields — bad=[]
+OK   every metric line declares one unit, never two — duplicated_fields=[]
+OK   every family required by the roadmap appears in the report — required=4 missing=[]
+OK   every metric line names a command — blank=[]
+OK   enough metric lines are declared machine-recheckable — measured=9 floor=6
+OK   each line declares the recheck class its registry entry really has — disagree=[]
+OK   history readings are read from a real git command — not_git=[]
+OK   every line prints the command the generator would print — wrong=[]
+OK   every metric produces a reading when re-run — unreadable=[]
+OK   each machine-recheckable reading is produced by running the command on its own line — checked=9 mismatch=[]
+OK   report header names the command that writes it — needle=python -X utf8 .codex/scripts/metrics_report.py --write present=True
+OK   no metric reading is left as a placeholder — hits=[] scanned=readings+header
+
+check_metrics_report: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+===== python -X utf8 .codex/scripts/check_source_of_truth.py
+OK   inventory exists — path=.codex/context/source-of-truth.md
+OK   the L0 entry that must route here exists — path=.codex/context/project-brief.md
+OK   the current-state scan surface holds >= 40 files — measured=67 floor=40
+OK   the inventory declares its field names in a FIELDS marker — found=True
+OK   inventory has >= 12 fact entries — measured=16 floor=12
+OK   every fact id is declared once — entries=16 duplicated=[]
+OK   every entry declares each field exactly once, with a known 类型 — fields=['类型', '唯一权威', '更新时机', '漂移检查', '锚点', '归属标记'] malformed=[]
+OK   every entry names exactly one authority, and the index is never its own authority — measured=16 bad=[]
+OK   every authority path exists and the cited line is inside it — dead=[]
+OK   no authority is a historical record — hit=[]
+OK   every anchor is a bounded, compilable pattern that fires on the cited authority line — bad=[]
+OK   every entry states an update trigger of >= 8 chars — bad=[]
+OK   every drift check is a runnable command, and generated counts are owned by a script with a bare floor — bad=[]
+OK   no entry was dropped by the per-entry checks — entries=16 usable=16 dropped=0 bad_kinds={'声明型': 14, '生成型': 2}
+OK   at least 2 entries are generated-count facts — measured=2 floor=2 kinds={'声明型': 14, '生成型': 2}
+OK   no fact is defined a second time without an attribution pointer — scanned_files=67 unattributed=0 hits=[]
+OK   no generated count is written into prose anywhere on the scan surface — measured=0 hits=[]
+OK   the 覆盖面 table is readable and names each root once — rows=7 roots=['.codex/', '.codex/agents/', '.codex/context/', '.codex/rules/', '.codex/scripts/', 'AGENTS.md', 'Docs/']
+OK   the 覆盖面 counts equal the recomputed per-root entry counts — declared={'.codex/': 2, '.codex/agents/': 1, '.codex/context/': 2, '.codex/rules/': 4, '.codex/scripts/': 3, 'AGENTS.md': 1, 'Docs/': 3} measured={'.codex/': 2, 'AGENTS.md': 1, '.codex/context/': 2, '.codex/rules/': 4, 'Docs/': 3, '.codex/scripts/': 3, '.codex/agents/': 1}
+OK   the index restates no authority body (>= 60-char run) — measured_hits=0 sample=[]
+OK   the index carries no placeholder tokens — hits=[]
+scanned_files=67 entries=16 kinds={'声明型': 14, '生成型': 2} authority_files=15
+
+check_source_of_truth: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+===== python -X utf8 .codex/scripts/check_roadmap_and_routing.py
+OK   file exists: .codex/ROADMAP.md
+OK   file exists: AGENTS.md
+OK   file exists: .codex/README.md
+OK   phase section exists: Phase A（已完成）
+OK   phase section exists: Phase B（下一批）
+OK   phase section exists: Phase C（依赖外部条件）
+OK   Phase B（下一批） has >= 7 entries — measured=7
+OK   Phase B（下一批） every entry carries all 8 field names — measured_entries=7 problems=[]
+OK   Phase B（下一批） every 执行提示词 is >= 40 chars — measured_short=[]
+OK   Phase B（下一批） every path inside 执行提示词 exists — measured_dead=[]
+OK   Phase B（下一批） every 开源来源 cites github.com or a skills path — measured_weak=[]
+OK   Phase C（依赖外部条件） has >= 3 entries — measured=3
+OK   Phase C（依赖外部条件） every entry carries all 8 field names — measured_entries=3 problems=[]
+OK   Phase C（依赖外部条件） every 执行提示词 is >= 40 chars — measured_short=[]
+OK   Phase C（依赖外部条件） every path inside 执行提示词 exists — measured_dead=[]
+OK   Phase C（依赖外部条件） every 开源来源 cites github.com or a skills path — measured_weak=[]
+OK   Phase B covers the seven planned capabilities — missing=[]
+OK   Phase C covers the three planned capabilities — missing=[]
+OK   no placeholder tokens in ROADMAP — measured=[]
+OK   AGENTS.md routing table currently has >= 12 linked rows — measured=20
+OK   current routing rows cover all four triggers — measured_rows=20 missing=[]
+OK   every current routing-row target exists — measured_targets=23 dead=[]
+OK   git diff AGENTS.md is readable — stderr=warning: in the working copy of 'AGENTS.md', LF will be replaced by CRLF the next time Git touches it
+NOTE AGENTS.md migration diff is authorized; current-state routing rows are authoritative — base=bf0b2bf911b8 window=uncommitted-only
+OK   HEAD revision of AGENTS.md is readable — stderr=
+NOTE routing-row increment is printed, not judged — base=bf0b2bf911b8 window=uncommitted-only added_rows=1 added_missing_triggers=['intent-capturer', 'pm-discovery', 'project-brief', 'ROADMAP'] added_dead_targets=[]
+OK   .codex/README.md has a 目录结构 section
+OK   registered-entry list is not drained below its floor — entries=6 floor=4
+OK   目录结构 section lists every registered entry — missing=[]
+
+check_roadmap_and_routing: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+===== python -X utf8 .codex/scripts/check_context_pack.py
+OK   file exists: .codex/context/project-brief.md
+OK   file exists: .codex/context/domain-glossary.md
+OK   brief is one page (non-empty, non-header lines <= 60) — measured=47
+OK   brief has the six required sections — measured=6; missing=[]
+OK   docs index is a valid curated subset of the real Docs/ file set — listed=21 actual=60 missing=[] unlisted=['Docs/04-ux-design/parity/screen-inventory.json', 'Docs/04-ux-design/知芽-Figma新稿迁移方案-V1.0.md', 'Docs/04-ux-design/知芽-TreeLearn-对话页1比1复刻方案-V1.0.md', 'Docs/04-ux-design/知芽-TreeLearn-对话页文本高亮与批注方案-V1.0.md', 'Docs/04-ux-design/知芽-TreeLearn-设置入口与按钮反馈更新-2026-10-09.md', 'Docs/04-ux-design/知芽-TreeLearn-设置页重设计-交互稿-V1.0.html', 'Docs/04-ux-design/知芽-TreeLearn-设置页重设计方案-V1.0.md', 'Docs/04-ux-design/知芽-TreeLearn-高亮批注交互Demo-V1.1.html', 'Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.1.html', 'Docs/04-ux-design/知芽-对话页动作行与附件批注处理方案-V1.0.md', 'Docs/04-ux-design/知芽（TreeLearn）对话页视觉重做规格_V1.0.md', 'Docs/04a-ux-cross-review/RikkaHub交互基准笔记.md']
+OK   every indexed path exists — dead=[]
+OK   brief cites >= 2 top-level dirs — measured=2 floor=2 cited=['backend', 'frontend']
+OK   no dir is claimed `尚未创建` while present on disk — claimed_absent=['backend'] stale=[] cited=['backend', 'frontend']
+OK   every other cited dir exists on disk — dead=[] cited=['backend', 'frontend']
+OK   glossary has >= 12 terms — measured=15
+OK   every glossary term cites a real path — measured_terms=15 dead_sources=[]
+OK   brief shares no 80-char run with Docs/ — measured_hits=0 sample=[]
+OK   no placeholder tokens — measured={}
+
+check_context_pack: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+===== python -X utf8 artifacts/tmp/b031-dup-scan.py
+driver=artifacts/tmp/b031-dup-scan.py
+assertion: 正文里不许出现紧邻重复 8-24 字且含 >= 6 个汉字的子串
+scanned_files=146 scanned_lines=20094
+raw_hits=166 cjk_prose_hits=0 non_prose_hits=166
+known_old_dup hits=0 floor=0
+positive_control fired=True unit='第 10 条基线所在元组；' (an unarmed detector is not a judgement)
+DUP-SCAN problems=0
+VERDICT: PASS
+EXITCODE=0
+
+================================================================================================================================================================
+块 04 — `文件:行` 活指针复算（drivers=b034-cite-probe.py / b034-pointer-fix.py / b034-pointer-fix2.py / b034-cite-scan.py）
+================================================================================================================================================================
+### 目标集怎么来的不是拍脑袋：`b034-cite-probe.py` 把 `git diff --name-only HEAD` 与被全仓 `.md` 按 `文件:行` 引用过的文件求交（capture=run266-cite-probe.txt 的 `== ` 行）
+== .codex/HARNESS.md  cited_sites=17
+== .codex/README.md  cited_sites=8
+== .codex/ROADMAP.md  cited_sites=13
+== .codex/context/project-brief.md  cited_sites=1
+== .codex/scripts/dev/checkers_selftest.py  cited_sites=24
+== .codex/scripts/run_all_guards.py  cited_sites=37
+== AGENTS.md  cited_sites=4
+== Docs/04-ux-design/design-system/README.md  cited_sites=1
+== Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md  cited_sites=2
+== android/README.md  cited_sites=1
+== artifacts/metrics/report.md  cited_sites=1
+
+### 脚本面干跑（capture=run267-pointers-dry.txt）：`SKIP` 两条历史引文 + 映射逐条 + `REVIEW needed=0`
+SKIP .codex/tasks/T-2026-10-20-loop-watcher-role-033.md:141 checkers_selftest.py:78-80 — quoted string reverse-searched by slice 033, not a live pointer
+SKIP .codex/tasks/T-2026-10-20-loop-watcher-role-033.md:313 checkers_selftest.py:78-80 — records slice 033's own needle rename 78-80 -> 82-84; rewriting it would falsify history
+VERDICT: DRY RUN (pass --apply to write)
+
+### 脚本面 `--apply` 那轮逐字（capture=run268-pointer-fix.txt）
+.codex/scripts/dev/checkers_selftest.py: HEAD lines=1240 now lines=1342
+.codex/scripts/run_all_guards.py: HEAD lines=408 now lines=410
+
+==== 故意不按映射搬的声称（历史引文，不是活指针）
+SKIP .codex/tasks/T-2026-10-20-loop-watcher-role-033.md:141 checkers_selftest.py:78-80 — quoted string reverse-searched by slice 033, not a live pointer
+SKIP .codex/tasks/T-2026-10-20-loop-watcher-role-033.md:313 checkers_selftest.py:78-80 — records slice 033's own needle rename 78-80 -> 82-84; rewriting it would falsify history
+
+==== 每条声称区间的映射（旧块与新块逐行比对；不一致就试锚点候选，仍不一致标 REVIEW）
+
+checkers_selftest.py [MOVED/diff-map(subseq,就地改=[('RUN_METRICS, CHECK_REPORTER, CHECK_WATCH', 'RUN_METRICS, CHECK_REPORTER, CHECK_WATCH')])] :44-84 -> :44-89  sites=1
+   old_first='CODE_REVIEWER_MD = ".codex/agents/code-reviewer.md"'
+   new_first='CODE_REVIEWER_MD = ".codex/agents/code-reviewer.md"'
+   old_last ='RUN_METRICS, CHECK_REPORTER, CHECK_WATCH)'
+   new_last ='RUN_METRICS, CHECK_REPORTER, CHECK_WATCH, CHECK_SOT)'
+
+checkers_selftest.py [SAME/diff-map] :55-58 -> :55-58  sites=1
+   old_first='CODE_SIMPLIFIER_MD = ".codex/agents/code-simplifier.md"'
+   new_first='CODE_SIMPLIFIER_MD = ".codex/agents/code-simplifier.md"'
+   old_last ='CHECK_SIMPLIFY = ".codex/scripts/check_code_simplifier_a'
+   new_last ='CHECK_SIMPLIFY = ".codex/scripts/check_code_simplifier_a'
+
+checkers_selftest.py [SAME/diff-map] :57-57 -> :57-57  sites=1
+   old_first='MAINTAINABILITY_RULE = ".codex/rules/maintainability.md"'
+   new_first='MAINTAINABILITY_RULE = ".codex/rules/maintainability.md"'
+   old_last ='MAINTAINABILITY_RULE = ".codex/rules/maintainability.md"'
+   new_last ='MAINTAINABILITY_RULE = ".codex/rules/maintainability.md"'
+
+checkers_selftest.py [SAME/diff-map] :59-64 -> :59-64  sites=1
+   old_first='RUN_EVALS = ".codex/scripts/run_evals.py"'
+   new_first='RUN_EVALS = ".codex/scripts/run_evals.py"'
+   old_last ='EVALS_README_DOC = ".codex/evals/README.md"'
+   new_last ='EVALS_README_DOC = ".codex/evals/README.md"'
+
+checkers_selftest.py [SAME/diff-map] :64-67 -> :64-67  sites=1
+   old_first='EVALS_README_DOC = ".codex/evals/README.md"'
+   new_first='EVALS_README_DOC = ".codex/evals/README.md"'
+   old_last ='CHECK_KEEPER = ".codex/scripts/check_eval_keeper_agent.p'
+   new_last ='CHECK_KEEPER = ".codex/scripts/check_eval_keeper_agent.p'
+
+checkers_selftest.py [SAME/diff-map] :68-71 -> :68-71  sites=2
+   old_first='RUN_METRICS = ".codex/scripts/metrics_report.py"'
+   new_first='RUN_METRICS = ".codex/scripts/metrics_report.py"'
+   old_last ='METRICS_REPORT = "artifacts/metrics/report.md"'
+   new_last ='METRICS_REPORT = "artifacts/metrics/report.md"'
+
+checkers_selftest.py [SAME/diff-map] :71-71 -> :71-71  sites=1
+   old_first='METRICS_REPORT = "artifacts/metrics/report.md"'
+   new_first='METRICS_REPORT = "artifacts/metrics/report.md"'
+   old_last ='METRICS_REPORT = "artifacts/metrics/report.md"'
+   new_last ='METRICS_REPORT = "artifacts/metrics/report.md"'
+
+checkers_selftest.py [SAME/diff-map] :72-75 -> :72-75  sites=1
+   old_first='METRICS_REPORTER_MD = ".codex/agents/metrics-reporter.md'
+   new_first='METRICS_REPORTER_MD = ".codex/agents/metrics-reporter.md'
+   old_last ='RUN_ROSTER = ".codex/scripts/run_all_guards.py"'
+   new_last ='RUN_ROSTER = ".codex/scripts/run_all_guards.py"'
+
+checkers_selftest.py [SAME/diff-map] :74-75 -> :74-75  sites=1
+   old_first='CHECK_REPORTER = ".codex/scripts/check_metrics_reporter_'
+   new_first='CHECK_REPORTER = ".codex/scripts/check_metrics_reporter_'
+   old_last ='RUN_ROSTER = ".codex/scripts/run_all_guards.py"'
+   new_last ='RUN_ROSTER = ".codex/scripts/run_all_guards.py"'
+
+checkers_selftest.py [SAME/diff-map] :79-79 -> :79-79  sites=1
+   old_first='CHECK_WATCH = ".codex/scripts/check_loop_watcher_agent.p'
+   new_first='CHECK_WATCH = ".codex/scripts/check_loop_watcher_agent.p'
+   old_last ='CHECK_WATCH = ".codex/scripts/check_loop_watcher_agent.p'
+   new_last ='CHECK_WATCH = ".codex/scripts/check_loop_watcher_agent.p'
+
+checkers_selftest.py [MOVED/diff-map(subseq,就地改=[('RUN_METRICS, CHECK_REPORTER, CHECK_WATCH', 'RUN_METRICS, CHECK_REPORTER, CHECK_WATCH')])] :82-84 -> :87-89  sites=9
+   old_first='BASELINES = (CHECK_INTENT, CHECK_ROADMAP, CHECK_TEMPLATE'
+   new_first='BASELINES = (CHECK_INTENT, CHECK_ROADMAP, CHECK_TEMPLATE'
+   old_last ='RUN_METRICS, CHECK_REPORTER, CHECK_WATCH)'
+   new_last ='RUN_METRICS, CHECK_REPORTER, CHECK_WATCH, CHECK_SOT)'
+
+checkers_selftest.py [MOVED/diff-map] :102-104 -> :107-109  sites=1
+   old_first='SAMPLE_SPEC_LONG = ("long", PM_SKILL, 89, "fire60")     '
+   new_first='SAMPLE_SPEC_LONG = ("long", PM_SKILL, 89, "fire60")     '
+   old_last ='SAMPLE_SPEC_TRIM = ("trim", PM_SKILL, 44, "quiet60")    '
+   new_last ='SAMPLE_SPEC_TRIM = ("trim", PM_SKILL, 44, "quiet60")    '
+
+checkers_selftest.py [MOVED/diff-map] :102-117 -> :107-122  sites=1
+   old_first='SAMPLE_SPEC_LONG = ("long", PM_SKILL, 89, "fire60")     '
+   new_first='SAMPLE_SPEC_LONG = ("long", PM_SKILL, 89, "fire60")     '
+   old_last ='SAMPLE_SPEC_METRICS_SRC = ("metricsSource60", RUN_METRIC'
+   new_last ='SAMPLE_SPEC_METRICS_SRC = ("metricsSource60", RUN_METRIC'
+
+run_all_guards.py [SAME/diff-map] :1-24 -> :1-24  sites=1
+   old_first='#!/usr/bin/env python3'
+   new_first='#!/usr/bin/env python3'
+   old_last ='"""'
+   new_last ='"""'
+
+run_all_guards.py [SAME/diff-map] :40-40 -> :40-40  sites=1
+   old_first='MIN_ROSTER = 20'
+   new_first='MIN_ROSTER = 20'
+   old_last ='MIN_ROSTER = 20'
+   new_last ='MIN_ROSTER = 20'
+
+run_all_guards.py [SAME/diff-map] :42-42 -> :42-42  sites=1
+   old_first='DEFAULT_TIMEOUT = 300'
+   new_first='DEFAULT_TIMEOUT = 300'
+   old_last ='DEFAULT_TIMEOUT = 300'
+   new_last ='DEFAULT_TIMEOUT = 300'
+
+run_all_guards.py [SAME/diff-map] :60-60 -> :60-60  sites=1
+   old_first='fail_codes=(1,), timeout=DEFAULT_TIMEOUT, rc_labels=None'
+   new_first='fail_codes=(1,), timeout=DEFAULT_TIMEOUT, rc_labels=None'
+   old_last ='fail_codes=(1,), timeout=DEFAULT_TIMEOUT, rc_labels=None'
+   new_last ='fail_codes=(1,), timeout=DEFAULT_TIMEOUT, rc_labels=None'
+
+run_all_guards.py [MOVED/diff-map(subseq,就地改=[])] :81-159 -> :81-161  sites=1
+   old_first='GUARDS = ['
+   new_first='GUARDS = ['
+   old_last ='E("sync_fixtures --selftest", NODE, ["frontend/scripts/s'
+   new_last ='E("sync_fixtures --selftest", NODE, ["frontend/scripts/s'
+
+run_all_guards.py [MOVED/diff-map(subseq,就地改=[])] :81-176 -> :81-178  sites=1
+   old_first='GUARDS = ['
+   new_first='GUARDS = ['
+   old_last =']'
+   new_last =']'
+
+run_all_guards.py [SAME/diff-map] :87-88 -> :87-88  sites=2
+   old_first='E("check_code_reviewer_agent", PY, [".codex/scripts/chec'
+   new_first='E("check_code_reviewer_agent", PY, [".codex/scripts/chec'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [SAME/diff-map] :89-90 -> :89-90  sites=1
+   old_first='E("check_codebase_researcher_agent", PY,'
+   new_first='E("check_codebase_researcher_agent", PY,'
+   old_last ='[".codex/scripts/check_codebase_researcher_agent.py"],'
+   new_last ='[".codex/scripts/check_codebase_researcher_agent.py"],'
+
+run_all_guards.py [SAME/diff-map] :89-91 -> :89-91  sites=3
+   old_first='E("check_codebase_researcher_agent", PY,'
+   new_first='E("check_codebase_researcher_agent", PY,'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [SAME/diff-map] :92-94 -> :92-94  sites=3
+   old_first='E("check_code_simplifier_agent", PY,'
+   new_first='E("check_code_simplifier_agent", PY,'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [SAME/diff-map] :95-96 -> :95-96  sites=1
+   old_first='E("check_loop_watcher_agent", PY,'
+   new_first='E("check_loop_watcher_agent", PY,'
+   old_last ='[".codex/scripts/check_loop_watcher_agent.py"],'
+   new_last ='[".codex/scripts/check_loop_watcher_agent.py"],'
+
+run_all_guards.py [SAME/anchor+span] :95-97 -> :95-97  sites=3
+   old_first='E("check_loop_watcher_agent", PY,'
+   new_first='E("check_loop_watcher_agent", PY,'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [MOVED/diff-map] :98-99 -> :100-101  sites=3
+   old_first='E("run_evals", PY, [".codex/scripts/run_evals.py"],'
+   new_first='E("run_evals", PY, [".codex/scripts/run_evals.py"],'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [MOVED/diff-map] :100-101 -> :102-103  sites=4
+   old_first='E("check_eval_keeper_agent", PY, [".codex/scripts/check_'
+   new_first='E("check_eval_keeper_agent", PY, [".codex/scripts/check_'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [MOVED/diff-map] :102-103 -> :104-105  sites=4
+   old_first='E("metrics_report", PY, [".codex/scripts/metrics_report.'
+   new_first='E("metrics_report", PY, [".codex/scripts/metrics_report.'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [MOVED/diff-map] :104-106 -> :106-108  sites=5
+   old_first='E("check_metrics_reporter_agent", PY,'
+   new_first='E("check_metrics_reporter_agent", PY,'
+   old_last ='[CHECKS_NEEDLE], ["core"]),'
+   new_last ='[CHECKS_NEEDLE], ["core"]),'
+
+run_all_guards.py [MOVED/diff-map] :122-122 -> :124-124  sites=1
+   old_first='E("check_androidtest_schema_expectations", PY,'
+   new_first='E("check_androidtest_schema_expectations", PY,'
+   old_last ='E("check_androidtest_schema_expectations", PY,'
+   new_last ='E("check_androidtest_schema_expectations", PY,'
+
+run_all_guards.py [MOVED/diff-map] :135-135 -> :137-137  sites=1
+   old_first='E("verify_1to1_selftest", NODE, [".codex/scripts/dev/par'
+   new_first='E("verify_1to1_selftest", NODE, [".codex/scripts/dev/par'
+   old_last ='E("verify_1to1_selftest", NODE, [".codex/scripts/dev/par'
+   new_last ='E("verify_1to1_selftest", NODE, [".codex/scripts/dev/par'
+FIX .codex/ROADMAP.md:447 'run_all_guards.py:135' -> 'run_all_guards.py:137'
+FIX .codex/evals/cases/001-impact-inventory/product.md:5 'dev/checkers_selftest.py:82-84' -> 'dev/checkers_selftest.py:87-89'
+FIX .codex/tasks/T-2026-10-19-code-reviewer-role-and-review-template-024.md:120 'dev/checkers_selftest.py:44-84' -> 'dev/checkers_selftest.py:44-89'
+FIX .codex/tasks/T-2026-10-19-code-simplifier-role-027.md:117 'checkers_selftest.py:82-84' -> 'checkers_selftest.py:87-89'
+FIX .codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md:108 'dev/checkers_selftest.py:82-84' -> 'dev/checkers_selftest.py:87-89'
+FIX .codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md:126 'dev/checkers_selftest.py:102-117' -> 'dev/checkers_selftest.py:107-122'
+FIX .codex/tasks/T-2026-10-19-eval-keeper-baseline-role-029.md:40 'run_all_guards.py:100-101' -> 'run_all_guards.py:102-103'
+FIX .codex/tasks/T-2026-10-19-eval-keeper-baseline-role-029.md:116 'run_all_guards.py:100-101' -> 'run_all_guards.py:102-103'
+FIX .codex/tasks/T-2026-10-19-eval-keeper-baseline-role-029.md:116 'checkers_selftest.py:82-84' -> 'checkers_selftest.py:87-89'
+FIX .codex/tasks/T-2026-10-19-eval-keeper-baseline-role-029.md:141 'run_all_guards.py:100-101' -> 'run_all_guards.py:102-103'
+FIX .codex/tasks/T-2026-10-19-eval-keeper-baseline-role-029.md:245 'run_all_guards.py:100-101' -> 'run_all_guards.py:102-103'
+FIX .codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md:40 'run_all_guards.py:98-99' -> 'run_all_guards.py:100-101'
+FIX .codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md:116 'run_all_guards.py:98-99' -> 'run_all_guards.py:100-101'
+FIX .codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md:117 'dev/checkers_selftest.py:82-84' -> 'dev/checkers_selftest.py:87-89'
+FIX .codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md:140 'run_all_guards.py:98-99' -> 'run_all_guards.py:100-101'
+FIX .codex/tasks/T-2026-10-19-guard-runner-one-command-roster-023.md:60 'run_all_guards.py:81-176' -> 'run_all_guards.py:81-178'
+FIX .codex/tasks/T-2026-10-19-harness-guard-judgements-d4-d6-021.md:68 'dev/checkers_selftest.py:102-104' -> 'dev/checkers_selftest.py:107-109'
+FIX .codex/tasks/T-2026-10-19-metrics-report-generator-030.md:42 'run_all_guards.py:102-103' -> 'run_all_guards.py:104-105'
+FIX .codex/tasks/T-2026-10-19-metrics-report-generator-030.md:132 'run_all_guards.py:102-103' -> 'run_all_guards.py:104-105'
+FIX .codex/tasks/T-2026-10-19-metrics-report-generator-030.md:132 'checkers_selftest.py:82-84' -> 'checkers_selftest.py:87-89'
+FIX .codex/tasks/T-2026-10-19-metrics-report-generator-030.md:158 'run_all_guards.py:102-103' -> 'run_all_guards.py:104-105'
+FIX .codex/tasks/T-2026-10-19-metrics-report-generator-030.md:263 'run_all_guards.py:102-103' -> 'run_all_guards.py:104-105'
+FIX .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md:44 'run_all_guards.py:104-106' -> 'run_all_guards.py:106-108'
+FIX .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md:45 'run_all_guards.py:104-106' -> 'run_all_guards.py:106-108'
+FIX .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md:152 'run_all_guards.py:104-106' -> 'run_all_guards.py:106-108'
+FIX .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md:152 'checkers_selftest.py:82-84' -> 'checkers_selftest.py:87-89'
+FIX .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md:190 'run_all_guards.py:104-106' -> 'run_all_guards.py:106-108'
+FIX .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md:218 'run_all_guards.py:81-159' -> 'run_all_guards.py:81-161'
+FIX .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md:282 'checkers_selftest.py:82-84' -> 'checkers_selftest.py:87-89'
+FIX .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md:330 'run_all_guards.py:104-106' -> 'run_all_guards.py:106-108'
+FIX .codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md:103 'dev/checkers_selftest.py:82-84' -> 'dev/checkers_selftest.py:87-89'
+FIX Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:79 'run_all_guards.py:122' -> 'run_all_guards.py:124'
+
+EDITS applied=32
+VERDICT: PASS
+
+### 文档面**第一次**干跑打出的 REVIEW（capture=run269-docs-dry.txt）——`.codex/README.md:32` 被本片就地改写而不是搬走，difflib 给不出内容相符的候选，驱动就拒绝整批写。这是仪器在挡人，不是流程走通了的证据
+MOVED 声称=3 SAME 声称=19
+REVIEW needed=1（候选都对不上内容，先人工看再 --apply）
+   .codex/README.md:32-32 -> 32-32
+
+### 人工核过现文之后的 HAND 轮（capture=run270-docs-dry.txt）：`REVIEW needed=0`、`MOVED 声称=3 SAME 声称=19`
+.codex/README.md [HAND-VERIFIED] :32-32 -> :32-32  sites=6
+MOVED 声称=3 SAME 声称=19
+VERDICT: DRY RUN (pass --apply to write)
+
+### 文档面 `--apply` 那轮逐字（capture=run271-docs-fix.txt）
+ROADMAP.md (.codex/ROADMAP.md): HEAD lines=461 now lines=463
+_TEMPLATE.md (.codex/tasks/_TEMPLATE.md): HEAD lines=132 now lines=132
+HARNESS.md (.codex/HARNESS.md): HEAD lines=27 now lines=28
+AGENTS.md (AGENTS.md): HEAD lines=67 now lines=68
+.codex/README.md (.codex/README.md): HEAD lines=33 now lines=35
+project-brief.md (.codex/context/project-brief.md): HEAD lines=67 now lines=69
+Docs/04-ux-design/design-system/README.md (Docs/04-ux-design/design-system/README.md): HEAD lines=77 now lines=77
+Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md (Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md): HEAD lines=159 now lines=159
+android/README.md (android/README.md): HEAD lines=1363 now lines=1363
+
+==== 声称条目数=22 站点数=49
+
+.codex/README.md [HAND-VERIFIED] :32-32 -> :32-32  sites=6
+     at .codex/tasks/T-2026-10-19-metrics-report-generator-030.md:43
+     at .codex/tasks/T-2026-10-19-metrics-report-generator-030.md:137
+     at .codex/tasks/T-2026-10-19-metrics-report-generator-030.md:159
+     at .codex/tasks/T-2026-10-19-metrics-report-generator-030.md:264
+     at .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md:159
+     at .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md:239
+   理由=行被本片就地改写而非搬走：新 32 行仍逐字登记 `artifacts/metrics/`（读它的判据是 `check_roadmap_and_routing` 的「目录结构 section lists every registered entry」，该守门本片实跑 rc=0），六处声称指的都是这一行的登记事实，所以号段不变。
+
+AGENTS.md [MOVED/diff-map] :62-62 -> :63-63  sites=2
+     at .codex/tasks/T-2026-10-19-code-simplifier-role-027.md:166
+     at .codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md:159
+   old_first='- 项目 agent：`.codex/agents/*.toml`；项目 skill：`.codex/skills/*/SKILL.md`。只加'
+   new_first='- 项目 agent：`.codex/agents/*.toml`；项目 skill：`.codex/skills/*/SKILL.md`。只加'
+   old_last ='- 项目 agent：`.codex/agents/*.toml`；项目 skill：`.codex/skills/*/SKILL.md`。只加'
+   new_last ='- 项目 agent：`.codex/agents/*.toml`；项目 skill：`.codex/skills/*/SKILL.md`。只加'
+
+AGENTS.md [MOVED/diff-map] :65-65 -> :66-66  sites=1
+     at .codex/ROADMAP.md:365
+   old_first='- `.codex/references/` 只保存迁移映射和历史案例，不作为当前产品事实。'
+   new_first='- `.codex/references/` 只保存迁移映射和历史案例，不作为当前产品事实。'
+   old_last ='- `.codex/references/` 只保存迁移映射和历史案例，不作为当前产品事实。'
+   new_last ='- `.codex/references/` 只保存迁移映射和历史案例，不作为当前产品事实。'
+
+project-brief.md [MOVED/diff-map] :61-61 -> :63-63  sites=1
+     at .codex/context/source-of-truth.md:51
+   old_first='## 阅读顺序'
+   new_first='## 阅读顺序'
+   old_last ='## 阅读顺序'
+   new_last ='## 阅读顺序'
+
+MOVED 声称=3 SAME 声称=19
+FIX .codex/ROADMAP.md:365 'AGENTS.md:65' -> 'AGENTS.md:66'
+FIX .codex/context/source-of-truth.md:51 'project-brief.md:61' -> 'project-brief.md:63'
+FIX .codex/tasks/T-2026-10-19-code-simplifier-role-027.md:166 'AGENTS.md:62' -> 'AGENTS.md:63'
+FIX .codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md:159 'AGENTS.md:62' -> 'AGENTS.md:63'
+
+EDITS applied=4
+VERDICT: PASS
+
+### **幂等复跑**（capture=run272-docs-idempotent.txt）：把本片对着现树写下的声称（清单 8 处 + 被上一轮改过行的 12 处）标成 `SKIP-FRESH` 后 `MOVED 声称=0`。这一支的起因是一条真缺陷：第一版文档面驱动把 `source-of-truth.md:51` 里那句本来就照现树写的 `project-brief.md:61` 搬成了 `:63`，守门的「锚点必须在被引那一行开火」当场转红
+SKIP-FRESH .codex/ROADMAP.md:365 AGENTS.md:66 — 该行是本片新写/改写过的
+SKIP-FRESH .codex/context/source-of-truth.md:35 .codex/README.md:3 — 整份文件是本片新写的
+SKIP-FRESH .codex/context/source-of-truth.md:43 AGENTS.md:34 — 整份文件是本片新写的
+SKIP-FRESH .codex/context/source-of-truth.md:51 project-brief.md:61 — 整份文件是本片新写的
+SKIP-FRESH .codex/context/source-of-truth.md:75 Docs/04-ux-design/design-system/README.md:9 — 整份文件是本片新写的
+SKIP-FRESH .codex/context/source-of-truth.md:115 ROADMAP.md:22 — 整份文件是本片新写的
+SKIP-FRESH .codex/context/source-of-truth.md:139 Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md:77 — 整份文件是本片新写的
+SKIP-FRESH .codex/context/source-of-truth.md:147 Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md:77 — 整份文件是本片新写的
+SKIP-FRESH .codex/tasks/T-2026-10-19-code-simplifier-role-027.md:166 AGENTS.md:63 — 该行是本片新写/改写过的
+SKIP-FRESH .codex/tasks/T-2026-10-19-eval-keeper-baseline-role-029.md:141 HARNESS.md:11 — 该行是本片新写/改写过的
+SKIP-FRESH .codex/tasks/T-2026-10-19-eval-keeper-baseline-role-029.md:141 ROADMAP.md:66-67 — 该行是本片新写/改写过的
+SKIP-FRESH .codex/tasks/T-2026-10-19-eval-keeper-baseline-role-029.md:245 HARNESS.md:11 — 该行是本片新写/改写过的
+SKIP-FRESH .codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md:159 AGENTS.md:63 — 该行是本片新写/改写过的
+SKIP-FRESH .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md:44 HARNESS.md:13 — 该行是本片新写/改写过的
+SKIP-FRESH .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md:190 HARNESS.md:13 — 该行是本片新写/改写过的
+SKIP-FRESH .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md:190 ROADMAP.md:108-119 — 该行是本片新写/改写过的
+SKIP-FRESH .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md:330 HARNESS.md:13 — 该行是本片新写/改写过的
+MOVED 声称=0 SAME 声称=12
+VERDICT: DRY RUN (pass --apply to write)
+
+### 全库形状扫描的**改前**那份读数（driver=artifacts/tmp/b034-cite-scan-v1.py，原样归档第一版，capture=run284-cite-scan-v1.txt）——三个误报形状都在这一份里：`lstrip("./")` 吃掉 `.codex/` 前缀、索引不跳 `build-chips/` 让裸文件名歧义、「区间里任意一行空行」当缺陷。下面同时贴被它误报的两条活指针，证明这不是修辞而是仪器在骗人
+scanned_md=177 citations=429
+citations=429 ok=236 missing_path=173 beyond_eof=4 blank_line=16
+VERDICT: READ THE FLAGS ABOVE
+--- 被误报的两条（v1 原样）
+MISSING-PATH .codex/context/source-of-truth.md:35 -> .codex/README.md:3-3
+MISSING-PATH android/README.md:891 -> item_chat_message.xml:148-148
+
+### 全库形状扫描的**改后**末态（capture=run281-cite-scan.txt）：当前态面零形状缺陷才打印 PASS，并把 v1 误报的那两条还原成读数（`OK android/README.md:891 -> …item_chat_message.xml:148`）；历史面（任务卡、`.workbuddy/`）只报计数不判红——它们记录的是当时读数，回填行号等于伪造历史
+scanned_md=176 citations=403
+== face=cur citations=112 ok=111 missing_path=0 beyond_eof=0 landing_blank=0 stackframe=1
+== face=hist citations=291 ok=258 missing_path=23 beyond_eof=3 landing_blank=7 stackframe=0
+citations=403 cur_bad=0 stackframes=1 hist_ok=258 hist_missing=23 hist_beyond=3 hist_blank=7
+VERDICT: PASS (current-state face has no shape defect)
+--- 被误报的那条在改后的解析结果
+OK android/README.md:891 -> android/app/src/main/res/layout/item_chat_message.xml:148-148 | android:text="@string/chat_failed"
+
+### 卡片写出之后再跑一遍同一支形状扫描（capture=run283-postcard.txt 的 cite-scan 段）——新卡片自己也在被扫的历史面里，计数随卡片增长而当前态面仍为零
+VERDICT: PASS
+== face=cur citations=112 ok=111 missing_path=0 beyond_eof=0 landing_blank=0 stackframe=1
+== face=hist citations=324 ok=284 missing_path=27 beyond_eof=6 landing_blank=7 stackframe=0
+citations=436 cur_bad=0 stackframes=1 hist_ok=284 hist_missing=27 hist_beyond=6 hist_blank=7
+VERDICT: PASS (current-state face has no shape defect)
+
+================================================================================================================================================================
+块 05 — 清单第一版就把现有重复指出来：原型扫描的两轮 + 去重踩到的既有判据
+================================================================================================================================================================
+### 原型扫描去重前（capture=run259-scan.txt，driver=b034-scan.py 沿用守门自己的解析与锚点）的逐条 DEF 站点
+scan_files=67
+### Java-only 约束  [声明型]  pattern='^(?=.*(?:Kotlin|\\.kt)).*(?:不写 Kotlin 源码|禁止 Kotlin 源码|do not introduce \\.kt)'  hits=5 bad=5
+   DEF .codex/context/project-brief.md:22 | - Java-only：不写 Kotlin 源码，不加 Kotlin Gradle 插件，不引 `org.jetbrains.kotlin`
+   DEF Docs/05-technical-design/TreeLearn_Harness全量开发交付提示词.md:36 | 1. 纯原生 Android、Java-only、minSdk 28、XML/View、五模块 :app/:core/:data/:ai/:
+   DEF Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md:14 | | 语言约束 | Java-only；禁止 Kotlin 源码、Kotlin Gradle 插件和 `org.jetbrains.kotli
+   DEF Docs/05-technical-design/知芽（TreeLearn）RikkaHub开源方案吸收评估_V0.1.md:15 | 2. **技术栈冲突**：RikkaHub 是 Kotlin + Jetpack Compose + Koin + Room + DataS
+   DEF android/README.md:16 | | 语言 | Java-only（禁止 Kotlin 源码、插件、`org.jetbrains.kotlin`、`-ktx`） |
+### 设计 token 权威链  [声明型]  pattern='^(?=.*:root)(?=.*权威)(?=.*原型)'  hits=5 bad=5
+   DEF .codex/rules/frontend.md:17 | - 权威链固定为：原型 `:root` → `Docs/04-ux-design/design-system/tokens.json` → 
+   DEF .codex/rules/ux-design.md:7 | - 设计系统的**当前态权威**是 `Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html` 的 `:r
+   DEF Docs/spec/SPEC-2026-09-27-android-v11-full-screen-fidelity.md:37 | - 设计 token 只引用项目权威源 `Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html` 的 `
+   DEF Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md:23 | - 来源：`Docs/04-ux-design/design-system/tokens.json`（其权威为高保真原型 `:root` 区
+   DEF Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md:134 | - 来源：`android/app/src/main/**` 屏幕与资源盘点、`android/build.gradle` 的模块方向与纯 
+### 设计 token 个数  [生成型]  pattern='^(?=.*\\d+ 个 )(?=.*(?:token|CSS 变量|tl_))'  hits=3 bad=3
+   DEF Docs/04-ux-design/design-system/README.md:9 | | [`../知芽-TreeLearn-高保真原型-v1.html`](../知芽-TreeLearn-高保真原型-v1.html) 的 `
+   DEF Docs/04-ux-design/design-system/README.md:11 | | [`../../../android/app/src/main/res/values/colors.xml`](../../../and
+   DEF Docs/04-ux-design/design-system/README.md:12 | | `frontend/src/styles/tokens.css` | **生成物**：前端侧全量副本（44 个 CSS 变量），由 `.
+### 单任务生产代码规模口径  [声明型]  pattern='^(?=.*(?:200|两百))(?=.*(?:500|五百|生产代码|production-code))'  hits=15 bad=13
+   DEF .codex/context/project-brief.md:27 | - 规模：单个任务的生产代码目标 200 行；RikkaHub 吸收战役内（T-086～T-105，用户 2026-09-24 两次裁定「可
+   DEF .codex/skills/line-budget/SKILL.md:3 | description: 500 行硬预算检查。用 PowerShell 脚本 git diff --numstat HEAD 统计未提交业
+   DEF .codex/skills/line-budget/SKILL.md:81 | - 仅 200–500 的 WARN 不阻塞提交，但要口头提示。
+   DEF .codex/skills/pm-discovery/SKILL.md:49 | - 能切成单任务不超过 200 行生产代码的垂直切片；切不动说明还没想具体。
+   DEF .codex/skills/pm-discovery/SKILL.md:102 | - **单任务不超过 200 行生产代码**：需求必须能被切成垂直切片，切不动就是还没收敛。
+   DEF Docs/05-technical-design/TreeLearn_Harness全量开发交付提示词.md:56 | 5. 实现中发现任务估算不准时仍遵守单 Task 200 行软预算和 500 行硬上限；必要时先在 .codex/tasks 中做最小、可追
+   DEF Docs/spec/SPEC-2026-09-22-figma-ia-migration.md:108 | - 疑虑 5：**已按证据结案——Vector Drawable 计入生产代码行预算。**（依据：`.codex/scripts/dev/c
+   DEF android/README.md:424 |   超 200 行软上限、也超 500 行硬上限；**没有用户批准的规模例外**，属待裁定偏差，
+   DEF android/README.md:467 |   （`artifacts/evidence/T-011-sizing.txt`），超 200 行软上限、也超 500 行硬上限；
+   DEF android/README.md:727 |   超 200 行软上限、也超 500 行硬上限；**没有用户批准的规模例外**，属待裁定偏差，不得当成已批准例外引用。
+   DEF android/README.md:994 |   911 行 / 5 个文件与对 T-012 既有文件的 +131 行扩展，超 200 行软上限与 500 行硬上限
+   DEF android/README.md:1088 |   超 200 行软上限、也超 500 行硬上限；**没有用户批准的规模例外**，属待裁定偏差，不得当成已批准例外引用。
+   DEF android/README.md:1142 |   `artifacts/evidence/T-052-tab-shell-library.txt` 第 8 节），超 200 行软上限、也
+### 守门档位条数  [生成型]  pattern='^(?=.*(?:core|precommit|合成注册表)).*(?:的 \\d+ 条[。（]|\\d+ 条用例)'  hits=3 bad=3
+   DEF .codex/skills/guard-runner/SKILL.md:23 | - `core`（默认）：只读、确定性、不依赖构建产物或 git 增量的 25 条。任何一片提交前都要整跑。
+   DEF .codex/skills/guard-runner/SKILL.md:24 | - `precommit`：依赖未提交增量、`frontend/dist` 或 Gradle 的 6 条（`line-budget`、`no
+   DEF .codex/skills/guard-runner/SKILL.md:68 | 26 条用例，在合成注册表上逐条注入违规并核对判决（跑的是临时子进程，真实仓库文件一个都不改）：
+### 交付指标报告的落点  [声明型]  pattern='artifacts/metrics/report\\.md'  hits=3 bad=1
+   DEF .codex/ROADMAP.md:113 | - **依赖**：`.codex/tasks/`、`.codex/references/regression-cases.md`（失败案例库
+### backend 仅监听本机环回  [声明型]  pattern='仅监听本机环回地址|仅绑定环回地址'  hits=10 bad=2
+   DEF .codex/rules/observability.md:13 | - 若将来引入**远程**后端服务或远程遥测管道，或本机服务出现多实例与集中日志，本规则全文重新启用，并在同一任务内补齐统一 trace 接
+   DEF .codex/rules/shared-state.md:11 | - 若将来引入**远程**后端、账号或云同步，或本机服务出现多实例、共享介质、跨进程 worker，本规则全文重新启用，并在引入任务中补齐跨
+
+### 原型扫描去重后一轮（capture=run260-scan.txt）的 PTR/DEF 站点
+scan_files=67
+### Java-only 约束  [声明型]  pattern='^(?=.*(?:Kotlin|\\.kt)).*(?:不写 Kotlin 源码|禁止 Kotlin 源码|do not introduce \\.kt)'  hits=5 bad=2
+   DEF Docs/05-technical-design/知芽（TreeLearn）RikkaHub开源方案吸收评估_V0.1.md:15 | 2. **技术栈冲突**：RikkaHub 是 Kotlin + Jetpack Compose + Koin + Room + DataS
+   DEF android/README.md:16 | | 语言 | Java-only（禁止 Kotlin 源码、插件、`org.jetbrains.kotlin`、`-ktx`） |
+### 设计 token 权威链  [声明型]  pattern='^(?=.*:root)(?=.*权威)(?=.*原型)'  hits=5 bad=3
+   DEF Docs/spec/SPEC-2026-09-27-android-v11-full-screen-fidelity.md:37 | - 设计 token 只引用项目权威源 `Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html` 的 `
+   DEF Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md:23 | - 来源：`Docs/04-ux-design/design-system/tokens.json`（其权威为高保真原型 `:root` 区
+   DEF Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md:134 | - 来源：`android/app/src/main/**` 屏幕与资源盘点、`android/build.gradle` 的模块方向与纯 
+### 设计 token 个数  [生成型]  pattern='^(?=.*\\d+ 个 )(?=.*(?:token|CSS 变量|tl_))'  hits=3 bad=3
+   DEF Docs/04-ux-design/design-system/README.md:9 | | [`../知芽-TreeLearn-高保真原型-v1.html`](../知芽-TreeLearn-高保真原型-v1.html) 的 `
+   DEF Docs/04-ux-design/design-system/README.md:11 | | [`../../../android/app/src/main/res/values/colors.xml`](../../../and
+   DEF Docs/04-ux-design/design-system/README.md:12 | | `frontend/src/styles/tokens.css` | **生成物**：前端侧全量副本（44 个 CSS 变量），由 `.
+### 单任务生产代码规模口径  [声明型]  pattern='^(?=.*(?:200|两百))(?=.*(?:500|五百|生产代码|production-code)).*(?:目标|预算|不超过|上限为|at most|sizing target)'  hits=8 bad=4
+   DEF .codex/skills/line-budget/SKILL.md:3 | description: 500 行硬预算检查。用 PowerShell 脚本 git diff --numstat HEAD 统计未提交业
+   DEF .codex/skills/pm-discovery/SKILL.md:49 | - 能切成单任务不超过 200 行生产代码的垂直切片；切不动说明还没想具体。
+   DEF .codex/skills/pm-discovery/SKILL.md:102 | - **单任务不超过 200 行生产代码**：需求必须能被切成垂直切片，切不动就是还没收敛。
+   DEF Docs/spec/SPEC-2026-09-22-figma-ia-migration.md:108 | - 疑虑 5：**已按证据结案——Vector Drawable 计入生产代码行预算。**（依据：`.codex/scripts/dev/c
+### 时间落库单位与时区口径  [声明型]  pattern='^(?=.*(?:CURRENT_TIMESTAMP|epoch milli))(?=.*(?:时区|本地|UTC))'  hits=4 bad=3
+   DEF Docs/05-technical-design/知芽（TreeLearn）Android SQLite 建表入场确认清单_V1.0.md:74 | | `attachments` | 一份已复制入私有目录的文件：内容哈希、显示名、mime、大小、解析状态与解析文本缓存 | 附件存储层（0
+   DEF Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md:152 | 所有表启用外键和事务；时间点使用 UTC epoch millis；ID 使用应用生成 UUID，不使用自增 ID。DDL 只允许位于生产 
+   DEF android/README.md:244 | | `TreeLearnSchema` | 十二张永久表的唯一 DDL 常量源：表名/列名常量、`CREATE_STATEMENTS`、索引
+### 守门档位条数  [生成型]  pattern='^(?=.*(?:core|precommit|合成注册表)).*(?:的 \\d+ 条[。（]|\\d+ 条用例)'  hits=3 bad=3
+   DEF .codex/skills/guard-runner/SKILL.md:23 | - `core`（默认）：只读、确定性、不依赖构建产物或 git 增量的 25 条。任何一片提交前都要整跑。
+   DEF .codex/skills/guard-runner/SKILL.md:24 | - `precommit`：依赖未提交增量、`frontend/dist` 或 Gradle 的 6 条（`line-budget`、`no
+   DEF .codex/skills/guard-runner/SKILL.md:68 | 26 条用例，在合成注册表上逐条注入违规并核对判决（跑的是临时子进程，真实仓库文件一个都不改）：
+### 交付指标报告的落点  [声明型]  pattern='artifacts/metrics/report\\.md'  hits=3 bad=1
+   DEF .codex/ROADMAP.md:113 | - **依赖**：`.codex/tasks/`、`.codex/references/regression-cases.md`（失败案例库
+
+### 本片把 `README.md` 的权威边界那句改成指针之后，**既有**守门 `check_roadmap_and_routing` 的「目录结构 section lists every registered entry」立刻转红（capture=run261-selftest.txt 的 BASELINE FAIL）——去重删掉的不只是重复，还可能是判据唯一的载体；这条红是在没动任何判据的前提下用「恢复被读的登记条目 + 权威边界改成指针」收掉的
+Mode: full (268 injected-violation cases + 14 baselines)
+BASELINE FAIL check_roadmap_and_routing rc=1
+FAIL 目录结构 section lists every registered entry — missing=['Docs/intent/', 'artifacts/metrics/']
+check_roadmap_and_routing: 1 check(s) failed
+EXITCODE=1
+OVERALL: INCONCLUSIVE
+EXITCODE=3
+
+================================================================================================================================================================
+块 06 — 指标面：报告过期如何先红给你看，以及重生成后的读数
+================================================================================================================================================================
+### 设计好的动作是 `--write` 重生成（capture=run264-metrics-refresh.txt）
+WROTE artifacts/metrics/report.md lines=20 metrics=12
+EXITCODE=0
+
+### 卡片在场后的指标面（capture=run283-postcard.txt）
+WROTE artifacts/metrics/report.md lines=20 metrics=12
+EXITCODE=0
+EXITCODE=0
+OK   every metric source is present — missing=[]
+OK   metric families derive from the ROADMAP B6 goal sentence — derived=4 floor=4 families=['交付节奏', '退回次数', '守门命中分布', '失败案例库增量']
+OK   registered metric list is not drained below its floor — registered=12 floor=8
+OK   the report landing directory exists — dir=artifacts/metrics/
+OK   metrics report file exists — path=artifacts/metrics/report.md
+OK   the report holds exactly one line per registered metric — lines=12 duplicated=[] hand_added=[] missing_from_report=[]
+OK   every metric line carries exactly the six required fields — bad=[]
+OK   every metric line declares one unit, never two — duplicated_fields=[]
+OK   every family required by the roadmap appears in the report — required=4 missing=[]
+OK   every metric line names a command — blank=[]
+OK   enough metric lines are declared machine-recheckable — measured=9 floor=6
+OK   each line declares the recheck class its registry entry really has — disagree=[]
+OK   history readings are read from a real git command — not_git=[]
+OK   every line prints the command the generator would print — wrong=[]
+OK   every metric produces a reading when re-run — unreadable=[]
+OK   each machine-recheckable reading is produced by running the command on its own line — checked=9 mismatch=[]
+OK   report header names the command that writes it — needle=python -X utf8 .codex/scripts/metrics_report.py --write present=True
+OK   no metric reading is left as a placeholder — hits=[] scanned=readings+header
+check_metrics_report: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+EXITCODE=0
+OK   inventory exists — path=.codex/context/source-of-truth.md
+OK   the L0 entry that must route here exists — path=.codex/context/project-brief.md
+OK   the current-state scan surface holds >= 40 files — measured=67 floor=40
+OK   the inventory declares its field names in a FIELDS marker — found=True
+OK   inventory has >= 12 fact entries — measured=16 floor=12
+OK   every fact id is declared once — entries=16 duplicated=[]
+OK   every entry declares each field exactly once, with a known 类型 — fields=['类型', '唯一权威', '更新时机', '漂移检查', '锚点', '归属标记'] malformed=[]
+OK   every entry names exactly one authority, and the index is never its own authority — measured=16 bad=[]
+OK   every authority path exists and the cited line is inside it — dead=[]
+OK   no authority is a historical record — hit=[]
+OK   every anchor is a bounded, compilable pattern that fires on the cited authority line — bad=[]
+OK   every entry states an update trigger of >= 8 chars — bad=[]
+OK   every drift check is a runnable command, and generated counts are owned by a script with a bare floor — bad=[]
+OK   no entry was dropped by the per-entry checks — entries=16 usable=16 dropped=0 bad_kinds={'声明型': 14, '生成型': 2}
+OK   at least 2 entries are generated-count facts — measured=2 floor=2 kinds={'声明型': 14, '生成型': 2}
+OK   no fact is defined a second time without an attribution pointer — scanned_files=67 unattributed=0 hits=[]
+OK   no generated count is written into prose anywhere on the scan surface — measured=0 hits=[]
+OK   the 覆盖面 table is readable and names each root once — rows=7 roots=['.codex/', '.codex/agents/', '.codex/context/', '.codex/rules/', '.codex/scripts/', 'AGENTS.md', 'Docs/']
+OK   the 覆盖面 counts equal the recomputed per-root entry counts — declared={'.codex/': 2, '.codex/agents/': 1, '.codex/context/': 2, '.codex/rules/': 4, '.codex/scripts/': 3, 'AGENTS.md': 1, 'Docs/': 3} measured={'.codex/': 2, 'AGENTS.md': 1, '.codex/context/': 2, '.codex/rules/': 4, 'Docs/': 3, '.codex/scripts/': 3, '.codex/agents/': 1}
+OK   the index restates no authority body (>= 60-char run) — measured_hits=0 sample=[]
+OK   the index carries no placeholder tokens — hits=[]
+check_source_of_truth: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+OK   file exists: .codex/ROADMAP.md
+OK   file exists: AGENTS.md
+OK   file exists: .codex/README.md
+OK   phase section exists: Phase A（已完成）
+OK   phase section exists: Phase B（下一批）
+OK   phase section exists: Phase C（依赖外部条件）
+OK   Phase B（下一批） has >= 7 entries — measured=7
+OK   Phase B（下一批） every entry carries all 8 field names — measured_entries=7 problems=[]
+OK   Phase B（下一批） every 执行提示词 is >= 40 chars — measured_short=[]
+OK   Phase B（下一批） every path inside 执行提示词 exists — measured_dead=[]
+OK   Phase B（下一批） every 开源来源 cites github.com or a skills path — measured_weak=[]
+OK   Phase C（依赖外部条件） has >= 3 entries — measured=3
+OK   Phase C（依赖外部条件） every entry carries all 8 field names — measured_entries=3 problems=[]
+OK   Phase C（依赖外部条件） every 执行提示词 is >= 40 chars — measured_short=[]
+OK   Phase C（依赖外部条件） every path inside 执行提示词 exists — measured_dead=[]
+OK   Phase C（依赖外部条件） every 开源来源 cites github.com or a skills path — measured_weak=[]
+OK   Phase B covers the seven planned capabilities — missing=[]
+OK   Phase C covers the three planned capabilities — missing=[]
+OK   no placeholder tokens in ROADMAP — measured=[]
+OK   AGENTS.md routing table currently has >= 12 linked rows — measured=20
+OK   current routing rows cover all four triggers — measured_rows=20 missing=[]
+OK   every current routing-row target exists — measured_targets=23 dead=[]
+OK   git diff AGENTS.md is readable — stderr=warning: in the working copy of 'AGENTS.md', LF will be replaced by CRLF the next time Git touches it
+OK   HEAD revision of AGENTS.md is readable — stderr=
+OK   .codex/README.md has a 目录结构 section
+OK   registered-entry list is not drained below its floor — entries=6 floor=4
+OK   目录结构 section lists every registered entry — missing=[]
+check_roadmap_and_routing: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+OK   file exists: .codex/context/project-brief.md
+OK   file exists: .codex/context/domain-glossary.md
+OK   brief is one page (non-empty, non-header lines <= 60) — measured=47
+OK   brief has the six required sections — measured=6; missing=[]
+OK   docs index is a valid curated subset of the real Docs/ file set — listed=21 actual=60 missing=[] unlisted=['Docs/04-ux-design/parity/screen-inventory.json', 'Docs/04-ux-design/知芽-Figma新稿迁移方案-V1.0.md', 'Docs/04-ux-design/知芽-TreeLearn-对话页1比1复刻方案-V1.0.md', 'Docs/04-ux-design/知芽-TreeLearn-对话页文本高亮与批注方案-V1.0.md', 'Docs/04-ux-design/知芽-TreeLearn-设置入口与按钮反馈更新-2026-10-09.md', 'Docs/04-ux-design/知芽-TreeLearn-设置页重设计-交互稿-V1.0.html', 'Docs/04-ux-design/知芽-TreeLearn-设置页重设计方案-V1.0.md', 'Docs/04-ux-design/知芽-TreeLearn-高亮批注交互Demo-V1.1.html', 'Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.1.html', 'Docs/04-ux-design/知芽-对话页动作行与附件批注处理方案-V1.0.md', 'Docs/04-ux-design/知芽（TreeLearn）对话页视觉重做规格_V1.0.md', 'Docs/04a-ux-cross-review/RikkaHub交互基准笔记.md']
+OK   every indexed path exists — dead=[]
+OK   brief cites >= 2 top-level dirs — measured=2 floor=2 cited=['backend', 'frontend']
+OK   no dir is claimed `尚未创建` while present on disk — claimed_absent=['backend'] stale=[] cited=['backend', 'frontend']
+OK   every other cited dir exists on disk — dead=[] cited=['backend', 'frontend']
+OK   glossary has >= 12 terms — measured=15
+OK   every glossary term cites a real path — measured_terms=15 dead_sources=[]
+OK   brief shares no 80-char run with Docs/ — measured_hits=0 sample=[]
+OK   no placeholder tokens — measured={}
+check_context_pack: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+EXITCODE=0
+EXITCODE=0
+
+### 当场重跑 `metrics_report.py`（只判不写）
+OK   every metric source is present — missing=[]
+OK   metric families derive from the ROADMAP B6 goal sentence — derived=4 floor=4 families=['交付节奏', '退回次数', '守门命中分布', '失败案例库增量']
+OK   registered metric list is not drained below its floor — registered=12 floor=8
+OK   the report landing directory exists — dir=artifacts/metrics/
+OK   metrics report file exists — path=artifacts/metrics/report.md
+OK   the report holds exactly one line per registered metric — lines=12 duplicated=[] hand_added=[] missing_from_report=[]
+OK   every metric line carries exactly the six required fields — bad=[]
+OK   every metric line declares one unit, never two — duplicated_fields=[]
+OK   every family required by the roadmap appears in the report — required=4 missing=[]
+OK   every metric line names a command — blank=[]
+OK   enough metric lines are declared machine-recheckable — measured=9 floor=6
+OK   each line declares the recheck class its registry entry really has — disagree=[]
+OK   history readings are read from a real git command — not_git=[]
+OK   every line prints the command the generator would print — wrong=[]
+OK   every metric produces a reading when re-run — unreadable=[]
+OK   each machine-recheckable reading is produced by running the command on its own line — checked=9 mismatch=[]
+OK   report header names the command that writes it — needle=python -X utf8 .codex/scripts/metrics_report.py --write present=True
+OK   no metric reading is left as a placeholder — hits=[] scanned=readings+header
+
+check_metrics_report: 0 check(s) failed
+EXITCODE=0
+
+================================================================================================================================================================
+块 07 — 产量口径、重复短语与改动面
+================================================================================================================================================================
+### 尺寸驱动（driver=artifacts/tmp/b034-sizing.py，沿用片 029/030/031 的同一个 `added_lines()`/`docstring_spans()`，capture=run282-sizing.txt）
+.codex/scripts/check_source_of_truth.py added_code=259 added_docstring=32 added_comment=12
+.codex/scripts/run_all_guards.py added_code=2 added_docstring=0 added_comment=0
+driver=artifacts/tmp/b034-sizing.py
+PRODUCTION_LINES total=261
+not-counted-as-code .codex/context/source-of-truth.md present_lines=160 wc_l=159
+not-counted-as-code .codex/scripts/dev/checkers_selftest.py present_lines=1342 wc_l=1341
+not-counted-as-code .codex/HARNESS.md present_lines=28 wc_l=27
+not-counted-as-code .codex/ROADMAP.md present_lines=463 wc_l=462
+not-counted-as-code AGENTS.md present_lines=68 wc_l=67
+not-counted-as-code artifacts/metrics/report.md present_lines=21 wc_l=20
+excluded by contract: checkers_selftest.py（24 例注入 + 第 14 条基线，自测面）、source-of-truth.md（清单本体=文档资产，由守门判形状）、HARNESS/AGENTS/ROADMAP 与去重改动过的散文（文档）、report.md（生成产物）
+VERDICT: PASS
+
+### 重复短语扫描（driver=artifacts/tmp/b031-dup-scan.py，本片沿用不新建）两次：卡片写出前 （capture=run280-dupscan.txt）与卡片在场后（capture=run283-postcard.txt 的 dup-scan 段）。正控每次都会响（`positive_control fired=True`），所以 `cjk_prose_hits=0` 不是空集通过
+driver=artifacts/tmp/b031-dup-scan.py
+assertion: 正文里不许出现紧邻重复 8-24 字且含 >= 6 个汉字的子串
+scanned_files=145 scanned_lines=19783
+raw_hits=166 cjk_prose_hits=0 non_prose_hits=166
+known_old_dup hits=0 floor=0
+positive_control fired=True unit='第 10 条基线所在元组；' (an unarmed detector is not a judgement)
+DUP-SCAN problems=0
+VERDICT: PASS
+--- 卡片在场后
+scanned_files=67 entries=16 kinds={'声明型': 14, '生成型': 2} authority_files=15
+scanned_files=146 scanned_lines=20089
+raw_hits=166 cjk_prose_hits=0 non_prose_hits=166
+known_old_dup hits=0 floor=0
+positive_control fired=True unit='第 10 条基线所在元组；' (an unarmed detector is not a judgement)
+DUP-SCAN problems=0
+VERDICT: PASS
+scanned_md=177 citations=436
+VERDICT: PASS (current-state face has no shape defect)
+
+### 业务代码零命中 + 改动面（`git diff --numstat HEAD -- android frontend` 空即零命中；下面附当场 `git status --porcelain`）
+2	2	android/README.md
+warning: in the working copy of 'android/README.md', LF will be replaced by CRLF the next time Git touches it
+ M .codex/HARNESS.md
+ M .codex/README.md
+ M .codex/ROADMAP.md
+ M .codex/context/project-brief.md
+ M .codex/evals/cases/001-impact-inventory/product.md
+ M .codex/rules/frontend.md
+ M .codex/rules/observability.md
+ M .codex/rules/shared-state.md
+ M .codex/rules/ux-design.md
+ M .codex/scripts/dev/checkers_selftest.py
+ M .codex/scripts/run_all_guards.py
+ M .codex/skills/guard-runner/SKILL.md
+ M .codex/skills/line-budget/SKILL.md
+ M .codex/skills/pm-discovery/SKILL.md
+ M .codex/tasks/T-2026-10-19-code-reviewer-role-and-review-template-024.md
+ M .codex/tasks/T-2026-10-19-code-simplifier-role-027.md
+ M .codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md
+ M .codex/tasks/T-2026-10-19-eval-keeper-baseline-role-029.md
+ M .codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md
+ M .codex/tasks/T-2026-10-19-guard-runner-one-command-roster-023.md
+ M .codex/tasks/T-2026-10-19-harness-guard-judgements-d4-d6-021.md
+ M .codex/tasks/T-2026-10-19-metrics-report-generator-030.md
+ M .codex/tasks/T-2026-10-19-metrics-reporter-role-031.md
+ M .codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md
+ M AGENTS.md
+ M Docs/04-ux-design/design-system/README.md
+ M "Docs/05-technical-design/TreeLearn_Harness\345\205\250\351\207\217\345\274\200\345\217\221\344\272\244\344\273\230\346\217\220\347\244\272\350\257\215.md"
+ M "Docs/05-technical-design/\347\237\245\350\212\275\357\274\210TreeLearn\357\274\211Android SQLite \345\273\272\350\241\250\345\205\245\345\234\272\347\241\256\350\256\244\346\270\205\345\215\225_V1.0.md"
+ M "Docs/05-technical-design/\347\237\245\350\212\275\357\274\210TreeLearn\357\274\211Android\346\234\254\345\234\260\344\274\230\345\205\210\346\212\200\346\234\257\346\236\266\346\236\204\346\226\271\346\241\210_V1.0.md"
+ M "Docs/05-technical-design/\347\237\245\350\212\275\357\274\210TreeLearn\357\274\211RikkaHub\345\274\200\346\272\220\346\226\271\346\241\210\345\220\270\346\224\266\350\257\204\344\274\260_V0.1.md"
+ M Docs/spec/SPEC-2026-09-21-ai-persona-preference.md
+ M Docs/spec/SPEC-2026-09-22-figma-ia-migration.md
+ M Docs/spec/SPEC-2026-09-27-android-v11-full-screen-fidelity.md
+ M Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md
+ M android/README.md
+ M artifacts/metrics/report.md
+?? .codex/context/source-of-truth.md
+?? .codex/scripts/check_source_of_truth.py
+?? .codex/tasks/T-2026-10-20-source-of-truth-inventory-034.md
+?? artifacts/evidence/T-2026-10-20-source-of-truth-inventory-034.txt
+
+### `git diff --stat HEAD`（当场重跑，只读；`core.autocrlf=true` 的换行警告一并留在读数里）
+ .codex/HARNESS.md                                  |   1 +
+ .codex/README.md                                   |   4 +-
+ .codex/ROADMAP.md                                  |  10 +-
+ .codex/context/project-brief.md                    |   8 +-
+ .codex/evals/cases/001-impact-inventory/product.md |   2 +-
+ .codex/rules/frontend.md                           |   2 +-
+ .codex/rules/observability.md                      |   2 +-
+ .codex/rules/shared-state.md                       |   2 +-
+ .codex/rules/ux-design.md                          |   2 +-
+ .codex/scripts/dev/checkers_selftest.py            | 108 ++++++++++++++++++++-
+ .codex/scripts/run_all_guards.py                   |   2 +
+ .codex/skills/guard-runner/SKILL.md                |   6 +-
+ .codex/skills/line-budget/SKILL.md                 |   2 +-
+ .codex/skills/pm-discovery/SKILL.md                |   4 +-
+ ...9-code-reviewer-role-and-review-template-024.md |   2 +-
+ .../tasks/T-2026-10-19-code-simplifier-role-027.md |   4 +-
+ ...26-10-19-codebase-researcher-impact-role-026.md |   4 +-
+ .../T-2026-10-19-eval-keeper-baseline-role-029.md  |   8 +-
+ .../T-2026-10-19-evals-inventory-and-runner-028.md |  10 +-
+ ...26-10-19-guard-runner-one-command-roster-023.md |   2 +-
+ ...026-10-19-harness-guard-judgements-d4-d6-021.md |   2 +-
+ .../T-2026-10-19-metrics-report-generator-030.md   |   8 +-
+ .../T-2026-10-19-metrics-reporter-role-031.md      |  14 +--
+ ...2026-10-19-project-brief-dir-state-guard-025.md |   2 +-
+ AGENTS.md                                          |   5 +-
+ Docs/04-ux-design/design-system/README.md          |   6 +-
+ ...273\230\346\217\220\347\244\272\350\257\215.md" |   4 +-
+ ...56\350\256\244\346\270\205\345\215\225_V1.0.md" |   2 +-
+ ...66\346\236\204\346\226\271\346\241\210_V1.0.md" |   4 +-
+ ...70\346\224\266\350\257\204\344\274\260_V0.1.md" |   2 +-
+ Docs/spec/SPEC-2026-09-21-ai-persona-preference.md |   2 +-
+ Docs/spec/SPEC-2026-09-22-figma-ia-migration.md    |   2 +-
+ ...-2026-09-27-android-v11-full-screen-fidelity.md |   2 +-
+ Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md |   6 +-
+ android/README.md                                  |   4 +-
+ artifacts/metrics/report.md                        |  14 +--
+ 36 files changed, 188 insertions(+), 76 deletions(-)
+warning: in the working copy of '.codex/HARNESS.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/ROADMAP.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/context/project-brief.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/evals/cases/001-impact-inventory/product.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/rules/frontend.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/rules/observability.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/rules/shared-state.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/rules/ux-design.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/skills/guard-runner/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/skills/line-budget/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/skills/pm-discovery/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-code-reviewer-role-and-review-template-024.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-code-simplifier-role-027.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-codebase-researcher-impact-role-026.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-eval-keeper-baseline-role-029.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-evals-inventory-and-runner-028.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-guard-runner-one-command-roster-023.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-harness-guard-judgements-d4-d6-021.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-metrics-report-generator-030.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-metrics-reporter-role-031.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-project-brief-dir-state-guard-025.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'AGENTS.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Docs/04-ux-design/design-system/README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Docs/05-technical-design/TreeLearn_Harness全量开发交付提示词.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Docs/05-technical-design/知芽（TreeLearn）Android SQLite 建表入场确认清单_V1.0.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Docs/05-technical-design/知芽（TreeLearn）Android本地优先技术架构方案_V1.0.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Docs/05-technical-design/知芽（TreeLearn）RikkaHub开源方案吸收评估_V0.1.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'android/README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'artifacts/metrics/report.md', LF will be replaced by CRLF the next time Git touches it
+

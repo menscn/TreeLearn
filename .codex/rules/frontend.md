@@ -14,7 +14,7 @@ This guard applies to direct execution and Harness work under `frontend/`. Every
 ## 设计数值与 CSS 变量
 
 - 视觉数值只允许引用 token：CSS 里用 `var(--green)` 这类变量名，JS/TS 里也不得写裸 hex。`tokens.css` 是**生成物**，路径 `frontend/src/styles/tokens.css`，只能由 `python .codex/scripts/dev/gen_design_tokens_css.py` 重新生成；手工编辑它（哪怕只改一个色）会被逐字节漂移校验判 FAIL，这是设计意图。
-- 权威链固定为：原型 `:root` → `Docs/04-ux-design/design-system/tokens.json` → `colors.xml` / `tokens.css`。前端侧不得反向改数值来「先满足界面」。
+- 权威链固定为：原型 `:root` → `Docs/04-ux-design/design-system/tokens.json` → `colors.xml` / `tokens.css`（这条链的权威定义在 `Docs/04-ux-design/design-system/README.md`）。前端侧不得反向改数值来「先满足界面」。
 - 守门：`python .codex/scripts/dev/check_design_tokens.py`（四方逐值 + `frontend/src/**` 裸 hex 扫描，注释与字符串字面量**不豁免**）与 `--selftest`（正反双向）。`frontend/` 还不存在时该扫描打印 `SKIPPED` 并从通过计数扣除，**不得读成通过**。
 
 ## 设备时区与时间展示

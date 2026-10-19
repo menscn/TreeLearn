@@ -33,7 +33,7 @@
 3. 读取 .codex/tasks/T-*.md 全部 Task v2，并先运行 python .codex/scripts/validate_tasks.py。任务已确认，不要重新拆任务或改变产品范围。
 
 二、必须保持的产品与架构约束
-1. 纯原生 Android、Java-only、minSdk 28、XML/View、五模块 :app/:core/:data/:ai/:tree-layout；禁止 Kotlin 源码、插件、org.jetbrains.kotlin 和 -ktx。
+1. 纯原生 Android、Java-only、minSdk 28、XML/View、五模块 :app/:core/:data/:ai/:tree-layout；禁止 Kotlin 源码、插件、org.jetbrains.kotlin 和 -ktx（权威正文 .codex/rules/android.md）。
 2. 本地优先模块化单体：不做云端账号、云同步、备份或远程遥测；Web 线允许新建 `frontend/` 与仅监听本机环回地址的 `backend/`，边界见 `Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md`（2026-10-15 用户裁定，见该规格 §5 与 `.codex/tasks/T-2026-10-15-web-h5-android-parity-requirement-001.md`）。
 3. AnswerRevision 不可变；重试/重置创建新 operation/revision，既有子分支永远引用创建时 sourceRevisionId 与 ContextSnapshot。
 4. reasoning_content 必须流式展示、部分落库、稳定版本持久化、可搜索、复制全文时包含，并通过 ContextPlan + DeepSeekContextEncoder 加入后续上下文。每条思考默认折叠，点击展开，使用可读的次级灰色。
@@ -53,7 +53,7 @@
 2. 你是总调度者。环境支持 subagent 时，按 .codex/agents 使用 android-dev 实现、android-no-kotlin-guard、db-migration-reviewer、contract-guardian 和 verifier 独立复核；不要让不同 implementer 同时修改同一 Task。verifier 必须串行。
 3. 每个实现 Task：ready → in_progress；先写目标测试并运行得到非零退出码，将真实 RED 命令/退出码/失败原因写回 Task；再做最小实现，用同一目标命令得到 GREEN；补回归证据后进入 verifying。只有独立 verifier PASS 才改为 verified。
 4. verifier FAIL/PARTIAL 时立刻回派原 Task 做最小修复并新增回归测试，然后重新验证；不要绕过 guard，也不要把已知失败报成完成。
-5. 实现中发现任务估算不准时仍遵守单 Task 200 行软预算和 500 行硬上限；必要时先在 .codex/tasks 中做最小、可追踪拆分，并重新运行任务校验。
+5. 实现中发现任务估算不准时仍遵守单 Task 200 行软预算和 500 行硬上限（口径权威正文 .codex/rules/harness-tasks.md）；必要时先在 .codex/tasks 中做最小、可追踪拆分，并重新运行任务校验。
 6. 不自动提交 Git，除非我另行明确要求。保留并避开你开始前已经存在的无关工作区改动。
 
 五、强制验证

@@ -1,6 +1,6 @@
 # Treelearn 项目规则入口
 
-项目规则统一维护在 `.codex/`；它是 Treelearn 唯一的 AI 研发流程入口。`.trae/` 已按用户授权删除，`.agents/`、`.workbuddy/` 和 `.superpowers/` 不承担本项目的权威规则职责。
+项目规则统一维护在 `.codex/`；它是 Treelearn 唯一的 AI 研发流程入口（该主张的权威正文在 `.codex/README.md`，逐条事实的落点在 `.codex/context/source-of-truth.md`）。`.trae/` 已按用户授权删除，`.agents/`、`.workbuddy/` 和 `.superpowers/` 不承担本项目的权威规则职责。
 
 ## 读取协议
 
@@ -30,7 +30,7 @@
 - 文件以 UTF-8 读写，中文不得出现问号占位、替换字符或乱码。
 - 不新增依赖、不自动提交、不自动推送；除非用户明确要求，保留现有业务代码和未提交改动。
 - 完成结论必须匹配证据覆盖；已知错误、缺少必要验证或工具未实际运行时不得报 PASS。
-- 规则新增或实质修订必须同步回归说明、文档影响和验证记录；同一约束只保留一份权威正文。
+- 规则新增或实质修订必须同步回归说明、文档影响和验证记录；同一约束只保留一份权威正文（逐条落点见 `.codex/context/source-of-truth.md`，该主张的权威正文在 `.codex/context/project-brief.md` 的 SoT 声明）。
 - `.codex/tasks/` 是唯一可写任务状态目录；不要把新任务写入 `.trae/`、`.cursor/` 或插件目录。
 
 ## 按需规则路由
@@ -54,6 +54,7 @@
 | Harness 验收或用户明确要求 verifier | [验收规则](.codex/rules/harness-verification.md) | 验收前 |
 | 未成形的想法或需要判断是否值得做 | [.codex/agents/intent-capturer.toml](.codex/agents/intent-capturer.toml)、[pm-discovery](.codex/skills/pm-discovery/SKILL.md) | Plan 阶段开始前 |
 | 需要产品当前阶段、技术栈和权威文档索引 | [Plan 背景包](.codex/context/project-brief.md) | Plan 阶段开始前 |
+| 改动会被当成现状读的正文，或需要确认某条事实的权威落点 | [事实源清单](.codex/context/source-of-truth.md) | 写入前；完成前复跑该条目的漂移检查 |
 | 需要知道遗留阶段和下一批工作 | [Treelearn 路线](.codex/ROADMAP.md) | 新会话选题或用户询问下一步时 |
 | 已 accepted 的需求进入设计 | [.codex/agents/spec-author.toml](.codex/agents/spec-author.toml)、[UX 规则](.codex/rules/ux-design.md) | Design 阶段开始前 |
 

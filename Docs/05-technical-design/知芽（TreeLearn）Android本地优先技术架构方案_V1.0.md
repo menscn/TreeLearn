@@ -11,7 +11,7 @@
 | 产品基准 | V3.0 冻结需求基准 + V3.1 增量 BASE-21～BASE-26 |
 | 终端 | 纯 Android 原生应用，手机竖屏优先，兼容平板横屏 |
 | 分发 | 个人设备直接安装 APK |
-| 语言约束 | Java-only；禁止 Kotlin 源码、Kotlin Gradle 插件和 `org.jetbrains.kotlin` 依赖 |
+| 语言约束 | Java-only；禁止 Kotlin 源码、Kotlin Gradle 插件和 `org.jetbrains.kotlin` 依赖（权威正文 `.codex/rules/android.md`） |
 
 ## 2. 目标与非目标
 
@@ -149,7 +149,7 @@ API Key 不进入任何表。模型与思考模式偏好可保存在普通 Share
 | `context_snapshots` | CreateBranchUseCase / BuildContextPlanUseCase | 每非根分支 1 行；不可变 | 上游内容引用；随分支删除 | 快照迁移到同等可验证格式 |
 | `ai_artifacts` | 派生 AI 用例 / 首页、导航、推荐 | 每 scope/kind 保留当前有效结果和必要版本 | 标题、摘要、推荐；随 scope 删除 | 派生物不再持久化或拆入专表 |
 
-所有表启用外键和事务；时间点使用 UTC epoch millis；ID 使用应用生成 UUID，不使用自增 ID。DDL 只允许位于生产 `SQLiteOpenHelper.onCreate/onUpgrade` 或集中、版本化的 migration runner，禁止 Repository、页面或普通业务路径临时建表。迁移只允许前向新增版本，不修改已经发布的迁移步骤。每次升级必须在 API 36 模拟器或真机的 Android framework SQLite 上验证新装、逐版本升级、关闭重开、`foreign_key_check`、`integrity_check`、事务回滚、约束和级联删除。（2026-09-21 用户决定：验收环境统一为 API 36 / 36.1，不再建设 API 28 环境；`minSdk 28` 仍为声明的最低兼容版本，由 `compileSdk 36 + minSdk 28` 的 lint `NewApi` 覆盖。）
+所有表启用外键和事务；时间点使用 UTC epoch millis（时间口径权威 `.codex/rules/sql.md`）；ID 使用应用生成 UUID，不使用自增 ID。DDL 只允许位于生产 `SQLiteOpenHelper.onCreate/onUpgrade` 或集中、版本化的 migration runner，禁止 Repository、页面或普通业务路径临时建表。迁移只允许前向新增版本，不修改已经发布的迁移步骤。每次升级必须在 API 36 模拟器或真机的 Android framework SQLite 上验证新装、逐版本升级、关闭重开、`foreign_key_check`、`integrity_check`、事务回滚、约束和级联删除。（2026-09-21 用户决定：验收环境统一为 API 36 / 36.1，不再建设 API 28 环境；`minSdk 28` 仍为声明的最低兼容版本，由 `compileSdk 36 + minSdk 28` 的 lint `NewApi` 覆盖。）
 
 ### 6.3 搜索
 
