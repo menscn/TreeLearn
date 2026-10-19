@@ -120,7 +120,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `harness_check_lib.citable_paths()`（同一筛选两份的那一处已合并）。
   另有两个**本片之前就在场**的消费方：`check_roadmap_and_routing.py:36` 把 `code-simplifier` 列进
   `PHASE_B_KEYWORDS`（`:170` 要求 Phase B 正文含每个关键词——删掉 ROADMAP 的 B5 条目那支守门立刻转红），
-  以及 `Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48` 那句 DEFERRED 只提到 B4，与本片无关。
+  以及 `Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:98` 那句 DEFERRED 只提到 B4，与本片无关。
   平台分支 = 不适用：无 Android/前端生产代码、无 API、无 SQL；「Java-only 不得被收敛破坏」写在角色 `<rules>` 里，
   那是**输出格式要求**，不是运行时分支。
 - Native bridge or independent-client compatibility/update requirements: 不适用（无桥接字段被触碰；
@@ -172,8 +172,8 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   命中全部指向已存在的对象（ROADMAP 的 B5 条目、`PHASE_B_KEYWORDS`、片 026 卡的指针校正句），
   本片没有把旧写法留在别处；逐字读数见块 06。
 - `documentation impact: none` reason and evidence, if applicable: 不适用。
-- Historical/PRD handling: `Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48` 的
-  `DEFERRED:待 B4（codebase-researcher）` 仍由 B0 那片改写，本片不动（B4 已交付但那句属规格补全的待办，
+- Historical/PRD handling: `Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:98` 的
+  `DEFERRED:待 B4` 仍由 B0 那片改写，本片不动（B4 已交付但那句属规格补全的待办，
   不是角色登记）。`.codex/rules/communication.md` 的阶段→角色表当前不列 B1/B4 角色，本片同样不单独加 B5
   （片 024 已记这条欠账）。
 

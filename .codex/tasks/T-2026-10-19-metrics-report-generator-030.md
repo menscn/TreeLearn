@@ -157,7 +157,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `:675-737`（19 例 `metrics:*`）/ `:875-879`（副本定点带报告正文）/ `:282-285`（抽干锚点跟随清单形状）/
   `:575-578`（`evals:pointer-stale` 锚点跟随快照）；`.codex/scripts/run_all_guards.py:99-100`、
   `.codex/scripts/check_roadmap_and_routing.py:39-44`、`.codex/README.md:32`、
-  `.codex/ROADMAP.md:111-118`（B6 五行回写）、`artifacts/metrics/report.md:1-20`、
+  `.codex/ROADMAP.md:112-119`（B6 五行回写；片 032 在 B0 加了一行，区间随之下移）、`artifacts/metrics/report.md:1-20`、
   `.codex/evals/cases/001-impact-inventory/product.md:1-13`（重转录后的快照，`:5` 仍是那条会漂的指针）。
   行号是先实测再落笔的：`artifacts/tmp/b030-pointers.py` 把本片与片 021/024/025/026/027/028/029 的 130 条引用
   逐条复算，末态 `POINTERS checked=130 stale=0`（表自身有 `MIN_POINTERS = 120` 的裸下限，抽干即红）。

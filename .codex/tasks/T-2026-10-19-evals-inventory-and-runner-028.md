@@ -162,8 +162,8 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   不写进本条」（片 023/027 定的「卡片不写死会漂的计数」规矩）。`docs index is a valid curated subset` 那类
   既有判据未改写；本片没有把旧写法留在别处（逐字读数见块 03）。
 - `documentation impact: none` reason and evidence, if applicable: 不适用。
-- Historical/PRD handling: `Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48` 的
-  `DEFERRED:待 B4（codebase-researcher）` 仍由 B0 那片改写，本片不动。`.codex/references/` 未新增条目
+- Historical/PRD handling: `Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:98` 的
+  `DEFERRED:待 B4` 仍由 B0 那片改写，本片不动。`.codex/references/` 未新增条目
   （评测语法是当前事实，不是迁移映射）。
 
 ## Acceptance criteria

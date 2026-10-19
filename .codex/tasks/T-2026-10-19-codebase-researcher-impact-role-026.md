@@ -148,12 +148,12 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `harness_check_lib.py`（新函数 docstring）、`HARNESS.md`、`ROADMAP.md`、片 024/025/026 三张卡，
   另有两个**本片之前就在场**的消费方：`check_roadmap_and_routing.py:36` 把 `codebase-researcher` 列进
   `PHASE_B_KEYWORDS`（`:170` 要求 Phase B 正文含每个关键词——所以 ROADMAP 的 B4 条目一旦删掉这个角色名，
-  那支守门立刻转红），以及 `Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48` 的
-  `DEFERRED:待 B4（codebase-researcher）。`——B4 已交付，但那句 DEFERRED 要由 B0 那片改写，本片不动它。
+  那支守门立刻转红），以及 `Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:98` 的
+  `DEFERRED:待 B4`——B4 已交付，但那句 DEFERRED 要由 B0 那片改写，本片不动它。
   24 条 `文件:行` 指针逐条复算：`python -X utf8 artifacts/tmp/b026-pointers.py` → `POINTERS checked=24 stale=0`。
 - Superseded phrases/examples reverse-searched: 被本片改写的旧句是 B4 的 `验收方式` 一行（原文只要求
   「命令 + 文件:行」与「未找到」两件事）与 `范围` 一行（原文只列两个路径）。反查
-  `grep -rnI "check_codebase_researcher_agent" .codex Docs` 在本片之前命中 `.codex/ROADMAP.md:83` 与 `:86`
+  `grep -rnI "check_codebase_researcher_agent" .codex Docs` 在本片之前命中 `.codex/ROADMAP.md:83` 与 `:86`（那是当时的现场行号；该串已被后续片回写摊开，现值由同一条命令现场取，片 032 不把它抄进本卡）
   两行（`git -c core.pager=cat grep -n "check_codebase_researcher_agent" HEAD -- .codex` → `HEAD:.codex/ROADMAP.md` 2 处），
   两处都被本片按新判据面改写，别处零命中；所以失配面只有 ROADMAP 的 B4 条目自身，已随本片回写闭合。
 - `documentation impact: none` reason and evidence, if applicable: 不适用。
@@ -235,7 +235,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   ③ 本片的指针校正是被驱动逼出来的：`artifacts/tmp/b026-pointers.py` 第一次跑就报 `stale=2`，
   两处是我自己刚写进卡片的区间（`<identity>` 与 `READONLY` 的行号猜错了）。改成先实测再落笔后 `stale=0`。
   ④ 收口时又抓到本卡两处「反查结论」写得不实：一处把 `codebase-researcher` 的消费方列漏了两个本片之前就在场的
-  （`check_roadmap_and_routing.py:36` 的 `PHASE_B_KEYWORDS`、`Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48`
+  （`check_roadmap_and_routing.py:36` 的 `PHASE_B_KEYWORDS`、`Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:98`
   的 DEFERRED 行），一处声称 `check_codebase_researcher_agent` 在 HEAD 侧零命中（实测 `HEAD:.codex/ROADMAP.md`
   两处）。两条都按现场读数改写，并把这三个 `文件:行` 一并入驱动复算，末态 `POINTERS checked=24 stale=0`。
 - Regression evidence: 块 03 的 86 例必须包含 68–86 这 19 条 `research:*` 且 7 条基线全 `OK`；

@@ -187,7 +187,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `.codex/scripts/dev/checkers_selftest.py:72-75`（4 个常量）/ `:78-80`（12 条基线所在元组的后两行）/
   `:111-113`（5 份抄检取样来源，本片新增 `SAMPLE_SPEC_METRICS_SRC` 在 `:113`）/ `:741-845`（35 例 `reporter:*`）/
   `:575-578`（`evals:pointer-stale` 锚点，本片把它跟随快照改成 `:78-80`）/ `:1028-1030`（抄检前缀闸门），
-  `.codex/scripts/run_all_guards.py:101-103`、`.codex/HARNESS.md:13`、`.codex/ROADMAP.md:107-118`（B6 条目，
+  `.codex/scripts/run_all_guards.py:101-103`、`.codex/HARNESS.md:13`、`.codex/ROADMAP.md:108-119`（B6 条目，片 032 加行后下移一位，
   本片改 `验收方式` `:114` / `交付任务` `:117` / `实现要点` `:118`）、
   `.codex/evals/cases/001-impact-inventory/product.md:1-13`（刷新后的快照，`:5` 就是被推下去的那条指针）。
   行号是先实测再落笔的：`artifacts/tmp/b031-pointer-fix.py --apply` 打印 `EDITS applied=46 bad=0 files=9`，
@@ -222,8 +222,8 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   末态 0 命中；被删掉的那条重复短语（同一半句连印两遍，形如「第 10 条基线所在元组；」×2）由
   `b031-dup-scan.py` 的 `KNOWN_DUP` 常量长期盯着，末态 `known_old_dup hits=0 floor=0`。
 - `documentation impact: none` reason and evidence, if applicable: 不适用。
-- Historical/PRD handling: `Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48` 的
-  `DEFERRED:待 B4（codebase-researcher）` 仍由 B0 那片改写，本片不动。`.codex/references/regression-cases.md`
+- Historical/PRD handling: `Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:98` 的
+  `DEFERRED:待 B4` 仍由 B0 那片改写，本片不动。`.codex/references/regression-cases.md`
   未新增条目（本片的教训先落在角色正文与卡片，够不上「失败案例库」的入库门槛：它没有跨片复现的判据形状）。
 
 ## Acceptance criteria
@@ -398,7 +398,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   这次仍然改措辞（写成「同一半句连印两遍，形如…」），
   没有把 `floor=0` 改成「允许引用」——一条要靠例外才能过的判据，下次同类坏句照样过得去。
   这次转红已经做成可重跑场景（块 01 RED-5：把 `实现要点` 里的回避式描述换回坏句原文，重复短语扫描必须报
-  `DUP .codex/ROADMAP.md:118` 与 `known_old_dup hits=1` / `dup-scan rc=1`），所以它不再依赖「后来有人看见了」。
+  `DUP .codex/ROADMAP.md:118` 与 `known_old_dup hits=1` / `dup-scan rc=1`），所以它不再依赖「后来有人看见了」。三处 `:118` 都是当时的现场读数：片 032 给 B0 加了 `实现要点` 一行，重跑该场景现在打印的是 119，本卡不把历史读数改成现值。
 
 ## Verification report
 
@@ -457,7 +457,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
 - Blocker: 无。
 - Unblock condition: 不适用。
 - Next steps: ① B6 两片（片 030 指标面 + 本片角色面）都在场，ROADMAP 的 B6 可标交付完成；下一片按
-  `check_roadmap_and_routing.py` 与 ROADMAP 的顺序取 B0（`Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48`
+  `check_roadmap_and_routing.py` 与 ROADMAP 的顺序取 B0（`Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:98`
   的 `DEFERRED:待 B4` 仍欠着）或 C2 `loop-watcher`。② 若下一片继续给 `checkers_selftest.py` 顶部加行，
   先接手 `b031-pointers.py`（把表里的 `SELFTEST` 区间行改成本片的实测值再跑），不要手写行号。
   ③ D11（成对 `.md`/`.toml` 的逐字重复由判据钉住而非生成器消除）仍开着，`code-simplifier` 是它的候选执行者。

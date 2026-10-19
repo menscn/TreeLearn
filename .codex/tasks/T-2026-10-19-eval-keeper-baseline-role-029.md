@@ -138,7 +138,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   `:84-212`（23 条判据与 3 处 fail-closed 早退 `:91` / `:101` / `:112`）、`:94-104`（从运行器现场派生期望语法）、
   `.codex/scripts/dev/checkers_selftest.py:64-67`（3 个常量）/ `:79-80`（10 条基线所在元组的后两行）/ `:110`（第 4 份抄检来源）/
   `:116-147`（`derive_sample()` 掩码空间修复）/ `:585-671`（29 例 `keeper:*`）/ `:1028-1030`（4 条抄检前缀）、
-  `.codex/scripts/run_all_guards.py:97-98`、`.codex/HARNESS.md:11`、`.codex/ROADMAP.md:65-66`、
+  `.codex/scripts/run_all_guards.py:97-98`、`.codex/HARNESS.md:11`、`.codex/ROADMAP.md:66-67`（被片 032 在 B0 加的一行推下去）、
   `.codex/evals/cases/001-impact-inventory/product.md:1-13`（刷新后的快照，`:5` 是被推下去的那条指针）。
   行号是先实测再落笔的：`artifacts/tmp/b029-pointers.py` 把本片与片 021/024/025/026/027/028 的 99 条引用逐条复算，
   末态 `POINTERS checked=99 stale=0`（表本身有 `MIN_POINTERS = 80` 的裸下限，抽干即红）。
@@ -167,8 +167,8 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   「以现场读数取，不写进本条」。旧句已完全替换：`grep -rn "B2 在片 029 之前不算交付完成" .codex Docs`
   末态 0 命中，旧措辞没有留在别处。
 - `documentation impact: none` reason and evidence, if applicable: 不适用。
-- Historical/PRD handling: `Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48` 的
-  `DEFERRED:待 B4（codebase-researcher）` 仍由 B0 那片改写，本片不动。`.codex/references/` 未新增条目。
+- Historical/PRD handling: `Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:98` 的
+  `DEFERRED:待 B4` 仍由 B0 那片改写，本片不动。`.codex/references/` 未新增条目。
 
 ## Acceptance criteria
 
@@ -349,8 +349,8 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
 - In progress: 无。**B2 至此两片齐**（片 028 评测资产面 + 片 029 角色面），ROADMAP 的 B2 条目可标交付完成。
 - Blocker: 无。
 - Unblock condition: 不适用。
-- Next steps: B6（`metrics-reporter` 角色与指标读数）→ B0（`Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:48`
-  那行 `DEFERRED:待 B4（codebase-researcher）` 的清除，同时是 `codebase-researcher` 的第一次真实使用）→
+- Next steps: B6（`metrics-reporter` 角色与指标读数）→ B0（`Docs/spec/SPEC-2026-09-21-ai-persona-preference.md:98`
+  那行 `DEFERRED:待 B4` 的清除，同时是 `codebase-researcher` 的第一次真实使用）→
   C2（`loop-watcher`）→ C3（事实源全量声明）→ C4（release-gate 裁定 + D7① 建表缺陷）。
 - Watch-outs: ① **不要把 `--tier core` 或整轮自检与任何会动 `.codex/` 的驱动并发跑**；本片的 RED/GREEN 与
   快照刷新都是先跑完再跑聚合命令，顺序不能倒。

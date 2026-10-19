@@ -32,12 +32,13 @@
 - **owner_lane**：harness
 - **验收方式**：（2026-09-21 按用户决定简化为轻流程）`python .codex/scripts/check_spec_author_agent.py <规格路径>` 退出码 0——只查四件事：文件存在、四节标题齐全、`intent:` 指向真实文件、没有占位符与裸 hex / 临场 px。**不再要求**独立复核轮次、证据文件，以及旧版的「每条检测分支都配一条注入用例」自闸门；规格由人 review 拍板。四类内容（需求规格 / 界面方案 / 技术规格 / 疑虑点）仍是写作要求，见 `.codex/templates/SPEC.md` 与 `.codex/agents/spec-author.md`，只是不再由守门脚本逐条强制。
 - **开源来源**：`https://github.com/openai/skills` → `skills/.curated/notion-spec-to-implementation/SKILL.md`；`https://github.com/anthropics/skills` → `skills/doc-coauthoring/SKILL.md`（2026-09-21 实测 HTTP 200）
-- **交付任务**：`T-2026-09-21-035`（spec-author 角色、SPEC.md 模板与守门，status=verified）；`T-2026-09-21-036`（第一份规格：AI 内置人设，只出需求规格 / 界面方案 / 疑虑点三节，`Technical spec` 记 `DEFERRED:待 B4`）。本条已开工，后续只需等 B4 落地后补技术规格。
+- **交付任务**：`T-2026-09-21-035`（spec-author 角色、SPEC.md 模板与守门，status=verified）；`T-2026-09-21-036`（第一份规格：AI 内置人设，只出需求规格 / 界面方案 / 疑虑点三节，`Technical spec` 记 `DEFERRED:待 B4`）；`T-2026-10-19-spec-author-technical-section-032`（兑现那份 `DEFERRED`：B4 落地后把 `Technical spec` 一节按接口 / 数据结构 / 状态迁移 / 错误语义四栏补齐，每条「现状」带实测 `路径:行`，另把补写时新撞出来的两处口径冲突原样上报成 2 条待拍板疑虑，不自行拍板）。本条已交付完成：验收命令 `python -X utf8 .codex/scripts/check_spec_author_agent.py Docs/spec/SPEC-2026-09-21-ai-persona-preference.md` 退出码 0，规格四节齐全、无占位符。
+- **实现要点（交付后回写，不是验收方式的替代）**：**简写与续写的引用等于没有引用**——`harness_check_lib.py` 的 `CITATION_RE` 只认以 Docs、.codex、android、frontend、artifacts、README 开头的反引号路径，「…TreeLearnSchema.java:47」与「:47」这两种写法都不被计成引用，所以 `CITATIONS problems=0` 里根本没算它们：一条不被计入的引用，改错了不会有任何命令变红。片 032 因此把那一节的 39 处简写/续写全部展开成完整相对路径（`full_citations before=42 after=81`、`short_after=0 cont_after=0`），代价是正文读起来啰嗦。**「继承上一条完整路径」这种按人读顺序做的推断在机器侧没有凭据**：第一版展开驱动跨 bullet 继承，把 `TreeLearnSchema` 的 17 个行号（`:838` `:1037` `:416-433` 等）全续成了 `TopicDao.java`——TopicDao 只有 238 行，人一眼看不出问题，`check_spec_author_agent.py` 也照样绿；改成「只在同一条 bullet 内继承 + 行号必须 ≤ 目标文件行数，否则 REFUSE 并退出码 1」之后，那 17 处立刻以 `no full path before it in this bullet` 响出来（`problems=34`），17 条由人手写全路径后复跑才 `problems=0`。**改写正文的驱动必须自证没吞掉正文**：同一支驱动漏了一行 `out.append(gap)`，反引号之间的散文会被整段丢掉，暴露方式是 `full_citations after=28 < before=42` 这种自相矛盾的读数；现在它比较「反引号之外的正文」逐字相同，不等就 CLAIM FAIL。**计数按匹配次数，不按有匹配的行数**：迁移注册表 4 个步骤写在 2 行里，按行数得到 `forward_migration_steps=2`——那是真话形状的假数，改成 `len(re.findall())` 得 4；这条正则今天还被真的写错过一次（`new Migration\d+To\d+\(\)`，类名是 `MigrationV1ToV2`，`To` 后还有 `V`），所以它被留成计数驱动的 RED-1。**锚点不唯一即 STALE**：探索阶段的转述里有 7 条锚点不实（`PREFS_NAME` 实为 `PREFERENCES_NAME`、`ModelThinkingPicker` 是 `public final`、`ALTER TABLE messages ADD COLUMN` 在代码里是拼接串不是字面量），全部改成唯一命中才允许落行号。**basename 唯一性索引必须排除反编译副本**：全库建索引时 `artifacts/recovery/decompiled/**` 与 `artifacts/tmp/_m007b/prod/**` 贡献了 198 个重名，「重名即拒绝」退化成永远拒绝——一条从不通过的检查和没有检查是一样的。**描述被禁止的写法时不要把那种写法写进反引号**：规格里那句反例本身会被展开驱动「修好」，规则被自己的工具吃掉。**「现状」与「规格」要在版式上分开**，且补写时新撞出来的口径冲突写成待拍板疑虑而不是技术结论：未知档位该抛还是回落（仓库现成做法是抛，见 `GenerationModel.fromWireId`）、切换人设算不算一次主题活动（整行写回会重排首页）都属这一类。**文档自身的结构行号也是指针，别只给代码配锚点，也别把人眼数出来的计数抄成结论**：收尾复核发现本卡引用规格小节位置的那几处行号是按人眼从规格数出来的，而本节口径说明插了两段就把它们各推歪 2 行（接口小节标题现值第 54 行、卡片写第 52 行；数据结构标题在第 67 行、卡片另写了一处第 66 行；两条疑虑正文落在第 103-104 行、卡片写成第 100-102 行），错得很安静——B0 的守门、全库活引用扫描与片 031 的指针复算表都放它过去，因为它们判的是代码那一侧。修法不是再人眼数一遍：给规格自身的结构（节标题、口径段、来源栏、疑虑节）也配锚点，`b032-pointers.py` 因此从 75 条涨到 88 条，并补了裸下限 `MIN_ANCHORS = 80`——表被抽干时 `measured=0` 读起来和「全活」一样舒服；卡片再按驱动打印的现值改写。同一轮还数出一处手抄计数：卡片写着本片在姊妹卡片里改了 15 处规格引用，现场按「指向该规格文件且带行号」数是 9 条，指向同一文件但不带行号的提及 5 处，ROADMAP 区间引用 3 条——「本片动了别人几处」同样是读数而不是叙述，已由 `artifacts/tmp/b032-sibling-refs.py` 判住（它连「被声称的那一行还装不装着那件事」一起判，锚点丢了即 STALE）。
 - **执行提示词**：先读 `.codex/templates/INTENT.md`、`.codex/rules/ux-design.md`、`.codex/rules/contracts.md`、`.codex/rules/documentation.md`、`.codex/ROADMAP.md` 五份，再挑一份已 accepted 的意图文件当实例，弄清 intent 的字段契约与现有 UX 政策（设计 token 四方比对脚本在 `.codex/scripts/dev/check_design_tokens.py`，前端 CSS 生成器在 `.codex/scripts/dev/gen_design_tokens_css.py`，权威数值在 `Docs/04-ux-design/design-system/tokens.json`）之后才动手。再参考上游 `https://github.com/openai/skills` 的 notion-spec-to-implementation 与 `https://github.com/anthropics/skills` 的 doc-coauthoring，取其「规格每条都要能追到来源」与「合作式成稿」的做法并二次优化。在 `.codex/agents/` 下新增 spec-author.md：只读上游、只写规格文件，不改代码、不改 intent、不建任务；在 `.codex/templates/` 下新增 SPEC.md，写清「规格里每一条都必须能追到 intent 条目、代码位置或设计 token」；再写一个纯标准库的**轻量**自检脚本（只查文件存在、四节标题、`intent:` 路径、占位符与裸 hex / 临场 px），跑通即可——本阶段不需要证据文件与自闸门。
 
 注意：`.codex/rules/contracts.md` 已把 `frontend/**` 与 `backend/**` 分别授权给 `frontend-dev` 与 `backend-dev`；`frontend/` 已落地（阶段 2 骨架 011–015、阶段一夹具 019、阶段三逐屏渲染与走查 020），`backend/` 目录尚未落地，不要把规划事实写成已运行服务。Web 线方向与边界见 `Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md`。写规格时不要把「仅本机环回可达的桌面服务」当成远程服务端，也不要假设横向扩容或多实例。规格完成后由人 review，接受才交给 requirement-decomposer 拆任务。
 
-注意：`Docs/spec/` 是 Stage 2 的产物目录，模板本身要求四类内容齐全；但**第一份规格**（AI 人设，上游为 `Docs/intent/INTENT-2026-09-21-ai-persona-preference.md`）按用户 2026-09-21 的口径**只出需求规格、界面方案、疑虑点三节**，`Technical spec` 一栏写 `DEFERRED:待 B4`，等 B4（codebase-researcher）落地后再补。
+注意：`Docs/spec/` 是 Stage 2 的产物目录，模板本身要求四类内容齐全；但**第一份规格**（AI 人设，上游为 `Docs/intent/INTENT-2026-09-21-ai-persona-preference.md`）按用户 2026-09-21 的口径**只出需求规格、界面方案、疑虑点三节**，`Technical spec` 一栏写 `DEFERRED:待 B4`，等 B4（codebase-researcher）落地后再补。那一句 `DEFERRED` 已由片 032 兑现（B4 即 `T-2026-10-19-codebase-researcher-impact-role-026` 已落地），现在该规格四节齐全；规格里的「现状」条目各带实测 `路径:行`，「规格」条目是等人 review 的口径而不是事实。
 
 ### B1 code-reviewer 角色与 REVIEW.md 报告模板
 
@@ -181,6 +182,9 @@ D5 = 互斥的两边同时消失），都是「复核后如实回写」而不是
 
 〔**2026-10-19 第三批**：登记 **D11**（core 档整跑里一条 Web 侧仪器间歇转红，且整跑读数把失败用例名吞掉了），
 **未闭合**；同批把 B4 交付回写进 Phase B（片 `T-2026-10-19-codebase-researcher-impact-role-026.md`）。〕
+
+〔**2026-10-20 第一批**：登记 **D12**（core 档最重的一条实测 262.4s，贴着 300s 默认上限，与任何命令并发即假红），
+**未闭合**；同批把 B0 交付回写进 Phase B（片 `T-2026-10-19-spec-author-technical-section-032.md`）。〕
 
 ### D1 `check_roadmap_and_routing` 的一次性迁移断言永久为红（2026-10-18 已按修法 ① 闭合）
 
@@ -428,3 +432,27 @@ D5 = 互斥的两边同时消失），都是「复核后如实回写」而不是
   本轮三份读数分别是 `run029-core.txt`（红）、`run029-cdp.txt`（单跑绿）、`run030-core.txt`（重跑绿）。
 - 归属：片 026 收口时发现；本片没有动 Web 侧任何代码或判据（`.codex/` 之外的文件一行未改，
   见该卡块 04 的 `git diff --stat HEAD` 口径与 core 档 27 条读数），所以这条红不归因于 B4，只归因于台账。
+
+### D12 core 档最重的一条守门贴着默认 300s 上限，与任何命令并发即假红（2026-10-20 登记，未闭合）
+
+- 现象：`python -X utf8 .codex/scripts/run_all_guards.py --tier core` 串行单跑时打印
+  `PASS verify_1to1_selftest rc=0 262.4s`（`artifacts/tmp/run168-core.txt`）；片 032 收尾时同一条命令与几支
+  `b032-*` 脚本并发跑，同一条变成 `FAIL verify_1to1_selftest timeout after 300s, so nothing was judged`、
+  汇总 `RUN-ALL-GUARDS pass=31 fail=1 inconclusive=0 fault=0` / `VERDICT: FAIL` / 退出码 1
+  （`artifacts/tmp/run186-tiers.txt`）。这一条用的正是 `run_all_guards.py:42` 的 `DEFAULT_TIMEOUT = 300`
+  ——条目定义在 `run_all_guards.py:132`，没有单独传 `timeout=`；262.4s 对 300s 只剩约 12% 余量。
+  D11 记下的 254.5s 与本轮的 262.4s 是同一件事的两次读数。
+- 后果（不修的话）：这条红不代表产物变差，代表**没判**——打印自己就写着 `nothing was judged`。而它的触发条件是
+  「旁边有人跑别的脚本」，恰好是交付收尾时最常见的姿势。拿这种轮次当结论只有两种走法，都坏：重跑到绿
+  （D8/D11 那一族里最坏的处理方式），或给这条放宽上限/加 `fail_codes` 消音（每放宽一次就少一个失败点，正是 D4
+  那族「仪器给自己开后门」）。反过来，一个不知情的实现片会花半天去归因一条根本不存在的回归。
+- 修法（不需要裁定，属既有先例的复用）：① 给这一条单独传按实测定的 `timeout=`——`Guard` 早已有这个参数
+  （`run_all_guards.py:60`、`:69`），只是这条没用上；数值要有依据，先在串行与并发两种姿势下各跑几轮取耗时分布，
+  不能凭感觉拍一个 900。② 汇总面已有 `inconclusive` 这一档，可考虑把「超时」从 `fail` 里分出单独计数并打印
+  「本轮未判」，让「没判」不再借用在告假红上的那个词——但这是判据语义变动，落地前要在 B3 的卡里写明。
+  ③ 流程侧立刻可用且本片已用：末态守门轮串行单跑、不与任何命令并发。
+- 回读：`python -X utf8 .codex/scripts/run_all_guards.py --tier core`（在有意并发一支数十秒级脚本的姿势下仍
+  `pass=32 fail=0 inconclusive=0 fault=0`），与串行单跑时该条读数仍与 262.4s 同量级（末态串行轮实测 235.6s）。
+  捕获留 gitignore 的 `artifacts/tmp/`：`run168-core.txt`（串行绿）、`run186-tiers.txt`（并发假红）、`run204-tiers.txt`（片 032 末态串行轮）。
+- 归属：片 032（B0，纯文档）收尾时发现；这条不归因于 B0——判据与它的 300s 上限都在 `run_all_guards.py` 里，
+  本片一行未动，只登记。
