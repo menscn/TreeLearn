@@ -17,15 +17,25 @@ description: 一条命令整跑仓库全部只读守门，并把「退出码 0�
 ## 跑法
 
 ```text
-python .codex/scripts/run_all_guards.py [--tier core|precommit|all] [--only 子串] [--list]
+python .codex/scripts/run_all_guards.py [--tier core|precommit|external|all] [--only 子串] [--list]
 ```
 
 - `core`（默认）：只读、确定性、不依赖构建产物或 git 增量的那档守门；条数不写在这里，`--list` 现场打印。任何一片提交前都要整跑。
 - `precommit`：依赖未提交增量、`frontend/dist` 或 Gradle 的那档（名单与条数同样只看 `--list`）：`line-budget`、`no-kotlin-check`、
   `guard-selftest -Fast`、`frontend verify`、`check_offline_bundle` 及其自检）。
+- `external`：判定取决于**本机以外的那个东西**的那档（现在只有 `cdp_shot_selftest`：它要浏览器真把原型渲染出来，
+  而原型的 React/Babel 来自 unpkg CDN，见 ROADMAP 的 D11③ 与 D14）。它仍被 `--tier all` 跑到，也有责任单跑命令，
+  但不进每片都要整跑的 core——一台出不去网的机器能让它必红，而那种红与产物无关。
+  它按实测单独传 `timeout=`：这条在「红但判了」的姿势下实测 123.3 / 265.3 / 314.5 秒，默认 300s 会把最后那种
+  掐在自己的判据行之前，那等于把 `DIAG` 挣来的诊断又丢掉。
+  「它被挪回 core」由 `check_run_all_guards.py` 的 `external-keys` 探针判红，不靠这段说明。
+  同一台机器断外网时 core 档并不会因此变绿：`verify_1to1_selftest` 用同一个浏览器仪器取同一个原型，还留在 core 里，
+  它会以 `TIMEOUT` 或 `fault` 出现（不是 `fail`）。碰到这种读数先用 `.codex/scripts/dev/net_probe.py`
+  确认外网（三面探针，只打印读数不判绿），再决定要不要动判据——把它也移出 core 属验收面变更，需要用户裁定（ROADMAP D14 的范围栏）。
 - `--list`：打印注册表（档位、守门名、要找的判据行片段），不运行任何东西。
 - `--only 子串`：只跑名字含该子串的条目。跑出来的绿话会写明 `subset only`——
-  子集绿不等于整表绿，别把它当成整跑的证据。
+  子集绿不等于整表绿，别把它当成整跑的证据。`subset=` 那一行回答的是「整表是不是都被判过了」，
+  所以 `--tier core` 也打印 `subset=yes`（档位本身就只选了一张表的子集），不是只有 `--only` 才算子集。
 
 ## 判定规则（为什么不是只看退出码）
 
@@ -43,10 +53,21 @@ python .codex/scripts/run_all_guards.py [--tier core|precommit|all] [--only 子�
 |---|---|
 | 0 | 入选守门全部打印了判据行且全部判绿 |
 | 1 | 至少一条判红，或至少一条没打印判据行 |
-| 3 | 汇总器没能把每条入选守门都跑起来（脚本/解释器缺失、输出不是合法 UTF-8、注册表自相矛盾、过滤选中零条）→ 本次结论不成立 |
+| 3 | 本次结论不成立：某条守门根本没跑起来（脚本/解释器缺失、输出不是合法 UTF-8、注册表自相矛盾、过滤选中零条），**或**某条守门撞到自己的超时上限 |
 
 `3` 与 `1` 分开的理由和仓库其余守门一致：「无从认证」被读成「判红」还算诚实，
-被读成「通过」才是事故。
+被读成「通过」才是事故。超时单独归到 `3`（片 036）是因为**超时就是没判**：它既没给出判据行也没给出
+判决，把它算成 `fail=1` 会让下一位实现者去查一个不存在的回归——`RUN-ALL-GUARDS` 那行的 `timeout=` 计数
+与 `TIMEOUT` 状态列一起，把「没判」和「判红」在读数里就分开。碰到 `timeout=` 非零时**重跑那一条**
+（最好串行单独跑），而不是给它放宽上限。
+
+## 红的时候读数长什么样
+
+任何一条不是 PASS 的守门后面紧跟一段 `DIAG`：那条守门自己的原始输出。短输出整段打印（`mode=full`），
+超过 `DIAG_FULL_MAX` 行的只取末尾（`mode=tail`，读数里写明取了末尾）。
+这条是片 036 补的：在那之前失败条目只打印被 needle 命中的那一行（例如
+`SELFTEST FAIL cases=17 failures=1`），子进程逐用例的输出被丢弃，所以「**哪一例**红」在整跑读数里
+没有答案，必须再单独跑一次那条命令才知道。
 
 ## 加一条守门
 
@@ -58,6 +79,16 @@ python .codex/scripts/run_all_guards.py [--tier core|precommit|all] [--only 子�
   `check(s) failed`、`VERDICT:`），否则一次判红会被误报成「没打印判据」。
 - 新守门默认进 `precommit`，除非它确定不依赖构建产物、实机、本机服务端或未提交增量。
 - 注册表有裸下限（`MIN_ROSTER`、`MIN_CORE`）：从表里删条目不会让汇总器更绿，只会让它判 3。
+  上限同样是裸字面量（`MAX_TIMEOUT`）：把 `timeout=` 写得比它大，那条守门就永远不会超时，
+  而「永不超时」与「判绿」在汇总面上长得一样。
+- 一条守门的实测耗时贴到默认上限的一半以上时，给它单独传 `timeout=`，数值要有依据：
+  取**串行健康轮**的多次读数，按最大值留约一倍余量（四次读数逐条列在 ROADMAP D12 处置 ③，那里是权威落点）。
+  规则是**上限要盖过「能给出判决的最长一次实测」，而不是盖过「最慢的那一次」**：前者掐了就是少一个失败点，
+  后者掐了只是少烧几分钟去打印同一句「没判」（`DIAG` 会把掐断前的部分输出照常摆出来）。
+  「并发姿势」这件事要先归因再决定：片 036 把同一支命令各跑一轮，串行与并发同值（`rc=3`），
+  那段耗时来自它自己的故障路径（渲染不出来时每个用例烧满等待），旁边的负载根本没参与——见 ROADMAP D12 处置 ②。
+  凭感觉拍一个 900 与放宽判据是同一件事；给一条**故障路径很长**的守门抬高上限同样不是修，
+  它只是让一轮多烧几分钟去打印同一句「仪器故障」。
 
 ## 自检
 
@@ -67,12 +98,19 @@ python .codex/scripts/check_run_all_guards.py
 
 用例条数由该脚本自己打印（`SELFTEST cases=…`），这里不写死；它在合成注册表上逐条注入违规并核对判决（跑的是临时子进程，真实仓库文件一个都不改）：
 rc=0 但静默 → FAIL、rc 落在判绿/判红集合外 → 无从认证、脚本缺失/解释器起不来/输出乱码 → 故障、
-挂住不回 → 超时判红、空表与被挪空的 core 档 → 注册表故障、子集绿话必须写明 `subset only` 等。
+挂住不回 → `TIMEOUT`（走退出码 3，不借 `fail=1` 那个词）、超时写超过 `MAX_TIMEOUT` → 注册表故障、
+判红时必须把子进程的用例名带进 `DIAG`、判绿时不许带 `DIAG`、长输出只取末尾并写明 `mode=tail`、
+空表与被挪空的 core 档 → 注册表故障、子集绿话必须写明 `subset only`、`--tier external` 不得把 core 条目带进判定面等。
+另有两条不跑子进程的表形状探针：`core-keys`（关键守门被人删掉就断）与 `external-keys`（环境依赖那条被挪回 core 就断）。
 改过 `run_all_guards.py` 的任何判定分支，都必须整跑这支自检并留输出。
+
+这支自检自己也注册进了 `core` 档（`check_run_all_guards`）：在那之前「改过判定分支必须整跑自检」
+这句话只写在本文里，没有任何常驻仪器替它负责——汇总器的判定分支坏了，整跑面照样全绿。
+它跑的是合成注册表与临时子进程，不会递归去跑真实那张表。
 
 ## 不在这张表里的东西
 
 需要实机或本机服务端才能判的走查不在只读汇总面内：`web_walk.mjs` 正文（只跑它的 `--selftest`）、
 `capture_screen.py`、像素量测与安装冒烟属于 ROADMAP 的 C4 release-gate。
 `dev/gen_*.py`、`inline_offline.mjs`、`make_t0xx_evidence.py` 会写文件，不是守门。
-`dev/count_*.py`、`dev/review_*.py` 是给人看的打印工具，没有判绿语义。
+`dev/count_*.py`、`dev/review_*.py`、`dev/net_probe.py` 是给人看的打印工具，没有判绿语义。

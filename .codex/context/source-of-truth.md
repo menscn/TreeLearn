@@ -120,10 +120,10 @@
 
 ### 守门档位条数
 - **类型**：生成型
-- **唯一权威**：`.codex/scripts/run_all_guards.py:40`
+- **唯一权威**：`.codex/scripts/run_all_guards.py:49`
 - **更新时机**：注册表增删条目后不需要改任何散文，条数只由 `--list` 打印
 - **漂移检查**：`python -X utf8 .codex/scripts/run_all_guards.py --list`
-- **锚点**：`^(?=.*(?:core|precommit|合成注册表)).*(?:的 \d+ 条[。（]|\d+ 条用例)`
+- **锚点**：`^(?=.*(?:core|precommit|external|合成注册表)).*(?:的 \d+ 条[。（]|\d+ 条用例)`
 - **归属标记**：`不适用（生成型要求扫描面零命中）`
 
 ### 当前态面的活指针声称条数

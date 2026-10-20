@@ -27,10 +27,18 @@ import run_all_guards as R  # noqa: E402
 
 EXIT_PASS, EXIT_FAIL, EXIT_FAULT = 0, 1, 3
 # 裸下限：用例数由被检集合自己数的话，删掉一半用例仍然是绿。
-MIN_CASES = 20
+# 片 036 抬过一次：新增的那几条全部围绕「非 PASS 时把子进程输出摆出来」「超时不再借判红那个词」
+# 与「环境依赖不进 core」，用例面涨了就不许再用旧下限给新面背书。
+# 当前实有多少条不写在这里——那是一个会随每片漂移的数，由本支脚本自己打印（`SELFTEST cases=`）；
+# 这里的字面量只回答「少到多少条就不能再算判过」。
+MIN_CASES = 26
 
 GREEN = "VERDICT-GREEN"
 PYC = [sys.executable, "-X", "utf8", "-c"]
+# 兜底值只为了一件事：RED 对照要把这支电池架在**没有超时上限**的旧实现上跑。
+# 直接写 R.MAX_TIMEOUT 会在构造用例表时 AttributeError，整支电池崩成仪器故障，
+# 那份读数就说不出「哪一条新判据在旧实现里是缺的」——而这正是 RED 要回答的问题。
+CEILING = getattr(R, "MAX_TIMEOUT", 1800)
 
 
 def guard(name, code, needles=(GREEN,), tiers=("core",), **kw):
@@ -51,6 +59,27 @@ OTHER_LINE = "print('totally unrelated chatter')\n"
 RC2 = "import sys\nprint('%s')\nsys.exit(2)\n" % GREEN
 BAD_UTF8 = "import sys\nsys.stdout.buffer.write(b'\\xff\\xfe\\x00bad')\n"
 SLEEPY = "import time\nprint('%s')\ntime.sleep(20)\n" % GREEN
+# D11 的正例形态：逐用例的行与汇总行都打出来，汇总行含 needle，退出码 1。
+# 「needle 命中那一行」恰好是最后一条，所以旧实现里那条 `FAIL neg-*` 的用例名会被丢掉。
+RED_WITH_CASES = ("import sys\n"
+                  "print('ok   pos-real-render rc=0')\n"
+                  "print('FAIL neg-wait-for-absent rc=1 want=0')\n"
+                  "print('%s cases=2 failures=1')\n"
+                  "sys.exit(1)\n" % GREEN)
+# 构建类守门的形态：输出远超 DIAG_FULL_MAX，只能取末尾，且读数里要写明取的是末尾。
+# 这段子进程代码里本来就带 `%03d` 和 `% i`，再用一次外层 `% GREEN` 会把它当成自己的转换符吃掉
+# （RED 那轮真实撞过：`TypeError: %i format`）——所以这里改用拼接，needle 不进格式化。
+LONG_OUT = ("import sys\n"
+            "for i in range(1, 81):\n    print('line-%03d' % i)\n"
+            "print(" + repr(GREEN) + ")\n"
+            "sys.exit(1)\n")
+# 挂住不回但在此之前已经打了逐用例行：超时那份输出也必须进 DIAG，否则「超时」连
+# 「它当时在判哪一例」都不肯留下。flush 是必需的——被 kill 的进程不会替缓冲区收尾。
+PARTIAL_SLEEPY = ("import sys, time\n"
+                  "print('%s')\n"
+                  "print('CASE-ALPHA 是子进程自己的逐用例行')\n"
+                  "sys.stdout.flush()\n"
+                  "time.sleep(20)\n" % GREEN)
 BAD_INTERPRETER = R.Entry("dead-interpreter", R.PY, [], [GREEN], ["core"],
                           argv=[os.path.join(R.REPO_ROOT, "no-such-interpreter-xyz.exe"), "-c", "pass"])
 MISSING_SCRIPT = R.E("missing-script", R.PY, [".codex/scripts/dev/does-not-exist.py"],
@@ -109,8 +138,24 @@ CASES = [
     ("子进程输出不是合法 UTF-8 → FAULT（乱码不能算判据行）",
      [guard("badbytes", BAD_UTF8)], [], EXIT_FAULT,
      ["FAULT", "not valid UTF-8"], ["VERDICT: PASS"]),
-    ("守门挂住不回 → FAIL 并写明超时", [guard("sleepy", SLEEPY, timeout=2)], [], EXIT_FAIL,
-     ["timeout after 2s"], ["VERDICT: PASS"]),
+    ("守门挂住不回 → 超时算「本轮没判」，走退出码 3，不借判红那个词（D12）",
+     [guard("sleepy", SLEEPY, timeout=2)], [], EXIT_FAULT,
+     ["TIMEOUT", "timeout after 2s", "timeout=1", "nothing was judged for them"],
+     ["VERDICT: PASS", "fail=1", "VERDICT: FAIL"]),
+    ("超时之前子进程已经打出来的逐用例行要进 DIAG",
+     [guard("partial-sleepy", PARTIAL_SLEEPY, timeout=2)], [], EXIT_FAULT,
+     ["TIMEOUT", "CASE-ALPHA", "mode=full"], ["VERDICT: PASS"]),
+    ("判红时把子进程自己的用例名一起打印（D11：红因不能只留在单独一次直跑里）",
+     [guard("red-with-cases", RED_WITH_CASES)], [], EXIT_FAIL,
+     ["FAIL", "DIAG", "mode=full", "neg-wait-for-absent"], ["VERDICT: PASS"]),
+    ("长输出只取末尾，并在读数里写明取的是末尾",
+     [guard("long-out", LONG_OUT)], [], EXIT_FAIL,
+     ["DIAG", "mode=tail", "line-080"], ["line-001", "VERDICT: PASS"]),
+    ("判绿的守门不附带 DIAG（汇总面不能被绿条目的流水输出灌满）",
+     [guard("green", OK)], [], EXIT_PASS, ["VERDICT: PASS"], ["DIAG"]),
+    ("超时上限写超过 MAX_TIMEOUT → 注册表故障：一条永不超时的守门与一条判绿无法区分",
+     [guard("ceiling", OK, timeout=CEILING + 1)], [], EXIT_FAULT,
+     ["ROSTER FAULT", "ceiling"], ["VERDICT: PASS"]),
     ("一条绿 + 一条哑：总体判红，但两条都要打印出来",
      [guard("green-a", OK), guard("silent-b", SILENT)], [], EXIT_FAIL,
      ["green-a", "silent-b", "fail=1", "VERDICT: FAIL"], ["VERDICT: PASS"]),
@@ -148,6 +193,10 @@ CASES = [
     ("--tier precommit 而该档为空 → 无从认证",
      [guard("green", OK)], ["--tier", "precommit"], EXIT_FAULT,
      ["NO-SELECTION"], ["VERDICT: PASS"]),
+    ("--tier external 只选外部依赖档，core 条目一条都不进判定面（D11③ 的档位边界）",
+     [guard("core-one", OK), guard("ext-one", OK, tiers=("external",))],
+     ["--tier", "external"], EXIT_PASS,
+     ["tier=external selected=1", "ext-one", "subset=yes"], ["core-one"]),
     ("--list 打印整表且不运行任何守门",
      [guard("green", OK)], ["--list"], EXIT_PASS,
      ["ROSTER entries=", "green"], ["VERDICT: PASS (all"]),
@@ -157,21 +206,38 @@ CASES = [
     ("真实注册表：形状合法、声明的脚本都在场、没用逃生口",
      None, "roster-shape", EXIT_PASS, ["entries=", "missing=0", "escape=0"], []),
     ("core 档仍覆盖那几支关键守门（删条目就会在这里断）",
-     None, "core-keys", EXIT_PASS, ["core-keys=4/4"], []),
+     None, "core-keys", EXIT_PASS, ["core-keys=5/5"], []),
+    ("需要外网渲染的那条只在 external 档：把它挪回 core 就会在这里断（D11③）",
+     None, "external-keys", EXIT_PASS, ["external-keys=1/1 core-leak=0"], []),
 ]
 
-# core 档必须一直带着这几支：它们分别守着任务契约、栈事实、Android 静态契约与夹具字节。
+# core 档必须一直带着这几支：它们分别守着任务契约、栈事实、Android 静态契约、夹具字节，
+# 以及**汇总器自己的判定分支**——最后一支在片 036 之前只写在 SKILL.md 的「改过判定分支必须整跑自检」
+# 那句话里，没有任何常驻仪器替这句话负责。
 CORE_KEYS = ["validate_tasks", "check_stack_facts",
-             "check_androidtest_schema_expectations", "sync_fixtures --check"]
+             "check_androidtest_schema_expectations", "sync_fixtures --check",
+             "check_run_all_guards"]
+# 反过来钉住「需要外网的不得混进 core 档」：D11③ 把 `cdp_shot_selftest` 移出 core 之后，
+# 光有「它在 external 档」这一半不够——一条同时挂着两档的条目仍然会被 core 整跑到。
+# 这一支与 core-keys 那支是一对：一支防「关键守门被删」，一支防「环境依赖被挪回来」。
+EXTERNAL_KEYS = ["cdp_shot_selftest"]
 
 
 def probe(kind):
-    """不跑子进程的两条：它们查的是「那张表还值不值得相信」。"""
+    """不跑子进程的三条：它们查的是「那张表还值不值得相信」。"""
     if kind == "core-keys":
         names = set(g.name for g in R.GUARDS if "core" in g.tiers)
         hits = [k for k in CORE_KEYS if k in names]
         return len(hits) == len(CORE_KEYS), "core-keys=%d/%d missing=%s" % (
             len(hits), len(CORE_KEYS), [k for k in CORE_KEYS if k not in names])
+    if kind == "external-keys":
+        ext = set(g.name for g in R.GUARDS if "external" in g.tiers)
+        core = set(g.name for g in R.GUARDS if "core" in g.tiers)
+        hits = [k for k in EXTERNAL_KEYS if k in ext]
+        leak = [k for k in EXTERNAL_KEYS if k in core]
+        return len(hits) == len(EXTERNAL_KEYS) and not leak, "external-keys=%d/%d core-leak=%d %s" % (
+            len(hits), len(EXTERNAL_KEYS), len(leak),
+            ("missing=%s" % [k for k in EXTERNAL_KEYS if k not in ext]) if not leak else "leak=%s" % leak)
     problems = R.roster_problems(R.GUARDS)
     missing = [p for g in R.GUARDS for p in R.repo_paths(g) if not os.path.isfile(p)]
     escape = [g.name for g in R.GUARDS if g.argv]

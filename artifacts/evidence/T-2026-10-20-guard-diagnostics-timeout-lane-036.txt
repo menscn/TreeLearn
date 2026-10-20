@@ -1,0 +1,708 @@
+Task evidence T-2026-10-20-036 — 整跑读数自己说清哪条红、超时不再借判红的词
+环境：Windows 10.0.26200 / x64 / Python 3.13.12 / Node 与 Git Bash；所有 Python 命令带 -X utf8。
+判据行逐字粘贴、不截断。块 00/08/09 里标了「当场重跑」的条目由本装配驱动现场执行只读命令，其余每一行都取自 artifacts/tmp/run*.txt 的在场捕获（该目录 gitignore，本片号段 run327–run358，共 34 份，逐条核对见块 09 末）。
+本片有两处作废读数点名保留：`run333`（负载接管道又不读，测出来的「并发」是半空转）与 `run329`（电池自己的 `%i format` 崩溃，RED 还没开始就红了）。
+还有一处推翻登记归因的对照：`run334`（并发）与 `run335`（串行单跑）同值，见块 04 与 ROADMAP D12 处置 ②。
+末态两轮（run356 core、run357 precommit）在卡片写完 Verdict 并重生成报告（run355）之后跑的，按 D12③ 串行单独跑、不与任何命令并发；跑前一次网络状态探针逐字在块 05 末（run354）。
+external 档的末态读数是 run351，它跑在卡片之前、表长与判据串与末态一致，块 07 里按此标明。
+缺的捕获：无
+
+================================================================================================================================================================
+块 00 — 判据本体：注册表与电池（当场重跑，只读）
+================================================================================================================================================================
+### python -X utf8 .codex/scripts/run_all_guards.py --list（档位与条数只在这里打印）
+ROSTER entries=43 core=36 precommit=6 external=1
+core           validate_tasks                         "SUMMARY files="
+core           check_context_pack                     "check(s) failed"
+core           check_code_reviewer_agent              "check(s) failed"
+core           check_codebase_researcher_agent        "check(s) failed"
+core           check_code_simplifier_agent            "check(s) failed"
+core           check_loop_watcher_agent               "check(s) failed"
+core           check_source_of_truth                  "check(s) failed"
+core           run_evals                              "check(s) failed"
+core           check_eval_keeper_agent                "check(s) failed"
+core           metrics_report                         "check(s) failed"
+core           check_metrics_reporter_agent           "check(s) failed"
+core           check_intent_capturer_agent            "check(s) failed"
+core           check_intent_template                  "check(s) failed"
+core           check_pm_discovery_skill               "check(s) failed"
+core           check_roadmap_and_routing              "check(s) failed"
+core           check_spec_author_agent                "check(s) failed"
+core           check_stack_facts                      "check(s) failed"
+core           check_design_tokens                    "check(s) failed"
+core           check_pointer_liveness                 "check(s) failed"
+core           check_pointer_liveness --selftest      "SELFTEST cases="
+core           check_androidtest_schema_expectations  "VERDICT:"
+core           check_run_all_guards                   "SELFTEST cases="
+core           checkers_selftest                      "OVERALL:"
+core           parity_ledger_selftest                 "VERDICT:"
+core           screen_inventory_selftest              "VERDICT:"
+core           measure_screen --selftest              "VERDICT:"
+core           verify_1to1_selftest                   "cases=" "vocabulary-layer-aborted"
+external       cdp_shot_selftest                      "cases=" "selftest-case-floor"
+core           web_walk --selftest                    "SELFTEST cases="
+core           check_dependency_direction             "dependency scan root="
+core           check_dependency_direction --selftest  "SELFTEST cases="
+core           check_user_copy_i18n                   "user-copy scan root="
+core           check_user_copy_i18n --selftest        "SELFTEST cases="
+core           check_device_time                      "device-time scan root="
+core           check_device_time --selftest           "SELFTEST cases="
+core           sync_fixtures --check                  "SYNC CHECK"
+core           sync_fixtures --selftest               "SELFTEST cases="
+precommit      check_offline_bundle                   "offline scan root="
+precommit      check_offline_bundle --selftest        "SELFTEST cases="
+precommit      frontend verify                        "verify steps="
+precommit      line-budget                            "业务变更行:" "[line-budget] 错误"
+precommit      no-kotlin-check                        "VERDICT:"
+precommit      guard-selftest -Fast                   "OVERALL ="
+EXITCODE=0
+EXITCODE=0
+### 落盘对照 run338-list.txt 里的关键三条
+ROSTER entries=43 core=36 precommit=6 external=1
+core           check_run_all_guards                   "SELFTEST cases="
+core           verify_1to1_selftest                   "cases=" "vocabulary-layer-aborted"
+external       cdp_shot_selftest                      "cases=" "selftest-case-floor"
+
+================================================================================================================================================================
+块 01 — RED 之前先打到电池自己（run329 全文，作废读数的原文保留）
+================================================================================================================================================================
+RED 对照：battery=.codex/scripts/check_run_all_guards.py（工作树，未改） impl=artifacts\tmp\_g036\run_all_guards.py（HEAD 副本，sha 见块内）
+RED impl facts: MAX_TIMEOUT 在场=False DIAG_FULL_MAX 在场=False 超时档名在场=False
+Traceback (most recent call last):
+  File "D:\Project\Android\Treelearn\artifacts\tmp\b036-red.py", line 41, in <module>
+    import check_run_all_guards as C  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\Android\Treelearn\.codex\scripts\check_run_all_guards.py", line 70, in <module>
+    LONG_OUT = ("import sys\n"
+                ~~~~~~~~~~~~~~
+                "for i in range(1, 81):\n    print('line-%03d' % i)\n"
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                "print('%s')\nsys.exit(1)\n" % GREEN)
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+TypeError: %d format: a real number is required, not str
+EXITCODE=1
+作废原因：`LONG_OUT` 的子进程代码里 `%03d` 与 `% i` 被外层 `% GREEN` 当成自己的转换符，电池在构造用例阶段就 TypeError，一条用例都没跑。改成拼接（不再外层格式化）之后才有块 02。
+
+================================================================================================================================================================
+块 02 — RED：同一支电池架在 HEAD 版实现上，逐条 BROKEN（run330）
+================================================================================================================================================================
+RED 对照：battery=.codex/scripts/check_run_all_guards.py（工作树，未改） impl=artifacts\tmp\_g036\run_all_guards.py（HEAD 副本，sha 见块内）
+RED impl facts: MAX_TIMEOUT 在场=False DIAG_FULL_MAX 在场=False 超时档名在场=False
+RED binding check: 电池 import 到的 run_all_guards 就是那份副本（同一个模块对象）
+CASE 判绿的守门被认下来                                            expected=0 actual=0  Ok
+CASE rc=0 但一个字都不打 → FAIL（B3 的核心要求）                        expected=1 actual=1  Ok
+CASE rc=1 且打了判据行 → FAIL                                   expected=1 actual=1  Ok
+CASE 判据行只出现在 stderr 也算数                                   expected=0 actual=0  Ok
+CASE rc=2（既不是判绿也不是判红的集合）→ 无从认证                            expected=3 actual=3  Ok
+CASE 注册的脚本文件不在场 → FAULT，不能当成通过                            expected=3 actual=3  Ok
+CASE 解释器起不来 → FAULT                                       expected=3 actual=3  Ok
+CASE 子进程输出不是合法 UTF-8 → FAULT（乱码不能算判据行）                    expected=3 actual=3  Ok
+CASE 守门挂住不回 → 超时算「本轮没判」，走退出码 3，不借判红那个词（D12）               expected=3 actual=1  BROKEN
+      |              > VERDICT-GREEN
+      | PASS         pad-18                                 rc=0 0.0s
+      |              > VERDICT-GREEN
+      | RUN-ALL-GUARDS pass=19 fail=1 inconclusive=0 fault=0
+      | VERDICT: FAIL (1 guard(s) red or silent)
+      | EXITCODE=1
+CASE 超时之前子进程已经打出来的逐用例行要进 DIAG                             expected=3 actual=1  BROKEN
+      |              > VERDICT-GREEN
+      | PASS         pad-18                                 rc=0 0.0s
+      |              > VERDICT-GREEN
+      | RUN-ALL-GUARDS pass=19 fail=1 inconclusive=0 fault=0
+      | VERDICT: FAIL (1 guard(s) red or silent)
+      | EXITCODE=1
+CASE 判红时把子进程自己的用例名一起打印（D11：红因不能只留在单独一次直跑里）                expected=1 actual=1  BROKEN
+      |              > VERDICT-GREEN
+      | PASS         pad-18                                 rc=0 0.0s
+      |              > VERDICT-GREEN
+      | RUN-ALL-GUARDS pass=19 fail=1 inconclusive=0 fault=0
+      | VERDICT: FAIL (1 guard(s) red or silent)
+      | EXITCODE=1
+CASE 长输出只取末尾，并在读数里写明取的是末尾                                 expected=1 actual=1  BROKEN
+      |              > VERDICT-GREEN
+      | PASS         pad-18                                 rc=0 0.0s
+      |              > VERDICT-GREEN
+      | RUN-ALL-GUARDS pass=19 fail=1 inconclusive=0 fault=0
+      | VERDICT: FAIL (1 guard(s) red or silent)
+      | EXITCODE=1
+CASE 判绿的守门不附带 DIAG（汇总面不能被绿条目的流水输出灌满）                      expected=0 actual=0  Ok
+CASE 超时上限写超过 MAX_TIMEOUT → 注册表故障：一条永不超时的守门与一条判绿无法区分       expected=3 actual=0  BROKEN
+      |              > VERDICT-GREEN
+      | PASS         pad-18                                 rc=0 0.0s
+      |              > VERDICT-GREEN
+      | RUN-ALL-GUARDS pass=20 fail=0 inconclusive=0 fault=0
+      | VERDICT: PASS (all 20 selected guard(s) printed a judgement line and returned green)
+      | EXITCODE=0
+CASE 一条绿 + 一条哑：总体判红，但两条都要打印出来                             expected=1 actual=1  Ok
+CASE 一条判红 + 一条起不来：故障压过判红，退出码 3                            expected=3 actual=3  Ok
+CASE 空注册表 → 注册表故障                                         expected=3 actual=3  Ok
+CASE core 档被挪空 → 注册表故障（不许把守门降档来凑绿）                        expected=3 actual=3  Ok
+CASE 重名条目 → 注册表故障                                         expected=3 actual=3  Ok
+CASE 判据行了 = 没有判据行 → 注册表故障                                 expected=3 actual=3  Ok
+CASE 档位名写错 → 注册表故障                                        expected=3 actual=3  Ok
+CASE pass_codes 不含 0 → 注册表故障                              expected=3 actual=3  Ok
+CASE 判绿码与判红码重叠 → 注册表故障                                    expected=3 actual=3  Ok
+CASE 超时写成非正数 → 注册表故障                                      expected=3 actual=3  Ok
+CASE --only 一个字都没选中 → 无从认证                                expected=3 actual=3  Ok
+CASE --only 只跑子集：绿话必须写明是子集                                expected=0 actual=0  Ok
+CASE --tier precommit 而该档为空 → 无从认证                        expected=3 actual=3  Ok
+CASE --tier external 只选外部依赖档，core 条目一条都不进判定面（D11③ 的档位边界）  expected=0 actual=3  BROKEN
+      | ROSTER FAULT ext-one: tiers must be a non-empty subset of ['core', 'precommit']
+      | VERDICT: INCONCLUSIVE (the roster itself is inconsistent)
+      | EXITCODE=3
+CASE --list 打印整表且不运行任何守门                                  expected=0 actual=0  Ok
+CASE 认不出的参数 → 用法错误，退出码 3                                  expected=3 actual=3  Ok
+CASE 真实注册表：形状合法、声明的脚本都在场、没用逃生口                            expected=0 actual=entries=42 core=36 problems=0 missing=0 escape=0  Ok
+CASE core 档仍覆盖那几支关键守门（删条目就会在这里断）                          expected=0 actual=core-keys=4/5 missing=['check_run_all_guards']  BROKEN
+CASE 需要外网渲染的那条只在 external 档：把它挪回 core 就会在这里断（D11③）        expected=0 actual=external-keys=0/1 core-leak=1 leak=['cdp_shot_selfte  BROKEN
+SELFTEST cases=33 executed=33 floor=26 broken=8
+  - 守门挂住不回 → 超时算「本轮没判」，走退出码 3，不借判红那个词（D12） — rc want=3 got=1 missing=['TIMEOUT', 'timeout=1', 'nothing was judged for them'] forbidden=['fail=1', 'VERDICT: FAIL']
+  - 超时之前子进程已经打出来的逐用例行要进 DIAG — rc want=3 got=1 missing=['TIMEOUT', 'CASE-ALPHA', 'mode=full'] forbidden=[]
+  - 判红时把子进程自己的用例名一起打印（D11：红因不能只留在单独一次直跑里） — rc want=1 got=1 missing=['DIAG', 'mode=full', 'neg-wait-for-absent'] forbidden=[]
+  - 长输出只取末尾，并在读数里写明取的是末尾 — rc want=1 got=1 missing=['DIAG', 'mode=tail', 'line-080'] forbidden=[]
+  - 超时上限写超过 MAX_TIMEOUT → 注册表故障：一条永不超时的守门与一条判绿无法区分 — rc want=3 got=0 missing=['ROSTER FAULT'] forbidden=['VERDICT: PASS']
+  - --tier external 只选外部依赖档，core 条目一条都不进判定面（D11③ 的档位边界） — rc want=0 got=3 missing=['tier=external selected=1', 'subset=yes'] forbidden=[]
+  - core 档仍覆盖那几支关键守门（删条目就会在这里断） — core-keys=4/5 missing=['check_run_all_guards'] missing=['core-keys=5/5']
+  - 需要外网渲染的那条只在 external 档：把它挪回 core 就会在这里断（D11③） — external-keys=0/1 core-leak=1 leak=['cdp_shot_selftest'] missing=['external-keys=1/1 core-leak=0']
+OVERALL: FAIL
+EXITCODE=1
+EXITCODE=1
+
+================================================================================================================================================================
+块 03 — GREEN：电池对当前实现（run331 是中间那次 broken=1，run332/run337/run350 是修后）
+================================================================================================================================================================
+### run331（`--tier external` 那条用例第一次写错 subset 期望，读数保留）
+CASE --tier external 只选外部依赖档，core 条目一条都不进判定面（D11③ 的档位边界）  expected=0 actual=0  BROKEN
+SELFTEST cases=33 executed=33 floor=26 broken=1
+OVERALL: FAIL
+### run332（registry 改动之前的一次绿）
+OVERALL: PASS
+EXITCODE=0
+EXITCODE=0
+### run337（DIAG/TIMEOUT/MAX_TIMEOUT/external/两条 needles/自注册 全部落地之后）
+CASE 判绿的守门被认下来                                            expected=0 actual=0  Ok
+CASE rc=0 但一个字都不打 → FAIL（B3 的核心要求）                        expected=1 actual=1  Ok
+CASE rc=1 且打了判据行 → FAIL                                   expected=1 actual=1  Ok
+CASE 判据行只出现在 stderr 也算数                                   expected=0 actual=0  Ok
+CASE rc=2（既不是判绿也不是判红的集合）→ 无从认证                            expected=3 actual=3  Ok
+CASE 注册的脚本文件不在场 → FAULT，不能当成通过                            expected=3 actual=3  Ok
+CASE 解释器起不来 → FAULT                                       expected=3 actual=3  Ok
+CASE 子进程输出不是合法 UTF-8 → FAULT（乱码不能算判据行）                    expected=3 actual=3  Ok
+CASE 守门挂住不回 → 超时算「本轮没判」，走退出码 3，不借判红那个词（D12）               expected=3 actual=3  Ok
+CASE 超时之前子进程已经打出来的逐用例行要进 DIAG                             expected=3 actual=3  Ok
+CASE 判红时把子进程自己的用例名一起打印（D11：红因不能只留在单独一次直跑里）                expected=1 actual=1  Ok
+CASE 长输出只取末尾，并在读数里写明取的是末尾                                 expected=1 actual=1  Ok
+CASE 判绿的守门不附带 DIAG（汇总面不能被绿条目的流水输出灌满）                      expected=0 actual=0  Ok
+CASE 超时上限写超过 MAX_TIMEOUT → 注册表故障：一条永不超时的守门与一条判绿无法区分       expected=3 actual=3  Ok
+CASE 一条绿 + 一条哑：总体判红，但两条都要打印出来                             expected=1 actual=1  Ok
+CASE 一条判红 + 一条起不来：故障压过判红，退出码 3                            expected=3 actual=3  Ok
+CASE 空注册表 → 注册表故障                                         expected=3 actual=3  Ok
+CASE core 档被挪空 → 注册表故障（不许把守门降档来凑绿）                        expected=3 actual=3  Ok
+CASE 重名条目 → 注册表故障                                         expected=3 actual=3  Ok
+CASE 判据行了 = 没有判据行 → 注册表故障                                 expected=3 actual=3  Ok
+CASE 档位名写错 → 注册表故障                                        expected=3 actual=3  Ok
+CASE pass_codes 不含 0 → 注册表故障                              expected=3 actual=3  Ok
+CASE 判绿码与判红码重叠 → 注册表故障                                    expected=3 actual=3  Ok
+CASE 超时写成非正数 → 注册表故障                                      expected=3 actual=3  Ok
+CASE --only 一个字都没选中 → 无从认证                                expected=3 actual=3  Ok
+CASE --only 只跑子集：绿话必须写明是子集                                expected=0 actual=0  Ok
+CASE --tier precommit 而该档为空 → 无从认证                        expected=3 actual=3  Ok
+CASE --tier external 只选外部依赖档，core 条目一条都不进判定面（D11③ 的档位边界）  expected=0 actual=0  Ok
+CASE --list 打印整表且不运行任何守门                                  expected=0 actual=0  Ok
+CASE 认不出的参数 → 用法错误，退出码 3                                  expected=3 actual=3  Ok
+CASE 真实注册表：形状合法、声明的脚本都在场、没用逃生口                            expected=0 actual=entries=43 core=36 problems=0 missing=0 escape=0  Ok
+CASE core 档仍覆盖那几支关键守门（删条目就会在这里断）                          expected=0 actual=core-keys=5/5 missing=[]  Ok
+CASE 需要外网渲染的那条只在 external 档：把它挪回 core 就会在这里断（D11③）        expected=0 actual=external-keys=1/1 core-leak=0 missing=[]  Ok
+SELFTEST cases=33 executed=33 floor=26 broken=0
+OVERALL: PASS
+EXITCODE=0
+### run350（再给 `cdp_shot_selftest` 设了 `timeout=600` 之后的复跑，表长从 42 变 43）
+CASE 真实注册表：形状合法、声明的脚本都在场、没用逃生口                            expected=0 actual=entries=43 core=36 problems=0 missing=0 escape=0  Ok
+CASE core 档仍覆盖那几支关键守门（删条目就会在这里断）                          expected=0 actual=core-keys=5/5 missing=[]  Ok
+CASE 需要外网渲染的那条只在 external 档：把它挪回 core 就会在这里断（D11③）        expected=0 actual=external-keys=1/1 core-leak=0 missing=[]  Ok
+SELFTEST cases=33 executed=33 floor=26 broken=0
+OVERALL: PASS
+EXITCODE=0
+
+================================================================================================================================================================
+块 04 — 两种姿势的对照、作废的 run333、以及 needles 覆盖缺陷的发现
+================================================================================================================================================================
+### run333（姿势作废：负载接 stdout=PIPE 且到最后才读，写满管道后阻塞在写上）
+pose: 3 支并发负载 + 1 条被测（负载先起，被测随后，全程重叠）
+TARGET verify_1to1_selftest secs=676.5 rc=3
+       | ok   neg-empty-ledger rc=3 (unit, want=3)
+       | FAIL vocabulary-layer-aborted 健康样本 D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-wKTX3m\dom.json 不存在——浏览器层没跑出读数，词表层从未被验证
+       | EXITCODE=3
+LOAD   checkers_selftest secs=678.5 rc=3
+LOAD   parity_ledger_selftest secs=678.5 rc=0
+LOAD   screen_inventory_selftest secs=678.5 rc=0
+CONC-RESULT target=676.5s loads-worst=678.5s ratio-to-serial-max(262.4s)=2.58
+EXITCODE=0
+### run334（修正姿势：4 支负载各写各的文件 + 靶子）
+pose: 4 支并发负载（输出落文件，不接管道）+ 1 条被测
+TARGET verify_1to1_selftest secs=677.7 rc=3 non-empty-output-lines=87
+       | ok   neg-app-not-booted rc=3 (121.4s, want=3)
+       | ok   neg-empty-ledger rc=3 (unit, want=3)
+       | FAIL vocabulary-layer-aborted 健康样本 D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-QocqpO\dom.json 不存在——浏览器层没跑出读数，词表层从未被验证
+       | EXITCODE=3
+TARGET needle-hits: cases=0
+LOAD   checkers_selftest                  secs= 679.8 rc=3
+LOAD   parity_ledger_selftest             secs= 679.7 rc=0
+LOAD   screen_inventory_selftest          secs= 679.7 rc=0
+LOAD   run_all_guards-only-cdp-less-battery secs= 679.7 rc=0
+CONC-RESULT target=677.7s loads-worst=679.8s serial-max-ref=262.4s ratio=2.58
+本文件的来历）：这一轮由后台任务启动，命令没带重定向，读数由运行器回传给会话后原样抄在这里；
+号段 run333 那份作废（管道没排空导致「并发」半空转，见该片证据块 04），本份是修正姿势后的读数。
+负载只与靶子重叠约 13 秒，靶子却从串行的 234.7s 涨到 676.5s 且判 3——这一段不能直接归因于并发，
+需要一次串行对照才能分辨「并发拖慢」与「D14 的网络此刻就不通」，对照读数见同目录 run335。
+EXITCODE=0
+### run335（串行单跑对照，旁边一条命令都不跑）
+08:28:12
+
+real	11m16.258s
+user	0m0.000s
+sys	0m0.030s
+rc=3
+08:39:28
+### run335 的子进程全文在 `artifacts/tmp/_serial-verify.txt`（同一轮，逐用例输出）
+real	11m16.258s
+rc=3
+### 同一支命令在外网通的时候（run327 串行整跑内）
+PASS         verify_1to1_selftest                   rc=0 234.7s
+FAIL         cdp_shot_selftest                      rc=1 265.3s
+RUN-ALL-GUARDS pass=35 fail=1 inconclusive=0 fault=0
+VERDICT: FAIL (1 guard(s) red or silent)
+### cdp 单跑全量：两条正控的用例名与原因行（run328）
+FAIL pos-real-render rc=1 want=0 (61.1s)
+FAIL pos-url-escape rc=1 want=0 (61.0s)
+### 发现：那条守门的故障分支不打 `cases=`，所以注册表要第二条判据行——读数取自 run328 的提前中止行
+EXITCODE=3
+EXITCODE=3
+EXITCODE=3
+EXITCODE=3
+EXITCODE=3
+EXITCODE=3
+
+================================================================================================================================================================
+块 05 — 三面网络探针（上收前 run336、上收后 run339、末态轮次之前 run354）
+================================================================================================================================================================
+### run336：`artifacts/tmp/b036-net-probe.py`（一次性驱动，已被 D13 的教训否证）
+registry : ProxyEnable=1 ProxyServer=127.0.0.1:7897
+react  via-registry : URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>
+react  no-proxy   : status=200 bytes=109931
+react-dom via-registry : URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>
+react-dom no-proxy   : status=200 bytes=1080227
+babel  via-registry : URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>
+babel  no-proxy   : status=200 bytes=3137752
+example via-registry : URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>
+example no-proxy   : status=200 bytes=577
+# curl 侧（用的是它自己的默认，不吃注册表代理）
+unpkg-react=000 exit����
+curl_rc=35
+example.com=200
+curl_rc=0
+### run339：`.codex/scripts/dev/net_probe.py`（常驻打印工具，逐字同值）
+registry : ProxyEnable=1 ProxyServer=127.0.0.1:7897
+react      https://unpkg.com/react@18.3.1/umd/react.development.js
+  via-registry URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>
+  no-proxy     status=200 bytes=109931
+  curl         http_code=000 curl_rc=35
+react-dom  https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js
+  via-registry URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>
+  no-proxy     status=200 bytes=1080227
+  curl         http_code=000 curl_rc=35
+babel      https://unpkg.com/@babel/standalone@7.29.0/babel.min.js
+  via-registry URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>
+  no-proxy     status=200 bytes=3137752
+  curl         http_code=000 curl_rc=35
+example    https://example.com/
+  via-registry URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>
+  no-proxy     status=200 bytes=577
+  curl         http_code=200 curl_rc=0
+PROBE targets=4 readings=12 — 只打印读数，不判绿不判红
+### run354：末态三档整跑开跑之前的同一条命令（证明那几轮的 `TIMEOUT` 不是「没网」而是「走注册表代理」）
+registry : ProxyEnable=1 ProxyServer=127.0.0.1:7897
+react      https://unpkg.com/react@18.3.1/umd/react.development.js
+  via-registry URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>
+  no-proxy     status=200 bytes=109931
+  curl         http_code=000 curl_rc=35
+react-dom  https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js
+  via-registry URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>
+  no-proxy     status=200 bytes=1080227
+  curl         http_code=000 curl_rc=35
+babel      https://unpkg.com/@babel/standalone@7.29.0/babel.min.js
+  via-registry URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>
+  no-proxy     status=200 bytes=3137752
+  curl         http_code=000 curl_rc=35
+example    https://example.com/
+  via-registry URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>
+  no-proxy     status=200 bytes=577
+  curl         http_code=200 curl_rc=0
+PROBE targets=4 readings=12 — 只打印读数，不判绿不判红
+
+================================================================================================================================================================
+块 06 — 真实整跑：core 档
+================================================================================================================================================================
+### run340（文档仍在改动中，这一轮的用途是给出真实 TIMEOUT 读数与三条 DIAG mode=full）
+RUN-ALL-GUARDS tier=core selected=36/43 subset=yes
+FAIL         validate_tasks                         rc=1 0.1s
+FAIL         metrics_report                         rc=1 0.7s
+FAIL         check_pointer_liveness                 rc=1 0.2s
+TIMEOUT      verify_1to1_selftest                   timeout after 600s — 本轮对这条没有判据，既不是绿也不是红
+NOTE         not-selected                           未选中：7 条不在本次判定面内（档位选择），整表绿不由此声明
+RUN-ALL-GUARDS pass=31 fail=3 inconclusive=1 fault=0 timeout=1
+VERDICT: INCONCLUSIVE (1 guard(s) hit their own timeout, so nothing was judged for them — 重跑或换串行姿势，别去查不存在的回归)
+### run346（抬上限之后、卡片写完之前的一次串行整跑）
+RUN-ALL-GUARDS tier=core selected=36/43 subset=yes
+TIMEOUT      verify_1to1_selftest                   timeout after 600s — 本轮对这条没有判据，既不是绿也不是红
+NOTE         not-selected                           未选中：7 条不在本次判定面内（档位选择），整表绿不由此声明
+RUN-ALL-GUARDS pass=35 fail=0 inconclusive=0 fault=0 timeout=1
+VERDICT: INCONCLUSIVE (1 guard(s) hit their own timeout, so nothing was judged for them — 重跑或换串行姿势，别去查不存在的回归)
+### run346 的 DIAG 段里有红因原文（`mode=full`，58/58 行全留）
+             | INSTRUMENT FAULT: #root 是空的或不存在（root=0 nodes=16 ready=complete title=知芽（TreeLearn） · 高保真交互原型 v2.5，重载 1 次后仍空）——原型的界面由页面内的 React+Babel 现场编译、脚本走公网 unpkg；被核对象没起来属仪器故障，不是结构不符
+### run356（末态：卡片 Verdict 写完 + 报告重生成之后，串行单独跑，全文逐字）
+start=09:50:43
+RUN-ALL-GUARDS tier=core selected=36/43 subset=yes
+PASS         validate_tasks                         rc=0 0.1s
+             > SUMMARY files=31 errors=0 warnings=9
+PASS         check_context_pack                     rc=0 0.4s
+             > check_context_pack: 0 check(s) failed
+PASS         check_code_reviewer_agent              rc=0 0.1s
+             > check_code_reviewer_agent: 0 check(s) failed
+PASS         check_codebase_researcher_agent        rc=0 0.1s
+             > check_codebase_researcher_agent: 0 check(s) failed
+PASS         check_code_simplifier_agent            rc=0 0.1s
+             > check_code_simplifier_agent: 0 check(s) failed
+PASS         check_loop_watcher_agent               rc=0 0.1s
+             > check_loop_watcher_agent: 0 check(s) failed
+PASS         check_source_of_truth                  rc=0 0.3s
+             > check_source_of_truth: 0 check(s) failed
+PASS         run_evals                              rc=0 0.1s
+             > run_evals: 0 check(s) failed
+PASS         check_eval_keeper_agent                rc=0 0.1s
+             > check_eval_keeper_agent: 0 check(s) failed
+PASS         metrics_report                         rc=0 1.0s
+             > check_metrics_report: 0 check(s) failed
+PASS         check_metrics_reporter_agent           rc=0 0.1s
+             > check_metrics_reporter_agent: 0 check(s) failed
+PASS         check_intent_capturer_agent            rc=0 0.1s
+             > check_intent_capturer_agent: 0 check(s) failed
+PASS         check_intent_template                  rc=0 0.1s
+             > check_intent_template: 0 check(s) failed
+PASS         check_pm_discovery_skill               rc=0 0.1s
+             > check_pm_discovery_skill: 0 check(s) failed
+PASS         check_roadmap_and_routing              rc=0 0.2s
+             > check_roadmap_and_routing: 0 check(s) failed
+PASS         check_spec_author_agent                rc=0 0.1s
+             > check_spec_author_agent: 0 check(s) failed
+PASS         check_stack_facts                      rc=0 0.4s
+             > check_stack_facts: 0 check(s) failed
+PASS         check_design_tokens                    rc=0 0.1s
+             > check_design_tokens: 0 check(s) failed
+PASS         check_pointer_liveness                 rc=0 0.2s
+             > check_pointer_liveness: 0 check(s) failed
+PASS         check_pointer_liveness --selftest      rc=0 10.5s
+             > SELFTEST cases=10 mismatch=0 expected=10
+PASS         check_androidtest_schema_expectations  rc=0 0.2s
+             > VERDICT: PASS
+PASS         check_run_all_guards                   rc=0 14.4s
+             > SELFTEST cases=33 executed=33 floor=26 broken=0
+PASS         checkers_selftest                      rc=0 36.9s
+             > OVERALL: PASS
+PASS         parity_ledger_selftest                 rc=0 1.8s
+             > VERDICT: PASS
+PASS         screen_inventory_selftest              rc=0 1.7s
+             > VERDICT: PASS
+PASS         measure_screen --selftest              rc=0 7.6s
+             > VERDICT: PASS (19 cases, positive and negative for every branch)
+TIMEOUT      verify_1to1_selftest                   timeout after 600s — 本轮对这条没有判据，既不是绿也不是红
+             DIAG verify_1to1_selftest lines=58/58 mode=full
+             | VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+             | EXITCODE=3
+             | VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+             | EXITCODE=3
+             | EXITCODE=2
+             | EXITCODE=2
+             | EXITCODE=2
+             | EXITCODE=2
+             | VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+             | EXITCODE=3
+             | VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+             | EXITCODE=3
+             | VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+             | EXITCODE=3
+             | VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+             | EXITCODE=3
+             | VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+             | EXITCODE=3
+             | VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+             | EXITCODE=3
+             | VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+             | EXITCODE=3
+             | VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+             | EXITCODE=3
+             | VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+             | EXITCODE=3
+             | VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+             | EXITCODE=3
+             | VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+             | EXITCODE=3
+             | VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+             | EXITCODE=3
+             | # command: verify_1to1.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-EY8vUz\s.json --profile D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selfte
+             | # profile screens.json bytes=5389 lines=201 sha256=5bf8ee66cd9341bfc7562eb7c45dead2332a3fae116e779c92215bc5c2628905
+             | # prototype.html bytes=186 lines=1 sha256=9e86a555aec91dc99a35566cee4ef08daf124ac05d7581518f650afd1c4c1ffc
+             | # wait_ms=20000 dom_checks=6
+             | FAIL page-not-rendered .screen 在 60s 内没出现（readyState=complete #root 子元素=1 nodes=7 href=file:///D:/Project/Android/Treelearn/artifacts/tmp/_verify1to1-selftest/run-EY8vUz/stub-rendered.html title=桩）
+             | judgements=1 failed=1
+             | VERDICT: FAIL
+             | EXITCODE=1
+             | INSTRUMENT FAULT: #root 是空的或不存在（root=0 nodes=16 ready=complete title=知芽（TreeLearn） · 高保真交互原型 v2.5，重载 1 次后仍空）——原型的界面由页面内的 React+Babel 现场编译、脚本走公网 unpkg；被核对象没起来属仪器故障，不是结构不符
+             | INSTRUMENT FAULT: #root 是空的或不存在（root=0 nodes=16 ready=complete title=知芽（TreeLearn） · 高保真交互原型 v2.5，重载 1 次后仍空）——原型的界面由页面内的 React+Babel 现场编译、脚本走公网 unpkg；被核对象没起来属仪器故障，不是结构不符
+             | USAGE ERROR: 未知选项 --turbo（可用: --screen --out --profile --browser --attach --url --wait-ms）
+             | USAGE ERROR: 必须给 --screen <屏名>：原型路径、点击序列、等待选择器与 DOM 检查项都从屏档案取
+             | USAGE ERROR: --wait-ms 必须是正整数毫秒，收到 0
+             | USAGE ERROR: 屏档案里没有 "nope"；可用: chat
+             | INSTRUMENT FAULT: 找不到 Edge 可执行文件（试过: /c/nowhere/msedge.exe）；用 --browser <路径> 指定
+             | INSTRUMENT FAULT: 屏 "chat" 的档案没有 prototype 回放段
+             | INSTRUMENT FAULT: 原型 HTML 不存在: D:\Project\Android\Treelearn\Docs\04-ux-design\no-such-prototype.html
+             | INSTRUMENT FAULT: 屏档案 不是合法 UTF-8: D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-EY8vUz\bad-utf8.json (The encoded data was not valid for encoding utf-8)
+             | INSTRUMENT FAULT: 屏 "chat" 的 prototype 段没有 dom_checks——没有检查项就没有见证
+             | INSTRUMENT FAULT: 屏 "chat" 的 prototype 段没有 dom_checks——没有检查项就没有见证
+             | INSTRUMENT FAULT: 档案里的 DOM 检查名不在词表内: no-such-check（词表现有: body-bg, grid-period, user-bubble, body-pitch, action-pitch, pill-inset）
+             | INSTRUMENT FAULT: --url 指向的本机文件不存在: D:\nope\missing.html
+             | INSTRUMENT FAULT: 导航被浏览器拒绝: net::ERR_ABORTED（目标 javascript:document.write(1)）
+             | INSTRUMENT FAULT: CDP 握手失败（端口 1 没有应答: fetch failed）
+             | INSTRUMENT FAULT: #root 是空的或不存在（root=0 nodes=16 ready=complete title=知芽（TreeLearn） · 高保真交互原型 v2.5，重载 1 次后仍空）——原型的界面由页面内的 React+Babel 现场编译、脚本走公网 unpkg；被核对象没起来属仪器故障，不是结构不符
+             | INSTRUMENT FAULT: #root 是空的或不存在（root=0 nodes=16 ready=complete title=知芽（TreeLearn） · 高保真交互原型 v2.5，重载 1 次后仍空）——原型的界面由页面内的 React+Babel 现场编译、脚本走公网 unpkg；被核对象没起来属仪器故障，不是结构不符
+PASS         web_walk --selftest                    rc=0 0.1s
+             > SELFTEST cases=6 bad=0
+PASS         check_dependency_direction             rc=0 0.1s
+             > dependency scan root=src layers=9 scanned=23 findings=0
+PASS         check_dependency_direction --selftest  rc=0 0.1s
+             > SELFTEST cases=10 floor=8 fail=0
+PASS         check_user_copy_i18n                   rc=0 0.1s
+             > user-copy scan root=src scanned=23 copy-dir-exempt-seen=true cjk-lines=0 files=0 baseline-entries=0 baseline-covered=0
+PASS         check_user_copy_i18n --selftest        rc=0 0.1s
+             > SELFTEST cases=15 floor=10 fail=0
+PASS         check_device_time                      rc=0 0.1s
+             > device-time scan root=D:\Project\Android\Treelearn\frontend\src scanned=23 exempt=utils/deviceTime.ts exempt-in-tree=true findings=0
+PASS         check_device_time --selftest           rc=0 0.1s
+             > SELFTEST cases=11 floor=8 fail=0
+PASS         sync_fixtures --check                  rc=0 0.1s
+             > SYNC CHECK src=13 dst=13 bad=0 redacted=0 dir=frontend\src\platform\fixtures
+PASS         sync_fixtures --selftest               rc=0 0.1s
+             > SELFTEST cases=8 bad=0 floor=1
+NOTE         not-selected                           未选中：7 条不在本次判定面内（档位选择），整表绿不由此声明
+RUN-ALL-GUARDS pass=35 fail=0 inconclusive=0 fault=0 timeout=1
+VERDICT: INCONCLUSIVE (1 guard(s) hit their own timeout, so nothing was judged for them — 重跑或换串行姿势，别去查不存在的回归)
+EXITCODE=3
+EXITCODE=3
+end=10:02:01
+
+================================================================================================================================================================
+块 07 — 另两档：precommit 与 external（含上限抬之前/之后的一对）
+================================================================================================================================================================
+### run347 --tier precommit（抬上限之前）
+RUN-ALL-GUARDS tier=precommit selected=6/43 subset=yes
+PASS         check_offline_bundle                   rc=0 0.1s
+             > offline scan root=dist assets=2 allowed-non-load-urls=20 violations=0
+PASS         check_offline_bundle --selftest        rc=0 0.2s
+             > SELFTEST cases=6 ok=6 fail=0
+PASS         frontend verify                        rc=0 5.1s
+             > verify steps=16 ok=16 bad=0 fault=0
+PASS         line-budget                            rc=0 0.5s
+             > 业务变更行: 0 (已跟踪 新增+删除 与 未跟踪 全部行；已排除生成/迁移/文档/证据 749 行；扫描业务文件 0 个，其中未跟踪 2 个)
+PASS         no-kotlin-check                        rc=0 27.6s
+             > VERDICT: PASS (13 OK line(s))
+PASS         guard-selftest -Fast                   rc=0 199.1s
+             > OVERALL = SELFTEST PASS (38 case(s))
+NOTE         not-selected                           未选中：37 条不在本次判定面内（档位选择），整表绿不由此声明
+RUN-ALL-GUARDS pass=6 fail=0 inconclusive=0 fault=0 timeout=0
+VERDICT: PASS (subset only — 6/43 entry(ies) judged, not the whole roster)
+EXITCODE=0
+exit=0
+### run357 --tier precommit（末态，卡片与重生成后的报告都在场）
+start=10:02:14
+RUN-ALL-GUARDS tier=precommit selected=6/43 subset=yes
+PASS         check_offline_bundle                   rc=0 0.2s
+             > offline scan root=dist assets=2 allowed-non-load-urls=20 violations=0
+PASS         check_offline_bundle --selftest        rc=0 0.2s
+             > SELFTEST cases=6 ok=6 fail=0
+PASS         frontend verify                        rc=0 18.1s
+             > verify steps=16 ok=16 bad=0 fault=0
+PASS         line-budget                            rc=0 0.5s
+             > 业务变更行: 0 (已跟踪 新增+删除 与 未跟踪 全部行；已排除生成/迁移/文档/证据 855 行；扫描业务文件 0 个，其中未跟踪 2 个)
+PASS         no-kotlin-check                        rc=0 62.0s
+             > VERDICT: PASS (13 OK line(s))
+PASS         guard-selftest -Fast                   rc=0 208.4s
+             > OVERALL = SELFTEST PASS (38 case(s))
+NOTE         not-selected                           未选中：37 条不在本次判定面内（档位选择），整表绿不由此声明
+RUN-ALL-GUARDS pass=6 fail=0 inconclusive=0 fault=0 timeout=0
+VERDICT: PASS (subset only — 6/43 entry(ies) judged, not the whole roster)
+EXITCODE=0
+EXITCODE=0
+end=10:07:03
+### run348 --tier external（`cdp_shot_selftest` 仍吃默认 300s：TIMEOUT，没有判决）
+RUN-ALL-GUARDS tier=external selected=1/43 subset=yes
+TIMEOUT      cdp_shot_selftest                      timeout after 300s — 本轮对这条没有判据，既不是绿也不是红
+NOTE         not-selected                           未选中：42 条不在本次判定面内（档位选择），整表绿不由此声明
+RUN-ALL-GUARDS pass=0 fail=0 inconclusive=0 fault=0 timeout=1
+VERDICT: INCONCLUSIVE (1 guard(s) hit their own timeout, so nothing was judged for them — 重跑或换串行姿势，别去查不存在的回归)
+### run351 --tier external（同一张表，只是 `timeout=600`：给判决了）
+RUN-ALL-GUARDS tier=external selected=1/43 subset=yes
+FAIL         cdp_shot_selftest                      rc=1 314.9s
+             > SELFTEST FAIL cases=17 failures=2
+             DIAG cdp_shot_selftest lines=30/91 mode=tail
+             | judgements=1 failed=1
+             | VERDICT: FAIL
+             | EXITCODE=1
+             | ok   neg-click-absent rc=1 (61.1s, want=1)
+             | # command: cdp_shot.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_cdpshot-selftest\run-REuZem\s.png --scale 1
+             | # profile screens.json bytes=3679 lines=48 sha256=f85fc4342f701b5ce1f27fd78230de6af348a5d5630d8ad7d0e2eb33335fdeaa
+             | # prototype.html bytes=150303 lines=2445 sha256=d4faea4b03d08a2add3985bf1788722d2cc7463ec2a990e88db43176bdff2eb2
+             | # scroll=none wait_ms=20000 declared_scale=2
+             | FAIL page-not-rendered .screen 在 60s 内没出现（readyState=complete href=file:///D:/Project/Android/Treelearn/Docs/04-ux-design/%E7%9F%A5%E8%8A%BD-TreeLearn-%E9%AB%98%E4%BF%9D%E7%9C%9F%E5%8E%9F%E5%9E%8B-v1.
+             | judgements=1 failed=1
+             | VERDICT: FAIL
+             | EXITCODE=1
+             | ok   neg-shot-scale-mismatch rc=1 (61.1s, want=1)
+             | # command: (unit) 空判据
+             | VERDICT: FAULT 没有任何判据被执行——空见证不算通过
+             | EXITCODE=3
+             | ok   neg-empty-ledger rc=3 (unit, want=3)
+             | SELFTEST FAIL cases=17 failures=2
+             | EXITCODE=1
+             | USAGE ERROR: 未知选项 --turbo（可用: --screen --out --profile --browser --attach --url --scroll --scale --wait-ms）
+             | USAGE ERROR: 必须给 --out <png>：产图路径显式给出，避免覆盖已归档的基线图
+             | USAGE ERROR: 屏档案里没有 "nope"；可用: chat
+             | USAGE ERROR: --scroll 只认 none|top|bottom，收到 sideways
+             | INSTRUMENT FAULT: 找不到 Edge 可执行文件（试过: /c/nowhere/msedge.exe）；用 --browser <路径> 指定
+             | INSTRUMENT FAULT: 屏 "chat" 的档案没有 prototype 回放段
+             | INSTRUMENT FAULT: 原型 HTML 不存在: D:\Project\Android\Treelearn\Docs\04-ux-design\no-such-prototype.html
+             | INSTRUMENT FAULT: 屏档案 不是合法 UTF-8: D:\Project\Android\Treelearn\artifacts\tmp\_cdpshot-selftest\run-REuZem\bad-utf8.json (The encoded data was not valid for encoding utf-8)
+             | INSTRUMENT FAULT: --url 指向的本机文件不存在: D:\nope\missing.html
+             | INSTRUMENT FAULT: 导航被浏览器拒绝: net::ERR_ABORTED（目标 javascript:document.write(1)）
+             | INSTRUMENT FAULT: CDP 握手失败（端口 1 没有应答: fetch failed）
+NOTE         not-selected                           未选中：42 条不在本次判定面内（档位选择），整表绿不由此声明
+RUN-ALL-GUARDS pass=0 fail=1 inconclusive=0 fault=0 timeout=0
+VERDICT: FAIL (1 guard(s) red or silent)
+EXITCODE=1
+### run349 是那条抬上限依据的单跑计时（`5m14.502s / rc=1`，子进程全文在 `artifacts/tmp/_cdp-solo.txt`）
+09:25:15
+
+real	5m14.502s
+user	0m0.015s
+sys	0m0.000s
+rc=1
+09:30:30
+
+================================================================================================================================================================
+块 08 — 指针复算、报告重生成与全部门禁
+================================================================================================================================================================
+### 复算器：片中的干跑 run341 与 `--apply` 落盘 run342
+holders=68 changed_files=9 targets=['.codex/README.md', '.codex/ROADMAP.md', '.codex/scripts/run_all_guards.py']
+MOVED 声称=6 SAME 声称=2 SKIP-FRESH 行=2 SKIP-RULES 行=0
+alias_unresolved=7（裸文件名声称，lib 口径不认，不复算也不改写）
+VERDICT: DRY RUN (pass --apply to write)
+holders=68 changed_files=9 targets=['.codex/README.md', '.codex/ROADMAP.md', '.codex/scripts/run_all_guards.py']
+MOVED 声称=6 SAME 声称=2 SKIP-FRESH 行=2 SKIP-RULES 行=0
+alias_unresolved=7（裸文件名声称，lib 口径不认，不复算也不改写）
+VERDICT: PASS
+### 最后一次文档改动之后的复算干跑（run353：`MOVED 声称=0`，所以本轮不 `--apply`）
+holders=68 changed_files=11 targets=['.codex/README.md', '.codex/ROADMAP.md', '.codex/scripts/run_all_guards.py']
+target .codex/README.md: HEAD lines=35 now lines=37
+target .codex/ROADMAP.md: HEAD lines=507 now lines=636
+target .codex/scripts/run_all_guards.py: HEAD lines=415 now lines=495
+MOVED 声称=0 SAME 声称=2 SKIP-FRESH 行=8 SKIP-RULES 行=0
+alias_unresolved=7（裸文件名声称，lib 口径不认，不复算也不改写）
+VERDICT: DRY RUN (pass --apply to write)
+### 文档改完之后的一批只读门禁（capture=run353-gates.txt，逐条 rc 与该条末行；`checkers_selftest` 全文 51KB 留在捕获里，这里不淹没其余各条）
+check_pointer_liveness (.codex/scripts/check_pointer_liveness.py) EXITCODE=0    末行: check_pointer_liveness: 0 check(s) failed
+check_source_of_truth (.codex/scripts/check_source_of_truth.py) EXITCODE=0    末行: check_source_of_truth: 0 check(s) failed
+check_roadmap_and_routing (.codex/scripts/check_roadmap_and_routing.py) EXITCODE=0    末行: check_roadmap_and_routing: 0 check(s) failed
+check_stack_facts (.codex/scripts/dev/check_stack_facts.py) EXITCODE=0    末行: check_stack_facts: 0 check(s) failed
+checkers_selftest (.codex/scripts/dev/checkers_selftest.py) EXITCODE=0    末行: OVERALL: PASS
+### 报告重生成（run344 抬上限之后 / run353 文档改完之后 / run355 卡片 Verdict 写完之后）
+WROTE artifacts/metrics/report.md lines=20 metrics=12
+EXITCODE=0
+WROTE artifacts/metrics/report.md lines=20 metrics=12
+EXITCODE=0
+WROTE artifacts/metrics/report.md lines=20 metrics=12
+EXITCODE=0
+### 末态门禁批（capture=run358-postcard-gates.txt：卡片写完、报告重生成、三档整跑之后，同口径再加上 validate_tasks / run_evals / 报告只判复算 / 复算器干跑 / 重复短语扫描）
+.codex/scripts/validate_tasks.py               EXITCODE=0    末行: SUMMARY files=31 errors=0 warnings=9
+.codex/scripts/check_source_of_truth.py        EXITCODE=0    末行: check_source_of_truth: 0 check(s) failed
+.codex/scripts/check_pointer_liveness.py       EXITCODE=0    末行: check_pointer_liveness: 0 check(s) failed
+.codex/scripts/check_roadmap_and_routing.py    EXITCODE=0    末行: check_roadmap_and_routing: 0 check(s) failed
+.codex/scripts/run_evals.py                    EXITCODE=0    末行: run_evals: 0 check(s) failed
+.codex/scripts/metrics_report.py               EXITCODE=0    末行: check_metrics_report: 0 check(s) failed
+.codex/scripts/dev/check_stack_facts.py        EXITCODE=0    末行: check_stack_facts: 0 check(s) failed
+.codex/scripts/dev/remap_pointers.py           EXITCODE=0    末行: VERDICT: DRY RUN (pass --apply to write)
+artifacts/tmp/b031-dup-scan.py                 EXITCODE=0    末行: VERDICT: PASS
+### 装配时点再当场重跑五条（证明上面那份 rc 在写出本文件的这一刻仍然成立）
+### 当场重跑 validate_tasks
+SUMMARY files=31 errors=0 warnings=9
+### 当场重跑 check_source_of_truth
+
+### 当场重跑 check_roadmap_and_routing
+
+### 当场重跑 metrics_report 只判复算（不带 --write）
+
+### 当场重跑 run_evals
+
+
+================================================================================================================================================================
+块 09 — 规模口径与改动面
+================================================================================================================================================================
+### 生产行测量（driver=artifacts/tmp/b035-sizing.py 同口径，capture=run352-sizing.txt）
+$ git diff --numstat HEAD（生产码口径：只算 .codex/scripts/run_all_guards.py）
+73	7	.codex/scripts/check_run_all_guards.py
+113	33	.codex/scripts/run_all_guards.py
+
+新增文件（未跟踪）:
+?? .codex/scripts/dev/net_probe.py
+?? .codex/tasks/T-2026-10-20-guard-diagnostics-timeout-lane-036.md
+
+net_probe.py lines= 94
+申报值来源：`.codex/rules/harness-tasks.md` 的 sizing 口径——tests/docs/generated 不计，本片计 `run_all_guards.py` 的 +113 与 `net_probe.py` 的 94 行 = 207，越过 200 软线已在卡片 Watch-outs ① 点名（`validate_tasks` 同场打 WARNING，见块 08）。
+$ git status --short
+ M .codex/README.md
+ M .codex/ROADMAP.md
+ M .codex/agents/loop-watcher.md
+ M .codex/agents/loop-watcher.toml
+ M .codex/context/source-of-truth.md
+ M .codex/scripts/check_run_all_guards.py
+ M .codex/scripts/run_all_guards.py
+ M .codex/skills/guard-runner/SKILL.md
+ M .codex/tasks/T-2026-10-19-guard-runner-one-command-roster-023.md
+ M Docs/spec/SPEC-2026-09-21-ai-persona-preference.md
+ M artifacts/metrics/report.md
+?? .codex/scripts/dev/net_probe.py
+?? .codex/tasks/T-2026-10-20-guard-diagnostics-timeout-lane-036.md
+?? artifacts/evidence/T-2026-10-20-guard-diagnostics-timeout-lane-036.txt
+EXITCODE=0
+$ git diff --stat HEAD
+ .codex/README.md                                   |   4 +-
+ .codex/ROADMAP.md                                  | 157 +++++++++++++++++++--
+ .codex/agents/loop-watcher.md                      |   6 +-
+ .codex/agents/loop-watcher.toml                    |   2 +-
+ .codex/context/source-of-truth.md                  |   4 +-
+ .codex/scripts/check_run_all_guards.py             |  80 ++++++++++-
+ .codex/scripts/run_all_guards.py                   | 146 ++++++++++++++-----
+ .codex/skills/guard-runner/SKILL.md                |  50 ++++++-
+ ...26-10-19-guard-runner-one-command-roster-023.md |  12 ++
+ Docs/spec/SPEC-2026-09-21-ai-persona-preference.md |   2 +-
+ artifacts/metrics/report.md                        |  10 +-
+ 11 files changed, 401 insertions(+), 72 deletions(-)
+warning: in the working copy of '.codex/README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/ROADMAP.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/agents/loop-watcher.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/agents/loop-watcher.toml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/context/source-of-truth.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/skills/guard-runner/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.codex/tasks/T-2026-10-19-guard-runner-one-command-roster-023.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'artifacts/metrics/report.md', LF will be replaced by CRLF the next time Git touches it
+EXITCODE=0
+### 捕获在场核对（NEEDED=34，全部在 artifacts/tmp/）
+present=34 missing=0

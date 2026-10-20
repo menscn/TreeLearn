@@ -75,7 +75,7 @@
 - **owner_lane**：harness
 - **验收方式**：`python .codex/scripts/run_all_guards.py` 退出码 0，且逐条打印每个守门的名字和结论；任何守门没有打印判据行即判 FAIL，不允许只凭退出码 0 报通过。
 - **开源来源**：`https://github.com/obra/superpowers` → `skills/verification-before-completion/SKILL.md`、`skills/systematic-debugging/SKILL.md`（2026-09-21 实测 HTTP 200）
-- **交付任务**：`T-2026-10-19-023`（`run_all_guards.py` 汇总器 + `check_run_all_guards.py` 26 例注入电池 + `.codex/skills/guard-runner/SKILL.md`，status=verifying）。与 B0 同样只加这行、条目本身留在 Phase B，因为**注册表会过期**：条目里的表是 2026-09-21 的设想，实际那张表的条数随每一片交付变化，读数一律用 `python -X utf8 .codex/scripts/run_all_guards.py --list` 现场取。同片闭合 D9。
+- **交付任务**：`T-2026-10-19-023`（`run_all_guards.py` 汇总器 + `check_run_all_guards.py` 注入电池（用例条数不写在这里，由该脚本自己打印的 `SELFTEST cases=` 现场取）+ `.codex/skills/guard-runner/SKILL.md`，status=verifying）。与 B0 同样只加这行、条目本身留在 Phase B，因为**注册表会过期**：条目里的表是 2026-09-21 的设想，实际那张表的条数随每一片交付变化，读数一律用 `python -X utf8 .codex/scripts/run_all_guards.py --list` 现场取。同片闭合 D9。片 036 在此追加：判绿/判红之外分出 `TIMEOUT` 档、非 PASS 附带 `DIAG`、`MAX_TIMEOUT` 上限、新增 `external` 档，并把这支注入电池自己注册进 core 档——所以「判定语义变过一次」这件事现在有一条常驻仪器背书，不只在 prose 里（见 D11/D12 的处置与该卡的修订节）。
 - **实现要点（交付后回写，不是验收方式的替代）**：判定用**两个条件**——退出码在该条的判绿集合里 **且** 输出里有它自己的判据行；只满足退出码的那条守门算「哑」并判 FAIL，两个都不满足而「根本没跑起来」（解释器缺失、脚本不在场、输出非 UTF-8）算 FAULT 并把总退出码压到 3，因为仪器坏了比判红更该被看见。子进程一律 Popen + 带 deadline 的 `communicate`，且先收裸字节再自己解码：Windows 上 `subprocess.run` 超时后会无限等管道（守门的孙进程握着管道时汇总器跟着挂死），而其读取线程会把解码异常吞成「没有输出」，于是「乱码」被读成「这条没判据」——两个病因不能混在一条 FAIL 里。
 - **执行提示词**：读 `.codex/HARNESS.md`、`.codex/rules/harness-verification.md`、`.codex/scripts/validate_tasks.py`、`.codex/README.md`，把仓库里现存的全部守门脚本列成一张表。按上游 `https://github.com/obra/superpowers` 的 verification-before-completion 里「先有证据再宣布完成」的次序，在 `.codex/scripts/` 下新增 run_all_guards.py 与配套校验脚本，硬要求是「判据必须有证据存在性断言」：子进程没打印判据行就算失败，并且给每条检测分支补一条注入违规必须判 FAIL 的自检用例；跑通后把输出贴进任务证据。
 
@@ -185,10 +185,13 @@ D5 = 互斥的两边同时消失），都是「复核后如实回写」而不是
 实施片 `T-2026-10-19-androidtest-derived-schema-version-022.md`。D1–D8 未因这两片变动判据。〕
 
 〔**2026-10-19 第三批**：登记 **D11**（core 档整跑里一条 Web 侧仪器间歇转红，且整跑读数把失败用例名吞掉了），
-**未闭合**；同批把 B4 交付回写进 Phase B（片 `T-2026-10-19-codebase-researcher-impact-role-026.md`）。〕
+**未闭合**；同批把 B4 交付回写进 Phase B（片 `T-2026-10-19-codebase-researcher-impact-role-026.md`）。
+D11 后由片 036 闭合（①③），其病因半转登为 D14。〕
 
 〔**2026-10-20 第一批**：登记 **D12**（core 档最重的一条实测 262.4s，贴着 300s 默认上限，与任何命令并发即假红），
-**未闭合**；同批把 B0 交付回写进 Phase B（片 `T-2026-10-19-spec-author-technical-section-032.md`）。〕
+**未闭合**；同批把 B0 交付回写进 Phase B（片 `T-2026-10-19-spec-author-technical-section-032.md`）。
+D12 的仪器半后由片 036 闭合，病因半转登为 D14；
+这句登记里的「与任何命令并发即假红」也被片 036 的串行/并发同值读数推翻，见 D12 处置 ②。〕
 
 ### D1 `check_roadmap_and_routing` 的一次性迁移断言永久为红（2026-10-18 已按修法 ① 闭合）
 
@@ -413,7 +416,7 @@ D5 = 互斥的两边同时消失），都是「复核后如实回写」而不是
 - 归属：登记并闭合于 2026-10-19（片 022），发现路径是 B3 把这条守门收进 `run_all_guards.py` core 档时的整跑读数——
   在此之前它的红只出现在单跑里，没有汇总面会把它和其他 30 条一起摆出来。
 
-### D11 core 档整跑里 `cdp_shot_selftest` 间歇转红，而整跑读数不打印失败的用例名（2026-10-19 登记，未闭合）
+### D11 core 档整跑里 `cdp_shot_selftest` 间歇转红，而整跑读数不打印失败的用例名（2026-10-19 登记，2026-10-20 片 036 登记并闭合）
 
 - 现象：2026-10-19 片 026 收口时 `python -X utf8 .codex/scripts/run_all_guards.py --tier core` 第一次给出
   `FAIL         cdp_shot_selftest                      rc=1 123.3s` / `> SELFTEST FAIL cases=17 failures=1`，
@@ -436,30 +439,109 @@ D5 = 互斥的两边同时消失），都是「复核后如实回写」而不是
   本轮三份读数分别是 `run029-core.txt`（红）、`run029-cdp.txt`（单跑绿）、`run030-core.txt`（重跑绿）。
 - 归属：片 026 收口时发现；本片没有动 Web 侧任何代码或判据（`.codex/` 之外的文件一行未改，
   见该卡块 04 的 `git diff --stat HEAD` 口径与 core 档 27 条读数），所以这条红不归因于 B4，只归因于台账。
+- 处置（2026-10-20，片 036）三半各落一处：
+  ① **DIAG**：`run_all_guards.py` 对任何非 PASS 且非 FAULT 的条目，紧跟判决行把那条守门自己的原始输出摆出来——
+  非空行不超过 `DIAG_FULL_MAX` 时整段（`mode=full`），更长只取末尾 `DIAG_TAIL_MAX` 行（`mode=tail`），
+  单行一律截到 `DIAG_LINE_CHARS` 字符。红因留在整跑读数里，不再要求人再单独跑那条命令。
+  ② **登记时那条「墙钟时序」假设被本轮证据推翻**：串行整跑再次给出 `FAIL cdp_shot_selftest rc=1 265.3s`
+  与 `> SELFTEST FAIL cases=17 failures=1`（旧语义到这一步就没了），而同一支命令单跑的全量输出给出红的是
+  `pos-real-render`（61.1s）与 `pos-url-escape`（61.0s）两例，两例的原因行都是
+  `page-not-rendered .screen 在 60s 内没出现（readyState=complete，title 正确）`——HTML 载入成功、外部脚本没载入。
+  原型 `Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html:9` 起的三个 `<script src>` 指向 unpkg CDN；
+  本机 Windows 系统代理配置在案但端口已不再监听：
+  走默认（注册表）代理时 `WinError 10061 由于目标计算机积极拒绝`，同一 URL 显式关掉代理后 `200`
+  （react 109,931 字节、react-dom 1,080,227 字节、babel 3,137,752 字节），`curl` 取不到 unpkg。
+  2026-10-20 片 036 复算这三面探针（`artifacts/tmp/run336-net-probe.txt`），注册表读数是
+  `ProxyEnable=1 ProxyServer=127.0.0.1:7897`，走该代理时**四个 URL 一律 10061**（连 example.com 也是），
+  显式禁用代理后四个一律 `200`；`curl` 侧则分叉——unpkg `000`（curl 退出码 35，SSL connect error）而
+  example.com `200`。登记时点写的「`curl` 对 unpkg 与 example.com 一律 `000`」没有留下捕获，按本轮读数作废。
+  浏览器实例由 `parity_cdp.mjs` 用全新 `--user-data-dir` 起、不带任何代理开关，因此继承系统代理，
+  取不到 React/Babel，`#root` 空 → `.screen` 永不出现。原型文件自 `164bd1f`（2026-09-29）一字未改，
+  所以这既不是产物回归也不是时序。**两次读数一次 `failures=1`、一次 `failures=2` 的差异本片没有解释，
+  也不再需要解释**：两例的名字与原因行现在都会出现在整跑读数里。
+  ③ 按本节原修法 ③ 把它移出 core：新增 `external` 档（判定取决于本机以外的那个东西），
+  `cdp_shot_selftest` 落该档，责任单跑命令就是它自己 `node .codex/scripts/dev/parity/cdp_shot_selftest.mjs`；
+  「被挪回 core 就断」不靠这段 prose，由 `check_run_all_guards.py` 的 `external-keys` 探针常驻盯住。
+  移出之后又补了一手：该条在 `external` 档里仍用默认 300s，而它「红但给出了判决」的单跑实测是
+  123.3s（本节的红）/ 265.3s（`run327`，红）/ 314.5s（`run349`，`SELFTEST FAIL cases=17 failures=2`），
+  300s 会把最后这种姿势掐在自己的判据行之前——`run348` 打出的就是 `TIMEOUT … timeout after 300s` + `DIAG mode=tail`，
+  一条本该给出判决的守门被读成「没判」。所以它按 D12③ 的同一口径单独传了 `timeout=`（`run351` 起它自己给判决）。
+- 为什么不在本片就地消除依赖：能真正消除的两种改法都落在 Web 仪器上——把三个 CDN 脚本收编进仓库离线渲染，
+  或给那个浏览器实例加 `--proxy-server=direct://`。前者要往仓库塞第三方字节，后者把「本机代理挂了就红」
+  换成「本机必须能直连否则红」，两边都改变这条判据在别的机器上的含义，属网络边界决定，不在 harness
+  汇总面这一片里悄悄做。登记为 D14 待裁定。
+- 回读（片 036 实测，捕获都在 gitignore 的 `artifacts/tmp/`）：`run327-core-baseline.txt`（旧语义串行整跑，
+  末行 `RUN-ALL-GUARDS pass=35 fail=1 …`，红的只有 needle 行）、`run328-cdp-solo-full.txt`（同一支命令单跑全量，
+  两例名与原因行逐字在场）、`run330-red-oldimpl.txt`（`artifacts/tmp/b036-red.py` 把新电池架在 HEAD 版实现上跑，
+  `broken=8`，逐条都是本节新增的判据）、`run337-green-battery-final.txt`（同一支电池对当前实现 `broken=0`）、
+  `run338-list.txt`（`cdp_shot_selftest` 已在 `external` 档，core 档里能看到 `check_run_all_guards`）。
+  网络三面探针逐字在 `run336-net-probe.txt`（并抄进卡片证据块 05）。
+  **本节原修法里「连续 ≥3 次 `--tier core` 全绿」这半句在当前这台机器上取不到**：D14 那条依赖此刻不通，
+  而 core 档里的 `verify_1to1_selftest` 与 `cdp_shot_selftest` 共用同一条依赖（见 D14 处置栏的新读数），
+  所以移出 cdp 之后 core 仍会因外网判 3/超时。绿轮的实测条件写在 D14，不在这里冒充已完成。
+  末态三轮的实测形状（`run346-core-final.txt` / `run347-precommit.txt` / `run348-external.txt`）：
+  core 档 `pass=35 fail=0 inconclusive=0 fault=0 timeout=1` + `VERDICT: INCONCLUSIVE` + 退出码 3——
+  除那条外网依赖的条目之外其余 35 条全部判绿，没有任何一条被消音；precommit 档 `pass=6 fail=0` + 退出码 0；
+  external 档给出的正是本节 ③ 说的那种「本该给出判决却被掐断」的形状，补完 `timeout=` 之后的读数在
+  `run351-external-after-timeout.txt`。
+- 归属：①③ 由片 036 闭合，② 归 D14（未闭合，等一次 Web 线的网络边界裁定）。本节原 修法 ② 作废：
+  它假设的是墙钟，而病因是外网可达性，给等待加「可判上界」治不了它。
 
-### D12 core 档最重的一条守门贴着默认 300s 上限，与任何命令并发即假红（2026-10-20 登记，未闭合）
+### D12 core 档最重的一条守门贴着默认 300s 上限，与任何命令并发即假红（2026-10-20 登记，片 036 登记并闭合；标题里那句「与任何命令并发」的归因已被本轮实测推翻，见处置 ②）
 
 - 现象：`python -X utf8 .codex/scripts/run_all_guards.py --tier core` 串行单跑时打印
   `PASS verify_1to1_selftest rc=0 262.4s`（`artifacts/tmp/run168-core.txt`）；片 032 收尾时同一条命令与几支
   `b032-*` 脚本并发跑，同一条变成 `FAIL verify_1to1_selftest timeout after 300s, so nothing was judged`、
   汇总 `RUN-ALL-GUARDS pass=31 fail=1 inconclusive=0 fault=0` / `VERDICT: FAIL` / 退出码 1
-  （`artifacts/tmp/run186-tiers.txt`）。这一条用的正是 `.codex/scripts/run_all_guards.py:42` 的 `DEFAULT_TIMEOUT = 300`
-  ——条目定义在 `.codex/scripts/run_all_guards.py:142`，没有单独传 `timeout=`；262.4s 对 300s 只剩约 12% 余量。
+  （`artifacts/tmp/run186-tiers.txt`）。这一条用的正是 `.codex/scripts/run_all_guards.py:51` 的 `DEFAULT_TIMEOUT = 300`
+  ——条目定义在 `.codex/scripts/run_all_guards.py:166`，没有单独传 `timeout=`；262.4s 对 300s 只剩约 12% 余量。
   D11 记下的 254.5s 与本轮的 262.4s 是同一件事的两次读数。
 - 后果（不修的话）：这条红不代表产物变差，代表**没判**——打印自己就写着 `nothing was judged`。而它的触发条件是
   「旁边有人跑别的脚本」，恰好是交付收尾时最常见的姿势。拿这种轮次当结论只有两种走法，都坏：重跑到绿
   （D8/D11 那一族里最坏的处理方式），或给这条放宽上限/加 `fail_codes` 消音（每放宽一次就少一个失败点，正是 D4
   那族「仪器给自己开后门」）。反过来，一个不知情的实现片会花半天去归因一条根本不存在的回归。
 - 修法（不需要裁定，属既有先例的复用）：① 给这一条单独传按实测定的 `timeout=`——`Guard` 早已有这个参数
-  （`.codex/scripts/run_all_guards.py:60`、`.codex/scripts/run_all_guards.py:69`），只是这条没用上；数值要有依据，先在串行与并发两种姿势下各跑几轮取耗时分布，
+  （`.codex/scripts/run_all_guards.py:78`、`.codex/scripts/run_all_guards.py:87`），只是这条没用上；数值要有依据，先在串行与并发两种姿势下各跑几轮取耗时分布，
   不能凭感觉拍一个 900。② 汇总面已有 `inconclusive` 这一档，可考虑把「超时」从 `fail` 里分出单独计数并打印
   「本轮未判」，让「没判」不再借用在告假红上的那个词——但这是判据语义变动，落地前要在 B3 的卡里写明。
   ③ 流程侧立刻可用且本片已用：末态守门轮串行单跑、不与任何命令并发。
-- 回读：`python -X utf8 .codex/scripts/run_all_guards.py --tier core`（在有意并发一支数十秒级脚本的姿势下仍
-  `pass=32 fail=0 inconclusive=0 fault=0`），与串行单跑时该条读数仍与 262.4s 同量级（末态串行轮实测 235.6s）。
-  捕获留 gitignore 的 `artifacts/tmp/`：`run168-core.txt`（串行绿）、`run186-tiers.txt`（并发假红）、`run204-tiers.txt`（片 032 末态串行轮）。
-- 归属：片 032（B0，纯文档）收尾时发现；这条不归因于 B0——判据与它的 300s 上限都在 `run_all_guards.py` 里，
-  本片一行未动，只登记。
+- 处置（2026-10-20，片 `T-2026-10-20-guard-diagnostics-timeout-lane-036.md`）：
+  ① 超时从 `fail` 里分出来单独一档：状态列 `TIMEOUT`、措辞 `timeout after <N>s — 本轮对这条没有判据，既不是绿也不是红`、
+  汇总行新增 `timeout=` 计数、总退出码走 3（`EXIT_FAULT`），判决行明文写「重跑或换串行姿势，别去查不存在的回归」。
+  `kill` 之后再给一次带 deadline 的 `communicate`，排得空就把那份部分输出交给 `DIAG`，排不空就在读数里写「管道没排空」。
+  同一片给注册表加上限 `MAX_TIMEOUT`（`.codex/scripts/run_all_guards.py:54`）：`timeout` 写得比它大即
+  `ROSTER FAULT`——「一条永不超时的守门」与「一条判绿的守门」在汇总面上长得一样，这一族与 `MIN_ROSTER`/`MIN_CORE` 同形。
+  ② **登记时的归因被本轮实测推翻**：把同一支 `.codex/scripts/dev/parity/verify_1to1_selftest.mjs` 分别按两种姿势各跑一轮
+  ——并发姿势（4 支负载 + 靶子，负载各写各的文件、不接管道）给出 `secs=676.5 rc=3`（`artifacts/tmp/run334-conc-timeout-fixed.txt`），
+  串行单跑（旁边一条命令都不跑）给出 `11m16.258s`（676.3s）`rc=3`（`artifacts/tmp/run335-serial-control.txt`）。
+  **两个姿势同值**，所以耗时不由旁边的负载决定，而由这条自己的故障路径决定：渲染不出来时每个用例都要烧满它那 60s 等待。
+  这条故障路径的成因与 D11② 是同一条（原型的外部脚本取不到，D14）。
+  因此 修法③「末态串行单跑」不是这条的解药，只是取干净时序读数的卫生习惯；`run186` 那次在 300s 处被掐断的真实成因
+  在登记时点无法分辨——那一次整跑读数没打印子进程的逐用例输出，而这正是 D11① 的 `DIAG` 现在补上的东西。
+  ③ `verify_1to1_selftest` 那条现在单独传 `timeout=600`（`.codex/scripts/run_all_guards.py:166`）。数值按实测分布定：
+  串行健康轮的四次读数 234.7s（`run327-core-baseline.txt`）/ 235.6s（`run204-tiers.txt`）/ 254.5s（本节 D11 记下的那次）/
+  262.4s（`run168-core.txt`），取最大值 262.4s 的约 2.3 倍；600 又刻意低于故障路径实测的 676.3s，因为那条路径跑满
+  十一分钟也只打印一句「仪器故障」，把它在 600s 处掐断交给 `TIMEOUT` 档，是让读数早一分钟说出同一件事而不是少说一件事。
+  上限受 `MAX_TIMEOUT` 钉住，不许写成「永不超时」。
+  ④ 同一口径在片 036 末又用了一次，方向相反：`cdp_shot_selftest` 的**会给出判决的最长一次**是 314.5s
+  （`run349-cdp-solo-timed.txt`，`SELFTEST FAIL cases=17 failures=2` / rc=1），比默认 300s 长，
+  于是默认上限掐掉的是一条本来能给出判决的守门（`run348-external.txt` 打的是 `timeout after 300s`）。
+  两条合起来定出这条规则：**上限要盖过「能给出判决的最长一次实测」，而不是盖过「最慢的那一次」**——
+  前者掐了就是少一个失败点，后者掐了只是少烧几分钟去打印同一句「没判」（`DIAG` 会把掐断前的部分输出照常摆出来）。
+  ⑤ 「改过判定分支必须整跑自检」这句话以前只写在 SKILL 正文里，没有仪器替它负责；现在汇总器自己的自检
+  `check_run_all_guards` 注册进 core 档，`--list` 的读数里能看到它。
+- 回读：`python -X utf8 .codex/scripts/run_all_guards.py --list`（档位与条数只在这里打印，本节不抄数字；
+  看到 `external` 这一档与 `check_run_all_guards` 在 core 档内）、`python -X utf8 .codex/scripts/check_run_all_guards.py`
+  （末行 `broken=0`，用例数由它自己打印）、`python -X utf8 .codex/scripts/run_all_guards.py --tier core`
+  （外网通时该条判绿且耗时与 ③ 那四个读数同量级；外网不通时给出 `TIMEOUT` + `timeout=1` + 退出码 3，
+  **不是** `fail=1`，号段见卡片证据块 06）。
+  本条**作废**登记时的回读「在有意并发一支数十秒级脚本的姿势下仍 `pass=32 fail=0 inconclusive=0 fault=0`」：
+  ② 那两轮实测表明并发姿势根本不产出这个读数（它产出的是 `rc=3`），把「重跑一次拿绿」写成回读等于教实现者去做 D8 那一族里最坏的处理。
+  捕获留 gitignore 的 `artifacts/tmp/`：`run168-core.txt`（串行绿）、`run186-tiers.txt`（当时的「并发假红」）、
+  `run204-tiers.txt`（片 032 末态串行轮）、`run333-conc-timeout.txt`（姿势作废的一份，原因见卡片证据块 04）、
+  `run334-conc-timeout-fixed.txt` 与 `run335-serial-control.txt`（② 那两轮对照）。
+- 归属：仪器半（①③④）闭合于片 036；病因半归 D14（未闭合，等一次 Web 线的网络边界裁定）。这条不归因于片 032——
+  判据与它的 300s 上限都在 `run_all_guards.py` 里，那片一行未动，只登记。
 
 ### D13 「给活指针复算行号」每片现写一支 gitignore 里的一次性驱动，从未升成常驻仪器（2026-10-20 登记并闭合）
 
@@ -504,3 +586,50 @@ D5 = 互斥的两边同时消失），都是「复核后如实回写」而不是
   清理后读到 0 不等于欠账消失——真正的回读是上面那三条命令。
 - 归属：登记并闭合于 2026-10-20（片 035）。本片新增两个常驻脚本、放宽一处解析字符类，不动那 13 支 gitignore
   驱动（它们是历史记录，删掉只会让上面的普查读数失去出处）。
+
+### D14 原型的 React/Babel 走 unpkg CDN，所以「本地优先」的 Web 渲染仪器其实要外网（2026-10-20 登记，未闭合，需裁定）
+
+- 现象：`Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html:9` 起有三个 `<script src>` 指向
+  `unpkg.com`（react / react-dom / @babel/standalone，都带 `integrity`），另有两行 `cdn.jsdelivr.net` 的字体样式表。
+  `parity_cdp.mjs` 起的浏览器实例用全新 `--user-data-dir` 且不带代理开关，因此继承 Windows 系统代理。
+  本机系统代理配置在案但端口不再监听时，实测：默认（注册表）代理路径 `WinError 10061 由于目标计算机积极拒绝`；
+  同一 URL 显式禁用代理后 `200`；`curl` 取不到 unpkg。2026-10-20 片 036 用常驻的
+  `.codex/scripts/dev/net_probe.py` 复算三面（`artifacts/tmp/run339-net-probe-perm.txt`）
+  给出更具体的一行：`ProxyEnable=1 ProxyServer=127.0.0.1:7897`，走该代理时四个 URL（含 example.com）一律 10061，
+  显式禁用代理后四个一律 200（react 109,931 / react-dom 1,080,227 / babel 3,137,752 / example 577 字节），
+  `curl` 侧则是 unpkg `000`（退出码 35）而 example.com `200`——登记时点那句「curl 两个都 000」没有留捕获，已按本轮作废。
+  「间歇」二字的来源就在这条：`127.0.0.1:7897` 那个客户端一开，仪器就绿；一关就红。
+  后果是 `cdp_shot_selftest` 的两条正控 `pos-real-render` / `pos-url-escape` 各以
+  `page-not-rendered .screen 在 60s 内没出现（readyState=complete）` 判红——HTML 载入了，脚本没载入。
+  D11 那次「间歇红」的病因就是这一条，不是墙钟时序。
+- 范围比登记时点记的更大（2026-10-20 片 036 实测）：同一条依赖不止咬 `cdp_shot_selftest`。
+  core 档里的 `.codex/scripts/dev/parity/verify_1to1_selftest.mjs` 用同一个 `parity_cdp.mjs` 起同一个原型，
+  在**串行单跑、旁边一条命令都不跑**的姿势下给出 `rc=3`、`11m16.258s`（`artifacts/tmp/run335-serial-control.txt`），
+  逐用例输出里 5 条是 `INSTRUMENT FAULT: #root 是空的或不存在（… 重载 1 次后仍空）`，其余是它自己设计的反控故障行。
+  所以 D11③ 把 cdp 移出 core 只是把这条依赖的一半挡在判定面外——只要 7897 不通，core 仍会被这一条拖成
+  `TIMEOUT`/`fault`（见 D12 处置 ②③）。是否把 `verify_1to1_selftest` 也移出 core 属**验收面变更**，
+  需要用户裁定，本片不动它。
+- 后果（不修的话）：一条声称「本地优先」的渲染仪器把可用性押在第三方 CDN 与一台机器的代理设置上。
+  它红的时候没人能一句话分辨是「原型回归」还是「这台机器此刻出不去」，只能重跑；
+  而它绿的时候也不能证明离线可用——项目对「默认不引入远程依赖」的边界（`.codex/context/project-brief.md`
+  的远程依赖声明）在这里没有仪器守着。片 036 的处理是把它移出 core 并写明责任单跑命令，
+  那是**止损不是修**：判定面不再被环境抖动污染，依赖本身还在。
+- 修法（两条互斥，需要先裁定，故本片不动一行 Web 代码）：① 把三个 CDN 资源按 `integrity` 校验后收编进仓库
+  （如 `Docs/04-ux-design/vendor/`），原型改成本地引用——离线可判、可复现，代价是仓库里多出第三方字节，
+  且原型 HTML 是设计事实源、改动要过 UX 规则；② 保持 CDN，但给 `parity_cdp.mjs` 那个实例显式加
+  `--proxy-server=direct://` 并让 `page-not-rendered` 能区分「外部脚本没载入」与「`.screen` 真的没了」，
+  把前者报成仪器故障（退出码 3）而不是判红——代价是换到「必须能直连」的网络环境仍然跑不动，
+  且把仪器的网络策略钉死在一台机器的形状上。① 是消依赖，② 是把依赖说出来；两者都不该由 harness 片顺手做。
+  ③ 还有一条不动仓库的姿势：把 `127.0.0.1:7897` 那个本机代理客户端重新跑起来，三面探针走注册表即 `200`、
+  core 档随即转绿。它能解释「间歇」，但不是修——它把这条判据的可用性钉在**这台机器恰好开着某个客户端**上，
+  换一台机器或换一个网络就重来一次，所以它只配当作取绿轮次的操作条件写进回读，不能当闭环。
+- 回读：`python -X utf8 .codex/scripts/dev/net_probe.py`（三面探针，是本片按 D13 的教训把原来写在
+  `artifacts/tmp/` 里的一次性驱动上收成的常驻打印工具；两次读数 `artifacts/tmp/run336-net-probe.txt`（上收前）与
+  `artifacts/tmp/run339-net-probe-perm.txt`（上收后）逐字相同），
+  `node .codex/scripts/dev/parity/cdp_shot_selftest.mjs`（当前姿势：断外网代理时
+  `SELFTEST FAIL cases=17 failures=2`，两例名与原因行逐字在场）、
+  `node .codex/scripts/dev/parity/verify_1to1_selftest.mjs`（串行单跑，`rc=3` 与 5 条 `#root 是空的或不存在`，
+  `artifacts/tmp/run335-serial-control.txt`），
+  以及裁定后那条对应的判据（①：拔网线整跑仍绿；②：`--tier external` 给出 FAULT/INCONCLUSIVE 而不是 FAIL）。
+  登记时点的 cdp 单跑读数在 `artifacts/tmp/run328-cdp-solo-full.txt`，两侧仪器与探针逐字在片 036 卡片的证据块 04/05。
+- 归属：2026-10-20 由片 036 在闭合 D11 时定位并登记；**未闭合**，等一次 Web 线的网络边界裁定。

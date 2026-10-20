@@ -2,7 +2,7 @@
 """把仓库现存的只读守门收成一条命令，并且拒绝「退出码 0 但没打印判据」。
 
 用法（从任意目录）：
-    python .codex/scripts/run_all_guards.py [--tier core|precommit|all] [--only 子串]... [--list]
+    python .codex/scripts/run_all_guards.py [--tier core|precommit|external|all] [--only 子串]... [--list]
 
 为什么要「判据行存在性」这第二道闸：一条守门返回 0 只说明它自己没报错，
 不说明它判过。解释器换成了别的、路径解析失败、被检集合变空——这些形态都会让
@@ -12,15 +12,24 @@
 分档：
   core        只读、确定性、不依赖构建产物或 git 增量（提交任何一片都要整跑）
   precommit   依赖未提交增量、构建产物或 Gradle 的那几支（提交前整跑）
-  all         两档相加
+  external    判定结果取决于**本机以外的东西**的那几支（此处指需要浏览器真的把原型渲染出来，
+              而 `Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html` 的 React/Babel 走 unpkg CDN）。
+              它留在注册表里、也被 `--tier all` 跑到，但不进 core：一台代理挂了的机器能让它必红，
+              而那种红与产物无关（ROADMAP D11③、D14）。
+  all         三档相加
 不在注册表里的东西也打印出来，不是隐掉：需要实机或本机服务端的走查（web_walk 正文、
 capture_screen、release-gate）属 ROADMAP 的 C4，不在只读汇总面内。
 
 退出码（与仓库其余守门同一纪律）：
   0 = 入选守门全部打印了判据行且全部判绿
   1 = 至少一条判红，或至少一条没打印判据行（「没判据」不等于「通过」）
-  3 = 汇总器没能把每条入选守门都跑起来（解释器或脚本缺失、注册表自相矛盾、
-      过滤条件选中零条）→ 本次结论不成立
+  3 = 本次结论不成立：汇总器没能把每条入选守门都跑起来（解释器或脚本缺失、注册表自相矛盾、
+      过滤条件选中零条、输出不是合法 UTF-8），或至少一条守门**撞到自己的超时上限**——
+      超时是「没判」，不是产物判红，所以它走 3 不走 1（ROADMAP D12）
+
+任何一条不是 PASS 的守门都紧跟一段 `DIAG`：把那条守门自己的原始输出摆出来（短的输出整段，
+长的取末尾），因为「哪一例红」必须在整跑读数里就有答案，而不是要人再单独跑一次那条命令
+才知道（ROADMAP D11）。
 """
 
 import os
@@ -35,11 +44,20 @@ EXIT_PASS = 0
 EXIT_FAIL = 1
 EXIT_FAULT = 3
 
-TIERS = ("core", "precommit")
+TIERS = ("core", "precommit", "external")
 # 注册表形状的裸下限：被检集合不能给自己定下限，否则删空整张表仍是绿。
 MIN_ROSTER = 20
 MIN_CORE = 18
 DEFAULT_TIMEOUT = 300
+# 上限同样是裸字面量：一条守门把 `timeout=` 写成 24 小时，它就永远不会「挂住不回」，
+# 而「永不超时」和「判绿」在汇总面上长得一模一样（D12 那族放宽上限的冲动要在注册表就被挡住）。
+MAX_TIMEOUT = 1800
+# 红的时候最怕只看见一行汇总判决：子进程逐用例的输出此前被整个丢弃，
+# 「哪一例红」在整跑读数里根本没有答案，必须再单独跑那条命令才知道（D11①）。
+# 短输出整段打印，长输出只打印末尾——Gradle 那种几千行的不能灌进汇总面。
+DIAG_FULL_MAX = 60
+DIAG_TAIL_MAX = 30
+DIAG_LINE_CHARS = 200
 
 PY = "python"
 NODE = "node"
@@ -129,6 +147,8 @@ GUARDS = [
     E("check_androidtest_schema_expectations", PY,
       [".codex/scripts/dev/check_androidtest_schema_expectations.py"],
       ["VERDICT:"], ["core"]),
+    E("check_run_all_guards", PY, [".codex/scripts/check_run_all_guards.py"],
+      [SELFTEST_NEEDLE], ["core"]),
     E("checkers_selftest", PY, [".codex/scripts/dev/checkers_selftest.py"],
       ["OVERALL:"], ["core"]),
     E("parity_ledger_selftest", PY, [".codex/scripts/dev/parity_ledger_selftest.py"],
@@ -139,10 +159,19 @@ GUARDS = [
       [".codex/scripts/dev/parity/measure_screen.py", "--selftest"],
       ["VERDICT:"], ["core"]),
     # ── Web 侧只读守门（node，无 node_modules 依赖）──
+    # 一条要浏览器真跑出读数的守门有「harness 没材料」这条提前中止分支：它打
+    # `FAIL vocabulary-layer-aborted` + `EXITCODE=3` 而**不打**汇总行 `cases=`。
+    # 只把 `cases=` 当判据行时，那条诚实的「本轮没判」会被汇总器读成「没打印判据」＝判红——
+    # 正是 SKILL.md「needles 必须在该条红路径上也在」要防的形状（实测读数见片 036 证据块 04）。
     E("verify_1to1_selftest", NODE, [".codex/scripts/dev/parity/verify_1to1_selftest.mjs"],
-      ["cases="], ["core"]),
+      ["cases=", "vocabulary-layer-aborted"], ["core"], timeout=600),
+    # D11③：这一条要浏览器真把原型渲染出来，而原型的 React/Babel 来自 unpkg CDN（D14），
+    # 本机系统代理一挂它必红——那种红与产物无关，所以它不进每片都要整跑的 core 档。
+    # 它的裸下限分支同样绕开 `cases=`（打 `selftest-case-floor` 后直接 EXITCODE=3），第二判据行为此而设。
+    # `timeout=600` 按实测：单跑三次读数 123.3s / 265.3s / 314.5s（314.5s 那次判 rc=1 并打印 `cases=17 failures=2`），
+    # 默认 300s 会把最后那种姿势掐在判据行之前——掐断一条**会给判决**的守门，等于把 D11① 挣来的诊断又丢掉。
     E("cdp_shot_selftest", NODE, [".codex/scripts/dev/parity/cdp_shot_selftest.mjs"],
-      ["cases="], ["core"]),
+      ["cases=", "selftest-case-floor"], ["external"], timeout=600),
     E("web_walk --selftest", NODE, [".codex/scripts/dev/parity/web_walk.mjs", "--selftest"],
       [SELFTEST_NEEDLE], ["core"]),
     E("check_dependency_direction", NODE, ["frontend/scripts/check_dependency_direction.mjs"],
@@ -212,6 +241,9 @@ def roster_problems(guards):
             problems.append("%s: pass_codes and fail_codes overlap" % g.name)
         if not isinstance(g.timeout, (int, float)) or g.timeout <= 0:
             problems.append("%s: timeout must be a positive number" % g.name)
+        elif g.timeout > MAX_TIMEOUT:
+            problems.append("%s: timeout %ss above the %ss ceiling — 一条永不超时的守门与一条判绿"
+                            "在汇总面上无法区分" % (g.name, g.timeout, MAX_TIMEOUT))
     return problems
 
 
@@ -270,13 +302,41 @@ def judge(entry, rc, output):
         rc, " " + label if label else ""), hit[0].strip()
 
 
+def _decode(stdout, stderr):
+    """两路管道拼成一段文本；不是合法 UTF-8 时返回 None（调用方据此判仪器故障）。"""
+    try:
+        return (stdout or b"").decode("utf-8") + (stderr or b"").decode("utf-8")
+    except UnicodeDecodeError:
+        return None
+
+
+def diag(output):
+    """非 PASS 时要摆出来的原始输出：短的就整段，长的只取末尾，行宽一律截断。
+
+    整段/末尾的分界按**非空行**数算，因为判红输出常见形态是十几行逐用例加一行汇总，
+    整段打印才能把「哪一例红」留在汇总面上；而构建类守门的输出动辄几千行，
+    那种只能看末尾（真实红因通常在最后）。
+    """
+    lines = [line for line in output.splitlines() if line.strip()]
+    if not lines:
+        return "empty", 0, []
+    if len(lines) <= DIAG_FULL_MAX:
+        return "full", len(lines), lines
+    return "tail", len(lines), lines[-DIAG_TAIL_MAX:]
+
+
 def execute(entry):
+    """跑一条守门，返回 (状态, 详情, 判据行摘录, 原始输出)。
+
+    状态有 PASS / FAIL / INCONCLUSIVE / TIMEOUT / FAULT 五种： TIMEOUT 与 FAIL 分开计，
+    因为「被自己的上限掐断」是**没判**，借判红那个词会让下一位实现者去查一个不存在的回归（D12）。
+    """
     argv, fault = resolve(entry)
     if fault:
-        return "FAULT", fault, ""
+        return "FAULT", fault, "", ""
     for path in repo_paths(entry):
         if not os.path.isfile(path):
-            return "FAULT", "script not found: %s" % path, ""
+            return "FAULT", "script not found: %s" % path, "", ""
     start = time.time()
     try:
         # 先拿裸字节再自己解码：Windows 上 subprocess 的读取线程会把解码异常打在 stderr
@@ -287,23 +347,27 @@ def execute(entry):
         process = subprocess.Popen(argv, cwd=REPO_ROOT, stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE, stdin=subprocess.DEVNULL)
     except OSError as exc:
-        return "FAULT", "cannot start: %s" % exc, ""
+        return "FAULT", "cannot start: %s" % exc, "", ""
     deadline = start + entry.timeout
     try:
         stdout, stderr = process.communicate(timeout=max(0.1, deadline - time.time()))
     except subprocess.TimeoutExpired:
         process.kill()
+        # 第二次读同样带 deadline：孙进程握着管道时这里也会挂，那份输出就只能放弃，
+        # 但「放弃了」要写进读数里，不能悄悄返回一个空串冒充「它一个字都没打」。
+        stdout = stderr = b""
         try:
-            process.communicate(timeout=5)
+            stdout, stderr = process.communicate(timeout=5)
+            partial = ""
         except subprocess.TimeoutExpired:
-            pass
-        return "FAIL", "timeout after %ss, so nothing was judged" % entry.timeout, ""
-    try:
-        output = ((stdout or b"").decode("utf-8") + (stderr or b"").decode("utf-8"))
-    except UnicodeDecodeError as exc:
-        return "FAULT", "output is not valid UTF-8 (%s) — 判据行不可读就不能报通过" % exc, ""
+            partial = "（管道没排空，超时前的输出取不到）"
+        return "TIMEOUT", "timeout after %ss — 本轮对这条没有判据，既不是绿也不是红%s" % (
+            entry.timeout, "" if not partial else "：" + partial), "", _decode(stdout, stderr) or ""
+    output = _decode(stdout, stderr)
+    if output is None:
+        return "FAULT", "output is not valid UTF-8 — 判据行不可读就不能报通过", "", ""
     status, detail, excerpt = judge(entry, process.returncode, output)
-    return status, "%s %.1fs" % (detail, time.time() - start), excerpt
+    return status, "%s %.1fs" % (detail, time.time() - start), excerpt, output
 
 
 def selected(guards, tier, filters):
@@ -341,7 +405,7 @@ def main(argv):
         else:
             print("usage error: unrecognized argument %s" % arg)
             print("usage: python .codex/scripts/run_all_guards.py "
-                  "[--tier core|precommit|all] [--only 子串] [--list]")
+                  "[--tier core|precommit|external|all] [--only 子串] [--list]")
             print("VERDICT: INCONCLUSIVE (the command line asked for nothing that can be judged)")
             print("EXITCODE=%d" % EXIT_FAULT)
             return EXIT_FAULT
@@ -356,9 +420,9 @@ def main(argv):
         return EXIT_FAULT
 
     if listing:
-        print("ROSTER entries=%d core=%d precommit=%d" % (
-            len(GUARDS), len([g for g in GUARDS if "core" in g.tiers]),
-            len([g for g in GUARDS if "precommit" in g.tiers])))
+        print("ROSTER entries=%d %s" % (
+            len(GUARDS), " ".join("%s=%d" % (tier, len([g for g in GUARDS if tier in g.tiers]))
+                                  for tier in TIERS)))
         for g in GUARDS:
             print("%-14s %-38s %s" % ("/".join(g.tiers), g.name,
                                       " ".join('"%s"' % n for n in g.needles)))
@@ -373,24 +437,40 @@ def main(argv):
         print("EXITCODE=%d" % EXIT_FAULT)
         return EXIT_FAULT
 
-    subset = bool(dropped)
+    # subset 回答的是「整表是不是都被判过了」，不是「有没有 --only」。
+    # 只看 dropped 的话，`--tier core` 会打印 `subset=no` 而它其实只跑了 43 条里的 36 条——
+    # 那一行会把「档位选择」读成「全表已判」，正是 D11③ 挪档之后最容易被误用的措辞。
+    unjudged = len(GUARDS) - len(pool)
     print("RUN-ALL-GUARDS tier=%s selected=%d/%d subset=%s" % (
-        tier, len(pool), len(GUARDS), "yes" if subset else "no"), flush=True)
-    counts = {"PASS": 0, "FAIL": 0, "INCONCLUSIVE": 0, "FAULT": 0}
+        tier, len(pool), len(GUARDS), "yes" if unjudged else "no"), flush=True)
+    counts = {"PASS": 0, "FAIL": 0, "INCONCLUSIVE": 0, "TIMEOUT": 0, "FAULT": 0}
     for entry in pool:
-        status, detail, excerpt = execute(entry)
+        status, detail, excerpt, output = execute(entry)
         counts[status] += 1
         print("%-12s %-38s %s" % (status, entry.name, detail), flush=True)
         if excerpt:
             print("             > %s" % excerpt[:160], flush=True)
-    if dropped:
-        print("NOTE         %-38s 未选中：%d 条不在本次判定面内，整表绿不由此声明" % (
-            "filtered-out", len(dropped)))
+        if status != "PASS" and status != "FAULT":
+            mode, total, lines = diag(output)
+            if lines:
+                print("             DIAG %s lines=%d/%d mode=%s" % (
+                    entry.name, len(lines), total, mode), flush=True)
+                for line in lines:
+                    print("             | %s" % line[:DIAG_LINE_CHARS], flush=True)
+    if unjudged:
+        print("NOTE         %-38s 未选中：%d 条不在本次判定面内（%s），整表绿不由此声明" % (
+            "not-selected", unjudged,
+            "--only 过滤 + 档位选择" if dropped else "档位选择"))
 
-    print("RUN-ALL-GUARDS pass=%d fail=%d inconclusive=%d fault=%d" % (
-        counts["PASS"], counts["FAIL"], counts["INCONCLUSIVE"], counts["FAULT"]))
+    print("RUN-ALL-GUARDS pass=%d fail=%d inconclusive=%d fault=%d timeout=%d" % (
+        counts["PASS"], counts["FAIL"], counts["INCONCLUSIVE"], counts["FAULT"],
+        counts["TIMEOUT"]))
     if counts["FAULT"]:
         print("VERDICT: INCONCLUSIVE (some guard never ran, so this run proves nothing)")
+        code = EXIT_FAULT
+    elif counts["TIMEOUT"]:
+        print("VERDICT: INCONCLUSIVE (%d guard(s) hit their own timeout, so nothing was "
+              "judged for them — 重跑或换串行姿势，别去查不存在的回归)" % counts["TIMEOUT"])
         code = EXIT_FAULT
     elif counts["INCONCLUSIVE"]:
         print("VERDICT: INCONCLUSIVE (a guard returned an unjudged exit code)")
@@ -398,7 +478,7 @@ def main(argv):
     elif counts["FAIL"]:
         print("VERDICT: FAIL (%d guard(s) red or silent)" % counts["FAIL"])
         code = EXIT_FAIL
-    elif subset:
+    elif unjudged:
         print("VERDICT: PASS (subset only — %d/%d entry(ies) judged, not the whole roster)" % (
             len(pool), len(GUARDS)))
         code = EXIT_PASS

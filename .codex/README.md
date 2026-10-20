@@ -8,7 +8,9 @@
 2. 小改动直接执行；大型或跨栈需求在用户选择 Harness 后进入 `.codex/HARNESS.md`。
 3. Harness 任务写入 `.codex/tasks/`，由对应 owner 实现，独立 verifier 只读验收。
 4. 提交前整跑只读守门并留证据：`python -X utf8 .codex/scripts/run_all_guards.py --tier core`（每片都要跑），
-   提交动作前再跑 `--tier precommit`；判定规则与「怎么加一条守门」见 `.codex/skills/guard-runner/SKILL.md`。
+   提交动作前再跑 `--tier precommit`；判定取决于本机以外那个东西（外网可达性）的守门单独成档
+   `--tier external`，不在每片必跑面内，它的责任单跑命令与红时该找谁写在技能正文里。
+   判定规则与「怎么加一条守门」见 `.codex/skills/guard-runner/SKILL.md`。
 5. 任务、规则和脚本只记录可复核的命令、结果和缺口；不自动提交或推送。
 
 ## 目录结构

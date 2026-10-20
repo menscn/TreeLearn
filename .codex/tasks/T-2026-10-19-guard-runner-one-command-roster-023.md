@@ -108,6 +108,18 @@ tdd_mode: required
 - PowerShell 三条用 rc_labels 保留原义（`line-budget` 1=WARN/2=FAIL，`no-kotlin-check` 2=PARTIAL），判定仍只有 pass_codes/fail_codes/其余三档；PARTIAL 不在 `no-kotlin-check` 的判绿集合里，所以它跳过阶段时汇总器判 INCONCLUSIVE 而不是绿。
 - 不用 `subprocess.run(timeout=)`：它超时后 kill 再无限等管道，守门的孙进程握着管道时汇总器跟着挂死，那比判红更糟。改 Popen + 每次读都带 deadline，并且先收裸字节再在进程内解码：Windows 的读取线程会把 `UnicodeDecodeError` 打在 stderr 后当成「没输出」，那样「乱码」会被读成「这条守门没判据」——仪器坏了与判据没打印是两个病因，不能混进同一条 FAIL。这条改判由 `artifacts/tmp/probe-utf8.py` 现场验证过（改前 `execute` 返回 FAIL，改后返回 FAULT/3）。
 - 注册表下限 `MIN_ROSTER = 20` / `MIN_CORE = 18` 与 `CORE_KEYS` 四条关键守门名写在裸字面量上：删条目不会让表「变小但仍绿」，而是当场 `ROSTER FAULT`。
+- **修订（2026-10-20，片 `T-2026-10-20-guard-diagnostics-timeout-lane-036.md`）——本卡的判定语义被改过，按 D12② 的要求写回交付卡而不是只留在 ROADMAP**：
+  ① 「超时」原来算在 `fail` 里（`FAIL … timeout after 300s` / 退出码 1），现在单独成档 `TIMEOUT` 并把总退出码压到 3，
+  措辞改成「本轮对这条没有判据」——因为超时是**没判**，不是产物判红，借判红那个词会让下一位实现者去查一个不存在的回归。
+  ② 非 PASS 且非 FAULT 的条目现在附带 `DIAG`（子进程自己的原始输出，短则整段 `mode=full`、长则末尾 `mode=tail`），
+  这一条补的是本卡验收方式没覆盖的那一半：判据行在场不等于**红因**在场。
+  ③ 新增 `MAX_TIMEOUT` 上限（超过即 `ROSTER FAULT`）与 `external` 档（`cdp_shot_selftest` 移出 core，见 D11③/D14）。
+  ④ `subset=` 那一行的含义从「有没有 `--only` 过滤」改成「整表是否都被判过」，所以 `--tier core` 现在也打印 `subset=yes`——
+  原措辞会把一次档位整跑读成「全表已判」。
+  ⑤ 本卡那句「26 例电池」的用例条数不再由 prose 承担：条数由 `check_run_all_guards.py` 自己打印，
+  且这支自检现在注册在 core 档里（`check_run_all_guards`），「改过判定分支必须整跑自检」这句话从此有常驻仪器背书。
+  修订前后的对照读数（同一支电池架在 `git show HEAD:` 取出的本卡实现上 `broken=8`，对修订后的实现 `broken=0`）
+  在本片卡片的证据块 02/03。本卡其余判据、下限与期望标签一字未删。
 
 ## Verification report
 
