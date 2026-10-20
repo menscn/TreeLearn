@@ -1,0 +1,55 @@
+{
+  "schema": "treelearn-ux-vendor/1",
+  "boundary": "原型渲染依赖的第三方脚本已收编进本目录，结构渲染不再依赖外网；remote 里逐条登记仍留在公网的装饰性字体面。",
+  "prototype": "Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html",
+  "recorded": "2026-10-20",
+  "integrity_note": "下面每个 integrity 值取自收编当时原型 HTML 声明的 SRI（unpkg 发布值），落盘前与文件实际 sha384 逐一比对全等。标签上不再写 integrity/crossorigin：实测 Edg/155.0.4283.45 在 file:// 下会把带这两个属性的本地脚本按 CORS 模式取子资源并拒绝执行，#root 停在 0。字节的校验位置从「浏览器执行前」移到 check_ux_vendor.py 的本地比对。",
+  "scripts": [
+    {
+      "file": "react.development.js",
+      "src": "./vendor/react.development.js",
+      "upstream": "https://unpkg.com/react@18.3.1/umd/react.development.js",
+      "version": "react@18.3.1",
+      "integrity": "sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L",
+      "bytes": 109931
+    },
+    {
+      "file": "react-dom.development.js",
+      "src": "./vendor/react-dom.development.js",
+      "upstream": "https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js",
+      "version": "react-dom@18.3.1",
+      "integrity": "sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm",
+      "bytes": 1080227
+    },
+    {
+      "file": "babel.min.js",
+      "src": "./vendor/babel.min.js",
+      "upstream": "https://unpkg.com/@babel/standalone@7.29.0/babel.min.js",
+      "version": "@babel/standalone@7.29.0",
+      "integrity": "sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y",
+      "bytes": 3137752
+    }
+  ],
+  "remote": [
+    {
+      "url": "https://fonts.googleapis.com",
+      "role": "字体源的 preconnect 提示",
+      "absence": "取不到不影响结构渲染"
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=Ma+Shan+Zheng&display=swap",
+      "role": "思源宋体/思源黑体/马善政楷体的样式表",
+      "absence": "退回系统字体，字面观感变化，DOM 结构不变"
+    },
+    {
+      "url": "https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/lxgwwenkai-regular.css",
+      "role": "霞鹜文楷 regular 的 unicode-range 分片清单",
+      "absence": "退回系统字体，字面观感变化，DOM 结构不变"
+    },
+    {
+      "url": "https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/lxgwwenkai-bold.css",
+      "role": "霞鹜文楷 bold 的 unicode-range 分片清单",
+      "absence": "退回系统字体，字面观感变化，DOM 结构不变"
+    }
+  ]
+}

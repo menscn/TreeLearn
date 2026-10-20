@@ -357,11 +357,12 @@ export async function run(argv) {
     }
     if (navRetries) ledger.ok(`navigation-retry = ${navRetries} 次（about:blank 未让位，Windows 启动竞态）`);
     /* 等不到 .screen 有两种成因，退出码必须分开：原型的界面是 React+Babel 在**页面里**现场编译出来的
-       （head 里三个 unpkg 脚本 + 两份公网字体），外部脚本没到 = 被核对象根本没起来，属仪器故障 (3)；
+       （head 里三个 `./vendor/` 脚本 + 三份公网字体面，脚本已于 2026-10-20 按 ROADMAP D14 收编进仓库），
+       脚本没执行 = 被核对象根本没起来，属仪器故障 (3)；
        界面渲出来了却没有 .screen 才属结构不符 (1)。readyState=complete 分不出这两件事——
-       2026-10-17 实测两次 CDN 未答应的读数正是 nodes=16、ready=complete、title 完全正确。
-       「没起来」与 about:blank 同属启动竞态，因此对这一档先按同一 URL 重载再判：公网抖动不该让
-       整条证据链不可重跑。结构不符**不**走重试，否则一次真缺陷会被重试掩盖成偶发。 */
+       2026-10-17 实测两次外部脚本没答应的读数正是 nodes=16、ready=complete、title 完全正确。
+       「没起来」与 about:blank 同属启动竞态，因此对这一档先按同一 URL 重载再判：一次偶发的编译/启动
+       竞态不该让整条证据链不可重跑。结构不符**不**走重试，否则一次真缺陷会被重试掩盖成偶发。 */
     const renderProbe = () => br.cdp.eval("({ready: document.readyState, href: location.href, title: document.title,"
       + " nodes: document.querySelectorAll('*').length,"
       + " root: (document.getElementById('root') || {childElementCount: -1}).childElementCount})");
@@ -377,7 +378,8 @@ export async function run(argv) {
       if (bootRetries >= MAX_BOOT_RETRIES) {
         throw new K.Fault(`#root 是空的或不存在（root=${probe.root} nodes=${probe.nodes} `
           + `ready=${probe.ready} title=${probe.title}，重载 ${bootRetries} 次后仍空）——原型的界面由页面内的 `
-          + "React+Babel 现场编译、脚本走公网 unpkg；被核对象没起来属仪器故障，不是结构不符");
+          + "React+Babel 现场编译、脚本取自 ./vendor/（字节身份由 check_ux_vendor.py 判）；"
+          + "被核对象没起来属仪器故障，不是结构不符");
       }
       bootRetries += 1;
       if (!(await navigated())) {
@@ -387,7 +389,7 @@ export async function run(argv) {
       }
     }
     if (bootRetries) {
-      ledger.ok(`boot-retry = ${bootRetries} 次后界面才渲出来（公网脚本未答应的启动竞态；`
+      ledger.ok(`boot-retry = ${bootRetries} 次后界面才渲出来（本地脚本没及时执行的启动竞态；`
         + `仍空即判仪器故障 3，上限 ${MAX_BOOT_RETRIES}）`);
     }
     await K.sleep(1200);

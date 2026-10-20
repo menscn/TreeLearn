@@ -1,0 +1,979 @@
+# Evidence for T-2026-10-20-ux-prototype-vendored-scripts-037.md（片 037 / ROADMAP D14）
+# 装配驱动：artifacts/tmp/b037-evidence.py（只拼接、核对在场、扫乱码；不改写读数）
+# 原始捕获全部在 gitignore 的 artifacts/tmp/，块 00 之外逐字抄录。
+
+== 块 00 现场命令与 git 面 ==
+--- python -X utf8 .codex/scripts/run_all_guards.py --list ---
+EXITCODE=0
+ROSTER entries=45 core=39 precommit=6 external=0
+core           validate_tasks                         "SUMMARY files="
+core           check_context_pack                     "check(s) failed"
+core           check_code_reviewer_agent              "check(s) failed"
+core           check_codebase_researcher_agent        "check(s) failed"
+core           check_code_simplifier_agent            "check(s) failed"
+core           check_loop_watcher_agent               "check(s) failed"
+core           check_source_of_truth                  "check(s) failed"
+core           run_evals                              "check(s) failed"
+core           check_eval_keeper_agent                "check(s) failed"
+core           metrics_report                         "check(s) failed"
+core           check_metrics_reporter_agent           "check(s) failed"
+core           check_intent_capturer_agent            "check(s) failed"
+core           check_intent_template                  "check(s) failed"
+core           check_pm_discovery_skill               "check(s) failed"
+core           check_roadmap_and_routing              "check(s) failed"
+core           check_spec_author_agent                "check(s) failed"
+core           check_stack_facts                      "check(s) failed"
+core           check_design_tokens                    "check(s) failed"
+core           check_ux_vendor                        "check(s) failed"
+core           check_ux_vendor --selftest             "SELFTEST cases="
+core           check_pointer_liveness                 "check(s) failed"
+core           check_pointer_liveness --selftest      "SELFTEST cases="
+core           check_androidtest_schema_expectations  "VERDICT:"
+core           check_run_all_guards                   "SELFTEST cases="
+core           checkers_selftest                      "OVERALL:"
+core           parity_ledger_selftest                 "VERDICT:"
+core           screen_inventory_selftest              "VERDICT:"
+core           measure_screen --selftest              "VERDICT:"
+core           verify_1to1_selftest                   "cases=" "vocabulary-layer-aborted"
+core           cdp_shot_selftest                      "cases=" "selftest-case-floor"
+core           web_walk --selftest                    "SELFTEST cases="
+core           check_dependency_direction             "dependency scan root="
+core           check_dependency_direction --selftest  "SELFTEST cases="
+core           check_user_copy_i18n                   "user-copy scan root="
+core           check_user_copy_i18n --selftest        "SELFTEST cases="
+core           check_device_time                      "device-time scan root="
+core           check_device_time --selftest           "SELFTEST cases="
+core           sync_fixtures --check                  "SYNC CHECK"
+core           sync_fixtures --selftest               "SELFTEST cases="
+precommit      check_offline_bundle                   "offline scan root="
+precommit      check_offline_bundle --selftest        "SELFTEST cases="
+precommit      frontend verify                        "verify steps="
+precommit      line-budget                            "业务变更行:" "[line-budget] 错误"
+precommit      no-kotlin-check                        "VERDICT:"
+precommit      guard-selftest -Fast                   "OVERALL ="
+EXITCODE=0
+--- git status --porcelain（证据装配时点）---
+EXITCODE=0
+ M .codex/ROADMAP.md
+ M .codex/context/source-of-truth.md
+ M .codex/rules/ux-design.md
+ M .codex/scripts/check_run_all_guards.py
+ M .codex/scripts/dev/net_probe.py
+ M .codex/scripts/dev/parity/verify_1to1.mjs
+ M .codex/scripts/run_all_guards.py
+ M .codex/skills/guard-runner/SKILL.md
+ M "Docs/04-ux-design/\347\237\245\350\212\275-TreeLearn-\351\253\230\344\277\235\347\234\237\345\216\237\345\236\213-v1.html"
+ M Docs/spec/SPEC-2026-09-21-ai-persona-preference.md
+ M artifacts/metrics/report.md
+?? .codex/scripts/check_ux_vendor.py
+?? .codex/tasks/T-2026-10-20-ux-prototype-vendored-scripts-037.md
+?? Docs/04-ux-design/vendor/
+--- git log --oneline -3 ---
+EXITCODE=0
+b7e7ad2 feat(harness): 片 036 闭合 D11+D12，把「哪条红、红在哪一例、超时＝没判」换成汇总面自己说清
+620729e feat(harness): 片 035 落地 D13 常驻仪器，把「活指针复算」从 gitignore 里的一次性驱动换成会响的判据
+eab95b0 feat(harness): 片 034 落地 C3 事实源清单，把「同一事实只有一处权威」换成一条会响的命令
+
+== 01 RED（manifest 缺席时的判决） ==
+--- artifacts/tmp/run365-vendor-guard-red.txt ---
+# command: python -X utf8 .codex/scripts/check_ux_vendor.py
+# 注入前状态：vendor/ 三文件已落盘、原型已改本地引用，manifest 尚未创建
+OK   prototype-missing — path=Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html
+FAIL vendor-manifest-missing — path=Docs/04-ux-design/vendor/manifest.json
+NOTE checks-skipped — manifest 读不出来，后面的比对没有对象（这一条不是绿）
+
+check_ux_vendor: 1 check(s) failed
+EXITCODE=1
+EXITCODE=1
+
+
+== 02 GREEN（manifest 落盘后的判决 + 注入电池） ==
+--- artifacts/tmp/run366-vendor-guard-green.txt ---
+# command: python -X utf8 .codex/scripts/check_ux_vendor.py（GREEN：manifest 已落盘）
+OK   vendor manifest parses as JSON — keys=['boundary', 'integrity_note', 'prototype', 'recorded', 'remote', 'schema', 'scripts']
+OK   vendor manifest schema — found='treelearn-ux-vendor/1' want='treelearn-ux-vendor/1'
+OK   vendor manifest script floor — measured=3 floor=3
+OK   vendor manifest points at the prototype — declared='Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html' want='Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html'
+OK   vendor script digest:react.development.js — declared=sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L measured=sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L bytes=109931
+OK   vendor script size:react.development.js — declared=109931 measured=109931
+OK   vendor script digest:react-dom.development.js — declared=sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm measured=sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm bytes=1080227
+OK   vendor script size:react-dom.development.js — declared=1080227 measured=1080227
+OK   vendor script digest:babel.min.js — declared=sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y measured=sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y bytes=3137752
+OK   vendor script size:babel.min.js — declared=3137752 measured=3137752
+OK   vendor manifest duplicate file — duplicated=[]
+OK   no external script src — 外网脚本引用=[]
+OK   local script free of integrity/crossorigin — 带 SRI 属性的本地标签=[]
+OK   undeclared vendor reference — HTML 引用了但没登记=[]
+OK   vendor reference present — 登记了但 HTML 没引用=[]
+OK   vendor manifest remote floor — measured=4 floor=4
+OK   remote face declared — 没登记的公网面=[]
+OK   remote face still live — 登记了但已不在 HTML=[]
+OK   vendor dir has only declared files — 磁盘上有但没登记=[]
+
+check_ux_vendor: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+
+# command: python -X utf8 .codex/scripts/check_ux_vendor.py --selftest
+Command: python -X utf8 .codex/scripts/check_ux_vendor.py --selftest
+Workspace: C:\Users\23745\AppData\Local\Temp\tl-ux-vendor-rrgphlg2
+BASELINE fixture checks_failed=0
+CASE 01 external-script-src              failed=2  label=no external script src -> ok
+CASE 02 protocol-relative-script         failed=2  label=no external script src -> ok
+CASE 03 integrity-on-local-script        failed=1  label=local script free of integrity/crossorigin -> ok
+CASE 04 crossorigin-on-local-script      failed=1  label=local script free of integrity/crossorigin -> ok
+CASE 05 vendor-file-deleted              failed=1  label=vendor script absent:react.development.js -> ok
+CASE 06 vendor-byte-flipped              failed=1  label=vendor script digest:react.development.js -> ok
+CASE 07 vendor-byte-appended             failed=2  label=vendor script size:react.development.js -> ok
+CASE 08 manifest-deleted                 failed=1  label=vendor manifest present -> ok
+CASE 09 manifest-not-json                failed=1  label=vendor manifest parses as JSON -> ok
+CASE 10 manifest-not-utf8                failed=1  label=vendor manifest readable -> ok
+CASE 11 manifest-scripts-cleared         failed=1  label=vendor manifest script floor -> ok
+CASE 12 manifest-digest-wrong            failed=1  label=vendor script digest:react.development.js -> ok
+CASE 13 remote-face-undeclared           failed=2  label=remote face declared -> ok
+CASE 14 remote-face-stale                failed=1  label=remote face still live -> ok
+CASE 15 new-cdn-link-added               failed=1  label=remote face declared -> ok
+CASE 16 declared-script-unreferenced     failed=1  label=vendor reference present -> ok
+CASE 17 undeclared-script-referenced     failed=1  label=undeclared vendor reference -> ok
+CASE 18 stray-file-in-vendor-dir         failed=1  label=vendor dir has only declared files -> ok
+CASE 19 schema-changed                   failed=1  label=vendor manifest schema -> ok
+CASE 20 prototype-path-wrong             failed=1  label=vendor manifest points at the prototype -> ok
+CASE 21 prototype-deleted                failed=1  label=prototype present -> ok
+SELFTEST cases=21 mismatch=0 expected=21 floor=21
+OVERALL: PASS
+EXITCODE=0
+EXITCODE=0
+
+
+== 03 断网单跑 cdp_shot_selftest ==
+--- artifacts/tmp/run367-cdp-selftest-offline.txt ---
+# command: cdp_shot.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_cdpshot-selftest\run-ub5oVS\shot.png
+# profile screens.json bytes=3679 lines=48 sha256=f85fc4342f701b5ce1f27fd78230de6af348a5d5630d8ad7d0e2eb33335fdeaa
+# prototype.html bytes=150052 lines=2446 sha256=fb32cd82ee87ea4da6ff2ee69f37eb77e5dbfaada08c309fba5f2c9376d349f2
+# scroll=none wait_ms=20000 declared_scale=2
+OK   browser = Edg/155.0.4283.45 (@50f24ef2aa5369a074b8888b7db82d9c0652d642, protocol 1.3)
+OK   html = D:\Project\Android\Treelearn\Docs\04-ux-design\知芽-TreeLearn-高保真原型-v1.html
+OK   clicks = .demo-link -> .topic-card
+OK   screen-rect = 412x816 @ 165,1977.5 (逻辑 px)
+OK   scrollbar-occupancy = 4 = 档案声明 4
+OK   shot = D:\Project\Android\Treelearn\artifacts\tmp\_cdpshot-selftest\run-ub5oVS\shot.png 824x1632 bytes=195676 scale=2
+judgements=6 failed=0
+VERDICT: PASS
+EXITCODE=0
+ok   pos-real-render rc=0 (6.7s, want=0)
+# command: cdp_shot.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_cdpshot-selftest\run-ub5oVS\shot-url.png --url file:///D:/Project/Android/Treelearn/Docs/04-ux-design/%E7%9F%A5%E8%8A%BD-TreeLearn-%E9%AB%98%E4%BF%9D%E7%9C%9F%E5%8E%9F%E5%9E%8B-v1.html
+# profile screens.json bytes=3679 lines=48 sha256=f85fc4342f701b5ce1f27fd78230de6af348a5d5630d8ad7d0e2eb33335fdeaa
+# html 由 --url 显式给出，未核档案路径
+# scroll=none wait_ms=20000 declared_scale=2
+OK   browser = Edg/155.0.4283.45 (@50f24ef2aa5369a074b8888b7db82d9c0652d642, protocol 1.3)
+OK   html = file:///D:/Project/Android/Treelearn/Docs/04-ux-design/%E7%9F%A5%E8%8A%BD-TreeLearn-%E9%AB%98%E4%BF%9D%E7%9C%9F%E5%8E%9F%E5%9E%8B-v1.html
+OK   clicks = .demo-link -> .topic-card
+OK   screen-rect = 412x816 @ 165,1977.5 (逻辑 px)
+OK   scrollbar-occupancy = 4 = 档案声明 4
+OK   shot = D:\Project\Android\Treelearn\artifacts\tmp\_cdpshot-selftest\run-ub5oVS\shot-url.png 824x1632 bytes=195676 scale=2
+judgements=6 failed=0
+VERDICT: PASS
+EXITCODE=0
+ok   pos-url-escape rc=0 (6.6s, want=0)
+USAGE ERROR: 未知选项 --turbo（可用: --screen --out --profile --browser --attach --url --scroll --scale --wait-ms）
+EXITCODE=2
+ok   neg-unknown-option rc=2 (0.0s, want=2)
+USAGE ERROR: 必须给 --out <png>：产图路径显式给出，避免覆盖已归档的基线图
+EXITCODE=2
+ok   neg-missing-out rc=2 (0.0s, want=2)
+USAGE ERROR: 屏档案里没有 "nope"；可用: chat
+EXITCODE=2
+ok   neg-unknown-screen rc=2 (0.0s, want=2)
+USAGE ERROR: --scroll 只认 none|top|bottom，收到 sideways
+EXITCODE=2
+ok   neg-bad-scroll rc=2 (0.0s, want=2)
+INSTRUMENT FAULT: 找不到 Edge 可执行文件（试过: /c/nowhere/msedge.exe）；用 --browser <路径> 指定
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+ok   neg-browser-absent-injection rc=3 (0.0s, want=3)
+INSTRUMENT FAULT: 屏 "chat" 的档案没有 prototype 回放段
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+ok   neg-profile-no-prototype rc=3 (0.0s, want=3)
+INSTRUMENT FAULT: 原型 HTML 不存在: D:\Project\Android\Treelearn\Docs\04-ux-design\no-such-prototype.html
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+ok   neg-html-missing rc=3 (0.0s, want=3)
+INSTRUMENT FAULT: 屏档案 不是合法 UTF-8: D:\Project\Android\Treelearn\artifacts\tmp\_cdpshot-selftest\run-ub5oVS\bad-utf8.json (The encoded data was not valid for encoding utf-8)
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+ok   neg-profile-not-utf8 rc=3 (0.0s, want=3)
+INSTRUMENT FAULT: --url 指向的本机文件不存在: D:\nope\missing.html
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+ok   neg-url-file-missing rc=3 (0.0s, want=3)
+INSTRUMENT FAULT: 导航被浏览器拒绝: net::ERR_ABORTED（目标 javascript:document.write(1)）
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+ok   neg-navigate-rejected rc=3 (0.9s, want=3)
+INSTRUMENT FAULT: CDP 握手失败（端口 1 没有应答: fetch failed）
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+ok   neg-cdp-handshake-fail rc=3 (0.0s, want=3)
+# command: cdp_shot.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_cdpshot-selftest\run-ub5oVS\s.png --profile D:\Project\Android\Treelearn\artifacts\tmp\_cdpshot-selftest\run-ub5oVS\bad-wait.json --wait-ms 1500
+# profile screens.json bytes=5350 lines=201 sha256=37fafd8dfb29cc16c6fc798c5bf4f91918e1a385849a44ca33ac4ace5f70224c
+# prototype.html bytes=150052 lines=2446 sha256=fb32cd82ee87ea4da6ff2ee69f37eb77e5dbfaada08c309fba5f2c9376d349f2
+# scroll=none wait_ms=1500 declared_scale=2
+OK   browser = Edg/155.0.4283.45 (@50f24ef2aa5369a074b8888b7db82d9c0652d642, protocol 1.3)
+OK   html = D:\Project\Android\Treelearn\Docs\04-ux-design\知芽-TreeLearn-高保真原型-v1.html
+OK   clicks = .demo-link -> .topic-card
+FAIL wait-for-absent .no-such-node 在 1500ms 内没出现（readyState=complete）——页面已加载，属结构不符而非仪器故障
+judgements=4 failed=1
+VERDICT: FAIL
+EXITCODE=1
+ok   neg-wait-for-absent rc=1 (6.5s, want=1)
+# command: cdp_shot.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_cdpshot-selftest\run-ub5oVS\s.png --profile D:\Project\Android\Treelearn\artifacts\tmp\_cdpshot-selftest\run-ub5oVS\bad-click.json
+# profile screens.json bytes=5332 lines=200 sha256=f2b3ead54b5a377f37b8ad95b2e3d99687b8542d100559ee55d8dcf659927e9f
+# prototype.html bytes=150052 lines=2446 sha256=fb32cd82ee87ea4da6ff2ee69f37eb77e5dbfaada08c309fba5f2c9376d349f2
+# scroll=none wait_ms=20000 declared_scale=2
+OK   browser = Edg/155.0.4283.45 (@50f24ef2aa5369a074b8888b7db82d9c0652d642, protocol 1.3)
+OK   html = D:\Project\Android\Treelearn\Docs\04-ux-design\知芽-TreeLearn-高保真原型-v1.html
+OK   clicks = #no-such-click-target
+FAIL click-target-absent #no-such-click-target
+judgements=4 failed=1
+VERDICT: FAIL
+EXITCODE=1
+ok   neg-click-absent rc=1 (3.1s, want=1)
+# command: cdp_shot.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_cdpshot-selftest\run-ub5oVS\s.png --scale 1
+# profile screens.json bytes=3679 lines=48 sha256=f85fc4342f701b5ce1f27fd78230de6af348a5d5630d8ad7d0e2eb33335fdeaa
+# prototype.html bytes=150052 lines=2446 sha256=fb32cd82ee87ea4da6ff2ee69f37eb77e5dbfaada08c309fba5f2c9376d349f2
+# scroll=none wait_ms=20000 declared_scale=2
+OK   browser = Edg/155.0.4283.45 (@50f24ef2aa5369a074b8888b7db82d9c0652d642, protocol 1.3)
+OK   html = D:\Project\Android\Treelearn\Docs\04-ux-design\知芽-TreeLearn-高保真原型-v1.html
+OK   clicks = .demo-link -> .topic-card
+OK   screen-rect = 412x816 @ 165,1977.5 (逻辑 px)
+OK   scrollbar-occupancy = 4 = 档案声明 4
+FAIL shot-scale-override 本次 scale=1 而档案声明=2；此图不可交给 --kind render（它按 2x 反算逻辑像素），请用默认比例重跑或同步档案
+judgements=6 failed=1
+VERDICT: FAIL
+EXITCODE=1
+ok   neg-shot-scale-mismatch rc=1 (6.5s, want=1)
+# command: (unit) 空判据
+VERDICT: FAULT 没有任何判据被执行——空见证不算通过
+EXITCODE=3
+ok   neg-empty-ledger rc=3 (unit, want=3)
+SELFTEST PASS cases=17 failures=0
+EXITCODE=0
+rc=0 wall=40s
+
+
+== 04 断网单跑 verify_1to1_selftest ==
+--- artifacts/tmp/run368-verify1to1-selftest-offline.txt ---
+# command: verify_1to1.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-6isqk4\dom.json
+# profile screens.json bytes=3679 lines=48 sha256=f85fc4342f701b5ce1f27fd78230de6af348a5d5630d8ad7d0e2eb33335fdeaa
+# prototype.html bytes=150052 lines=2446 sha256=fb32cd82ee87ea4da6ff2ee69f37eb77e5dbfaada08c309fba5f2c9376d349f2
+# wait_ms=20000 dom_checks=6
+OK   browser = Edg/155.0.4283.45 (@50f24ef2aa5369a074b8888b7db82d9c0652d642, protocol 1.3)
+OK   html = D:\Project\Android\Treelearn\Docs\04-ux-design\知芽-TreeLearn-高保真原型-v1.html
+OK   clicks = .demo-link -> .topic-card
+OK   tokens = 现场回读 6 个（词表要求 6 个，逐个独立复核一致）
+OK   body-bg = rgb(244, 241, 235) = :root --bg #F4F1EB
+OK   grid-period 周期=32px = --s8 墨色=rgba(30, 43, 35, 0.02)（2 个停止点同色）≈ --paper-rule rgba(30,43,35,.018)（alpha 按读数分辨率 ±0.0051 比对）（注意：--lh-read=28px ≠ 周期 32px，与 tokens.json 里「阅读行高 == 格线间距」的注释不符，属设计侧待裁定）
+OK   user-bubble 无气泡底（bg=rgba(0, 0, 0, 0) radius=0px=退役后制式） font-size=15px = --fs-body；距屏右=24 = --gutter 20 + 滚动条占位 4
+OK   body-pitch AI 正文行高=28px = :root --lh-read 28px
+OK   action-pitch = [44, 44, 44] 等距且=按钮宽 44（首钮中心内缩=29；44 无 CSS token，权威是 Android 侧 @dimen/touch_min=44dp，跨端比对属阶段 3）
+OK   pill-inset = 20 = AI 正文左内缩 20 = :root --gutter 20
+OK   dom-checks = 6/6 成立（名单来自档案 body-bg, grid-period, user-bubble, body-pitch, action-pitch, pill-inset）
+OK   out = D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-6isqk4\dom.json bytes=6472
+judgements=12 failed=0
+VERDICT: PASS
+EXITCODE=0
+# command: verify_1to1.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-6isqk4\dom-url.json --url file:///D:/Project/Android/Treelearn/Docs/04-ux-design/%E7%9F%A5%E8%8A%BD-TreeLearn-%E9%AB%98%E4%BF%9D%E7%9C%9F%E5%8E%9F%E5%9E%8B-v1.html
+# profile screens.json bytes=3679 lines=48 sha256=f85fc4342f701b5ce1f27fd78230de6af348a5d5630d8ad7d0e2eb33335fdeaa
+# html 由 --url 显式给出，未核档案路径
+# wait_ms=20000 dom_checks=6
+OK   browser = Edg/155.0.4283.45 (@50f24ef2aa5369a074b8888b7db82d9c0652d642, protocol 1.3)
+OK   html = file:///D:/Project/Android/Treelearn/Docs/04-ux-design/%E7%9F%A5%E8%8A%BD-TreeLearn-%E9%AB%98%E4%BF%9D%E7%9C%9F%E5%8E%9F%E5%9E%8B-v1.html
+OK   clicks = .demo-link -> .topic-card
+OK   tokens = 现场回读 6 个（词表要求 6 个，逐个独立复核一致）
+OK   body-bg = rgb(244, 241, 235) = :root --bg #F4F1EB
+OK   grid-period 周期=32px = --s8 墨色=rgba(30, 43, 35, 0.02)（2 个停止点同色）≈ --paper-rule rgba(30,43,35,.018)（alpha 按读数分辨率 ±0.0051 比对）（注意：--lh-read=28px ≠ 周期 32px，与 tokens.json 里「阅读行高 == 格线间距」的注释不符，属设计侧待裁定）
+OK   user-bubble 无气泡底（bg=rgba(0, 0, 0, 0) radius=0px=退役后制式） font-size=15px = --fs-body；距屏右=24 = --gutter 20 + 滚动条占位 4
+OK   body-pitch AI 正文行高=28px = :root --lh-read 28px
+OK   action-pitch = [44, 44, 44] 等距且=按钮宽 44（首钮中心内缩=29；44 无 CSS token，权威是 Android 侧 @dimen/touch_min=44dp，跨端比对属阶段 3）
+OK   pill-inset = 20 = AI 正文左内缩 20 = :root --gutter 20
+OK   dom-checks = 6/6 成立（名单来自档案 body-bg, grid-period, user-bubble, body-pitch, action-pitch, pill-inset）
+OK   out = D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-6isqk4\dom-url.json bytes=6472
+judgements=12 failed=0
+VERDICT: PASS
+EXITCODE=0
+USAGE ERROR: 未知选项 --turbo（可用: --screen --out --profile --browser --attach --url --wait-ms）
+EXITCODE=2
+USAGE ERROR: 必须给 --screen <屏名>：原型路径、点击序列、等待选择器与 DOM 检查项都从屏档案取
+EXITCODE=2
+USAGE ERROR: --wait-ms 必须是正整数毫秒，收到 0
+EXITCODE=2
+USAGE ERROR: 屏档案里没有 "nope"；可用: chat
+EXITCODE=2
+INSTRUMENT FAULT: 找不到 Edge 可执行文件（试过: /c/nowhere/msedge.exe）；用 --browser <路径> 指定
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 屏 "chat" 的档案没有 prototype 回放段
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 原型 HTML 不存在: D:\Project\Android\Treelearn\Docs\04-ux-design\no-such-prototype.html
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 屏档案 不是合法 UTF-8: D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-6isqk4\bad-utf8.json (The encoded data was not valid for encoding utf-8)
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 屏 "chat" 的 prototype 段没有 dom_checks——没有检查项就没有见证
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 屏 "chat" 的 prototype 段没有 dom_checks——没有检查项就没有见证
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 档案里的 DOM 检查名不在词表内: no-such-check（词表现有: body-bg, grid-period, user-bubble, body-pitch, action-pitch, pill-inset）
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: --url 指向的本机文件不存在: D:\nope\missing.html
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 导航被浏览器拒绝: net::ERR_ABORTED（目标 javascript:document.write(1)）
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: CDP 握手失败（端口 1 没有应答: fetch failed）
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+# command: verify_1to1.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-6isqk4\s.json --profile D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-6isqk4\bad-wait.json --wait-ms 1500
+# profile screens.json bytes=5350 lines=201 sha256=37fafd8dfb29cc16c6fc798c5bf4f91918e1a385849a44ca33ac4ace5f70224c
+# prototype.html bytes=150052 lines=2446 sha256=fb32cd82ee87ea4da6ff2ee69f37eb77e5dbfaada08c309fba5f2c9376d349f2
+# wait_ms=1500 dom_checks=6
+OK   browser = Edg/155.0.4283.45 (@50f24ef2aa5369a074b8888b7db82d9c0652d642, protocol 1.3)
+OK   html = D:\Project\Android\Treelearn\Docs\04-ux-design\知芽-TreeLearn-高保真原型-v1.html
+OK   clicks = .demo-link -> .topic-card
+FAIL wait-for-absent .no-such-node 在 1500ms 内没出现（readyState=complete）——页面已加载，属结构不符而非仪器故障
+judgements=4 failed=1
+VERDICT: FAIL
+EXITCODE=1
+# command: verify_1to1.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-6isqk4\s.json --profile D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-6isqk4\bad-click.json
+# profile screens.json bytes=5332 lines=200 sha256=f2b3ead54b5a377f37b8ad95b2e3d99687b8542d100559ee55d8dcf659927e9f
+# prototype.html bytes=150052 lines=2446 sha256=fb32cd82ee87ea4da6ff2ee69f37eb77e5dbfaada08c309fba5f2c9376d349f2
+# wait_ms=20000 dom_checks=6
+OK   browser = Edg/155.0.4283.45 (@50f24ef2aa5369a074b8888b7db82d9c0652d642, protocol 1.3)
+OK   html = D:\Project\Android\Treelearn\Docs\04-ux-design\知芽-TreeLearn-高保真原型-v1.html
+OK   clicks = #no-such-click-target
+FAIL click-target-absent #no-such-click-target
+judgements=4 failed=1
+VERDICT: FAIL
+EXITCODE=1
+# command: verify_1to1.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-6isqk4\s.json --profile D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-6isqk4\stub-rendered.json
+# profile screens.json bytes=5389 lines=201 sha256=7815f55bf63b24d0f51cb83db8cbeb3a571fc0d3af3950a5402c955fafcc690a
+# prototype.html bytes=186 lines=1 sha256=9e86a555aec91dc99a35566cee4ef08daf124ac05d7581518f650afd1c4c1ffc
+# wait_ms=20000 dom_checks=6
+FAIL page-not-rendered .screen 在 60s 内没出现（readyState=complete #root 子元素=1 nodes=7 href=file:///D:/Project/Android/Treelearn/artifacts/tmp/_verify1to1-selftest/run-6isqk4/stub-rendered.html title=桩）
+judgements=1 failed=1
+VERDICT: FAIL
+EXITCODE=1
+INSTRUMENT FAULT: #root 是空的或不存在（root=0 nodes=6 ready=complete title=桩，重载 1 次后仍空）——原型的界面由页面内的 React+Babel 现场编译、脚本走公网 unpkg；被核对象没起来属仪器故障，不是结构不符
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+# command: (unit) 空判据
+VERDICT: FAULT 没有任何判据被执行——空见证不算通过
+EXITCODE=3
+ok   pos-real-dom-render rc=0 (6.5s, want=0)
+ok   pos-url-escape rc=0 (6.5s, want=0)
+ok   neg-unknown-option rc=2 (0.0s, want=2)
+ok   neg-missing-screen rc=2 (0.0s, want=2)
+ok   neg-bad-wait rc=2 (0.0s, want=2)
+ok   neg-unknown-screen rc=2 (0.0s, want=2)
+ok   neg-browser-absent-injection rc=3 (0.0s, want=3)
+ok   neg-profile-no-prototype rc=3 (0.0s, want=3)
+ok   neg-html-missing rc=3 (0.0s, want=3)
+ok   neg-profile-not-utf8 rc=3 (0.0s, want=3)
+ok   neg-checks-absent rc=3 (0.0s, want=3)
+ok   neg-checks-empty rc=3 (0.0s, want=3)
+ok   neg-check-name-unknown rc=3 (0.0s, want=3)
+ok   neg-url-file-missing rc=3 (0.0s, want=3)
+ok   neg-navigate-rejected rc=3 (0.9s, want=3)
+ok   neg-cdp-handshake-fail rc=3 (0.0s, want=3)
+ok   neg-wait-for-absent rc=1 (6.5s, want=1)
+ok   neg-click-absent rc=1 (3.0s, want=1)
+ok   neg-page-not-rendered rc=1 (61.1s, want=1)
+ok   neg-app-not-booted rc=3 (121.2s, want=3)
+ok   neg-empty-ledger rc=3 (unit, want=3)
+ok   positive-control 6/6 项在真实读数上判绿（形状由探针自己给出，非手写夹具）
+ok   body-bg/底色不等于 --bg 判红且其它 5 项不受影响
+ok   body-bg/--bg 取空（token 缺失） 判红且其它 5 项不受影响
+ok   grid-period/纸感渐变整个没了 判红且其它 5 项不受影响
+ok   grid-period/所有墨色停止点一起改色（脱离 token） 判红且其它 5 项不受影响
+ok   grid-period/只改第一个墨色停止点（渐变里出现两种墨） 判红且其它 5 项不受影响
+ok   grid-period/声明侧改色而页面没跟上 判红且其它 5 项不受影响
+ok   grid-period/周期不等于 --s8 判红且其它 5 项不受影响
+ok   user-bubble/.msg-user 不存在 判红且其它 5 项不受影响
+ok   user-bubble/气泡底被加回来了 判红且其它 5 项不受影响
+ok   user-bubble/圆角被加回来了 判红且其它 5 项不受影响
+ok   user-bubble/字号脱离 --fs-body 判红且其它 5 项不受影响
+ok   user-bubble/右缘间距脱离 gutter+滚动条 判红且其它 5 项不受影响
+ok   body-pitch/正文行高脱离 --lh-read 判红且其它 5 项不受影响
+ok   action-pitch/图标行不等距 判红且其它 5 项不受影响
+ok   action-pitch/等距但不等于按钮宽 判红且其它 5 项不受影响
+ok   action-pitch/量不到按钮宽度 判红且其它 5 项不受影响
+ok   pill-inset/胶囊与正文不同栏 判红且其它 5 项不受影响
+ok   pill-inset/量不到胶囊左内缩 判红且其它 5 项不受影响
+SELFTEST PASS cases=40 cli=20 muts=18 failures=0
+EXITCODE=0
+rc=0 wall=214s
+
+
+== 05 三面探针复算（注册表代理仍不通） ==
+--- artifacts/tmp/run369-net-probe-vendor-era.txt ---
+registry : ProxyEnable=1 ProxyServer=127.0.0.1:7897
+face1      https://fonts.googleapis.com
+  via-registry URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>
+  no-proxy     HTTP 404
+  curl         http_code=000 curl_rc=35
+face2      https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=Ma+Shan+Zheng&display=swap
+  via-registry URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>
+  no-proxy     status=200 bytes=1390
+  curl         http_code=000 curl_rc=35
+face3      https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/lxgwwenkai-regular.css
+  via-registry URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>
+  no-proxy     status=200 bytes=105359
+  curl         http_code=200 curl_rc=0
+face4      https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/lxgwwenkai-bold.css
+  via-registry URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>
+  no-proxy     status=200 bytes=105068
+  curl         http_code=200 curl_rc=0
+example    https://example.com/
+  via-registry URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>
+  no-proxy     status=200 bytes=577
+  curl         http_code=200 curl_rc=0
+PROBE targets=5 readings=15 — 只打印读数，不判绿不判红
+
+
+== 06 SRI 现象 A/B（带属性两连故障、摘属性即起） ==
+--- artifacts/tmp/run362-verify1to1-after-vendor.txt ---
+start=11:28:28
+INSTRUMENT FAULT: #root 是空的或不存在（root=0 nodes=16 ready=complete title=知芽（TreeLearn） · 高保真交互原型 v2.5，重载 1 次后仍空）——原型的界面由页面内的 React+Babel 现场编译、脚本走公网 unpkg；被核对象没起来属仪器故障，不是结构不符
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: #root 是空的或不存在（root=0 nodes=16 ready=complete title=知芽（TreeLearn） · 高保真交互原型 v2.5，重载 1 次后仍空）——原型的界面由页面内的 React+Babel 现场编译、脚本走公网 unpkg；被核对象没起来属仪器故障，不是结构不符
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+USAGE ERROR: 未知选项 --turbo（可用: --screen --out --profile --browser --attach --url --wait-ms）
+EXITCODE=2
+USAGE ERROR: 必须给 --screen <屏名>：原型路径、点击序列、等待选择器与 DOM 检查项都从屏档案取
+EXITCODE=2
+USAGE ERROR: --wait-ms 必须是正整数毫秒，收到 0
+EXITCODE=2
+USAGE ERROR: 屏档案里没有 "nope"；可用: chat
+EXITCODE=2
+INSTRUMENT FAULT: 找不到 Edge 可执行文件（试过: /c/nowhere/msedge.exe）；用 --browser <路径> 指定
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 屏 "chat" 的档案没有 prototype 回放段
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 原型 HTML 不存在: D:\Project\Android\Treelearn\Docs\04-ux-design\no-such-prototype.html
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 屏档案 不是合法 UTF-8: D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-1M3EEu\bad-utf8.json (The encoded data was not valid for encoding utf-8)
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 屏 "chat" 的 prototype 段没有 dom_checks——没有检查项就没有见证
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 屏 "chat" 的 prototype 段没有 dom_checks——没有检查项就没有见证
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 档案里的 DOM 检查名不在词表内: no-such-check（词表现有: body-bg, grid-period, user-bubble, body-pitch, action-pitch, pill-inset）
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: --url 指向的本机文件不存在: D:\nope\missing.html
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 导航被浏览器拒绝: net::ERR_ABORTED（目标 javascript:document.write(1)）
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: CDP 握手失败（端口 1 没有应答: fetch failed）
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: #root 是空的或不存在（root=0 nodes=16 ready=complete title=知芽（TreeLearn） · 高保真交互原型 v2.5，重载 1 次后仍空）——原型的界面由页面内的 React+Babel 现场编译、脚本走公网 unpkg；被核对象没起来属仪器故障，不是结构不符
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: #root 是空的或不存在（root=0 nodes=16 ready=complete title=知芽（TreeLearn） · 高保真交互原型 v2.5，重载 1 次后仍空）——原型的界面由页面内的 React+Babel 现场编译、脚本走公网 unpkg；被核对象没起来属仪器故障，不是结构不符
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+# command: verify_1to1.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-1M3EEu\s.json --profile D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-1M3EEu\stub-rendered.json
+# profile screens.json bytes=5389 lines=201 sha256=dbcea072c4ef9128059d5b003081f0614f13723580f0d1614fa36b4918acf3cc
+# prototype.html bytes=186 lines=1 sha256=9e86a555aec91dc99a35566cee4ef08daf124ac05d7581518f650afd1c4c1ffc
+# wait_ms=20000 dom_checks=6
+FAIL page-not-rendered .screen 在 60s 内没出现（readyState=complete #root 子元素=1 nodes=7 href=file:///D:/Project/Android/Treelearn/artifacts/tmp/_verify1to1-selftest/run-1M3EEu/stub-rendered.html title=桩）
+judgements=1 failed=1
+VERDICT: FAIL
+EXITCODE=1
+
+--- artifacts/tmp/run363-cdpshot-after-vendor.txt ---
+# command: cdp_shot.mjs --screen chat --out artifacts/tmp/_probe-vendor.png --scale 1
+# profile screens.json bytes=3679 lines=48 sha256=f85fc4342f701b5ce1f27fd78230de6af348a5d5630d8ad7d0e2eb33335fdeaa
+# prototype.html bytes=150376 lines=2446 sha256=154f232d7f99fbb5a4cf5490964b3fe316ce0392a327bb0e81afc509310e3216
+# scroll=none wait_ms=20000 declared_scale=2
+FAIL page-not-rendered .screen 在 60s 内没出现（readyState=complete href=file:///D:/Project/Android/Treelearn/Docs/04-ux-design/%E7%9F%A5%E8%8A%BD-TreeLearn-%E9%AB%98%E4%BF%9D%E7%9C%9F%E5%8E%9F%E5%9E%8B-v1.html title=知芽（TreeLearn） · 高保真交互原型 v2.5）
+judgements=1 failed=1
+VERDICT: FAIL
+EXITCODE=1
+EXITCODE=1
+
+--- artifacts/tmp/run364-cdpshot-no-sri.txt ---
+# command: cdp_shot.mjs --screen chat --out artifacts/tmp/_probe-vendor2.png --scale 1
+# profile screens.json bytes=3679 lines=48 sha256=f85fc4342f701b5ce1f27fd78230de6af348a5d5630d8ad7d0e2eb33335fdeaa
+# prototype.html bytes=150052 lines=2446 sha256=fb32cd82ee87ea4da6ff2ee69f37eb77e5dbfaada08c309fba5f2c9376d349f2
+# scroll=none wait_ms=20000 declared_scale=2
+OK   browser = Edg/155.0.4283.45 (@50f24ef2aa5369a074b8888b7db82d9c0652d642, protocol 1.3)
+OK   html = D:\Project\Android\Treelearn\Docs\04-ux-design\知芽-TreeLearn-高保真原型-v1.html
+OK   clicks = .demo-link -> .topic-card
+OK   screen-rect = 412x816 @ 165,1977.5 (逻辑 px)
+OK   scrollbar-occupancy = 4 = 档案声明 4
+FAIL shot-scale-override 本次 scale=1 而档案声明=2；此图不可交给 --kind render（它按 2x 反算逻辑像素），请用默认比例重跑或同步档案
+judgements=6 failed=1
+VERDICT: FAIL
+EXITCODE=1
+EXITCODE=1
+
+
+== 07 core streak 三轮（串行、单独跑） ==
+--- artifacts/tmp/run371-core-streak1.txt ---
+# command: python -X utf8 .codex/scripts/run_all_guards.py --tier core
+# 姿势：串行、单独跑（旁边不跑任何命令）。这是 D14 闭合后的 streak 第 1 轮；
+# 前一轮 run370-core-round1.txt 因 metrics 报告过期判 fail=1/inconclusive=1，不是回归
+RUN-ALL-GUARDS tier=core selected=39/45 subset=yes
+PASS         validate_tasks                         rc=0 0.1s
+             > SUMMARY files=32 errors=0 warnings=9
+PASS         check_context_pack                     rc=0 1.8s
+             > check_context_pack: 0 check(s) failed
+PASS         check_code_reviewer_agent              rc=0 0.1s
+             > check_code_reviewer_agent: 0 check(s) failed
+PASS         check_codebase_researcher_agent        rc=0 0.1s
+             > check_codebase_researcher_agent: 0 check(s) failed
+PASS         check_code_simplifier_agent            rc=0 0.1s
+             > check_code_simplifier_agent: 0 check(s) failed
+PASS         check_loop_watcher_agent               rc=0 0.1s
+             > check_loop_watcher_agent: 0 check(s) failed
+PASS         check_source_of_truth                  rc=0 0.3s
+             > check_source_of_truth: 0 check(s) failed
+PASS         run_evals                              rc=0 0.1s
+             > run_evals: 0 check(s) failed
+PASS         check_eval_keeper_agent                rc=0 0.1s
+             > check_eval_keeper_agent: 0 check(s) failed
+PASS         metrics_report                         rc=0 0.9s
+             > check_metrics_report: 0 check(s) failed
+PASS         check_metrics_reporter_agent           rc=0 0.1s
+             > check_metrics_reporter_agent: 0 check(s) failed
+PASS         check_intent_capturer_agent            rc=0 0.1s
+             > check_intent_capturer_agent: 0 check(s) failed
+PASS         check_intent_template                  rc=0 0.1s
+             > check_intent_template: 0 check(s) failed
+PASS         check_pm_discovery_skill               rc=0 0.1s
+             > check_pm_discovery_skill: 0 check(s) failed
+PASS         check_roadmap_and_routing              rc=0 0.1s
+             > check_roadmap_and_routing: 0 check(s) failed
+PASS         check_spec_author_agent                rc=0 0.1s
+             > check_spec_author_agent: 0 check(s) failed
+PASS         check_stack_facts                      rc=0 0.3s
+             > check_stack_facts: 0 check(s) failed
+PASS         check_design_tokens                    rc=0 0.1s
+             > check_design_tokens: 0 check(s) failed
+PASS         check_ux_vendor                        rc=0 0.1s
+             > check_ux_vendor: 0 check(s) failed
+PASS         check_ux_vendor --selftest             rc=0 4.4s
+             > SELFTEST cases=21 mismatch=0 expected=21 floor=21
+PASS         check_pointer_liveness                 rc=0 0.2s
+             > check_pointer_liveness: 0 check(s) failed
+PASS         check_pointer_liveness --selftest      rc=0 1.8s
+             > SELFTEST cases=10 mismatch=0 expected=10
+PASS         check_androidtest_schema_expectations  rc=0 0.1s
+             > VERDICT: PASS
+PASS         check_run_all_guards                   rc=0 13.0s
+             > SELFTEST cases=33 executed=33 floor=26 broken=0
+PASS         checkers_selftest                      rc=0 44.7s
+             > OVERALL: PASS
+PASS         parity_ledger_selftest                 rc=0 1.7s
+             > VERDICT: PASS
+PASS         screen_inventory_selftest              rc=0 1.6s
+             > VERDICT: PASS
+PASS         measure_screen --selftest              rc=0 8.0s
+             > VERDICT: PASS (19 cases, positive and negative for every branch)
+PASS         verify_1to1_selftest                   rc=0 214.1s
+             > SELFTEST PASS cases=40 cli=20 muts=18 failures=0
+PASS         cdp_shot_selftest                      rc=0 39.6s
+             > SELFTEST PASS cases=17 failures=0
+PASS         web_walk --selftest                    rc=0 0.1s
+             > SELFTEST cases=6 bad=0
+PASS         check_dependency_direction             rc=0 0.1s
+             > dependency scan root=src layers=9 scanned=23 findings=0
+PASS         check_dependency_direction --selftest  rc=0 0.1s
+             > SELFTEST cases=10 floor=8 fail=0
+PASS         check_user_copy_i18n                   rc=0 0.1s
+             > user-copy scan root=src scanned=23 copy-dir-exempt-seen=true cjk-lines=0 files=0 baseline-entries=0 baseline-covered=0
+PASS         check_user_copy_i18n --selftest        rc=0 0.1s
+             > SELFTEST cases=15 floor=10 fail=0
+PASS         check_device_time                      rc=0 0.1s
+             > device-time scan root=D:\Project\Android\Treelearn\frontend\src scanned=23 exempt=utils/deviceTime.ts exempt-in-tree=true findings=0
+PASS         check_device_time --selftest           rc=0 0.1s
+             > SELFTEST cases=11 floor=8 fail=0
+PASS         sync_fixtures --check                  rc=0 0.1s
+             > SYNC CHECK src=13 dst=13 bad=0 redacted=0 dir=frontend\src\platform\fixtures
+PASS         sync_fixtures --selftest               rc=0 0.1s
+             > SELFTEST cases=8 bad=0 floor=1
+NOTE         not-selected                           未选中：6 条不在本次判定面内（档位选择），整表绿不由此声明
+RUN-ALL-GUARDS pass=39 fail=0 inconclusive=0 fault=0 timeout=0
+VERDICT: PASS (subset only — 39/45 entry(ies) judged, not the whole roster)
+EXITCODE=0
+wall=334s
+EXITCODE=0
+
+--- artifacts/tmp/run372-core-streak2.txt ---
+# command: python -X utf8 .codex/scripts/run_all_guards.py --tier core
+# 姿势：串行、单独跑，D14 闭合后的 streak 第 2 轮（第 1 轮见 run371-core-streak1.txt，pass=39 fail=0）
+RUN-ALL-GUARDS tier=core selected=39/45 subset=yes
+PASS         validate_tasks                         rc=0 0.1s
+             > SUMMARY files=32 errors=0 warnings=9
+PASS         check_context_pack                     rc=0 1.6s
+             > check_context_pack: 0 check(s) failed
+PASS         check_code_reviewer_agent              rc=0 0.1s
+             > check_code_reviewer_agent: 0 check(s) failed
+PASS         check_codebase_researcher_agent        rc=0 0.1s
+             > check_codebase_researcher_agent: 0 check(s) failed
+PASS         check_code_simplifier_agent            rc=0 0.1s
+             > check_code_simplifier_agent: 0 check(s) failed
+PASS         check_loop_watcher_agent               rc=0 0.1s
+             > check_loop_watcher_agent: 0 check(s) failed
+PASS         check_source_of_truth                  rc=0 0.2s
+             > check_source_of_truth: 0 check(s) failed
+PASS         run_evals                              rc=0 0.1s
+             > run_evals: 0 check(s) failed
+PASS         check_eval_keeper_agent                rc=0 0.1s
+             > check_eval_keeper_agent: 0 check(s) failed
+PASS         metrics_report                         rc=0 0.8s
+             > check_metrics_report: 0 check(s) failed
+PASS         check_metrics_reporter_agent           rc=0 0.1s
+             > check_metrics_reporter_agent: 0 check(s) failed
+PASS         check_intent_capturer_agent            rc=0 0.1s
+             > check_intent_capturer_agent: 0 check(s) failed
+PASS         check_intent_template                  rc=0 0.0s
+             > check_intent_template: 0 check(s) failed
+PASS         check_pm_discovery_skill               rc=0 0.1s
+             > check_pm_discovery_skill: 0 check(s) failed
+PASS         check_roadmap_and_routing              rc=0 0.1s
+             > check_roadmap_and_routing: 0 check(s) failed
+PASS         check_spec_author_agent                rc=0 0.0s
+             > check_spec_author_agent: 0 check(s) failed
+PASS         check_stack_facts                      rc=0 0.3s
+             > check_stack_facts: 0 check(s) failed
+PASS         check_design_tokens                    rc=0 0.1s
+             > check_design_tokens: 0 check(s) failed
+PASS         check_ux_vendor                        rc=0 0.1s
+             > check_ux_vendor: 0 check(s) failed
+PASS         check_ux_vendor --selftest             rc=0 4.1s
+             > SELFTEST cases=21 mismatch=0 expected=21 floor=21
+PASS         check_pointer_liveness                 rc=0 0.2s
+             > check_pointer_liveness: 0 check(s) failed
+PASS         check_pointer_liveness --selftest      rc=0 1.7s
+             > SELFTEST cases=10 mismatch=0 expected=10
+PASS         check_androidtest_schema_expectations  rc=0 0.2s
+             > VERDICT: PASS
+PASS         check_run_all_guards                   rc=0 13.3s
+             > SELFTEST cases=33 executed=33 floor=26 broken=0
+PASS         checkers_selftest                      rc=0 43.1s
+             > OVERALL: PASS
+PASS         parity_ledger_selftest                 rc=0 1.5s
+             > VERDICT: PASS
+PASS         screen_inventory_selftest              rc=0 1.6s
+             > VERDICT: PASS
+PASS         measure_screen --selftest              rc=0 7.6s
+             > VERDICT: PASS (19 cases, positive and negative for every branch)
+PASS         verify_1to1_selftest                   rc=0 214.3s
+             > SELFTEST PASS cases=40 cli=20 muts=18 failures=0
+PASS         cdp_shot_selftest                      rc=0 39.4s
+             > SELFTEST PASS cases=17 failures=0
+PASS         web_walk --selftest                    rc=0 0.1s
+             > SELFTEST cases=6 bad=0
+PASS         check_dependency_direction             rc=0 0.1s
+             > dependency scan root=src layers=9 scanned=23 findings=0
+PASS         check_dependency_direction --selftest  rc=0 0.1s
+             > SELFTEST cases=10 floor=8 fail=0
+PASS         check_user_copy_i18n                   rc=0 0.1s
+             > user-copy scan root=src scanned=23 copy-dir-exempt-seen=true cjk-lines=0 files=0 baseline-entries=0 baseline-covered=0
+PASS         check_user_copy_i18n --selftest        rc=0 0.1s
+             > SELFTEST cases=15 floor=10 fail=0
+PASS         check_device_time                      rc=0 0.1s
+             > device-time scan root=D:\Project\Android\Treelearn\frontend\src scanned=23 exempt=utils/deviceTime.ts exempt-in-tree=true findings=0
+PASS         check_device_time --selftest           rc=0 0.1s
+             > SELFTEST cases=11 floor=8 fail=0
+PASS         sync_fixtures --check                  rc=0 0.1s
+             > SYNC CHECK src=13 dst=13 bad=0 redacted=0 dir=frontend\src\platform\fixtures
+PASS         sync_fixtures --selftest               rc=0 0.1s
+             > SELFTEST cases=8 bad=0 floor=1
+NOTE         not-selected                           未选中：6 条不在本次判定面内（档位选择），整表绿不由此声明
+RUN-ALL-GUARDS pass=39 fail=0 inconclusive=0 fault=0 timeout=0
+VERDICT: PASS (subset only — 39/45 entry(ies) judged, not the whole roster)
+EXITCODE=0
+wall=331s
+EXITCODE=0
+
+--- artifacts/tmp/run373-core-streak3.txt ---
+# command: python -X utf8 .codex/scripts/run_all_guards.py --tier core
+# 姿势：串行、单独跑，D14 闭合后的 streak 第 3 轮（run371 pass=39 / run372 pass=39）
+RUN-ALL-GUARDS tier=core selected=39/45 subset=yes
+PASS         validate_tasks                         rc=0 0.1s
+             > SUMMARY files=32 errors=0 warnings=9
+PASS         check_context_pack                     rc=0 1.6s
+             > check_context_pack: 0 check(s) failed
+PASS         check_code_reviewer_agent              rc=0 0.1s
+             > check_code_reviewer_agent: 0 check(s) failed
+PASS         check_codebase_researcher_agent        rc=0 0.1s
+             > check_codebase_researcher_agent: 0 check(s) failed
+PASS         check_code_simplifier_agent            rc=0 0.1s
+             > check_code_simplifier_agent: 0 check(s) failed
+PASS         check_loop_watcher_agent               rc=0 0.1s
+             > check_loop_watcher_agent: 0 check(s) failed
+PASS         check_source_of_truth                  rc=0 0.3s
+             > check_source_of_truth: 0 check(s) failed
+PASS         run_evals                              rc=0 0.0s
+             > run_evals: 0 check(s) failed
+PASS         check_eval_keeper_agent                rc=0 0.1s
+             > check_eval_keeper_agent: 0 check(s) failed
+PASS         metrics_report                         rc=0 0.7s
+             > check_metrics_report: 0 check(s) failed
+PASS         check_metrics_reporter_agent           rc=0 0.1s
+             > check_metrics_reporter_agent: 0 check(s) failed
+PASS         check_intent_capturer_agent            rc=0 0.1s
+             > check_intent_capturer_agent: 0 check(s) failed
+PASS         check_intent_template                  rc=0 0.1s
+             > check_intent_template: 0 check(s) failed
+PASS         check_pm_discovery_skill               rc=0 0.1s
+             > check_pm_discovery_skill: 0 check(s) failed
+PASS         check_roadmap_and_routing              rc=0 0.1s
+             > check_roadmap_and_routing: 0 check(s) failed
+PASS         check_spec_author_agent                rc=0 0.1s
+             > check_spec_author_agent: 0 check(s) failed
+PASS         check_stack_facts                      rc=0 0.3s
+             > check_stack_facts: 0 check(s) failed
+PASS         check_design_tokens                    rc=0 0.1s
+             > check_design_tokens: 0 check(s) failed
+PASS         check_ux_vendor                        rc=0 0.1s
+             > check_ux_vendor: 0 check(s) failed
+PASS         check_ux_vendor --selftest             rc=0 4.2s
+             > SELFTEST cases=21 mismatch=0 expected=21 floor=21
+PASS         check_pointer_liveness                 rc=0 0.2s
+             > check_pointer_liveness: 0 check(s) failed
+PASS         check_pointer_liveness --selftest      rc=0 1.3s
+             > SELFTEST cases=10 mismatch=0 expected=10
+PASS         check_androidtest_schema_expectations  rc=0 0.1s
+             > VERDICT: PASS
+PASS         check_run_all_guards                   rc=0 12.8s
+             > SELFTEST cases=33 executed=33 floor=26 broken=0
+PASS         checkers_selftest                      rc=0 41.5s
+             > OVERALL: PASS
+PASS         parity_ledger_selftest                 rc=0 1.6s
+             > VERDICT: PASS
+PASS         screen_inventory_selftest              rc=0 1.4s
+             > VERDICT: PASS
+PASS         measure_screen --selftest              rc=0 7.5s
+             > VERDICT: PASS (19 cases, positive and negative for every branch)
+PASS         verify_1to1_selftest                   rc=0 213.8s
+             > SELFTEST PASS cases=40 cli=20 muts=18 failures=0
+PASS         cdp_shot_selftest                      rc=0 39.8s
+             > SELFTEST PASS cases=17 failures=0
+PASS         web_walk --selftest                    rc=0 0.1s
+             > SELFTEST cases=6 bad=0
+PASS         check_dependency_direction             rc=0 0.1s
+             > dependency scan root=src layers=9 scanned=23 findings=0
+PASS         check_dependency_direction --selftest  rc=0 0.1s
+             > SELFTEST cases=10 floor=8 fail=0
+PASS         check_user_copy_i18n                   rc=0 0.1s
+             > user-copy scan root=src scanned=23 copy-dir-exempt-seen=true cjk-lines=0 files=0 baseline-entries=0 baseline-covered=0
+PASS         check_user_copy_i18n --selftest        rc=0 0.1s
+             > SELFTEST cases=15 floor=10 fail=0
+PASS         check_device_time                      rc=0 0.1s
+             > device-time scan root=D:\Project\Android\Treelearn\frontend\src scanned=23 exempt=utils/deviceTime.ts exempt-in-tree=true findings=0
+PASS         check_device_time --selftest           rc=0 0.1s
+             > SELFTEST cases=11 floor=8 fail=0
+PASS         sync_fixtures --check                  rc=0 0.1s
+             > SYNC CHECK src=13 dst=13 bad=0 redacted=0 dir=frontend\src\platform\fixtures
+PASS         sync_fixtures --selftest               rc=0 0.1s
+             > SELFTEST cases=8 bad=0 floor=1
+NOTE         not-selected                           未选中：6 条不在本次判定面内（档位选择），整表绿不由此声明
+RUN-ALL-GUARDS pass=39 fail=0 inconclusive=0 fault=0 timeout=0
+VERDICT: PASS (subset only — 39/45 entry(ies) judged, not the whole roster)
+EXITCODE=0
+wall=329s
+EXITCODE=0
+
+
+== 08 precommit 一轮 ==
+--- artifacts/tmp/run374-precommit.txt ---
+# command: python -X utf8 .codex/scripts/run_all_guards.py --tier precommit
+# 姿势：串行、单独跑；core streak 三轮全绿（run371/372/373）之后取
+RUN-ALL-GUARDS tier=precommit selected=6/45 subset=yes
+PASS         check_offline_bundle                   rc=0 0.1s
+             > offline scan root=dist assets=2 allowed-non-load-urls=20 violations=0
+PASS         check_offline_bundle --selftest        rc=0 0.1s
+             > SELFTEST cases=6 ok=6 fail=0
+PASS         frontend verify                        rc=0 16.8s
+             > verify steps=16 ok=16 bad=0 fault=0
+PASS         line-budget                            rc=0 0.9s
+             > 业务变更行: 0 (已跟踪 新增+删除 与 未跟踪 全部行；已排除生成/迁移/文档/证据 34300 行；扫描业务文件 0 个，其中未跟踪 6 个)
+PASS         no-kotlin-check                        rc=0 54.0s
+             > VERDICT: PASS (13 OK line(s))
+PASS         guard-selftest -Fast                   rc=0 207.3s
+             > OVERALL = SELFTEST PASS (38 case(s))
+NOTE         not-selected                           未选中：39 条不在本次判定面内（档位选择），整表绿不由此声明
+RUN-ALL-GUARDS pass=6 fail=0 inconclusive=0 fault=0 timeout=0
+VERDICT: PASS (subset only — 6/45 entry(ies) judged, not the whole roster)
+EXITCODE=0
+wall=280s
+EXITCODE=0
+
+
+== 09 末态确认轮（卡片散文落盘之后） ==
+--- artifacts/tmp/run375-core-final.txt ---
+# command: python -X utf8 .codex/scripts/run_all_guards.py --tier core
+# 姿势：串行、单独跑。这是末态确认轮：卡片散文与 status=verified、ROADMAP streak 句、metrics 重生成全部落盘之后取，
+# 树即提交树。streak 三轮 run371/372/373 与本轮的关系见卡片 Verification ⑤
+RUN-ALL-GUARDS tier=core selected=39/45 subset=yes
+PASS         validate_tasks                         rc=0 0.1s
+             > SUMMARY files=32 errors=0 warnings=9
+PASS         check_context_pack                     rc=0 1.6s
+             > check_context_pack: 0 check(s) failed
+PASS         check_code_reviewer_agent              rc=0 0.1s
+             > check_code_reviewer_agent: 0 check(s) failed
+PASS         check_codebase_researcher_agent        rc=0 0.1s
+             > check_codebase_researcher_agent: 0 check(s) failed
+PASS         check_code_simplifier_agent            rc=0 0.1s
+             > check_code_simplifier_agent: 0 check(s) failed
+PASS         check_loop_watcher_agent               rc=0 0.1s
+             > check_loop_watcher_agent: 0 check(s) failed
+PASS         check_source_of_truth                  rc=0 0.2s
+             > check_source_of_truth: 0 check(s) failed
+PASS         run_evals                              rc=0 0.0s
+             > run_evals: 0 check(s) failed
+PASS         check_eval_keeper_agent                rc=0 0.1s
+             > check_eval_keeper_agent: 0 check(s) failed
+PASS         metrics_report                         rc=0 0.7s
+             > check_metrics_report: 0 check(s) failed
+PASS         check_metrics_reporter_agent           rc=0 0.1s
+             > check_metrics_reporter_agent: 0 check(s) failed
+PASS         check_intent_capturer_agent            rc=0 0.1s
+             > check_intent_capturer_agent: 0 check(s) failed
+PASS         check_intent_template                  rc=0 0.0s
+             > check_intent_template: 0 check(s) failed
+PASS         check_pm_discovery_skill               rc=0 0.1s
+             > check_pm_discovery_skill: 0 check(s) failed
+PASS         check_roadmap_and_routing              rc=0 0.1s
+             > check_roadmap_and_routing: 0 check(s) failed
+PASS         check_spec_author_agent                rc=0 0.1s
+             > check_spec_author_agent: 0 check(s) failed
+PASS         check_stack_facts                      rc=0 0.3s
+             > check_stack_facts: 0 check(s) failed
+PASS         check_design_tokens                    rc=0 0.1s
+             > check_design_tokens: 0 check(s) failed
+PASS         check_ux_vendor                        rc=0 0.1s
+             > check_ux_vendor: 0 check(s) failed
+PASS         check_ux_vendor --selftest             rc=0 4.4s
+             > SELFTEST cases=21 mismatch=0 expected=21 floor=21
+PASS         check_pointer_liveness                 rc=0 0.2s
+             > check_pointer_liveness: 0 check(s) failed
+PASS         check_pointer_liveness --selftest      rc=0 1.6s
+             > SELFTEST cases=10 mismatch=0 expected=10
+PASS         check_androidtest_schema_expectations  rc=0 0.2s
+             > VERDICT: PASS
+PASS         check_run_all_guards                   rc=0 12.8s
+             > SELFTEST cases=33 executed=33 floor=26 broken=0
+PASS         checkers_selftest                      rc=0 45.3s
+             > OVERALL: PASS
+PASS         parity_ledger_selftest                 rc=0 1.6s
+             > VERDICT: PASS
+PASS         screen_inventory_selftest              rc=0 1.7s
+             > VERDICT: PASS
+PASS         measure_screen --selftest              rc=0 7.5s
+             > VERDICT: PASS (19 cases, positive and negative for every branch)
+PASS         verify_1to1_selftest                   rc=0 213.9s
+             > SELFTEST PASS cases=40 cli=20 muts=18 failures=0
+PASS         cdp_shot_selftest                      rc=0 39.5s
+             > SELFTEST PASS cases=17 failures=0
+PASS         web_walk --selftest                    rc=0 0.1s
+             > SELFTEST cases=6 bad=0
+PASS         check_dependency_direction             rc=0 0.1s
+             > dependency scan root=src layers=9 scanned=23 findings=0
+PASS         check_dependency_direction --selftest  rc=0 0.1s
+             > SELFTEST cases=10 floor=8 fail=0
+PASS         check_user_copy_i18n                   rc=0 0.1s
+             > user-copy scan root=src scanned=23 copy-dir-exempt-seen=true cjk-lines=0 files=0 baseline-entries=0 baseline-covered=0
+PASS         check_user_copy_i18n --selftest        rc=0 0.1s
+             > SELFTEST cases=15 floor=10 fail=0
+PASS         check_device_time                      rc=0 0.1s
+             > device-time scan root=D:\Project\Android\Treelearn\frontend\src scanned=23 exempt=utils/deviceTime.ts exempt-in-tree=true findings=0
+PASS         check_device_time --selftest           rc=0 0.1s
+             > SELFTEST cases=11 floor=8 fail=0
+PASS         sync_fixtures --check                  rc=0 0.1s
+             > SYNC CHECK src=13 dst=13 bad=0 redacted=0 dir=frontend\src\platform\fixtures
+PASS         sync_fixtures --selftest               rc=0 0.1s
+             > SELFTEST cases=8 bad=0 floor=1
+NOTE         not-selected                           未选中：6 条不在本次判定面内（档位选择），整表绿不由此声明
+RUN-ALL-GUARDS pass=39 fail=0 inconclusive=0 fault=0 timeout=0
+VERDICT: PASS (subset only — 39/45 entry(ies) judged, not the whole roster)
+EXITCODE=0
+wall=333s
+EXITCODE=0
+
+
+== 10 末态门禁批 ==
+--- artifacts/tmp/run376-final-gates.txt ---
+=== metrics_report --write（末态重生成，幂等复跑）===
+WROTE artifacts/metrics/report.md lines=20 metrics=12
+EXITCODE=0
+EXITCODE=0
+
+=== validate_tasks ===
+WARNING T-2026-10-20-source-of-truth-inventory-034.md: estimated production lines 261 exceeds soft limit 200
+PASS T-2026-10-20-source-of-truth-inventory-034.md
+PASS T-2026-10-20-ux-prototype-vendored-scripts-037.md
+SUMMARY files=32 errors=0 warnings=9
+EXITCODE=0
+
+=== check_source_of_truth ===
+check_source_of_truth: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+
+=== check_roadmap_and_routing ===
+check_roadmap_and_routing: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+
+=== check_pointer_liveness ===
+check_pointer_liveness: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+
+=== check_context_pack ===
+check_context_pack: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+
+=== check_ux_vendor ===
+check_ux_vendor: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+
+=== run_evals ===
+OK   every expectation kind is exercised by some case — missing=[] seen=['forbid', 'must', 'paths-exist', 'pointers-alive', 'shape']
+NOTE case and expectation inventory is printed, not judged — EVALS cases=1 expectations=9
+
+run_evals: 0 check(s) failed
+EXITCODE=0
+EXITCODE=0
+
+=== 乱码扫描（全仓改动面）===
+scanned=11 fffd=0 q_runs=0
+EXITCODE=0
+== 乱码扫描 ==
+U+FFFD 计数=0
+连续三个以上 ? 的行数=0（mojibake 的典型形状；单个中文问号是合法标点不计）

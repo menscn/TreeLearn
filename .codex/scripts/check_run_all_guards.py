@@ -207,37 +207,30 @@ CASES = [
      None, "roster-shape", EXIT_PASS, ["entries=", "missing=0", "escape=0"], []),
     ("core 档仍覆盖那几支关键守门（删条目就会在这里断）",
      None, "core-keys", EXIT_PASS, ["core-keys=5/5"], []),
-    ("需要外网渲染的那条只在 external 档：把它挪回 core 就会在这里断（D11③）",
-     None, "external-keys", EXIT_PASS, ["external-keys=1/1 core-leak=0"], []),
+    ("同时挂 external 与 core 两档 → 注册表故障：档位声明不许是装饰（片 037 用结构规则替掉按名字钉人）",
+     [guard("core-one", OK), guard("double", OK, tiers=("core", "external"))], [], EXIT_FAULT,
+     ["ROSTER FAULT", "both external and core"], ["VERDICT: PASS"]),
 ]
 
 # core 档必须一直带着这几支：它们分别守着任务契约、栈事实、Android 静态契约、夹具字节，
 # 以及**汇总器自己的判定分支**——最后一支在片 036 之前只写在 SKILL.md 的「改过判定分支必须整跑自检」
 # 那句话里，没有任何常驻仪器替这句话负责。
+# 「需要外网的不得混进 core 档」这一半不再按名字钉人：片 037 闭合 D14 之后 `cdp_shot_selftest`
+# 不再是环境依赖（原型脚本已按 sha384 收编进仓库，代理不通也判绿），把它留在 external 档等于在
+# 没有理由的时候放宽判定面。改由 `run_all_guards.roster_problems` 的结构规则守（同时挂两档＝注册表故障），
+# 上面那条注入用例替这条规则作证。
 CORE_KEYS = ["validate_tasks", "check_stack_facts",
              "check_androidtest_schema_expectations", "sync_fixtures --check",
              "check_run_all_guards"]
-# 反过来钉住「需要外网的不得混进 core 档」：D11③ 把 `cdp_shot_selftest` 移出 core 之后，
-# 光有「它在 external 档」这一半不够——一条同时挂着两档的条目仍然会被 core 整跑到。
-# 这一支与 core-keys 那支是一对：一支防「关键守门被删」，一支防「环境依赖被挪回来」。
-EXTERNAL_KEYS = ["cdp_shot_selftest"]
 
 
 def probe(kind):
-    """不跑子进程的三条：它们查的是「那张表还值不值得相信」。"""
+    """不跑子进程的两条：它们查的是「那张表还值不值得相信」。"""
     if kind == "core-keys":
         names = set(g.name for g in R.GUARDS if "core" in g.tiers)
         hits = [k for k in CORE_KEYS if k in names]
         return len(hits) == len(CORE_KEYS), "core-keys=%d/%d missing=%s" % (
             len(hits), len(CORE_KEYS), [k for k in CORE_KEYS if k not in names])
-    if kind == "external-keys":
-        ext = set(g.name for g in R.GUARDS if "external" in g.tiers)
-        core = set(g.name for g in R.GUARDS if "core" in g.tiers)
-        hits = [k for k in EXTERNAL_KEYS if k in ext]
-        leak = [k for k in EXTERNAL_KEYS if k in core]
-        return len(hits) == len(EXTERNAL_KEYS) and not leak, "external-keys=%d/%d core-leak=%d %s" % (
-            len(hits), len(EXTERNAL_KEYS), len(leak),
-            ("missing=%s" % [k for k in EXTERNAL_KEYS if k not in ext]) if not leak else "leak=%s" % leak)
     problems = R.roster_problems(R.GUARDS)
     missing = [p for g in R.GUARDS for p in R.repo_paths(g) if not os.path.isfile(p)]
     escape = [g.name for g in R.GUARDS if g.argv]

@@ -9,24 +9,39 @@
 「产物回归」与「这台机器此刻出不去」——而整跑读数本身分辨不了。ROADMAP 的 D11② / D12② / D14
 三次为这件事现写驱动，前两份留在 gitignore 的 `artifacts/tmp/` 里没人能复用，所以按 D13 的教训上收。
 
-默认 URL 就是那条依赖的正文（`Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html:9` 起的三个
-`<script src>`，外加 example.com 作对照）：改动那三行时这个默认会跟着失效，
-`check_pointer_liveness.py` 不查字符串，所以要人工核对——见 ROADMAP 的 D14。
+默认目标不抄清单：它读 `Docs/04-ux-design/vendor/manifest.json` 里登记的每一条公网面（2026-10-20 起
+三个渲染脚本已收编进仓库，清单里剩的是字体面），外加 example.com 作对照。清单加一条公网面，这里就
+自动多探一面；哪天又出现「仪器红得说不清是不是网络」，跑它就是了。
 退出码：探针跑完就是 0；一个 URL 都取不到时打 `NO-READING` 并以 3 退出（取不到读数不等于判绿）。
 """
 
+import json
 import os
 import subprocess
 import sys
 import urllib.error
 import urllib.request
 
-DEFAULT_URLS = [
-    ("react", "https://unpkg.com/react@18.3.1/umd/react.development.js"),
-    ("react-dom", "https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"),
-    ("babel", "https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"),
-    ("example", "https://example.com/"),
-]
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__)))))
+MANIFEST = os.path.join(REPO_ROOT, "Docs", "04-ux-design", "vendor", "manifest.json")
+CONTROL = ("example", "https://example.com/")
+
+
+def declared_faces():
+    """清单里登记的公网面就是要探的面——在这里另抄一份 URL 等于给它第二个权威。"""
+    try:
+        with open(MANIFEST, encoding="utf-8") as handle:
+            doc = json.load(handle)
+    except (OSError, ValueError) as exc:
+        print("MANIFEST-UNREADABLE %s — 退回只探对照面" % exc)
+        return [CONTROL]
+    pairs = []
+    for i, item in enumerate(doc.get("remote", [])):
+        url = str(item.get("url", ""))
+        if url:
+            pairs.append(("face%d" % (i + 1), url))
+    return pairs + [CONTROL]
 TIMEOUT = 25
 
 
@@ -70,7 +85,7 @@ def via_curl(url):
 
 
 def main(argv):
-    targets = [(url, url) for url in argv[1:]] or DEFAULT_URLS
+    targets = [(u[:28], u) for u in argv[1:]] or declared_faces()
     print("registry : %s" % registry_proxy())
     readings = 0
     for label, url in targets:

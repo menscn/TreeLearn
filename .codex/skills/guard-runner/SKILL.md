@@ -23,15 +23,16 @@ python .codex/scripts/run_all_guards.py [--tier core|precommit|external|all] [--
 - `core`（默认）：只读、确定性、不依赖构建产物或 git 增量的那档守门；条数不写在这里，`--list` 现场打印。任何一片提交前都要整跑。
 - `precommit`：依赖未提交增量、`frontend/dist` 或 Gradle 的那档（名单与条数同样只看 `--list`）：`line-budget`、`no-kotlin-check`、
   `guard-selftest -Fast`、`frontend verify`、`check_offline_bundle` 及其自检）。
-- `external`：判定取决于**本机以外的那个东西**的那档（现在只有 `cdp_shot_selftest`：它要浏览器真把原型渲染出来，
-  而原型的 React/Babel 来自 unpkg CDN，见 ROADMAP 的 D11③ 与 D14）。它仍被 `--tier all` 跑到，也有责任单跑命令，
-  但不进每片都要整跑的 core——一台出不去网的机器能让它必红，而那种红与产物无关。
-  它按实测单独传 `timeout=`：这条在「红但判了」的姿势下实测 123.3 / 265.3 / 314.5 秒，默认 300s 会把最后那种
-  掐在自己的判据行之前，那等于把 `DIAG` 挣来的诊断又丢掉。
-  「它被挪回 core」由 `check_run_all_guards.py` 的 `external-keys` 探针判红，不靠这段说明。
-  同一台机器断外网时 core 档并不会因此变绿：`verify_1to1_selftest` 用同一个浏览器仪器取同一个原型，还留在 core 里，
-  它会以 `TIMEOUT` 或 `fault` 出现（不是 `fail`）。碰到这种读数先用 `.codex/scripts/dev/net_probe.py`
-  确认外网（三面探针，只打印读数不判绿），再决定要不要动判据——把它也移出 core 属验收面变更，需要用户裁定（ROADMAP D14 的范围栏）。
+- `external`：判定取决于**本机以外的东西**（网络、别台机器、外部服务）的那档。当前**为空**——唯一的成员
+  `cdp_shot_selftest` 原先红在「原型的 React/Babel 走公网 CDN」（ROADMAP D11③ 的归因），2026-10-20 那三个
+  脚本按 sha384 收编进 `Docs/04-ux-design/vendor/`（D14 闭合，字节身份由 `check_ux_vendor.py` 判）之后，
+  它在本机代理不通的条件下 40s 判绿并被搬回 core。留档不删：一条挂 `external` 又挂 `core` 的条目会被
+  `roster_problems` 判成注册表故障，所以这条判定面一旦有了成员就绕不开「不进每片整跑」这个语义。
+  `--tier external` 选中零条时以退出码 3 出声（`NO-SELECTION`），不会静悄悄地绿。
+  浏览器类仪器的 `timeout=` 仍按实测单独传：`314.5s` 是 `cdp_shot_selftest` **给出过判决**的最长一次实测，
+  上限要盖过它而不是盖过最快那次（片 036 为 D12 立的口径），默认 300s 会把那种姿势掐在自己的判据行之前。
+  碰到浏览器类仪器的红/故障读数，先用 `.codex/scripts/dev/net_probe.py` 取三面读数（它探的就是
+  `Docs/04-ux-design/vendor/manifest.json` 登记的公网面，只打印不判绿），再决定要不要动判据。
 - `--list`：打印注册表（档位、守门名、要找的判据行片段），不运行任何东西。
 - `--only 子串`：只跑名字含该子串的条目。跑出来的绿话会写明 `subset only`——
   子集绿不等于整表绿，别把它当成整跑的证据。`subset=` 那一行回答的是「整表是不是都被判过了」，
@@ -101,7 +102,10 @@ rc=0 但静默 → FAIL、rc 落在判绿/判红集合外 → 无从认证、脚
 挂住不回 → `TIMEOUT`（走退出码 3，不借 `fail=1` 那个词）、超时写超过 `MAX_TIMEOUT` → 注册表故障、
 判红时必须把子进程的用例名带进 `DIAG`、判绿时不许带 `DIAG`、长输出只取末尾并写明 `mode=tail`、
 空表与被挪空的 core 档 → 注册表故障、子集绿话必须写明 `subset only`、`--tier external` 不得把 core 条目带进判定面等。
-另有两条不跑子进程的表形状探针：`core-keys`（关键守门被人删掉就断）与 `external-keys`（环境依赖那条被挪回 core 就断）。
+另有一条不跑子进程的表形状探针：`core-keys`（关键守门被人删掉就断）。曾经与它配对的 `external-keys`
+（按名字钉住 `cdp_shot_selftest` 不许挪回 core）已于片 037 随 D14 闭合删掉——那条前提（原型脚本走公网）
+不存在了，留着等于在无理由时放宽判定面；「同一条目不许同时挂 `external` 与 `core`」改由注册表结构规则守，
+上面用例列表里那条注入用例替它作证。
 改过 `run_all_guards.py` 的任何判定分支，都必须整跑这支自检并留输出。
 
 这支自检自己也注册进了 `core` 档（`check_run_all_guards`）：在那之前「改过判定分支必须整跑自检」

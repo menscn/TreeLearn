@@ -21,6 +21,17 @@
 - 改设计的顺序固定：**先改原型 `:root` → 同步 `tokens.json` → 同步 `colors.xml` → 重新生成 `tokens.css` → 跑守门脚本**。任何一处单独改都会让守门变红；直接编辑 `tokens.css` 也算单独改。
 - 数值只能引用 token：Figma 节点不得写裸 hex/px，XML 布局不得出现临场数字。档位扩充要先落到原型 `:root`——间距只用 `s1/s2/s3/s4/s6/s8`（4pt 基准），圆角只用 `r-sm/r-md/r-lg/r-full`，阴影只用 `sh-1/sh-2`，字号只用 `fs-*`。
 
+- 原型渲染依赖的字节身份与仍在外网的公网面，唯一权威是 `Docs/04-ux-design/vendor/manifest.json`（ROADMAP D14 于
+  2026-10-20 闭合：三个 React/Babel 脚本按 sha384 校验后收编进 `Docs/04-ux-design/vendor/`，字体样式表仍留在公网，
+  属装饰性依赖——缺了只影响字形不影响结构）。两条硬边界由守门判：`<head>` 里不许出现任何 `http(s)://` 的
+  `<script src>`；本地脚本标签不许带 `integrity`/`crossorigin`（实测 `Edg/155` 在 `file://` 下会按 CORS 模式
+  取子资源并拒绝执行，界面根本起不来）。改这份 HTML 的依赖面前先跑：
+
+  ```bash
+  python .codex/scripts/check_ux_vendor.py            # manifest ↔ 磁盘字节 ↔ <head> 引用
+  python .codex/scripts/check_ux_vendor.py --selftest # 在临时副本里注入缺陷，证明每条判据都会响
+  ```
+
 ## Figma 链路（figwright MCP + 两个技能）
 
 一次性安装（详细命令见本节末）：

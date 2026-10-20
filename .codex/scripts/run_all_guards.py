@@ -12,10 +12,12 @@
 分档：
   core        只读、确定性、不依赖构建产物或 git 增量（提交任何一片都要整跑）
   precommit   依赖未提交增量、构建产物或 Gradle 的那几支（提交前整跑）
-  external    判定结果取决于**本机以外的东西**的那几支（此处指需要浏览器真的把原型渲染出来，
-              而 `Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html` 的 React/Babel 走 unpkg CDN）。
-              它留在注册表里、也被 `--tier all` 跑到，但不进 core：一台代理挂了的机器能让它必红，
-              而那种红与产物无关（ROADMAP D11③、D14）。
+  external    判定结果取决于**本机以外的东西**（网络、别台机器、外部服务）的那几支。
+              当前为空：唯一的成员 `cdp_shot_selftest` 在 ROADMAP D14 闭合后搬回 core——
+              它原先的红来自原型脚本走公网 CDN，2026-10-20 那三个脚本按 sha384 收编进
+              `Docs/04-ux-design/vendor/` 之后，仪器在本机代理不通的条件下 40s 判绿
+              （改档前后读数见 D14 处置与该片证据）。留空不等于删档：`--tier external`
+              选中零条会以退出码 3 出声，这条判定面一旦有了成员就会被跑起来。
   all         三档相加
 不在注册表里的东西也打印出来，不是隐掉：需要实机或本机服务端的走查（web_walk 正文、
 capture_screen、release-gate）属 ROADMAP 的 C4，不在只读汇总面内。
@@ -138,6 +140,11 @@ GUARDS = [
       [CHECKS_NEEDLE], ["core"]),
     E("check_design_tokens", PY, [".codex/scripts/dev/check_design_tokens.py"],
       [CHECKS_NEEDLE], ["core"]),
+    # 原型第三方脚本的字节身份（D14 收编）：manifest ↔ 磁盘字节 ↔ <head> 引用三方一致才算绿。
+    E("check_ux_vendor", PY, [".codex/scripts/check_ux_vendor.py"],
+      [CHECKS_NEEDLE], ["core"]),
+    E("check_ux_vendor --selftest", PY, [".codex/scripts/check_ux_vendor.py", "--selftest"],
+      [SELFTEST_NEEDLE], ["core"]),
     E("check_pointer_liveness", PY, [".codex/scripts/check_pointer_liveness.py"],
       [CHECKS_NEEDLE], ["core"]),
     E("check_pointer_liveness --selftest", PY,
@@ -165,13 +172,14 @@ GUARDS = [
     # 正是 SKILL.md「needles 必须在该条红路径上也在」要防的形状（实测读数见片 036 证据块 04）。
     E("verify_1to1_selftest", NODE, [".codex/scripts/dev/parity/verify_1to1_selftest.mjs"],
       ["cases=", "vocabulary-layer-aborted"], ["core"], timeout=600),
-    # D11③：这一条要浏览器真把原型渲染出来，而原型的 React/Babel 来自 unpkg CDN（D14），
-    # 本机系统代理一挂它必红——那种红与产物无关，所以它不进每片都要整跑的 core 档。
+    # 这一条要浏览器真把原型渲染出来。D11③ 把它移出 core 的理由是「原型的 React/Babel 走公网 CDN，
+    # 本机系统代理一挂它必红」；D14 于 2026-10-20 把三个脚本按 sha384 收编进仓库后那条理由消失，
+    # 同一天在本机代理不通的条件下单跑 `SELFTEST PASS cases=17 failures=0`、40s（见 D14 处置）。
     # 它的裸下限分支同样绕开 `cases=`（打 `selftest-case-floor` 后直接 EXITCODE=3），第二判据行为此而设。
-    # `timeout=600` 按实测：单跑三次读数 123.3s / 265.3s / 314.5s（314.5s 那次判 rc=1 并打印 `cases=17 failures=2`），
-    # 默认 300s 会把最后那种姿势掐在判据行之前——掐断一条**会给判决**的守门，等于把 D11① 挣来的诊断又丢掉。
+    # `timeout=600` 维持不动：314.5s 仍是这支仪器**给出判决**的最长一次实测记录（那次红在 CDN 等待上），
+    # 上限要盖过最长那次而不是盖过最快那次（片 036 为 D12 立的口径）。
     E("cdp_shot_selftest", NODE, [".codex/scripts/dev/parity/cdp_shot_selftest.mjs"],
-      ["cases=", "selftest-case-floor"], ["external"], timeout=600),
+      ["cases=", "selftest-case-floor"], ["core"], timeout=600),
     E("web_walk --selftest", NODE, [".codex/scripts/dev/parity/web_walk.mjs", "--selftest"],
       [SELFTEST_NEEDLE], ["core"]),
     E("check_dependency_direction", NODE, ["frontend/scripts/check_dependency_direction.mjs"],
@@ -235,6 +243,12 @@ def roster_problems(guards):
             problems.append("%s: needs at least one non-empty judgement line" % g.name)
         if not g.tiers or any(t not in TIERS for t in g.tiers):
             problems.append("%s: tiers must be a non-empty subset of %s" % (g.name, list(TIERS)))
+        # `external` 的存在理由就是「这条不进每片都要整跑的 core」。同时挂两档等于把档位声明
+        # 变成装饰：core 整跑照样把它拉进判定面。片 037 之前这一条只写在 SKILL.md 的话里，
+        # 由一支按名字钉住 `cdp_shot_selftest` 的探针代劳；那条前提随 D14 闭合消失，
+        # 留下的形状改用结构规则守——名字会换，档位语义不该被绕过。
+        if "external" in g.tiers and "core" in g.tiers:
+            problems.append("%s: tagged both external and core" % g.name)
         if 0 not in g.pass_codes:
             problems.append("%s: pass_codes must contain 0" % g.name)
         if set(g.pass_codes) & set(g.fail_codes):

@@ -26,7 +26,7 @@
 | `.codex/rules/` | 4 |
 | `.codex/scripts/` | 4 |
 | `AGENTS.md` | 1 |
-| `Docs/` | 3 |
+| `Docs/` | 4 |
 
 ## 条目
 
@@ -120,7 +120,7 @@
 
 ### 守门档位条数
 - **类型**：生成型
-- **唯一权威**：`.codex/scripts/run_all_guards.py:49`
+- **唯一权威**：`.codex/scripts/run_all_guards.py:51`
 - **更新时机**：注册表增删条目后不需要改任何散文，条数只由 `--list` 打印
 - **漂移检查**：`python -X utf8 .codex/scripts/run_all_guards.py --list`
 - **锚点**：`^(?=.*(?:core|precommit|external|合成注册表)).*(?:的 \d+ 条[。（]|\d+ 条用例)`
@@ -157,6 +157,14 @@
 - **漂移检查**：`python -X utf8 .codex/scripts/dev/check_stack_facts.py`
 - **锚点**：`仅监听本机环回地址|仅绑定环回地址`
 - **归属标记**：`SPEC-2026-10-15-web-h5-android-parity`
+
+### 原型渲染依赖的字节身份与外网面
+- **类型**：声明型
+- **唯一权威**：`Docs/04-ux-design/vendor/manifest.json:3`
+- **更新时机**：收编或替换原型的第三方脚本、新增或摘掉一个公网面、或改浏览器对本地脚本的 SRI 语义时
+- **漂移检查**：`python -X utf8 .codex/scripts/check_ux_vendor.py`
+- **锚点**：`^(?=.*原型渲染依赖)(?=.*(?:收编|remote))`
+- **归属标记**：`manifest\.json|check_ux_vendor\.py`
 
 ### 复核报告归档位置
 - **类型**：声明型
