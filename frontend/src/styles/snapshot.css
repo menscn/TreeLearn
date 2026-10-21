@@ -1,0 +1,388 @@
+/*
+ * 按采集坐标还原的屏（SnapshotScreen）。
+ *
+ * 几何全部来自夹具的 bounds_dp；这里只给 Android drawable 没被采集到的部分补表面与字形，
+ * 颜色、圆角、字号、间距一律取 tokens.css 的 token，不另立一套数值。
+ */
+
+.snap-screen {
+  display: block;
+  position: relative;
+  flex: none;
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+  background-color: var(--bg);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0 27px,
+    var(--paper-rule) 27px 28px
+  );
+}
+
+.snap-screen * {
+  box-sizing: border-box;
+}
+
+.snap-underlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.snap-scrim {
+  position: absolute;
+  background: rgba(22, 36, 28, 0.32);
+  z-index: 1;
+}
+
+.snap-pane {
+  position: absolute;
+  background: var(--surface);
+  box-shadow: var(--sh-2);
+  z-index: 1;
+}
+
+.snap-surface {
+  position: absolute;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-1);
+  z-index: 2;
+}
+
+.snap-divider {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.snap-rule {
+  position: absolute;
+  border-top: 1px solid var(--line);
+  z-index: 3;
+}
+
+.snap-text {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: var(--fs-body);
+  letter-spacing: -0.2px;
+  line-height: 1.25;
+  z-index: 3;
+}
+
+.snap-label {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.snap-screen .appbar-title {
+  margin: 0;
+  font-size: var(--fs-h1);
+  font-weight: 600;
+  line-height: 1.15;
+  overflow: visible;
+}
+
+.snap-screen .appbar-title .snap-label {
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.snap-display {
+  color: var(--ink);
+  font-size: var(--fs-h1);
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.snap-section {
+  color: var(--ink3);
+  font-size: var(--fs-h2);
+  font-weight: 600;
+}
+
+.snap-section-strong {
+  color: var(--ink);
+}
+
+.snap-row-title {
+  color: var(--ink);
+  font-size: var(--fs-h2);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.snap-body {
+  color: var(--ink);
+  font-size: var(--fs-body);
+}
+
+.snap-cap {
+  color: var(--ink3);
+  font-size: var(--fs-sm);
+}
+
+.snap-body.snap-tight,
+.snap-cap.snap-tight,
+.snap-meta-line.snap-tight {
+  font-size: var(--fs-cap);
+}
+
+.snap-meta-line {
+  color: var(--ink2);
+  font-size: var(--fs-body);
+}
+
+.snap-para {
+  align-items: center;
+  color: var(--ink);
+  font-size: var(--fs-sm);
+  line-height: 1.3;
+  overflow: visible;
+  white-space: normal;
+}
+
+.snap-para .snap-label {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: pre-wrap;
+}
+
+.snap-para-muted {
+  color: var(--ink2);
+}
+
+.snap-drawer-row .snap-label {
+  padding: 0 12px;
+}
+
+.snap-warn {
+  color: var(--amber);
+}
+
+.snap-danger {
+  color: var(--red);
+  font-size: var(--fs-sm);
+}
+
+.snap-chip {
+  align-self: center;
+  background: var(--green-soft);
+  border-radius: var(--r-full);
+  color: var(--green-deep);
+  display: inline-flex;
+  font-size: 10px;
+  font-weight: 600;
+  justify-content: center;
+  padding: 0 var(--s2);
+  width: auto;
+  min-width: 0;
+}
+
+.snap-chip.snap-text {
+  max-width: 60%;
+}
+
+.snap-chip-plain {
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--ink3);
+  font-weight: 400;
+}
+
+.snap-mark {
+  color: var(--green);
+  font-size: var(--fs-h1);
+  font-weight: 600;
+}
+
+.snap-chevron-text {
+  color: var(--ink3);
+  font-size: var(--fs-h1);
+}
+
+.snap-field {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--s3);
+  background: color-mix(in srgb, var(--surface) 55%, var(--bg));
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--ink3);
+  font-family: var(--sans);
+  font-size: var(--fs-body);
+  overflow: hidden;
+  white-space: nowrap;
+  z-index: 3;
+}
+
+.snap-button {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--green);
+  border-radius: var(--r-sm);
+  color: var(--surface);
+  font-family: var(--sans);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  z-index: 3;
+}
+
+.snap-icon {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-sm);
+  color: var(--green-deep);
+  z-index: 3;
+}
+
+.snap-icon svg {
+  fill: none;
+  height: 24px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+  width: 24px;
+}
+
+.snap-back {
+  padding: 0;
+  color: var(--green-deep);
+}
+
+.snap-back svg {
+  height: 30px;
+  stroke-width: 1.9;
+  width: 30px;
+}
+
+.snap-icon.is-tool {
+  background: var(--surface);
+  box-shadow: var(--sh-2);
+  color: var(--ink2);
+}
+
+.snap-icon.is-save {
+  background: var(--green);
+  border-radius: var(--r-sm);
+  color: var(--surface);
+}
+
+.snap-switch {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  border-radius: var(--r-full);
+  padding: 2px;
+  z-index: 3;
+}
+
+.snap-switch.is-on {
+  background: color-mix(in srgb, var(--green) 24%, var(--surface));
+  justify-content: flex-end;
+}
+
+.snap-switch.is-off {
+  background: rgba(22, 36, 28, 0.1);
+}
+
+.snap-knob {
+  background: var(--green-deep);
+  border-radius: var(--r-full);
+  box-shadow: var(--sh-1);
+  height: 100%;
+  width: 21px;
+}
+
+.snap-switch.is-off .snap-knob {
+  background: var(--ink3);
+}
+
+.snap-hit {
+  position: absolute;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  padding: 0;
+  z-index: 4;
+}
+
+.snap-hit:focus-visible,
+.snap-back:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 1px;
+}
+
+.snap-heatmap {
+  position: absolute;
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(7, 1fr);
+  z-index: 3;
+}
+
+.snap-heatmap span {
+  background: color-mix(in srgb, var(--line) 78%, var(--surface));
+  border-radius: 5px;
+}
+
+.snap-heatmap span.is-lit {
+  background: var(--green-deep);
+}
+
+.snap-canvas {
+  position: absolute;
+  background-color: color-mix(in srgb, var(--line) 60%, var(--surface));
+  background-image: radial-gradient(rgba(22, 36, 28, 0.1) 1px, transparent 1.2px);
+  background-size: 14px 14px;
+  z-index: 3;
+}
+
+.snap-canvas-pill {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  max-width: 84px;
+  overflow: hidden;
+  transform: translateX(-50%);
+  background: var(--surface);
+  border: 1px solid var(--green);
+  border-radius: var(--r-full);
+  color: var(--green-deep);
+  font-family: var(--sans);
+  font-size: 7px;
+  padding: 1px 6px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.snap-canvas-shoot {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  width: 2px;
+  height: 12px;
+  background: var(--green);
+  border-radius: 1px;
+}

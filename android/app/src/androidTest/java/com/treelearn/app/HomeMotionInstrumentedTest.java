@@ -103,10 +103,18 @@ public final class HomeMotionInstrumentedTest {
     private static final class Captured {
         final View view;
         final Animation animation;
+        final long addedAt;
+        final long capturedAt;
 
         Captured(View view, Animation animation) {
+            this(view, animation, 0L, 0L);
+        }
+
+        Captured(View view, Animation animation, long addedAt, long capturedAt) {
             this.view = view;
             this.animation = animation;
+            this.addedAt = addedAt;
+            this.capturedAt = capturedAt;
         }
     }
 
@@ -196,7 +204,9 @@ public final class HomeMotionInstrumentedTest {
             new ViewGroup.OnHierarchyChangeListener() {
                 @Override
                 public void onChildViewAdded(View parent, View child) {
-                    child.post(() -> cards.add(new Captured(child, child.getAnimation())));
+                    long addedAt = SystemClock.uptimeMillis();
+                    child.post(() -> cards.add(new Captured(child, child.getAnimation(), addedAt,
+                            SystemClock.uptimeMillis())));
                 }
 
                 @Override
@@ -206,6 +216,9 @@ public final class HomeMotionInstrumentedTest {
 
     @Before
     public void setUp() {
+        // Earlier suites unlink the database file; the process-wide container would keep reading
+        // that deleted inode, so the home this test launches would find no topics to draw.
+        AppContainer.resetForTests();
         helper = new TreeLearnDatabaseHelper(context());
         clearTopics();
         ((Application) context().getApplicationContext())
@@ -252,6 +265,12 @@ public final class HomeMotionInstrumentedTest {
         assertNull("the library is swapped in exactly as it was - no entrance motion",
                 awaitSwap(R.id.library_root).animation);
 
+        // The gear lives on the home view, which the library tab has just swapped out: the tab bar
+        // is the only way back to it, and the entrance it replays on that return is not this test's
+        // subject (the settings entrance below is read from the swap that follows).
+        click(R.id.tab_home);
+        assertNotNull("the home tab mounts the home screen again", waitFor(R.id.home_draft));
+
         click(R.id.home_settings_button);
         assertNotNull("the home gear mounts the settings screen", waitFor(R.id.settings_root));
         assertNull("the settings too", awaitSwap(R.id.settings_root).animation);
@@ -279,7 +298,8 @@ public final class HomeMotionInstrumentedTest {
         awaitCardCount(3);
         for (int order = 0; order < 3; order++) {
             Captured card = cards.get(order);
-            assertNotNull("card " + order + " must enter", card.animation);
+            assertNotNull("card " + order + " must enter (" + describeCards() + ")",
+                    card.animation);
             assertEquals("every card takes the prototype's 350ms",
                     HomeMotion.CARD_ENTER_MS, card.animation.getDuration());
             assertEquals("card " + order + " starts after the ones before it",
@@ -323,14 +343,23 @@ public final class HomeMotionInstrumentedTest {
         activity = launch();
         awaitCardCount(1);
         Captured first = cards.get(0);
-        assertNotNull("the first draw is the entrance", first.animation);
+        assertNotNull("the first draw is the entrance (" + describeCards() + ")",
+                first.animation);
+
+        // A redraw is only "later" once the entrance has ended. While cards are still entering, a
+        // render that replaces them hands the replacement the stagger by design (a resume refresh
+        // can do exactly that), so a keystroke sent mid-entrance would be a replacement, not a
+        // redraw, and would be measuring that rule instead of this one.
+        ViewGroup list = (ViewGroup) view(R.id.home_recent_list);
+        awaitCardEntranceEnded(list);
+        int drawnBeforeKeystroke = cardCount();
 
         // A keystroke is the cheapest honest redraw: it travels the same state-to-render path the
         // composer uses on every key, which is where a re-applied entrance would flicker.
         instrumentation.runOnMainSync(() -> ((EditText) activity.findViewById(R.id.home_draft))
                 .setText("SYNTHETIC-MOTION-DRAFT"));
 
-        Captured redrawn = awaitCardDrawnAfter(first.view);
+        Captured redrawn = awaitCardDrawnFrom(drawnBeforeKeystroke);
         assertNull("a redraw is not an entrance - the history cards must not enter again",
                 redrawn.animation);
         assertEquals("and the redraw still holds the card's title", TITLE_A,
@@ -400,9 +429,25 @@ public final class HomeMotionInstrumentedTest {
         db().delete(TreeLearnSchema.Topics.TABLE, null, null);
     }
 
+    /** Every card row the probe read, with what it saw and how late the read landed. */
+    private String describeCards() {
+        synchronized (cards) {
+            StringBuilder text = new StringBuilder("captured=").append(cards.size());
+            for (int index = 0; index < cards.size(); index++) {
+                Captured card = cards.get(index);
+                text.append(" [").append(index).append("]=")
+                        .append(card.animation == null ? "null"
+                                : card.animation.getDuration() + "ms+"
+                                        + card.animation.getStartOffset() + "ms")
+                        .append(" lag=").append(card.capturedAt - card.addedAt).append("ms")
+                        .append(" attached=").append(card.view.isAttachedToWindow());
+            }
+            return text.toString();
+        }
+    }
+
     /** Waits for the next swap whose screen contains this root id, then returns and drops it. */
-    private Captured awaitSwap(int rootId) {
-        long deadline = SystemClock.uptimeMillis() + WAIT_MS;
+    private Captured awaitSwap(int rootId) {        long deadline = SystemClock.uptimeMillis() + WAIT_MS;
         while (SystemClock.uptimeMillis() < deadline) {
             synchronized (swaps) {
                 for (Captured candidate : swaps) {
@@ -451,15 +496,36 @@ public final class HomeMotionInstrumentedTest {
         throw new AssertionError("the home's first card was never laid out");
     }
 
-    /** Waits for the home to draw a row that is not the given one, i.e. for the next render. */
-    private Captured awaitCardDrawnAfter(View previous) {
+    /** Waits until the entrance on the list's current first row has finished and been cleared. */
+    private void awaitCardEntranceEnded(ViewGroup rows) {
+        long deadline = SystemClock.uptimeMillis() + WAIT_MS;
+        while (SystemClock.uptimeMillis() < deadline) {
+            final boolean[] ended = {false};
+            instrumentation.runOnMainSync(() -> {
+                View row = rows.getChildAt(0);
+                ended[0] = row != null && row.getAnimation() == null;
+            });
+            if (ended[0]) {
+                return;
+            }
+            SystemClock.sleep(20L);
+        }
+        throw new AssertionError("the card entrance never ended within " + WAIT_MS + "ms");
+    }
+
+    private int cardCount() {
+        synchronized (cards) {
+            return cards.size();
+        }
+    }
+
+    /** Waits for the home to draw a row beyond this many captures, i.e. for the next render. */
+    private Captured awaitCardDrawnFrom(int index) {
         long deadline = SystemClock.uptimeMillis() + WAIT_MS;
         while (SystemClock.uptimeMillis() < deadline) {
             synchronized (cards) {
-                for (Captured candidate : cards) {
-                    if (candidate.view != previous) {
-                        return candidate;
-                    }
+                if (cards.size() > index) {
+                    return cards.get(index);
                 }
             }
             SystemClock.sleep(20L);

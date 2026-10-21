@@ -141,7 +141,7 @@ public final class NavigationScreen extends LinearLayout {
         NavigationViewState.Row current = currentRow();
         summaryCard.setVisibility(ready ? VISIBLE : GONE);
         rowsSection.setVisibility(ready ? VISIBLE : GONE);
-        currentTitle.setText(current == null ? "" : current.title);
+        currentTitle.setText(current == null ? "" : displayTitle(current.title));
         currentChip.setVisibility(current != null && !current.archivable ? VISIBLE : GONE);
         summaryFold.setText(next.summaryCollapsed ? R.string.navigation_unfold
                 : R.string.navigation_fold);
@@ -196,7 +196,7 @@ public final class NavigationScreen extends LinearLayout {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         for (final NavigationViewState.Row row : list) {
             View item = inflater.inflate(R.layout.item_navigation_row, target, false);
-            ((TextView) item.findViewById(R.id.navigation_row_title)).setText(row.title);
+            ((TextView) item.findViewById(R.id.navigation_row_title)).setText(displayTitle(row.title));
             ((TextView) item.findViewById(R.id.navigation_row_meta)).setText(getContext().getString(
                     row.current ? R.string.navigation_row_current : R.string.navigation_row_children,
                     row.childCount));
@@ -311,7 +311,14 @@ public final class NavigationScreen extends LinearLayout {
         if (row == null) {
             row = rowIn(state.archived, branchId);
         }
-        return row == null ? "" : row.title;
+        return row == null ? "" : displayTitle(row.title);
+    }
+
+    /** A branch without a title yet is a designed state, so it reads as a name rather than a blank row. */
+    private String displayTitle(String title) {
+        return title == null || title.trim().isEmpty()
+                ? getContext().getString(R.string.navigation_unnamed)
+                : title;
     }
 
     private static NavigationViewState.Row rowIn(List<NavigationViewState.Row> rows,

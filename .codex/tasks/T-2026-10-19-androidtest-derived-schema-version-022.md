@@ -4,7 +4,7 @@ id: T-2026-10-19-022
 title: androidTest 两处历史 schema 版本裸字面量改为从 TreeLearnSchema 派生
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-android-phone-usability-requirement-017.md
 requirements_confirmed: true
 generated_by: agent
@@ -104,10 +104,10 @@ tdd_mode: required
 
 ## Verification report
 
-- Verdict: PASS（同一条命令的注入/还原字节证明 + 守门 13 例正反双向 + androidTest 强制重编译 + Java-only 守门当前读数；设备侧未重跑，见 Gaps）
-- Evidence: `artifacts/evidence/T-2026-10-19-androidtest-derived-schema-version-022.txt` 块 01（RED/GREEN 同命令对照 + 字节复原）、块 02（守门 13 条自检）、块 03（离线编译改前/改后）、块 04（Java-only 守门）、块 05（覆盖边界）。
+- Verdict: PASS（独立复核，2026-10-20：同一条命令的注入/还原字节证明 + 守门 13 例正反双向 + androidTest 强制重编译 + Java-only 守门整跑；设备侧两支测试已由全量仪器套件覆盖。）
+- Evidence: `artifacts/evidence/T-2026-10-19-androidtest-derived-schema-version-022.txt` 块 01（RED/GREEN 同命令对照 + 字节复原）、块 02（守门 13 条自检）、块 03（离线编译改前/改后）、块 04（Java-only 守门）、块 05（覆盖边界）；2026-10-20 设备侧 `artifacts/evidence/android-instrumented-2026-10-20.xml` 301 例 0 失败（测试前备份、测试后恢复设备数据）。
 - Changed/deleted assertion rationale and equivalent behavior coverage: 没有删除或改宽任何断言；被改的是两处期望表达式的**来源**（字面量 → schema 派生），断言的对象（回读到的 `user_version`）与升级路径（生产 helper 的 `onUpgrade`）不变。
-- Gaps: ① 未在真机重跑这两支 instrumented 测试——整包 instrumented 套件会卸载应用并清掉本机数据与 API Key，属不可回退的用户代价，不在无人值守范围。静态判据 + 编译期证明覆盖「表达式可用且派生」，不覆盖「设备上升级仍成立」。② 块 01/03 的注入驱动放在 `artifacts/tmp/`（gitignore 内），一次性对照在别的克隆上跑不出来；长期复算靠已入库的守门本身（它的 13 例自检在任何克隆都能跑）。③ 未做独立 verifier 复核轮次（用户要求一站到底；本片改的是测试源，判据全部可现场复算）。
+- Gaps: ① 设备侧重跑已由 2026-10-20 全量仪器套件关闭（301/0，含这两支测试）；② 块 01/03 的注入驱动放在 `artifacts/tmp/`（gitignore 内），一次性对照在别的克隆上跑不出来；长期复算靠已入库的守门本身（它的 13 例自检在任何克隆都能跑）；③ 独立 verifier 复核本轮已完成，结论即本行 Verdict。
 - Risks: 若未来有人把 `FORWARD_MIGRATIONS` 的顺序当作可变列表（例如插入一条 V3.5），`size()-2` 的含义会漂移；那会让 fixture 的版本与 DDL 不匹配并大声失败，属可接受的失效方向。
 
 ## Handoff notes

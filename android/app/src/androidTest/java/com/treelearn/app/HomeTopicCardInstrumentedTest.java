@@ -78,6 +78,9 @@ public final class HomeTopicCardInstrumentedTest {
 
     @Before
     public void setUp() {
+        // Earlier suites unlink the database file; the process-wide container would keep reading
+        // that deleted inode. Start this case on a container built from the file that exists now.
+        AppContainer.resetForTests();
         helper = new TreeLearnDatabaseHelper(context());
         clearTopics();
     }

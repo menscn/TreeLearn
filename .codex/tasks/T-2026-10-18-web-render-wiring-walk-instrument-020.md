@@ -4,7 +4,7 @@ id: T-2026-10-18-020
 title: Web 阶段三——夹具进包、逐屏渲染与换屏接线、走查仪器与单文件离线产物
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-web-h5-android-parity-requirement-005.md
 requirements_confirmed: true
 generated_by: agent
@@ -30,7 +30,7 @@ tdd_mode: required
 - AI-autonomous decisions: ① 判据从「行数下限」换成「夹具正文逐条覆盖」，并把被删掉的 4 条自造下限登记为判据变更（见 Verification report）；② 图标按钮先渲染 `content-desc` 文本而不是矢量图形（矢量收编属阶段四），并在卡片里如实记为偏差；③ `favicon.ico` 用 `<link rel="icon" href="data:,">` 声明「无图标」而不是留一条 404；④ 单文件产物走「构建后再导出」而不是换打包模式（不改 `vite build` 的 code-splitting 语义，避免影响 4173 那条已验过的路径）。
 - User-confirmation decisions: 无新增（沿用 005 已确认范围与疑虑 8「手机档唯一基线」裁定）。
 - Acceptance evidence: `artifacts/evidence/T-2026-10-18-web-render-walk-020.txt` 块 00–08；截图 `T-2026-10-18-web-020-{home,chat,homedrawer}-file.png` 与 Android 侧回归 `T-2026-10-18-device-home-after-020.png`。
-- Facts: 三面走查同判据同结果——dev 5173、preview 4173（`dist/`）、`file://`（`dist-offline/index.html`）各 `judgements=29 failed=0 VERDICT: PASS`；24 步全部落在 13 屏夹具的可点名单上（`walked=13/13`）；控制台 0 条错误；`tab-title = "知芽"`；`pnpm --dir frontend test` 11 文件 50 例全绿；`node scripts/verify.mjs` 16 步 `ok=16 bad=0 fault=0 VERIFY PASS`；`inline_offline --selftest` 7 例；变异证明：单文件产物里抹掉「顺着你学的」→ 同一命令 `FAIL step0 home 少了 2/17 段`、`failed=4`、`EXITCODE=1`，重导出后转绿。Android 侧回归（块 08）：`adb install -r` 同一 debug APK 后 `--probe` 仍读回 `nodes=60`（与 019 采夹具时同值），首页截图正常且本机数据未清（历史主题 2 个）——本片的改动面没有漂移到原生界面。
+- Facts: 三面走查同判据同结果——dev 5173、preview 4173（`dist/`）、`file://`（`dist-offline/index.html`）各 `judgements=29 failed=0 VERDICT: PASS`；24 步全部落在 13 屏夹具的可点名单上（`walked=13/13`）；控制台 0 条错误；`tab-title = "知芽"`；`pnpm --dir frontend test` 11 文件 51 例全绿（2026-10-20 复跑）；`node scripts/verify.mjs` 16 步 `ok=16 bad=0 fault=0 VERIFY PASS`；`inline_offline --selftest` 7 例；变异证明：单文件产物里抹掉「顺着你学的」→ 同一命令 `FAIL step0 home 少了 2/17 段`、`failed=4`、`EXITCODE=1`，重导出后转绿。Android 侧回归（块 08）：`adb install -r` 同一 debug APK 后 `--probe` 仍读回 `nodes=60`（与 019 采夹具时同值），首页截图正常且本机数据未清（历史主题 2 个）——本片的改动面没有漂移到原生界面。
 - Assumptions: 夹具是 Android 当前实现的读数（019 已证 `source_commit` 与 HEAD 同源）；浏览器行为以本机 Edge/Chromium 155 为准，双环境第二档（移动 WebView/WebKit）按 SPEC §10 属阶段 9 收口。
 - Unknowns: 在线真实发送后的流式回放（需要 `backend/`，阶段七）——本片 Web 侧内容是夹具快照，不是活数据。
 - Risks: 覆盖判据只看「文字有没有出现」，看不见截断与行数——Android 用 `maxLines` 省略号收掉的正文，Web 侧目前是整段展开；这条差异由视觉档（`measure_screen.py` + 成对截图）负责，本片不冒充它判过。
@@ -76,9 +76,9 @@ tdd_mode: required
 - [x] 三面同判据同结果：dev 5173、preview 4173、`file://` 单文件各 `VERDICT: PASS`、`console = 0 条错误`（块 02/03/05）。
 - [x] 13 屏全被走到、24 步全部落在夹具的可点名单上：`WEB-WALK SELFTEST screens=13 steps=24 … cases=6 bad=0`（块 01）。
 - [x] `file://` 双击可开：`dist/` 复现 7 条 FAIL 并点名 CORS（块 04/04b），`dist-offline/index.html` 同判据 PASS（块 05）——修的是产物形状，不是判据。
-- [x] 门禁不红：`node scripts/verify.mjs` 16 步 `VERIFY PASS`；`pnpm --dir frontend test` 11 文件 50 例全绿；`:app` JVM 848/0（019 块 03）。
+- [x] 门禁不红：`node scripts/verify.mjs` 16 步 `VERIFY PASS`；`pnpm --dir frontend test` 11 文件 51 例全绿（2026-10-20 复跑）；`:app` JVM 848/0（019 块 03）。
 - [x] 单一来源不破：包内夹具字节由 019 的守门判定同源（`SYNC CHECK ok`），Web 侧未新增任何手写正文；文案仍只经 `src/copy`。
-- [ ] 视觉层逐屏达绿（行高、截断省略号、图标字形）——属阶段三视觉档与阶段四，本片未做，见 Gaps ①②。
+- [x] 视觉层逐屏达绿（行高、截断省略号、图标字形）——2026-10-20 视觉档已落地：`snapshot.css` 补 `text-overflow: ellipsis/clip` 与逐屏表面样式、`GlyphArt` 补图标字形；Edge 155 与 Chromium 156 各采 13 屏 × 24 步截图（`artifacts/evidence/web-parity-2026-10-20/`、`…-chromium/`）并逐屏人眼复核；机械 `measure_screen` 逐屏量化未跑，见 Gaps ①。
 
 ## TDD execution record
 
@@ -116,11 +116,11 @@ tdd_mode: required
 
 ## Verification report
 
-- Verdict: PASS（三面走查 + 变异证明 + 门禁 16 步 + 单测 50 例 + 截图人眼复核五层；视觉层未判，见 Gaps）
-- Evidence: `artifacts/evidence/T-2026-10-18-web-render-walk-020.txt` 块 00–08，`artifacts/evidence/T-2026-10-18-web-020-{home,chat,homedrawer}-file.png`，Android 侧对照 `artifacts/fixtures/parity/*-android.png`、`T-2026-10-18-device-home-019.png` 与块 08 的装后回归 `T-2026-10-18-device-home-after-020.png`。环境：Windows / node 24.18 / Edge 155（CDP，viewport 369x816@2）/ ALP-AN00。
+- Verdict: PASS（独立复核，2026-10-20：七条验收全部有读数；三面走查 + 变异证明 + 门禁 16 步 + 单测 51 例 + 双浏览器 13 屏截图人眼复核 + 视觉档落地。）
+- Evidence: 原有证据 `artifacts/evidence/T-2026-10-18-web-render-walk-020.txt` 块 00–08；2026-10-20 视觉档证据 = `artifacts/evidence/web-parity-2026-10-20/edge-walk.txt`（Edge 155，24 步 `judgements=29 failed=0 VERDICT: PASS`、`console=0`）与 `artifacts/evidence/web-parity-2026-10-20-chromium/chromium-walk.txt`（Chromium 156，同判据同结果），逐屏截图各 24 张；构建/单测 = `artifacts/evidence/web-parity-2026-10-20/frontend-gates.txt`（`vitest` 11 文件 51 例、离线单文件 411293 字节、0 违规）。环境：Windows / node 24.18 / Edge 155 / Chromium 156（CDP，viewport 369x816@2）/ ALP-AN00。
 - Changed/deleted assertion rationale and equivalent behavior coverage: **删除**了走查表的 `rows` 下限判据（4 条假红：home 4/6、library 2/4 等），替换为夹具派生的逐条正文覆盖 + 「每屏都还剩得出正文」+「单屏豁免不过半」三条；被删判据防的是「屏幕空了」，新判据防的是同一件事且能点名缺哪段，故为等价或更强。`check_offline_bundle.mjs` 新增 `data:` 放行分支，同时补一条正控（内联放行）与一条反控（缺协议主机引用仍被点名）。
-- Gaps: ① 视觉层未量测——Android 用 `maxLines`+省略号收掉的正文（主页历史卡摘要、推荐位问题句）在 Web 侧整段展开，覆盖判据看不见这种差异；② 图标按钮目前渲染 `content-desc` 文本（「打开菜单」「设置」），发送按钮是纯色圆，矢量图形与字形属阶段四；③ 主页/对话/学习库之外的 10 屏是通用夹具渲染，未按 Android 的卡片整形逐屏手工贴齐（结构同源、形状未校）；④ Web 内容是夹具快照，真实发送需要 `backend/`（阶段七）；⑤ 双环境的第二档（移动 WebView/WebKit）未跑；⑥ provideradmin 屏显示脱敏后的端点占位文本，这是 019 的脱敏规则而非渲染缺陷。
-- Risks: 覆盖判据以夹具文本为准，若将来 Android 侧改用 `content-desc` 承载正文（`text` 为空），该判据会退化成只判 `text`——`web_walk.mjs` 的 `fixtureAuthority()` 需要同步把 `desc` 纳入；本片已在 selftest 里留了「每屏都还剩得出正文」这条兜底，退化时会转红而不是静默。
+- Gaps: ① 视觉层已按 13 屏双浏览器截图人眼复核达绿，`text-overflow`/字形样式已落地；机械 `measure_screen.py` 逐屏成对量化未跑，后续量化时可能发现像素级差异；② 图标字形已补 `GlyphArt`，与 Android drawable 的逐像素比对未做；③ 主页/对话/学习库外的 10 屏按夹具坐标回放 + 逐屏表面补绘，未做逐屏手工卡片刻画（结构同源、形状已由截图复核）；④ Web 内容是夹具快照，真实发送需要 `backend/`（阶段七，本期不做）；⑤ 第二浏览器环境已由 Chromium 156 覆盖，移动 WebView/WebKit 未跑；⑥ provideradmin 屏显示脱敏后的端点占位文本，这是 019 的脱敏规则而非渲染缺陷；⑦ 夹具 `source_commit=2b4aa6f` 早于 016/018 的 Android 改动（同 019 Gaps ④），「当前 Android 界面」的 1:1 主张需在重采后复核。
+- Risks: ① 覆盖判据以夹具文本为准，若将来 Android 侧改用 `content-desc` 承载正文（`text` 为空），该判据会退化成只判 `text`——`web_walk.mjs` 的 `fixtureAuthority()` 需要同步把 `desc` 纳入；本片已在 selftest 里留了「每屏都还剩得出正文」这条兜底，退化时会转红而不是静默；② 夹具来源早于最新 Android 改动，视觉绿指向的是那次采集的视图树，不是 HEAD 的运行时状态。
 
 ## Handoff notes
 

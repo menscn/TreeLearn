@@ -7,6 +7,7 @@ import { injectRuntime } from "./platform/runtime";
 import { copyText } from "./copy";
 import "./styles/tokens.css";
 import "./styles/app.css";
+import "./styles/snapshot.css";
 
 const host = document.getElementById("root");
 if (host === null) {

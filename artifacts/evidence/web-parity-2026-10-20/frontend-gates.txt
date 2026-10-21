@@ -1,0 +1,46 @@
+$ tsc --noEmit && node scripts/check_dependency_direction.mjs && node scripts/check_device_time.mjs && node scripts/check_user_copy_i18n.mjs && node scripts/sync_fixtures.mjs --check
+dependency scan root=src layers=9 scanned=23 findings=0
+dependency direction ok — 23 个文件全部按 pages→layouts→components→hooks→store→api→platform→utils→copy 单向
+device-time scan root=D:\Project\Android\Treelearn\frontend\src scanned=23 exempt=utils/deviceTime.ts exempt-in-tree=true findings=0
+device time ok — 时间展示只经 src/utils/deviceTime.ts 一处
+user-copy scan root=src scanned=23 copy-dir-exempt-seen=true cjk-lines=0 files=0 baseline-entries=0 baseline-covered=0
+user copy ok — 生产代码的可见文案全部经 src/copy 按 key 读取（或已被冻结基线覆盖）
+SYNC CHECK src=13 dst=13 bad=0 redacted=0 dir=frontend\src\platform\fixtures
+SYNC CHECK ok
+EXITCODE=0
+$ vitest run
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.5 [39m[90mD:/Project/Android/Treelearn/frontend[39m
+
+ [32m✓[39m test/copy/copy.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m test/utils/deviceTime.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32m✓[39m test/store/screenRoute.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m test/platform/FixtureRuntimeAdapter.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m test/platform/bundledFixtures.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m test/platform/fixtureNodes.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m test/store/screenLinks.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m test/shell/AppShell.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 27[2mms[22m[39m
+ [32m✓[39m test/pages/HomePage.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 102[2mms[22m[39m
+ [32m✓[39m test/pages/ChatPage.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 105[2mms[22m[39m
+ [32m✓[39m test/pages/SnapshotScreen.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 156[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m11 passed[39m[22m[90m (11)[39m
+[2m      Tests [22m [1m[32m51 passed[39m[22m[90m (51)[39m
+[2m   Start at [22m 21:57:38
+[2m   Duration [22m 1.20s[2m (environment 66%, import 12%, transform 11%, tests 10%, worker 1%)[22m
+
+$ tsc --noEmit && vite build && node scripts/check_offline_bundle.mjs && node scripts/inline_offline.mjs
+[36mvite v8.3.4 [32mbuilding client environment for production...[36m[39m
+transforming...
+✓ 50 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.58 kB │ gzip:  0.45 kB
+dist/assets/style-CkWnurFW.css   10.34 kB │ gzip:  2.58 kB
+dist/assets/index-CMElljzK.js   409.87 kB │ gzip: 91.28 kB
+
+[32m✓ built in 112ms[39m
+offline scan root=dist assets=2 allowed-non-load-urls=20 violations=0
+offline ok — 产物内没有任何需要联网加载的脚本、字体或样式
+inline dist=dist scripts=1 styles=1 js=400537B css=10347B single=dist-offline/index.html bytes=411293 violations=0
+inline ok — 单文件产物不需要目录、不需要服务，双击即可执行（模块已内联，file:// 无 CORS 取回）

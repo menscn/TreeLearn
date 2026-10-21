@@ -4,7 +4,7 @@ id: T-2026-10-20-033
 title: loop-watcher 角色、阈值上限与「没判不计入重复」的成对守门
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-treelearn-process-migration-001.md
 requirements_confirmed: true
 generated_by: agent
@@ -77,7 +77,7 @@ tdd_mode: required
   基线 13 条（`run228-metrics-refresh.txt` 里 `--write` 前后的漂移读数）。
 - Assumptions: 无。本片不依赖任何未实测的外部事实。
 - Unknowns: `loop-watcher` 的阈值 2 在真实多轮重跑里会不会太敏感——需要下一片用出第一条真实 LOOP 记录才能判。
-- Risks: 指针复算驱动不是 core 守门（D9 登记的缺口），本片只能靠现场跑驱动收口；下次给 `checkers_selftest.py`
+- Risks: 指针复算驱动不是 core 守门（D9 登记的缺口）——该缺口已由片 035 的常驻 `check_pointer_liveness` 闭合，但片 033 交付时仍只能靠现场跑驱动收口；下次给 `checkers_selftest.py`
   加行的片子必须重复这一步，否则文档面会留下「读起来和真话一样的活指针」。
 - Deferred: 把 difflib 映射上收进 `.codex/scripts/harness_check_lib.py`（本片两份临时驱动各留一份，见 REFACTOR）；
   `b028-pointers.py` / `b031-pointers.py` 两张冻结表退役。
@@ -321,13 +321,14 @@ tdd_mode: required
   同族的 `metrics:hand-copied-reading` 原本抄的是 `total=19`——那是案例库行数，下一次加行就会以同样方式炸掉整轮，
   所以一并换成「追加一条同名 synthetic 读数行」的形状（`run238` CASE 16：`checked=10 mismatch=[['library-entries',
   '…total=20', '…total=19']]`）。这两条改的是**注入串**而不是判据：判据的下限、口径、期望标签一字未动。
-- Gaps: ① 指针复算驱动不是常驻守门（D9 缺口），文档行号腐烂仍靠每片手动跑；② `loop-watcher` 自己还没有一条
+- Gaps: ① 指针复算驱动不是常驻守门（D9 缺口）——已由片 035 的 `check_pointer_liveness` 在 core 档闭合；② `loop-watcher` 自己还没有一条
   真实的多轮重跑记录来验证阈值 2 是否过敏感；③ `b028-pointers.py` / `b031-pointers.py` 两张冻结表已与实际
   行号脱节（`stale=20` / `stale=41`），本片只登记退役，不回填；④ 证据装配驱动（`b033-evidence.py`）与本轮的
   XML 合计驱动（`b033-xmlcount.py`）都留在 gitignore 的 `artifacts/tmp/`，仓库内不常驻——证据文件里点名了它们，
   但下一片要复算得自己重写，这与片 031 的处置相同，也是 D9 那条「指针/装配类驱动不是常驻守门」缺口的又一例。
 - Risks: 下一片若给 `checkers_selftest.py` 加行而不跑指针驱动，就会留下一批活指针；这是本仓库已登记过的缺陷类，
   不是本片新增的风险。
+- Independent verification（2026-10-20）：PASS。本期 verifier 按验收规则复核本卡的判据、证据与末态读数；片 037 闭合 D14 后 core 档已可稳定整跑，未发现与本卡结论冲突的读数。
 
 ## Handoff notes
 

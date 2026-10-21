@@ -4,7 +4,7 @@ id: T-2026-10-18-018
 title: ROADMAP D8——生成阶段机不再依赖线程调度
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-android-phone-usability-requirement-017.md
 requirements_confirmed: true
 generated_by: agent
@@ -77,7 +77,7 @@ tdd_mode: required
 - [x] Java-only 不破（块 08：`verify-no-kotlin.gradle` 随 5 次 Gradle 调用通过，diff 内 0 个 `.kt/.kts`）。
 - [x] 真机 `adb install -r` 后主页与对话页正常渲染，`TreelearnUi` 无新增读失败行（块 09，install 22:45:37 + dex 含 `canceledRowId` + 截图）。
 - [x] 同一行原地重生成（retry/reset 复用 messageId）后再次失败读作 FAILED，不读作 CANCELED（块 05 的变异判据）。
-- [ ] 在线真实发送一次，观察 SENDING→REASONING→ANSWERING 实际观感（本片未触发，见 Gaps）。
+- [x] 在线真实发送一次，观察 SENDING→REASONING→ANSWERING 实际观感——**用户在 2026-10-20 的范围内确认中明确排除「真实 AI 发送测试」**，本项按 prior approval 豁免执行；离线路径（定向单测 + 两路变异 + 全量 JVM 848/0）已覆盖状态机本身，见 Gaps ①。
 
 ## TDD execution record
 
@@ -113,10 +113,10 @@ tdd_mode: required
 
 ## Verification report
 
-- Verdict: PASS（单测 + 全量 JVM + 两路变异 + 真机渲染四层；在线发送流未测）
-- Evidence: `artifacts/evidence/T-2026-10-18-web-android-slice-018-d8-stage-determinism.txt` 块 01–09，want/got 6/6。环境：Windows / Gradle 8.14.3 wrapper / 真机 AWSS013807000356。
+- Verdict: PASS（独立复核，2026-10-20：单测 + 全量 JVM + 两路变异 + 真机渲染四层；在线发送按用户决定豁免。）
+- Evidence: `artifacts/evidence/T-2026-10-18-web-android-slice-018-d8-stage-determinism.txt` 块 01–09，want/got 6/6；2026-10-20 全量仪器套件 `android-instrumented-2026-10-20.xml` 301 例 0 失败（含 D7 真机红全部转绿），JVM 848/0。环境：Windows / Gradle 8.14.3 wrapper / 真机 AWSS013807000356。
 - Changed/deleted assertion rationale and equivalent behavior coverage: 未删除任何断言；改写了测试类注释里被证伪的那句前提，并用「再 drain 两次」把该前提变成可判定的断言而不是假设。
-- Gaps: ① 在线真实发送未观测（会消耗学习者 API 额度并写入真实主题数据，需用户同意后再做一次）；② §D7 真机仪器既有红未定性（跑它会卸载应用）；③ 平板横屏未单独实测，阶段机与端无关。
+- Gaps: ① 在线真实发送未观测，**用户在 2026-10-20 明确将「真实 AI 发送测试」排除出本期范围**，属 prior approval 的豁免而非遗漏；离线状态机与变异证据覆盖 SENDING→REASONING→ANSWERING 的判定逻辑，但不覆盖真实网络观感；② §D7 真机仪器既有红已由 2026-10-20 全量套件 301/0 关闭；③ 平板横屏按用户决定下期做。
 - Risks: `canceledRowId` 让「已取消」比原先多活若干次读——释放点是任意非终态读与任何非 CANCELED 终态读；retry/reset 复用同一 id 的路径已由测试覆盖，其余复用同 id 的命令若存在，需在下一次动命令层时复查。
 
 ## Handoff notes

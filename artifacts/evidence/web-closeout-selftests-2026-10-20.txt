@@ -1,0 +1,45 @@
+== check_dependency_direction --selftest
+SELFTEST cases=10 floor=8 fail=0
+  ok   反向 import 被点名
+  ok   越出 src 直读夹具被点名
+  ok   合法方向链不被点名
+  ok   入口文件按名单放行
+  ok   可判文件计数含全部样本
+  ok   违规存在判 1
+  ok   分层名单与规格一致（按当前态逐字比对）
+  ok   去掉两处违规后同一棵树判通过（反向对照）
+  ok   扫描根缺失判 3
+  ok   可判文件低于下限判 3 并点名下限
+EXITCODE=0
+== check_device_time --selftest
+SELFTEST cases=11 floor=8 fail=0
+  ok   违规样本被点名（Intl 与时区写死）
+  ok   违规样本被点名（toLocale）
+  ok   合法样本不被点名
+  ok   共享模块自身豁免且仍计入 scanned
+  ok   单源声明的派生关系逐字一致
+  ok   豁免只认路径，同名不同路径必须点名
+  ok   违规存在判 1 且标签指向绕过
+  ok   去掉违规后同一棵树判通过（反向对照）
+  ok   豁免缺席但仍有可判文件判 3 并点名豁免
+  ok   可判文件为空判 3 并点名下限
+  ok   目录缺失判 3 并点名目录
+EXITCODE=0
+== check_user_copy_i18n --selftest
+SELFTEST cases=15 floor=10 fail=0
+  ok   JSX 文本与字符串字面量同判违规
+  ok   注释里的中文不点名
+  ok   URL 路径里的中文仍算可见文本候选（并由基线覆盖）
+  ok   带理由的 i18n-ignore 放行
+  ok   空理由的 i18n-ignore 仍点名
+  ok   经文案表取值的合法样本不点名
+  ok   注释里的引号不会开启字符串（后续中文仍点名）
+  ok   文案表目录整体豁免且仍计入 scanned
+  ok   豁免只在同行生效（理由写在别行仍点名）
+  ok   存在未经基线的违规判 1
+  ok   违规全部落在基线内判 0 并打 NOTE
+  ok   基线数大于实测判 1 并点名 STALE
+  ok   基线缺失判 3 并点名基线
+  ok   文案表缺席判 3 并点名豁免
+  ok   源码目录缺失判 3
+EXITCODE=0

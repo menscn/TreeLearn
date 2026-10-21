@@ -20,6 +20,9 @@ describe("换屏映射表", () => {
     expect(linkFor("settings_back")).toEqual({ kind: "back" });
     expect(linkFor("tree_back")).toEqual({ kind: "back" });
     expect(linkFor("chat_settings")).toEqual({ kind: "screen", screen: "settings" });
+    expect(linkFor("navigation_enter")).toEqual({ kind: "screen", screen: "chat" });
+    expect(linkFor("navigation_canvas")).toEqual({ kind: "screen", screen: "treecanvas" });
+    expect(linkFor("tree_nav")).toEqual({ kind: "screen", screen: "navigation" });
     expect(linkFor("drawer_heatmap_card")).toBeNull();
   });
 

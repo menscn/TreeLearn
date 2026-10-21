@@ -221,6 +221,8 @@ public final class AttachmentStorageInstrumentedTest {
                     rawInt(v3, "PRAGMA user_version"));
             assertTrue("a V3 database must not yet have the attachments table",
                     !tables(v3).contains(TreeLearnSchema.Attachments.TABLE));
+            assertTrue("a V3 database must not yet have the annotations table",
+                    !tables(v3).contains(TreeLearnSchema.Annotations.TABLE));
         } finally {
             v3.close();
         }
@@ -233,6 +235,8 @@ public final class AttachmentStorageInstrumentedTest {
                 tables(upgraded).contains(TreeLearnSchema.Attachments.TABLE));
         assertTrue("the upgrade must add the message_attachments table",
                 tables(upgraded).contains(TreeLearnSchema.MessageAttachments.TABLE));
+        assertTrue("the upgrade must add the annotations table",
+                tables(upgraded).contains(TreeLearnSchema.Annotations.TABLE));
         assertEquals("rows written before the upgrade survive it", 1, messageCount());
         assertEquals("foreign_key_check must report no dangling reference", 0,
                 rawRows(upgraded, "PRAGMA foreign_key_check"));
@@ -279,20 +283,23 @@ public final class AttachmentStorageInstrumentedTest {
         }
     }
 
-    /** The current production DDL minus what V4 introduces: a genuine V3 database. */
+    /** The current production DDL minus what V4 and V5 introduce: a genuine V3 database. */
     private static List<String> versionThreeCreateStatements() {
         java.util.List<String> statements = new java.util.ArrayList<>();
         for (String statement : TreeLearnSchema.CREATE_TABLE_STATEMENTS) {
             if (statement.startsWith("CREATE TABLE " + TreeLearnSchema.Attachments.TABLE)
                     || statement.startsWith("CREATE TABLE "
-                            + TreeLearnSchema.MessageAttachments.TABLE)) {
+                            + TreeLearnSchema.MessageAttachments.TABLE)
+                    || statement.startsWith("CREATE TABLE " + TreeLearnSchema.Annotations.TABLE)) {
                 continue;
             }
             statements.add(statement);
         }
         for (String statement : TreeLearnSchema.CREATE_INDEX_STATEMENTS) {
             if (statement.contains(TreeLearnSchema.Attachments.TABLE)
-                    || statement.contains(TreeLearnSchema.MessageAttachments.TABLE)) {
+                    || statement.contains(TreeLearnSchema.MessageAttachments.TABLE)
+                    || statement.contains(TreeLearnSchema.INDEX_ANNOTATIONS_ANCHOR)
+                    || statement.contains(TreeLearnSchema.INDEX_ANNOTATIONS_MESSAGE)) {
                 continue;
             }
             statements.add(statement);

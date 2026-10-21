@@ -235,8 +235,13 @@ public final class HomeScreen extends LinearLayout {
         recentEmpty.setVisibility(settled && !hasTopics ? VISIBLE : GONE);
         recentList.setVisibility(hasTopics ? VISIBLE : GONE);
 
-        recentList.removeAllViews();
         int visibleCount = Math.min(MAX_RECENT, state.topics.size());
+        // A resume refresh can hand the same topics back while the cards drawn a moment ago are
+        // still entering. Replacing them without the stagger would leave the entrance half-spent
+        // on views nobody sees, so the replacements inherit it.
+        boolean cardsStillEntering = recentList.getChildCount() > 0
+                && recentList.getChildAt(0).getAnimation() != null;
+        recentList.removeAllViews();
         for (int index = 0; index < visibleCount; index++) {
             View card = topicCard(state.topics.get(index));
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
@@ -246,7 +251,7 @@ public final class HomeScreen extends LinearLayout {
             }
             recentList.addView(card, params);
         }
-        if (entrancePending && visibleCount > 0) {
+        if (visibleCount > 0 && (entrancePending || cardsStillEntering)) {
             staggerCards();
         }
     }
@@ -276,6 +281,13 @@ public final class HomeScreen extends LinearLayout {
     private View topicCard(TopicCard card) {
         View view = LayoutInflater.from(getContext())
                 .inflate(R.layout.item_home_topic, recentList, false);
+        bindTopicCard(view, card);
+        return view;
+    }
+
+    /** Paints one card, new or already on screen, from the topic it shows. */
+    private void bindTopicCard(View view, TopicCard card) {
+        view.setTag(card.topicId);
         ((TextView) view.findViewById(R.id.home_topic_title)).setText(card.title);
 
         boolean summarised = !card.summary.trim().isEmpty();
@@ -293,7 +305,6 @@ public final class HomeScreen extends LinearLayout {
                 actions.onTopicTapped(card);
             }
         });
-        return view;
     }
 
     /**

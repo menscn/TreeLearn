@@ -17,6 +17,11 @@ const SCREEN_LINKS: Record<string, ScreenName> = {
   chat_nav: "navigation",
   chat_overview: "treecanvas",
   chat_settings: "settings",
+  /** 分支导航的两个头部出口：一个回到对话，一个切到画布；与 Android 的入口语义一致。 */
+  navigation_enter: "chat",
+  navigation_canvas: "treecanvas",
+  /** 画布头部那枚分支导航按钮回到导航屏。 */
+  tree_nav: "navigation",
   settings_key_entry: "settingskey",
   settings_providers_entry: "provideradmin",
   settings_models_entry: "modelsettings",

@@ -4,7 +4,7 @@ id: T-2026-10-18-015
 title: 文案守门、verify 汇总入口与 file:// 离线实测
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-web-h5-android-parity-requirement-005.md
 requirements_confirmed: true
 generated_by: agent
@@ -74,8 +74,8 @@ tdd_mode: required
 
 - [x] `pnpm --dir frontend check:user-copy-i18n` rc=0 且打印判决行；`--selftest` 15 例全绿（证据块 04）。
 - [x] 承重实测：① 把某文件从基线删掉必须判 1 并点名 GROWN；② 基线数大于实测必须判 1 并点名 STALE；③ 基线文件缺失必须判 3；④ 文案表目录缺席必须判 3——四条都在自检里真实执行。
-- [x] 阶段 2 出口门禁可复现：`pnpm --dir frontend build`、`lint`、`test`、`verify` 全部 rc=0，且 `verify` 的 11 步每步都命中判决行（证据块 03/05）。
-- [x] 011 卡 Gaps ①：`file://` 直接打开产物可用（浏览器 DOM 快照 + 控制台零消息，证据块 06）。
+- [x] 阶段 2 出口门禁可复现：`pnpm --dir frontend build`、`lint`、`test`、`verify` 全部 rc=0，且 `verify` 的 16 步每步都命中判决行（2026-10-20 复跑：`verify steps=16 ok=16 bad=0 fault=0`、`EXITCODE=0`；旧记录 11 步已随 `verify` 加步过期）。
+- [x] 011 卡 Gaps ①：`file://` 直接打开产物可用（`dist-offline/index.html` 单文件形态；`dist/index.html` 走模块加载，`file://` 下按 020 的证据块 04/04b 复现 CORS 失败，属产物形态而非判据）。
 
 ## TDD execution record
 
@@ -111,11 +111,11 @@ tdd_mode: required
 
 ## Verification report
 
-- Verdict: PENDING（待独立 verifier）
-- Evidence: 单元/契约证据 = 自检 15 例（4 条故障分支 + 2 条反向对照）；启动证据 = `verify` 11 步 rc=0；真实交互证据 = 浏览器打开 `file:///D:/Project/Android/Treelearn/frontend/dist/index.html`，DOM 快照 `RootWebArea "知芽"` + `navigation` 下「主页」「学习库」两条 StaticText，`list_console_messages` 返回无消息（证据块 06）。环境：本机 Windows / node 24.18（守门运行）与 node 25.9.0（pnpm 子进程）/ Chrome（browser-use）。
+- Verdict: PASS（独立复核，2026-10-20：四条验收全部有当期读数；`file://` 一档按单文件产物 `dist-offline/index.html` 判定。）
+- Evidence: 单元/契约证据 = `--selftest` 15 例全绿（`SELFTEST cases=15 floor=10 fail=0`，见 `artifacts/evidence/web-closeout-selftests-2026-10-20.txt`）；启动证据 = `pnpm --dir frontend verify` 16 步 rc=0、`lint` `EXITCODE=0`、全量单测 51 例全绿（`artifacts/evidence/web-parity-2026-10-20/frontend-gates.txt` 与 `artifacts/evidence/web-closeout-lint-2026-10-20.txt`）；真实交互证据 = 020 的 `dist-offline/index.html` `file://` 判定 PASS，以及 Edge/Chromium 各 24 步 `judgements=29 failed=0`。环境：本机 Windows / node 24.18（守门运行）与 node 25.9.0（pnpm 子进程）/ Edge 155 / Chromium 156。
 - Changed/deleted assertion rationale and equivalent behavior coverage: 无断言被删；`lint` 与 `build` 的断言面被扩大，原有类型检查/打包判据逐条保留在同一命令链里。
-- Gaps: ① CJK 判定不区分语法位置，注释外的合法非 UI 文本需要逐行豁免（本片 14 处）；② `verify` 不判定「产物在真机上是否渲染正确」，那属阶段 3 的逐屏判据；③ 独立复核轮未跑。
-- Risks: 若后续屏把服务返回的 message 直接渲染，本守门会红——这是设计如此，那条文案必须经前端错误语义映射。
+- Gaps: ① 当期扫描 `cjk-lines=0`，无需逐行豁免；② `verify` 不判定「产物在真机上是否渲染正确」，该层由 020 的双浏览器逐屏走查覆盖；③ 独立复核轮已由本期 verifier 完成，结论即本行 Verdict。
+- Risks: ① 若后续屏把服务返回的 message 直接渲染，本守门会红——这是设计如此，那条文案必须经前端错误语义映射；② CJK 判定看不见 `\uXXXX` 转义写法（`SnapshotScreen.tsx` 现有 18 处转义常量只用于匹配夹具标签与选字形，不直接渲染文案，故当期无违规；但守门存在这条盲区，新增可见文案不得用转义绕过文案表）。
 
 ## Handoff notes
 

@@ -4,7 +4,7 @@ id: T-2026-10-18-019
 title: Web 阶段一——Android 真机结构夹具采集仪器与包内副本漂移守门
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-web-h5-android-parity-requirement-005.md
 requirements_confirmed: true
 generated_by: agent
@@ -76,7 +76,7 @@ tdd_mode: required
 - [x] 信封字段与 dp 归一可回读：13 组夹具的 `schema_version/screen/source_commit/captured_at_ms/device/payload` 齐全，视口一致为 `[369.23, 816.0]`，`shot_sha256` 逐屏不同（块 04）。
 - [x] 包内副本与权威夹具同源：`SYNC WRITE src=13 dst=13 bad=0 redacted=1`，随后 `SYNC CHECK ok`；漂移守门在变异注入下 `bad=1 / EXITCODE=1`（块 05–07）。
 - [x] 门禁不红：`./gradlew :app:testDebugUnitTest` 结果 XML 现场计数 94 文件 / 848 tests / 0 failures / 0 errors（块 03）；设备上是当前 APK，`adb install -r` Success（块 08/08b）。
-- [ ] 台账 NO-PROFILE 两列归零——按 005 允许的第二条走法处理为「写明可接受偏差」，理由见 Gaps ①。
+- [x] 台账 NO-PROFILE 两列归零——按 005 允许的第二条走法处理为「写明可接受偏差」，理由见 Gaps ①（2026-10-20 台账由生成命令重导出后两列仍为登记性 `NO-PROFILE：屏档案里没有这个键 / 没有夹具回放规格可查`；`parity_ledger_selftest.py` 20 例 `VERDICT: PASS`，见 `artifacts/evidence/web-closeout-ledger-2026-10-20.txt`）。
 
 ## TDD execution record
 
@@ -113,10 +113,10 @@ tdd_mode: required
 
 ## Verification report
 
-- Verdict: PASS（实采 13/13 + 仪器自检 11 例 + 守门自检 8 例 + 变异注入转红 + 恢复转绿 + JVM 848/0 + 设备当前 APK 六层证据）
-- Evidence: `artifacts/evidence/T-2026-10-18-web-fixture-capture-019-instrument.txt` 块 01–08b。环境：Windows / Python 标准库 / node 24.18 / 真机 AWSS013807000356（ALP-AN00 1200x2652@520dpi）。
+- Verdict: PASS（独立复核，2026-10-20：六条验收 + 末尾 NO-PROFILE 可接受偏差登记全部有当期读数；台账与清单由生成命令重导出后自检 20/20 绿。）
+- Evidence: `artifacts/evidence/T-2026-10-18-web-fixture-capture-019-instrument.txt` 块 01–08b；2026-10-20 复跑 `parity_ledger_selftest.py` → `cases executed=20 expected=20 failures=0 VERDICT: PASS`（`artifacts/evidence/web-closeout-ledger-2026-10-20.txt`）。环境：Windows / Python 标准库 / node 24.18 / 真机 AWSS013807000356（ALP-AN00 1200x2652@520dpi）。
 - Changed/deleted assertion rationale and equivalent behavior coverage: 本片未删除任何既有判据；`ledger.md` 与 `screen-inventory.json` 的变化全部由生成命令重导出（行号位移来自 016/018 两片 Android 改动）。
-- Gaps: ① **台账 NO-PROFILE 两列未归零，按 005 允许的第二条走法登记为可接受偏差**——那两列量的是 `screens.json` 原型档的「量测记录/回放规格」在不在，真机结构夹具是另一种证据，填进去会让 `MEASURED` 一词承担两件事；② `StatsDetailScreen` 与全部浮层未采（前者缺可达路径，后者属阶段四）；③ `status_bar_dp` 在有全屏节点时读作 0.0（派生量的定义如此），需要系统栏真实高度的比对要在阶段三视觉档里用另一支仪器取。
+- Gaps: ① **台账 NO-PROFILE 两列按 005 允许的第二条走法登记为可接受偏差**——那两列量的是 `screens.json` 原型档的「量测记录/回放规格」在不在，真机结构夹具是另一种证据，填进去会让 `MEASURED` 一词承担两件事；② `StatsDetailScreen` 与全部浮层未采（前者缺可达路径，后者属阶段四）；③ `status_bar_dp` 在有全屏节点时读作 0.0（派生量的定义如此），系统栏真实高度的比对留给后续视觉档；④ 夹具 `source_commit=2b4aa6f`（2026-10-18 22:49，16 个提交之前），016/018 之后的 Android 界面改动尚未重采——本片的采集判据在该次采集时点成立，但「当前 Android 界面」的 1:1 主张在重采前不成立。
 - Risks: 每次重采必然触发 13 条 DRIFT（相对日期），流程上必须紧跟 `sync_fixtures.mjs` + 重跑 `verify`；否则 Web 读到的是旧基线而门禁会转红——这条风险的表现形式是可判定的，不是静默的。
 
 ## Handoff notes

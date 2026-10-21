@@ -4,7 +4,7 @@ id: T-2026-10-18-016
 title: 分支导航读不出——未命名子分支与静默 catch
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-android-phone-usability-requirement-017.md
 requirements_confirmed: true
 generated_by: agent
@@ -70,11 +70,11 @@ tdd_mode: required
 
 ## Acceptance criteria
 
-- [x] 存在 null 标题子分支时，`NavigationPresenter` 渲染 `READY` 且该分支在可见列表里，标签为 `""`。
+- [x] 存在 null 标题子分支时，`NavigationPresenter` 渲染 `READY` 且该分支在可见列表里，标签为 `""`；**2026-10-20 用户拍板改为显示「未命名分支」**（`NavigationScreen.displayTitle` + `strings.xml` 的 `navigation_unnamed`），本判据的期望标签由该决定取代，presenter 仍保留空标题，显示层做占位。
 - [x] 读失败时原因恰到达诊断口一次，并点名异常类名（导航 3 处、画布 2 处 catch 全部接线）。
 - [x] `NavigationPresenterTest` 23 条全绿；`:app` 全套件的既有红只剩 D8 两条且与本卡改动无因果。
 - [x] Java-only（no-kotlin）守门 PASS。
-- [x] 真机 `adb install -r` 后同一入口渲染分支列表，未命名子分支在列；`logcat -s TreelearnUi` 在读成功时保持空。
+- [x] 真机 `adb install -r` 后同一入口渲染分支列表，未命名子分支在列；`logcat -s TreelearnUi` 在读成功时保持空。2026-10-20 视觉复核：真机截图 `unnamed-branch-03-navigation-2026-10-20.png` 中该行显示「未命名分支」，同批 `home/chat` 截图与 XML 一并留证。
 
 ## TDD execution record
 
@@ -110,11 +110,11 @@ tdd_mode: required
 
 ## Verification report
 
-- Verdict: PENDING（待独立 verifier）
-- Evidence: 见 `artifacts/evidence/T-2026-10-18-web-android-slice-016-nav-untitled-branch.txt` 六个块（BEFORE 真机屏 + 空日志、RED、GREEN、全套件、no-kotlin、AFTER 真机列表）。设备 AWSS013807000356，`adb install -r`，`lastUpdateTime=2026-10-18 22:20:30`，产物内含 `read failed scope=` 串。
-- Changed/deleted assertion rationale and equivalent behavior coverage: 无断言被删；`Node` 的 null 拒绝被替换为「归一 + 用例证明可读」，等价覆盖由 `aBranchNotYetNamedIsStillReadableAndStaysInTheList` 承担。
-- Risks: 空标签在列表里可读性差，但它与画布/弹层现状一致；若产品要占位文案，应在阶段一的文案键里一次定清。
-- Gaps: ① 未命名分支的占位文案未决；② 写路径其余静默 catch 未接诊断口；③ D8 两条既有用例仍红，套件信号未完全可用；④ 未跑仪器测试（会清空本机数据）。
+- Verdict: PASS（独立复核，2026-10-20：六条验收全部有读数；原「空标签」判据由用户当日拍板的「未命名分支」占位取代，真机截图可见。）
+- Evidence: 原证据 `artifacts/evidence/T-2026-10-18-web-android-slice-016-nav-untitled-branch.txt` 六块（BEFORE 真机屏 + 空日志、RED、GREEN、全套件、no-kotlin、AFTER 真机列表）；2026-10-20 终态 = 真机 `adb install -r` 后截图 `artifacts/evidence/unnamed-branch-03-navigation-2026-10-20.png` + `unnamed-branch-03-navigation-2026-10-20.xml` 显示该行「未命名分支」，全量仪器套件 `android-instrumented-2026-10-20.xml` 301 例 0 失败（测试前已备份设备数据、测试后恢复）。设备 AWSS013807000356，`adb install -r`。
+- Changed/deleted assertion rationale and equivalent behavior coverage: 无断言被删；`Node` 的 null 拒绝被替换为「归一 + 用例证明可读」，等价覆盖由 `aBranchNotYetNamedIsStillReadableAndStaysInTheList` 承担；显示层占位有真机截图证据，presenter 的空标题语义未变。
+- Risks: 占位文案现在是资源键 `navigation_unnamed`，画布与弹层若也要占位，应复用同一键而不是各写一份。
+- Gaps: ① 未命名分支的占位文案已由用户拍板并落地（本项关闭）；② 写路径其余静默 catch 未接诊断口（独立问题，不属本片）；③ D8 两条既有红已由 018 闭合，`:app` JVM 848/0、2026-10-20 仪器套件 301/0；④ 仪器套件已于 2026-10-20 全量跑过（备份—测试—恢复流程），本条关闭。
 
 ## Handoff notes
 

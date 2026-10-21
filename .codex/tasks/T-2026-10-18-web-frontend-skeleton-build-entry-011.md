@@ -4,7 +4,7 @@ id: T-2026-10-18-011
 title: frontend 工程骨架与构建入口
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-web-h5-android-parity-requirement-005.md
 requirements_confirmed: true
 generated_by: agent
@@ -70,9 +70,9 @@ tdd_mode: required
 
 ## Acceptance criteria
 
-- [ ] `pnpm --dir frontend build` rc=0 且 `dist/` 出图；`pnpm --dir frontend lint` rc=0。
-- [ ] 既有 token 链不被破坏：`python -X utf8 .codex/scripts/dev/check_design_tokens.py` 对 `frontend/src/**` 裸 hex 扫描无命中。
-- [ ] 外壳不含任何用户可见硬编码文案（为 014 的文案守门预留绿灯）。
+- [x] `pnpm --dir frontend build` rc=0 且 `dist/` 出图；`pnpm --dir frontend lint` rc=0（2026-10-20 复跑：构建 `dist/index.html` 0.58 kB 出图，lint `EXITCODE=0`）。
+- [x] 既有 token 链不被破坏：`python -X utf8 .codex/scripts/dev/check_design_tokens.py` 对 `frontend/src/**` 裸 hex 扫描无命中（2026-10-20 core 整跑 `0 check(s) failed`）。
+- [x] 外壳不含任何用户可见硬编码文案（为 014 的文案守门预留绿灯；`check_user_copy_i18n` 扫描 23 文件 `cjk-lines=0 findings=0`）。
 
 ## TDD execution record
 
@@ -108,10 +108,10 @@ tdd_mode: required
 
 ## Verification report
 
-- Verdict: PENDING
-- Evidence: 单元/契约/启动证据 = 上述门禁产物（构建与类型检查两条命令的真实退出码与判决行）；真实交互证据 = 尚未采集（骨架无屏内容），留待阶段 3。
+- Verdict: PASS（独立复核，2026-10-20：三条验收全部由当期命令复核；阶段 3 已补真实交互证据。）
+- Evidence: 构建/类型检查 = `artifacts/evidence/web-parity-2026-10-20/frontend-gates.txt`（`tsc --noEmit` + `vite build` 50 modules、`dist/index.html` 出图）；lint = `artifacts/evidence/web-closeout-lint-2026-10-20.txt`（`EXITCODE=0`）；token = `artifacts/evidence/guards-2026-10-20-final.log` 的 `check_design_tokens: 0 check(s) failed`；文案硬编码 = 同 gates 的 `check_user_copy_i18n`（`cjk-lines=0 findings=0`）；真实交互 = Edge/Chromium 两次 24 步走查各 `judgements=29 failed=0 VERDICT: PASS`（`artifacts/evidence/web-parity-2026-10-20/edge-walk.txt`、`artifacts/evidence/web-parity-2026-10-20-chromium/chromium-walk.txt`）。
 - Changed/deleted assertion rationale and equivalent behavior coverage: 规模口径由 263 改 130，等价覆盖为「离线判定的 137 行归 014」，两侧之和仍可回算。
-- Gaps: ① `file://` 双击可开这一档尚未实测（归 014）；② 外壳尚无屏内容；③ 独立复核轮未跑。
+- Gaps: ① `file://` 双击可开由 020 的 `dist-offline/index.html` 关闭（`dist/` 形态按设计不适用）；② 外壳后续已有 13 屏内容；③ 独立复核轮已由本期 verifier 完成，结论即本行 Verdict。
 - Risks: 若 014 的守门按文件名子串排除测试文件，会出现「绿但没判到」；已写入 014 的 Watch-outs。
 
 ## Handoff notes

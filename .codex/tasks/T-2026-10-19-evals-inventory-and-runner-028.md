@@ -4,7 +4,7 @@ id: T-2026-10-19-028
 title: 评测集资产、期望语法与 run_evals 运行器
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-treelearn-process-migration-001.md
 requirements_confirmed: true
 generated_by: agent
@@ -341,6 +341,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
 - Risks: `run_evals.py` 与被检快照同居 `.codex/`，而 `.codex/` 里每一片都会移动行号——所以本片之后
   任何加行都必须重跑块 04 的指针驱动，否则 `product.md` 里那 2 条 `文件:行` 会先响（这是想要的），
   但卡片正文里的区间不会自动响（那要靠人重跑）。
+- Independent verification（2026-10-20）：PASS。本期 verifier 按验收规则复核本卡的判据、证据与末态读数；片 037 闭合 D14 后 core 档已可稳定整跑，未发现与本卡结论冲突的读数。
 
 ## Handoff notes
 

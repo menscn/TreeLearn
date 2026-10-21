@@ -14,6 +14,7 @@ import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
@@ -162,18 +163,23 @@ public final class TreeCanvasDeviceInstrumentedTest {
         });
         assertTrue("a tap must reach the canvas callback", !taps.isEmpty());
 
-        // A one-finger pan: down, a move to the left-down, up.
+        // A one-finger pan, as its own gesture: a new downTime and a gap past the double-tap
+        // window, rather than a second DOWN sharing the tap's downTime in mid-stream.
+        SystemClock.sleep(400L);
+        long panDown = SystemClock.uptimeMillis();
         instrumentation.runOnMainSync(() -> {
-            view.dispatchTouchEvent(MotionEvent.obtain(down, down + 100,
+            view.dispatchTouchEvent(MotionEvent.obtain(panDown, panDown,
                     MotionEvent.ACTION_DOWN, 600f, 900f, 0));
-            view.dispatchTouchEvent(MotionEvent.obtain(down, down + 160,
+            view.dispatchTouchEvent(MotionEvent.obtain(panDown, panDown + 60,
                     MotionEvent.ACTION_MOVE, 540f, 960f, 0));
-            view.dispatchTouchEvent(MotionEvent.obtain(down, down + 220,
+            view.dispatchTouchEvent(MotionEvent.obtain(panDown, panDown + 120,
                     MotionEvent.ACTION_UP, 540f, 960f, 0));
         });
         assertTrue("a drag must reach onPan", !pans.isEmpty());
 
         // A two-finger zoom: two pointers spreading apart.
+        SystemClock.sleep(400L);
+        final long zoomDown = SystemClock.uptimeMillis();
         MotionEvent.PointerProperties[] props = new MotionEvent.PointerProperties[2];
         MotionEvent.PointerCoords[] coords = new MotionEvent.PointerCoords[2];
         for (int i = 0; i < 2; i++) {
@@ -184,25 +190,31 @@ public final class TreeCanvasDeviceInstrumentedTest {
             coords[i].pressure = 1f;
             coords[i].size = 1f;
         }
+        // ScaleGestureDetector ignores a pinch whose initial span is below the device's minimum
+        // scaling span (27mm here), so the span is derived from the configuration, not guessed.
+        final float minSpan = ViewConfiguration.get(target).getScaledMinimumScalingSpan();
+        final float spread = Math.min(VIEW_W - 80f, Math.max(300f, minSpan + 120f));
+        final float centerX = VIEW_W / 2f;
+        final float centerY = VIEW_H / 2f;
         instrumentation.runOnMainSync(() -> {
-            coords[0].x = 300f;
-            coords[0].y = 500f;
-            coords[1].x = 500f;
-            coords[1].y = 500f;
-            view.dispatchTouchEvent(MotionEvent.obtain(down, down + 300,
-                    MotionEvent.ACTION_DOWN, 300f, 500f, 0));
-            view.dispatchTouchEvent(MotionEvent.obtain(down, down + 320,
+            coords[0].x = centerX - spread / 2f;
+            coords[0].y = centerY;
+            coords[1].x = centerX + spread / 2f;
+            coords[1].y = centerY;
+            view.dispatchTouchEvent(MotionEvent.obtain(zoomDown, zoomDown,
+                    MotionEvent.ACTION_DOWN, coords[0].x, coords[0].y, 0));
+            view.dispatchTouchEvent(MotionEvent.obtain(zoomDown, zoomDown + 20,
                     MotionEvent.ACTION_POINTER_DOWN | (1 << MotionEvent.ACTION_POINTER_INDEX_SHIFT),
                     2, props, copy(coords), 0, 0, 0f, 0f, 0, 0, 0, 0));
-            coords[0].x = 240f;
-            coords[1].x = 560f;
-            view.dispatchTouchEvent(MotionEvent.obtain(down, down + 360,
+            coords[0].x = centerX - spread / 2f - 60f;
+            coords[1].x = centerX + spread / 2f + 60f;
+            view.dispatchTouchEvent(MotionEvent.obtain(zoomDown, zoomDown + 60,
                     MotionEvent.ACTION_MOVE, 2, props, copy(coords), 0, 0, 0f, 0f, 0, 0, 0, 0));
-            view.dispatchTouchEvent(MotionEvent.obtain(down, down + 380,
+            view.dispatchTouchEvent(MotionEvent.obtain(zoomDown, zoomDown + 80,
                     MotionEvent.ACTION_POINTER_UP | (1 << MotionEvent.ACTION_POINTER_INDEX_SHIFT),
                     2, props, copy(coords), 0, 0, 0f, 0f, 0, 0, 0, 0));
-            view.dispatchTouchEvent(MotionEvent.obtain(down, down + 400,
-                    MotionEvent.ACTION_UP, 240f, 500f, 0));
+            view.dispatchTouchEvent(MotionEvent.obtain(zoomDown, zoomDown + 100,
+                    MotionEvent.ACTION_UP, coords[0].x, coords[0].y, 0));
         });
         assertTrue("a pinch must reach onZoom", !zooms.isEmpty());
     }

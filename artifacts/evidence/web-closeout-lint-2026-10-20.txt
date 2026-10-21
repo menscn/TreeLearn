@@ -1,0 +1,11 @@
+$ tsc --noEmit && node scripts/check_dependency_direction.mjs && node scripts/check_device_time.mjs && node scripts/check_user_copy_i18n.mjs && node scripts/sync_fixtures.mjs --check
+dependency scan root=src layers=9 scanned=23 findings=0
+dependency direction ok — 23 个文件全部按 pages→layouts→components→hooks→store→api→platform→utils→copy 单向
+device-time scan root=D:\Project\Android\Treelearn\frontend\src scanned=23 exempt=utils/deviceTime.ts exempt-in-tree=true findings=0
+device time ok — 时间展示只经 src/utils/deviceTime.ts 一处
+user-copy scan root=src scanned=23 copy-dir-exempt-seen=true cjk-lines=0 files=0 baseline-entries=0 baseline-covered=0
+user copy ok — 生产代码的可见文案全部经 src/copy 按 key 读取（或已被冻结基线覆盖）
+SYNC CHECK src=13 dst=13 bad=0 redacted=0 dir=frontend\src\platform\fixtures
+SYNC CHECK ok
+EXITCODE=0
+EXITCODE=0

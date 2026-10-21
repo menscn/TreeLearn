@@ -4,7 +4,7 @@ id: T-2026-10-19-027
 title: code-simplifier 角色、判据面禁令与成对守门
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-treelearn-process-migration-001.md
 requirements_confirmed: true
 generated_by: agent
@@ -341,6 +341,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
 - Risks: 共用 `citable_paths()` 与 `agent_section_names()` 之后，`_TEMPLATE.md`、`verifier.md`、`code-reviewer.md`
   的小节/字段改名会同时让 B1/B4/B5 三支守门转红——这是想要的耦合，但它让「顺手改模板措辞」变成一次跨文件改动，
   改之前要先看这三支的 FAIL 标签。
+- Independent verification（2026-10-20）：PASS。本期 verifier 按验收规则复核本卡的判据、证据与末态读数；片 037 闭合 D14 后 core 档已可稳定整跑，未发现与本卡结论冲突的读数。
 
 ## Handoff notes
 

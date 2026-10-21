@@ -85,8 +85,9 @@ public final class ChatScreenFollowModeInstrumentedTest {
                 recordingActions(pauseCount, new int[1]));
         settleView();
 
-        ImageButton follow = screen.findViewById(R.id.chat_follow);
-        assertEquals(View.GONE, follow.getVisibility());
+        // The slot is the only visibility switch; the key inside it never disappears on its own.
+        View followSlot = screen.findViewById(R.id.chat_follow_slot);
+        assertEquals(View.GONE, followSlot.getVisibility());
         assertEquals(0, pauseCount[0]);
     }
 
@@ -102,11 +103,12 @@ public final class ChatScreenFollowModeInstrumentedTest {
         settleView();
 
         ImageButton follow = screen.findViewById(R.id.chat_follow);
+        View followSlot = screen.findViewById(R.id.chat_follow_slot);
         ScrollView scroll = screen.findViewById(R.id.chat_scroll);
-        assertEquals(View.VISIBLE, follow.getVisibility());
+        assertEquals(View.VISIBLE, followSlot.getVisibility());
         InstrumentationRegistry.getInstrumentation().runOnMainSync(follow::performClick);
         assertEquals(1, followCount[0]);
-        assertEquals(View.GONE, follow.getVisibility());
+        assertEquals(View.GONE, followSlot.getVisibility());
 
         String grownAnswer = longAnswer() + "One more generated line.\n";
         ChatMessage grown = generatingAnswer(messageId, grownAnswer);
@@ -130,6 +132,7 @@ public final class ChatScreenFollowModeInstrumentedTest {
         settleView();
 
         ImageButton follow = screen.findViewById(R.id.chat_follow);
+        View followSlot = screen.findViewById(R.id.chat_follow_slot);
         ScrollView scroll = screen.findViewById(R.id.chat_scroll);
         InstrumentationRegistry.getInstrumentation().runOnMainSync(follow::performClick);
         settleView();
@@ -140,7 +143,7 @@ public final class ChatScreenFollowModeInstrumentedTest {
         assertTrue("the gesture must move the answer away from its latest position",
                 scroll.getScrollY() < bottom);
         assertEquals("manual movement inside the same row pauses follow", 2, pauseCount[0]);
-        assertEquals(View.VISIBLE, follow.getVisibility());
+        assertEquals(View.VISIBLE, followSlot.getVisibility());
     }
 
     @Test
@@ -153,6 +156,7 @@ public final class ChatScreenFollowModeInstrumentedTest {
         settleView();
 
         ImageButton follow = screen.findViewById(R.id.chat_follow);
+        View followSlot = screen.findViewById(R.id.chat_follow_slot);
         ScrollView scroll = screen.findViewById(R.id.chat_scroll);
         InstrumentationRegistry.getInstrumentation().runOnMainSync(follow::performClick);
         settleView();
@@ -160,7 +164,7 @@ public final class ChatScreenFollowModeInstrumentedTest {
         settleView();
 
         assertEquals("manual movement detaches the restored follow", 2, pauseCount[0]);
-        assertEquals(View.VISIBLE, follow.getVisibility());
+        assertEquals(View.VISIBLE, followSlot.getVisibility());
         ChatMessage grown = generatingAnswer(messageId,
                 longAnswer() + "Additional streamed content.\n");
         InstrumentationRegistry.getInstrumentation().runOnMainSync(
@@ -217,14 +221,38 @@ public final class ChatScreenFollowModeInstrumentedTest {
         settleView();
         assertEquals("the gesture detaches follow", View.VISIBLE, follow.getVisibility());
 
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(
-                () -> scroll.fullScroll(View.FOCUS_DOWN));
-        settleView();
+        // Scroll straight to the floor rather than via fullScroll(FOCUS_DOWN): with animations
+        // enabled the SDK's focus path runs a smooth scroll over ~250ms, so the positions on the
+        // way are not a resting place - the product rightly keeps the key until the scroll
+        // settles. A direct scrollTo is one position and one settle, which is what "resting on
+        // the newest content" means.
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            int floor = Math.max(0, scroll.getChildAt(0).getHeight() - scroll.getHeight());
+            scroll.scrollTo(0, floor);
+        });
 
-        assertEquals("resting on the newest content hides the key", View.GONE,
-                screen.<View>findViewById(R.id.chat_follow_slot).getVisibility());
+        View slot = screen.findViewById(R.id.chat_follow_slot);
+        assertTrue("resting on the newest content hides the key (y=" + scroll.getScrollY()
+                        + " floor=" + (scroll.getChildAt(0).getHeight() - scroll.getHeight())
+                        + " pauses=" + pauseCount[0] + ")",
+                awaitSlotGone(slot));
         assertEquals("and it tells the presenter, exactly as the key itself would",
                 2, followCount[0]);
+    }
+
+    /** The reattachment is reported after the scroll settle, so it is waited for, not slept on. */
+    private static boolean awaitSlotGone(View slot) {
+        long deadline = SystemClock.uptimeMillis() + 3_000L;
+        while (SystemClock.uptimeMillis() < deadline) {
+            final boolean[] gone = {false};
+            InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                    () -> gone[0] = slot.getVisibility() == View.GONE);
+            if (gone[0]) {
+                return true;
+            }
+            SystemClock.sleep(25L);
+        }
+        return false;
     }
 
     private static String longAnswer() {
@@ -301,7 +329,13 @@ public final class ChatScreenFollowModeInstrumentedTest {
             instrumentation.sendPointerSync(move);
             move.recycle();
         }
-        long upTime = downTime + 150L;
+        // A finger held still before it lifts: without this the last 30ms of travel is a fling,
+        // whose scroller keeps moving after the test's fullScroll and re-detaches the view.
+        MotionEvent hold = MotionEvent.obtain(downTime, downTime + 420L, MotionEvent.ACTION_MOVE,
+                x, endY, 0);
+        instrumentation.sendPointerSync(hold);
+        hold.recycle();
+        long upTime = downTime + 470L;
         MotionEvent up = MotionEvent.obtain(downTime, upTime, MotionEvent.ACTION_UP,
                 x, endY, 0);
         instrumentation.sendPointerSync(up);

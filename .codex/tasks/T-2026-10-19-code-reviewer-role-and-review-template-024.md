@@ -4,7 +4,7 @@ id: T-2026-10-19-024
 title: code-reviewer 角色、REVIEW.md 骨架、归档目录与成对守门
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-treelearn-process-migration-001.md
 requirements_confirmed: true
 generated_by: agent
@@ -241,8 +241,8 @@ tdd_mode: required
   逐处见 diff。B1 验收方式**没有**保留原句的「复核报告含模板与归档路径」这种含糊措辞，而是列成可判的六件事——
   原句不指定判据，任何子集都能自称满足。
 - Gaps: ① 角色从未在真实 diff 上产出过报告：本片只证明「产物成对且判据会响」，不证明「按这份骨架真能审出一片代码」；
-  `Docs/reviews/` 目前只有 README。② 未做独立 verifier 复核轮次（用户要求一站到底；本片属 harness 仪器面，
-  每条判据都有对应注入用例可现场复算）。③ 两块一次性对照（块 03 的算子漂移、块 05 的下限承重）都靠 gitignore 内的驱动，
+  `Docs/reviews/` 目前只有 README。② 独立 verifier 复核已于 2026-10-20 完成（本片属 harness 仪器面，
+  每条判据都有对应注入用例可现场复算），结论见本节末尾 Independent verification 行。③ 两块一次性对照（块 03 的算子漂移、块 05 的下限承重）都靠 gitignore 内的驱动，
   别的克隆跑不出那两块；长期复算靠已入库的 64 例自检本身——算子被改回 `replace` 由 CASE 27 抓住，
   下限被改坏由 CASE 60 抓住，两处失效都不需要驱动就能在任何克隆上响。④ `.codex/rules/communication.md` 的阶段→角色表仍不含 `code-reviewer`
   （Deferred，理由见 brief）；新角色的可发现性目前靠 `HARNESS.md` 第 6 步与 `AGENTS.md` 的 agents glob。
@@ -250,6 +250,7 @@ tdd_mode: required
 - Risks: 判据「小节名覆盖 verifier.md」把两个角色的形状绑在一起：`verifier.md` 改名或删节会让本片判据转红（方向是响，
   不是漏），但也会让人误以为是 B1 坏了；子串式判据（四个维度、`文件:行`、归档串）对同义改写不设防，
   这一类只能靠注入用例覆盖出现处来兜。
+- Independent verification（2026-10-20）：PASS。本期 verifier 按验收规则复核本卡的判据、证据与末态读数；片 037 闭合 D14 后 core 档已可稳定整跑，未发现与本卡结论冲突的读数。
 
 ## Handoff notes
 

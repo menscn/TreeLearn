@@ -5,7 +5,7 @@ id: T-2026-10-20-035
 title: 活指针形状守门、指针复算器常驻化、10 例双向自检与本片自己被抓到的一条号段
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-treelearn-process-migration-001.md
 requirements_confirmed: true
 generated_by: agent
@@ -139,24 +139,25 @@ Parent summary：`T-2026-10-18-treelearn-process-migration-001` 确认把 `.code
 
 ## Acceptance criteria
 
-- [ ] `python -X utf8 .codex/scripts/check_pointer_liveness.py` 退出码 0：8 条 `OK` 判据行逐字进证据，末行
+- [x] `python -X utf8 .codex/scripts/check_pointer_liveness.py` 退出码 0：8 条 `OK` 判据行逐字进证据，末行
       `check_pointer_liveness: 0 check(s) failed`（`run287` 放宽前 / `run293` 放宽后 / `run311` 经 runner / `run315` 整跑内）。
-- [ ] 三种必死形状各自会响：`--selftest` 的 CASE 01–04 分别注入「删掉被声称的文件」「行号越界」「区间倒置」
+- [x] 三种必死形状各自会响：`--selftest` 的 CASE 01–04 分别注入「删掉被声称的文件」「行号越界」「区间倒置」
       「落点改成空行」，除退出码外还断言**具体那条 FAIL 标签**出现（`run288` / `run294`，`cases=10 mismatch=0`）。
-- [ ] 集合被抽干即红，不许「零命中即绿」：CASE 05–08 各抽干扫描面、匹配集、清单声称集、历史面四条下限。
-- [ ] 反向不误伤：JVM 栈帧里的 `File.java:45` 不算声称（CASE 09）、历史面的缺陷只报不判（CASE 10），两例期望退出码 0。
-- [ ] 缺口是真的而不是自说自话：同一条越界声称注入到副本后，`check_source_of_truth.py` 与 `run_evals.py` 仍 rc=0，
+- [x] 集合被抽干即红，不许「零命中即绿」：CASE 05–08 各抽干扫描面、匹配集、清单声称集、历史面四条下限。
+- [x] 反向不误伤：JVM 栈帧里的 `File.java:45` 不算声称（CASE 09）、历史面的缺陷只报不判（CASE 10），两例期望退出码 0。
+- [x] 缺口是真的而不是自说自话：同一条越界声称注入到副本后，`check_source_of_truth.py` 与 `run_evals.py` 仍 rc=0，
       本片新判据 rc=1 并点名 `line beyond eof=110`（`b035-red.py`，`run314`）；副本未注入时三支基线全绿，
       否则驱动打印 `INSTRUMENT FAULT` 并退出码 3（`run312`/`run313` 就是这条前置条件真的响过一次）。
-- [ ] 复算器搬得动本片自己造成的漂移且不越改越错：`EDITS applied=2`（两条指向 `harness_check_lib.py:174→178`、
+- [x] 复算器搬得动本片自己造成的漂移且不越改越错：`EDITS applied=2`（两条指向 `harness_check_lib.py:174→178`、
       `run_all_guards.py:124→129`，`run291`），复跑幂等（`MOVED 声称=0`，`run297`/`run299`）。
-- [ ] 复算器的每一类**拒绝**都可读：`SKIP-FRESH` 六行全部带落点内容（`run305`），指向本片新建文件的声称单独枚举
+- [x] 复算器的每一类**拒绝**都可读：`SKIP-FRESH` 六行全部带落点内容（`run305`），指向本片新建文件的声称单独枚举
       （`VERIFY-FRESH-TARGET claims=1`，`run306`）——那一条就是清单里 `check_pointer_liveness.py:58` 的过期号段，
       改正为 `:59` 后复跑确认落点内容变成 `MIN_CITATIONS = 40`（`run307`）。
-- [ ] 档位面不回归：`--tier core` `pass=36 fail=0 inconclusive=0 fault=0`、`--tier precommit`
+- [x] 档位面不回归：`--tier core` `pass=36 fail=0 inconclusive=0 fault=0`、`--tier precommit`
       `pass=6 fail=0 inconclusive=0 fault=0`，两轮串行单独跑、不与任何命令并发（D12 纪律）。
-- [ ] 解析口径仍是一份：`run_evals` 的 `pointers-alive` 与 `check_source_of_truth` 的权威行号解析在放宽字符类后
+- [x] 解析口径仍是一份：`run_evals` 的 `pointers-alive` 与 `check_source_of_truth` 的权威行号解析在放宽字符类后
       双双 rc=0（`run295`），清单守门读数 `entries=17 kinds={'声明型': 14, '生成型': 3}`（`run296`）。
+- 2026-10-20 独立复核：以上九条按各自引用的 `run286–run325` 证据逐条核对，三种死形状、四条抽干下限、两例反向不误伤、RED 对照、复算器幂等与拒绝可读、档位面、解析口径单源九项均成立；本轮 core 档现为 `pass=39 fail=0`（串行），判据与下限未改动。
 
 ## TDD execution record
 
@@ -292,6 +293,7 @@ Parent summary：`T-2026-10-18-treelearn-process-migration-001` 确认把 `.code
   那条目录的声称就不在任何仪器视野里——这是本片把「面」写死两处（判据与 `check_source_of_truth.py`）换来的代价，
   两处的下限会分别响，但只在被抽干时响，不在被绕开时响。D11/D12 那两条与并发有关的假红仍未闭合，
   本片末态两档因此坚持串行单独跑。
+- Independent verification（2026-10-20）：PASS。本期 verifier 按验收规则复核本卡的判据、证据与末态读数；片 037 闭合 D14 后 core 档已可稳定整跑，未发现与本卡结论冲突的读数。
 
 ## Handoff notes
 

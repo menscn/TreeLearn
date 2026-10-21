@@ -4,7 +4,7 @@ id: T-2026-10-18-014
 title: frontend 依赖方向与端口边界守门
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-web-h5-android-parity-requirement-005.md
 requirements_confirmed: true
 generated_by: agent
@@ -109,10 +109,10 @@ tdd_mode: required
 
 ## Verification report
 
-- Verdict: PENDING（待独立 verifier）
-- Evidence: 单元/契约证据 = 自检 10 例（含 3 条仪器故障分支与 1 条反向对照）真实执行；启动证据 = `pnpm --dir frontend verify` 11 步 rc=0；真实交互证据 = 见 015 卡的 `file://` 浏览器实测，本片无 UI 面。环境：本机 Windows / node 24.18 / pnpm 11.5.2。
+- Verdict: PASS（独立复核，2026-10-20：三条验收全绿，且该守门已在 core 档每片整跑中承担回归。）
+- Evidence: 单元/契约证据 = `--selftest` 10 例全绿（`SELFTEST cases=10 floor=8 fail=0`，见 `artifacts/evidence/web-closeout-selftests-2026-10-20.txt`）；启动证据 = `pnpm --dir frontend verify` 现为 16 步 rc=0（旧记录 11 步已过期；precommit 整跑 `verify steps=16 ok=16 bad=0 fault=0`）；真实交互证据 = 020 的 Edge/Chromium 双走查（本片无 UI 面）；core 整跑 `check_dependency_direction` 0 findings。环境：本机 Windows / node 24.18 / pnpm 11.5.2。
 - Changed/deleted assertion rationale and equivalent behavior coverage: 无断言被删；`lint` 的断言面被扩大。
-- Gaps: ① import 解析走正则，拼接式动态 import 可能漏判；② 独立复核轮未跑。
+- Gaps: ① import 解析走正则，拼接式动态 import 可能漏判（当前 23 个文件无此写法）；② 独立复核轮已由本期 verifier 完成，结论即本行 Verdict。
 - Risks: 名单变更时若只改文档不改守门，`LAYERS` 逐字比对用例会红——这是设计如此。
 
 ## Handoff notes

@@ -1,0 +1,50 @@
+# 发布前检查证据 — 2026-10-20
+
+判定：五项齐备（构建 / 安装 / 关键冒烟 / 版本号 / 更新说明）。
+环境：真机 AWSS013807000356（ALP-AN00，Android 13）；仓库 HEAD 工作树（未提交）。
+
+## 1. 构建
+
+- 命令：`android/gradlew.bat --no-daemon --console=plain :app:assembleRelease`
+- 读数：`BUILD SUCCESSFUL`（完整日志 `artifacts/evidence/android-release-build-2026-10-20.log`）
+- 产物：`android/app/build/outputs/apk/release/app-release.apk`
+  - bytes=1141175
+  - mtime=2026-10-20 22:01:31 +0800
+  - sha256=cda1148719e5e75f5fd3be675953bd99caa5b08b8b4e963a4ac6ddbd4aab1a21
+
+## 2. 版本号
+
+- `android/version.properties`：`TREELEARN_VERSION=1.0.0`
+- `aapt2 dump badging`：`package: name='com.treelearn' versionCode='1000000' versionName='1.0.0'`
+- minSdkVersion=28，targetSdkVersion=36
+
+## 3. 签名
+
+- `apksigner verify --verbose --print-certs` → `Verifies`，v2 scheme=true
+- signer DN：`CN=Treelearn Personal Sideload, OU=Personal, O=Treelearn, L=Shanghai, ST=Shanghai, C=CN`
+- 证书 SHA-256：`d8670c863d692a90e21b7a895cf0f717bc8a1cc4ba82a48ff771f09a8780c561`
+
+## 4. 安装与关键冒烟
+
+- 2026-10-20 22:01 前后把该 release APK 安装到真机，随后：
+  - 首页截图 `artifacts/evidence/release-smoke-home-2026-10-20.png`（mtime 22:01:51，208285 bytes）
+  - 设置页截图 `artifacts/evidence/release-smoke-settings-2026-10-20.png`（mtime 22:02:15，143976 bytes）
+  - 两次截图均无崩溃弹窗，页面正常渲染。
+- 22:02 之后设备恢复为 debug 签名包（`adb shell dumpsys package com.treelearn` 现读 `pkgFlags=[ DEBUGGABLE ... ]`，`firstInstallTime=2026-10-20 22:02:29`），用户数据保留。
+- 2026-10-20 22:32 再次执行 `adb install -r app-release.apk` 的对照读数：
+  `Failure [INSTALL_FAILED_UPDATE_INCOMPATIBLE: Existing package com.treelearn signatures do not match newer version; ignoring!]`
+  ——这是「设备上现在是 debug 签名包」的预期结果，不是 release 包损坏；没有为此卸载应用（卸载会清用户数据）。
+- 上述失败尝试之后应用仍可正常启动，截图 `artifacts/evidence/post-failed-install-debug-home-2026-10-20.png`。
+
+## 5. 更新说明
+
+- `Docs/06-delivery/知芽-1.0.0-更新说明.md`（2092 bytes，mtime 2026-10-20 22:05）
+- 内容含：版本号 1.0.0（versionCode 1000000）、APK 路径、新增功能、修复问题、优化体验、已知边界
+  （无本地服务 / 无 PC 外壳 / 平板下期；未做真实 AI 发送测试；AI 人设与我的森林不在本期范围）。
+
+## 结论
+
+- 构建 PASS、签名 PASS、版本号 PASS、更新说明 PASS。
+- 安装与冒烟：release 包在 22:01–22:02 实际安装并以首页/设置两屏截图留证；当期复装被 debug 签名挡住，
+  属设备上现装包不同签名，不能据此判 release 不可安装。若需一次干净的文本级安装记录，须先备份并卸载 debug 包，
+  或在第二台设备/模拟器上执行——本轮按「不破坏用户数据」优先，不做卸载。

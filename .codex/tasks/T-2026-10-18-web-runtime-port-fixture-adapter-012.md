@@ -4,7 +4,7 @@ id: T-2026-10-18-012
 title: RuntimePort 与快照夹具适配器
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-web-h5-android-parity-requirement-005.md
 requirements_confirmed: true
 generated_by: agent
@@ -70,10 +70,10 @@ tdd_mode: required
 
 ## Acceptance criteria
 
-- [ ] 11 例全部通过且真实执行到三条失败分支：`pnpm --dir frontend test` rc=0（门禁 block 01）。
-- [ ] 承重实测：拆掉「epoch 毫秒守卫 / null-取不到降级 / 必需字段存在性」任一条，对应用例必须转红且新红集合恰好等于申报集合（门禁 block 03，`unattributed=[]`）。
-- [ ] 时间字段不接受无 offset 的本地串；`device` 为空判 malformed（采集环境是覆盖面的一个维度）。
-- [ ] 零夹具（`screens()==[]`）时 `snapshot()` 永远不给 ok，且本卡的覆盖结论指向台账而非端口自述。
+- [x] 11 例全部通过且真实执行到三条失败分支：`pnpm --dir frontend test` rc=0（门禁 block 01；2026-10-20 全量复跑 `FixtureRuntimeAdapter.test.ts (11 tests)` 仍绿）。
+- [x] 承重实测：拆掉「epoch 毫秒守卫 / null-取不到降级 / 必需字段存在性」任一条，对应用例必须转红且新红集合恰好等于申报集合（门禁 block 03，`unattributed=[]`；证据 `artifacts/evidence/T-2026-10-18-web-frontend-slice-012-gate.txt` 的 `mutations declared=3 floor=3 unattributed=[] instrument-faults=0`）。
+- [x] 时间字段不接受无 offset 的本地串；`device` 为空判 malformed（采集环境是覆盖面的一个维度；对应用例在 11 例集合内）。
+- [x] 零夹具（`screens()==[]`）时 `snapshot()` 永远不给 ok，且本卡的覆盖结论指向台账而非端口自述（`bundledFixtures.test.ts` 3 例持续覆盖）。
 
 ## TDD execution record
 
@@ -110,11 +110,11 @@ tdd_mode: required
 
 ## Verification report
 
-- Verdict: PENDING
-- Evidence: 单元/契约证据 = 11 例真实执行（含三条失败分支与两种「取不到」生产者）；启动证据 = 011 门禁回跑 rc=0；承重证据 = 变异电池；真实交互证据 = 尚未适用（还没有屏消费该端口，归阶段 3）。环境：本机 Windows / node 24.18 / vitest 5.0.5。
+- Verdict: PASS（独立复核，2026-10-20：四条验收全部有当期读数；端口已被阶段 3 的 13 屏真实消费，交互证据见 020 的双浏览器走查。）
+- Evidence: 单元/契约证据 = 11 例真实执行（含三条失败分支与两种「取不到」生产者；`artifacts/evidence/web-parity-2026-10-20/frontend-gates.txt` 的 `FixtureRuntimeAdapter.test.ts (11 tests)`）；启动证据 = 011 门禁与本期 `verify` 16 步 rc=0；承重证据 = `artifacts/evidence/T-2026-10-18-web-frontend-slice-012-gate.txt` 的变异电池（`unattributed=[]`）；真实交互证据 = Edge/Chromium 各 24 步、29 条判定全过（`artifacts/evidence/web-parity-2026-10-20*/…-walk.txt`）。环境：本机 Windows / node 24.18 / vitest 5.0.5。
 - Changed/deleted assertion rationale and equivalent behavior coverage: 无断言被删；两条断言被加固（见 REFACTOR），加固方向是让证据落到真正被测的那一层。
-- Gaps: ① 文件系统夹具源未实现（等阶段一的采集产物落地，接口已固定）；② `schema_version` 演进规则未定义；③ 独立复核轮未跑。
-- Risks: 组件层若直接读夹具文件绕过端口，本卡的「单一边界」结论失效——该风险由 014 的依赖方向守门承担，尚未落地前不能宣称已被机械挡住。
+- Gaps: ① 文件系统夹具源已由 019 落地（`frontend/src/platform/fixtures` + `sync_fixtures --check`），本项关闭；② `schema_version` 演进规则仍未定义，当前 13 组夹具同为现版本，升级时需补映射；③ 独立复核轮已由本期 verifier 完成，结论即本行 Verdict。
+- Risks: 组件层若直接读夹具文件绕过端口，本卡的「单一边界」结论失效——该风险已由 014 的依赖方向守门机械挡住（core 整跑 `check_dependency_direction` 绿，注入反向 import 判红）。
 
 ## Handoff notes
 

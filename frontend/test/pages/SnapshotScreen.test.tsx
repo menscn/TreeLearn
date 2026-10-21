@@ -4,7 +4,6 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { FixtureRuntimeAdapter, memoryFixtureSource } from "../../src/platform/FixtureRuntimeAdapter";
 import { bundledEntries } from "../../src/platform/bundledFixtures";
-import { copyText } from "../../src/copy";
 import { injectRuntime } from "../../src/platform/runtime";
 import { navigate, replaceStack } from "../../src/store/screenRoute";
 import { ScreenRouter } from "../../src/pages/ScreenRouter";
@@ -30,7 +29,17 @@ async function press(host: HTMLElement, selector: string): Promise<void> {
   });
 }
 
-describe("还没精修的屏走通用读取，并且出得去", () => {
+/** 夹具正文 → 必须出现在页面上的文字，与 web_walk 的覆盖判据同一份来源。 */
+function expectedTexts(screen: string): string[] {
+  const envelope = JSON.parse(bundledEntries()[screen] ?? "{}") as {
+    payload?: { nodes?: Array<{ text?: string }> };
+  };
+  return (envelope.payload?.nodes ?? [])
+    .map((node) => (node.text ?? "").trim())
+    .filter((text) => text !== "");
+}
+
+describe("还没精修的屏按采集坐标还原，并且出得去", () => {
   let restore: (() => void) | undefined;
   let host: HTMLElement;
   let root: Root | undefined;
@@ -52,26 +61,28 @@ describe("还没精修的屏走通用读取，并且出得去", () => {
     host.remove();
   });
 
-  it("设置里的六个子项按 resource-id 走到各自的屏，正文按采集顺序出字", async () => {
+  it("设置页的屏头、卡面与六个入口都在采集坐标上，入口逐条走到各自的屏", async () => {
     navigate("settings");
     root = await render(host);
-    // 屏头在 Android 侧是没有 resource-id 的文本，这里不猜它是标题，让它作为一行出字。
-    expect(host.querySelector(".appbar-title")?.textContent).toBe("");
-    expect(Array.from(host.querySelectorAll(".row")).map((el) => el.textContent)).toContain("设置");
+    expect(host.querySelector('[data-screen="settings"]')).not.toBeNull();
+    expect(host.querySelector(".appbar-title")?.textContent).toBe("设置");
+    for (const text of expectedTexts("settings")) expect(host.textContent).toContain(text);
+    const entries = host.querySelectorAll("button.node-tap[data-node$='_entry']");
+    expect(entries.length).toBe(6);
     await press(host, '[data-node="settings_models_entry"]');
     expect(host.querySelector('[data-screen="modelsettings"]')).not.toBeNull();
-    const rows = Array.from(host.querySelectorAll(".row, .row-title")).map((el) => el.textContent ?? "");
-    expect(rows).toContain("模型设置");
-    expect(rows.filter((t) => t === "deepseek-flash").length).toBeGreaterThanOrEqual(3);
+    expect(host.querySelector(".appbar-title")?.textContent).toBe("模型设置");
+    expect(host.textContent?.match(/deepseek-flash/g)?.length ?? 0).toBeGreaterThanOrEqual(3);
   });
 
-  it("自绘屏的夹具里没有 *_back 节点，Web 侧补一枚返回按钮把栈退回去", async () => {
+  it("自绘屏的返回图标没有 resource-id，Web 侧把它认成 state_back 并把栈退回去", async () => {
     navigate("settings");
     root = await render(host);
     await press(host, '[data-node="settings_search_entry"]');
-    expect(host.querySelector('[data-screen="searchservicesettings"]')).not.toBeNull();
+    const screen = host.querySelector('[data-screen="searchservicesettings"]');
+    expect(screen).not.toBeNull();
     const back = host.querySelector('[data-node="state_back"]');
-    expect(back?.textContent).toBe(copyText("state_back"));
+    expect(back?.tagName).toBe("BUTTON");
     await press(host, '[data-node="state_back"]');
     expect(host.querySelector('[data-screen="settings"]')).not.toBeNull();
   });
@@ -82,13 +93,29 @@ describe("还没精修的屏走通用读取，并且出得去", () => {
     expect(host.querySelector('[data-copy="state_fixture_unavailable"]')).not.toBeNull();
   });
 
-  it("抽屉那屏的日历卡与最近学习按夹具正文出字，没有动作映射的行不做假可点", async () => {
+  it("抽屉那屏保留家底与抽屉两层，日历卡是表面而不是假按钮", async () => {
     navigate("homedrawer");
     root = await render(host);
     const card = host.querySelector('[data-node="drawer_heatmap_card"]');
-    expect(card?.tagName).toBe("P");
-    expect(card?.textContent).toContain("本月学习热度日历");
-    expect(Array.from(host.querySelectorAll(".row")).some((el) => (el.textContent ?? "").includes("最近学习")))
-      .toBe(true);
+    expect(card?.tagName).not.toBe("BUTTON");
+    expect(card?.className).toContain("snap-surface");
+    expect(host.textContent).toContain("学习概览");
+    expect(host.textContent).toContain("学习热度");
+    expect(host.textContent).toContain("最近学习");
+    const back = host.querySelector('[data-node="state_back"]');
+    expect(back).not.toBeNull();
+    await press(host, '[data-node="state_back"]');
+    expect(host.querySelector('[data-screen="home"]')).not.toBeNull();
+  });
+
+  it("画布那屏把采集到的标题和副题还原成屏头，返回键按 resource-id 退出", async () => {
+    navigate("treecanvas");
+    root = await render(host);
+    expect(host.querySelector(".appbar-title")?.textContent).toBe("总览画布");
+    expect(host.textContent).toContain("注意力权重可视化与模型可解释性的关系");
+    const back = host.querySelector('[data-node="tree_back"]');
+    expect(back?.tagName).toBe("BUTTON");
+    await press(host, '[data-node="tree_back"]');
+    expect(host.querySelector('[data-screen="home"]')).not.toBeNull();
   });
 });

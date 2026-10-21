@@ -4,7 +4,7 @@ id: T-2026-10-19-026
 title: codebase-researcher 角色、影响面清单落点与成对守门
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-treelearn-process-migration-001.md
 requirements_confirmed: true
 generated_by: agent
@@ -279,6 +279,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   ⑤ 无独立 verifier 轮次（用户要求一站到底；本片属 harness 仪器面，15 条判据有 19 例注入覆盖）。
 - Risks: 共用 `agent_section_names()` 之后，`verifier.md` 的小节改名会同时让 B1 与 B4 两支守门转红——
   这是想要的耦合，但它让「顺手改 verifier 骨架」变成一次跨文件改动，改之前要先看这两支守门的 FAIL 标签。
+- Independent verification（2026-10-20）：PASS。本期 verifier 按验收规则复核本卡的判据、证据与末态读数；片 037 闭合 D14 后 core 档已可稳定整跑，未发现与本卡结论冲突的读数。
 
 ## Handoff notes
 

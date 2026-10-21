@@ -4,7 +4,7 @@ id: T-2026-10-19-025
 title: project-brief 目录现状修正与 check_context_pack 的双向判据
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-treelearn-process-migration-001.md
 requirements_confirmed: true
 generated_by: agent
@@ -210,6 +210,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   反查这类结论只有在被检文本进入末态后复算才算证据，写在计划里只是预测（块 06 是复算轮）。
 - Risks: 镜像顶层目录名让沙箱更接近真仓库——如果某条判据其实是在依赖「副本里没有 android/」而转绿，
   它现在会第一次真判。今天 6 条基线全绿，说明没有这种耦合；但这条改动本身要在下一次加判据时被想起。
+- Independent verification（2026-10-20）：PASS。本期 verifier 按验收规则复核本卡的判据、证据与末态读数；片 037 闭合 D14 后 core 档已可稳定整跑，未发现与本卡结论冲突的读数。
 
 ## Handoff notes
 

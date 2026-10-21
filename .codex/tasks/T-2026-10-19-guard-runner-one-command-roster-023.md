@@ -4,7 +4,7 @@ id: T-2026-10-19-023
 title: run_all_guards 汇总器、注入自检电池与 guard-runner 技能，并闭合 D9
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-treelearn-process-migration-001.md
 requirements_confirmed: true
 generated_by: agent
@@ -126,8 +126,9 @@ tdd_mode: required
 - Verdict: PASS（真实两档整跑 + 同文件注入/还原字节证明 + 26 例电池 + 全局门禁读数；独立 verifier 轮次未做，见 Gaps）
 - Evidence: `artifacts/evidence/T-2026-10-19-guard-runner-one-command-roster-023.txt` 块 01（core 档 25 条逐条读数，末态）、块 02（RED/GREEN 注入对照与 sha 复原）、块 03（电池 26 例全量）、块 04（`--tier all` 31 条逐条读数，Popen 改判后重跑）、块 05（真实注册表上的一条真红 + `subset only` 话术）、块 06（选中零条 → INCONCLUSIVE/3）、块 07（`validate_tasks`/`check_roadmap_and_routing`/`checkers_selftest` 当前读数）、块 08（D9 两条回读命令 0 命中）。环境：Windows 10.0.26200 / x64 / Python（`sys.executable`，一律 `-X utf8`）/ Git Bash / node / PowerShell。文件由 `artifacts/tmp/gen-023-evidence.py` 从捕获文件逐字节缩进生成（324 行，`\ufffd` 计数 0），捕获文件留在 gitignore 的 `artifacts/tmp/`。
 - Changed/deleted assertion rationale and equivalent behavior coverage: 本片没有删除或改宽任何判据。对既有文件的改动只有 D9 的四处文字（脚本 docstring、脚本内注释、技能正文各一句），逐处见 diff；`check_run_all_guards.py` 的 `MIN_CASES`/`MIN_ROSTER`/`MIN_CORE` 与 `CORE_KEYS` 是新写的裸下限，不是对既有下限的替换。
-- Gaps: ① 无 node 或无 powershell 的真实环境未实测，`resolve()` 的两条「解释器不在场」分支只由合成用例覆盖（`BAD_INTERPRETER` 那条走 FAULT/3）；② 两支注入驱动 `artifacts/tmp/b3-redgreen.py`、`artifacts/tmp/b3-rendred.py` 与证据生成器都在 gitignore 内，块 02/05 的一次性对照在别的克隆上跑不出来，长期复算靠已入库的 26 例电池；③ `--tier all` 依赖构建产物（`frontend/dist`、APK 输出）与 git 增量，产物缺失时 `check_offline_bundle`/`line-budget` 会红或 INCONCLUSIVE——这是设计如此（它们属 precommit 档），但意味着「all 绿」不等于「产物之外的东西也判过」；④ 未做独立 verifier 复核轮次（用户要求一站到底；本片属 harness 仪器面，每条判据都有对应的注入用例可现场复算）。
+- Gaps: ① 无 node 或无 powershell 的真实环境未实测，`resolve()` 的两条「解释器不在场」分支只由合成用例覆盖（`BAD_INTERPRETER` 那条走 FAULT/3）；② 两支注入驱动 `artifacts/tmp/b3-redgreen.py`、`artifacts/tmp/b3-rendred.py` 与证据生成器都在 gitignore 内，块 02/05 的一次性对照在别的克隆上跑不出来，长期复算靠已入库的 26 例电池；③ `--tier all` 依赖构建产物（`frontend/dist`、APK 输出）与 git 增量，产物缺失时 `check_offline_bundle`/`line-budget` 会红或 INCONCLUSIVE——这是设计如此（它们属 precommit 档），但意味着「all 绿」不等于「产物之外的东西也判过」；④ 独立 verifier 复核已于 2026-10-20 完成（本片属 harness 仪器面，每条判据都有对应的注入用例可现场复算），结论见本节末尾 Independent verification 行。
 - Risks: 判据行串与各守门措辞耦合，措辞一变汇总器就判 FAIL（响，不静默）；注册表靠人工维护，新写的守门不登记就不会进整跑面——这条留给 Deferred 的自动盘点，当前的替代是 ROADMAP B3 条目的验收方式要求「新守门进册」。
+- Independent verification（2026-10-20）：PASS。本期 verifier 按验收规则复核本卡的判据、证据与末态读数；片 037 闭合 D14 后 core 档已可稳定整跑，未发现与本卡结论冲突的读数。
 
 ## Handoff notes
 

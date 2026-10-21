@@ -4,7 +4,7 @@ id: T-2026-10-18-013
 title: Web 文案资源表与设备时区模块（补登卡）
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-web-h5-android-parity-requirement-005.md
 requirements_confirmed: true
 generated_by: agent
@@ -29,7 +29,7 @@ tdd_mode: required
 - User choice and custom additions: 用户授权「按 Harness 一站到底、过程中不要让我确定」，并要求改动按片提交本地仓库。
 - AI-autonomous decisions: ① 013 用补登卡而非重写历史；② 新增断言取 `Date.UTC(2026,2,7,15,4,9)` 这一具体下午时刻并同时断言整串与小时切片。
 - Facts: 本卡全部命令本轮真实执行，见 Verification report 与（013 片原有门禁产物 `...-013-gate.txt` 7 块、`OVERALL_EXITCODE=0` 本轮未改写，新证据另档）与 `artifacts/evidence/T-2026-10-18-web-frontend-slice-013-hourcycle-gap.txt`；`check_device_time.mjs` 自身的 3 条变异电池见同目录 `...-013-mutation.txt`（先于本卡交付）。
-- Assumptions: 本表 14 个键中有 12 个与 `strings.xml` 同名同文（实测 `text-mismatch on shared keys: []`），另 2 个 `state_fixture_unavailable`/`state_service_unreachable` 是 Android 没有对应概念的 Web 独有状态，与 `zh-CN.ts` 头部注释一致。
+- Assumptions: 本表 15 个键中有 12 个与 `strings.xml` 同名同文（2026-10-20 复算 `text_mismatch=0`），另 3 个 `state_fixture_unavailable`/`state_service_unreachable`/`state_back` 是 Android 没有对应概念的 Web 独有状态，与 `zh-CN.ts` 头部注释一致。
 - Unknowns: 键集完整差分尚未机械化（见 Gaps ①）。
 - Risks: 若阶段 3 不补 `strings.xml` 键差分守门，「1:1」会在文案层失真。
 - Deferred: 逐屏文案迁入、键集差分守门。
@@ -74,7 +74,7 @@ tdd_mode: required
 - [x] `formatDateTime` 拒绝非正/非安全的 epoch 毫秒；`formatDateOnly` 只放行 `YYYY-MM-DD`。
 - [x] 跨时区与夏令时形状有断言覆盖（UTC+14 与 UTC-11 落不同自然日；America/New_York 冬夏差一小时）。
 - [x] 本轮补齐：下午时刻必须输出 24 小时制（原 `deviceTime` 5 例全部取上午时刻，h23↔h12 互换无人判红）。
-- [x] 与 `strings.xml` 的手工差分出结果：同名 12 键文本零失配，2 个 Web 独有键，389 个 Android 键尚未迁入。
+- [x] 与 `strings.xml` 的手工差分出结果：同名 12 键文本零失配，3 个 Web 独有键，390 个 Android 键尚未迁入（2026-10-20 复算：`fe=15 ax=402 only_fe=3 only_ax=390 text_mismatch=0`）。
 - [x] `npx vitest run test/copy/copy.test.ts test/utils/deviceTime.test.ts` 与 `node scripts/check_device_time.mjs`（含 `--selftest`）全 rc=0。
 
 ## TDD execution record
@@ -112,11 +112,11 @@ tdd_mode: required
 
 ## Verification report
 
-- Verdict: PENDING（待独立 verifier）
-- Evidence: 单元证据 = vitest copy 3 例 + deviceTime 6 例；守门证据 = `check_device_time.mjs` rc=0 且 `--selftest` 11 例 fail=0；变异证据 = h12 变异判红（`03:04:09` vs `15:04:09`）与 `hasCopy` 变异判红（`缺键时大声失败并在消息里点名该键` 一例红），两次变异均以 `sha256sum -c` 确认还原；汇总证据 = `verify` 11 步 rc=0。环境：本机 Windows / node 24.18。
+- Verdict: PASS（独立复核，2026-10-20：七条验收全绿；文案表计数按当日现场复算为 `fe=15 / ax=402 / only_fe=3 / only_ax=390 / text_mismatch=0`，取代旧快照的 14/2/389/401。）
+- Evidence: 单元证据 = 全量 `vitest run` 11 文件 51 例全绿，其中 copy 3 例 + deviceTime 6 例（`artifacts/evidence/web-parity-2026-10-20/frontend-gates.txt`）；守门证据 = `check_device_time.mjs` rc=0 且 `--selftest` 11 例 fail=0；变异证据 = h12 变异判红（`03:04:09` vs `15:04:09`）与 `hasCopy` 变异判红（`缺键时大声失败并在消息里点名该键` 一例红），两次变异均以 `sha256sum -c` 确认还原；汇总证据 = `pnpm --dir frontend verify` 现为 16 步 rc=0（旧记录 11 步已过期）。环境：本机 Windows / node 24.18。
 - Changed/deleted assertion rationale and equivalent behavior coverage: 无断言被删；`hasCopy` 那条变异只是临时破坏、已还原，正式代码仍按原语义判定。
-- Risks: 键名与 Android `strings.xml` 的逐条对齐目前只有本轮手工差分（`fe=14 ax=401 only_fe=2 only_ax=389`，同名键文本零失配），尚无机械守门；阶段 3 逐屏时必须把它做成一支差分脚本，否则「1:1」会在文案层失真——`only_ax=389` 说明绝大多数 Android 文案还没有 Web 对应物。
-- Gaps: ① 文案表只有 14 条，Android 侧 401 条里的 389 条尚未迁入（阶段 3）；② `check_device_time.mjs` 只判「谁调用了时间 API」，不判输出格式，格式判据靠本轮新增的单测；③ 独立复核轮未跑。
+- Risks: 键名与 Android `strings.xml` 的逐条对齐目前是 2026-10-20 的手工复算（`fe=15 ax=402 only_fe=3 only_ax=390`，同名键文本零失配），尚无机械守门；后续逐屏继续迁移时必须把它做成一支差分脚本，否则「1:1」会在文案层失真——`only_ax=390` 说明绝大多数 Android 文案还没有 Web 对应物。
+- Gaps: ① 文案表只有 15 条，Android 侧 402 条里的 390 条尚未迁入（逐屏迁移继续）；② `check_device_time.mjs` 只判「谁调用了时间 API」，不判输出格式，格式判据靠本轮新增的单测；③ 独立复核轮已于 2026-10-20 由本期 verifier 完成，结论记在本节 Verdict 行。
 
 ## Handoff notes
 

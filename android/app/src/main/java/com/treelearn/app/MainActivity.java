@@ -348,11 +348,18 @@ public final class MainActivity extends Activity
             return;
         }
         if (navigationBranchId != null) {
-            showChat(navigationBranchId);
+            // This is a return to the conversation that opened the page, not a new conversation
+            // opened from it: the ids are cleared first so the chat keeps the tab origin it was
+            // entered with instead of re-capturing the page as that origin.
+            String branchId = navigationBranchId;
+            navigationBranchId = null;
+            showChat(branchId);
             return;
         }
         if (treeBranchId != null) {
-            showChat(treeBranchId);
+            String branchId = treeBranchId;
+            treeBranchId = null;
+            showChat(branchId);
             return;
         }
         if (chatBranchId != null) {
@@ -533,7 +540,10 @@ public final class MainActivity extends Activity
             showHome();
             return;
         }
-        showChat(treeBranchId);
+        // Same rule as the system back: this return keeps the conversation's own tab origin.
+        String branchId = treeBranchId;
+        treeBranchId = null;
+        showChat(branchId);
     }
 
     /**

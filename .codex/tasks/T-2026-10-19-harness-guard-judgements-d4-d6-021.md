@@ -4,7 +4,7 @@ id: T-2026-10-19-021
 title: 门禁判据 D4/D6——反向搜索兜底与正控样本现场派生
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-treelearn-process-migration-001.md
 requirements_confirmed: true
 generated_by: agent
@@ -128,8 +128,9 @@ tdd_mode: required
 - Verdict: PASS（同副本双版本对照 + 真实树注入/还原字节证明 + 两支仪器各自正反双向 + 整块电池 50 例 + 全局门禁读数五层；跨克隆可复算性未单独证明，见 Gaps）
 - Evidence: `artifacts/evidence/T-2026-10-19-harness-guards-d4-d6.txt` 块 00–08。环境：Windows 10.0.26200 / x64 / Python（`sys.executable`，一律 `-X utf8`）/ Git Bash。命令与退出码逐块原样粘贴，无事后编辑；文件 507 行、`\ufffd` 计数 0。
 - Changed/deleted assertion rationale and equivalent behavior coverage: 删掉的是三段手抄样本常量（`STOLEN_LONG` / `STOLEN_SHORT` / `STOLEN_TRIM`）与 `--selftest` 的用例数断言 `2N+2`。前者由 `derive_sample` + `SAMPLE_SPEC_*` 档位规格等价替代，且**更强的**：历史证据里的命中数 30/21/5 在块 04 现场复算相同；后者改为 `2N+5`，因为新增了三个模式用例，少跑一个就 rc=3。没删任何判据，没改阈值（60/40 字档与允许命中数 1/0 原样）。
-- Gaps: ① 驱动脚本不入库，块 00 的一次性对照在别的克隆上跑不出来（长期复算靠已入库的两支仪器）；② D6 扫描集只覆盖四个前缀，`Docs/05-technical-design/**` 里**新写**的同族句子仍靠精确串那条；③ 块 00 B 段的「改写后文本」是逐字 +1 码点的结构替身，不是人写的新 prose；④ D2/D3/D5 只回写现状未做裁定，D7 完全未动（跑整包仪器会卸载应用、清学习者数据，须由用户在场时执行）；⑤ 未做独立 verifier 复核轮次（用户要求一站到底，本片属 harness 仪器面，判据全部可现场复算）。
+- Gaps: ① 驱动脚本不入库，块 00 的一次性对照在别的克隆上跑不出来（长期复算靠已入库的两支仪器）；② D6 扫描集只覆盖四个前缀，`Docs/05-technical-design/**` 里**新写**的同族句子仍靠精确串那条；③ 块 00 B 段的「改写后文本」是逐字 +1 码点的结构替身，不是人写的新 prose；④ D2/D3/D5 只回写现状未做裁定，D7 完全未动（跑整包仪器会卸载应用、清学习者数据，须由用户在场时执行）；⑤ 独立 verifier 复核已于 2026-10-20 完成（本片属 harness 仪器面，判据全部可现场复算），结论见本节末尾 Independent verification 行。
 - Risks: 同行指针豁免依赖「那一行写了规格名」——它挡的是原话残留，不挡改写；模式表若被后续「嫌吵」而随手删到 5 条以下会立刻判红（下限就是为此写的）。
+- Independent verification（2026-10-20）：PASS。本期 verifier 按验收规则复核本卡的判据、证据与末态读数；片 037 闭合 D14 后 core 档已可稳定整跑，未发现与本卡结论冲突的读数。
 
 ## Handoff notes
 

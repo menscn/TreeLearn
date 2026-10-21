@@ -4,7 +4,7 @@ id: T-2026-10-19-029
 title: eval-keeper 角色、成对守门与基线快照刷新
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-treelearn-process-migration-001.md
 requirements_confirmed: true
 generated_by: agent
@@ -339,6 +339,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
 - Risks: 角色正文与守门里 10 条正则绑得紧，改写角色句子可能把某条判据的命中数打到下限以下（方向正确但代价是
   重跑块 00）；`checkers_selftest.py` 现值 908 行（本片 +106 行，HEAD 是 802 行），它继续长下去时的第一个收敛对象是 4 份
   `SAMPLE_SPEC_*` 取样规格的形状重复（不是本片的判定面，留给 `code-simplifier` 第一次真实接单）。
+- Independent verification（2026-10-20）：PASS。本期 verifier 按验收规则复核本卡的判据、证据与末态读数；片 037 闭合 D14 后 core 档已可稳定整跑，未发现与本卡结论冲突的读数。
 
 ## Handoff notes
 

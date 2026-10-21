@@ -227,6 +227,15 @@ public final class AppContainer {
         return instance;
     }
 
+    /**
+     * Drops the process-wide instance so the next {@link #get} opens the database file that exists
+     * now. Instrumented fixtures that unlink the database leave this container's helper on a deleted
+     * inode; the suites that drive the real shell call this so they read the file they seeded.
+     */
+    static synchronized void resetForTests() {
+        instance = null;
+    }
+
     /** Backed by the real stores; also answers {@link KeyVault}. */
     public SettingsStore settingsStore() {
         return settingsStore;

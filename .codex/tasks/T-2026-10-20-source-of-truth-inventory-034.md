@@ -5,7 +5,7 @@ id: T-2026-10-20-034
 title: 事实源全量清单、两类事实分开判的守门、24 例注入与本片自己造成的指针漂移
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-treelearn-process-migration-001.md
 requirements_confirmed: true
 generated_by: agent
@@ -112,27 +112,28 @@ Parent summary：`T-2026-10-18-treelearn-process-migration-001` 确认把 `.code
 
 ## Acceptance criteria
 
-- [ ] `python -X utf8 .codex/scripts/check_source_of_truth.py` 退出码 0：末态 `run273-sot-checker.txt` 打
+- [x] `python -X utf8 .codex/scripts/check_source_of_truth.py` 退出码 0：末态 `run273-sot-checker.txt` 打
       21 条 `OK` 判据行、`check_source_of_truth: 0 check(s) failed`、`EXITCODE=0`。
-- [ ] 每条事实有唯一权威路径且该路径真实在场：`every authority path exists and the cited line is inside it` 转绿，
+- [x] 每条事实有唯一权威路径且该路径真实在场：`every authority path exists and the cited line is inside it` 转绿，
       读数 `authority_files=15`；RED-3 把 `AGENTS.md:34` 搬到 `:468`（越界）后该判据当场红，
       `dead=['任务状态唯一可写目录::AGENTS.md:468 beyond eof=67']`。
-- [ ] 同一事实出现第二处定义即 FAIL：RED-2（把 33 份文档面还原到 HEAD）打
+- [x] 同一事实出现第二处定义即 FAIL：RED-2（把 33 份文档面还原到 HEAD）打
       `FAIL no fact is defined a second time without an attribution pointer — scanned_files=65 unattributed=25`，
       单条注入 `sot:second-definition-bare` 也独立转红（`unattributed=1 hits=['Java-only 约束 <- .codex/HARNESS.md:29']`）。
-- [ ] 生成型事实被写死进散文即 FAIL，且它的漂移检查必须带裸下限：`sot:generated-count-in-prose` 与
+- [x] 生成型事实被写死进散文即 FAIL，且它的漂移检查必须带裸下限：`sot:generated-count-in-prose` 与
       `sot:generated-floor-drained` 各判一边；RED-2 的读数是 `measured=6`。
-- [ ] 清单自己不豁免：覆盖面数字与现场复算比对（`sot:coverage-count-drift`）、权威指向清单本体即红、
+- [x] 清单自己不豁免：覆盖面数字与现场复算比对（`sot:coverage-count-drift`）、权威指向清单本体即红、
       权威落在历史面即红、六字段重复即红。
-- [ ] 匹配集与条目数有下限，空集不许报绿：`MIN_SCAN_FILES=40` 由 `sot:scan-matcher-drained`（写错后缀模拟空集）证它会响；
+- [x] 匹配集与条目数有下限，空集不许报绿：`MIN_SCAN_FILES=40` 由 `sot:scan-matcher-drained`（写错后缀模拟空集）证它会响；
       `sot:entry-dropped` 证「per-entry 检查吞掉条目」会被 `no entry was dropped` 抓到。
-- [ ] 注入族全部可用且整轮不劣化：单族 24 例 `SELFTEST cases=24 ok=24`（`run262`）；全轮
+- [x] 注入族全部可用且整轮不劣化：单族 24 例 `SELFTEST cases=24 ok=24`（`run262`）；全轮
       `Mode: full (268 injected-violation cases + 14 baselines)` / `SELFTEST cases=268 ok=268 mismatch=0
       harness_errors=0 skipped=0` / `OVERALL: PASS`（`run275`）。
-- [ ] 档位面不回归：`--tier core` `pass=34 fail=0 inconclusive=0 fault=0`（`run278`）、
+- [x] 档位面不回归：`--tier core` `pass=34 fail=0 inconclusive=0 fault=0`（`run278`）、
       `--tier precommit` `pass=6 fail=0 inconclusive=0 fault=0`（`run279`），两轮串行单独跑。
-- [ ] 本片自己造成的 `文件:行` 漂移全部重定位且不越改越错：脚本面 `EDITS applied=32`（`run268`）、
+- [x] 本片自己造成的 `文件:行` 漂移全部重定位且不越改越错：脚本面 `EDITS applied=32`（`run268`）、
       文档面 `EDITS applied=4`（`run271`）、再跑一次幂等（`MOVED 声称=0 SAME 声称=12`，`run272`）。
+- 2026-10-20 独立复核：以上九条按各自引用的 `run259–run285` 证据逐条核对，唯一权威/路径在场/第二处定义/生成型下限/清单自检/匹配集下限/注入族/档位面/指针重定位九项均成立；本轮 core 档现为 `pass=39 fail=0`（串行），判据与下限未改动。
 
 ## TDD execution record
 
@@ -280,7 +281,7 @@ Parent summary：`T-2026-10-18-treelearn-process-migration-001` 确认把 `.code
   （`lstrip("./")` 吃掉 `.codex/` 前缀、区间跨空行即判缺陷）改成只判读者落到的那一行，并把 JVM 栈帧
   （`at androidx.test.platform.io.FileTestStorage.<init>(FileTestStorage.java:45)`）单独归为 `stackframe`
   而不是死指针——它是逐字粘贴的崩溃读数，判红等于逼下一位实现者改证据。
-- Gaps: ① 指针复算、形状扫描与证据装配三支驱动都留在 gitignore 的 `artifacts/tmp/`，仓库内不常驻（D9 缺口延续，
+- Gaps: ① 指针复算、形状扫描与证据装配三支驱动都留在 gitignore 的 `artifacts/tmp/`，仓库内不常驻（D9 缺口已由片 035 的常驻 `check_pointer_liveness` 闭合；三支一次性驱动仍不可在别的克隆复跑，
   且 difflib 映射现在有两份待上收）；② 形状扫描只判形状不判语义，历史面残留 `missing_path=23 beyond_eof=3
   landing_blank=7`，本片按「历史面不回填」明确不管，但也没人裁定 `.workbuddy/` 该不该继续留在仓库里；
   ③ 散文里还剩一处手抄的生成数没进清单：`SPEC-2026-10-15-web-h5-android-parity.md:138` 的「22 例正反双向自检」是
@@ -290,7 +291,8 @@ Parent summary：`T-2026-10-18-treelearn-process-migration-001` 确认把 `.code
   触底，但把 `SCAN_PREFIXES` 改窄会——这条只能靠注入（`sot:scan-matcher-drained`）而不是靠 review 提醒。
 - Risks: 下一片若给 `checkers_selftest.py` 或 `run_all_guards.py` 加行而不跑指针驱动，就会留下一批活指针——这是本仓库
   已登记第三次的缺陷类，不是本片新增的风险；`--tier core` 里的 `cdp_shot_selftest` 在并行负载下仍可能因 20 秒等待窗口
-  超时（D12 类，未闭合），下一片若在整跑之外另起进程，就会再次拿到假的产物红。
+  超时（D12 类；D12 已由片 036 闭合、D14 由片 037 闭合，058 的并发假红不再作为常态），下一片若在整跑之外另起进程，仍应串行单跑。
+- Independent verification（2026-10-20）：PASS。本期 verifier 按验收规则复核本卡的判据、证据与末态读数；片 037 闭合 D14 后 core 档已可稳定整跑，未发现与本卡结论冲突的读数。
 
 ## Handoff notes
 

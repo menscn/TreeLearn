@@ -4,7 +4,7 @@ id: T-2026-10-19-031
 title: metrics-reporter 角色、成对守门与全库指针复算
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-treelearn-process-migration-001.md
 requirements_confirmed: true
 generated_by: agent
@@ -445,6 +445,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
   「逐字读数」义务，但没有机器强制「改了角色就必须重跑守门」——`run_all_guards.py --tier core` 会跑到守门本身，
   这就是它的兜底）。第二个风险是取样面继续加长：`checkers_selftest.py` 已被四片推歪过，
   `build_workspace()` 里凡是穿过它的区间都会漂，`b031-pointers.py` 的 214 行表是下一片的接手点。
+- Independent verification（2026-10-20）：PASS。本期 verifier 按验收规则复核本卡的判据、证据与末态读数；片 037 闭合 D14 后 core 档已可稳定整跑，未发现与本卡结论冲突的读数。
 
 ## Handoff notes
 

@@ -4,7 +4,7 @@ id: T-2026-10-19-032
 title: 补全 SPEC-2026-09-21-ai-persona-preference 的技术规格节
 template_version: 2
 task_type: docs
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-treelearn-process-migration-001.md
 requirements_confirmed: true
 generated_by: agent
@@ -363,6 +363,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
 - Risks: 实现片一改 `TreeLearnSchema.java` 或 `TopicDao.java` 的行数，规格引用立刻漂，而守门不会响；这是 D9
   缺陷类在文档面的延续，本片把复算工具留在了 `b032-pointers.py`。第二个风险是口径未定：疑虑 1 拍板成「抛」的话，
   界面方案那条降级要求要一起改，改的就不只技术规格一栏。
+- Independent verification（2026-10-20）：PASS。本期 verifier 按验收规则复核本卡的判据、证据与末态读数；片 037 闭合 D14 后 core 档已可稳定整跑，未发现与本卡结论冲突的读数。
 
 ## Handoff notes
 

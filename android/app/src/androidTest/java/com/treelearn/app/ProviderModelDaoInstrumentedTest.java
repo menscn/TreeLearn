@@ -121,6 +121,8 @@ public final class ProviderModelDaoInstrumentedTest {
             // restating a literal (check_androidtest_schema_expectations.py guards this).
             v2.execSQL("PRAGMA user_version = " + PREVIOUS_SCHEMA_VERSION);
             assertEquals(PREVIOUS_SCHEMA_VERSION, rawInt(v2, "PRAGMA user_version"));
+            assertFalse("the fixture must not already carry a V5 table",
+                    tableExists(v2, TreeLearnSchema.Annotations.TABLE));
         } finally {
             v2.close();
         }
@@ -129,6 +131,8 @@ public final class ProviderModelDaoInstrumentedTest {
 
         assertEquals("the upgrade must stamp the current version",
                 TreeLearnSchema.DATABASE_VERSION, rawInt(upgraded, "PRAGMA user_version"));
+        assertTrue("the upgrade must add the annotations table",
+                tableExists(upgraded, TreeLearnSchema.Annotations.TABLE));
         assertEquals("the pre-existing topic survived", 1,
                 rawInt(upgraded, "SELECT COUNT(*) FROM topics WHERE id='t-083'"));
         assertEquals("the upgrade seeded the builtin provider", 1, ProviderDao.listByCreatedAt(
@@ -238,25 +242,21 @@ public final class ProviderModelDaoInstrumentedTest {
     // Fixtures and helpers.
     // ------------------------------------------------------------------
 
-    /** The production DDL minus the two tables and the one index V3 introduced. */
+    /** The production DDL minus what V5 introduced: a genuine V4 database. */
     private static List<String> versionTwoCreateStatements() {
         List<String> statements = new ArrayList<>();
         for (String statement : TreeLearnSchema.CREATE_TABLE_STATEMENTS) {
             // The fixture shape must match PREVIOUS_SCHEMA_VERSION, which derives to the version
-            // before the current one: V3 today. So the V4 attachment pair stays out, while the V3
-            // provider/model pair stays in — a genuine previous-version database has it, and the
-            // production upgrade must not replay CREATE TABLE on existing tables (T-096).
-            if (statement.startsWith("CREATE TABLE " + TreeLearnSchema.Attachments.TABLE)
-                    || statement.startsWith("CREATE TABLE "
-                            + TreeLearnSchema.MessageAttachments.TABLE)) {
+            // before the current one: V4 today. Everything V5 adds (the annotation table and its
+            // two indexes) stays out; the attachment pair arrived with V4, so it stays in.
+            if (statement.startsWith("CREATE TABLE " + TreeLearnSchema.Annotations.TABLE)) {
                 continue;
             }
             statements.add(statement);
         }
         for (String statement : TreeLearnSchema.CREATE_INDEX_STATEMENTS) {
-            if (statement.contains(TreeLearnSchema.INDEX_ATTACHMENTS_CONTENT_HASH)
-                    || statement.contains(TreeLearnSchema.INDEX_MESSAGE_ATTACHMENTS_MESSAGE)
-                    || statement.contains(TreeLearnSchema.INDEX_MESSAGE_ATTACHMENTS_ATTACHMENT)) {
+            if (statement.contains(TreeLearnSchema.INDEX_ANNOTATIONS_ANCHOR)
+                    || statement.contains(TreeLearnSchema.INDEX_ANNOTATIONS_MESSAGE)) {
                 continue;
             }
             statements.add(statement);
@@ -275,6 +275,13 @@ public final class ProviderModelDaoInstrumentedTest {
         }
         assertEquals("PRAGMA integrity_check must be ok", "ok",
                 rawString(db, "PRAGMA integrity_check"));
+    }
+
+    private static boolean tableExists(SQLiteDatabase db, String table) {
+        try (android.database.Cursor cursor = db.rawQuery(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name=?", new String[]{table})) {
+            return cursor.getCount() > 0;
+        }
     }
 
     private static int rawInt(SQLiteDatabase db, String sql) {

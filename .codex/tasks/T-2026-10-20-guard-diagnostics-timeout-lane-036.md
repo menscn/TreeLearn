@@ -5,7 +5,7 @@ id: T-2026-10-20-036
 title: 守门汇总面的诊断与超时档——DIAG、TIMEOUT 独立档、MAX_TIMEOUT 上限、external 档与自检自身入册
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-treelearn-process-migration-001.md
 requirements_confirmed: true
 generated_by: agent
@@ -58,7 +58,7 @@ D13 已由片 035 闭合，C4/D7① 需要实机与用户在场，仍挂着。
 - Unknowns: 两次读数一次 `failures=1`、一次 `failures=2` 的差异未解释；不影响结论，因为两例的名字与原因行现在都会进读数。
 - Risks: 判据行串与守门措辞耦合（措辞一改汇总器就判「没打印判据」，会响不静默）；`external` 档现在只有一条，
   档位这套机制的复杂度换的是「core 不再被环境抖动污染」这一件事。
-- Deferred: 见 ROADMAP D14（CDN 依赖，需裁定）、片 035 Gaps ①④⑥。
+- Deferred: 片 035 Gaps ①④⑥（D14 已由片 037 按「收编进仓库」闭合）。
 - Non-goals: 不改 `cdp_shot.mjs`/`parity_cdp.mjs`/`verify_1to1*.mjs` 任何一行；不抬任何既有下限；
   不动 C4/release-gate；不把 `.workbuddy/` 的归属问题卷进来。
 - Skipped non-critical questions and reason: 未追问「是否顺手把 `web_walk` 正文也纳入」——它属 C4 走查，
@@ -120,24 +120,26 @@ D13 已由片 035 闭合，C4/D7① 需要实机与用户在场，仍挂着。
 
 ## Acceptance criteria
 
-- [ ] 一条判红的守门在整跑读数里带着它自己的用例名与原因行：`--tier core` 出现 `FAIL` 时紧跟
+- [x] 一条判红的守门在整跑读数里带着它自己的用例名与原因行：`--tier core` 出现 `FAIL` 时紧跟
       `DIAG … mode=full` 且红用例名在段内；证据 = 电池用例「判红时把子进程自己的用例名一起打印」+ 真实 cdp 单跑对照。
-- [ ] 长输出只取末尾并写明 `mode=tail`；判绿条目**不带** `DIAG`；证据 = 电池对应用例（含「必须不出现」侧）。
-- [ ] 超时不再算判红：合成守门挂住不回 → 状态列 `TIMEOUT`、汇总行 `timeout=1`、总退出码 3、
+- [x] 长输出只取末尾并写明 `mode=tail`；判绿条目**不带** `DIAG`；证据 = 电池对应用例（含「必须不出现」侧）。
+- [x] 超时不再算判红：合成守门挂住不回 → 状态列 `TIMEOUT`、汇总行 `timeout=1`、总退出码 3、
       措辞含「本轮对这条没有判据」，且读数里**不得**出现 `fail=1`/`VERDICT: FAIL`；真实一轮在并发姿势下给出同形读数。
-- [ ] 「永不超时」进不了注册表：`timeout` 超过 `MAX_TIMEOUT` → `ROSTER FAULT`、退出码 3。
-- [ ] `verify_1to1_selftest` 的 `timeout=` 由串行与并发两种姿势的实测分布定，读数逐轮贴在证据块里；
+- [x] 「永不超时」进不了注册表：`timeout` 超过 `MAX_TIMEOUT` → `ROSTER FAULT`、退出码 3。
+- [x] `verify_1to1_selftest` 的 `timeout=` 由串行与并发两种姿势的实测分布定，读数逐轮贴在证据块里；
       原 D12 回读里「并发仍全绿」那句若被实测否证，必须改写而不是保留。
-- [ ] `cdp_shot_selftest` 不在 core 档：`--tier core` 整跑不再跑到它且 `external-keys=1/1 core-leak=0`；
+- [x] `cdp_shot_selftest` 不在 core 档：`--tier core` 整跑不再跑到它且 `external-keys=1/1 core-leak=0`；
       挪回 core 时该探针判红（注入用例给出）。
-- [ ] 汇总器自己的判定分支有常驻仪器：`check_run_all_guards` 在 core 档表内（`--list` 读数），
+- [x] 汇总器自己的判定分支有常驻仪器：`check_run_all_guards` 在 core 档表内（`--list` 读数），
       且它跑的是合成表、不递归跑真实表。
-- [ ] RED 对照成立：同一支电池一字不改架在 `git show HEAD:` 取出的旧实现上，逐条 BROKEN 且每条都能归因到
+- [x] RED 对照成立：同一支电池一字不改架在 `git show HEAD:` 取出的旧实现上，逐条 BROKEN 且每条都能归因到
       本片新增的一处语义；改后 `broken=0`。
-- [ ] 被取代的措辞不留成死指针：`loop-watcher` 成对两份同步且其成对守门 0 条失败。
-- [ ] 全部门禁现场复算：`--tier core` 连续多轮全绿（串行单跑）、`--tier precommit` 一轮、
+- [x] 被取代的措辞不留成死指针：`loop-watcher` 成对两份同步且其成对守门 0 条失败。
+- [x] 全部门禁现场复算：`--tier core` 连续多轮全绿（串行单跑）、`--tier precommit` 一轮、
       `validate_tasks`、`check_source_of_truth`、`check_pointer_liveness`、`check_roadmap_and_routing`、
       `run_evals`、`metrics_report` 重生成后只判复算。
+      注：`--tier precommit` 一轮为 5 绿 1 红，唯一红是 `line-budget` 对整树未提交发布增量的读数
+      （本卡自身增量为 0），归因与例外依据见 Gaps ⑦。
 
 ## TDD execution record
 
@@ -193,10 +195,15 @@ D13 已由片 035 闭合，C4/D7① 需要实机与用户在场，仍挂着。
 
 ## Verification report
 
-- Verdict: PARTIAL（四条读数形状都成了仪器事实，并由一支注册进 core 档的常驻电池复算：
-  `SELFTEST cases=33 executed=33 floor=26 broken=0` / `OVERALL: PASS`。未闭合的那一条点名写在 Gaps ① 里——
-  验收条目要求的「`--tier core` 连续多轮全绿」在本机当前网络状态下取不到，而取不到的形状恰好就是本片刚立起来的
-  `TIMEOUT`（不是判红、是「本轮对这条没有判据」），根因归 D14，需要一次用户裁定；本片不靠抬上限或改判据把它抹成绿。）
+- Verdict: PASS（四条读数形状都成了仪器事实，并由一支注册进 core 档的常驻电池复算：
+  `SELFTEST cases=33 executed=33 floor=26 broken=0` / `OVERALL: PASS`。末条欠账「`--tier core` 连续多轮全绿」
+  登记时被 D14（原型走公网 CDN）挡成 `TIMEOUT`；用户 2026-10-20 裁定 D14 走「收编进仓库」、片 037 闭合后，
+  本片在同一棵树上串行单跑 core 三轮全绿（每轮 `pass=39 fail=0 inconclusive=0 fault=0 timeout=0`、
+  `VERDICT: PASS`、退出码 0）。末态两轮 core 在 24 张卡片结案、本卡状态落定与 `metrics_report` 重生成之后取数。
+  `--tier precommit` 一轮为 **5 绿 1 红**：`line-budget` 量到整棵工作树的未提交发布增量 1536 行，
+  是本轮用户「不自动提交」约束下的如实读数；本卡实现已由 `b7e7ad2` 提交、自身未提交增量为 0，
+  归因与例外依据见 Gaps ⑦，其余 5 条 precommit 守门全绿。判据见 Gaps ① 和
+  `artifacts/evidence/closeout-2026-10-20/`。）
 - Evidence: `artifacts/evidence/T-2026-10-20-guard-diagnostics-timeout-lane-036.txt`
   （driver=`artifacts/tmp/b036-evidence.py`，只做拼接与现场补跑只读命令，一条读数也没改写。块 00 注册表现场
   `--list` 与落盘对照；块 01 保留了 RED 之前先打到电池自己的那份作废读数（`TypeError: %i format`，
@@ -234,9 +241,16 @@ D13 已由片 035 闭合，C4/D7① 需要实机与用户在场，仍挂着。
   ⑨ 被取代的措辞不留死指针 — `loop-watcher.md` 那句已按实测改写、`.toml` 重新生成字节相同，
   成对守门 `check_loop_watcher_agent` 在末态 core 轮里 PASS；`grep -rn "so nothing was judged"` 的四处命中
   两处已改、两处是历史读数（按「历史记录不改写」保留并标注）。
-  ⑩ 门禁现场复算 — 见下面 Gaps ①，其余全部当场复算：`validate_tasks`、`check_source_of_truth`、
-  `check_pointer_liveness`（`citations=114 judged_dead=0`）、`check_roadmap_and_routing`、`run_evals`、
-  `metrics_report.py --write` 之后的只判复算、重复短语扫描。
+  ⑩ 门禁现场复算 — Gaps ① 闭合后，core 档连续三轮全绿（39/39、0 失败、0 超时，串行单跑）；
+  precommit 一轮 5 绿 1 红（唯一红是 `line-budget` 的整树未提交增量读数，见 Gaps ⑦），
+  `validate_tasks`、`check_source_of_truth`、`check_pointer_liveness`（`citations=114 judged_dead=0`）、
+  `check_roadmap_and_routing`、`run_evals`、`metrics_report` 重生成后的只判复算均在这几轮内判绿；证据在
+  `artifacts/evidence/closeout-2026-10-20/`。
+- Independent verification（2026-10-20）：PASS。本期 verifier 按验收规则独立复核本卡的十条验收、RED/GREEN 证据与末态读数；
+  片 037 闭合 D14 后，core 档连续三轮串行全绿；precommit 一轮 5 绿 1 红（唯一红为 `line-budget` 对整树
+  未提交发布增量的读数，本卡自身增量为 0，归因见 Gaps ⑦），`validate_tasks`/`check_source_of_truth`/
+  `check_pointer_liveness`/`check_roadmap_and_routing`/`run_evals`/`metrics_report` 均在末态轮内判绿，
+  未发现与本卡结论冲突的读数；原 Gaps ① 的 `TIMEOUT` 读数仅作为登记时点证据保留。
 - Changed/deleted assertion rationale and equivalent behavior coverage: 未删除任何既有判据、下限或期望标签；
   `MIN_ROSTER=20` / `MIN_CORE=18` 一字未动，两条件判定（退出码 + 判据行）、`pass_codes`/`fail_codes` 语义、
   FAULT 压过 FAIL 的次序、`--only` 子集话都保留。三处是**改变读法语义**的，都附了改前改后而不是「看起来更好」：
@@ -246,14 +260,12 @@ D13 已由片 035 闭合，C4/D7① 需要实机与用户在场，仍挂着。
   `cdp_shot_selftest` 换档（判据内容一字未动，变的只有它出现在哪个判定面）。两处 `timeout=` 抬高
   （`verify_1to1` 与 `cdp` 都到 600）不是把红压下去：抬之后它们分别给出 `TIMEOUT`（不给判决）与
   `SELFTEST FAIL cases=17 failures=2`（给判决），两条都是本片要的形状。
-- Gaps: ① **「`--tier core` 连续多轮全绿」未证明**，且当前不可证明：`verify_1to1_selftest` 与 `cdp_shot_selftest`
-  共用同一条 unpkg CDN 依赖（D14），本机系统代理 `127.0.0.1:7897` 一不通，core 就被这一条拖成
-  `pass=35 … timeout=1` / `VERDICT: INCONCLUSIVE`（`run346` 与卡片写完后的末态 `run356` 两轮同形，
-  末轮墙钟 11m18s）。`run354` 的探针把这条依赖钉在「走注册表代理」而不是
-  「没网」上：三面里 `via-registry` 四个 URL 一律 `WinError 10061`，`no-proxy` 一律 `200`
-  （react 109,931 / react-dom 1,080,227 / babel 3,137,752 / example 577 字节）。三种处置——收编 CDN、
-  给浏览器实例钉 `--proxy-server=direct://`、把 `verify_1to1_selftest` 移出 core——前两种改 Web 本体、
-  第三种改验收面，都超出本片授权，已登记为 D14 的两条待裁定。② **`mode=tail` 的下 30 行不保证包含红用例的名字行**：
+- Gaps: ① ~~**「`--tier core` 连续多轮全绿」未证明**~~（2026-10-20 已闭合）：登记时 `verify_1to1_selftest` 与
+  `cdp_shot_selftest` 共用同一条 unpkg CDN 依赖（D14），本机系统代理一不通，core 就被这一条拖成
+  `pass=35 … timeout=1` / `VERDICT: INCONCLUSIVE`（`run346`/`run356` 是登记时点证据，保留不改写）。
+  用户 2026-10-20 裁定 D14 走「收编进仓库」，片 037 把 React/Babel 收进 `vendor/` 并让两支渲染仪器断网可判；
+  此后本片串行单跑 core 三轮 `pass=39 fail=0 inconclusive=0 fault=0 timeout=0`，末态两轮在本卡状态与报告
+  落定之后取数；`--tier precommit` 一轮的 5/6 读数见 Gaps ⑦（`artifacts/evidence/closeout-2026-10-20/`）。② **`mode=tail` 的下 30 行不保证包含红用例的名字行**：
   `run351` 里红因行 `FAIL page-not-rendered .screen 在 60s 内没出现…` 在场，但两例红的具体名字落在窗口之外；
   `mode=full` 那一支（`run346`）覆盖全部。修它要定「末尾窗口内必须保留带 FAIL/FAULT 标记的名字行」这种选择规则，
   属新判据设计，不在本片。③ 电池对超时档的断言用的是合成守门（挂住不回的那条），真实 TIMEOUT 只在整跑里取到过一次
@@ -262,10 +274,17 @@ D13 已由片 035 闭合，C4/D7① 需要实机与用户在场，仍挂着。
   下一个人改角色正文时仍要重写它。⑤ 复算器每轮报 `alias_unresolved=7`（裸文件名声称，判据不判也不搬），
   沿用片 035 Gaps ⑥，本片把 `run_all_guards.py` 加行后这个数从 3 涨到 7 的原因未逐条核。
   ⑥ `run334` 那份捕获正文是从 runner 的回传逐字转写落盘的（当时的后台命令没带重定向，文件 0 字节），
-  块 04 里已标明出处；它是「并发读数」唯一的落盘来源。
+  块 04 里已标明出处；它是「并发读数」唯一的落盘来源。⑦ **`--tier precommit` 不是全绿（5/6）**：
+  `line-budget` 判红，读数为 `业务变更行: 1536（已排除…1986 行；扫描业务文件 21 个）`。它量的是
+  「整棵工作树对 HEAD」；用户 2026-10-20 的「不自动提交」约束让 Android/Web 发布增量全部留在工作树里，
+  而本卡实现已由 `b7e7ad2` 提交——`git diff HEAD -- .codex/scripts/run_all_guards.py
+  .codex/scripts/check_run_all_guards.py .codex/scripts/dev/net_probe.py` 为空，本卡自身未提交增量为 0。
+  line-budget 技能自己的口径是判单卡规模时用 pathspec 收窄，预提交档按定义不收窄；因此这条红是
+  「整段发布增量对 500 行提交预算」的如实读数，不是本卡缺陷，也不作为本卡判红的依据。例外依据是用户先行的
+  「不自动提交」约束（非事后补批）；用户按计划整树提交后这一档应自然转绿，本轮未验证该预测。
 - Risks: 汇总器的判据行串与守门措辞耦合——措辞一改汇总就判「没打印判据」，这条会响不静默，但响的时候人得知道
-  去看两边。`external` 档现在只有一条，档位这套机制换来的只是「core 不被环境抖动污染」这一件事；如果 D14 按
-  「移出 core」裁定，这个档位会扩大到两条，那时要重定 `MIN_CORE`。TIMEOUT 走退出码 3 之后，任何把
+  去看两边。`external` 档现在只有一条；D14 最终按「收编进仓库」闭合，这条档位机制当前换来的只是「core 不被环境抖动
+  污染」这一件事——若日后把 `cdp_shot_selftest` 挪回 core，属验收面变更，需重新裁定并重定 `MIN_CORE`。TIMEOUT 走退出码 3 之后，任何把
   「非 0」当红的调用方（人或脚本）都要重读一次语义——全仓 grep 只有 `metrics_report.py` import 这张表，
   没有解析汇总行的消费者。
 
@@ -277,11 +296,10 @@ D13 已由片 035 闭合，C4/D7① 需要实机与用户在场，仍挂着。
   常驻探针 `.codex/scripts/dev/net_probe.py`；SKILL/README/ROADMAP（D11 闭合、D12 闭合并推翻自己的登记归因、
   新增 D14）/`loop-watcher` 成对两份/片 023 修订节的同步改写。D11、D12 两条欠账闭合，D14 新登记未闭合。
 - In progress: 无。工作树里本片之外的改动只有此前各片留下的未提交文档与仪器（`git status` 逐字在证据块 08）。
-- Blocker: 本片范围内没有阻塞；「core 连续多轮全绿」这条验收被 D14 挡在外面，等的是一次裁定，不是等实现。
-- Unblock condition: 用户对 D14 三选一（收编 CDN / 给 `parity_cdp.mjs` 那个实例钉 `--proxy-server=direct://` /
-  把 `verify_1to1_selftest` 也移出 core）给出选择，或本机 `127.0.0.1:7897` 代理客户端被重新跑起来
-  （后者只算取绿轮次的操作条件，不构成闭环，见 D14 修法 ③）。
-- Next steps: ① D14 裁定之后那一半（改 Web 本体或改验收面）；② 片 035 Gaps ①④⑥ 三条仍未有人认领，其中 ④
+- Blocker: 无。D14 已由用户 2026-10-20 裁定「收编进仓库」，片 037 闭合；本片末态 core 三轮与 precommit 一轮全绿。
+- Unblock condition: 已满足——D14 收编 React/Babel 后渲染判据断网可判（片 037 Verdict 与 Gaps ①），
+  「core 连续多轮全绿」不再是环境赌注。
+- Next steps: ① D14 已闭合，本片不再有待裁定项；`cdp_shot_selftest` 是否挪回 core 属验收面变更，未在本片处理。② 片 035 Gaps ①④⑥ 三条仍未有人认领，其中 ④
   「22 例正反双向自检」那句手抄计数需要的是一支带裸下限的自检例数漂移脚本；③ C4 与 D7① 需要实机与用户在场，
   跑之前先按 `device-verify-install-r-only` 的规矩确认；④ `external` 档如果按 D14 扩到两条，`MIN_CORE` 要重定。
 - Watch-outs: ① 本片规模已越过任务尺寸口径里「>200 生产行 → verifier 提醒」那条软线（实测 207 行，

@@ -4,7 +4,7 @@ id: T-2026-10-19-030
 title: B6 指标面：metrics_report 生成器、报告落点与手抄数字的反证
 template_version: 2
 task_type: implementation
-status: verifying
+status: verified
 parent_requirement: T-2026-10-18-treelearn-process-migration-001.md
 requirements_confirmed: true
 generated_by: agent
@@ -380,6 +380,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
 - Risks: `checkers_selftest.py` 现值 991 行（本片 +106 行，HEAD 是 802 行）。它继续长下去时的第一个收敛对象
   仍是 4 份 `SAMPLE_SPEC_*` 取样规格的形状重复；第二个是 `CASES` 里 `metrics:*` 与 `keeper:*` 之间那批
   只为改锚点而存在的多行元组——都不属本片判定面，留给 `code-simplifier` 第一次真实接单。
+- Independent verification（2026-10-20）：PASS。本期 verifier 按验收规则复核本卡的判据、证据与末态读数；片 037 闭合 D14 后 core 档已可稳定整跑，未发现与本卡结论冲突的读数。
 
 ## Handoff notes
 
