@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The app shell: one Activity, one content host, and the bottom tab bar that carries the first-level
-  destinations (PRD 6.2.16 as of V3.2 - the home page is no longer the only entry page, so the shell
-  is now "content + persistent bar" rather than a single host). The conversation, canvas, navigation
-  and search screens still arrive by swapping the host's child, not by adding Activities.
+  The app shell: one Activity, one content host, and the floating capsule tab bar that carries the
+  first-level destinations (PRD 6.2.16 as of V3.2). The conversation, canvas, navigation and search
+  screens still arrive by swapping the host's child, not by adding Activities.
 
-  The bar is included here once and shown or hidden by MainActivity's swap(): first-level tab screens
-  show it, second-level screens hide it. No screen draws a copy of its own.
+  Since 2026-10-22 Scheme A the bar floats above the content instead of taking a row in a vertical
+  column: the host fills the window and the bar is pinned to the bottom with its own margins. The
+  room the bar needs is paid by the two first-level screens in their own scroll containers
+  (@dimen/tab_bar_clearance with clipToPadding off, T-2026-10-22-062), not by the host - padding the
+  host ended the viewport above the capsule, so content never passed under the glass. The value
+  still lives in one dimen, and MainActivity#swap still owns the one predicate that decides whether
+  the bar is on screen at all.
 
-  `main_root` is kept from the T-002 skeleton because the launch test finds it by that id.
-  T-106 wraps it in a FrameLayout so the home drawer (a programmatic overlay) can cover the whole
-  shell - bar included - without becoming a child the next swap() would wipe.
+  `main_root` is kept from the T-002 skeleton and `shell_host` keeps its id because the launch and
+  shell tests find them by those names. `main_root` does not clip its children: a View's elevation
+  shadow is drawn by its parent, and clipping the capsule to its own bounds is what left the floating
+  bar with no projection at all (T-2026-10-22-061).
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/main_drawer_root"
@@ -22,20 +27,26 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" />
 
-<LinearLayout
+<FrameLayout
     android:id="@+id/main_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:clipChildren="false">
 
     <FrameLayout
         android:id="@+id/shell_host"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_height="match_parent" />
 
-    <include layout="@layout/screen_tab_bar" />
+    <include
+        layout="@layout/screen_tab_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="@dimen/tab_bar_margin"
+        android:layout_marginEnd="@dimen/tab_bar_margin"
+        android:layout_marginBottom="@dimen/tab_bar_bottom" />
 
-</LinearLayout>
+</FrameLayout>
 
 </FrameLayout>

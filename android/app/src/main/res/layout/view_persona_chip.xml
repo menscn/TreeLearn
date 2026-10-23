@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The composer's answer-style chip: the prototype's .persona-chip
+  (Docs/04-ux-design/知芽-TreeLearn-人设与森林原型-v1.html, 人设选择器 section) - green-soft fill,
+  deep-green semibold name, and the chevron that says a picker opens below.
+
+  This is the visual pill only. Like the model chip it is hosted by a 44dp container
+  (PersonaPicker), which owns the tap target and the accessibility node.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/persona_chip"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_pill"
+    android:backgroundTint="@color/tl_green_soft"
+    android:gravity="center_vertical"
+    android:minHeight="@dimen/model_chip_height"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/space_s3"
+    android:paddingTop="@dimen/space_s1"
+    android:paddingEnd="@dimen/space_s3"
+    android:paddingBottom="@dimen/space_s1">
+
+    <TextView
+        android:id="@+id/persona_chip_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:importantForAccessibility="no"
+        android:textColor="@color/tl_green_deep"
+        android:textSize="@dimen/text_cap"
+        android:textStyle="bold" />
+
+    <ImageView
+        android:id="@+id/persona_chip_chevron"
+        android:layout_width="11dp"
+        android:layout_height="11dp"
+        android:layout_marginStart="@dimen/space_s1"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_chevron_down"
+        android:tint="@color/tl_green_deep" />
+</LinearLayout>

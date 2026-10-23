@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.treelearn.core.domain.AnswerRevision;
 import com.treelearn.core.domain.GenerationModel;
+import com.treelearn.core.domain.Persona;
 import com.treelearn.data.db.TreeLearnSchema;
 
 import java.util.ArrayList;
@@ -118,6 +119,8 @@ public final class AnswerRevisionDao {
                 GenerationModel.fromWireId(
                         Rows.string(cursor, TreeLearnSchema.AnswerRevisions.MODEL)),
                 Rows.bool(cursor, TreeLearnSchema.AnswerRevisions.THINKING_ENABLED),
+                Persona.fromWireId(
+                        Rows.string(cursor, TreeLearnSchema.AnswerRevisions.PERSONA)),
                 Rows.string(cursor, TreeLearnSchema.AnswerRevisions.PROMPT_POLICY_VERSION),
                 Rows.longOf(cursor, TreeLearnSchema.AnswerRevisions.CREATED_AT));
     }
@@ -131,6 +134,7 @@ public final class AnswerRevisionDao {
         values.put(TreeLearnSchema.AnswerRevisions.ANSWER_CONTENT, revision.answerContent);
         values.put(TreeLearnSchema.AnswerRevisions.MODEL, revision.model.wireId);
         values.put(TreeLearnSchema.AnswerRevisions.THINKING_ENABLED, revision.thinkingEnabled ? 1 : 0);
+        values.put(TreeLearnSchema.AnswerRevisions.PERSONA, revision.persona.wireId);
         values.put(TreeLearnSchema.AnswerRevisions.PROMPT_POLICY_VERSION,
                 revision.promptPolicyVersion);
         values.put(TreeLearnSchema.AnswerRevisions.CREATED_AT, revision.createdAt);

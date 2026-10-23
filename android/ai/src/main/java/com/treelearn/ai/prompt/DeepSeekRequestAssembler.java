@@ -1,6 +1,7 @@
 package com.treelearn.ai.prompt;
 
 import com.treelearn.core.domain.Guard;
+import com.treelearn.core.domain.Persona;
 import com.treelearn.core.domain.PromptPurpose;
 import com.treelearn.core.domain.PromptSpec;
 import java.util.ArrayList;
@@ -35,9 +36,22 @@ public final class DeepSeekRequestAssembler {
      */
     public static DeepSeekRequest assemble(PromptPurpose purpose, boolean thinkingEnabled,
             List<DeepSeekMessage> encodedHistory, String currentInput, PromptBudget budget) {
+        return assemble(purpose, thinkingEnabled, encodedHistory, currentInput, Persona.DEFAULT,
+                budget);
+    }
+
+    /**
+     * The persona-carrying shape. The style only changes {@code messages[0].content}; it is never a
+     * second system message, so "exactly one system message, at position 0" still holds by
+     * construction.
+     */
+    public static DeepSeekRequest assemble(PromptPurpose purpose, boolean thinkingEnabled,
+            List<DeepSeekMessage> encodedHistory, String currentInput, Persona persona,
+            PromptBudget budget) {
         Guard.object(budget, "budget");
+        Guard.object(persona, "persona");
         PromptSpec spec = DeepSeekPromptRegistry.spec(purpose);
-        String systemContent = DeepSeekPromptRegistry.systemContent(purpose, thinkingEnabled);
+        String systemContent = DeepSeekPromptRegistry.systemContent(purpose, thinkingEnabled, persona);
         List<DeepSeekMessage> history = validateHistory(purpose, encodedHistory);
         String latest = validateCurrentInput(purpose, currentInput);
         reserveFor(purpose, systemContent, latest, history, budget);
@@ -45,7 +59,7 @@ public final class DeepSeekRequestAssembler {
         messages.add(new DeepSeekMessage(DeepSeekMessage.Role.SYSTEM, systemContent));
         messages.addAll(history);
         messages.add(new DeepSeekMessage(DeepSeekMessage.Role.USER, latest));
-        return new DeepSeekRequest(purpose, spec.policyVersion, thinkingEnabled, messages,
+        return new DeepSeekRequest(purpose, spec.policyVersion, thinkingEnabled, persona, messages,
                 systemContent.length(), charsOf(history), latest.length());
     }
 

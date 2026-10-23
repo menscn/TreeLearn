@@ -3,6 +3,7 @@ package com.treelearn.data.db;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.treelearn.core.domain.GenerationModel;
+import com.treelearn.core.domain.Persona;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,12 +54,17 @@ import java.util.List;
  *       independent unread authority, so there is no unread counter and no unread ordinal column.</li>
  *   <li>Prompt storage is limited to the stable {@code prompt_purpose} /
  *       {@code prompt_policy_version} pair. No column may hold the system prompt body.</li>
+ *   <li>The answer style (SPEC-2026-09-21) is a stable wire id on the topic, the attempt and the
+ *       stable revision, in that order of authority: a switch writes only the topic row, admission
+ *       copies it, stabilization freezes it. Every persona column is added by
+ *       {@code ALTER TABLE ADD COLUMN} on the upgrade, which cannot carry a CHECK, so both install
+ *       paths share one declaration constant instead.</li>
  * </ul>
  */
 public final class TreeLearnSchema {
 
     /** Bumped only together with a new forward migration. */
-    public static final int DATABASE_VERSION = 5;
+    public static final int DATABASE_VERSION = 6;
 
     private TreeLearnSchema() {
     }
@@ -75,6 +81,15 @@ public final class TreeLearnSchema {
         public static final String LAST_VISITED_BRANCH_ID = "last_visited_branch_id";
         public static final String CREATED_AT = "created_at";
         public static final String UPDATED_AT = "updated_at";
+        /** The topic's current answer style; only future answers read it. */
+        public static final String PERSONA = "persona";
+        /**
+         * Shared by the fresh install and the V5 -> V6 {@code ALTER TABLE ADD COLUMN}: the
+         * upgrade cannot carry a CHECK, so the two paths must not describe the column differently.
+         * The default is referenced through {@link Persona#DEFAULT} so its wire id has one home.
+         */
+        public static final String PERSONA_DECLARATION =
+                PERSONA + " TEXT NOT NULL DEFAULT '" + Persona.DEFAULT.wireId + "'";
     }
 
     public static final class Branches {
@@ -145,6 +160,11 @@ public final class TreeLearnSchema {
         /** The purpose is recoverable from this version's prefix via PromptPurpose.ownerOf. */
         public static final String PROMPT_POLICY_VERSION = "prompt_policy_version";
         public static final String CREATED_AT = "created_at";
+        /** §5.1: a stable revision saves the style that produced it, like model and thinking. */
+        public static final String PERSONA = "persona";
+        /** Same declaration text on both install paths; see {@link Topics#PERSONA_DECLARATION}. */
+        public static final String PERSONA_DECLARATION =
+                PERSONA + " TEXT NOT NULL DEFAULT '" + Persona.DEFAULT.wireId + "'";
     }
 
     public static final class GenerationOperations {
@@ -163,6 +183,11 @@ public final class TreeLearnSchema {
         public static final String ERROR_CODE = "error_code";
         public static final String CREATED_AT = "created_at";
         public static final String UPDATED_AT = "updated_at";
+        /** The style pinned by the attempt's command; final for the same reason as the version. */
+        public static final String PERSONA = "persona";
+        /** Same declaration text on both install paths; see {@link Topics#PERSONA_DECLARATION}. */
+        public static final String PERSONA_DECLARATION =
+                PERSONA + " TEXT NOT NULL DEFAULT '" + Persona.DEFAULT.wireId + "'";
     }
 
     public static final class ContextSnapshots {
@@ -280,6 +305,8 @@ public final class TreeLearnSchema {
                     + Branches.ID + ") ON DELETE SET NULL",
             Topics.CREATED_AT + " INTEGER NOT NULL",
             Topics.UPDATED_AT + " INTEGER NOT NULL",
+            // Last in both install paths: ALTER TABLE ADD COLUMN appends.
+            Topics.PERSONA_DECLARATION,
     };
 
     private static final String[] BRANCHES_DEFINITIONS = {
@@ -431,6 +458,8 @@ public final class TreeLearnSchema {
                     + AnswerRevisions.THINKING_ENABLED + " IN (0,1))",
             AnswerRevisions.PROMPT_POLICY_VERSION + " TEXT NOT NULL",
             AnswerRevisions.CREATED_AT + " INTEGER NOT NULL",
+            // Last in both install paths: ALTER TABLE ADD COLUMN appends.
+            AnswerRevisions.PERSONA_DECLARATION,
     };
 
     private static final String[] GENERATION_OPERATIONS_DEFINITIONS = {
@@ -453,6 +482,8 @@ public final class TreeLearnSchema {
             GenerationOperations.ERROR_CODE + " TEXT",
             GenerationOperations.CREATED_AT + " INTEGER NOT NULL",
             GenerationOperations.UPDATED_AT + " INTEGER NOT NULL",
+            // Last in both install paths: ALTER TABLE ADD COLUMN appends.
+            GenerationOperations.PERSONA_DECLARATION,
     };
 
     private static final String[] CONTEXT_SNAPSHOTS_DEFINITIONS = {
@@ -873,7 +904,7 @@ public final class TreeLearnSchema {
      */
     public static final List<Migration> FORWARD_MIGRATIONS =
             Collections.unmodifiableList(Arrays.asList(new MigrationV1ToV2(), new MigrationV2ToV3(),
-                    new MigrationV3ToV4(), new MigrationV4ToV5()));
+                    new MigrationV3ToV4(), new MigrationV4ToV5(), new MigrationV5ToV6()));
 
     /** The single V1 -> V2 step: executes {@link #MIGRATION_V1_TO_V2_STATEMENTS} in order. */
     private static final class MigrationV1ToV2 implements Migration {
@@ -1021,6 +1052,50 @@ public final class TreeLearnSchema {
         @Override
         public void apply(SQLiteDatabase database) {
             for (String statement : MIGRATION_V4_TO_V5_STATEMENTS) {
+                database.execSQL(statement);
+            }
+        }
+    }
+
+    /**
+     * V5 -> V6: the answer style on the topic, the attempt and the stable revision
+     * (SPEC-2026-09-21-ai-persona-preference 数据与迁移).
+     *
+     * <p>Three statements, each repeating the fresh install's declaration text verbatim, so a
+     * fresh database and an upgraded one cannot end up with two shapes of the same column. The
+     * {@code DEFAULT} is what lets existing rows acquire the default style without the migration
+     * inventing a per-row decision; there is deliberately no CHECK, because
+     * {@code ALTER TABLE ADD COLUMN} cannot carry one and a fresh install must not accept values an
+     * upgrade would refuse. Validity of the wire id is judged at the read/write boundary by
+     * {@link Persona}.
+     *
+     * <p>Published steps are never rewritten: a released version's migration is part of the
+     * contract with the databases already on devices (rules/sql.md).
+     */
+    public static final List<String> MIGRATION_V5_TO_V6_STATEMENTS =
+            Collections.unmodifiableList(Arrays.asList(
+                    "ALTER TABLE " + Topics.TABLE + " ADD COLUMN " + Topics.PERSONA_DECLARATION,
+                    "ALTER TABLE " + GenerationOperations.TABLE + " ADD COLUMN "
+                            + GenerationOperations.PERSONA_DECLARATION,
+                    "ALTER TABLE " + AnswerRevisions.TABLE + " ADD COLUMN "
+                            + AnswerRevisions.PERSONA_DECLARATION));
+
+    /** The single V5 -> V6 step: executes {@link #MIGRATION_V5_TO_V6_STATEMENTS} in order. */
+    private static final class MigrationV5ToV6 implements Migration {
+
+        @Override
+        public int fromVersion() {
+            return 5;
+        }
+
+        @Override
+        public int toVersion() {
+            return 6;
+        }
+
+        @Override
+        public void apply(SQLiteDatabase database) {
+            for (String statement : MIGRATION_V5_TO_V6_STATEMENTS) {
                 database.execSQL(statement);
             }
         }

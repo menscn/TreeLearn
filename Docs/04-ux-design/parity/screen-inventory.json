@@ -2,9 +2,9 @@
   "components": [
     "AnswerActionBar",
     "ChatMotion",
-    "ChildBranchPopup",
     "EdgeFadeLayout",
     "FollowScrollView",
+    "GlassSurfaceLayout",
     "GridBackdrop",
     "HomeMotion",
     "MarkdownRenderer",
@@ -12,18 +12,21 @@
     "NoticeText",
     "PaperRuleBackdrop",
     "PaperRules",
+    "PersonaPicker",
+    "PersonaUi",
     "ReasoningDisclosure",
     "RecommendationMarquee",
     "RecommendationTag",
     "RuleEditText",
     "TreeCanvasView",
-    "WordMenuPopup"
+    "WordMenuPopup",
+    "WordmarkTextView"
   ],
   "counts": {
-    "component_classes": 18,
-    "layout_files": 45,
-    "screen_package_files": 32,
-    "screens": 14,
+    "component_classes": 21,
+    "layout_files": 49,
+    "screen_package_files": 36,
+    "screens": 15,
     "self_drawn": 5,
     "surfaces": 16,
     "surfaces_by_kind": {
@@ -155,6 +158,14 @@
       "includes": [],
       "root_id": "navigation_row"
     },
+    "item_persona_intro_card": {
+      "dirs": [
+        "layout"
+      ],
+      "hidden": false,
+      "includes": [],
+      "root_id": null
+    },
     "item_recommendation": {
       "dirs": [
         "layout"
@@ -194,14 +205,6 @@
       "hidden": false,
       "includes": [],
       "root_id": "search_panel_root"
-    },
-    "popup_child_branches": {
-      "dirs": [
-        "layout"
-      ],
-      "hidden": false,
-      "includes": [],
-      "root_id": "child_branches_popup"
     },
     "popup_model_picker": {
       "dirs": [
@@ -303,6 +306,14 @@
       "hidden": false,
       "includes": [],
       "root_id": "navigation_content"
+    },
+    "screen_persona_intro": {
+      "dirs": [
+        "layout"
+      ],
+      "hidden": false,
+      "includes": [],
+      "root_id": null
     },
     "screen_provider_admin": {
       "dirs": [
@@ -417,6 +428,30 @@
       "includes": [],
       "root_id": null
     },
+    "view_persona_chip": {
+      "dirs": [
+        "layout"
+      ],
+      "hidden": false,
+      "includes": [],
+      "root_id": "persona_chip"
+    },
+    "view_persona_more": {
+      "dirs": [
+        "layout"
+      ],
+      "hidden": false,
+      "includes": [],
+      "root_id": null
+    },
+    "view_persona_option": {
+      "dirs": [
+        "layout"
+      ],
+      "hidden": false,
+      "includes": [],
+      "root_id": "persona_option"
+    },
     "view_reasoning": {
       "dirs": [
         "layout"
@@ -442,6 +477,7 @@
         "item_chat_table_cell",
         "item_chat_table_header_cell",
         "item_chat_table_row",
+        "item_child_branch",
         "item_source_history",
         "panel_search_picker",
         "screen_chat",
@@ -452,13 +488,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 1076,
+          "line": 1134,
           "method": "showChat"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 1102,
+          "line": 1160,
           "method": "showChat"
         }
       ],
@@ -478,13 +514,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 776,
+          "line": 832,
           "method": "showFileManager"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 781,
+          "line": 837,
           "method": "showFileManager"
         }
       ],
@@ -506,13 +542,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 203,
+          "line": 209,
           "method": "onCreate"
         },
         {
           "channel": "addView",
           "host_id": "main_drawer_root",
-          "line": 222,
+          "line": 228,
           "method": "onCreate"
         }
       ],
@@ -535,13 +571,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 186,
+          "line": 192,
           "method": "onCreate"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 672,
+          "line": 711,
           "method": "showHome"
         }
       ],
@@ -566,13 +602,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 1023,
+          "line": 1080,
           "method": "showLibrary"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 1029,
+          "line": 1086,
           "method": "showLibrary"
         }
       ],
@@ -592,13 +628,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 744,
+          "line": 800,
           "method": "showModels"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 749,
+          "line": 805,
           "method": "showModels"
         }
       ],
@@ -621,19 +657,48 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 1199,
+          "line": 1258,
           "method": "enterNavigation"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 1219,
+          "line": 1278,
           "method": "enterNavigation"
         }
       ],
       "root_layout": "screen_navigation",
       "self_drawn": false,
       "sw600dp": true
+    },
+    {
+      "channels": [
+        "constructed",
+        "swap"
+      ],
+      "class": "PersonaIntroScreen",
+      "layout_refs": [
+        "item_persona_intro_card",
+        "screen_persona_intro"
+      ],
+      "path": "screen/PersonaIntroScreen.java",
+      "reached_by": [
+        {
+          "channel": "constructed",
+          "host_id": null,
+          "line": 748,
+          "method": "showPersonaIntro"
+        },
+        {
+          "channel": "swap",
+          "host_id": null,
+          "line": 750,
+          "method": "showPersonaIntro"
+        }
+      ],
+      "root_layout": "screen_persona_intro",
+      "self_drawn": false,
+      "sw600dp": false
     },
     {
       "channels": [
@@ -649,13 +714,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 715,
+          "line": 771,
           "method": "showProviders"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 720,
+          "line": 776,
           "method": "showProviders"
         }
       ],
@@ -675,13 +740,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 754,
+          "line": 810,
           "method": "showSearchSettings"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 759,
+          "line": 815,
           "method": "showSearchSettings"
         }
       ],
@@ -703,13 +768,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 707,
+          "line": 763,
           "method": "showKeyAdmin"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 710,
+          "line": 766,
           "method": "showKeyAdmin"
         }
       ],
@@ -731,13 +796,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 187,
+          "line": 193,
           "method": "onCreate"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 697,
+          "line": 737,
           "method": "showSettings"
         }
       ],
@@ -759,13 +824,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 790,
+          "line": 846,
           "method": "showStatsDetail"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 795,
+          "line": 851,
           "method": "showStatsDetail"
         }
       ],
@@ -788,13 +853,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 1147,
+          "line": 1206,
           "method": "showTree"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 1153,
+          "line": 1212,
           "method": "showTree"
         }
       ],
@@ -814,13 +879,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 764,
+          "line": 820,
           "method": "showVoiceSettings"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 770,
+          "line": 826,
           "method": "showVoiceSettings"
         }
       ],
@@ -829,7 +894,7 @@
       "sw600dp": false
     }
   ],
-  "source_commit": "44367d6c6a070015a6a134a55338034ab2755ce0",
+  "source_commit": "f77d34fe3d7eafc29488f926a4611c50162bf7b5",
   "spec_link": {
     "count_shaped_lines": [
       12,
@@ -848,7 +913,7 @@
       "kind": "dialog",
       "layout": "panel_search_picker",
       "layout_sw600dp": false,
-      "line": 630,
+      "line": 649,
       "producer": "ChatScreen",
       "root_id": null
     },
@@ -859,19 +924,8 @@
       "kind": "popup_menu",
       "layout": null,
       "layout_sw600dp": false,
-      "line": 421,
+      "line": 439,
       "producer": "ChatScreen",
-      "root_id": null
-    },
-    {
-      "consumer_proven": null,
-      "host_is_screen_root": null,
-      "host_layout": null,
-      "kind": "popup_window",
-      "layout": "popup_child_branches",
-      "layout_sw600dp": false,
-      "line": 67,
-      "producer": "ChildBranchPopup",
       "root_id": null
     },
     {
@@ -882,7 +936,7 @@
       "kind": "code_drawn_host",
       "layout": null,
       "layout_sw600dp": false,
-      "line": 222,
+      "line": 228,
       "producer": "HomeDrawerScreen",
       "root_id": null
     },
@@ -915,7 +969,7 @@
       "kind": "popup_menu",
       "layout": null,
       "layout_sw600dp": false,
-      "line": 221,
+      "line": 232,
       "producer": "NavigationScreen",
       "root_id": null
     },
@@ -926,8 +980,19 @@
       "kind": "alert_dialog",
       "layout": null,
       "layout_sw600dp": false,
-      "line": 264,
+      "line": 275,
       "producer": "NavigationScreen",
+      "root_id": null
+    },
+    {
+      "consumer_proven": null,
+      "host_is_screen_root": null,
+      "host_layout": null,
+      "kind": "popup_window",
+      "layout": "view_persona_option",
+      "layout_sw600dp": false,
+      "line": 105,
+      "producer": "PersonaPicker",
       "root_id": null
     },
     {

@@ -1,6 +1,7 @@
 package com.treelearn.app.ui;
 
 import com.treelearn.core.domain.AnswerRevision;
+import com.treelearn.core.domain.Persona;
 import com.treelearn.core.domain.ReadingPosition;
 
 import java.util.List;
@@ -63,6 +64,14 @@ public interface ChatSink {
     void openSettings();
 
     /**
+     * 2026-10-23: opens the static answer-style introduction reached from the picker's last row.
+     * A default keeps every existing screen and test double source-compatible; only the Activity
+     * swaps in the page.
+     */
+    default void openPersonaIntro() {
+    }
+
+    /**
      * Opens the tree canvas on the topic this branch belongs to.
      *
      * <p>Navigation only: the canvas is centred on the branch the conversation is showing, and the
@@ -106,4 +115,18 @@ public interface ChatSink {
      * scrolling a screen it does not belong to.
      */
     void renderPosition(String branchId, ReadingPosition position);
+
+    /**
+     * 2026-10-23: tells the learner the answer style was stored. A default keeps every existing
+     * screen and test double source-compatible; only the Activity shows a message.
+     */
+    default void showPersonaSwitched(Persona persona) {
+    }
+
+    /**
+     * 2026-10-23: a stored style this build cannot read was replaced by the default for display.
+     * Said once per visit, because the fallback itself is a one-time read outcome.
+     */
+    default void showPersonaFellBack() {
+    }
 }

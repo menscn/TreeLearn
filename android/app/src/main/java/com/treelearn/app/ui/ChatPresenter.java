@@ -8,6 +8,7 @@ import com.treelearn.core.domain.Branch;
 import com.treelearn.core.domain.GenerationModel;
 import com.treelearn.core.domain.Guard;
 import com.treelearn.core.domain.Message;
+import com.treelearn.core.domain.Persona;
 import com.treelearn.core.domain.ReadingAnchor;
 import com.treelearn.core.domain.ReadingPosition;
 import com.treelearn.app.ui.ChatSpeaker;
@@ -103,6 +104,11 @@ public final class ChatPresenter implements ChatActions {
     private boolean awaitingFirstRow;
     /** T-075: the newest row's id and content sizes, so a growth while detached is one count. */
     private String tailFingerprint = "";
+    /**
+     * 2026-10-23: whether an unknown stored style was already reported. The fallback is a fact of
+     * the visit, not of each read, so a poll cannot repeat the sentence every few hundred millis.
+     */
+    private boolean personaFallbackAnnounced;
 
     public ChatPresenter(ChatSink sink, UiThread ui, Executor background, KeyVault key, ChatData data,
             ChatCommands commands, SettingsStore settings, CopyLabels labels, String branchId,
@@ -338,6 +344,10 @@ public final class ChatPresenter implements ChatActions {
         }
         ui.post(() -> {
             render(apply(snapshot));
+            if (snapshot.personaFellBack && !personaFallbackAnnounced) {
+                personaFallbackAnnounced = true;
+                sink.showPersonaFellBack();
+            }
             // T-B: the marks are not view state - they are handed to the screen beside it, the
             // same one-channel-per-fact rule openChildren follows. Every read re-pushes, so a
             // highlight written by a command lands the way one stored long ago does.
@@ -364,6 +374,7 @@ public final class ChatPresenter implements ChatActions {
         ChatViewState next = state.withPhase(ChatViewState.Phase.READY)
                 .withBranchTitle(snapshot.branchTitle)
                 .withMessages(snapshot.messages)
+                .withPersona(snapshot.persona)
                 .withSourceCard(snapshot.sourceCard)
                 // T-076: the archived flag rides the read's branch row (073 §5's S-ARCHIVED).
                 .withArchived(snapshot.branch != null && snapshot.branch.isArchived())
@@ -903,10 +914,41 @@ public final class ChatPresenter implements ChatActions {
         render(state.withModel(require(model, "model")));
     }
 
+    /**
+     * 2026-10-23: a style choice is one narrow write on the topic row, not a session setting. The
+     * chip moves first so the tap feels immediate; a refused write puts the old style back before
+     * the failure is drawn, and no read follows - a style change cannot alter a stored message.
+     */
+    @Override
+    public void onPersonaSelected(Persona persona) {
+        final Persona chosen = require(persona, "persona");
+        final Persona previous = state.persona;
+        if (chosen == previous) {
+            return;
+        }
+        render(state.withPersona(chosen));
+        background.execute(() -> {
+            final ChatCommandResult result = commands.setPersona(branchId, chosen);
+            ui.post(() -> {
+                if (result.isAccepted()) {
+                    sink.showPersonaSwitched(chosen);
+                } else {
+                    render(state.withPersona(previous).withNotice(result.notice()));
+                }
+            });
+        });
+    }
+
     @Override
     public void onThinkingToggled(boolean enabled) {
         settings.setThinkingEnabled(enabled);
         render(state.withThinkingEnabled(enabled));
+    }
+
+    /** 2026-10-23: reading the seven styles changes nothing, so this is navigation and no more. */
+    @Override
+    public void onPersonaIntroPressed() {
+        sink.openPersonaIntro();
     }
 
     @Override

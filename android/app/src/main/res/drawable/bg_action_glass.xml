@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Scheme A's answer action dot (.actions .icon-btn, 29px). The control keeps the 44dp touch
+  target, so the visible face is the same dot inset by (44 - 29) / 2 inside the target. The fill
+  and edge are the registered glass tokens; the proposal's white 24%/36% pair is not in the token
+  chain, and inventing it here would be a second source for the material.
+-->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/ripple_control">
+    <item>
+        <layer-list>
+            <item
+                android:left="@dimen/action_glass_inset"
+                android:top="@dimen/action_glass_inset"
+                android:right="@dimen/action_glass_inset"
+                android:bottom="@dimen/action_glass_inset">
+                <shape android:shape="rectangle">
+                    <gradient
+                        android:angle="270"
+                        android:endColor="@android:color/transparent"
+                        android:startColor="@color/glass_sheen" />
+                    <corners android:radius="@dimen/radius_full" />
+                </shape>
+            </item>
+            <item
+                android:left="@dimen/action_glass_inset"
+                android:top="@dimen/action_glass_inset"
+                android:right="@dimen/action_glass_inset"
+                android:bottom="@dimen/action_glass_inset">
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/glass_chrome" />
+                    <stroke android:width="@dimen/hairline" android:color="@color/glass_edge" />
+                    <corners android:radius="@dimen/radius_full" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    <item android:id="@android:id/mask">
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/white" />
+            <corners android:radius="@dimen/radius_full" />
+        </shape>
+    </item>
+</ripple>

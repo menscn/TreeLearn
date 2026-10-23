@@ -2,12 +2,17 @@
 <!--
   Tablet library: the same column, capped at a comfortable reading measure and centred, so a landscape
   tablet shows one readable list instead of rows stretched across the full width.
+
+  The scroll container pays the floating capsule's room and does not clip it, here as on the phone
+  (T-2026-10-22-062). See layout/screen_home.xml for why the host holds no padding.
 -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/library_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:clipToPadding="false"
+    android:fillViewport="true"
+    android:paddingBottom="@dimen/tab_bar_clearance">
 
     <FrameLayout
         android:layout_width="match_parent"

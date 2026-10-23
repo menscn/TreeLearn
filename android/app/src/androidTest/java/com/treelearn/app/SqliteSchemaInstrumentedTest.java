@@ -16,6 +16,7 @@ import android.database.sqlite.SQLiteDatabase;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.treelearn.core.domain.Persona;
 import com.treelearn.data.db.ConstraintExtendedCode;
 import com.treelearn.data.db.DatabaseTransactionRunner;
 import com.treelearn.data.db.TreeLearnDatabaseHelper;
@@ -204,7 +205,10 @@ public final class SqliteSchemaInstrumentedTest {
                 "id:TEXT:1",
                 "last_visited_branch_id:TEXT:0",
                 "created_at:INTEGER:1",
-                "updated_at:INTEGER:1"));
+                "updated_at:INTEGER:1",
+                // V6 appends the style column last on both install paths, for the same reason the
+                // V2 quote column is last on messages: ALTER TABLE ADD COLUMN appends.
+                TreeLearnSchema.Topics.PERSONA + ":TEXT:1"));
         spec.put("branches", String.join(", ",
                 "id:TEXT:1",
                 "topic_id:TEXT:1",
@@ -250,7 +254,8 @@ public final class SqliteSchemaInstrumentedTest {
                 "model:TEXT:1",
                 "thinking_enabled:INTEGER:1",
                 "prompt_policy_version:TEXT:1",
-                "created_at:INTEGER:1"));
+                "created_at:INTEGER:1",
+                TreeLearnSchema.AnswerRevisions.PERSONA + ":TEXT:1"));
         spec.put("generation_operations", String.join(", ",
                 "id:TEXT:1",
                 "branch_id:TEXT:1",
@@ -265,7 +270,8 @@ public final class SqliteSchemaInstrumentedTest {
                 "partial_answer:TEXT:1",
                 "error_code:TEXT:0",
                 "created_at:INTEGER:1",
-                "updated_at:INTEGER:1"));
+                "updated_at:INTEGER:1",
+                TreeLearnSchema.GenerationOperations.PERSONA + ":TEXT:1"));
         spec.put("context_snapshots", String.join(", ",
                 "id:TEXT:1",
                 "branch_id:TEXT:1",
@@ -1196,6 +1202,11 @@ public final class SqliteSchemaInstrumentedTest {
                 rawString(upgraded, "SELECT role FROM messages WHERE id='m-upgrade'"));
         assertNull("a row written before V2 has no quote, and NULL is how that is stored",
                 rawString(upgraded, "SELECT quoted_text FROM messages WHERE id='m-upgrade'"));
+        // V5 -> V6 adds the style column with a default, so a row that predates it must read back
+        // as the default style rather than NULL or as a value the enum cannot name.
+        assertEquals("a topic written before V6 falls back to the default style",
+                Persona.DEFAULT.wireId,
+                rawString(upgraded, "SELECT persona FROM topics WHERE id='t-upgrade'"));
     }
 
     // ------------------------------------------------------------------
@@ -1268,7 +1279,7 @@ public final class SqliteSchemaInstrumentedTest {
                             + TreeLearnSchema.Annotations.TABLE)) {
                 continue;
             }
-            statements.add(withoutV2MessagesColumn(statement));
+            statements.add(withoutV6PersonaColumn(withoutV2MessagesColumn(statement)));
         }
         for (String statement : TreeLearnSchema.CREATE_INDEX_STATEMENTS) {
             if (!statement.contains(TreeLearnSchema.INDEX_MODELS_PROVIDER_MODEL)
@@ -1294,6 +1305,34 @@ public final class SqliteSchemaInstrumentedTest {
         }
         String column = ", " + TreeLearnSchema.Messages.QUOTED_TEXT_DECLARATION;
         assertTrue("the messages DDL must declare the V2 column, otherwise V1 == V2 and this "
+                + "fixture would prove nothing: " + createTable, createTable.contains(column));
+        return createTable.replace(column, "");
+    }
+
+    /**
+     * Strips the V6 style column from the three tables that carry it.
+     *
+     * <p>A genuine V1 database predates V6, so the fixture must not already contain these columns:
+     * otherwise the V5 -> V6 {@code ALTER TABLE ADD COLUMN} would fail on a duplicate column and
+     * this case would never reach the upgrade it claims to witness. Like
+     * {@link #withoutV2MessagesColumn}, the column text is read from the live schema constants so a
+     * rename cannot silently make this stripping a no-op.
+     */
+    private static String withoutV6PersonaColumn(String createTable) {
+        String declaration;
+        if (createTable.startsWith("CREATE TABLE " + TreeLearnSchema.Topics.TABLE + " (")) {
+            declaration = TreeLearnSchema.Topics.PERSONA_DECLARATION;
+        } else if (createTable.startsWith(
+                "CREATE TABLE " + TreeLearnSchema.GenerationOperations.TABLE + " (")) {
+            declaration = TreeLearnSchema.GenerationOperations.PERSONA_DECLARATION;
+        } else if (createTable.startsWith(
+                "CREATE TABLE " + TreeLearnSchema.AnswerRevisions.TABLE + " (")) {
+            declaration = TreeLearnSchema.AnswerRevisions.PERSONA_DECLARATION;
+        } else {
+            return createTable;
+        }
+        String column = ", " + declaration;
+        assertTrue("the table DDL must declare the V6 column, otherwise V1 == V6 for it and this "
                 + "fixture would prove nothing: " + createTable, createTable.contains(column));
         return createTable.replace(column, "");
     }

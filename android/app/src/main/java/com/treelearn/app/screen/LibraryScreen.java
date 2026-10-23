@@ -1,10 +1,14 @@
 package com.treelearn.app.screen;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
+import android.graphics.Typeface;
 import android.text.Editable;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.TextWatcher;
 import android.text.format.DateUtils;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -46,6 +50,7 @@ public final class LibraryScreen extends LinearLayout {
     private final TextView segmentDone;
     private final TextView searchScope;
     private final EditText searchInput;
+    private final View note;
 
     private LibraryPresenter actions;
     private Runnable onBack;
@@ -62,6 +67,7 @@ public final class LibraryScreen extends LinearLayout {
         segmentDone = findViewById(R.id.library_segment_done);
         searchScope = findViewById(R.id.library_search_scope);
         searchInput = findViewById(R.id.library_search_input);
+        note = findViewById(R.id.library_note);
         findViewById(R.id.library_back).setOnClickListener(view -> {
             if (onBack != null) {
                 onBack.run();
@@ -105,6 +111,7 @@ public final class LibraryScreen extends LinearLayout {
         try {
             boolean done = next.segment == LibraryViewState.Segment.DONE;
             searchScope.setVisibility(GONE);
+            note.setVisibility(VISIBLE);
             drawSegments(next, done);
             boolean listed = next.phase == LibraryViewState.Phase.READY
                     && !(done ? next.archived.isEmpty() : next.rows.isEmpty());
@@ -145,6 +152,7 @@ public final class LibraryScreen extends LinearLayout {
         rendering = true;
         try {
             searchScope.setVisibility(VISIBLE);
+            note.setVisibility(GONE);
             rows.removeAllViews();
             boolean listed = page.pane == SearchPage.Pane.LIST;
             rows.setVisibility(listed ? VISIBLE : GONE);
@@ -239,21 +247,41 @@ public final class LibraryScreen extends LinearLayout {
         }
     }
 
-    /** The selected pill is the coloured one; the other keeps the page's own neutral fill. */
+    /**
+     * The selected half wears Scheme A's bright glass face; the other is transparent inside the same
+     * capsule. The count is a smaller span of the same text rather than a second view, so the two
+     * halves keep one text contract ("进行中 2") for readers and for the instrumented tests.
+     */
     private void drawSegments(LibraryViewState next, boolean done) {
-        segmentInProgress.setText(getContext().getString(R.string.library_segment_count,
-                getContext().getString(R.string.library_segment_in_progress), next.rows.size()));
-        segmentDone.setText(getContext().getString(R.string.library_segment_count,
-                getContext().getString(R.string.library_segment_done), next.archived.size()));
-        tint(segmentInProgress, !done);
-        tint(segmentDone, done);
+        segmentInProgress.setText(segment(R.string.library_segment_in_progress,
+                next.rows.size(), !done));
+        segmentDone.setText(segment(R.string.library_segment_done,
+                next.archived.size(), done));
+        face(segmentInProgress, !done);
+        face(segmentDone, done);
     }
 
-    private void tint(TextView pill, boolean selected) {
+    private CharSequence segment(int name, int count, boolean selected) {
         Context context = getContext();
-        pill.setBackgroundTintList(ColorStateList.valueOf(context.getColor(
-                selected ? R.color.tl_green_soft : R.color.tl_bg)));
+        String text = context.getString(R.string.library_segment_count,
+                context.getString(name), count);
+        SpannableStringBuilder span = new SpannableStringBuilder(text);
+        int start = text.lastIndexOf(' ') + 1;
+        float ratio = context.getResources().getDimension(R.dimen.text_library_segment_num)
+                / context.getResources().getDimension(R.dimen.text_library_segment);
+        int base = context.getColor(selected ? R.color.tl_green_deep : R.color.tl_ink3);
+        span.setSpan(new RelativeSizeSpan(ratio), start, text.length(),
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        span.setSpan(new ForegroundColorSpan((base & 0x00FFFFFF) | 0xB3000000),
+                start, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return span;
+    }
+
+    private void face(TextView pill, boolean selected) {
+        Context context = getContext();
+        pill.setBackgroundResource(selected ? R.drawable.bg_segment_active : 0);
         pill.setTextColor(context.getColor(selected ? R.color.tl_green_deep : R.color.tl_ink3));
+        pill.setTypeface(null, selected ? Typeface.BOLD : Typeface.NORMAL);
     }
 
     private void renderTopics(LibraryViewState next) {

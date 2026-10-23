@@ -2,9 +2,9 @@
 
 - 生成命令：`python -X utf8 .codex/scripts/dev/gen_parity_ledger.py`
 - 本次实际参数：(无，全部走默认路径)
-- 清单登记来源提交：44367d6c6a070015a6a134a55338034ab2755ce0；本行现场读到的 HEAD：44367d6c6a070015a6a134a55338034ab2755ce0
-- 清单文件哈希（本次读到的字节）：`7d5c0b18a871bf53513005b876b3b37a462c0ead40944b04fa5f58571dddfd81`
-- 实测面哈希：已落盘 `cac4ca0dd57c0200c9cad1be003ea6cf5fceea772477bdde5d7301091b383077` ／ 当前树重导出 `cac4ca0dd57c0200c9cad1be003ea6cf5fceea772477bdde5d7301091b383077`
+- 清单登记来源提交：f77d34fe3d7eafc29488f926a4611c50162bf7b5；本行现场读到的 HEAD：f77d34fe3d7eafc29488f926a4611c50162bf7b5
+- 清单文件哈希（本次读到的字节）：`76eeb4031f5cac0dc98954ad219235bd862e41da80d828dc1c4f077a48556cd0`
+- 实测面哈希：已落盘 `b57d07ee8da6636f4dfe5b376f06257a025917492528987fb4ea042ca15fcabf` ／ 当前树重导出 `b57d07ee8da6636f4dfe5b376f06257a025917492528987fb4ea042ca15fcabf`
 - 清单新鲜度：一致（当前树重导出的实测面与已落盘清单同哈希）
 - 规格指针（规格里不写范围数字，只指向清单）：登记的 True ／ 现场重读的 True → 一致
 - 行为仪器（verify_1to1.mjs）：adopted — 未收编时本列只报缺证据，不报通过。
@@ -19,6 +19,7 @@
 | LibraryScreen | 屏 | 根布局 screen_library / 入口 2 处（constructed,swap）/ sw600dp=有 | NO-PROFILE：屏档案里没有这个键 | NO-PROFILE：没有夹具回放规格可查 |
 | ModelSettingsScreen | 屏 | 自绘（无根布局） / 入口 2 处（constructed,swap）/ sw600dp=无 | NO-PROFILE：屏档案里没有这个键 | NO-PROFILE：没有夹具回放规格可查 |
 | NavigationScreen | 屏 | 根布局 screen_navigation / 入口 2 处（constructed,swap）/ sw600dp=有 | NO-PROFILE：屏档案里没有这个键 | NO-PROFILE：没有夹具回放规格可查 |
+| PersonaIntroScreen | 屏 | 根布局 screen_persona_intro / 入口 2 处（constructed,swap）/ sw600dp=无 | NO-PROFILE：屏档案里没有这个键 | NO-PROFILE：没有夹具回放规格可查 |
 | ProviderAdminScreen | 屏 | 根布局 screen_provider_admin / 入口 2 处（constructed,swap）/ sw600dp=无 | NO-PROFILE：屏档案里没有这个键 | NO-PROFILE：没有夹具回放规格可查 |
 | SearchServiceSettingsScreen | 屏 | 自绘（无根布局） / 入口 2 处（constructed,swap）/ sw600dp=无 | NO-PROFILE：屏档案里没有这个键 | NO-PROFILE：没有夹具回放规格可查 |
 | SettingsKeyScreen | 屏 | 根布局 screen_settings_key / 入口 2 处（constructed,swap）/ sw600dp=无 | NO-PROFILE：屏档案里没有这个键 | NO-PROFILE：没有夹具回放规格可查 |
@@ -28,12 +29,12 @@
 | VoiceSettingsScreen | 屏 | 自绘（无根布局） / 入口 2 处（constructed,swap）/ sw600dp=无 | NO-PROFILE：屏档案里没有这个键 | NO-PROFILE：没有夹具回放规格可查 |
 | panel_search_picker ← ChatScreen | 浮层 | 浮层 panel_search_picker（dialog）/ sw600dp=无 | NO-PROFILE：屏档案里没有这个键 | NO-PROFILE：没有夹具回放规格可查 |
 | (代码绘制) ← ChatScreen | 浮层 | 浮层 代码绘制，无布局文件（popup_menu）/ sw600dp=无 | NO-PROFILE：屏档案里没有这个键 | NO-PROFILE：没有夹具回放规格可查 |
-| popup_child_branches ← ChildBranchPopup | 浮层 | 浮层 popup_child_branches（popup_window）/ sw600dp=无 | NO-PROFILE：屏档案里没有这个键 | NO-PROFILE：没有夹具回放规格可查 |
 | (代码绘制) ← HomeDrawerScreen | 浮层 | 浮层 代码绘制，无布局文件（code_drawn_host）/ sw600dp=无 | NO-PROFILE：屏档案里没有这个键 | NO-PROFILE：没有夹具回放规格可查 |
 | (代码绘制) ← ModelSettingsScreen | 浮层 | 浮层 代码绘制，无布局文件（popup_window）/ sw600dp=无 | NO-PROFILE：屏档案里没有这个键 | NO-PROFILE：没有夹具回放规格可查 |
 | popup_model_picker ← ModelThinkingPicker | 浮层 | 浮层 popup_model_picker（popup_window）/ sw600dp=无 | NO-PROFILE：屏档案里没有这个键 | NO-PROFILE：没有夹具回放规格可查 |
 | (代码绘制) ← NavigationScreen | 浮层 | 浮层 代码绘制，无布局文件（popup_menu）/ sw600dp=无 | NO-PROFILE：屏档案里没有这个键 | NO-PROFILE：没有夹具回放规格可查 |
 | (代码绘制) ← NavigationScreen | 浮层 | 浮层 代码绘制，无布局文件（alert_dialog）/ sw600dp=无 | NO-PROFILE：屏档案里没有这个键 | NO-PROFILE：没有夹具回放规格可查 |
+| view_persona_option ← PersonaPicker | 浮层 | 浮层 view_persona_option（popup_window）/ sw600dp=无 | NO-PROFILE：屏档案里没有这个键 | NO-PROFILE：没有夹具回放规格可查 |
 | (代码绘制) ← ProviderAdminScreen | 浮层 | 浮层 代码绘制，无布局文件（alert_dialog）/ sw600dp=无 | NO-PROFILE：屏档案里没有这个键 | NO-PROFILE：没有夹具回放规格可查 |
 | (代码绘制) ← ProviderAdminScreen | 浮层 | 浮层 代码绘制，无布局文件（alert_dialog）/ sw600dp=无 | NO-PROFILE：屏档案里没有这个键 | NO-PROFILE：没有夹具回放规格可查 |
 | (代码绘制) ← SearchServiceSettingsScreen | 浮层 | 浮层 代码绘制，无布局文件（popup_window）/ sw600dp=无 | NO-PROFILE：屏档案里没有这个键 | NO-PROFILE：没有夹具回放规格可查 |
@@ -45,15 +46,15 @@
 
 ## 汇总（全部由上面的行现场计数得出）
 
-- 台账条目 = 屏 14 + 浮层 16 = 30
-- 视觉层 各状态：MEASURED=1, NO-PROFILE=29
-- 视觉层 状态合计 = 30（必须等于台账条目数）
-- 行为层 各状态：NO-PROFILE=29, REPLAY-SPEC=1
-- 行为层 状态合计 = 30（必须等于台账条目数）
+- 台账条目 = 屏 15 + 浮层 16 = 31
+- 视觉层 各状态：MEASURED=1, NO-PROFILE=30
+- 视觉层 状态合计 = 31（必须等于台账条目数）
+- 行为层 各状态：NO-PROFILE=30, REPLAY-SPEC=1
+- 行为层 状态合计 = 31（必须等于台账条目数）
 - 自绘屏 5 个（清单里 self_drawn=True 的条数，逐条见上表）
 - sw600dp 变体屏 6 个
 - 未被任何入口引用的屏 = 0；未被引用的布局文件 = 0
-- 范围条目的权威是本清单的 `counts`：屏 14 ／ 浮层 16 ／ 自绘 5；规格正文里形如「N 个屏幕」「N 个浮层」「N 个自绘屏」的行：12, 149, 155, 158（是否为历史引用由人来标注，本行不判）
+- 范围条目的权威是本清单的 `counts`：屏 15 ／ 浮层 16 ／ 自绘 5；规格正文里形如「N 个屏幕」「N 个浮层」「N 个自绘屏」的行：12, 149, 155, 158（是否为历史引用由人来标注，本行不判）
 
 判定：全部通过
 

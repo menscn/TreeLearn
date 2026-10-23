@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  我的森林（SPEC-2026-10-21-my-forest）：顶栏是返回 + 标题 + 一句承诺；其下是铺满剩余高度的
+  斜俯瞰地块。场景左上角提示、右上角罗盘；底部浮着选中树的纸条与一行真实读数的脚注。
+  The ground itself is @com.treelearn.app.forest.ForestScene; this layout only stacks it under
+  the two facts surfaces and the four states.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/tl_bg"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/page_gutter"
+        android:paddingTop="@dimen/space_s3"
+        android:paddingEnd="@dimen/page_gutter"
+        android:paddingBottom="@dimen/space_s2">
+
+        <ImageButton
+            android:id="@+id/forest_back"
+            android:layout_width="@dimen/touch_min"
+            android:layout_height="@dimen/touch_min"
+            android:background="@drawable/bg_icon_button"
+            android:contentDescription="@string/cd_forest_back"
+            android:padding="@dimen/space_s2"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_nav_back"
+            android:tint="@color/tl_ink2" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_s2"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/noto_serif_sc"
+                android:letterSpacing="0.02"
+                android:text="@string/forest_title"
+                android:textColor="@color/tl_ink"
+                android:textSize="@dimen/text_h1"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:text="@string/forest_subtitle"
+                android:textColor="@color/tl_ink3"
+                android:textSize="@dimen/text_cap" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <com.treelearn.app.forest.ForestScene
+            android:id="@+id/forest_scene"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <LinearLayout
+            android:id="@+id/forest_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|start"
+            android:layout_marginStart="@dimen/space_s4"
+            android:layout_marginTop="@dimen/space_s3"
+            android:background="@drawable/bg_forest_hint"
+            android:elevation="@dimen/card_elevation"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/space_s3"
+            android:paddingTop="@dimen/forest_hint_pad_v"
+            android:paddingEnd="@dimen/space_s3"
+            android:paddingBottom="@dimen/forest_hint_pad_v">
+
+            <ImageView
+                android:layout_width="@dimen/forest_hint_icon"
+                android:layout_height="@dimen/forest_hint_icon"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_forest_pin"
+                android:tint="@color/tl_green" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_s1"
+                android:text="@string/forest_hint"
+                android:textColor="@color/tl_ink2"
+                android:textSize="@dimen/text_cap" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/forest_compass"
+            android:layout_width="@dimen/forest_compass"
+            android:layout_height="@dimen/forest_compass"
+            android:layout_gravity="top|end"
+            android:layout_marginTop="@dimen/space_s3"
+            android:layout_marginEnd="@dimen/space_s4"
+            android:background="@drawable/bg_forest_compass"
+            android:contentDescription="@string/cd_forest_compass"
+            android:elevation="@dimen/card_elevation"
+            android:importantForAccessibility="no">
+
+            <ImageView
+                android:layout_width="@dimen/forest_compass_arrow"
+                android:layout_height="@dimen/forest_compass_arrow_h"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="7dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_forest_compass"
+                android:tint="@color/tl_green" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="13dp"
+                android:text="N"
+                android:textColor="@color/tl_ink3"
+                android:textSize="9sp"
+                android:textStyle="bold" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/forest_state"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/space_s6"
+            android:paddingEnd="@dimen/space_s6"
+            android:visibility="gone">
+
+            <FrameLayout
+                android:id="@+id/forest_state_ring"
+                android:layout_width="@dimen/forest_ring"
+                android:layout_height="@dimen/forest_ring"
+                android:background="@drawable/bg_forest_empty_ring">
+
+                <ImageView
+                    android:id="@+id/forest_state_icon"
+                    android:layout_width="@dimen/forest_empty_icon"
+                    android:layout_height="@dimen/forest_empty_icon"
+                    android:layout_gravity="center"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_brand_sprout"
+                    android:tint="@color/tl_green" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/forest_state_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_s4"
+                android:fontFamily="@font/noto_serif_sc"
+                android:gravity="center"
+                android:textColor="@color/tl_ink"
+                android:textSize="@dimen/text_h2"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/forest_state_message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_s2"
+                android:gravity="center"
+                android:lineSpacingExtra="4dp"
+                android:textColor="@color/tl_ink2"
+                android:textSize="@dimen/text_sm" />
+
+            <TextView
+                android:id="@+id/forest_state_action"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_s4"
+                android:background="@drawable/bg_forest_cta"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:minHeight="@dimen/touch_min"
+                android:paddingStart="@dimen/space_s6"
+                android:paddingEnd="@dimen/space_s6"
+                android:textColor="@color/tl_surface"
+                android:textSize="@dimen/text_sm"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/page_gutter"
+            android:paddingEnd="@dimen/page_gutter"
+            android:paddingBottom="@dimen/forest_foot_bottom">
+
+            <LinearLayout
+                android:id="@+id/forest_sheet"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/space_s3"
+                android:background="@drawable/bg_forest_sheet"
+                android:elevation="@dimen/card_elevation"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="@dimen/space_s4"
+                android:paddingTop="@dimen/space_s3"
+                android:paddingEnd="@dimen/space_s3"
+                android:paddingBottom="@dimen/space_s3"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/forest_sheet_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/noto_serif_sc"
+                        android:maxLines="1"
+                        android:textColor="@color/tl_ink"
+                        android:textSize="@dimen/text_h2"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/forest_sheet_meta"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/forest_meta_top"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textColor="@color/tl_ink3"
+                        android:textSize="@dimen/text_cap" />
+                </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/forest_sheet_open"
+                    android:layout_width="@dimen/touch_min"
+                    android:layout_height="@dimen/touch_min"
+                    android:layout_marginStart="@dimen/space_s3"
+                    android:background="@drawable/bg_forest_cta"
+                    android:contentDescription="@string/cd_forest_open"
+                    android:padding="@dimen/space_s3"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_chevron_right"
+                    android:tint="@color/tl_surface" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/forest_footnote"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:letterSpacing="0.02"
+                android:textColor="@color/tl_ink3"
+                android:textSize="@dimen/text_cap" />
+        </LinearLayout>
+    </FrameLayout>
+</LinearLayout>

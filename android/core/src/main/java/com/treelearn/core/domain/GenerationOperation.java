@@ -45,6 +45,8 @@ public final class GenerationOperation {
     public final String promptPolicyVersion;
     public final GenerationModel model;
     public final boolean thinkingEnabled;
+    /** The style the command pinned; copied verbatim into the stable revision. */
+    public final Persona persona;
     public final long createdAt;
 
     private GenerationState state;
@@ -61,6 +63,7 @@ public final class GenerationOperation {
                 command.promptPolicyVersion, "command.promptPolicyVersion");
         this.model = Guard.object(command.model, "command.model");
         this.thinkingEnabled = command.thinkingEnabled;
+        this.persona = Guard.object(command.persona, "command.persona");
         this.state = GenerationState.STAGED;
         this.createdAt = Guard.epochMillis(now, "createdAt");
     }
@@ -245,7 +248,7 @@ public final class GenerationOperation {
         }
         DomainResult<AnswerRevision> created = AnswerRevision.create(
                 messageId, revisionNo, finalReasoning, finalAnswer,
-                model, thinkingEnabled, promptPolicyVersion, now);
+                model, thinkingEnabled, persona, promptPolicyVersion, now);
         if (created.isFailure()) {
             return created;
         }

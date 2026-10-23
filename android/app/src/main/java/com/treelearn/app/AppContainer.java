@@ -16,6 +16,7 @@ import com.treelearn.app.generation.GenerationGateway;
 import com.treelearn.app.generation.MessageTranslator;
 import com.treelearn.app.generation.QuickModelGateway;
 import com.treelearn.app.artifact.DerivedService;
+import com.treelearn.app.forest.ForestData;
 import com.treelearn.app.library.LibraryData;
 import com.treelearn.app.navigation.NavigationData;
 import com.treelearn.app.navigation.SqliteNavigationStore;
@@ -42,6 +43,7 @@ import com.treelearn.app.wiring.ChatWiring;
 import com.treelearn.app.wiring.ChatStore;
 import com.treelearn.app.wiring.CoordinatorGenerationPort;
 import com.treelearn.app.wiring.GenerationPort;
+import com.treelearn.app.wiring.ForestWiring;
 import com.treelearn.app.wiring.HomeWiring;
 import com.treelearn.app.wiring.LibraryWiring;
 import com.treelearn.app.wiring.NavigationWiring;
@@ -119,6 +121,9 @@ public final class AppContainer {
 
     /** The library's topic list: a read-only store, built once like every other store. */
     private final LibraryWiring libraryWiring;
+
+    /** The forest's read: the library's topics plus the one forest projection and the stats entry. */
+    private final ForestWiring forestWiring;
 
     private final ReadingStore readingStore;
 
@@ -213,6 +218,7 @@ public final class AppContainer {
         // implementation rather than a second one that could answer with a different set.
         this.libraryStore = new SqliteLibraryStore(helper);
         this.libraryWiring = new LibraryWiring(libraryStore, navigationWiring);
+        this.forestWiring = new ForestWiring(libraryWiring, libraryStore, homeStore, clock);
         this.readingStore = new SqliteReadingStore(helper);
         this.searchRepository = new SqliteSearchStore(helper);
         this.chatDraftStore = new SharedPreferencesChatDraftStore(applicationContext);
@@ -312,6 +318,11 @@ public final class AppContainer {
      */
     public LibraryData libraryData() {
         return libraryWiring;
+    }
+
+    /** The forest page's one read: the same topic collection, the forest projection and the streak. */
+    public ForestData forestData() {
+        return forestWiring;
     }
 
     /**

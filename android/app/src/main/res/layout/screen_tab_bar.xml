@@ -1,55 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The bottom tab bar carries Home and Library. It belongs to
-  the shell, not to any screen - activity_main.xml includes it once, and MainActivity shows or hides it
-  from swap() - so no screen draws a bar of its own and no return path can drift.
+  Phone tab bar (2026-10-22 Scheme A): a floating glass capsule pinned by activity_main's include.
+  The outer node exists only to keep the shell's tab_bar id stable while the visible capsule carries
+  its own id, margins and padding; the two tab items sit side by side with the glyph beside the label.
 
-  Each item is one tap target of at least @dimen/touch_min carrying an icon and its label. Icon and
-  label are named per tab rather than sharing one pair of ids: multiple items in one layout that all
-  answered to `tab_icon` would be a duplicate id, which this repository's lint gate aborts on, and the
-  only declarative way around it (an item layout included multiple times) cannot give each copy its own
-  `android:src` and label text. The selected/unselected state is likewise not spelled here on purpose:
-  MainActivity tints the icon and the label with the token each state owns, which keeps "which tab is
-  current" a single decision in one place.
+  Each item names its own icon and label for the reason the pre-Scheme-A copy recorded: two items in
+  one layout cannot all answer to one id, so the caller (MainActivity#markTab) is told which pair it
+  is painting.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/tab_bar"
-    android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:background="@android:color/transparent" android:orientation="vertical">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent"
+    android:clipChildren="false">
 
-    <View android:layout_width="match_parent" android:layout_height="@dimen/hairline"
-        android:background="@color/tl_line" />
+    <com.treelearn.app.screen.GlassSurfaceLayout
+        android:id="@+id/tab_bar_pill"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/tab_bar_height"
+        android:background="@drawable/bg_glass_bar"
+        android:baselineAligned="false"
+        android:elevation="@dimen/glass_capsule_elevation"
+        android:orientation="horizontal"
+        android:padding="@dimen/tab_bar_padding">
 
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:baselineAligned="false" android:orientation="horizontal">
+        <LinearLayout
+            android:id="@+id/tab_home"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/tab_bar_item"
+            android:layout_weight="1"
+            android:background="@drawable/bg_tab_item"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="horizontal">
 
-        <LinearLayout android:id="@+id/tab_home" android:layout_width="0dp"
-            android:layout_height="wrap_content" android:layout_weight="1"
-            android:background="?android:attr/selectableItemBackground" android:clickable="true"
-            android:focusable="true" android:gravity="center" android:minHeight="@dimen/touch_min"
-            android:orientation="vertical" android:paddingTop="@dimen/space_s2"
-            android:paddingBottom="@dimen/space_s2">
-            <ImageView android:id="@+id/tab_home_icon" android:layout_width="24dp"
-                android:layout_height="24dp" android:importantForAccessibility="no"
+            <ImageView
+                android:id="@+id/tab_home_icon"
+                android:layout_width="@dimen/tab_bar_icon"
+                android:layout_height="@dimen/tab_bar_icon"
+                android:importantForAccessibility="no"
                 android:src="@drawable/ic_tab_home" />
-            <TextView android:id="@+id/tab_home_label" android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_s1"
-                android:text="@string/tab_home" android:textSize="@dimen/text_cap" />
+
+            <TextView
+                android:id="@+id/tab_home_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/tab_bar_gap"
+                android:text="@string/tab_home"
+                android:textSize="@dimen/text_cap" />
         </LinearLayout>
 
-        <LinearLayout android:id="@+id/tab_library" android:layout_width="0dp"
-            android:layout_height="wrap_content" android:layout_weight="1"
-            android:background="?android:attr/selectableItemBackground" android:clickable="true"
-            android:focusable="true" android:gravity="center" android:minHeight="@dimen/touch_min"
-            android:orientation="vertical" android:paddingTop="@dimen/space_s2"
-            android:paddingBottom="@dimen/space_s2">
-            <ImageView android:id="@+id/tab_library_icon" android:layout_width="24dp"
-                android:layout_height="24dp" android:importantForAccessibility="no"
+        <LinearLayout
+            android:id="@+id/tab_library"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/tab_bar_item"
+            android:layout_marginStart="@dimen/space_s1"
+            android:layout_weight="1"
+            android:background="@drawable/bg_tab_item"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/tab_library_icon"
+                android:layout_width="@dimen/tab_bar_icon"
+                android:layout_height="@dimen/tab_bar_icon"
+                android:importantForAccessibility="no"
                 android:src="@drawable/ic_tab_library" />
-            <TextView android:id="@+id/tab_library_label" android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_s1"
-                android:text="@string/tab_library" android:textSize="@dimen/text_cap" />
+
+            <TextView
+                android:id="@+id/tab_library_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/tab_bar_gap"
+                android:text="@string/tab_library"
+                android:textSize="@dimen/text_cap" />
         </LinearLayout>
 
-    </LinearLayout>
-</LinearLayout>
+    </com.treelearn.app.screen.GlassSurfaceLayout>
+</FrameLayout>

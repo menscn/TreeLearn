@@ -2,12 +2,18 @@
 <!--
   Phone library: one column, full width. The column itself lives in screen_library_body.xml, so the
   phone page and the tablet page cannot drift; only the width that surrounds it differs.
+
+  Like the home, this page pays the floating capsule's room in its own scroll container with
+  clipToPadding off (T-2026-10-22-062), so topic rows pass under the glass instead of stopping above
+  it. See layout/screen_home.xml for why the host no longer holds that padding.
 -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/library_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:clipToPadding="false"
+    android:fillViewport="true"
+    android:paddingBottom="@dimen/tab_bar_clearance">
 
     <include
         layout="@layout/screen_library_body"

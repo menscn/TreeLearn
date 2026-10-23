@@ -1,0 +1,327 @@
+{
+  "generatedAt": "2026-10-21T10:54:56.129Z",
+  "url": "http://127.0.0.1:5199/",
+  "browser": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+  "shots": [
+    "desktop-home.png",
+    "desktop-home-nav-collapsed.png",
+    "desktop-chat.png",
+    "desktop-branch-panel.png",
+    "desktop-tree.png",
+    "desktop-library.png",
+    "desktop-library-filtered.png",
+    "desktop-settings.png",
+    "narrow-chat.png",
+    "narrow-branch-overlay.png",
+    "narrow-library.png"
+  ],
+  "failed": 0,
+  "results": [
+    {
+      "scenario": "桌面主页布局",
+      "expected": "页宽 960、侧栏 240、无横向溢出、品牌有 SVG",
+      "actual": {
+        "screen": "home",
+        "pageWidth": 960,
+        "sidebarWidth": 240,
+        "overflowX": false,
+        "brandIcon": true
+      },
+      "pass": true
+    },
+    {
+      "scenario": "空格键折叠侧栏",
+      "expected": "data-nav=collapsed、aria-expanded=false、宽 76、焦点留在触发按钮",
+      "actual": {
+        "nav": "collapsed",
+        "expanded": "false",
+        "width": 76,
+        "active": "toggle-nav",
+        "focusVisible": true
+      },
+      "pass": true
+    },
+    {
+      "scenario": "空格键展开侧栏",
+      "expected": "data-nav=expanded、宽 240",
+      "actual": {
+        "nav": "expanded",
+        "width": 240
+      },
+      "pass": true
+    },
+    {
+      "scenario": "主题 0 对话来自夹具",
+      "expected": "标题含注意力权重、回答 >1500 字、3 条建议",
+      "actual": {
+        "title": "注意力权重可视化与模型可解释性的关系",
+        "hasAnswer": true,
+        "answerLen": 1970,
+        "suggestions": 3,
+        "scrollHeight": 3146,
+        "clientHeight": 625,
+        "topbarY": 0,
+        "dockBottom": 900,
+        "dockY": 701
+      },
+      "pass": true
+    },
+    {
+      "scenario": "正文独立滚动、工具区固定",
+      "expected": "滚动 >0 且顶栏 y 与底部输入区位置不变",
+      "actual": {
+        "before": {
+          "topbarY": 0,
+          "dockY": 701,
+          "dockBottom": 900
+        },
+        "after": {
+          "scrollTop": 600,
+          "topbarY": 0,
+          "dockY": 701,
+          "dockBottom": 900
+        }
+      },
+      "pass": true
+    },
+    {
+      "scenario": "中文输入法组合输入",
+      "expected": "compositionstart/end 各至少 1 次、草稿含『中文草稿』、视图与 hash 不变",
+      "actual": {
+        "during": {
+          "ime": {
+            "start": 1,
+            "update": 1,
+            "end": 0,
+            "input": 1
+          },
+          "value": "zhongwen",
+          "screen": "chat",
+          "hash": "#/chat/0"
+        },
+        "after": {
+          "ime": {
+            "start": 1,
+            "update": 2,
+            "end": 1,
+            "input": 2
+          },
+          "value": "中文草稿",
+          "screen": "chat",
+          "hash": "#/chat/0",
+          "copyStatus": null
+        },
+        "finalValue": "中文草稿",
+        "fallback": false
+      },
+      "pass": true
+    },
+    {
+      "scenario": "复制整条回答",
+      "expected": "成功状态且剪贴板内容与回答一致",
+      "actual": {
+        "status": "copied",
+        "clipOk": true,
+        "clipLen": 2156,
+        "clipHead": "核心先说结论：注意力头消"
+      },
+      "pass": true
+    },
+    {
+      "scenario": "宽窗分支面板",
+      "expected": "面板可见、宽 320、与正文并排、遮罩不显示、焦点在关闭按钮",
+      "actual": {
+        "hidden": false,
+        "position": "static",
+        "width": 320,
+        "left": 1120,
+        "mainRight": 1120,
+        "scrimDisplay": "none",
+        "focus": "branch-close",
+        "expanded": "true"
+      },
+      "pass": true
+    },
+    {
+      "scenario": "Esc 关闭分支面板并还焦",
+      "expected": "面板隐藏、焦点回到 #branch-toggle",
+      "actual": {
+        "hidden": true,
+        "focus": "branch-toggle",
+        "focusVisible": true
+      },
+      "pass": true
+    },
+    {
+      "scenario": "知识树缩放与关闭",
+      "expected": "放大夹在 150%、缩小夹在 50%、适应回 100%、Esc 关闭并还焦",
+      "actual": {
+        "high": "150%",
+        "low": "50%",
+        "fit": "100%",
+        "treeClosed": {
+          "open": false,
+          "focus": "tree-toggle"
+        }
+      },
+      "pass": true
+    },
+    {
+      "scenario": "浏览器后退/前进恢复对话与草稿",
+      "expected": "back 回主页、forward 回对话、草稿仍在、阅读位置恢复",
+      "actual": {
+        "backScreen": "home",
+        "restored": {
+          "screen": "chat",
+          "value": "中文草稿",
+          "scrollTop": 600
+        }
+      },
+      "pass": true
+    },
+    {
+      "scenario": "学习库默认两行",
+      "expected": "两行主题、无空态",
+      "actual": {
+        "rows": 2,
+        "expanded": 0,
+        "empty": false
+      },
+      "pass": true
+    },
+    {
+      "scenario": "学习库搜索、筛选与摘要展开",
+      "expected": "查询命中 1 行、进行中筛选按下、摘要展开且 aria 同步",
+      "actual": {
+        "searched": {
+          "q": "关键头",
+          "rows": 1,
+          "empty": false
+        },
+        "filtered": {
+          "pressed": "true",
+          "rows": 1
+        },
+        "expanded": {
+          "expanded": "true",
+          "aria": "true"
+        }
+      },
+      "pass": true
+    },
+    {
+      "scenario": "学习库阅读位置与筛选恢复（1440×520）",
+      "expected": "列表实际溢出、滚到可滚上限、往返后位置不变",
+      "actual": {
+        "overflow": {
+          "scrollHeight": 570,
+          "clientHeight": 444,
+          "scrollTop": 126,
+          "rows": 2,
+          "cleared": true
+        },
+        "restored": {
+          "scrollTop": 126,
+          "rows": 2,
+          "filter": "true"
+        }
+      },
+      "pass": true
+    },
+    {
+      "scenario": "设置分类＋详情只读",
+      "expected": "active=search、详情同步、只读说明存在、动作全禁用、无 role=switch",
+      "actual": {
+        "active": "search",
+        "detail": "search",
+        "readonly": "Web 端只读：以下内容来自最近一次采集；保存、删除、替换、开关与试听尚未接通。",
+        "disabledActions": true,
+        "roleSwitch": 0
+      },
+      "pass": true
+    },
+    {
+      "scenario": "设置分类与滚动恢复（1440×520）",
+      "expected": "active=search、滚动位置 140",
+      "actual": {
+        "active": "search",
+        "scrollTop": 140,
+        "scrollHeight": 816,
+        "clientHeight": 444
+      },
+      "pass": true
+    },
+    {
+      "scenario": "窄窗设置不丢分类且无页面横向溢出",
+      "expected": "侧栏自动收起、active=search、分类条可横向滚动、页面无横向溢出",
+      "actual": {
+        "nav": "collapsed",
+        "active": "search",
+        "overflowX": false,
+        "catsOverflow": true
+      },
+      "pass": true
+    },
+    {
+      "scenario": "窄窗对话保留草稿",
+      "expected": "侧栏收起、屏幕 chat、草稿仍在、无页面横向溢出",
+      "actual": {
+        "nav": "collapsed",
+        "screen": "chat",
+        "draft": "中文草稿",
+        "overflowX": false,
+        "readingWidth": 380
+      },
+      "pass": true
+    },
+    {
+      "scenario": "窄窗分支面板覆盖",
+      "expected": "position=absolute、宽 ≤340、贴右缘、遮罩可见、焦点在关闭按钮",
+      "actual": {
+        "hidden": false,
+        "position": "absolute",
+        "width": 340,
+        "right": 390,
+        "viewport": 390,
+        "scrimDisplay": "block",
+        "focus": "branch-close"
+      },
+      "pass": true
+    },
+    {
+      "scenario": "窄窗 Esc 关闭分支面板并还焦",
+      "expected": "面板隐藏、焦点回 #branch-toggle",
+      "actual": {
+        "hidden": true,
+        "focus": "branch-toggle"
+      },
+      "pass": true
+    },
+    {
+      "scenario": "窄窗学习库保留筛选状态",
+      "expected": "两行、全部筛选仍按下、无页面横向溢出",
+      "actual": {
+        "screen": "library",
+        "rows": 2,
+        "filter": "true",
+        "expanded": 1,
+        "pageWidth": 390,
+        "overflowX": false,
+        "scrollTop": 0
+      },
+      "pass": true
+    },
+    {
+      "scenario": "宽度往返不清业务状态",
+      "expected": "回到 library、两行、筛选仍按下、页宽恢复 960",
+      "actual": {
+        "screen": "library",
+        "rows": 2,
+        "filter": "true",
+        "pageWidth": 960,
+        "sidebar": 76
+      },
+      "pass": true
+    }
+  ]
+}

@@ -101,14 +101,17 @@ public final class RecommendationTagTest {
     }
 
     @Test
-    public void theChipCarriesThePrototypesThreePartsAndLeavesTheTintToTheJudgement()
+    public void theChipCarriesTheCategoryTheIconAndTheQuestionText()
             throws Exception {
         String chip = read(RES.resolve(Paths.get("layout", "item_recommendation.xml")));
         assertTrue("the category pill", chip.contains("android:id=\"@+id/rec_tag\""));
         assertTrue("the question text", chip.contains("android:id=\"@+id/rec_text\""));
-        assertTrue("the prototype's trailing chevron", chip.contains(
-                "android:id=\"@+id/rec_chevron\""));
-        assertTrue("the chevron must be the right-pointing one",
+        // 2026-10-22 Scheme A draws the 232dp card with a leading sparkle and no trailing chevron;
+        // the card is tapped as a whole, so the chevron was decoration that implied a second action.
+        assertTrue("the card's leading sparkle", chip.contains("android:id=\"@+id/rec_icon\""));
+        assertTrue("the sparkle is the prototype's", chip.contains("@drawable/ic_sparkle"));
+        assertFalse("no trailing chevron", chip.contains("rec_chevron"));
+        assertFalse("and no right-pointing glyph at all",
                 chip.contains("@drawable/ic_chevron_right"));
 
         // The tint is per-kind now, so a single hard-coded tint in the markup would pin every tag to one

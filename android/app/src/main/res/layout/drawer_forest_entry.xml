@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The drawer's forest row (SPEC-2026-10-21-my-forest): after the heatmap card and before recent
+  learning. One 44dp tap target: a sage round badge, the name, one line of why, and a chevron. The
+  row is a shortcut; the library stays the canonical topic list.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawer_forest_entry"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_forest_entry"
+    android:clickable="true"
+    android:contentDescription="@string/cd_drawer_forest"
+    android:focusable="true"
+    android:gravity="center_vertical"
+    android:minHeight="@dimen/touch_min"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/space_s2"
+    android:paddingTop="@dimen/space_s2"
+    android:paddingEnd="@dimen/space_s2"
+    android:paddingBottom="@dimen/space_s2">
+
+    <FrameLayout
+        android:layout_width="@dimen/forest_badge"
+        android:layout_height="@dimen/forest_badge"
+        android:background="@drawable/bg_forest_badge">
+
+        <ImageView
+            android:layout_width="@dimen/forest_badge_icon"
+            android:layout_height="@dimen/forest_badge_icon"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_forest"
+            android:tint="@color/tl_green_deep" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/space_s3"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/drawer_forest_title"
+            android:textColor="@color/tl_ink"
+            android:textSize="@dimen/text_sm"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_s1"
+            android:text="@string/drawer_forest_sub"
+            android:textColor="@color/tl_ink3"
+            android:textSize="@dimen/text_cap" />
+    </LinearLayout>
+
+    <ImageView
+        android:layout_width="@dimen/forest_chevron"
+        android:layout_height="@dimen/forest_chevron"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_chevron_right"
+        android:tint="@color/tl_ink3" />
+</LinearLayout>

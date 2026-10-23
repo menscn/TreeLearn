@@ -31,8 +31,10 @@ import com.treelearn.core.domain.GenerationModel;
 import com.treelearn.core.domain.GenerationState;
 import com.treelearn.core.domain.Guard;
 import com.treelearn.core.domain.Message;
+import com.treelearn.core.domain.Persona;
 import com.treelearn.data.db.dao.BranchCreation;
 import com.treelearn.data.db.dao.ContextSnapshotDao;
+import com.treelearn.data.db.dao.TopicDao;
 
 import java.time.Clock;
 import java.util.ArrayList;
@@ -219,7 +221,8 @@ public final class ChatWiring implements ChatData, ChatCommands {
         Map<String, List<Annotation>> marks = store.annotations(messages);
         return Snapshot.of(conversation.branchTitle, messages, newQuestions(answerRecommendations),
                 answerRecommendations.isEmpty() ? "" : recommendationsRevisionId, conversation.branch,
-                conversation.messages, sourceCard(conversation.branch), marks);
+                conversation.messages, sourceCard(conversation.branch), marks, conversation.persona,
+                conversation.personaFellBack);
     }
 
     /**
@@ -531,6 +534,23 @@ public final class ChatWiring implements ChatData, ChatCommands {
         return ChatCommandResult.succeeded();
     }
 
+    /**
+     * 2026-10-23: the style switch is one narrow write on the topic row. A store that refuses it
+     * (the branch or its topic is gone) is an ordinary storage refusal, not a crash: the chip has
+     * already moved optimistically, so the presenter must get a value it can revert on.
+     */
+    @Override
+    public ChatCommandResult setPersona(String branchId, Persona persona) {
+        Guard.id(branchId, "branchId");
+        Guard.object(persona, "persona");
+        try {
+            store.updatePersona(branchId, persona);
+        } catch (RuntimeException refused) {
+            return ChatCommandResult.refused(HomeViewState.Notice.STORAGE);
+        }
+        return ChatCommandResult.succeeded();
+    }
+
     /** Retry and reset share one route; only the decision they delegate to differs (T-010). */
     private ChatCommandResult replace(String messageId, GenerationModel model, boolean thinkingEnabled,
             long now, boolean reset) {
@@ -593,7 +613,7 @@ public final class ChatWiring implements ChatData, ChatCommands {
                         attachmentText)
                         : groundingBlock + "\n" + DeepSeekContextEncoder.currentInput(input, quote,
                         attachmentText),
-                budget);
+                forCommand.persona, budget);
         GenerationCoordinator.SubmitOutcome outcome = generation.submit(command, assembler);
         if (outcome.isAccepted()) {
             return ChatCommandResult.ran(outcome.operationId);
@@ -647,11 +667,19 @@ public final class ChatWiring implements ChatData, ChatCommands {
                 : new RequestHistory(compressed, true);
     }
 
-    /** Pins the one usage and the one version a conversation position runs under. */
-    private static GenerationCommand pin(String branchId, String messageId, GenerationModel model,
+    /**
+     * Pins the one usage, version and style a conversation position runs under.
+     *
+     * <p>The style is read from the topic row at admission, not from the composer chip: the chip
+     * only displays and writes that row, so the row is the one authority. A row this build cannot
+     * name falls back to the default, mirrored at the read boundary.
+     */
+    private GenerationCommand pin(String branchId, String messageId, GenerationModel model,
             boolean thinkingEnabled, long now) {
+        TopicDao.PersonaRead persona = store.personaOfBranch(branchId);
         DomainResult<GenerationCommand> pinned = GenerationCommand.create(branchId, messageId,
-                AnswerPolicy.PURPOSE, AnswerPolicy.version(), model, thinkingEnabled, now);
+                AnswerPolicy.PURPOSE, AnswerPolicy.version(), model, thinkingEnabled,
+                persona == null ? Persona.DEFAULT : persona.persona, now);
         if (pinned.isFailure()) {
             throw new IllegalStateException(
                     "the prompt registry's own version was refused by the domain: " + pinned.error());

@@ -1,49 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Tablet tab bar: the same two items, capped at the reading measure and centred, so a landscape
-  tablet does not stretch the labels across the whole width. The items are identical to the phone
-  copy on purpose - the qualifier changes the box, never the contents - and each item names its own
-  icon and label for the reason the phone copy records (multiple items, one layout, no duplicate ids).
+  Tablet tab bar: the same floating capsule and the same items as the phone copy, capped at a width
+  that still fits a 600dp-wide window (the 640dp reading measure would overflow once the shell's 24dp
+  side margins are taken out). The qualifier changes the box, never the contents: both copies carry
+  the same ids, so MainActivity does not know which one it inflated.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/tab_bar"
-    android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:background="@android:color/transparent" android:orientation="vertical">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent"
+    android:clipChildren="false">
 
-    <View android:layout_width="match_parent" android:layout_height="@dimen/hairline"
-        android:background="@color/tl_line" />
+    <com.treelearn.app.screen.GlassSurfaceLayout
+        android:id="@+id/tab_bar_pill"
+        android:layout_width="@dimen/tab_bar_tablet_width"
+        android:layout_height="@dimen/tab_bar_height"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/bg_glass_bar"
+        android:baselineAligned="false"
+        android:elevation="@dimen/glass_capsule_elevation"
+        android:orientation="horizontal"
+        android:padding="@dimen/tab_bar_padding">
 
-    <LinearLayout android:layout_width="@dimen/content_measure" android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal" android:baselineAligned="false"
-        android:orientation="horizontal">
+        <LinearLayout
+            android:id="@+id/tab_home"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/tab_bar_item"
+            android:layout_weight="1"
+            android:background="@drawable/bg_tab_item"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="horizontal">
 
-        <LinearLayout android:id="@+id/tab_home" android:layout_width="0dp"
-            android:layout_height="wrap_content" android:layout_weight="1"
-            android:background="?android:attr/selectableItemBackground" android:clickable="true"
-            android:focusable="true" android:gravity="center" android:minHeight="@dimen/touch_min"
-            android:orientation="vertical" android:paddingTop="@dimen/space_s2"
-            android:paddingBottom="@dimen/space_s2">
-            <ImageView android:id="@+id/tab_home_icon" android:layout_width="24dp"
-                android:layout_height="24dp" android:importantForAccessibility="no"
+            <ImageView
+                android:id="@+id/tab_home_icon"
+                android:layout_width="@dimen/tab_bar_icon"
+                android:layout_height="@dimen/tab_bar_icon"
+                android:importantForAccessibility="no"
                 android:src="@drawable/ic_tab_home" />
-            <TextView android:id="@+id/tab_home_label" android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_s1"
-                android:text="@string/tab_home" android:textSize="@dimen/text_cap" />
+
+            <TextView
+                android:id="@+id/tab_home_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/tab_bar_gap"
+                android:text="@string/tab_home"
+                android:textSize="@dimen/text_cap" />
         </LinearLayout>
 
-        <LinearLayout android:id="@+id/tab_library" android:layout_width="0dp"
-            android:layout_height="wrap_content" android:layout_weight="1"
-            android:background="?android:attr/selectableItemBackground" android:clickable="true"
-            android:focusable="true" android:gravity="center" android:minHeight="@dimen/touch_min"
-            android:orientation="vertical" android:paddingTop="@dimen/space_s2"
-            android:paddingBottom="@dimen/space_s2">
-            <ImageView android:id="@+id/tab_library_icon" android:layout_width="24dp"
-                android:layout_height="24dp" android:importantForAccessibility="no"
+        <LinearLayout
+            android:id="@+id/tab_library"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/tab_bar_item"
+            android:layout_marginStart="@dimen/space_s1"
+            android:layout_weight="1"
+            android:background="@drawable/bg_tab_item"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/tab_library_icon"
+                android:layout_width="@dimen/tab_bar_icon"
+                android:layout_height="@dimen/tab_bar_icon"
+                android:importantForAccessibility="no"
                 android:src="@drawable/ic_tab_library" />
-            <TextView android:id="@+id/tab_library_label" android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_s1"
-                android:text="@string/tab_library" android:textSize="@dimen/text_cap" />
+
+            <TextView
+                android:id="@+id/tab_library_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/tab_bar_gap"
+                android:text="@string/tab_library"
+                android:textSize="@dimen/text_cap" />
         </LinearLayout>
 
-    </LinearLayout>
-</LinearLayout>
+    </com.treelearn.app.screen.GlassSurfaceLayout>
+</FrameLayout>

@@ -1,0 +1,19 @@
+# 片 062 GREEN：让位归滚动容器之后的真机读数（adb install -r 后的实拍）
+# cmd: python -X utf8 .codex/scripts/dev/check_glass_depth.py --shot 062-after-home-bottom.png --band bottom --drift-before 062-after-home-top.png --drift-after 062-after-home-bottom.png
+# 取区帧=静止帧（末条停在胶囊上方），J4 用「页面顶」与「滚到底」两帧对比；box 与 061 逐位相同，J1-J3 因此可直接对照
+GLASS-DEPTH shot=062-after-home-bottom.png band=bottom box=78,2385..1121,2586 scene_pixels=14400
+OK   J1 玻璃—背景分离 = 19.6 L（需 ≥ 10）
+OK   J2 投影暗带 = 12.4 L（需 ≥ 6）
+OK   J3 背景亮度跨度 = 26.2 L（需 ≥ 24）
+OK   J3 背景彩度跨度 = 13.0（需 ≥ 6）
+OK   J4 玻璃下内容经过 = 35.1 L 变化（需 ≥ 8）
+VERDICT: PASS
+EXITCODE=0
+EXITCODE=0
+
+# 同一仪器在改动前那一版 build 上的读数见 062-baseline-reading.txt（J4 = 0.0 L）
+# 自检：
+GLASS-DEPTH SELFTEST cases=11 failures=0
+VERDICT: PASS
+EXITCODE=0
+EXITCODE=0

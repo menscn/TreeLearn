@@ -59,7 +59,7 @@ public final class HomeDrawerScreen extends FrameLayout {
         int gutter = getResources().getDimensionPixelSize(R.dimen.page_gutter);
         panel = new LinearLayout(context);
         panel.setOrientation(LinearLayout.VERTICAL);
-        panel.setBackgroundColor(context.getColor(R.color.tl_surface));
+        panel.setBackgroundResource(R.drawable.bg_glass_panel);
         panel.setPadding(gutter, getResources().getDimensionPixelSize(R.dimen.space_s4), gutter,
                 getResources().getDimensionPixelSize(R.dimen.space_s4));
         // 78% of the screen, computed here so no width token is minted for a presentation value.
@@ -83,6 +83,15 @@ public final class HomeDrawerScreen extends FrameLayout {
             }
         });
         panel.addView(heatmapCard, heatmapLayoutParams());
+
+        View forestEntry = LayoutInflater.from(context).inflate(R.layout.drawer_forest_entry,
+                panel, false);
+        forestEntry.setOnClickListener(view -> {
+            if (actions != null) {
+                actions.onForestTapped();
+            }
+        });
+        panel.addView(forestEntry, forestEntryLayoutParams());
 
         TextView title = new TextView(context);
         title.setText(R.string.drawer_quick_title);
@@ -196,6 +205,13 @@ public final class HomeDrawerScreen extends FrameLayout {
     }
 
     private LinearLayout.LayoutParams heatmapLayoutParams() {
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.bottomMargin = getResources().getDimensionPixelSize(R.dimen.space_s3);
+        return params;
+    }
+
+    private LinearLayout.LayoutParams forestEntryLayoutParams() {
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.bottomMargin = getResources().getDimensionPixelSize(R.dimen.space_s3);

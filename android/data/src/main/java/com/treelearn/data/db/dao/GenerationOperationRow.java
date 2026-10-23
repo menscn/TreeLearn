@@ -2,6 +2,7 @@ package com.treelearn.data.db.dao;
 
 import com.treelearn.core.domain.GenerationModel;
 import com.treelearn.core.domain.GenerationState;
+import com.treelearn.core.domain.Persona;
 import com.treelearn.core.domain.PromptPurpose;
 
 /**
@@ -28,6 +29,8 @@ public final class GenerationOperationRow {
     public final PromptPurpose purpose;
     public final GenerationModel model;
     public final boolean thinkingEnabled;
+    /** The style pinned before submission; copied into the stable revision by the stabilizer. */
+    public final Persona persona;
     /** The version pinned before submission; never rewritten once the attempt exists. */
     public final String promptPolicyVersion;
     public final GenerationState state;
@@ -45,8 +48,9 @@ public final class GenerationOperationRow {
 
     GenerationOperationRow(String id, String commandId, String branchId, String messageId,
                            PromptPurpose purpose, GenerationModel model, boolean thinkingEnabled,
-                           String promptPolicyVersion, GenerationState state, String partialReasoning,
-                           String partialAnswer, String errorCode, long createdAt, long updatedAt) {
+                           Persona persona, String promptPolicyVersion, GenerationState state,
+                           String partialReasoning, String partialAnswer, String errorCode,
+                           long createdAt, long updatedAt) {
         this.id = id;
         this.commandId = commandId;
         this.branchId = branchId;
@@ -54,6 +58,7 @@ public final class GenerationOperationRow {
         this.purpose = purpose;
         this.model = model;
         this.thinkingEnabled = thinkingEnabled;
+        this.persona = persona;
         this.promptPolicyVersion = promptPolicyVersion;
         this.state = state;
         this.partialReasoning = partialReasoning;
@@ -68,6 +73,6 @@ public final class GenerationOperationRow {
         // Lengths, not text: partial content is conversation data and must not reach a log line (§15).
         return "GenerationOperationRow[" + id + ", " + state + ", reasoning="
                 + partialReasoning.length() + " chars, answer=" + partialAnswer.length()
-                + " chars, policy=" + promptPolicyVersion + "]";
+                + " chars, policy=" + promptPolicyVersion + ", persona=" + persona.wireId + "]";
     }
 }

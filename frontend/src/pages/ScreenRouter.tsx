@@ -1,14 +1,11 @@
 import { useRoute } from "../hooks/useRoute";
-import { HomePage } from "./HomePage";
-import { ChatPage } from "./ChatPage";
-import { LibraryPage } from "./LibraryPage";
 import { SnapshotScreen } from "./SnapshotScreen";
 
-/** 栈顶那屏 → 组件。精修过的三屏逐屏点名，其余按采集坐标还原；名单与夹具条目名一致。 */
+/**
+ * 旧栈路由只保留采集坐标快照：主页、学习库与对话都已迁到工作区，
+ * 这里继续供 parity 证据与尚未精修的采集屏使用，不复制工作区交互。
+ */
 export function ScreenRouter() {
   const route = useRoute();
-  if (route.screen === "home") return <HomePage />;
-  if (route.screen === "chat") return <ChatPage />;
-  if (route.screen === "library") return <LibraryPage />;
   return <SnapshotScreen screen={route.screen} />;
 }

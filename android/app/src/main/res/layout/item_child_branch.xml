@@ -1,27 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  One child branch in the popup: what it is called, and what it still owes. The row is its own 44dp
-  target, so a list of children is a list of reachable choices.
+  One child branch in the answer's inline stack (Scheme A .branch-item.glass): a 14dp glass card
+  with the fork glyph and the branch title. The whole card is the 44dp target, so a list of
+  children is a list of reachable choices; the unread count rides at the end.
+
+  2026-10-22: the trailing chevron is gone with the popup. The card itself opens the branch, so a
+  second arrow would imply a second action inside the row.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/child_branch_row"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground"
+    android:layout_marginBottom="@dimen/branch_item_gap"
+    android:background="@drawable/bg_branch_item"
+    android:foreground="?android:attr/selectableItemBackground"
     android:gravity="center_vertical"
     android:minHeight="@dimen/touch_min"
     android:orientation="horizontal"
-    android:paddingStart="@dimen/space_s2"
-    android:paddingTop="@dimen/space_s1"
-    android:paddingEnd="@dimen/space_s1"
-    android:paddingBottom="@dimen/space_s1">
+    android:paddingStart="@dimen/branch_item_pad_h"
+    android:paddingTop="@dimen/branch_item_pad_v"
+    android:paddingEnd="@dimen/branch_item_pad_h"
+    android:paddingBottom="@dimen/branch_item_pad_v">
 
     <ImageView
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_marginEnd="@dimen/space_s2"
+        android:layout_width="@dimen/branch_icon"
+        android:layout_height="@dimen/branch_icon"
+        android:layout_marginEnd="@dimen/branch_item_icon_gap"
         android:importantForAccessibility="no"
-        android:src="@drawable/ic_nav_tree"
+        android:src="@drawable/ic_action_fork"
         android:tint="@color/tl_green" />
 
     <TextView
@@ -30,15 +36,16 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:ellipsize="end"
-        android:fontFamily="sans-serif-medium"
-        android:maxLines="2"
-        android:textColor="@color/tl_ink"
-        android:textSize="@dimen/text_body" />
+        android:lineSpacingMultiplier="1.5"
+        android:maxLines="3"
+        android:textColor="@color/tl_ink2"
+        android:textSize="@dimen/text_branch_item" />
 
     <TextView
         android:id="@+id/child_branch_unread"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/space_s2"
         android:background="@drawable/bg_popup_unread"
         android:paddingStart="@dimen/space_s2"
         android:paddingTop="@dimen/space_s1"
@@ -47,12 +54,4 @@
         android:textColor="@color/tl_amber"
         android:textSize="@dimen/text_cap"
         android:visibility="gone" />
-
-    <ImageView
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_marginStart="@dimen/space_s1"
-        android:importantForAccessibility="no"
-        android:src="@drawable/ic_chevron_right"
-        android:tint="@color/tl_ink3" />
 </LinearLayout>

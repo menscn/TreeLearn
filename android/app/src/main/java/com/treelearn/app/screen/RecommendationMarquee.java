@@ -30,8 +30,11 @@ import java.util.List;
  *   <li>The drift stops whenever the strip is not on screen, is detached, is too narrow to scroll, or
  *       is drawn where nobody can see it. PRD 6.2.17 exception 4 explicitly does not require the
  *       animation to keep running off screen.
- *   <li>It also stops when the system's animator scale is zero, because the drift is a motion like any
- *       other and {@link ChatMotion} is this app's one reader of that setting (T-2026-09-27-005).
+ *   <li>It does not consult the system's animator scale. PRD 6.2.17 point 2 requires the strip to
+ *       drift, and the pause while a chip is touched is the control the learner is given; the
+ *       entrance animations still honour that setting through {@link ChatMotion}. This strip is
+ *       content, not an entrance, so a handset with animations switched off still shows it moving -
+ *       the 2026-10-22 walkthrough reported a still strip as a defect.
  * </ul>
  *
  * <p>The two rows live inside one {@link EdgeFadeLayout}, which dissolves both of them together at
@@ -229,7 +232,7 @@ public final class RecommendationMarquee extends LinearLayout {
     /**
      * Whether the next step has something to show for itself.
      *
-     * <p>Three gates the old loop did not have, and the reason each is here:
+     * <p>Two gates the old loop did not have, and the reason each is here:
      *
      * <ul>
      *   <li>the window has focus - a dialog, the shade, or another app in front is served frames by the
@@ -237,18 +240,19 @@ public final class RecommendationMarquee extends LinearLayout {
      *   <li>the block is inside the window's visible area - {@link #isShown()} says nothing about a
      *       ScrollView, so a strip the learner has scrolled past used to keep redrawing the home from off
      *       screen. The home is a ScrollView, and the topic cards below the strip are exactly the taps
-     *       that were being delayed;
-     *   <li>the system wants motion - with the animator scale at zero the chips stand still, as they do
-     *       everywhere else in this app.
+     *       that were being delayed.
      * </ul>
+     *
+     * <p>The system animator scale is deliberately absent: PRD 6.2.17 point 2 makes the drift the
+     * strip's reason to exist and exception 4 only excuses it off screen, which the visibility gate
+     * already covers. Touch is the pause the learner has.
      *
      * <p>When a gate closes, the timer keeps running and only the step is skipped: nothing in the view
      * tree tells this class when the strip scrolls back into view, and a tick that draws nothing costs a
      * handler wake rather than a frame.
      */
     private boolean isWorthDrawing() {
-        if (!isShown() || !hasWindowFocus()
-                || ChatMotion.reduced(getContext().getContentResolver())) {
+        if (!isShown() || !hasWindowFocus()) {
             return false;
         }
         return getGlobalVisibleRect(visiblePart);

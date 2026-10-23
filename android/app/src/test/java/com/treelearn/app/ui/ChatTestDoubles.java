@@ -9,6 +9,7 @@ import com.treelearn.core.domain.ContextSnapshotCodec;
 import com.treelearn.core.domain.DomainResult;
 import com.treelearn.core.domain.GenerationModel;
 import com.treelearn.core.domain.Message;
+import com.treelearn.core.domain.Persona;
 import com.treelearn.core.domain.ReadingAnchor;
 import com.treelearn.core.domain.ReadingPosition;
 import com.treelearn.app.reading.ReadingStore;
@@ -135,6 +136,7 @@ final class ChatTestDoubles {
         ChatCommandResult selectResult = ChatCommandResult.ran(OP);
         ChatCommandResult forkResult = ChatCommandResult.openedBranch(BRANCH_2);
         ChatCommandResult highlightResult = ChatCommandResult.ran(OP);
+        ChatCommandResult setPersonaResult = ChatCommandResult.succeeded();
         List<AnswerRevision> versions = Collections.emptyList();
         Runnable afterAcceptedSend;
 
@@ -150,6 +152,7 @@ final class ChatTestDoubles {
         GenerationModel lastModel;
         boolean lastThinking;
         long lastNow;
+        Persona lastPersona;
 
         @Override
         public ChatCommandResult send(String branchId, String text, String quote,
@@ -222,6 +225,13 @@ final class ChatTestDoubles {
             calls.add("applyHighlight");
             lastMessageId = messageId;
             return highlightResult;
+        }
+
+        @Override
+        public ChatCommandResult setPersona(String branchId, Persona persona) {
+            calls.add("setPersona");
+            lastPersona = persona;
+            return setPersonaResult;
         }
 
         boolean called(String name) {
@@ -309,6 +319,9 @@ final class ChatTestDoubles {
          */
         final List<java.util.Map<String, List<Annotation>>> marksRenders =
                 new ArrayList<java.util.Map<String, List<Annotation>>>();
+        final List<Persona> personaSwitches = new ArrayList<Persona>();
+        int personaFallbacks;
+        int personaIntrosOpened;
         int settingsOpened;
         int closed;
         int keyboardDismissals;
@@ -370,6 +383,21 @@ final class ChatTestDoubles {
         @Override
         public void openSettings() {
             settingsOpened++;
+        }
+
+        @Override
+        public void openPersonaIntro() {
+            personaIntrosOpened++;
+        }
+
+        @Override
+        public void showPersonaSwitched(Persona persona) {
+            personaSwitches.add(persona);
+        }
+
+        @Override
+        public void showPersonaFellBack() {
+            personaFallbacks++;
         }
 
         @Override

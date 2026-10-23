@@ -15,6 +15,7 @@ import com.treelearn.core.domain.GenerationCommand;
 import com.treelearn.core.domain.GenerationModel;
 import com.treelearn.core.domain.GenerationOperation;
 import com.treelearn.core.domain.Message;
+import com.treelearn.core.domain.Persona;
 import com.treelearn.core.domain.Topic;
 import com.treelearn.data.db.dao.BranchCreation;
 import com.treelearn.data.db.dao.ContextSnapshotDao;
@@ -181,6 +182,8 @@ final class WiringDoubles {
         Branch branch;
         List<ChildBranch> children = new ArrayList<ChildBranch>();
         final Map<String, Message> positions = new HashMap<String, Message>();
+        Persona writtenPersona;
+        boolean personaWriteFails;
 
         @Override
         public Conversation read(String branchId) {
@@ -260,6 +263,14 @@ final class WiringDoubles {
         @Override
         public Branch branch(String branchId) {
             return branch;
+        }
+
+        @Override
+        public void updatePersona(String branchId, Persona persona) {
+            if (personaWriteFails) {
+                throw new IllegalStateException("the narrow write was refused");
+            }
+            writtenPersona = persona;
         }
 
         @Override

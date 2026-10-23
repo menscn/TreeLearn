@@ -187,10 +187,10 @@ public final class GenerationCoordinator {
                     null);
             return SubmitOutcome.refused(Refusal.PROMPT_BUILD, refused.reason);
         }
-        // The command pins the version and the assembler copies it onto the request. They are
-        // produced by different modules, so a disagreement means one of them moved and the row would
-        // otherwise record a version that was not the one sent.
-        if (request == null || !command.promptPolicyVersion.equals(request.policyVersion)) {
+        // The command pins the version and the style, and the assembler copies both onto the
+        // request. They are produced by different modules, so a disagreement means one of them moved
+        // and the row would otherwise record an identity that was not the one sent.
+        if (!requestMatches(command, request)) {
             telemetry.record(GenerationTelemetry.Event.PROMPT_REFUSED, null, command.branchId, 0,
                     null);
             return SubmitOutcome.refused(Refusal.VERSION_MISMATCH, null);
@@ -202,6 +202,19 @@ public final class GenerationCoordinator {
         }
         run(after);
         return outcome;
+    }
+
+    /**
+     * Whether the assembled request carries exactly the identity the command pinned.
+     *
+     * <p>Both dimensions are compared: a request built for a different policy version and one built
+     * for a different style are the same class of failure — the row would record an identity that was
+     * never sent. Package-private so the JVM suite can exercise the judgement without a database.
+     */
+    static boolean requestMatches(GenerationCommand command, DeepSeekRequest request) {
+        return request != null
+                && command.promptPolicyVersion.equals(request.policyVersion)
+                && command.persona == request.persona;
     }
 
     private SubmitOutcome admit(GenerationCommand command, DeepSeekRequest request,

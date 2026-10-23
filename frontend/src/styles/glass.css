@@ -1,0 +1,240 @@
+/* 晨雾玻璃材质层（T-2026-10-21-050）。
+   加载顺序固定在 pages.css 之后：本文件只覆盖颜色、背景、阴影与圆角，
+   所有颜色数值来自 tokens.css，不写裸色值；不改断点、命中区域或正文对比，阅读面固定 86%。
+   T-2026-10-22-058 追加 053 的两处莫兰迪柔光与一枚标签 tint，仍只覆盖材质。
+   T-2026-10-22-063 起本文件也负责「浮起来」：两档投影 + 145° 对角 tint 消费 061 的 token，
+   被取代的 `--glass-shadow` 已从整条链删除；顶栏改覆盖层这一结构事实在 workspace.css /
+   pages.css 的滚动容器上，不在这里。 */
+
+html {
+  background: var(--mist-base);
+}
+
+body {
+  background-color: var(--mist-base);
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 27px,
+      var(--paper-rule) 27px,
+      var(--paper-rule) 28px
+    ),
+    radial-gradient(820px 700px at 92% 52%, var(--glow-rose), transparent 60%),
+    radial-gradient(760px 660px at 6% 24%, var(--glow-lilac), transparent 58%),
+    radial-gradient(1200px 900px at 82% 10%, var(--glow-white), transparent 62%),
+    radial-gradient(900px 720px at 78% 18%, var(--glow-green), transparent 64%),
+    radial-gradient(1000px 820px at 8% 78%, var(--glow-sand), transparent 66%),
+    linear-gradient(135deg, var(--mist-warm), var(--mist-base) 38%, var(--mist-cool) 72%, var(--mist-deep));
+  background-attachment: fixed;
+}
+
+.app-workspace {
+  background: transparent;
+}
+
+/* 一层共享的 1px 高光边 + 方案 A `.glass` 的两档投影：边与影子各写一次，避免每张卡片各写一份。
+   偏移/模糊/扩散是消费者的几何，不进 token（原型 `:root` 的注释同此），数值照抄提案
+   `Docs/04-ux-design/2026-10-21-玻璃质感重设计提案/A-晨雾玻璃.html` 的 `.glass` 第 400–403 行；
+   方向性 rim（inset 0 1px 0 / 0 -1px 0）不做——061 实测后已把 rim 两档从 token 链撤回，
+   Android 只能画整圈边，Web 单独保留一对没人消费的值就是死数值。 */
+.app-sidebar,
+.workspace-topbar,
+.chat-reading,
+.composer,
+.branch-panel,
+.tree-dialog,
+.suggestion,
+.search-field,
+.settings-page .field,
+.settings-action {
+  box-shadow:
+    inset 0 0 0 1px var(--glass-edge),
+    0 20px 40px -28px var(--glass-shadow-key),
+    0 2px 6px var(--glass-shadow-ambient);
+}
+
+.app-sidebar {
+  border-right: 0;
+  background-color: var(--glass-chrome);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}
+
+/* 顶部受光 + 145° 对角 tint：暗端 = 该面自身 alpha × `--glass-tint-falloff`，
+   与 Android 侧 `glass_*_lo` 的 ARGB 副本同源推导（那边由 GlassMaterialTokensTest 重算，
+   这边由 color-mix 在运行时算），两端都不写第二个字面量。受光层只覆盖上缘，不改正文对比。 */
+.app-sidebar,
+.workspace-topbar,
+.branch-panel {
+  background-image:
+    linear-gradient(180deg, var(--glass-sheen), transparent 22%),
+    linear-gradient(145deg, var(--glass-chrome),
+      color-mix(in srgb, var(--glass-chrome) calc(var(--glass-tint-falloff) * 100%), transparent));
+}
+
+.chat-reading,
+.tree-dialog {
+  background-image:
+    linear-gradient(180deg, var(--glass-sheen), transparent 22%),
+    linear-gradient(145deg, var(--glass-reader),
+      color-mix(in srgb, var(--glass-reader) calc(var(--glass-tint-falloff) * 100%), transparent));
+}
+
+.composer {
+  background-image:
+    linear-gradient(180deg, var(--glass-sheen), transparent 22%),
+    linear-gradient(145deg, var(--glass-card),
+      color-mix(in srgb, var(--glass-card) calc(var(--glass-tint-falloff) * 100%), transparent));
+}
+
+.suggestion,
+.settings-action {
+  background-image: linear-gradient(145deg, var(--glass-card),
+    color-mix(in srgb, var(--glass-card) calc(var(--glass-tint-falloff) * 100%), transparent));
+}
+
+.search-field,
+.settings-page .field {
+  background-image: linear-gradient(145deg, var(--glass-field),
+    color-mix(in srgb, var(--glass-field) calc(var(--glass-tint-falloff) * 100%), transparent));
+}
+
+.workspace-topbar {
+  border-bottom: 0;
+  background-color: var(--glass-chrome);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}
+
+.chat-reading {
+  margin: var(--s6) auto;
+  border-radius: var(--r-2xl);
+  background-color: var(--glass-reader);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}
+
+.chat-baseline {
+  border: 0;
+  border-radius: var(--r-xl);
+  background: var(--glass-card);
+  box-shadow: inset 0 0 0 1px var(--glass-edge);
+}
+
+.chat-dock {
+  border-top: 0;
+  background: transparent;
+  box-shadow: 0 -1px 0 var(--glass-line);
+}
+
+.composer {
+  border: 0;
+  border-radius: var(--r-2xl);
+  background-color: var(--glass-card);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}
+
+.composer:focus-within {
+  box-shadow:
+    inset 0 0 0 1px var(--glass-edge),
+    0 0 0 2px color-mix(in srgb, var(--green) 26%, transparent),
+    0 20px 40px -28px var(--glass-shadow-key),
+    0 2px 6px var(--glass-shadow-ambient);
+}
+
+.branch-panel {
+  border-left: 0;
+  background-color: var(--glass-chrome);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}
+
+.tree-dialog {
+  border: 0;
+  border-radius: var(--r-2xl);
+  background-color: var(--glass-reader);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}
+
+.suggestion {
+  border: 0;
+  border-radius: var(--r-xl);
+  background-color: var(--glass-card);
+}
+
+.suggestion:hover {
+  background: var(--glass-chrome);
+}
+
+/* 推荐标签用 tint 作非文字表面：文字仍由 app.css 的 green-deep 表达语义。 */
+.rec-tag {
+  background: var(--tint-sage);
+}
+
+.search-field {
+  border: 0;
+  border-radius: var(--r-xl);
+  background-color: var(--glass-field);
+}
+
+.search-field:focus-within {
+  box-shadow:
+    inset 0 0 0 1px var(--glass-edge),
+    0 0 0 2px color-mix(in srgb, var(--green) 26%, transparent);
+}
+
+.settings-page .field {
+  border: 0;
+  border-radius: var(--r-xl);
+  background-color: var(--glass-field);
+}
+
+.settings-page .field:disabled {
+  background: color-mix(in srgb, var(--glass-field) 70%, var(--surface));
+}
+
+.settings-action {
+  border: 0;
+  border-radius: var(--r-xl);
+  background-color: var(--glass-card);
+}
+
+/* 窄窗侧栏是覆盖层：玻璃底与遮罩的 z-index、定位保持不变。 */
+@media (max-width: 760px) {
+  .app-sidebar {
+    background-color: var(--glass-chrome);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  }
+}
+
+/* 降级不做假模糊：不支持背景模糊时提高不透明度，阅读面回到实色。 */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .app-sidebar,
+  .workspace-topbar,
+  .composer,
+  .branch-panel,
+  .tree-dialog {
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+  }
+
+  .chat-reading {
+    background: var(--surface);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .app-sidebar,
+  .workspace-topbar,
+  .composer,
+  .branch-panel,
+  .tree-dialog,
+  .chat-reading {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--surface);
+  }
+}

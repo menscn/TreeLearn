@@ -1,6 +1,8 @@
 package com.treelearn.ai.prompt;
 
 import com.treelearn.core.domain.DomainResult;
+import com.treelearn.core.domain.Guard;
+import com.treelearn.core.domain.Persona;
 import com.treelearn.core.domain.PromptPurpose;
 import com.treelearn.core.domain.PromptSpec;
 import java.util.Collections;
@@ -43,22 +45,50 @@ public final class DeepSeekPromptRegistry {
     }
 
     /**
-     * @return the system content of {@code purpose}, with the static thinking addendum appended when
-     *         thinking is on. The addendum is a main-answer policy (prompt design §4.1); asking a
-     *         derived purpose for it is refused instead of quietly ignored.
+     * @return the system content of {@code purpose} under the default answer style; the shape every
+     *         caller had before persona existed
      */
     public static String systemContent(PromptPurpose purpose, boolean thinkingEnabled) {
+        return systemContent(purpose, thinkingEnabled, Persona.DEFAULT);
+    }
+
+    /**
+     * @return the system content of {@code purpose}, with the static thinking addendum and then the
+     *         style addendum appended when each is on. Both are main-answer policy (prompt design
+     *         §4.1); asking a derived purpose for either is refused instead of quietly ignored.
+     * @throws PromptBuildException with {@code THINKING_NOT_APPLICABLE_FOR_PURPOSE} when a derived
+     *         purpose is asked for thinking or for a non-default style. The category is shared
+     *         deliberately: both dimensions describe the adaptive-tutor call, and a derived purpose
+     *         is one structured call that carries neither.
+     */
+    public static String systemContent(PromptPurpose purpose, boolean thinkingEnabled,
+            Persona persona) {
         PromptSpec spec = spec(purpose);
-        if (!thinkingEnabled) {
+        Guard.object(persona, "persona");
+        String styleAddendum = PersonaPrompts.addendum(persona);
+        if (purpose != PromptPurpose.LEARNING_ANSWER) {
+            if (thinkingEnabled) {
+                throw new PromptBuildException(
+                        PromptBuildException.Reason.THINKING_NOT_APPLICABLE_FOR_PURPOSE, purpose,
+                        "thinking is part of the adaptive-tutor policy; a derived purpose is a single "
+                                + "structured call and never carries the addendum");
+            }
+            if (!styleAddendum.isEmpty()) {
+                throw new PromptBuildException(
+                        PromptBuildException.Reason.THINKING_NOT_APPLICABLE_FOR_PURPOSE, purpose,
+                        "a non-default answer style is part of the adaptive-tutor policy; a derived "
+                                + "purpose is a single structured call and never carries the addendum");
+            }
             return spec.systemContent;
         }
-        if (purpose != PromptPurpose.LEARNING_ANSWER) {
-            throw new PromptBuildException(
-                    PromptBuildException.Reason.THINKING_NOT_APPLICABLE_FOR_PURPOSE, purpose,
-                    "thinking is part of the adaptive-tutor policy; a derived purpose is a single "
-                            + "structured call and never carries the addendum");
+        StringBuilder content = new StringBuilder(spec.systemContent);
+        if (thinkingEnabled) {
+            content.append(SECTION_BREAK).append(PromptBodiesV1.THINKING_ADDENDUM);
         }
-        return spec.systemContent + SECTION_BREAK + PromptBodiesV1.THINKING_ADDENDUM;
+        if (!styleAddendum.isEmpty()) {
+            content.append(SECTION_BREAK).append(styleAddendum);
+        }
+        return content.toString();
     }
 
     private static Map<PromptPurpose, PromptSpec> buildSpecs() {

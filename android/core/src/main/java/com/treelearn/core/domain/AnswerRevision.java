@@ -26,6 +26,8 @@ public final class AnswerRevision {
     public final String answerContent;
     public final GenerationModel model;
     public final boolean thinkingEnabled;
+    /** The style the attempt was sent with; frozen here so an old answer stays attributable. */
+    public final Persona persona;
     /** The exact prompt policy version that produced this answer; never blank. */
     public final String promptPolicyVersion;
     public final long createdAt;
@@ -38,6 +40,7 @@ public final class AnswerRevision {
             String answerContent,
             GenerationModel model,
             boolean thinkingEnabled,
+            Persona persona,
             String promptPolicyVersion,
             long createdAt) {
         this.id = Guard.id(id, "id");
@@ -47,6 +50,7 @@ public final class AnswerRevision {
         this.answerContent = Guard.nonBlank(answerContent, "answerContent");
         this.model = Guard.object(model, "model");
         this.thinkingEnabled = thinkingEnabled;
+        this.persona = Guard.object(persona, "persona");
         this.promptPolicyVersion = Guard.nonBlank(promptPolicyVersion, "promptPolicyVersion");
         this.createdAt = Guard.epochMillis(createdAt, "createdAt");
     }
@@ -76,6 +80,21 @@ public final class AnswerRevision {
             boolean thinkingEnabled,
             String promptPolicyVersion,
             long now) {
+        return create(messageId, revisionNo, reasoningContent, answerContent, model,
+                thinkingEnabled, Persona.DEFAULT, promptPolicyVersion, now);
+    }
+
+    /** The persona-carrying creation path; {@link GenerationOperation#stabilize} uses this one. */
+    public static DomainResult<AnswerRevision> create(
+            String messageId,
+            int revisionNo,
+            String reasoningContent,
+            String answerContent,
+            GenerationModel model,
+            boolean thinkingEnabled,
+            Persona persona,
+            String promptPolicyVersion,
+            long now) {
         // Argument shapes first, in the declared order of the arguments, for the reason
         // GenerationCommand.create states: a call carrying both a malformed argument and an
         // un-pinnable version must still report the caller bug rather than a business code. This entry
@@ -88,6 +107,7 @@ public final class AnswerRevision {
         Guard.text(reasoningContent, "reasoningContent");
         Guard.nonBlank(answerContent, "answerContent");
         Guard.object(model, "model");
+        Guard.object(persona, "persona");
         Guard.epochMillis(now, "createdAt");
         if (PromptPurpose.isAbsent(promptPolicyVersion)) {
             return DomainResult.fail(DomainErrorCode.PROMPT_POLICY_VERSION_REQUIRED,
@@ -100,7 +120,7 @@ public final class AnswerRevision {
         }
         return DomainResult.ok(new AnswerRevision(
                 Guard.newId(), messageId, revisionNo, reasoningContent, answerContent,
-                model, thinkingEnabled, promptPolicyVersion, now));
+                model, thinkingEnabled, persona, promptPolicyVersion, now));
     }
 
     /**
@@ -121,8 +141,24 @@ public final class AnswerRevision {
             boolean thinkingEnabled,
             String promptPolicyVersion,
             long createdAt) {
+        return restore(id, messageId, revisionNo, reasoningContent, answerContent, model,
+                thinkingEnabled, Persona.DEFAULT, promptPolicyVersion, createdAt);
+    }
+
+    /** Rehydrates a revision together with the style the stored row recorded. */
+    public static AnswerRevision restore(
+            String id,
+            String messageId,
+            int revisionNo,
+            String reasoningContent,
+            String answerContent,
+            GenerationModel model,
+            boolean thinkingEnabled,
+            Persona persona,
+            String promptPolicyVersion,
+            long createdAt) {
         return new AnswerRevision(id, messageId, revisionNo, reasoningContent, answerContent,
-                model, thinkingEnabled, promptPolicyVersion, createdAt);
+                model, thinkingEnabled, persona, promptPolicyVersion, createdAt);
     }
 
     public boolean hasReasoning() {
@@ -132,6 +168,7 @@ public final class AnswerRevision {
     @Override
     public String toString() {
         return "AnswerRevision[no=" + revisionNo + ", model=" + model.wireId
-                + ", policy=" + promptPolicyVersion + ", answerChars=" + answerContent.length() + "]";
+                + ", policy=" + promptPolicyVersion + ", persona=" + persona.wireId
+                + ", answerChars=" + answerContent.length() + "]";
     }
 }

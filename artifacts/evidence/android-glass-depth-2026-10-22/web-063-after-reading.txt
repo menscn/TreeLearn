@@ -1,0 +1,95 @@
+Web 063 判据取证（check_glass_depth.py，与 Android 同一份取区实现、同一组阈值）
+截图目录：artifacts/evidence/android-glass-depth-2026-10-22/　生成：2026-10-22
+阈值全束未动：J1_MIN_LIFT=10.0 J2_MIN_SHADOW=6.0 J3_MIN_SPAN=24.0 J3_MIN_CHROMA=6.0
+J4_MIN_DRIFT=8.0 INK_FLOOR=150 MIN_SCENE_PIXELS=240
+
+一、每条判据主张在哪一扇面、哪一帧，为什么
+· J1/J2/J3 主张在首页 `.composer`（宽窗 1440×900）。它是 Web 上唯一「不贴画面边、四周有场景可当
+  背景参照」的玻璃面。顶栏与侧栏横跨整幅画面，`_background` 遇到贴边面退到四角场景中位，而顶栏
+  自己就占住上面两角，J1 必读成 ≈0（实测 -0.7 ~ 3.2 L）。这正是父卡 060/061 落地时登记过的仪器
+  盲区，卡片 Risks 里预先写的处置就是「换被测面并把选择写进证据」，这里就是那条处置的执行。
+  第二块面（窄窗顶栏，J1 读到 26.2）一并列出作交叉核对，不作为主张。
+· J4 主张在 `.workspace-topbar` 的窄窗聊天帧。J4 需要「内容从玻璃下方经过」，而顶栏是 Web 上唯一
+  的覆盖层（`.chat-dock` 仍占 flex 列的一格，内容不从 composer 下方经过），所以 J4 不换面。
+  选窄窗 618×1350 的聊天帧的理由见第三节：Android 的 35.1 L 是在手机宽度上读的，那里顶栏下方
+  整幅都是列表内容；Web 的 1440 宽窗里顶栏有两成到四成的宽度下面是页面留白，同一统计量被稀释。
+
+二、主张的四条读数（逐条命令原样）
+
+$ python -X utf8 .codex/scripts/dev/check_glass_depth.py --shot web-063-home-top.png --band bottom
+GLASS-DEPTH shot=web-063-home-top.png band=bottom box=498,990..2575,1137 scene_pixels=82168
+OK   J1 玻璃—背景分离 = 19.4 L / OK J2 投影暗带 = 41.6 L
+OK   J3 背景亮度跨度 = 41.8 L / OK J3 背景彩度跨度 = 17.0
+VERDICT: PASS  EXITCODE=0
+
+$ python -X utf8 .codex/scripts/dev/check_glass_depth.py --shot web-063-narrow-chat-top.png --band top \
+    --drift-before web-063-narrow-chat-top.png --drift-after web-063-narrow-chat-scrolled.png
+GLASS-DEPTH shot=web-063-narrow-chat-top.png band=top box=61,1..1175,127 scene_pixels=14779
+FAIL J1 = -0.5 L（本条不在此面主张，见第一节：贴边面盲区）
+OK   J2 = 8.5 L / OK J3 跨度 = 47.4 L / OK J3 彩度 = 15.0
+OK   J4 玻璃下内容经过 = 11.3 L 变化（需 ≥ 8）
+EXITCODE=1（唯一未成立的就是有意不主张的 J1）
+
+三、其余各帧的完整读数（不藏红）
+
+$ ... --shot web-063-narrow-top.png --band top --drift-before ... --drift-after web-063-narrow-scrolled.png
+GLASS-DEPTH band=top box=61,1..1235,127 scene_pixels=14840
+OK J1 = 26.2 / OK J2 = 9.4 / OK J3 = 42.6 / OK J3 彩度 = 16.0 / FAIL J4 = 0.0
+J4 这里是 0.0 的原因是场景事实而不是材质事实：618×1350 这一帧首页不溢出，采集器回读
+`SCROLL .page-scroll to=bottom before=0 after=0 range=0`，两张截图逐字节相同（与
+web-063-library-top/scrolled.png 同一情况，库里 3 条主题在宽窗也不溢出）。没有可滚动的内容，
+就没有可经过玻璃的内容。
+
+$ ... --shot web-063-home-top.png --band top --drift-before web-063-home-top.png --drift-after web-063-home-scrolled.png
+GLASS-DEPTH band=top box=95,1..2879,151　J1 3.2 FAIL（盲区）/ J2 22.6 / J3 41.8/17.0 / J4 4.2 FAIL
+$ ... --shot web-063-chat-top.png --band top --drift-before web-063-chat-top.png --drift-after web-063-chat-scrolled.png
+GLASS-DEPTH band=top box=95,1..2779,151　J1 -0.7 FAIL（盲区）/ J2 16.6 / J3 41.8/17.0 / J4 5.9 FAIL
+
+四、宽窗 J4 读不到的原因：实测，不是推定
+· 面内逐行分布（chat 1440，`artifacts/tmp/drift_probe.py`）：y 119..131 这几行行内 p95 = 14.9~19.6，
+  p100 = 20.9，而 y<110 的行几乎为 0；全面 ≥8 L 的像素只占 2.74%，落在 p95（需 5%）之外。
+  信号集中在下缘，正是 145° 对角 tint 把暗端（0.54×0.58≈0.31 alpha）放在下缘的结果。
+· 1440 帧里顶栏左端 95px 与右端留白下面只有雾面自身，正文列只占面宽的一部分；618 帧整幅都是正文列。
+· 运行时单变量对照（artifacts/tmp/mat_probe.mjs，仓库文件未改，1440 home 顶栏同一取窗）：
+  现状 blur28/chrome.54 → p95 4.2；blur4 → 5.8；blur0 → p95 0.0（p99 43.3、p100 46.5）；
+  chrome.30 → 8.8；chrome.30+blur4 → 13.0；关掉 sheen → 4.2（与现状逐位相同，上缘受光层不是原因）。
+  读法：Web 的 J4 主要由 tint alpha 支配；把模糊关掉反而让 p95 归零，因为锐利文字只占极少像素，
+  整面统计量吃不到——Android 的 35.1 L 靠的是「顶栏下方整片都是列表内容」，不是靠模糊。
+  这一组只用于解释差值来源，没有据此动过任何 token、阈值或取区。
+
+五、让位结构自己的像素 RED/GREEN（运行时把顶栏退回不覆盖，同一取区同一阈值）
+artifacts/tmp/nobar_probe.mjs 在 618 聊天页把 `.workspace-topbar` 置为 static、`.chat-scroll` 的
+padding-top 置 0（不改仓库文件），同一面框 61,1..1175,127 比两帧：
+  p50/p75/p90/p95/p99/p100 全为 0.0 L，≥8 L 的像素 0 个
+顶栏退回列首时玻璃下面一行像素都不会变；改成覆盖层后同窗读 11.3 L。11.3 完全来自让位本身。
+（`--band top`/`--band bottom` 之外的「无让位」结构在 `test/styles/glass-depth.test.ts`
+「顶栏是覆盖层，滚动容器自己付顶部留白」那条用例里也有 RED→GREEN 记录：web-063-red.txt。）
+
+六、交互与降级实测（artifacts/tmp/verify_063.mjs，10 条全 OK，退出码 0）
+宽窗顶栏控件命中点仍归自己 / 顶栏 position:absolute 且 z-index:2 / `.page-scroll` padding-top:76px /
+主区首个交互元素在玻璃下方且可点（y=249 > 栏底 76）/ 滚到底后顶栏控件依然可点 /
+窄窗抽屉 z=20(absolute) 与遮罩 z=19(fixed) 都压得住顶栏(z=2) / 窄窗汉堡钮命中点归自己 /
+窄窗留白跟着顶栏高度改成 64px（本片实测中发现的缺陷：栏高 64 而留白仍写 76，静止时玻璃下缘露出
+一条 12px 空带；已在 workspace.css 与 pages.css 各补一条同名覆盖）/
+prefers-reduced-transparency:reduce 下在场玻璃面 backdrop-filter 全为 none、底色回实色 /
+默认媒体下顶栏仍是 blur(28px) saturate(1.5) + rgba(255,255,255,.54)（降级块没有误伤主路径）。
+「浏览器不支持 backdrop-filter」那条降级无法在本引擎运行时触发（`CSS.supports('backdrop-filter',
+'blur(1px)')` 为 true），它由 glass-depth.test.ts 的「两条既有降级与窄窗侧栏都还在」静态断言兜住。
+`position: sticky` 全仓 grep：`frontend/src/styles` 内无任何 sticky 规则，父卡担心的表头遮挡风险
+在这条链上不存在。
+
+七、截图清单（采集器 web_capture.mjs，1440×900@2 与 618×1350@2）
+web-063-home-top.png / web-063-home-scrolled.png（2880×1800，range=142）
+web-063-chat-top.png / web-063-chat-scrolled.png（2880×1800，range=2566）
+web-063-library-top.png / web-063-library-scrolled.png（两帧逐字节相同，range=0）
+web-063-narrow-top.png / web-063-narrow-scrolled.png（1236×2700，range=0，两帧逐字节相同）
+web-063-narrow-chat-top.png / web-063-narrow-chat-scrolled.png（1236×2700，range=2294）
+采集统一带 `Emulation.setScrollbarsHidden`，理由写在 web_capture.mjs 注释里：常驻经典滚动条占住
+判据当背景参照的左右列，会把 J1 读成 4.4 L。
+
+八、最终主张
+J1 玻璃—背景分离：composer 面 19.4 L（窄窗顶栏另读 26.2）→ 成立
+J2 投影暗带：　　　composer 面 41.6 L（顶栏面 8.5~22.6）→ 成立
+J3 雾面跨度/彩度：composer 面 41.8/17.0（顶栏面 42.6/16.0、47.4/15.0）→ 成立
+J4 内容经过玻璃：　窄窗顶栏 11.3 L → 成立；同规则在 1440 宽窗读 4.2~5.9，原因见第四节，
+　　　　　　　　　未因此放宽阈值、未改脚本取区、未改 061 的 token 数值。

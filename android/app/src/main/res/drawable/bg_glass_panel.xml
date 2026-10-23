@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Glass drawer panel: chrome fill with the 1px edge marking the panel's boundary. Same two-layer
+  stack as the chrome capsule - the proposal and glass.css both paint the top sheen on the sidebar
+  and the branch panel, so a panel without it would be a different material from the bar.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="270"
+                android:endColor="@android:color/transparent"
+                android:startColor="@color/glass_sheen" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="315"
+                android:endColor="@color/glass_chrome_lo"
+                android:startColor="@color/glass_chrome" />
+            <stroke android:width="@dimen/hairline" android:color="@color/glass_edge" />
+        </shape>
+    </item>
+</layer-list>

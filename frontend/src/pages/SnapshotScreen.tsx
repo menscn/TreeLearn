@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
+import { Icon, iconFor } from "../components/Icon";
 import { Notice } from "../components/Notice";
 import { useFixtureScreen } from "../hooks/useFixtureScreen";
 import { useRoute } from "../hooks/useRoute";
@@ -11,8 +12,8 @@ import { linkFor, type ScreenLink } from "../store/screenLinks";
  *
  * 判据来自夹具本身（`bounds_dp` 已是 dp，视口 369.23×816），这里不推算布局：
  * 文字、控件、图标的落点都取实测值，Web 只补 Android drawable 没被采集到的
- * 表面、字形与色彩（token 来自 tokens.css）。精修过的三屏（主页、对话、学习库）
- * 各走各的组件，不走这里。
+ * 表面、字形与色彩（token 来自 tokens.css）。主页、学习库与对话走工作区，
+ * 这里承接其余的采集屏与旧栈 parity 证据。
  */
 
 const WRAPPERS = new Set([
@@ -217,7 +218,12 @@ function entrySurfaces(nodes: FixtureNode[], stage: Stage): Surface[] {
 function buildSurfaces(nodes: FixtureNode[], stage: Stage, screen: ScreenName): Surface[] {
   const explicit = nodes
     .filter((node) => node.id.endsWith("_card") && hasArea(node))
-    .map((node) => ({ key: `card-${node.id}`, nodeId: node.id, dividers: [], style: box(node, stage.dy) }));
+    .map((node) => ({
+      key: `card-${node.id}-${node.bounds_dp[0]}-${node.bounds_dp[1]}`,
+      nodeId: node.id,
+      dividers: [],
+      style: box(node, stage.dy)
+    }));
   const entries = entrySurfaces(nodes, stage);
   const clusters = CLUSTER_CARD_SCREENS.has(screen) ? clusterSurfaces(nodes, stage) : [];
   const rows = screen === "homedrawer" ? drawerRowSurfaces(nodes, stage) : [];
@@ -255,80 +261,6 @@ function narrow(text: string, width: number, fontSize: number): boolean {
   let units = 0;
   for (const ch of text) units += /[\u0000-\u00ff]/.test(ch) ? 0.55 : 1;
   return units * fontSize > width * 0.98;
-}
-
-type Glyph = "back" | "close" | "chevron" | "check" | "plus" | "minus" | "fit" | "center"
-  | "branch" | "chat" | "share" | "more" | "logo" | "sun" | null;
-
-function glyphOf(node: FixtureNode): Glyph {
-  const desc = node.desc;
-  const [left = 0, , width = 0] = node.bounds_dp;
-  if (desc.startsWith(BACK_TEXT)) return "back";
-  if (desc.startsWith(CLOSE_TEXT)) return "close";
-  if (node.id === "home_settings_button") return "sun";
-  if (node.id === "settings_key_save" || desc === "\u4FDD\u5B58") return "check";
-  if (desc.startsWith("\u653E\u5927")) return "plus";
-  if (desc.startsWith("\u7F29\u5C0F")) return "minus";
-  if (desc.startsWith("\u7F29\u653E")) return "fit";
-  if (desc.startsWith("\u56DE\u5230")) return "center";
-  if (desc.startsWith("\u6253\u5F00\u5206\u652F")) return "branch";
-  if (desc.startsWith("\u8FDB\u5165\u5BF9\u8BDD")) return "chat";
-  if (desc.startsWith("\u67E5\u770B\u753B\u5E03")) return "share";
-  if (desc.includes("\u66F4\u591A")) return "more";
-  if (desc.includes("Logo")) return "logo";
-  if (left > 260 && width > 0 && width <= 44 && desc !== "") return "chevron";
-  return null;
-}
-
-function GlyphArt({ glyph }: { glyph: Glyph }) {
-  if (glyph === "back") {
-    return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 7 12l8 8" /></svg>;
-  }
-  if (glyph === "close") {
-    return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5 5 19" /></svg>;
-  }
-  if (glyph === "chevron") {
-    return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 4 8 8-8 8" /></svg>;
-  }
-  if (glyph === "check") {
-    return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10" /></svg>;
-  }
-  if (glyph === "plus") {
-    return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" /><path d="M15.5 15.5 21 21M10.5 7.5v6M7.5 10.5h6" /></svg>;
-  }
-  if (glyph === "minus") {
-    return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" /><path d="M15.5 15.5 21 21M7.5 10.5h6" /></svg>;
-  }
-  if (glyph === "fit") {
-    return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" /></svg>;
-  }
-  if (glyph === "center") {
-    return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M12 2v5M12 17v5M2 12h5M17 12h5" /></svg>;
-  }
-  if (glyph === "branch") {
-    return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="5" r="2" /><circle cx="18" cy="5" r="2" /><circle cx="12" cy="19" r="2" /><path d="M6 7v3c0 3 6 2 6 5v2M18 7v3c0 3-6 2-6 5" /></svg>;
-  }
-  if (glyph === "chat") {
-    return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z" /></svg>;
-  }
-  if (glyph === "share") {
-    return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="17" cy="5" r="2.4" /><circle cx="6" cy="12" r="2.4" /><circle cx="17" cy="19" r="2.4" /><path d="m8.2 10.8 6.6-4.4M8.2 13.2l6.6 4.4" /></svg>;
-  }
-  if (glyph === "more") {
-    return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.4" /><circle cx="12" cy="12" r="1.4" /><circle cx="19" cy="12" r="1.4" /></svg>;
-  }
-  if (glyph === "logo") {
-    return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21V9M12 12c0-4 3-7 7-7 0 4-3 7-7 7Zm0 4c0-3-2.5-6-6-6 0 3.5 2.5 6 6 6Z" /></svg>;
-  }
-  if (glyph === "sun") {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <circle cx="12" cy="12" r="4" />
-        <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1" />
-      </svg>
-    );
-  }
-  return null;
 }
 
 function truncate(text: string): string {
@@ -404,8 +336,26 @@ export function SnapshotScreen({ screen }: { screen: ScreenName }) {
           style={box(node, stage.dy)}
           type="button"
         >
-          <GlyphArt glyph={node.desc.startsWith(CLOSE_TEXT) ? "close" : "back"} />
+          <Icon name={node.desc.startsWith(CLOSE_TEXT) ? "chat_close" : "nav_back"} />
         </button>
+      );
+    }
+    const glyph = iconFor(node);
+    if (glyph !== null && node.text === "") {
+      const tool = ["tree_zoom_in", "tree_zoom_out", "tree_fit_tool", "tree_center"].includes(node.id);
+      const save = node.id === "settings_key_save" || node.id === "provider_key_save";
+      const linked = layer === "content" && linkFor(node.id) !== null;
+      return (
+        <span
+          aria-label={node.desc === "" ? undefined : node.desc}
+          className={`snap-icon ${tool ? "is-tool" : ""} ${save ? "is-save" : ""}`}
+          data-node={!linked && layer === "content" && node.id !== "" ? node.id : undefined}
+          key={`icon-${node.id}-${node.bounds_dp[1]}`}
+          role={node.desc === "" ? undefined : "img"}
+          style={box(node, stage.dy)}
+        >
+          <Icon name={glyph} />
+        </span>
       );
     }
     if (node.class.endsWith("Switch")) {
@@ -428,26 +378,6 @@ export function SnapshotScreen({ screen }: { screen: ScreenName }) {
       return (
         <span className="snap-button" key={`button-${node.bounds_dp[1]}`} style={box(node, stage.dy)}>
           {node.text}
-        </span>
-      );
-    }
-    if ((node.class.endsWith("ImageView") || node.class.endsWith("ImageButton")
-      || node.class.endsWith("Button")) && node.desc !== "") {
-      const glyph = glyphOf(node);
-      if (glyph === null) return null;
-      const tool = ["tree_zoom_in", "tree_zoom_out", "tree_fit_tool", "tree_center"].includes(node.id);
-      const save = node.id === "settings_key_save";
-      const linked = layer === "content" && linkFor(node.id) !== null;
-      return (
-        <span
-          aria-label={node.desc}
-          className={`snap-icon ${tool ? "is-tool" : ""} ${save ? "is-save" : ""}`}
-          data-node={!linked && layer === "content" && node.id !== "" ? node.id : undefined}
-          key={`icon-${node.id}-${node.bounds_dp[1]}`}
-          role="img"
-          style={box(node, stage.dy)}
-        >
-          <GlyphArt glyph={glyph} />
         </span>
       );
     }

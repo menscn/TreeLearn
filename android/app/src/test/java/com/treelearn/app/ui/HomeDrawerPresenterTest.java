@@ -35,6 +35,7 @@ public final class HomeDrawerPresenterTest {
         HomeDrawerPresenter.State last;
         final List<String> openedBranches = new ArrayList<>();
         int statsOpens;
+        int forestOpens;
 
         @Override
         public void render(HomeDrawerPresenter.State next) {
@@ -49,6 +50,11 @@ public final class HomeDrawerPresenterTest {
         @Override
         public void openStats() {
             statsOpens++;
+        }
+
+        @Override
+        public void openForest() {
+            forestOpens++;
         }
     }
 
@@ -153,6 +159,21 @@ public final class HomeDrawerPresenterTest {
         presenter.onStatsTapped();
         assertEquals(1, sink.statsOpens);
         assertEquals(HomeDrawerPresenter.Phase.CLOSED, sink.last.phase);
+    }
+
+    @Test
+    public void forestEntryClosesTheDrawerFirst() {
+        RecordingSink sink = new RecordingSink();
+        HomeDrawerPresenter presenter = new HomeDrawerPresenter(sink,
+                new FixedSource(java.util.Collections.singletonList(row("t0"))));
+        presenter.start();
+        presenter.onDrawerToggled();
+
+        presenter.onForestTapped();
+
+        assertEquals(1, sink.forestOpens);
+        assertEquals("the drawer never survives navigation", HomeDrawerPresenter.Phase.CLOSED,
+                sink.last.phase);
     }
 
     @Test

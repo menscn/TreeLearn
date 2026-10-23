@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Android × 方案 A · 对齐诊断与执行方案</title>
+<style>
+  :root{
+    --paper:#f2f1ec;
+    --paper-2:#eae8e1;
+    --ink:#1f2a23;
+    --ink-2:#4f5a51;
+    --ink-3:#7d857b;
+    --line:#d8d5cb;
+    --line-2:#c8c4b8;
+    --green:#2b6e45;
+    --green-deep:#164027;
+    --green-soft:#dfe9e1;
+    --rose:#bf9d9e;
+    --lilac:#a7a0b8;
+    --sand:#d6a96e;
+    --sage:#a9bfae;
+    --radius:22px;
+    --radius-lg:28px;
+    --serif:"Songti SC","Noto Serif CJK SC","Noto Serif SC","SimSun",serif;
+    --sans:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:
+      radial-gradient(900px 420px at 12% 0%, rgba(191,157,158,.10), transparent 62%),
+      radial-gradient(820px 380px at 92% 6%, rgba(167,160,184,.10), transparent 60%),
+      var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:15px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green-deep)}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 32px}
+  .kicker{
+    margin:0;
+    font-size:11px;
+    letter-spacing:.18em;
+    font-weight:600;
+    color:var(--green);
+  }
+  header.hero{padding:76px 0 42px}
+  header.hero h1{
+    margin:18px 0 0;
+    font-family:var(--serif);
+    font-size:clamp(38px,5.2vw,66px);
+    line-height:1.18;
+    font-weight:600;
+    letter-spacing:-.02em;
+  }
+  header.hero h1 em{font-style:normal;color:var(--green)}
+  .lede{
+    max-width:760px;
+    margin:22px 0 0;
+    color:var(--ink-2);
+    font-size:16px;
+    line-height:1.8;
+  }
+  .meta-strip{
+    display:flex;flex-wrap:wrap;gap:10px;margin-top:28px;
+  }
+  .meta-strip span{
+    padding:8px 14px;border:1px solid var(--line);border-radius:999px;
+    background:rgba(255,255,255,.46);font-size:12px;color:var(--ink-2);
+  }
+  .meta-strip b{color:var(--green-deep);font-weight:600}
+
+  section{padding:52px 0;border-top:1px solid var(--line)}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:26px}
+  .sec-num{
+    font-family:var(--serif);font-size:13px;color:var(--green);
+    letter-spacing:.12em;font-weight:600;
+  }
+  .sec-head h2{
+    margin:0;font-family:var(--serif);font-size:clamp(26px,3.2vw,38px);
+    line-height:1.3;font-weight:600;letter-spacing:-.01em;
+  }
+  .sec-head p{margin:0 0 0 auto;max-width:380px;color:var(--ink-3);font-size:12.5px}
+
+  .answer-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:28px;align-items:start}
+  .callout{
+    padding:26px 28px;border-radius:var(--radius-lg);
+    background:rgba(255,255,255,.58);border:1px solid rgba(255,255,255,.8);
+    box-shadow:0 22px 50px -34px rgba(31,42,35,.35),inset 0 0 0 1px rgba(22,64,39,.05);
+  }
+  .callout h3{margin:0 0 10px;font-size:17px}
+  .callout p{margin:0;color:var(--ink-2);font-size:14px}
+  .diagram{
+    padding:22px;border-radius:var(--radius);
+    background:#e9ece5;border:1px solid var(--line);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:12.5px;color:var(--ink-2);line-height:1.9;
+  }
+  .diagram b{color:var(--green-deep)}
+  .diagram .box{
+    display:inline-block;padding:8px 10px;border-radius:10px;
+    background:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.9);
+    box-shadow:0 1px 0 rgba(22,64,39,.06);
+  }
+  .diagram .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .diagram .arrow{color:var(--ink-3)}
+  .diagram .note{margin-top:12px;font-family:var(--sans);font-size:12px;color:var(--ink-3)}
+
+  .cause-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .cause{
+    padding:22px;border-radius:var(--radius);
+    background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.8);
+  }
+  .cause .tag{font-size:10px;letter-spacing:.14em;color:var(--green);font-weight:700}
+  .cause h3{margin:8px 0 6px;font-size:15.5px}
+  .cause p{margin:0;color:var(--ink-2);font-size:13px}
+
+  .screen-block{margin-top:34px}
+  .screen-title{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .screen-title h3{margin:0;font-family:var(--serif);font-size:24px;font-weight:600}
+  .screen-title .badge{
+    padding:4px 9px;border-radius:999px;background:var(--green-soft);
+    color:var(--green-deep);font-size:10.5px;font-weight:600;
+  }
+  .compare{
+    display:grid;grid-template-columns:repeat(2,minmax(0,390px));
+    gap:26px;align-items:start;justify-content:center;
+  }
+  .shot{
+    border-radius:26px;overflow:hidden;background:#fff;
+    border:1px solid rgba(22,64,39,.10);
+    box-shadow:0 30px 60px -40px rgba(22,64,39,.45),inset 0 0 0 1px rgba(255,255,255,.7);
+  }
+  .shot img{display:block;width:100%;height:auto}
+  .shot-cap{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:10px 14px 12px;font-size:11px;color:var(--ink-3);
+    background:rgba(255,255,255,.84);border-top:1px solid var(--line);
+  }
+  .shot-cap b{font-weight:600;color:var(--ink)}
+  .shot-cap .dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:1px}
+  .dot.now{background:#c47d73}
+  .dot.target{background:var(--green)}
+  .diff{
+    margin:22px 0 0;padding:0;list-style:none;counter-reset:d;
+    display:grid;grid-template-columns:1fr 1fr;gap:10px 26px;
+  }
+  .diff li{
+    counter-increment:d;position:relative;padding-left:32px;
+    color:var(--ink-2);font-size:13px;line-height:1.6;
+  }
+  .diff li::before{
+    content:counter(d,decimal-leading-zero);
+    position:absolute;left:0;top:1px;width:22px;height:22px;border-radius:50%;
+    display:grid;place-items:center;background:rgba(43,110,69,.10);
+    color:var(--green-deep);font-size:9.5px;font-weight:700;
+  }
+  .diff li b{color:var(--ink);font-weight:600}
+
+  .roi-intro{max-width:820px;color:var(--ink-2);font-size:14.5px;margin:0 0 24px}
+  .roi-layout{display:grid;grid-template-columns:1.15fr .85fr;gap:26px;align-items:start}
+  .demo-wrap{
+    padding:24px;border-radius:var(--radius-lg);border:1px solid var(--line);
+    background:rgba(255,255,255,.44);
+  }
+  .toggles{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+  .toggle{
+    appearance:none;border:1px solid var(--line-2);background:rgba(255,255,255,.6);
+    color:var(--ink-2);padding:8px 13px;border-radius:999px;font-size:12px;
+    font-family:var(--sans);cursor:pointer;transition:.2s;
+  }
+  .toggle:hover{border-color:var(--green);color:var(--green-deep)}
+  .toggle[aria-pressed="true"]{
+    background:var(--green-deep);border-color:var(--green-deep);color:#fff;
+  }
+  .toggle-reset{margin-left:auto;border-style:dashed}
+  .demo{
+    position:relative;min-height:360px;border-radius:26px;overflow:hidden;
+    background:
+      radial-gradient(420px 220px at 18% 10%, rgba(43,110,69,.10), transparent 62%),
+      radial-gradient(360px 240px at 88% 22%, rgba(214,169,110,.14), transparent 60%),
+      linear-gradient(180deg,#f6f4ee,#eef0e9);
+    border:1px solid rgba(255,255,255,.9);
+    padding:26px 22px;
+    transition:background .35s;
+  }
+  .demo[data-glow="on"]{
+    background:
+      radial-gradient(420px 220px at 14% 8%, rgba(191,157,158,.18), transparent 62%),
+      radial-gradient(360px 240px at 90% 20%, rgba(167,160,184,.16), transparent 58%),
+      radial-gradient(420px 220px at 78% 96%, rgba(43,110,69,.08), transparent 60%),
+      linear-gradient(180deg,#f7f4ee,#eef0e9);
+  }
+  .demo:before{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:repeating-linear-gradient(0deg, rgba(22,64,39,.035) 0 1px, transparent 1px 30px);
+    opacity:.7;
+  }
+  .demo-top{
+    position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;
+    height:44px;padding:0 12px;border-radius:999px;
+    background:rgba(255,255,255,.56);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.88),0 14px 30px -24px rgba(22,64,39,.4);
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+  }
+  .demo-top span{font-size:12px;color:var(--ink-3)}
+  .demo-top b{font-family:var(--serif);font-size:17px;color:var(--green-deep);letter-spacing:.02em}
+  .demo-hero{position:relative;z-index:2;text-align:center;padding:20px 0 16px}
+  .demo-hero h4{
+    margin:0;font-family:var(--sans);font-size:21px;letter-spacing:-.02em;
+    color:var(--ink);transition:font-family .25s;
+  }
+  .demo[data-type="on"] .demo-hero h4{font-family:var(--serif);font-weight:600}
+  .demo-hero p{margin:5px 0 0;font-size:11.5px;color:var(--ink-2)}
+  .demo-card{
+    position:relative;z-index:2;display:flex;gap:11px;
+    padding:15px 15px 15px 17px;border-radius:17px;
+    background:rgba(255,255,255,.74);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.9),0 18px 36px -30px rgba(22,64,39,.45);
+    transition:border-radius .28s,box-shadow .28s;
+  }
+  .demo[data-radius="on"] .demo-card{
+    border-radius:28px;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.9),0 30px 60px -40px rgba(22,64,39,.5);
+  }
+  .demo-band{
+    position:absolute;left:0;top:16px;bottom:16px;width:3px;border-radius:0 3px 3px 0;
+    background:transparent;transition:background .28s;
+  }
+  .demo[data-tint="on"] .demo-band{background:var(--rose)}
+  .demo-icon{
+    width:30px;height:30px;border-radius:10px;flex:none;display:grid;place-items:center;
+    background:rgba(43,110,69,.10);color:var(--green-deep);font-size:11px;font-weight:700;
+    transition:background .28s,color .28s;
+  }
+  .demo[data-tint="on"] .demo-icon{background:rgba(167,160,184,.24);color:#4b4359}
+  .demo-copy{min-width:0}
+  .demo-copy h5{margin:0;font-size:13px;line-height:1.45;font-weight:600}
+  .demo-copy p{margin:4px 0 0;font-size:11px;line-height:1.6;color:var(--ink-2)}
+  .demo-meta{margin-top:6px;font-size:10px;color:var(--ink-3)}
+  .demo-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:5px;vertical-align:1px}
+  .demo[data-tint="on"] .demo-dot{background:var(--sage)}
+  .demo-foot{position:relative;z-index:2;display:flex;align-items:center;gap:8px;margin-top:14px}
+  .demo-chip{
+    height:29px;padding:0 11px;border-radius:999px;display:inline-flex;align-items:center;
+    background:rgba(255,255,255,.36);border:1px solid rgba(255,255,255,.56);
+    font-size:10.5px;color:var(--ink-2);
+  }
+  .demo-send{
+    margin-left:auto;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;
+    background:linear-gradient(155deg,var(--green),var(--green-deep));color:#fff;font-size:16px;
+    box-shadow:0 10px 20px -10px rgba(22,64,39,.6),inset 0 1px 0 rgba(255,255,255,.3);
+  }
+  .demo-note{margin:12px 0 0;font-size:11px;color:var(--ink-3)}
+
+  .palette{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .swatch{
+    display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:14px;
+    background:rgba(255,255,255,.55);border:1px solid var(--line);
+  }
+  .swatch i{width:26px;height:26px;border-radius:8px;flex:none;display:block}
+  .swatch b{display:block;font-size:11.5px;color:var(--ink)}
+  .swatch span{display:block;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;color:var(--ink-3)}
+  .rules{margin:18px 0 0;padding:0;list-style:none}
+  .rules li{position:relative;padding-left:16px;margin-top:9px;font-size:12.5px;color:var(--ink-2)}
+  .rules li:before{content:"";position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:50%;background:var(--green)}
+  .dont{
+    margin-top:16px;padding:14px 16px;border-radius:14px;
+    background:rgba(191,157,158,.10);border:1px solid rgba(191,157,158,.28);
+    font-size:12px;color:#6f4f4f;
+  }
+  .dont b{color:#5a3f3f}
+
+  .plan{display:grid;gap:12px}
+  .plan-row{
+    display:grid;grid-template-columns:64px 1fr 1.05fr;gap:18px;align-items:start;
+    padding:18px 20px;border-radius:18px;background:rgba(255,255,255,.5);
+    border:1px solid rgba(255,255,255,.8);
+  }
+  .plan-row .n{
+    font-family:var(--serif);font-size:22px;color:var(--green);line-height:1.2;
+  }
+  .plan-row h3{margin:0 0 4px;font-size:14.5px}
+  .plan-row p{margin:0;font-size:12.5px;color:var(--ink-2)}
+  .plan-row .accept{font-size:12px;color:var(--ink-3)}
+  .plan-row .accept b{color:var(--green-deep)}
+
+  .decisions{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+  .decision{
+    padding:18px 20px;border-radius:18px;background:rgba(255,255,255,.55);
+    border:1px solid var(--line);
+  }
+  .decision .k{font-size:10px;letter-spacing:.14em;color:var(--green);font-weight:700}
+  .decision h3{margin:7px 0 6px;font-size:14px}
+  .decision p{margin:0;font-size:12.5px;color:var(--ink-2)}
+  .decision .default{margin-top:9px;font-size:12px;color:var(--green-deep)}
+
+  footer{
+    padding:40px 0 64px;border-top:1px solid var(--line);
+    color:var(--ink-3);font-size:12px;line-height:1.8;
+  }
+  footer b{color:var(--ink-2)}
+
+  @media (max-width:900px){
+    .wrap{padding:0 20px}
+    .answer-grid,.roi-layout{grid-template-columns:1fr}
+    .cause-grid{grid-template-columns:1fr}
+    .compare{grid-template-columns:1fr}
+    .diff{grid-template-columns:1fr}
+    .palette{grid-template-columns:1fr}
+    .plan-row{grid-template-columns:44px 1fr}
+    .plan-row .accept{grid-column:2}
+    .decisions{grid-template-columns:1fr}
+    .sec-head{display:block}
+    .sec-head p{margin:8px 0 0;max-width:none}
+  }
+  @media print{
+    body{background:#fff}
+    header.hero{padding-top:24px}
+    section{break-inside:avoid}
+    .demo{min-height:300px}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="kicker">TREELEARN · DESIGN AUDIT · 2026-10-22</p>
+    <h1>Android 实机与方案 A 的差距，<br><em>以及怎么补。</em></h1>
+    <p class="lede">当前 APK 已经拿到了晨雾玻璃的材质，但沿用的仍是旧的原生结构：顶栏、首页输入区、推荐、历史卡、底部 tab、对话输入区都还没有按方案 A 重排。下面先回答“是否共用 H5”，再逐屏拆差距，最后给出莫兰迪三步与 Harness 执行顺序。</p>
+    <div class="meta-strip">
+      <span><b>3</b> 屏真机对照</span>
+      <span><b>1:1</b> 结构与控件目标</span>
+      <span><b>原生 Java/XML</b> 不是 H5 壳</span>
+      <span><b>2</b> 层目标：A 结构 + 莫兰迪材质</span>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-num">01 / 代码关系</span>
+      <h2>Android 和 Web 不是同一套 H5</h2>
+      <p>这是这次“为什么 APK 没跟着变”的根因，也决定了对齐必须原生重画。</p>
+    </div>
+    <div class="answer-grid">
+      <div class="callout">
+        <h3>共享的是设计事实，不是界面代码</h3>
+        <p>Web 是 React + TypeScript；Android 是 Java + 原生 View/XML。两边共享设计 token 的生成链、文案与夹具、1:1 判据；<b>不共享 UI 组件、布局或 CSS</b>。Web 的 <code>glass.css</code> 不会进入 APK，Android 也不会加载 H5 页面来跑主界面。</p>
+      </div>
+      <div class="diagram">
+        <div class="row"><span class="box">Web · React/TS<br><small>src/styles/glass.css</small></span></div>
+        <div class="row"><span class="arrow">↘</span><span class="box">tokens.json → tokens.css</span></div>
+        <div class="row"><span class="arrow">↗</span><span class="box">tokens.json → colors.xml</span></div>
+        <div class="row"><span class="box">Android · Java/XML<br><small>res/layout · res/drawable</small></span></div>
+        <p class="note">箭头只传“数值与事实”，不传布局。要让实机像 A，必须在 Android 原生层把结构、图标、间距和状态一起重做。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-num">02 / 根因</span>
+      <h2>材质有了，骨架还是旧的</h2>
+      <p>049 做的是“表面材质覆盖”，不是“方案 A 结构复刻”。</p>
+    </div>
+    <div class="cause-grid">
+      <div class="cause">
+        <span class="tag">STRUCTURE</span>
+        <h3>顶栏 / 输入区 / tab 没重排</h3>
+        <p>当前顶栏是裸 icon 行，A 是悬浮玻璃胶囊；当前首页输入区只有模型胶囊和浅色发送，A 还有附件圆钮与深绿发送；当前 tab 是整宽底栏，A 是悬浮胶囊。</p>
+      </div>
+      <div class="cause">
+        <span class="tag">CONTROLS</span>
+        <h3>复合控件没有拼出来</h3>
+        <p>推荐是 marquee 长条，A 是两张玻璃卡；历史卡缺右箭头；学习库 segment 是两个独立胶囊，A 是一个玻璃容器；对话分支还没有 A 的“从这条回答继续”竖线栈。</p>
+      </div>
+      <div class="cause">
+        <span class="tag">TYPE &amp; SYSTEM</span>
+        <h3>字体与系统栏没对齐</h3>
+        <p>A 的品牌与正文标题是中文衬线；当前实机的 <code>serif</code> 回退成了黑体。系统状态栏与手势条也不能照抄 mock 的 9:41 和黑色 home indicator。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-num">03 / 三屏对照</span>
+      <h2>逐项差距</h2>
+      <p>左侧为当前 APK 真机截图（1200×2652），右侧为方案 A 提案手机屏（390×844 @2x）。</p>
+    </div>
+
+    <div class="screen-block">
+      <div class="screen-title"><h3>首页</h3><span class="badge">结构差距最大</span></div>
+      <div class="compare">
+        <figure class="shot" style="margin:0">
+          <img src="img/current-home.png" alt="当前 Android 首页">
+          <figcaption class="shot-cap"><span><i class="dot now"></i><b>当前 APK</b> · 真机</span><span>无胶囊顶栏 / 无副标题 / 无附件</span></figcaption>
+        </figure>
+        <figure class="shot" style="margin:0">
+          <img src="img/schemeA-home.png" alt="方案 A 首页">
+          <figcaption class="shot-cap"><span><i class="dot target"></i><b>方案 A</b> · 目标</span><span>胶囊顶栏 / 副标题 / 绿发送</span></figcaption>
+        </figure>
+      </div>
+      <ol class="diff">
+        <li><b>顶栏：</b>裸 icon 行改为 52dp 悬浮玻璃胶囊，左右 16dp、圆角 999；菜单与设置仍在两端。</li>
+        <li><b>Hero：</b>补上副标题“把一个问题，种成一棵树。”；品牌“知芽”需要真正的中文衬线，而不是回退黑体。</li>
+        <li><b>输入区：</b>补 30dp 附件圆钮、30dp 模型胶囊、40dp 深绿发送；最小高度 138dp；输入字号提到 14.5sp。</li>
+        <li><b>推荐：</b>整行 marquee chip 改为两张 232dp 玻璃卡，sparkle + 两行文字；“顺着你学的”移到 section 右侧。</li>
+        <li><b>历史卡：</b>保留现有摘要，补右侧 chevron；标题、摘要、元信息的层级与 A 对齐。</li>
+        <li><b>底部 tab：</b>整宽底栏改为悬浮胶囊（左右 24dp、底部 20dp、62dp 高），当前 tab 用绿色 tint 胶囊。</li>
+      </ol>
+    </div>
+
+    <div class="screen-block">
+      <div class="screen-title"><h3>对话</h3><span class="badge">交互差距最大</span></div>
+      <div class="compare">
+        <figure class="shot" style="margin:0">
+          <img src="img/current-chat.png" alt="当前 Android 对话页">
+          <figcaption class="shot-cap"><span><i class="dot now"></i><b>当前 APK</b> · 真机</span><span>裸顶栏 / 大卡片输入区 / 无竖线分支栈</span></figcaption>
+        </figure>
+        <figure class="shot" style="margin:0">
+          <img src="img/schemeA-chat.png" alt="方案 A 对话页">
+          <figcaption class="shot-cap"><span><i class="dot target"></i><b>方案 A</b> · 目标</span><span>胶囊顶栏 / 阅读面 / 分支竖线 / dock</span></figcaption>
+        </figure>
+      </div>
+      <ol class="diff">
+        <li><b>顶栏：</b>52dp 悬浮胶囊；标题 + 下拉 chevron；右侧分支、画布、设置三钮；标题不再被硬截断。</li>
+        <li><b>阅读面：</b>补“你”标签、知芽芽标、动作行与时间排布；正文仍固定 86% 白玻璃，保证长文可读。</li>
+        <li><b>分支栈：</b>补“从这条回答继续”标签 + 左侧竖线 + 三条 branch item；这需要把分支数据接进 ChatScreen，是本次最大的一块。</li>
+        <li><b>输入区：</b>当前是带配置提示的大卡；A 是 dock：圆形附件 + 单行占位 + 模型胶囊 + 40dp 绿发送。</li>
+        <li><b>字体与图标：</b>标题改衬线；图标线宽、圆角与 A 的 sprite 对齐；动作行用 36dp icon button。</li>
+      </ol>
+    </div>
+
+    <div class="screen-block">
+      <div class="screen-title"><h3>学习库</h3><span class="badge">材质与容器</span></div>
+      <div class="compare">
+        <figure class="shot" style="margin:0">
+          <img src="img/current-library.png" alt="当前 Android 学习库">
+          <figcaption class="shot-cap"><span><i class="dot now"></i><b>当前 APK</b> · 真机</span><span>裸标题 / 两个独立 segment / 整宽 tab</span></figcaption>
+        </figure>
+        <figure class="shot" style="margin:0">
+          <img src="img/schemeA-library.png" alt="方案 A 学习库">
+          <figcaption class="shot-cap"><span><i class="dot target"></i><b>方案 A</b> · 目标</span><span>胶囊顶栏 / 玻璃 segment / 底部提示</span></figcaption>
+        </figure>
+      </div>
+      <ol class="diff">
+        <li><b>顶栏：</b>返回 + “学习库”放入 52dp 悬浮玻璃胶囊。</li>
+        <li><b>搜索：</b>46dp 玻璃 searchbar，胶囊圆角，图标与占位文字间距对齐 A。</li>
+        <li><b>Segment：</b>两个独立胶囊改成一个玻璃容器包两个 segment，active 用绿色 tint 并保留计数。</li>
+        <li><b>卡片：</b>摘要与 chevron 已经在，主要补玻璃材质、17dp 圆角与 A 的间距。</li>
+        <li><b>提示：</b>补“新的分支会自动收进学习库”芽标提示。</li>
+        <li><b>底部 tab：</b>与首页共用悬浮胶囊；学习库选中态用绿色 tint。</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-num">04 / 莫兰迪 ROI</span>
+      <h2>三步，按收益排序</h2>
+      <p>莫兰迪不是把绿色换掉，而是把环境色温调软、把分类色收进小面积。以下可单独开关。</p>
+    </div>
+    <p class="roi-intro">A 的底色是绿 + 沙的晨雾。参考图的“灰粉 / 灰紫 / 沙杏 / 鼠尾草”可以借，但只借在环境光和很小的分类面；正文、按钮、焦点仍用品牌绿与近黑绿。这样既有莫兰迪的安静，又不会掉进“整页灰米底 + 彩色卡片墙”。</p>
+    <div class="roi-layout">
+      <div class="demo-wrap">
+        <div class="toggles">
+          <button class="toggle" type="button" data-step="glow" aria-pressed="false">01 环境光</button>
+          <button class="toggle" type="button" data-step="tint" aria-pressed="false">02 分类 tint</button>
+          <button class="toggle" type="button" data-step="radius" aria-pressed="false">03 圆角 / 字阶</button>
+          <button class="toggle toggle-reset" type="button" id="reset">重置</button>
+        </div>
+        <div class="demo" id="demo">
+          <div class="demo-top"><span>☰</span><b>知芽</b><span>☼</span></div>
+          <div class="demo-hero">
+            <h4>把一个问题，种成一棵树。</h4>
+            <p>先看环境光，再看分类色，最后看形体。</p>
+          </div>
+          <div class="demo-card">
+            <span class="demo-band"></span>
+            <span class="demo-icon">芽</span>
+            <div class="demo-copy">
+              <h5>注意力权重可视化与模型可解释性的关系</h5>
+              <p>本分支从可视化只是局部观察工具出发，讨论权重与因果贡献为什么不等同。</p>
+              <div class="demo-meta"><span class="demo-dot"></span>1 个分支 · 3 天前</div>
+            </div>
+          </div>
+          <div class="demo-foot">
+            <span class="demo-chip">V4.1 Flash</span>
+            <span class="demo-send">↑</span>
+          </div>
+        </div>
+        <p class="demo-note">演示只表达三步的方向与比例，不是最终像素；生产值以 token 链落盘后为准。</p>
+      </div>
+      <div>
+        <div class="palette">
+          <div class="swatch"><i style="background:#bf9d9e"></i><div><b>环境光 · 藕粉</b><span>rgba(191,157,158,.12)</span></div></div>
+          <div class="swatch"><i style="background:#a7a0b8"></i><div><b>环境光 · 灰紫</b><span>rgba(167,160,184,.12)</span></div></div>
+          <div class="swatch"><i style="background:#d9c7c5"></i><div><b>tint · 藕粉</b><span>#D9C7C5</span></div></div>
+          <div class="swatch"><i style="background:#cfc9d7"></i><div><b>tint · 灰紫</b><span>#CFC9D7</span></div></div>
+          <div class="swatch"><i style="background:#dccbb4"></i><div><b>tint · 沙杏</b><span>#DCCBB4</span></div></div>
+          <div class="swatch"><i style="background:#c6d0c3"></i><div><b>tint · 鼠尾草</b><span>#C6D0C3</span></div></div>
+        </div>
+        <ul class="rules">
+          <li><b>01 环境光：</b>只进背景，不盖内容；alpha 8–12%，两处光斑即可。</li>
+          <li><b>02 分类 tint：</b>只上非文字面（卡侧带、图标底、分支点），面积不超过 10%；正文与按钮不动。</li>
+          <li><b>03 圆角 / 字阶：</b>卡片 22 / 阅读面 28；标题衬线；阴影从“投影”改为更大更淡的环境光。</li>
+        </ul>
+        <div class="dont"><b>不照搬：</b>红黄绿窗口点、整页灰米底、每张卡一个颜色、把品牌绿换成灰紫。它们会让正文对比度掉到 AA 以下，也会稀释知芽的绿芽识别。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-num">05 / 执行</span>
+      <h2>Harness 拆卡顺序</h2>
+      <p>先结构后材质；每一片都能独立回滚，并且都以真机截图 + UIAutomator 读数验收。</p>
+    </div>
+    <div class="plan">
+      <div class="plan-row">
+        <div class="n">00</div>
+        <div><h3>冻结方案 A 与差距台账</h3><p>以 A-晨雾玻璃.html 为唯一目标；本页 + 三屏截图 + 读数作为基线。不改生产代码。</p></div>
+        <div class="accept"><b>产物：</b>本对比页、img/、capture-scheme-a.mjs；<b>验收：</b>三屏当前截图与 A 截图可复现。</div>
+      </div>
+      <div class="plan-row">
+        <div class="n">01</div>
+        <div><h3>Token 链 + 莫兰迪三步</h3><p>新增 2 个 glow、4 个 tint、on-tint 文本；原型 → tokens.json → colors.xml + tokens.css；Web glass.css 与 Android PaperRuleBackdrop 同步消费。</p></div>
+        <div class="accept"><b>验收：</b>check_design_tokens 0；两端都可开关三步；对比度实测正文 ≥4.5:1。</div>
+      </div>
+      <div class="plan-row">
+        <div class="n">02</div>
+        <div><h3>Android 外壳 + 首页</h3><p>悬浮顶栏、hero 副标题、附件/模型/绿发送、两张推荐卡、历史 chevron、悬浮 tabbar。</p></div>
+        <div class="accept"><b>验收：</b>真机截图对齐 A；UIAutomator 读 topbar 52dp、composer 138dp、两张推荐卡、tabbar 62dp；既有 JVM 测试全绿。</div>
+      </div>
+      <div class="plan-row">
+        <div class="n">03</div>
+        <div><h3>Android 对话</h3><p>胶囊顶栏、阅读面结构、动作行、分支竖线栈、dock 输入区；分支数据接入 ChatScreen。</p></div>
+        <div class="accept"><b>验收：</b>复制/重生成/新建分支不回归；IME、滚动位置、返回焦点保持；真机截图对齐 A。</div>
+      </div>
+      <div class="plan-row">
+        <div class="n">04</div>
+        <div><h3>Android 学习库 + 分支导航</h3><p>胶囊顶栏、玻璃搜索、segment 容器与计数、卡片材质、底部提示；分支导航复用同一套顶栏与卡片。</p></div>
+        <div class="accept"><b>验收：</b>搜索、筛选、滚动恢复、平板宽度不回归；真机截图对齐 A；平板沿用共享 body 不漂移。</div>
+      </div>
+      <div class="plan-row">
+        <div class="n">05</div>
+        <div><h3>Web ROI + 全量回归</h3><p>Web 只叠莫兰迪环境光/分类 tint/圆角字阶，不改 A 的结构；对话列宽已修，保持。</p></div>
+        <div class="accept"><b>验收：</b>pnpm verify 16/16；浏览器 1440/390 读数；token 守门 0。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-num">06 / 拍板</span>
+      <h2>开始前需要确认的四件事</h2>
+      <p>这些会改变成本或“1:1”的定义，不适合由我替你决定。</p>
+    </div>
+    <div class="decisions">
+      <div class="decision">
+        <div class="k">TARGET</div>
+        <h3>A 原样，还是 A + 莫兰迪？</h3>
+        <p>如果“都一致”包含色温，那就以 A 原样为准，ROI 三步只作为可选层；如果接受环境光与分类 tint 的微调，则默认叠加上去。</p>
+        <div class="default">默认：结构 A 1:1，材质叠加 ROI；对比页可切换。</div>
+      </div>
+      <div class="decision">
+        <div class="k">TYPE</div>
+        <h3>是否允许内置中文衬线字体？</h3>
+        <p>当前实机的 <code>serif</code> 已回退成黑体，和 A 的品牌/标题不一致。要 1:1 需要内置一份 OFL 衬线（会增大 APK）；否则只能接受系统回退。</p>
+        <div class="default">默认：先内置子集字体，真机复核字形。</div>
+      </div>
+      <div class="decision">
+        <div class="k">CONTROLS</div>
+        <h3>没有后端流程的控件怎么办？</h3>
+        <p>首页附件、对话标题下拉、分支竖线栈都需要真实行为。现有流程接不上时，我倾向“先不画”，而不是放一个点了没反应的按钮。</p>
+        <div class="default">默认：能接则接；接不上先不画，并在卡片里登记。</div>
+      </div>
+      <div class="decision">
+        <div class="k">SYSTEM BARS</div>
+        <h3>系统栏保留真实，不画 mock</h3>
+        <p>A 的 9:41 状态栏和黑色 home indicator 是展示用；实机应使用真实系统栏，并通过 insets 让胶囊顶栏与手势条保持安全距离。</p>
+        <div class="default">默认：保留系统真实栏，只对齐内容区。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p><b>口径：</b>本页是设计诊断与执行计划，不是生产代码，也不替代 <code>Docs/04-ux-design</code> 的权威原型。所有数值与截图在落卡后重新取；生产值以 token 链为准。</p>
+    <p><b>验收：</b>真机只用 <code>adb install -r</code>；不跑全量 instrumentation（会卸载应用并清掉本地数据与 Key）。Web 以 <code>pnpm verify</code> 与浏览器读数为准。</p>
+    <p>TREELEARN · A 晨雾玻璃对齐 · 2026-10-22</p>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var demo = document.getElementById("demo");
+    var buttons = Array.prototype.slice.call(document.querySelectorAll(".toggle[data-step]"));
+    var reset = document.getElementById("reset");
+    var map = { glow: "glow", tint: "tint", radius: "radius" };
+    function sync() {
+      buttons.forEach(function (button) {
+        var step = button.getAttribute("data-step");
+        var on = demo.getAttribute("data-" + map[step]) === "on";
+        button.setAttribute("aria-pressed", on ? "true" : "false");
+      });
+    }
+    buttons.forEach(function (button) {
+      button.addEventListener("click", function () {
+        var step = button.getAttribute("data-step");
+        var key = "data-" + map[step];
+        var next = demo.getAttribute(key) === "on" ? "off" : "on";
+        demo.setAttribute(key, next);
+        if (step === "radius") demo.setAttribute("data-type", next);
+        sync();
+      });
+    });
+    reset.addEventListener("click", function () {
+      demo.setAttribute("data-glow", "off");
+      demo.setAttribute("data-tint", "off");
+      demo.setAttribute("data-radius", "off");
+      demo.setAttribute("data-type", "off");
+      sync();
+    });
+  })();
+</script>
+</body>
+</html>

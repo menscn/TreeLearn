@@ -1,0 +1,2572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>知芽 · 玻璃质感重设计提案</title>
+<style>
+/* ============================================================
+   知芽 · 玻璃质感重设计提案
+   本文件只服务提案页面，不是生产设计 token 的第二权威。
+   选定方向后，数值仍需按「原型 :root → tokens.json →
+   colors.xml → tokens.css → 守门」的既定顺序落盘。
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: var(--font-ui);
+  color: var(--page-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+p, h1, h2, h3, ul, figure { margin: 0; }
+ul { padding: 0; list-style: none; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { background: none; border: 0; padding: 0; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+svg { display: block; }
+::selection { background: rgba(43, 110, 69, .18); }
+
+:root {
+  --font-ui: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-serif: "Noto Serif SC", "Songti SC", "STSong", "SimSun", Georgia, serif;
+  --font-latin: "Avenir Next", "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  --page-bg: #e9ece5;
+  --page-ink: #17231b;
+  --page-ink2: #4a5a50;
+  --page-ink3: #6a7970;
+  --page-green: #2b6e45;
+  --page-deep: #164027;
+  --page-line: rgba(23, 35, 27, .1);
+  --page-edge: rgba(255, 255, 255, .68);
+  --page-shadow: 0 30px 70px -40px rgba(20, 38, 27, .35);
+}
+
+/* ---------- 三套材质 ---------- */
+
+[data-theme="mist"] {
+  --scene-base: #eef1e9;
+  --scene-grad: linear-gradient(155deg, #f3f4ee 0%, #eceee6 36%, #f6f1e7 68%, #e8efe9 100%);
+  --glow-a: #cfdfd1;
+  --glow-b: #f6e5c9;
+  --glow-c: #dbe8de;
+  --glass-tint: 255, 255, 255;
+  --glass-a1: .62;
+  --glass-a2: calc(var(--glass-a1) * .58);
+  --glass-blur: 28px;
+  --glass-sat: 150%;
+  --glass-edge: .72;
+  --reader-a1: .86;
+  --reader-a2: .74;
+  --shadow-rgb: 22, 36, 28;
+  --ink: #16241c;
+  --ink2: #435449;
+  --ink3: #5f7066;
+  --green: #2b6e45;
+  --green-deep: #164027;
+  --green-soft: #e3f0e7;
+  --green-faint: #f0f7f1;
+  --highlight: rgba(255, 243, 176, .58);
+  --radius-card: 22px;
+  --radius-panel: 28px;
+  --hairline: rgba(22, 36, 28, .08);
+  --tab-active: rgba(255, 255, 255, .62);
+  --accent-soft: rgba(43, 110, 69, .1);
+  --shaft-opacity: .32;
+  --shaft-rotate: 20deg;
+}
+
+[data-theme="moss"] {
+  --scene-base: #e2ebdc;
+  --scene-grad: linear-gradient(150deg, #e8f0e2 0%, #dbe7d5 38%, #f1ead9 72%, #d5e4d6 100%);
+  --glow-a: #a9c9a5;
+  --glow-b: #f4ddb0;
+  --glow-c: #b7d3b7;
+  --glass-tint: 226, 242, 228;
+  --glass-a1: .52;
+  --glass-a2: calc(var(--glass-a1) * .54);
+  --glass-blur: 26px;
+  --glass-sat: 170%;
+  --glass-edge: .6;
+  --reader-a1: .8;
+  --reader-a2: .68;
+  --shadow-rgb: 15, 36, 24;
+  --ink: #10251a;
+  --ink2: #3c5345;
+  --ink3: #556b5d;
+  --green: #1f6b44;
+  --green-deep: #0e3020;
+  --green-soft: #d8ebdc;
+  --green-faint: #eaf5ec;
+  --highlight: rgba(233, 217, 168, .6);
+  --radius-card: 26px;
+  --radius-panel: 32px;
+  --hairline: rgba(15, 36, 24, .09);
+  --tab-active: rgba(255, 255, 255, .5);
+  --accent-soft: rgba(31, 107, 68, .12);
+  --shaft-opacity: .55;
+  --shaft-rotate: 15deg;
+}
+
+[data-theme="lumen"] {
+  --scene-base: #eef0e9;
+  --scene-grad: linear-gradient(160deg, #f7f3e9 0%, #eef1e9 35%, #e3ece7 70%, #f2eee4 100%);
+  --glow-a: #fff1d2;
+  --glow-b: #cfe4da;
+  --glow-c: #e8f2e8;
+  --glass-tint: 255, 255, 255;
+  --glass-a1: .3;
+  --glass-a2: calc(var(--glass-a1) * .5);
+  --glass-blur: 18px;
+  --glass-sat: 135%;
+  --glass-edge: .88;
+  --reader-a1: .72;
+  --reader-a2: .6;
+  --shadow-rgb: 22, 36, 28;
+  --ink: #142019;
+  --ink2: #3e5046;
+  --ink3: #5a6b61;
+  --green: #2b6e45;
+  --green-deep: #143c27;
+  --green-soft: #e3f0e7;
+  --green-faint: #f0f7f1;
+  --highlight: rgba(255, 243, 176, .48);
+  --radius-card: 20px;
+  --radius-panel: 26px;
+  --hairline: rgba(22, 36, 28, .08);
+  --tab-active: rgba(255, 255, 255, .42);
+  --accent-soft: rgba(43, 110, 69, .1);
+  --shaft-opacity: .82;
+  --shaft-rotate: 24deg;
+}
+
+/* ---------- 图标 ---------- */
+
+.icon-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+.icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+
+/* ---------- 场景光 ---------- */
+
+.scene {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: var(--scene-grad);
+  transition: opacity .35s ease;
+}
+.scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .045;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+}
+.glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(44px);
+  opacity: .72;
+  will-change: transform;
+}
+.glow-a {
+  width: 74%;
+  height: 50%;
+  left: -24%;
+  top: -11%;
+  background: radial-gradient(circle, var(--glow-a) 0%, transparent 68%);
+  animation: drift-a 18s ease-in-out infinite alternate;
+}
+.glow-b {
+  width: 66%;
+  height: 48%;
+  right: -22%;
+  top: 17%;
+  background: radial-gradient(circle, var(--glow-b) 0%, transparent 68%);
+  animation: drift-b 23s ease-in-out infinite alternate;
+}
+.glow-c {
+  width: 86%;
+  height: 56%;
+  left: -14%;
+  bottom: -22%;
+  background: radial-gradient(circle, var(--glow-c) 0%, transparent 68%);
+  animation: drift-a 27s ease-in-out infinite alternate-reverse;
+}
+.light-shaft {
+  position: absolute;
+  top: -28%;
+  right: 0;
+  width: 48%;
+  height: 160%;
+  transform: rotate(var(--shaft-rotate));
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .55), rgba(255, 255, 255, 0));
+  filter: blur(26px);
+  opacity: var(--shaft-opacity);
+  mix-blend-mode: screen;
+}
+.canopy,
+.sun {
+  display: none;
+}
+[data-theme="moss"] .canopy {
+  display: block;
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(35, 78, 47, .22), transparent 70%);
+  filter: blur(28px);
+  opacity: .8;
+}
+[data-theme="moss"] .canopy-a {
+  width: 58%;
+  height: 30%;
+  left: -14%;
+  top: 6%;
+  transform: rotate(-18deg);
+}
+[data-theme="moss"] .canopy-b {
+  width: 52%;
+  height: 26%;
+  right: -18%;
+  bottom: 8%;
+  transform: rotate(14deg);
+}
+[data-theme="lumen"] .sun {
+  display: block;
+  position: absolute;
+  right: -8%;
+  top: 4%;
+  width: 42%;
+  height: 32%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 244, 210, .9) 0%, rgba(255, 244, 210, .28) 36%, transparent 70%);
+  filter: blur(18px);
+  mix-blend-mode: screen;
+}
+
+@keyframes drift-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(16px, -12px, 0) scale(1.06); }
+}
+@keyframes drift-b {
+  from { transform: translate3d(0, 0, 0) scale(1.02); }
+  to { transform: translate3d(-14px, 10px, 0) scale(1); }
+}
+@keyframes caret {
+  0%, 44% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* ---------- 设备框 ---------- */
+
+.phone-figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.phone {
+  position: relative;
+  width: 408px;
+  padding: 9px;
+  border-radius: 54px;
+  background: linear-gradient(155deg, #3a413b 0%, #161b17 34%, #080b09 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .2),
+    0 42px 80px -42px rgba(15, 30, 20, .6),
+    0 16px 34px -24px rgba(15, 30, 20, .4);
+  transition: transform .55s cubic-bezier(.2, .8, .2, 1), box-shadow .55s cubic-bezier(.2, .8, .2, 1);
+}
+.phone::after {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  border-radius: 46px;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .09);
+}
+.phone-figure:hover .phone {
+  transform: translateY(-5px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .2),
+    0 52px 92px -42px rgba(15, 30, 20, .65),
+    0 20px 40px -24px rgba(15, 30, 20, .45);
+}
+.phone-screen {
+  position: relative;
+  width: 390px;
+  height: 844px;
+  border-radius: 46px;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--scene-base);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.phone-caption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10.5px;
+  letter-spacing: .14em;
+  color: var(--page-ink3);
+}
+.phone-caption::before {
+  content: "";
+  width: 18px;
+  height: 1px;
+  background: var(--page-line);
+}
+
+/* ---------- 状态栏 ---------- */
+
+.statusbar {
+  position: absolute;
+  z-index: 50;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  color: var(--ink);
+  font-family: var(--font-latin);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  pointer-events: none;
+}
+.statusbar .time { padding-left: 2px; }
+.status-icons {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  opacity: .88;
+}
+.status-icons svg { width: 15px; height: 11px; }
+.status-icons .battery { width: 23px; height: 12px; }
+.punch {
+  position: absolute;
+  z-index: 60;
+  top: 12px;
+  left: 50%;
+  width: 11px;
+  height: 11px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: #080b09;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .14);
+}
+.home-indicator {
+  position: absolute;
+  z-index: 40;
+  bottom: 8px;
+  left: 50%;
+  width: 118px;
+  height: 4px;
+  transform: translateX(-50%);
+  border-radius: 99px;
+  background: rgba(22, 36, 28, .26);
+}
+
+/* ---------- 玻璃材质 ---------- */
+
+.glass {
+  position: relative;
+  background:
+    radial-gradient(120% 90% at 14% -10%, rgba(255, 255, 255, .52), transparent 44%),
+    linear-gradient(145deg, rgba(var(--glass-tint), var(--glass-a1)), rgba(var(--glass-tint), var(--glass-a2)));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  border: 1px solid rgba(255, 255, 255, var(--glass-edge));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .72),
+    inset 0 -1px 0 rgba(255, 255, 255, .12),
+    0 20px 40px -28px rgba(var(--shadow-rgb), .42),
+    0 2px 6px rgba(var(--shadow-rgb), .05);
+}
+.glass--reader {
+  background:
+    radial-gradient(120% 90% at 12% -8%, rgba(255, 255, 255, .4), transparent 42%),
+    linear-gradient(145deg, rgba(var(--glass-tint), var(--reader-a1)), rgba(var(--glass-tint), var(--reader-a2)));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .8),
+    inset 0 -1px 0 rgba(255, 255, 255, .16),
+    0 24px 50px -30px rgba(var(--shadow-rgb), .44),
+    0 2px 6px rgba(var(--shadow-rgb), .05);
+}
+[data-theme="moss"] .glass {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .68),
+    inset 0 -10px 26px -22px rgba(31, 107, 68, .35),
+    0 20px 42px -28px rgba(var(--shadow-rgb), .46);
+}
+[data-theme="lumen"] .glass {
+  border-color: rgba(255, 255, 255, .9);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .95),
+    inset 0 -1px 0 rgba(255, 255, 255, .2),
+    0 24px 48px -30px rgba(var(--shadow-rgb), .46),
+    0 2px 6px rgba(var(--shadow-rgb), .05);
+}
+[data-theme="lumen"] .glass--reader {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .95),
+    0 24px 50px -30px rgba(var(--shadow-rgb), .5);
+}
+.inner {
+  background: linear-gradient(145deg, rgba(255, 255, 255, .34), rgba(255, 255, 255, .14));
+  border: 1px solid rgba(255, 255, 255, .42);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45);
+}
+
+/* ---------- 应用骨架 ---------- */
+
+.app {
+  position: absolute;
+  z-index: 10;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding-top: 44px;
+}
+.topbar {
+  flex: none;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 52px;
+  margin: 6px 16px 0;
+  padding: 0 8px;
+  border-radius: 999px;
+}
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--ink2);
+  flex: none;
+}
+.icon-btn .icon { width: 20px; height: 20px; }
+.topbar .brand {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--green-deep);
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+.topbar .brand .icon { width: 21px; height: 21px; }
+.topbar .title-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 2px;
+}
+.topbar .title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -.01em;
+}
+.topbar .title-wrap .icon {
+  width: 14px;
+  height: 14px;
+  color: var(--ink3);
+}
+.app-body {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+/* ---------- 首页 ---------- */
+
+.screen-home .app-body {
+  padding: 14px 16px 0;
+  overflow: hidden;
+}
+.hero { margin: 6px 4px 0; }
+.hero-kicker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  color: var(--ink3);
+}
+.hero-kicker .icon {
+  width: 13px;
+  height: 13px;
+  color: var(--green);
+}
+.hero h1 {
+  font-family: var(--font-serif);
+  font-size: 29px;
+  line-height: 1.26;
+  font-weight: 600;
+  letter-spacing: -.02em;
+  margin-top: 7px;
+  text-wrap: balance;
+}
+.hero h1 .accent { color: var(--green); }
+.hero-sub {
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--ink2);
+  margin-top: 6px;
+}
+.composer {
+  margin-top: 13px;
+  border-radius: var(--radius-panel);
+  padding: 14px 14px 12px;
+  min-height: 138px;
+  display: flex;
+  flex-direction: column;
+}
+.composer-input {
+  flex: 1;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--ink);
+  letter-spacing: .005em;
+}
+.composer-input .caret {
+  display: inline-block;
+  width: 1.5px;
+  height: 17px;
+  margin-left: 2px;
+  vertical-align: -3px;
+  background: var(--green);
+  animation: caret 1.2s step-end infinite;
+}
+.composer-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 10px;
+}
+.composer-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--ink3);
+  background: rgba(255, 255, 255, .26);
+  border: 1px solid rgba(255, 255, 255, .4);
+  flex: none;
+}
+.composer-icon .icon { width: 17px; height: 17px; }
+.model-chip {
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .3);
+  border: 1px solid rgba(255, 255, 255, .42);
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--ink2);
+  white-space: nowrap;
+}
+.model-chip .icon {
+  width: 13px;
+  height: 13px;
+  color: var(--ink3);
+}
+.send {
+  width: 40px;
+  height: 40px;
+  margin-left: auto;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(155deg, var(--green) 0%, var(--green-deep) 100%);
+  color: #fff;
+  flex: none;
+  box-shadow:
+    0 10px 20px -10px rgba(22, 64, 39, .6),
+    inset 0 1px 0 rgba(255, 255, 255, .3),
+    inset 0 -1px 0 rgba(0, 0, 0, .18);
+}
+.send .icon { width: 19px; height: 19px; }
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 16px 4px 8px;
+}
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  color: var(--ink2);
+}
+.section-label .icon {
+  width: 13px;
+  height: 13px;
+  color: var(--green);
+}
+.section-count {
+  font-size: 10px;
+  color: var(--ink3);
+}
+.suggest-row {
+  display: flex;
+  gap: 9px;
+  overflow: hidden;
+  margin: 0 -16px;
+  padding: 0 16px;
+}
+.suggest {
+  flex: 0 0 232px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 11px 12px;
+  border-radius: 17px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ink2);
+}
+.suggest .icon {
+  width: 14px;
+  height: 14px;
+  color: var(--green);
+  margin-top: 2px;
+}
+.topic {
+  display: block;
+  padding: 11px 12px;
+  border-radius: var(--radius-card);
+  margin-bottom: 8px;
+}
+.topic-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.topic h3 {
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.42;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  color: var(--ink);
+}
+.topic .chev {
+  width: 14px;
+  height: 14px;
+  color: var(--ink3);
+  margin-top: 2px;
+}
+.topic p {
+  font-size: 10.5px;
+  line-height: 1.55;
+  color: var(--ink2);
+  margin-top: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.topic .meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9.5px;
+  color: var(--ink3);
+  margin-top: 6px;
+}
+.topic .meta .icon {
+  width: 11px;
+  height: 11px;
+  color: var(--green);
+}
+
+/* ---------- 底部胶囊 tab ---------- */
+
+.tabbar {
+  position: absolute;
+  z-index: 30;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  width: calc(100% - 48px);
+  height: 62px;
+  padding: 6px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.tab {
+  flex: 1;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 999px;
+  color: var(--ink3);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .02em;
+}
+.tab .icon { width: 18px; height: 18px; }
+.tab.is-active {
+  background: var(--tab-active);
+  color: var(--green-deep);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .6),
+    0 8px 16px -12px rgba(var(--shadow-rgb), .35);
+}
+
+/* ---------- 对话 ---------- */
+
+.screen-chat .app-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 12px 22px;
+  min-height: 0;
+}
+.reader {
+  flex: 1;
+  min-height: 0;
+  border-radius: var(--radius-panel);
+  padding: 15px 15px 14px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.reader-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(180deg, #000 90%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 90%, transparent 100%);
+}
+.user-msg {
+  max-width: 84%;
+  margin-left: auto;
+  padding-top: 2px;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--ink2);
+  text-align: left;
+}
+.user-msg .who {
+  display: block;
+  text-align: right;
+  font-size: 9px;
+  letter-spacing: .14em;
+  color: var(--ink3);
+  margin-bottom: 3px;
+}
+.ai-tag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 13px 0 7px;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  color: var(--green);
+}
+.ai-tag .icon { width: 13px; height: 13px; }
+.answer {
+  font-size: 13.2px;
+  line-height: 1.82;
+  color: var(--ink);
+  letter-spacing: .002em;
+}
+.answer p { margin: 0 0 9px; }
+.answer strong {
+  font-weight: 600;
+  color: var(--green-deep);
+}
+.answer .mark {
+  background: var(--highlight);
+  border-radius: 3px;
+  padding: 0 2px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 10px 0 2px;
+}
+.actions .icon-btn {
+  width: 29px;
+  height: 29px;
+  background: rgba(255, 255, 255, .24);
+  border: 1px solid rgba(255, 255, 255, .36);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4);
+}
+.actions .icon-btn .icon { width: 16px; height: 16px; }
+.actions .time {
+  margin-left: auto;
+  font-size: 9.5px;
+  color: var(--ink3);
+}
+.branch-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 10px 0 7px;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  color: var(--ink3);
+}
+.branch-label .icon {
+  width: 13px;
+  height: 13px;
+  color: var(--green);
+}
+.branch-label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--hairline);
+}
+.branch-stack {
+  position: relative;
+  padding-left: 11px;
+  margin-left: 2px;
+}
+.branch-stack::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 10px;
+  width: 1px;
+  background: linear-gradient(180deg, var(--green), rgba(var(--shadow-rgb), .08));
+}
+.branch-stack::after {
+  content: "";
+  position: absolute;
+  left: -2px;
+  top: 1px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 3px rgba(43, 110, 69, .1);
+}
+.branch-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 9px 10px;
+  border-radius: 14px;
+  margin-bottom: 6px;
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--ink2);
+}
+.branch-item .icon {
+  width: 13px;
+  height: 13px;
+  color: var(--green);
+  margin-top: 1px;
+}
+.composer--dock {
+  flex: none;
+  padding: 11px 12px 11px 14px;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.composer--dock .composer-line {
+  flex: 1;
+  min-width: 0;
+  padding-left: 2px;
+  font-size: 12.5px;
+  color: var(--ink3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.composer--dock .composer-icon {
+  width: 29px;
+  height: 29px;
+}
+.composer--dock .model-chip { height: 29px; }
+.composer--dock .send {
+  width: 38px;
+  height: 38px;
+  margin-left: 0;
+}
+
+/* ---------- 分支导航 ---------- */
+
+.screen-branch .app-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 16px 24px;
+  overflow: hidden;
+}
+.summary {
+  flex: none;
+  border-radius: var(--radius-panel);
+  padding: 15px 15px 13px;
+}
+.summary-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.summary h2 {
+  flex: 1;
+  font-size: 13.5px;
+  line-height: 1.45;
+  font-weight: 600;
+  letter-spacing: -.01em;
+}
+.summary .tag {
+  flex: none;
+  font-size: 8.5px;
+  line-height: 1;
+  padding: 5px 7px;
+  border-radius: 999px;
+  background: var(--green-faint);
+  color: var(--green-deep);
+  border: 1px solid rgba(255, 255, 255, .5);
+  white-space: nowrap;
+}
+.summary .collapse {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  color: var(--ink3);
+  flex: none;
+  margin-top: -3px;
+}
+.summary .collapse .icon { width: 15px; height: 15px; }
+.ai-summary-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 10px 0 5px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  color: var(--green);
+}
+.ai-summary-label .icon { width: 12px; height: 12px; }
+.summary-text {
+  max-height: 300px;
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 1.78;
+  color: var(--ink2);
+  -webkit-mask-image: linear-gradient(180deg, #000 88%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 88%, transparent 100%);
+}
+.summary-text p { margin: 0 0 6px; }
+.summary-text li {
+  position: relative;
+  padding-left: 10px;
+  margin: 4px 0;
+}
+.summary-text li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--green);
+}
+.list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 2px;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  color: var(--ink3);
+}
+.list-head span:last-child {
+  font-weight: 400;
+  letter-spacing: .02em;
+}
+.branch-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 12px;
+  border-radius: 17px;
+}
+.branch-row .node {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(43, 110, 69, .45);
+  display: grid;
+  place-items: center;
+  color: var(--green);
+  flex: none;
+  background: rgba(255, 255, 255, .26);
+}
+.branch-row .node .icon { width: 12px; height: 12px; }
+.branch-row .txt { flex: 1; min-width: 0; }
+.branch-row h3 {
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.branch-row .meta {
+  font-size: 9px;
+  color: var(--ink3);
+  margin-top: 2px;
+}
+.branch-row .more {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  color: var(--ink3);
+}
+.branch-row .more .icon { width: 15px; height: 15px; }
+.empty-branch {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px dashed rgba(var(--shadow-rgb), .14);
+  font-size: 10px;
+  line-height: 1.55;
+  color: var(--ink3);
+}
+.empty-branch .icon {
+  width: 14px;
+  height: 14px;
+  color: var(--green);
+  margin-top: 1px;
+}
+
+/* ---------- 学习库 ---------- */
+
+.screen-library .app-body {
+  padding: 14px 16px 94px;
+  overflow: hidden;
+}
+.searchbar {
+  height: 44px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 13px;
+  color: var(--ink3);
+  font-size: 11px;
+}
+.searchbar .icon { width: 16px; height: 16px; }
+.segment {
+  display: flex;
+  gap: 4px;
+  margin-top: 11px;
+  padding: 4px;
+  border-radius: 999px;
+  height: 40px;
+}
+.segment .seg {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  color: var(--ink3);
+}
+.segment .seg.is-active {
+  background: rgba(255, 255, 255, .6);
+  color: var(--green-deep);
+  font-weight: 600;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .65),
+    0 6px 12px -10px rgba(var(--shadow-rgb), .35);
+}
+.segment .num {
+  font-family: var(--font-latin);
+  font-size: 9.5px;
+  opacity: .7;
+}
+.library-list { margin-top: 14px; }
+.library-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 13px;
+  border-radius: var(--radius-card);
+  margin-bottom: 9px;
+}
+.library-card .txt { flex: 1; min-width: 0; }
+.library-card h3 {
+  font-size: 12.5px;
+  line-height: 1.45;
+  font-weight: 600;
+  color: var(--ink);
+}
+.library-card p {
+  font-size: 10.5px;
+  line-height: 1.55;
+  color: var(--ink2);
+  margin-top: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.library-card .meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+  color: var(--ink3);
+  margin-top: 6px;
+}
+.library-card .meta .icon {
+  width: 11px;
+  height: 11px;
+  color: var(--green);
+}
+.library-card .chev {
+  width: 14px;
+  height: 14px;
+  color: var(--ink3);
+  margin-top: 2px;
+}
+
+/* ---------- 提案页 ---------- */
+
+.proposal-page,
+.direction-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(1100px 560px at 82% -8%, rgba(207, 224, 209, .5), transparent 62%),
+    radial-gradient(900px 500px at 8% 26%, rgba(246, 229, 201, .42), transparent 62%),
+    var(--page-bg);
+  color: var(--page-ink);
+  font-family: var(--font-ui);
+}
+.proposal-page::before,
+.direction-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .035;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+}
+.proposal-page > *,
+.direction-page > * { position: relative; z-index: 1; }
+
+.proposal-nav {
+  position: sticky;
+  top: 14px;
+  z-index: 100;
+  max-width: 1320px;
+  height: 54px;
+  margin: 14px auto 0;
+  padding: 0 10px 0 18px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  border-radius: 999px;
+  background: rgba(250, 251, 247, .7);
+  border: 1px solid var(--page-edge);
+  box-shadow: 0 18px 40px -30px rgba(20, 38, 27, .35);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
+}
+.proposal-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--page-deep);
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.proposal-brand .icon {
+  width: 20px;
+  height: 20px;
+}
+.proposal-brand .tag {
+  margin-left: 2px;
+  padding-left: 10px;
+  border-left: 1px solid var(--page-line);
+  font-family: var(--font-ui);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: .14em;
+  color: var(--page-ink3);
+}
+.proposal-nav nav {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: auto;
+}
+.proposal-nav nav a {
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  color: var(--page-ink2);
+  transition: background .2s ease, color .2s ease;
+}
+.proposal-nav nav a:hover {
+  background: rgba(255, 255, 255, .55);
+  color: var(--page-deep);
+}
+.proposal-nav nav a.is-active {
+  background: rgba(43, 110, 69, .1);
+  color: var(--page-deep);
+}
+
+.proposal-hero {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 88px 32px 30px;
+}
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .2em;
+  color: var(--page-ink3);
+}
+.eyebrow::before {
+  content: "";
+  width: 26px;
+  height: 1px;
+  background: var(--page-green);
+}
+.proposal-hero h1 {
+  max-width: 920px;
+  margin-top: 18px;
+  font-family: var(--font-serif);
+  font-size: clamp(42px, 5vw, 64px);
+  line-height: 1.14;
+  font-weight: 600;
+  letter-spacing: -.035em;
+  text-wrap: balance;
+}
+.proposal-hero h1 .accent { color: var(--page-green); }
+.proposal-hero p {
+  max-width: 690px;
+  margin-top: 20px;
+  font-size: 15px;
+  line-height: 1.85;
+  color: var(--page-ink2);
+  text-wrap: pretty;
+}
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
+}
+.hero-meta span {
+  padding: 7px 11px;
+  border: 1px solid var(--page-line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .3);
+  font-size: 10.5px;
+  color: var(--page-ink2);
+}
+.hero-note {
+  margin-top: 18px;
+  font-size: 10.5px;
+  color: var(--page-ink3);
+}
+
+.direction-strip {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 26px 24px 72px;
+  display: grid;
+  grid-template-columns: repeat(3, 408px);
+  gap: 30px;
+  justify-content: center;
+}
+.dir-card {
+  width: 408px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 18px;
+  border-top: 1px solid var(--page-line);
+}
+.dir-head { width: 100%; margin-bottom: 16px; }
+.dir-top {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.dir-num {
+  font-family: var(--font-serif);
+  font-size: 13px;
+  letter-spacing: .04em;
+  color: var(--page-green);
+}
+.dir-name {
+  font-family: var(--font-serif);
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+}
+.dir-tag {
+  margin-left: auto;
+  padding: 5px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(43, 110, 69, .14);
+  background: rgba(43, 110, 69, .1);
+  font-size: 9px;
+  color: var(--page-deep);
+  white-space: nowrap;
+}
+.dir-en {
+  margin-top: 5px;
+  font-size: 8.5px;
+  letter-spacing: .2em;
+  color: var(--page-ink3);
+}
+.dir-line {
+  min-height: 38px;
+  margin-top: 8px;
+  font-size: 11.5px;
+  line-height: 1.65;
+  color: var(--page-ink2);
+}
+.dir-specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+.dir-specs span {
+  padding: 4px 7px;
+  border: 1px solid var(--page-line);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, .4);
+  font-family: var(--font-latin);
+  font-size: 9px;
+  color: var(--page-ink2);
+}
+.dir-palette {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 12px;
+}
+.swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, .06);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35);
+}
+.dir-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  margin-top: 14px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid rgba(43, 110, 69, .25);
+  font-size: 10.5px;
+  color: var(--page-green);
+}
+.dir-link .icon { width: 12px; height: 12px; }
+
+.compare,
+.recommend {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 30px 32px 50px;
+}
+.section-title {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.section-title h2 {
+  font-family: var(--font-serif);
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -.02em;
+}
+.section-title p {
+  max-width: 430px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--page-ink3);
+}
+.compare-wrap {
+  overflow-x: auto;
+  border-top: 1px solid var(--page-line);
+}
+.compare table {
+  width: 100%;
+  min-width: 860px;
+  border-collapse: collapse;
+}
+.compare th,
+.compare td {
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--page-line);
+  text-align: left;
+  vertical-align: top;
+  font-size: 12px;
+  line-height: 1.55;
+}
+.compare thead th {
+  padding-top: 16px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  color: var(--page-ink3);
+}
+.compare thead th:first-child { width: 120px; }
+.compare td:first-child {
+  font-size: 10.5px;
+  letter-spacing: .06em;
+  color: var(--page-ink3);
+}
+.compare .dir-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  vertical-align: 1px;
+}
+.compare tr.is-rec td { background: rgba(43, 110, 69, .055); }
+.compare .rec-label {
+  margin-left: 6px;
+  padding: 3px 6px;
+  border: 1px solid rgba(43, 110, 69, .2);
+  border-radius: 999px;
+  font-size: 9px;
+  color: var(--page-green);
+  white-space: nowrap;
+}
+
+.recommend { padding-bottom: 90px; }
+.recommend-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 22px;
+}
+.reco-card {
+  padding: 20px;
+  border: 1px solid var(--page-edge);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .42);
+  box-shadow: 0 20px 40px -36px rgba(20, 38, 27, .3);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+.reco-card .k {
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  color: var(--page-green);
+}
+.reco-card h3 {
+  margin-top: 9px;
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.reco-card p {
+  margin-top: 8px;
+  font-size: 11.5px;
+  line-height: 1.75;
+  color: var(--page-ink2);
+}
+.reco-hybrid {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border: 1px dashed rgba(43, 110, 69, .28);
+  border-radius: 20px;
+  background: rgba(243, 247, 241, .45);
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--page-ink2);
+}
+.reco-hybrid strong { color: var(--page-deep); font-weight: 600; }
+.reco-hybrid .icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  color: var(--page-green);
+}
+
+.proposal-footer {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 32px 46px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  font-size: 10px;
+  line-height: 1.7;
+  color: var(--page-ink3);
+}
+.proposal-footer p { max-width: 680px; }
+
+/* ---------- 方向页 ---------- */
+
+.direction-hero {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 58px 32px 26px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 40px;
+}
+.direction-title h1 {
+  margin-top: 14px;
+  font-family: var(--font-serif);
+  font-size: clamp(36px, 4.4vw, 56px);
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: -.03em;
+}
+.direction-title .en {
+  margin-top: 8px;
+  font-size: 9px;
+  letter-spacing: .22em;
+  color: var(--page-ink3);
+}
+.direction-title .lead {
+  max-width: 620px;
+  margin-top: 16px;
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--page-ink2);
+}
+.direction-tagline {
+  max-width: 340px;
+  padding-left: 18px;
+  border-left: 1px solid var(--page-line);
+  font-family: var(--font-serif);
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--page-deep);
+}
+.direction-layout {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 10px 32px 80px;
+  display: grid;
+  grid-template-columns: 320px 848px;
+  gap: 40px;
+  align-items: start;
+}
+.direction-aside {
+  position: sticky;
+  top: 92px;
+}
+.aside-block {
+  margin-bottom: 14px;
+  padding: 20px;
+  border: 1px solid var(--page-edge);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .42);
+  box-shadow: var(--page-shadow);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+.aside-block h2 {
+  margin-bottom: 12px;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: .16em;
+  color: var(--page-ink3);
+}
+.spec-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.spec-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 7px;
+  border-bottom: 1px dashed var(--page-line);
+  font-size: 10.5px;
+  color: var(--page-ink2);
+}
+.spec-line:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+.spec-line b {
+  font-family: var(--font-latin);
+  font-weight: 500;
+  color: var(--page-ink);
+}
+.aside-block p {
+  font-size: 11px;
+  line-height: 1.75;
+  color: var(--page-ink2);
+}
+.pc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pc {
+  position: relative;
+  padding-left: 14px;
+  font-size: 10.5px;
+  line-height: 1.65;
+  color: var(--page-ink2);
+}
+.pc::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--page-green);
+}
+.pc.neg::before { background: rgba(23, 35, 27, .28); }
+.pc b { color: var(--page-ink); font-weight: 600; }
+.control-row { margin-bottom: 12px; }
+.control-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 10px;
+  color: var(--page-ink2);
+}
+.control-label output {
+  font-family: var(--font-latin);
+  font-size: 9.5px;
+  color: var(--page-ink3);
+}
+input[type="range"] {
+  width: 100%;
+  height: 20px;
+  accent-color: var(--page-green);
+  cursor: pointer;
+}
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+  font-size: 10px;
+  color: var(--page-ink2);
+}
+.switch-row input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--page-green);
+  cursor: pointer;
+}
+.reset {
+  margin-top: 14px;
+  padding: 7px 12px;
+  border: 1px solid var(--page-line);
+  border-radius: 999px;
+  font-size: 10px;
+  color: var(--page-ink2);
+  transition: background .2s ease;
+}
+.reset:hover { background: rgba(255, 255, 255, .5); }
+.control-note {
+  margin-top: 12px !important;
+  font-size: 9.5px !important;
+  line-height: 1.65 !important;
+  color: var(--page-ink3) !important;
+}
+.board-wrap { min-width: 0; }
+.board-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  font-size: 10px;
+  letter-spacing: .14em;
+  color: var(--page-ink3);
+}
+.board {
+  display: grid;
+  grid-template-columns: repeat(2, 408px);
+  gap: 30px 32px;
+}
+.scene-off .scene { opacity: 0; }
+.scene-off .phone-screen { background: #e9ece5; }
+
+.direction-footer {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 32px 70px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.landing-note {
+  padding: 18px 20px;
+  border: 1px solid var(--page-line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .28);
+}
+.landing-note .k {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .16em;
+  color: var(--page-green);
+}
+.landing-note h3 {
+  margin-top: 7px;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 600;
+}
+.landing-note p {
+  margin-top: 7px;
+  font-size: 10.5px;
+  line-height: 1.75;
+  color: var(--page-ink2);
+}
+
+/* ---------- 入场 ---------- */
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.dir-card,
+.phone-figure {
+  animation: rise .75s cubic-bezier(.2, .8, .2, 1) both;
+}
+.dir-card:nth-child(2) { animation-delay: .08s; }
+.dir-card:nth-child(3) { animation-delay: .16s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .glow,
+  .composer-input .caret,
+  .dir-card,
+  .phone-figure { animation: none !important; }
+  html { scroll-behavior: auto; }
+}
+
+/* ---------- 响应式 ---------- */
+
+@media (max-width: 1360px) {
+  .direction-strip {
+    grid-template-columns: repeat(2, 408px);
+  }
+}
+@media (max-width: 1280px) {
+  .proposal-nav { margin-left: 20px; margin-right: 20px; }
+  .direction-layout {
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 28px;
+  }
+  .board {
+    grid-template-columns: repeat(2, minmax(0, 408px));
+    justify-content: center;
+  }
+}
+@media (max-width: 1120px) {
+  .direction-layout { grid-template-columns: 1fr; }
+  .direction-aside {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .direction-aside .aside-block { margin-bottom: 0; }
+}
+@media (max-width: 980px) {
+  .direction-strip { grid-template-columns: 408px; }
+  .proposal-nav nav a:not(.nav-home) { display: none; }
+  .direction-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .direction-tagline {
+    max-width: 620px;
+    padding-left: 0;
+    border-left: 0;
+  }
+  .recommend-grid { grid-template-columns: 1fr; }
+  .direction-footer { grid-template-columns: 1fr; }
+  .proposal-footer { flex-direction: column; }
+}
+@media (max-width: 900px) {
+  .board { grid-template-columns: 408px; }
+  .direction-aside { grid-template-columns: 1fr; }
+  .compare,
+  .recommend { padding-left: 20px; padding-right: 20px; }
+  .section-title { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 600px) {
+  .proposal-hero { padding: 60px 20px 20px; }
+  .proposal-nav { margin: 8px 10px 0; }
+  .proposal-nav nav { display: none; }
+  .direction-strip { grid-template-columns: minmax(0, 1fr); padding: 20px 12px 50px; }
+  .dir-card { width: 100%; }
+  .phone { zoom: .8; }
+  .board { grid-template-columns: minmax(0, 1fr); justify-items: center; }
+  .direction-hero { padding: 40px 20px 18px; }
+  .direction-layout { padding: 6px 20px 60px; }
+  .direction-footer { padding: 0 20px 50px; }
+  .proposal-footer { padding: 0 20px 36px; }
+}
+
+/* ---------- 首页品牌与提案补充 ---------- */
+
+.topbar .push { margin-left: auto; }
+.home-brand {
+  margin: 22px 4px 20px;
+  text-align: center;
+}
+.home-brand .lockup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--green-deep);
+}
+.home-brand .lockup .icon { width: 40px; height: 40px; }
+.home-brand h1 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 41px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: .06em;
+}
+.home-brand p {
+  margin-top: 12px;
+  font-size: 12px;
+  line-height: 1.6;
+  letter-spacing: .06em;
+  color: var(--ink2);
+}
+.suggest,
+.topic,
+.branch-item,
+.branch-row,
+.library-card,
+.seg { text-align: left; }
+.suggest span { flex: 1; }
+
+.screen-branch .summary {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.screen-branch .summary-text {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+}
+
+.topbar .title-lg {
+  flex: 1;
+  min-width: 0;
+  margin-left: 3px;
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.library-note {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 24px 4px 0;
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--ink3);
+}
+.library-note .icon {
+  width: 13px;
+  height: 13px;
+  color: var(--green);
+}
+.dir-meta { width: 100%; }
+:focus-visible {
+  outline: 2px solid rgba(43, 110, 69, .45);
+  outline-offset: 2px;
+}
+
+</style>
+</head>
+<body class="proposal-page">
+<svg class="icon-sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-sprout" viewBox="0 0 24 24">
+    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7">
+      <path d="M12 21.5V13" />
+      <path d="M12 13C12 9.2 9.2 6.5 4.8 6.5C4.8 10.3 7.6 13 12 13Z" fill="currentColor" fill-opacity=".18" />
+      <path d="M12 11C12 6.8 15 4 19.5 4C19.5 8.2 16.5 11 12 11Z" fill="currentColor" fill-opacity=".3" />
+    </g>
+  </symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24">
+    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8">
+      <path d="M4 7h16M4 12h16M4 17h16" />
+    </g>
+  </symbol>
+  <symbol id="i-back" viewBox="0 0 24 24">
+    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8">
+      <path d="M15 5l-7 7 7 7" />
+    </g>
+  </symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24">
+    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8">
+      <path d="M12 12m-3 0a3 3 0 1 1 6 0a3 3 0 1 1-6 0" />
+      <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2.1 2.1M16.9 16.9 19 19M19 5l-2.1 2.1M7.1 16.9 5 19" />
+    </g>
+  </symbol>
+  <symbol id="i-tree" viewBox="0 0 24 24">
+    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8">
+      <path d="M5 12m-2.1 0a2.1 2.1 0 1 1 4.2 0a2.1 2.1 0 1 1-4.2 0" />
+      <path d="M17.5 6m-2.1 0a2.1 2.1 0 1 1 4.2 0a2.1 2.1 0 1 1-4.2 0" />
+      <path d="M17.5 18m-2.1 0a2.1 2.1 0 1 1 4.2 0a2.1 2.1 0 1 1-4.2 0" />
+      <path d="M7 11.2 15.5 6.8M7 12.8l8.5 4.4" />
+    </g>
+  </symbol>
+  <symbol id="i-overview" viewBox="0 0 24 24">
+    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8">
+      <path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z" />
+      <path d="M9 4v14M15 6v14" />
+    </g>
+  </symbol>
+  <symbol id="i-fork" viewBox="0 0 24 24">
+    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8">
+      <path d="M6 6m-2.1 0a2.1 2.1 0 1 1 4.2 0a2.1 2.1 0 1 1-4.2 0" />
+      <path d="M6 18m-2.1 0a2.1 2.1 0 1 1 4.2 0a2.1 2.1 0 1 1-4.2 0" />
+      <path d="M18 8m-2.1 0a2.1 2.1 0 1 1 4.2 0a2.1 2.1 0 1 1-4.2 0" />
+      <path d="M6 8.1v7.8M6 13c0-2.4 2.6-3.4 5.4-3.4h4.4" />
+    </g>
+  </symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24">
+    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7">
+      <path d="M12 3.5 13.8 9 19.5 10.8 13.8 12.6 12 18.5 10.2 12.6 4.5 10.8 10.2 9z" />
+      <path d="M18.5 3.5v3M20 5h-3" />
+    </g>
+  </symbol>
+  <symbol id="i-search" viewBox="0 0 24 24">
+    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8">
+      <path d="M10.8 4.2A6.6 6.6 0 1 0 10.8 17.4A6.6 6.6 0 1 0 10.8 4.2M15.7 15.7 20.2 20.2" />
+    </g>
+  </symbol>
+  <symbol id="i-attach" viewBox="0 0 24 24">
+    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7">
+      <path d="M20.5 11.5 11 21a5 5 0 0 1-7.1-7.1L13.8 4a3.5 3.5 0 0 1 5 5L9.7 18.1a2 2 0 0 1-2.8-2.8l8.5-8.5" />
+    </g>
+  </symbol>
+  <symbol id="i-send" viewBox="0 0 24 24">
+    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9">
+      <path d="M12 19V5M5.5 11.5 12 5l6.5 6.5" />
+    </g>
+  </symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24">
+    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7">
+      <path d="M11 9h7a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z" />
+      <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" />
+    </g>
+  </symbol>
+  <symbol id="i-reset" viewBox="0 0 24 24">
+    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7">
+      <path d="M20 12a8 8 0 1 1-2.3-5.7" />
+      <path d="M20 3.5V8h-4.5" />
+    </g>
+  </symbol>
+  <symbol id="i-more" viewBox="0 0 24 24">
+    <g fill="currentColor">
+      <circle cx="5" cy="12" r="1.2" />
+      <circle cx="12" cy="12" r="1.2" />
+      <circle cx="19" cy="12" r="1.2" />
+    </g>
+  </symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24">
+    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8">
+      <path d="M6 9l6 6 6-6" />
+    </g>
+  </symbol>
+  <symbol id="i-chevron-right" viewBox="0 0 24 24">
+    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8">
+      <path d="M9 6l6 6-6 6" />
+    </g>
+  </symbol>
+  <symbol id="i-home" viewBox="0 0 24 24">
+    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8">
+      <path d="M3.6 10.2 12 3.6 20.4 10.2V19.8H3.6ZM9.4 19.8V14.2h5.2v5.6" />
+    </g>
+  </symbol>
+  <symbol id="i-library" viewBox="0 0 24 24">
+    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8">
+      <path d="M12 6.6C10.2 5 7.2 4.6 4.6 5.4v13c2.6-.8 5.6-.4 7.4 1.2M12 6.6c1.8-1.6 4.8-2 7.4-1.2v13c-2.6-.8-5.6-.4-7.4 1.2M12 6.6v13" />
+    </g>
+  </symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24">
+    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8">
+      <path d="M20 12.5c0 3.6-3.6 6.5-8 6.5-1 0-2-.15-2.9-.43L4.5 20l1.1-3.3A6.6 6.6 0 0 1 4 12.5C4 8.9 7.6 6 12 6s8 2.9 8 6.5z" />
+    </g>
+  </symbol>
+  <symbol id="i-think" viewBox="0 0 24 24">
+    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7">
+      <path d="M12 4.5a5 5 0 0 0-3 9v2.5h6V13.5a5 5 0 0 0-3-9z" />
+      <path d="M10 19h4" />
+    </g>
+  </symbol>
+  <symbol id="i-signal" viewBox="0 0 16 12">
+    <g fill="currentColor">
+      <rect x="0" y="7" width="2" height="4" rx=".6" />
+      <rect x="4" y="5" width="2" height="6" rx=".6" />
+      <rect x="8" y="2.5" width="2" height="8.5" rx=".6" />
+      <rect x="12" y="0" width="2" height="11" rx=".6" />
+    </g>
+  </symbol>
+  <symbol id="i-wifi" viewBox="0 0 16 12">
+    <g fill="none" stroke="currentColor" stroke-linecap="round">
+      <path d="M1 4.1a10.5 10.5 0 0 1 14 0" stroke-width="1.35" opacity=".55" />
+      <path d="M3.4 6.7a7 7 0 0 1 9.2 0" stroke-width="1.35" />
+      <circle cx="8" cy="10" r="1.25" fill="currentColor" stroke="none" />
+    </g>
+  </symbol>
+  <symbol id="i-battery" viewBox="0 0 26 12">
+    <g>
+      <rect x="1" y="1.2" width="21" height="9.6" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".55" />
+      <rect x="3" y="3.2" width="16" height="5.6" rx="1.3" fill="currentColor" />
+      <path d="M23.6 4.2v3.6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8" opacity=".55" />
+    </g>
+  </symbol>
+</svg>
+<header class="proposal-nav">
+    <a class="proposal-brand" href="index.html">
+      <svg class="icon" aria-hidden="true"><use href="#i-sprout"></use></svg>
+      <span>知芽</span>
+      <span class="tag">GLASS STUDY</span>
+    </a>
+    <nav><a class="nav-home is-active" href="index.html">总览</a><a class="" href="A-晨雾玻璃.html">A 晨雾</a><a class="" href="B-青苔温室.html">B 青苔</a><a class="" href="C-浮光.html">C 浮光</a></nav>
+  </header>
+  <main>
+    <section class="proposal-hero">
+      <div class="eyebrow">TREELEARN · 材质重设计提案 · 2026-10-21</div>
+      <h1>把纸的安静，<br>换成<span class="accent">玻璃的通透</span>。</h1>
+      <p>知芽已经有自己的骨架：芽形标识、生长绿、分支隐喻，以及以阅读为中心的层级。这次不改骨架，只换材料——让光、雾和透明度成为新的界面语言。三套方向共用同一组真实界面与文案，只改变玻璃、背景光与色温。</p>
+      <div class="hero-meta">
+        <span>3 个方向</span>
+        <span>4 屏 × 3 = 12 个界面</span>
+        <span>真实 Android 文案</span>
+        <span>不改生产 token</span>
+      </div>
+      <p class="hero-note">先看 A，再用 B / C 校准气质。每个方向页都有通透度与模糊的实时滑杆。</p>
+    </section>
+
+    <section class="direction-strip" aria-label="三套设计方向">
+      <article class="dir-card" data-theme="mist">
+      <header class="dir-head">
+        <div class="dir-top">
+          <span class="dir-num">A</span>
+          <span class="dir-name">晨雾玻璃</span>
+          <span class="dir-tag">推荐 · 最稳</span>
+        </div>
+        <div class="dir-en">MIST GLASS</div>
+        <p class="dir-line">白玻璃、薄雾绿、几乎无色的边缘。最接近 iOS 原生材质，也最容易从现有纸感平滑迁移。</p>
+        <div class="dir-specs"><span>雾绿 → 暖沙</span><span>白玻璃 62%</span><span>28px / 150%</span><span>86%</span><span>22 / 28</span><span>宋体标题 + 系统黑体</span></div>
+        <div class="dir-palette"><span class="swatch" style="background:#f3f4ee" title="#f3f4ee"></span><span class="swatch" style="background:#cfdfd1" title="#cfdfd1"></span><span class="swatch" style="background:#f6e5c9" title="#f6e5c9"></span><span class="swatch" style="background:#2b6e45" title="#2b6e45"></span><span class="swatch" style="background:#16241c" title="#16241c"></span></div>
+      </header>
+      <figure class="phone-figure">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="scene" aria-hidden="true">
+        <span class="glow glow-a"></span>
+        <span class="glow glow-b"></span>
+        <span class="glow glow-c"></span>
+        <span class="light-shaft"></span>
+        <span class="canopy canopy-a"></span>
+        <span class="canopy canopy-b"></span>
+        <span class="sun"></span>
+      </div>
+          <div class="statusbar">
+        <span class="time">9:41</span>
+        <span class="status-icons">
+          <svg aria-hidden="true"><use href="#i-signal"></use></svg>
+          <svg aria-hidden="true"><use href="#i-wifi"></use></svg>
+          <svg class="battery" aria-hidden="true"><use href="#i-battery"></use></svg>
+        </span>
+      </div>
+          <div class="punch" aria-hidden="true"></div>
+          <div class="app screen-chat">
+  <header class="topbar glass">
+    <button class="icon-btn" type="button" aria-label="返回">
+      <svg class="icon"><use href="#i-back"></use></svg>
+    </button>
+    <div class="title-wrap">
+      <span class="title">注意力权重可视化与模型可解释性的关系</span>
+      <svg class="icon" aria-hidden="true"><use href="#i-chevron-down"></use></svg>
+    </div>
+    <button class="icon-btn" type="button" aria-label="分支导航">
+      <svg class="icon"><use href="#i-tree"></use></svg>
+    </button>
+    <button class="icon-btn" type="button" aria-label="树状总览">
+      <svg class="icon"><use href="#i-overview"></use></svg>
+    </button>
+    <button class="icon-btn" type="button" aria-label="设置">
+      <svg class="icon"><use href="#i-gear"></use></svg>
+    </button>
+  </header>
+
+  <div class="app-body">
+    <article class="reader glass glass--reader">
+      <div class="reader-scroll">
+        <div class="user-msg">
+          <span class="who">你</span>
+          注意力权重可视化与模型可解释性的关系
+        </div>
+
+        <div class="ai-tag">
+          <svg class="icon" aria-hidden="true"><use href="#i-sprout"></use></svg>
+          知芽
+        </div>
+
+        <div class="answer">
+          <p>核心先说结论：注意力头消融（ablation）的基本流程是“逐个或成组地让某个头失效，再测量任务指标变化”；而“该头重要”与“其他头补偿”的区分，关键不在消融本身，而在于<span class="mark">是否测量了被消融后的内部状态变化</span>，以及是否做了<span class="mark">针对补偿路径的对照实验</span>。</p>
+          <p>以“某层某头是否对任务重要”为例，标准实验从固定基线开始；选择消融方式时尤其要分清三种含义：<strong>置零</strong>破坏性最强但会引入分布外输入，<strong>均值消融</strong>保留统计常态、分布偏移较小，<strong>激活替换</strong>用于因果定位。三者不能混用，否则指标下降可能来自分布外干扰，而非该头功能被移除。</p>
+        </div>
+
+        <div class="actions">
+          <button class="icon-btn" type="button" aria-label="复制整条回答">
+            <svg class="icon"><use href="#i-copy"></use></svg>
+          </button>
+          <button class="icon-btn" type="button" aria-label="重新生成这条回答">
+            <svg class="icon"><use href="#i-reset"></use></svg>
+          </button>
+          <button class="icon-btn" type="button" aria-label="从这条回答新建主题">
+            <svg class="icon"><use href="#i-fork"></use></svg>
+          </button>
+          <span class="time">3天前</span>
+        </div>
+
+        <div class="branch-label">
+          <svg class="icon" aria-hidden="true"><use href="#i-fork"></use></svg>
+          从这条回答继续
+        </div>
+
+        <div class="branch-stack">
+          <button class="branch-item glass" type="button">
+            <svg class="icon" aria-hidden="true"><use href="#i-fork"></use></svg>
+            <span>在注意力头消融中，zero ablation、mean ablation 和 activation patching 三者的分布偏移程度不同，能否设计一个对照实验，量化区分“该头被移除功能”与“输入分布外导致指标下降”这两种效应？</span>
+          </button>
+          <button class="branch-item glass" type="button">
+            <svg class="icon" aria-hidden="true"><use href="#i-fork"></use></svg>
+            <span>用 CKA 或余弦相似度衡量消融前后隐藏状态差异时，如何确定“表示变化大到足以判定补偿”的阈值？如果指标不变但表示相似度中等（比如 0.7），该倾向哪种解释？</span>
+          </button>
+          <button class="branch-item glass" type="button">
+            <svg class="icon" aria-hidden="true"><use href="#i-fork"></use></svg>
+            <span>联合消融发现 H 与 H′ 冗余后，如何进一步判断二者是“功能等价的真冗余”，还是“一个头在另一个失效后被迫改变注意力模式”的从属关系？训练时消融能否给出决定性证据？</span>
+          </button>
+        </div>
+      </div>
+    </article>
+
+    <div class="composer--dock glass">
+      <button class="composer-icon" type="button" aria-label="添加附件">
+        <svg class="icon"><use href="#i-attach"></use></svg>
+      </button>
+      <span class="composer-line">在当前分支继续追问…</span>
+      <span class="model-chip">V4.1 Flash</span>
+      <button class="send" type="button" aria-label="发送">
+        <svg class="icon"><use href="#i-send"></use></svg>
+      </button>
+    </div>
+  </div>
+</div>
+          <div class="home-indicator" aria-hidden="true"></div>
+        </div>
+      </div>
+      <figcaption class="phone-caption">对话 · A 晨雾玻璃</figcaption>
+    </figure>
+      <a class="dir-link" href="A-晨雾玻璃.html">进入方向页
+        <svg class="icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg>
+      </a>
+    </article><article class="dir-card" data-theme="moss">
+      <header class="dir-head">
+        <div class="dir-top">
+          <span class="dir-num">B</span>
+          <span class="dir-name">青苔温室</span>
+          <span class="dir-tag">最大胆</span>
+        </div>
+        <div class="dir-en">MOSS HOUSE</div>
+        <p class="dir-line">青苔绿底、树冠阴影和更厚的青玻璃。品牌辨识度最高，也最挑使用场景。</p>
+        <div class="dir-specs"><span>青苔 → 暖光</span><span>青玻璃 52%</span><span>26px / 170%</span><span>80%</span><span>26 / 32</span><span>宋体标题 + 系统黑体</span></div>
+        <div class="dir-palette"><span class="swatch" style="background:#e8f0e2" title="#e8f0e2"></span><span class="swatch" style="background:#a9c9a5" title="#a9c9a5"></span><span class="swatch" style="background:#f4ddb0" title="#f4ddb0"></span><span class="swatch" style="background:#1f6b44" title="#1f6b44"></span><span class="swatch" style="background:#10251a" title="#10251a"></span></div>
+      </header>
+      <figure class="phone-figure">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="scene" aria-hidden="true">
+        <span class="glow glow-a"></span>
+        <span class="glow glow-b"></span>
+        <span class="glow glow-c"></span>
+        <span class="light-shaft"></span>
+        <span class="canopy canopy-a"></span>
+        <span class="canopy canopy-b"></span>
+        <span class="sun"></span>
+      </div>
+          <div class="statusbar">
+        <span class="time">9:41</span>
+        <span class="status-icons">
+          <svg aria-hidden="true"><use href="#i-signal"></use></svg>
+          <svg aria-hidden="true"><use href="#i-wifi"></use></svg>
+          <svg class="battery" aria-hidden="true"><use href="#i-battery"></use></svg>
+        </span>
+      </div>
+          <div class="punch" aria-hidden="true"></div>
+          <div class="app screen-chat">
+  <header class="topbar glass">
+    <button class="icon-btn" type="button" aria-label="返回">
+      <svg class="icon"><use href="#i-back"></use></svg>
+    </button>
+    <div class="title-wrap">
+      <span class="title">注意力权重可视化与模型可解释性的关系</span>
+      <svg class="icon" aria-hidden="true"><use href="#i-chevron-down"></use></svg>
+    </div>
+    <button class="icon-btn" type="button" aria-label="分支导航">
+      <svg class="icon"><use href="#i-tree"></use></svg>
+    </button>
+    <button class="icon-btn" type="button" aria-label="树状总览">
+      <svg class="icon"><use href="#i-overview"></use></svg>
+    </button>
+    <button class="icon-btn" type="button" aria-label="设置">
+      <svg class="icon"><use href="#i-gear"></use></svg>
+    </button>
+  </header>
+
+  <div class="app-body">
+    <article class="reader glass glass--reader">
+      <div class="reader-scroll">
+        <div class="user-msg">
+          <span class="who">你</span>
+          注意力权重可视化与模型可解释性的关系
+        </div>
+
+        <div class="ai-tag">
+          <svg class="icon" aria-hidden="true"><use href="#i-sprout"></use></svg>
+          知芽
+        </div>
+
+        <div class="answer">
+          <p>核心先说结论：注意力头消融（ablation）的基本流程是“逐个或成组地让某个头失效，再测量任务指标变化”；而“该头重要”与“其他头补偿”的区分，关键不在消融本身，而在于<span class="mark">是否测量了被消融后的内部状态变化</span>，以及是否做了<span class="mark">针对补偿路径的对照实验</span>。</p>
+          <p>以“某层某头是否对任务重要”为例，标准实验从固定基线开始；选择消融方式时尤其要分清三种含义：<strong>置零</strong>破坏性最强但会引入分布外输入，<strong>均值消融</strong>保留统计常态、分布偏移较小，<strong>激活替换</strong>用于因果定位。三者不能混用，否则指标下降可能来自分布外干扰，而非该头功能被移除。</p>
+        </div>
+
+        <div class="actions">
+          <button class="icon-btn" type="button" aria-label="复制整条回答">
+            <svg class="icon"><use href="#i-copy"></use></svg>
+          </button>
+          <button class="icon-btn" type="button" aria-label="重新生成这条回答">
+            <svg class="icon"><use href="#i-reset"></use></svg>
+          </button>
+          <button class="icon-btn" type="button" aria-label="从这条回答新建主题">
+            <svg class="icon"><use href="#i-fork"></use></svg>
+          </button>
+          <span class="time">3天前</span>
+        </div>
+
+        <div class="branch-label">
+          <svg class="icon" aria-hidden="true"><use href="#i-fork"></use></svg>
+          从这条回答继续
+        </div>
+
+        <div class="branch-stack">
+          <button class="branch-item glass" type="button">
+            <svg class="icon" aria-hidden="true"><use href="#i-fork"></use></svg>
+            <span>在注意力头消融中，zero ablation、mean ablation 和 activation patching 三者的分布偏移程度不同，能否设计一个对照实验，量化区分“该头被移除功能”与“输入分布外导致指标下降”这两种效应？</span>
+          </button>
+          <button class="branch-item glass" type="button">
+            <svg class="icon" aria-hidden="true"><use href="#i-fork"></use></svg>
+            <span>用 CKA 或余弦相似度衡量消融前后隐藏状态差异时，如何确定“表示变化大到足以判定补偿”的阈值？如果指标不变但表示相似度中等（比如 0.7），该倾向哪种解释？</span>
+          </button>
+          <button class="branch-item glass" type="button">
+            <svg class="icon" aria-hidden="true"><use href="#i-fork"></use></svg>
+            <span>联合消融发现 H 与 H′ 冗余后，如何进一步判断二者是“功能等价的真冗余”，还是“一个头在另一个失效后被迫改变注意力模式”的从属关系？训练时消融能否给出决定性证据？</span>
+          </button>
+        </div>
+      </div>
+    </article>
+
+    <div class="composer--dock glass">
+      <button class="composer-icon" type="button" aria-label="添加附件">
+        <svg class="icon"><use href="#i-attach"></use></svg>
+      </button>
+      <span class="composer-line">在当前分支继续追问…</span>
+      <span class="model-chip">V4.1 Flash</span>
+      <button class="send" type="button" aria-label="发送">
+        <svg class="icon"><use href="#i-send"></use></svg>
+      </button>
+    </div>
+  </div>
+</div>
+          <div class="home-indicator" aria-hidden="true"></div>
+        </div>
+      </div>
+      <figcaption class="phone-caption">对话 · B 青苔温室</figcaption>
+    </figure>
+      <a class="dir-link" href="B-青苔温室.html">进入方向页
+        <svg class="icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg>
+      </a>
+    </article><article class="dir-card" data-theme="lumen">
+      <header class="dir-head">
+        <div class="dir-top">
+          <span class="dir-num">C</span>
+          <span class="dir-name">浮光</span>
+          <span class="dir-tag">最轻</span>
+        </div>
+        <div class="dir-en">LUMEN</div>
+        <p class="dir-line">玻璃只有 30% 白度，靠 1px 高光边缘和散景定义边界。最通透，也最考验背景控制。</p>
+        <div class="dir-specs"><span>米金 → 雾绿</span><span>超薄玻璃 30%</span><span>18px / 135%</span><span>72%</span><span>20 / 26</span><span>宋体标题 + 系统黑体</span></div>
+        <div class="dir-palette"><span class="swatch" style="background:#f7f3e9" title="#f7f3e9"></span><span class="swatch" style="background:#fff1d2" title="#fff1d2"></span><span class="swatch" style="background:#cfe4da" title="#cfe4da"></span><span class="swatch" style="background:#2b6e45" title="#2b6e45"></span><span class="swatch" style="background:#142019" title="#142019"></span></div>
+      </header>
+      <figure class="phone-figure">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="scene" aria-hidden="true">
+        <span class="glow glow-a"></span>
+        <span class="glow glow-b"></span>
+        <span class="glow glow-c"></span>
+        <span class="light-shaft"></span>
+        <span class="canopy canopy-a"></span>
+        <span class="canopy canopy-b"></span>
+        <span class="sun"></span>
+      </div>
+          <div class="statusbar">
+        <span class="time">9:41</span>
+        <span class="status-icons">
+          <svg aria-hidden="true"><use href="#i-signal"></use></svg>
+          <svg aria-hidden="true"><use href="#i-wifi"></use></svg>
+          <svg class="battery" aria-hidden="true"><use href="#i-battery"></use></svg>
+        </span>
+      </div>
+          <div class="punch" aria-hidden="true"></div>
+          <div class="app screen-chat">
+  <header class="topbar glass">
+    <button class="icon-btn" type="button" aria-label="返回">
+      <svg class="icon"><use href="#i-back"></use></svg>
+    </button>
+    <div class="title-wrap">
+      <span class="title">注意力权重可视化与模型可解释性的关系</span>
+      <svg class="icon" aria-hidden="true"><use href="#i-chevron-down"></use></svg>
+    </div>
+    <button class="icon-btn" type="button" aria-label="分支导航">
+      <svg class="icon"><use href="#i-tree"></use></svg>
+    </button>
+    <button class="icon-btn" type="button" aria-label="树状总览">
+      <svg class="icon"><use href="#i-overview"></use></svg>
+    </button>
+    <button class="icon-btn" type="button" aria-label="设置">
+      <svg class="icon"><use href="#i-gear"></use></svg>
+    </button>
+  </header>
+
+  <div class="app-body">
+    <article class="reader glass glass--reader">
+      <div class="reader-scroll">
+        <div class="user-msg">
+          <span class="who">你</span>
+          注意力权重可视化与模型可解释性的关系
+        </div>
+
+        <div class="ai-tag">
+          <svg class="icon" aria-hidden="true"><use href="#i-sprout"></use></svg>
+          知芽
+        </div>
+
+        <div class="answer">
+          <p>核心先说结论：注意力头消融（ablation）的基本流程是“逐个或成组地让某个头失效，再测量任务指标变化”；而“该头重要”与“其他头补偿”的区分，关键不在消融本身，而在于<span class="mark">是否测量了被消融后的内部状态变化</span>，以及是否做了<span class="mark">针对补偿路径的对照实验</span>。</p>
+          <p>以“某层某头是否对任务重要”为例，标准实验从固定基线开始；选择消融方式时尤其要分清三种含义：<strong>置零</strong>破坏性最强但会引入分布外输入，<strong>均值消融</strong>保留统计常态、分布偏移较小，<strong>激活替换</strong>用于因果定位。三者不能混用，否则指标下降可能来自分布外干扰，而非该头功能被移除。</p>
+        </div>
+
+        <div class="actions">
+          <button class="icon-btn" type="button" aria-label="复制整条回答">
+            <svg class="icon"><use href="#i-copy"></use></svg>
+          </button>
+          <button class="icon-btn" type="button" aria-label="重新生成这条回答">
+            <svg class="icon"><use href="#i-reset"></use></svg>
+          </button>
+          <button class="icon-btn" type="button" aria-label="从这条回答新建主题">
+            <svg class="icon"><use href="#i-fork"></use></svg>
+          </button>
+          <span class="time">3天前</span>
+        </div>
+
+        <div class="branch-label">
+          <svg class="icon" aria-hidden="true"><use href="#i-fork"></use></svg>
+          从这条回答继续
+        </div>
+
+        <div class="branch-stack">
+          <button class="branch-item glass" type="button">
+            <svg class="icon" aria-hidden="true"><use href="#i-fork"></use></svg>
+            <span>在注意力头消融中，zero ablation、mean ablation 和 activation patching 三者的分布偏移程度不同，能否设计一个对照实验，量化区分“该头被移除功能”与“输入分布外导致指标下降”这两种效应？</span>
+          </button>
+          <button class="branch-item glass" type="button">
+            <svg class="icon" aria-hidden="true"><use href="#i-fork"></use></svg>
+            <span>用 CKA 或余弦相似度衡量消融前后隐藏状态差异时，如何确定“表示变化大到足以判定补偿”的阈值？如果指标不变但表示相似度中等（比如 0.7），该倾向哪种解释？</span>
+          </button>
+          <button class="branch-item glass" type="button">
+            <svg class="icon" aria-hidden="true"><use href="#i-fork"></use></svg>
+            <span>联合消融发现 H 与 H′ 冗余后，如何进一步判断二者是“功能等价的真冗余”，还是“一个头在另一个失效后被迫改变注意力模式”的从属关系？训练时消融能否给出决定性证据？</span>
+          </button>
+        </div>
+      </div>
+    </article>
+
+    <div class="composer--dock glass">
+      <button class="composer-icon" type="button" aria-label="添加附件">
+        <svg class="icon"><use href="#i-attach"></use></svg>
+      </button>
+      <span class="composer-line">在当前分支继续追问…</span>
+      <span class="model-chip">V4.1 Flash</span>
+      <button class="send" type="button" aria-label="发送">
+        <svg class="icon"><use href="#i-send"></use></svg>
+      </button>
+    </div>
+  </div>
+</div>
+          <div class="home-indicator" aria-hidden="true"></div>
+        </div>
+      </div>
+      <figcaption class="phone-caption">对话 · C 浮光</figcaption>
+    </figure>
+      <a class="dir-link" href="C-浮光.html">进入方向页
+        <svg class="icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg>
+      </a>
+    </article>
+    </section>
+
+    <section class="compare">
+      <div class="section-title">
+        <h2>三套方向，怎么选</h2>
+        <p>四屏、文案和层级完全一致，只把材质这一个变量拉开。所有读数都能在方向页用滑杆复现。</p>
+      </div>
+      <div class="compare-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>维度</th>
+              <th>A 晨雾玻璃 <span class="rec-label">推荐</span></th>
+              <th>B 青苔温室</th>
+              <th>C 浮光</th>
+            </tr>
+          </thead>
+          <tbody><tr><td>第一眼</td><td>安静、接近 iOS 原生</td><td>温室感、品牌存在感最强</td><td>最轻、几乎无边界</td></tr><tr><td>玻璃读数</td><td>62% · 28px · 150%</td><td>52% · 26px · 170%</td><td>30% · 18px · 135%</td></tr><tr><td>场景光</td><td>雾绿 + 暖沙</td><td>青苔 + 树冠阴影</td><td>米金 + 日光</td></tr><tr><td>阅读区</td><td>86%，对比最稳</td><td>80%，需要重校</td><td>72%，已经是下限</td></tr><tr><td>迁移成本</td><td>低</td><td>高</td><td>中</td></tr><tr><td>最适合</td><td>默认主题</td><td>品牌展示 / Pad</td><td>浏览 / 封面</td></tr><tr><td>主要风险</td><td>玻璃存在感偏弱</td><td>长读容易疲劳</td><td>可读性依赖背景</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="recommend">
+      <div class="section-title">
+        <h2>如果今天就要选</h2>
+        <p>先确定主界面，再决定展示面。玻璃不是越透越好，阅读区必须留一层不透明的底线。</p>
+      </div>
+      <div class="recommend-grid">
+        <article class="reco-card"><div class="k">主推荐</div><h3>A · 晨雾玻璃</h3><p>作为默认主题落地。阅读区的对比最稳，最接近 iOS 的原生材质，也最容易从现有纸感迁移。先落 A，再用 B 的光斑和 C 的边缘高光做局部增强。</p></article><article class="reco-card"><div class="k">品牌强化</div><h3>B · 青苔温室</h3><p>留给发布会、Pad 展示和品牌页。青苔底与树冠阴影能把「生长」讲清楚；不建议直接作为长文主界面。</p></article><article class="reco-card"><div class="k">轻量展示</div><h3>C · 浮光</h3><p>适合封面、短内容和营销页。它最通透，但 72% 阅读区是下限，不应再往下调。</p></article>
+        <div class="reco-hybrid">
+          <svg class="icon" aria-hidden="true"><use href="#i-sprout"></use></svg>
+          <p><strong>混合建议：</strong>A 的结构 + B 的一层树冠阴影 + C 的 1px 高光边缘。混合后仍沿用 A 的阅读底，不改变正文对比。</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="proposal-footer">
+    <p>提案边界：三个方向页都是静态高保真演示，不修改 tokens.json、colors.xml、tokens.css 或任何 Android / Web 代码。选定方向后，数值仍需按「原型 :root → tokens.json → colors.xml → tokens.css → 守门」落盘。</p>
+    <p>依据：现有四屏 Android fixture 文案、Docs/04-ux-design 设计 token、ic_brand_sprout 官方芽形标识。浅色主题；深色主题不在本次范围。</p>
+  </footer>
+
+</body>
+</html>

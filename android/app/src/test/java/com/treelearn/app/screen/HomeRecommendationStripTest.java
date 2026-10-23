@@ -18,10 +18,10 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * The 2026-09-28 home fixes, as pins rather than as prose.
+ * The recommendation strip's fixes, as pins rather than as prose.
  *
- * <p>Three complaints from one walkthrough, and each one is pinned here at the level the fix actually
- * lives at:
+ * <p>Three complaints from the 2026-09-28 walkthrough, plus the 2026-10-22 report that the strip had
+ * stopped drifting, each pinned at the level the fix actually lives at:
  *
  * <ul>
  *   <li><strong>The strip must not rebuild for a keystroke.</strong> The screen renders the whole
@@ -33,6 +33,10 @@ import java.util.List;
  *   <li><strong>The strip must not crowd the composer.</strong> Pinned in the layout, and pinned as
  *       a departure from the prototype rather than as a fidelity claim, because the prototype's own
  *       value is 4px and is the thing being overridden.
+ *   <li><strong>The strip must keep drifting when the system's animations are off.</strong> PRD
+ *       6.2.17 point 2 asks for the drift and gives touch as the pause; the earlier gate on the
+ *       animator scale left a handset with animations disabled showing a still strip. Pinned by the
+ *       absence of that gate and by the survival of the visibility gate that exception 4 allows.
  * </ul>
  *
  * <p>What is deliberately not pinned here is the history list's rebuild on every render: the reload
@@ -128,6 +132,30 @@ public final class HomeRecommendationStripTest {
         assertEquals("the question takes part in equality", first.get(0), same);
         assertFalse("so does the kind",
                 chip(first.get(0).question, Recommendation.Kind.FOLLOW_UP).equals(first.get(0)));
+    }
+
+    // ------------------------------------------------------------------
+    // The fix for "the strip does not scroll any more"
+    // ------------------------------------------------------------------
+
+    /**
+     * The drift is the recommendation area's behaviour, not an entrance: PRD 6.2.17 point 2
+     * requires it and makes touch the pause, while exception 4 only excuses it off screen. The
+     * strip used to return early when {@code ANIMATOR_DURATION_SCALE} was zero, so a handset with
+     * animations switched off showed a still strip - reported as a defect in the 2026-10-22
+     * walkthrough. Entrance motion still honours that setting through {@link ChatMotion}.
+     */
+    @Test
+    public void theDriftDoesNotStopForTheSystemAnimatorScale() throws Exception {
+        String source = marquee();
+        assertFalse("PRD 6.2.17 point 2 has no reduced-motion exception",
+                source.contains("ChatMotion.reduced"));
+        assertFalse("and the strip reads no other form of the animator scale",
+                source.contains("ANIMATOR_DURATION_SCALE"));
+        assertTrue("the visibility gate that exception 4 excuses stays",
+                source.contains("getGlobalVisibleRect(visiblePart)"));
+        assertTrue("and the touch pause the learner is given stays",
+                source.contains("RESUME_DELAY_MILLIS"));
     }
 
     // ------------------------------------------------------------------

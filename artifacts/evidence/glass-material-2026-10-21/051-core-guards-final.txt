@@ -1,0 +1,144 @@
+RUN-ALL-GUARDS tier=core selected=39/45 subset=yes
+PASS         validate_tasks                         rc=0 0.2s
+             > SUMMARY files=46 errors=0 warnings=15
+PASS         check_context_pack                     rc=0 2.4s
+             > check_context_pack: 0 check(s) failed
+PASS         check_code_reviewer_agent              rc=0 0.2s
+             > check_code_reviewer_agent: 0 check(s) failed
+PASS         check_codebase_researcher_agent        rc=0 0.2s
+             > check_codebase_researcher_agent: 0 check(s) failed
+PASS         check_code_simplifier_agent            rc=0 0.1s
+             > check_code_simplifier_agent: 0 check(s) failed
+PASS         check_loop_watcher_agent               rc=0 0.2s
+             > check_loop_watcher_agent: 0 check(s) failed
+PASS         check_source_of_truth                  rc=0 0.5s
+             > check_source_of_truth: 0 check(s) failed
+PASS         run_evals                              rc=0 0.1s
+             > run_evals: 0 check(s) failed
+PASS         check_eval_keeper_agent                rc=0 0.2s
+             > check_eval_keeper_agent: 0 check(s) failed
+PASS         metrics_report                         rc=0 1.5s
+             > check_metrics_report: 0 check(s) failed
+PASS         check_metrics_reporter_agent           rc=0 0.2s
+             > check_metrics_reporter_agent: 0 check(s) failed
+PASS         check_intent_capturer_agent            rc=0 0.1s
+             > check_intent_capturer_agent: 0 check(s) failed
+PASS         check_intent_template                  rc=0 0.1s
+             > check_intent_template: 0 check(s) failed
+PASS         check_pm_discovery_skill               rc=0 0.1s
+             > check_pm_discovery_skill: 0 check(s) failed
+PASS         check_roadmap_and_routing              rc=0 0.2s
+             > check_roadmap_and_routing: 0 check(s) failed
+PASS         check_spec_author_agent                rc=0 0.2s
+             > check_spec_author_agent: 0 check(s) failed
+PASS         check_stack_facts                      rc=0 0.8s
+             > check_stack_facts: 0 check(s) failed
+PASS         check_design_tokens                    rc=0 0.1s
+             > check_design_tokens: 0 check(s) failed
+PASS         check_ux_vendor                        rc=0 0.2s
+             > check_ux_vendor: 0 check(s) failed
+PASS         check_ux_vendor --selftest             rc=0 34.0s
+             > SELFTEST cases=21 mismatch=0 expected=21 floor=21
+PASS         check_pointer_liveness                 rc=0 0.2s
+             > check_pointer_liveness: 0 check(s) failed
+PASS         check_pointer_liveness --selftest      rc=0 5.3s
+             > SELFTEST cases=10 mismatch=0 expected=10
+PASS         check_androidtest_schema_expectations  rc=0 0.2s
+             > VERDICT: PASS
+PASS         check_run_all_guards                   rc=0 21.3s
+             > SELFTEST cases=33 executed=33 floor=26 broken=0
+PASS         checkers_selftest                      rc=0 82.1s
+             > OVERALL: PASS
+PASS         parity_ledger_selftest                 rc=0 2.8s
+             > VERDICT: PASS
+PASS         screen_inventory_selftest              rc=0 2.2s
+             > VERDICT: PASS
+PASS         measure_screen --selftest              rc=0 11.1s
+             > VERDICT: PASS (19 cases, positive and negative for every branch)
+TIMEOUT      verify_1to1_selftest                   timeout after 600s — 本轮对这条没有判据，既不是绿也不是红
+             DIAG verify_1to1_selftest lines=30/161 mode=tail
+             | ok   body-pitch/正文行高脱离 --lh-read 判红且其它 5 项不受影响
+             | ok   action-pitch/图标行不等距 判红且其它 5 项不受影响
+             | ok   action-pitch/等距但不等于按钮宽 判红且其它 5 项不受影响
+             | ok   action-pitch/量不到按钮宽度 判红且其它 5 项不受影响
+             | ok   pill-inset/胶囊与正文不同栏 判红且其它 5 项不受影响
+             | ok   pill-inset/量不到胶囊左内缩 判红且其它 5 项不受影响
+             | SELFTEST PASS cases=40 cli=20 muts=18 failures=0
+             | EXITCODE=0
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-p5aApp
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-CHJrs1
+             | USAGE ERROR: 未知选项 --turbo（可用: --screen --out --profile --browser --attach --url --wait-ms）
+             | USAGE ERROR: 必须给 --screen <屏名>：原型路径、点击序列、等待选择器与 DOM 检查项都从屏档案取
+             | USAGE ERROR: --wait-ms 必须是正整数毫秒，收到 0
+             | USAGE ERROR: 屏档案里没有 "nope"；可用: chat
+             | INSTRUMENT FAULT: 找不到 Edge 可执行文件（试过: /c/nowhere/msedge.exe）；用 --browser <路径> 指定
+             | INSTRUMENT FAULT: 屏 "chat" 的档案没有 prototype 回放段
+             | INSTRUMENT FAULT: 原型 HTML 不存在: D:\Project\Android\Treelearn\Docs\04-ux-design\no-such-prototype.html
+             | INSTRUMENT FAULT: 屏档案 不是合法 UTF-8: D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-puxoaX\bad-utf8.json (The encoded data was not valid for encoding utf-8)
+             | INSTRUMENT FAULT: 屏 "chat" 的 prototype 段没有 dom_checks——没有检查项就没有见证
+             | INSTRUMENT FAULT: 屏 "chat" 的 prototype 段没有 dom_checks——没有检查项就没有见证
+             | INSTRUMENT FAULT: 档案里的 DOM 检查名不在词表内: no-such-check（词表现有: body-bg, grid-period, user-bubble, body-pitch, action-pitch, pill-inset）
+             | INSTRUMENT FAULT: --url 指向的本机文件不存在: D:\nope\missing.html
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-L6WXJ7
+             | INSTRUMENT FAULT: 导航被浏览器拒绝: net::ERR_ABORTED（目标 javascript:document.write(1)）
+             | INSTRUMENT FAULT: CDP 握手失败（端口 1 没有应答: fetch failed）
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-M5lt7b
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-StuuTL
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-dfkMpR
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-aQSADY
+             | INSTRUMENT FAULT: #root 是空的或不存在（root=0 nodes=6 ready=complete title=桩，重载 1 次后仍空）——原型的界面由页面内的 React+Babel 现场编译、脚本取自 ./vendor/（字节身份由 check_ux_vendor.py 判）；被核对象没起来属仪器故障，不是结构不符
+TIMEOUT      cdp_shot_selftest                      timeout after 600s — 本轮对这条没有判据，既不是绿也不是红
+             DIAG cdp_shot_selftest lines=30/118 mode=tail
+             | OK   screen-rect = 412x816 @ 179,1977.5 (逻辑 px)
+             | OK   scrollbar-occupancy = 4 = 档案声明 4
+             | FAIL shot-scale-override 本次 scale=1 而档案声明=2；此图不可交给 --kind render（它按 2x 反算逻辑像素），请用默认比例重跑或同步档案
+             | judgements=6 failed=1
+             | VERDICT: FAIL
+             | EXITCODE=1
+             | ok   neg-shot-scale-mismatch rc=1 (22.7s, want=1)
+             | # command: (unit) 空判据
+             | VERDICT: FAULT 没有任何判据被执行——空见证不算通过
+             | EXITCODE=3
+             | ok   neg-empty-ledger rc=3 (unit, want=3)
+             | SELFTEST PASS cases=17 failures=0
+             | EXITCODE=0
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-e5qkz0
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-7m8Y8H
+             | USAGE ERROR: 未知选项 --turbo（可用: --screen --out --profile --browser --attach --url --scroll --scale --wait-ms）
+             | USAGE ERROR: 必须给 --out <png>：产图路径显式给出，避免覆盖已归档的基线图
+             | USAGE ERROR: 屏档案里没有 "nope"；可用: chat
+             | USAGE ERROR: --scroll 只认 none|top|bottom，收到 sideways
+             | INSTRUMENT FAULT: 找不到 Edge 可执行文件（试过: /c/nowhere/msedge.exe）；用 --browser <路径> 指定
+             | INSTRUMENT FAULT: 屏 "chat" 的档案没有 prototype 回放段
+             | INSTRUMENT FAULT: 原型 HTML 不存在: D:\Project\Android\Treelearn\Docs\04-ux-design\no-such-prototype.html
+             | INSTRUMENT FAULT: 屏档案 不是合法 UTF-8: D:\Project\Android\Treelearn\artifacts\tmp\_cdpshot-selftest\run-4Jlk14\bad-utf8.json (The encoded data was not valid for encoding utf-8)
+             | INSTRUMENT FAULT: --url 指向的本机文件不存在: D:\nope\missing.html
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-HhGfnd
+             | INSTRUMENT FAULT: 导航被浏览器拒绝: net::ERR_ABORTED（目标 javascript:document.write(1)）
+             | INSTRUMENT FAULT: CDP 握手失败（端口 1 没有应答: fetch failed）
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-Pdnl3T
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-JiGdRp
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-WHKjMW
+PASS         web_walk --selftest                    rc=0 198.5s
+             > SELFTEST cases=6 bad=0
+PASS         check_dependency_direction             rc=0 0.9s
+             > dependency scan root=src layers=9 scanned=35 findings=0
+PASS         check_dependency_direction --selftest  rc=0 0.1s
+             > SELFTEST cases=10 floor=8 fail=0
+PASS         check_user_copy_i18n                   rc=0 0.2s
+             > user-copy scan root=src scanned=35 copy-dir-exempt-seen=true cjk-lines=0 files=0 baseline-entries=0 baseline-covered=0
+PASS         check_user_copy_i18n --selftest        rc=0 0.2s
+             > SELFTEST cases=15 floor=10 fail=0
+PASS         check_device_time                      rc=0 0.1s
+             > device-time scan root=D:\Project\Android\Treelearn\frontend\src scanned=35 exempt=utils/deviceTime.ts exempt-in-tree=true findings=0
+PASS         check_device_time --selftest           rc=0 0.1s
+             > SELFTEST cases=11 floor=8 fail=0
+PASS         sync_fixtures --check                  rc=0 0.2s
+             > SYNC CHECK src=13 dst=13 bad=0 redacted=0 dir=frontend\src\platform\fixtures
+PASS         sync_fixtures --selftest               rc=0 0.3s
+             > SELFTEST cases=8 bad=0 floor=1
+NOTE         not-selected                           未选中：6 条不在本次判定面内（档位选择），整表绿不由此声明
+RUN-ALL-GUARDS pass=37 fail=0 inconclusive=0 fault=0 timeout=2
+VERDICT: INCONCLUSIVE (2 guard(s) hit their own timeout, so nothing was judged for them — 重跑或换串行姿势，别去查不存在的回归)
+EXITCODE=3
+EXIT=3

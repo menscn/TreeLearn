@@ -1,0 +1,157 @@
+$ vitest run "--" "test/styles/glass.test.ts"
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.5 [39m[90mD:/Project/Android/Treelearn/frontend[39m
+
+ [32m✓[39m test/copy/copy.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [31m❯[39m test/styles/glass.test.ts [2m([22m[2m4 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[32m 13[2mms[22m[39m
+   [31m❯[39m Web 晨雾玻璃材质层 [2m(4)[22m
+[31m     [31m×[31m 只消费设计 token，不写裸色值[39m[32m 8[2mms[22m[39m
+[31m     [31m×[31m 场景覆盖 body，工作区与外壳改为玻璃[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m 大面才启用真实模糊，并保留不支持时的回退[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m 在 pages.css 之后加载，成为最后一层材质覆盖[39m[32m 2[2mms[22m[39m
+ [32m✓[39m test/platform/FixtureRuntimeAdapter.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m test/utils/deviceTime.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 718[2mms[22m[39m
+   [32m✓[39m 设备时间展示 [2m(6)[22m
+     [33m[2m✓[22m[39m 设备时区现场读取，不写死[33m 590[2mms[22m[39m
+ [32m✓[39m test/store/screenRoute.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m test/platform/bundledFixtures.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m test/platform/fixtureNodes.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 124[2mms[22m[39m
+ [32m✓[39m test/store/screenLinks.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 229[2mms[22m[39m
+ [32m✓[39m test/store/workspaceData.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 501[2mms[22m[39m
+ [32m✓[39m test/store/workspace.test.ts [2m([22m[2m13 tests[22m[2m)[22m[33m 618[2mms[22m[39m
+ [32m✓[39m test/shell/AppShell.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 3723[2mms[22m[39m
+   [32m✓[39m 工作区外壳：侧栏、顶部栏与内容槽 [2m(7)[22m
+     [33m[2m✓[22m[39m 标题仍来自文案表；侧栏名称、最近学习与主内容槽都在[33m 1156[2mms[22m[39m
+     [33m[2m✓[22m[39m 折叠按钮的可访问名与 aria-expanded 跟着状态走[33m 418[2mms[22m[39m
+     [33m[2m✓[22m[39m 侧栏进入学习库后面包屑跟随，返回按钮把视图退回去[33m 468[2mms[22m[39m
+     [33m[2m✓[22m[39m 最近学习点进主题，面包屑用真实主题标题[33m 505[2mms[22m[39m
+     [33m[2m✓[22m[39m 窄窗侧栏初始收起，遮罩可把展开的侧栏收起[33m 542[2mms[22m[39m
+     [33m[2m✓[22m[39m 所有图标按钮都有可访问名与悬停提示[33m 339[2mms[22m[39m
+ [32m✓[39m test/pages/SnapshotScreen.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 4409[2mms[22m[39m
+   [32m✓[39m 还没精修的屏按采集坐标还原，并且出得去 [2m(5)[22m
+     [33m[2m✓[22m[39m 设置页的屏头、卡面与六个入口都在采集坐标上，入口逐条走到各自的屏[33m 2276[2mms[22m[39m
+     [33m[2m✓[22m[39m 自绘屏的返回图标没有 resource-id，Web 侧把它认成 state_back 并把栈退回去[33m 884[2mms[22m[39m
+     [33m[2m✓[22m[39m 抽屉那屏保留家底与抽屉两层，日历卡是表面而不是假按钮[33m 804[2mms[22m[39m
+     [33m[2m✓[22m[39m 画布那屏把采集到的标题和副题还原成屏头，返回键按 resource-id 退出[33m 333[2mms[22m[39m
+ [32m✓[39m test/pages/HomePage.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 5673[2mms[22m[39m
+   [32m✓[39m 工作区主页：真实推荐、主题与草稿 [2m(5)[22m
+     [33m[2m✓[22m[39m 推荐、历史主题、模型与草稿占位都来自 home 夹具，侧栏最近学习也是真主题[33m 2219[2mms[22m[39m
+     [33m[2m✓[22m[39m 点推荐进入主题 0，并把这条问题写进对话草稿[33m 1288[2mms[22m[39m
+     [33m[2m✓[22m[39m 点历史主题进入对应主题；主页草稿在往返与窗口变化后都还在[33m 1056[2mms[22m[39m
+     [33m[2m✓[22m[39m home 夹具缺失时不编推荐，学习库里的真主题仍可进入[33m 778[2mms[22m[39m
+ [32m✓[39m test/pages/IconParity.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 5389[2mms[22m[39m
+   [32m✓[39m 图标节点的字形与 Android drawable 同源 [2m(6)[22m
+     [33m[2m✓[22m[39m 工作区首页的品牌、推荐、主题与输入区都出字形，content-desc 不落到页面上[33m 2090[2mms[22m[39m
+     [33m[2m✓[22m[39m 工作区对话屏的分支、树、复制、附件与发送都出字形，按钮不贴文字[33m 743[2mms[22m[39m
+     [33m[2m✓[22m[39m 工作区学习库的返回、搜索与摘要按钮都带图标[33m 475[2mms[22m[39m
+     [33m[2m✓[22m[39m 工作区设置的分类、保存、删除与试听按钮都带图标[33m 715[2mms[22m[39m
+     [33m[2m✓[22m[39m 快照屏的设置入口画 chevron，画布工具画放大/缩小/适应/回到[33m 1053[2mms[22m[39m
+ [32m✓[39m test/pages/SettingsPage.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 7609[2mms[22m[39m
+   [32m✓[39m 工作区设置：分类＋详情、只读与恢复 [2m(7)[22m
+     [33m[2m✓[22m[39m 六类真实分类齐备，默认停在 API KEY，详情显示掩码与只读说明[33m 1966[2mms[22m[39m
+     [33m[2m✓[22m[39m 提供商详情只放真实字段：DeepSeek、脱敏地址、1 个模型与开启状态[33m 932[2mms[22m[39m
+     [33m[2m✓[22m[39m 模型、搜索、语音与文件详情来自各自夹具[33m 1341[2mms[22m[39m
+     [33m[2m✓[22m[39m 所有写入入口禁用并说明尚未接通；开关只是状态徽标，不是可操作控件[33m 1304[2mms[22m[39m
+     [33m[2m✓[22m[39m 离开再返回恢复分类与滚动位置；窄窗不清空；未知分类回落第一类[33m 1335[2mms[22m[39m
+     [33m[2m✓[22m[39m 缺失某类夹具时该分类提示采集缺失，分类仍可切换[33m 391[2mms[22m[39m
+ [32m✓[39m test/pages/LibraryPage.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 7638[2mms[22m[39m
+   [32m✓[39m 工作区学习库：搜索、筛选、摘要与恢复 [2m(7)[22m
+     [33m[2m✓[22m[39m 两个主题、真实摘要与 meta 都在；摘要默认收起，可展开且 aria 指向摘要[33m 1765[2mms[22m[39m
+     [33m[2m✓[22m[39m 搜索命中标题、摘要与来源问题，大小写不敏感；无命中出空态并可清空[33m 2685[2mms[22m[39m
+     [33m[2m✓[22m[39m 状态分段按真实计数工作：进行中 2、已完成 0，已完成不伪造条目[33m 761[2mms[22m[39m
+     [33m[2m✓[22m[39m 往返后恢复查询、筛选、展开与滚动位置[33m 1195[2mms[22m[39m
+     [33m[2m✓[22m[39m 窗口缩到窄窗后，查询、筛选、展开与滚动位置都不被清空[33m 652[2mms[22m[39m
+     [33m[2m✓[22m[39m 搜索图标、清空按钮与摘要按钮都有字形和可访问名[33m 327[2mms[22m[39m
+ [32m✓[39m test/pages/ChatPage.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[33m 10953[2mms[22m[39m
+   [32m✓[39m 工作区对话页：阅读、复制、面板与知识树 [2m(9)[22m
+     [33m[2m✓[22m[39m 主题 0 的标题、模型、时间、回答结构与三条建议都来自夹具[33m 1714[2mms[22m[39m
+     [33m[2m✓[22m[39m 点建议把问题填进草稿并聚焦输入框，草稿在换视图后仍读得回来[33m 3258[2mms[22m[39m
+     [33m[2m✓[22m[39m 离开对话时记下正文滚动位置，回来按主题恢复[33m 941[2mms[22m[39m
+     [33m[2m✓[22m[39m 复制取原始回答全文并给出成功反馈；剪贴板拒绝时明确失败[33m 613[2mms[22m[39m
+     [33m[2m✓[22m[39m 发送、附件、重置与新建分支都禁用，可访问名说明尚未接通[33m 546[2mms[22m[39m
+     [33m[2m✓[22m[39m 分支面板默认关闭，打开后列根分支、子分支数与 AI 总结，Esc 还焦[33m 832[2mms[22m[39m
+     [33m[2m✓[22m[39m 窄窗遮罩可点关闭分支面板[33m 934[2mms[22m[39m
+     [33m[2m✓[22m[39m 知识树显示真实根节点，缩放夹在 50–150%，Esc 关闭并还焦[33m 1787[2mms[22m[39m
+     [33m[2m✓[22m[39m 主题 1 只显示学习库摘要与无基线说明，不借用主题 0 的回答[33m 325[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 4 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m test/styles/glass.test.ts[2m > [22mWeb 晨雾玻璃材质层[2m > [22m只消费设计 token，不写裸色值
+[31m[1mAssertionError[22m: glass.css must exist: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m glass test/styles/glass.test.ts:[2m16:57[22m[39m
+    [90m 14|[39m
+    [90m 15|[39m function glass(): string {
+    [90m 16|[39m   expect(existsSync(glassPath), "glass.css must exist").toBe(true);
+    [90m   |[39m                                                         [31m^[39m
+    [90m 17|[39m   return readFileSync(glassPath, "utf8");
+    [90m 18|[39m }
+[90m [2m❯[22m test/styles/glass.test.ts:[2m22:17[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/styles/glass.test.ts[2m > [22mWeb 晨雾玻璃材质层[2m > [22m场景覆盖 body，工作区与外壳改为玻璃
+[31m[1mAssertionError[22m: glass.css must exist: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m glass test/styles/glass.test.ts:[2m16:57[22m[39m
+    [90m 14|[39m
+    [90m 15|[39m function glass(): string {
+    [90m 16|[39m   expect(existsSync(glassPath), "glass.css must exist").toBe(true);
+    [90m   |[39m                                                         [31m^[39m
+    [90m 17|[39m   return readFileSync(glassPath, "utf8");
+    [90m 18|[39m }
+[90m [2m❯[22m test/styles/glass.test.ts:[2m51:17[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/styles/glass.test.ts[2m > [22mWeb 晨雾玻璃材质层[2m > [22m大面才启用真实模糊，并保留不支持时的回退
+[31m[1mAssertionError[22m: glass.css must exist: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m glass test/styles/glass.test.ts:[2m16:57[22m[39m
+    [90m 14|[39m
+    [90m 15|[39m function glass(): string {
+    [90m 16|[39m   expect(existsSync(glassPath), "glass.css must exist").toBe(true);
+    [90m   |[39m                                                         [31m^[39m
+    [90m 17|[39m   return readFileSync(glassPath, "utf8");
+    [90m 18|[39m }
+[90m [2m❯[22m test/styles/glass.test.ts:[2m74:17[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/styles/glass.test.ts[2m > [22mWeb 晨雾玻璃材质层[2m > [22m在 pages.css 之后加载，成为最后一层材质覆盖
+[31m[1mAssertionError[22m: expected -1 to be greater than 642[39m
+[36m [2m❯[22m test/styles/glass.test.ts:[2m89:19[22m[39m
+    [90m 87|[39m     const layer = main.indexOf('"./styles/glass.css"');
+    [90m 88|[39m     expect(pages).toBeGreaterThanOrEqual(0);
+    [90m 89|[39m     expect(layer).toBeGreaterThan(pages);
+    [90m   |[39m                   [31m^[39m
+    [90m 90|[39m   });
+    [90m 91|[39m });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m16 passed[39m[22m[90m (17)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m107 passed[39m[22m[90m (111)[39m
+[2m   Start at [22m 07:18:31
+[2m   Duration [22m 69.97s[2m (environment 80%, tests 9%, transform 9%, import 2%)[22m
+
+[ELIFECYCLE] Test failed. See above for more details.

@@ -1,0 +1,717 @@
+/* 主页与学习库：页面骨架、扫描型主题行、本地搜索与状态筛选。
+   只放这两页的版式；外壳与对话仍在 workspace.css。 */
+
+.workspace-page {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  /* 与 .chat-scroll 同一条规则：顶栏已是覆盖层，留白由滚动容器自己付（T-2026-10-22-063）。 */
+  padding-top: 76px;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+.page {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: calc(var(--s8) * 1.5) var(--s8);
+}
+
+.page-title,
+.home-title {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 600;
+  line-height: 1.6;
+  letter-spacing: .015em;
+}
+
+.page-title {
+  font-size: var(--fs-display);
+}
+
+.home-title {
+  margin-top: var(--s3);
+  color: var(--green-deep);
+  font-size: var(--fs-brand);
+  line-height: 1.5;
+}
+
+.page-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  margin: 0;
+  color: var(--green-deep);
+  font-size: var(--fs-cap);
+  letter-spacing: .08em;
+}
+
+.page-eyebrow .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.home-dock {
+  margin-top: var(--s6);
+}
+
+.home-dock .composer {
+  max-width: none;
+}
+
+.home-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  margin: var(--s8) 0 var(--s4);
+  font-size: var(--fs-h2);
+  font-weight: 600;
+}
+
+.home-heading .icon {
+  width: 18px;
+  height: 18px;
+  color: var(--green);
+}
+
+.home-count {
+  color: var(--ink3);
+  font-size: var(--fs-cap);
+  font-weight: 400;
+}
+
+.home-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s3);
+}
+
+.suggestion {
+  flex: 1;
+  min-width: 240px;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s2);
+  min-height: 44px;
+  padding: var(--s4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--ink2);
+  font: inherit;
+  font-size: var(--fs-sm);
+  line-height: 1.8;
+  text-align: left;
+}
+
+.suggestion .icon {
+  width: 16px;
+  height: 16px;
+  margin-top: var(--s1);
+  flex: none;
+  color: var(--green);
+}
+
+.suggestion:hover {
+  border-color: var(--green);
+  background: var(--green-faint);
+}
+
+.suggestion-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+}
+
+.suggestion-tag {
+  color: var(--green-deep);
+  font-size: var(--fs-cap);
+  letter-spacing: .04em;
+}
+
+.suggestion-text {
+  color: var(--ink2);
+  overflow-wrap: anywhere;
+}
+
+.topic-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.topic-row {
+  padding: var(--s6) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.topic-row:first-child {
+  padding-top: var(--s2);
+}
+
+.topic-open {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s4);
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+}
+
+.topic-open strong {
+  font-size: var(--fs-h2);
+  font-weight: 600;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.topic-open .icon {
+  width: 16px;
+  height: 16px;
+  margin-top: var(--s1);
+  flex: none;
+  color: var(--ink3);
+}
+
+.topic-open:hover strong {
+  color: var(--green-deep);
+}
+
+.topic-excerpt {
+  display: -webkit-box;
+  margin: var(--s2) 0 0;
+  overflow: hidden;
+  color: var(--ink2);
+  font-size: var(--fs-sm);
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.topic-excerpt.is-expanded {
+  display: block;
+}
+
+.topic-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--s1);
+  margin: var(--s2) 0 0;
+  color: var(--ink3);
+  font-size: var(--fs-cap);
+}
+
+.topic-meta .icon {
+  width: 14px;
+  height: 14px;
+}
+
+.topic-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s4);
+  margin-top: var(--s2);
+  flex-wrap: wrap;
+}
+
+.topic-foot .topic-meta {
+  margin: 0;
+}
+
+.summary-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s1);
+  min-height: 44px;
+  padding: 0 var(--s2);
+  border: 0;
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--green-deep);
+  font: inherit;
+  font-size: var(--fs-sm);
+}
+
+.summary-toggle .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.summary-toggle:hover {
+  background: var(--green-faint);
+}
+
+.library-tools {
+  display: flex;
+  align-items: center;
+  gap: var(--s4);
+  margin-top: var(--s6);
+  flex-wrap: wrap;
+}
+
+.search-field {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  min-height: 44px;
+  padding: 0 var(--s2) 0 var(--s3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-full);
+  background: var(--surface);
+  color: var(--ink3);
+}
+
+.search-field:focus-within {
+  border-color: var(--green);
+  box-shadow: 0 0 0 2px var(--green-soft);
+}
+
+.search-field > .icon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.search-field input {
+  flex: 1;
+  min-width: 0;
+  height: 42px;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-sm);
+}
+
+.search-field input::placeholder {
+  color: var(--ink3);
+}
+
+.search-field input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.search-clear {
+  width: 44px;
+  height: 44px;
+  margin-right: -6px;
+  color: var(--ink3);
+}
+
+.segments {
+  display: flex;
+  align-items: center;
+  gap: var(--s1);
+  flex-wrap: wrap;
+}
+
+.segment {
+  min-height: 44px;
+  padding: 0 var(--s3);
+  border: 0;
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--ink3);
+  font: inherit;
+  font-size: var(--fs-sm);
+}
+
+.segment:hover {
+  background: var(--green-faint);
+}
+
+.segment[aria-pressed="true"] {
+  background: var(--green-soft);
+  color: var(--green-deep);
+  font-weight: 600;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: var(--s8) 0;
+  padding: var(--s8) var(--s4);
+  border: 1px dashed var(--line);
+  border-radius: var(--r-md);
+  color: var(--ink3);
+  font-size: var(--fs-sm);
+  text-align: center;
+}
+
+.empty-state p {
+  margin: 0;
+}
+
+.empty-state .icon-btn {
+  margin-top: var(--s3);
+}
+
+/* 设置：左分类、右只读详情；分类名与摘要始终用文字，不靠图标猜含义。 */
+.settings-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(var(--s8) * 1.5);
+  margin-top: var(--s6);
+}
+
+.settings-categories {
+  width: 200px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+}
+
+.settings-category {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: var(--s2) var(--s3);
+  border: 0;
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--ink2);
+  font: inherit;
+  font-size: var(--fs-sm);
+  text-align: left;
+}
+
+.settings-category-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+
+.settings-category:hover {
+  background: var(--green-faint);
+}
+
+.settings-category.active {
+  background: var(--green-soft);
+  color: var(--green-deep);
+  font-weight: 600;
+}
+
+.settings-category-title {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.settings-category-summary {
+  display: block;
+  margin-top: 2px;
+  color: var(--ink3);
+  font-size: var(--fs-cap);
+  font-weight: 400;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.settings-category .icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.settings-detail {
+  flex: 1;
+  min-width: 0;
+}
+
+.settings-detail h2 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: var(--fs-h1);
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.settings-summary {
+  margin: var(--s1) 0 0;
+  color: var(--ink3);
+  font-size: var(--fs-sm);
+}
+
+.settings-readonly {
+  margin: var(--s4) 0 0;
+  padding: var(--s3) var(--s4);
+  border-left: 3px solid var(--amber);
+  border-radius: var(--r-sm);
+  background: var(--amber-soft);
+  color: var(--ink2);
+  font-size: var(--fs-sm);
+  line-height: 1.8;
+}
+
+.setting-block {
+  padding: var(--s6) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.setting-heading {
+  margin: 0 0 var(--s3);
+  color: var(--ink3);
+  font-size: var(--fs-cap);
+  font-weight: 400;
+  letter-spacing: .06em;
+}
+
+.setting-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s4);
+  min-height: 44px;
+  padding: var(--s1) 0;
+}
+
+.setting-field + .setting-field {
+  border-top: 1px dashed var(--line);
+}
+
+.setting-label {
+  color: var(--ink);
+  font-size: var(--fs-sm);
+  overflow-wrap: anywhere;
+}
+
+.setting-value {
+  color: var(--ink2);
+  font-size: var(--fs-sm);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.setting-field .icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  color: var(--green);
+}
+
+.setting-switch {
+  align-items: flex-start;
+}
+
+.setting-switch-copy {
+  min-width: 0;
+}
+
+.switch-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s1);
+  flex: none;
+  min-height: 28px;
+  padding: 0 var(--s3);
+  border-radius: var(--r-full);
+  background: var(--line);
+  color: var(--ink2);
+  font-size: var(--fs-cap);
+  cursor: default;
+}
+
+.switch-badge[data-state="on"] {
+  background: var(--green-soft);
+  color: var(--green-deep);
+}
+
+.switch-badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.settings-page .field {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: var(--s3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--ink2);
+  font: inherit;
+  font-size: var(--fs-sm);
+}
+
+.settings-page .field:disabled {
+  cursor: not-allowed;
+  color: var(--ink3);
+  background: color-mix(in srgb, var(--surface) 55%, var(--bg));
+}
+
+.field-note {
+  margin: var(--s2) 0 0;
+  color: var(--ink3);
+  font-size: var(--fs-cap);
+  line-height: 1.7;
+}
+
+.setting-row-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--s2) 0;
+  border: 0;
+  background: none;
+  color: var(--ink2);
+  font: inherit;
+  font-size: var(--fs-sm);
+  text-align: left;
+}
+
+.setting-row-action:disabled {
+  cursor: not-allowed;
+  color: var(--ink3);
+}
+
+.setting-row-action .icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s3);
+  margin-top: var(--s6);
+}
+
+.settings-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  min-height: 44px;
+  padding: 0 var(--s4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--ink2);
+  font: inherit;
+  font-size: var(--fs-sm);
+}
+
+.settings-action .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.settings-action:disabled {
+  cursor: not-allowed;
+  color: var(--ink3);
+  opacity: .72;
+}
+
+.settings-missing .notice {
+  margin: 0;
+}
+
+.workspace-page button:focus-visible,
+.workspace-page input:focus-visible,
+.workspace-page textarea:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+.search-field input:focus-visible {
+  outline: none;
+}
+
+@media (max-width: 760px) {
+  /* 与 workspace.css 里窄窗顶栏的 height:64px 成对，理由见那里的注释。 */
+  .page-scroll {
+    padding-top: 64px;
+  }
+
+  .page {
+    padding: var(--s6) var(--s4);
+  }
+
+  .home-title {
+    font-size: var(--fs-display);
+  }
+
+  .home-suggestions {
+    flex-direction: column;
+  }
+
+  .suggestion {
+    min-width: 0;
+  }
+
+  .library-tools {
+    gap: var(--s2);
+  }
+
+  .search-field {
+    flex-basis: 100%;
+  }
+
+  .settings-layout {
+    flex-direction: column;
+    gap: var(--s4);
+    margin-top: var(--s4);
+  }
+
+  .settings-categories {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: var(--s2);
+    scrollbar-width: thin;
+  }
+
+  .settings-category {
+    flex: 0 0 auto;
+    width: auto;
+  }
+
+  .settings-category-title {
+    flex: none;
+  }
+
+  .settings-category-summary {
+    display: none;
+  }
+
+  .setting-field {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-height: 650px) {
+  .page {
+    padding-top: var(--s6);
+  }
+}

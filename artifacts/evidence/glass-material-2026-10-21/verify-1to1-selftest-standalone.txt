@@ -1,0 +1,162 @@
+# command: verify_1to1.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-Iiof4p\dom.json
+# profile screens.json bytes=3679 lines=48 sha256=f85fc4342f701b5ce1f27fd78230de6af348a5d5630d8ad7d0e2eb33335fdeaa
+# prototype.html bytes=151314 lines=2467 sha256=447d7ad2f256afbf907b142e73ab1bc801ec0fd3f99f33e20147d890c912ba55
+# wait_ms=20000 dom_checks=6
+OK   browser = Edg/155.0.4283.45 (@50f24ef2aa5369a074b8888b7db82d9c0652d642, protocol 1.3)
+OK   html = D:\Project\Android\Treelearn\Docs\04-ux-design\知芽-TreeLearn-高保真原型-v1.html
+OK   clicks = .demo-link -> .topic-card
+OK   tokens = 现场回读 6 个（词表要求 6 个，逐个独立复核一致）
+OK   body-bg = rgb(244, 241, 235) = :root --bg #F4F1EB
+OK   grid-period 周期=32px = --s8 墨色=rgba(30, 43, 35, 0.02)（2 个停止点同色）≈ --paper-rule rgba(30,43,35,.018)（alpha 按读数分辨率 ±0.0051 比对）（注意：--lh-read=28px ≠ 周期 32px，与 tokens.json 里「阅读行高 == 格线间距」的注释不符，属设计侧待裁定）
+OK   user-bubble 无气泡底（bg=rgba(0, 0, 0, 0) radius=0px=退役后制式） font-size=15px = --fs-body；距屏右=24 = --gutter 20 + 滚动条占位 4
+OK   body-pitch AI 正文行高=28px = :root --lh-read 28px
+OK   action-pitch = [44, 44, 44] 等距且=按钮宽 44（首钮中心内缩=29；44 无 CSS token，权威是 Android 侧 @dimen/touch_min=44dp，跨端比对属阶段 3）
+OK   pill-inset = 20 = AI 正文左内缩 20 = :root --gutter 20
+OK   dom-checks = 6/6 成立（名单来自档案 body-bg, grid-period, user-bubble, body-pitch, action-pitch, pill-inset）
+OK   out = D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-Iiof4p\dom.json bytes=7197
+judgements=12 failed=0
+VERDICT: PASS
+EXITCODE=0
+WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-R2Ib0y
+# command: verify_1to1.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-Iiof4p\dom-url.json --url file:///D:/Project/Android/Treelearn/Docs/04-ux-design/%E7%9F%A5%E8%8A%BD-TreeLearn-%E9%AB%98%E4%BF%9D%E7%9C%9F%E5%8E%9F%E5%9E%8B-v1.html
+# profile screens.json bytes=3679 lines=48 sha256=f85fc4342f701b5ce1f27fd78230de6af348a5d5630d8ad7d0e2eb33335fdeaa
+# html 由 --url 显式给出，未核档案路径
+# wait_ms=20000 dom_checks=6
+OK   browser = Edg/155.0.4283.45 (@50f24ef2aa5369a074b8888b7db82d9c0652d642, protocol 1.3)
+OK   html = file:///D:/Project/Android/Treelearn/Docs/04-ux-design/%E7%9F%A5%E8%8A%BD-TreeLearn-%E9%AB%98%E4%BF%9D%E7%9C%9F%E5%8E%9F%E5%9E%8B-v1.html
+OK   clicks = .demo-link -> .topic-card
+OK   tokens = 现场回读 6 个（词表要求 6 个，逐个独立复核一致）
+OK   body-bg = rgb(244, 241, 235) = :root --bg #F4F1EB
+OK   grid-period 周期=32px = --s8 墨色=rgba(30, 43, 35, 0.02)（2 个停止点同色）≈ --paper-rule rgba(30,43,35,.018)（alpha 按读数分辨率 ±0.0051 比对）（注意：--lh-read=28px ≠ 周期 32px，与 tokens.json 里「阅读行高 == 格线间距」的注释不符，属设计侧待裁定）
+OK   user-bubble 无气泡底（bg=rgba(0, 0, 0, 0) radius=0px=退役后制式） font-size=15px = --fs-body；距屏右=24 = --gutter 20 + 滚动条占位 4
+OK   body-pitch AI 正文行高=28px = :root --lh-read 28px
+OK   action-pitch = [44, 44, 44] 等距且=按钮宽 44（首钮中心内缩=29；44 无 CSS token，权威是 Android 侧 @dimen/touch_min=44dp，跨端比对属阶段 3）
+OK   pill-inset = 20 = AI 正文左内缩 20 = :root --gutter 20
+OK   dom-checks = 6/6 成立（名单来自档案 body-bg, grid-period, user-bubble, body-pitch, action-pitch, pill-inset）
+OK   out = D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-Iiof4p\dom-url.json bytes=7197
+judgements=12 failed=0
+VERDICT: PASS
+EXITCODE=0
+WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-KDiDFc
+USAGE ERROR: 未知选项 --turbo（可用: --screen --out --profile --browser --attach --url --wait-ms）
+EXITCODE=2
+USAGE ERROR: 必须给 --screen <屏名>：原型路径、点击序列、等待选择器与 DOM 检查项都从屏档案取
+EXITCODE=2
+USAGE ERROR: --wait-ms 必须是正整数毫秒，收到 0
+EXITCODE=2
+USAGE ERROR: 屏档案里没有 "nope"；可用: chat
+EXITCODE=2
+INSTRUMENT FAULT: 找不到 Edge 可执行文件（试过: /c/nowhere/msedge.exe）；用 --browser <路径> 指定
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 屏 "chat" 的档案没有 prototype 回放段
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 原型 HTML 不存在: D:\Project\Android\Treelearn\Docs\04-ux-design\no-such-prototype.html
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 屏档案 不是合法 UTF-8: D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-Iiof4p\bad-utf8.json (The encoded data was not valid for encoding utf-8)
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 屏 "chat" 的 prototype 段没有 dom_checks——没有检查项就没有见证
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 屏 "chat" 的 prototype 段没有 dom_checks——没有检查项就没有见证
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 档案里的 DOM 检查名不在词表内: no-such-check（词表现有: body-bg, grid-period, user-bubble, body-pitch, action-pitch, pill-inset）
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: --url 指向的本机文件不存在: D:\nope\missing.html
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-jw51ZV
+INSTRUMENT FAULT: 导航被浏览器拒绝: net::ERR_ABORTED（目标 javascript:document.write(1)）
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: CDP 握手失败（端口 1 没有应答: fetch failed）
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+# command: verify_1to1.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-Iiof4p\s.json --profile D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-Iiof4p\bad-wait.json --wait-ms 1500
+# profile screens.json bytes=5350 lines=201 sha256=37fafd8dfb29cc16c6fc798c5bf4f91918e1a385849a44ca33ac4ace5f70224c
+# prototype.html bytes=151314 lines=2467 sha256=447d7ad2f256afbf907b142e73ab1bc801ec0fd3f99f33e20147d890c912ba55
+# wait_ms=1500 dom_checks=6
+OK   browser = Edg/155.0.4283.45 (@50f24ef2aa5369a074b8888b7db82d9c0652d642, protocol 1.3)
+OK   html = D:\Project\Android\Treelearn\Docs\04-ux-design\知芽-TreeLearn-高保真原型-v1.html
+OK   clicks = .demo-link -> .topic-card
+FAIL wait-for-absent .no-such-node 在 1500ms 内没出现（readyState=interactive）——页面已加载，属结构不符而非仪器故障
+judgements=4 failed=1
+VERDICT: FAIL
+EXITCODE=1
+WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-dXd16U
+# command: verify_1to1.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-Iiof4p\s.json --profile D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-Iiof4p\bad-click.json
+# profile screens.json bytes=5332 lines=200 sha256=f2b3ead54b5a377f37b8ad95b2e3d99687b8542d100559ee55d8dcf659927e9f
+# prototype.html bytes=151314 lines=2467 sha256=447d7ad2f256afbf907b142e73ab1bc801ec0fd3f99f33e20147d890c912ba55
+# wait_ms=20000 dom_checks=6
+OK   browser = Edg/155.0.4283.45 (@50f24ef2aa5369a074b8888b7db82d9c0652d642, protocol 1.3)
+OK   html = D:\Project\Android\Treelearn\Docs\04-ux-design\知芽-TreeLearn-高保真原型-v1.html
+OK   clicks = #no-such-click-target
+FAIL click-target-absent #no-such-click-target
+judgements=4 failed=1
+VERDICT: FAIL
+EXITCODE=1
+WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-eeOREz
+# command: verify_1to1.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-Iiof4p\s.json --profile D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-Iiof4p\stub-rendered.json
+# profile screens.json bytes=5389 lines=201 sha256=598f1b51cda1c9fcf3d3ee85c2951cac391f405e8ae5cc74b4e9bf37f97b6d31
+# prototype.html bytes=186 lines=1 sha256=9e86a555aec91dc99a35566cee4ef08daf124ac05d7581518f650afd1c4c1ffc
+# wait_ms=20000 dom_checks=6
+FAIL page-not-rendered .screen 在 60s 内没出现（readyState=complete #root 子元素=1 nodes=7 href=file:///D:/Project/Android/Treelearn/artifacts/tmp/_verify1to1-selftest/run-Iiof4p/stub-rendered.html title=桩）
+judgements=1 failed=1
+VERDICT: FAIL
+EXITCODE=1
+WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-LLvnAa
+WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-q2IRyy
+INSTRUMENT FAULT: #root 是空的或不存在（root=0 nodes=6 ready=complete title=桩，重载 1 次后仍空）——原型的界面由页面内的 React+Babel 现场编译、脚本取自 ./vendor/（字节身份由 check_ux_vendor.py 判）；被核对象没起来属仪器故障，不是结构不符
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+# command: (unit) 空判据
+VERDICT: FAULT 没有任何判据被执行——空见证不算通过
+EXITCODE=3
+ok   pos-real-dom-render rc=0 (24.7s, want=0)
+ok   pos-url-escape rc=0 (15.3s, want=0)
+ok   neg-unknown-option rc=2 (0.0s, want=2)
+ok   neg-missing-screen rc=2 (0.0s, want=2)
+ok   neg-bad-wait rc=2 (0.0s, want=2)
+ok   neg-unknown-screen rc=2 (0.0s, want=2)
+ok   neg-browser-absent-injection rc=3 (0.0s, want=3)
+ok   neg-profile-no-prototype rc=3 (0.0s, want=3)
+ok   neg-html-missing rc=3 (0.0s, want=3)
+ok   neg-profile-not-utf8 rc=3 (0.0s, want=3)
+ok   neg-checks-absent rc=3 (0.0s, want=3)
+ok   neg-checks-empty rc=3 (0.0s, want=3)
+ok   neg-check-name-unknown rc=3 (0.0s, want=3)
+ok   neg-url-file-missing rc=3 (0.0s, want=3)
+ok   neg-navigate-rejected rc=3 (9.5s, want=3)
+ok   neg-cdp-handshake-fail rc=3 (0.0s, want=3)
+ok   neg-wait-for-absent rc=1 (16.1s, want=1)
+ok   neg-click-absent rc=1 (11.9s, want=1)
+ok   neg-page-not-rendered rc=1 (74.9s, want=1)
+ok   neg-app-not-booted rc=3 (147.9s, want=3)
+ok   neg-empty-ledger rc=3 (unit, want=3)
+ok   positive-control 6/6 项在真实读数上判绿（形状由探针自己给出，非手写夹具）
+ok   body-bg/底色不等于 --bg 判红且其它 5 项不受影响
+ok   body-bg/--bg 取空（token 缺失） 判红且其它 5 项不受影响
+ok   grid-period/纸感渐变整个没了 判红且其它 5 项不受影响
+ok   grid-period/所有墨色停止点一起改色（脱离 token） 判红且其它 5 项不受影响
+ok   grid-period/只改第一个墨色停止点（渐变里出现两种墨） 判红且其它 5 项不受影响
+ok   grid-period/声明侧改色而页面没跟上 判红且其它 5 项不受影响
+ok   grid-period/周期不等于 --s8 判红且其它 5 项不受影响
+ok   user-bubble/.msg-user 不存在 判红且其它 5 项不受影响
+ok   user-bubble/气泡底被加回来了 判红且其它 5 项不受影响
+ok   user-bubble/圆角被加回来了 判红且其它 5 项不受影响
+ok   user-bubble/字号脱离 --fs-body 判红且其它 5 项不受影响
+ok   user-bubble/右缘间距脱离 gutter+滚动条 判红且其它 5 项不受影响
+ok   body-pitch/正文行高脱离 --lh-read 判红且其它 5 项不受影响
+ok   action-pitch/图标行不等距 判红且其它 5 项不受影响
+ok   action-pitch/等距但不等于按钮宽 判红且其它 5 项不受影响
+ok   action-pitch/量不到按钮宽度 判红且其它 5 项不受影响
+ok   pill-inset/胶囊与正文不同栏 判红且其它 5 项不受影响
+ok   pill-inset/量不到胶囊左内缩 判红且其它 5 项不受影响
+SELFTEST PASS cases=40 cli=20 muts=18 failures=0
+EXITCODE=0
+RC1=1

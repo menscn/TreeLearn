@@ -1,0 +1,713 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.5 [39m[90mD:/Project/Android/Treelearn/frontend[39m
+
+ [32m✓[39m test/styles/glass.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [31m❯[39m test/styles/glass-depth.test.ts [2m([22m[2m6 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[32m 14[2mms[22m[39m
+   [31m❯[39m Web 玻璃纵深消费 [2m(6)[22m
+[31m     [31m×[31m 被取代的 --glass-shadow 在链上与消费面都已清空[39m[32m 8[2mms[22m[39m
+[31m     [31m×[31m 投影两档各引用一枚 token，几何照抄方案 A 的 .glass[39m[32m 2[2mms[22m[39m
+[31m     [31m×[31m 四面 tint 的暗端由 falloff 推导，不各写一份字面量[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m 顶栏是覆盖层，滚动容器自己付顶部留白，让内容从玻璃下方经过[39m[32m 1[2mms[22m[39m
+     [32m✓[39m 两条既有降级与窄窗侧栏都还在[32m 0[2mms[22m[39m
+     [32m✓[39m 材质层不写裸色值[32m 1[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 4 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m test/styles/glass-depth.test.ts[2m > [22mWeb 玻璃纵深消费[2m > [22m被取代的 --glass-shadow 在链上与消费面都已清空
+[31m[1mAssertionError[22m: expected '/* 晨雾玻璃材质层（T-2026-10-21-050）。\n   加载顺…' not to contain 'var(--glass-shadow)'[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- var(--glass-shadow)[39m
+[31m+ /* 晨雾玻璃材质层（T-2026-10-21-050）。[39m
+[31m+    加载顺序固定在 pages.css 之后：本文件只覆盖颜色、背景、阴影与圆角，[39m
+[31m+    不改布局尺寸、断点、z-index、滚动容器或命中区域。[39m
+[31m+    所有数值来自 tokens.css；不透明白色会让正文失去对比，阅读面固定 86%。[39m
+[31m+    T-2026-10-22-058 追加 053 的两处莫兰迪柔光与一枚标签 tint，仍只覆盖材质。 */[39m
+[31m+[39m
+[31m+ html {[39m
+[31m+   background: var(--mist-base);[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ body {[39m
+[31m+   background-color: var(--mist-base);[39m
+[31m+   background-image:[39m
+[31m+     repeating-linear-gradient([39m
+[31m+       to bottom,[39m
+[31m+       transparent 0,[39m
+[31m+       transparent 27px,[39m
+[31m+       var(--paper-rule) 27px,[39m
+[31m+       var(--paper-rule) 28px[39m
+[31m+     ),[39m
+[31m+     radial-gradient(820px 700px at 92% 52%, var(--glow-rose), transparent 60%),[39m
+[31m+     radial-gradient(760px 660px at 6% 24%, var(--glow-lilac), transparent 58%),[39m
+[31m+     radial-gradient(1200px 900px at 82% 10%, var(--glow-white), transparent 62%),[39m
+[31m+     radial-gradient(900px 720px at 78% 18%, var(--glow-green), transparent 64%),[39m
+[31m+     radial-gradient(1000px 820px at 8% 78%, var(--glow-sand), transparent 66%),[39m
+[31m+     linear-gradient(135deg, var(--mist-warm), var(--mist-base) 38%, var(--mist-cool) 72%, var(--mist-deep));[39m
+[31m+   background-attachment: fixed;[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ .app-workspace {[39m
+[31m+   background: transparent;[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ /* 一层共享的 1px 高光边：方向 C 的边只写一次，避免每张卡片各写一份。 */[39m
+[31m+ .app-sidebar,[39m
+[31m+ .workspace-topbar,[39m
+[31m+ .chat-reading,[39m
+[31m+ .composer,[39m
+[31m+ .branch-panel,[39m
+[31m+ .tree-dialog,[39m
+[31m+ .suggestion,[39m
+[31m+ .search-field,[39m
+[31m+ .settings-page .field,[39m
+[31m+ .settings-action {[39m
+[31m+   box-shadow: inset 0 0 0 1px var(--glass-edge), var(--glass-shadow);[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ .app-sidebar {[39m
+[31m+   border-right: 0;[39m
+[31m+   background: var(--glass-chrome);[39m
+[31m+   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));[39m
+[31m+   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ /* 顶部高光：玻璃面从一条更亮的边开始，只覆盖上缘，不改变正文对比。 */[39m
+[31m+ .app-sidebar,[39m
+[31m+ .workspace-topbar,[39m
+[31m+ .chat-reading,[39m
+[31m+ .composer,[39m
+[31m+ .branch-panel,[39m
+[31m+ .tree-dialog {[39m
+[31m+   background-image: linear-gradient(180deg, var(--glass-sheen), transparent 22%);[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ .workspace-topbar {[39m
+[31m+   border-bottom: 0;[39m
+[31m+   background-color: var(--glass-chrome);[39m
+[31m+   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));[39m
+[31m+   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ .chat-reading {[39m
+[31m+   margin: var(--s6) auto;[39m
+[31m+   border-radius: var(--r-2xl);[39m
+[31m+   background-color: var(--glass-reader);[39m
+[31m+   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));[39m
+[31m+   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ .chat-baseline {[39m
+[31m+   border: 0;[39m
+[31m+   border-radius: var(--r-xl);[39m
+[31m+   background: var(--glass-card);[39m
+[31m+   box-shadow: inset 0 0 0 1px var(--glass-edge);[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ .chat-dock {[39m
+[31m+   border-top: 0;[39m
+[31m+   background: transparent;[39m
+[31m+   box-shadow: 0 -1px 0 var(--glass-line);[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ .composer {[39m
+[31m+   border: 0;[39m
+[31m+   border-radius: var(--r-2xl);[39m
+[31m+   background-color: var(--glass-card);[39m
+[31m+   box-shadow: inset 0 0 0 1px var(--glass-edge), var(--glass-shadow);[39m
+[31m+   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));[39m
+[31m+   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ .composer:focus-within {[39m
+[31m+   box-shadow:[39m
+[31m+     inset 0 0 0 1px var(--glass-edge),[39m
+[31m+     0 0 0 2px color-mix(in srgb, var(--green) 26%, transparent),[39m
+[31m+     var(--glass-shadow);[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ .branch-panel {[39m
+[31m+   border-left: 0;[39m
+[31m+   background-color: var(--glass-chrome);[39m
+[31m+   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));[39m
+[31m+   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ .tree-dialog {[39m
+[31m+   border: 0;[39m
+[31m+   border-radius: var(--r-2xl);[39m
+[31m+   background-color: var(--glass-reader);[39m
+[31m+   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));[39m
+[31m+   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ .suggestion {[39m
+[31m+   border: 0;[39m
+[31m+   border-radius: var(--r-xl);[39m
+[31m+   background: var(--glass-card);[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ .suggestion:hover {[39m
+[31m+   background: var(--glass-chrome);[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ /* 推荐标签用 tint 作非文字表面：文字仍由 app.css 的 green-deep 表达语义。 */[39m
+[31m+ .rec-tag {[39m
+[31m+   background: var(--tint-sage);[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ .search-field {[39m
+[31m+   border: 0;[39m
+[31m+   border-radius: var(--r-xl);[39m
+[31m+   background: var(--glass-field);[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ .search-field:focus-within {[39m
+[31m+   box-shadow:[39m
+[31m+     inset 0 0 0 1px var(--glass-edge),[39m
+[31m+     0 0 0 2px color-mix(in srgb, var(--green) 26%, transparent);[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ .settings-page .field {[39m
+[31m+   border: 0;[39m
+[31m+   border-radius: var(--r-xl);[39m
+[31m+   background: var(--glass-field);[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ .settings-page .field:disabled {[39m
+[31m+   background: color-mix(in srgb, var(--glass-field) 70%, var(--surface));[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ .settings-action {[39m
+[31m+   border: 0;[39m
+[31m+   border-radius: var(--r-xl);[39m
+[31m+   background: var(--glass-card);[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ /* 窄窗侧栏是覆盖层：玻璃底与遮罩的 z-index、定位保持不变。 */[39m
+[31m+ @media (max-width: 760px) {[39m
+[31m+   .app-sidebar {[39m
+[31m+     background-color: var(--glass-chrome);[39m
+[31m+     -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));[39m
+[31m+     backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));[39m
+[31m+   }[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ /* 降级不做假模糊：不支持背景模糊时提高不透明度，阅读面回到实色。 */[39m
+[31m+ @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {[39m
+[31m+   .app-sidebar,[39m
+[31m+   .workspace-topbar,[39m
+[31m+   .composer,[39m
+[31m+   .branch-panel,[39m
+[31m+   .tree-dialog {[39m
+[31m+     background: color-mix(in srgb, var(--surface) 92%, transparent);[39m
+[31m+   }[39m
+[31m+[39m
+[31m+   .chat-reading {[39m
+[31m+     background: var(--surface);[39m
+[31m+   }[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ @media (prefers-reduced-transparency: reduce) {[39m
+[31m+   .app-sidebar,[39m
+[31m+   .workspace-topbar,[39m
+[31m+   .composer,[39m
+[31m+   .branch-panel,[39m
+[31m+   .tree-dialog,[39m
+[31m+   .chat-reading {[39m
+[31m+     -webkit-backdrop-filter: none;[39m
+[31m+     backdrop-filter: none;[39m
+[31m+     background: var(--surface);[39m
+[31m+   }[39m
+[31m+ }[39m
+[31m+[39m
+
+[36m [2m❯[22m test/styles/glass-depth.test.ts:[2m35:33[22m[39m
+    [90m 33|[39m describe("Web 玻璃纵深消费", () => {
+    [90m 34|[39m   it("被取代的 --glass-shadow 在链上与消费面都已清空", () => {
+    [90m 35|[39m     expect(read(glassPath)).not.toContain("var(--glass-shadow)");
+    [90m   |[39m                                 [31m^[39m
+    [90m 36|[39m     expect(read(tokensPath)).not.toMatch(/--glass-shadow\s*:/);
+    [90m 37|[39m   });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/styles/glass-depth.test.ts[2m > [22mWeb 玻璃纵深消费[2m > [22m投影两档各引用一枚 token，几何照抄方案 A 的 .glass
+[31m[1mAssertionError[22m: expected '/* 晨雾玻璃材质层（T-2026-10-21-050）。\n   加载顺…' to match /box-shadow:[^;]*0 20px 40px -28px va…/s[39m
+
+[32m- Expected:[39m
+/box-shadow:[^;]*0 20px 40px -28px var\(--glass-shadow-key\)/s
+
+[31m+ Received:[39m
+"/* 晨雾玻璃材质层（T-2026-10-21-050）。
+   加载顺序固定在 pages.css 之后：本文件只覆盖颜色、背景、阴影与圆角，
+   不改布局尺寸、断点、z-index、滚动容器或命中区域。
+   所有数值来自 tokens.css；不透明白色会让正文失去对比，阅读面固定 86%。
+   T-2026-10-22-058 追加 053 的两处莫兰迪柔光与一枚标签 tint，仍只覆盖材质。 */
+
+html {
+  background: var(--mist-base);
+}
+
+body {
+  background-color: var(--mist-base);
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 27px,
+      var(--paper-rule) 27px,
+      var(--paper-rule) 28px
+    ),
+    radial-gradient(820px 700px at 92% 52%, var(--glow-rose), transparent 60%),
+    radial-gradient(760px 660px at 6% 24%, var(--glow-lilac), transparent 58%),
+    radial-gradient(1200px 900px at 82% 10%, var(--glow-white), transparent 62%),
+    radial-gradient(900px 720px at 78% 18%, var(--glow-green), transparent 64%),
+    radial-gradient(1000px 820px at 8% 78%, var(--glow-sand), transparent 66%),
+    linear-gradient(135deg, var(--mist-warm), var(--mist-base) 38%, var(--mist-cool) 72%, var(--mist-deep));
+  background-attachment: fixed;
+}
+
+.app-workspace {
+  background: transparent;
+}
+
+/* 一层共享的 1px 高光边：方向 C 的边只写一次，避免每张卡片各写一份。 */
+.app-sidebar,
+.workspace-topbar,
+.chat-reading,
+.composer,
+.branch-panel,
+.tree-dialog,
+.suggestion,
+.search-field,
+.settings-page .field,
+.settings-action {
+  box-shadow: inset 0 0 0 1px var(--glass-edge), var(--glass-shadow);
+}
+
+.app-sidebar {
+  border-right: 0;
+  background: var(--glass-chrome);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}
+
+/* 顶部高光：玻璃面从一条更亮的边开始，只覆盖上缘，不改变正文对比。 */
+.app-sidebar,
+.workspace-topbar,
+.chat-reading,
+.composer,
+.branch-panel,
+.tree-dialog {
+  background-image: linear-gradient(180deg, var(--glass-sheen), transparent 22%);
+}
+
+.workspace-topbar {
+  border-bottom: 0;
+  background-color: var(--glass-chrome);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}
+
+.chat-reading {
+  margin: var(--s6) auto;
+  border-radius: var(--r-2xl);
+  background-color: var(--glass-reader);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}
+
+.chat-baseline {
+  border: 0;
+  border-radius: var(--r-xl);
+  background: var(--glass-card);
+  box-shadow: inset 0 0 0 1px var(--glass-edge);
+}
+
+.chat-dock {
+  border-top: 0;
+  background: transparent;
+  box-shadow: 0 -1px 0 var(--glass-line);
+}
+
+.composer {
+  border: 0;
+  border-radius: var(--r-2xl);
+  background-color: var(--glass-card);
+  box-shadow: inset 0 0 0 1px var(--glass-edge), var(--glass-shadow);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}
+
+.composer:focus-within {
+  box-shadow:
+    inset 0 0 0 1px var(--glass-edge),
+    0 0 0 2px color-mix(in srgb, var(--green) 26%, transparent),
+    var(--glass-shadow);
+}
+
+.branch-panel {
+  border-left: 0;
+  background-color: var(--glass-chrome);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}
+
+.tree-dialog {
+  border: 0;
+  border-radius: var(--r-2xl);
+  background-color: var(--glass-reader);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}
+
+.suggestion {
+  border: 0;
+  border-radius: var(--r-xl);
+  background: var(--glass-card);
+}
+
+.suggestion:hover {
+  background: var(--glass-chrome);
+}
+
+/* 推荐标签用 tint 作非文字表面：文字仍由 app.css 的 green-deep 表达语义。 */
+.rec-tag {
+  background: var(--tint-sage);
+}
+
+.search-field {
+  border: 0;
+  border-radius: var(--r-xl);
+  background: var(--glass-field);
+}
+
+.search-field:focus-within {
+  box-shadow:
+    inset 0 0 0 1px var(--glass-edge),
+    0 0 0 2px color-mix(in srgb, var(--green) 26%, transparent);
+}
+
+.settings-page .field {
+  border: 0;
+  border-radius: var(--r-xl);
+  background: var(--glass-field);
+}
+
+.settings-page .field:disabled {
+  background: color-mix(in srgb, var(--glass-field) 70%, var(--surface));
+}
+
+.settings-action {
+  border: 0;
+  border-radius: var(--r-xl);
+  background: var(--glass-card);
+}
+
+/* 窄窗侧栏是覆盖层：玻璃底与遮罩的 z-index、定位保持不变。 */
+@media (max-width: 760px) {
+  .app-sidebar {
+    background-color: var(--glass-chrome);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  }
+}
+
+/* 降级不做假模糊：不支持背景模糊时提高不透明度，阅读面回到实色。 */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .app-sidebar,
+  .workspace-topbar,
+  .composer,
+  .branch-panel,
+  .tree-dialog {
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+  }
+
+  .chat-reading {
+    background: var(--surface);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .app-sidebar,
+  .workspace-topbar,
+  .composer,
+  .branch-panel,
+  .tree-dialog,
+  .chat-reading {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--surface);
+  }
+}
+"
+
+[36m [2m❯[22m test/styles/glass-depth.test.ts:[2m41:17[22m[39m
+    [90m 39|[39m   it("投影两档各引用一枚 token，几何照抄方案 A 的 .glass", () => {
+    [90m 40|[39m     const css = read(glassPath);
+    [90m 41|[39m     expect(css).toMatch(/box-shadow:[^;]*0 20px 40px -28px var\(--glas…
+    [90m   |[39m                 [31m^[39m
+    [90m 42|[39m     expect(css).toMatch(/box-shadow:[^;]*0 2px 6px var\(--glass-shadow…
+    [90m 43|[39m   });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/styles/glass-depth.test.ts[2m > [22mWeb 玻璃纵深消费[2m > [22m四面 tint 的暗端由 falloff 推导，不各写一份字面量
+[31m[1mAssertionError[22m: --glass-chrome: expected '/* 晨雾玻璃材质层（T-2026-10-21-050）。\n   加载顺…' to match /linear-gradient\(145deg,[^;]*var\(--…/s[39m
+
+[32m- Expected:[39m
+/linear-gradient\(145deg,[^;]*var\(--glass-chrome\)[^;]*color-mix\(in srgb,\s*var\(--glass-chrome\)\s+calc\(var\(--glass-tint-falloff\) \* 100%\),\s*transparent\)/s
+
+[31m+ Received:[39m
+"/* 晨雾玻璃材质层（T-2026-10-21-050）。
+   加载顺序固定在 pages.css 之后：本文件只覆盖颜色、背景、阴影与圆角，
+   不改布局尺寸、断点、z-index、滚动容器或命中区域。
+   所有数值来自 tokens.css；不透明白色会让正文失去对比，阅读面固定 86%。
+   T-2026-10-22-058 追加 053 的两处莫兰迪柔光与一枚标签 tint，仍只覆盖材质。 */
+
+html {
+  background: var(--mist-base);
+}
+
+body {
+  background-color: var(--mist-base);
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 27px,
+      var(--paper-rule) 27px,
+      var(--paper-rule) 28px
+    ),
+    radial-gradient(820px 700px at 92% 52%, var(--glow-rose), transparent 60%),
+    radial-gradient(760px 660px at 6% 24%, var(--glow-lilac), transparent 58%),
+    radial-gradient(1200px 900px at 82% 10%, var(--glow-white), transparent 62%),
+    radial-gradient(900px 720px at 78% 18%, var(--glow-green), transparent 64%),
+    radial-gradient(1000px 820px at 8% 78%, var(--glow-sand), transparent 66%),
+    linear-gradient(135deg, var(--mist-warm), var(--mist-base) 38%, var(--mist-cool) 72%, var(--mist-deep));
+  background-attachment: fixed;
+}
+
+.app-workspace {
+  background: transparent;
+}
+
+/* 一层共享的 1px 高光边：方向 C 的边只写一次，避免每张卡片各写一份。 */
+.app-sidebar,
+.workspace-topbar,
+.chat-reading,
+.composer,
+.branch-panel,
+.tree-dialog,
+.suggestion,
+.search-field,
+.settings-page .field,
+.settings-action {
+  box-shadow: inset 0 0 0 1px var(--glass-edge), var(--glass-shadow);
+}
+
+.app-sidebar {
+  border-right: 0;
+  background: var(--glass-chrome);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}
+
+/* 顶部高光：玻璃面从一条更亮的边开始，只覆盖上缘，不改变正文对比。 */
+.app-sidebar,
+.workspace-topbar,
+.chat-reading,
+.composer,
+.branch-panel,
+.tree-dialog {
+  background-image: linear-gradient(180deg, var(--glass-sheen), transparent 22%);
+}
+
+.workspace-topbar {
+  border-bottom: 0;
+  background-color: var(--glass-chrome);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}
+
+.chat-reading {
+  margin: var(--s6) auto;
+  border-radius: var(--r-2xl);
+  background-color: var(--glass-reader);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}
+
+.chat-baseline {
+  border: 0;
+  border-radius: var(--r-xl);
+  background: var(--glass-card);
+  box-shadow: inset 0 0 0 1px var(--glass-edge);
+}
+
+.chat-dock {
+  border-top: 0;
+  background: transparent;
+  box-shadow: 0 -1px 0 var(--glass-line);
+}
+
+.composer {
+  border: 0;
+  border-radius: var(--r-2xl);
+  background-color: var(--glass-card);
+  box-shadow: inset 0 0 0 1px var(--glass-edge), var(--glass-shadow);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}
+
+.composer:focus-within {
+  box-shadow:
+    inset 0 0 0 1px var(--glass-edge),
+    0 0 0 2px color-mix(in srgb, var(--green) 26%, transparent),
+    var(--glass-shadow);
+}
+
+.branch-panel {
+  border-left: 0;
+  background-color: var(--glass-chrome);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}
+
+.tree-dialog {
+  border: 0;
+  border-radius: var(--r-2xl);
+  background-color: var(--glass-reader);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}
+
+.suggestion {
+  border: 0;
+  border-radius: var(--r-xl);
+  background: var(--glass-card);
+}
+
+.suggestion:hover {
+  background: var(--glass-chrome);
+}
+
+/* 推荐标签用 tint 作非文字表面：文字仍由 app.css 的 green-deep 表达语义。 */
+.rec-tag {
+  background: var(--tint-sage);
+}
+
+.search-field {
+  border: 0;
+  border-radius: var(--r-xl);
+  background: var(--glass-field);
+}
+
+.search-field:focus-within {
+  box-shadow:
+    inset 0 0 0 1px var(--glass-edge),
+    0 0 0 2px color-mix(in srgb, var(--green) 26%, transparent);
+}
+
+.settings-page .field {
+  border: 0;
+  border-radius: var(--r-xl);
+  background: var(--glass-field);
+}
+
+.settings-page .field:disabled {
+  background: color-mix(in srgb, var(--glass-field) 70%, var(--surface));
+}
+
+.settings-action {
+  border: 0;
+  border-radius: var(--r-xl);
+  background: var(--glass-card);
+}
+
+/* 窄窗侧栏是覆盖层：玻璃底与遮罩的 z-index、定位保持不变。 */
+@media (max-width: 760px) {
+  .app-sidebar {
+    background-color: var(--glass-chrome);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  }
+}
+
+/* 降级不做假模糊：不支持背景模糊时提高不透明度，阅读面回到实色。 */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .app-sidebar,
+  .workspace-topbar,
+  .composer,
+  .branch-panel,
+  .tree-dialog {
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+  }
+
+  .chat-reading {
+    background: var(--surface);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .app-sidebar,
+  .workspace-topbar,
+  .composer,
+  .branch-panel,
+  .tree-dialog,
+  .chat-reading {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--surface);
+  }
+}
+"
+
+[36m [2m❯[22m test/styles/glass-depth.test.ts:[2m53:25[22m[39m
+    [90m 51|[39m         "s",
+    [90m 52|[39m       );
+    [90m 53|[39m       expect(css, face).toMatch(derived);
+    [90m   |[39m                         [31m^[39m
+    [90m 54|[39m     }
+    [90m 55|[39m   });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/styles/glass-depth.test.ts[2m > [22mWeb 玻璃纵深消费[2m > [22m顶栏是覆盖层，滚动容器自己付顶部留白，让内容从玻璃下方经过
+[31m[1mAssertionError[22m: expected '\n  height: 76px;\n  flex: none;\n  d…' to match /position:\s*absolute/[39m
+
+[32m- Expected:[39m
+/position:\s*absolute/
+
+[31m+ Received:[39m
+"
+  height: 76px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: 0 var(--s6);
+  border-bottom: 1px solid var(--hairline);
+  background: var(--bg);
+"
+
+[36m [2m❯[22m test/styles/glass-depth.test.ts:[2m60:17[22m[39m
+    [90m 58|[39m     const ws = read(workspacePath);
+    [90m 59|[39m     const bar = rule(ws, ".workspace-topbar");
+    [90m 60|[39m     expect(bar).toMatch(/position:\s*absolute/);
+    [90m   |[39m                 [31m^[39m
+    [90m 61|[39m     expect(bar).toMatch(/z-index:/);
+    [90m 62|[39m     expect(rule(ws, ".workspace-column")).toMatch(/position:\s*relativ…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m6 passed[39m[22m[90m (10)[39m
+[2m   Start at [22m 22:37:06
+[2m   Duration [22m 170ms[2m (import 35%, tests 35%, transform 16%, worker 14%, environment 1%)[22m
+
+EXIT=1

@@ -1,0 +1,36 @@
+SCREEN ChatScreen               root=screen_chat            self_drawn=False sw600dp=True  channels=constructed,swap       entries=showChat@1076,showChat@1102
+SCREEN FileManagerScreen        root=-                      self_drawn=True  sw600dp=False channels=constructed,swap       entries=showFileManager@776,showFileManager@781
+SCREEN HomeDrawerScreen         root=-                      self_drawn=True  sw600dp=False channels=addView,constructed    entries=onCreate@203,onCreate@222
+SCREEN HomeScreen               root=screen_home            self_drawn=False sw600dp=True  channels=constructed,swap       entries=onCreate@186,showHome@672
+SCREEN LibraryScreen            root=screen_library         self_drawn=False sw600dp=True  channels=constructed,swap       entries=showLibrary@1023,showLibrary@1029
+SCREEN ModelSettingsScreen      root=-                      self_drawn=True  sw600dp=False channels=constructed,swap       entries=showModels@744,showModels@749
+SCREEN NavigationScreen         root=screen_navigation      self_drawn=False sw600dp=True  channels=constructed,swap       entries=enterNavigation@1199,enterNavigation@1219
+SCREEN ProviderAdminScreen      root=screen_provider_admin  self_drawn=False sw600dp=False channels=constructed,swap       entries=showProviders@715,showProviders@720
+SCREEN SearchServiceSettingsScreen root=-                      self_drawn=True  sw600dp=False channels=constructed,swap       entries=showSearchSettings@754,showSearchSettings@759
+SCREEN SettingsKeyScreen        root=screen_settings_key    self_drawn=False sw600dp=False channels=constructed,swap       entries=showKeyAdmin@707,showKeyAdmin@710
+SCREEN SettingsScreen           root=screen_settings        self_drawn=False sw600dp=True  channels=constructed,swap       entries=onCreate@187,showSettings@697
+SCREEN StatsDetailScreen        root=screen_stats_detail    self_drawn=False sw600dp=False channels=constructed,swap       entries=showStatsDetail@790,showStatsDetail@795
+SCREEN TreeCanvasScreen         root=screen_tree            self_drawn=False sw600dp=True  channels=constructed,swap       entries=showTree@1147,showTree@1153
+SCREEN VoiceSettingsScreen      root=-                      self_drawn=True  sw600dp=False channels=constructed,swap       entries=showVoiceSettings@764,showVoiceSettings@770
+SURFACE dialog            layout=panel_search_picker      producer=ChatScreen               line=633   sw600dp=False
+SURFACE popup_menu        layout=-                        producer=ChatScreen               line=424   sw600dp=False
+SURFACE code_drawn_host   layout=-                        producer=HomeDrawerScreen         line=222   sw600dp=False host_id=main_drawer_root
+SURFACE popup_window      layout=-                        producer=ModelSettingsScreen      line=248   sw600dp=False
+SURFACE popup_window      layout=popup_model_picker       producer=ModelThinkingPicker      line=127   sw600dp=False
+SURFACE popup_menu        layout=-                        producer=NavigationScreen         line=232   sw600dp=False
+SURFACE alert_dialog      layout=-                        producer=NavigationScreen         line=275   sw600dp=False
+SURFACE alert_dialog      layout=-                        producer=ProviderAdminScreen      line=214   sw600dp=False
+SURFACE alert_dialog      layout=-                        producer=ProviderAdminScreen      line=219   sw600dp=False
+SURFACE popup_window      layout=-                        producer=SearchServiceSettingsScreen line=301   sw600dp=False
+SURFACE alert_dialog      layout=-                        producer=SettingsKeyScreen        line=113   sw600dp=False
+SURFACE popup_window      layout=view_node_popup          producer=TreeCanvasScreen         line=213   sw600dp=False
+SURFACE popup_window      layout=popup_word_action        producer=WordMenuPopup            line=149   sw600dp=False
+SURFACE popup_window      layout=popup_word_more          producer=WordMenuPopup            line=177   sw600dp=False
+SURFACE included_hidden   layout=overlay_fullscreen_editor producer=ChatScreen               line=None  sw600dp=False host=screen_chat consumer_proven=True
+MEASURED screens=14 self_drawn=5 sw600dp=6 surfaces=15 visible_includes=8 component_classes=17 layout_files=44 screen_package_files=31
+SURFACES_BY_KIND {"alert_dialog": 4, "code_drawn_host": 1, "dialog": 1, "included_hidden": 1, "popup_menu": 2, "popup_window": 6}
+FLOOR screens>=8 got=14 surfaces>=3 got=15 ok=True
+SPEC_POINTER cites=True file=screen-inventory.json judged-into-exit=True
+SPEC_RESTATED count-shaped=4 lines=12,149,155,158 (printed for a human to label as historical - not judged: the numbers belong to this file's counts)
+JSON written path=D:/Project/Android/Treelearn/Docs/04-ux-design/parity/screen-inventory.json bytes=21754 sha256=1eab69eec9b468cc039ba70fc0b3a8797e6d1102054e29179418a3cd666ba17e
+EXITCODE=0

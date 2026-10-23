@@ -29,6 +29,12 @@ public final class GenerationCommand {
     public final String promptPolicyVersion;
     public final GenerationModel model;
     public final boolean thinkingEnabled;
+    /**
+     * The answer style this attempt was admitted with, copied from the topic row at admission.
+     * Final for the same reason the policy version is: a switch affects future answers only, so an
+     * attempt already in flight keeps the style it was sent with.
+     */
+    public final Persona persona;
     public final long createdAt;
 
     private GenerationCommand(
@@ -39,6 +45,7 @@ public final class GenerationCommand {
             String promptPolicyVersion,
             GenerationModel model,
             boolean thinkingEnabled,
+            Persona persona,
             long createdAt) {
         this.id = Guard.id(id, "id");
         requireArgumentShape(branchId, messageId, purpose, model, createdAt);
@@ -47,6 +54,7 @@ public final class GenerationCommand {
         this.purpose = purpose;
         this.model = model;
         this.thinkingEnabled = thinkingEnabled;
+        this.persona = Guard.object(persona, "persona");
         this.createdAt = createdAt;
         this.promptPolicyVersion = Guard.nonBlank(promptPolicyVersion, "promptPolicyVersion");
     }
@@ -111,7 +119,26 @@ public final class GenerationCommand {
             GenerationModel model,
             boolean thinkingEnabled,
             long now) {
+        return create(branchId, messageId, purpose, promptPolicyVersion, model, thinkingEnabled,
+                Persona.DEFAULT, now);
+    }
+
+    /**
+     * The persona-carrying factory. A null persona is a caller bug, not "the default", for the same
+     * reason a null purpose is: the caller has to say which style it means, and the fallback for an
+     * unknown <em>stored</em> value belongs at the read boundary, not here.
+     */
+    public static DomainResult<GenerationCommand> create(
+            String branchId,
+            String messageId,
+            PromptPurpose purpose,
+            String promptPolicyVersion,
+            GenerationModel model,
+            boolean thinkingEnabled,
+            Persona persona,
+            long now) {
         requireArgumentShape(branchId, messageId, purpose, model, now);
+        Guard.object(persona, "persona");
         DomainError versionFailure =
                 PromptPurpose.versionFailureFor(purpose, promptPolicyVersion);
         if (versionFailure != null) {
@@ -119,13 +146,14 @@ public final class GenerationCommand {
         }
         return DomainResult.ok(new GenerationCommand(
                 Guard.newId(), branchId, messageId, purpose, promptPolicyVersion, model,
-                thinkingEnabled, now));
+                thinkingEnabled, persona, now));
     }
 
     @Override
     public String toString() {
         return "GenerationCommand[message=" + messageId + ", " + purpose + " "
                 + promptPolicyVersion + ", " + model.wireId
-                + (thinkingEnabled ? ", thinking" : ", no thinking") + "]";
+                + (thinkingEnabled ? ", thinking" : ", no thinking")
+                + ", persona=" + persona.wireId + "]";
     }
 }

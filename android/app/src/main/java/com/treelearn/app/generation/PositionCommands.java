@@ -6,6 +6,7 @@ import com.treelearn.core.domain.GenerationCommand;
 import com.treelearn.core.domain.GenerationModel;
 import com.treelearn.core.domain.Guard;
 import com.treelearn.core.domain.Message;
+import com.treelearn.core.domain.Persona;
 import com.treelearn.core.domain.PromptPurpose;
 
 /**
@@ -141,18 +142,32 @@ public final class PositionCommands {
         public final PromptPurpose purpose;
         public final GenerationModel model;
         public final boolean thinkingEnabled;
-
         /**
-         * @throws IllegalArgumentException if an id is not a canonical UUID or the purpose or model
-         *                                  is missing, per the error-channel rule in {@link Guard}
+         * The style the replacement runs with. Read from the topic row inside the retry/reset
+         * transaction, so a switch made after the original answer still applies to the next
+         * attempt — which is exactly the confirmed rule "a switch affects future answers".
          */
+        public final Persona persona;
+
+        /** The pre-persona shape; kept so existing callers keep meaning the default style. */
         public Baseline(String branchId, String messageId, PromptPurpose purpose,
                 GenerationModel model, boolean thinkingEnabled) {
+            this(branchId, messageId, purpose, model, thinkingEnabled, Persona.DEFAULT);
+        }
+
+        /**
+         * @throws IllegalArgumentException if an id is not a canonical UUID or the purpose, model or
+         *                                  persona is missing, per the error-channel rule in
+         *                                  {@link Guard}
+         */
+        public Baseline(String branchId, String messageId, PromptPurpose purpose,
+                GenerationModel model, boolean thinkingEnabled, Persona persona) {
             this.branchId = Guard.id(branchId, "branchId");
             this.messageId = Guard.id(messageId, "messageId");
             this.purpose = Guard.object(purpose, "purpose");
             this.model = Guard.object(model, "model");
             this.thinkingEnabled = thinkingEnabled;
+            this.persona = Guard.object(persona, "persona");
         }
 
         /**
@@ -165,7 +180,7 @@ public final class PositionCommands {
          */
         public DomainResult<GenerationCommand> commandFor(String policyVersion, long now) {
             return GenerationCommand.create(branchId, messageId, purpose, policyVersion, model,
-                    thinkingEnabled, now);
+                    thinkingEnabled, persona, now);
         }
     }
 }

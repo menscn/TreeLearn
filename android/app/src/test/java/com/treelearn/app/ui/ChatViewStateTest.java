@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.treelearn.core.domain.GenerationModel;
+import com.treelearn.core.domain.Persona;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,6 +51,18 @@ public final class ChatViewStateTest {
         assertTrue(initial().withDraft("why").canSubmit());
         assertFalse(initial().withDraft("   ").canSubmit());
         assertFalse(initial().withDraft("why").withSending(true).canSubmit());
+    }
+
+    @Test
+    public void theStyleStartsAtDefaultAndTravelsThroughEveryBuilder() {
+        assertEquals(Persona.DEFAULT, initial().persona);
+
+        ChatViewState styled = initial().withPersona(Persona.STUDY_BUDDY).withDraft("why");
+
+        assertEquals(Persona.STUDY_BUDDY, styled.persona);
+        assertEquals("a read must not reset the style",
+                Persona.STUDY_BUDDY, styled.withMessages(Collections.<ChatMessage>emptyList()).persona);
+        assertEquals("why", styled.withMessages(Collections.<ChatMessage>emptyList()).draft);
     }
 
     @Test

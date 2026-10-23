@@ -1,0 +1,32 @@
+captured_at=2026-10-22T07:51:00Z
+package=com.treelearn
+version=    versionName=1.0
+install_mode=adb install -r (no uninstall, no clear)
+
+--- restore procedure ---
+1. adb shell am force-stop com.treelearn
+2. adb push artifacts/tmp/treelearn-after-install.db /data/local/tmp/treelearn-original.db
+3. adb shell run-as com.treelearn cp /data/local/tmp/treelearn-original.db databases/treelearn.db
+4. adb shell run-as com.treelearn rm -f databases/treelearn.db-journal databases/treelearn.db-wal databases/treelearn.db-shm
+5. adb shell monkey -p com.treelearn -c android.intent.category.LAUNCHER 1
+
+--- databases (on device after restore) ---
+total 192
+-rw-rw---- 1 u0_a358 u0_a358 196608 2026-10-22 07:50 treelearn.db
+
+--- row counts (pulled copy, sqlite3) ---
+topics|0
+branches|0
+messages|0
+providers|1
+models|1
+
+--- ui state after restore ---
+home_topics_empty="还没有主题" visible
+library_empty="还没有学习记录 / 去主页写下第一个问题" visible
+screenshots: home-android-restored.png, library-android-restored.png
+
+note=chat-android.png / library-android.png were captured against a temporary seeded DB
+     (topic 晨雾玻璃材质验收) solely to exercise the chat reader + composer glass surfaces.
+     That fixture was removed by restoring the original DB; the current device state is the
+     original empty library with provider/model configuration intact.

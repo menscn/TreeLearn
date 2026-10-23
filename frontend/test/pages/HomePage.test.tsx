@@ -2,21 +2,29 @@
 import { act, createElement, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { WorkspaceDataProvider } from "../../src/components/WorkspaceDataProvider";
+import { copyText } from "../../src/copy";
+import { AppShell } from "../../src/layouts/AppShell";
+import { WorkspaceRouter } from "../../src/pages/WorkspaceRouter";
 import { FixtureRuntimeAdapter, memoryFixtureSource } from "../../src/platform/FixtureRuntimeAdapter";
 import { bundledEntries } from "../../src/platform/bundledFixtures";
 import { injectRuntime } from "../../src/platform/runtime";
-import { replaceStack } from "../../src/store/screenRoute";
-import { HomePage } from "../../src/pages/HomePage";
-import { ScreenRouter } from "../../src/pages/ScreenRouter";
+import {
+  draftFor,
+  resetWorkspace,
+  workspaceSnapshot
+} from "../../src/store/workspace";
 
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
-/** 夹具读取是异步的（端口返回 Promise），所以每次渲染都要跨一个宏任务把 then 链跑完。 */
+const FIRST_QUESTION = "注意力头消融实验中如何区分关键头与补偿性替代头";
+
 async function render(host: HTMLElement, node: ReactNode): Promise<Root> {
   let root!: Root;
   await act(async () => {
     root = createRoot(host);
     root.render(node);
+    await new Promise((resolve) => setTimeout(resolve, 0));
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
   return root;
@@ -31,17 +39,37 @@ async function press(host: HTMLElement, selector: string): Promise<void> {
   });
 }
 
+async function typeInto(host: HTMLElement, selector: string, value: string): Promise<void> {
+  const el = host.querySelector(selector);
+  expect(el, selector).not.toBeNull();
+  const setter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")?.set;
+  await act(async () => {
+    setter?.call(el, value);
+    el!.dispatchEvent(new Event("input", { bubbles: true }));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+}
+
 function source(entries: Record<string, string> = bundledEntries()) {
   return new FixtureRuntimeAdapter(memoryFixtureSource(entries));
 }
 
-describe("主页把采集夹具读成可点的历史主题", () => {
+function workspaceShell(): ReactNode {
+  return createElement(
+    WorkspaceDataProvider,
+    null,
+    createElement(AppShell, null, createElement(WorkspaceRouter))
+  );
+}
+
+describe("工作区主页：真实推荐、主题与草稿", () => {
   let restore: (() => void) | undefined;
   let host: HTMLElement;
   let root: Root | undefined;
 
   beforeEach(() => {
-    replaceStack("home");
+    window.history.replaceState(null, "", "/");
+    resetWorkspace();
     restore = injectRuntime(source());
     host = document.createElement("div");
     document.body.append(host);
@@ -55,49 +83,94 @@ describe("主页把采集夹具读成可点的历史主题", () => {
     restore?.();
     restore = undefined;
     host.remove();
+    window.history.replaceState(null, "", "/");
   });
 
-  it("标题、推荐与历史主题按夹具正文出字，节点身份留在 data-node 上", async () => {
-    root = await render(host, createElement(HomePage));
-    const titles = Array.from(host.querySelectorAll(".topic-title")).map((el) => el.textContent);
-    expect(titles.length).toBeGreaterThanOrEqual(2);
-    expect(titles[0]).toContain("注意力");
+  it("推荐、历史主题、模型与草稿占位都来自 home 夹具，侧栏最近学习也是真主题", async () => {
+    root = await render(host, workspaceShell());
+    expect(host.querySelector('[data-screen="home"]')).not.toBeNull();
+
+    const input = host.querySelector("#home-composer-input") as HTMLTextAreaElement | null;
+    expect(input).not.toBeNull();
+    expect(input?.placeholder).toBe("输入你的根问题，例如：帮我系统理解 Transformer 的注意力机制");
+    expect(host.querySelector('[data-node="home_model_chip"]')?.textContent).toContain("V4.1 Flash");
+
+    expect(host.querySelector('[data-node="home_recommendations_title"]')?.textContent).toBe("猜你想学");
+    const suggestions = Array.from(host.querySelectorAll("[data-recommendation]"));
+    expect(suggestions).toHaveLength(2);
+    expect(suggestions[0]?.textContent).toContain(FIRST_QUESTION);
+    expect(suggestions[1]?.textContent).toContain("注意力权重与因果贡献不等同的实证检验方法");
+    expect(host.querySelector('[data-node="rec_tag"]')?.textContent).toBe("顺着你学的");
+
     expect(host.querySelector('[data-node="home_recent_title"]')?.textContent).toContain("历史主题");
-    expect(host.querySelectorAll('[data-node="home_topic_title"]').length).toBe(titles.length);
-    const chips = Array.from(host.querySelectorAll('.rec-list button[data-node="rec_chip"]'));
-    expect(chips.length).toBeGreaterThanOrEqual(1);
-    expect(host.querySelectorAll('[data-node="rec_tag"]').length).toBe(chips.length);
-    expect(host.querySelectorAll('[data-node="rec_text"]').length).toBe(chips.length);
-    expect(chips[0]?.textContent).toContain("顺着你学的");
+    expect(host.querySelector('[data-node="home_recent_count"]')?.textContent).toBe("2 个");
+    const titles = Array.from(host.querySelectorAll('[data-node="home_topic_title"]')).map((el) => el.textContent);
+    expect(titles).toEqual([
+      "注意力权重可视化与模型可解释性的关系",
+      "系统理解 Transformer 的注意力机制"
+    ]);
+    const metas = Array.from(host.querySelectorAll('[data-node="home_topic_meta"]')).map((el) => el.textContent);
+    expect(metas).toEqual(["1 个分支 · 3天前", "2 个分支 · 3天前"]);
+
+    const recent = Array.from(host.querySelectorAll("[data-recent-topic]"));
+    expect(recent).toHaveLength(2);
+    expect(recent[0]?.textContent).toContain("注意力权重可视化与模型可解释性的关系");
   });
 
-  it("点推荐芯片走到对话屏：整枚芯片都是可点面，不是只把问题当文字贴出来", async () => {
-    root = await render(host, createElement(ScreenRouter));
-    await press(host, '[data-node="rec_chip"]');
-    expect(host.querySelector('[data-screen="chat"]')).not.toBeNull();
+  it("点推荐进入主题 0，并把这条问题写进对话草稿", async () => {
+    root = await render(host, workspaceShell());
+    await press(host, '[data-recommendation="0"]');
+
+    expect(workspaceSnapshot().view).toBe("chat");
+    expect(workspaceSnapshot().topic).toBe(0);
+    expect(draftFor("chat:0")).toBe(FIRST_QUESTION);
+    const chatInput = host.querySelector("#chat-composer-input") as HTMLTextAreaElement | null;
+    expect(chatInput?.value).toBe(FIRST_QUESTION);
   });
 
-  it("点历史主题卡走到对话屏，而不是留在原地", async () => {
-    root = await render(host, createElement(ScreenRouter));
+  it("点历史主题进入对应主题；主页草稿在往返与窗口变化后都还在", async () => {
+    root = await render(host, workspaceShell());
+    await typeInto(host, "#home-composer-input", "根问题草稿：中文输入法");
+    expect(draftFor("home")).toBe("根问题草稿：中文输入法");
+
+    await act(async () => {
+      window.dispatchEvent(new Event("resize"));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    expect((host.querySelector("#home-composer-input") as HTMLTextAreaElement | null)?.value)
+      .toBe("根问题草稿：中文输入法");
+
+    await press(host, '[data-topic="1"]');
+    expect(workspaceSnapshot().view).toBe("chat");
+    expect(workspaceSnapshot().topic).toBe(1);
+
+    await press(host, '[data-nav-view="home"]');
+    expect((host.querySelector("#home-composer-input") as HTMLTextAreaElement | null)?.value)
+      .toBe("根问题草稿：中文输入法");
+    expect(draftFor("home")).toBe("根问题草稿：中文输入法");
+  });
+
+  it("home 夹具缺失时不编推荐，学习库里的真主题仍可进入", async () => {
+    const entries = { ...bundledEntries() };
+    delete entries.home;
+    restore?.();
+    restore = injectRuntime(source(entries));
+
+    root = await render(host, workspaceShell());
     expect(host.querySelector('[data-screen="home"]')).not.toBeNull();
-    await press(host, '[data-node="home_topic_card"]');
-    expect(host.querySelector('[data-screen="chat"]')).not.toBeNull();
-    expect(host.querySelector('[data-screen="home"]')).toBeNull();
+    expect(host.querySelectorAll("[data-recommendation]")).toHaveLength(0);
+    expect(host.querySelector('[data-node="home_recommendations_title"]')).toBeNull();
+    expect(host.querySelectorAll('[data-node="home_topic_card"]')).toHaveLength(2);
+
+    await press(host, '[data-topic="0"]');
+    expect(workspaceSnapshot().view).toBe("chat");
   });
 
-  it("点设置入口走到设置屏，返回键回到主页", async () => {
-    root = await render(host, createElement(ScreenRouter));
-    await press(host, '[data-node="home_settings_button"]');
-    expect(host.querySelector('[data-screen="settings"]')).not.toBeNull();
-    await press(host, '[data-node="settings_back"]');
-    expect(host.querySelector('[data-screen="home"]')).not.toBeNull();
-  });
-
-  it("读不到夹具时出的是那条文案，而不是空白屏", async () => {
+  it("所有夹具都读不到时出工作区错误文案，而不是一页空白", async () => {
     restore?.();
     restore = injectRuntime(source({}));
-    root = await render(host, createElement(HomePage));
-    expect(host.querySelector('[data-copy="state_fixture_unavailable"]')?.textContent)
-      .toContain("还没有采集到基线");
+    root = await render(host, workspaceShell());
+    expect(host.querySelector('[data-screen="home"]')).toBeNull();
+    expect(host.textContent).toContain(copyText("workspace_error"));
   });
 });

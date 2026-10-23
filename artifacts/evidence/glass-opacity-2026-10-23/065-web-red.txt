@@ -1,0 +1,32 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.5 [39m[90mD:/Project/Android/Treelearn/frontend[39m
+
+ [31m❯[39m test/styles/glass.test.ts [2m([22m[2m5 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 7[2mms[22m[39m
+   [31m❯[39m Web 晨雾玻璃材质层 [2m(5)[22m
+     [32m✓[39m 只消费设计 token，不写裸色值[32m 2[2mms[22m[39m
+     [32m✓[39m 场景覆盖 body，工作区与外壳改为玻璃[32m 1[2mms[22m[39m
+     [32m✓[39m 大面才启用真实模糊，并保留不支持时的回退[32m 0[2mms[22m[39m
+     [32m✓[39m 在 pages.css 之后加载，成为最后一层材质覆盖[32m 0[2mms[22m[39m
+[31m     [31m×[31m 五面 alpha 停在拍板下限之上[39m[32m 2[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m test/styles/glass.test.ts[2m > [22mWeb 晨雾玻璃材质层[2m > [22m五面 alpha 停在拍板下限之上
+[31m[1mAssertionError[22m: --glass-chrome 低于拍板下限: expected 0.54 to be greater than or equal to 0.7[39m
+[36m [2m❯[22m test/styles/glass.test.ts:[2m110:54[22m[39m
+    [90m108|[39m       const found = css.match(new RegExp(`--${name}:\\s*rgba\\([^)]*,\…
+    [90m109|[39m       expect(found, `tokens.css must carry --${name} as rgba`).not.toB…
+    [90m110|[39m       expect(Number(found?.[1]), `--${name} 低于拍板下限`).toBeGreaterThanOr…
+    [90m   |[39m                                                      [31m^[39m
+    [90m111|[39m     }
+    [90m112|[39m   });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (5)[39m
+[2m   Start at [22m 08:21:46
+[2m   Duration [22m 156ms[2m (import 39%, tests 27%, transform 20%, worker 13%, environment 1%)[22m
+
+WEB_EXIT=1

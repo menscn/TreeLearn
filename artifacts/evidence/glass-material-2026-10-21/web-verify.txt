@@ -1,0 +1,25 @@
+$ node scripts/verify.mjs
+
+| step | want | got | 判决行 | 命中 |
+|---|---|---|---|---|
+| lint（类型 + 三支静态守门） | rc=0 | rc=0 | "user copy ok" | yes |
+| test（vitest 全量） | rc=0 | rc=0 | "Tests " | yes |
+| build（产物 + 离线判定 + 单文件内联） | rc=0 | rc=0 | "offline ok" | yes |
+| check_dependency_direction 判决 | rc=0 | rc=0 | " ok" | yes |
+| check_dependency_direction --selftest | rc=0 | rc=0 | "SELFTEST cases=" | yes |
+| check_user_copy_i18n 判决 | rc=0 | rc=0 | " ok" | yes |
+| check_user_copy_i18n --selftest | rc=0 | rc=0 | "SELFTEST cases=" | yes |
+| check_device_time 判决 | rc=0 | rc=0 | " ok" | yes |
+| check_device_time --selftest | rc=0 | rc=0 | "SELFTEST cases=" | yes |
+| check_offline_bundle 判决 | rc=0 | rc=0 | " ok" | yes |
+| check_offline_bundle --selftest | rc=0 | rc=0 | "SELFTEST cases=" | yes |
+| inline_offline 判决 | rc=0 | rc=0 | " ok" | yes |
+| inline_offline --selftest | rc=0 | rc=0 | "SELFTEST cases=" | yes |
+| sync_fixtures --check（包内副本 = 权威夹具脱敏后字节） | rc=0 | rc=0 | "SYNC CHECK ok" | yes |
+| sync_fixtures --selftest | rc=0 | rc=0 | "SELFTEST cases=" | yes |
+| web_walk --selftest（走查表按夹具逐条核死链） | rc=0 | rc=0 | "SELFTEST cases=" | yes |
+
+verify steps=16 ok=16 bad=0 fault=0
+VERIFY PASS
+OVERALL_EXITCODE=0
+EXIT=0

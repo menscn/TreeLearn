@@ -4,6 +4,7 @@ import com.treelearn.core.domain.Annotation;
 import com.treelearn.core.domain.Branch;
 import com.treelearn.core.domain.Guard;
 import com.treelearn.core.domain.Message;
+import com.treelearn.core.domain.Persona;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -90,10 +91,20 @@ public interface ChatData {
          */
         public final Map<String, List<Annotation>> annotations;
 
+        /**
+         * 2026-10-23: the topic's answer style as the read found it. Only the chip displays it -
+         * every generation command re-reads the topic row, so this copy cannot become a second
+         * authority over what the next answer is generated as.
+         */
+        public final Persona persona;
+        /** True when the stored wire id was unknown and the default was adopted for display. */
+        public final boolean personaFellBack;
+
         private Snapshot(String branchTitle, List<ChatMessage> messages,
                 List<Recommendation> answerRecommendations, String recommendationsRevisionId,
                 Branch branch, List<Message> readingRows, SourceCard sourceCard,
-                Map<String, List<Annotation>> annotations) {
+                Map<String, List<Annotation>> annotations, Persona persona,
+                boolean personaFellBack) {
             this.branchTitle = branchTitle == null ? "" : branchTitle;
             this.messages = Collections.unmodifiableList(new ArrayList<ChatMessage>(messages));
             this.answerRecommendations = Collections.unmodifiableList(
@@ -105,6 +116,8 @@ public interface ChatData {
             this.sourceCard = sourceCard;
             this.annotations = annotations == null
                     ? Collections.<String, List<Annotation>>emptyMap() : annotations;
+            this.persona = persona == null ? Persona.DEFAULT : persona;
+            this.personaFellBack = personaFellBack;
         }
 
         public static Snapshot of(String branchTitle, List<ChatMessage> messages,
@@ -118,11 +131,21 @@ public interface ChatData {
                 List<Recommendation> answerRecommendations, String recommendationsRevisionId,
                 Branch branch, List<Message> readingRows, SourceCard sourceCard,
                 Map<String, List<Annotation>> annotations) {
+            return of(branchTitle, messages, answerRecommendations, recommendationsRevisionId,
+                    branch, readingRows, sourceCard, annotations, Persona.DEFAULT, false);
+        }
+
+        public static Snapshot of(String branchTitle, List<ChatMessage> messages,
+                List<Recommendation> answerRecommendations, String recommendationsRevisionId,
+                Branch branch, List<Message> readingRows, SourceCard sourceCard,
+                Map<String, List<Annotation>> annotations, Persona persona,
+                boolean personaFellBack) {
             Guard.object(messages, "messages");
             Guard.object(answerRecommendations, "answerRecommendations");
             Guard.object(readingRows, "readingRows");
             return new Snapshot(branchTitle, messages, answerRecommendations,
-                    recommendationsRevisionId, branch, readingRows, sourceCard, annotations);
+                    recommendationsRevisionId, branch, readingRows, sourceCard, annotations, persona,
+                    personaFellBack);
         }
 
     }

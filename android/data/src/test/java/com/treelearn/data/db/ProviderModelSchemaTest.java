@@ -31,8 +31,8 @@ import java.util.Set;
 public final class ProviderModelSchemaTest {
 
     @Test
-    public void theSchemaVersionIsFiveWithAForwardStepPerPublishedVersion() {
-        assertEquals(5, TreeLearnSchema.DATABASE_VERSION);
+    public void theSchemaVersionIsSixWithAForwardStepPerPublishedVersion() {
+        assertEquals(6, TreeLearnSchema.DATABASE_VERSION);
         for (int version = 1; version < TreeLearnSchema.DATABASE_VERSION; version++) {
             int steps = 0;
             for (TreeLearnSchema.Migration migration : TreeLearnSchema.FORWARD_MIGRATIONS) {

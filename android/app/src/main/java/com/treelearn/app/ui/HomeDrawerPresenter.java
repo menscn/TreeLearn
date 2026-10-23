@@ -46,6 +46,8 @@ public final class HomeDrawerPresenter {
         void openBranch(String branchId);
 
         void openStats();
+
+        void openForest();
     }
 
     /** The drawer's whole world: phase, quick rows, and the compact heatmap snapshot. */
@@ -132,6 +134,12 @@ public final class HomeDrawerPresenter {
     public void onStatsTapped() {
         render(new State(Phase.CLOSED, state.rows, state.stats));
         sink.openStats();
+    }
+
+    /** The forest entry is a destination like the statistics room: the drawer closes, then it opens. */
+    public void onForestTapped() {
+        render(new State(Phase.CLOSED, state.rows, state.stats));
+        sink.openForest();
     }
 
     private List<LibraryViewState.Row> readRows() {

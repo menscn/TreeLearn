@@ -17,21 +17,175 @@
     <dimen name="radius_sm">8dp</dimen>
     <dimen name="radius_md">14dp</dimen>
     <dimen name="radius_lg">18dp</dimen>
+    <dimen name="radius_xl">22dp</dimen>
+    <dimen name="radius_2xl">28dp</dimen>
     <dimen name="radius_full">99dp</dimen>
     <dimen name="card_elevation">1dp</dimen>
 
     <dimen name="text_display">26sp</dimen>
-    <dimen name="text_brand">30sp</dimen>
+    <!-- 2026-10-22 Scheme A: the home wordmark is 41sp in the proposal's .home-brand h1. -->
+    <dimen name="text_brand">41sp</dimen>
+    <!-- The h1's own line-height: 1. The bundled serif's 2.858em CFF box would otherwise set the
+         lockup's height and push the subtitle away; WordmarkTextView centres that box inside this. -->
+    <dimen name="brand_line_height">41sp</dimen>
     <dimen name="text_h1">20sp</dimen>
+    <!-- The home subtitle's own size: Scheme A's .home-brand p is 12px, below the caption tier. -->
+    <dimen name="text_home_sub">12sp</dimen>
+    <!-- The composer's writing size (Scheme A .composer-input 14.5px), a half step below body. -->
+    <dimen name="text_composer">14.5sp</dimen>
     <dimen name="text_h2">16sp</dimen>
     <dimen name="text_body">15sp</dimen>
     <dimen name="text_sm">13sp</dimen>
     <dimen name="text_cap">11sp</dimen>
+    <!-- 2026-10-22 Scheme A chat type: .topbar .title 13px, .user-msg 12.5px, .who 9px,
+         .ai-tag 9.5px, .answer 13.2px, .branch-label 9.5px, .branch-item 10.5px. -->
+    <dimen name="text_topbar_title">13sp</dimen>
+    <dimen name="text_chat_user">12.5sp</dimen>
+    <dimen name="text_chat_who">9sp</dimen>
+    <dimen name="text_ai_tag">9.5sp</dimen>
+    <dimen name="text_answer">13.2sp</dimen>
+    <dimen name="text_branch_label">9.5sp</dimen>
+    <dimen name="text_branch_item">10.5sp</dimen>
 
     <!-- Every tappable control respects this; the accessibility rule is 44dp, not 48dp, because
          the prototype's own hit areas are built to it. -->
     <dimen name="touch_min">44dp</dimen>
-    <dimen name="brand_mark_size">56dp</dimen>
+    <!-- 2026-10-22 Scheme A: the sprout mark and wordmark lockup. -->
+    <dimen name="brand_mark_size">40dp</dimen>
+    <!-- Scheme A's .screen-home .app-body: padding 14px 16px 0. -->
+    <dimen name="home_body_top">14dp</dimen>
+    <dimen name="home_brand_top">22dp</dimen>
+    <dimen name="home_brand_bottom">20dp</dimen>
+    <!-- The capsule chrome shared by the topbar and the floating tab bar: .topbar 52px and .tabbar
+         62px with 6px padding / 50px items. The clearance leaves 8dp of air between the bar's top
+         and the last row of content (20 bottom + 62 height + 8 gap). -->
+    <dimen name="topbar_height">52dp</dimen>
+    <dimen name="topbar_offset">6dp</dimen>
+    <dimen name="topbar_icon">36dp</dimen>
+    <dimen name="tab_bar_height">62dp</dimen>
+    <dimen name="tab_bar_padding">6dp</dimen>
+    <dimen name="tab_bar_item">50dp</dimen>
+    <dimen name="tab_bar_icon">18dp</dimen>
+    <dimen name="tab_bar_gap">6dp</dimen>
+    <dimen name="tab_bar_margin">24dp</dimen>
+    <dimen name="tab_bar_bottom">20dp</dimen>
+    <dimen name="tab_bar_clearance">90dp</dimen>
+    <!-- The tablet capsule is capped below the 640dp reading measure: 600dp - 48dp of shell margins
+         leaves 552dp, and a fixed 640dp pill would be clipped by its own window. -->
+    <dimen name="tab_bar_tablet_width">480dp</dimen>
+    <dimen name="glass_capsule_elevation">8dp</dimen>
+    <!-- Scheme A's .composer: min-height 138px, padding 14px 14px 12px, row margin-top 10px. -->
+    <dimen name="composer_min_height">138dp</dimen>
+    <dimen name="composer_pad">14dp</dimen>
+    <dimen name="composer_pad_bottom">12dp</dimen>
+    <dimen name="composer_row_top">10dp</dimen>
+    <dimen name="model_chip_height">30dp</dimen>
+    <!-- Scheme A's .suggest cards: 232px wide, 17px corners, 14px sparkle, padding 11px 12px. -->
+    <dimen name="rec_card_width">232dp</dimen>
+    <dimen name="radius_rec">17dp</dimen>
+    <dimen name="rec_icon_size">14dp</dimen>
+    <dimen name="rec_pad_v">11dp</dimen>
+    <dimen name="rec_pad_h">12dp</dimen>
+    <!-- Scheme A's .topic cards: 11px 12px padding, 14px chevron, 6px meta gap, 11px meta glyph. -->
+    <dimen name="topic_pad_v">11dp</dimen>
+    <dimen name="topic_pad_h">12dp</dimen>
+    <dimen name="topic_chevron">14dp</dimen>
+    <dimen name="topic_meta_top">6dp</dimen>
+    <dimen name="topic_meta_icon">11dp</dimen>
+    <!-- Scheme A's chat column: .screen-chat .app-body padding 12px 12px 22px, gap 10px;
+         .reader padding 15px 15px 14px; the composer dock radius 24px, padding 11px 12px 11px 14px. -->
+    <dimen name="chat_body_pad">12dp</dimen>
+    <dimen name="chat_body_bottom">22dp</dimen>
+    <dimen name="chat_gap">10dp</dimen>
+    <dimen name="reader_pad">15dp</dimen>
+    <dimen name="reader_pad_bottom">14dp</dimen>
+    <dimen name="dock_radius">24dp</dimen>
+    <dimen name="dock_pad_start">14dp</dimen>
+    <dimen name="dock_pad">11dp</dimen>
+    <dimen name="dock_pad_end">12dp</dimen>
+    <dimen name="dock_gap">7dp</dimen>
+    <dimen name="dock_icon">29dp</dimen>
+    <!-- Scheme A draws the 29px answer action dot; the 44dp target stays, so the visible face is
+         inset by (44 - 29) / 2. -->
+    <dimen name="action_glass_inset">7.5dp</dimen>
+    <!-- Scheme A's .branch-label margin 10px 0 7px and .branch-stack: 11px gutter, 5px dot, 1px
+         line; .branch-item padding 9px 10px, radius 14px, 6px gap. -->
+    <dimen name="branch_label_top">10dp</dimen>
+    <dimen name="branch_label_bottom">7dp</dimen>
+    <dimen name="branch_label_gap">7dp</dimen>
+    <dimen name="branch_icon">13dp</dimen>
+    <dimen name="branch_gutter">11dp</dimen>
+    <dimen name="branch_rail">5dp</dimen>
+    <dimen name="branch_line">1dp</dimen>
+    <dimen name="radius_branch_item">14dp</dimen>
+    <dimen name="branch_item_pad_v">9dp</dimen>
+    <dimen name="branch_item_pad_h">10dp</dimen>
+    <dimen name="branch_item_gap">6dp</dimen>
+    <dimen name="branch_item_icon_gap">7dp</dimen>
+    <!-- 2026-10-22 Scheme A library and branch navigation. Library: title-lg 19px, search 44px
+         and 11px, segment 40px with a 10.5px label and 9.5px count, cards padding 12px 13px with a
+         12.5px title / 10.5px summary / 9px meta and a 14px chevron, note 10px. Navigation: summary
+         padding 15px 15px 13px with a 13.5px title / 8.5px tag / 9px label / 11px body, branch rows
+         17px corners and 11px 12px padding around a 22px node, an 11.5px title and a 9px meta, empty
+         note 10px. The 40px segment and 24px row menu sit below this project's 44dp touch floor, so
+         their faces are drawn inside 44dp targets. -->
+    <dimen name="text_library_title">19sp</dimen>
+    <dimen name="text_library_search">11sp</dimen>
+    <dimen name="text_library_segment">10.5sp</dimen>
+    <dimen name="text_library_segment_num">9.5sp</dimen>
+    <dimen name="text_library_card_title">12.5sp</dimen>
+    <dimen name="text_library_summary">10.5sp</dimen>
+    <dimen name="text_library_meta">9sp</dimen>
+    <dimen name="text_library_note">10sp</dimen>
+    <dimen name="library_body_top">14dp</dimen>
+    <dimen name="library_search_pad">13dp</dimen>
+    <dimen name="library_segment_pad">4dp</dimen>
+    <dimen name="library_segment_gap">4dp</dimen>
+    <dimen name="library_segment_top">11dp</dimen>
+    <dimen name="library_list_top">14dp</dimen>
+    <dimen name="library_card_gap">9dp</dimen>
+    <dimen name="library_card_pad_v">12dp</dimen>
+    <dimen name="library_card_pad_h">13dp</dimen>
+    <dimen name="library_meta_top">6dp</dimen>
+    <dimen name="library_meta_icon">11dp</dimen>
+    <dimen name="library_meta_gap">5dp</dimen>
+    <dimen name="library_chevron">14dp</dimen>
+    <dimen name="library_chevron_top">2dp</dimen>
+    <dimen name="library_note_top">24dp</dimen>
+    <dimen name="library_note_icon">13dp</dimen>
+    <dimen name="library_note_gap">7dp</dimen>
+
+    <dimen name="text_nav_summary_title">13.5sp</dimen>
+    <dimen name="text_nav_tag">8.5sp</dimen>
+    <dimen name="text_nav_label">9sp</dimen>
+    <dimen name="text_nav_summary">11sp</dimen>
+    <dimen name="text_nav_row_title">11.5sp</dimen>
+    <dimen name="text_nav_row_meta">9sp</dimen>
+    <dimen name="text_nav_empty">10sp</dimen>
+    <dimen name="text_list_head">9.5sp</dimen>
+    <dimen name="nav_gap">12dp</dimen>
+    <dimen name="nav_summary_pad">15dp</dimen>
+    <dimen name="nav_summary_pad_bottom">13dp</dimen>
+    <dimen name="nav_summary_label_top">10dp</dimen>
+    <dimen name="nav_summary_label_bottom">5dp</dimen>
+    <dimen name="nav_summary_label_gap">5dp</dimen>
+    <dimen name="nav_summary_label_icon">12dp</dimen>
+    <dimen name="nav_fold_size">26dp</dimen>
+    <dimen name="nav_fold_pad">5.5dp</dimen>
+    <dimen name="nav_tag_pad_v">5dp</dimen>
+    <dimen name="nav_tag_pad_h">7dp</dimen>
+    <dimen name="nav_row_pad_v">11dp</dimen>
+    <dimen name="nav_row_pad_h">12dp</dimen>
+    <dimen name="nav_row_gap">9dp</dimen>
+    <dimen name="nav_row_node">22dp</dimen>
+    <dimen name="nav_row_node_icon">12dp</dimen>
+    <dimen name="nav_row_meta_top">2dp</dimen>
+    <dimen name="nav_row_action_inset">14.5dp</dimen>
+    <dimen name="nav_empty_pad_v">10dp</dimen>
+    <dimen name="nav_empty_pad_h">12dp</dimen>
+    <dimen name="nav_empty_gap">8dp</dimen>
+    <dimen name="nav_empty_icon">14dp</dimen>
+    <dimen name="radius_nav_row">17dp</dimen>
     <dimen name="hairline">1dp</dimen>
     <!-- T-041 D1: the child-branch popup caps its height so rows beyond one screen stay reachable
          through the ScrollView that wraps its list (same intent as the navigation page's list). -->
@@ -77,4 +231,24 @@
          build over exactly that. The phone layouts do not read it - on a phone the column is the
          screen width - so the value here is never applied to a phone; it is the name's default. -->
     <dimen name="content_measure">640dp</dimen>
+
+    <!-- T-068 我的森林（persona/forest prototype §我的森林）: the drawer badge, the ground's floating
+         chrome, the selection sheet and the footnote's own offsets. The site's 6px / 10px / 38px /
+         40px / 30px values are not on the shared 4pt scale, so they get names here rather than
+         being spelled inline in a layout. -->
+    <dimen name="forest_badge">40dp</dimen>
+    <dimen name="forest_badge_icon">18dp</dimen>
+    <dimen name="forest_chevron">18dp</dimen>
+    <dimen name="forest_hint_pad_v">6dp</dimen>
+    <dimen name="forest_hint_icon">13dp</dimen>
+    <dimen name="forest_compass">30dp</dimen>
+    <dimen name="forest_compass_arrow">6dp</dimen>
+    <dimen name="forest_compass_arrow_h">4dp</dimen>
+    <dimen name="forest_ring">96dp</dimen>
+    <dimen name="forest_ring_box">112dp</dimen>
+    <dimen name="forest_empty_icon">38dp</dimen>
+    <dimen name="forest_sheet_bottom">38dp</dimen>
+    <dimen name="forest_sheet_arrow_pad">12dp</dimen>
+    <dimen name="forest_meta_top">2dp</dimen>
+    <dimen name="forest_foot_bottom">10dp</dimen>
 </resources>

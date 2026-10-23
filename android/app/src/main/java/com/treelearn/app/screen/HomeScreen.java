@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -40,9 +41,6 @@ public final class HomeScreen extends LinearLayout {
     private final EditText draft;
     private final ImageButton send;
     private final TextView notice;
-    private final View hero;
-    /** The main slogan: shown only while the home has no history topics (T-003). */
-    private final TextView heroTitle;
     private final View recommendationsSection;
     /** The strip's short heading; its text is one of two strings, chosen by the same judgement as the hero (T-005). */
     private final TextView recommendationsTitle;
@@ -89,8 +87,6 @@ public final class HomeScreen extends LinearLayout {
         draft = findViewById(R.id.home_draft);
         send = findViewById(R.id.home_send);
         notice = findViewById(R.id.home_notice);
-        hero = findViewById(R.id.home_hero);
-        heroTitle = findViewById(R.id.home_hero_title);
         recommendationsSection = findViewById(R.id.home_recommendations_section);
         recommendationsTitle = findViewById(R.id.home_recommendations_title);
         recentSection = findViewById(R.id.home_recent_section);
@@ -170,8 +166,8 @@ public final class HomeScreen extends LinearLayout {
             modelChip.render(state.model, state.thinkingEnabled);
             send.setEnabled(state.canSubmit());
             renderNotice(state.notice);
-            hero.setVisibility(VISIBLE);
-            heroTitle.setVisibility(state.hasTopics() ? GONE : VISIBLE);
+            // Since 2026-10-22 Scheme A the brand block and its subtitle are always visible: the
+            // proposal keeps them above the composer whether or not the learner has topics.
             recommendationsTitle.setText(state.hasTopics()
                     ? R.string.home_rec_history : R.string.home_rec_starter);
             boolean stripUsable = state.phase == HomeViewState.Phase.READY
@@ -205,6 +201,22 @@ public final class HomeScreen extends LinearLayout {
         }
         entrancePending = true;
         startAnimation(HomeMotion.screenEntrance(getResources().getDisplayMetrics().density));
+    }
+
+    /**
+     * The empty forest's one way out: land on the home composer and raise the keyboard, so "plant the
+     * first tree" is one tap away from typing the first question. Posted because the home has only
+     * just been swapped in when the forest asks.
+     */
+    public void focusCreateEntry() {
+        draft.post(() -> {
+            draft.requestFocus();
+            InputMethodManager keyboard = (InputMethodManager) getContext()
+                    .getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (keyboard != null) {
+                keyboard.showSoftInput(draft, InputMethodManager.SHOW_IMPLICIT);
+            }
+        });
     }
 
     /**
@@ -247,7 +259,7 @@ public final class HomeScreen extends LinearLayout {
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             if (index + 1 < visibleCount) {
-                params.bottomMargin = getResources().getDimensionPixelSize(R.dimen.space_s3);
+                params.bottomMargin = getResources().getDimensionPixelSize(R.dimen.space_s2);
             }
             recentList.addView(card, params);
         }

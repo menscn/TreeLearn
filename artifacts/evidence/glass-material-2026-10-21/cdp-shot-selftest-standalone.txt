@@ -1,0 +1,120 @@
+# command: cdp_shot.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_cdpshot-selftest\run-X0fGEP\shot.png
+# profile screens.json bytes=3679 lines=48 sha256=f85fc4342f701b5ce1f27fd78230de6af348a5d5630d8ad7d0e2eb33335fdeaa
+# prototype.html bytes=151314 lines=2467 sha256=447d7ad2f256afbf907b142e73ab1bc801ec0fd3f99f33e20147d890c912ba55
+# scroll=none wait_ms=20000 declared_scale=2
+OK   browser = Edg/155.0.4283.45 (@50f24ef2aa5369a074b8888b7db82d9c0652d642, protocol 1.3)
+OK   browser-relaunch = 2 次早期退出后起来（Windows 启动器交接竞态）
+OK   html = D:\Project\Android\Treelearn\Docs\04-ux-design\知芽-TreeLearn-高保真原型-v1.html
+OK   clicks = .demo-link -> .topic-card
+OK   screen-rect = 412x816 @ 179,1977.5 (逻辑 px)
+OK   scrollbar-occupancy = 4 = 档案声明 4
+OK   shot = D:\Project\Android\Treelearn\artifacts\tmp\_cdpshot-selftest\run-X0fGEP\shot.png 824x1632 bytes=178729 scale=2
+judgements=7 failed=0
+VERDICT: PASS
+EXITCODE=0
+WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-IIQa1m
+ok   pos-real-render rc=0 (96.1s, want=0)
+# command: cdp_shot.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_cdpshot-selftest\run-X0fGEP\shot-url.png --url file:///D:/Project/Android/Treelearn/Docs/04-ux-design/%E7%9F%A5%E8%8A%BD-TreeLearn-%E9%AB%98%E4%BF%9D%E7%9C%9F%E5%8E%9F%E5%9E%8B-v1.html
+# profile screens.json bytes=3679 lines=48 sha256=f85fc4342f701b5ce1f27fd78230de6af348a5d5630d8ad7d0e2eb33335fdeaa
+# html 由 --url 显式给出，未核档案路径
+# scroll=none wait_ms=20000 declared_scale=2
+OK   browser = Edg/155.0.4283.45 (@50f24ef2aa5369a074b8888b7db82d9c0652d642, protocol 1.3)
+OK   html = file:///D:/Project/Android/Treelearn/Docs/04-ux-design/%E7%9F%A5%E8%8A%BD-TreeLearn-%E9%AB%98%E4%BF%9D%E7%9C%9F%E5%8E%9F%E5%9E%8B-v1.html
+OK   clicks = .demo-link -> .topic-card
+OK   screen-rect = 412x816 @ 165,1977.5 (逻辑 px)
+OK   scrollbar-occupancy = 4 = 档案声明 4
+OK   shot = D:\Project\Android\Treelearn\artifacts\tmp\_cdpshot-selftest\run-X0fGEP\shot-url.png 824x1632 bytes=195670 scale=2
+judgements=6 failed=0
+VERDICT: PASS
+EXITCODE=0
+WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-Ohdh9V
+ok   pos-url-escape rc=0 (23.0s, want=0)
+USAGE ERROR: 未知选项 --turbo（可用: --screen --out --profile --browser --attach --url --scroll --scale --wait-ms）
+EXITCODE=2
+ok   neg-unknown-option rc=2 (0.0s, want=2)
+USAGE ERROR: 必须给 --out <png>：产图路径显式给出，避免覆盖已归档的基线图
+EXITCODE=2
+ok   neg-missing-out rc=2 (0.0s, want=2)
+USAGE ERROR: 屏档案里没有 "nope"；可用: chat
+EXITCODE=2
+ok   neg-unknown-screen rc=2 (0.0s, want=2)
+USAGE ERROR: --scroll 只认 none|top|bottom，收到 sideways
+EXITCODE=2
+ok   neg-bad-scroll rc=2 (0.0s, want=2)
+INSTRUMENT FAULT: 找不到 Edge 可执行文件（试过: /c/nowhere/msedge.exe）；用 --browser <路径> 指定
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+ok   neg-browser-absent-injection rc=3 (0.0s, want=3)
+INSTRUMENT FAULT: 屏 "chat" 的档案没有 prototype 回放段
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+ok   neg-profile-no-prototype rc=3 (0.0s, want=3)
+INSTRUMENT FAULT: 原型 HTML 不存在: D:\Project\Android\Treelearn\Docs\04-ux-design\no-such-prototype.html
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+ok   neg-html-missing rc=3 (0.0s, want=3)
+INSTRUMENT FAULT: 屏档案 不是合法 UTF-8: D:\Project\Android\Treelearn\artifacts\tmp\_cdpshot-selftest\run-X0fGEP\bad-utf8.json (The encoded data was not valid for encoding utf-8)
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+ok   neg-profile-not-utf8 rc=3 (0.0s, want=3)
+INSTRUMENT FAULT: --url 指向的本机文件不存在: D:\nope\missing.html
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+ok   neg-url-file-missing rc=3 (0.0s, want=3)
+WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-BFDh0y
+INSTRUMENT FAULT: 导航被浏览器拒绝: net::ERR_ABORTED（目标 javascript:document.write(1)）
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+ok   neg-navigate-rejected rc=3 (9.5s, want=3)
+INSTRUMENT FAULT: CDP 握手失败（端口 1 没有应答: fetch failed）
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+ok   neg-cdp-handshake-fail rc=3 (0.0s, want=3)
+# command: cdp_shot.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_cdpshot-selftest\run-X0fGEP\s.png --profile D:\Project\Android\Treelearn\artifacts\tmp\_cdpshot-selftest\run-X0fGEP\bad-wait.json --wait-ms 1500
+# profile screens.json bytes=5350 lines=201 sha256=37fafd8dfb29cc16c6fc798c5bf4f91918e1a385849a44ca33ac4ace5f70224c
+# prototype.html bytes=151314 lines=2467 sha256=447d7ad2f256afbf907b142e73ab1bc801ec0fd3f99f33e20147d890c912ba55
+# scroll=none wait_ms=1500 declared_scale=2
+OK   browser = Edg/155.0.4283.45 (@50f24ef2aa5369a074b8888b7db82d9c0652d642, protocol 1.3)
+OK   html = D:\Project\Android\Treelearn\Docs\04-ux-design\知芽-TreeLearn-高保真原型-v1.html
+OK   clicks = .demo-link -> .topic-card
+FAIL wait-for-absent .no-such-node 在 1500ms 内没出现（readyState=interactive）——页面已加载，属结构不符而非仪器故障
+judgements=4 failed=1
+VERDICT: FAIL
+EXITCODE=1
+WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-y0jT4r
+ok   neg-wait-for-absent rc=1 (18.4s, want=1)
+# command: cdp_shot.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_cdpshot-selftest\run-X0fGEP\s.png --profile D:\Project\Android\Treelearn\artifacts\tmp\_cdpshot-selftest\run-X0fGEP\bad-click.json
+# profile screens.json bytes=5332 lines=200 sha256=f2b3ead54b5a377f37b8ad95b2e3d99687b8542d100559ee55d8dcf659927e9f
+# prototype.html bytes=151314 lines=2467 sha256=447d7ad2f256afbf907b142e73ab1bc801ec0fd3f99f33e20147d890c912ba55
+# scroll=none wait_ms=20000 declared_scale=2
+OK   browser = Edg/155.0.4283.45 (@50f24ef2aa5369a074b8888b7db82d9c0652d642, protocol 1.3)
+OK   html = D:\Project\Android\Treelearn\Docs\04-ux-design\知芽-TreeLearn-高保真原型-v1.html
+OK   clicks = #no-such-click-target
+FAIL click-target-absent #no-such-click-target
+judgements=4 failed=1
+VERDICT: FAIL
+EXITCODE=1
+WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-t2kerM
+ok   neg-click-absent rc=1 (25.7s, want=1)
+# command: cdp_shot.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_cdpshot-selftest\run-X0fGEP\s.png --scale 1
+# profile screens.json bytes=3679 lines=48 sha256=f85fc4342f701b5ce1f27fd78230de6af348a5d5630d8ad7d0e2eb33335fdeaa
+# prototype.html bytes=151314 lines=2467 sha256=447d7ad2f256afbf907b142e73ab1bc801ec0fd3f99f33e20147d890c912ba55
+# scroll=none wait_ms=20000 declared_scale=2
+OK   browser = Edg/155.0.4283.45 (@50f24ef2aa5369a074b8888b7db82d9c0652d642, protocol 1.3)
+OK   html = D:\Project\Android\Treelearn\Docs\04-ux-design\知芽-TreeLearn-高保真原型-v1.html
+OK   clicks = .demo-link -> .topic-card
+OK   screen-rect = 412x816 @ 165,1977.5 (逻辑 px)
+OK   scrollbar-occupancy = 4 = 档案声明 4
+FAIL shot-scale-override 本次 scale=1 而档案声明=2；此图不可交给 --kind render（它按 2x 反算逻辑像素），请用默认比例重跑或同步档案
+judgements=6 failed=1
+VERDICT: FAIL
+EXITCODE=1
+WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-Xr9etI
+ok   neg-shot-scale-mismatch rc=1 (22.3s, want=1)
+# command: (unit) 空判据
+VERDICT: FAULT 没有任何判据被执行——空见证不算通过
+EXITCODE=3
+ok   neg-empty-ledger rc=3 (unit, want=3)
+SELFTEST PASS cases=17 failures=0
+EXITCODE=0
+RC2=127

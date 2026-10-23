@@ -1,76 +1,201 @@
-import { firstById, groupsById, nodesById, pickChild } from "../platform/fixtureNodes";
-import { useFixtureScreen } from "../hooks/useFixtureScreen";
-import { NodeTap } from "../components/NodeTap";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { BranchPanel } from "../components/BranchPanel";
+import { ChatAnswer } from "../components/ChatAnswer";
+import { Composer } from "../components/Composer";
+import { Icon } from "../components/Icon";
+import { IconButton } from "../components/IconButton";
 import { Notice } from "../components/Notice";
+import { TreeOverlay } from "../components/TreeOverlay";
+import { useWorkspaceData } from "../components/WorkspaceDataProvider";
+import { useCopy } from "../hooks/useCopy";
+import { useWorkspace } from "../hooks/useWorkspace";
+import {
+  draftFor,
+  rememberScroll,
+  scrollFor,
+  setDraft,
+  setTreeOpen
+} from "../store/workspace";
 
-const APPBAR_BACK = "chat_back";
+type CopyFeedback = "copied" | "failed" | null;
 
-/** 对话页：正文按采集顺序出段，建议行按容器分组，底部只读到当时那枚模型芯片。 */
-export function ChatPage() {
-  const { status, payload } = useFixtureScreen("chat");
-  if (payload === null) {
-    return status === "loading" ? null : <Notice copyKey="state_fixture_unavailable" />;
+async function writeClipboard(text: string): Promise<boolean> {
+  try {
+    if (navigator.clipboard?.writeText !== undefined) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    // 剪贴板权限被拒时仍可退回选区复制，下面再试一次。
   }
-  const n = payload.nodes;
-  const body = n.filter((node) => node.id.startsWith("chat_answer") && node.text !== "");
-  const asks = nodesById(n, "chat_ask_why").concat(nodesById(n, "chat_ask_how"), nodesById(n, "chat_ask_what"));
+  try {
+    const area = document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.top = "-1000px";
+    document.body.append(area);
+    area.select();
+    const copied = typeof document.execCommand === "function" && document.execCommand("copy");
+    area.remove();
+    return copied;
+  } catch {
+    return false;
+  }
+}
+
+/** 对话工作区：正文独立滚动，输入区固定在底部；未接通的动作只说现状。 */
+export function ChatPage() {
+  const t = useCopy();
+  const state = useWorkspace();
+  const data = useWorkspaceData();
+  const topic = data.topics[state.topic];
+  const chat = data.chat !== null && data.chat.topicIndex === state.topic ? data.chat : null;
+  const branch = data.branches.find((item) => item.topicIndex === state.topic) ?? null;
+  const tree = data.tree !== null && data.tree.topicIndex === state.topic ? data.tree : null;
+  const topicKey = `chat:${state.topic}`;
+
+  const [draft, setDraftState] = useState(() => draftFor(topicKey));
+  const [feedback, setFeedback] = useState<CopyFeedback>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const feedbackTimer = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    setDraftState(draftFor(topicKey));
+  }, [topicKey]);
+
+  useLayoutEffect(() => {
+    const element = scrollRef.current;
+    if (element === null) return;
+    element.scrollTop = scrollFor(topicKey);
+    return () => rememberScroll(topicKey, element.scrollTop);
+  }, [topicKey]);
+
+  useEffect(() => () => {
+    if (feedbackTimer.current !== undefined) window.clearTimeout(feedbackTimer.current);
+  }, []);
+
+  const updateDraft = (value: string): void => {
+    setDraftState(value);
+    setDraft(topicKey, value);
+  };
+
+  const report = (next: Exclude<CopyFeedback, null>): void => {
+    setFeedback(next);
+    if (feedbackTimer.current !== undefined) window.clearTimeout(feedbackTimer.current);
+    feedbackTimer.current = window.setTimeout(() => setFeedback(null), 3000);
+  };
+
+  const copyAnswer = async (): Promise<void> => {
+    if (chat === null) return;
+    report(await writeClipboard(chat.answer) ? "copied" : "failed");
+  };
+
+  const closeTree = useCallback((): void => {
+    setTreeOpen(false);
+    window.setTimeout(() => document.getElementById("tree-toggle")?.focus(), 0);
+  }, []);
+
+  if (topic === undefined) {
+    return (
+      <section className="chat-screen" data-screen="chat">
+        <Notice copyKey="state_fixture_unavailable" />
+      </section>
+    );
+  }
+
   return (
-    <section className="screen" data-screen="chat">
-      <header className="appbar" data-node="chat_appbar">
-        <NodeTap node={firstById(n, APPBAR_BACK)} />
-        <span className="appbar-title" data-node="chat_title">
-          {firstById(n, "chat_title")?.text ?? ""}
-        </span>
-        <NodeTap node={firstById(n, "chat_nav")} />
-        <NodeTap node={firstById(n, "chat_overview")} />
-        <NodeTap node={firstById(n, "chat_settings")} />
-      </header>
+    <section className="chat-screen" data-screen="chat">
+      <div className="chat-shell">
+        <div className="chat-main">
+          <div
+            ref={scrollRef}
+            className="chat-scroll"
+            data-slot="chat-scroll"
+            onScroll={(event) => rememberScroll(topicKey, event.currentTarget.scrollTop)}
+          >
+            <article className="chat-reading">
+              <h1 className="chat-title" data-node="chat_title">{topic.title}</h1>
+              <p className="chat-meta">{chat?.time ?? topic.meta}</p>
 
-      <div className="chat-body" data-node="chat_messages">
-        {body.map((node, i) => (
-          <p className="chat-answer-run" data-node={node.id} key={`body-${i}`}>
-            {node.text}
-          </p>
-        ))}
-        <div className="chat-actions" data-node="chat_actions">
-          {n.filter((node) => node.id.startsWith("act_")).map((node, i) => (
-            <NodeTap node={node} key={`act-${i}`} />
-          ))}
+              {chat === null ? (
+                <section className="chat-baseline" data-chat-baseline>
+                  <h2>{t("chat_no_chat_baseline")}</h2>
+                  <p>{topic.summary}</p>
+                  <p className="chat-muted">{t("chat_no_chat_body")}</p>
+                </section>
+              ) : (
+                <>
+                  <p className="chat-assistant">
+                    <Icon className="chat-assistant-mark" name="brand_sprout" />
+                    <span>{t("app_name")}</span>
+                    <small>{chat.model}</small>
+                  </p>
+                  <ChatAnswer blocks={chat.blocks} />
+                </>
+              )}
+
+              <div className="chat-answer-actions" data-node="chat_actions">
+                <IconButton
+                  action="chat-copy"
+                  glyph="action_copy"
+                  label={t("chat_copy")}
+                  disabled={chat === null}
+                  onClick={() => {
+                    void copyAnswer();
+                  }}
+                />
+                <IconButton
+                  action="chat-reset"
+                  glyph="nav_restore"
+                  label={`${t("chat_action_reset")} · ${t("chat_action_unavailable")}`}
+                  disabled
+                />
+                <IconButton
+                  action="chat-fork"
+                  glyph="action_fork"
+                  label={`${t("chat_action_fork")} · ${t("chat_action_unavailable")}`}
+                  disabled
+                />
+              </div>
+              <p className="chat-feedback" data-copy-status={feedback ?? undefined} role="status">
+                {feedback === "copied" ? t("chat_copied") : feedback === "failed" ? t("chat_copy_failed") : ""}
+              </p>
+
+              {chat !== null && chat.suggestions.length > 0 ? (
+                <section className="chat-followups" aria-label={t("chat_suggestions")}>
+                  <p>{t("chat_suggestions")}</p>
+                  {chat.suggestions.map((text, index) => (
+                    <button
+                      className="followup"
+                      data-suggestion={index}
+                      key={`suggestion-${index}`}
+                      type="button"
+                      onClick={() => {
+                        updateDraft(text);
+                        inputRef.current?.focus();
+                      }}
+                    >
+                      <Icon name="nav_chat" />
+                      <span>{text}</span>
+                    </button>
+                  ))}
+                </section>
+              ) : null}
+            </article>
+          </div>
+          <Composer
+            value={draft}
+            placeholder={chat?.placeholder ?? t("chat_composer_placeholder")}
+            model={chat?.model ?? ""}
+            inputRef={inputRef}
+            onChange={updateDraft}
+          />
         </div>
-        {asks.map((node, i) => (
-          <span className="ask-chip" data-node={node.id} key={`ask-${i}`}>
-            {node.text}
-          </span>
-        ))}
+        <BranchPanel branch={branch} open={state.panelOpen} />
       </div>
-
-      {groupsById(n, "suggestion_row").length > 0 && (
-        <section className="section">
-          <ul className="suggestion-list">
-            {groupsById(n, "suggestion_row").map((group, i) => (
-              <li className="suggestion-row" data-node="suggestion_row" key={`sug-${i}`}>
-                <span className="suggestion-text" data-node="suggestion_text">
-                  {pickChild(group.children, "suggestion_text")?.text ?? group.node.text}
-                </span>
-                <NodeTap node={pickChild(group.children, "suggestion_fork")} />
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      <footer className="composer" data-node="chat_composer">
-        <p className="composer-hint" data-node="chat_draft">
-          {firstById(n, "chat_draft")?.text ?? ""}
-        </p>
-        <div className="composer-row">
-          <span className="chip" data-node="model_chip_label">
-            {firstById(n, "model_chip_label")?.text ?? ""}
-          </span>
-          <NodeTap node={firstById(n, "chat_attach")} />
-          <span className="composer-send" data-node="chat_send" aria-label={firstById(n, "chat_send")?.desc ?? ""} />
-        </div>
-      </footer>
+      {tree !== null && state.treeOpen ? <TreeOverlay tree={tree} onClose={closeTree} /> : null}
     </section>
   );
 }

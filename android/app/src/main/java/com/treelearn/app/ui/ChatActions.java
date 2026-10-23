@@ -1,6 +1,7 @@
 package com.treelearn.app.ui;
 
 import com.treelearn.core.domain.GenerationModel;
+import com.treelearn.core.domain.Persona;
 import com.treelearn.core.domain.ReadingAnchor;
 
 import java.util.Set;
@@ -147,6 +148,15 @@ public interface ChatActions {
     void onNavigationPressed();
 
     void onModelSelected(GenerationModel model);
+
+    /**
+     * 2026-10-23: the learner picked one answer style for this topic. It is a topic-level write
+     * that affects only future generations; choosing the style already stored writes nothing.
+     */
+    void onPersonaSelected(Persona persona);
+
+    /** Opens the static answer-style introduction; navigation only, no style is chosen there. */
+    void onPersonaIntroPressed();
 
     void onThinkingToggled(boolean enabled);
 

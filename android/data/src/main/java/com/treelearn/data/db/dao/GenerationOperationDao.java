@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteStatement;
 import com.treelearn.core.domain.GenerationModel;
 import com.treelearn.core.domain.GenerationOperation;
 import com.treelearn.core.domain.GenerationState;
+import com.treelearn.core.domain.Persona;
 import com.treelearn.core.domain.PromptPurpose;
 import com.treelearn.data.db.TreeLearnSchema;
 
@@ -263,6 +264,8 @@ public final class GenerationOperationDao {
                 GenerationModel.fromWireId(
                         Rows.string(cursor, TreeLearnSchema.GenerationOperations.MODEL)),
                 Rows.bool(cursor, TreeLearnSchema.GenerationOperations.THINKING_ENABLED),
+                Persona.fromWireId(
+                        Rows.string(cursor, TreeLearnSchema.GenerationOperations.PERSONA)),
                 Rows.string(cursor, TreeLearnSchema.GenerationOperations.PROMPT_POLICY_VERSION),
                 GenerationState.valueOf(
                         Rows.string(cursor, TreeLearnSchema.GenerationOperations.STATE)),
@@ -284,6 +287,7 @@ public final class GenerationOperationDao {
         values.put(TreeLearnSchema.GenerationOperations.MODEL, operation.model.wireId);
         values.put(TreeLearnSchema.GenerationOperations.THINKING_ENABLED,
                 operation.thinkingEnabled ? 1 : 0);
+        values.put(TreeLearnSchema.GenerationOperations.PERSONA, operation.persona.wireId);
         values.put(TreeLearnSchema.GenerationOperations.PROMPT_POLICY_VERSION,
                 operation.promptPolicyVersion);
         values.put(TreeLearnSchema.GenerationOperations.STATE, operation.state().name());

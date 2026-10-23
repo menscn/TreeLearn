@@ -17,16 +17,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.window.OnBackInvokedDispatcher;
 
+import com.treelearn.app.forest.ForestPresenter;
 import com.treelearn.app.library.LibraryPresenter;
 import com.treelearn.app.library.LibrarySink;
 import com.treelearn.app.library.LibraryViewState;
 import com.treelearn.app.screen.ChatScreen;
 import com.treelearn.app.screen.FileManagerScreen;
+import com.treelearn.app.screen.ForestScreen;
 import com.treelearn.app.screen.HomeDrawerScreen;
 import com.treelearn.app.screen.HomeScreen;
 import com.treelearn.app.screen.LibraryScreen;
 import com.treelearn.app.screen.ModelSettingsScreen;
 import com.treelearn.app.screen.NavigationScreen;
+import com.treelearn.app.screen.PersonaIntroScreen;
 import com.treelearn.app.screen.ProviderAdminScreen;
 import com.treelearn.app.screen.SearchServiceSettingsScreen;
 import com.treelearn.app.screen.StatsDetailScreen;
@@ -68,6 +71,7 @@ import com.treelearn.core.domain.AnswerRevision;
 import com.treelearn.core.domain.Annotation;
 import com.treelearn.app.voice.SystemTtsEngine;
 import com.treelearn.core.domain.GenerationModel;
+import com.treelearn.core.domain.Persona;
 import com.treelearn.core.domain.ReadingAnchor;
 import com.treelearn.core.domain.ReadingPosition;
 import com.treelearn.treelayout.ViewportConstraints;
@@ -166,8 +170,15 @@ public final class MainActivity extends Activity
     private FileManagerPresenter fileManagerPresenter;
     private StatsDetailScreen statsDetailScreen;
     private StatsDetailPresenter statsDetailPresenter;
+    /** The forest page and its read (T-068); both null while the page is not on screen. */
+    private ForestScreen forestScreen;
+    private ForestPresenter forestPresenter;
     private HomeDrawerScreen homeDrawerScreen;
     private HomeDrawerPresenter homeDrawerPresenter;
+
+    /** The static answer-style introduction; null while it is not on screen (T-067). */
+    private PersonaIntroScreen personaIntroScreen;
+    private boolean personaIntroFromSettings;
 
     private boolean showingSettings;
     private boolean homeStarted;
@@ -216,6 +227,11 @@ public final class MainActivity extends Activity
             public void openStats() {
                 showStatsDetail();
             }
+
+            @Override
+            public void openForest() {
+                showForest();
+            }
         }, container.libraryData()::topics, container.homeData()::stats, container.uiThread(),
                 container.background());
         homeDrawerScreen.setActions(homeDrawerPresenter);
@@ -234,6 +250,10 @@ public final class MainActivity extends Activity
         settingsScreen.setOnSearchPressed(this::showSearchSettings);
         settingsScreen.setOnVoicePressed(this::showVoiceSettings);
         settingsScreen.setOnFilesPressed(this::showFileManager);
+        settingsScreen.setOnPersonaIntroPressed(() -> {
+            personaIntroFromSettings = true;
+            showPersonaIntro();
+        });
 
         tabHome.setOnClickListener(view -> showHome());
         tabLibrary.setOnClickListener(view -> showLibrary());
@@ -246,6 +266,11 @@ public final class MainActivity extends Activity
         super.onResume();
         if (fileManagerScreen != null) {
             fileManagerPresenter.onResumed();
+            return;
+        }
+        if (forestScreen != null) {
+            // The forest is a read taken when it opened; coming back to the process must not
+            // re-shuffle the ground under a learner who is looking at it.
             return;
         }
         if (showingSettings) {
@@ -324,9 +349,25 @@ public final class MainActivity extends Activity
      * showing its lists steps out to the home tab.
      */
     private void onBackRequested() {
+        if (personaIntroScreen != null) {
+            boolean fromSettings = personaIntroFromSettings;
+            personaIntroScreen = null;
+            if (fromSettings) {
+                showSettings();
+            } else if (chatBranchId != null) {
+                showChat(chatBranchId);
+            } else {
+                showHome();
+            }
+            return;
+        }
         if (homeDrawerScreen != null
                 && homeDrawerScreen.getVisibility() == View.VISIBLE) {
             homeDrawerPresenter.onDrawerToggled();
+            return;
+        }
+        if (forestScreen != null) {
+            showHome();
             return;
         }
         if (statsDetailScreen != null) {
@@ -464,6 +505,22 @@ public final class MainActivity extends Activity
         if (chatScreen != null && isTheBranchOnScreen(branchId)) {
             chatScreen.renderPosition(position);
         }
+    }
+
+    /** 2026-10-23: the style switch is stored; the sentence repeats the style's own name. */
+    @Override
+    public void showPersonaSwitched(Persona persona) {
+        String name = getString(com.treelearn.app.screen.PersonaUi.nameRes(persona));
+        Toast.makeText(this, getString(R.string.persona_switched, name), Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * 2026-10-23: a stored style this build cannot name was read as the default. The default is
+     * already what the chip shows, so the sentence explains the substitution and stores nothing.
+     */
+    @Override
+    public void showPersonaFellBack() {
+        Toast.makeText(this, R.string.persona_fallback_notice, Toast.LENGTH_LONG).show();
     }
 
     /** Whether {@code branchId} is the branch the current conversation screen was opened for. */
@@ -658,12 +715,15 @@ public final class MainActivity extends Activity
         navigationScreen = null;
         navigationPresenter = null;
         chatBranchId = null;
+        personaIntroScreen = null;
         stopSpeechSession();
         chatScreen = null;
         chatPresenter = null;
         treeBranchId = null;
         treeCanvasScreen = null;
         treeCanvasPresenter = null;
+        forestScreen = null;
+        forestPresenter = null;
         showingSettings = false;
         searchPresenter = null;
         libraryScreen = null;
@@ -679,6 +739,7 @@ public final class MainActivity extends Activity
     private void showSettings() {
         // Settings is a room opened from Home or Chat, not a bottom navigation destination.
         showingSettings = true;
+        personaIntroScreen = null;
         libraryScreen = null;
         libraryPresenter = null;
         keyAdminScreen = null;
@@ -694,10 +755,28 @@ public final class MainActivity extends Activity
         fileManagerPresenter = null;
         statsDetailScreen = null;
         statsDetailPresenter = null;
+        forestScreen = null;
+        forestPresenter = null;
         swap(settingsScreen);
         settingsPresenter.start();
         refreshProvidersSubtitle();
         refreshModelsSubtitle();
+    }
+
+    /**
+     * T-067: the static answer-style introduction. It reads nothing, so it needs no presenter; the
+     * host only remembers where it was opened from so Back returns there.
+     */
+    private void showPersonaIntro() {
+        personaIntroScreen = new PersonaIntroScreen(this);
+        personaIntroScreen.setOnBackPressed(this::onBackRequested);
+        swap(personaIntroScreen);
+    }
+
+    @Override
+    public void openPersonaIntro() {
+        personaIntroFromSettings = false;
+        showPersonaIntro();
     }
 
     /** Opens the API KEY room (settings redesign 2026-09-28). It shares the settings presenter, so
@@ -794,6 +873,50 @@ public final class MainActivity extends Activity
         statsDetailScreen.setOnBackPressed(this::onBackRequested);
         swap(statsDetailScreen);
         statsDetailPresenter.start();
+    }
+
+    /**
+     * T-068: the forest page, reached from the drawer's expansion slot. Built and dropped per visit
+     * like every other room, and read through the one forest port. The slip's arrow reuses
+     * {@link #showChat(String)}, so a tree opens exactly the conversation the library would open.
+     */
+    private void showForest() {
+        chatEntryRoute = null;
+        navigationBranchId = null;
+        navigationScreen = null;
+        navigationPresenter = null;
+        chatBranchId = null;
+        personaIntroScreen = null;
+        stopSpeechSession();
+        chatScreen = null;
+        chatPresenter = null;
+        treeBranchId = null;
+        treeCanvasScreen = null;
+        treeCanvasPresenter = null;
+        showingSettings = false;
+        searchPresenter = null;
+        libraryScreen = null;
+        libraryPresenter = null;
+        statsDetailScreen = null;
+        statsDetailPresenter = null;
+        forestScreen = new ForestScreen(this);
+        forestPresenter = new ForestPresenter(forestScreen, container.forestData(),
+                container.uiThread(), container.background());
+        forestScreen.setPresenter(forestPresenter);
+        forestScreen.setOnBackPressed(this::onBackRequested);
+        forestScreen.setOnBranchOpened(this::showChat);
+        forestScreen.setOnCreateFirstTopic(this::goCreateFirstTopic);
+        swap(forestScreen);
+        forestPresenter.start();
+    }
+
+    /**
+     * The empty forest's one exit: home, composer focused, keyboard up. The forest wrote nothing, so
+     * there is no state to hand over beyond the caret the learner asked for.
+     */
+    private void goCreateFirstTopic() {
+        showHome();
+        homeScreen.focusCreateEntry();
     }
 
     /** The SAF picker's request code; T-097 owns this one host-side flow. */
@@ -1011,12 +1134,15 @@ public final class MainActivity extends Activity
         navigationScreen = null;
         navigationPresenter = null;
         chatBranchId = null;
+        personaIntroScreen = null;
         stopSpeechSession();
         chatScreen = null;
         chatPresenter = null;
         treeBranchId = null;
         treeCanvasScreen = null;
         treeCanvasPresenter = null;
+        forestScreen = null;
+        forestPresenter = null;
         showingSettings = false;
         searchPresenter = new SearchPresenter(this, container.uiThread(), container.background(),
                 container.searchRepository());
@@ -1065,9 +1191,12 @@ public final class MainActivity extends Activity
         navigationScreen = null;
         navigationPresenter = null;
         chatBranchId = branchId;
+        personaIntroScreen = null;
         treeBranchId = null;
         treeCanvasScreen = null;
         treeCanvasPresenter = null;
+        forestScreen = null;
+        forestPresenter = null;
         showingSettings = false;
         searchPresenter = null;
         libraryScreen = null;
@@ -1137,9 +1266,12 @@ public final class MainActivity extends Activity
         navigationPresenter = null;
         treeBranchId = branchId;
         chatBranchId = null;
+        personaIntroScreen = null;
         stopSpeechSession();
         chatScreen = null;
         chatPresenter = null;
+        forestScreen = null;
+        forestPresenter = null;
         showingSettings = false;
         searchPresenter = null;
         libraryScreen = null;
@@ -1191,6 +1323,8 @@ public final class MainActivity extends Activity
         stopSpeechSession();
         chatScreen = null;
         chatPresenter = null;
+        forestScreen = null;
+        forestPresenter = null;
         showingSettings = false;
         searchPresenter = null;
         libraryScreen = null;
@@ -1237,8 +1371,15 @@ public final class MainActivity extends Activity
      *
      * <p>A first-level destination shows it and a second-level screen hides it, and that judgement is
      * made here rather than by each screen for itself: a bar every screen positioned on its own is a bar
-     * whose visibility drifts the first time a screen forgets. The predicate reads the shell's own
-     * knowledge of what it is showing, so it cannot disagree with the screen that was just swapped in.
+     * whose visibility drifts the first time a screen forgets. Since 2026-10-22 Scheme A the bar floats
+     * above the content instead of sitting in a column, and since T-2026-10-22-062 the room it needs is
+     * paid by the scrolling screens' own containers, not by this host. Padding the host stopped the
+     * viewport above the capsule, so nothing ever travelled under the glass and the translucency had
+     * nothing to be translucent over; a scroll container with {@code clipToPadding} off keeps the
+     * content passing under the bar while still landing the last row whole above it.
+     *
+     * <p>The predicate reads the shell's own knowledge of what it is showing, so it cannot disagree
+     * with the screen that was just swapped in.
      */
     private void swap(View screen) {
         host.removeAllViews();
@@ -1249,8 +1390,10 @@ public final class MainActivity extends Activity
         if (screen == homeScreen) {
             homeScreen.playEntrance();
         }
-        tabBar.setVisibility(screen == homeScreen || screen == libraryScreen
-                ? View.VISIBLE : View.GONE);
+        // The two first-level destinations are exactly the two screens that carry the clearance in
+        // their scroll container, so this predicate and those layouts describe the same fact.
+        boolean firstLevel = screen == homeScreen || screen == libraryScreen;
+        tabBar.setVisibility(firstLevel ? View.VISIBLE : View.GONE);
     }
 
     /** A first-level destination, by tab. The only way the level moves besides the tab tap itself. */

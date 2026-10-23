@@ -1,0 +1,182 @@
+{
+  "generatedAt": "2026-10-21T23:42:28.161Z",
+  "url": "http://127.0.0.1:5174/",
+  "browser": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+  "viewports": [
+    "1440x900",
+    "390x844"
+  ],
+  "shots": [
+    "desktop-home.png",
+    "desktop-home-nav-collapsed.png",
+    "desktop-chat.png",
+    "desktop-library.png",
+    "desktop-settings.png",
+    "narrow-home.png",
+    "narrow-sidebar-open.png",
+    "narrow-chat.png"
+  ],
+  "readings": [
+    {
+      "name": "桌面主页：雾面场景 + 玻璃侧栏/顶栏",
+      "expected": "screen=home，body 有雾面渐变，侧栏 54% 白并带 blur，1px 高光边",
+      "actual": {
+        "home": {
+          "screen": "home",
+          "overflowX": false,
+          "bodyImage": "repeating-linear-gradient(rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0) 27px, rgba(30, 43, 35, 0.02) 27px, rgba(30, 43, 35, 0.02) 28px), radial-gradient(1200px 900px at 82% 10%, rgba(255, 255, 255, 0.4), rgba(0, 0, 0, 0) 62%), radial-gradient(900px 720px at 78% 18%, rgba(43, 110, 69, 0.1), rgba(0, 0, 0, 0) 64%), radial-gradient(1000px 820px at 8% 78%, rgba(214, 169, 110, 0.14), rgba(0, 0, 0, 0) 66%), linear-gradient(135deg, rgb(246, 241, 231), rgb(243, 244, 238) 38%, rgb(232, 239, 233) 72%, rgb(236, 238, 230))",
+          "bodyColor": "rgb(243, 244, 238)"
+        },
+        "sidebar": {
+          "background": "rgba(255, 255, 255, 0.54)",
+          "image": "linear-gradient(rgba(255, 255, 255, 0.5), rgba(0, 0, 0, 0) 22%)",
+          "backdrop": "blur(28px) saturate(1.5)",
+          "shadow": "rgba(255, 255, 255, 0.88) 0px 0px 0px 1px inset, rgba(22, 36, 28, 0.07) 0px 12px 32px 0px",
+          "radius": "0px",
+          "display": "flex",
+          "width": 240
+        },
+        "topbar": {
+          "background": "rgba(255, 255, 255, 0.54)",
+          "image": "linear-gradient(rgba(255, 255, 255, 0.5), rgba(0, 0, 0, 0) 22%)",
+          "backdrop": "blur(28px) saturate(1.5)",
+          "shadow": "rgba(255, 255, 255, 0.88) 0px 0px 0px 1px inset, rgba(22, 36, 28, 0.07) 0px 12px 32px 0px",
+          "radius": "0px",
+          "display": "flex",
+          "width": 1200
+        }
+      },
+      "pass": true
+    },
+    {
+      "name": "桌面侧栏折叠",
+      "expected": "data-nav=collapsed、宽 76",
+      "actual": {
+        "nav": "collapsed",
+        "width": 76
+      },
+      "pass": true
+    },
+    {
+      "name": "桌面对话：86% 阅读面 + 玻璃输入区",
+      "expected": "screen=chat，阅读面 28px 圆角、86% 白、无第二层纸底，composer 72% 白 + blur + 高光边",
+      "actual": {
+        "chat": {
+          "screen": "chat",
+          "overflowX": false,
+          "answer": true
+        },
+        "reading": {
+          "background": "rgba(255, 255, 255, 0.86)",
+          "image": "linear-gradient(rgba(255, 255, 255, 0.5), rgba(0, 0, 0, 0) 22%)",
+          "backdrop": "blur(28px) saturate(1.5)",
+          "shadow": "rgba(255, 255, 255, 0.88) 0px 0px 0px 1px inset, rgba(22, 36, 28, 0.07) 0px 12px 32px 0px",
+          "radius": "28px",
+          "display": "block",
+          "width": 784
+        },
+        "composer": {
+          "background": "rgba(255, 255, 255, 0.72)",
+          "image": "linear-gradient(rgba(255, 255, 255, 0.5), rgba(0, 0, 0, 0) 22%)",
+          "backdrop": "blur(28px) saturate(1.5)",
+          "shadow": "rgba(255, 255, 255, 0.88) 0px 0px 0px 1px inset, rgba(22, 36, 28, 0.07) 0px 12px 32px 0px",
+          "radius": "28px",
+          "display": "block",
+          "width": 720
+        },
+        "dock": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "backdrop": "none",
+          "shadow": "rgba(22, 36, 28, 0.06) 0px -1px 0px 0px",
+          "radius": "0px",
+          "display": "block",
+          "width": 1200
+        }
+      },
+      "pass": true
+    },
+    {
+      "name": "桌面学习库：搜索字段玻璃化",
+      "expected": "screen=library、两行主题、搜索字段 50% 底 + 高光边、无横向溢出",
+      "actual": {
+        "library": {
+          "screen": "library",
+          "rows": 2,
+          "overflowX": false
+        },
+        "search": {
+          "background": "rgba(244, 241, 235, 0.5)",
+          "image": "none",
+          "backdrop": "none",
+          "shadow": "rgba(255, 255, 255, 0.88) 0px 0px 0px 1px inset, rgba(22, 36, 28, 0.07) 0px 12px 32px 0px",
+          "radius": "22px",
+          "display": "flex",
+          "width": 665
+        }
+      },
+      "pass": true
+    },
+    {
+      "name": "桌面设置：字段与只读入口玻璃化",
+      "expected": "screen=settings、字段 50% 底、入口 72% 底，均有高光边、无横向溢出",
+      "actual": {
+        "settings": {
+          "screen": "settings",
+          "overflowX": false
+        },
+        "field": {
+          "background": "color(srgb 0.971312 0.96316 0.945049 / 0.651373)",
+          "image": "none",
+          "backdrop": "none",
+          "shadow": "rgba(255, 255, 255, 0.88) 0px 0px 0px 1px inset, rgba(22, 36, 28, 0.07) 0px 12px 32px 0px",
+          "radius": "22px",
+          "display": "block",
+          "width": 648
+        },
+        "action": {
+          "background": "rgba(255, 255, 255, 0.72)",
+          "image": "none",
+          "backdrop": "none",
+          "shadow": "rgba(255, 255, 255, 0.88) 0px 0px 0px 1px inset, rgba(22, 36, 28, 0.07) 0px 12px 32px 0px",
+          "radius": "22px",
+          "display": "flex",
+          "width": 120
+        }
+      },
+      "pass": true
+    },
+    {
+      "name": "窄窗主页：无横向溢出，侧栏默认收起",
+      "expected": "390×844、nav=collapsed、无横向溢出",
+      "actual": {
+        "nav": "collapsed",
+        "overflowX": false
+      },
+      "pass": true
+    },
+    {
+      "name": "窄窗侧栏以玻璃覆盖层开合",
+      "expected": "nav=expanded、侧栏可见、50% 白 + blur",
+      "actual": {
+        "nav": "expanded",
+        "width": 240,
+        "left": 0,
+        "backdrop": "blur(28px) saturate(1.5)",
+        "background": "rgba(255, 255, 255, 0.54)"
+      },
+      "pass": true
+    },
+    {
+      "name": "窄窗对话：阅读面不溢出",
+      "expected": "screen=chat、无横向溢出、阅读面贴合视口",
+      "actual": {
+        "screen": "chat",
+        "overflowX": false,
+        "readingWidth": 380
+      },
+      "pass": true
+    }
+  ],
+  "failed": []
+}

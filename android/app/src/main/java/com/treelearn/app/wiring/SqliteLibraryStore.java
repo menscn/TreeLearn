@@ -40,6 +40,24 @@ public final class SqliteLibraryStore {
     }
 
     /**
+     * Every topic's forest tallies in one statement (T-068): the whole branch count, the archived
+     * subset, the last-use stamp and the stored style. Read-only like {@link #topics()}.
+     */
+    public List<TopicDao.ForestCount> forestCounts() {
+        return TopicDao.listForestCounts(helper.getWritableDatabase());
+    }
+
+    /**
+     * One topic's stored style through one of its branches, with the existing fallback flag.
+     * The forest sheet names the style; it must not grow a second reading rule.
+     *
+     * @return the style read, or null when no branch row carries this id
+     */
+    public TopicDao.PersonaRead personaOfBranch(String branchId) {
+        return TopicDao.personaOfBranch(helper.getWritableDatabase(), branchId);
+    }
+
+    /**
      * The archived branches of every topic, as the store holds them.
      *
      * <p>This is the completed segment's own read, and it is deliberately a thin one: identity,

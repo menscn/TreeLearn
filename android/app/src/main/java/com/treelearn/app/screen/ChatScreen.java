@@ -54,6 +54,7 @@ import com.treelearn.app.ui.math.MathNode;
 import com.treelearn.app.ui.math.MathView;
 import com.treelearn.core.domain.Annotation;
 import com.treelearn.core.domain.AnswerRevision;
+import com.treelearn.core.domain.Persona;
 import com.treelearn.core.domain.ReadingAnchor;
 import com.treelearn.core.domain.ReadingPosition;
 
@@ -134,6 +135,8 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
     private Runnable onVoiceReleased;
     private Runnable onVoiceGuidance;
     private final ModelThinkingPicker modelChip;
+    /** 2026-10-23: the topic's answer style, beside the model chip on the dock's tools line. */
+    private final PersonaPicker personaChip;
     private final TextView searchChip;
     private final Button send;
     /** T-075: the follow-latest key (073 §6); hidden while the view follows on its own. */
@@ -150,11 +153,14 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
     /** Marks arrive beside the view state because a highlight changes spans, not answer text. */
     private Map<String, List<Annotation>> annotationMarks = Collections.emptyMap();
 
-    /** The two cards that hang over an answer: the selection menu, and the child-branch list. */
+    /** The selection card that hangs over an answer. */
     private WordMenuPopup wordMenu;
     private String wordMenuMessageId = "";
-    private ChildBranchPopup childrenPopup;
-    private String childrenPopupMessageId = "";
+    /**
+     * The message whose inline child-branch stack is open, or empty when none is. At most one
+     * answer shows its children at a time, which is the same "one list at a time" the popup had.
+     */
+    private String openBranchesMessageId = "";
 
     private ChatActions actions;
     private boolean rendering;
@@ -271,6 +277,7 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         });
         draft = findViewById(R.id.chat_draft);
         modelChip = findViewById(R.id.chat_model_chip);
+        personaChip = findViewById(R.id.chat_persona_chip);
         searchChip = findViewById(R.id.chat_search_chip);
         send = findViewById(R.id.chat_send);
         followSlot = findViewById(R.id.chat_follow_slot);
@@ -374,6 +381,17 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
                 actions.onThinkingToggled(enabled);
             }
         });
+        personaChip.setListener(new PersonaPicker.Listener() {
+            @Override
+            public void onPersonaSelected(Persona persona) {
+                actions.onPersonaSelected(persona);
+            }
+
+            @Override
+            public void onIntroRequested() {
+                actions.onPersonaIntroPressed();
+            }
+        });
     }
 
     /** Repaints the marks handed over by the presenter's read without rebuilding the conversation. */
@@ -446,7 +464,7 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             error.setVisibility(state.phase == ChatViewState.Phase.ERROR ? VISIBLE : GONE);
             renderMessages(state);
             dismissWordMenuIfUnavailable(state);
-            dismissChildrenPopupIfUnavailable(state);
+            collapseBranchesIfUnavailable(state);
             renderNotice(state.notice);
             renderSourceCard(state);
             renderQuote(state.quote);
@@ -461,6 +479,7 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             renderFullscreen(state);
             renderSearchChip(state);
             modelChip.render(state.model, state.thinkingEnabled);
+            personaChip.render(state.persona);
             if (state.phase == ChatViewState.Phase.READY) {
                 settle(state);
                 renderStageChange(state);
@@ -1034,14 +1053,20 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
      * is the one place that knows how a branch is opened.
      */
     public void showChildren(String messageId, List<ChildBranch> children,
-            ChildBranchPopup.Listener listener) {
-        dismissPopups();
+            Consumer<String> listener) {
+        dismissWordMenu();
         Row row = rows.get(messageId);
         if (row == null || children.isEmpty()) {
             return;
         }
-        childrenPopup = ChildBranchPopup.show(row.childrenAnchor(), children, listener);
-        childrenPopupMessageId = messageId;
+        if (!messageId.equals(openBranchesMessageId)) {
+            Row previous = rows.get(openBranchesMessageId);
+            if (previous != null) {
+                previous.hideChildren();
+            }
+        }
+        row.showChildren(children, listener);
+        openBranchesMessageId = messageId;
     }
 
     /**
@@ -1049,7 +1074,7 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
      * card was already up: two menus over two answers at once would be two selections to reason about.
      */
     private void showWordMenu(Row row) {
-        dismissPopups();
+        dismissWordMenu();
         if (row != null) {
             wordMenu = row.openWordMenu();
             wordMenuMessageId = wordMenu == null ? "" : row.messageId;
@@ -1057,15 +1082,10 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
     }
 
     /**
-     * A card must not outlive the selection or the row it was opened from. The fields are cleared
-     * before the cards are told to close, so a card's own "I am gone" callback cannot start the
+     * A card must not outlive the selection or the row it was opened from. The field is cleared
+     * before the card is told to close, so the card's own "I am gone" callback cannot start the
      * dismissal over from the top.
      */
-    private void dismissPopups() {
-        dismissWordMenu();
-        dismissChildrenPopup();
-    }
-
     private void dismissWordMenu() {
         WordMenuPopup menu = wordMenu;
         wordMenu = null;
@@ -1091,31 +1111,27 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         }
     }
 
-    private void dismissChildrenPopupIfUnavailable(ChatViewState state) {
-        if (childrenPopup == null) {
+    /** The inline stack must not outlive the children it was opened for. */
+    private void collapseBranchesIfUnavailable(ChatViewState state) {
+        if (openBranchesMessageId.isEmpty()) {
             return;
         }
         for (ChatMessage message : state.messages) {
-            if (message.messageId.equals(childrenPopupMessageId)
+            if (message.messageId.equals(openBranchesMessageId)
                     && message.isStable() && message.hasChildren()) {
                 return;
             }
         }
-        dismissChildrenPopup();
-    }
-
-    private void dismissChildrenPopup() {
-        ChildBranchPopup children = childrenPopup;
-        childrenPopup = null;
-        childrenPopupMessageId = "";
-        if (children != null) {
-            children.close();
+        Row row = rows.get(openBranchesMessageId);
+        if (row != null) {
+            row.hideChildren();
         }
+        openBranchesMessageId = "";
     }
 
     @Override
     protected void onDetachedFromWindow() {
-        dismissPopups();
+        dismissWordMenu();
         scroll.removeCallbacks(scrollSettled);
         ReadingAnchor anchor;
         if (speaker != null) {
@@ -1153,6 +1169,9 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         private final View translation;
         private final TextView translationHeader;
         private final TextView translationText;
+        /** The inline child-branch stack: a label, the rail, and the rows the presenter handed over. */
+        private final View branchSection;
+        private final LinearLayout branchList;
 
         private String messageId = "";
         private ChatMessage message;
@@ -1202,6 +1221,8 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             translation = root.findViewById(R.id.chat_translation);
             translationHeader = (TextView) root.findViewById(R.id.chat_translation_header);
             translationText = (TextView) root.findViewById(R.id.chat_translation_text);
+            branchSection = root.findViewById(R.id.chat_branch_section);
+            branchList = root.findViewById(R.id.chat_branch_list);
             disclosure.setListener(this);
             actionBar.setListener(this);
             translationHeader.setOnClickListener(view -> ChatScreen.this.fire(actions -> {
@@ -1630,7 +1651,7 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             @Override
             public void onDestroyActionMode(ActionMode mode) {
                 selectionMode = null;
-                dismissPopups();
+                dismissWordMenu();
             }
         }
 
@@ -1825,9 +1846,29 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             fire(actions -> actions.onChildrenPressed(id));
         }
 
-        /** The row's 子分支 entry is the list's anchor, so the list opens where it was asked for. */
-        View childrenAnchor() {
-            return actionBar;
+        /**
+         * Draws the presenter's children under this answer. The rows are rebuilt on every call: the
+         * list is small, and each child's unread count is part of what was handed over, so a stale row
+         * would report a count nobody just read.
+         */
+        void showChildren(List<ChildBranch> children, Consumer<String> listener) {
+            branchList.removeAllViews();
+            LayoutInflater inflater = LayoutInflater.from(getContext());
+            for (ChildBranch child : children) {
+                View childRow = inflater.inflate(R.layout.item_child_branch, branchList, false);
+                ((TextView) childRow.findViewById(R.id.child_branch_title)).setText(child.title);
+                TextView unread = childRow.findViewById(R.id.child_branch_unread);
+                unread.setText(getContext().getString(R.string.chat_children_unread, child.unreadCount));
+                unread.setVisibility(child.unreadCount > 0 ? VISIBLE : GONE);
+                childRow.setOnClickListener(view -> listener.accept(child.branchId));
+                branchList.addView(childRow);
+            }
+            branchSection.setVisibility(VISIBLE);
+        }
+
+        void hideChildren() {
+            branchSection.setVisibility(GONE);
+            branchList.removeAllViews();
         }
 
     }

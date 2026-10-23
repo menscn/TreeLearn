@@ -35,13 +35,26 @@ body {
 .app-tab {
   flex: 1 1 0;
   appearance: none;
+  align-items: center;
   border: 0;
   background: none;
   color: var(--ink3);
+  display: flex;
+  flex-direction: column;
   font: inherit;
   font-size: var(--fs-sm);
+  gap: var(--s1);
   padding: var(--s2) 0;
   text-align: center;
+}
+
+.icon {
+  display: block;
+  flex: none;
+  height: var(--s6);
+  max-height: 100%;
+  max-width: 100%;
+  width: var(--s6);
 }
 
 .screen {
@@ -54,8 +67,8 @@ body {
 .appbar {
   display: flex;
   align-items: center;
-  gap: var(--s2);
-  flex-wrap: wrap;
+  gap: 0;
+  flex-wrap: nowrap;
 }
 
 .appbar-plain {
@@ -63,16 +76,28 @@ body {
 }
 
 .appbar-brand {
+  align-items: center;
   color: var(--green-deep);
+  display: flex;
   font-family: var(--kai);
   font-size: var(--fs-brand);
+  gap: var(--s2);
   margin-inline: auto;
+}
+
+.appbar-brand .icon {
+  color: var(--green-deep);
 }
 
 .appbar-title {
   color: var(--ink);
+  flex: 1 1 auto;
   font-size: var(--fs-h1);
-  margin-inline-end: auto;
+  min-width: 0;
+  overflow: hidden;
+  padding-inline: var(--s2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .node-tap,
@@ -94,6 +119,35 @@ body {
 
 .node-tap:active {
   background: var(--green-faint);
+}
+
+.node-icon,
+.node-inline {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+}
+
+.node-icon {
+  color: var(--ink2);
+  height: 44px;
+  padding: 0;
+  width: 44px;
+}
+
+.node-inline {
+  gap: var(--s1);
+  padding: var(--s1) var(--s2);
+}
+
+.node-inline .icon {
+  color: var(--ink2);
+  height: 15px;
+  width: 15px;
+}
+
+.node-label {
+  min-width: 0;
 }
 
 .composer {
@@ -119,25 +173,60 @@ body {
 }
 
 .chip {
+  align-items: center;
   background: var(--green-faint);
   border-radius: var(--r-full);
   color: var(--green-deep);
+  display: inline-flex;
   font-size: var(--fs-cap);
+  gap: var(--s1);
   padding: var(--s1) var(--s2);
 }
 
+.chip .icon {
+  color: var(--ink2);
+}
+
+.chip .chip-effort {
+  height: 15px;
+  width: 15px;
+}
+
+.chip .chip-chevron {
+  height: 11px;
+  width: 11px;
+}
+
 .composer-send {
+  align-items: center;
   background: var(--green);
   border-radius: var(--r-full);
-  height: var(--s6);
+  color: var(--surface);
+  display: flex;
+  height: 44px;
+  justify-content: center;
   margin-inline-start: auto;
+  width: 44px;
+}
+
+.composer-send .icon {
+  height: var(--s6);
   width: var(--s6);
 }
 
 .section-title {
+  align-items: center;
   color: var(--ink2);
+  display: flex;
   font-size: var(--fs-h2);
+  gap: var(--s2);
   margin: 0 0 var(--s2);
+}
+
+.section-title .icon {
+  color: var(--ink3);
+  height: var(--s4);
+  width: var(--s4);
 }
 
 .section-count {
@@ -227,6 +316,18 @@ body {
   margin: var(--s1) 0 0;
 }
 
+.topic-meta {
+  align-items: center;
+  display: flex;
+  gap: var(--s1);
+}
+
+.topic-meta .icon {
+  color: var(--ink3);
+  height: var(--s3);
+  width: var(--s3);
+}
+
 .row {
   background: var(--surface);
   border: 1px solid var(--hairline);
@@ -280,12 +381,21 @@ body {
 }
 
 .search-hint {
+  align-items: center;
   border: 1px solid var(--hairline);
   border-radius: var(--r-md);
   color: var(--ink3);
+  display: flex;
   font-size: var(--fs-sm);
+  gap: var(--s2);
   margin: 0;
   padding: var(--s2) var(--s3);
+}
+
+.search-icon {
+  color: var(--ink3);
+  height: var(--s4);
+  width: var(--s4);
 }
 
 .suggestion-row {

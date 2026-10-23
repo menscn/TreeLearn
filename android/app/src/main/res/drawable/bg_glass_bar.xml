@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Glass chrome capsule (2026-10-22 Scheme A): the topbar and the floating tab bar share this shape.
+  The fully rounded corner is what makes the chrome read as a capsule rather than a strip; the 1px
+  highlight edge is the same glass edge every other surface carries, so the old divider is gone.
+
+  The stack is the same two layers every glass face here carries: a top sheen underneath, the
+  translucent tint over it. The proposal paints that highlight on `.glass` (radial 52% white) and
+  glass.css paints it on `.workspace-topbar` (linear 50% -> transparent at 22%), so a chrome face
+  without it is not a lighter material - it is the only face in the app missing the light source.
+
+  The fill's diagonal is the proposal's: angle 315 is the nearest multiple of 45° to CSS 145deg
+  (the 10° gap is registered as mechanical equivalence in T-2026-10-22-061), and the dark end is the
+  surface's own alpha times the single falloff token. A flat translucent fill is what measured as
+  "a film laid on the page".
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="270"
+                android:endColor="@android:color/transparent"
+                android:startColor="@color/glass_sheen" />
+            <corners android:radius="@dimen/radius_full" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="315"
+                android:endColor="@color/glass_chrome_lo"
+                android:startColor="@color/glass_chrome" />
+            <stroke android:width="@dimen/hairline" android:color="@color/glass_edge" />
+            <corners android:radius="@dimen/radius_full" />
+        </shape>
+    </item>
+</layer-list>

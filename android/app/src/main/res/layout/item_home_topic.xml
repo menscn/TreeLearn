@@ -2,7 +2,10 @@
 <!--
   One home history-topic card: the prototype's .topic-card
   (Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html lines 170-173 and 1730-1751), three stacked
-  parts - a top row of unread dot + serif title, a two-line summary, and a meta line.
+  parts - a top row of unread dot + sans title + open chevron, a two-line summary, and a meta line.
+
+  The chevron is Scheme A's own (2026-10-22): it states that the whole card opens the conversation,
+  and it is decoration on the card's one tap target - not a second, smaller action.
 
   Two things this markup deliberately does not carry:
 
@@ -26,7 +29,10 @@
     android:focusable="true"
     android:minHeight="@dimen/touch_min"
     android:orientation="vertical"
-    android:padding="@dimen/space_s4">
+    android:paddingStart="@dimen/topic_pad_h"
+    android:paddingTop="@dimen/topic_pad_v"
+    android:paddingEnd="@dimen/topic_pad_h"
+    android:paddingBottom="@dimen/topic_pad_v">
 
     <LinearLayout
         android:id="@+id/home_topic_top"
@@ -50,39 +56,50 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:ellipsize="end"
-            android:fontFamily="serif"
             android:maxLines="2"
             android:textColor="@color/tl_ink"
-            android:textSize="@dimen/text_h2" />
+            android:textSize="@dimen/text_sm"
+            android:textStyle="bold" />
+
+        <!-- Scheme A's .topic .chev: the card is the tap target, and the chevron states that the
+             whole card opens the conversation rather than offering a second, smaller action. -->
+        <ImageView
+            android:id="@+id/home_topic_chevron"
+            android:layout_width="@dimen/topic_chevron"
+            android:layout_height="@dimen/topic_chevron"
+            android:layout_marginStart="@dimen/space_s2"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_chevron_right"
+            android:tint="@color/tl_ink3" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/home_topic_summary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/space_s2"
+        android:layout_marginTop="@dimen/space_s1"
         android:ellipsize="end"
-        android:lineSpacingMultiplier="1.7"
+        android:lineSpacingMultiplier="1.55"
         android:maxLines="2"
         android:textColor="@color/tl_ink2"
-        android:textSize="@dimen/text_sm"
+        android:textSize="@dimen/text_cap"
         android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/home_topic_meta_row"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/space_s3"
+        android:layout_marginTop="@dimen/topic_meta_top"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <ImageView
             android:id="@+id/home_topic_tree"
-            android:layout_width="@dimen/space_s3"
-            android:layout_height="@dimen/space_s3"
+            android:layout_width="@dimen/topic_meta_icon"
+            android:layout_height="@dimen/topic_meta_icon"
             android:importantForAccessibility="no"
             android:src="@drawable/ic_tree_branch"
-            android:tint="@color/tl_ink3" />
+            android:tint="@color/tl_green" />
 
         <TextView
             android:id="@+id/home_topic_meta"

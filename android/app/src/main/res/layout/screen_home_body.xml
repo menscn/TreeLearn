@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The home page as the prototype draws it (T-003): the column stacks from the top instead of centring
-  a group, and the order is the prototype's own - appbar, brand lockup with the empty-state slogan,
-  composer, recommendations, history. The brand lockup is a horizontal "sprout + 知芽"; the slogan is
-  shown only while the home has no history topics (HomeViewState.hasTopics, read by HomeScreen).
+  The home page as Scheme A draws it (2026-10-22): a glass capsule topbar, the large serif brand
+  lockup with its sans subtitle, the tall glass composer, recommendations and history. The column
+  stacks from the top and the order is the proposal's own - topbar, brand, composer, recommendations,
+  history.
+
+  The subtitle is always shown since Scheme A always shows it. It keeps the `home_hero_title` id and
+  the existing copy (the 2026-10-22 decision changed placement, not wording); only its type changed
+  from a serif headline to the proposal's 12sp sans line.
+
+  The topbar carries no attachment entry: since 2026-10-22 the home has no end-to-end path from a
+  draft to a first-message attachment, and the user's rule is to delete an entry that cannot reach
+  real data rather than leave a button that does nothing.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/home_content"
@@ -15,20 +23,24 @@
     <LinearLayout
         android:id="@+id/home_appbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/topbar_height"
+        android:layout_marginStart="@dimen/space_s4"
+        android:layout_marginTop="@dimen/topbar_offset"
+        android:layout_marginEnd="@dimen/space_s4"
+        android:background="@drawable/bg_glass_bar"
+        android:elevation="@dimen/glass_capsule_elevation"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingStart="@dimen/page_gutter"
-        android:paddingTop="@dimen/space_s4"
-        android:paddingEnd="@dimen/page_gutter">
+        android:paddingStart="@dimen/space_s2"
+        android:paddingEnd="@dimen/space_s2">
 
         <ImageView
             android:id="@+id/home_drawer_button"
-            android:layout_width="@dimen/touch_min"
-            android:layout_height="@dimen/touch_min"
-            android:layout_marginStart="-8dp"
+            android:layout_width="@dimen/topbar_icon"
+            android:layout_height="@dimen/topbar_icon"
             android:background="@drawable/bg_icon_button"
             android:contentDescription="@string/cd_home_drawer"
+            android:padding="@dimen/space_s2"
             android:scaleType="centerInside"
             android:src="@drawable/ic_nav_menu"
             android:tint="@color/tl_ink2" />
@@ -40,10 +52,11 @@
 
         <ImageView
             android:id="@+id/home_settings_button"
-            android:layout_width="@dimen/touch_min"
-            android:layout_height="@dimen/touch_min"
+            android:layout_width="@dimen/topbar_icon"
+            android:layout_height="@dimen/topbar_icon"
             android:background="@drawable/bg_icon_button"
             android:contentDescription="@string/cd_home_settings"
+            android:padding="@dimen/space_s2"
             android:scaleType="centerInside"
             android:src="@drawable/ic_chat_gear"
             android:tint="@color/tl_ink2" />
@@ -55,8 +68,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingStart="@dimen/page_gutter"
-        android:paddingEnd="@dimen/page_gutter"
+        android:paddingStart="@dimen/space_s4"
+        android:paddingTop="@dimen/home_body_top"
+        android:paddingEnd="@dimen/space_s4"
         android:paddingBottom="@dimen/space_s4">
 
         <LinearLayout
@@ -65,14 +79,13 @@
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:orientation="vertical"
-            android:paddingTop="@dimen/space_s4"
-            android:paddingBottom="@dimen/space_s6">
+            android:paddingTop="@dimen/home_brand_top"
+            android:paddingBottom="@dimen/home_brand_bottom">
 
             <LinearLayout
                 android:id="@+id/home_brand_lockup"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/space_s2"
                 android:gravity="center"
                 android:orientation="horizontal">
 
@@ -84,14 +97,18 @@
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_brand_sprout" />
 
-                <TextView
+                <!-- The height is the proposal's line-height: 1, not wrap_content: the bundled
+                     serif's 2.858em CFF line box otherwise pushes the subtitle 52dp down
+                     (2026-10-22 walkthrough). WordmarkTextView centres the font box in this frame. -->
+                <com.treelearn.app.screen.WordmarkTextView
                     android:id="@+id/home_brand"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/space_s2"
-                    android:fontFamily="serif"
+                    android:layout_height="@dimen/brand_line_height"
+                    android:layout_marginStart="@dimen/space_s3"
+                    android:fontFamily="@font/noto_serif_sc"
+                    android:letterSpacing="0.06"
                     android:text="@string/app_name"
-                    android:textColor="@color/tl_ink"
+                    android:textColor="@color/tl_green_deep"
                     android:textSize="@dimen/text_brand"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -100,23 +117,28 @@
                 android:id="@+id/home_hero_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="serif"
+                android:layout_marginTop="@dimen/space_s3"
                 android:gravity="center"
-                android:lineSpacingMultiplier="1.5"
+                android:letterSpacing="0.06"
+                android:lineSpacingMultiplier="1.6"
                 android:text="@string/home_hero_title"
                 android:textAlignment="center"
-                android:textColor="@color/tl_ink"
-                android:textSize="@dimen/text_h1" />
+                android:textColor="@color/tl_ink2"
+                android:textSize="@dimen/text_home_sub" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/home_composer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_card"
+            android:background="@drawable/bg_glass_composer"
             android:elevation="@dimen/card_elevation"
+            android:minHeight="@dimen/composer_min_height"
             android:orientation="vertical"
-            android:padding="@dimen/space_s4">
+            android:paddingStart="@dimen/composer_pad"
+            android:paddingTop="@dimen/composer_pad"
+            android:paddingEnd="@dimen/composer_pad"
+            android:paddingBottom="@dimen/composer_pad_bottom">
 
             <com.treelearn.app.screen.RuleEditText
                 android:id="@+id/home_draft"
@@ -130,12 +152,12 @@
                 android:paddingBottom="0dp"
                 android:textColor="@color/tl_ink"
                 android:textColorHint="@color/tl_ink3"
-                android:textSize="@dimen/text_body" />
+                android:textSize="@dimen/text_composer" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_s2"
+                android:layout_marginTop="@dimen/composer_row_top"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -155,6 +177,9 @@
                     android:layout_height="1dp"
                     android:layout_weight="1" />
 
+                <!-- The send control keeps the project's 44dp touch minimum; Scheme A draws a 40dp
+                     circle, and shrinking to it would put the one irreversible action below the
+                     repository's accessibility floor. The 4dp difference is registered in 055. -->
                 <ImageButton
                     android:id="@+id/home_send"
                     android:layout_width="@dimen/touch_min"
@@ -227,12 +252,12 @@
             android:id="@+id/home_recent_section"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_s6"
+            android:layout_marginTop="@dimen/space_s4"
             android:orientation="vertical">
 
             <!-- The prototype's .home-sec: a short heading and a count on one baseline, the count
                  empty while there is nothing to count. The horizontal gutter comes from home_primary,
-                 which already carries page_gutter for the whole column. -->
+                 which already carries the body gutter for the whole column. -->
             <LinearLayout
                 android:id="@+id/home_recent_head"
                 android:layout_width="match_parent"
@@ -276,7 +301,7 @@
                 android:id="@+id/home_recent_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_s3"
+                android:layout_marginTop="@dimen/space_s2"
                 android:orientation="vertical"
                 android:visibility="gone" />
         </LinearLayout>

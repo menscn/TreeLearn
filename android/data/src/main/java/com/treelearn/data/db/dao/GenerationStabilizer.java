@@ -125,7 +125,7 @@ public final class GenerationStabilizer {
         }
         DomainResult<AnswerRevision> created = AnswerRevision.create(row.messageId, revisionNo,
                 row.partialReasoning, row.partialAnswer, row.model, row.thinkingEnabled,
-                row.promptPolicyVersion, now);
+                row.persona, row.promptPolicyVersion, now);
         if (created.isFailure()) {
             throw refuse(created);
         }

@@ -482,7 +482,7 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
 | 类型 | 职责 | 关键不变量 |
 | :--- | :--- | :--- |
 | `AppContainer` | 依赖装配：真实 `SettingsRepository` + `KeystoreSecretStore`、单后台线程、主 Looper 的 `UiThread` | 只持 application context，不持 Activity；所有 store 调用串行在一条线程上 |
-| `MainActivity` | 应用外壳：在 `R.id.shell_host` 里换屏 + 常驻 `R.id.tab_bar` 的显隐与高亮；`R.id.shell_backdrop` 统一绘制全站纸纹，实现 `HomeSink` + `SettingsSink` + `ChatSink` + `TreeCanvasSink` + `NavigationSink` + `SearchPresenter.Sink` + `LibrarySink` | 自己不持草稿、不持状态、不做决策；纸纹是外壳唯一全屏装饰层，页面根布局保持透明；每个屏幕的系统返回由它统一接管（见「系统返回」）；一级 / 二级的分别只由 `swap()` 与 `showTab()` 两处判定（T-052/T-010） |
+| `MainActivity` | 应用外壳：在 `R.id.shell_host` 里换屏 + 常驻 `R.id.tab_bar` 的显隐与高亮；`R.id.shell_backdrop` 统一绘制全站纸纹，实现 `HomeSink` + `SettingsSink` + `ChatSink` + `TreeCanvasSink` + `NavigationSink` + `SearchPresenter.Sink` + `LibrarySink` | 自己不持草稿、不持状态、不做决策；纸纹是外壳唯一全屏装饰层，页面根布局保持透明；每个屏幕的系统返回由它统一接管（见「系统返回」）；一级 / 二级的分别只由 `swap()` 与 `showTab()` 两处判定（T-052/T-010）；`swap()` 只切胶囊显隐，不再给 `shell_host` 加底部内边距——让位归属见「应用外壳」表的 `activity_main.xml` 行（T-2026-10-22-062） |
 | `ui.HomePresenter` | 首页的全部决策 | 草稿只在 accepted 分支清空；推荐点击先写入草稿再走同一条 `onSubmit()`；缺 Key 时只提示并跳设置，**不写任何行**；055 起不再承载搜索/归档/设置导航与列表改名删除动作（落点：标签栏与学习库）。**2026-09-28：`load()` 分两次 post**——历史主题一读到就下发（带它蕴含的相位），推荐条随后单独 post。推荐条是派生物、生产时可能阻塞在模型流上（上限 `BlockingDerivedCaller.TIMEOUT_SECONDS`），合并下发会让卡片在 provider 应答前一直不出现；推荐失败只清空条本身，页面保持第一次 post 的可用状态（PRD 6.2.17 exception 3） |
 | `ui.HomeViewState` | 首页可绘制的全部状态（相位/草稿/Key/模型/思考/历史主题/推荐/提交中/提示） | 四相位 LOADING/EMPTY/ERROR/READY；`topics` 是按最近使用排序的历史来源，首页最多绘制三条并可点击恢复；`hasTopics()` 是「有没有历史主题」的**唯一**判定点——主标语是否出现、推荐区标题取哪一句、区头计数画不画，三处读的都是它；`Notice` 是分类不是句子；两个列表不可变 |
 | `ui.SettingsPresenter` | 设置段决策：读 Key 状态、保存/替换、删除 | Key 文本从不进入任何 ViewState；缓冲区归它所有并 `finally` 擦除，成功失败都擦。**2026-09-28 设置页重设计起它同时服务两个视图**：根页（只读状态画入口行副标题）与 API KEY 二级页（表单动作），渲染由 `MainActivity.render(SettingsViewState)` 按 `keyAdminScreen` 是否在屏路由 |
@@ -492,7 +492,7 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
 | `screen.HomeScreen` / `screen.SettingsScreen` | 两个视图：只转发手势 + 按 ViewState 绘制 | 唯一本地状态是「回填抑制」（渲染自己写进去的文本不再回调 presenter，避免光标跳动）；历史主题区只画最近 3 条（`MAX_RECENT`，快捷面而非全量列表），区头计数只在 `hasTopics()` 时出现、无主题时改画空态句；卡片的可选部位（摘要行、未读点）由 `ui.TopicCard` 的实际字段决定，空摘要不留占位句；卡片的 content description 把未读数一并说出来，不靠那颗蓝点独自承担这个事实。**2026-09-28 设置页重设计：`SettingsScreen` 是纯分组导航列表**（「AI 提供商」「能力」两张 flush 卡 + 行间发丝线，全部入口行用 `ic_chevron_right`），不再承载任何表单；Key 的健康度画在「API KEY · DeepSeek」入口行副标题（掩码 + 判定，读同一个 `SettingsViewState`） |
 | `screen.SettingsKeyScreen` | API KEY 二级页（2026-09-28 设置页重设计自根页迁入）：状态卡（掩码 + 三态 pill + 删除文字链）与替换表单卡（输入框 + 44dp 绿底白勾图标按钮同行） | 原 `SettingsScreen` 的密钥处理规则原样随迁：Key 永不成为 `String`（char[] 缓冲移交 presenter 并擦除）、只见掩码、离开窗口即清输入框；全页唯一实心元素是保存图标（`bg_save_ico`/`ic_check`，带 contentDescription）；删除是红色文字链 + `AlertDialog` 确认，永不与保存同排同权；Key 缺失时删除链接与分隔线同隐 |
 | `screen.ModelThinkingPicker` | 输入框内的模型/思考贴附式弹层 | 锚定当前标识；下方空间不足时向上翻转，始终不遮挡触发它的标识 |
-| `screen.RecommendationMarquee` | 首页推荐区 | 推荐项拆成上下两条独立轨道；每条 chip 画两份并按一份宽度回跳，接缝永不可见；上行向左、下行向右；触摸暂停、离手 2.6 s 恢复；离屏/未附加/窄到不可滚动时停滚；chip 是「类别胶囊 + 文本 + 右箭头」三段，其中**文案与两档底色不在此判定**，只向 `screen.RecommendationTag` 取（T-2026-09-27-005）。**2026-09-28 起两条轨道画在 `screen.EdgeFadeLayout` 里**，由它一次性羽化整块左右边缘；`render(...)` 在同一批 chip 上**不做任何事**（按值比较，`HomeScreen` 每次击键都会把整个 state 交下来，重建轨道会让滚动位置归零并重放首帧）。**2026-10-16 性能轮**：步进从 1px/帧改成 2px/33ms（同速、少一半重绘），并加 `isWorthDrawing()` 四道闸（`isShown` / `hasWindowFocus` / `ChatMotion.reduced` / `getGlobalVisibleRect`）——动画缩放为 0 时不漂，因为漂移就是一种动效，而 `ChatMotion` 是本应用读 `ANIMATOR_DURATION_SCALE` 的唯一入口。ALP-AN00 实测：首页空转 10 s = 299 帧（≈30 fps，改前 63 fps 且 `Number High input latency` 读数 2501，改后同窗口 0-2）；`settings put global animator_duration_scale 0` 后同窗口 0 帧。复算：`adb -s <serial> shell dumpsys gfxinfo com.treelearn reset` → 等 10 s → `dumpsys gfxinfo com.treelearn | grep -E "Total frames|High input latency"` |
+| `screen.RecommendationMarquee` | 首页推荐区 | 推荐项拆成上下两条独立轨道；每条 chip 画两份并按一份宽度回跳，接缝永不可见；上行向左、下行向右；触摸暂停、离手 2.6 s 恢复；离屏/未附加/窄到不可滚动时停滚；chip 是「类别胶囊 + 文本 + 右箭头」三段，其中**文案与两档底色不在此判定**，只向 `screen.RecommendationTag` 取（T-2026-09-27-005）。**2026-09-28 起两条轨道画在 `screen.EdgeFadeLayout` 里**，由它一次性羽化整块左右边缘；`render(...)` 在同一批 chip 上**不做任何事**（按值比较，`HomeScreen` 每次击键都会把整个 state 交下来，重建轨道会让滚动位置归零并重放首帧）。**2026-10-16 性能轮**：步进从 1px/帧改成 2px/33ms（同速、少一半重绘），并加可见性闸（`isShown` / `hasWindowFocus` / `getGlobalVisibleRect`）。**2026-10-22 走查修正**：原先第四道闸 `ChatMotion.reduced` 已删除——PRD 6.2.17 第 2 条要求推荐区自动横向滚动、用户触摸即暂停，例外 4 只豁免离屏/后台，不豁免低动效；漂移是内容行为而不是入场动效，动画缩放为 0 的手机上不滚已被用户报为缺陷。入场动效仍统一由 `ChatMotion` 读缩放。ALP-AN00 实测（动画缩放非 0 的窗口）：首页空转 10 s = 299 帧（≈30 fps，改前 63 fps 且 `Number High input latency` 读数 2501，改后同窗口 0-2）。复算：`adb -s <serial> shell dumpsys gfxinfo com.treelearn reset` → 等 10 s → `dumpsys gfxinfo com.treelearn | grep -E "Total frames|High input latency"` |
 | `screen.EdgeFadeLayout` | 会羽化自己左右边缘的纵向容器（2026-09-28，同日两次修正） | 原型的 `mask-image:linear-gradient(90deg,transparent,#000 20px,#000 calc(100% - 20px),transparent)`（挂在 `.rec-row` 每行上）。Android 用 **`DST_IN`** 复刻：`dst_in = dst × src_alpha`，与 CSS mask 的 alpha 语义**一致**，故渐变数组**照抄原型**（两端 `transparent`=隐藏、中间 `#000`=显示），不需要补集。**首版用 `DST_OUT` + 补集数组是真机翻车后修正的**：`DST_OUT`（`dst × (1 − src_alpha)`）在 `drawRect` 上整块生效——source alpha 取自 `Paint`（默认 255）而非 shader，结果整条推荐带被一次擦光，只剩块外边框，实机读数见 `artifacts/evidence/home-fade-fix-2026-09-28.log` 前的截图量测。宽度取 `rec_fade_width`（20dp）。遮罩挂在**包住两行的块**上——这与原型（每行各挂）不同，是有意的偏离：两行一起淡出只需一次离屏绘制，也不会在两行之间留接缝；原型的渐变从**物理左**起算（`90deg` 且 stop 未按逻辑序写），故 RTL 下不对称是**照抄原型**，不是缺陷；宽度 ≤ 两倍羽化宽度时保留硬边而不是整块隐去 |
 | `screen.RecommendationTag` | 推荐类别 → 标签文案与底色档的**唯一判定点**（T-2026-09-27-005） | 三类 `Kind` 全部手写、**无 `default:` 兜底**——新增一类而不给标签是编译错误，而不是悄悄落到「入门」（旧实现正因有这个兜底，评审 M7 读不出「三类是否都接上」）；底色只有两档：品牌档（`green_soft` 底 + `green_deep` 字）只给「顺着你学的」，其余走中性档（`line` 底 + `ink3` 字），全取既有 token；`item_recommendation.xml` 不再自带 `backgroundTint`/`textColor` |
 | `screen.PaperRules` | 全站纸纹与输入框信纸格线的**同一个**画线实现（T-2026-09-27-002/004/010） | 线距、相位与两个派生色（`paper_rule` / `paper_write`）都在这里算；纹理与信纸只有颜色不同，不写第二套线距；两个具名入口 `pageRuleColour` / `writingRuleColour` 是「谁叠在谁上面」的唯一定义点 |
@@ -539,7 +539,7 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
   别名化会让「改页面边距」顺带移动羽化宽度。
 - **与原型的有意偏差**（逐条可核，理由见规格的偏差表）：不做 hover 态；推荐卡与类别胶囊高度按 `touch_min`；
   保留本项目外壳的左上抽屉按钮，不搬原型的顶栏搜索/归档图标与主题卡「⋯」菜单；品牌字形走平台衬线
-  （不打包字体）；空态**不提供**「先逛逛示例主题」（App 无示例数据生成器）。
+  （2026-10-21 时不打包字体；**2026-10-22 起改为随 APK 分发 Noto Serif CJK SC，见「中文衬线字体」一节**）；空态**不提供**「先逛逛示例主题」（App 无示例数据生成器）。
   **2026-09-28 用户裁决新增一条**：推荐区与输入卡的间距取 `space_s4`（16dp）。此处**三层口径不一致**，
   故一并记下：原型 `.rec-block` 是 `padding:4px 0 6px`、自身无 margin（几乎紧贴输入卡）；
   首页视觉规格的 token 矩阵把 `.rec-block` 映射为 `space_s4` 但未说明是 padding 还是 margin，
@@ -686,6 +686,29 @@ Activity、唯一宿主，一级目的地靠替换宿主子视图切换；对话
 - 规模：本切片 **1428 非空非注释生产行（Java，26 个文件）+ 884 行资源**，超 200 行软上限、也超
   500 行硬上限（`artifacts/evidence/T-012-sizing.txt`）；**没有用户批准的规模例外**，属待裁定偏差，
   不得当成已批准例外引用。
+## 晨雾玻璃材质（2026-10-21）
+
+默认外观已从「不透明纸感表面」改为「晨雾玻璃」：全屏雾面场景 + 半透明表面 + 1px 高光边。骨架、命中区域、滚动、输入法、返回栈与数据都没有改动。
+
+- **场景**：`activity_main.xml` 的 `shell_backdrop` 仍是唯一全屏装饰层，由 `screen.PaperRuleBackdrop` 绘制。它先铺四角 mist 线性渐变，再叠绿/沙/白/玫瑰/丁香五处径向柔光，最后用 `screen.PaperRules` 画横格；所有颜色与孔径都取自资源，不写死在 Java 里。横格的颜色仍按「实际画在 mist 基色上」由 `PaperRules.pageRuleColour` 推导。
+- **玻璃表面**：共享 drawable 统一为 `bg_glass_card` / `bg_glass_reader` / `bg_glass_field` / `bg_glass_bar` / `bg_glass_panel` / `bg_glass_chip` / `bg_glass_segment`；`bg_card`、`bg_topic_card`、`bg_library_card`、`bg_composer_inner`、`bg_field`、`bg_library_search` 等既有名字改为指向玻璃形状，布局引用因此不需要逐屏复制。每个玻璃形状都是 layer-list：顶部 sheen、半透明填充、`@color/glass_edge` 的 1px 描边；圆角用 `radius_xl` / `radius_2xl`。2026-10-22 方案 A 的学习库与分支导航（T-2026-10-22-057）又落了 `bg_glass_search`（44dp 胶囊输入）、`bg_segment_active`（分段亮面，上下各内缩 4dp）、`bg_summary_panel`（28dp 面板）、`bg_nav_row` / `bg_nav_node`（17dp 分支行与 22dp 节点）、`bg_root_tag`（根分支标签）与 `bg_empty_branch`（虚线空态）；这些形状同样只引用 `glass_*` 令牌与命名尺寸。
+- **语义卡片**：聊天里的失败条与译文卡不再用 `bg_card + backgroundTint`（tint 会把描边一起涂掉）。它们分别使用不透明的 `bg_semantic_alert`（软红）与 `bg_semantic_note`（浅绿），语义色与玻璃高光边同时保留。
+- **tab bar 与抽屉**：底部标签栏改用 `bg_glass_bar` 并去掉装饰分隔线，分层由玻璃顶边承担；抽屉面板使用 `bg_glass_panel`。标签栏仍由外壳唯一持有，`MainActivity.swap()` 仍是显隐与当前 tab 的唯一判定点。
+- **不伪造实时模糊**：Android 侧不调用 `RenderEffect`，也没有把噪声叠在半透明层上冒充模糊。场景本身是静态柔焦；API 28+ 一律使用同一套静态玻璃。低端机上的表现取舍见下方证据中的风险记录。
+- **令牌副本**：玻璃色是 rgba，不进入只收 6 位 hex 的 `colors.xml`；Android 副本集中在 `values/glass.xml`（8 位 ARGB）。`GlassMaterialTokensTest` 读 `design-system/tokens.json` 逐项复算 alpha 并比对，手改任何一侧都会让 JVM 套件转红。mist 的 4 个不透明色仍走 `colors.xml` 与四方 token 守门。
+
+**验证（2026-10-21）**：`:app:testDebugUnitTest` 859 例 / 0 失败；`:app:assembleDebug`、`:app:assembleDebugAndroidTest`、`verifyNoKotlinDex` 均退出码 0。真机 `ANRBBB5427000010` 以 `adb install -r` 安装后截取首页/对话/学习库/设置四屏，场景、玻璃表面与高光边可见；安装前后数据未被清理（对话截图使用临时种子数据，截后已恢复原库并复核 topics=0、provider/model 仍在）。浏览器侧由 `frontend/src/styles/glass.css` 提供真实 `backdrop-filter`，证据与逐项读数见 `artifacts/evidence/glass-material-2026-10-21/README.md`。
+
+## 中文衬线字体（2026-10-22）
+
+品牌与页面主标题不再落到 ROM 自带 `serif`，而是随 APK 分发一个固定的 SC 字重：
+
+- **资源**：`app/src/main/res/font/noto_serif_sc.otf`，由设备 `/system/fonts/NotoSerifCJK-Regular.ttc` 的第 3 个 face（`Noto Serif CJK SC` / `NotoSerifCJKsc-Regular`，CFF 轮廓）提取，约 24.4MB。只随仓库与 APK 分发，不联网下载。
+- **许可**：`app/src/main/assets/licenses/NotoSerifCJK-OFL.txt`，SIL Open Font License 1.1，版权行按字体 name table 记为 Adobe 2017–2022；许可随 APK 一起打包。
+- **应用范围**：`home_brand`、`library_title` 引用 `@font/noto_serif_sc`；首页副题自 055 起是 12sp sans，分支导航顶栏自 057 起是与首页共用的 13sp sans 胶囊标题，两处都不再使用衬线。正文仍由主题的 `sans-serif` 承担。话题卡、学习库卡与搜索结果标题去掉了旧的 `serif`，与方案 A 的 sans 标题一致。
+- **行高**：`home_brand` 由 `screen.WordmarkTextView` 绘制，框高取 `brand_line_height`（与 41sp 字号同值的原型 `line-height: 1`）。该字体的 CFF 包围盒高 2.858em，Android 会把它当成行的 ascent+descent：`wrap_content` 时 41sp 的视图实测 381px、墨迹仅 124px，把副题推到 52dp 之外（原型是 12dp）。视图只把字体自己的行盒在框内居中绘制，不改字体文件，也不影响学习库标题的既有排版。
+- **回退**：资源字体加载失败时由平台回退系统字体，不影响布局与业务。`ChineseSerifTitleTest` 钉住字体 sfnt 头、许可文本、品牌与学习库标题的衬线边界，以及首页副题、导航顶栏与三处卡片的 sans。
+
 ## 应用层入口索引（`:app`）—— 搜索、未读与阅读位置（T-015）
 
 搜索与阅读位置都在 `app/src/main/java/com/treelearn/app/{search,reading}/`。
@@ -820,10 +843,10 @@ View 自己不持内容。
 | `screen.AnswerActionBar` | 引用/重置/翻译/朗读/子分支 | 按 `ChatMessage` 谓词启用；复制、新建主题与版本切换入口按当前精简 UI 隐藏；选中文字后的追问与新建主题由应用自绘的划词菜单承载 |
 | `ui.TextSelection` | 一段文字的选区值类型 | 纯 JVM 值类型，不含任何 Android 类型；划词菜单与底部引用读的是同一段平台选区 |
 | `ui.WordMenu` | 划词菜单的判定类型 | 六格主菜单（问 AI / 新建主题 / 高亮 / 批注 / 复制 / 全选），可点与否、落点都在这里；终态无「更多」子菜单，六格一律图标承载（T-B 拍板硬约束）；`fitFor` 是窄屏宽度兜底——窗口装不下六格时保留前缀、尾部折进「更多」卡片，操作一个不少；高亮/批注为新增 MARK 组（批注弹窗属 T-D）；回答文字使用 Android 原生可拖动选区，菜单由 `WordMenuPopup` 绘制，平台工具条被清空 |
-| `ui.ChildBranch` | 子分支弹层的一行：去哪、叫什么、还欠多少 | 标题由装配层解析后传入：已保存标题优先，其次首条问题，再以来源回答首句或“未命名分支”兜底；弹层不自己推导 |
+| `ui.ChildBranch` | 子分支行内栈的一行：去哪、叫什么、还欠多少 | 标题由装配层解析后传入：已保存标题优先，其次首条问题，再以来源回答首句或“未命名分支”兜底；行内栈不自己推导 |
 | `screen.WordMenuPopup` | 划词菜单的承载类（`PopupWindow`） | 菜单由它画出并定位到选中句；它只画与套用，判定全部来自 `WordMenu` |
-| `screen.ChildBranchPopup` | 子分支列表弹层（`PopupWindow` + 窗口内避让定位） | 行是**传进来**的，弹层不读库；优先显示在操作栏上方并夹紧到安全边距，只有点行才导航，点外面或按返回只关列表 |
-| `wiring.BranchChildren` | 「这条回答的直接子分支」与「每个位置各有几个子分支」的唯一判定点 | 子 = 非根、带 source message、未归档；chips 与弹层两处读同一份，因此不会出现「数量说有、列表却拿不出」 |
+| `screen.ChatScreen` 的 `chat_branch_section` | 答案下方的行内子分支栈（T-056，2026-10-22 方案 A 结构） | 数据仍由 presenter 经 `onChildrenPressed` 读取真实 `ChildBranch`，`MainActivity.openChildren` 转交；同一时刻只展开一条，展开另一条会收起前一条；消息不稳定、没有子分支或行已不在时整块隐藏（`collapseBranchesIfUnavailable`）；行点击回报 `branchId`。2026-10-22 起不再有窗口级浮层，原先的 `ChildBranchPopup`、`popup_child_branches.xml` 与定位测试均已删除 |
+| `wiring.BranchChildren` | 「这条回答的直接子分支」与「每个位置各有几个子分支」的唯一判定点 | 子 = 非根、带 source message、未归档；chips 与行内栈两处读同一份，因此不会出现「数量说有、列表却拿不出」 |
 | `wiring.ChatWiring` | 对话的**真实**数据路径（T-032）：读回 + 五条命令，实现 `ChatData` 与 `ChatCommands` | 读回走 `MessageDao.findByBranch` / `AnswerRevisionDao` / `GenerationOperationDao`；`send`/`retry`/`reset` 装配请求后交协调器、`selectRevision` 直接落库、`fork` 走 `BranchCreation`；每条拒绝都以可见 `Notice` 返回；派生 worker 的**回读提醒只在真写了行时发出**——`runDerivedPass` 按 `HomeDerivedPort.ensureConversationArtifacts` 的布尔返回值决定要不要 `notifyGenerationListeners`，因为提醒的含义是「再读一次」，而读一次又会派生一次，无条件提醒等于自己给自己上弦（2026-10-16 实测：ALP-AN00 上一条已完整派生的对话，9 s 内 `render` 被调用 1155 次≈130 次/秒、输出像素逐帧相同；修法见 `ChatWiring.runDerivedPass`，两条 JVM 回归锁在 `ChatWiringRecommendationsTest`，变异实测「去掉 if」只红那一条负例、「恒不提醒」只红那一条正例）。空转读数用 `adb -s <serial> shell dumpsys gfxinfo com.treelearn reset` 后等 10 s，再 `dumpsys gfxinfo com.treelearn \| grep -E "Total frames\|High input latency"`，修后为 `Total frames rendered: 0`；1155 那个数需要临时在 `ChatScreen.render` 里加一条计数日志才能复现，该探针本轮已删除，不留在树里 |
 | `wiring.ChatStore` / `wiring.SqliteChatStore` | 对话的端口与它的 SQLite 实现 | 端口**委托** T-010 的 `AnswerVersions`/`PositionCommands`，不复制它们的判定；分支标题按 `BranchHeading` 统一读取，子分支在保存标题和首条问题都为空时读取其固定来源修订的回答首句作为临时名称，完全无文本时显示“未命名分支”；`history()` 用编码器自己的 `ContextPlan.Entry` 词汇表达「问题之前的行」——非根分支先经 `ContextSnapshot.fromStored` 读回出生快照、由 `SnapshotHistoryMerger`（T-064，纯 JVM 类型）按 sources 顺序展开成前置 entry，再接本分支行；快照行缺失（根分支）时就是存储的行。快照不可解码或引用的行已不在时经 `ChatStore.SnapshotUnreadable` 拒绝本次请求（STORAGE 提示），不静默丢上游背景 |
 | `wiring.PromptLimits` | 请求预算的两个数字，全应用唯一取值点 | `AppContainer` 用 `PromptLimits.budget()` 构造那一个 `PromptBudget`；数字与理由见 `:app` 首页一节的「请求预算（T-032 的一次决定）」 |
@@ -1060,7 +1083,7 @@ View 自己不持内容。
 | `navigation.NavigationData` / `NavigationActions` / `NavigationSink` | 读、手势、出口三个端口 | 屏幕**不读库也不判定**：哪些分支可见、能否归档、删除覆盖哪棵子树一律读 `NavigationViewState`，页面只转发动作 |
 | `wiring.NavigationWiring` | 导航页的**真实**数据路径：持有单例 `SqliteNavigationStore`，把 `NavigationData` 的方法原样委托 | 本层**不重写判定**，也**不实现** `NavigationActions`（那是 presenter 的手势契约，宿主每次进入时构造）——第二份「什么可见」正是列表与画布漂移的来源 |
 | `AppContainer.navigationData()` | 组合根暴露的端口 | 装配只发生一次，页面拿到的是全应用同一条连接 |
-| `screen.NavigationScreen` + `res/layout/screen_navigation*.xml`（含 `layout-sw600dp/` 镜像） | 导航页视图：非归档 / 已归档两个分组、当前选中、分支级 AI 总结（可折叠）、行内菜单（折叠 / 归档 / 永久删除） | 归档与删除两个菜单项**只在 `row.archivable` 为真时出现**，因此根分支没有归档；屏幕里没有 SQL、没有 DAO |
+| `screen.NavigationScreen` + `res/layout/screen_navigation*.xml`（含 `layout-sw600dp/` 镜像） | 导航页视图：非归档 / 已归档两个分组、当前选中、分支级 AI 总结（可折叠）、行内菜单（折叠 / 归档 / 永久删除） | 归档与删除两个菜单项**只在 `row.archivable` 为真时出现**，因此根分支没有归档；屏幕里没有 SQL、没有 DAO。2026-10-22 方案 A（057）：顶栏是共用 13sp sans 胶囊；总结卡是 28dp 玻璃面板，折叠键是 26dp chevron（旋转 180° 表示折叠，contentDescription 随状态切换）；列表头是 9.5sp 双列行（「分支列表」+ 当前分支真实 `childCount`）；分支行是 17dp 玻璃行 + 22dp 节点，菜单/恢复键保留 44dp 命中区、可见图标 15dp；当前分支 `childCount == 0` 时才画虚线幼芽空态 |
 | `MainActivity.showNavigation` / `enterNavigation` / `render` / `leaveNavigation` / `openNavigation` | 导航页宿主：进入、宿主渲染、离开与出口 | 页面按分支构造、离开即丢（与对话页、画布同一条规则）；`openNavigation` 是 `showNavigation` 的唯一宿主出口（首页的 `openArchived` 随 055 退役） |
 
 **这一层的交互事实：**
@@ -1095,8 +1118,8 @@ V3.2 PRD 6.2.16 原先把主页 / 学习库 / 设置并列为一级入口。2026
 
 | 类型 | 职责 | 关键不变量 |
 | :--- | :--- | :--- |
-| `res/layout/activity_main.xml` | 应用外壳的盒子：`main_drawer_root` 先放 `shell_backdrop`，再放 `LinearLayout(main_root)`；后者包含 `shell_host`（`0dp` + `weight=1`）与 `<include layout="@layout/screen_tab_bar"/>` | 纸纹与标签栏都是**外壳的一部分**，不是任何屏幕画的；`R.id.main_root`、`R.id.shell_backdrop` 与 `R.id.home_draft` 都仍在（`AppLaunchInstrumentedTest` 依赖） |
-| `res/layout/screen_tab_bar.xml` + `layout-sw600dp/` 镜像 | 两个标签项 `tab_home` / `tab_library`，每项 `minHeight=touch_min`，带 24dp 图标与标签 | 两项在同一个布局里**各自命名 id**（`tab_home_icon`、`tab_library_icon`）；图标与文案仍留在声明式布局里 |
+| `res/layout/activity_main.xml` | 应用外壳的盒子：`main_drawer_root` 先放 `shell_backdrop`，再放 `LinearLayout(main_root)`；后者包含 `shell_host`（`0dp` + `weight=1`）与 `<include layout="@layout/screen_tab_bar"/>` | 纸纹与标签栏都是**外壳的一部分**，不是任何屏幕画的；`R.id.main_root`、`R.id.shell_backdrop` 与 `R.id.home_draft` 都仍在（`AppLaunchInstrumentedTest` 依赖）；**`main_root`/`shell_host` 不为标签栏留底部内边距**（T-2026-10-22-062）：宿主一旦留白，滚动视口就终止在胶囊上缘，玻璃底下永远没有可透之物，「不像是浮在上面」正是这一条。留白改由首页与学习库的滚动容器自己付（`clipToPadding="false"` + `android:paddingBottom="@dimen/tab_bar_clearance"`），数值仍只有一处权威定义，回归锁是 `TabBarUnderScrollLayoutTest` 四条 |
+| `res/layout/screen_tab_bar.xml` + `layout-sw600dp/` 镜像 | 两个标签项 `tab_home` / `tab_library`，每项 `minHeight=touch_min`，带 24dp 图标与标签 | 两项在同一个布局里**各自命名 id**（`tab_home_icon`、`tab_library_icon`）；图标与文案仍留在声明式布局里；它是 `main_root` 里 `shell_host` 的**后置兄弟**，配合 `glass_capsule_elevation` 画在滚过的内容之上，因此内容经过胶囊时不需要胶囊自己让位（T-2026-10-22-062） |
 | `MainActivity.swap(View)` | 换屏，并且是**唯一**判定标签栏显隐的地方 | 只有主页与学习库显示底栏；设置、聊天、画布及其它辅助页面隐藏底栏 |
 | `MainActivity.showTab(Tab)` / `selectTab(Tab)` / `markTab(...)` | 两个底部目的地按名称进入；`currentTab` 是主页或学习库的唯一记录 | 二级屏保留此前 tab；`markTab` 同时给 label 上色与给 icon 上 tint（`tl_green_deep` / `tl_ink3`），只改一个就是半选中 |
 | `HomeScreen.home_settings_button` / `MainActivity.showSettings()` | 首页右上角齿轮打开设置根页 | 设置根页不设为当前 tab；从首页打开后返回首页，从聊天打开后返回原聊天；缺少 Key 的引导仍走同一设置页 |
@@ -1104,7 +1127,7 @@ V3.2 PRD 6.2.16 原先把主页 / 学习库 / 设置并列为一级入口。2026
 | `library.LibraryData` / `LibrarySink` / `LibraryViewState` / `LibraryPresenter` | 学习库的读端口、出口、可绘制状态与全部判定 | 屏幕**不做任何判定**：能否列出、在哪个相位、每行说什么，全部来自一个不可变 `LibraryViewState`；相位 LOADING / READY / EMPTY / ERROR，空表是 EMPTY 而不是错误 |
 | `wiring.SqliteLibraryStore` | 学习库的真实数据路径：把连接交给 `TopicDao.listOverviews` | **只读**：本切片不加表、不加列、不加 migration、没有写方法可误用，所以它连事务执行器都不需要——那样的构造只可能为了一次裸写 |
 | `wiring.LibraryWiring` | `TopicDao.Overview` → `LibraryViewState.Row` 的映射 | 树名只由 `BranchHeading.of(存下来的标题, 首个用户问题)` 给出，与首页卡片、对话标题**同一个实现**，所以一个主题不可能在库里叫另一个名字 |
-| `screen.LibraryScreen` + `res/layout/screen_library*.xml` / `screen_library_body.xml` / `item_library_topic.xml` | 学习库视图：返回箭头、标题、搜索框（T-054 接管为检索入口）、两个分段位（T-053 接管已完成位）、行列表与状态句 | 行 = 强调条 + 标题 + 「分支数 · 最近使用（· 未读数）」；未读点没读就 `gone`；屏幕里没有 SQL、没有 DAO、没有排序；箭头只上报同一个返回请求，落点由宿主一处判定 |
+| `screen.LibraryScreen` + `res/layout/screen_library*.xml` / `screen_library_body.xml` / `item_library_topic.xml` | 学习库视图：返回箭头、标题、搜索框（T-054 接管为检索入口）、两个分段位（T-053 接管已完成位）、行列表与状态句 | 2026-10-22 方案 A（057）把页头改成 52dp 玻璃胶囊（返回键 36dp、衬线 19sp 标题），搜索框改成 44dp 胶囊，两个分段共用一个 44dp 胶囊容器；行 = 12.5sp 标题 + 两行 10.5sp 摘要 + 11dp 树枝图标与 9sp 元信息 + 14dp chevron，卡片 12/13dp 内边距、9dp 间距，旧强调条已删除；分段计数来自 `next.rows.size()` / `next.archived.size()`，以 `RelativeSizeSpan` 显示为 9.5sp，整段文本仍是「进行中 N」；浏览态底部有 13dp 幼芽说明，搜索态隐藏。未读点没读就 `gone`；屏幕里没有 SQL、没有 DAO、没有排序；箭头只上报同一个返回请求，落点由宿主一处判定 |
 | `AppContainer.libraryData()` | 组合根暴露的端口 | 装配只发生一次，学习库与首页读的是同一条连接、同一条语句 |
 | `android/app/src/androidTest/java/com/treelearn/app/BottomTabShellInstrumentedTest.java` | 本片验收：标签可达与高亮、两条返回落点、学习库页头箭头（两级：退搜索 / 回主页）、学习库真实行、空表空态 | 每个动作都走产品真的画出来的控件（标签项、库行、学习库与对话的返回按钮、导航页的返回），不调私有方法、不模拟系统返回手势 |
 

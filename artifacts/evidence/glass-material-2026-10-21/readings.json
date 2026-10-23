@@ -1,0 +1,240 @@
+{
+  "generatedAt": "2026-10-22T09:00:00+08:00",
+  "head": "f77d34f",
+  "scope": "T-2026-10-21-047 glass material (048 token, 049 Android, 050 Web, 051 evidence)",
+  "environment": {
+    "host": "Windows 10.0.26200 x64 (Git Bash)",
+    "gradle": "8.14.3",
+    "jdk": "21.0.10",
+    "node": "v25.9.0",
+    "pnpm": "11.5.2",
+    "browser": "Microsoft Edge 155.0.4283.45 (headless CDP)",
+    "device": "ANRBBB5427000010 Android 17 / API 37 2136x3200 density 420",
+    "package": "com.treelearn"
+  },
+  "commands": [
+    {
+      "id": "token-red",
+      "command": "python -X utf8 .codex/scripts/dev/check_design_tokens.py",
+      "expected": "non-zero before glass tokens exist",
+      "actual": "exit=1",
+      "transcript": "token-red.txt",
+      "verdict": "PASS"
+    },
+    {
+      "id": "token-green",
+      "command": "python -X utf8 .codex/scripts/dev/check_design_tokens.py",
+      "expected": "exit=0 with 63/63/20/63",
+      "actual": "exit=0, 10 checks OK, 63/63/20/63",
+      "transcript": "token-green.txt",
+      "verdict": "PASS"
+    },
+    {
+      "id": "token-selftest",
+      "command": "python -X utf8 .codex/scripts/dev/check_design_tokens.py --selftest",
+      "expected": "exit=0, 41 cases",
+      "actual": "exit=0, cases=41",
+      "transcript": "token-selftest.txt",
+      "verdict": "PASS"
+    },
+    {
+      "id": "token-generated-check",
+      "command": "python -X utf8 .codex/scripts/dev/gen_design_tokens_css.py --check",
+      "expected": "exit=0, byte-identical",
+      "actual": "exit=0, bytes=2065 tokens=63",
+      "transcript": "051-guards.txt",
+      "verdict": "PASS"
+    },
+    {
+      "id": "android-red",
+      "command": "./gradlew :app:testDebugUnitTest --tests GlassMaterialTokensTest --tests GlassSurfaceLayoutTest",
+      "expected": "non-zero before glass resources",
+      "actual": "exit=1, 11 tests / 10 failed",
+      "transcript": "android-red.txt",
+      "verdict": "PASS"
+    },
+    {
+      "id": "android-green",
+      "command": "same directed tests",
+      "expected": "exit=0",
+      "actual": "exit=0, BUILD SUCCESSFUL in 30s",
+      "transcript": "android-green.txt",
+      "verdict": "PASS"
+    },
+    {
+      "id": "android-build",
+      "command": "./gradlew :app:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest :verifyNoKotlinDex",
+      "expected": "exit=0",
+      "actual": "exit=0, BUILD SUCCESSFUL in 3m 34s, verifyNoKotlinDex PASS",
+      "transcript": "android-build.txt",
+      "verdict": "PASS"
+    },
+    {
+      "id": "android-jvm",
+      "command": "sum android/app/build/test-results/testDebugUnitTest/*.xml",
+      "expected": "all green",
+      "actual": "files=96 tests=859 failures=0 errors=0 skipped=0",
+      "transcript": "android-jvm-results.txt",
+      "verdict": "PASS"
+    },
+    {
+      "id": "web-red",
+      "command": "pnpm --dir frontend test -- test/styles/glass.test.ts",
+      "expected": "non-zero before glass.css",
+      "actual": "exit=1, 4 failed / 107 passed",
+      "transcript": "web-red.txt",
+      "verdict": "PASS"
+    },
+    {
+      "id": "web-green",
+      "command": "same directed test",
+      "expected": "exit=0",
+      "actual": "exit=0, 111/111",
+      "transcript": "web-green.txt",
+      "verdict": "PASS"
+    },
+    {
+      "id": "web-verify",
+      "command": "pnpm --dir frontend verify",
+      "expected": "exit=0, 16/16",
+      "actual": "exit=0, verify steps=16 ok=16, VERIFY PASS",
+      "transcript": "web-verify.txt",
+      "verdict": "PASS"
+    },
+    {
+      "id": "browser-readings",
+      "command": "repo CDP driver (Edge headless), viewports 1440x900 and 390x844",
+      "expected": "8/8 readings pass",
+      "actual": "8/8 pass=true",
+      "transcript": "browser-readings.json",
+      "verdict": "PASS"
+    },
+    {
+      "id": "device-install",
+      "command": "adb install -r android/app/build/outputs/apk/debug/app-debug.apk",
+      "expected": "data preserved",
+      "actual": "topics=0 branches=0 messages=0 providers=1 models=1; original DB restored after fixture",
+      "transcript": "device-data-after.txt",
+      "verdict": "PASS"
+    },
+    {
+      "id": "validate-tasks",
+      "command": "python -X utf8 .codex/scripts/validate_tasks.py",
+      "expected": "exit=0",
+      "actual": "exit=0, 46 files, errors=0 warnings=15",
+      "transcript": "051-fix-verification.txt",
+      "verdict": "PASS"
+    },
+    {
+      "id": "context-pack",
+      "command": "python -X utf8 .codex/scripts/check_context_pack.py",
+      "expected": "exit=0",
+      "actual": "exit=0",
+      "transcript": "051-fix-verification.txt",
+      "verdict": "PASS"
+    },
+    {
+      "id": "source-of-truth",
+      "command": "python -X utf8 .codex/scripts/check_source_of_truth.py",
+      "expected": "exit=0",
+      "actual": "exit=0",
+      "transcript": "051-fix-verification.txt",
+      "verdict": "PASS"
+    },
+    {
+      "id": "metrics",
+      "command": "python -X utf8 .codex/scripts/metrics_report.py",
+      "expected": "exit=0",
+      "actual": "exit=0",
+      "transcript": "051-fix-verification.txt",
+      "verdict": "PASS"
+    },
+    {
+      "id": "checkers-selftest",
+      "command": "python -X utf8 .codex/scripts/dev/checkers_selftest.py",
+      "expected": "exit=0",
+      "actual": "exit=0, 268/268",
+      "transcript": "051-fix-verification.txt",
+      "verdict": "PASS"
+    },
+    {
+      "id": "core-first-run",
+      "command": "python -X utf8 .codex/scripts/run_all_guards.py --tier core",
+      "expected": "exit=0 or documented baseline gaps",
+      "actual": "exit=3: pass=33 fail=3 inconclusive=1 timeout=2; the 3 fails and the derived inconclusive were fixed and re-verified after the run",
+      "transcript": "051-core-guards.txt",
+      "verdict": "GAP"
+    },
+    {
+      "id": "core-final",
+      "command": "python -X utf8 .codex/scripts/run_all_guards.py --tier core",
+      "expected": "exit=0 or documented baseline gaps",
+      "actual": "exit=3: pass=37 fail=0 inconclusive=0 fault=0 timeout=2; verify_1to1_selftest (SELFTEST PASS cases=40) and cdp_shot_selftest (SELFTEST PASS cases=17) printed EXITCODE=0 then hung on Edge handles until the 600s limit",
+      "transcript": "051-core-guards-final.txt",
+      "verdict": "GAP"
+    },
+    {
+      "id": "verify-1to1-selftest-standalone",
+      "command": "node .codex/scripts/dev/parity/verify_1to1_selftest.mjs",
+      "expected": "SELFTEST PASS",
+      "actual": "printed SELFTEST PASS cases=40 cli=20 muts=18 failures=0 and EXITCODE=0; process did not exit (Edge handles); killed after output",
+      "transcript": "verify-1to1-selftest-standalone.txt",
+      "verdict": "GAP"
+    },
+    {
+      "id": "cdp-shot-selftest-standalone",
+      "command": "node .codex/scripts/dev/parity/cdp_shot_selftest.mjs",
+      "expected": "SELFTEST PASS",
+      "actual": "printed SELFTEST PASS cases=17 failures=0 and EXITCODE=0; process did not exit (Edge handles); killed after output",
+      "transcript": "cdp-shot-selftest-standalone.txt",
+      "verdict": "GAP"
+    }
+  ],
+  "device": {
+    "installMode": "adb install -r (no uninstall, no clear)",
+    "originalDbBytes": 196608,
+    "afterInstallRows": {
+      "topics": 0,
+      "branches": 0,
+      "messages": 0,
+      "providers": 1,
+      "models": 1
+    },
+    "fixture": "topic 晨雾玻璃材质验收 temporarily seeded for chat/library screenshots, removed by restoring the original DB",
+    "screenshots": [
+      "home-android.png",
+      "settings-android.png",
+      "chat-android.png",
+      "library-android.png",
+      "home-android-restored.png",
+      "library-android-restored.png",
+      "drawer-android.png"
+    ]
+  },
+  "browser": {
+    "tool": "repo parity_cdp driver (Edge headless), Playwright not installed and not added",
+    "viewports": [
+      "1440x900",
+      "390x844"
+    ],
+    "screenshots": [
+      "desktop-home.png",
+      "desktop-home-nav-collapsed.png",
+      "desktop-chat.png",
+      "desktop-library.png",
+      "desktop-settings.png",
+      "narrow-home.png",
+      "narrow-sidebar-open.png",
+      "narrow-chat.png"
+    ],
+    "readings": "8/8 pass"
+  },
+  "gaps": [
+    "Core full run exits 3 on this host: 37 guards pass, 0 fail, 2 timeouts. verify_1to1_selftest and cdp_shot_selftest print SELFTEST PASS/EXITCODE=0 but their Node process does not exit because browser handles keep the event loop alive, so the runner hits its 600s limit. Baseline 2026-10-20 was 39/39 green.",
+    "Playwright was not installed; browser evidence uses the repo CDP/Edge driver instead.",
+    "No real-time Android blur by design; static soft-focus scene only.",
+    "Pad landscape not separately captured; phone only.",
+    "Chat/library screenshots used a temporary seeded DB; original DB restored afterwards.",
+    "No vendor color-shift measurement, formal contrast measurement, low-end performance baseline, or dark mode."
+  ]
+}

@@ -3,6 +3,9 @@
   Tablet home: the same column, capped at a comfortable reading measure and centred, so a landscape
   tablet shows one readable page instead of a single column stretched across the full width. The
   width-consuming screens are the ones with a canvas (T-017) and the conversation (T-013).
+
+  The capsule clearance belongs to the scroll container, so the tablet variant pays it exactly like
+  the phone one (T-2026-10-22-062) - the measure is capped, the under-glass travel is not.
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/home_screen"
@@ -13,7 +16,9 @@
         android:id="@+id/home_root"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:paddingBottom="@dimen/tab_bar_clearance">
 
         <FrameLayout
             android:layout_width="match_parent"

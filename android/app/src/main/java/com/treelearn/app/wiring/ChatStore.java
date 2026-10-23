@@ -11,8 +11,10 @@ import com.treelearn.core.domain.DomainResult;
 import com.treelearn.core.domain.GenerationCommand;
 import com.treelearn.core.domain.GenerationModel;
 import com.treelearn.core.domain.Message;
+import com.treelearn.core.domain.Persona;
 import com.treelearn.data.db.dao.BranchCreation;
 import com.treelearn.data.db.dao.ContextSnapshotDao;
+import com.treelearn.data.db.dao.TopicDao;
 
 import java.util.Collections;
 import java.util.List;
@@ -99,6 +101,26 @@ public interface ChatStore {
     /** @return the branch, or null when no row carries the id */
     Branch branch(String branchId);
 
+    /**
+     * The topic's current answer style, read through {@code branchId}.
+     *
+     * <p>A default keeps test fakes source-compatible; the real store answers from the row. The
+     * result keeps the fallback visible so the screen can tell the learner once instead of silently
+     * adopting a default, which is why it is this small result and not a bare {@link Persona}.
+     */
+    default TopicDao.PersonaRead personaOfBranch(String branchId) {
+        return new TopicDao.PersonaRead(Persona.DEFAULT, false);
+    }
+
+    /**
+     * 2026-10-23: stores one answer style on the topic behind {@code branchId}.
+     *
+     * <p>Abstract rather than defaulted: a store that silently "succeeded" without writing would
+     * let the chip claim a style the next send does not use, which is the one failure this path
+     * may not hide. Only the SQLite store and the wiring test double implement this port.
+     */
+    void updatePersona(String branchId, Persona persona);
+
     /** @return the position, or null when no row carries the id */
     Message position(String messageId);
 
@@ -136,6 +158,10 @@ public interface ChatStore {
         public final Branch branch;
         /** The same positions as stored rows, in the same order; empty when there is no branch row. */
         public final List<Message> messages;
+        /** The topic's current style; the composer chip displays it, the send path re-reads the row. */
+        public final Persona persona;
+        /** True when the stored wire id was unknown and the default was adopted for display. */
+        public final boolean personaFellBack;
 
         public Conversation(String branchTitle, List<Position> positions) {
             this(branchTitle, positions, null, Collections.<Message>emptyList());
@@ -151,10 +177,18 @@ public interface ChatStore {
          */
         public Conversation(String branchTitle, List<Position> positions, Branch branch,
                 List<Message> messages) {
+            this(branchTitle, positions, branch, messages, Persona.DEFAULT, false);
+        }
+
+        /** The full read: rows plus the topic's current style and its fallback flag. */
+        public Conversation(String branchTitle, List<Position> positions, Branch branch,
+                List<Message> messages, Persona persona, boolean personaFellBack) {
             this.branchTitle = branchTitle;
             this.positions = positions;
             this.branch = branch;
             this.messages = messages;
+            this.persona = persona == null ? Persona.DEFAULT : persona;
+            this.personaFellBack = personaFellBack;
         }
     }
 

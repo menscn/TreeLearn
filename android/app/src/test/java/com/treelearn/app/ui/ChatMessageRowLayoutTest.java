@@ -226,20 +226,27 @@ public final class ChatMessageRowLayoutTest {
         assertTrue("the question still hugs the end like .msg-user (align-self:flex-end)",
                 block.contains("android:layout_gravity=\"end\""));
         String question = elementAround(xml, "chat_question");
-        assertTrue("the question's own text is the body ink, not the on-bubble surface colour",
-                question.contains("android:textColor=\"@color/tl_ink\""));
+        // 2026-10-22 Scheme A (T-056): .user-msg is ink-2, one step below the answer's ink, so the
+        // question no longer shares the answer's exact colour. What this pins is that it stays a
+        // text colour and never returns to the on-bubble surface colour.
+        assertTrue("the question's own text is a text ink, not the on-bubble surface colour",
+                question.contains("android:textColor=\"@color/tl_ink2\"")
+                        && !question.contains("@color/tl_surface"));
     }
 
     @Test
     public void theAiTagIsThePlainBrandWithTheSpark() throws Exception {
         String xml = read(RES.resolve(Paths.get("layout", "item_chat_message.xml")));
         String tag = elementAround(xml, "chat_ai_tag");
-        assertTrue("the tag is the plain brand + spark (.at-brand), not a chip",
-                tag.contains("@drawable/ic_ai_spark") && !tag.contains("@drawable/bg_tag"));
-        assertTrue("the brand reads green-deep like the prototype",
-                tag.contains("android:textColor=\"@color/tl_green_deep\""));
-        assertTrue("the spark is tinted green-deep too",
-                tag.contains("android:drawableTint=\"@color/tl_green_deep\""));
+        // 2026-10-22 Scheme A (T-056): .ai-tag draws the 13dp sprout in green with a letterspaced
+        // label, replacing the older spark + green-deep pair. The contract is unchanged: a plain
+        // brand mark, not a chip.
+        assertTrue("the tag is the plain brand + sprout (.ai-tag), not a chip",
+                tag.contains("@drawable/ic_brand_sprout") && !tag.contains("@drawable/bg_tag"));
+        assertTrue("the brand reads green like the prototype",
+                tag.contains("android:textColor=\"@color/tl_green\""));
+        assertTrue("the sprout is tinted green too",
+                tag.contains("android:drawableTint=\"@color/tl_green\""));
     }
 
     @Test
@@ -315,11 +322,13 @@ public final class ChatMessageRowLayoutTest {
                 .contains("android:visibility=\"gone\""));
         assertTrue("attachment entry must use a paperclip icon",
                 elementAround(composer, "chat_attach").contains("@drawable/ic_chat_attach"));
-        // 2026-09-27 user decision: the two-level card with the circular send (prototype .composer).
+        // 2026-10-22 Scheme A (T-056): the two-level card became one horizontal dock, so the send
+        // is still the circular fab but the field sits on the dock's glass, not on a second strip.
         assertTrue("the send control is the circular fab in the layout too",
                 elementAround(composer, "chat_send").contains("@drawable/bg_send_fab"));
-        assertTrue("the input card is the paper surface on the strip",
-                composer.contains("@drawable/bg_composer_inner"));
+        assertTrue("the input card is the dock glass",
+                elementAround(composer, "chat_composer_card")
+                        .contains("@drawable/bg_glass_dock"));
         String strings = read(RES.resolve(Paths.get("values", "strings.xml")));
         assertTrue("the hint names the branch, like the prototype placeholder",
                 strings.contains("<string name=\"chat_draft_hint\">在当前分支继续追问…</string>"));

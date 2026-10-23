@@ -99,6 +99,16 @@ public final class SettingsScreen extends LinearLayout {
                 });
     }
 
+    /** Opens the static answer-style introduction; the same page the picker's last row reaches. */
+    public void setOnPersonaIntroPressed(Runnable onPersonaIntroPressed) {
+        findViewById(R.id.settings_persona_intro_entry).setOnClickListener(
+                view -> {
+                    if (onPersonaIntroPressed != null) {
+                        onPersonaIntroPressed.run();
+                    }
+                });
+    }
+
     public void setModelsSubtitle(String text) {
         ((TextView) findViewById(R.id.settings_models_sub)).setText(text);
     }

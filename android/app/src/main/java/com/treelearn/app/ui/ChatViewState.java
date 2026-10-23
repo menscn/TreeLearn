@@ -2,6 +2,7 @@ package com.treelearn.app.ui;
 
 import com.treelearn.core.domain.GenerationModel;
 import com.treelearn.core.domain.Guard;
+import com.treelearn.core.domain.Persona;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -138,6 +139,13 @@ public final class ChatViewState {
     /** The search engine's human label, or empty when search is off. */
     public final String searchEngineLabel;
 
+    /**
+     * 2026-10-23: the topic's answer style, shown on the dock's persona chip. It is a display copy:
+     * every request reads the topic row again at operation time, so a stale chip can never change
+     * what the next answer is generated as.
+     */
+    public final Persona persona;
+
     /** The one attachment the composer carries (T-097); null while the composer carries none. */
     public final ComposerAttachment composerAttachment;
 
@@ -176,7 +184,7 @@ public final class ChatViewState {
             SourceCard sourceCard, boolean sourceCardExpanded, Stage stage, boolean followLatest,
             int missedCount, boolean archived, boolean fullscreenEditing, Translations translations,
             boolean searchEnabled, String searchEngineLabel, ComposerAttachment composerAttachment,
-            boolean askAiChips) {
+            boolean askAiChips, Persona persona) {
         this.phase = Guard.object(phase, "phase");
         this.branchId = Guard.id(branchId, "branchId");
         this.branchTitle = branchTitle == null ? "" : branchTitle;
@@ -205,6 +213,7 @@ public final class ChatViewState {
         this.searchEngineLabel = searchEngineLabel == null ? "" : searchEngineLabel;
         this.composerAttachment = composerAttachment;
         this.askAiChips = askAiChips;
+        this.persona = persona == null ? Persona.DEFAULT : persona;
     }
 
     public static ChatViewState initial(String branchId, GenerationModel model,
@@ -213,7 +222,8 @@ public final class ChatViewState {
                 "", keyConfigured, model, thinkingEnabled, Collections.<String>emptySet(),
                 Collections.<String>emptySet(),
                 Collections.<Recommendation>emptyList(), "", null, false, null, false,
-                Stage.IDLE, true, 0, false, false, Translations.EMPTY, false, "", null, false);
+                Stage.IDLE, true, 0, false, false, Translations.EMPTY, false, "", null, false,
+                Persona.DEFAULT);
     }
 
     /** @return the row with this id, or null when the conversation does not contain it */
@@ -314,7 +324,7 @@ public final class ChatViewState {
                 keyConfigured, model, thinkingEnabled, expandedReasoning, collapsedReasoning,
                 recommendations, recommendationsMessageId, notice, sending, sourceCard,
                 sourceCardExpanded, stage, followLatest, missedCount, archived, fullscreenEditing,
-                translations, searchEnabled, searchEngineLabel, value, false);
+                translations, searchEnabled, searchEngineLabel, value, false, persona);
     }
 
     /** Shows or hides the three 问 AI quick queries; they never outlive the quote they ride. */
@@ -323,7 +333,7 @@ public final class ChatViewState {
                 keyConfigured, model, thinkingEnabled, expandedReasoning, collapsedReasoning,
                 recommendations, recommendationsMessageId, notice, sending, sourceCard,
                 sourceCardExpanded, stage, followLatest, missedCount, archived, fullscreenEditing,
-                translations, searchEnabled, searchEngineLabel, composerAttachment, value);
+                translations, searchEnabled, searchEngineLabel, composerAttachment, value, persona);
     }
 
     public ChatViewState withKeyConfigured(boolean value) {
@@ -339,6 +349,15 @@ public final class ChatViewState {
     public ChatViewState withThinkingEnabled(boolean value) {
         return copy(phase, branchTitle, messages, draft, quote, keyConfigured, model, value,
                 expandedReasoning, collapsedReasoning, recommendations, recommendationsMessageId, notice, sending);
+    }
+
+    /** 2026-10-23: swaps the answer style the chip shows; null reads as the default style. */
+    public ChatViewState withPersona(Persona value) {
+        return new ChatViewState(phase, branchId, branchTitle, messages, draft, quote, keyConfigured,
+                model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
+                recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
+                stage, followLatest, missedCount, archived, fullscreenEditing, translations,
+                searchEnabled, searchEngineLabel, composerAttachment, askAiChips, value);
     }
 
     /**
@@ -385,7 +404,7 @@ public final class ChatViewState {
                 nextQuote, nextKeyConfigured, nextModel, nextThinkingEnabled, nextExpanded,
                 nextCollapsed, nextRecommendations, nextRecommendationsMessageId, nextNotice,
                 nextSending, sourceCard, sourceCardExpanded, stage, followLatest, missedCount,
-                archived, fullscreenEditing, translations, searchEnabled, searchEngineLabel, composerAttachment, askAiChips);
+                archived, fullscreenEditing, translations, searchEnabled, searchEngineLabel, composerAttachment, askAiChips, persona);
     }
 
     /** Replaces the source card with a read's answer; the expansion state travels unchanged. */
@@ -395,7 +414,7 @@ public final class ChatViewState {
                 recommendations,
                 recommendationsMessageId, notice, sending, value, sourceCardExpanded, stage,
                 followLatest, missedCount, archived, fullscreenEditing, translations, searchEnabled,
-                searchEngineLabel, composerAttachment, askAiChips);
+                searchEngineLabel, composerAttachment, askAiChips, persona);
     }
 
     public ChatViewState withSourceCardExpanded(boolean value) {
@@ -404,7 +423,7 @@ public final class ChatViewState {
                 recommendations,
                 recommendationsMessageId, notice, sending, sourceCard, value, stage,
                 followLatest, missedCount, archived, fullscreenEditing, translations, searchEnabled,
-                searchEngineLabel, composerAttachment, askAiChips);
+                searchEngineLabel, composerAttachment, askAiChips, persona);
     }
 
     /** T-075: sets the generation stage; the rest of the state travels unchanged. */
@@ -413,7 +432,7 @@ public final class ChatViewState {
                 model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
                 recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
                 value == null ? Stage.IDLE : value, followLatest, missedCount, archived,
-                fullscreenEditing, translations, searchEnabled, searchEngineLabel, composerAttachment, askAiChips);
+                fullscreenEditing, translations, searchEnabled, searchEngineLabel, composerAttachment, askAiChips, persona);
     }
 
     /** T-075: sets the scroll-follow state; the rest of the state travels unchanged. */
@@ -422,7 +441,7 @@ public final class ChatViewState {
                 model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
                 recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
                 stage, following, missedSoFar, archived, fullscreenEditing, translations,
-                searchEnabled, searchEngineLabel, composerAttachment, askAiChips);
+                searchEnabled, searchEngineLabel, composerAttachment, askAiChips, persona);
     }
 
     /**
@@ -434,7 +453,7 @@ public final class ChatViewState {
                 model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
                 recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
                 stage, followLatest, missedCount, value, fullscreenEditing, translations,
-                searchEnabled, searchEngineLabel, composerAttachment, askAiChips);
+                searchEnabled, searchEngineLabel, composerAttachment, askAiChips, persona);
     }
 
     /** Enters or leaves fullscreen edit mode; the rest of the state travels unchanged. */
@@ -443,7 +462,7 @@ public final class ChatViewState {
                 model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
                 recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
                 stage, followLatest, missedCount, archived, value, translations, searchEnabled,
-                searchEngineLabel, composerAttachment, askAiChips);
+                searchEngineLabel, composerAttachment, askAiChips, persona);
     }
 
     /**
@@ -459,7 +478,7 @@ public final class ChatViewState {
                 model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
                 recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
                 stage, followLatest, missedCount, archived, fullscreenEditing,
-                translations.started(messageId), searchEnabled, searchEngineLabel, composerAttachment, askAiChips);
+                translations.started(messageId), searchEnabled, searchEngineLabel, composerAttachment, askAiChips, persona);
     }
 
     public ChatViewState withTranslationFinished(String messageId, String translation) {
@@ -467,7 +486,7 @@ public final class ChatViewState {
                 model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
                 recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
                 stage, followLatest, missedCount, archived, fullscreenEditing,
-                translations.finished(messageId, translation), searchEnabled, searchEngineLabel, composerAttachment, askAiChips);
+                translations.finished(messageId, translation), searchEnabled, searchEngineLabel, composerAttachment, askAiChips, persona);
     }
 
     public ChatViewState withTranslationToggled(String messageId) {
@@ -475,7 +494,7 @@ public final class ChatViewState {
                 model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
                 recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
                 stage, followLatest, missedCount, archived, fullscreenEditing,
-                translations.toggled(messageId), searchEnabled, searchEngineLabel, composerAttachment, askAiChips);
+                translations.toggled(messageId), searchEnabled, searchEngineLabel, composerAttachment, askAiChips, persona);
     }
 
     public ChatViewState withSearchEnabled(boolean value, String engineLabel) {
@@ -483,7 +502,7 @@ public final class ChatViewState {
                 model, thinkingEnabled, expandedReasoning, collapsedReasoning, recommendations,
                 recommendationsMessageId, notice, sending, sourceCard, sourceCardExpanded,
                 stage, followLatest, missedCount, archived, fullscreenEditing, translations,
-                value, engineLabel, composerAttachment, askAiChips);
+                value, engineLabel, composerAttachment, askAiChips, persona);
     }
 
     public boolean isTranslating(String messageId) {

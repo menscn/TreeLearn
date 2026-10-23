@@ -1,0 +1,46 @@
+OK   selftest: 三方一致必须 PASS
+OK   selftest: token 值漂移必须 FAIL
+OK   selftest: 缺少 token 必须 FAIL
+OK   selftest: 凭空多出 token 必须 FAIL
+OK   selftest: colors.xml 少资源必须 FAIL
+OK   selftest: colors.xml 多资源必须 FAIL
+OK   selftest: colors.xml 数值漂移必须 FAIL
+OK   selftest: 全无色值（解析退化）必须 FAIL
+OK   selftest: :root 缺失必须 FAIL
+OK   selftest: 解析器能读同一行多条声明
+OK   selftest: 四方一致必须 PASS
+OK   selftest: 生成 CSS 数值漂移必须 FAIL
+OK   selftest: 生成 CSS 少 token 必须 FAIL
+OK   selftest: 生成 CSS 凭空多出 token 必须 FAIL
+OK   selftest: 生成 CSS 文件缺失必须 FAIL 而不是跳过
+OK   selftest: 生成 CSS 解析退化（条目低于下限）必须 FAIL
+OK   selftest: 同一内容以 token 字典与生成 CSS 两种形态喂入必须解析相等
+OK   selftest: 输出顺序跟随 token 来源顺序，不重排、不排序
+OK   selftest: 生成物不得含日期或时间戳（否则「逐字节相同」的漂移校验永远红）
+OK   selftest: 逐字节相同的生成物必须 PASS
+OK   selftest: 生成物被清空必须判 FAIL（内容归零与删除文件同属漂移）
+OK   selftest: 改动一个字符必须判 FAIL
+OK   selftest: 行尾换行差异也必须判 FAIL（比对不得被换行归一吞掉）
+OK   selftest: 末尾多一个空行也必须判 FAIL
+OK   selftest: 上游 token 改了值而生成物没跟着重生成必须判 FAIL
+OK   selftest: 声明顺序被重排必须判 FAIL（顺序也是生成物的一部分）
+OK   selftest: 漂移判定必须给出可定位的行号与两侧取值 — measured=tokens.css 与重新生成的结果不逐字节相同（说明有人手改了生成物）：["第 8 行 已落盘='  --bg: #F7F6F1;' 重新生成='  --bg: #F7F6F0;'"]
+OK   selftest: 裸 hex 必须被扫出
+OK   selftest: var() 引用不得算裸 hex
+OK   selftest: 8 位 hex 必须被扫出
+OK   selftest: 5 位非颜色片段（CSS 不支持）不得误报
+OK   selftest: 注释里的 hex 同样判 FAIL（剥注释会让解析器自证清白）
+OK   selftest: 字符串字面量里的 hex 必须判 FAIL —— React 内联样式 style={{color:'#FFF'}} 就是字符串，豁免字符串等于给守门开主通道
+OK   selftest: 命中必须带真实行号（报 1 行会让按行修的人扑空） — measured=[(1, '#FF0000'), (3, '#00FF00')]
+OK   selftest: 同一内容以字符串与文件字典两种形状喂入必须给出相同命中数
+OK   selftest: frontend 不存在必须记 SKIPPED，不得记 PASS 也不得记 FAIL
+OK   selftest: 前端源码裸 hex 必须 FAIL
+OK   selftest: 生成的 tokens.css 是唯一豁免文件，且它被扣除出扫描数（豁免来自被判对象自身）
+OK   selftest: frontend 里除生成物外没有文件必须 SKIPPED，不得因「零命中」判 PASS
+OK   selftest: 读不出 UTF-8 的前端文件必须判 FAIL（不得静默跳过）
+OK   selftest: 只有真二进制扩展名不读；SVG 是文本且 fill 里就是颜色，必须照扫
+OK   selftest: 执行用例数恰好 = 41（增删判据都要显式改这个数） — measured=41
+selftest judgement cases executed = 41
+
+check_design_tokens --selftest: 0 check(s) failed
+EXITCODE=0

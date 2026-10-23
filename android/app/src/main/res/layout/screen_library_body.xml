@@ -1,109 +1,189 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The library column (T-052, PRD 6.2.16 point 4): the title, the search box, the two segments and
-  the list. Shared by the phone page and the tablet page, so the two cannot drift - both
-  `layout/screen_library.xml` and `layout-sw600dp/screen_library.xml` include this one column.
+  The library column, aligned to Scheme A's fifth figure on 2026-10-22 (T-2026-10-22-057): a floating
+  glass capsule topbar with the serif page title, the 44dp pill search field, one glass segment capsule
+  whose two halves carry real counts, the compact glass topic cards, and the sprout note that closes the
+  page. Shared by the phone page and the tablet page, so the two cannot drift.
 
   The list container `library_rows` is the three contents' shared container: the 「进行中」 segment
-  fills it with topic rows, the 「已完成」 segment (053) with archived branch rows, and the search
-  box (054) with hit rows while a query is live - so a row is always found in the same place.
+  fills it with topic rows, the 「已完成」 segment with archived branch rows, and the search box with
+  hit rows while a query is live - so a row is always found in the same place.
+
+  What is deliberately not the proposal's raw number: the segment capsule is Scheme A's 40dp face, but
+  the two halves are 44dp tall touch targets. The bright selected face is a 4dp-inset drawable inside
+  that target, which keeps the visible pill at the proposal's proportions without putting the page's
+  two filters below this project's touch floor.
 
   `library_search_input` is a real control since 054: its text goes to `LibraryPresenter` (and on
-  to the search stack), and the results replace the list in place. The two segment pills are also
-  real controls, wired by `LibraryScreen`; tapping one leaves the search state.
+  to the search stack), and the results replace the list in place. The two segment halves are also
+  real controls, wired by `LibraryScreen`; tapping one leaves the search state. The note is a
+  browsing-state line, so `LibraryScreen` hides it while a query is on screen.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:orientation="vertical" android:paddingBottom="@dimen/space_s6">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/space_s6">
 
-    <!-- 2026-09-28 user decision: this title and the settings page's title are the same kind of
-         thing, so they must read as one style. The settings header sets the size (text_h1), the
-         weight (bold) and the ink (tl_ink); previously the library used text_h2 and the two pages
-         disagreed.
-
-         2026-09-28 user decision (second): the library now carries a real back arrow, like the
-         settings header, instead of the touch_min-wide empty placeholder it used to lead with. The
-         two headers therefore read as one style in full - same lead control, same title metrics.
-         The arrow is what makes them equal; the placeholder only made the titles' left edges line
-         up while leaving the two pages visibly different.
-
-         What back means here is MainActivity's single decision, not this file's. Tapping this arrow
-         reports the same request as the system back gesture, so the two never disagree: while a
-         query is live it leaves the search state and the library's own lists come back, and
-         otherwise it steps back to the home tab. -->
     <LinearLayout
+        android:id="@+id/library_appbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/topbar_height"
+        android:layout_marginStart="@dimen/space_s4"
+        android:layout_marginTop="@dimen/topbar_offset"
+        android:layout_marginEnd="@dimen/space_s4"
+        android:background="@drawable/bg_glass_bar"
+        android:elevation="@dimen/glass_capsule_elevation"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingStart="@dimen/page_gutter"
-        android:paddingTop="@dimen/space_s4"
-        android:paddingEnd="@dimen/page_gutter">
+        android:paddingStart="@dimen/space_s2"
+        android:paddingEnd="@dimen/space_s2">
 
         <ImageView
             android:id="@+id/library_back"
-            android:layout_width="@dimen/touch_min"
-            android:layout_height="@dimen/touch_min"
-            android:layout_marginStart="-8dp"
+            android:layout_width="@dimen/topbar_icon"
+            android:layout_height="@dimen/topbar_icon"
             android:background="@drawable/bg_icon_button"
             android:contentDescription="@string/cd_library_back"
+            android:padding="@dimen/space_s2"
             android:scaleType="centerInside"
             android:src="@drawable/ic_nav_back"
-            android:tint="@color/tl_green_deep" />
+            android:tint="@color/tl_ink2" />
 
-        <TextView android:id="@+id/library_title" android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/library_title"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/space_s2"
+            android:fontFamily="@font/noto_serif_sc"
+            android:letterSpacing="0.02"
             android:text="@string/library_title"
-            android:textColor="@color/tl_ink" android:textSize="@dimen/text_h1"
+            android:textColor="@color/tl_ink"
+            android:textSize="@dimen/text_library_title"
             android:textStyle="bold" />
     </LinearLayout>
 
-    <EditText android:id="@+id/library_search_input" android:layout_width="match_parent"
-        android:layout_height="@dimen/touch_min" android:layout_marginStart="@dimen/page_gutter"
-        android:layout_marginTop="@dimen/space_s3" android:layout_marginEnd="@dimen/page_gutter"
-        android:background="@drawable/bg_library_search" android:cursorVisible="true"
-        android:drawableStart="@drawable/ic_search" android:drawablePadding="@dimen/space_s2"
-        android:focusable="true" android:focusableInTouchMode="true"
-        android:hint="@string/library_search_hint" android:includeFontPadding="false"
-        android:imeOptions="actionSearch" android:importantForAutofill="no"
-        android:inputType="text" android:maxLines="1"
-        android:paddingStart="@dimen/space_s3" android:paddingEnd="@dimen/space_s3"
-        android:textColorHint="@color/tl_ink3" android:textSize="@dimen/text_sm" />
+    <EditText
+        android:id="@+id/library_search_input"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/touch_min"
+        android:layout_marginStart="@dimen/page_gutter"
+        android:layout_marginTop="@dimen/library_body_top"
+        android:layout_marginEnd="@dimen/page_gutter"
+        android:background="@drawable/bg_library_search"
+        android:cursorVisible="true"
+        android:drawableStart="@drawable/ic_search"
+        android:drawablePadding="@dimen/space_s2"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:hint="@string/library_search_hint"
+        android:imeOptions="actionSearch"
+        android:importantForAutofill="no"
+        android:includeFontPadding="false"
+        android:inputType="text"
+        android:maxLines="1"
+        android:paddingStart="@dimen/library_search_pad"
+        android:paddingEnd="@dimen/library_search_pad"
+        android:textColor="@color/tl_ink"
+        android:textColorHint="@color/tl_ink3"
+        android:textSize="@dimen/text_library_search" />
 
-    <TextView android:id="@+id/library_search_scope" android:layout_width="match_parent"
-        android:layout_height="wrap_content" android:paddingStart="@dimen/page_gutter"
-        android:paddingTop="@dimen/space_s2" android:paddingEnd="@dimen/page_gutter"
-        android:text="@string/library_search_scope" android:textColor="@color/tl_ink3"
-        android:textSize="@dimen/text_cap" android:visibility="gone" />
+    <TextView
+        android:id="@+id/library_search_scope"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/page_gutter"
+        android:paddingTop="@dimen/space_s2"
+        android:paddingEnd="@dimen/page_gutter"
+        android:text="@string/library_search_scope"
+        android:textColor="@color/tl_ink3"
+        android:textSize="@dimen/text_cap"
+        android:visibility="gone" />
 
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/page_gutter" android:layout_marginTop="@dimen/space_s3"
-        android:layout_marginEnd="@dimen/page_gutter" android:orientation="horizontal">
+    <!-- One capsule, two halves. The halves stay 44dp tall; only the bright face is inset (see the
+         comment above), so the touch floor survives without changing the visible proportion. -->
+    <LinearLayout
+        android:id="@+id/library_segment"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/touch_min"
+        android:layout_marginStart="@dimen/page_gutter"
+        android:layout_marginTop="@dimen/library_segment_top"
+        android:layout_marginEnd="@dimen/page_gutter"
+        android:background="@drawable/bg_library_segment"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/library_segment_pad"
+        android:paddingEnd="@dimen/library_segment_pad">
 
-        <TextView android:id="@+id/library_segment_in_progress" android:layout_width="wrap_content"
-            android:layout_height="@dimen/touch_min" android:background="@drawable/bg_library_segment"
-            android:backgroundTint="@color/tl_green_soft" android:clickable="true"
-            android:focusable="true" android:gravity="center"
-            android:minWidth="88dp" android:paddingStart="@dimen/space_s4"
-            android:paddingEnd="@dimen/space_s4" android:text="@string/library_segment_in_progress"
-            android:textColor="@color/tl_green_deep" android:textSize="@dimen/text_sm" />
+        <TextView
+            android:id="@+id/library_segment_in_progress"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:textSize="@dimen/text_library_segment" />
 
-        <TextView android:id="@+id/library_segment_done" android:layout_width="wrap_content"
-            android:layout_height="@dimen/touch_min" android:layout_marginStart="@dimen/space_s2"
-            android:background="@drawable/bg_library_segment" android:backgroundTint="@color/tl_surface"
-            android:clickable="true" android:focusable="true" android:gravity="center"
-            android:minWidth="88dp" android:paddingStart="@dimen/space_s4"
-            android:paddingEnd="@dimen/space_s4" android:text="@string/library_segment_done"
-            android:textColor="@color/tl_ink3" android:textSize="@dimen/text_sm" />
+        <TextView
+            android:id="@+id/library_segment_done"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/library_segment_gap"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:textSize="@dimen/text_library_segment" />
     </LinearLayout>
 
-    <LinearLayout android:id="@+id/library_rows" android:layout_width="match_parent"
-        android:layout_height="wrap_content" android:orientation="vertical" />
+    <LinearLayout
+        android:id="@+id/library_rows"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/library_list_top"
+        android:orientation="vertical" />
 
-    <TextView android:id="@+id/library_state" android:layout_width="match_parent"
-        android:layout_height="wrap_content" android:gravity="center"
-        android:paddingStart="@dimen/page_gutter" android:paddingTop="@dimen/space_s6"
-        android:paddingEnd="@dimen/page_gutter" android:textColor="@color/tl_ink3"
-        android:textSize="@dimen/text_sm" android:visibility="gone" />
+    <TextView
+        android:id="@+id/library_state"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingStart="@dimen/page_gutter"
+        android:paddingTop="@dimen/space_s6"
+        android:paddingEnd="@dimen/page_gutter"
+        android:textColor="@color/tl_ink3"
+        android:textSize="@dimen/text_sm"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/library_note"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/page_gutter"
+        android:layout_marginTop="@dimen/library_note_top"
+        android:layout_marginEnd="@dimen/page_gutter"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/space_s1"
+        android:paddingEnd="@dimen/space_s1">
+
+        <ImageView
+            android:id="@+id/library_note_icon"
+            android:layout_width="@dimen/library_note_icon"
+            android:layout_height="@dimen/library_note_icon"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_brand_sprout"
+            android:tint="@color/tl_green" />
+
+        <TextView
+            android:id="@+id/library_note_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/library_note_gap"
+            android:layout_weight="1"
+            android:lineSpacingMultiplier="1.6"
+            android:text="@string/library_note"
+            android:textColor="@color/tl_ink3"
+            android:textSize="@dimen/text_library_note" />
+    </LinearLayout>
 </LinearLayout>

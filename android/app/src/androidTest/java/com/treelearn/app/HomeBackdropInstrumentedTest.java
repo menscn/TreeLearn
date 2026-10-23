@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
@@ -60,27 +61,34 @@ public final class HomeBackdropInstrumentedTest {
         assertEquals("the rule thickness is the hairline token",
                 (float) context.getResources().getDimensionPixelSize(R.dimen.hairline),
                 backdrop.thicknessPx(), 0f);
-        assertEquals("the rule colour is the line token composited over the page, not a new resource",
-                PaperRules.composite(context.getColor(R.color.tl_bg), context.getColor(R.color.tl_line),
-                        PaperRules.ruleAlpha()),
+        assertEquals("the rule colour is the line token composited over the mist scene, not a new resource",
+                PaperRules.composite(context.getColor(R.color.tl_mist_base),
+                        context.getColor(R.color.tl_line), PaperRules.ruleAlpha()),
                 backdrop.ruleColor());
+        assertEquals("the scene base is the mist token",
+                context.getColor(R.color.tl_mist_base), backdrop.mistColor());
     }
 
     @Test
     public void theTabBarAndRouteRootsDoNotHideTheSharedPaperTexture() {
-        assertTransparentTabBar("phone tab bar", phone());
-        assertTransparentTabBar("tablet tab bar", tablet());
+        assertTranslucentTabBar("phone tab bar", phone());
+        assertTranslucentTabBar("tablet tab bar", tablet());
         assertNoPaperBackdrop("phone home layout", R.layout.screen_home, context());
         assertNoPaperBackdrop("chat layout", R.layout.screen_chat_body, context());
         assertNoPaperBackdrop("navigation layout", R.layout.screen_navigation_body, context());
         assertNoPaperBackdrop("tree layout", R.layout.screen_tree_body, context());
     }
 
-    private void assertTransparentTabBar(String which, View root) {
-        Drawable background = root.findViewById(R.id.tab_bar).getBackground();
-        assertTrue(which + " must let shell paper show through",
-                background == null || (background instanceof ColorDrawable
-                        && ((ColorDrawable) background).getColor() == 0));
+    /**
+     * The bar used to be fully transparent. Since the 2026-10-21 glass material it draws the
+     * translucent chrome itself, so the invariant is "not opaque", not "null": the mist scene and
+     * the rule texture must still read through it.
+     */
+    private void assertTranslucentTabBar(String which, View root) {
+        Drawable background = root.findViewById(R.id.tab_bar_pill).getBackground();
+        assertNotNull(which + " must carry the shared glass chrome", background);
+        assertTrue(which + " must let the mist scene show through",
+                background.getOpacity() != PixelFormat.OPAQUE);
     }
 
     private void assertNoPaperBackdrop(String which, int layout, Context context) {

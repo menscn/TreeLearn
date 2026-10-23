@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Phone home: one column, full width. The column itself lives in screen_home_body.xml.
+
+  The floating capsule (PRD 6.2.16) overlaps this scroll container rather than standing below it, so
+  the page pays the bar's room here with @dimen/tab_bar_clearance and clipToPadding off: rows travel
+  under the glass while the page moves and still come to rest whole above it at the end of the
+  scroll. Before T-2026-10-22-062 the host held that padding instead, which ended the viewport above
+  the capsule and left the translucent face with nothing to be translucent over.
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/home_screen"
@@ -11,7 +17,9 @@
         android:id="@+id/home_root"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:paddingBottom="@dimen/tab_bar_clearance">
 
         <include
             layout="@layout/screen_home_body"

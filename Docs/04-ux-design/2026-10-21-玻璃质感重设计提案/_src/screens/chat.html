@@ -1,0 +1,85 @@
+<div class="app screen-chat">
+  <header class="topbar glass">
+    <button class="icon-btn" type="button" aria-label="返回">
+      <svg class="icon"><use href="#i-back"></use></svg>
+    </button>
+    <div class="title-wrap">
+      <span class="title">注意力权重可视化与模型可解释性的关系</span>
+      <svg class="icon" aria-hidden="true"><use href="#i-chevron-down"></use></svg>
+    </div>
+    <button class="icon-btn" type="button" aria-label="分支导航">
+      <svg class="icon"><use href="#i-tree"></use></svg>
+    </button>
+    <button class="icon-btn" type="button" aria-label="树状总览">
+      <svg class="icon"><use href="#i-overview"></use></svg>
+    </button>
+    <button class="icon-btn" type="button" aria-label="设置">
+      <svg class="icon"><use href="#i-gear"></use></svg>
+    </button>
+  </header>
+
+  <div class="app-body">
+    <article class="reader glass glass--reader">
+      <div class="reader-scroll">
+        <div class="user-msg">
+          <span class="who">你</span>
+          注意力权重可视化与模型可解释性的关系
+        </div>
+
+        <div class="ai-tag">
+          <svg class="icon" aria-hidden="true"><use href="#i-sprout"></use></svg>
+          知芽
+        </div>
+
+        <div class="answer">
+          <p>核心先说结论：注意力头消融（ablation）的基本流程是“逐个或成组地让某个头失效，再测量任务指标变化”；而“该头重要”与“其他头补偿”的区分，关键不在消融本身，而在于<span class="mark">是否测量了被消融后的内部状态变化</span>，以及是否做了<span class="mark">针对补偿路径的对照实验</span>。</p>
+          <p>以“某层某头是否对任务重要”为例，标准实验从固定基线开始；选择消融方式时尤其要分清三种含义：<strong>置零</strong>破坏性最强但会引入分布外输入，<strong>均值消融</strong>保留统计常态、分布偏移较小，<strong>激活替换</strong>用于因果定位。三者不能混用，否则指标下降可能来自分布外干扰，而非该头功能被移除。</p>
+        </div>
+
+        <div class="actions">
+          <button class="icon-btn" type="button" aria-label="复制整条回答">
+            <svg class="icon"><use href="#i-copy"></use></svg>
+          </button>
+          <button class="icon-btn" type="button" aria-label="重新生成这条回答">
+            <svg class="icon"><use href="#i-reset"></use></svg>
+          </button>
+          <button class="icon-btn" type="button" aria-label="从这条回答新建主题">
+            <svg class="icon"><use href="#i-fork"></use></svg>
+          </button>
+          <span class="time">3天前</span>
+        </div>
+
+        <div class="branch-label">
+          <svg class="icon" aria-hidden="true"><use href="#i-fork"></use></svg>
+          从这条回答继续
+        </div>
+
+        <div class="branch-stack">
+          <button class="branch-item glass" type="button">
+            <svg class="icon" aria-hidden="true"><use href="#i-fork"></use></svg>
+            <span>在注意力头消融中，zero ablation、mean ablation 和 activation patching 三者的分布偏移程度不同，能否设计一个对照实验，量化区分“该头被移除功能”与“输入分布外导致指标下降”这两种效应？</span>
+          </button>
+          <button class="branch-item glass" type="button">
+            <svg class="icon" aria-hidden="true"><use href="#i-fork"></use></svg>
+            <span>用 CKA 或余弦相似度衡量消融前后隐藏状态差异时，如何确定“表示变化大到足以判定补偿”的阈值？如果指标不变但表示相似度中等（比如 0.7），该倾向哪种解释？</span>
+          </button>
+          <button class="branch-item glass" type="button">
+            <svg class="icon" aria-hidden="true"><use href="#i-fork"></use></svg>
+            <span>联合消融发现 H 与 H′ 冗余后，如何进一步判断二者是“功能等价的真冗余”，还是“一个头在另一个失效后被迫改变注意力模式”的从属关系？训练时消融能否给出决定性证据？</span>
+          </button>
+        </div>
+      </div>
+    </article>
+
+    <div class="composer--dock glass">
+      <button class="composer-icon" type="button" aria-label="添加附件">
+        <svg class="icon"><use href="#i-attach"></use></svg>
+      </button>
+      <span class="composer-line">在当前分支继续追问…</span>
+      <span class="model-chip">V4.1 Flash</span>
+      <button class="send" type="button" aria-label="发送">
+        <svg class="icon"><use href="#i-send"></use></svg>
+      </button>
+    </div>
+  </div>
+</div>

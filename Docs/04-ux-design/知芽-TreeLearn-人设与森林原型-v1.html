@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>知芽 · 人设与森林原型</title>
+<style>
+/* 设计 token 镜像自 知芽-TreeLearn-高保真原型-v1.html 的 :root，逐值一致；权威仍是那一处。 */
+:root{
+  --bg:#F4F1EB;
+  --surface:#FCFBF8;
+  --ink:#16241C;
+  --ink2:#435449;
+  --ink3:#627067;
+  --line:#E2DFD6;
+  --hairline:rgba(26,40,32,.07);
+  --green:#2B6E45;
+  --green-deep:#164027;
+  --green-soft:#E3F0E7;
+  --green-faint:#F0F7F1;
+  --blue:#2563EB;
+  --amber:#B05108;
+  --amber-soft:#FBF3E2;
+  --red:#C0392B;
+  --red-soft:#FBEAE7;
+  --yellow-highlight:#FFF3B0;
+
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s6:24px; --s8:32px;
+  --gutter:20px;
+
+  --r-sm:8px;
+  --r-md:14px;
+  --r-lg:18px;
+  --r-full:99px;
+
+  --fs-display:26px;
+  --fs-brand:30px;
+  --fs-h1:20px;
+  --fs-h2:16px;
+  --fs-body:15px;
+  --fs-sm:13px;
+  --fs-cap:11px;
+
+  --sh-1:0 1px 2px rgba(22,36,28,.04);
+  --sh-2:0 4px 12px rgba(22,36,28,.06);
+
+  --kai:'LXGW WenKai','Noto Serif SC','Songti SC',serif;
+  --serif:'Noto Serif SC','Songti SC',Georgia,serif;
+  --brush:'Ma Shan Zheng','LXGW WenKai',serif;
+  --sans:'Noto Sans SC',-apple-system,sans-serif;
+
+  --paper-rule:rgba(30,43,35,.018);
+  --paper-write:rgba(46,125,79,.075);
+  --lh-read:28px;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--line);
+  color:var(--ink);
+  font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;
+}
+button{font:inherit;color:inherit;background:none;border:none;padding:0;cursor:pointer;}
+svg{display:block;}
+
+/* ============ 提案页外壳 ============ */
+.page{max-width:1260px;margin:0 auto;padding:var(--s8) var(--s6) 112px;}
+.page-eyebrow{font-size:var(--fs-cap);letter-spacing:.18em;color:var(--ink2);font-weight:700;}
+.page-title{font-family:var(--serif);font-size:var(--fs-brand);line-height:1.3;font-weight:700;color:var(--green-deep);margin:var(--s2) 0 0;letter-spacing:.01em;}
+.page-sub{font-size:var(--fs-body);line-height:1.8;color:var(--ink2);max-width:720px;margin:var(--s3) 0 0;}
+.page-meta{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s3);margin-top:var(--s4);}
+.meta-pill{font-size:var(--fs-cap);color:var(--ink2);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-full);padding:var(--s1) var(--s3);}
+.meta-pill b{color:var(--green-deep);font-weight:600;}
+
+.section{margin-top:calc(var(--s8) * 2);}
+.section-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--s1) var(--s3);border-bottom:1px solid var(--line);padding-bottom:var(--s3);margin-bottom:var(--s6);}
+.section-no{font-family:var(--serif);font-size:var(--fs-h1);color:var(--green);font-weight:700;}
+.section-title{font-family:var(--serif);font-size:var(--fs-h1);font-weight:700;color:var(--ink);}
+.section-desc{font-size:var(--fs-sm);color:var(--ink2);line-height:1.7;margin-left:auto;max-width:560px;}
+
+.boards{display:flex;flex-wrap:wrap;gap:var(--s8) var(--s4);align-items:flex-start;}
+.board{width:390px;flex:0 0 390px;}
+.phone{
+  width:390px;height:844px;background:var(--bg);
+  border:1px solid var(--line);border-radius:var(--r-lg);
+  overflow:hidden;position:relative;box-shadow:var(--sh-2);
+}
+.screen{
+  height:100%;display:flex;flex-direction:column;position:relative;
+  font-family:var(--sans);
+  background-color:var(--bg);
+  background-image:repeating-linear-gradient(to bottom,transparent 0 31px,var(--paper-rule) 31px 32px);
+}
+.board-cap{margin-top:var(--s3);}
+.board-no{font-size:var(--fs-cap);letter-spacing:.14em;color:var(--ink3);font-weight:700;}
+.board-name{font-family:var(--serif);font-size:var(--fs-h2);font-weight:700;margin-top:var(--s1);}
+.board-note{font-size:var(--fs-sm);color:var(--ink2);line-height:1.75;margin-top:var(--s1);}
+.board-note b{color:var(--green-deep);font-weight:600;}
+
+/* ============ 通用 Appbar ============ */
+.appbar{
+  display:flex;align-items:center;gap:var(--s1);flex-shrink:0;
+  padding:var(--s2) var(--s3) var(--s2) var(--s4);
+  border-bottom:1px solid var(--hairline);
+  background:var(--bg);z-index:5;min-height:56px;
+}
+.icon-btn{
+  width:44px;height:44px;border-radius:var(--r-full);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--ink2);flex-shrink:0;transition:background .15s,color .15s;
+}
+.icon-btn:hover{background:var(--green-soft);color:var(--green-deep);}
+.appbar-title{flex:1;min-width:0;padding-left:var(--s1);}
+.appbar-title .t1{font-size:var(--fs-h2);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em;}
+.appbar-title .t2{font-size:var(--fs-cap);color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+
+/* ============ 聊天页 ============ */
+.chat-body{flex:1;min-height:0;overflow-y:auto;padding:var(--s4) var(--gutter) var(--s4);}
+.msg{margin-bottom:var(--s6);}
+.msg-u{display:flex;justify-content:flex-end;}
+.msg-u .bubble{max-width:86%;font-size:var(--fs-body);line-height:1.75;color:var(--ink);text-align:right;}
+.msg-a .who{display:flex;align-items:center;gap:var(--s2);font-size:var(--fs-cap);color:var(--ink3);margin-bottom:var(--s2);}
+.msg-a .who b{color:var(--green-deep);font-weight:600;font-size:var(--fs-sm);}
+.think{
+  display:inline-flex;align-items:center;gap:var(--s1);
+  font-size:var(--fs-cap);color:var(--ink3);
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-full);padding:var(--s1) var(--s3);margin-bottom:var(--s3);
+}
+.msg-a p{font-size:var(--fs-body);line-height:1.85;color:var(--ink);margin:0 0 var(--s3);}
+.msg-a p:last-child{margin-bottom:0;}
+.hl{background:var(--green-faint);border-radius:2px;padding:0 1px;}
+
+.composer{flex-shrink:0;position:relative;z-index:12;padding:var(--s3) var(--gutter) var(--s4);border-top:1px solid var(--hairline);background:var(--bg);}
+.composer-box{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-1);padding:var(--s3) var(--s3) var(--s2);}
+.composer-input{font-size:var(--fs-body);color:var(--ink3);min-height:26px;display:flex;align-items:center;}
+.composer-tools{display:flex;align-items:center;gap:var(--s2);margin-top:var(--s2);}
+.model-chip{
+  position:relative;display:inline-flex;align-items:center;gap:var(--s1);
+  font-size:var(--fs-cap);color:var(--ink2);
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-full);padding:5px var(--s3);min-height:32px;
+  white-space:nowrap;transition:border-color .15s,color .15s;
+}
+.model-chip::after{content:'';position:absolute;inset:-6px;}
+.model-chip:hover{border-color:var(--green);color:var(--green-deep);}
+.model-chip .thk{color:var(--green-deep);font-weight:600;}
+.persona-chip{
+  position:relative;display:inline-flex;align-items:center;gap:var(--s1);
+  font-size:var(--fs-cap);font-weight:600;color:var(--green-deep);
+  background:var(--green-soft);border:1px solid var(--green-soft);
+  border-radius:var(--r-full);padding:5px var(--s3);min-height:32px;
+  white-space:nowrap;transition:border-color .15s;
+}
+.persona-chip::after{content:'';position:absolute;inset:-6px;}
+.persona-chip:hover{border-color:var(--green);}
+.send{
+  width:44px;height:44px;border-radius:var(--r-full);
+  background:var(--green);color:var(--surface);
+  display:flex;align-items:center;justify-content:center;
+  margin-left:auto;flex-shrink:0;transition:background .15s;
+}
+.send:hover{background:var(--green-deep);}
+
+/* ---- 人设选择器 ---- */
+.popover{
+  position:absolute;left:var(--gutter);right:var(--gutter);
+  bottom:calc(100% - var(--s2));z-index:20;
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-lg);box-shadow:var(--sh-2);padding:var(--s1);
+  animation:poIn .17s cubic-bezier(.2,.9,.3,1);
+}
+@keyframes poIn{from{opacity:0;transform:scale(.97) translateY(4px);}to{opacity:1;transform:none;}}
+.popover[hidden]{display:none;}
+.popover-item{
+  display:flex;align-items:center;gap:var(--s2);width:100%;
+  padding:var(--s2) var(--s3);border-radius:var(--r-md);
+  min-height:44px;text-align:left;transition:background .13s;
+}
+.popover-item:hover{background:var(--green-faint);}
+.popover-item.on{background:var(--green-faint);}
+.pi-main{flex:1;min-width:0;}
+.pi-t{display:flex;align-items:center;gap:var(--s2);font-size:var(--fs-sm);font-weight:600;color:var(--ink);}
+.pi-tag{font-size:10px;font-weight:500;color:var(--ink3);background:var(--bg);border-radius:var(--r-full);padding:1px var(--s2);}
+.pi-check{color:var(--green);opacity:0;display:flex;flex-shrink:0;}
+.popover-item.on .pi-check{opacity:1;}
+.popover-sep{height:1px;background:var(--line);margin:var(--s1) var(--s3);}
+.popover-more{
+  display:flex;align-items:center;gap:var(--s2);width:100%;
+  padding:var(--s2) var(--s3);border-radius:var(--r-md);min-height:44px;
+  color:var(--green-deep);font-size:var(--fs-sm);font-weight:600;
+}
+.popover-more:hover{background:var(--green-faint);}
+.pm-arrow{margin-left:auto;color:var(--ink3);display:flex;}
+
+/* ============ 回答风格介绍页 ============ */
+.intro-body{flex:1;min-height:0;overflow-y:auto;padding-bottom:var(--s8);}
+.intro-lead{padding:var(--s4) var(--gutter) var(--s2);font-size:var(--fs-sm);color:var(--ink2);line-height:1.8;}
+.intro-lead b{color:var(--green-deep);font-weight:600;}
+.set-section{margin:var(--s4) var(--gutter) 0;}
+.set-card{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-md);padding:var(--s4);box-shadow:var(--sh-1);
+}
+.pc-head{display:flex;align-items:center;gap:var(--s2);}
+.pc-name{font-family:var(--serif);font-size:var(--fs-h2);font-weight:700;color:var(--ink);}
+.pc-tag{font-size:10px;color:var(--green-deep);background:var(--green-soft);border-radius:var(--r-full);padding:2px var(--s2);font-weight:600;}
+.pc-sub{font-size:var(--fs-sm);color:var(--ink2);line-height:1.7;margin:var(--s1) 0 var(--s3);}
+.pc-demo{background:var(--green-faint);border-radius:var(--r-sm);padding:var(--s3);}
+.pc-q{font-size:var(--fs-cap);color:var(--ink3);line-height:1.6;margin-bottom:var(--s2);}
+.pc-a{font-size:var(--fs-sm);line-height:1.85;color:var(--ink);}
+.pc-a::before{content:'知芽：';color:var(--green-deep);font-weight:600;}
+.intro-foot{padding:var(--s6) var(--gutter) 0;font-size:var(--fs-cap);color:var(--ink3);line-height:1.7;text-align:center;}
+
+/* ============ 抽屉 ============ */
+.drawer-scrim{position:absolute;inset:0;background:var(--green-deep);opacity:.10;z-index:10;}
+.drawer{
+  position:absolute;left:0;top:0;bottom:0;width:344px;max-width:86%;
+  background:var(--bg);z-index:11;display:flex;flex-direction:column;
+  box-shadow:var(--sh-2);border-right:1px solid var(--line);
+}
+.drawer-head{display:flex;align-items:center;gap:var(--s2);padding:var(--s4) var(--s2) var(--s3) var(--gutter);}
+.dh-t{flex:1;font-family:var(--serif);font-size:var(--fs-h1);font-weight:700;letter-spacing:.01em;}
+.drawer-body{padding:0 var(--gutter) var(--s4);display:flex;flex-direction:column;gap:var(--s3);}
+.drawer-block{background:var(--surface);border-radius:var(--r-md);box-shadow:var(--sh-1);padding:var(--s4);}
+.heat-head{display:flex;align-items:baseline;gap:var(--s2);margin-bottom:var(--s3);}
+.hh-t{font-size:var(--fs-sm);font-weight:600;color:var(--ink);}
+.hh-m{margin-left:auto;font-family:var(--serif);font-size:var(--fs-cap);color:var(--ink3);}
+.heat-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:var(--s1);}
+.heat-cell{aspect-ratio:1/1;border-radius:3px;background:var(--line);}
+.heat-cell.l1{background:var(--green-faint);}
+.heat-cell.l2{background:var(--green-soft);}
+.heat-cell.l3{background:var(--green);}
+.drawer-label{font-size:var(--fs-sm);font-weight:600;color:var(--ink);margin:var(--s2) 0 0;}
+.drawer-label span{font-weight:400;color:var(--ink3);font-size:var(--fs-cap);margin-left:var(--s2);}
+.hist-row{display:flex;align-items:center;gap:var(--s3);min-height:44px;border-bottom:1px solid var(--hairline);}
+.hist-row:last-child{border-bottom:none;}
+.hr-t{flex:1;min-width:0;font-size:var(--fs-sm);line-height:1.45;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hr-m{font-size:var(--fs-cap);color:var(--ink3);flex-shrink:0;}
+.forest-entry{display:flex;align-items:center;gap:var(--s3);min-height:44px;cursor:pointer;}
+.fe-icon{
+  width:40px;height:40px;border-radius:var(--r-full);
+  background:var(--green-soft);color:var(--green-deep);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.fe-main{flex:1;min-width:0;}
+.fe-t{display:block;font-size:var(--fs-body);font-weight:600;color:var(--ink);}
+.fe-s{display:block;font-size:var(--fs-cap);color:var(--ink3);margin-top:2px;}
+.fe-arrow{color:var(--ink3);display:flex;flex-shrink:0;}
+
+/* ============ 我的森林（俯瞰地块） ============ */
+.forest-scene{
+  flex:1;min-height:0;position:relative;overflow:hidden;
+  background:
+    radial-gradient(72% 52% at 32% 24%, var(--green-faint) 0%, transparent 70%),
+    radial-gradient(90% 60% at 50% 108%, var(--green-soft) 0%, transparent 62%),
+    linear-gradient(165deg, var(--green-soft) 0%, var(--green-faint) 44%, var(--green-soft) 100%);
+}
+.forest-scene::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(var(--green) .7px, transparent .8px);
+  background-size:14px 14px;opacity:.05;
+}
+.forest-scene::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  box-shadow:inset 0 0 100px var(--green-soft), inset 0 -60px 80px var(--green-soft);
+}
+.terrain{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+.contour{fill:none;stroke:var(--green);stroke-width:1;stroke-opacity:.10;}
+.contour.faint{stroke-opacity:.06;}
+.grass{fill:none;stroke:var(--green);stroke-width:1.2;stroke-linecap:round;stroke-opacity:.22;}
+.stone{fill:var(--ink3);opacity:.10;}
+
+.forest-hint{
+  position:absolute;left:var(--s4);top:var(--s3);z-index:4;
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:var(--fs-cap);color:var(--ink2);
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-full);padding:6px var(--s3);box-shadow:var(--sh-1);
+}
+.forest-hint svg{color:var(--green);flex-shrink:0;}
+.compass{
+  position:absolute;right:var(--s4);top:var(--s3);z-index:4;
+  width:30px;height:30px;border-radius:50%;
+  background:var(--surface);border:1px solid var(--line);box-shadow:var(--sh-1);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  font-size:9px;font-weight:700;color:var(--ink3);line-height:1;
+}
+.compass::before{content:'';width:0;height:0;border-left:3px solid transparent;border-right:3px solid transparent;border-bottom:4px solid var(--green);}
+
+.forest-canopy-layer{position:absolute;inset:0;z-index:3;}
+.ftree{
+  position:absolute;transform:translate(-50%,-50%);
+  display:flex;align-items:center;justify-content:center;
+  overflow:visible;border-radius:50%;
+  transition:transform .18s;
+}
+.ftree:hover{transform:translate(-50%,-50%) scale(1.03);}
+.ftree .halo{
+  position:absolute;inset:-20%;border-radius:50%;pointer-events:none;
+  background:radial-gradient(closest-side, var(--green-faint) 32%, transparent 72%);
+  opacity:0;transition:opacity .18s;
+}
+.ftree.sel .halo{opacity:1;}
+.ftree.sel::after{
+  content:'';position:absolute;left:12%;right:12%;bottom:5%;height:16%;
+  border-radius:50%;border:1px solid var(--green);opacity:.32;pointer-events:none;
+}
+.ftree .canopy{position:relative;width:100%;height:100%;overflow:visible;}
+.ftree-tag{
+  position:absolute;left:50%;bottom:calc(100% + 1px);transform:translateX(-50%);
+  max-width:190px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-size:var(--fs-cap);font-weight:600;color:var(--ink);
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-full);
+  padding:3px var(--s3);box-shadow:var(--sh-1);
+}
+.ftree.tb .ftree-tag{bottom:auto;top:calc(100% + 1px);}
+.ftree.tr .ftree-tag{left:auto;right:0;transform:none;}
+.ftree.tl .ftree-tag{left:0;transform:none;}
+.ftree-when{
+  position:absolute;left:50%;top:calc(100% - 1px);transform:translateX(-50%);
+  display:inline-flex;align-items:center;gap:3px;white-space:nowrap;
+  font-size:10px;color:var(--ink3);
+}
+.ftree-when::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--green);opacity:.55;}
+
+.forest-sheet{
+  position:absolute;left:var(--s4);right:var(--s4);bottom:38px;z-index:5;
+  display:flex;align-items:center;gap:var(--s3);
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-lg);box-shadow:var(--sh-2);padding:var(--s3) var(--s3) var(--s3) var(--s4);
+}
+.fs-main{flex:1;min-width:0;}
+.fs-title{font-family:var(--serif);font-size:var(--fs-h2);font-weight:700;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink);}
+.fs-meta{font-size:var(--fs-cap);color:var(--ink3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.5;}
+.fs-meta .arc{color:var(--ink2);font-weight:500;}
+.fs-go{
+  width:44px;height:44px;border-radius:var(--r-full);flex-shrink:0;
+  background:var(--green);color:var(--surface);
+  display:flex;align-items:center;justify-content:center;transition:background .15s;
+}
+.fs-go:hover{background:var(--green-deep);}
+.forest-foot{
+  position:absolute;left:0;right:0;bottom:10px;z-index:4;
+  text-align:center;font-size:10px;color:var(--ink3);letter-spacing:.02em;
+}
+
+/* ============ 森林状态 ============ */
+.state-stack{padding:var(--s4) var(--gutter);display:flex;flex-direction:column;gap:var(--s4);}
+.state-label{font-size:var(--fs-cap);letter-spacing:.12em;color:var(--ink3);font-weight:700;}
+.plot{
+  position:relative;overflow:hidden;border-radius:var(--r-lg);
+  border:1px solid var(--line);box-shadow:var(--sh-1);
+  background:
+    radial-gradient(72% 55% at 32% 24%, var(--green-faint) 0%, transparent 70%),
+    linear-gradient(165deg, var(--green-soft) 0%, var(--green-faint) 45%, var(--green-soft) 100%);
+}
+.plot::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(var(--green) .7px, transparent .8px);
+  background-size:14px 14px;opacity:.05;
+}
+.empty-plot{height:226px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;}
+.ep-dash{
+  position:absolute;left:50%;top:47%;width:128px;height:128px;border-radius:50%;
+  border:1px dashed var(--green);opacity:.16;transform:translate(-50%,-50%);
+}
+.ep-icon{color:var(--green);opacity:.6;display:flex;position:relative;z-index:1;margin-bottom:2px;}
+.ep-t{position:relative;z-index:1;font-family:var(--serif);font-size:var(--fs-h2);font-weight:600;color:var(--ink);}
+.ep-s{position:relative;z-index:1;font-size:var(--fs-sm);color:var(--ink2);line-height:1.7;margin:0;text-align:center;}
+.fail-plot{height:214px;}
+.fail-spot{
+  position:absolute;left:63%;top:44%;transform:translate(-50%,-50%);z-index:3;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+}
+.fail-hole{
+  width:46px;height:46px;border-radius:50%;
+  border:1.5px dashed var(--ink3);background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-size:var(--fs-h2);color:var(--ink3);opacity:.65;
+}
+.fail-tag{
+  white-space:nowrap;font-size:10px;color:var(--ink2);
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-full);
+  padding:3px var(--s2);box-shadow:var(--sh-1);
+}
+.fail-tag b{color:var(--green-deep);font-weight:600;}
+.sheet-demo{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
+  box-shadow:var(--sh-1);padding:var(--s4);
+}
+.sheet-demo .state-note{text-align:left;margin-top:var(--s2);}
+.state-note{font-size:var(--fs-cap);color:var(--ink3);line-height:1.6;margin-top:var(--s2);text-align:center;}
+
+@media (max-width:860px){
+  .page{padding:var(--s6) var(--s4) 72px;}
+  .board{width:100%;flex:0 0 auto;}
+  .phone{width:390px;max-width:100%;}
+  .section-desc{margin-left:0;}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="page-eyebrow">DESIGN PROPOSAL · 2026-10-21</div>
+    <h1 class="page-title">人设与森林</h1>
+    <p class="page-sub">两个下一版界面的设计提案：回答风格怎么选、怎么介绍；种下的主题在地面上长成怎样一片森林。只展示这两件事，其余界面沿用现有高保真原型。</p>
+    <div class="page-meta">
+      <span class="meta-pill">数值全部引用 <b>设计 token</b></span>
+      <span class="meta-pill">人设：<b>主题级 · 七档</b></span>
+      <span class="meta-pill">森林：<b>斜俯瞰地块 · 零 schema</b></span>
+      <span class="meta-pill">点击聊天页人设 chip、森林里的树均可试</span>
+    </div>
+  </header>
+
+  <!-- ================= 人设 ================= -->
+  <section class="section">
+    <div class="section-head">
+      <span class="section-no">一</span>
+      <h2 class="section-title">AI 人设</h2>
+      <p class="section-desc">七档固定风格，跟着主题走。只改变讲解方式、深度、节奏与措辞，不改变事实、纠错与诚实边界。</p>
+    </div>
+
+    <div class="boards">
+
+      <!-- 01 聊天页 -->
+      <article class="board">
+        <div class="phone">
+          <div class="screen">
+            <div class="appbar">
+              <button class="icon-btn" aria-label="返回">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <div class="appbar-title">
+                <div class="t1">导数到底是什么</div>
+                <div class="t2">从变化率开始 · 第 4 轮</div>
+              </div>
+              <button class="icon-btn" aria-label="更多">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+              </button>
+            </div>
+
+            <div class="chat-body">
+              <div class="msg msg-u">
+                <div class="bubble">为什么导数能表示斜率？我总觉得这是两件事。</div>
+              </div>
+
+              <div class="msg msg-a">
+                <div class="who"><b>知芽</b><span>学霸搭子</span></div>
+                <div class="think">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                  思考过程
+                </div>
+                <p>它们不是两件事，是同一件事的两种说法。</p>
+                <p>先别背「导数等于斜率」。拿两个点算一次平均变化：横着走一段，纵着升多少。这个比值，就是两点之间那条割线抬起的快慢。</p>
+                <p>现在把第二个点慢慢挪向第一个点。<span class="hl">割线会越来越贴近切线</span>，那个比值也会停在一个数上。这个数就是导数，而切线抬起的快慢，正是我们说的斜率。</p>
+              </div>
+            </div>
+
+            <div class="composer">
+              <div class="popover" id="persona-popover" hidden>
+                <div data-persona-list></div>
+                <div class="popover-sep"></div>
+                <button class="popover-more">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6L3.3 9.3l6.1-.7z"/></svg>
+                  了解每种风格
+                  <span class="pm-arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                  </span>
+                </button>
+              </div>
+
+              <div class="composer-box">
+                <div class="composer-input">继续问这一支…</div>
+                <div class="composer-tools">
+                  <button class="model-chip">DeepSeek <span class="thk">· 思考</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                  </button>
+                  <button class="persona-chip" id="persona-chip">
+                    <span data-persona-name>学霸搭子</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                  </button>
+                  <button class="send" aria-label="发送">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="board-cap">
+          <div class="board-no">01 · 聊天页</div>
+          <div class="board-name">风格在家里，不在每条回答上</div>
+          <p class="board-note">人设 chip 与模型 chip 同排、同尺寸；点击可替换。切换只写主题的 <b>persona</b> 一列，不刷新活动时间、不改变首页排序。回答上不标注人设。</p>
+        </div>
+      </article>
+
+      <!-- 02 选择器近景 -->
+      <article class="board">
+        <div class="phone">
+          <div class="screen">
+            <div class="appbar">
+              <button class="icon-btn" aria-label="返回">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <div class="appbar-title">
+                <div class="t1">导数到底是什么</div>
+                <div class="t2">从变化率开始 · 第 4 轮</div>
+              </div>
+            </div>
+
+            <div class="chat-body">
+              <div class="msg msg-u">
+                <div class="bubble">为什么导数能表示斜率？</div>
+              </div>
+              <div class="msg msg-a">
+                <div class="who"><b>知芽</b><span>学霸搭子</span></div>
+                <div class="think">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                  思考过程
+                </div>
+                <p>先看割线，再让它贴近切线。两件事就合成一件事了。</p>
+              </div>
+            </div>
+
+            <div class="composer">
+              <div class="popover" data-static>
+                <div data-persona-list></div>
+                <div class="popover-sep"></div>
+                <button class="popover-more">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6L3.3 9.3l6.1-.7z"/></svg>
+                  了解每种风格
+                  <span class="pm-arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                  </span>
+                </button>
+              </div>
+
+              <div class="composer-box">
+                <div class="composer-input">继续问这一支…</div>
+                <div class="composer-tools">
+                  <button class="model-chip">DeepSeek <span class="thk">· 思考</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                  </button>
+                  <button class="persona-chip">
+                    <span data-persona-name>学霸搭子</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                  </button>
+                  <button class="send" aria-label="发送">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="board-cap">
+          <div class="board-no">02 · 人设选择器</div>
+          <div class="board-name">七行单选，一条去介绍页的路</div>
+          <p class="board-note">当前档浅绿底 + 勾选；每行 44dp 热区。读到未知档位时回落默认档并只提示一次，<b>不让一行坏值拖垮整个主题列表</b>。底部入口进回答风格介绍页。</p>
+        </div>
+      </article>
+
+      <!-- 03 介绍页 -->
+      <article class="board">
+        <div class="phone">
+          <div class="screen">
+            <div class="appbar">
+              <button class="icon-btn" aria-label="返回">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <div class="appbar-title">
+                <div class="t1">回答风格介绍</div>
+                <div class="t2">七种讲法，同一条事实底线</div>
+              </div>
+            </div>
+
+            <div class="intro-body">
+              <p class="intro-lead">风格改变的是<b>怎么讲</b>：深度、节奏、措辞、是否反问、是否延伸。它不改变什么是对的，也不替你跳过该有的纠错。</p>
+              <div data-persona-cards></div>
+              <p class="intro-foot">自建人设将来在这里管理。本期只有内置七档。</p>
+            </div>
+          </div>
+        </div>
+        <div class="board-cap">
+          <div class="board-no">03 · 回答风格介绍页</div>
+          <div class="board-name">同一道题，七种讲法的对照</div>
+          <p class="board-note">每档一张卡：档名 + 一句话定位 + 同一问题的不同讲法。示例是设计资产，用来让差异可感知，<b>不是模型输出的逐字承诺</b>。画板内可滚动。</p>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ================= 森林 ================= -->
+  <section class="section">
+    <div class="section-head">
+      <span class="section-no">二</span>
+      <h2 class="section-title">我的森林</h2>
+      <p class="section-desc">抽屉扩展位进入独立全屏页。从斜上方俯瞰的一片林地：一题一树，树干落地、树冠按段枝多少长大；点一棵树，回到它停下的地方。统计安静地压在页脚。</p>
+    </div>
+
+    <div class="boards">
+
+      <!-- 04 抽屉 -->
+      <article class="board">
+        <div class="phone">
+          <div class="screen">
+            <div class="appbar">
+              <button class="icon-btn" aria-label="打开学习概览">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+              </button>
+              <div class="appbar-title">
+                <div class="t1">知芽</div>
+                <div class="t2">今天想弄明白什么？</div>
+              </div>
+            </div>
+            <div class="chat-body">
+              <div class="msg msg-u"><div class="bubble">继续上次那个导数的问题。</div></div>
+              <div class="msg msg-a">
+                <div class="who"><b>知芽</b><span>学霸搭子</span></div>
+                <p>上次停在「割线贴近切线」。今天从那个点接着走。</p>
+              </div>
+            </div>
+
+            <div class="drawer-scrim"></div>
+            <aside class="drawer">
+              <div class="drawer-head">
+                <div class="dh-t">学习概览</div>
+                <button class="icon-btn" aria-label="关闭">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
+              <div class="drawer-body">
+                <div class="drawer-block">
+                  <div class="heat-head">
+                    <span class="hh-t">最近四周</span>
+                    <span class="hh-m">连续 7 天</span>
+                  </div>
+                  <div class="heat-grid" data-heat></div>
+                </div>
+
+                <div class="drawer-block">
+                  <div class="drawer-label">最近学习 <span>仅显示最近三支</span></div>
+                  <div class="hist-row"><span class="hr-t">导数到底是什么</span><span class="hr-m">今天</span></div>
+                  <div class="hist-row"><span class="hr-t">从零理解贝叶斯</span><span class="hr-m">昨天</span></div>
+                  <div class="hist-row"><span class="hr-t">为什么睡眠影响记忆</span><span class="hr-m">10/18</span></div>
+                </div>
+
+                <div class="drawer-block">
+                  <div class="forest-entry" data-forest-entry>
+                    <span class="fe-icon">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="10" r="4"/><circle cx="16" cy="13" r="3"/><circle cx="12.5" cy="16.5" r="2.4"/></svg>
+                    </span>
+                    <span class="fe-main">
+                      <span class="fe-t">我的森林</span>
+                      <span class="fe-s">12 棵树 · 全部历史</span>
+                    </span>
+                    <span class="fe-arrow">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+        <div class="board-cap">
+          <div class="board-no">04 · 学习概览抽屉</div>
+          <div class="board-name">森林在「最近学习」之后</div>
+          <p class="board-note">入口放在快速主题列表之后，用一行完整的可点区域承接。森林是<b>回顾面</b>：归档、删除、分享仍留在正典入口，抽屉不承担管理动作。</p>
+        </div>
+      </article>
+
+      <!-- 05 森林页 -->
+      <article class="board">
+        <div class="phone">
+          <div class="screen">
+            <div class="appbar">
+              <button class="icon-btn" aria-label="返回">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <div class="appbar-title">
+                <div class="t1">我的森林</div>
+                <div class="t2">12 棵树 · 60 段枝 · 1 段已归档</div>
+              </div>
+            </div>
+
+            <div class="forest-scene">
+              <svg class="terrain" viewBox="0 0 390 788" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <g class="contour">
+                  <path d="M-40 676 C 36 630 92 658 150 622 S 254 556 324 576 S 420 528 454 548"/>
+                  <path d="M-34 578 C 42 532 98 560 156 524 S 260 458 330 478 S 426 430 460 450"/>
+                  <path d="M-28 480 C 48 434 104 462 162 426 S 266 360 336 380 S 432 332 466 352"/>
+                  <path d="M-22 382 C 54 336 110 364 168 328 S 272 262 342 282 S 438 234 472 254"/>
+                  <path d="M-16 284 C 60 238 116 266 174 230 S 278 164 348 184 S 444 136 478 156"/>
+                </g>
+                <g class="contour faint">
+                  <path d="M-10 186 C 66 140 122 168 180 132 S 284 66 354 86 S 450 38 484 58"/>
+                </g>
+                <path class="contour" d="M286 250 C 250 224 250 178 282 154 C 316 129 362 144 370 180 C 378 219 330 268 286 250 Z"/>
+                <path class="contour faint" d="M296 233 C 272 214 274 184 296 168 C 320 150 350 161 355 185 C 360 212 326 244 296 233 Z"/>
+                <g class="grass">
+                  <path d="M56 250 q3 -11 0 -17 M61 250 q4 -9 5 -16 M51 250 q-3 -9 -7 -14"/>
+                  <path d="M330 330 q3 -10 0 -16 M335 330 q4 -8 5 -14 M325 330 q-3 -8 -6 -12"/>
+                  <path d="M96 620 q3 -10 0 -16 M101 620 q4 -8 5 -14 M91 620 q-3 -8 -6 -12"/>
+                  <path d="M228 470 q3 -10 0 -16 M233 470 q4 -8 5 -14 M223 470 q-3 -8 -6 -12"/>
+                  <path d="M356 690 q3 -10 0 -16 M361 690 q4 -8 5 -14 M351 690 q-3 -8 -6 -12"/>
+                </g>
+                <g>
+                  <ellipse class="stone" cx="312" cy="610" rx="7" ry="4"/>
+                  <ellipse class="stone" cx="68" cy="352" rx="6" ry="3.5"/>
+                  <ellipse class="stone" cx="206" cy="704" rx="5" ry="3"/>
+                </g>
+              </svg>
+
+              <div class="forest-hint">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 1 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.2"/></svg>
+                点一棵树，回到它停下的地方
+              </div>
+              <span class="compass" aria-hidden="true">N</span>
+
+              <div class="forest-canopy-layer" data-forest-trees></div>
+              <div class="forest-sheet" data-forest-sheet></div>
+              <div class="forest-foot">连续 7 天 · 活跃 12 天 · 提问 60 · 消息 220 · 不含归档</div>
+            </div>
+          </div>
+        </div>
+        <div class="board-cap">
+          <div class="board-no">05 · 我的森林</div>
+          <div class="board-name">斜俯瞰一片林地，一题一树</div>
+          <p class="board-note">斜俯瞰：树冠在上、树干落地，影子统一朝右下；地面铺着等高线与草簇。树的大小看段枝多少（归档枝也算），位置固定、不随学习时间重排；<b>点一棵树</b>，底部纸条告诉你是哪一棵、最近何时回来。归档只出现在元信息里；统计压在页脚，明确不含归档。</p>
+        </div>
+      </article>
+
+      <!-- 06 森林状态 -->
+      <article class="board">
+        <div class="phone">
+          <div class="screen">
+            <div class="appbar">
+              <button class="icon-btn" aria-label="返回">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <div class="appbar-title">
+                <div class="t1">森林的状态</div>
+                <div class="t2">空 · 一棵读不出来 · 归档</div>
+              </div>
+            </div>
+
+            <div class="state-stack">
+              <div>
+                <div class="state-label">空森林</div>
+                <div class="plot empty-plot" style="margin-top:var(--s2);">
+                  <span class="ep-dash"></span>
+                  <span class="ep-icon">
+                    <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-6.5"/><path d="M12 14.5c-1.8-1.4-2.7-3-2.7-4.7 1.8 0 2.7 1.4 2.7 2.8"/><path d="M12 14.5c1.8-1.4 2.7-3 2.7-4.7-1.8 0-2.7 1.4-2.7 2.8"/><path d="M7.5 21h9"/></svg>
+                  </span>
+                  <div class="ep-t">森林还在等第一颗种子</div>
+                  <p class="ep-s">回到主页，问出第一个问题，<br>这里就会多一棵树。</p>
+                </div>
+              </div>
+
+              <div>
+                <div class="state-label">一棵树读不出来</div>
+                <div class="plot fail-plot" style="margin-top:var(--s2);">
+                  <span class="ftree" style="left:24%;top:40%;width:66px;height:66px" data-canopy data-size="66" data-seed="13"></span>
+                  <span class="ftree" style="left:46%;top:72%;width:46px;height:46px" data-canopy data-size="46" data-seed="21"></span>
+                  <span class="ftree" style="left:82%;top:68%;width:54px;height:54px" data-canopy data-size="54" data-seed="43"></span>
+                  <span class="ftree" style="left:77%;top:24%;width:40px;height:40px" data-canopy data-size="40" data-seed="57"></span>
+                  <div class="fail-spot">
+                    <span class="fail-hole">?</span>
+                    <span class="fail-tag">暂时读不出来 · <b>重试</b></span>
+                  </div>
+                </div>
+                <p class="state-note">只降级这一棵，其余树照常。</p>
+              </div>
+
+              <div>
+                <div class="state-label">归档枝只进元信息</div>
+                <div class="sheet-demo" style="margin-top:var(--s2);">
+                  <div class="fs-title">从零理解贝叶斯</div>
+                  <div class="fs-meta">6 段枝 · <span class="arc">含 1 段已归档</span> · 昨天 21:14 · 手把手</div>
+                  <p class="state-note">归档枝不从树里消失，也不灰化；统计不含它。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="board-cap">
+          <div class="board-no">06 · 森林的状态</div>
+          <div class="board-name">空、坏一棵、归档，都不改森林的形状</div>
+          <p class="board-note">森林为空时画一块空地，不用 0 值冒充数据；一棵树读取失败只在原地留一个坑，其余照常；归档枝不从树里消失，归档只出现在元信息与统计口径里。</p>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+</div>
+
+<script>
+const ICON_CHECK = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+
+const PERSONAS = [
+  { name:'默认', tag:'均衡', sub:'先答核心，再按你的追问加深。',
+    demo:'导数是一点附近的瞬时变化率，斜率是这条切线在图上抬起多快。两者说的是同一件事的两种语言。' },
+  { name:'手把手', tag:'分步', sub:'把每一步拆到能跟上，再往下走。',
+    demo:'先看一个小段：横着走一点点，纵着升多少。第一步只算这个比值；第二步让它越来越小；第三步看它停在哪个数上。' },
+  { name:'严格导师', tag:'追问', sub:'先确认前提，再要求你自己把推理走完。',
+    demo:'先别记结论。你说的「斜率」是割线的还是切线的？把这两个分清，再谈导数为什么等于它。' },
+  { name:'学霸搭子', tag:'并肩', sub:'像同学一样并肩试，语气轻快，允许走错。',
+    demo:'我陪你试一个思路：先拿两个点算平均斜率，再把第二个点往第一个点挪。挪到快贴上时，你觉得会发生什么？' },
+  { name:'毒舌损友', tag:'直白', sub:'嘴上不饶人，但只损题目和套路，不损你。',
+    demo:'这题不是难，是你在背「导数等于斜率」这句话。来，回到定义：变化量除以变化量，到底是哪两个量？' },
+  { name:'深夜陪读', tag:'慢速', sub:'先接住状态，再放慢节奏讲最小的一步。',
+    demo:'先不急着追进度。今天只弄明白一件事：切线为什么只在一个点上碰图。剩下的明天再说。' },
+  { name:'学习修复师', tag:'补地基', sub:'先定位是哪一层断了，再补那块地基。',
+    demo:'你可能不是不懂导数，是「函数图像上的点」这一层没站稳。我们先用一句话说清：图上每个点，横纵各代表什么？' }
+];
+
+let currentPersona = '学霸搭子';
+
+function renderPersonaLists(){
+  document.querySelectorAll('[data-persona-list]').forEach(list => {
+    list.innerHTML = PERSONAS.map(p => (
+      '<button class="popover-item' + (p.name === currentPersona ? ' on' : '') + '" data-persona-option="' + p.name + '">' +
+        '<span class="pi-main">' +
+          '<span class="pi-t">' + p.name + '<span class="pi-tag">' + p.tag + '</span></span>' +
+        '</span>' +
+        '<span class="pi-check">' + ICON_CHECK + '</span>' +
+      '</button>'
+    )).join('');
+  });
+}
+
+function renderPersonaCards(){
+  document.querySelectorAll('[data-persona-cards]').forEach(el => {
+    el.innerHTML = PERSONAS.map(p => (
+      '<section class="set-section">' +
+        '<div class="set-card">' +
+          '<div class="pc-head"><span class="pc-name">' + p.name + '</span><span class="pc-tag">' + p.tag + '</span></div>' +
+          '<p class="pc-sub">' + p.sub + '</p>' +
+          '<div class="pc-demo">' +
+            '<div class="pc-q">你问：为什么导数能表示斜率？</div>' +
+            '<div class="pc-a">' + p.demo + '</div>' +
+          '</div>' +
+        '</div>' +
+      '</section>'
+    )).join('');
+  });
+}
+
+function syncPersonaUI(){
+  document.querySelectorAll('[data-persona-name]').forEach(el => { el.textContent = currentPersona; });
+  document.querySelectorAll('[data-persona-option]').forEach(btn => {
+    btn.classList.toggle('on', btn.dataset.personaOption === currentPersona);
+  });
+}
+
+document.addEventListener('click', ev => {
+  const option = ev.target.closest('[data-persona-option]');
+  if (option) {
+    currentPersona = option.dataset.personaOption;
+    syncPersonaUI();
+    document.querySelectorAll('.popover').forEach(p => {
+      if (!p.hasAttribute('data-static')) p.hidden = true;
+    });
+    return;
+  }
+  const chip = ev.target.closest('#persona-chip');
+  if (chip) {
+    const pop = document.getElementById('persona-popover');
+    pop.hidden = !pop.hidden;
+  }
+});
+
+/* ---- 抽屉热力图：固定演示数据，不引入第二套统计口径 ---- */
+function renderHeat(){
+  const seed = [0,1,1,2,3,1,0, 1,2,2,3,1,1,0, 2,3,1,2,3,2,1, 1,2,3,1,2,1,0, 2,3,2,1,1,0,1];
+  document.querySelectorAll('[data-heat]').forEach(el => {
+    el.innerHTML = seed.map(v => '<span class="heat-cell' + (v ? ' l' + v : '') + '"></span>').join('');
+  });
+}
+
+/* ---- 俯瞰森林：一题一树，树冠从上方看 ---- */
+const FOREST = [
+  { id:'deriv', title:'导数到底是什么', branches:9, when:'今天 09:41', persona:'学霸搭子', archived:0, x:63, y:38, size:100, seed:7, recent:'今天' },
+  { id:'bayes', title:'从零理解贝叶斯', branches:6, when:'昨天 21:14', persona:'手把手', archived:1, x:28, y:33, size:82, seed:13, recent:'昨天' },
+  { id:'sleep', title:'为什么睡眠影响记忆', branches:5, when:'10 月 18 日', persona:'深夜陪读', archived:0, x:82, y:57, size:74, seed:21, recent:'10/18' },
+  { id:'eigen', title:'特征值到底在描述什么', branches:4, when:'10 月 16 日', persona:'默认', archived:0, x:14, y:13, size:62, seed:31, tone:1.12 },
+  { id:'entropy', title:'熵和信息量是一回事吗', branches:7, when:'10 月 14 日', persona:'学霸搭子', archived:0, x:71, y:13, size:78, seed:43, tone:1.05 },
+  { id:'limit', title:'为什么极限要先于连续', branches:3, when:'10 月 12 日', persona:'严格导师', archived:0, x:44, y:12, size:54, seed:57, tone:0.82 },
+  { id:'newton', title:'牛顿法为什么会跑偏', branches:4, when:'10 月 9 日', persona:'默认', archived:0, x:12, y:51, size:66, seed:61 },
+  { id:'matrix', title:'矩阵乘法为什么这样定义', branches:8, when:'10 月 6 日', persona:'手把手', archived:0, x:39, y:60, size:88, seed:73 },
+  { id:'fourier', title:'傅里叶变换在做什么', branches:4, when:'10 月 4 日', persona:'默认', archived:0, x:52, y:22, size:60, seed:97, tone:1.06 },
+  { id:'proof', title:'反证法为什么成立', branches:5, when:'10 月 1 日', persona:'严格导师', archived:0, x:24, y:69, size:62, seed:103, tone:1.08 },
+  { id:'gradient', title:'梯度下降为什么能下山', branches:3, when:'9 月 30 日', persona:'手把手', archived:0, x:87, y:34, size:56, seed:101, tone:0.9 },
+  { id:'dual', title:'什么是对偶空间', branches:2, when:'9 月 28 日', persona:'默认', archived:0, x:69, y:75, size:54, seed:83, tone:0.88 }
+];
+
+let selectedTree = 'deriv';
+
+function mulberry32(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+/* 斜俯瞰的树：树干落地、树冠在上，影子落在地面右下；tone 让树冠有深浅 */
+function treeSprite(size, seed, tone){
+  const shade = tone || 1;
+  const rnd = mulberry32(seed);
+  const cx = size * 0.50;
+  const cy = size * 0.37;
+  const baseY = size * 0.85;
+  const crownTopY = size * 0.47;
+  const lean = (rnd() * 2 - 1) * size * 0.05;
+  const crownX = cx + lean;
+  const tw = Math.max(1.7, size * 0.027);
+  const parts = [];
+
+  parts.push('<ellipse cx="' + (size * 0.60).toFixed(1) + '" cy="' + (size * 0.87).toFixed(1) +
+    '" rx="' + (size * 0.32).toFixed(1) + '" ry="' + (size * 0.085).toFixed(1) + '" fill="var(--green-deep)" opacity=".10"/>');
+  parts.push('<ellipse cx="' + (size * 0.54).toFixed(1) + '" cy="' + (size * 0.845).toFixed(1) +
+    '" rx="' + (size * 0.17).toFixed(1) + '" ry="' + (size * 0.05).toFixed(1) + '" fill="var(--green-deep)" opacity=".07"/>');
+
+  parts.push('<path d="M ' + (cx - tw).toFixed(1) + ' ' + baseY.toFixed(1) +
+    ' C ' + (cx - tw * 0.8).toFixed(1) + ' ' + (size * 0.74).toFixed(1) +
+    ' ' + (crownX - tw * 0.45).toFixed(1) + ' ' + (size * 0.60).toFixed(1) +
+    ' ' + (crownX - tw * 0.32).toFixed(1) + ' ' + crownTopY.toFixed(1) +
+    ' L ' + (crownX + tw * 0.32).toFixed(1) + ' ' + crownTopY.toFixed(1) +
+    ' C ' + (crownX + tw * 0.45).toFixed(1) + ' ' + (size * 0.60).toFixed(1) +
+    ' ' + (cx + tw * 0.8).toFixed(1) + ' ' + (size * 0.74).toFixed(1) +
+    ' ' + (cx + tw).toFixed(1) + ' ' + baseY.toFixed(1) + ' Z" fill="var(--green-deep)" opacity=".50"/>');
+
+  parts.push('<path d="M ' + (crownX - tw * 0.15).toFixed(1) + ' ' + (size * 0.68).toFixed(1) +
+    ' Q ' + (crownX - size * 0.09).toFixed(1) + ' ' + (size * 0.62).toFixed(1) +
+    ' ' + (crownX - size * 0.16).toFixed(1) + ' ' + (size * 0.57).toFixed(1) + '"' +
+    ' fill="none" stroke="var(--green-deep)" stroke-width="' + (tw * 0.65).toFixed(1) + '" stroke-linecap="round" opacity=".42"/>');
+  parts.push('<path d="M ' + (crownX + tw * 0.05).toFixed(1) + ' ' + (size * 0.66).toFixed(1) +
+    ' Q ' + (crownX + size * 0.08).toFixed(1) + ' ' + (size * 0.61).toFixed(1) +
+    ' ' + (crownX + size * 0.15).toFixed(1) + ' ' + (size * 0.56).toFixed(1) + '"' +
+    ' fill="none" stroke="var(--green-deep)" stroke-width="' + (tw * 0.6).toFixed(1) + '" stroke-linecap="round" opacity=".36"/>');
+
+  parts.push('<ellipse cx="' + (crownX + size * 0.01).toFixed(1) + '" cy="' + (cy + size * 0.075).toFixed(1) +
+    '" rx="' + (size * 0.29).toFixed(1) + '" ry="' + (size * 0.155).toFixed(1) + '" fill="var(--green-deep)" opacity="' + Math.min(0.24, 0.12 * shade).toFixed(2) + '"/>');
+
+  const lobes = 8 + Math.floor(rnd() * 4);
+  for (let i = 0; i < lobes; i += 1){
+    const a = (i / lobes) * Math.PI * 2 + (rnd() - 0.5) * 0.34;
+    const outer = i < lobes - 3;
+    const rx = size * (outer ? (0.13 + rnd() * 0.045) : (0.10 + rnd() * 0.035));
+    const ry = size * (outer ? (0.095 + rnd() * 0.035) : (0.075 + rnd() * 0.03));
+    const x = crownX + Math.cos(a) * size * (outer ? (0.17 + rnd() * 0.035) : (0.06 + rnd() * 0.05));
+    const y = cy + Math.sin(a) * size * (outer ? (0.10 + rnd() * 0.03) : (0.04 + rnd() * 0.04));
+    parts.push('<ellipse cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" rx="' + rx.toFixed(1) + '" ry="' + ry.toFixed(1) +
+      '" fill="var(--green)" opacity="' + Math.min(0.9, (0.54 + rnd() * 0.22) * shade).toFixed(2) + '"/>');
+  }
+  for (let i = 0; i < 9; i += 1){
+    const a = rnd() * Math.PI * 2;
+    const x = crownX + Math.cos(a) * size * (0.27 + rnd() * 0.06);
+    const y = cy + Math.sin(a) * size * (0.16 + rnd() * 0.04);
+    parts.push('<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + (size * 0.018).toFixed(1) +
+      '" fill="var(--green)" opacity=".30"/>');
+  }
+  parts.push('<ellipse cx="' + (crownX - size * 0.10).toFixed(1) + '" cy="' + (cy - size * 0.09).toFixed(1) + '" rx="' + (size * 0.13).toFixed(1) + '" ry="' + (size * 0.08).toFixed(1) + '" fill="var(--green-soft)" opacity=".30"/>');
+  parts.push('<ellipse cx="' + (crownX - size * 0.17).toFixed(1) + '" cy="' + (cy + size * 0.01).toFixed(1) + '" rx="' + (size * 0.075).toFixed(1) + '" ry="' + (size * 0.05).toFixed(1) + '" fill="var(--green-soft)" opacity=".22"/>');
+  parts.push('<ellipse cx="' + (crownX - size * 0.01).toFixed(1) + '" cy="' + (cy - size * 0.15).toFixed(1) + '" rx="' + (size * 0.075).toFixed(1) + '" ry="' + (size * 0.045).toFixed(1) + '" fill="var(--green-soft)" opacity=".20"/>');
+
+  return '<svg class="canopy" viewBox="0 0 ' + size + ' ' + size + '" aria-hidden="true">' + parts.join('') + '</svg>';
+}
+
+function forestMeta(t){
+  return (t.archived ? t.branches + ' 段枝 · <span class="arc">含 ' + t.archived + ' 段已归档</span>' : t.branches + ' 段枝')
+    + ' · ' + t.when + ' · ' + t.persona;
+}
+
+function renderForest(){
+  const layer = document.querySelector('[data-forest-trees]');
+  if (layer){
+    layer.innerHTML = FOREST.map(t => {
+      const sel = t.id === selectedTree;
+      const cls = 'ftree' + (sel ? ' sel' : '') + (t.y < 24 ? ' tb' : '') + (t.x > 72 ? ' tr' : (t.x < 26 ? ' tl' : ''));
+      return '<button class="' + cls + '" data-tree-id="' + t.id + '" style="left:' + t.x + '%;top:' + t.y +
+        '%;width:' + t.size + 'px;height:' + t.size + 'px" aria-label="' + t.title + '">' +
+        '<span class="halo"></span>' + treeSprite(t.size, t.seed, t.tone) +
+        (sel ? '<span class="ftree-tag">' + t.title + '</span>' : '') +
+        (t.recent && !sel ? '<span class="ftree-when">' + t.recent + '</span>' : '') +
+      '</button>';
+    }).join('');
+  }
+  const sheet = document.querySelector('[data-forest-sheet]');
+  if (sheet){
+    const t = FOREST.find(x => x.id === selectedTree) || FOREST[0];
+    sheet.innerHTML = '<div class="fs-main"><div class="fs-title">' + t.title + '</div>' +
+      '<div class="fs-meta">' + forestMeta(t) + '</div></div>' +
+      '<button class="fs-go" aria-label="回到这棵树"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>';
+  }
+}
+
+function renderCanopies(){
+  document.querySelectorAll('[data-canopy]').forEach(el => {
+    el.innerHTML = treeSprite(parseFloat(el.dataset.size || 56), parseInt(el.dataset.seed || 1, 10), parseFloat(el.dataset.tone || 1));
+  });
+}
+
+document.addEventListener('click', ev => {
+  const tree = ev.target.closest('[data-tree-id]');
+  if (!tree) return;
+  selectedTree = tree.dataset.treeId;
+  renderForest();
+});
+
+renderPersonaLists();
+renderPersonaCards();
+renderHeat();
+renderForest();
+renderCanopies();
+syncPersonaUI();
+</script>
+</body>
+</html>

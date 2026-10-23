@@ -1,0 +1,420 @@
+# 051 轮后复跑（2026-10-22 09:00 +08:00）
+
+在 047/051 标记 verified 后先运行 `metrics_report.py --write` 重生成，再按顺序复跑：
+`validate_tasks.py`（首段，末尾 SUMMARY）→ `check_context_pack.py` → `check_source_of_truth.py`
+→ `metrics_report.py`（只读校验）→ `checkers_selftest.py`（末段，268 例）。
+核心整跑的两条浏览器仪器超时见 `051-core-guards-final.txt`，本文件不重复。
+
+PASS T-2026-10-18-android-chat-stage-determinism-018.md
+PASS T-2026-10-18-android-nav-untitled-branch-016.md
+PASS T-2026-10-18-android-phone-usability-requirement-017.md
+PASS T-2026-10-18-process-asset-copy-002.md
+PASS T-2026-10-18-process-validation-004.md
+PASS T-2026-10-18-treelearn-process-migration-001.md
+PASS T-2026-10-18-web-copy-table-and-device-time-013.md
+PASS T-2026-10-18-web-dependency-direction-guard-014.md
+PASS T-2026-10-18-web-frontend-skeleton-build-entry-011.md
+PASS T-2026-10-18-web-h5-android-parity-requirement-005.md
+WARNING T-2026-10-18-web-parity-fixture-capture-instrument-019.md: estimated production lines 775 exceeds soft limit 200
+PASS T-2026-10-18-web-parity-fixture-capture-instrument-019.md
+WARNING T-2026-10-18-web-render-wiring-walk-instrument-020.md: estimated production lines 1576 exceeds soft limit 200
+PASS T-2026-10-18-web-render-wiring-walk-instrument-020.md
+PASS T-2026-10-18-web-runtime-port-fixture-adapter-012.md
+PASS T-2026-10-18-web-stack-adaptation-003.md
+WARNING T-2026-10-18-web-user-copy-guard-and-verify-entry-015.md: estimated production lines 245 exceeds soft limit 200
+PASS T-2026-10-18-web-user-copy-guard-and-verify-entry-015.md
+PASS T-2026-10-19-androidtest-derived-schema-version-022.md
+PASS T-2026-10-19-code-reviewer-role-and-review-template-024.md
+PASS T-2026-10-19-code-simplifier-role-027.md
+PASS T-2026-10-19-codebase-researcher-impact-role-026.md
+PASS T-2026-10-19-eval-keeper-baseline-role-029.md
+PASS T-2026-10-19-evals-inventory-and-runner-028.md
+WARNING T-2026-10-19-guard-runner-one-command-roster-023.md: estimated production lines 332 exceeds soft limit 200
+PASS T-2026-10-19-guard-runner-one-command-roster-023.md
+PASS T-2026-10-19-harness-guard-judgements-d4-d6-021.md
+WARNING T-2026-10-19-metrics-report-generator-030.md: estimated production lines 317 exceeds soft limit 200
+PASS T-2026-10-19-metrics-report-generator-030.md
+PASS T-2026-10-19-metrics-reporter-role-031.md
+PASS T-2026-10-19-project-brief-dir-state-guard-025.md
+PASS T-2026-10-19-spec-author-technical-section-032.md
+WARNING T-2026-10-20-guard-diagnostics-timeout-lane-036.md: estimated production lines 207 exceeds soft limit 200
+PASS T-2026-10-20-guard-diagnostics-timeout-lane-036.md
+WARNING T-2026-10-20-loop-watcher-role-033.md: estimated production lines 214 exceeds soft limit 200
+PASS T-2026-10-20-loop-watcher-role-033.md
+WARNING T-2026-10-20-pointer-liveness-standing-guard-035.md: estimated production lines 391 exceeds soft limit 200
+PASS T-2026-10-20-pointer-liveness-standing-guard-035.md
+WARNING T-2026-10-20-source-of-truth-inventory-034.md: estimated production lines 261 exceeds soft limit 200
+PASS T-2026-10-20-source-of-truth-inventory-034.md
+PASS T-2026-10-20-ux-prototype-vendored-scripts-037.md
+PASS T-2026-10-21-ai-persona-and-forest-requirement-038.md
+WARNING T-2026-10-21-android-glass-surfaces-049.md: estimated production lines 420 exceeds soft limit 200
+PASS T-2026-10-21-android-glass-surfaces-049.md
+PASS T-2026-10-21-forest-spec-040.md
+PASS T-2026-10-21-glass-evidence-and-docs-051.md
+PASS T-2026-10-21-glass-material-requirement-047.md
+PASS T-2026-10-21-glass-token-chain-048.md
+PASS T-2026-10-21-persona-spec-decisions-039.md
+WARNING T-2026-10-21-web-glass-workspace-050.md: estimated production lines 380 exceeds soft limit 200
+PASS T-2026-10-21-web-glass-workspace-050.md
+PASS T-2026-10-21-web-learning-workspace-requirement-041.md
+PASS T-2026-10-21-workspace-browser-evidence-and-docs-046.md
+WARNING T-2026-10-21-workspace-chat-and-branch-panel-043.md: estimated production lines 380 exceeds soft limit 200
+PASS T-2026-10-21-workspace-chat-and-branch-panel-043.md
+WARNING T-2026-10-21-workspace-home-library-044.md: estimated production lines 320 exceeds soft limit 200
+PASS T-2026-10-21-workspace-home-library-044.md
+WARNING T-2026-10-21-workspace-settings-category-detail-045.md: estimated production lines 300 exceeds soft limit 200
+PASS T-2026-10-21-workspace-settings-category-detail-045.md
+WARNING T-2026-10-21-workspace-shell-and-state-042.md: estimated production lines 360 exceeds soft limit 200
+PASS T-2026-10-21-workspace-shell-and-state-042.md
+SUMMARY files=46 errors=0 warnings=15
+OK   file exists: .codex/context/project-brief.md
+OK   file exists: .codex/context/domain-glossary.md
+OK   brief is one page (non-empty, non-header lines <= 60) — measured=47
+OK   brief has the six required sections — measured=6; missing=[]
+OK   docs index is a valid curated subset of the real Docs/ file set — listed=21 actual=80 missing=[] unlisted=['Docs/04-ux-design/2026-10-21-玻璃质感重设计提案/A-晨雾玻璃.html', 'Docs/04-ux-design/2026-10-21-玻璃质感重设计提案/B-青苔温室.html', 'Docs/04-ux-design/2026-10-21-玻璃质感重设计提案/C-浮光.html', 'Docs/04-ux-design/2026-10-21-玻璃质感重设计提案/README.md', 'Docs/04-ux-design/2026-10-21-玻璃质感重设计提案/_src/build.py', 'Docs/04-ux-design/2026-10-21-玻璃质感重设计提案/_src/glass.css', 'Docs/04-ux-design/2026-10-21-玻璃质感重设计提案/_src/icons.svg', 'Docs/04-ux-design/2026-10-21-玻璃质感重设计提案/_src/screens/branch.html', 'Docs/04-ux-design/2026-10-21-玻璃质感重设计提案/_src/screens/chat.html', 'Docs/04-ux-design/2026-10-21-玻璃质感重设计提案/_src/screens/home.html', 'Docs/04-ux-design/2026-10-21-玻璃质感重设计提案/_src/screens/library.html', 'Docs/04-ux-design/2026-10-21-玻璃质感重设计提案/index.html']
+OK   every indexed path exists — dead=[]
+OK   brief cites >= 2 top-level dirs — measured=2 floor=2 cited=['backend', 'frontend']
+OK   no dir is claimed `尚未创建` while present on disk — claimed_absent=['backend'] stale=[] cited=['backend', 'frontend']
+OK   every other cited dir exists on disk — dead=[] cited=['backend', 'frontend']
+OK   glossary has >= 12 terms — measured=15
+OK   every glossary term cites a real path — measured_terms=15 dead_sources=[]
+OK   brief shares no 80-char run with Docs/ — measured_hits=0 sample=[]
+OK   no placeholder tokens — measured={}
+
+check_context_pack: 0 check(s) failed
+EXITCODE=0
+OK   inventory exists — path=.codex/context/source-of-truth.md
+OK   the L0 entry that must route here exists — path=.codex/context/project-brief.md
+OK   the current-state scan surface holds >= 40 files — measured=67 floor=40
+OK   the inventory declares its field names in a FIELDS marker — found=True
+OK   inventory has >= 12 fact entries — measured=18 floor=12
+OK   every fact id is declared once — entries=18 duplicated=[]
+OK   every entry declares each field exactly once, with a known 类型 — fields=['类型', '唯一权威', '更新时机', '漂移检查', '锚点', '归属标记'] malformed=[]
+OK   every entry names exactly one authority, and the index is never its own authority — measured=18 bad=[]
+OK   every authority path exists and the cited line is inside it — dead=[]
+OK   no authority is a historical record — hit=[]
+OK   every anchor is a bounded, compilable pattern that fires on the cited authority line — bad=[]
+OK   every entry states an update trigger of >= 8 chars — bad=[]
+OK   every drift check is a runnable command, and generated counts are owned by a script with a bare floor — bad=[]
+OK   no entry was dropped by the per-entry checks — entries=18 usable=18 dropped=0 bad_kinds={'声明型': 15, '生成型': 3}
+OK   at least 2 entries are generated-count facts — measured=3 floor=2 kinds={'声明型': 15, '生成型': 3}
+OK   no fact is defined a second time without an attribution pointer — scanned_files=67 unattributed=0 hits=[]
+OK   no generated count is written into prose anywhere on the scan surface — measured=0 hits=[]
+OK   the 覆盖面 table is readable and names each root once — rows=7 roots=['.codex/', '.codex/agents/', '.codex/context/', '.codex/rules/', '.codex/scripts/', 'AGENTS.md', 'Docs/']
+OK   the 覆盖面 counts equal the recomputed per-root entry counts — declared={'.codex/': 2, '.codex/agents/': 1, '.codex/context/': 2, '.codex/rules/': 4, '.codex/scripts/': 4, 'AGENTS.md': 1, 'Docs/': 4} measured={'.codex/': 2, 'AGENTS.md': 1, '.codex/context/': 2, '.codex/rules/': 4, 'Docs/': 4, '.codex/scripts/': 4, '.codex/agents/': 1}
+OK   the index restates no authority body (>= 60-char run) — measured_hits=0 sample=[]
+OK   the index carries no placeholder tokens — hits=[]
+scanned_files=67 entries=18 kinds={'声明型': 15, '生成型': 3} authority_files=17
+
+check_source_of_truth: 0 check(s) failed
+EXITCODE=0
+OK   every metric source is present — missing=[]
+OK   metric families derive from the ROADMAP B6 goal sentence — derived=4 floor=4 families=['交付节奏', '退回次数', '守门命中分布', '失败案例库增量']
+OK   registered metric list is not drained below its floor — registered=12 floor=8
+OK   the report landing directory exists — dir=artifacts/metrics/
+OK   metrics report file exists — path=artifacts/metrics/report.md
+OK   the report holds exactly one line per registered metric — lines=12 duplicated=[] hand_added=[] missing_from_report=[]
+OK   every metric line carries exactly the six required fields — bad=[]
+OK   every metric line declares one unit, never two — duplicated_fields=[]
+OK   every family required by the roadmap appears in the report — required=4 missing=[]
+OK   every metric line names a command — blank=[]
+OK   enough metric lines are declared machine-recheckable — measured=9 floor=6
+OK   each line declares the recheck class its registry entry really has — disagree=[]
+OK   history readings are read from a real git command — not_git=[]
+OK   every line prints the command the generator would print — wrong=[]
+OK   every metric produces a reading when re-run — unreadable=[]
+OK   each machine-recheckable reading is produced by running the command on its own line — checked=9 mismatch=[]
+OK   report header names the command that writes it — needle=python -X utf8 .codex/scripts/metrics_report.py --write present=True
+OK   no metric reading is left as a placeholder — hits=[] scanned=readings+header
+
+check_metrics_report: 0 check(s) failed
+EXITCODE=0
+Command: python .codex/scripts/dev/checkers_selftest.py
+Mode: full (268 injected-violation cases + 14 baselines)
+Workspace: C:\Users\23745\AppData\Local\Temp\tlx-selftest-mrflngfg
+Workspace note: longest path 127
+BASELINE OK check_intent_capturer_agent rc=0
+BASELINE OK check_roadmap_and_routing rc=0
+BASELINE OK check_intent_template rc=0
+BASELINE OK check_spec_author_agent rc=0
+BASELINE OK check_code_reviewer_agent rc=0
+BASELINE OK check_context_pack rc=0
+BASELINE OK check_codebase_researcher_agent rc=0
+BASELINE OK check_code_simplifier_agent rc=0
+BASELINE OK run_evals rc=0
+BASELINE OK check_eval_keeper_agent rc=0
+BASELINE OK metrics_report rc=0
+BASELINE OK check_metrics_reporter_agent rc=0
+BASELINE OK check_loop_watcher_agent rc=0
+BASELINE OK check_source_of_truth rc=0
+CASE 01 OK        intent:agent-file-missing - rc=1, FAIL file exists: .codex/agents/intent-capturer.md
+CASE 02 OK        intent:prerequisite-file-gone - rc=1, FAIL prerequisite path exists on disk: .codex/context/project-brief.md
+CASE 03 OK        intent:field-marker-unreadable - rc=1, FAIL both field markers are readable — template=15 agent=None
+CASE 04 OK        intent:field-set-drift - rc=1, FAIL agent output field set equals the template FIELDS marker — agent=15 template=15 diff=['id', 'idX']
+CASE 05 OK        intent:field-not-backticked - rc=1, FAIL every template field appears backticked in the output-format section — measured=15; missing=['id']
+CASE 06 OK        intent:section-list-drift - rc=1, FAIL listed body sections equal the template ## titles — template=9 agent=9 diff=['Core flow（核心流程）', 'Coreflow（核心流程）']
+CASE 07 OK        intent:required-section-missing - rc=1, FAIL required sections present — measured=6; missing=['禁区']
+CASE 08 OK        intent:verifier-section-uncovered - rc=1, FAIL section set covers .codex/agents/verifier.md — reference=2; uncovered=['附加要求']
+CASE 09 OK        intent:writable-scope-lost - rc=1, FAIL declares writable scope Docs/intent/**
+CASE 10 OK        intent:readonly-scope-lost - rc=1, FAIL declares read-only scopes — missing=['.codex/tasks/**']
+CASE 11 OK        intent:prerequisite-name-missing - rc=1, FAIL names all 3 prerequisite files — missing=['.codex/context/project-brief.md']
+CASE 12 OK        intent:terminal-state-lost - rc=1, FAIL handles terminal state: needs-more-info
+CASE 13 OK        intent:handoff-checklist-lost - rc=1, FAIL accepted branch produces a handoff checklist
+CASE 14 OK        intent:handoff-target-lost - rc=1, FAIL handoff target is requirement-decomposer
+CASE 15 OK        intent:rejected-branch-lost - rc=1, FAIL rejected branch keeps the intent file
+CASE 16 OK        intent:gap-escalation-lost - rc=1, FAIL background-gap escalation is written as a prohibition in one clause — measured=None
+CASE 17 OK        intent:gap-semantics-reversed - rc=1, FAIL background-gap escalation is written as a prohibition in one clause — measured=None
+CASE 18 OK        intent:placeholder-injected - rc=1, FAIL no placeholder tokens — measured=['TODO']
+CASE 19 OK        intent:copied-methodology-long - rc=1, FAIL shares at most 1 run(s) of 60 chars with pm-discovery — measured_hits=30 sample=[('.codex/skills/pm-discovery/SKILL.md', '#pm-discovery——产品发现与需求收敛>定位：把脑子里的模糊想法，收敛成一份可以立刻拿去拆分的需求。>铁律：*')]
+CASE 20 OK        intent:copied-methodology-short - rc=1, FAIL shares at most 0 run(s) of 40 chars with pm-discovery — measured_hits=21 sample=[('.codex/skills/pm-discovery/SKILL.md', '#pm-discovery——产品发现与需求收敛>定位：把脑子里的模糊想法，收敛')]
+CASE 21 OK        intent:copied-methodology-44-chars - rc=1, FAIL shares at most 0 run(s) of 40 chars with pm-discovery — measured_hits=5 sample=[('.codex/skills/pm-discovery/SKILL.md', '#pm-discovery——产品发现与需求收敛>定位：把脑子里的模糊想法，收敛')]
+CASE 22 OK        roadmap:file-missing - rc=1, FAIL file exists: .codex/ROADMAP.md
+CASE 23 OK        roadmap:phase-section-renamed - rc=1, FAIL phase section exists: Phase C（依赖外部条件）
+CASE 24 OK        roadmap:entries-unreadable - rc=1, FAIL Phase B（下一批） has >= 7 entries — measured=0
+CASE 25 OK        roadmap:field-renamed - rc=1, FAIL Phase B（下一批） every entry carries all 8 field names — measured_entries=7 problems=[('B1 code-reviewer 角色与 REVIEW.md 报告模板', ['依赖'])]
+CASE 26 OK        roadmap:prompt-too-short - rc=1, FAIL Phase B（下一批） every 执行提示词 is >= 40 chars — measured_short=[('B1', 10)]
+CASE 27 OK        roadmap:prompt-dead-path - rc=1, FAIL Phase B（下一批） every path inside 执行提示词 exists — measured_dead=[('B1', '.codex/HARNES.md'), ('B3', '.codex/HARNES.md')]
+CASE 28 OK        roadmap:vague-source - rc=1, FAIL Phase B（下一批） every 开源来源 cites github.com or a skills path — measured_weak=['B1']
+CASE 29 OK        roadmap:phase-b-capability-lost - rc=1, FAIL Phase B covers the seven planned capabilities — missing=['eval-keeper']
+CASE 30 OK        roadmap:phase-b-spec-author-lost - rc=1, FAIL Phase B covers the seven planned capabilities — missing=['spec-author']
+CASE 31 OK        roadmap:phase-c-capability-lost - rc=1, FAIL Phase C covers the three planned capabilities — missing=['release-gate']
+CASE 32 OK        roadmap:placeholder-injected - rc=1, FAIL no placeholder tokens in ROADMAP — measured=['TBD']
+CASE 33 OK        roadmap:routing-floor-load-bearing - rc=1, FAIL AGENTS.md routing table currently has >= 999 linked rows — measured=20
+CASE 34 OK        roadmap:routing-table-truncated - rc=1, FAIL AGENTS.md routing table currently has >= 12 linked rows — measured=5
+CASE 35 OK        roadmap:routing-trigger-lost - rc=1, FAIL current routing rows cover all four triggers — measured_rows=20 missing=['project-brief']
+CASE 36 OK        roadmap:routing-target-dead - rc=1, FAIL every current routing-row target exists — measured_targets=23 dead=['.codex/rules/androidx.md']
+CASE 37 OK        roadmap:readme-entry-removed - rc=1, FAIL 目录结构 section lists every registered entry — missing=['.codex/templates/']
+CASE 38 OK        roadmap:evals-entry-removed - rc=1, FAIL 目录结构 section lists every registered entry — missing=['.codex/evals/']
+CASE 39 OK        roadmap:readme-entries-drained - rc=1, FAIL registered-entry list is not drained below its floor — entries=2 floor=4
+CASE 40 OK        replay:template-is-not-an-instance - rc=1, FAIL decision record states exactly one terminal state — measured=['accepted / rejected / needs-more-info']
+CASE 41 OK        intent:gap-prohibition-negated - rc=1, FAIL background-gap escalation keeps the canonical prohibition clause — measured=False
+CASE 42 OK        intent:gap-prohibition-hedged - rc=1, FAIL no line in the agent file negates or exempts the background-gap rule — measured=['- 背景缺口上报：当 `.codex/context/**` 与 `Docs/**` 合起来也回答不了某个产品事实时，把它登记为「未知项」并显式报告缺口，**不得凭印象补一个看起来合理的答案**，与其它约定冲突时不再适用。']
+CASE 43 OK        intent:gap-prohibition-synonym - rc=1, FAIL no line in the agent file negates or exempts the background-gap rule — measured=['- 背景缺口上报：当 `.codex/context/**` 与 `Docs/**` 合起来也回答不了某个产品事实时，把它登记为「未知项」并显式报告缺口，不得凭印象补一个看起来合理的答案——该要求已作废。']
+CASE 44 OK        intent:gap-prohibition-crossline - rc=1, FAIL no line in the agent file negates or exempts the background-gap rule — measured=['- 上述背景缺口要求在赶工期时可以忽略。']
+CASE 45 OK        intent:gap-waiver-uncoupled-line - rc=1, FAIL no line in the agent file negates or exempts the background-gap rule — measured=['- 上述规则于赶工期时作废。']
+CASE 46 OK        template:marker-vs-section-drift - rc=1, FAIL FIELDS marker equals the template own metadata keys + ## titles — marker=15 derived=14 diff=['Core flow（核心流程）']
+CASE 47 OK        template:required-section-dropped - rc=1, FAIL template body has exactly the 9 required ## sections — measured=8 missing=['Core flow（核心流程）'] extra=[]
+CASE 48 OK        replay:terminal-value-on-next-line - rc=1, FAIL decision record states exactly one terminal state — measured=[]
+CASE 49 OK        spec:file-missing - rc=1, FAIL spec file exists — missing: .codex/templates/SPEC.md
+CASE 50 OK        spec:content-class-lost - rc=1, FAIL declares the four content classes — sections=4; missing=['界面方案']
+CASE 51 OK        spec:placeholder-injected - rc=1, FAIL no placeholder tokens — measured=['TODO']
+CASE 52 OK        spec:bare-px-injected - rc=1, FAIL no bare hex or ad-hoc px values — hex=[] px=['14px']
+CASE 53 OK        review:agent-file-missing - rc=1, FAIL the five inputs exist — missing=['.codex/agents/code-reviewer.md']
+CASE 54 OK        review:template-file-missing - rc=1, FAIL the five inputs exist — missing=['Docs/REVIEW.md']
+CASE 55 OK        review:verifier-section-uncovered - rc=1, FAIL agent section names cover verifier.md — verifier_sections=5 missing=['rules']
+CASE 56 OK        review:dimension-dropped - rc=1, FAIL agent names the four review dimensions — missing=['测试充分性']
+CASE 57 OK        review:archive-path-missing - rc=1, FAIL review template declares an archive path — dir=False pattern=True section=True
+CASE 58 OK        review:archive-dir-missing - rc=1, FAIL the declared archive directory exists on disk — dir=Docs\reviews
+CASE 59 OK        review:severity-merged - rc=1, FAIL report separates blocking from non-blocking — missing=['非阻塞建议']
+CASE 60 OK        review:location-dropped - rc=1, FAIL every finding must carry a file:line location — hits=0
+CASE 61 OK        review:field-list-drained - rc=1, FAIL review template declares its own field list — measured=0 floor=6
+CASE 62 OK        review:task-fields-drained - rc=1, FAIL task template still defines the Verification report fields — measured=3 floor=4 names=['Verdict', 'Evidence', 'Changed/deleted assertion rationale and equivalent behavior coverage']
+CASE 63 OK        review:field-collision-injected - rc=1, FAIL report fields do not redefine task-card verification fields — review_fields=13 task_fields=5 overlap=['Gaps']
+CASE 64 OK        review:placeholder-injected - rc=1, FAIL role text and report skeleton carry no placeholder tokens — hits=['TODO']
+CASE 65 OK        review:toml-md-drift - rc=1, FAIL agent .toml body equals the agent markdown verbatim — toml_chars=3957 md_chars=3991 equal=False
+CASE 66 OK        review:toml-unparsable - rc=1, FAIL agent .toml parses as a Codex agent file — TOMLDecodeError('Invalid value (at end of document)')
+CASE 67 OK        context:stale-absent-claim - rc=1, FAIL no dir is claimed `尚未创建` while present on disk — claimed_absent=['backend', 'frontend'] stale=['frontend'] cited=['backend', 'frontend']
+CASE 68 OK        context:dead-dir-cite - rc=1, FAIL every other cited dir exists on disk — dead=['fronten'] cited=['backend', 'fronten']
+CASE 69 OK        context:dir-cites-drained - rc=1, FAIL brief cites >= 2 top-level dirs — measured=0 floor=2 cited=[]
+CASE 70 OK        research:agent-file-missing - rc=1, FAIL the seven inputs exist — missing=['.codex/agents/codebase-researcher.md']
+CASE 71 OK        research:task-template-gone - rc=1, FAIL the seven inputs exist — missing=['.codex/tasks/_TEMPLATE.md']
+CASE 72 OK        research:verifier-sections-drained - rc=1, FAIL verifier.md exposes a usable set of section names — measured=1 floor=4 names=['职责清单']
+CASE 73 OK        research:verifier-section-uncovered - rc=1, FAIL agent section names cover verifier.md — verifier_sections=6 missing=['附加要求']
+CASE 74 OK        research:impact-field-renamed - rc=1, FAIL agent names every impact field from the task template — template_fields=4 missing=['Producer/consumer/sibling entrypoints and platform surfaces']
+CASE 75 OK        research:impact-fields-drained - rc=1, FAIL task template declares the four impact fields — measured=3 floor=4 names=['Producer/consumer/sibling entrypoints and platform branches', 'Native bridge or independent-client compatibility/update requirements', 'Behavior-neutral non-applicability reason, if applicable']
+CASE 76 OK        research:location-dropped - rc=1, FAIL agent requires each conclusion as command + file:line — location_hits=0 floor=2 command_hits=16 floor=3
+CASE 77 OK        research:command-dropped - rc=1, FAIL agent requires each conclusion as command + file:line — location_hits=2 floor=2 command_hits=0 floor=3
+CASE 78 OK        research:absent-claim-dropped - rc=1, FAIL agent requires an explicit 未找到 instead of silence — hits=0 floor=2
+CASE 79 OK        research:provenance-merged - rc=1, FAIL agent separates 实测 from 推测 and demands proof for 推测 — missing=['推测']
+CASE 80 OK        research:landing-not-a-section - rc=1, FAIL agent declares READONLY with one writable landing — readonly=True landing_lines=1 named=False
+CASE 81 OK        research:readonly-dropped - rc=1, FAIL agent declares READONLY with one writable landing — readonly=False landing_lines=1 named=True
+CASE 82 OK        research:dead-path-cited - rc=1, FAIL every path cited by the role exists on disk — dead=['.codex/rules/nonexistent-rule.md'] cited=7
+CASE 83 OK        research:cites-drained - rc=1, FAIL agent cites >= 5 checkable repo paths — measured=4 floor=5 cited=['.codex/agents/verifier.md', '.codex/context/project-brief.md', '.codex/tasks', '.codex/tasks/_TEMPLATE.md']
+CASE 84 OK        research:rules-restated - rc=1, FAIL role text does not restate the rules it cites — measured_hits=1 sample=[('.codex/rules/regression.md', '#防回归与行为证据读取时机：行为修改、共享逻辑、回归修复或相应验收前。仅加载本任务命中的规则；正文约束沿用原适用范围，不')]
+CASE 85 OK        research:placeholder-injected - rc=1, FAIL role text carries no placeholder tokens — hits=['TODO']
+CASE 86 OK        research:toml-md-drift - rc=1, FAIL agent .toml body equals the agent markdown verbatim — toml_chars=3798 md_chars=3832 equal=False
+CASE 87 OK        research:toml-name-missing - rc=1, FAIL agent .toml declares name and description — name=False description=True
+CASE 88 OK        research:toml-unparsable - rc=1, FAIL agent .toml parses as a Codex agent file — TOMLDecodeError('Invalid value (at end of document)')
+CASE 89 OK        simplify:agent-file-missing - rc=1, FAIL the six inputs exist — missing=['.codex/agents/code-simplifier.md']
+CASE 90 OK        simplify:task-template-gone - rc=1, FAIL the six inputs exist — missing=['.codex/tasks/_TEMPLATE.md']
+CASE 91 OK        simplify:reference-sections-drained - rc=1, FAIL reference role exposes a usable set of section names — measured=5 floor=6 names=['触发时机', '职责清单', '输出格式', '交接', '禁区']
+CASE 92 OK        simplify:reference-section-uncovered - rc=1, FAIL agent section names cover the reference role — reference_sections=10 missing=['附加要求']
+CASE 93 OK        simplify:before-dropped - rc=1, FAIL agent names a measurement point on both sides of the change — before_hits=0 floor=2 after_hits=5 floor=2
+CASE 94 OK        simplify:after-dropped - rc=1, FAIL agent names a measurement point on both sides of the change — before_hits=6 floor=2 after_hits=0 floor=2
+CASE 95 OK        simplify:same-suite-dropped - rc=1, FAIL agent requires one and the same suite/command on both sides — hits=0 floor=2
+CASE 96 OK        simplify:green-dropped - rc=1, FAIL agent requires that suite to be green on both sides — hits=0 floor=2
+CASE 97 OK        simplify:loosen-permitted - rc=1, FAIL agent forbids touching the judgement surface to get green — measured=1 floor=2
+CASE 98 OK        simplify:dead-code-kept - rc=1, FAIL agent obliges deleting 无生产者/不可达 code — measured=0 floor=2
+CASE 99 OK        simplify:comment-preservation-allowed - rc=1, FAIL agent forbids keeping dead code as comments — measured=0 floor=1
+CASE 100 OK        simplify:template-subsection-gone - rc=1, FAIL task template still declares the REFACTOR subsection — title=None
+CASE 101 OK        simplify:template-heading-renamed - rc=1, FAIL agent names the template REFACTOR subsection verbatim — title='REFACTORIZE — optional' named=False
+CASE 102 OK        simplify:landing-dropped - rc=1, FAIL agent names the template REFACTOR subsection verbatim — title='REFACTOR — optional' named=False
+CASE 103 OK        simplify:landing-not-a-section - rc=1, FAIL agent declares its only writable landing is that subsection — landing_lines=1 all_named=False
+CASE 104 OK        simplify:verifier-unreferenced - rc=1, FAIL agent defers acceptance and code quality to the existing roles — verifier_refs=0 floor=2 reviewer_refs=3 floor=2
+CASE 105 OK        simplify:reviewer-unreferenced - rc=1, FAIL agent defers acceptance and code quality to the existing roles — verifier_refs=3 floor=2 reviewer_refs=0 floor=2
+CASE 106 OK        simplify:cites-drained - rc=1, FAIL agent cites >= 4 checkable repo paths — measured=0 floor=4 cited=[]
+CASE 107 OK        simplify:dead-path-cited - rc=1, FAIL every path cited by the role exists on disk — dead=['.codex/rules/nonexistent-simplify-rule.md'] cited=7
+CASE 108 OK        simplify:rules-restated - rc=1, FAIL role text does not restate the rules it cites — measured_hits=1 sample=[('.codex/rules/maintainability.md', '#可维护性与修改成本增量治理读取时机：新增或修改人工维护的生产代码、重构、拆分，触碰大文件、高复杂度文件及函数，或涉及热')]
+CASE 109 OK        simplify:placeholder-injected - rc=1, FAIL role text carries no placeholder tokens — hits=['TODO']
+CASE 110 OK        simplify:toml-md-drift - rc=1, FAIL agent .toml body equals the agent markdown verbatim — toml_chars=3183 md_chars=3217 equal=False
+CASE 111 OK        simplify:toml-name-missing - rc=1, FAIL agent .toml declares name and description — name=False description=True
+CASE 112 OK        simplify:toml-unparsable - rc=1, FAIL agent .toml parses as a Codex agent file — TOMLDecodeError('Invalid value (at end of document)')
+CASE 113 OK        evals:cases-dir-deleted - rc=1, FAIL eval cases directory exists — path=.codex/evals/cases
+CASE 114 OK        evals:case-dir-deleted - rc=1, FAIL cases/ holds at least MIN_CASES case dirs — measured=0 floor=1 cases=[]
+CASE 115 OK        evals:product-removed - rc=1, FAIL case 001-impact-inventory ships input+expected+product — missing=['product.md']
+CASE 116 OK        evals:expected-removed - rc=1, FAIL case 001-impact-inventory ships input+expected+product — missing=['expected.md']
+CASE 117 OK        evals:product-blanked - rc=1, FAIL case 001-impact-inventory assets are all non-empty — empty=['product.md']
+CASE 118 OK        evals:unknown-expectation-line - rc=1, FAIL case 001-impact-inventory expectations all parse — unknown=['- 这条大概是好的，看一眼就知道。'] parsed=9
+CASE 119 OK        evals:expected-emptied - rc=1, FAIL case 001-impact-inventory declares at least MIN_EXPECTATIONS expectations — measured=0 floor=5
+CASE 120 OK        evals:threshold-zero - rc=1, FAIL case 001-impact-inventory thresholds are all >= 1 — 恒真期望（>=0）不该被允许: [('must', '(code evidence)')]
+CASE 121 OK        evals:bullet-unpinned - rc=1, FAIL case 001-impact-inventory pins every product bullet — unpinned=['Intended change and old behavior to '] bullets=4
+CASE 122 OK        evals:shape-kind-dropped - rc=1, FAIL every expectation kind is exercised by some case — missing=['shape'] seen=['forbid', 'must', 'paths-exist', 'pointers-alive']
+CASE 123 OK        evals:shape-token-lost - rc=1, FAIL case 001-impact-inventory shape: 生产者 & 消费者 & 同级入口 — bullets=0 floor=1 tokens=3
+CASE 124 OK        evals:forbid-hit - rc=1, FAIL case 001-impact-inventory forbid: 待填 — bullets=1 expected=0
+CASE 125 OK        evals:pointer-stale - rc=1, FAIL case 001-impact-inventory pointers-alive — citations=2 floor=2 problems=[(('.codex/scripts/dev/checkers_selftest.py', 99999, 99999), 'line beyond eof=1341')]
+CASE 126 OK        evals:path-dead - rc=1, FAIL case 001-impact-inventory paths-exist — cited=5 floor=3 dead=['.codex/HARNESX.md']
+CASE 127 OK        keeper:agent-file-missing - rc=1, FAIL the seven inputs exist — missing=['.codex/agents/eval-keeper.md']
+CASE 128 OK        keeper:toml-file-missing - rc=1, FAIL the seven inputs exist — missing=['.codex/agents/eval-keeper.toml']
+CASE 129 OK        keeper:runner-gone - rc=1, FAIL the seven inputs exist — missing=['.codex/scripts/run_evals.py']
+CASE 130 OK        keeper:evals-readme-gone - rc=1, FAIL the seven inputs exist — missing=['.codex/evals/README.md']
+CASE 131 OK        keeper:codex-readme-gone - rc=1, FAIL the seven inputs exist — missing=['.codex/README.md']
+CASE 132 OK        keeper:reference-role-gone - rc=1, FAIL the seven inputs exist — missing=['.codex/agents/verifier.md']
+CASE 133 OK        keeper:grammar-drained - rc=1, FAIL expectation grammar derives from the runner — kinds=0 assets=3 evals_dir=.codex/evals/
+CASE 134 OK        keeper:reference-sections-drained - rc=1, FAIL reference role exposes a usable set of section names — measured=1 floor=5 names=['职责清单']
+CASE 135 OK        keeper:section-uncovered - rc=1, FAIL agent section names cover the reference role — reference_sections=5 missing=['职责清单']
+CASE 136 OK        keeper:run-command-swapped - rc=1, FAIL agent names the runnable evaluation command — measured=0 floor=2
+CASE 137 OK        keeper:command-dead-script - rc=1, FAIL every command in the role points at a script that exists — scripts=['.codex/scripts/dev/checkers_selftest.py', '.codex/scripts/nonexistent-eval-runner.py', '.codex/scripts/run_evals.py'] floor=2 missing=['.codex/scripts/nonexistent-eval-runner.py']
+CASE 138 OK        keeper:rerun-obligation-dropped - rc=1, FAIL agent obliges a full selftest re-run after refreshing a snapshot — measured=0 floor=2
+CASE 139 OK        keeper:selftest-target-renamed - rc=1, FAIL agent names the selftest target verbatim — named=False floor=1
+CASE 140 OK        keeper:loosen-permitted - rc=1, FAIL agent forbids touching the judgement surface to get green — measured=1 floor=2
+CASE 141 OK        keeper:handcopy-allowed - rc=1, FAIL agent forbids hand-copying the product snapshot — measured=0 floor=2
+CASE 142 OK        keeper:summary-only-allowed - rc=1, FAIL agent requires verbatim readings instead of a summary — measured=0 floor=2
+CASE 143 OK        keeper:acceptance-claimed - rc=1, FAIL agent refuses to be the one that declares acceptance — measured=1 floor=2
+CASE 144 OK        keeper:landing-not-evals - rc=1, FAIL agent declares its only writable landing is the evals directory — landing_lines=1 all_named=False landing=.codex/evals/
+CASE 145 OK        keeper:readonly-dropped - rc=1, FAIL agent declares everything else READONLY — measured=0 floor=2
+CASE 146 OK        keeper:kind-unnamed - rc=1, FAIL agent names every expectation kind the runner accepts — kinds=5 missing=['forbid']
+CASE 147 OK        keeper:asset-unnamed - rc=1, FAIL agent names the three files a case must ship — assets=3 missing=['input.md']
+CASE 148 OK        keeper:evals-dir-unregistered - rc=1, FAIL evals directory is registered in the harness README — registered=False path=.codex/evals/
+CASE 149 OK        keeper:cites-drained - rc=1, FAIL agent cites >= 4 checkable repo paths — measured=0 floor=4 cited=[]
+CASE 150 OK        keeper:dead-path-cited - rc=1, FAIL every path cited by the role exists on disk — dead=['.codex/evals/nonexistent-grammar.md'] cited=7
+CASE 151 OK        keeper:grammar-table-restated - rc=1, FAIL role text does not restate the grammar table or the rules it cites — measured_hits=1 sample=[('.codex/evals/README.md', '`）>这里放的是「AI产物vs基线期望」的可重跑判定。规则、角色正文、守门脚本各有只读守门，>本目录补的是最后一块：产物')]
+CASE 152 OK        keeper:placeholder-injected - rc=1, FAIL role text carries no placeholder tokens — hits=['TODO']
+CASE 153 OK        keeper:toml-md-drift - rc=1, FAIL agent .toml body equals the agent markdown verbatim — toml_chars=3770 md_chars=3804 equal=False
+CASE 154 OK        keeper:toml-name-missing - rc=1, FAIL agent .toml declares name and description — name=False description=True
+CASE 155 OK        keeper:toml-unparsable - rc=1, FAIL agent .toml parses as a Codex agent file — TOMLDecodeError('Invalid value (at end of document)')
+CASE 156 OK        metrics:report-dir-deleted - rc=1, FAIL the report landing directory exists — dir=artifacts/metrics/
+CASE 157 OK        metrics:report-deleted - rc=1, FAIL metrics report file exists — path=artifacts/metrics/report.md
+CASE 158 OK        metrics:metric-source-deleted - rc=1, FAIL every metric source is present — missing=['.codex/references/regression-cases.md']
+CASE 159 OK        metrics:roadmap-family-dropped - rc=1, FAIL metric families derive from the ROADMAP B6 goal sentence — derived=3 floor=4 families=['交付节奏', '退回次数', '失败案例库增量']
+CASE 160 OK        metrics:registry-floor-raised - rc=1, FAIL registered metric list is not drained below its floor — registered=12 floor=99
+CASE 161 OK        metrics:report-line-renamed - rc=1, FAIL the report holds exactly one line per registered metric — lines=12 duplicated=[] hand_added=['library-entrys'] missing_from_report=['library-entries']
+CASE 162 OK        metrics:report-line-dropped - rc=1, FAIL the report holds exactly one line per registered metric — lines=11 duplicated=[] hand_added=[] missing_from_report=['baseline-checkers']
+CASE 163 OK        metrics:field-renamed - rc=1, FAIL every metric line carries exactly the six required fields — bad=['tasks-status-counts']
+CASE 164 OK        metrics:unit-duplicated - rc=1, FAIL every metric line declares one unit, never two — duplicated_fields=[['total-commits', ['口径']]]
+CASE 165 OK        metrics:family-renamed-in-report - rc=1, FAIL every family required by the roadmap appears in the report — required=4 missing=['交付节奏']
+CASE 166 OK        metrics:command-blanked - rc=1, FAIL every metric line names a command — blank=['total-commits']
+CASE 167 OK        metrics:history-command-faked - rc=1, FAIL history readings are read from a real git command — not_git=['total-commits']
+CASE 168 OK        metrics:recheck-label-swapped - rc=1, FAIL each line declares the recheck class its registry entry really has — disagree=[('cards-by-file-date', '否')]
+CASE 169 OK        metrics:recheck-all-flipped - rc=1, FAIL enough metric lines are declared machine-recheckable — measured=0 floor=6
+CASE 170 OK        metrics:print-command-drifted - rc=1, FAIL every line prints the command the generator would print — wrong=[['library-entries', 'python -X utf8 .codex/scripts/metrics_report.py --read library-entrys']]
+CASE 171 OK        metrics:hand-copied-reading - rc=1, FAIL each machine-recheckable reading is produced by running the command on its own line — checked=10 mismatch=[['library-entries', 'rows=13;headings=6;total=20', 'rows=13;headings=6;total=19']]
+CASE 172 OK        metrics:source-drifted-under-report - rc=1, FAIL each machine-recheckable reading is produced by running the command on its own line — checked=9 mismatch=[['library-entries', 'rows=13;headings=6;total=19', 'rows=14;headings=6;total=20']]
+CASE 173 OK        metrics:placeholder-injected - rc=1, FAIL no metric reading is left as a placeholder — hits=['待填'] scanned=readings+header
+CASE 174 OK        metrics:write-command-drifted - rc=1, FAIL report header names the command that writes it — needle=python -X utf8 .codex/scripts/metrics_report.py --write present=False
+CASE 175 OK        reporter:agent-file-missing - rc=1, FAIL the seven inputs exist — missing=['.codex/agents/metrics-reporter.md']
+CASE 176 OK        reporter:toml-file-missing - rc=1, FAIL the seven inputs exist — missing=['.codex/agents/metrics-reporter.toml']
+CASE 177 OK        reporter:generator-gone - rc=1, FAIL the seven inputs exist — missing=['.codex/scripts/metrics_report.py']
+CASE 178 OK        reporter:roadmap-gone - rc=1, FAIL the seven inputs exist — missing=['.codex/ROADMAP.md']
+CASE 179 OK        reporter:codex-readme-gone - rc=1, FAIL the seven inputs exist — missing=['.codex/README.md']
+CASE 180 OK        reporter:reference-role-gone - rc=1, FAIL the seven inputs exist — missing=['.codex/agents/verifier.md']
+CASE 181 OK        reporter:roster-gone - rc=1, FAIL the seven inputs exist — missing=['.codex/scripts/run_all_guards.py']
+CASE 182 OK        reporter:families-drained - rc=1, FAIL metric families and the report landing derive from the generator — families=1 floor=3 landing=artifacts/metrics/ report=artifacts/metrics/report.md
+CASE 183 OK        reporter:landing-drained - rc=1, FAIL metric families and the report landing derive from the generator — families=4 floor=3 landing= report=report.md
+CASE 184 OK        reporter:reference-sections-drained - rc=1, FAIL reference role exposes a usable set of section names — measured=1 floor=5 names=['职责清单']
+CASE 185 OK        reporter:section-uncovered - rc=1, FAIL agent section names cover the reference role — reference_sections=5 missing=['职责清单']
+CASE 186 OK        reporter:generator-command-swapped - rc=1, FAIL agent names the runnable metric command — measured=0 floor=2
+CASE 187 OK        reporter:write-command-drifted - rc=1, FAIL agent carries the generator's write command verbatim — write_command=python -X utf8 .codex/scripts/metrics_report.py --write present=False
+CASE 188 OK        reporter:read-command-drifted - rc=1, FAIL agent carries the generator's single-metric recheck command verbatim — read_command=python -X utf8 .codex/scripts/metrics_report.py --read <指标名> present=False
+CASE 189 OK        reporter:command-dead-script - rc=1, FAIL every command in the role points at a script that exists — scripts=['.codex/scripts/metrics_report.py', '.codex/scripts/nonexistent-metrics-runner.py', '.codex/scripts/run_all_guards.py'] floor=2 missing=['.codex/scripts/nonexistent-metrics-runner.py']
+CASE 190 OK        reporter:recheck-flag-dropped - rc=1, FAIL agent requires single-metric rechecks instead of mental arithmetic — measured=0 floor=2
+CASE 191 OK        reporter:rerun-obligation-dropped - rc=1, FAIL agent obliges a full core-battery re-run after regenerating — measured=0 floor=2
+CASE 192 OK        reporter:handcopy-allowed - rc=1, FAIL agent forbids hand-copying the report readings — measured=0 floor=2
+CASE 193 OK        reporter:shape-only-denied - rc=1, FAIL agent says out loud that history readings are judged by shape only — measured=0 floor=1
+CASE 194 OK        reporter:floor-tampering-allowed - rc=1, FAIL agent forbids touching the judgement surface to get green — measured=1 floor=2
+CASE 195 OK        reporter:split-obligation-dropped - rc=1, FAIL agent sends family or metric changes to a separate slice with injected cases — measured=1 floor=2
+CASE 196 OK        reporter:summary-only-allowed - rc=1, FAIL agent requires verbatim readings instead of a summary — measured=1 floor=2
+CASE 197 OK        reporter:acceptance-claimed - rc=1, FAIL agent refuses to be the one that declares acceptance — measured=1 floor=2
+CASE 198 OK        reporter:landing-not-metrics - rc=1, FAIL agent declares its only writable landing is the report directory — landing_lines=1 all_named=False landing=artifacts/metrics/
+CASE 199 OK        reporter:readonly-dropped - rc=1, FAIL agent declares everything else READONLY — measured=0 floor=2
+CASE 200 OK        reporter:family-unnamed - rc=1, FAIL agent names every family derived from the roadmap goal sentence — families=4 missing=['交付节奏']
+CASE 201 OK        reporter:report-file-unnamed - rc=1, FAIL agent names the report file the generator writes — report=artifacts/metrics/report.md present=False
+CASE 202 OK        reporter:landing-unregistered - rc=1, FAIL report directory is registered in the harness README — registered=False path=artifacts/metrics/
+CASE 203 OK        reporter:cites-drained - rc=1, FAIL agent cites >= 4 checkable repo paths — measured=2 floor=4 cited=['artifacts/metrics', 'artifacts/metrics/report.md']
+CASE 204 OK        reporter:dead-path-cited - rc=1, FAIL every path cited by the role exists on disk — dead=['.codex/scripts/nonexistent-metrics-judge.py'] cited=7
+CASE 205 OK        reporter:generator-text-restated - rc=1, FAIL role text does not restate the generator docstring or the roadmap entry — measured_hits=1 sample=[('.codex/scripts/metrics_report.py', '"""交付指标报告：一页报告+「每个数字是哪条命令读出的」写在同一行（ROADMAPB6的指标面，片030）。用法（从任')]
+CASE 206 OK        reporter:placeholder-injected - rc=1, FAIL role text carries no placeholder tokens — hits=['TODO']
+CASE 207 OK        reporter:toml-md-drift - rc=1, FAIL agent .toml body equals the agent markdown verbatim — toml_chars=4691 md_chars=4725 equal=False
+CASE 208 OK        reporter:toml-name-missing - rc=1, FAIL agent .toml declares name and description — name=False description=True
+CASE 209 OK        reporter:toml-unparsable - rc=1, FAIL agent .toml parses as a Codex agent file — TOMLDecodeError('Invalid value (at end of document)')
+CASE 210 OK        watch:agent-file-missing - rc=1, FAIL the ten inputs exist — missing=['.codex/agents/loop-watcher.md']
+CASE 211 OK        watch:toml-file-missing - rc=1, FAIL the ten inputs exist — missing=['.codex/agents/loop-watcher.toml']
+CASE 212 OK        watch:template-gone - rc=1, FAIL the ten inputs exist — missing=['.codex/tasks/_TEMPLATE.md']
+CASE 213 OK        watch:observability-rule-gone - rc=1, FAIL the ten inputs exist — missing=['.codex/rules/observability.md']
+CASE 214 OK        watch:roster-gone - rc=1, FAIL the ten inputs exist — missing=['.codex/scripts/run_all_guards.py']
+CASE 215 OK        watch:reference-sections-drained - rc=1, FAIL reference role exposes a usable set of section names — measured=5 floor=6 names=['触发时机', '职责清单', '输出格式', '交接', '禁区']
+CASE 216 OK        watch:section-uncovered - rc=1, FAIL agent section names cover the reference role — reference_sections=9 missing=['输出格式']
+CASE 217 OK        watch:threshold-vague - rc=1, FAIL agent states a parseable repeat threshold within a supervisable range — lines=0 floor=2 values=[] sane=[] max=5
+CASE 218 OK        watch:threshold-single-place - rc=1, FAIL agent states a parseable repeat threshold within a supervisable range — lines=1 floor=2 values=[2] sane=[2] max=5
+CASE 219 OK        watch:threshold-too-high - rc=1, FAIL agent states a parseable repeat threshold within a supervisable range — lines=2 floor=2 values=[40] sane=[] max=5
+CASE 220 OK        watch:identity-dropped - rc=1, FAIL agent defines a failure identity from command, judgement line and reading — measured=0 floor=2
+CASE 221 OK        watch:notjudged-word-gone - rc=1, FAIL agent keeps 没判 (timeout/absent script) out of the repeat count — measured=0 floor=2
+CASE 222 OK        watch:notjudged-timeout-shape-gone - rc=1, FAIL agent keeps 没判 (timeout/absent script) out of the repeat count — measured=1 floor=2
+CASE 223 OK        watch:stop-item-judgement-surface-demoted - rc=1, FAIL agent lists at least 5 distinct stop conditions — measured=4 floor=5
+CASE 224 OK        watch:stop-item-user-facts-demoted - rc=1, FAIL agent lists at least 5 distinct stop conditions — measured=4 floor=5
+CASE 225 OK        watch:template-loop-gone - rc=1, FAIL task template still declares the LOOP subsection — title=None
+CASE 226 OK        watch:loop-fields-drained - rc=1, FAIL the LOOP subsection declares its report fields — measured=3 floor=4 fields=['Failure identity and repeat count', 'Stop condition hit', 'Handoff']
+CASE 227 OK        watch:loop-field-renamed - rc=1, FAIL agent names every report field from the template verbatim — fields=4 missing=['Command and passes']
+CASE 228 OK        watch:convergence-evidence-drained - rc=1, FAIL agent ties any convergence claim to a printed reading — measured=0 floor=2
+CASE 229 OK        watch:evidence-free-convergence-allowed - rc=1, FAIL agent forbids declaring convergence without evidence — measured=0 floor=1
+CASE 230 OK        watch:verbatim-drained - rc=1, FAIL agent pastes readings verbatim instead of paraphrasing them — measured=0 floor=2
+CASE 231 OK        watch:round-shape-drained - rc=1, FAIL a round requires its own judgement line and exit code — round_lines=0 floor=2 exitcode_hits=4
+CASE 232 OK        watch:privacy-drained - rc=1, FAIL agent forbids pasting bodies or credentials into the report — measured=0 floor=1
+CASE 233 OK        watch:readonly-flipped - rc=1, FAIL agent declares itself read-only over code and judgement assets — measured=0 floor=1
+CASE 234 OK        watch:landing-moved - rc=1, FAIL agent declares its only writable landing is that subsection — landing_lines=1 all_named=False
+CASE 235 OK        watch:verifier-unreferenced - rc=1, FAIL agent defers acceptance, review and consolidation to the existing roles — verifier_refs=0 reviewer_refs=3 simplifier_refs=3 floor=2
+CASE 236 OK        watch:reviewer-unreferenced - rc=1, FAIL agent defers acceptance, review and consolidation to the existing roles — verifier_refs=4 reviewer_refs=0 simplifier_refs=3 floor=2
+CASE 237 OK        watch:simplifier-unreferenced - rc=1, FAIL agent defers acceptance, review and consolidation to the existing roles — verifier_refs=4 reviewer_refs=3 simplifier_refs=0 floor=2
+CASE 238 OK        watch:cites-drained - rc=1, FAIL agent cites >= 6 checkable repo paths — measured=0 floor=6 cited=[]
+CASE 239 OK        watch:dead-path-cited - rc=1, FAIL every path cited by the role exists on disk — dead=['.codex/rules/nonexistent-loop-rule.md'] cited=8
+CASE 240 OK        watch:rules-restated - rc=1, FAIL role text does not restate the rules it cites — measured_hits=1 sample=[('.codex/rules/observability.md', '#日志与行为遥测读取时机：新增或改造处理流程、用户功能或遥测改动前。仅加载本任务命中的规则；正文约束沿用原适用范围，不因')]
+CASE 241 OK        watch:placeholder-injected - rc=1, FAIL role text carries no placeholder tokens — hits=['TODO']
+CASE 242 OK        watch:toml-md-drift - rc=1, FAIL agent .toml body equals the agent markdown verbatim — toml_chars=4817 md_chars=4851 equal=False
+CASE 243 OK        watch:toml-name-missing - rc=1, FAIL agent .toml declares name and description — name=False description=True
+CASE 244 OK        watch:toml-unparsable - rc=1, FAIL agent .toml parses as a Codex agent file — TOMLDecodeError('Invalid value (at end of document)')
+CASE 245 OK        sot:inventory-missing - rc=1, FAIL inventory exists — path=.codex/context/source-of-truth.md
+CASE 246 OK        sot:l0-router-missing - rc=1, FAIL the L0 entry that must route here exists — path=.codex/context/project-brief.md
+CASE 247 OK        sot:scan-matcher-drained - rc=1, FAIL the current-state scan surface holds >= 40 files — measured=0 floor=40
+CASE 248 OK        sot:fields-marker-unreadable - rc=1, FAIL the inventory declares its field names in a FIELDS marker — found=False
+CASE 249 OK        sot:entries-drained - rc=1, FAIL inventory has >= 12 fact entries — measured=0 floor=12
+CASE 250 OK        sot:field-duplicated - rc=1, FAIL every entry declares each field exactly once, with a known 类型 — fields=['类型', '唯一权威', '更新时机', '漂移检查', '锚点', '归属标记'] malformed=["复核报告归档位置::duplicated_fields={'类型': 2}"]
+CASE 251 OK        sot:kind-unknown - rc=1, FAIL every entry declares each field exactly once, with a known 类型 — fields=['类型', '唯一权威', '更新时机', '漂移检查', '锚点', '归属标记'] malformed=["流程入口唯一::kind='传闻型'"]
+CASE 252 OK        sot:fact-id-duplicated - rc=1, FAIL every fact id is declared once — entries=19 duplicated=['复核报告归档位置']
+CASE 253 OK        sot:index-as-own-authority - rc=1, FAIL every entry names exactly one authority, and the index is never its own authority — measured=17 bad=['任务状态唯一可写目录::the index cites itself as its own authority']
+CASE 254 OK        sot:authority-dead-path - rc=1, FAIL every authority path exists and the cited line is inside it — dead=['Java-only 约束::.codex/rules/androidX.md:8']
+CASE 255 OK        sot:authority-beyond-eof - rc=1, FAIL every authority path exists and the cited line is inside it — dead=['任务状态唯一可写目录::AGENTS.md:9999 beyond eof=67']
+CASE 256 OK        sot:authority-on-history-plane - rc=1, FAIL no authority is a historical record — hit=['设计 token 权威链::.codex/tasks/_TEMPLATE.md']
+CASE 257 OK        sot:anchor-silent-on-authority - rc=1, FAIL every anchor is a bounded, compilable pattern that fires on the cited authority line — bad=["领域术语索引::anchor does not fire on the cited line .codex/context/domain-glossary.md:3 line='> 用途：让角色在不读完整 PRD 的前提下对齐术语。每条都给出权威出处；定义与出处冲突时以出处为准。'"]
+CASE 258 OK        sot:anchor-uncompilable - rc=1, FAIL every anchor is a bounded, compilable pattern that fires on the cited authority line — bad=['交付指标报告的落点::uncompilable=missing ), unterminated subpattern at position 26']
+CASE 259 OK        sot:anchor-copies-authority - rc=1, FAIL every anchor is a bounded, compilable pattern that fires on the cited authority line — bad=['流程入口唯一::len=128 max=96']
+CASE 260 OK        sot:update-trigger-vague - rc=1, FAIL every entry states an update trigger of >= 8 chars — bad=['设计 token 个数::len=2']
+CASE 261 OK        sot:drift-command-dead - rc=1, FAIL every drift check is a runnable command, and generated counts are owned by a script with a bare floor — bad=["领域术语索引::cmd='`python -X utf8 .codex/scripts/check_context_pac' runnable_py_found=True"]
+CASE 262 OK        sot:generated-floor-drained - rc=1, FAIL every drift check is a runnable command, and generated counts are owned by a script with a bare floor — bad=['设计 token 个数::drift script .codex/scripts/dev/check_design_tokens.py declares no bare MIN_ floor so the generated count has no owner']
+CASE 263 OK        sot:generated-count-in-prose - rc=1, FAIL no generated count is written into prose anywhere on the scan surface — measured=1 hits=['设计 token 个数 <- .codex/HARNESS.md:29']
+CASE 264 OK        sot:second-definition-bare - rc=1, FAIL no fact is defined a second time without an attribution pointer — scanned_files=64 unattributed=1 hits=['Java-only 约束 <- .codex/HARNESS.md:29']
+CASE 265 OK        sot:coverage-count-drift - rc=1, FAIL the 覆盖面 counts equal the recomputed per-root entry counts — declared={'.codex/': 2, '.codex/agents/': 1, '.codex/context/': 2, '.codex/rules/': 9, '.codex/scripts/': 4, 'AGENTS.md': 1, 'Docs/': 4} measured={'.codex/': 2, 'AGENTS.md': 1, '.codex/context/': 2, '.codex/rules/': 4, 'Docs/': 4, '.codex/scripts/': 4, '.codex/agents/': 1}
+CASE 266 OK        sot:coverage-root-duplicated - rc=1, FAIL the 覆盖面 table is readable and names each root once — rows=8 roots=['.codex/', '.codex/agents/', '.codex/context/', '.codex/rules/', '.codex/scripts/', 'AGENTS.md', 'Docs/']
+CASE 267 OK        sot:index-restates-authority - rc=1, FAIL the index restates no authority body (>= 60-char run) — measured_hits=1 sample=[('.codex/rules/android.md', '#Android栈与Java-onlyguard读取时机：android分析、修改或复核前。仅加载本任务命中的规则；正文')]
+CASE 268 OK        sot:placeholder-in-index - rc=1, FAIL the index carries no placeholder tokens — hits=['TBD']
+SELFTEST cases=268 ok=268 mismatch=0 harness_errors=0 skipped=0
+OVERALL: PASS
+EXITCODE=0

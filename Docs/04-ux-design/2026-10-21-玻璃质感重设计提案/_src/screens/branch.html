@@ -1,0 +1,73 @@
+<div class="app screen-branch">
+  <header class="topbar glass">
+    <button class="icon-btn" type="button" aria-label="返回">
+      <svg class="icon"><use href="#i-back"></use></svg>
+    </button>
+    <div class="title-wrap">
+      <span class="title">分支导航</span>
+    </div>
+    <button class="icon-btn" type="button" aria-label="进入对话">
+      <svg class="icon"><use href="#i-chat"></use></svg>
+    </button>
+    <button class="icon-btn" type="button" aria-label="查看画布">
+      <svg class="icon"><use href="#i-tree"></use></svg>
+    </button>
+  </header>
+
+  <div class="app-body">
+    <section class="summary glass">
+      <div class="summary-head">
+        <h2>注意力权重可视化与模型可解释性的关系</h2>
+        <span class="tag">根分支 · 不可归档</span>
+        <button class="collapse" type="button" aria-label="折叠">
+          <svg class="icon"><use href="#i-chevron-down"></use></svg>
+        </button>
+      </div>
+
+      <div class="ai-summary-label">
+        <svg class="icon" aria-hidden="true"><use href="#i-sparkle"></use></svg>
+        AI 总结
+      </div>
+
+      <div class="summary-text">
+        <p>本分支从注意力权重可视化与模型可解释性的关系出发，明确可视化只是局部内部机制观察工具、不等同于解释（权重与因果贡献不等同），随后深入讨论注意力头消融实验的流程及如何区分“头真重要”与“其他头补偿性替代”。</p>
+        <ul>
+          <li>注意力权重是 softmax 归一化的相对关注度，可视化常以热力图、连线图或按层 / 头聚合形式呈现。</li>
+          <li>模型可解释性分局部解释（显著图、LIME、SHAP）与全局解释（探针、因果干预、概念激活）。</li>
+          <li>Bahdanau 等 2015 年翻译模型中注意力峰值近似与源词对齐，被视为早期可解释性正面证据。</li>
+          <li>Jain 与 Wallace（2019）等指出权重与输出因果贡献不等同，可构造权重不同而输出相同的反例。</li>
+          <li>注意力权重是中间变量而非原因，需配合消融、激活替换、因果干预与多方法交叉验证。</li>
+          <li>消融方式包括置零、均值消融、激活替换（activation patching / resample），选择会直接影响结论与分布偏移。</li>
+          <li>消融流程为：固定基线、选消融方式、逐头 / 逐组 / 迭代消融、测量指标变化、多随机种子与子集统计重复。</li>
+          <li>单头消融影响通常很小，成组消融才有信号，冗余不等于不重要。</li>
+          <li>区分真重要与补偿：测量内部表示变化（余弦相似度、CKA），指标不变但表示大变提示补偿。</li>
+          <li>可通过消融后权重再分配、联合（成对）消融、激活替换定位因果路径、训练时消融、数据集切片来识别补偿。</li>
+          <li>推理时消融测当前模型是否依赖，训练时消融测功能能否被替代学习，二者回答不同问题。</li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="list-head">
+      <span>分支列表</span>
+      <span>当前 · 0 子分支</span>
+    </div>
+
+    <div class="branch-row glass">
+      <span class="node">
+        <svg class="icon" aria-hidden="true"><use href="#i-tree"></use></svg>
+      </span>
+      <div class="txt">
+        <h3>注意力权重可视化与模型可解释性的关系</h3>
+        <div class="meta">当前 · 0 子分支</div>
+      </div>
+      <button class="more" type="button" aria-label="更多操作">
+        <svg class="icon"><use href="#i-more"></use></svg>
+      </button>
+    </div>
+
+    <div class="empty-branch">
+      <svg class="icon" aria-hidden="true"><use href="#i-sprout"></use></svg>
+      <span>从任意一条回答继续追问，新的分支会在这里生长。</span>
+    </div>
+  </div>
+</div>

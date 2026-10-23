@@ -109,10 +109,9 @@ public final class BottomTabShellInstrumentedTest {
 
         assertEquals("the bar is the shell, so it is on screen with the home tab",
                 View.VISIBLE, view(R.id.tab_bar).getVisibility());
-        android.view.ViewGroup bar = (android.view.ViewGroup) view(R.id.tab_bar);
-        android.view.ViewGroup tabItems = (android.view.ViewGroup) bar.getChildAt(1);
+        android.view.ViewGroup bar = (android.view.ViewGroup) view(R.id.tab_bar_pill);
         assertEquals("only Home and Library remain in the bottom bar", 2,
-                tabItems.getChildCount());
+                bar.getChildCount());
         assertHighlighted(R.id.tab_home);
 
         click(R.id.tab_library);
@@ -254,10 +253,8 @@ public final class BottomTabShellInstrumentedTest {
         assertEquals("a topic with unread answers shows the dot", View.VISIBLE,
                 newest.findViewById(R.id.library_topic_unread).getVisibility());
 
-        View accent = newest.findViewById(R.id.library_topic_accent);
-        assertNotNull("the row carries the accent bar the design draws", accent);
-        assertEquals("the accent bar spans the row it marks", newest.getHeight(), accent.getHeight());
-
+        // 2026-10-22 Scheme A removed the decorative accent bar from the library card
+        // (T-2026-10-22-057); the card surface and the unread dot above are what the row says.
         View oldest = rows.getChildAt(1);
         assertEquals("a topic whose title was never derived is named by its first question",
                 QUESTION_B, text(oldest, R.id.library_topic_title));

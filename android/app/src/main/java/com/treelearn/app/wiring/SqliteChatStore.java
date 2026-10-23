@@ -17,6 +17,7 @@ import com.treelearn.core.domain.GenerationCommand;
 import com.treelearn.core.domain.GenerationModel;
 import com.treelearn.core.domain.Guard;
 import com.treelearn.core.domain.Message;
+import com.treelearn.core.domain.Persona;
 import com.treelearn.core.domain.Topic;
 import com.treelearn.data.db.DatabaseTransactionRunner;
 import com.treelearn.data.db.TreeLearnDatabaseHelper;
@@ -88,8 +89,30 @@ public final class SqliteChatStore implements ChatStore {
         for (Message row : rows) {
             positions.add(position(database, row, forks, attempt));
         }
+        TopicDao.PersonaRead persona = TopicDao.personaOfBranch(database, branchId);
         return new Conversation(BranchHeading.of(branch.title(), firstLearnerMessage(rows)),
-                Collections.unmodifiableList(positions), branch, Collections.unmodifiableList(rows));
+                Collections.unmodifiableList(positions), branch, Collections.unmodifiableList(rows),
+                persona == null ? Persona.DEFAULT : persona.persona,
+                persona != null && persona.fellBack);
+    }
+
+    @Override
+    public TopicDao.PersonaRead personaOfBranch(String branchId) {
+        Guard.id(branchId, "branchId");
+        return TopicDao.personaOfBranch(database(), branchId);
+    }
+
+    @Override
+    public void updatePersona(String branchId, Persona persona) {
+        Guard.id(branchId, "branchId");
+        Guard.object(persona, "persona");
+        SQLiteDatabase database = database();
+        Branch branch = BranchDao.findById(database, branchId);
+        if (branch == null) {
+            throw new IllegalStateException("no branch row carries " + branchId
+                    + "; an answer style cannot be stored for a branch that is not stored");
+        }
+        TopicDao.updatePersona(database, branch.topicId, persona);
     }
 
     @Override

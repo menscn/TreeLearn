@@ -5,7 +5,7 @@ title: AI 内置人设（用户可选的学习风格）
 date: 2026-09-21
 intent: Docs/intent/INTENT-2026-09-21-ai-persona-preference.md
 author: spec-author
-status: draft
+status: accepted
 
 ## Requirement spec（需求规格）
 
@@ -63,6 +63,8 @@ status: draft
 - 现状·身份钉死与漂移拦截：主回答的用途与版本各在一处钉死（`android/app/src/main/java/com/treelearn/app/wiring/AnswerPolicy.java:16`、`android/app/src/main/java/com/treelearn/app/wiring/AnswerPolicy.java:21`），命令在 `ChatWiring.pin()` 组装（`android/app/src/main/java/com/treelearn/app/wiring/ChatWiring.java:651`），请求对象自己携带版本字段（`android/ai/src/main/java/com/treelearn/ai/prompt/DeepSeekRequest.java:19`），提交时命令版本与请求版本不符即拒（`android/app/src/main/java/com/treelearn/app/generation/GenerationCoordinator.java:193`）。
 - 规格：人设进入命令（`android/core/src/main/java/com/treelearn/core/domain/GenerationCommand.java:106`）与请求后，那条不符即拒必须**同时比人设**——合取成一条判据，不是新增一条各判各的。只比版本的守门会放行「命令说严格导师、请求拼了手把手」，而那正是既有那条判据要拦的东西换了个字段。
 - 规格·日志面：`DeepSeekRequest` 的自述串只打印用途、版本与思考位（`android/ai/src/main/java/com/treelearn/ai/prompt/DeepSeekRequest.java:42`）；人设加入后这里只许多一个身份字段，不得带出附加段正文（承接 intent「Constraints」的「日志、测试报告与遥测不得记录提示词正文」）。
+- 规格·七个稳定 wireId（2026-10-23 定，实现片起生效）：`default`、`hand-holding`、`strict-mentor`、`study-buddy`、`sarcastic-friend`、`late-night`、`learning-repair`。它们是唯一能进 `topics.persona`、`generation_operations.persona`、`answer_revisions.persona` 与请求身份的字面量；不复用、不随界面改档名而变。未知值一律在读取边界回落 `default`，理由与代价见「疑虑点」。
+- 规格·附加段的边界：人设附加段只在 `LEARNING_ANSWER` 上追加，基础导师正文与版本字面量都不动；派生用途（标题、分支摘要、推荐问题）携带非默认人设时按既有拒绝抛出，不静默忽略。档名、一句话定位与示例都是界面文案，不进入提示词。
 
 ### 数据结构（主题列、回答记录列与前向迁移）
 
@@ -95,13 +97,40 @@ status: draft
 - 规格·无论拍板走哪条都不变的底线：**一行坏值不能让整个主题列表读失败**，坏值的影响面必须限于它自己那一档。这条底线的形状由读取入口决定——`TopicDao.read()` 直接 `new Topic(...)`（`android/data/src/main/java/com/treelearn/data/db/dao/TopicDao.java:221`），而 `Topic` 的构造器本身就在校验（`android/core/src/main/java/com/treelearn/core/domain/Topic.java:18`）：把未知档当成构造失败在构造器里抛，读的就是整屏。
 - 现状·索要不适用的附加段属于编程错误：按既有拒绝抛（`android/ai/src/main/java/com/treelearn/ai/prompt/DeepSeekPromptRegistry.java:57`），不返回「没加人设」的静默成功。人设沿用同一条，派生用途要到人设即失败在请求组装前，不产生一次昂贵的调用。
 
+### 行为样例矩阵（设计资产，不是逐字断言）
+
+矩阵只规定「同一受控问题下，各档在六个方向上的行为差异」，不规定逐字回答。评测按方向判读，模型正常波动不判回归。六轴取自 intent 的 Open questions：起点假设、信息密度、是否反问、是否催继续、情绪表达、是否主动延伸。
+
+受控问题集（固定三题，题面与追问路径都不随档位变化）：
+
+- Q1 概念解释：「为什么导数能表示斜率？」
+- Q2 错误前提：「函数在某点可导，所以它在该点一定连续，反过来也成立吧？」
+- Q3 挫败卡壳：「我看了三遍还是不懂特征值，算了。」
+
+| 档位 | 起点假设 | 信息密度 | 是否反问 | 是否催继续 | 情绪表达 | 是否主动延伸 |
+|---|---|---|---|---|---|---|
+| 默认 | 基础够用 | 中，先答核心 | 关键歧义时反问一次 | 不催 | 平稳克制 | 只在收尾给一个可选方向 |
+| 手把手 | 刚入门 | 低，一次一步 | 每步后确认一次 | 小步推进，不催快 | 耐心，不评判 | 不主动扩展，先走完当前步 |
+| 严格导师 | 能自己走完 | 中高，要求推理 | 必然先确认前提 | 要求先作答再继续 | 冷静、直接 | 只指向必要的前置知识 |
+| 学霸搭子 | 并肩试错 | 中 | 用提问带着试 | 轻推继续 | 轻快、共情 | 主动给一个可试的下一步 |
+| 毒舌损友 | 会背结论 | 中，先拆套路 | 反问拆套路 | 用激将催继续，不人身 | 调侃题目与套路 | 不延伸，先纠当前这一步 |
+| 深夜陪读 | 状态不佳 | 低，最小一步 | 少量确认 | 不催，允许停 | 温和，先接住情绪 | 不延伸，留到下次 |
+| 学习修复师 | 地基有缺口 | 低到中，先诊断 | 诊断式反问 | 补完再走，不催 | 稳定、不评判 | 指向更早的一层知识 |
+
+方向断言示例：
+
+- Q2 在「默认」下必须先指出逆命题不成立；在「严格导师」下还要求学习者自己给出反例；在「毒舌损友」下只能调侃「背结论」这个做法，不得贬低学习者。
+- Q3 在「深夜陪读」下不得追加新知识点；在「学习修复师」下必须先把问题定位到更早的一层；在「手把手」下只拆出最小的一步。
+- 任何一档都不得编造结论、不得跳过纠错、不得把「最高规则」让位给风格。
+
 - 来源：行号由 `artifacts/tmp/b032-pointers.py` 的锚点唯一命中给出，计数由 `artifacts/tmp/b032-counts.py` 现场数出，两份读数都记在片 032 卡片的 Verification report。需求口径来自 `Docs/intent/INTENT-2026-09-21-ai-persona-preference.md` 的「Constraints and non-goals」「Decision record」与「移交清单」；条目依赖是 `.codex/ROADMAP.md` 的 B4（本节就是 B0 里 `DEFERRED:待 B4` 那一栏的兑现）。
 
 ## Doubts（疑虑点）
 
-- 未决疑虑 2 条，都是技术规格补写时新撞出来的，不由本规格自行拍板：
-  - 疑虑 1（未知档位的处置与仓库现成做法相反）：界面方案要「读到未知档位时把『默认』显示为当前档并给一次 toast，不出现空白按钮、不阻断选择」，而同一类坏值在生产代码里的现成处理是直接抛（`android/core/src/main/java/com/treelearn/core/domain/GenerationModel.java:23`、`android/core/src/main/java/com/treelearn/core/domain/GenerationModel.java:29`）。（冲突对象：界面方案「状态与异常」那条 与 `GenerationModel.fromWireId` 的先例；两种走法：A 抄抛——未知档让读取当场失败，界面那条降级要求随之改掉；B 在 DAO 边界做全映射回落默认档，并向上传递一个「回落发生过」的信号供 toast，代价是本仓同时存在两种未知值口径；谁拍板：用户本人。无论走哪条，技术规格「错误语义」里那条底线不变：一行坏值不得让整个主题列表读失败。）
-  - 疑虑 2（切换人设算不算一次主题活动）：主题行今天的写入口是整行写回并带上 `updated_at`（`android/data/src/main/java/com/treelearn/data/db/dao/TopicDao.java:42`、`android/data/src/main/java/com/treelearn/data/db/dao/TopicDao.java:230`），而首页那一列正是按 `updated_at` 倒序排（`android/data/src/main/java/com/treelearn/data/db/dao/TopicDao.java:189`、`android/data/src/main/java/com/treelearn/data/db/dao/TopicDao.java:219`）。（冲突对象：intent「Core flow」第 2 条只说「选择立即写入该主题」，没规定它是否刷新活动时间；两种走法：A 新增只写 `persona` 的写路径，首页顺序不动；B 复用整行写回，代价是点一下人设就把这棵树挪到首页顶部；谁拍板：用户本人。技术规格已按 A 写出边界，但那是界面后果决定的，不是技术结论。）
+- 未决疑虑 0 条。
+- 已拍板（2026-10-23，用户本人；随「按照 harness，结合当前 UX 风格，进行开发，在 web 和 android 上」的指令授权进入实现）：
+  - 原疑虑 1（未知档位的处置与仓库现成做法相反），走 B：在读取边界做全映射，未知 wire 值回落默认档，并向上带一个「回落发生过」的一次性信号供界面只提示一次。`Topic` 构造器不因未知人设抛错，一行坏值不影响同屏其他主题。代价：本仓同时存在「抛」与「回落」两种未知值口径。边界写死：模型枚举来自本地代码且没有跨版本写入路径，读到未知值属于代码错误，继续抛；人设列会被降级安装和迁移残留写成旧值，属于可预期的数据状态，因此回落。两种口径各有消费者，不做同构。
+  - 原疑虑 2（切换人设算不算一次主题活动），走 A：新增只写 `persona` 一列的窄写路径，不刷新 `updated_at`、不改变首页排序、不复用 `TopicDao.update()` 的整行写回；写路径要求恰好命中一行。代价：主题写入口从一处变为两处，窄写路径不参与主题创建，创建仍只走原入口。
 - 已拍板（2026-09-21，用户本人）：
   - 最高规则的落点（原疑虑 1，走 A）：正文写进 `Docs/01-demand/结构化需求基准说明书_知芽（TreeLearn）_V3.1增量.md` 新增一条，`AGENTS.md` 只留一句指针并形成需求准入闸门，正文不复制。事实依据：全仓检索「宗旨」「最高规则」「最高原则」「北极星」，除两份人设 intent 与本规格引用这四个词的那一句外零命中，即这条规则目前没有产品正文锚点；而 `.codex/context/project-brief.md` 的「事实源（SoT）声明」把产品事实归 `Docs/**`、工程约束归 `.codex/rules/**`。理由：这条规则既是产品口径又是需求准入闸门，而权威正文只能有一份（把同一条规则写成两个入口，本仓已经发生过两次漂移）；`AGENTS.md` 自身声明是「索引摘要」，把正文放那里与它自己的定位冲突。代价：只读 `AGENTS.md` 的人要点开链接才看到全文。措辞定为「这个需求是否让用户学得下去、学得会」，不用「学习效率」——情绪价值档改善的是坚持率与体验，只写「效率」会把本次需求自己挡在门外。落点与本 intent 的 Decision record 一致。
   - 介绍页本期不放可点的增删改查按钮，只留一句「自建人设将来在这里管理」。

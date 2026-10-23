@@ -6,7 +6,8 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -58,17 +59,19 @@ public final class NavigationScreen extends LinearLayout {
     private final View summaryBody;
     private final TextView currentTitle;
     private final TextView currentChip;
-    private final TextView summaryFold;
+    private final ImageView summaryFold;
     private final TextView summaryText;
     private final TextView summaryStale;
-    private final TextView rowsSection;
+    private final View listHead;
+    private final TextView rowsCount;
+    private final View empty;
     private final TextView notice;
     private final TextView phase;
     private final View archivedSection;
     private final LinearLayout rows;
     private final LinearLayout archivedRows;
-    private final Button enter;
-    private final Button canvas;
+    private final ImageButton enter;
+    private final ImageButton canvas;
 
     private NavigationActions actions;
     private Host host;
@@ -94,7 +97,9 @@ public final class NavigationScreen extends LinearLayout {
         summaryFold = findViewById(R.id.navigation_summary_fold);
         summaryText = findViewById(R.id.navigation_summary_text);
         summaryStale = findViewById(R.id.navigation_summary_stale);
-        rowsSection = findViewById(R.id.navigation_rows_section);
+        listHead = findViewById(R.id.navigation_list_head);
+        rowsCount = findViewById(R.id.navigation_rows_count);
+        empty = findViewById(R.id.navigation_empty);
         notice = findViewById(R.id.navigation_notice);
         phase = findViewById(R.id.navigation_phase);
         archivedSection = findViewById(R.id.navigation_archived_section);
@@ -140,16 +145,22 @@ public final class NavigationScreen extends LinearLayout {
         }
         NavigationViewState.Row current = currentRow();
         summaryCard.setVisibility(ready ? VISIBLE : GONE);
-        rowsSection.setVisibility(ready ? VISIBLE : GONE);
+        listHead.setVisibility(ready ? VISIBLE : GONE);
         currentTitle.setText(current == null ? "" : displayTitle(current.title));
         currentChip.setVisibility(current != null && !current.archivable ? VISIBLE : GONE);
-        summaryFold.setText(next.summaryCollapsed ? R.string.navigation_unfold
-                : R.string.navigation_fold);
+        summaryFold.setRotation(next.summaryCollapsed ? 180f : 0f);
+        summaryFold.setContentDescription(getContext().getString(next.summaryCollapsed
+                ? R.string.navigation_unfold : R.string.navigation_fold));
         summaryBody.setVisibility(next.summaryCollapsed ? GONE : VISIBLE);
         summaryStale.setVisibility(next.summaryStale ? VISIBLE : GONE);
         summaryText.setText(summary());
         enter.setEnabled(next.selectedBranchId != null);
         canvas.setEnabled(next.selectedBranchId != null);
+        int children = current == null ? 0 : current.childCount;
+        rowsCount.setText(current == null ? ""
+                : getContext().getString(R.string.navigation_row_current, children));
+        empty.setVisibility(ready && current != null && current.childCount == 0
+                ? VISIBLE : GONE);
         renderRows(next.visible, rows, false);
         renderRows(next.archived, archivedRows, true);
         archivedSection.setVisibility(next.archived.isEmpty() ? GONE : VISIBLE);
@@ -200,8 +211,8 @@ public final class NavigationScreen extends LinearLayout {
             ((TextView) item.findViewById(R.id.navigation_row_meta)).setText(getContext().getString(
                     row.current ? R.string.navigation_row_current : R.string.navigation_row_children,
                     row.childCount));
-            Button more = item.findViewById(R.id.navigation_row_more);
-            Button restore = item.findViewById(R.id.navigation_row_restore);
+            ImageButton more = item.findViewById(R.id.navigation_row_more);
+            ImageButton restore = item.findViewById(R.id.navigation_row_restore);
             more.setVisibility(archived ? GONE : VISIBLE);
             restore.setVisibility(archived ? VISIBLE : GONE);
             if (archived) {

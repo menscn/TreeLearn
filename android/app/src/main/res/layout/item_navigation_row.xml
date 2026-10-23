@@ -1,55 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  One branch row. The row itself selects the branch; the trailing control opens the row's own menu.
-  The restore control is the archived list's arm of the same layout, so a live row and an archived row
-  cannot drift apart in height or in where their title sits.
+  One branch row, aligned to Scheme A's .branch-row on 2026-10-22 (T-2026-10-22-057): a 17dp glass
+  row, 11dp above and below, 12dp at the sides, led by the 22dp node with its 12dp tree, then the
+  11.5sp title and the 9sp meta line, and finally the row's own menu.
+
+  The row itself selects the branch. The menu keeps a 44dp target although the proposal draws 24dp:
+  the visible glyph is the proposal's 15dp, inset inside the touch floor, so the row reads the same
+  without putting an irreversible menu behind a smaller target. The restore arm is the archived
+  list's version of the same row, so a live row and an archived row cannot drift in height or in
+  where their title sits.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/navigation_row"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground"
+    android:layout_marginStart="@dimen/space_s4"
+    android:layout_marginEnd="@dimen/space_s4"
+    android:layout_marginBottom="@dimen/nav_gap"
+    android:background="@drawable/bg_nav_row"
     android:gravity="center_vertical"
     android:minHeight="@dimen/touch_min"
     android:orientation="horizontal"
-    android:paddingStart="@dimen/page_gutter"
-    android:paddingEnd="@dimen/space_s2">
+    android:paddingStart="@dimen/nav_row_pad_h"
+    android:paddingTop="@dimen/nav_row_pad_v"
+    android:paddingEnd="@dimen/nav_row_pad_h"
+    android:paddingBottom="@dimen/nav_row_pad_v">
 
-    <TextView android:id="@+id/navigation_row_title"
-        android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
-        android:ellipsize="end" android:maxLines="1"
-        android:paddingTop="@dimen/space_s2" android:paddingBottom="@dimen/space_s2"
-        android:textColor="@color/tl_ink" android:textSize="@dimen/text_h2" />
+    <FrameLayout
+        android:id="@+id/navigation_row_node"
+        android:layout_width="@dimen/nav_row_node"
+        android:layout_height="@dimen/nav_row_node"
+        android:background="@drawable/bg_nav_node">
 
-    <TextView android:id="@+id/navigation_row_meta"
-        android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:paddingStart="@dimen/space_s2"
-        android:textColor="@color/tl_ink3" android:textSize="@dimen/text_cap" />
+        <ImageView
+            android:id="@+id/navigation_row_node_icon"
+            android:layout_width="@dimen/nav_row_node_icon"
+            android:layout_height="@dimen/nav_row_node_icon"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_nav_tree"
+            android:tint="@color/tl_green" />
+    </FrameLayout>
 
-    <Button android:id="@+id/navigation_row_more"
-        android:layout_width="wrap_content" android:layout_height="@dimen/touch_min"
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/nav_row_gap"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/navigation_row_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:lineSpacingMultiplier="1.4"
+            android:maxLines="1"
+            android:textColor="@color/tl_ink"
+            android:textSize="@dimen/text_nav_row_title"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/navigation_row_meta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/nav_row_meta_top"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/tl_ink3"
+            android:textSize="@dimen/text_nav_row_meta" />
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/navigation_row_more"
+        android:layout_width="@dimen/touch_min"
+        android:layout_height="@dimen/touch_min"
         android:background="@drawable/bg_icon_button"
         android:contentDescription="@string/cd_navigation_row_more"
-        android:drawableStart="@drawable/ic_nav_more"
-        android:drawableTint="@color/tl_ink3"
-        android:drawablePadding="0dp"
-        android:minWidth="@dimen/touch_min"
-        android:paddingStart="10dp" android:paddingEnd="10dp"
-        android:stateListAnimator="@null"
-        android:text=""
-        android:textColor="@color/tl_ink3" android:textSize="@dimen/text_sm" />
+        android:padding="@dimen/nav_row_action_inset"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_nav_more"
+        android:tint="@color/tl_ink3" />
 
-    <Button android:id="@+id/navigation_row_restore"
-        android:layout_width="wrap_content" android:layout_height="@dimen/touch_min"
+    <ImageButton
+        android:id="@+id/navigation_row_restore"
+        android:layout_width="@dimen/touch_min"
+        android:layout_height="@dimen/touch_min"
         android:background="@drawable/bg_icon_button"
         android:contentDescription="@string/cd_navigation_row_restore"
-        android:drawableStart="@drawable/ic_nav_restore"
-        android:drawableTint="@color/tl_green_deep"
-        android:drawablePadding="0dp"
-        android:minWidth="@dimen/touch_min"
-        android:paddingStart="10dp" android:paddingEnd="10dp"
-        android:stateListAnimator="@null"
-        android:text=""
-        android:textColor="@color/tl_green_deep" android:textSize="@dimen/text_sm"
+        android:padding="@dimen/nav_row_action_inset"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_nav_restore"
+        android:tint="@color/tl_green_deep"
         android:visibility="gone" />
 </LinearLayout>

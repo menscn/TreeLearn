@@ -1,5 +1,6 @@
 package com.treelearn.ai.prompt;
 
+import com.treelearn.core.domain.Persona;
 import com.treelearn.core.domain.PromptPurpose;
 import java.util.Collections;
 import java.util.List;
@@ -18,6 +19,8 @@ public final class DeepSeekRequest {
     public final PromptPurpose purpose;
     public final String policyVersion;
     public final boolean thinkingEnabled;
+    /** The style the system message was composed with; identity for logs, never a second message. */
+    public final Persona persona;
     /** Immutable and ordered; index 0 is the only system message, the last entry is the current input. */
     public final List<DeepSeekMessage> messages;
     public final int systemChars;
@@ -25,11 +28,12 @@ public final class DeepSeekRequest {
     public final int currentInputChars;
 
     DeepSeekRequest(PromptPurpose purpose, String policyVersion, boolean thinkingEnabled,
-            List<DeepSeekMessage> messages, int systemChars, int historyChars,
+            Persona persona, List<DeepSeekMessage> messages, int systemChars, int historyChars,
             int currentInputChars) {
         this.purpose = purpose;
         this.policyVersion = policyVersion;
         this.thinkingEnabled = thinkingEnabled;
+        this.persona = persona;
         this.messages = Collections.unmodifiableList(messages);
         this.systemChars = systemChars;
         this.historyChars = historyChars;
@@ -40,7 +44,8 @@ public final class DeepSeekRequest {
     public String toString() {
         // Identity and counts only (prompt design §5, §15): never a message body.
         return "DeepSeekRequest[" + purpose + " " + policyVersion + ", thinking=" + thinkingEnabled
-                + ", messages=" + messages.size() + ", systemChars=" + systemChars
-                + ", historyChars=" + historyChars + ", currentInputChars=" + currentInputChars + "]";
+                + ", persona=" + persona.wireId + ", messages=" + messages.size()
+                + ", systemChars=" + systemChars + ", historyChars=" + historyChars
+                + ", currentInputChars=" + currentInputChars + "]";
     }
 }

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The answer-style introduction (persona prototype 03): a second-level reading page reached from the
+  picker's last row and from the settings list. It carries no state and no control besides Back -
+  choosing a style still happens only in the topic's own picker (SPEC-2026-09-21, 入口位置).
+  Like the settings page, the whole column scrolls, so the title scrolls away with the cards instead
+  of standing over them without a ground of its own.
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/space_s8">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/page_gutter"
+            android:paddingTop="@dimen/space_s4"
+            android:paddingEnd="@dimen/page_gutter">
+
+            <ImageView
+                android:id="@+id/persona_intro_back"
+                android:layout_width="@dimen/touch_min"
+                android:layout_height="@dimen/touch_min"
+                android:layout_marginStart="-8dp"
+                android:background="@drawable/bg_icon_button"
+                android:contentDescription="@string/cd_persona_intro_back"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_nav_back"
+                android:tint="@color/tl_green_deep" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_s2"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/persona_intro_title"
+                    android:textColor="@color/tl_ink"
+                    android:textSize="@dimen/text_h1"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/persona_intro_subtitle"
+                    android:textColor="@color/tl_ink3"
+                    android:textSize="@dimen/text_cap" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/persona_intro_lead"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:lineSpacingExtra="6dp"
+            android:paddingStart="@dimen/page_gutter"
+            android:paddingTop="@dimen/space_s4"
+            android:paddingEnd="@dimen/page_gutter"
+            android:text="@string/persona_intro_lead"
+            android:textColor="@color/tl_ink2"
+            android:textSize="@dimen/text_body" />
+
+        <LinearLayout
+            android:id="@+id/persona_intro_cards"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_gutter"
+            android:layout_marginTop="@dimen/space_s4"
+            android:layout_marginEnd="@dimen/page_gutter"
+            android:orientation="vertical" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_s6"
+            android:gravity="center"
+            android:lineSpacingExtra="4dp"
+            android:paddingStart="@dimen/page_gutter"
+            android:paddingEnd="@dimen/page_gutter"
+            android:text="@string/persona_intro_footer"
+            android:textColor="@color/tl_ink3"
+            android:textSize="@dimen/text_cap" />
+    </LinearLayout>
+</ScrollView>

@@ -98,8 +98,13 @@ public final class ChatMotionLayoutStabilityTest {
     public void theFailureBarUsesTheRedTokens() throws Exception {
         String row = read(RES.resolve(Paths.get("layout", "item_chat_message.xml")));
         String failure = elementAround(row, "chat_failure");
+        assertTrue("073 §2 S-FAILED: the bar points at the dedicated soft-red surface",
+                failure.contains("@drawable/bg_semantic_alert"));
+        // The fill moved into a drawable so a backgroundTint cannot flatten the glass edge; the
+        // invariant is still "the bar sits on tl_red_soft", read where the colour now lives.
         assertTrue("073 §2 S-FAILED: the bar sits on the soft red",
-                failure.contains("@color/tl_red_soft"));
+                read(RES.resolve(Paths.get("drawable", "bg_semantic_alert.xml")))
+                        .contains("@color/tl_red_soft"));
         assertTrue("073 §2 S-FAILED: the text is the red ink",
                 elementAround(row, "chat_failure_text").contains("@color/tl_red"));
     }

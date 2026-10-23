@@ -1,0 +1,78 @@
+Web/Android 064 判据取证（check_glass_depth.py，与 061/062/063 同一份取区实现、同一组阈值）
+截图目录：artifacts/evidence/glass-opacity-2026-10-23/　生成：2026-10-23
+阈值全束未动：J1_MIN_LIFT=10.0 J2_MIN_SHADOW=6.0 J3_MIN_SPAN=24.0 J3_MIN_CHROMA=6.0
+J4_MIN_DRIFT=8.0 INK_FLOOR=150 MIN_SCENE_PIXELS=240
+取区规则未动。token 变更：chrome .54→.74、card .72→.86、reader .86→.93、field .50→.74；
+edge/line/sheen/tint-falloff 一个未改。
+
+一、为什么这次要先把曲线量出来（用户拍板「玻璃的不透明度太低了」）
+顶栏是 Web 上唯一的覆盖层，「内容穿过玻璃」的像素信号与顶栏 alpha 是同一根轴：alpha 越高，
+穿过来的内容越淡。这条轴不是推定，是运行时单变量实测（artifacts/tmp/opacity_sweep.mjs 与
+opacity_sweep2.mjs，仓库文件未改，618×1350 聊天帧顶栏同一面框 61,1..1175,127）：
+  chrome .54（现状）→ J4 11.3 L
+  chrome .58 → 9.9 L      chrome .62 → 8.3 L      chrome .66 → 7.1 L
+  chrome .70 → 5.9 L      chrome .74 → 4.9 L      chrome .78 → 3.9 L
+  chrome .70 + falloff .45 → 6.1 L（把 tint 暗端调回 .31 alpha 只换回 0.2 L：
+    支配项是整面 alpha，不是 145° 暗端，所以「上实下透」救不回这条信号）
+阈值 8.0 L 之下的天花板是 chrome ≈ .62。用户在这条曲线上的裁决（2026-10-23）：
+「跟到 .74，放弃 Web 的像素判据」——顶栏与其余四面一起变实，Web 顶栏不再主张 J4，
+让位结构改由 CSS 断言兜住；Android 的 J4 主张保留。
+
+二、主张的读数（逐条命令原样）
+
+$ python -X utf8 .codex/scripts/dev/check_glass_depth.py --shot 065-web-home-top.png --band bottom
+GLASS-DEPTH shot=065-web-home-top.png band=bottom box=498,990..2575,1137 scene_pixels=82171
+OK   J1 玻璃—背景分离 = 19.8 L（需 ≥ 10）
+OK   J2 投影暗带 = 46.4 L（需 ≥ 6）
+OK   J3 背景亮度跨度 = 43.7 L（需 ≥ 24）
+OK   J3 背景彩度跨度 = 12.0（需 ≥ 6）
+VERDICT: PASS
+面选择沿用 063：`.composer` 是 Web 上唯一不贴画面边、四周有场景可当背景参照的玻璃面。
+
+$ python -X utf8 .codex/scripts/dev/check_glass_depth.py --shot 065-android-home-bottom.png --band bottom \
+    --drift-before 065-android-home-top.png --drift-after 065-android-home-bottom.png
+GLASS-DEPTH shot=065-android-home-bottom.png band=bottom box=78,2385..1121,2586 scene_pixels=14400
+OK   J1 玻璃—背景分离 = 22.8 L（需 ≥ 10）
+OK   J2 投影暗带 = 12.4 L（需 ≥ 6）
+OK   J3 背景亮度跨度 = 26.2 L（需 ≥ 24）
+OK   J3 背景彩度跨度 = 13.0（需 ≥ 6）
+OK   J4 玻璃下内容经过 = 21.2 L 变化（需 ≥ 8）
+VERDICT: PASS
+box 与 061/062 逐位相同，五条读数因此可直接对照。真机 AWSS013807000356（1200x2652），
+`adb install -r`（未跑 instrumentation，避免清真机数据）。
+
+三、有意不主张的一条：Web 顶栏 J4（按拍板退让）
+
+$ python -X utf8 .codex/scripts/dev/check_glass_depth.py --shot 065-web-narrow-chat-top.png --band top \
+    --drift-before 065-web-narrow-chat-top.png --drift-after 065-web-narrow-chat-scrolled.png
+GLASS-DEPTH shot=065-web-narrow-chat-top.png band=top box=61,1..1175,127 scene_pixels=14779
+FAIL J1 玻璃—背景分离 = -0.7 L（贴边面盲区，063 第一节已登记，本就不在此面主张）
+OK   J2 投影暗带 = 8.5 L / OK J3 跨度 = 49.2 L / OK J3 彩度 = 15.0
+FAIL J4 玻璃下内容经过 = 4.9 L 变化（需 ≥ 8）——本片按用户裁决不再主张
+EXITCODE=1（两条 FAIL 都是有意不主张的：J1 是仪器盲区，J4 是本次换来的代价）
+
+四、before / after 对照（同一面框、同一取区、同一阈值）
+Web `.composer`（1440 首页）：J1 19.4→19.8　J2 41.6→46.4　J3 41.8→43.7　彩度 17.0→12.0
+Web 顶栏（618 聊天）：J2 8.5→8.5　J3 47.4→49.2　彩度 15.0→15.0　J4 11.3→4.9（放弃主张）
+Android 底部胶囊（真机）：J1 19.6→22.8　J2 12.4→12.4　J3 26.2→26.2　彩度 13.0→13.0　J4 35.1→21.2
+读法：分离与投影都变强（J1/J2 只升不降），Android 的经过信号仍有 2.6 倍余量；
+唯一被花掉的就是 Web 顶栏那条 11.3→4.9，这正是拍板里写明要花的。
+
+五、机械断言（不依赖取景的两端下限）
+Web：`frontend/test/styles/glass.test.ts`「五面 alpha 停在拍板下限之上」——读生成的 tokens.css，
+chrome/card/reader/field 下限 .70/.84/.92/.70。RED：`expected 0.54 to be greater than or equal to 0.7`。
+Android：`GlassMaterialTokensTest.theGlassSurfacesStayAboveTheAgreedOpacityFloors`——读 tokens.json 同一组下限。
+RED：`glass-chrome must stay at or above alpha 0.7, got 0.54`。
+下限而不是当前值：把 token 抄进测试会出现第二份事实，且它对「更透明」这个方向永远不响。
+
+六、截图与取景
+065-web-home-top.png 2880x1800（1440x900@2x）、065-web-narrow-chat-top.png / -scrolled.png
+1236x2700（618x1350@2x，聊天由首页 `button[data-topic="0"]` 进入，`.chat-scroll` range=2294）。
+采集统一走 `web_capture.mjs`：声明尺寸、2x、`Emulation.setScrollbarsHidden`（理由见该文件注释）。
+065-android-home-top.png（页面顶）与 065-android-home-bottom.png（滚到底，末条停在胶囊上方），
+`adb shell screencap` 原分辨率 1200x2652。
+
+七、顺带发现（不在本片范围，如实登记）
+Android 首页顶栏不是覆盖层：滚到底那一帧顶栏整条随内容划走，正文副标题直接顶到状态栏下缘。
+Web 的顶栏是覆盖层（063）。这是两端的结构不对称，与本片 token 改动无关（062 的
+`062-after-home-scrolled.png` 同一帧形），留作下一片选题。

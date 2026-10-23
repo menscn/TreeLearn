@@ -1,0 +1,235 @@
+RUN-ALL-GUARDS tier=core selected=39/45 subset=yes
+PASS         validate_tasks                         rc=0 0.2s
+             > SUMMARY files=46 errors=0 warnings=15
+FAIL         check_context_pack                     no judgement line printed (rc=1, wanted "check(s) failed") 0.2s
+             DIAG check_context_pack lines=26/26 mode=full
+             | OK   file exists: .codex/context/project-brief.md
+             | OK   file exists: .codex/context/domain-glossary.md
+             | OK   brief is one page (non-empty, non-header lines <= 60) — measured=47
+             | OK   brief has the six required sections — measured=6; missing=[]
+             | OK   docs index is a valid curated subset of the real Docs/ file set — listed=21 actual=81 missing=[] unlisted=['Docs/04-ux-design/2026-10-21-玻璃质感重设计提案/A-晨雾玻璃.html', 'Docs/04-ux-design/2026-10-21-玻璃质感
+             | OK   every indexed path exists — dead=[]
+             | OK   brief cites >= 2 top-level dirs — measured=2 floor=2 cited=['backend', 'frontend']
+             | OK   no dir is claimed `尚未创建` while present on disk — claimed_absent=['backend'] stale=[] cited=['backend', 'frontend']
+             | OK   every other cited dir exists on disk — dead=[] cited=['backend', 'frontend']
+             | OK   glossary has >= 12 terms — measured=15
+             | OK   every glossary term cites a real path — measured_terms=15 dead_sources=[]
+             | Traceback (most recent call last):
+             |   File "D:\Project\Android\Treelearn\.codex\scripts\check_context_pack.py", line 126, in <module>
+             |     sys.exit(main())
+             |              ~~~~^^
+             |   File "D:\Project\Android\Treelearn\.codex\scripts\check_context_pack.py", line 114, in main
+             |     hits, detail = max_overlap_with_files(overlap_text, walk_files("Docs"), OVERLAP_N)
+             |                    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+             |   File "D:\Project\Android\Treelearn\.codex\scripts\harness_check_lib.py", line 141, in max_overlap_with_files
+             |     hits = overlap_hits(source, read_text(rel), n, mapping)
+             |                                 ~~~~~~~~~^^^^^
+             |   File "D:\Project\Android\Treelearn\.codex\scripts\harness_check_lib.py", line 44, in read_text
+             |     return f.read()
+             |            ~~~~~~^^
+             |   File "<frozen codecs>", line 325, in decode
+             | UnicodeDecodeError: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+PASS         check_code_reviewer_agent              rc=0 0.1s
+             > check_code_reviewer_agent: 0 check(s) failed
+PASS         check_codebase_researcher_agent        rc=0 0.1s
+             > check_codebase_researcher_agent: 0 check(s) failed
+PASS         check_code_simplifier_agent            rc=0 0.1s
+             > check_code_simplifier_agent: 0 check(s) failed
+PASS         check_loop_watcher_agent               rc=0 0.1s
+             > check_loop_watcher_agent: 0 check(s) failed
+FAIL         check_source_of_truth                  rc=1 0.5s
+             > check_source_of_truth: 1 check(s) failed
+             DIAG check_source_of_truth lines=24/24 mode=full
+             | OK   inventory exists — path=.codex/context/source-of-truth.md
+             | OK   the L0 entry that must route here exists — path=.codex/context/project-brief.md
+             | OK   the current-state scan surface holds >= 40 files — measured=67 floor=40
+             | OK   the inventory declares its field names in a FIELDS marker — found=True
+             | OK   inventory has >= 12 fact entries — measured=18 floor=12
+             | OK   every fact id is declared once — entries=18 duplicated=[]
+             | OK   every entry declares each field exactly once, with a known 类型 — fields=['类型', '唯一权威', '更新时机', '漂移检查', '锚点', '归属标记'] malformed=[]
+             | OK   every entry names exactly one authority, and the index is never its own authority — measured=18 bad=[]
+             | OK   every authority path exists and the cited line is inside it — dead=[]
+             | OK   no authority is a historical record — hit=[]
+             | OK   every anchor is a bounded, compilable pattern that fires on the cited authority line — bad=[]
+             | OK   every entry states an update trigger of >= 8 chars — bad=[]
+             | OK   every drift check is a runnable command, and generated counts are owned by a script with a bare floor — bad=[]
+             | OK   no entry was dropped by the per-entry checks — entries=18 usable=18 dropped=0 bad_kinds={'声明型': 15, '生成型': 3}
+             | OK   at least 2 entries are generated-count facts — measured=3 floor=2 kinds={'声明型': 15, '生成型': 3}
+             | OK   no fact is defined a second time without an attribution pointer — scanned_files=67 unattributed=0 hits=[]
+             | FAIL no generated count is written into prose anywhere on the scan surface — measured=1 hits=['设计 token 个数 <- Docs/04-ux-design/design-system/README.md:50']
+             | OK   the 覆盖面 table is readable and names each root once — rows=7 roots=['.codex/', '.codex/agents/', '.codex/context/', '.codex/rules/', '.codex/scripts/', 'AGENTS.md', 'Docs/']
+             | OK   the 覆盖面 counts equal the recomputed per-root entry counts — declared={'.codex/': 2, '.codex/agents/': 1, '.codex/context/': 2, '.codex/rules/': 4, '.codex/scripts/': 4, 'AGENTS.md': 1, 'Docs/': 4
+             | OK   the index restates no authority body (>= 60-char run) — measured_hits=0 sample=[]
+             | OK   the index carries no placeholder tokens — hits=[]
+             | scanned_files=67 entries=18 kinds={'声明型': 15, '生成型': 3} authority_files=17
+             | check_source_of_truth: 1 check(s) failed
+             | EXITCODE=1
+PASS         run_evals                              rc=0 0.1s
+             > run_evals: 0 check(s) failed
+PASS         check_eval_keeper_agent                rc=0 0.1s
+             > check_eval_keeper_agent: 0 check(s) failed
+FAIL         metrics_report                         rc=1 2.4s
+             > check_metrics_report: 1 check(s) failed
+             DIAG metrics_report lines=20/20 mode=full
+             | OK   every metric source is present — missing=[]
+             | OK   metric families derive from the ROADMAP B6 goal sentence — derived=4 floor=4 families=['交付节奏', '退回次数', '守门命中分布', '失败案例库增量']
+             | OK   registered metric list is not drained below its floor — registered=12 floor=8
+             | OK   the report landing directory exists — dir=artifacts/metrics/
+             | OK   metrics report file exists — path=artifacts/metrics/report.md
+             | OK   the report holds exactly one line per registered metric — lines=12 duplicated=[] hand_added=[] missing_from_report=[]
+             | OK   every metric line carries exactly the six required fields — bad=[]
+             | OK   every metric line declares one unit, never two — duplicated_fields=[]
+             | OK   every family required by the roadmap appears in the report — required=4 missing=[]
+             | OK   every metric line names a command — blank=[]
+             | OK   enough metric lines are declared machine-recheckable — measured=9 floor=6
+             | OK   each line declares the recheck class its registry entry really has — disagree=[]
+             | OK   history readings are read from a real git command — not_git=[]
+             | OK   every line prints the command the generator would print — wrong=[]
+             | OK   every metric produces a reading when re-run — unreadable=[]
+             | FAIL each machine-recheckable reading is produced by running the command on its own line — checked=9 mismatch=[['cards-by-file-date', '2026-10-21=9;2026-10-20=5;2026-10-19=12', '2026-10-21=14;2026-10-
+             | OK   report header names the command that writes it — needle=python -X utf8 .codex/scripts/metrics_report.py --write present=True
+             | OK   no metric reading is left as a placeholder — hits=[] scanned=readings+header
+             | check_metrics_report: 1 check(s) failed
+             | EXITCODE=1
+PASS         check_metrics_reporter_agent           rc=0 0.2s
+             > check_metrics_reporter_agent: 0 check(s) failed
+PASS         check_intent_capturer_agent            rc=0 0.2s
+             > check_intent_capturer_agent: 0 check(s) failed
+PASS         check_intent_template                  rc=0 0.1s
+             > check_intent_template: 0 check(s) failed
+PASS         check_pm_discovery_skill               rc=0 0.1s
+             > check_pm_discovery_skill: 0 check(s) failed
+PASS         check_roadmap_and_routing              rc=0 0.2s
+             > check_roadmap_and_routing: 0 check(s) failed
+PASS         check_spec_author_agent                rc=0 0.1s
+             > check_spec_author_agent: 0 check(s) failed
+PASS         check_stack_facts                      rc=0 0.8s
+             > check_stack_facts: 0 check(s) failed
+PASS         check_design_tokens                    rc=0 0.3s
+             > check_design_tokens: 0 check(s) failed
+PASS         check_ux_vendor                        rc=0 29.9s
+             > check_ux_vendor: 0 check(s) failed
+PASS         check_ux_vendor --selftest             rc=0 44.0s
+             > SELFTEST cases=21 mismatch=0 expected=21 floor=21
+PASS         check_pointer_liveness                 rc=0 0.9s
+             > check_pointer_liveness: 0 check(s) failed
+PASS         check_pointer_liveness --selftest      rc=0 59.0s
+             > SELFTEST cases=10 mismatch=0 expected=10
+PASS         check_androidtest_schema_expectations  rc=0 0.2s
+             > VERDICT: PASS
+PASS         check_run_all_guards                   rc=0 44.0s
+             > SELFTEST cases=33 executed=33 floor=26 broken=0
+INCONCLUSIVE checkers_selftest                      rc=3 — 退出码不在该守门的判绿/判红集合里，本次无从认证 14.1s
+             > OVERALL: INCONCLUSIVE
+             DIAG checkers_selftest lines=19/19 mode=full
+             | Command: python .codex/scripts/dev/checkers_selftest.py
+             | Mode: full (268 injected-violation cases + 14 baselines)
+             | Workspace: C:\Users\23745\AppData\Local\Temp\tlx-selftest-z3286zok
+             | Workspace note: longest path 127
+             | BASELINE OK check_intent_capturer_agent rc=0
+             | BASELINE OK check_roadmap_and_routing rc=0
+             | BASELINE OK check_intent_template rc=0
+             | BASELINE OK check_spec_author_agent rc=0
+             | BASELINE OK check_code_reviewer_agent rc=0
+             | BASELINE FAIL check_context_pack rc=1
+             | s/chat.html', 'Docs/04-ux-design/2026-10-21-玻璃质感重设计提案/_src/screens/home.html', 'Docs/04-ux-design/2026-10-21-玻璃质感重设计提案/_src/screens/library.html']
+             | OK   every indexed path exists — dead=[]
+             | OK   brief cites >= 2 top-level dirs — measured=2 floor=2 cited=['backend', 'frontend']
+             | OK   no dir is claimed `尚未创建` while present on disk — claimed_absent=['backend'] stale=[] cited=['backend', 'frontend']
+             | OK   every other cited dir exists on disk — dead=[] cited=['backend', 'frontend']
+             | OK   glossary has >= 12 terms — measured=15
+             | OK   every glossary term cites a real path — measured_terms=15 dead_sources=[]
+             | OVERALL: INCONCLUSIVE
+             | EXITCODE=3
+PASS         parity_ledger_selftest                 rc=0 5.9s
+             > VERDICT: PASS
+PASS         screen_inventory_selftest              rc=0 2.8s
+             > VERDICT: PASS
+PASS         measure_screen --selftest              rc=0 13.3s
+             > VERDICT: PASS (19 cases, positive and negative for every branch)
+TIMEOUT      verify_1to1_selftest                   timeout after 600s — 本轮对这条没有判据，既不是绿也不是红
+             DIAG verify_1to1_selftest lines=30/161 mode=tail
+             | ok   body-pitch/正文行高脱离 --lh-read 判红且其它 5 项不受影响
+             | ok   action-pitch/图标行不等距 判红且其它 5 项不受影响
+             | ok   action-pitch/等距但不等于按钮宽 判红且其它 5 项不受影响
+             | ok   action-pitch/量不到按钮宽度 判红且其它 5 项不受影响
+             | ok   pill-inset/胶囊与正文不同栏 判红且其它 5 项不受影响
+             | ok   pill-inset/量不到胶囊左内缩 判红且其它 5 项不受影响
+             | SELFTEST PASS cases=40 cli=20 muts=18 failures=0
+             | EXITCODE=0
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-VQtUmJ
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-rcsE2A
+             | USAGE ERROR: 未知选项 --turbo（可用: --screen --out --profile --browser --attach --url --wait-ms）
+             | USAGE ERROR: 必须给 --screen <屏名>：原型路径、点击序列、等待选择器与 DOM 检查项都从屏档案取
+             | USAGE ERROR: --wait-ms 必须是正整数毫秒，收到 0
+             | USAGE ERROR: 屏档案里没有 "nope"；可用: chat
+             | INSTRUMENT FAULT: 找不到 Edge 可执行文件（试过: /c/nowhere/msedge.exe）；用 --browser <路径> 指定
+             | INSTRUMENT FAULT: 屏 "chat" 的档案没有 prototype 回放段
+             | INSTRUMENT FAULT: 原型 HTML 不存在: D:\Project\Android\Treelearn\Docs\04-ux-design\no-such-prototype.html
+             | INSTRUMENT FAULT: 屏档案 不是合法 UTF-8: D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-9G3Jpv\bad-utf8.json (The encoded data was not valid for encoding utf-8)
+             | INSTRUMENT FAULT: 屏 "chat" 的 prototype 段没有 dom_checks——没有检查项就没有见证
+             | INSTRUMENT FAULT: 屏 "chat" 的 prototype 段没有 dom_checks——没有检查项就没有见证
+             | INSTRUMENT FAULT: 档案里的 DOM 检查名不在词表内: no-such-check（词表现有: body-bg, grid-period, user-bubble, body-pitch, action-pitch, pill-inset）
+             | INSTRUMENT FAULT: --url 指向的本机文件不存在: D:\nope\missing.html
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-STPO2Y
+             | INSTRUMENT FAULT: 导航被浏览器拒绝: net::ERR_ABORTED（目标 javascript:document.write(1)）
+             | INSTRUMENT FAULT: CDP 握手失败（端口 1 没有应答: fetch failed）
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-dhjGun
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-0uWGWA
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-wXLi22
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-tWa4v9
+             | INSTRUMENT FAULT: #root 是空的或不存在（root=0 nodes=6 ready=complete title=桩，重载 1 次后仍空）——原型的界面由页面内的 React+Babel 现场编译、脚本取自 ./vendor/（字节身份由 check_ux_vendor.py 判）；被核对象没起来属仪器故障，不是结构不符
+TIMEOUT      cdp_shot_selftest                      timeout after 600s — 本轮对这条没有判据，既不是绿也不是红
+             DIAG cdp_shot_selftest lines=30/118 mode=tail
+             | OK   screen-rect = 412x816 @ 179,1977.5 (逻辑 px)
+             | OK   scrollbar-occupancy = 4 = 档案声明 4
+             | FAIL shot-scale-override 本次 scale=1 而档案声明=2；此图不可交给 --kind render（它按 2x 反算逻辑像素），请用默认比例重跑或同步档案
+             | judgements=6 failed=1
+             | VERDICT: FAIL
+             | EXITCODE=1
+             | ok   neg-shot-scale-mismatch rc=1 (16.9s, want=1)
+             | # command: (unit) 空判据
+             | VERDICT: FAULT 没有任何判据被执行——空见证不算通过
+             | EXITCODE=3
+             | ok   neg-empty-ledger rc=3 (unit, want=3)
+             | SELFTEST PASS cases=17 failures=0
+             | EXITCODE=0
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-1Uqrx6
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-uEYYQR
+             | USAGE ERROR: 未知选项 --turbo（可用: --screen --out --profile --browser --attach --url --scroll --scale --wait-ms）
+             | USAGE ERROR: 必须给 --out <png>：产图路径显式给出，避免覆盖已归档的基线图
+             | USAGE ERROR: 屏档案里没有 "nope"；可用: chat
+             | USAGE ERROR: --scroll 只认 none|top|bottom，收到 sideways
+             | INSTRUMENT FAULT: 找不到 Edge 可执行文件（试过: /c/nowhere/msedge.exe）；用 --browser <路径> 指定
+             | INSTRUMENT FAULT: 屏 "chat" 的档案没有 prototype 回放段
+             | INSTRUMENT FAULT: 原型 HTML 不存在: D:\Project\Android\Treelearn\Docs\04-ux-design\no-such-prototype.html
+             | INSTRUMENT FAULT: 屏档案 不是合法 UTF-8: D:\Project\Android\Treelearn\artifacts\tmp\_cdpshot-selftest\run-kVJYur\bad-utf8.json (The encoded data was not valid for encoding utf-8)
+             | INSTRUMENT FAULT: --url 指向的本机文件不存在: D:\nope\missing.html
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-WzyL7l
+             | INSTRUMENT FAULT: 导航被浏览器拒绝: net::ERR_ABORTED（目标 javascript:document.write(1)）
+             | INSTRUMENT FAULT: CDP 握手失败（端口 1 没有应答: fetch failed）
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-rq2e36
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-ZZHseP
+             | WARN user-data-dir 没能删除（浏览器子进程仍持有）: C:\Users\23745\AppData\Local\Temp\parity-cdp-HhcgjO
+PASS         web_walk --selftest                    rc=0 0.3s
+             > SELFTEST cases=6 bad=0
+PASS         check_dependency_direction             rc=0 0.1s
+             > dependency scan root=src layers=9 scanned=35 findings=0
+PASS         check_dependency_direction --selftest  rc=0 0.2s
+             > SELFTEST cases=10 floor=8 fail=0
+PASS         check_user_copy_i18n                   rc=0 0.1s
+             > user-copy scan root=src scanned=35 copy-dir-exempt-seen=true cjk-lines=0 files=0 baseline-entries=0 baseline-covered=0
+PASS         check_user_copy_i18n --selftest        rc=0 0.1s
+             > SELFTEST cases=15 floor=10 fail=0
+PASS         check_device_time                      rc=0 0.1s
+             > device-time scan root=D:\Project\Android\Treelearn\frontend\src scanned=35 exempt=utils/deviceTime.ts exempt-in-tree=true findings=0
+PASS         check_device_time --selftest           rc=0 0.1s
+             > SELFTEST cases=11 floor=8 fail=0
+PASS         sync_fixtures --check                  rc=0 0.1s
+             > SYNC CHECK src=13 dst=13 bad=0 redacted=0 dir=frontend\src\platform\fixtures
+PASS         sync_fixtures --selftest               rc=0 0.1s
+             > SELFTEST cases=8 bad=0 floor=1
+NOTE         not-selected                           未选中：6 条不在本次判定面内（档位选择），整表绿不由此声明
+RUN-ALL-GUARDS pass=33 fail=3 inconclusive=1 fault=0 timeout=2
+VERDICT: INCONCLUSIVE (2 guard(s) hit their own timeout, so nothing was judged for them — 重跑或换串行姿势，别去查不存在的回归)
+EXITCODE=3

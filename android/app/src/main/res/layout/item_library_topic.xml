@@ -1,59 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  One library row (T-052, PRD 6.2.16 point 4): the left accent bar, the topic's identity, its branch
-  count and last use, and the unread dot. The whole row is one tap target - tapping it resumes the
-  topic, the same move the home list makes - and the dot is a hidden-until-earned view rather than a
-  count, because "there is something new" is the only thing the row has to say about unread.
+  One library row, aligned to Scheme A's .library-card on 2026-10-22 (T-2026-10-22-057): one compact
+  glass card, 13dp near the sides, 12dp above and below, a 12.5sp title, a two-line 10.5sp summary and
+  a 9sp meta line led by the 11dp branch tree, with a 14dp disclosure chevron on the right.
+
+  Scheme A draws no left accent bar, so the old 3dp marker is gone: the card itself already says the
+  row is a topic, and a second colour bar was decoration the proposal does not have. The unread dot
+  stays because it carries a real fact, and the row's content description keeps that fact reachable
+  without relying on the colour alone.
+
+  The whole card is one tap target - tapping it resumes the topic, the same move the home list makes.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/library_topic" android:layout_width="match_parent"
-    android:layout_height="wrap_content" android:layout_marginStart="@dimen/page_gutter"
-    android:layout_marginTop="@dimen/space_s3" android:layout_marginEnd="@dimen/page_gutter"
-    android:background="@drawable/bg_library_card" android:clickable="true"
-    android:elevation="@dimen/card_elevation" android:focusable="true"
-    android:gravity="center_vertical" android:minHeight="@dimen/touch_min"
-    android:orientation="horizontal">
+    android:id="@+id/library_topic"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="@dimen/page_gutter"
+    android:layout_marginEnd="@dimen/page_gutter"
+    android:layout_marginBottom="@dimen/library_card_gap"
+    android:background="@drawable/bg_library_card"
+    android:clickable="true"
+    android:elevation="@dimen/card_elevation"
+    android:focusable="true"
+    android:gravity="top"
+    android:minHeight="@dimen/touch_min"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/library_card_pad_h"
+    android:paddingTop="@dimen/library_card_pad_v"
+    android:paddingEnd="@dimen/library_card_pad_h"
+    android:paddingBottom="@dimen/library_card_pad_v">
 
-    <View android:id="@+id/library_topic_accent" android:layout_width="3dp"
-        android:layout_height="match_parent"
-        android:alpha="0" android:background="@color/tl_green"
-        android:importantForAccessibility="no" />
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-        android:layout_weight="1" android:orientation="vertical"
-        android:paddingStart="@dimen/space_s4" android:paddingTop="@dimen/space_s2"
-        android:paddingEnd="@dimen/space_s2" android:paddingBottom="@dimen/space_s2">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:gravity="center_vertical" android:orientation="horizontal">
-
-            <TextView android:id="@+id/library_topic_title" android:layout_width="0dp"
-                android:layout_height="wrap_content" android:layout_weight="1"
-                android:ellipsize="end" android:fontFamily="serif" android:maxLines="2"
-                android:textColor="@color/tl_ink" android:textSize="@dimen/text_h2"
+            <TextView
+                android:id="@+id/library_topic_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:lineSpacingMultiplier="1.45"
+                android:maxLines="2"
+                android:textColor="@color/tl_ink"
+                android:textSize="@dimen/text_library_card_title"
                 android:textStyle="bold" />
 
-            <View android:id="@+id/library_topic_unread" android:layout_width="8dp"
-                android:layout_height="8dp" android:layout_marginStart="@dimen/space_s2"
-                android:background="@drawable/bg_unread_dot" android:importantForAccessibility="no"
+            <View
+                android:id="@+id/library_topic_unread"
+                android:layout_width="@dimen/space_s2"
+                android:layout_height="@dimen/space_s2"
+                android:layout_marginStart="@dimen/space_s2"
+                android:background="@drawable/bg_unread_dot"
+                android:importantForAccessibility="no"
                 android:visibility="gone" />
-
-            <ImageView android:layout_width="@dimen/space_s4" android:layout_height="@dimen/space_s4"
-                android:layout_marginStart="@dimen/space_s2" android:contentDescription="@null"
-                android:src="@drawable/ic_chevron_right" android:tint="@color/tl_ink3" />
         </LinearLayout>
 
-        <!-- The topic's root summary (T-061, PRD 6.2.16 point 4). Gone when the topic has none:
-             one line fewer, never an explanatory placeholder standing in for it. -->
-        <TextView android:id="@+id/library_topic_summary" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_s1"
-            android:ellipsize="end" android:maxLines="2" android:textColor="@color/tl_ink2"
-            android:textSize="@dimen/text_sm" android:visibility="gone" />
+        <!-- The topic's root summary. Gone when the topic has none: one line fewer, never an
+             explanatory placeholder standing in for it. -->
+        <TextView
+            android:id="@+id/library_topic_summary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_s1"
+            android:ellipsize="end"
+            android:lineSpacingMultiplier="1.55"
+            android:maxLines="2"
+            android:textColor="@color/tl_ink2"
+            android:textSize="@dimen/text_library_summary"
+            android:visibility="gone" />
 
-        <TextView android:id="@+id/library_topic_meta" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_s1"
-            android:ellipsize="end" android:maxLines="1" android:textColor="@color/tl_ink3"
-            android:textSize="@dimen/text_cap" />
+        <LinearLayout
+            android:id="@+id/library_topic_meta_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/library_meta_top"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/library_topic_tree"
+                android:layout_width="@dimen/library_meta_icon"
+                android:layout_height="@dimen/library_meta_icon"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_nav_tree"
+                android:tint="@color/tl_green" />
+
+            <TextView
+                android:id="@+id/library_topic_meta"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/library_meta_gap"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/tl_ink3"
+                android:textSize="@dimen/text_library_meta" />
+        </LinearLayout>
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/library_topic_chevron"
+        android:layout_width="@dimen/library_chevron"
+        android:layout_height="@dimen/library_chevron"
+        android:layout_marginStart="@dimen/space_s2"
+        android:layout_marginTop="@dimen/library_chevron_top"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_chevron_right"
+        android:tint="@color/tl_ink3" />
 </LinearLayout>

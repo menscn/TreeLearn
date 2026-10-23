@@ -9,11 +9,13 @@ import com.treelearn.core.domain.GenerationCommand;
 import com.treelearn.core.domain.GenerationModel;
 import com.treelearn.core.domain.Guard;
 import com.treelearn.core.domain.Message;
+import com.treelearn.core.domain.Persona;
 import com.treelearn.core.domain.PromptPurpose;
 import com.treelearn.data.db.DatabaseTransactionRunner;
 import com.treelearn.data.db.dao.AnswerRevisionDao;
 import com.treelearn.data.db.dao.GenerationOperationDao;
 import com.treelearn.data.db.dao.MessageDao;
+import com.treelearn.data.db.dao.TopicDao;
 
 import java.util.Collections;
 import java.util.List;
@@ -134,7 +136,8 @@ public final class AnswerVersions {
                     throw new Refused(errorFor(refusal));
                 }
                 PositionCommands.Baseline baseline = new PositionCommands.Baseline(position.branchId,
-                        position.id, ANSWER_PURPOSE, model, thinkingEnabled);
+                        position.id, ANSWER_PURPOSE, model, thinkingEnabled,
+                        personaOfTopic(work, position.branchId));
                 DomainResult<GenerationCommand> command = baseline.commandFor(policyVersion, now);
                 if (command.isFailure()) {
                     throw new Refused(command.error());
@@ -144,6 +147,18 @@ public final class AnswerVersions {
         } catch (Refused refusal) {
             return DomainResult.fail(refusal.error);
         }
+    }
+
+    /**
+     * The current style of the topic that owns {@code branchId}.
+     *
+     * <p>Read inside the transaction, not passed down from the screen: the chip only displays and
+     * writes the topic row, so the row is the one authority for what the next attempt uses. A row
+     * this build cannot name falls back to the default, exactly like every other read boundary.
+     */
+    private static Persona personaOfTopic(SQLiteDatabase database, String branchId) {
+        TopicDao.PersonaRead read = TopicDao.personaOfBranch(database, branchId);
+        return read == null ? Persona.DEFAULT : read.persona;
     }
 
     /**

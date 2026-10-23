@@ -2,6 +2,7 @@ package com.treelearn.app.ui;
 
 import com.treelearn.core.domain.AnswerRevision;
 import com.treelearn.core.domain.GenerationModel;
+import com.treelearn.core.domain.Persona;
 
 import java.util.List;
 
@@ -65,4 +66,11 @@ public interface ChatCommands {
      */
     ChatCommandResult applyHighlight(String messageId, String answerText, int proseIndex,
             int startInclusive, int endInclusive);
+
+    /**
+     * 2026-10-23: stores one answer style on the branch's topic. It is a narrow write - only the
+     * {@code persona} column moves, so the home list's activity order is untouched - and it changes
+     * nothing about answers already stored.
+     */
+    ChatCommandResult setPersona(String branchId, Persona persona);
 }

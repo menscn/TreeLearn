@@ -49,6 +49,8 @@
   --r-sm:8px;     /* chip、小按钮 */
   --r-md:14px;    /* 卡片 */
   --r-lg:18px;    /* 输入框、大容器 */
+  --r-xl:22px;    /* 玻璃卡片（2026-10-21 材质） */
+  --r-2xl:28px;   /* 玻璃阅读面/输入卡（2026-10-21 材质） */
   --r-full:99px;
 
   /* —— 字号系统：display 与 caption 拉开约 2.4 倍对比 —— */
@@ -64,9 +66,45 @@
   --sh-1:0 1px 2px rgba(22,36,28,.04);
   --sh-2:0 4px 12px rgba(22,36,28,.06);
 
-  /* —— 字体：正文走系统 sans-serif；品牌衬线走回退栈，本轮不打包字体 —— */
+  /* —— 玻璃材质：A 晨雾玻璃 + C 1px 高光边（2026-10-21 用户拍板） ——
+       五面 alpha 于 2026-10-23 整体上移一档（用户拍板「不透明度太低」）：玻璃要读得出「有一块面」，
+       顶栏的通透不再靠压低 alpha 换，Web 顶栏「内容穿过玻璃」的像素信号随之退让（见 064 卡片）。 */
+  --glass-chrome:rgba(255,255,255,.74);   /* 顶栏/底栏/侧栏 */
+  --glass-card:rgba(255,255,255,.86);     /* 卡片 */
+  --glass-reader:rgba(255,255,255,.93);   /* 阅读面：不随通透度下调 */
+  --glass-field:rgba(244,241,235,.74);    /* 输入框/搜索框 */
+  --glass-edge:rgba(255,255,255,.88);     /* 1px 高光边（C） */
+  --glass-line:rgba(22,36,28,.06);        /* 玻璃内分隔 */
+  --glass-sheen:rgba(255,255,255,.50);    /* 顶部高光渐变 */
+  --glow-green:rgba(43,110,69,.16);       /* 场景柔光：生长绿 */
+  --glow-sand:rgba(214,169,110,.20);      /* 场景柔光：暖沙 */
+  --glow-white:rgba(255,255,255,.48);     /* 场景柔光：白光 */
+  /* —— 莫兰迪增量（2026-10-22 拍板 A + 莫兰迪毛玻璃）：只用于柔光与非文字表面，绿色仍是唯一动作色 —— */
+  --glow-rose:rgba(201,164,162,.18);      /* 场景柔光：灰玫瑰 */
+  --glow-lilac:rgba(163,156,186,.16);     /* 场景柔光：丁香灰 */
+  --tint-rose:#EFDFDB;                    /* 推荐卡图标底：灰玫瑰 */
+  --tint-lilac:#E8E3EE;                   /* 推荐卡图标底：丁香灰 */
+  --tint-sand:#F2E9D9;                    /* 分支标签底：暖沙 */
+  --tint-sage:#E3EDE4;                    /* 推荐卡图标底：鼠尾草 */
+  /* —— 雾面四色（2026-10-22 加深）：真机基线读数四角跨度 7.7 L、彩度 3.0，玻璃因此读作「贴着页面的白膜」。
+         顶到底约 241→210 L，R−B 由 +19 漂到 −7；跨度与色相漂移是「浮起来」的前提，不是装饰。 —— */
+  --mist-base:#EDEDE4;                    /* 雾面底：中 */
+  --mist-deep:#C7D6CE;                    /* 雾面：深 */
+  --mist-warm:#F7F1E4;                    /* 雾面：暖 */
+  --mist-cool:#DCE6DF;                    /* 雾面：冷 */
+  --glass-blur:28px;
+  --glass-saturate:150%;
+  /* —— 玻璃投影两档：只提出方案 A .glass 四层里属于「颜色事实」的部分。
+         模糊/偏移/扩散属于消费者的几何，不进 token；Android 用 spot=主档、ambient=环境档。
+         旧的单档 --glass-shadow（0 12px 32px .07）是「不透明表面」时代的值，已由这两档取代，
+         2026-10-22 片 063 随 Web 消费切换一并从本链删除。 —— */
+  --glass-shadow-key:rgba(22,36,28,.42);          /* 主投影：方案 A 的 0 20px 40px -28px 档 */
+  --glass-shadow-ambient:rgba(22,36,28,.05);      /* 环境投影：贴面的 0 2px 6px 软影 */
+  --glass-tint-falloff:.58;                       /* 145° tint 暗端 = 该面自身 alpha × 此比例（方案 A calc(a1*.58)） */
+
+  /* —— 字体：正文走系统 sans-serif；Android 自 2026-10-22 起随 APK 分发 Noto Serif CJK SC —— */
   --kai:'LXGW WenKai','Noto Serif SC','Songti SC',serif;   /* 遗留楷体：2026-09-27 起 .screen 已改用 --sans；现存唯一引用是 .home-hero .hh-sub（首页 hero 副标题）。退役待定 */
-  --serif:'Noto Serif SC','Songti SC',Georgia,serif;       /* 品牌衬线回退栈（各 ROM 字形有差异） */
+  --serif:'Noto Serif SC','Songti SC',Georgia,serif;       /* 品牌衬线回退栈（Web 由 CDN 提供；Android 由 res/font/noto_serif_sc.otf 承担） */
   --brush:'Ma Shan Zheng','LXGW WenKai',serif;             /* 品牌题字 */
   --sans:'Noto Sans SC',-apple-system,sans-serif;          /* 正文；Android 落系统 sans-serif */
 

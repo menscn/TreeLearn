@@ -116,10 +116,10 @@ public final class TreeLearnSchemaAnnotationsTest {
     }
 
     @Test
-    public void theVersionChainIsContiguousUpToFive() {
-        // V5 (T-2026-09-28-026) is the current version; the literal is the one version this suite
-        // pins, exactly like the quote-invariant suite pins its own.
-        assertEquals(5, TreeLearnSchema.DATABASE_VERSION);
+    public void theVersionChainIsContiguousUpToSix() {
+        // V6 (SPEC-2026-09-21-ai-persona-preference) is the current version; the literal is the one
+        // version this suite pins, exactly like the quote-invariant suite pins its own.
+        assertEquals(6, TreeLearnSchema.DATABASE_VERSION);
 
         for (int version = 1; version < TreeLearnSchema.DATABASE_VERSION; version++) {
             int steps = 0;

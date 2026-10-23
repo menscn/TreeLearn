@@ -1,61 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  One recommendation chip: the prototype's .rec-chip
-  (Docs/04-ux-design/知芽-TreeLearn-高保真原型-v1.html line 350), three parts left to right - the category
-  pill, the question, and a trailing chevron.
+  One recommendation card (2026-10-22 Scheme A): the proposal's .suggest is a 232dp glass card led
+  by a green sparkle. The card is stacked because the product keeps PRD 6.2.17 point 3's category
+  tag: the tag and the sparkle share the first line, the question takes the lines below it.
 
   Two things this markup deliberately does not decide:
 
   * The tag's colours. They are per kind, and that judgement lives in RecommendationTag, so the markup
-    carries neither a backgroundTint nor a textColor for the tag. Pinning either one here would give all
-    three categories the same tier and silently undo the judgement.
-  * The chevron's meaning. It is decoration on a chip whose whole surface sends the question as the root
-    question (PRD 6.2.17 point 4); it is not a second, smaller target that opens a detail page.
-
-  The chip's height is @dimen/touch_min rather than the prototype's ~33px, because the chip IS the tap
-  target here. That deviation is registered in the parent spec's deviation table.
+    carries neither a backgroundTint nor a textColor for the tag.
+  * The chevron. Scheme A's suggestion card carries none: the whole surface is the tap target that
+    sends the question as the root question (PRD 6.2.17 point 4), so a chevron would promise a
+    second action that does not exist.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/rec_chip"
-    android:layout_width="wrap_content"
-    android:layout_height="@dimen/touch_min"
+    android:layout_width="@dimen/rec_card_width"
+    android:layout_height="wrap_content"
     android:layout_marginEnd="@dimen/space_s2"
-    android:background="@drawable/bg_chip"
+    android:background="@drawable/bg_rec_card"
     android:clickable="true"
     android:focusable="true"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:paddingStart="@dimen/space_s3"
-    android:paddingEnd="@dimen/space_s3">
+    android:minHeight="@dimen/touch_min"
+    android:orientation="vertical"
+    android:paddingStart="@dimen/rec_pad_h"
+    android:paddingTop="@dimen/rec_pad_v"
+    android:paddingEnd="@dimen/rec_pad_h"
+    android:paddingBottom="@dimen/rec_pad_v">
 
-    <TextView
-        android:id="@+id/rec_tag"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_pill"
-        android:importantForAccessibility="no"
-        android:paddingStart="@dimen/space_s2"
-        android:paddingTop="@dimen/space_s1"
-        android:paddingEnd="@dimen/space_s2"
-        android:paddingBottom="@dimen/space_s1"
-        android:textSize="@dimen/text_cap" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/rec_icon"
+            android:layout_width="@dimen/rec_icon_size"
+            android:layout_height="@dimen/rec_icon_size"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_sparkle"
+            android:tint="@color/tl_green" />
+
+        <TextView
+            android:id="@+id/rec_tag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_s1"
+            android:background="@drawable/bg_pill"
+            android:importantForAccessibility="no"
+            android:paddingStart="@dimen/space_s2"
+            android:paddingTop="@dimen/space_s1"
+            android:paddingEnd="@dimen/space_s2"
+            android:paddingBottom="@dimen/space_s1"
+            android:textSize="@dimen/text_cap" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/rec_text"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/space_s2"
+        android:layout_marginTop="@dimen/space_s1"
         android:importantForAccessibility="no"
-        android:maxWidth="@dimen/rec_text_max"
-        android:textColor="@color/tl_ink"
-        android:textSize="@dimen/text_sm" />
-
-    <ImageView
-        android:id="@+id/rec_chevron"
-        android:layout_width="@dimen/space_s3"
-        android:layout_height="@dimen/space_s3"
-        android:layout_marginStart="@dimen/space_s2"
-        android:importantForAccessibility="no"
-        android:src="@drawable/ic_chevron_right"
-        android:tint="@color/tl_ink" />
+        android:lineSpacingMultiplier="1.5"
+        android:maxLines="3"
+        android:textColor="@color/tl_ink2"
+        android:textSize="@dimen/text_cap" />
 </LinearLayout>

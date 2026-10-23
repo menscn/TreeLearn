@@ -6,9 +6,9 @@
   coloured in ModelThinkingPicker, because the prototype gives it the identity green while the rest of
   the chip stays secondary ink.
 
-  This is the visual pill only. The prototype draws it about 22px tall, so it is deliberately NOT the
-  tap target: the 44dp hot zone belongs to the ModelThinkingPicker that hosts it (see that class), which
-  keeps the pill faithful without shrinking the control below @dimen/touch_min.
+  This is the visual pill only. Scheme A draws it 30dp tall (2026-10-22), so it is deliberately NOT
+  the tap target: the 44dp hot zone belongs to the ModelThinkingPicker that hosts it (see that
+  class), which keeps the pill faithful without shrinking the control below @dimen/touch_min.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/model_chip"
@@ -16,6 +16,7 @@
     android:layout_height="wrap_content"
     android:background="@drawable/bg_chip"
     android:gravity="center_vertical"
+    android:minHeight="@dimen/model_chip_height"
     android:orientation="horizontal"
     android:paddingStart="@dimen/space_s3"
     android:paddingTop="@dimen/space_s1"
