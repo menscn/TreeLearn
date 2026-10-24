@@ -1,0 +1,68 @@
+074 · 首页历史主题不再截断——真机读数
+设备 AWSS013807000356（Honor / Android 13 / API 33），窗口 1200x2652，density 3.25，状态栏 115px。
+安装方式：adb -s AWSS013807000356 install -r（不跑 instrumentation，避免清掉本机业务数据与 API Key）。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0. 仪器为什么必须是像素
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+`dumpsys activity top` 打印的是 View.getBounds()，即 mLeft,mTop,…。ScrollView 滚动时改的是自己的
+mScrollY，不改子 view 的 mTop，所以 home_content 在任何滚动位置都读作 `0,0-…`。
+→ 用 bounds 判「有没有滚」是坏仪器（本轮前一版结论就是这么错的）。
+→ 滚不滚只看两帧像素差；bounds 只用来判「列比视口高还是矮」这一件事。
+两帧差的基线：页面不滚但推荐带在动，同仪器读数 3.4%（见下 2a）；页面真滚，读数 21.9%–42.8%。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. 修之前（MAX_RECENT=3 在位）
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+读处于 15:52 的 dump（074-before-o-0.txt 同源）：
+  ScrollView  home_root         0,0-1200,2537   paddingBottom = tab_bar_clearance 90dp = 293px
+  LinearLayout home_content     0,0-1200,2486   ← 比 home_root 矮 51px
+  LinearLayout home_recent_list 0,83-1096,729   ← 3 张卡，列表高 646px
+区头文本按 `state.topics.size()` 播报全量（截图 074-before-swipe-a.png 可见「6 个」对上 3 张卡）。
+
+一次滑动的两帧差（同一仪器，采样步长 3px，阈值 Σ|ΔRGB|>18）：
+  074-before-swipe-a.png vs 074-before-swipe-b.png  ->  3.37%   （= 推荐带在动，页面没滚）
+  另一次同状态复测（15:45，h-h0/h-h1）              ->  3.53%
+判据吻合源码：View.canScrollVertically(1) 走 computeVerticalScrollRange() - computeVerticalScrollExtent()；
+ScrollView 的 range override 返回 getChildAt(0).getBottom()（2486），而 View.computeVerticalScrollExtent()
+返回 getHeight()（2537）且不减 padding —— range-extent = -51 < 0， ScrollView.onInterceptTouchEvent
+第 661 行 `if (getScrollY() == 0 && !canScrollVertically(1)) return false;` 直接拒绝拦截，
+整页任何拖拽都不被接管。底部那 293px 内边距因此是一块拖不开的空白。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. 修之后（画出 topics 的全部条目）
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2a. 列高与卡数
+  16:09  home_content 0,0-1200,3432   home_recent_list 0,83-1096,1675
+  16:17  home_content 0,0-1200,3656   home_recent_list 0,83-1096,1899  ← 列表 1816px，3 张卡时是 646px
+  3432 与 3656 都 > home_root 的 2537 → canScrollVertically(1) 为真。
+  074-device-after-bottom.png：区头「7 个」，画面内 7 张卡逐条可见，最后一张停在悬浮胶囊上沿之上。
+
+2b. 滑动真的动了
+  16:17 一轮 `input swipe 600 2200 600 900 500`  ->  21.85% 屏幕像素变化
+  16:26 连四轮 `input swipe 600 2200 600 700 400` ->  42.83%（074-device-after-top.png 为同批首帧）
+
+2c. 判据（JVM 单测，读源码文本的结构性断言）
+  命令（RED 与 GREEN 同一条）：
+    ./gradlew :app:testDebugUnitTest --tests "*HomeMotionTest*" --console=plain      # 在 android/ 下执行
+  RED：把 HEAD 版 HomeScreen.java（MAX_RECENT 在位）临时放回工作树后执行 -> exit 1
+       074-red-console.txt: HomeMotionTest > theHomeDrawsEveryTopicTheReadReturned FAILED
+                            java.lang.AssertionError at HomeMotionTest.java:87
+       （断言体在 HomeMotionTest.java:87-91，要求源码含 `index < state.topics.size()` 且不含
+         `MAX_RECENT` / `visibleCount`；HEAD 版三条都不满足。）
+       放回方式：git show HEAD:…HomeScreen.java > 同路径；跑完立即 cp 回备份，
+                 md5 前后一致 e1e4afbd99d19a228659c652562227cc（备份 artifacts/tmp/HomeScreen.java.fixed）。
+  GREEN：修复在位执行同一条命令 -> exit 0，074-green-console.txt: BUILD SUCCESSFUL
+  全量回归：./gradlew :app:testDebugUnitTest -> exit 0，tests=944 failures=0 errors=0 skipped=0
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. 这一片没有动的东西
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- `screen_home.xml` 的结构、paddingBottom=@dimen/tab_bar_clearance（90dp）与 fillViewport 全部保留。
+  让位归属不变：最后一行停在胶囊上方靠的就是这段内边距，本片只改「画几条」。
+- 区头计数的判定点没动（HomeScreen.java:246 读 state.topics.size()；hasTopics() 仍是唯一判定点）。
+- Web 侧零改动：frontend/src/pages/HomePage.tsx 本来就是 data.topics.map(…)，从不截断。
+  本片是把 Android 拉回 Web 已有口径，不是新口径。
+- HomeMotion.CARD_STAGGER_STEPS_MAX=5 保留（它是等待上限不是列表上限），javadoc 改写了理由，
+  因为原来的理由引用了已被删除的 MAX_RECENT。
+- 抽屉的最近学习仍是固定条数快捷面（screen.HomeDrawerScreen），本片不触及。

@@ -1,0 +1,148 @@
+# command: verify_1to1.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-c7DBY0\dom.json
+# profile screens.json bytes=3679 lines=48 sha256=f85fc4342f701b5ce1f27fd78230de6af348a5d5630d8ad7d0e2eb33335fdeaa
+# prototype.html bytes=154059 lines=2489 sha256=354d7eb00266b0ba67296906d26433ced0b14e4066553f39218cce15ad0cba5f
+# wait_ms=20000 dom_checks=6
+OK   browser = Edg/155.0.4283.62 (@aa3a7406ba8c53a83536df539f07124d73c899bd, protocol 1.3)
+OK   html = D:\Project\Android\Treelearn\Docs\04-ux-design\知芽-TreeLearn-高保真原型-v1.html
+OK   clicks = .demo-link -> .topic-card
+OK   tokens = 现场回读 6 个（词表要求 6 个，逐个独立复核一致）
+OK   body-bg = rgb(244, 241, 235) = :root --bg #F4F1EB
+FAIL grid-period 量不到纸感渐变（实测 background-image="none"）
+OK   user-bubble 无气泡底（bg=rgba(0, 0, 0, 0) radius=0px=退役后制式） font-size=15px = --fs-body；距屏右=24 = --gutter 20 + 滚动条占位 4
+OK   body-pitch AI 正文行高=28px = :root --lh-read 28px
+OK   action-pitch = [44, 44, 44] 等距且=按钮宽 44（首钮中心内缩=29；44 无 CSS token，权威是 Android 侧 @dimen/touch_min=44dp，跨端比对属阶段 3）
+OK   pill-inset = 20 = AI 正文左内缩 20 = :root --gutter 20
+FAIL dom-checks = 5/6 成立（名单来自档案 body-bg, grid-period, user-bubble, body-pitch, action-pitch, pill-inset）
+OK   out = D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-c7DBY0\dom.json bytes=7323
+judgements=12 failed=2
+VERDICT: FAIL
+EXITCODE=1
+# command: verify_1to1.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-c7DBY0\dom-url.json --url file:///D:/Project/Android/Treelearn/Docs/04-ux-design/%E7%9F%A5%E8%8A%BD-TreeLearn-%E9%AB%98%E4%BF%9D%E7%9C%9F%E5%8E%9F%E5%9E%8B-v1.html
+# profile screens.json bytes=3679 lines=48 sha256=f85fc4342f701b5ce1f27fd78230de6af348a5d5630d8ad7d0e2eb33335fdeaa
+# html 由 --url 显式给出，未核档案路径
+# wait_ms=20000 dom_checks=6
+OK   browser = Edg/155.0.4283.62 (@aa3a7406ba8c53a83536df539f07124d73c899bd, protocol 1.3)
+OK   html = file:///D:/Project/Android/Treelearn/Docs/04-ux-design/%E7%9F%A5%E8%8A%BD-TreeLearn-%E9%AB%98%E4%BF%9D%E7%9C%9F%E5%8E%9F%E5%9E%8B-v1.html
+OK   clicks = .demo-link -> .topic-card
+OK   tokens = 现场回读 6 个（词表要求 6 个，逐个独立复核一致）
+OK   body-bg = rgb(244, 241, 235) = :root --bg #F4F1EB
+FAIL grid-period 量不到纸感渐变（实测 background-image="none"）
+OK   user-bubble 无气泡底（bg=rgba(0, 0, 0, 0) radius=0px=退役后制式） font-size=15px = --fs-body；距屏右=24 = --gutter 20 + 滚动条占位 4
+OK   body-pitch AI 正文行高=28px = :root --lh-read 28px
+OK   action-pitch = [44, 44, 44] 等距且=按钮宽 44（首钮中心内缩=29；44 无 CSS token，权威是 Android 侧 @dimen/touch_min=44dp，跨端比对属阶段 3）
+OK   pill-inset = 20 = AI 正文左内缩 20 = :root --gutter 20
+FAIL dom-checks = 5/6 成立（名单来自档案 body-bg, grid-period, user-bubble, body-pitch, action-pitch, pill-inset）
+OK   out = D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-c7DBY0\dom-url.json bytes=7073
+judgements=12 failed=2
+VERDICT: FAIL
+EXITCODE=1
+USAGE ERROR: 未知选项 --turbo（可用: --screen --out --profile --browser --attach --url --wait-ms）
+EXITCODE=2
+USAGE ERROR: 必须给 --screen <屏名>：原型路径、点击序列、等待选择器与 DOM 检查项都从屏档案取
+EXITCODE=2
+USAGE ERROR: --wait-ms 必须是正整数毫秒，收到 0
+EXITCODE=2
+USAGE ERROR: 屏档案里没有 "nope"；可用: chat
+EXITCODE=2
+INSTRUMENT FAULT: 找不到 Edge 可执行文件（试过: /c/nowhere/msedge.exe）；用 --browser <路径> 指定
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 屏 "chat" 的档案没有 prototype 回放段
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 原型 HTML 不存在: D:\Project\Android\Treelearn\Docs\04-ux-design\no-such-prototype.html
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 屏档案 不是合法 UTF-8: D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-c7DBY0\bad-utf8.json (The encoded data was not valid for encoding utf-8)
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 屏 "chat" 的 prototype 段没有 dom_checks——没有检查项就没有见证
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 屏 "chat" 的 prototype 段没有 dom_checks——没有检查项就没有见证
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 档案里的 DOM 检查名不在词表内: no-such-check（词表现有: body-bg, grid-period, user-bubble, body-pitch, action-pitch, pill-inset）
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: --url 指向的本机文件不存在: D:\nope\missing.html
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: 导航被浏览器拒绝: net::ERR_ABORTED（目标 javascript:document.write(1)）
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+INSTRUMENT FAULT: CDP 握手失败（端口 1 没有应答: fetch failed）
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+# command: verify_1to1.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-c7DBY0\s.json --profile D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-c7DBY0\bad-wait.json --wait-ms 1500
+# profile screens.json bytes=5350 lines=201 sha256=37fafd8dfb29cc16c6fc798c5bf4f91918e1a385849a44ca33ac4ace5f70224c
+# prototype.html bytes=154059 lines=2489 sha256=354d7eb00266b0ba67296906d26433ced0b14e4066553f39218cce15ad0cba5f
+# wait_ms=1500 dom_checks=6
+OK   browser = Edg/155.0.4283.62 (@aa3a7406ba8c53a83536df539f07124d73c899bd, protocol 1.3)
+OK   html = D:\Project\Android\Treelearn\Docs\04-ux-design\知芽-TreeLearn-高保真原型-v1.html
+OK   clicks = .demo-link -> .topic-card
+FAIL wait-for-absent .no-such-node 在 1500ms 内没出现（readyState=complete）——页面已加载，属结构不符而非仪器故障
+judgements=4 failed=1
+VERDICT: FAIL
+EXITCODE=1
+# command: verify_1to1.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-c7DBY0\s.json --profile D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-c7DBY0\bad-click.json
+# profile screens.json bytes=5332 lines=200 sha256=f2b3ead54b5a377f37b8ad95b2e3d99687b8542d100559ee55d8dcf659927e9f
+# prototype.html bytes=154059 lines=2489 sha256=354d7eb00266b0ba67296906d26433ced0b14e4066553f39218cce15ad0cba5f
+# wait_ms=20000 dom_checks=6
+OK   browser = Edg/155.0.4283.62 (@aa3a7406ba8c53a83536df539f07124d73c899bd, protocol 1.3)
+OK   html = D:\Project\Android\Treelearn\Docs\04-ux-design\知芽-TreeLearn-高保真原型-v1.html
+OK   clicks = #no-such-click-target
+FAIL click-target-absent #no-such-click-target
+judgements=4 failed=1
+VERDICT: FAIL
+EXITCODE=1
+# command: verify_1to1.mjs --screen chat --out D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-c7DBY0\s.json --profile D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-c7DBY0\stub-rendered.json
+# profile screens.json bytes=5389 lines=201 sha256=31e63be68e9ec40491e750b046120dba60b35d1838f1226a9d4d9d752b087bc0
+# prototype.html bytes=186 lines=1 sha256=9e86a555aec91dc99a35566cee4ef08daf124ac05d7581518f650afd1c4c1ffc
+# wait_ms=20000 dom_checks=6
+FAIL page-not-rendered .screen 在 60s 内没出现（readyState=complete #root 子元素=1 nodes=7 href=file:///D:/Project/Android/Treelearn/artifacts/tmp/_verify1to1-selftest/run-c7DBY0/stub-rendered.html title=桩）
+judgements=1 failed=1
+VERDICT: FAIL
+EXITCODE=1
+INSTRUMENT FAULT: #root 是空的或不存在（root=0 nodes=6 ready=complete title=桩，重载 1 次后仍空）——原型的界面由页面内的 React+Babel 现场编译、脚本取自 ./vendor/（字节身份由 check_ux_vendor.py 判）；被核对象没起来属仪器故障，不是结构不符
+VERDICT: FAULT 仪器故障不写成判据失败，也不写 PASS
+EXITCODE=3
+# command: (unit) 空判据
+VERDICT: FAULT 没有任何判据被执行——空见证不算通过
+EXITCODE=3
+FAIL pos-real-dom-render rc=1 want=0 (6.7s)
+FAIL pos-url-escape rc=1 want=0 (6.5s)
+ok   neg-unknown-option rc=2 (0.0s, want=2)
+ok   neg-missing-screen rc=2 (0.0s, want=2)
+ok   neg-bad-wait rc=2 (0.0s, want=2)
+ok   neg-unknown-screen rc=2 (0.0s, want=2)
+ok   neg-browser-absent-injection rc=3 (0.0s, want=3)
+ok   neg-profile-no-prototype rc=3 (0.0s, want=3)
+ok   neg-html-missing rc=3 (0.0s, want=3)
+ok   neg-profile-not-utf8 rc=3 (0.0s, want=3)
+ok   neg-checks-absent rc=3 (0.0s, want=3)
+ok   neg-checks-empty rc=3 (0.0s, want=3)
+ok   neg-check-name-unknown rc=3 (0.0s, want=3)
+ok   neg-url-file-missing rc=3 (0.0s, want=3)
+ok   neg-navigate-rejected rc=3 (0.8s, want=3)
+ok   neg-cdp-handshake-fail rc=3 (0.0s, want=3)
+ok   neg-wait-for-absent rc=1 (6.5s, want=1)
+ok   neg-click-absent rc=1 (3.1s, want=1)
+ok   neg-page-not-rendered rc=1 (62.1s, want=1)
+ok   neg-app-not-booted rc=3 (121.8s, want=3)
+ok   neg-empty-ledger rc=3 (unit, want=3)
+FAIL positive-control 健康样本上这些检查本就判红: grid-period——正控不成立，负向比对因此是空见证
+SELFTEST FAIL cases=40 cli=20 muts=18 failures=4
+EXITCODE=1
+
+── RED 复现与还原（可逆，三支仪器文件）──
+RED 不是历史转录，是现场把 HEAD 里的三支仪器文件放回工作树跑出来的：
+    git show HEAD:.codex/scripts/dev/parity/<file> > .codex/scripts/dev/parity/<file>
+    （verify_1to1.mjs / verify_1to1_selftest.mjs / screens.json 三支一起放回；grid-period 命中数=6 即旧版在位）
+放回前先把 076 的现版本 cp 到 artifacts/tmp/076-red-backup/，跑完逐一 cp 回，三个 md5 与备份逐位一致：
+    verify_1to1.mjs          f02554419f580d6222c26f5dcb80610e
+    verify_1to1_selftest.mjs 4fdf28c90cd684bea4f337c5f6113c4b
+    screens.json             9756b2970de88bdf28d1ae7d9dedb814
+原型的 .screen 背景（073 已删横格、工作树未改）是这次红的被核对象：实测 background-image="none"。
+红点逐行 5 处（pos-real-tree 与 pos-written-artifact 各 2 处 + positive-control 1 处），全部落在 grid-period 一条上；
+汇总口径 failures=4 是脚本自己的聚合方式，本片不重算它。

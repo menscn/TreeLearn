@@ -1,10 +1,15 @@
 /* 晨雾玻璃材质层（T-2026-10-21-050）。
    加载顺序固定在 pages.css 之后：本文件只覆盖颜色、背景、阴影与圆角，
-   所有颜色数值来自 tokens.css，不写裸色值；不改断点、命中区域或正文对比，阅读面固定 86%。
+   所有颜色数值来自 tokens.css，不写裸色值；不改断点、命中区域或正文对比，阅读面走 --glass-reader。
    T-2026-10-22-058 追加 053 的两处莫兰迪柔光与一枚标签 tint，仍只覆盖材质。
    T-2026-10-22-063 起本文件也负责「浮起来」：两档投影 + 145° 对角 tint 消费 061 的 token，
    被取代的 `--glass-shadow` 已从整条链删除；顶栏改覆盖层这一结构事实在 workspace.css /
-   pages.css 的滚动容器上，不在这里。 */
+   pages.css 的滚动容器上，不在这里。
+   T-2026-10-23-072 起多一面 --glass-control：带文字的按钮/浮层不再退回 chrome，
+   静止→悬停的 alpha 不能倒挂。
+   T-2026-10-23-073 撤掉整页横格：用户读真机后判定背景横线不好看，要求所有界面去掉。
+   场景的渐变与五处柔光逐字节不动——只删了叠在最上面的那一层 repeating-linear-gradient。
+   `--paper-rule` 仍留在 token 链里（13 屏快照 `.snap-screen` 还在用它），只是活的应用界面不再画。 */
 
 html {
   background: var(--mist-base);
@@ -13,13 +18,6 @@ html {
 body {
   background-color: var(--mist-base);
   background-image:
-    repeating-linear-gradient(
-      to bottom,
-      transparent 0,
-      transparent 27px,
-      var(--paper-rule) 27px,
-      var(--paper-rule) 28px
-    ),
     radial-gradient(820px 700px at 92% 52%, var(--glow-rose), transparent 60%),
     radial-gradient(760px 660px at 6% 24%, var(--glow-lilac), transparent 58%),
     radial-gradient(1200px 900px at 82% 10%, var(--glow-white), transparent 62%),
@@ -165,8 +163,10 @@ body {
   background-color: var(--glass-card);
 }
 
+/* 悬停态落在控制面上：hover 不能让一块带文字的按钮比静止态更透明。
+   这里原先退回 chrome（.74），静止态是 card（.86）——鼠标一放上去，底下那层文字就透上来了。 */
 .suggestion:hover {
-  background: var(--glass-chrome);
+  background: var(--glass-control);
 }
 
 /* 推荐标签用 tint 作非文字表面：文字仍由 app.css 的 green-deep 表达语义。 */
@@ -202,6 +202,54 @@ body {
   background-color: var(--glass-card);
 }
 
+/* 人设：弹窗浮在输入区之上。它是 .composer（自带 backdrop-filter）的后代，
+   背景模糊取不到弹窗这块区域的底，所以这里给不透明实色：菜单浮在正文上必须读得清。 */
+.persona-popover {
+  border: 0;
+  border-radius: var(--r-xl);
+  background-color: var(--surface);
+  box-shadow:
+    inset 0 0 0 1px var(--glass-edge),
+    0 20px 40px -28px var(--glass-shadow-key),
+    0 2px 6px var(--glass-shadow-ambient);
+}
+
+/* 反馈条浮在对话正文之上，和 Android 悬浮标签栏是同一类面：标签压着别人的文字。
+   2026-10-23 从 card 上移到 control，平涂不走 tint。 */
+.persona-feedback {
+  border: 0;
+  background-color: var(--glass-control);
+  box-shadow:
+    inset 0 0 0 1px var(--glass-edge),
+    0 2px 6px var(--glass-shadow-ambient);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}
+
+.persona-card,
+.settings-persona-entry {
+  border: 0;
+  border-radius: var(--r-xl);
+  background-color: var(--glass-card);
+  box-shadow: inset 0 0 0 1px var(--glass-line);
+}
+
+.settings-persona-entry:hover {
+  background-color: var(--glass-control);
+  box-shadow:
+    inset 0 0 0 1px var(--glass-edge),
+    0 0 0 2px color-mix(in srgb, var(--green) 18%, transparent);
+}
+
+.persona-card-demo {
+  border-left-color: var(--mist-deep);
+  background: color-mix(in srgb, var(--glass-field) 60%, transparent);
+}
+
+.persona-card-tag {
+  background: var(--tint-sage);
+}
+
 /* 窄窗侧栏是覆盖层：玻璃底与遮罩的 z-index、定位保持不变。 */
 @media (max-width: 760px) {
   .app-sidebar {
@@ -217,6 +265,7 @@ body {
   .workspace-topbar,
   .composer,
   .branch-panel,
+  .persona-feedback,
   .tree-dialog {
     background: color-mix(in srgb, var(--surface) 92%, transparent);
   }
@@ -231,6 +280,7 @@ body {
   .workspace-topbar,
   .composer,
   .branch-panel,
+  .persona-feedback,
   .tree-dialog,
   .chat-reading {
     -webkit-backdrop-filter: none;

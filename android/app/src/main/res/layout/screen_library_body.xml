@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The library column, aligned to Scheme A's fifth figure on 2026-10-22 (T-2026-10-22-057): a floating
-  glass capsule topbar with the serif page title, the 44dp pill search field, one glass segment capsule
-  whose two halves carry real counts, the compact glass topic cards, and the sprout note that closes the
-  page. Shared by the phone page and the tablet page, so the two cannot drift.
+  The library column, aligned to Scheme A's fifth figure on 2026-10-22 (T-2026-10-22-057): the 44dp
+  pill search field, one glass segment capsule whose two halves carry real counts, the compact glass
+  topic cards, and the sprout note that closes the page. Shared by the phone page and the tablet page,
+  so the two cannot drift.
+
+  The floating glass capsule topbar with the serif page title is not in this column: since
+  2026-10-23-075 it lives in layout/screen_library.xml, pinned over the scroll container, so the
+  page's only back entry and its title stay on screen while the rows move under the glass.
 
   The list container `library_rows` is the three contents' shared container: the 「进行中」 segment
   fills it with topic rows, the 「已完成」 segment with archived branch rows, and the search box with
@@ -24,44 +28,6 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:paddingBottom="@dimen/space_s6">
-
-    <LinearLayout
-        android:id="@+id/library_appbar"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/topbar_height"
-        android:layout_marginStart="@dimen/space_s4"
-        android:layout_marginTop="@dimen/topbar_offset"
-        android:layout_marginEnd="@dimen/space_s4"
-        android:background="@drawable/bg_glass_bar"
-        android:elevation="@dimen/glass_capsule_elevation"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="@dimen/space_s2"
-        android:paddingEnd="@dimen/space_s2">
-
-        <ImageView
-            android:id="@+id/library_back"
-            android:layout_width="@dimen/topbar_icon"
-            android:layout_height="@dimen/topbar_icon"
-            android:background="@drawable/bg_icon_button"
-            android:contentDescription="@string/cd_library_back"
-            android:padding="@dimen/space_s2"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_nav_back"
-            android:tint="@color/tl_ink2" />
-
-        <TextView
-            android:id="@+id/library_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/space_s2"
-            android:fontFamily="@font/noto_serif_sc"
-            android:letterSpacing="0.02"
-            android:text="@string/library_title"
-            android:textColor="@color/tl_ink"
-            android:textSize="@dimen/text_library_title"
-            android:textStyle="bold" />
-    </LinearLayout>
 
     <EditText
         android:id="@+id/library_search_input"

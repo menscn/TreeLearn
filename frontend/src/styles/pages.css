@@ -637,6 +637,167 @@
   margin: 0;
 }
 
+/* 设置页里的「回答风格介绍」入口：它只是入口，风格跟着主题走，不是全局开关。 */
+.settings-persona {
+  margin-top: var(--s8);
+}
+
+.settings-persona-caption {
+  margin: 0 0 var(--s2);
+  color: var(--ink3);
+  font-size: var(--fs-cap);
+  letter-spacing: .06em;
+}
+
+.settings-persona-entry {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--s4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.settings-persona-entry:hover {
+  border-color: var(--green);
+  background: var(--green-faint);
+}
+
+.settings-persona-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.settings-persona-title {
+  display: block;
+  font-size: var(--fs-body);
+}
+
+.settings-persona-sub {
+  display: block;
+  margin-top: 2px;
+  color: var(--ink3);
+  font-size: var(--fs-cap);
+}
+
+.settings-persona-entry .icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  color: var(--ink3);
+}
+
+/* 回答风格介绍：静态七张卡，不做选择、不发请求。 */
+.persona-intro-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s3);
+  margin-bottom: var(--s6);
+}
+
+.persona-intro-head .icon-btn {
+  flex: none;
+  margin-top: var(--s1);
+}
+
+.persona-intro-titles {
+  min-width: 0;
+}
+
+.persona-intro-subtitle {
+  margin: var(--s1) 0 0;
+  color: var(--ink3);
+  font-size: var(--fs-sm);
+}
+
+.persona-intro-lead {
+  max-width: 62ch;
+  margin: 0;
+  color: var(--ink2);
+  font-size: var(--fs-body);
+  line-height: 1.9;
+}
+
+.persona-intro-question {
+  margin: var(--s6) 0 0;
+  color: var(--ink3);
+  font-family: var(--serif);
+  font-size: var(--fs-sm);
+  letter-spacing: .02em;
+}
+
+.persona-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--s4);
+  margin-top: var(--s3);
+}
+
+.persona-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  padding: var(--s4) var(--s6) var(--s6);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+}
+
+.persona-card-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s2);
+}
+
+.persona-card-title {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: var(--fs-h2);
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.persona-card-tag {
+  padding: 2px var(--s2);
+  border-radius: var(--r-full);
+  background: var(--tint-sage);
+  color: var(--green-deep);
+  font-size: var(--fs-cap);
+  white-space: nowrap;
+}
+
+.persona-card-sub {
+  margin: 0;
+  color: var(--ink2);
+  font-size: var(--fs-sm);
+  line-height: 1.8;
+}
+
+.persona-card-demo {
+  margin: auto 0 0;
+  padding: var(--s3) var(--s4);
+  border-left: 2px solid var(--green-soft);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  background: var(--green-faint);
+  color: var(--ink2);
+  font-family: var(--serif);
+  font-size: var(--fs-sm);
+  line-height: 1.9;
+}
+
+.persona-intro-footer {
+  margin: var(--s6) 0 0;
+  color: var(--ink3);
+  font-size: var(--fs-cap);
+}
+
 .workspace-page button:focus-visible,
 .workspace-page input:focus-visible,
 .workspace-page textarea:focus-visible {
@@ -707,6 +868,20 @@
 
   .setting-field {
     flex-wrap: wrap;
+  }
+
+  .persona-cards {
+    grid-template-columns: 1fr;
+    gap: var(--s3);
+  }
+
+  .persona-card {
+    padding: var(--s3) var(--s4) var(--s4);
+  }
+
+  .persona-intro-head {
+    gap: var(--s2);
+    margin-bottom: var(--s4);
   }
 }
 

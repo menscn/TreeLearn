@@ -51,8 +51,9 @@ import com.treelearn.app.R;
  * <p><strong>What it must not do.</strong> It adds no judgement of its own. Offsets and thickness come
  * from {@link PaperRules#lineOffsets} ({@code @dimen/hairline}), and the colour from
  * {@link PaperRules#writingRuleColour(int, int)} - the identity {@code green} over {@code surface},
- * the counterpart of the page texture {@link PaperRuleBackdrop} paints, decided in that one class so the
- * two textures cannot drift apart.
+ * decided in that one class so a second ruled surface could never appear with its own hand-assembled
+ * composite. (The page background stopped being that second surface on 2026-10-23: see
+ * {@link PaperRuleBackdrop}.)
  */
 public final class RuleEditText extends EditText {
 

@@ -5,12 +5,16 @@ import { Composer } from "../components/Composer";
 import { Icon } from "../components/Icon";
 import { IconButton } from "../components/IconButton";
 import { Notice } from "../components/Notice";
+import { PersonaPicker } from "../components/PersonaPicker";
 import { TreeOverlay } from "../components/TreeOverlay";
 import { useWorkspaceData } from "../components/WorkspaceDataProvider";
+import { copyFormat } from "../copy";
 import { useCopy } from "../hooks/useCopy";
 import { useWorkspace } from "../hooks/useWorkspace";
+import { personaNameKey, type PersonaId } from "../store/persona";
 import {
   draftFor,
+  openView,
   rememberScroll,
   scrollFor,
   setDraft,
@@ -57,12 +61,15 @@ export function ChatPage() {
 
   const [draft, setDraftState] = useState(() => draftFor(topicKey));
   const [feedback, setFeedback] = useState<CopyFeedback>(null);
+  const [personaNote, setPersonaNote] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const feedbackTimer = useRef<number | undefined>(undefined);
+  const personaTimer = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     setDraftState(draftFor(topicKey));
+    setPersonaNote(null);
   }, [topicKey]);
 
   useLayoutEffect(() => {
@@ -74,6 +81,7 @@ export function ChatPage() {
 
   useEffect(() => () => {
     if (feedbackTimer.current !== undefined) window.clearTimeout(feedbackTimer.current);
+    if (personaTimer.current !== undefined) window.clearTimeout(personaTimer.current);
   }, []);
 
   const updateDraft = (value: string): void => {
@@ -85,6 +93,12 @@ export function ChatPage() {
     setFeedback(next);
     if (feedbackTimer.current !== undefined) window.clearTimeout(feedbackTimer.current);
     feedbackTimer.current = window.setTimeout(() => setFeedback(null), 3000);
+  };
+
+  const announcePersona = (persona: PersonaId): void => {
+    setPersonaNote(copyFormat("persona_switched", t(personaNameKey(persona))));
+    if (personaTimer.current !== undefined) window.clearTimeout(personaTimer.current);
+    personaTimer.current = window.setTimeout(() => setPersonaNote(null), 3000);
   };
 
   const copyAnswer = async (): Promise<void> => {
@@ -191,6 +205,18 @@ export function ChatPage() {
             model={chat?.model ?? ""}
             inputRef={inputRef}
             onChange={updateDraft}
+            personaSlot={
+              <PersonaPicker
+                topic={state.topic}
+                onIntro={() => openView("persona-intro")}
+                onSwitched={announcePersona}
+              />
+            }
+            statusSlot={
+              personaNote === null ? null : (
+                <p className="persona-feedback" data-persona-feedback role="status">{personaNote}</p>
+              )
+            }
           />
         </div>
         <BranchPanel branch={branch} open={state.panelOpen} />

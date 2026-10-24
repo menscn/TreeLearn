@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Glass control capsule (2026-10-23 片 072): the floating tab bar's face, taken off bg_glass_bar. Since
+  片 075 it is also the face of the two pinned top bars (home, library) - see the reason below.
+
+  Why a sixth face instead of raising chrome: the pill's labels sit on top of someone else's text -
+  a card title scrolling underneath reads through a 74% fill, and the pair of layers blurs into one
+  illegible band. That is the failure mode the user reported, so this face stops trading against the
+  transparency claim and takes the reader's alpha (.93). Chrome keeps .74 for the top bars that scroll
+  with their own page (chat, navigation), where the ratified decision still stands; the moment a bar
+  is pinned over a moving column it becomes the same case as the tab bar, which is why the home and
+  library bars joined it on 片 075.
+
+  Flat, not tinted: bg_glass_bar's 145° diagonal darkens its lower end to alpha × falloff (.74 × .54),
+  which is the darker half of exactly the band where the overlap was worst. A 52-62dp capsule cannot
+  carry that gradient and stay legible; the sheen and the 1px edge stay, so the light source is still
+  the same one every other face here paints.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="270"
+                android:endColor="@android:color/transparent"
+                android:startColor="@color/glass_sheen" />
+            <corners android:radius="@dimen/radius_full" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/glass_control" />
+            <stroke android:width="@dimen/hairline" android:color="@color/glass_edge" />
+            <corners android:radius="@dimen/radius_full" />
+        </shape>
+    </item>
+</layer-list>

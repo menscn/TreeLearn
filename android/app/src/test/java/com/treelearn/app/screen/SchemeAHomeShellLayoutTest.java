@@ -38,6 +38,10 @@ public final class SchemeAHomeShellLayoutTest {
         return read(RES.resolve(Paths.get("layout", name)));
     }
 
+    private static String tablet(String name) throws Exception {
+        return read(RES.resolve(Paths.get("layout-sw600dp", name)));
+    }
+
     private static String drawable(String name) throws Exception {
         return read(RES.resolve(Paths.get("drawable", name)));
     }
@@ -53,6 +57,16 @@ public final class SchemeAHomeShellLayoutTest {
         int elementEnd = xml.indexOf('>', idIndex);
         assertTrue("malformed layout", elementEnd >= 0);
         return xml.substring(Math.max(0, xml.lastIndexOf('<', idIndex)), elementEnd);
+    }
+
+    /** The dp a dimen resolves to, so a judgement can compare two values instead of two strings. */
+    private static int dp(String name) throws Exception {
+        String xml = dimens();
+        int at = xml.indexOf("name=\"" + name + "\"");
+        assertTrue("dimen " + name + " must exist", at >= 0);
+        int end = xml.indexOf("<", xml.indexOf('>', at));
+        String body = xml.substring(xml.indexOf('>', at) + 1, end).trim();
+        return Integer.parseInt(body.substring(0, body.length() - 2).trim());
     }
 
     // ------------------------------------------------------------------
@@ -98,8 +112,8 @@ public final class SchemeAHomeShellLayoutTest {
         assertTrue("the shell keeps the tab_bar id", bar.contains("android:id=\"@+id/tab_bar\""));
         assertTrue("the visible capsule is its own node",
                 bar.contains("android:id=\"@+id/tab_bar_pill\""));
-        assertTrue("the capsule draws the shared glass chrome",
-                bar.contains("android:background=\"@drawable/bg_glass_bar\""));
+        assertTrue("the capsule draws the control face: its labels sit over text that scrolls under it",
+                bar.contains("android:background=\"@drawable/bg_glass_control_bar\""));
         assertTrue("Scheme A's 6dp inner padding",
                 bar.contains("android:padding=\"@dimen/tab_bar_padding\""));
 
@@ -121,13 +135,15 @@ public final class SchemeAHomeShellLayoutTest {
                         && tablet.contains("android:id=\"@+id/tab_bar_pill\""));
         assertTrue("the tablet capsule is capped below the reading measure so it cannot clip",
                 tablet.contains("@dimen/tab_bar_tablet_width"));
+        assertTrue("the tablet capsule takes the same control face, not chrome",
+                tablet.contains("android:background=\"@drawable/bg_glass_control_bar\""));
         assertFalse("the old divider is not part of a floating capsule",
                 bar.contains("android:background=\"@color/tl_line\"")
                         || tablet.contains("android:background=\"@color/tl_line\""));
 
-        String glassBar = drawable("bg_glass_bar.xml");
-        assertTrue("the capsule keeps the chrome fill",
-                glassBar.contains("@color/glass_chrome"));
+        String glassBar = drawable("bg_glass_control_bar.xml");
+        assertTrue("the capsule keeps the flat control fill",
+                glassBar.contains("@color/glass_control"));
         assertTrue("and the 1px highlight edge",
                 glassBar.contains("@color/glass_edge") && glassBar.contains("@dimen/hairline"));
         assertTrue("with Scheme A's fully rounded corners",
@@ -150,10 +166,11 @@ public final class SchemeAHomeShellLayoutTest {
 
     @Test
     public void theHomeTopbarIsAGlassCapsule() throws Exception {
-        String body = layout("screen_home_body.xml");
+        String body = layout("screen_home.xml");
         String appbar = elementAround(body, "home_appbar");
-        assertTrue("the topbar is a capsule, so it carries the chrome",
-                appbar.contains("android:background=\"@drawable/bg_glass_bar\""));
+        assertTrue("a pinned bar is chrome over moving text, so it takes the control face the "
+                        + "bottom capsule takes (072), not the see-through chrome face",
+                appbar.contains("android:background=\"@drawable/bg_glass_control_bar\""));
         assertTrue("Scheme A's 52dp capsule", appbar.contains(
                 "android:layout_height=\"@dimen/topbar_height\""));
         assertTrue("it sits 6dp below the status bar",
@@ -179,6 +196,52 @@ public final class SchemeAHomeShellLayoutTest {
         String settings = elementAround(body, "home_settings_button");
         assertTrue("the gear keeps the same 36dp capsule target",
                 settings.contains("android:layout_width=\"@dimen/topbar_icon\""));
+    }
+
+    /**
+     * T-2026-10-23-075: the topbar stays put and the column moves under it.
+     *
+     * <p>The bar used to be {@code home_content}'s first row, so scrolling took the drawer entry and
+     * the settings entry away with the brand - the learner's report was the bar disappearing while
+     * the page was still moving. The Web page has pinned it since Scheme A (`.workspace-topbar` is
+     * {@code position: absolute} over a scroll container that pays {@code padding-top}), so floating
+     * is the parity, not a second design.
+     *
+     * <p>The judgement is the same pair the bottom capsule already holds: the bar must be a later
+     * sibling of the scroll container (so it draws over it), and the container must pay the bar's
+     * room in padding with {@code clipToPadding} off (so rows travel under the glass and still rest
+     * whole below it). A pinned bar with no clearance would sit on the first row and hide it.
+     */
+    @Test
+    public void theHomeTopbarFloatsWhileTheColumnScrollsUnderIt() throws Exception {
+        String shell = layout("screen_home.xml");
+        int scroll = shell.indexOf("@+id/home_root");
+        int appbar = shell.indexOf("@+id/home_appbar");
+        assertTrue("the bar is a later sibling of the scroll container, so it floats over it",
+                scroll > 0 && appbar > scroll);
+        assertTrue("the column no longer carries the bar as its first row",
+                !layout("screen_home_body.xml").contains("home_appbar"));
+        String root = elementAround(shell, "home_root");
+        assertTrue("the page pays the bar's room in its own scroll container",
+                root.contains("android:paddingTop=\"@dimen/top_bar_clearance\""));
+        assertTrue("and does not clip it, so content travels under the glass",
+                root.contains("android:clipToPadding=\"false\""));
+        assertTrue("the wrapper lets the capsule's shadow out",
+                elementAround(shell, "home_screen").contains("android:clipChildren=\"false\""));
+
+        assertTrue("the clearance is the bar's outer height and not a new number: "
+                        + "6dp offset + 52dp face",
+                dp("top_bar_clearance") == dp("topbar_offset") + dp("topbar_height"));
+
+        String tablet = tablet("screen_home.xml");
+        assertTrue("the tablet page pins it the same way",
+                tablet.contains("@+id/home_appbar")
+                        && elementAround(tablet, "home_root")
+                                .contains("android:paddingTop=\"@dimen/top_bar_clearance\""));
+        assertTrue("and caps the bar to the reading measure so a wide window does not show a "
+                        + "full-width bar over a narrow column",
+                elementAround(tablet, "home_appbar")
+                        .contains("android:layout_width=\"@dimen/content_measure\""));
     }
 
     @Test

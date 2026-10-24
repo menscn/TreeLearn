@@ -1,0 +1,56 @@
+072 · 第六面 --glass-control（控制面）——读数与复测
+设备 AWSS013807000356（Honor / Android 13 / API 33），1200x2652，density 3.25，状态栏 115px。
+诉求原文：「按钮的不透明度太低了，导致两个上下层的文字会看起来重叠，Android 和 web 都修改」。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. 落地当天的真机读数（072-android-home-{top,bottom}.png）
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    python -X utf8 .codex/scripts/dev/check_glass_depth.py --shot 072-android-home-top.png --band bottom
+GLASS-DEPTH box=61,2382..1138,2586
+OK   J1 玻璃—背景分离 = 33.1 L（需 ≥ 10）
+OK   J2 投影暗带 = 12.4→12.9 L（需 ≥ 6）
+OK   J3 背景亮度跨度 = 26.2 L（需 ≥ 24）
+OK   J3 背景彩度跨度 = 13.0（需 ≥ 6）
+对照 065 的 chrome 面：box=78,2385..1121,2586、J1 22.8、J2 12.4、J3 26.2/13.0、J4 21.2。
+取区框从 `78,2385..1121,2586` 变成 `61,2382..1138,2586`，是平涂把边缘亮度台阶换了位置，不是面被画宽了。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. 复测（滚动恢复之后，17:0x 同一台机器）
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+落地那天首页不能下滑（那是 074 在修的缺陷），所以 J4 只能读到 0.0——不是材质回退，是**没有对照帧**。
+074 修好、075 用真滑动对复测（075-pill-d1.png 给 box，漂移对 075-home-top.png vs 075-home-scrolled.png）：
+    python -X utf8 .codex/scripts/dev/check_glass_depth.py \
+      --shot artifacts/evidence/pinned-topbar-2026-10-23/075-pill-d1.png --band bottom \
+      --drift-before artifacts/evidence/pinned-topbar-2026-10-23/075-home-top.png \
+      --drift-after  artifacts/evidence/pinned-topbar-2026-10-23/075-home-scrolled.png
+GLASS-DEPTH box=78,2385..1121,2586   ← 这一版框与 dumpsys 的 tab_bar_pill 绝对位置逐位吻合
+OK   J1 = 35.5 L   OK J2 = 12.4 L   OK J3 = 26.2 L + 彩度 13.0
+FAIL J4 = 2.3 L（需 ≥ 8）   EXITCODE=1
+（复测那张图：072-recheck-pill.png。J1 33.1 -> 35.5 的差来自背景与框宽，不来自材质——两次跑的面都是同一枚 .93。）
+
+同位像素分箱（脚本 artifacts/evidence/pinned-topbar-2026-10-23/075-band-drift.py，第四节口径）：
+  底部胶囊面内 y 2391..2580 × x 141..1058   变化像素 2.67%   |dL| 中位 1.00  P95 2.28
+即「两层字糊在一起」这件事在这枚面上已经不发生了：面内不随滚动变化。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. J4 的处置：从「暂时撤回待复测」改为定稿不主张
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+J4 的定义是「内容滚过玻璃覆盖的那一行时，那里的亮度要变 ≥8 L」，它奖励的是**通透**。
+control 面是 .93 平涂，2.3 L 是它的算术结果，不是缺陷。这与 065 给 Web 顶栏的处置同一条：
+用户在 .54→.74 那条曲线上拍板「跟到 .74，放弃 Web 的像素判据」，本片的控制面走的是同一个理由的
+加强版（控制面的失败模式是两层字互相渗透，判据是读不读得清）。
+所以 Android 悬浮标签栏（以及 075 起同样常驻的两枚顶栏）**不再主张 J4**；让位与结构改由断言兜住：
+  - `GlassSurfaceLayoutTest` 平涂例外（flat 面不参与 145° tint 断言）
+  - `glass-depth.test.ts`「控制面平涂」
+  - `GlassMaterialTokensTest` / `glass.test.ts` 的 alpha 下限（control 与 reader 同记 0.92）
+  - `glass.test.ts`「悬停不许比静止更透明」
+变更记录里 072 那条的「J4 21.2→0.0……暂时撤回，待滚动恢复后复测」按本文件改为定稿。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. 没有变的东西
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- `--glass-chrome` 仍是 .74：065 的裁决没被推翻，只是标签栏不再由它承担。
+  聊天与抽屉导航两枚随页面滚动的栏继续用 `bg_glass_bar`（chrome + 145° tint）。
+- token 链没有新增枚数以外的东西：token/资源计数由 `check_design_tokens.py` 打印
+  （当前 measured_tokens=72 measured_resources=24，四方集合相等，`gen_design_tokens_css.py --check` 逐字节一致）。
+- `glass_control` 故意**没有** `glass_control_lo`：平涂是这枚面的定义的一部分，不是省事。

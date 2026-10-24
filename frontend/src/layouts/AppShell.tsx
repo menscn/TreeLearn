@@ -39,7 +39,11 @@ export function AppShell({ children = null }: { children?: ReactNode }) {
       ? t("tab_library")
       : state.view === "settings"
         ? t("nav_settings")
-        : currentTopic?.title ?? t("app_name");
+        : state.view === "persona-intro"
+          ? t("persona_intro_title")
+          : state.view === "forest"
+            ? t("forest_title")
+            : currentTopic?.title ?? t("app_name");
 
   useEffect(() => {
     document.title = t("app_name");
@@ -101,6 +105,26 @@ export function AppShell({ children = null }: { children?: ReactNode }) {
             );
           })}
         </nav>
+        <button
+          className={`forest-entry${state.view === "forest" ? " active" : ""}`}
+          data-forest-entry
+          type="button"
+          aria-label={t("cd_drawer_forest")}
+          title={t("cd_drawer_forest")}
+          aria-current={state.view === "forest" ? "page" : undefined}
+          onClick={() => openView("forest")}
+        >
+          <span className="forest-entry-icon" aria-hidden="true">
+            <Icon name="nav_forest" />
+          </span>
+          <span className="forest-entry-main">
+            <span className="forest-entry-title" data-forest-entry-title>{t("drawer_forest_title")}</span>
+            <span className="forest-entry-sub">{t("drawer_forest_sub")}</span>
+          </span>
+          <span className="forest-entry-arrow" aria-hidden="true">
+            <Icon name="chevron_right" />
+          </span>
+        </button>
         <p className="side-heading">{t("nav_recent")}</p>
         <div className="recent">
           {data.topics.map((topic, index) => {

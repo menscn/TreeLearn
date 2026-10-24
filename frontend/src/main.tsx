@@ -12,6 +12,7 @@ import "./styles/app.css";
 import "./styles/snapshot.css";
 import "./styles/workspace.css";
 import "./styles/pages.css";
+import "./styles/forest.css";
 import "./styles/glass.css";
 
 const host = document.getElementById("root");

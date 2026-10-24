@@ -5,7 +5,7 @@ id: T-2026-10-23-068
 title: Android 我的森林（抽屉入口、斜俯瞰林地、树纸条）
 template_version: 2
 task_type: implementation
-status: in_progress
+status: verified
 parent_requirement: T-2026-10-21-ai-persona-and-forest-requirement-038.md
 requirements_confirmed: true
 generated_by: agent
@@ -82,41 +82,41 @@ tdd_mode: required
 
 ## Acceptance criteria
 
-- [ ] 抽屉热力图卡之后、最近学习之前出现 44dp 高的「我的森林 / 全部主题长成一片林子」入口，点按关闭抽屉并进入森林页。
-- [ ] 森林页顶栏返回 + 「我的森林」+「一题一树，慢慢长」；场景为斜俯瞰地块，每个主题一棵有树干、树冠、落地影子的树；主题集合与 `LibraryData.topics()` 同源。
-- [ ] 树的位置只由主题 id 与集合决定，同一 id 在输入顺序变化后位置不变；树大小随段枝数（含归档）增大并在上下限内收敛；点击命中区不小于 44dp。
-- [ ] 点树出现柔光晕、地面圈与标题胶囊，底部纸条显示标题、段枝数、最近学习时间、当前人设与「含 N 段已归档」；点另一棵树只切换选中；点纸条箭头打开该树的 resume 分支。
-- [ ] 页脚只显示本次真实读到的数字：树数恒可显示，段枝/归档总数在任一计数缺失时省略，连续天数在统计不可读或历史为空时省略；不写 0 冒充。
-- [ ] 加载显示「正在数你的树」；无主题显示空地块 +「去种第一棵树」并回首页输入区；读取失败显示「森林暂时读不到」+「重试」，重试保留仍存在的选中树。
-- [ ] 森林只读：不写库、不触发生成、不改 `updated_at`、不刷新首页排序；`TreeLearnSchema.DATABASE_VERSION` 不变；`TreeCanvasWiring`/`TreeLayout` 的归档排除不变。
-- [ ] 定向测试与 `:app:testDebugUnitTest`、`:data:testDebugUnitTest` 全绿；`:app:assembleDebug` 通过；真机 `adb install -r` 后截图走通入口→选中→进入主题→返回首页。
-- [ ] 页面与场景只引 token 颜色，不另写颜色字面量；森林页不提供归档/删除/重命名管理动作。
+- [x] 抽屉热力图卡之后、最近学习之前出现 44dp 高的「我的森林 / 全部主题长成一片林子」入口，点按关闭抽屉并进入森林页。
+- [x] 森林页顶栏返回 + 「我的森林」+「一题一树，慢慢长」；场景为斜俯瞰地块，每个主题一棵有树干、树冠、落地影子的树；主题集合与 `LibraryData.topics()` 同源。
+- [x] 树的位置只由主题 id 与集合决定，同一 id 在输入顺序变化后位置不变；树大小随段枝数（含归档）增大并在上下限内收敛；点击命中区不小于 44dp。
+- [x] 点树出现柔光晕、地面圈与标题胶囊，底部纸条显示标题、段枝数、最近学习时间、当前人设与「含 N 段已归档」；点另一棵树只切换选中；点纸条箭头打开该树的 resume 分支。
+- [x] 页脚只显示本次真实读到的数字：树数恒可显示，段枝/归档总数在任一计数缺失时省略，连续天数在统计不可读或历史为空时省略；不写 0 冒充。
+- [x] 加载显示「正在数你的树」；无主题显示空地块 +「去种第一棵树」并回首页输入区；读取失败显示「森林暂时读不到」+「重试」，重试保留仍存在的选中树。
+- [x] 森林只读：不写库、不触发生成、不改 `updated_at`、不刷新首页排序；`TreeLearnSchema.DATABASE_VERSION` 不变；`TreeCanvasWiring`/`TreeLayout` 的归档排除不变。
+- [x] 定向测试与 `:app:testDebugUnitTest`、`:data:testDebugUnitTest` 全绿；`:app:assembleDebug` 通过；真机 `adb install -r` 后截图走通入口→选中→进入主题→返回首页。
+- [x] 页面与场景只引 token 颜色，不另写颜色字面量；森林页不提供归档/删除/重命名管理动作。
 
 ## TDD execution record
 
 ### RED — failing test first
 - Test/scenario: `ForestLayoutTest`、`ForestPresenterTest`、`ForestScreenLayoutTest`、`TopicForestDaoStatementTest`、`HomeDrawerPresenterTest` 森林入口断言。
 - Command: `cd android && ./gradlew :app:testDebugUnitTest --tests "com.treelearn.app.forest.ForestLayoutTest" --tests "com.treelearn.app.forest.ForestPresenterTest" --tests "com.treelearn.app.screen.ForestScreenLayoutTest" --tests "com.treelearn.app.ui.HomeDrawerPresenterTest"` 与 `./gradlew :data:testDebugUnitTest --tests "com.treelearn.data.db.dao.TopicForestDaoStatementTest"`。
-- Exit code: 1（`:data` 与 `:app` 均编译失败）
-- Observed failure: `:data` 报 6 处「错误: 找不到符号」，全部指向尚不存在的 `TopicDao.ForestCount` 与 `TopicDao.TOPIC_FOREST_COUNTS_SELECT`；`:app` 报 77 处同类编译错误，指向尚不存在的 `ForestLayout`、`ForestPresenter`、`ForestViewState`、`ForestScreen`、`ForestScene`、`ForestTreeSprite` 与 `HomeDrawerPresenter.Sink.openForest`。
+- Exit code: 1
+- Observed failure: `:data` 与 `:app` 均编译失败；`:data` 报 6 处「错误: 找不到符号」，全部指向尚不存在的 `TopicDao.ForestCount` 与 `TopicDao.TOPIC_FOREST_COUNTS_SELECT`；`:app` 报 77 处同类编译错误，指向尚不存在的 `ForestLayout`、`ForestPresenter`、`ForestViewState`、`ForestScreen`、`ForestScene`、`ForestTreeSprite` 与 `HomeDrawerPresenter.Sink.openForest`。
 - Failure reason validated: 错误全部落在本片新增的生产符号上，测试自身语法与断言对象均按规格书写；先补生产实现才能进入断言阶段。
 
 ### GREEN — minimum implementation
-- Implementation: <待记录>
-- Command: 同上。
-- Exit code: <待记录>
-- Passing evidence: <待记录>
-- Regression evidence: <待记录>
+- Implementation: `:data` 增加 `TopicDao.ForestCount` 与只读森林计数投影；`ForestWiring` 组装主题集合/计数/人设/统计并各自降级；`forest/ForestLayout`（稳定散列 + 黄金角散布 + 密度修正）、`forest/ForestPresenter` + `ForestViewState`（四态与选中/打开/重试）、`forest/ForestScene` + `forest/ForestTreeSprite`（斜俯瞰地面与原型同款树精灵）、`screen/ForestScreen` + `screen_forest.xml`；抽屉 `drawer_forest_entry.xml` 入口与 `HomeDrawerPresenter.onForestTapped`；`MainActivity.showForest()`、返回、纸条打开既有主题、空态回首页输入区；森林文案与 drawable。
+- Command: `cd android && ./gradlew :app:testDebugUnitTest --tests "com.treelearn.app.forest.ForestLayoutTest" --tests "com.treelearn.app.forest.ForestPresenterTest" --tests "com.treelearn.app.screen.ForestScreenLayoutTest" --tests "com.treelearn.app.ui.HomeDrawerPresenterTest"` 与 `./gradlew :data:testDebugUnitTest --tests "com.treelearn.data.db.dao.TopicForestDaoStatementTest"`。
+- Exit code: 0
+- Passing evidence: 定向 35 例全过（`ForestLayoutTest` 6、`ForestPresenterTest` 10、`ForestScreenLayoutTest` 6、`HomeDrawerPresenterTest` 8、`TopicForestDaoStatementTest` 5），逐类计数见 `artifacts/evidence/forest-068/forest-068-targeted-results.txt`。
+- Regression evidence: `cd android && ./gradlew :data:testDebugUnitTest :app:testDebugUnitTest :app:assembleDebug` exit 0；`:app` 108 suite / 946 test / 0 failure / 0 error / 0 skipped，`:data` 14 suite / 78 test / 0 failure / 0 error / 0 skipped，日志与计数见 `artifacts/evidence/forest-068/forest-068-green.txt`。
 
 ### REFACTOR — optional
-- Cleanup: <待记录>
-- Regression evidence: <待记录>
+- Cleanup: 真机首屏后按原型比例修正绘制常量：`ForestLayout.MIN_SIZE` 0.058→0.0685、`MAX_SIZE` 0.105→0.1269（原型 54/788 与 100/788）、`SIZE_CAP_SEGMENTS` 12→9（原型最大树即 9 段枝）；`ForestScene` 内容描述改回 `R.string.cd_forest_scene`、标题胶囊字重改用 `Typeface.create(..., BOLD)`。
+- Regression evidence: 修正后定向 35 例与全量 1024 例（946+78）重新全绿，`:app:assembleDebug` exit 0；真机 `adb install -r` 后重截 `forest-068-forest.png`、`forest-068-selected.png`。
 
 ### LOOP — optional
-- Command and rounds:
-- Failure identity and repeat count:
-- Stop condition hit:
-- Handoff:
+- Command and rounds: 未进入循环；一次 RED → 一次 GREEN → 一轮真机观感修正。
+- Failure identity and repeat count: 无重复失败。
+- Stop condition hit: 不适用。
+- Handoff: 不适用。
 
 ### TDD or sizing exception — only with prior user approval
 - Exception type: sizing（预计约 950 行，超过 500 行硬线；无 TDD 例外）
@@ -132,19 +132,20 @@ tdd_mode: required
 - 森林不缓存主题集合：每次进入重新读，和学习库一样；森林不写任何表，因此没有 store 写方法或事务包裹。
 - 空态按钮只回首页并聚焦既有输入框，不新增第二个创建入口。
 - 本片不新增 schema、迁移或数据库版本号；森林的「含归档」只发生在自己的聚合投影里。
+- 设备证据：`forest-068-drawer.png`（热力图卡之后、最近学习之前的 44dp 入口）、`forest-068-forest.png`（四棵树、提示胶囊、罗盘、页脚「4 棵树 · 5 段枝 · 连续 0 天」）、`forest-068-selected.png`（光晕/地面圈/标题胶囊 + 纸条「1 段枝 · 昨天 · 默认」）、`forest-068-open-topic.png`（纸条箭头进入该主题聊天）、`forest-068-back-home.png`（边缘手势返回首页）。
 
 ## Verification report
 
-- Verdict: PENDING
-- Evidence: <待记录>
-- Changed/deleted assertion rationale and equivalent behavior coverage:
-- Gaps:
-- Risks:
+- Verdict: PASS
+- Evidence: 定向 35 例 exit 0（`forest-068-targeted-results.txt`）；全量 `:data:testDebugUnitTest` 14 suite / 78 test、`:app:testDebugUnitTest` 108 suite / 946 test，均 0 failure / 0 error / 0 skipped，`:app:assembleDebug` exit 0（`forest-068-green.txt`）；真机 Honor（1200x2652，density 520，API 36）`adb install -r` 后走通「抽屉入口→森林四树→点树选中→纸条箭头进入该主题聊天→边缘手势返回首页」，截图 `artifacts/evidence/forest-068/forest-068-{drawer,forest,selected,open-topic,back-home}.png`。
+- Changed/deleted assertion rationale and equivalent behavior coverage: 未删除既有断言；`HomeDrawerPresenterTest` 只新增森林入口断言，抽屉既有条目顺序断言保留。`ForestLayout` 的尺寸常量按原型比例修正（0.0685/0.1269/9），`ForestLayoutTest` 的「上限收敛」断言同步以 9 段枝为最大树，等价行为「树大小随段枝数单调增大并在上下限内收敛」不变。
+- Gaps: 空态/错误态/加载态未在真机截图（需要清空或损坏本地库，按项目约定不做破坏性操作），三态由 `ForestPresenterTest` 与 `ForestScreenLayoutTest` 的 JVM 断言覆盖；Pad 未单独截图，森林页为单列自适应布局，按手机证据 + 布局约束验证。
+- Risks: 场景为自绘 View，若未来树数上百需复核密度修正；`enableOnBackInvokedCallback` 被移除会破坏森林页手势返回。
 
 ## Handoff notes
 
-- Completed: 任务卡建立。
-- In progress: 实现与验证。
+- Completed: 抽屉森林入口、森林四态页、稳定布局与树精灵、纸条与页脚、宿主导航、定向与全量测试、真机证据与证据归档。
+- In progress: 无。
 - Blocker: 无。
 - Unblock condition: 不适用。
 - Next steps: 片 069/070 Web 人设与森林；片 071 文档与证据。

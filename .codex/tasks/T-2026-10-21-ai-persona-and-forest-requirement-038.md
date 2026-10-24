@@ -5,7 +5,7 @@ id: T-2026-10-21-038
 title: AI 内置人设与「我的森林」需求父卡
 template_version: 2
 task_type: requirement
-status: in_progress
+status: verified
 parent_requirement: null
 requirements_confirmed: true
 generated_by: agent
@@ -80,13 +80,13 @@ tdd_mode: not-applicable
 
 ## Acceptance criteria
 
-- [ ] 039/040 两份规格通过 `check_spec_author_agent.py`，未决疑虑为 0；森林规格明确斜俯瞰、固定位置、归档同样式、统计复用与零 schema。
-- [ ] Android 人设：七档 wireId 可解析、未知值回落默认且不拖垮读取；人设只追加在 `LEARNING_ANSWER`；V5→V6 迁移在新装与升级两条路径得到同一列定义；切换只写 `persona` 一列且首页顺序不变；旧回答不改写。
-- [ ] Android 森林：主题集合与 `LibraryWiring.topics()` 同源；归档分支计入段枝数并在纸条标注；空态/错误态/加载态各有渲染路径；不写库、不改 `updated_at`。
-- [ ] Web 人设与森林：所有用户可见中文走 `zh-CN.ts`；人设 chip、弹窗、介绍页与设置入口可操作；森林路由可达、点树选中、纸条跳转正确；不伪造统计数字。
-- [ ] 两端证据：Android `./gradlew :app:testDebugUnitTest` 与编译通过，真机安装后截图；Web `pnpm lint`、`pnpm test`、`pnpm build` 通过，浏览器截图。
-- [ ] 守门：`validate_tasks.py` errors=0；`check_pointer_liveness.py`、`check_design_tokens.py`、`check_ux_vendor.py`、`check_source_of_truth.py` 退出码 0。
-- [ ] 行数：本批新增生产逻辑落在新文件；触碰的既有大文件只做接线，`maintainability.md` 的 800/150/20/4 门禁不被突破，历史超限文件不增长。
+- [x] 039/040 两份规格通过 `check_spec_author_agent.py`，未决疑虑为 0；森林规格明确斜俯瞰、固定位置、归档同样式、统计复用与零 schema。（两片实测 `0 check(s) failed`、退出码 0，四节齐全、front-matter intent 指向真实文件、无占位符、无裸色值/裸 px；两份 Doubts 节各自首条即「未决疑虑 0 条」，人设原疑虑 1/2 已记为 2026-10-23 用户拍板并落地）
+- [x] Android 人设：七档 wireId 可解析、未知值回落默认且不拖垮读取；人设只追加在 `LEARNING_ANSWER`；V5→V6 迁移在新装与升级两条路径得到同一列定义；切换只写 `persona` 一列且首页顺序不变；旧回答不改写。（片 064/066/067 的 RED/GREEN 读数；窄写为 `TopicDao.updatePersona`，刻意不复用整行 `update`；列声明常量由 fresh 建表与 `MIGRATION_V5_TO_V6_STATEMENTS` 共用）
+- [x] Android 森林：主题集合与 `LibraryWiring.topics()` 同源；归档分支计入段枝数并在纸条标注；空态/错误态/加载态各有渲染路径；不写库、不改 `updated_at`。（片 068：`TOPIC_FOREST_COUNTS_SELECT` 一次读、总数不带 `archived_at` 仅第二计数收窄；`ForestViewState` 四态；`ForestScreenLayoutTest` 6 例；全片零写路径）
+- [x] Web 人设与森林：所有用户可见中文走 `zh-CN.ts`；人设 chip、弹窗、介绍页与设置入口可操作；森林路由可达、点树选中、纸条跳转正确；不伪造统计数字。（片 069/070：`pnpm lint` 含 user-copy i18n 基线只减不增；CDP 探针走通入口→林地→选中→切换→纸条进主题→返回→窄屏；页脚只写读到的数字，读不到即省略不写 0）
+- [x] 两端证据：Android `./gradlew :app:testDebugUnitTest` 与编译通过，真机安装后截图；Web `pnpm lint`、`pnpm test`、`pnpm build` 通过，浏览器截图。（片 068 回归 `:data`/`:app` 单测 + `:app:assembleDebug` exit 0；片 070 全量 `pnpm test` 24 文件 154 例 exit 0；真机 `adb install -r` 截图 persona-066（6 张）/067（9 张）/forest-068（5 图 + 3 份原文），Web 069（8 张）/070（6 张）+ `readings.json`；本批收尾另复跑一次 Android 回归，读数见 Verification report）
+- [x] 守门：`validate_tasks.py` errors=0；`check_pointer_liveness.py`、`check_design_tokens.py`、`check_ux_vendor.py`、`check_source_of_truth.py` 退出码 0。（core 档整跑 `RUN-ALL-GUARDS pass=39 fail=0 inconclusive=0 fault=0 timeout=0`、退出码 0；四条具名守门逐条 `0 check(s) failed`；`frontend verify` 16 步全绿、`no-kotlin-check` `VERDICT: PASS`、`guard-selftest -Fast` 38 例 PASS，读数见 Verification report）
+- [ ] 行数：本批新增生产逻辑落在新文件；触碰的既有大文件只做接线，`maintainability.md` 的 800/150/20/4 门禁不被突破，历史超限文件不增长。（**前半条达成、后半条未达成并已实测归因**：新增逻辑确在新文件，但三个历史超限文件的已超限指标比修改前增长——`MainActivity` 951→1055、`ChatScreen` 1436→1466、`ChatPresenter` 856→886 有效行。逐 hunk 归因给本批的人设/森林相关新增为 62 / 8 / 15 行，其余属同在 `HEAD~1`→工作树区间的玻璃线。详见 Verification report 与 Gaps ⑤）
 
 ## TDD execution record
 
@@ -126,17 +126,58 @@ tdd_mode: not-applicable
 
 ## Verification report
 
-- Verdict: PENDING
-- Evidence: 本卡的证据是 039–042 的产物与守门读数；`validate_tasks.py` 与 `check_pointer_liveness.py` 在每次卡片改动后复跑。
-- Changed/deleted assertion rationale and equivalent behavior coverage: 不适用（本卡无断言）。
-- Gaps: 森林 UX 是否进入 Figma 取决于本机 figwright 连通性；行为样例的区分度要等用户 review；实现片尚未创建。
-- Risks: 设计片若把 intent 的旧措辞直接抄进规格，会把「已归档主题」这个不存在的对象带进实现；V6 迁移和窄写路径若在实现时才补设计，会重复规格的返工。
+- Verdict: PASS（附一条已登记的实测偏差：验收第 7 条的「历史超限文件不增长」半条未达成，见该条与 Gaps ⑤；其余六条验收均有命令级读数）
+- Evidence: 本卡的证据是八张子片的 RED/GREEN 记录加一次收尾整跑，逐条可回读；卡片本身不重复各片的命令原文，只登记谁覆盖了哪一条验收。
+  - 设计收口：039/040 两片规格经 `check_spec_author_agent.py` 各 4 项判据全绿、退出码 0，两份 Doubts 节首条均为「未决疑虑 0 条」；
+    最高规则（「这个需求是否让用户学得下去、学得会」）已落 `Docs/01-demand/结构化需求基准说明书_知芽（TreeLearn）_V3.1增量.md`，`AGENTS.md` 只留指针。
+  - Android 人设：064（`:core` 七档枚举 + `:ai` 穷尽附加段 + V5→V6 三列迁移 + 窄写与回落）、066（对话页 chip/弹窗/接线）、067（介绍页与设置入口）。
+  - Android 森林：068（`:data` 一次聚合读 + `ForestLayout` 纯函数 + 自绘树精灵 + `ForestScreen` + 抽屉入口 + 统计脚注），
+    回归 `cd android && ./gradlew :data:testDebugUnitTest :app:testDebugUnitTest :app:assembleDebug` exit 0（`:app` 946 例 / `:data` 78 例，0 失败 0 跳过）；
+    收尾复跑同一条命令 exit 0、`BUILD SUCCESSFUL in 38s`、82 actionable tasks 全部 UP-TO-DATE——071 只改文档，Android 源码与测试输入零变化，
+    因此这条读数是「缓存命中即无回归」而不是「946 例重跑一遍」，重跑的逐类计数以 068 那次为准。
+  - Web：069（人设 chip/弹窗/介绍页/设置入口 + 主题级内存状态）、070（`forest` 视图 + 侧栏入口 + SVG 树精灵 + 诚实页脚），
+    全量 `pnpm test` 24 文件 154 例、`pnpm lint`、`pnpm build` 均 exit 0。
+  - 文档与证据：071（PRD BASE-14 回写注记、`android/README.md` 人设/森林两节、parity/抽屉/人设三规格时效条目、
+    `artifacts/evidence/persona-forest-2026-10-23-index.md` 证据索引、`.codex/ROADMAP.md` 两处时效）。
+  - 设计复核：070 片的 Web 森林经设计师两轮缺陷修复（胶囊朝向、入口卡）后重拍；Android 真机截图 20 张 + 命令原文 3 份在
+    `artifacts/evidence/`，逐单元一行索引见 071 的证据索引。
+  - 收尾整跑读数（文档定稿、两张卡状态翻转并 `metrics_report.py --write` 之后，仓库根执行）：
+    - `python -X utf8 .codex/scripts/run_all_guards.py`（core 档）→ `RUN-ALL-GUARDS pass=39 fail=0 inconclusive=0 fault=0 timeout=0`、
+      `VERDICT: PASS (subset only — 39/45 entry(ies) judged, not the whole roster)`、退出码 0。
+      本卡验收第 6 条点名的四支全在其中：`validate_tasks` `SUMMARY files=72 errors=0 warnings=25`、
+      `check_pointer_liveness` `0 check(s) failed`、`check_design_tokens` `0 check(s) failed`、`check_ux_vendor` `0 check(s) failed`（自检 21 例 mismatch=0）、
+      `check_source_of_truth` `0 check(s) failed`；`checkers_selftest` `OVERALL: PASS`、`verify_1to1_selftest` `cases=39 failures=0`。
+    - `python -X utf8 .codex/scripts/run_all_guards.py --tier precommit` → `pass=5 fail=1`、`VERDICT: FAIL`、退出码 1。
+      五条绿：`check_offline_bundle`（violations=0）、其自检 6 例、`frontend verify` `steps=16 ok=16 bad=0`、
+      `no-kotlin-check` `VERDICT: PASS (13 OK line(s))`（Java-only 硬约束的机器面）、`guard-selftest -Fast` `38 case(s) PASS`。
+      **一条红是 `line-budget`**：`业务变更行: 3637`、`FAIL: 业务变更 >500 行，须拆 task`。它量的是 `HEAD`→整个工作树，
+      而本工作树按用户既有拍板是「混合线整树一次提交」，玻璃线 049–065 的未提交部分与本批 069–071 都在这一个读数里，
+      因此这条红属于**提交形状**而不是本批的切片形状——本批每片的 500 行硬预算由 064–071 各自卡面的 line-budget 记录承担（例：066 实测上界 444 行）。
+    - **验收第 7 条的后半条实测未达成**（增量棘轮）：`HEAD~1`→工作树按有效行（非空、非纯注释）量得
+      `MainActivity` 951→1055、`ChatScreen` 1436→1466、`ChatPresenter` 856→886，三个历史超限文件均增长。
+      逐 hunk 归因：含 `persona`/`forest` 关键字的新增行分别是 62 / 8 / 15，其余 85 / 66 / 27 属玻璃线与其他在飞改动。
+      未超限的触碰面按规则允许正常演进：`ChatWiring` 568→584、`TreeLearnSchema` 660→696 有效行，仍在 800 之下。
+      这条偏差**不在本收口片里靠重构去凑绿**——那会把已 verified 的 066/067/068 的验收面推翻，且规则明确禁止为降行数做机械拆分；
+      登记为 Gaps ⑤ 与下一批的热点治理片。
+- Changed/deleted assertion rationale and equivalent behavior coverage: 两处卡片登记与实测不符，均已按实测纠正且等价覆盖由「产品口径未变、只有落盘位置变了」承担：
+  ① 本卡 Facts 写「PRD 增量正文在 `..._V3.1增量.md`」，实测 BASE-14 正文在 V3.0 基线（V3.1 是 BASE-21~26），故 071 的回写落点在 V3.0；
+  ② 片 070 验收第 6 条原写「loading 显示『正在数你的树』」，实现确认 Web 路由对 `loading`/`error` 用共享状态行统一挡门，森林专属 loading 文案在任何路径都不渲染，已按共享挡门口径改述。
+  本卡 Facts 的 `DATABASE_VERSION = 5`（`:61`）是建卡时的真值，落地后为 6；按归档规则不改写当时读数，以 064/071 的迁移与回写记录为准。
+- Gaps: ① Android 真机上的 V5→V6 迁移执行仍只有 JVM 契约测试背书（既有拍板：全量仪器测试会卸载应用并清本地数据，设备面只走 `adb install -r` + 截图）；
+  ② 森林主题数量增长后的绘制上界未实测（自用规模按几十棵设计，超出后需重新评估缩放画布）；
+  ③ 「学霸搭子」与「深夜陪读」的行为样例区分度未经受控问题集实测；④ 平板档的森林与人设差异复刻尚未成片，其前置是平板基线截图采集（当前仓库内不存在）；
+  ⑤ **增量棘轮欠账**：`MainActivity`（1055 有效行）、`ChatScreen`（1466）、`ChatPresenter`（886）三个历史超限文件在本批+玻璃线的共用区间里继续增长，
+  其中人设/森林接线占 62 / 8 / 15 行。需要一支独立的热点治理片按 `.codex/rules/maintainability.md` 的抽取判据处理（先内聚职责、后行数），
+  不能靠本批收尾时的机械拆分还账。
+- Risks: ① `android/README.md` 与 parity 规格现处在 `check_pointer_liveness.py` 被判定面上，后续实现片只改代码不看文档会新增一条红；
+  ② 窄写路径让主题写入口从一处变两处，第三处写 `topics` 的入口出现就会绕过「切换风格不刷新活动时间」这条拍板；
+  ③ Web 与 Android 的树精灵几何靠**同常量同算法**保持一致，没有跨端共享文件的机器判据，改一端常量必须同步改另一端（片 070 的 watch-out）。
 
 ## Handoff notes
 
-- Completed: 父卡建立；用户四项决策与 2026-10-23 的 Web+Android 实现授权已登记；039/040 规格已收口。
-- In progress: 066–071 六张实现片与文档证据片（064 已 verified）。
+- Completed: 039/040 设计收口 + 042 原型 + 064/066/067（Android 人设三片）+ 068（Android 森林）+ 069/070（Web 两片）+ 071（文档与证据）全部 verified；用户四项决策与 2026-10-23 的 Web+Android 实现授权均已落地并有对应产物。
+- In progress: 无。本批 064–071 七张实现/文档片结案。
 - Blocker: 无。
-- Unblock condition: 无。
-- Next steps: 064 Android 人设核心（已完成）→ 066 Android 人设选择器 → 067 Android 人设介绍页 → 068 Android 森林 → 069 Web 人设 → 070 Web 森林 → 071 文档与证据。
-- Watch-outs: ① 迁移必须新装与升级两条路径同列定义；② `TopicDao.update()` 的整行写回不得用于人设切换；③ 森林统计只能复用 `StatsRaw` + `StatsAggregator`；④ 默认总览画布的归档过滤不能被顺手改掉；⑤ Web 不伪造统计数字；⑥ 本工作树有别的在飞线，提交时整树一次。
+- Unblock condition: 不适用。
+- Next steps: ① 下一批候选看 `.codex/ROADMAP.md` 的 Phase B/C；② 产品面仍未闭合的实事是 Android 真机上 V5→V6 的执行证据（需要一次允许卸载的窗口，见 Gaps ①）与平板档基线截图采集（parity 阶段 3 之后的前置片）；③ 森林主题量上界与两档人设的区分度要等真实使用一段时间后再评估，不预先起优化片。
+- Watch-outs: ① 迁移的新装与升级两条路径必须共用列声明常量；② `TopicDao.update()` 的整行写回不得用于人设切换，且不得再出现第三处 `topics` 写入口；③ 森林统计只能复用 `StatsRaw` + `StatsAggregator`，读不到就省略、不写 0；④ 默认总览画布的归档过滤不能被顺手改掉；⑤ Web 是只读 parity 演示，不得伪造 streak/生成/归档数字；⑥ 树精灵两端靠同常量同算法对齐，改一端必须同步改另一端；⑦ 本工作树有别的在飞线，提交时整树一次。

@@ -80,7 +80,7 @@ public class IconAssetsTest {
                 "@drawable/ic_nav_restore", "@string/cd_navigation_row_restore");
         assertIconAction("layout/screen_settings_body.xml", "settings_back",
                 "@drawable/ic_nav_back", "@string/cd_settings_back");
-        assertIconAction("layout/screen_library_body.xml", "library_back",
+        assertIconAction("layout/screen_library.xml", "library_back",
                 "@drawable/ic_nav_back", "@string/cd_library_back");
     }
 

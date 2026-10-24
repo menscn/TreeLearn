@@ -68,11 +68,17 @@
 
   /* —— 玻璃材质：A 晨雾玻璃 + C 1px 高光边（2026-10-21 用户拍板） ——
        五面 alpha 于 2026-10-23 整体上移一档（用户拍板「不透明度太低」）：玻璃要读得出「有一块面」，
-       顶栏的通透不再靠压低 alpha 换，Web 顶栏「内容穿过玻璃」的像素信号随之退让（见 064 卡片）。 */
-  --glass-chrome:rgba(255,255,255,.74);   /* 顶栏/底栏/侧栏 */
+       顶栏的通透不再靠压低 alpha 换，Web 顶栏「内容穿过玻璃」的像素信号随之退让（见 065 卡片）。
+       同日追加第六面 `--glass-control`（见 069 卡片）：标签压在别处文字之上的控制面（Android 悬浮
+       标签栏，Web 悬停态与浮层）不再参与通透度权衡——它的失败模式是两层文字糊在一起，判据是读不读得清。
+       chrome 仍是顶栏/侧栏那类「整条带」的面：2026-10-23 拍板跟到 .74，放弃它的像素判据。
+       077 再单独抬 control 一档：常驻顶栏浮在滚动列之上，整行推荐语以 |ΔL| 10.3 穿过 .93 的面，
+       越过了 check_glass_depth.py 判「面下有内容经过」的 8 L 线——通透面那是目的，控制面那是缺陷。 */
+  --glass-chrome:rgba(255,255,255,.74);   /* 顶栏/侧栏（悬浮标签栏改用 --glass-control） */
   --glass-card:rgba(255,255,255,.86);     /* 卡片 */
   --glass-reader:rgba(255,255,255,.93);   /* 阅读面：不随通透度下调 */
   --glass-field:rgba(244,241,235,.74);    /* 输入框/搜索框 */
+  --glass-control:rgba(255,255,255,.98);  /* 控制面：遮住它下面的东西，平涂不走 145° tint */
   --glass-edge:rgba(255,255,255,.88);     /* 1px 高光边（C） */
   --glass-line:rgba(22,36,28,.06);        /* 玻璃内分隔 */
   --glass-sheen:rgba(255,255,255,.50);    /* 顶部高光渐变 */
@@ -109,7 +115,7 @@
   --sans:'Noto Sans SC',-apple-system,sans-serif;          /* 正文；Android 落系统 sans-serif */
 
   /* —— 纸感：极淡横格，读作纹理而非参考线；正文行高对齐格距 —— */
-  --paper-rule:rgba(30,43,35,.018);   /* 2026-09-28 由 .028 减淡：真机上仍读作"粗"，横线弱化到与纸底差 4 阶 */
+  --paper-rule:rgba(30,43,35,.018);   /* 2026-09-28 由 .028 减淡：真机上仍读作"粗"，横线弱化到与纸底差 4 阶。2026-10-23 起整页横格从所有界面背景撤掉（用户读真机后判定不好看），token 不退役：Web 13 屏快照仍是消费者 */
   --paper-write:rgba(46,125,79,.075);
   --lh-read:28px;   /* 阅读行高 == 格线间距，避免逐行错位 */
 }
@@ -153,7 +159,8 @@ input,textarea{font-family:inherit;color:inherit;}
 /* ============ 手机内通用 ============ */
 .screen{height:100%;display:flex;flex-direction:column;position:relative;font-family:var(--sans);/* 2026-09-27 由 --kai 改为 --sans：对话页设计稿与真机 themes.xml 均为 sans-serif，楷体是与两者都不符的一方 */
   background-color:var(--bg);
-  background-image:repeating-linear-gradient(to bottom,transparent 0 31px,var(--paper-rule) 31px 32px);
+  /* 2026-10-23：整页横格按用户判定从背景撤掉（"背景中的横线去掉吧，现在不好看"）。
+     输入框的信纸格线（.home-input textarea）是面内的横线，不是背景，保留。 */
   animation:screenIn .28s cubic-bezier(.2,.8,.2,1);}
 @keyframes screenIn{from{opacity:0;transform:translateX(14px);}to{opacity:1;transform:none;}}
 .appbar{display:flex;align-items:center;gap:var(--s1);padding:var(--s2) var(--s3) var(--s2) var(--s4);border-bottom:1px solid var(--hairline);background:rgba(247,246,240,.88);z-index:5;min-height:56px;}

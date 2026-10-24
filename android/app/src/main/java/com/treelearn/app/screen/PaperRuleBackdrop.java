@@ -14,29 +14,33 @@ import com.treelearn.app.R;
 
 /**
  * The app shell's shared mist scene (paper texture since T-2026-09-27-010, glass material since
- * T-2026-10-21-049).
+ * T-2026-10-21-049, <em>rule-free</em> since T-2026-10-23-073).
  *
- * <p>Pure decoration: a full-page schedule of hairline rules over a static soft-focus mist, painted
- * as a sibling <em>below</em> the shell content, so the accepted layout, hit testing and scroll
- * behaviour of every screen are untouched by construction - a plain, non-clickable, non-focusable
- * view under it cannot change what the content decides.
+ * <p>Pure decoration: a static soft-focus mist painted as a sibling <em>below</em> the shell content,
+ * so the accepted layout, hit testing and scroll behaviour of every screen are untouched by
+ * construction - a plain, non-clickable, non-focusable view under it cannot change what the content
+ * decides.
  *
  * <p>The glass look is honest: Android does not fake a live backdrop blur. The scene itself is soft
  * (a warm-to-cool mist gradient with five wide radial glows), and the translucent surfaces above
  * it read as glass against that scene.
  *
- * <p>Every parameter is token-derived and the rule judgement itself lives in {@link PaperRules}: the
- * spacing is {@code @dimen/space_s8}, the thickness is {@code @dimen/hairline}, and the rule colour
- * is {@link PaperRules#pageRuleColour(int, int)} computed over the mist base, which is what the rules
- * are actually drawn on.
+ * <p><strong>Why this class still carries "PaperRule" in its name.</strong> The full-page hairline
+ * rules were painted here until 2026-10-23, when the user read them on a device and asked for them to
+ * go away from every screen ("背景中的横线去掉吧…不要影响其他地方，以及背景的颜色分布等"). Only the rule pass
+ * left: the name, the layout id and the scene's own values are what they were, because renaming the
+ * view would rewrite dated parity evidence for no visual gain. The composer's writing field keeps its
+ * grid - those are ruled lines inside an input box, not a page background - and they still come from
+ * {@link PaperRules}.
+ *
+ * <p>Every parameter that remains is token-derived: the scene base is {@code @color/tl_mist_base}, the
+ * glows are the five {@code @color/glow_*} tokens, and every position and radius is computed from the
+ * view's own size - nothing is hard-coded in Java.
  */
 public final class PaperRuleBackdrop extends View {
 
     private final Paint scene = new Paint();
     private final Paint glow = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint rules = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final float spacing;
-    private final float thickness;
     private final int mistBase;
     private final int mistDeep;
     private final int mistWarm;
@@ -70,10 +74,6 @@ public final class PaperRuleBackdrop extends View {
         glowWhite = context.getColor(R.color.glow_white);
         glowRose = context.getColor(R.color.glow_rose);
         glowLilac = context.getColor(R.color.glow_lilac);
-        rules.setStyle(Paint.Style.FILL);
-        rules.setColor(PaperRules.pageRuleColour(mistBase, context.getColor(R.color.tl_line)));
-        spacing = getResources().getDimensionPixelSize(R.dimen.space_s8);
-        thickness = getResources().getDimensionPixelSize(R.dimen.hairline);
         setClickable(false);
         setFocusable(false);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
@@ -117,9 +117,6 @@ public final class PaperRuleBackdrop extends View {
         glow(canvas, whiteGlow, width * 0.46f, height * 0.02f, span * 0.50f);
         glow(canvas, roseGlow, width * 0.92f, height * 0.52f, span * 0.30f);
         glow(canvas, lilacGlow, width * 0.06f, height * 0.24f, span * 0.28f);
-        for (float top : PaperRules.lineOffsets(height, spacing, thickness)) {
-            canvas.drawRect(0f, top, width, top + thickness, rules);
-        }
     }
 
     private void glow(Canvas canvas, Shader shader, float centerX, float centerY, float radius) {
@@ -127,20 +124,8 @@ public final class PaperRuleBackdrop extends View {
         canvas.drawCircle(centerX, centerY, radius, glow);
     }
 
-    /** Test seams: the values must stay token-derived, so they are read back and asserted. */
-    public int ruleColor() {
-        return rules.getColor();
-    }
-
+    /** Test seam: the scene base must stay token-derived, so it is read back and asserted. */
     public int mistColor() {
         return mistBase;
-    }
-
-    public float spacingPx() {
-        return spacing;
-    }
-
-    public float thicknessPx() {
-        return thickness;
     }
 }

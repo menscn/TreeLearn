@@ -1,4 +1,6 @@
-export type WorkspaceView = "home" | "library" | "settings" | "chat";
+import type { PersonaId } from "./persona";
+
+export type WorkspaceView = "home" | "library" | "settings" | "chat" | "persona-intro" | "forest";
 
 export type LibraryFilter = "all" | "in_progress" | "done";
 
@@ -19,11 +21,12 @@ export interface WorkspaceState extends WorkspaceLocation {
   libraryFilter: LibraryFilter;
   libraryExpanded: string[];
   settingsCategory: string;
+  personas: Record<number, PersonaId>;
 }
 
 export const DEFAULT_SETTINGS_CATEGORY = "api-key";
 
-const VIEWS: ReadonlySet<string> = new Set(["home", "library", "settings", "chat"]);
+const VIEWS: ReadonlySet<string> = new Set(["home", "library", "settings", "chat", "persona-intro", "forest"]);
 
 function isView(value: string): value is WorkspaceView {
   return VIEWS.has(value);
@@ -58,7 +61,8 @@ function freshState(): WorkspaceState {
     libraryQuery: "",
     libraryFilter: "all",
     libraryExpanded: [],
-    settingsCategory: DEFAULT_SETTINGS_CATEGORY
+    settingsCategory: DEFAULT_SETTINGS_CATEGORY,
+    personas: {}
   };
 }
 
@@ -222,6 +226,18 @@ export function toggleSummary(id: string): void {
 export function setSettingsCategory(id: string): void {
   if (state.settingsCategory === id) return;
   state = { ...state, settingsCategory: id };
+  emit();
+}
+
+/** 主题级人设的会话内读法：没选过就是默认档，chip 因此不存在空态。 */
+export function personaFor(topic: number): PersonaId {
+  return state.personas[topic] ?? "default";
+}
+
+/** 只写会话内映射：Web 是只读 parity 演示，人设的持久化权威在 Android 库。 */
+export function setTopicPersona(topic: number, persona: PersonaId): void {
+  if (personaFor(topic) === persona) return;
+  state = { ...state, personas: { ...state.personas, [topic]: persona } };
   emit();
 }
 

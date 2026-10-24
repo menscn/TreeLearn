@@ -1,0 +1,28 @@
+073 · Web 运行时回读原始值（getComputedStyle，不是 CSS 文本）
+来源：browser-use evaluate_script @ http://localhost:5173/，2026-10-23 17:2x。
+这份文件是 073-reading.txt 第 3 节点名的 raw；计数由 reading 一侧给出，这里只留原样。
+
+backgroundColor
+  rgb(237, 237, 228)
+
+backgroundImage（body 实际绘制层，按浏览器解析顺序）
+  radial-gradient(820px 700px at 92% 52%, rgba(201, 164, 162, 0.18), rgba(0, 0, 0, 0) 60%)
+  radial-gradient(760px 660px at 6% 24%, rgba(163, 156, 186, 0.16), rgba(0, 0, 0, 0) 58%)
+  radial-gradient(1200px 900px at 82% 10%, rgba(255, 255, 255, 0.48), rgba(0, 0, 0, 0) 62%)
+  radial-gradient(900px 720px at 78% 18%, rgba(43, 110, 69, 0.16), rgba(0, 0, 0, 0) 64%)
+  radial-gradient(1000px 820px at 8% 78%, rgba(214, 169, 110, 0.2), rgba(0, 0, 0, 0) 66%)
+  linear-gradient(135deg, rgb(247, 241, 228), rgb(237, 237, 228) 38%, rgb(220, 230, 223) 72%, rgb(199, 214, 206))
+
+计数（由这份 raw 数出）
+  radial-gradient  = 5
+  linear-gradient  = 1
+  repeating-        = 0   ← 横格层不在 body 的实际绘制列表里
+  --paper-rule     = 0 次被引用
+
+:root 上 --paper-rule 的回读值
+  rgba(30,43,35,.018)
+  → token 本身不退役（Web 13 屏快照的 `.snap-screen` 仍是它唯一的活消费者），
+    但真实界面已经没有一面把它画在背景上。
+
+五枚柔光的圆心与半径逐条对应 `PaperRuleBackdrop` 的绘制参数，mist 四色的四个 rgb 值与 `colors.xml`
+的 mist 四档同源——这两件事合起来就是「只删了一层」在 Web 侧的证明。

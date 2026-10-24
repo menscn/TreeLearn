@@ -28,6 +28,7 @@ describe("Web 晨雾玻璃材质层", () => {
       "--glass-card",
       "--glass-reader",
       "--glass-field",
+      "--glass-control",
       "--glass-edge",
       "--glass-line",
       "--glass-sheen",
@@ -93,10 +94,13 @@ describe("Web 晨雾玻璃材质层", () => {
   });
 
   /**
-   * 064 拍板：玻璃要读得出「有一块面」，五面的 alpha 就不能掉回这些值以下。
+   * 064 拍板：玻璃要读得出「有一块面」，六面的 alpha 就不能掉回这些值以下。
    * 断言写的是下限而不是当前值——把 token 抄进测试会出现第二份事实，改 token 时它不会响。
+   * control 与 reader 同档（072）：标签压在别人的文字之上时，判据是读不读得清，不是透多少景。
+   * 077 把 control 抬到 reader 之上：常驻栏下整行文字以 |ΔL| 10.3 穿过 .93，越过了
+   * check_glass_depth.py 用来判「面下有内容经过」的 8 L 线——通透面那是目的，控制面那是缺陷。
    */
-  it("五面 alpha 停在拍板下限之上", () => {
+  it("六面 alpha 停在拍板下限之上", () => {
     expect(existsSync(tokensPath), "tokens.css must exist").toBe(true);
     const css = readFileSync(tokensPath, "utf8");
     const floors: Array<[string, number]> = [
@@ -104,11 +108,28 @@ describe("Web 晨雾玻璃材质层", () => {
       ["glass-card", 0.84],
       ["glass-reader", 0.92],
       ["glass-field", 0.7],
+      ["glass-control", 0.97],
     ];
     for (const [name, floor] of floors) {
       const found = css.match(new RegExp(`--${name}:\\s*rgba\\([^)]*,\\s*([0-9.]+)\\)`));
       expect(found, `tokens.css must carry --${name} as rgba`).not.toBeNull();
       expect(Number.parseFloat(found?.[1] ?? ""), `--${name} 低于拍板下限`).toBeGreaterThanOrEqual(floor);
     }
+  });
+
+  /**
+   * 069 拍板：静止态是 card、悬停态退回 chrome，等于鼠标一放上去底下那层文字就透上来。
+   * jsdom 不渲染 CSS，这条材质倒挂只能从 glass.css 源码判。
+   */
+  it("悬停态不许比静止态更透明", () => {
+    const css = glass();
+    const hoverRules = css.match(/[^{}]*:hover[^{]*\{[^}]*\}/g) ?? [];
+    expect(hoverRules.length, "glass.css 里要有悬停态可判").toBeGreaterThan(0);
+    for (const rule of hoverRules) {
+      expect(rule, "悬停态用 chrome 就是让底下的文字透上来：\n" + rule)
+        .not.toContain("var(--glass-chrome)");
+    }
+    expect(css).toMatch(/\.suggestion:hover\s*\{[^}]*var\(--glass-control\)/);
+    expect(css).toMatch(/\.settings-persona-entry:hover\s*\{[^}]*var\(--glass-control\)/);
   });
 });

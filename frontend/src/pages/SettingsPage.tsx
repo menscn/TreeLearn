@@ -4,7 +4,7 @@ import { Notice } from "../components/Notice";
 import { useWorkspaceData } from "../components/WorkspaceDataProvider";
 import { useCopy } from "../hooks/useCopy";
 import { useWorkspace } from "../hooks/useWorkspace";
-import { rememberScroll, scrollFor, setSettingsCategory } from "../store/workspace";
+import { openView, rememberScroll, scrollFor, setSettingsCategory } from "../store/workspace";
 import type { SettingsCategory, SettingsField } from "../store/workspaceData";
 
 const SCROLL_PREFIX = "settings:";
@@ -238,6 +238,23 @@ export function SettingsPage() {
             </nav>
             <SettingsDetail category={active} />
           </div>
+          <section className="settings-persona">
+            <p className="settings-persona-caption">{t("persona_intro_title")}</p>
+            <button
+              className="settings-persona-entry"
+              data-persona-intro-entry
+              type="button"
+              aria-label={t("persona_intro_title")}
+              title={t("persona_intro_title")}
+              onClick={() => openView("persona-intro")}
+            >
+              <span className="settings-persona-copy">
+                <span className="settings-persona-title">{t("persona_intro_title")}</span>
+                <span className="settings-persona-sub">{t("settings_persona_intro_sub")}</span>
+              </span>
+              <Icon name="chevron_right" />
+            </button>
+          </section>
         </div>
       </div>
     </section>

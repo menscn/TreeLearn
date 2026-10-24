@@ -194,43 +194,31 @@ export const DOM_CHECKS = {
       ? { ok: true, detail: `body-bg = ${actual} = :root --bg ${declared}` }
       : { ok: false, detail: `body-bg 实测=${actual} 而 :root --bg=${declared}——变量声明没落到 .screen 上` };
   },
-  "grid-period": (d) => {
+  /* 073（用户 2026-10-23 判定「背景中的横线去掉吧，现在不好看」）把整页横格从三处同批撤掉：原型 `.screen`
+     的 `repeating-linear-gradient`、Web `glass.css` 的 body 最上层、Android `PaperRuleBackdrop` 的画线循环。
+     本条因此不再量「周期是否等于 --s8」——那个量已经没有生产者，继续在健康页面上判红会把一条已拍板的
+     设计变更读成渲染缺陷。它判的是**撤掉之后仍然成立的现行制式**，三条都可证伪：
+     ① `.screen` 背景里不得再出现 `repeating-linear-gradient`（横线不许以任何写法回来）；
+     ② 背景里不得再出现 `--paper-rule` 那个墨色（只换关键字不改墨色是同一条缺陷的另一半）；
+     ③ `--paper-rule` token 本身必须仍在——073 按「不退役、不改名」约定保留它，当前唯一消费者是 Web 13 屏
+        快照的 `.snap-screen`。token 与页面一起消失是删错了东西，不是设计达成。
+     墨色比对扫**全部** rgba 停止点，不取第一个也不取最后一个：浏览器把 `transparent` 序列化成
+     `rgba(0, 0, 0, 0)` 排在最前，只数一端会让落在序列中间的注入判绿（这条来自 009 电池第一版的实测漏检）。 */
+  "page-plain": (d) => {
     const tex = d.gridTexture;
-    if (!tex || !/repeating-linear-gradient/.test(tex)) {
-      return { ok: false, detail: `grid-period 量不到纸感渐变（实测 background-image=${JSON.stringify(tex)}）` };
+    if (typeof tex !== "string") {
+      return { ok: false, detail: `page-plain 量不到 .screen 的 background-image（实测=${JSON.stringify(tex)}）——探针或被核页面结构变了，这条无从判` };
     }
-    /* 周期取最后一个 px 停止点；解析不出周期属结构变了，不是「没量到」，要出声。 */
-    const pxs = [...tex.matchAll(/(-?[\d.]+)px/g)].map((m) => parseFloat(m[1]));
-    if (!pxs.length) return { ok: false, detail: `grid-period 渐变里没有可解析的 px 停止点: ${tex}` };
-    const period = Math.max(...pxs);
-    /* 墨色的识别形状：**渐变里所有非透明颜色必须彼此相等且等于 --paper-rule**。
-       两条都不是凭空造的：
-       ① 不取「最后一个 rgba」——浏览器把 `transparent` 也序列化成 `rgba(0, 0, 0, 0)` 排在最前，
-          电池实测「改最后一个」与「改第一个」在判据里长得一样，一条打中透明停止点的注入因此判绿；
-       ② 不要求「非透明恰好一个」——真实读数是 31px 与 32px 两个停止点用同一个墨色，
-          恰好一个的规则在健康页面上就判红（正控断言当场抓住，见 009 的 TDD 记录）。
-       「透明停止点是正常成分」同理：只数非透明的。 */
-    const inks = [...tex.matchAll(/rgba?\([^)]*\)/g)].map((m) => ({ text: m[0], c: parseColor(m[0]) })).filter((x) => x.c);
-    const opaque = inks.filter((x) => x.c[3] > ALPHA_TOL);
     const declared = d.tokens["--paper-rule"], want = parseColor(declared);
     const bad = [];
-    if (!opaque.length) bad.push(`渐变里一个非透明墨色都没有（全部颜色=${JSON.stringify(inks.map((x) => x.text))}）——纸感渐变没了墨色`);
-    else if (opaque.some((x) => !sameColor(x.c, opaque[0].c))) bad.push(`渐变里有多种墨色: ${JSON.stringify([...new Set(opaque.map((x) => x.text))])}——一条格线只许一种墨`);
-    else if (!want) bad.push(`:root --paper-rule 解析不出（实测=${JSON.stringify(declared)}），墨色无从核对`);
-    else if (!sameColor(opaque[0].c, want)) bad.push(`格线墨色实测=${opaque[0].text}（${opaque.length} 个停止点）而 :root --paper-rule=${declared}——超出读数分辨率 ±${ALPHA_TOL}，纸感 token 改了而页面没用上`);
-    /* 周期的权威是 `--s8`（32px），不是本仪器发明的常量：Android 侧 `PaperRuleBackdrop` 第 44 行
-       取 `R.dimen.space_s8` 并在注释里写明「原型页面的格线每第二个间距步重复一次」，
-       两端读的是同一个 token。拿它当判据才是「适配而非重新开发」。 */
-    const wantPeriod = parsePx(d.tokens["--s8"]);
-    if (wantPeriod === null) bad.push(`周期无法核对：:root --s8 解析不出（实测=${JSON.stringify(d.tokens["--s8"])}）`);
-    else if (period !== wantPeriod) bad.push(`格线周期实测=${period}px 而 --s8=${wantPeriod}px（Android 侧同名 dimen space_s8）`);
-    /* tokens.json 里 lh-read 的注释写着「阅读行高 == 格线间距」，而两边实测是 28 与 32。
-       这是**设计侧文档与 CSS 的矛盾**，不属本片判据：判红会把一条待裁定的文档错误冒充成渲染缺陷，
-       判绿则是替设计侧编一条从未成立的等式。因此只把它打印出来，缺口登记在 009 的 Gaps。 */
-    const lh = parsePx(d.tokens["--lh-read"]);
-    const note = lh !== null && lh !== period ? `（注意：--lh-read=${lh}px ≠ 周期 ${period}px，与 tokens.json 里「阅读行高 == 格线间距」的注释不符，属设计侧待裁定）` : "";
-    return bad.length ? { ok: false, detail: `grid-period ${bad.join("；")}` }
-      : { ok: true, detail: `grid-period 周期=${period}px = --s8 墨色=${opaque[0].text}（${opaque.length} 个停止点同色）≈ --paper-rule ${declared}（alpha 按读数分辨率 ±${ALPHA_TOL} 比对）${note}` };
+    if (/repeating-linear-gradient/.test(tex)) bad.push(`整页横格又回来了：.screen 背景里仍有 repeating-linear-gradient（${tex}）`);
+    if (!want) bad.push(`:root --paper-rule 解析不出（实测=${JSON.stringify(declared)}）——073 有意保留这条 token 给快照 .snap-screen，它不该消失`);
+    else {
+      const inks = [...tex.matchAll(/rgba?\([^)]*\)/g)].map((m) => m[0]).filter((t) => { const c = parseColor(t); return c && sameColor(c, want); });
+      if (inks.length) bad.push(`.screen 背景仍用 --paper-rule 的墨色画了 ${inks.length} 个停止点（${inks[0]}）——换关键字不等于撤掉横线`);
+    }
+    return bad.length ? { ok: false, detail: `page-plain ${bad.join("；")}` }
+      : { ok: true, detail: `page-plain .screen 背景 ${tex.split("gradient(").length - 1} 层渐变、无 repeating、不含 --paper-rule 墨色（token 仍在 ${declared}，唯一消费者是快照 .snap-screen）` };
   },
   /** 前身（artifacts/tmp）与 2026-09-27 的那份读数把这条判成「气泡底 == --green-bubble、圆角 == --r-md」。
    *  那个 token 已在 2026-09-28 退役（原型 :root 第 34 行注释、design-system/README.md 的 16→15 变更日志；
@@ -489,7 +477,7 @@ async function cdpFonts(cdp, nodeId) {
  *  名字必须是 :root 里**真实存在**的自定义属性——`--green-bubble` 与 `--s5` 都不存在（前者 2026-09-28
  *  退役、后者从未有过），拿它们当依据会让检查以「解析不出」失败，而那条失败读起来像页面缺陷。 */
 DOM_CHECKS["body-bg"].tokens = ["--bg"];
-DOM_CHECKS["grid-period"].tokens = ["--paper-rule", "--s8", "--lh-read"];
+DOM_CHECKS["page-plain"].tokens = ["--paper-rule"];
 DOM_CHECKS["user-bubble"].tokens = ["--fs-body", "--gutter"];
 DOM_CHECKS["body-pitch"].tokens = ["--lh-read"];
 DOM_CHECKS["action-pitch"].tokens = [];

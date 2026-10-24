@@ -46,6 +46,8 @@ public final class GlassSurfaceLayoutTest {
                 "@dimen/radius_lg");
         assertGlassDrawable("bg_glass_bar.xml", "@color/glass_chrome", null);
         assertGlassDrawable("bg_glass_panel.xml", "@color/glass_chrome", null);
+        assertGlassDrawable("bg_glass_control_bar.xml", "@color/glass_control",
+                "@dimen/radius_full");
     }
 
     private void assertGlassDrawable(String name, String fill, String radius) throws Exception {
@@ -84,8 +86,9 @@ public final class GlassSurfaceLayoutTest {
     @Test
     public void theTabBarIsGlassAndDropsTheDecorativeDivider() throws Exception {
         String bar = layout("screen_tab_bar.xml");
-        assertTrue("the tab bar must let the mist scene show through",
-                bar.contains("android:background=\"@drawable/bg_glass_bar\""));
+        // 2026-10-23 片 069：标签压在从它下方滚过去的正文之上，这一面改用控制面 token 而不是 chrome。
+        assertTrue("the tab bar must be opaque enough to keep two layers of text apart",
+                bar.contains("android:background=\"@drawable/bg_glass_control_bar\""));
         assertFalse("the 1px glass edge replaces the old line divider",
                 bar.contains("android:background=\"@color/tl_line\""));
     }
@@ -93,7 +96,7 @@ public final class GlassSurfaceLayoutTest {
     @Test
     public void theChatReaderAndComposerUseTheGlassLayer() throws Exception {
         String chat = layout("screen_chat_body.xml");
-        assertTrue("the message flow sits on the 86% reader surface",
+        assertTrue("the message flow sits on the reader surface",
                 chat.contains("@drawable/bg_glass_reader"));
         assertTrue("the composer strip itself must not paint an opaque surface",
                 chat.contains("android:id=\"@+id/chat_composer\"")
@@ -133,7 +136,7 @@ public final class GlassSurfaceLayoutTest {
     }
 
     @Test
-    public void everyGlassFaceFalloffsOnTheProposalDiagonal() throws Exception {
+    public void everyTintedGlassFaceFalloffsOnTheProposalDiagonal() throws Exception {
         File[] faces = RES.resolve("drawable").toFile().listFiles(
                 (dir, name) -> name.startsWith("bg_glass_") && name.endsWith(".xml"));
         assertTrue("no glass drawables to judge", faces != null && faces.length > 0);
@@ -141,6 +144,14 @@ public final class GlassSurfaceLayoutTest {
         for (File face : faces) {
             String body = new String(Files.readAllBytes(face.toPath()), StandardCharsets.UTF_8);
             String name = face.getName();
+            // The control face is the one registered exception, and it is registered by its fill:
+            // a tint that darkens the lower half of a 62dp pill is exactly what let the labels and
+            // the text scrolling under them blur into one band.
+            if (name.equals("bg_glass_control_bar.xml")) {
+                assertFalse(name + " is flat on purpose, so it must not derive a tint stop",
+                        body.contains("_lo\""));
+                continue;
+            }
             // CSS 145deg 在 shape 渐变里只能落到 45° 的倍数，取 315（=CSS 135，左上亮、右下暗）。
             // 这 10° 是机械等价的登记项，不是随手取整：见 T-2026-10-22-061 的 Constraints。
             assertTrue(name + " must fall off along the tint diagonal, not sit flat",
@@ -177,12 +188,13 @@ public final class GlassSurfaceLayoutTest {
     }
 
     @Test
-    public void theChromeFacesCarryTheTopSheenUnderTheirTint() throws Exception {
+    public void theGlassFacesCarryTheTopSheenUnderTheirFill() throws Exception {
         // 提案把高光画在 .glass 上，glass.css 把它画在 .workspace-topbar/.app-sidebar/.branch-panel 上。
         // 少了这一层，底栏与侧栏就不是「更透的玻璃」，而是全 app 唯一没有光源的面。
-        for (String name : new String[]{"bg_glass_bar.xml", "bg_glass_panel.xml"}) {
+        for (String name : new String[]{"bg_glass_bar.xml", "bg_glass_panel.xml",
+                "bg_glass_control_bar.xml"}) {
             String body = drawable(name);
-            assertTrue(name + " must put the sheen under the tint like every other glass face",
+            assertTrue(name + " must put the sheen under its fill like every other glass face",
                     body.contains("@color/glass_sheen") && body.contains("android:angle=\"270\""));
         }
     }
@@ -192,14 +204,15 @@ public final class GlassSurfaceLayoutTest {
         String backdrop = read(SRC.resolve(Paths.get("screen", "PaperRuleBackdrop.java")));
         assertTrue("the scene is a real linear gradient, not a flat fill",
                 backdrop.contains("LinearGradient"));
-        assertTrue("the scene carries three radial glows", backdrop.contains("RadialGradient"));
+        assertTrue("the scene must keep its five glows", backdrop.contains("RadialGradient"));
         for (String token : new String[]{"tl_mist_base", "tl_mist_deep", "tl_mist_warm",
                 "tl_mist_cool", "glow_green", "glow_sand", "glow_white", "glow_rose",
                 "glow_lilac"}) {
             assertTrue("the scene must read " + token, backdrop.contains("R.color." + token));
         }
-        assertTrue("the paper rules stay on top of the scene",
-                backdrop.contains("PaperRules.lineOffsets("));
+        assertTrue("the page background paints no rules since 2026-10-23, so it must not read the "
+                + "line token any more", !backdrop.contains("tl_line"));
+        assertTrue("and it must not schedule any lines", !backdrop.contains("lineOffsets"));
     }
 
     @Test

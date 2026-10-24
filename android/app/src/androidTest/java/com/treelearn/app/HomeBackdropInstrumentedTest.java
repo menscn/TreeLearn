@@ -18,21 +18,24 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.treelearn.app.screen.PaperRuleBackdrop;
-import com.treelearn.app.screen.PaperRules;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * T-2026-09-27-010 acceptance: the app shell carries the prototype's paper texture as a pure sibling
- * decoration in phone and tablet contexts, without perturbing the accepted layout.
+ * T-2026-09-27-010 acceptance (narrowed 2026-10-23): the app shell carries the prototype's mist scene
+ * as a pure sibling decoration in phone and tablet contexts, without perturbing the accepted layout.
  *
- * <p>Mirrors {@link CanvasBackdropInstrumentedTest}: every assertion is structural. The texture must
- * sit <em>below</em> the shell content in z-order, must take no touches and no focus, must stay
- * invisible to assistive tech, and must draw only with values that already exist as tokens - because
- * the one thing this slice must not do is change what the shell decides about scroll, hit
- * testing or the drawer button. Those stay watched by {@code AppLaunchInstrumentedTest} and
+ * <p>Mirrors {@link CanvasBackdropInstrumentedTest}: every assertion is structural. The scene must sit
+ * <em>below</em> the shell content in z-order, must take no touches and no focus, must stay invisible to
+ * assistive tech, and must draw only with values that already exist as tokens - because the one thing
+ * this slice must not do is change what the shell decides about scroll, hit testing or the drawer
+ * button. Those stay watched by {@code AppLaunchInstrumentedTest} and
  * {@code BottomTabShellInstrumentedTest}, unchanged.
+ *
+ * <p>The full-page hairline rules this decoration used to paint on top of the scene were removed on
+ * 2026-10-23 at the user's request; the assertions that pinned their period, thickness and derived
+ * colour went with them, and the view's name is the only thing left of that texture.
  *
  * <p>The tablet configuration is resolved here by overriding the requested screen width rather than by
  * needing a tablet: {@code layout-sw600dp} is selected from the context's configuration, so one run on
@@ -51,26 +54,16 @@ public final class HomeBackdropInstrumentedTest {
     }
 
     @Test
-    public void theRuleParametersComeFromExistingTokens() {
+    public void theSceneBaseComesFromAnExistingToken() {
         Context context = context();
         PaperRuleBackdrop backdrop = phone().findViewById(R.id.shell_backdrop);
 
-        assertEquals("the rule period is the space_s8 token",
-                (float) context.getResources().getDimensionPixelSize(R.dimen.space_s8),
-                backdrop.spacingPx(), 0f);
-        assertEquals("the rule thickness is the hairline token",
-                (float) context.getResources().getDimensionPixelSize(R.dimen.hairline),
-                backdrop.thicknessPx(), 0f);
-        assertEquals("the rule colour is the line token composited over the mist scene, not a new resource",
-                PaperRules.composite(context.getColor(R.color.tl_mist_base),
-                        context.getColor(R.color.tl_line), PaperRules.ruleAlpha()),
-                backdrop.ruleColor());
         assertEquals("the scene base is the mist token",
                 context.getColor(R.color.tl_mist_base), backdrop.mistColor());
     }
 
     @Test
-    public void theTabBarAndRouteRootsDoNotHideTheSharedPaperTexture() {
+    public void theTabBarAndRouteRootsDoNotHideTheSharedMistScene() {
         assertTranslucentTabBar("phone tab bar", phone());
         assertTranslucentTabBar("tablet tab bar", tablet());
         assertNoPaperBackdrop("phone home layout", R.layout.screen_home, context());
@@ -122,18 +115,18 @@ public final class HomeBackdropInstrumentedTest {
         View backdrop = root.findViewById(R.id.shell_backdrop);
         View column = root.findViewById(R.id.main_root);
 
-        assertNotNull(which + " must carry the paper texture layer", backdrop);
-        assertTrue(which + " uses the dedicated rule view", backdrop instanceof PaperRuleBackdrop);
-        assertTrue(which + " draws the texture before (below) the scrolling column",
+        assertNotNull(which + " must carry the shared scene layer", backdrop);
+        assertTrue(which + " uses the dedicated scene view", backdrop instanceof PaperRuleBackdrop);
+        assertTrue(which + " draws the scene before (below) the scrolling column",
                 screen.indexOfChild(backdrop) < screen.indexOfChild(column));
         assertFalse(which + ": a decoration never takes touches", backdrop.isClickable());
         assertFalse(which + ": a decoration never takes focus", backdrop.isFocusable());
         assertEquals(which + ": a decoration is invisible to assistive tech",
                 View.IMPORTANT_FOR_ACCESSIBILITY_NO, backdrop.getImportantForAccessibility());
         ViewGroup.LayoutParams params = backdrop.getLayoutParams();
-        assertEquals(which + ": the texture fills the screen width",
+        assertEquals(which + ": the scene fills the screen width",
                 ViewGroup.LayoutParams.MATCH_PARENT, params.width);
-        assertEquals(which + ": the texture fills the screen height",
+        assertEquals(which + ": the scene fills the screen height",
                 ViewGroup.LayoutParams.MATCH_PARENT, params.height);
     }
 

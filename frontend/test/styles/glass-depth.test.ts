@@ -54,6 +54,26 @@ describe("Web 玻璃纵深消费", () => {
     }
   });
 
+  it("控制面平涂：标签压在别人的文字之上，担不起 tint 的暗半段", () => {
+    const css = read(glassPath);
+    expect(css).not.toMatch(/linear-gradient\(145deg[^;]*var\(--glass-control\)/);
+    expect(css).toMatch(/\.persona-feedback[^{]*\{[^}]*var\(--glass-control\)/s);
+  });
+
+  it("整页背景不再画横格，但场景的渐变与五处柔光一处不少", () => {
+    // 2026-10-23 用户判定"背景中的横线…现在不好看"，要求所有界面去掉，同时点名不要动背景的颜色分布。
+    // 于是这一片只许删一层：删掉的必须是横格，留下的必须是同一批渐变与柔光。
+    const body = rule(read(glassPath), "body");
+    expect(body).not.toContain("repeating-linear-gradient");
+    expect(body).not.toContain("--paper-rule");
+    for (const glow of ["--glow-rose", "--glow-lilac", "--glow-white", "--glow-green", "--glow-sand"]) {
+      expect(body, `${glow} must still be in the scene`).toContain(`var(${glow})`);
+    }
+    expect(body).toMatch(
+      /linear-gradient\(135deg, var\(--mist-warm\), var\(--mist-base\) 38%, var\(--mist-cool\) 72%, var\(--mist-deep\)\)/,
+    );
+  });
+
   it("顶栏是覆盖层，滚动容器自己付顶部留白，让内容从玻璃下方经过", () => {
     const ws = read(workspacePath);
     const bar = rule(ws, ".workspace-topbar");

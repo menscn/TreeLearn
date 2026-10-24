@@ -81,7 +81,7 @@ public final class ChineseSerifTitleTest {
                 elementAround(layout("screen_home_body.xml"), "home_hero_title")
                         .contains("@font/noto_serif_sc"));
         assertTrue("the library page title uses it",
-                elementAround(layout("screen_library_body.xml"), "library_title")
+                elementAround(layout("screen_library.xml"), "library_title")
                         .contains("@font/noto_serif_sc"));
         // 2026-10-22 Scheme A gives the branch navigation the shared 13sp sans capsule title
         // (T-2026-10-22-057); the library keeps the one large serif page title.

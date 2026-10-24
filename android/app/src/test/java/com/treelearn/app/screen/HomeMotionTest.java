@@ -74,12 +74,21 @@ public final class HomeMotionTest {
         assertEquals(capped, HomeMotion.cardDelayMs(10_000));
     }
 
+    /**
+     * The home stopped trimming its history list on 2026-10-23: the section head counts the whole
+     * read, so a cap made the page announce six topics and draw three, and left the column shorter
+     * than the scroll view - which is the one shape a scroll view answers "cannot scroll" to. The
+     * stagger cap above is now the only thing that bounds the entrance, and it is a wait limit, not
+     * a list limit.
+     */
     @Test
-    public void theCapIsAboveEveryPositionTheHomeActuallyDraws() {
-        assertTrue("the cap must not trim the stagger the home itself uses: "
-                        + HomeMotion.CARD_STAGGER_STEPS_MAX + " steps against "
-                        + HomeScreen.MAX_RECENT + " cards",
-                HomeMotion.CARD_STAGGER_STEPS_MAX >= HomeScreen.MAX_RECENT - 1);
+    public void theHomeDrawsEveryTopicTheReadReturned() throws Exception {
+        String screen = homeScreen();
+        assertTrue("the history section must iterate the read, not a window of it",
+                screen.contains("index < state.topics.size()"));
+        assertTrue("no second list cap may come back: the head's count and the cards must be "
+                        + "the same list",
+                !screen.contains("MAX_RECENT") && !screen.contains("visibleCount"));
     }
 
     @Test

@@ -26,6 +26,19 @@ export function hasCopy(key: string): boolean {
   return Object.prototype.hasOwnProperty.call(RESOURCES, key);
 }
 
+/**
+ * 带占位符文案的唯一格式化出口：沿用 Android `strings.xml` 的 `%1$s` / `%1$d` 约定，
+ * 生产代码不得在组件里自己拼用户可见句子。
+ */
+export function copyFormat(key: string, ...args: (string | number)[]): string {
+  let text = copyText(key);
+  args.forEach((arg, index) => {
+    const value = String(arg);
+    text = text.split(`%${index + 1}$s`).join(value).split(`%${index + 1}$d`).join(value);
+  });
+  return text;
+}
+
 /** 排序后的键名，供守门与测试逐条点名，不依赖对象插入顺序。 */
 export function copyKeys(): string[] {
   return Object.keys(RESOURCES).sort();

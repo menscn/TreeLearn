@@ -111,10 +111,10 @@ public final class SchemeALibraryNavigationLayoutTest {
 
     @Test
     public void theLibraryTopbarIsTheSerifCapsule() throws Exception {
-        String body = layout("screen_library_body.xml");
+        String body = layout("screen_library.xml");
         String appbar = elementAround(body, "library_appbar");
-        assertTrue("the library leads with the floating capsule",
-                appbar.contains("android:background=\"@drawable/bg_glass_bar\""));
+        assertTrue("a pinned bar is chrome over moving rows, so it takes the control face (072)",
+                appbar.contains("android:background=\"@drawable/bg_glass_control_bar\""));
         assertTrue("Scheme A's 52dp capsule",
                 appbar.contains("android:layout_height=\"@dimen/topbar_height\""));
         assertTrue("it sits 6dp below the status bar",
@@ -145,6 +145,40 @@ public final class SchemeALibraryNavigationLayoutTest {
         String dims = dimens();
         assertTrue("the 19sp page title is named",
                 dims.contains("<dimen name=\"text_library_title\">19sp</dimen>"));
+    }
+
+    /**
+     * T-2026-10-23-075: the library's bar pins where the home's pins.
+     *
+     * <p>Same defect, same fix: the bar was the column's first row, so a learner three rows into a
+     * long list had scrolled away the only back entry the page has. The home test
+     * ({@code SchemeAHomeShellLayoutTest#theHomeTopbarFloatsWhileTheColumnScrollsUnderIt}) holds the
+     * pair rule and where the number comes from; this one only holds that the library joined it, so
+     * the two first-level surfaces cannot drift apart again.
+     */
+    @Test
+    public void theLibraryTopbarFloatsWhileTheRowsScrollUnderIt() throws Exception {
+        String shell = layout("screen_library.xml");
+        assertTrue("the scroll container is still the node the shell tests find",
+                shell.contains("android:id=\"@+id/library_root\""));
+        assertTrue("the bar is a later sibling of it, so it floats over the rows",
+                shell.indexOf("@+id/library_root") < shell.indexOf("@+id/library_appbar"));
+        assertTrue("the column no longer carries the bar as its first row",
+                !layout("screen_library_body.xml").contains("library_appbar"));
+        String root = elementAround(shell, "library_root");
+        assertTrue("the page pays the bar's room with clipToPadding off",
+                root.contains("android:paddingTop=\"@dimen/top_bar_clearance\"")
+                        && root.contains("android:clipToPadding=\"false\""));
+        assertTrue("the wrapper lets the capsule's shadow out",
+                elementAround(shell, "library_screen").contains("android:clipChildren=\"false\""));
+
+        String tablet = read(RES.resolve(Paths.get("layout-sw600dp", "screen_library.xml")));
+        assertTrue("the tablet page pins it the same way, capped to the reading measure",
+                tablet.contains("@+id/library_appbar")
+                        && elementAround(tablet, "library_root")
+                                .contains("android:paddingTop=\"@dimen/top_bar_clearance\"")
+                        && elementAround(tablet, "library_appbar")
+                                .contains("android:layout_width=\"@dimen/content_measure\""));
     }
 
     @Test

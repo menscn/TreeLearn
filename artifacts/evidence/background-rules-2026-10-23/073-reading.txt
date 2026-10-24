@@ -1,0 +1,66 @@
+073 · 整页横格从所有界面背景撤掉——读数与「只删一层」的证明
+设备 AWSS013807000356（1200x2652）/ Web http://localhost:5173/（Chromium，Vite dev）
+改动：原型 `.screen` 的 repeating-linear-gradient、`frontend/src/styles/glass.css` 的 body 最上层、
+`screen.PaperRuleBackdrop.onDraw` 的画线循环。三处同批删。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Android：背景条带扫描（同仪器、同一条带、两帧）
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+测量规则（固定，不手挑）：取左侧纯背景竖条带 x=2..58、y=400..2300（1900 行），每行取该带内亮度中位；
+对每行再取「上下各 5 行」窗口中位作基线，|偏离| > 0.8 L 记为「该行有东西」。连续同行号并成段。
+亮度 L = 0.299R+0.587G+0.114B。
+
+  修之前  073-before-home.png（10:30，横格在位）
+        偏离>0.8L 的行 = 69   连续段 = 22   最大|偏离| = 12.61 L
+  修之后  073-after-home.png（16:26，当前构建）
+        偏离>0.8L 的行 = 14   连续段 = 5    最大|偏离| = 0.89 L
+  同一条带再取一帧（072-bottom.png，滚动后）：14 行 / 6 段 / 最大 1.00 L —— 与上一行同量级，是取整噪声。
+  → 横线那种 12.6 L 的对比没了，剩下的是 ≤1.0 L 的抖动。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. Android：背景颜色分布到底动没动（这是用户点名的约束）
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+同一条带逐行中位对齐比较两帧（旧帧 073-before-home.png × 新帧 073-after-home.png），
+阈值 |ΔL| > 0.5 记为「这一行变了」：
+  1900 行中：不变 1844 行，变化 56 行。
+  变化的 56 行聚成 20 段，段长只有 {1, 3} 两种；3px 正是原先横线的厚度。
+  段首 y：528 632 736 840 944 1048 1152 1256 1360 [1378 1397] 1464 1568 1672 1776 1880 1984 2088 2192 2296
+  相邻段首间距：104,104,104,104,104,104,104,104,18,19,67,104,104,104,104,104,104,104,104
+  → 17/20 段严格落在 104px 格子上（104px = @dimen/space_s8，正是原画线的周期）；
+    3 段（1378 / 1397 / 一个 1px）落在格子外，是内容边缘的抗锯齿，不是背景层。
+  可比行（剔除任一侧有线的行）1828 行：|ΔL| 中位 0.00、|Δ(R-B)| 中位 0.00。
+  → 结论：mist 四色线性渐变与五处径向柔光的位置/半径/色值一个字节没动；被删掉的只有那一条重复层。
+    用户点名的「背景的颜色分布不要影响」在这条测量上是 0.00。
+
+源码侧同批证据：`git diff HEAD -- android/app/src/main/java/com/treelearn/app/screen/PaperRuleBackdrop.java`
+只删绘制与随之失去生产者的 seam（ruleColor/spacingPx/thicknessPx），shader 构造段未改；
+`PaperRules.java` 删 pageRuleColour/ruleAlpha/RULE_ALPHA，`writingRuleColour`（输入卡信纸格线）保留。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. Web：运行时回读 getComputedStyle(document.body).backgroundImage
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+不是读 CSS 文本，是读浏览器实际算出来的值（073-web-computed-style.txt 有完整 raw）。
+  radial-gradient( 计数 = 5
+  linear-gradient( 计数 = 1        → body 实际绘制 6 层
+  repeating 计数      = 0          → 横格层确实不在其中
+  --paper-rule 引用   = 0          → body 不再引这个 token
+  linear-gradient(135deg, rgb(247,241,228) → rgb(237,237,228) 38% → rgb(220,230,223) 72% → rgb(199,214,206))
+  五枚柔光：rgba(201,164,162,.18)@92%52% / rgba(163,156,186,.16)@6%24% / rgba(255,255,255,.48)@82%10%
+            / rgba(43,110,69,.16)@78%18% / rgba(214,169,110,.2)@8%78%
+  `--paper-rule` 变量本身仍在 :root，回读值 rgba(30,43,35,.018) —— token 不退役，只是活界面不再画它。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. 判据与回归
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- `GlassSurfaceLayoutTest.theScenePainterUsesTheMistAndGlowTokens` 与
+  `HomeComposerLayoutTest.theWritingTextureReadsItsColourFromTheOneJudgement` 各加负断言
+  （backdrop 源码不得再出现 lineOffsets / tl_line / `PaperRules.`）。
+- `frontend/test/styles/glass-depth.test.ts`「整页背景不再画横格，但场景的渐变与五处柔光一处不少」点名留下的 6 层。
+- `./gradlew :app:testDebugUnitTest` -> exit 0，tests=944 failures=0（本片退役 2 例整页纸纹用例：946 -> 944）。
+- `pnpm --dir frontend verify` -> steps=16 ok=16 bad=0 fault=0；`vitest run test/styles` -> 4 files / 20 tests passed。
+- `check_design_tokens.py` -> OK=10 FAIL=0 SKIPPED=0；`gen_design_tokens_css.py --check` -> 逐字节一致 bytes=2348 tokens=72。
+- 真机 `adb install -r` Success。
+
+RED/GREEN 说明：本片的断言与实现是同批写下的，没有活体 RED 转录（卡片里按例外如实登记）。
+可得的等效证据是上面第 1/2/3 节的「同仪器两帧对照」与「运行时回读」——它们量的就是改动前后，
+不是改动之后的单帧自述。

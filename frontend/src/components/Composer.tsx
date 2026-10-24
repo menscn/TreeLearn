@@ -1,4 +1,4 @@
-import type { RefObject } from "react";
+import type { ReactNode, RefObject } from "react";
 import { useCopy } from "../hooks/useCopy";
 import { Icon } from "./Icon";
 import { IconButton } from "./IconButton";
@@ -15,12 +15,15 @@ interface ComposerProps {
   dockClassName?: string;
   dockDataNode?: string;
   modelNode?: string;
+  personaSlot?: ReactNode;
+  statusSlot?: ReactNode;
 }
 
 /**
  * 输入区：草稿是真的，发送与附件还没接通。
  * 两个按钮都禁用并在可访问名里说明原因，避免把演示稿的发送行为搬进生产。
  * 宿主可以换输入框 id、可访问名与说明；动作本身保持同一套未接通语义。
+ * `personaSlot` 挂在输入行的模型 chip 之后，`statusSlot` 挂在输入区上沿（浮层，不占正文高度）。
  */
 export function Composer({
   value,
@@ -33,12 +36,15 @@ export function Composer({
   note,
   dockClassName = "chat-dock",
   dockDataNode = "chat_composer",
-  modelNode = "chat_model_chip"
+  modelNode = "chat_model_chip",
+  personaSlot = null,
+  statusSlot = null
 }: ComposerProps) {
   const t = useCopy();
   const unavailable = t("chat_action_unavailable");
   return (
     <div className={dockClassName} data-node={dockDataNode}>
+      {statusSlot}
       <form className="composer" onSubmit={(event) => event.preventDefault()}>
         <textarea
           id={inputId}
@@ -57,6 +63,7 @@ export function Composer({
               <Icon className="icon chip-chevron" name="chevron_down" />
             </span>
           )}
+          {personaSlot}
           <span className="composer-spacer" />
           <IconButton
             action="chat-attach"

@@ -1,0 +1,27 @@
+072 · Web 侧运行时回读（localhost:5173，browser-use evaluate_script 取 computed style / CSSOM）
+这份读数的意义：证明 control 面不是写在 CSS 里的死值，而是运行时真的解析出来并被三个消费者用上。
+
+一、:root 上的六面（getComputedStyle(document.documentElement).getPropertyValue）
+  --glass-chrome        rgba(255,255,255,.74)
+  --glass-card          rgba(255,255,255,.86)
+  --glass-reader        rgba(255,255,255,.93)
+  --glass-field         rgba(244,241,235,.74)
+  --glass-control       rgba(255,255,255,.93)   ← 本片新增的第六面
+  --glass-edge          rgba(255,255,255,.88)
+  --glass-tint-falloff  .58
+control 与 reader 同档 .93，与 `GlassMaterialTokensTest` / `glass.test.ts` 记的同一条下限 0.92 相容。
+
+二、CSSOM 里引用 --glass-control 的规则（遍历 document.styleSheets，含 @media 内层）
+  .suggestion:hover                 { background: var(--glass-control) }
+  .settings-persona-entry:hover     { background: var(--glass-control) }
+  .persona-feedback                 { background: var(--glass-control) }
+三处都是「文字压在别处内容之上」的控制面，正是拍板要换的对象；`--glass-control` 在 Web 的消费者数 = 3。
+
+三、材质倒挂检查（069 立的那条：悬停不许比静止更透明）
+  .suggestion 静止态 computed backgroundColor = rgba(255, 255, 255, 0.86)（= --glass-card）
+  .suggestion:hover 用 --glass-control = .93
+  .93 > .86，运行时方向正确。（`glass.test.ts` 里那条源码断言守的是反向改动：jsdom 不渲染 CSS，
+   所以「静止 card / 悬停 chrome」这种倒挂只能从 glass.css 源码判，不能只靠这份回读。）
+
+四、.persona-feedback 在本页没挂载（querySelector 返回 null），所以它的读数只到 CSSOM 层。
+这条如实记下：第三节的运行时回读覆盖 .suggestion，另外两处是源码/CSSOM 级证据。

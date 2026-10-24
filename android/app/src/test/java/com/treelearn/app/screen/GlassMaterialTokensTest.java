@@ -128,8 +128,8 @@ public final class GlassMaterialTokensTest {
     @Test
     public void everyGlassTokenHasTheSameArgbCopyOnAndroid() throws Exception {
         Map<String, String> expected = expectedGlassColours();
-        assertEquals("the glass material and the Morandi scene define fourteen translucent colour tokens",
-                14, expected.size());
+        assertEquals("the glass material and the Morandi scene define fifteen translucent colour tokens",
+                15, expected.size());
         Map<String, String> wanted = new LinkedHashMap<>(expected);
         wanted.putAll(expectedTintFallopStops());
         assertEquals("glass.xml must carry the token copies plus the derived tint ends, "
@@ -142,6 +142,9 @@ public final class GlassMaterialTokensTest {
         Map<String, String> stops = expectedTintFallopStops();
         assertTrue("the chrome capsule must be tinted", stops.containsKey("glass_chrome_lo"));
         assertTrue("the reader surface must be tinted", stops.containsKey("glass_reader_lo"));
+        assertTrue("the control face is flat on purpose: its labels sit on other text, and a tint "
+                + "that darkens the lower half of a 62dp pill is what made the two layers collide",
+                !stops.containsKey("glass_control_lo"));
         int chrome = Integer.parseInt(stops.get("glass_chrome_lo").substring(1, 3), 16);
         int reader = Integer.parseInt(stops.get("glass_reader_lo").substring(1, 3), 16);
         assertTrue("the more opaque reader must keep a darker-lit end than the chrome, got "
@@ -153,6 +156,15 @@ public final class GlassMaterialTokensTest {
      * surface at all. The assertion is a floor rather than a copy of the tokens — pinning today's
      * value would put a second source of the same fact in the test suite and would stay silent about
      * a change in the other direction.
+     *
+     * <p>{@code glass-control} joins the reader's floor the same day for the opposite reason: a face
+     * whose labels overlap other text is judged by legibility, not by how much scene it lets through.
+     *
+     * <p>2026-10-23-077 lifts it past the reader. The pinned home bar measured the recommendation row
+     * crossing underneath it at |dL| max 10.3 L over 13.6..22.3% of the row — above the 8 L line
+     * {@code check_glass_depth.py} already uses for "content is passing under this glass". For a
+     * transparent face that reading is the goal; for the control face it is the defect, so the same
+     * number is a ceiling there and a floor here.
      */
     @Test
     public void theGlassSurfacesStayAboveTheAgreedOpacityFloors() throws Exception {
@@ -161,6 +173,7 @@ public final class GlassMaterialTokensTest {
         floors.put("glass-card", 0.84f);
         floors.put("glass-reader", 0.92f);
         floors.put("glass-field", 0.70f);
+        floors.put("glass-control", 0.97f);
 
         Map<String, Float> alphas = new LinkedHashMap<>();
         Matcher matcher = RGBA.matcher(read(TOKENS));

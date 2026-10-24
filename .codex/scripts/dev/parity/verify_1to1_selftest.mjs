@@ -65,27 +65,16 @@ const CASES = [
   { name: "neg-app-not-booted", want: 3, args: (f) => ["--screen", "chat", "--out", path.join(f, "s.json"), "--profile", path.join(f, "stub-empty.json")] },
 ];
 
-/** 从渐变正文里派生「墨色那个 rgba」：浏览器把 `transparent` 也序列化成 `rgba(0, 0, 0, 0)`，
- *  所以不能拿第一个 rgba 当墨色——电池的第一版就是这么漏掉一条注入的（改到透明停止点上，
- *  墨色一个字没变，判据照样判绿）。派生而不是硬写：渐变的序列化形状一变，这里立刻抛错出声。 */
-const inkText = (tex) => {
-  const m = [...String(tex).matchAll(/rgba?\([^)]*\)/g)].map((x) => x[0]);
-  const ink = m.find((t) => !/^rgba\(0,\s*0,\s*0,\s*0\)$/.test(t));
-  if (!ink) throw new Error("健康样本里找不到非透明墨色——渐变的序列化形状与注入假设不符");
-  return ink;
-};
-
 /** 词表层的变异：每条只动一个字段，动的正是该检查赖以成立的那个量。
  *  `only` 声明「除本条以外其它检查仍须判绿」——一条改动同时打红两条，说明这两条判据共用
  *  一个未被隔离的量（本仓库出现过「业务码遮住调用方 bug」的同形缺陷），此时必须出声而不是各红一半。 */
 const MUTS = [
   { check: "body-bg", label: "底色不等于 --bg", only: true, hurt: (d) => { d.screen.css["background-color"] = "rgb(1, 2, 3)"; } },
   { check: "body-bg", label: "--bg 取空（token 缺失）", only: true, hurt: (d) => { d.tokens["--bg"] = ""; } },
-  { check: "grid-period", label: "纸感渐变整个没了", only: true, hurt: (d) => { d.gridTexture = "none"; } },
-  { check: "grid-period", label: "所有墨色停止点一起改色（脱离 token）", only: true, hurt: (d) => { const ink = inkText(d.gridTexture); d.gridTexture = d.gridTexture.split(ink).join("rgba(11, 22, 33, 0.6)"); } },
-  { check: "grid-period", label: "只改第一个墨色停止点（渐变里出现两种墨）", only: true, hurt: (d) => { const ink = inkText(d.gridTexture); const i = d.gridTexture.indexOf(ink); d.gridTexture = d.gridTexture.slice(0, i) + "rgba(11, 22, 33, 0.6)" + d.gridTexture.slice(i + ink.length); } },
-  { check: "grid-period", label: "声明侧改色而页面没跟上", only: true, hurt: (d) => { d.tokens["--paper-rule"] = "rgba(30, 43, 35, 0.5)"; } },
-  { check: "grid-period", label: "周期不等于 --s8", only: true, hurt: (d) => { d.tokens["--s8"] = "40px"; } },
+  { check: "page-plain", label: "整页横格回来了（repeating 关键字）", only: true, hurt: (d) => { d.gridTexture = "repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0) 0 27px, rgba(11, 22, 33, 0.02) 27px 28px)"; } },
+  { check: "page-plain", label: "换写法把 --paper-rule 墨色留在背景里", only: true, hurt: (d) => { d.gridTexture = d.gridTexture + ", " + d.tokens["--paper-rule"]; } },
+  { check: "page-plain", label: "--paper-rule token 消失（删错了东西）", only: true, hurt: (d) => { d.tokens["--paper-rule"] = ""; } },
+  { check: "page-plain", label: "量不到 .screen 背景", only: true, hurt: (d) => { d.gridTexture = null; } },
   { check: "user-bubble", label: ".msg-user 不存在", only: true, hurt: (d) => { d.userBubble = null; } },
   { check: "user-bubble", label: "气泡底被加回来了", only: true, hurt: (d) => { d.userBubble.css["background-color"] = "rgb(63, 108, 73)"; } },
   { check: "user-bubble", label: "圆角被加回来了", only: true, hurt: (d) => { d.userBubble.css["border-radius"] = "14px"; } },

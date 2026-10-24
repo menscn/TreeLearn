@@ -70,6 +70,13 @@
     <dimen name="tab_bar_margin">24dp</dimen>
     <dimen name="tab_bar_bottom">20dp</dimen>
     <dimen name="tab_bar_clearance">90dp</dimen>
+    <!-- The topbar's room in the first-level scroll containers, since 2026-10-23-075: the bar floats
+         over the page like the capsule below it, so the page pays this with clipToPadding off and
+         rows travel under the glass. It is the bar's own outer height - the 6dp offset plus the
+         52dp face, no extra air - because the column already leaves its own gap under the bar
+         (@dimen/home_body_top / the search field's top margin). Change the bar's height or its offset
+         and this pair has to move with it; the layout tests hold the two together. -->
+    <dimen name="top_bar_clearance">58dp</dimen>
     <!-- The tablet capsule is capped below the 640dp reading measure: 600dp - 48dp of shell margins
          leaves 552dp, and a fixed 640dp pill would be clipped by its own window. -->
     <dimen name="tab_bar_tablet_width">480dp</dimen>

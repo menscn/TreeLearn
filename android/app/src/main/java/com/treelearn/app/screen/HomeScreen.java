@@ -32,9 +32,9 @@ import java.util.List;
  * does not push text back into the composer while the composer is the one that just changed it, so a
  * keystroke never moves the cursor.
  *
- * <p>The history section is a compact shortcut surface: it draws at most {@link #MAX_RECENT} of the
- * state's newest topics, counts only what the read found, says so when it found nothing, and forwards
- * each tap to the same resume action as the library.
+ * <p>The history section draws every topic the read returned: the section head counts the same list
+ * the cards come from, so a number the learner can see is a number they can reach. Says so when the
+ * read found nothing, and forwards each tap to the same resume action as the library.
  */
 public final class HomeScreen extends LinearLayout {
 
@@ -220,21 +220,18 @@ public final class HomeScreen extends LinearLayout {
     }
 
     /**
-     * How many history topics the home draws: the shortcut surface, not the full list.
-     *
-     * <p>Package-visible because {@code HomeMotion.CARD_STAGGER_STEPS_MAX} is justified by it - the
-     * cap on a card's wait must sit above every place this list actually has - and the unit test
-     * holds the two together.
-     */
-    static final int MAX_RECENT = 3;
-
-    /**
      * The history section: a head that counts what is there, the empty sentence while nothing is, or
      * the cards themselves.
      *
      * <p>The section is drawn once the read has settled - a home that is still loading or that failed
      * to read has nothing trustworthy to say about topics yet. The count is hidden rather than zeroed
      * while there are none, which is what {@link HomeViewState#hasTopics()} already means.
+     *
+     * <p>Every topic the read returned gets a card. The home used to stop at three and let the head
+     * count the whole read anyway, which the learner read as a broken page: six topics announced,
+     * three drawn, the rest unreachable from this surface. It also left the column shorter than the
+     * scroll view, and a scroll view whose child fits inside it reports that it cannot scroll at all
+     * - so the empty room below the third card could not even be dragged.
      */
     private void renderRecent(HomeViewState state) {
         boolean settled = state.phase == HomeViewState.Phase.READY
@@ -247,23 +244,22 @@ public final class HomeScreen extends LinearLayout {
         recentEmpty.setVisibility(settled && !hasTopics ? VISIBLE : GONE);
         recentList.setVisibility(hasTopics ? VISIBLE : GONE);
 
-        int visibleCount = Math.min(MAX_RECENT, state.topics.size());
         // A resume refresh can hand the same topics back while the cards drawn a moment ago are
         // still entering. Replacing them without the stagger would leave the entrance half-spent
         // on views nobody sees, so the replacements inherit it.
         boolean cardsStillEntering = recentList.getChildCount() > 0
                 && recentList.getChildAt(0).getAnimation() != null;
         recentList.removeAllViews();
-        for (int index = 0; index < visibleCount; index++) {
+        for (int index = 0; index < state.topics.size(); index++) {
             View card = topicCard(state.topics.get(index));
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            if (index + 1 < visibleCount) {
+            if (index + 1 < state.topics.size()) {
                 params.bottomMargin = getResources().getDimensionPixelSize(R.dimen.space_s2);
             }
             recentList.addView(card, params);
         }
-        if (visibleCount > 0 && (entrancePending || cardsStillEntering)) {
+        if (!state.topics.isEmpty() && (entrancePending || cardsStillEntering)) {
             staggerCards();
         }
     }

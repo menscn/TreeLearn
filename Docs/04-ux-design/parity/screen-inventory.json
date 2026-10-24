@@ -24,9 +24,9 @@
   ],
   "counts": {
     "component_classes": 21,
-    "layout_files": 49,
-    "screen_package_files": 36,
-    "screens": 15,
+    "layout_files": 51,
+    "screen_package_files": 37,
+    "screens": 16,
     "self_drawn": 5,
     "surfaces": 16,
     "surfaces_by_kind": {
@@ -53,6 +53,14 @@
         "screen_tab_bar"
       ],
       "root_id": "main_drawer_root"
+    },
+    "drawer_forest_entry": {
+      "dirs": [
+        "layout"
+      ],
+      "hidden": false,
+      "includes": [],
+      "root_id": "drawer_forest_entry"
     },
     "drawer_heatmap": {
       "dirs": [
@@ -250,6 +258,14 @@
       "includes": [],
       "root_id": "chat_content"
     },
+    "screen_forest": {
+      "dirs": [
+        "layout"
+      ],
+      "hidden": false,
+      "includes": [],
+      "root_id": null
+    },
     "screen_home": {
       "dirs": [
         "layout",
@@ -259,7 +275,7 @@
       "includes": [
         "screen_home_body"
       ],
-      "root_id": "home_screen"
+      "root_id": null
     },
     "screen_home_body": {
       "dirs": [
@@ -278,7 +294,7 @@
       "includes": [
         "screen_library_body"
       ],
-      "root_id": "library_root"
+      "root_id": "library_screen"
     },
     "screen_library_body": {
       "dirs": [
@@ -488,13 +504,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 1134,
+          "line": 1205,
           "method": "showChat"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 1160,
+          "line": 1231,
           "method": "showChat"
         }
       ],
@@ -514,13 +530,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 832,
+          "line": 855,
           "method": "showFileManager"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 837,
+          "line": 860,
           "method": "showFileManager"
         }
       ],
@@ -530,11 +546,40 @@
     },
     {
       "channels": [
+        "constructed",
+        "swap"
+      ],
+      "class": "ForestScreen",
+      "layout_refs": [
+        "screen_forest"
+      ],
+      "path": "screen/ForestScreen.java",
+      "reached_by": [
+        {
+          "channel": "constructed",
+          "host_id": null,
+          "line": 902,
+          "method": "showForest"
+        },
+        {
+          "channel": "swap",
+          "host_id": null,
+          "line": 909,
+          "method": "showForest"
+        }
+      ],
+      "root_layout": "screen_forest",
+      "self_drawn": false,
+      "sw600dp": false
+    },
+    {
+      "channels": [
         "addView",
         "constructed"
       ],
       "class": "HomeDrawerScreen",
       "layout_refs": [
+        "drawer_forest_entry",
         "drawer_heatmap"
       ],
       "path": "screen/HomeDrawerScreen.java",
@@ -542,13 +587,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 209,
+          "line": 214,
           "method": "onCreate"
         },
         {
           "channel": "addView",
           "host_id": "main_drawer_root",
-          "line": 228,
+          "line": 238,
           "method": "onCreate"
         }
       ],
@@ -571,13 +616,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 192,
+          "line": 197,
           "method": "onCreate"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 711,
+          "line": 732,
           "method": "showHome"
         }
       ],
@@ -602,13 +647,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 1080,
+          "line": 1149,
           "method": "showLibrary"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 1086,
+          "line": 1155,
           "method": "showLibrary"
         }
       ],
@@ -628,13 +673,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 800,
+          "line": 823,
           "method": "showModels"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 805,
+          "line": 828,
           "method": "showModels"
         }
       ],
@@ -657,13 +702,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 1258,
+          "line": 1333,
           "method": "enterNavigation"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 1278,
+          "line": 1353,
           "method": "enterNavigation"
         }
       ],
@@ -686,13 +731,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 748,
+          "line": 771,
           "method": "showPersonaIntro"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 750,
+          "line": 773,
           "method": "showPersonaIntro"
         }
       ],
@@ -714,13 +759,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 771,
+          "line": 794,
           "method": "showProviders"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 776,
+          "line": 799,
           "method": "showProviders"
         }
       ],
@@ -740,13 +785,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 810,
+          "line": 833,
           "method": "showSearchSettings"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 815,
+          "line": 838,
           "method": "showSearchSettings"
         }
       ],
@@ -768,13 +813,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 763,
+          "line": 786,
           "method": "showKeyAdmin"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 766,
+          "line": 789,
           "method": "showKeyAdmin"
         }
       ],
@@ -796,13 +841,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 193,
+          "line": 198,
           "method": "onCreate"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 737,
+          "line": 760,
           "method": "showSettings"
         }
       ],
@@ -824,13 +869,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 846,
+          "line": 869,
           "method": "showStatsDetail"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 851,
+          "line": 874,
           "method": "showStatsDetail"
         }
       ],
@@ -853,13 +898,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 1206,
+          "line": 1279,
           "method": "showTree"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 1212,
+          "line": 1285,
           "method": "showTree"
         }
       ],
@@ -879,13 +924,13 @@
         {
           "channel": "constructed",
           "host_id": null,
-          "line": 820,
+          "line": 843,
           "method": "showVoiceSettings"
         },
         {
           "channel": "swap",
           "host_id": null,
-          "line": 826,
+          "line": 849,
           "method": "showVoiceSettings"
         }
       ],
@@ -894,7 +939,7 @@
       "sw600dp": false
     }
   ],
-  "source_commit": "f77d34fe3d7eafc29488f926a4611c50162bf7b5",
+  "source_commit": "1629ad56a4d6175f6016379fbb57d6a046a29088",
   "spec_link": {
     "count_shaped_lines": [
       12,
@@ -936,7 +981,7 @@
       "kind": "code_drawn_host",
       "layout": null,
       "layout_sw600dp": false,
-      "line": 228,
+      "line": 238,
       "producer": "HomeDrawerScreen",
       "root_id": null
     },

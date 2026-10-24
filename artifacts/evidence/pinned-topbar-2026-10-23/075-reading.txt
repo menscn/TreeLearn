@@ -1,0 +1,177 @@
+075 · 首页/库页顶部横栏常驻悬浮——真机读数
+设备 AWSS013807000356（Honor / Android 13 / API 33），窗口 1200x2652，density 3.25，状态栏 115px。
+安装方式：adb -s AWSS013807000356 install -r（不跑 instrumentation，避免清掉本机业务数据与 API Key）。
+诉求原文：「红色这个常驻，不跟随滑动，往上滑动时，这个横栏就类似浮在上面」（红框圈住首页 ☰ + 太阳/齿轮那条栏）。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0. 仪器为什么是「两帧同位像素差」
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+同 074 的结论：dumpsys 打印 View.getBounds()，ScrollView 滚动只改自己的 mScrollY，不改子 view 的
+mTop，所以 bounds 能证明「栏在不在位、列从哪开始」，不能证明「滚没滚」。滚没滚只看两帧像素差。
+本片用的仪器与 074 同一阈值（同位像素 Σ|ΔRGB|>18 记作变化），脚本随证据入库：
+    python -X utf8 artifacts/evidence/pinned-topbar-2026-10-23/075-band-drift.py
+
+关键分区（绝对 y，已加过状态栏的 115px 偏移）：
+  115..135  home_screen 上沿 = 胶囊自己的 6dp 上浮边距（topbar_offset）
+  135..304  胶囊本体（home_appbar 52,20-1148,189）
+  310..900  栏下正文带——这里必须翻动，否则「常驻」就等于页面死了
+  2391..2580 / x 141..1058   底部标签胶囊面内
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. 几何：栏确实从列里搬出来了
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+修之前（本片动工前的 dumpsys）：
+  ScrollView  home_root      0,0-1200,2537
+    LinearLayout home_content 0,0-1200,3432      ← 顶栏是 home_content 的第一个子节点，跟着列滚
+修之后（075-geometry-excerpt.txt，16:55 首页 / 17:13 库页）：
+  FrameLayout home_screen     0,0-1200,2537   clipChildren=false
+    ScrollView  home_root     0,0-1200,2537   paddingTop=@dimen/top_bar_clearance, clipToPadding=false
+      LinearLayout home_content 0,189-1200,3656
+    LinearLayout home_appbar    52,20-1148,189   ← 兄弟节点，排在 ScrollView 之后 -> 画在上面，且不在滚动树里
+  FrameLayout library_screen  0,0-1200,2537
+    ScrollView  library_root  0,0-1200,2537   （id 未改名，消费方零改动）
+      LinearLayout           0,189-1200,2615
+    LinearLayout library_appbar 52,20-1148,189
+
+home_content 起点 189px = 58dp × 3.25 = 188.5 -> 189，与 @dimen/top_bar_clearance 逐位吻合；
+这条等式由 SchemeAHomeShellLayoutTest 用 dp() 比较两个 dimen（top_bar_clearance == topbar_offset +
+topbar_height）钉住，改栏高或改上浮边距而不同步让位，单测直接红。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. 常驻之后暴露的问题：玻璃让下面的字透上来
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+两帧（首页顶 -> 滑动后）在胶囊带 135..304 的同位像素差：
+
+  面                     变化像素%   |dL| 中位   P95     最大
+  chrome .74（本片初版）  33.05%      4.14       10.07    73.14
+  control .93（定稿）      3.65%      1.00        3.07    58.63
+
+chrome 面下每三条采样像素就有一条在变，中位 4.14 L、P95 10.07 L——那就是「推荐语从栏里穿过去」，
+与 072 报修的底部胶囊是同一个失败模式（两层字糊在一起）。所以本片把两枚常驻栏一起换到 072 已拍板的
+第六面 `--glass-control`（平涂 .93，无 145° tint、无 _lo），理由与 072 完全一致：栏压在别人的文字之上时，
+判据是读不读得清，不是透多少景。
+
+control 面残差 3.65% / 最大 58.63 L 落在哪里，逐像素定位过：>25 L 的采样点只有 48 个（占 0.09%），
+全部聚在 x 64..76 / y 268..286 = 胶囊左下圆角弧**之外**的投影带（胶囊高 169px，圆角半径 ≈84px，
+弧只吃四角）。取一定在面内的直边段（y 150..250 × x 140..1120）：
+  变化像素 0.49%   |dL| 中位 1.00   P95 1.07   最大 10.71
+即面内不随滚动变化，残差是投影叠在移动背景上的正常结果，不是文字渗透。
+
+同一对帧的其余分区：
+  栏下正文带 310..900      45.10% 变化（中位 3.07 / P95 167.34） ← 列真的在栏下走
+  底部胶囊面内              2.67% 变化（中位 1.00 / P95 2.28）    ← 072 那张胶囊同批复测，行为一致
+
+库页（同一枚面，栏内没有常驻动画）：
+  顶栏带 135..304           0.83% 变化（中位 0.07 / P95 1.00 / 最大 10.50）
+  栏下正文带 310..900      59.33% 变化（中位 11.36）
+库页的数比首页更干净，因为首页胶囊带里还有自己的常驻元素；0.83% 是这枚面的真实静止度。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. check_glass_depth.py 的读数与一条仪器盲区
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+原始输出见 075-glass-depth-console.txt（四条命令逐条带 exit code）。
+
+  Android 首页常驻栏 control 面  box=85,1..1114,303  J1 17.6 OK / J2 -2.1 FAIL / J3 29.8+13.0 OK / J4 10.2 OK
+  Android 首页常驻栏 chrome 面   box=85,1..1114,303  J1 9.9 FAIL / J2 -2.1 FAIL / J3 29.8+13.0 OK / J4 14.2 OK
+  Android 底部胶囊 control 面    box=78,2385..1121,2586  J1 35.5 / J2 12.4 / J3 26.2+13.0 / J4 2.3 FAIL
+  Web 顶栏（零改动）             box=31,1..1439,75   J1 1.0 FAIL / J2 21.5 / J3 43.7+12.0 / J4 2.0 FAIL
+
+盲区（登记，不改脚本、不挑读数）：`--band top` 给 Android 首页常驻栏找到的面从 y=1 开始，比真实胶囊
+（y=135）高 134 行，把状态栏和 6dp 上浮边距一起吃进来了。分区实测解释了这条 box 里各段在干什么：
+  1..115 状态栏      0.21% 变化，中位 0.00   ——不参与
+  115..135 上浮边距   56.27% 变化，中位 12.51 ——J4 的 10.2/14.2 全部由这一段贡献
+  135..304 胶囊本体    3.60% 变化，中位 1.00  ——面内
+所以：
+- 这条 box 上的 J4「OK」不是玻璃的主张，是栏上方那 20px 背景带在翻动，**本片不引用它**；
+- J2 两次都读 -2.1、且两枚不同的面给出同一个数，说明取样行根本没落在面的下缘上（那是雾面自己的
+  亮带），同样不引用；
+- 只有 J1 的**方向**可用，因为两次跑共用同一个 box、同一枚取区规则，差的只有面的 alpha：
+  9.9 -> 17.6 L。绝对值被 box 稀释了（box 上半是背景），但「换面把分离度推过 10 的门槛」这件事成立。
+盲区与 061 登记的贴边面盲区同类（那次是 Web 全宽顶栏把四角退路读成 ≈0），处置也照旧：不给任何一端
+放宽阈值，改为不在这条 box 上主张判据，改由第 2 节的分区两帧差和下面的结构性断言给结论。
+
+J4 对 control 面的适用性（同时补上 072 挂着的「待滚动恢复后复测」）：
+J4 的定义是「内容滚过玻璃覆盖的行时，那里的亮度要变 ≥8 L」。control 面是 .93 平涂，
+2.3 L 是它的算术结果（072 时读到的 0.0 是因为那两帧首页根本没滚——首页不能下滑是 074 在修的缺陷，
+现已修复，这次是真正的漂移对：075-home-top.png vs 075-home-scrolled.png）。
+所以 Android 胶囊与两枚常驻栏**不再主张 J4**，与 065 给 Web 顶栏的处置对齐；让位结构本身改由
+结构性断言兜住（见第 5 节）。072 变更记录里「暂时撤回，待滚动恢复后复测」一句按这条读数改为定稿。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. 端差：Web 本片零改动，且是有意的
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Web 早就常驻（063 起 `.workspace-topbar` 就是列的覆盖层），本片没有需要补的结构。运行时回读
+（localhost:5173，evaluate_script 取 computed style）：
+  position=absolute  top/left/right=0  z-index=2  height=64px
+  background=rgba(255,255,255,0.74)  backdrop-filter=blur(28px) saturate(1.5)
+  .page-scroll padding-top=64px   ← 与栏高成对，063 钉过的那两条 64px 在运行时确实还是成对的
+两帧（scrollTop 0 -> 142，`.page-scroll` 可滚范围 142px）：
+  Web 顶栏带 0..76      变化像素 0.00%  |dL| 中位 0.00  P95 1.28  最大 2.28
+  栏下正文带 80..300    变化像素 50.79% |dL| 中位 9.93
+也就是说 Web 用**另一种材质**（.74 + 真模糊）拿到了同一个结果：栏内一个字都不动，栏下的列在走。
+Android 没有真 backdrop blur，同等alpha 下溶解不掉文字，所以要靠 .93 平涂达到同一读数
+（面内 0.49% / 中位 1.00）。这是材质路径的端差，不是结果的端差，登记不抹平：
+Web 顶栏继续用 `--glass-chrome`，两枚 Android 常驻栏用 `--glass-control`。
+（065 早已量化过这条模糊的保护作用：Web 顶栏 J4 .54→11.3 / .74→4.9 L。）
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. 判据（结构性断言，JVM 单测读布局文本）
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+命令（RED 与 GREEN 同一条，在 android/ 下执行）：
+    ./gradlew :app:testDebugUnitTest --tests "*SchemeAHomeShellLayoutTest*" --tests "*SchemeALibraryNavigationLayoutTest*" --console=plain
+
+GREEN（本片改动在位）：exit 0。新增两条测试分别钉：
+  theHomeTopbarFloatsWhileTheColumnScrollsUnderIt / theLibraryTopbarFloatsWhileTheRowsScrollUnderIt
+    - `home_appbar` / `library_appbar` 与 ScrollView 是兄弟，且排在它之后（字符串下标比较）
+    - body 布局里不再出现这个 id（栏不属于列）
+    - ScrollView 有 paddingTop=@dimen/top_bar_clearance 且 clipToPadding="false"
+    - 外壳 FrameLayout clipChildren="false"
+    - dp("top_bar_clearance") == dp("topbar_offset") + dp("topbar_height")（比较解析后的 dp 数，不是字符串）
+    - layout-sw600dp 两份同判（宽窗也常驻），且栏宽锁 @dimen/content_measure、靠 layout_gravity 居中，
+      不给 marginHorizontal -> 宽窗不会出现「满宽栏压在封顶列上」
+  两枚常驻栏的面：`theHomeTopbarIsAGlassCapsule` / `theLibraryTopbarIsTheSerifCapsule` 现在都要求
+    `@drawable/bg_glass_control_bar`（072 的第六面），消息里写明理由：常驻栏是压在移动文字之上的 chrome。
+
+RED：断言写好、布局还在 HEAD 状态时跑同一条命令 -> exit 1，`20 tests completed, 4 failed`
+（075-red-console.txt）：
+    SchemeAHomeShellLayoutTest > theHomeTopbarIsAGlassCapsule FAILED
+        java.lang.AssertionError: id home_appbar must exist
+    SchemeAHomeShellLayoutTest > theHomeTopbarFloatsWhileTheColumnScrollsUnderIt FAILED
+        java.lang.AssertionError: the bar is a later sibling of the scroll container, so it floats over it
+    SchemeALibraryNavigationLayoutTest > theLibraryTopbarFloatsWhileTheRowsScrollUnderIt FAILED
+        java.lang.AssertionError: the bar is a later sibling of it, so it floats over the rows
+    SchemeALibraryNavigationLayoutTest > theLibraryTopbarIsTheSerifCapsule FAILED
+        java.lang.AssertionError: id library_appbar must exist
+四条红分别对应本片要立的四件事：栏不在外壳里（前两行的 id must exist 来自测试只读
+`layout/screen_home.xml` / `layout/screen_library.xml`）、兄弟次序不成立（常驻结构还没做）。
+退回方式（可逆，逐文件校验过）：`git show HEAD:<path> > <path>` 放回 6 个布局
+（layout/screen_home.xml、layout/screen_home_body.xml、layout/screen_library.xml、
+layout/screen_library_body.xml、layout-sw600dp/screen_home.xml、layout-sw600dp/screen_library.xml），
+跑完从 artifacts/tmp/075-red-backup/ 逐一 cp 回，6 个文件 md5 与备份逐一一致（校验发生在 17:2x，
+比的是「退回 HEAD 之前那一份工作树」）。之后 `screen_home.xml` 的头注释又被补了一句设计事实源
+（原型 `_src/screens/home.html` + glass.css `.topbar{flex:none}`），那只是注释、不含任何被断言的字符串，
+全量套件在改动之后重跑过（075-suite.txt）。
+`values/dimens.xml` 全程未动，所以 `dp("top_bar_clearance")` 在 RED 那次也能解析——那条等式断言
+不是红的来源，红的来源是兄弟次序与 id 归属。
+
+GREEN：修复在位执行同一条命令 -> exit 0，075-green-console.txt: BUILD SUCCESSFUL
+
+回归中真实红过、并已修的两处（不是本片要主张的判据，是本片搬动布局的连带）：
+  IconAssetsTest.java:92 与 ChineseSerifTitleTest.java:84 原本在 `screen_library_body.xml` 里查
+  `library_back` / `library_title`；控件的 id、图标、tint、文案一个没改，只是换了宿主文件，
+  于是把两处读取点一起改指 `screen_library.xml`。全量：见 075-suite.txt。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. 本片没有动的东西
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- 滚动跟随的两枚栏（聊天、抽屉导航）继续用 `bg_glass_bar`（chrome .74 + 145° tint）：它们的栏和自己的
+  页面一起滚，没有「压在别人的文字之上」这件事，065 的裁决对它们仍然有效。`bg_glass_bar` 仍有两个
+  活消费者，没被孤立。
+- 让位归属不变：底部仍由 `tab_bar_clearance`（90dp）把最后一行停在胶囊上方；本片新增的是顶部那一段，
+  两段互不挪用。
+- 不新增依赖、不动 token 链：`--glass-control` 是 072 已入库的第六面，本片只是多两个消费者，
+  token/资源计数不变（`check_design_tokens.py` 当前 measured_tokens=72 measured_resources=24）。
+- `library_root` 这个 id 保留，Java 侧（LibraryScreen）与所有以 id 寻址的断言零改动。
+- Web 侧零改动（见第 4 节，是登记过的有意端差，不是漏改）。
+- Pad（sw600dp）只做了布局同判与结构性断言，**没有真机/模拟器宽窗截图**：本机只有一台手机。
+  这条覆盖面缺口如实留在卡片里。

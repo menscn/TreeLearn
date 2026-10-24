@@ -15,6 +15,8 @@ export type GlyphName =
   | "chat_gear"
   | "nav_back"
   | "nav_tree"
+  | "nav_forest"
+  | "forest_pin"
   | "chat_overview"
   | "chat_attach"
   | "chat_send"
@@ -148,6 +150,27 @@ const GLYPHS: Record<GlyphName, ReactNode> = {
       <path d="M17.5 6m-2.1 0a2.1 2.1 0 1 1 4.2 0a2.1 2.1 0 1 1-4.2 0" />
       <path d="M17.5 18m-2.1 0a2.1 2.1 0 1 1 4.2 0a2.1 2.1 0 1 1-4.2 0" />
       <path d="M7 11.2 15.5 6.8M7 12.8l8.5 4.4" />
+    </g>
+  ),
+  nav_forest: (
+    <g {...STROKE}>
+      <g strokeWidth={1.5}>
+        <path d="M12 3l3.2 5.2H8.8L12 3z" />
+        <path d="M12 7.3l4.4 6.2H7.6L12 7.3z" />
+        <path d="M12 21v-6.2" />
+      </g>
+      <g strokeWidth={1.4}>
+        <path d="M5 9.2l2.4 4H2.6L5 9.2z" />
+        <path d="M5 21v-4.2" />
+        <path d="M19 9.2l2.4 4h-4.8L19 9.2z" />
+        <path d="M19 21v-4.2" />
+      </g>
+    </g>
+  ),
+  forest_pin: (
+    <g {...STROKE}>
+      <path d="M12 21s-7-6.2-7-11a7 7 0 1 1 14 0c0 4.8-7 11-7 11z" />
+      <path d="M12 12.2a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4z" />
     </g>
   ),
   chat_overview: (

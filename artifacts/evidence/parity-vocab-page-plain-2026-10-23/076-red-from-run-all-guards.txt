@@ -1,0 +1,55 @@
+FAIL         verify_1to1_selftest                   rc=1 213.9s
+             > SELFTEST FAIL cases=40 cli=20 muts=18 failures=4
+             DIAG verify_1to1_selftest lines=30/136 mode=tail
+             | ok   neg-profile-not-utf8 rc=3 (0.0s, want=3)
+             | ok   neg-checks-absent rc=3 (0.0s, want=3)
+             | ok   neg-checks-empty rc=3 (0.0s, want=3)
+             | ok   neg-check-name-unknown rc=3 (0.0s, want=3)
+             | ok   neg-url-file-missing rc=3 (0.0s, want=3)
+             | ok   neg-navigate-rejected rc=3 (0.8s, want=3)
+             | ok   neg-cdp-handshake-fail rc=3 (0.0s, want=3)
+             | ok   neg-wait-for-absent rc=1 (6.4s, want=1)
+             | ok   neg-click-absent rc=1 (3.1s, want=1)
+             | ok   neg-page-not-rendered rc=1 (61.3s, want=1)
+             | ok   neg-app-not-booted rc=3 (121.5s, want=3)
+             | ok   neg-empty-ledger rc=3 (unit, want=3)
+             | FAIL positive-control 健康样本上这些检查本就判红: grid-period——正控不成立，负向比对因此是空见证
+             | SELFTEST FAIL cases=40 cli=20 muts=18 failures=4
+             | EXITCODE=1
+             | USAGE ERROR: 未知选项 --turbo（可用: --screen --out --profile --browser --attach --url --wait-ms）
+             | USAGE ERROR: 必须给 --screen <屏名>：原型路径、点击序列、等待选择器与 DOM 检查项都从屏档案取
+             | USAGE ERROR: --wait-ms 必须是正整数毫秒，收到 0
+             | USAGE ERROR: 屏档案里没有 "nope"；可用: chat
+             | INSTRUMENT FAULT: 找不到 Edge 可执行文件（试过: /c/nowhere/msedge.exe）；用 --browser <路径> 指定
+             | INSTRUMENT FAULT: 屏 "chat" 的档案没有 prototype 回放段
+             | INSTRUMENT FAULT: 原型 HTML 不存在: D:\Project\Android\Treelearn\Docs\04-ux-design\no-such-prototype.html
+             | INSTRUMENT FAULT: 屏档案 不是合法 UTF-8: D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-IU7xAv\bad-utf8.json (The encoded data was not valid for encoding utf-8)
+             | INSTRUMENT FAULT: 屏 "chat" 的 prototype 段没有 dom_checks——没有检查项就没有见证
+             | INSTRUMENT FAULT: 屏 "chat" 的 prototype 段没有 dom_checks——没有检查项就没有见证
+             | INSTRUMENT FAULT: 档案里的 DOM 检查名不在词表内: no-such-check（词表现有: body-bg, grid-period, user-bubble, body-pitch, action-pitch, pill-inset）
+             | INSTRUMENT FAULT: --url 指向的本机文件不存在: D:\nope\missing.html
+             | INSTRUMENT FAULT: 导航被浏览器拒绝: net::ERR_ABORTED（目标 javascript:document.write(1)）
+             | INSTRUMENT FAULT: CDP 握手失败（端口 1 没有应答: fetch failed）
+             | INSTRUMENT FAULT: #root 是空的或不存在（root=0 nodes=6 ready=complete title=桩，重载 1 次后仍空）——原型的界面由页面内的 React+Babel 现场编译、脚本取自 ./vendor/（字节身份由 check_ux_vendor.py 判）；被核对象没起来属仪器故障，不是结构不符
+PASS         cdp_shot_selftest                      rc=0 40.4s
+             > SELFTEST PASS cases=17 failures=0
+PASS         web_walk --selftest                    rc=0 0.1s
+             > SELFTEST cases=6 bad=0
+PASS         check_dependency_direction             rc=0 0.1s
+             > dependency scan root=src layers=9 scanned=41 findings=0
+PASS         check_dependency_direction --selftest  rc=0 0.1s
+             > SELFTEST cases=10 floor=8 fail=0
+PASS         check_user_copy_i18n                   rc=0 0.1s
+             > user-copy scan root=src scanned=41 copy-dir-exempt-seen=true cjk-lines=0 files=0 baseline-entries=0 baseline-covered=0
+PASS         check_user_copy_i18n --selftest        rc=0 0.1s
+             > SELFTEST cases=15 floor=10 fail=0
+PASS         check_device_time                      rc=0 0.1s
+             > device-time scan root=D:\Project\Android\Treelearn\frontend\src scanned=41 exempt=utils/deviceTime.ts exempt-in-tree=true findings=0
+PASS         check_device_time --selftest           rc=0 0.1s
+             > SELFTEST cases=11 floor=8 fail=0
+PASS         sync_fixtures --check                  rc=0 0.1s
+             > SYNC CHECK src=13 dst=13 bad=0 redacted=0 dir=frontend\src\platform\fixtures
+PASS         sync_fixtures --selftest               rc=0 0.1s
+             > SELFTEST cases=8 bad=0 floor=1
+NOTE         not-selected                           未选中：6 条不在本次判定面内（档位选择），整表绿不由此声明
+RUN-ALL-GUARDS pass=36 fail=3 inconclusive=0 fault=0 timeout=0

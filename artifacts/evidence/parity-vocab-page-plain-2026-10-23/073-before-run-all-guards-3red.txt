@@ -1,0 +1,158 @@
+RUN-ALL-GUARDS tier=core selected=39/45 subset=yes
+PASS         validate_tasks                         rc=0 0.1s
+             > SUMMARY files=70 errors=0 warnings=25
+PASS         check_context_pack                     rc=0 1.7s
+             > check_context_pack: 0 check(s) failed
+PASS         check_code_reviewer_agent              rc=0 0.1s
+             > check_code_reviewer_agent: 0 check(s) failed
+PASS         check_codebase_researcher_agent        rc=0 0.1s
+             > check_codebase_researcher_agent: 0 check(s) failed
+PASS         check_code_simplifier_agent            rc=0 0.1s
+             > check_code_simplifier_agent: 0 check(s) failed
+PASS         check_loop_watcher_agent               rc=0 0.1s
+             > check_loop_watcher_agent: 0 check(s) failed
+PASS         check_source_of_truth                  rc=0 0.2s
+             > check_source_of_truth: 0 check(s) failed
+PASS         run_evals                              rc=0 0.0s
+             > run_evals: 0 check(s) failed
+PASS         check_eval_keeper_agent                rc=0 0.1s
+             > check_eval_keeper_agent: 0 check(s) failed
+PASS         metrics_report                         rc=0 0.7s
+             > check_metrics_report: 0 check(s) failed
+PASS         check_metrics_reporter_agent           rc=0 0.1s
+             > check_metrics_reporter_agent: 0 check(s) failed
+PASS         check_intent_capturer_agent            rc=0 0.1s
+             > check_intent_capturer_agent: 0 check(s) failed
+PASS         check_intent_template                  rc=0 0.1s
+             > check_intent_template: 0 check(s) failed
+PASS         check_pm_discovery_skill               rc=0 0.1s
+             > check_pm_discovery_skill: 0 check(s) failed
+PASS         check_roadmap_and_routing              rc=0 0.1s
+             > check_roadmap_and_routing: 0 check(s) failed
+PASS         check_spec_author_agent                rc=0 0.0s
+             > check_spec_author_agent: 0 check(s) failed
+PASS         check_stack_facts                      rc=0 0.3s
+             > check_stack_facts: 0 check(s) failed
+PASS         check_design_tokens                    rc=0 0.1s
+             > check_design_tokens: 0 check(s) failed
+PASS         check_ux_vendor                        rc=0 0.1s
+             > check_ux_vendor: 0 check(s) failed
+PASS         check_ux_vendor --selftest             rc=0 4.9s
+             > SELFTEST cases=21 mismatch=0 expected=21 floor=21
+FAIL         check_pointer_liveness                 rc=1 0.2s
+             > check_pointer_liveness: 1 check(s) failed
+             DIAG check_pointer_liveness lines=12/12 mode=full
+             | OK   the current-state scan surface holds >= 40 files — measured=69 floor=40
+             | OK   the claim parser found >= 40 `路径:行` claims on that surface — measured=111 floor=40 holders=5
+             | OK   every claimed path exists in the tree it was written in — dead=[]
+             | OK   every claimed line is inside the file it names — beyond_eof=[]
+             | OK   no claimed range runs backwards — reversed=[]
+             | FAIL every claimed line lands on content, not on a blank line — landing_blank=['android/ai/src/main/java/com/treelearn/ai/prompt/DeepSeekRequest.java:42', 'android/data/src/main/java/com/treelearn/dat
+             | OK   the fact index's own claims are inside the judged set — measured=18 floor=6 index_present=True
+             | OK   the history face is counted, not silently dropped — measured=251 floor=20 files=156
+             | NOTE historical claims are reported, never judged — citations=251 dead=4 beyond_eof=5 reversed=0 landing_blank=12
+             | holders=5 citations=111 judged_dead=0 judged_beyond=0 judged_reversed=0 judged_blank=3 index_claims=18 hist_citations=251
+             | check_pointer_liveness: 1 check(s) failed
+             | EXITCODE=1
+PASS         check_pointer_liveness --selftest      rc=0 1.5s
+             > SELFTEST cases=10 mismatch=0 expected=10
+PASS         check_androidtest_schema_expectations  rc=0 0.1s
+             > VERDICT: PASS
+PASS         check_run_all_guards                   rc=0 12.7s
+             > SELFTEST cases=33 executed=33 floor=26 broken=0
+PASS         checkers_selftest                      rc=0 43.6s
+             > OVERALL: PASS
+FAIL         parity_ledger_selftest                 rc=1 1.3s
+             > VERDICT: FAIL
+             DIAG parity_ledger_selftest lines=30/122 mode=tail
+             |   check a missing counts sub-key faults the same way         ok
+             |   check it names the sub-key rather than crashing            ok
+             | CASE neg-inventory-crlf-checkout      rc=3 want=3 ok
+             |   check the same bytes with LF still judge clean             ok
+             |   check LF control prints a byte fingerprint                 ok
+             |   check a CR checkout is tier 3, not a judgement             ok
+             |   check the fault says which file and why                    ok
+             |   check it names the pin to restore                          ok
+             |   check no ledger body is emitted from smudged bytes         ok
+             |   check nothing is reported as a judgement                   ok
+             | CASE neg-missing-profile              rc=3 want=3 ok
+             |   check tier 3 when the profile is gone                      ok
+             |   check fault names the profile                              ok
+             | CASE neg-inventory-instrument-absent  rc=3 want=3 ok
+             |   check tier 3, not the case-mismatch tier                   ok
+             |   check fault names the instrument that could not be loaded  ok
+             |   check the fault is reported on stdout, not only as a crash ok
+             |   check the run prints its own exit-code line                ok
+             |   check no traceback escapes to stderr                       ok
+             |   check no ledger comes out of a tree that cannot be measured ok
+             | CASE neg-unknown-arg                  rc=2 want=2 ok
+             |   check tier 2 for bad usage                                 ok
+             |   check no ledger printed                                    ok
+             | cases executed=20 expected=20 failures=3
+             | VERDICT: FAIL
+             | EXITCODE=1
+             | usage: gen_parity_ledger.py [-h] [--inventory INVENTORY] [--profile PROFILE]
+             |                             [--java JAVA] [--res RES] [--spec SPEC]
+             |                             [--out OUT] [--no-write]
+             | gen_parity_ledger.py: error: unrecognized arguments: --definitely-not-an-option
+PASS         screen_inventory_selftest              rc=0 1.2s
+             > VERDICT: PASS
+PASS         measure_screen --selftest              rc=0 7.3s
+             > VERDICT: PASS (19 cases, positive and negative for every branch)
+FAIL         verify_1to1_selftest                   rc=1 213.9s
+             > SELFTEST FAIL cases=40 cli=20 muts=18 failures=4
+             DIAG verify_1to1_selftest lines=30/136 mode=tail
+             | ok   neg-profile-not-utf8 rc=3 (0.0s, want=3)
+             | ok   neg-checks-absent rc=3 (0.0s, want=3)
+             | ok   neg-checks-empty rc=3 (0.0s, want=3)
+             | ok   neg-check-name-unknown rc=3 (0.0s, want=3)
+             | ok   neg-url-file-missing rc=3 (0.0s, want=3)
+             | ok   neg-navigate-rejected rc=3 (0.8s, want=3)
+             | ok   neg-cdp-handshake-fail rc=3 (0.0s, want=3)
+             | ok   neg-wait-for-absent rc=1 (6.4s, want=1)
+             | ok   neg-click-absent rc=1 (3.1s, want=1)
+             | ok   neg-page-not-rendered rc=1 (61.3s, want=1)
+             | ok   neg-app-not-booted rc=3 (121.5s, want=3)
+             | ok   neg-empty-ledger rc=3 (unit, want=3)
+             | FAIL positive-control 健康样本上这些检查本就判红: grid-period——正控不成立，负向比对因此是空见证
+             | SELFTEST FAIL cases=40 cli=20 muts=18 failures=4
+             | EXITCODE=1
+             | USAGE ERROR: 未知选项 --turbo（可用: --screen --out --profile --browser --attach --url --wait-ms）
+             | USAGE ERROR: 必须给 --screen <屏名>：原型路径、点击序列、等待选择器与 DOM 检查项都从屏档案取
+             | USAGE ERROR: --wait-ms 必须是正整数毫秒，收到 0
+             | USAGE ERROR: 屏档案里没有 "nope"；可用: chat
+             | INSTRUMENT FAULT: 找不到 Edge 可执行文件（试过: /c/nowhere/msedge.exe）；用 --browser <路径> 指定
+             | INSTRUMENT FAULT: 屏 "chat" 的档案没有 prototype 回放段
+             | INSTRUMENT FAULT: 原型 HTML 不存在: D:\Project\Android\Treelearn\Docs\04-ux-design\no-such-prototype.html
+             | INSTRUMENT FAULT: 屏档案 不是合法 UTF-8: D:\Project\Android\Treelearn\artifacts\tmp\_verify1to1-selftest\run-IU7xAv\bad-utf8.json (The encoded data was not valid for encoding utf-8)
+             | INSTRUMENT FAULT: 屏 "chat" 的 prototype 段没有 dom_checks——没有检查项就没有见证
+             | INSTRUMENT FAULT: 屏 "chat" 的 prototype 段没有 dom_checks——没有检查项就没有见证
+             | INSTRUMENT FAULT: 档案里的 DOM 检查名不在词表内: no-such-check（词表现有: body-bg, grid-period, user-bubble, body-pitch, action-pitch, pill-inset）
+             | INSTRUMENT FAULT: --url 指向的本机文件不存在: D:\nope\missing.html
+             | INSTRUMENT FAULT: 导航被浏览器拒绝: net::ERR_ABORTED（目标 javascript:document.write(1)）
+             | INSTRUMENT FAULT: CDP 握手失败（端口 1 没有应答: fetch failed）
+             | INSTRUMENT FAULT: #root 是空的或不存在（root=0 nodes=6 ready=complete title=桩，重载 1 次后仍空）——原型的界面由页面内的 React+Babel 现场编译、脚本取自 ./vendor/（字节身份由 check_ux_vendor.py 判）；被核对象没起来属仪器故障，不是结构不符
+PASS         cdp_shot_selftest                      rc=0 40.4s
+             > SELFTEST PASS cases=17 failures=0
+PASS         web_walk --selftest                    rc=0 0.1s
+             > SELFTEST cases=6 bad=0
+PASS         check_dependency_direction             rc=0 0.1s
+             > dependency scan root=src layers=9 scanned=41 findings=0
+PASS         check_dependency_direction --selftest  rc=0 0.1s
+             > SELFTEST cases=10 floor=8 fail=0
+PASS         check_user_copy_i18n                   rc=0 0.1s
+             > user-copy scan root=src scanned=41 copy-dir-exempt-seen=true cjk-lines=0 files=0 baseline-entries=0 baseline-covered=0
+PASS         check_user_copy_i18n --selftest        rc=0 0.1s
+             > SELFTEST cases=15 floor=10 fail=0
+PASS         check_device_time                      rc=0 0.1s
+             > device-time scan root=D:\Project\Android\Treelearn\frontend\src scanned=41 exempt=utils/deviceTime.ts exempt-in-tree=true findings=0
+PASS         check_device_time --selftest           rc=0 0.1s
+             > SELFTEST cases=11 floor=8 fail=0
+PASS         sync_fixtures --check                  rc=0 0.1s
+             > SYNC CHECK src=13 dst=13 bad=0 redacted=0 dir=frontend\src\platform\fixtures
+PASS         sync_fixtures --selftest               rc=0 0.1s
+             > SELFTEST cases=8 bad=0 floor=1
+NOTE         not-selected                           未选中：6 条不在本次判定面内（档位选择），整表绿不由此声明
+RUN-ALL-GUARDS pass=36 fail=3 inconclusive=0 fault=0 timeout=0
+VERDICT: FAIL (3 guard(s) red or silent)
+EXITCODE=1

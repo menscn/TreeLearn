@@ -140,22 +140,23 @@ public final class HomeComposerLayoutTest {
     }
 
     /**
-     * The one-entry-point invariant this slice is most likely to lose: the page texture and the writing
-     * texture are two inks decided in one class. A later painter that re-assembles the composite by hand
-     * would pass every pixel test and still be the drift this repository has already been burned by, so
-     * the painters are pinned to the named judgement.
+     * The one-entry-point invariant this slice is most likely to lose: the ruled writing field takes its
+     * colour and its schedule from the named judgement. A later painter that re-assembles the composite
+     * by hand would pass every pixel test and still be the drift this repository has already been burned
+     * by, so the painter is pinned to the named judgement - and the page backdrop, whose rules were
+     * deleted on 2026-10-23, is pinned to not having re-assembled them.
      */
     @Test
-    public void bothPaperTexturesReadTheirColourFromTheOneJudgement() throws Exception {
+    public void theWritingTextureReadsItsColourFromTheOneJudgement() throws Exception {
         String field = read(SRC.resolve(Paths.get("screen", "RuleEditText.java")));
         String backdrop = read(SRC.resolve(Paths.get("screen", "PaperRuleBackdrop.java")));
         assertTrue("the writing field must read PaperRules#writingRuleColour",
                 field.contains("PaperRules.writingRuleColour("));
-        assertTrue("the page backdrop must read PaperRules#pageRuleColour",
-                backdrop.contains("PaperRules.pageRuleColour("));
-        assertTrue("and neither may inline a composite of its own",
-                !field.contains("PaperRules.composite(") && !backdrop.contains("PaperRules.composite("));
-        assertTrue("both must take their offsets from the same schedule",
-                field.contains("PaperRules.lineOffsets(") && backdrop.contains("PaperRules.lineOffsets("));
+        assertTrue("the writing field must take its offsets from that one schedule",
+                field.contains("PaperRules.lineOffsets("));
+        assertTrue("and it may not inline a composite of its own",
+                !field.contains("PaperRules.composite("));
+        assertTrue("the page backdrop paints no rules since 2026-10-23",
+                !backdrop.contains("PaperRules."));
     }
 }

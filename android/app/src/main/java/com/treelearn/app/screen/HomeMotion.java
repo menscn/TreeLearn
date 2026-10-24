@@ -58,9 +58,9 @@ public final class HomeMotion {
      * How many steps the wait may span.
      *
      * <p>The prototype's delay grows with the list and never stops, which is right for a page whose
-     * tail you can scroll away, and wrong for a list that has stopped being the point. The home
-     * draws at most {@code HomeScreen.MAX_RECENT} cards, so this cap sits above every position the
-     * home actually uses and only stops a longer list from waiting on a card nobody is looking at.
+     * tail you can scroll away. The home draws every topic the read returned, so a learner with a
+     * long history would otherwise watch the last card arrive half a second after the first - a wait
+     * on a card nobody is looking at yet. This cap stops the delay from growing past that point.
      */
     public static final int CARD_STAGGER_STEPS_MAX = 5;
 

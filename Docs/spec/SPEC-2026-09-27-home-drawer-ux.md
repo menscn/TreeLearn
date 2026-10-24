@@ -23,7 +23,7 @@ intent: android/app/src/main/res/layout/screen_home_body.xml
 
 ## 技术规格
 
-- 修改 `HomeScreen` 的布局结构：放大 Logo 与软件名置于缩小后的标语上方，推荐学习先于输入框，最近学习位于输入框之后；推荐区使用上下双轨反向横向滚动，历史最多展示三条并按统一间距排列。**[顺序部分已被取代]** 「推荐学习先于输入框」不再生效，顺序正文以 [SPEC-2026-09-27-home-visual-fidelity.md](SPEC-2026-09-27-home-visual-fidelity.md) 为唯一出处；品牌区「Logo 与软件名」按原型改为横排。
+- 修改 `HomeScreen` 的布局结构：放大 Logo 与软件名置于缩小后的标语上方，推荐学习先于输入框，最近学习位于输入框之后；推荐区使用上下双轨反向横向滚动，历史最多展示三条并按统一间距排列。**[顺序与历史条数部分已被取代]** 「推荐学习先于输入框」不再生效，顺序正文以 [SPEC-2026-09-27-home-visual-fidelity.md](SPEC-2026-09-27-home-visual-fidelity.md) 为唯一出处；品牌区「Logo 与软件名」按原型改为横排。「历史最多展示三条」自 2026-10-23-074 起同样不再生效：首页历史主题区画出读取结果的全部条目，与区头计数是同一条列表——上限让页面写成「6 个」只画 3 张卡，且列高低于 `ScrollView` 自身时该视图报告「不能滚动」，整页拖不动（真机缺陷；Web 侧 `HomePage.tsx` 从来不截断）。**本条只取代首页**：抽屉的最近学习仍是固定条数的快捷面，见下「界面方案」与 `android/README.md` 的 `screen.HomeDrawerScreen` 行。
 - 修改 `HomeDrawerScreen` 的绘制结构：移除中段滚动容器，增加“学习概览”标题与关闭入口，历史行复用现有 `LibraryViewState.Row` 数据，新增当前月份标准 7×6 日历热力图区域与空历史状态。
 - 修改 `HomeDrawerPresenter` 的状态，使侧边栏一次读取最近主题与统计快照；最近主题继续通过 `QuickTopicsSource` 读取，热力图继续通过现有 `HomeData`/`HomeStore` 统计端口读取。
 - 删除首页 `HomeScreen` 对热力图展示和点击入口的绑定，但不删除统计领域模型、统计详情页或其测试。
@@ -39,3 +39,7 @@ intent: android/app/src/main/res/layout/screen_home_body.xml
 - 设计稿中的状态栏属于系统窗口区域，本轮只确保内容不覆盖状态栏，不伪造一套应用内状态栏。
 - 如果统计读取失败，抽屉仍显示最近学习；隐藏热力图，不添加失败说明文字。设置继续由底部标签栏进入。
 
+
+## 修订记录（追加，不回改上文原判定）
+
+- 2026-10-23｜上文「热力图、历史摘要与设置入口」那组抽屉槽位是本轮改造时的结构读数；片 068 之后抽屉在**热力图卡片之后、「最近学习」标题之前**多了一条只读入口「我的森林」（`android/app/src/main/res/layout/drawer_forest_entry.xml`，装配处 `android/app/src/main/java/com/treelearn/app/screen/HomeDrawerScreen.java:87`），该位置由 `android/app/src/test/java/com/treelearn/app/screen/ForestScreenLayoutTest.java:60` 的 `theDrawerEntrySitsAfterTheHeatmapAndBeforeRecentLearning` 钉住。森林的口径与状态面不在本规格，见 `Docs/spec/SPEC-2026-10-21-my-forest.md`；本条只登记槽位事实，不改写上文的压缩策略。

@@ -2,16 +2,27 @@
 <!--
   Phone home: one column, full width. The column itself lives in screen_home_body.xml.
 
-  The floating capsule (PRD 6.2.16) overlaps this scroll container rather than standing below it, so
-  the page pays the bar's room here with @dimen/tab_bar_clearance and clipToPadding off: rows travel
-  under the glass while the page moves and still come to rest whole above it at the end of the
-  scroll. Before T-2026-10-22-062 the host held that padding instead, which ended the viewport above
-  the capsule and left the translucent face with nothing to be translucent over.
+  Both floating capsules belong to this file, not to the column: the page pays their room in its own
+  scroll container (@dimen/tab_bar_clearance below and @dimen/top_bar_clearance above) with
+  clipToPadding off, so rows travel under the glass while the page moves and still come to rest whole
+  above them at the end of the scroll. Before T-2026-10-22-062 the host held the bottom padding
+  instead, which ended the viewport above the capsule and left the translucent face with nothing to be
+  translucent over. The topbar joined it on 2026-10-23-075: it used to be the column's first row, so
+  it scrolled away with the brand and the learner lost the two entries they had just been using. The
+  proposal sheet already pins it - `_src/screens/home.html` puts `<header class="topbar glass">`
+  beside `.app-body`, and glass.css gives it `flex: none` - and so does the Web workspace
+  (`.workspace-topbar`, position absolute + a padding-top on the scroll container). The floating
+  placement is the design fact Android had diverged from, not a new idea.
+
+  `clipChildren` is off for the same reason the shell's is: an elevation shadow is drawn by the
+  parent, and clipping the capsule to its own bounds is what left the floating bar with no
+  projection at all (T-2026-10-22-061).
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/home_screen"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:clipChildren="false">
 
     <ScrollView
         android:id="@+id/home_root"
@@ -19,11 +30,57 @@
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:fillViewport="true"
-        android:paddingBottom="@dimen/tab_bar_clearance">
+        android:paddingBottom="@dimen/tab_bar_clearance"
+        android:paddingTop="@dimen/top_bar_clearance">
 
         <include
             layout="@layout/screen_home_body"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/home_appbar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/topbar_height"
+        android:layout_gravity="top"
+        android:layout_marginStart="@dimen/space_s4"
+        android:layout_marginTop="@dimen/topbar_offset"
+        android:layout_marginEnd="@dimen/space_s4"
+        android:background="@drawable/bg_glass_control_bar"
+        android:elevation="@dimen/glass_capsule_elevation"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/space_s2"
+        android:paddingEnd="@dimen/space_s2">
+
+        <ImageView
+            android:id="@+id/home_drawer_button"
+            android:layout_width="@dimen/topbar_icon"
+            android:layout_height="@dimen/topbar_icon"
+            android:background="@drawable/bg_icon_button"
+            android:contentDescription="@string/cd_home_drawer"
+            android:padding="@dimen/space_s2"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_nav_menu"
+            android:tint="@color/tl_ink2" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:id="@+id/home_settings_button"
+            android:layout_width="@dimen/topbar_icon"
+            android:layout_height="@dimen/topbar_icon"
+            android:background="@drawable/bg_icon_button"
+            android:contentDescription="@string/cd_home_settings"
+            android:padding="@dimen/space_s2"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_chat_gear"
+            android:tint="@color/tl_ink2" />
+
+    </LinearLayout>
 </FrameLayout>
+

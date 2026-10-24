@@ -13,6 +13,7 @@
     <color name="glass_card">#DBFFFFFF</color>
     <color name="glass_reader">#EDFFFFFF</color>
     <color name="glass_field">#BDF4F1EB</color>
+    <color name="glass_control">#FAFFFFFF</color>
     <color name="glass_edge">#E0FFFFFF</color>
     <color name="glass_line">#0F16241C</color>
     <color name="glass_sheen">#80FFFFFF</color>
@@ -28,6 +29,8 @@
       glass-tint-falloff ratio, so the 93% reader keeps a brighter bottom edge than the 74% chrome
       instead of sharing one literal. GlassMaterialTokensTest recomputes all four from tokens.json
       and rejects a copy that drifts, which is what makes these safe to keep next to the mirrors.
+      glass_control has no _lo on purpose: the control face is flat, because a tint that darkens a
+      62dp pill toward its lower edge is exactly what let two layers of text blur into each other.
     -->
     <color name="glass_chrome_lo">#6EFFFFFF</color>
     <color name="glass_card_lo">#7FFFFFFF</color>
