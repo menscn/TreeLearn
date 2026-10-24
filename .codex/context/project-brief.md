@@ -9,7 +9,7 @@
 ## 当前阶段与技术栈
 
 - 阶段：需求以 V3.0 冻结基准 + V3.1 增量（BASE-21～26）+ V3.3 增量（BASE-27～29，多 Provider，2026-09-24）为准；信息架构以 V3.2 PRD 修订为准；正在做 Android 首版与设置中心能力。
-- 形态：Android 客户端为主（手机竖屏优先、兼容平板横屏，个人设备直接装 APK）；`frontend/` 是并行的 Web/H5 复刻线（React + TypeScript + Vite，与 Android 逐屏对齐）。
+- 形态：Android 客户端为主（手机竖屏优先、兼容平板横屏，个人设备直接装 APK）；`frontend/` 是并行的 Web/H5 复刻线（React + TypeScript + Vite，与 Android 逐屏对齐）；`desktop/` 是 Electron 桌面壳，加载 Web 离线单文件产物并打包为 Windows 便携 exe，不另写界面。
 - 模块：`:app`、`:core`、`:data`、`:ai`、`:tree-layout`；依赖只能向下，`:core` 不碰 Android UI、网络、数据库实现。
 - 构建：Gradle Groovy DSL、Java 17 toolchain、`minSdk 28`。
 - UI 与状态：原生 XML/View 加自定义 View/Canvas；显式 ScreenController/Presenter 配不可变 ViewState。

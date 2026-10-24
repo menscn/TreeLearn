@@ -185,7 +185,7 @@ def path_line_citations(text):
 
     只认带仓库相对前缀的路径：裸文件名 `run_all_guards.py:89` 到底指哪一个文件无法确定，
     按 basename 全库搜索会把「重名即命中」当成真话，所以这里不认——需要复算时写全路径。
-    前缀表里 `AGENTS` 与 `README` 是根级入口文件本身（清单与 ROADMAP 直接写 `AGENTS.md:34`），
+    前缀表里 `AGENTS` 与 `README` 是根级入口文件本身（清单与 ROADMAP 直接写 `AGENTS.md:35`），
     它们没有目录分隔，但全仓库只有一个同名文件，指认不歧义。
     路径体只排除空白与反引号：反引号成对已经把一条声称关在一个 token 里，体内的全角
     括号、逗号、顿号、分号都是合法文件名字符——`Docs/01-demand/…（TreeLearn）_V3.0.md:70`

@@ -146,6 +146,7 @@ The project is still early; screens and interactions keep changing with real usa
 - **DeepSeek is the only provider wired up so far.** Multi-provider support is a frozen increment — see [`Docs/spec/SPEC-2026-09-23-providers-and-models.md`](Docs/spec/SPEC-2026-09-23-providers-and-models.md).
 - **No cloud account, no cloud sync, no remote telemetry.** The planned `backend/` is a desktop service bound to **the loopback interface only**, providing data and key proxying for the PC web UI — it is not a remote server. Scope and boundaries: [`Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md`](Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md).
 - **The Web/H5 client is being rebuilt to be screen-for-screen equivalent to Android**, under one shared spec so the parity claim stays mechanically re-checkable.
+- **The Windows desktop app reuses the same offline Web bundle**, wrapped by the Electron shell in `desktop/` and packaged as a portable exe; it adds no UI or styling of its own.
 
 ---
 
@@ -161,6 +162,7 @@ Treelearn/
 │  ├─ tree-layout/        tree layout computation
 │  └─ scripts/            guard and dev scripts
 ├─ frontend/              Web / H5 client (React + TypeScript + Vite)
+├─ desktop/               Windows desktop shell (Electron, loads the offline Web bundle)
 ├─ Docs/                  requirements / PRD / UX design / technical design / delivered specs
 ├─ assets/readme/         screenshots used in this README
 ├─ artifacts/             guard and acceptance evidence
@@ -178,6 +180,7 @@ Treelearn/
 | [`Docs/05-technical-design/`](Docs/05-technical-design) | Local-first architecture, prompt design, SQLite schema confirmation |
 | [`Docs/spec/`](Docs/spec) | Feature specs that were accepted and shipped |
 | [`android/README.md`](android/README.md) | Build, guards, module contracts, common commands, on-device verification |
+| [`desktop/README.md`](desktop/README.md) | Desktop shell layout, run/verify/package commands, packaging constraints |
 
 </details>
 

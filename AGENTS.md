@@ -21,6 +21,7 @@
 
 - `android/` 是本地优先 Android 客户端，Java-only 是硬约束；Android SQLite、原生桥接、手机/Pad 展示和 APK 运行证据必须按专项规则验证。
 - `frontend/` 是 React/TypeScript 前端；用户可见文案、时间展示、设计 token、API 客户端和错误语义遵循前端规则。
+- `desktop/` 是 Electron 桌面壳，加载 `frontend/dist-offline/index.html` 并打包为 Windows 便携 exe；不另写界面与样式，构建、启动与窗口证据遵循启动和多端规则。
 - `backend/` 是规划中的本机环回 Java/Spring Boot 服务；目录尚未落地时只保留规则和 owner，不把规划事实写成已运行服务。
 - `Docs/04-ux-design/` 与设计 token 是当前设计事实源；Figma/原型工具只服务于 Treelearn 对应画布。
 - 项目默认不引入远程账号、远程同步或远程遥测；若未来改变该边界，必须先更新权威规格和对应规则。
@@ -42,6 +43,7 @@
 | 大文件、高复杂度、模块职责、共享业务规则、状态边界或兼容分支 | [可维护性](.codex/rules/maintainability.md) | 影响分析、设计、修改及复核前 |
 | 手机/Pad、窗口自适应、跨端数据兼容、原生资源或展示隔离 | [多端边界](.codex/rules/multi-device.md) | 影响分析、设计、修改及复核前 |
 | `frontend/**` | [前端规则](.codex/rules/frontend.md) | 分析、修改及复核前 |
+| `desktop/**` | [启动与部署](.codex/rules/startup.md)、[多端边界](.codex/rules/multi-device.md) | 修改前；完成前提供构建、启动与窗口尺寸证据 |
 | `android/**` | [Android 规则](.codex/rules/android.md)、[契约 guard](.codex/rules/contracts.md) | 分析、修改前；完成前执行 Java-only guard |
 | `backend/**` | [后端规则](.codex/rules/backend.md)、[契约 guard](.codex/rules/contracts.md) | 分析、修改及复核前 |
 | 任意 SQL、SQLiteOpenHelper、Flyway、建表、维护或数据脚本 | [SQL 规则](.codex/rules/sql.md)、[契约 guard](.codex/rules/contracts.md) | 设计、执行及真实引擎验证前 |

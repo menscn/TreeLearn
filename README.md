@@ -146,6 +146,7 @@ Release 签名的 keystore 存放在仓库之外，凭据只从进程环境变�
 - **AI 供应商目前只接了 DeepSeek**。多 Provider 是已冻结的增量需求，规格见 [`Docs/spec/SPEC-2026-09-23-providers-and-models.md`](Docs/spec/SPEC-2026-09-23-providers-and-models.md)。
 - **不做云端账号、云同步与远程遥测**。规划中的 `backend/` 是**仅监听本机环回地址**的桌面服务，为 PC 端 Web 界面提供数据与密钥代理，不是远程服务器；范围与边界见 [`Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md`](Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md)。
 - **Web/H5 端正在按"与 Android 逐屏等价"的方向复刻**，同一份规格约束两端，判据可机械复算。
+- **Windows 桌面端复用同一份 Web 离线产物**，由 `desktop/` 的 Electron 壳装进标准窗口并打包为便携 exe，不另写界面与样式。
 
 ---
 
@@ -161,6 +162,7 @@ Treelearn/
 │  ├─ tree-layout/        树布局计算
 │  └─ scripts/            守门与开发脚本
 ├─ frontend/              Web / H5 端（React + TypeScript + Vite）
+├─ desktop/               Windows 桌面壳（Electron，加载 frontend 离线产物）
 ├─ Docs/                  需求 / PRD / UX 设计 / 技术设计 / 已交付规格
 ├─ assets/readme/         本README截图
 ├─ artifacts/             守门与验收证据
@@ -178,6 +180,7 @@ Treelearn/
 | [`Docs/05-technical-design/`](Docs/05-technical-design) | 本地优先技术架构、提示词设计、SQLite 建表确认 |
 | [`Docs/spec/`](Docs/spec) | 已 accepted 并交付完成的功能规格 |
 | [`android/README.md`](android/README.md) | 构建、守门、模块契约、常用命令与真机验证方式 |
+| [`desktop/README.md`](desktop/README.md) | 桌面壳结构、启动/验收/打包命令与打包约束 |
 
 </details>
 

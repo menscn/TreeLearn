@@ -1017,7 +1017,7 @@ CASES = [
      "every fact id is declared once", "append"),
     # 索引把自己写成权威：那之后「改权威先查清单」就没有可查的对象了。
     ("sot:index-as-own-authority", CHECK_SOT, SOT_INVENTORY,
-     "- **唯一权威**：`AGENTS.md:34`",
+     "- **唯一权威**：`AGENTS.md:35`",
      "- **唯一权威**：`.codex/context/source-of-truth.md:13`",
      "every entry names exactly one authority, and the index is never its own authority",
      "replace_line"),
@@ -1025,7 +1025,7 @@ CASES = [
      "`.codex/rules/android.md:8`", "`.codex/rules/androidX.md:8`",
      "every authority path exists and the cited line is inside it", "replace"),
     ("sot:authority-beyond-eof", CHECK_SOT, SOT_INVENTORY,
-     "`AGENTS.md:34`", "`AGENTS.md:9999`",
+     "`AGENTS.md:35`", "`AGENTS.md:9999`",
      "every authority path exists and the cited line is inside it", "replace"),
     # 权威落在任务卡上：那里的句子是历史，会把下一位实现者指导成「照旧稿做」。
     ("sot:authority-on-history-plane", CHECK_SOT, SOT_INVENTORY,

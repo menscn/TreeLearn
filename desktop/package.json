@@ -1,0 +1,43 @@
+{
+  "name": "treelearn-desktop",
+  "private": true,
+  "version": "1.0.0",
+  "description": "知芽 Treelearn 桌面壳：复用 frontend 的离线单文件产物",
+  "author": "Treelearn",
+  "main": "main.js",
+  "packageManager": "pnpm@11.5.2",
+  "scripts": {
+    "start": "node scripts/sync-app.mjs && electron .",
+    "smoke": "node scripts/sync-app.mjs && electron . --smoke",
+    "test": "node --test \"test/*.test.mjs\"",
+    "verify": "node scripts/verify-shell.mjs",
+    "package:win": "node scripts/package-win.mjs"
+  },
+  "devDependencies": {
+    "electron": "45.0.0",
+    "electron-builder": "26.18.0"
+  },
+  "build": {
+    "appId": "com.treelearn.zhiya",
+    "productName": "知芽",
+    "electronDist": "node_modules/electron/dist",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "window-options.cjs",
+      "navigation.cjs",
+      "app/**",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "portable"
+      ]
+    },
+    "portable": {
+      "artifactName": "Treelearn-${version}-portable.exe"
+    }
+  }
+}
