@@ -215,8 +215,14 @@ GUARDS = [
       pass_codes=(0,), fail_codes=(1, 2), rc_labels={1: "WARN", 2: "FAIL/错误"}),
     E("no-kotlin-check", PS, ["android/scripts/no-kotlin-check.ps1"],
       ["VERDICT:"], ["precommit"], rc_labels={2: "PARTIAL（跳过阶段，绝不是通过）"}),
+    # 默认 300s 盖不住这条守门给出判决的实际时长：2026-10-25 同一条命令串行单跑 265.8s、冷跑 265.2s
+    # 打出 `OVERALL = SELFTEST PASS (38 case(s))`；在 084 的 precommit 整档并行面上它给出判决用了
+    # 276.0s（占原上限 92%），到 085 同一档位同一位置则跑满 300s 仍没打出判据行，汇总面只留
+    # `TIMEOUT / INCONCLUSIVE`。判决时长已经贴着天花板，按片 036 给 D12 立的口径
+    # 「上限要盖过最长那次而不是盖过最快那次」抬到 600；
+    # 动的是仪器自身的天花板，needles 与 pass_codes 一字未动，不是任何一条判据的宽严。
     E("guard-selftest -Fast", PS, ["android/scripts/dev/guard-selftest.ps1", "-Fast"],
-      ["OVERALL ="], ["precommit"]),
+      ["OVERALL ="], ["precommit"], timeout=600),
 ]
 
 

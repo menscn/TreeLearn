@@ -22,6 +22,9 @@ export type GlyphName =
   | "chat_send"
   | "action_copy"
   | "action_fork"
+  | "action_highlight"
+  | "action_note"
+  | "action_select_all"
   | "nav_restore"
   | "nav_more"
   | "chevron_right"
@@ -197,6 +200,25 @@ const GLYPHS: Record<GlyphName, ReactNode> = {
       <path d="M6 18m-2.1 0a2.1 2.1 0 1 1 4.2 0a2.1 2.1 0 1 1-4.2 0" />
       <path d="M18 8m-2.1 0a2.1 2.1 0 1 1 4.2 0a2.1 2.1 0 1 1-4.2 0" />
       <path d="M6 8.1v7.8M6 13c0-2.4 2.6-3.4 5.4-3.4h4.4" />
+    </g>
+  ),
+  action_highlight: (
+    <g {...STROKE}>
+      <path d="M14.06 4.94a2.2 2.2 0 0 1 3.11 3.11L10.4 14.82 7.29 11.71Z" />
+      <path d="M7.29 11.71 4.6 14.4l3.11 3.11 2.69-2.69" />
+      <path d="M4 20.5h13" />
+    </g>
+  ),
+  action_note: (
+    <g {...STROKE}>
+      <path d="M5 4.5h14v9.5l-5.5 5.5H5Z" />
+      <path d="M13.5 19.5V14H19" />
+    </g>
+  ),
+  action_select_all: (
+    <g {...STROKE}>
+      <path d="M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" />
+      <path d="M8 12.2 10.8 15 16.4 9.4" />
     </g>
   ),
   nav_restore: (

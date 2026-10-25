@@ -1,0 +1,241 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.5 [39m[90mD:/Project/Android/Treelearn/frontend[39m
+
+ [32m✓[39m test/styles/chat-column.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m test/styles/glass.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [31m❯[39m test/styles/reading-shell.test.ts [2m([22m[2m7 tests[22m[2m | [22m[31m7 failed[39m[2m)[22m[32m 14[2mms[22m[39m
+   [31m❯[39m 阅读页悬浮玻璃外壳 [2m(7)[22m
+[31m     [31m×[31m 外壳四边内缩，侧栏成为独立浮起的玻璃面[39m[32m 7[2mms[22m[39m
+[31m     [31m×[31m 顶栏是胶囊，不再贴满窗口也不画下边框[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m 滚动留白等于栏高加 12px 间距，两种断点都不留空带[39m[32m 2[2mms[22m[39m
+[31m     [31m×[31m 输入坞没有横线，靠内缩与间距和正文分离[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m 输入框是悬浮玻璃卡：圆角与内边距落在 token 上[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m 答案动作是玻璃圆点，不再用一条线收尾[39m[32m 0[2mms[22m[39m
+[31m     [31m×[31m 窄窗外壳再收一档，抽屉与顶栏仍是浮面[39m[32m 0[2mms[22m[39m
+ [31m❯[39m test/styles/glass-depth.test.ts [2m([22m[2m9 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 20[2mms[22m[39m
+   [31m❯[39m Web 玻璃纵深消费 [2m(9)[22m
+     [32m✓[39m 被取代的 --glass-shadow 在链上与消费面都已清空[32m 3[2mms[22m[39m
+     [32m✓[39m 投影两档各引用一枚 token，几何照抄方案 A 的 .glass[32m 1[2mms[22m[39m
+     [32m✓[39m 四面 tint 的暗端由 falloff 推导，不各写一份字面量[32m 1[2mms[22m[39m
+     [32m✓[39m 控制面平涂：标签压在别人的文字之上，担不起 tint 的暗半段[32m 1[2mms[22m[39m
+     [32m✓[39m 整页背景不再画横格，但场景的渐变与五处柔光一处不少[32m 1[2mms[22m[39m
+[31m     [31m×[31m 顶栏是覆盖层，滚动容器自己付顶部留白，让内容从玻璃下方经过[39m[32m 9[2mms[22m[39m
+[31m     [31m×[31m 窄窗栏高降下来时，两条留白跟着降，玻璃下缘不留空带[39m[32m 2[2mms[22m[39m
+     [32m✓[39m 两条既有降级与窄窗侧栏都还在[32m 1[2mms[22m[39m
+     [32m✓[39m 材质层不写裸色值[32m 1[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 9 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m test/styles/glass-depth.test.ts[2m > [22mWeb 玻璃纵深消费[2m > [22m顶栏是覆盖层，滚动容器自己付顶部留白，让内容从玻璃下方经过
+[31m[1mAssertionError[22m: .chat-scroll must take the bar's room plus the floating gap: expected 76 to be 88 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 88[39m
+[31m+ 76[39m
+
+[36m [2m❯[22m test/styles/glass-depth.test.ts:[2m91:81[22m[39m
+    [90m 89|[39m     for (const [scroller, css] of Object.entries(rooms)) {
+    [90m 90|[39m       const pad = Number(rule(css, scroller).match(/padding-top:\s*(\d…
+    [90m 91|[39m       expect(pad, `${scroller} must take the bar's room plus the float…
+    [90m   |[39m                                                                                 [31m^[39m
+    [90m 92|[39m     }
+    [90m 93|[39m   });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/styles/glass-depth.test.ts[2m > [22mWeb 玻璃纵深消费[2m > [22m窄窗栏高降下来时，两条留白跟着降，玻璃下缘不留空带
+[31m[1mAssertionError[22m: .chat-scroll leaves a gap under the narrow bar: expected 64 to be 76 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 76[39m
+[31m+ 64[39m
+
+[36m [2m❯[22m test/styles/glass-depth.test.ts:[2m108:68[22m[39m
+    [90m106|[39m     ] as const) {
+    [90m107|[39m       const pad = Number(rule(css, scroller).match(/padding-top:\s*(\d…
+    [90m108|[39m       expect(pad, `${scroller} leaves a gap under the narrow bar`).toB…
+    [90m   |[39m                                                                    [31m^[39m
+    [90m109|[39m     }
+    [90m110|[39m   });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/styles/reading-shell.test.ts[2m > [22m阅读页悬浮玻璃外壳[2m > [22m外壳四边内缩，侧栏成为独立浮起的玻璃面
+[31m[1mAssertionError[22m: expected '\n  display: flex;\n  height: 100dvh;…' to match /padding:\s*var\(--s3\)/[39m
+
+[32m- Expected:[39m
+/padding:\s*var\(--s3\)/
+
+[31m+ Received:[39m
+"
+  display: flex;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-read);
+"
+
+[36m [2m❯[22m test/styles/reading-shell.test.ts:[2m37:19[22m[39m
+    [90m 35|[39m   it("外壳四边内缩，侧栏成为独立浮起的玻璃面", () => {
+    [90m 36|[39m     const shell = rule(workspace, ".app-workspace");
+    [90m 37|[39m     expect(shell).toMatch(/padding:\s*var\(--s3\)/);
+    [90m   |[39m                   [31m^[39m
+    [90m 38|[39m     expect(shell).toMatch(/gap:\s*var\(--s3\)/);
+    [90m 39|[39m     const sidebar = rule(workspace, ".app-sidebar");
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/styles/reading-shell.test.ts[2m > [22m阅读页悬浮玻璃外壳[2m > [22m顶栏是胶囊，不再贴满窗口也不画下边框
+[31m[1mAssertionError[22m: expected '\n  position: absolute;\n  top: 0;\n …' to match /height:\s*52px/[39m
+
+[32m- Expected:[39m
+/height:\s*52px/
+
+[31m+ Received:[39m
+"
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 2;
+  height: 76px;
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: 0 var(--s6);
+  border-bottom: 1px solid var(--hairline);
+  background: var(--bg);
+"
+
+[36m [2m❯[22m test/styles/reading-shell.test.ts:[2m46:17[22m[39m
+    [90m 44|[39m   it("顶栏是胶囊，不再贴满窗口也不画下边框", () => {
+    [90m 45|[39m     const bar = rule(workspace, ".workspace-topbar");
+    [90m 46|[39m     expect(bar).toMatch(/height:\s*52px/);
+    [90m   |[39m                 [31m^[39m
+    [90m 47|[39m     expect(bar).toMatch(/border-radius:\s*var\(--r-full\)/);
+    [90m 48|[39m     expect(bar).toMatch(/border-bottom:\s*0/);
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/styles/reading-shell.test.ts[2m > [22m阅读页悬浮玻璃外壳[2m > [22m滚动留白等于栏高加 12px 间距，两种断点都不留空带
+[31m[1mAssertionError[22m: .chat-scroll 与顶栏高度不配套: expected 76 to be 88 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 88[39m
+[31m+ 76[39m
+
+[36m [2m❯[22m test/styles/reading-shell.test.ts:[2m61:43[22m[39m
+    [90m 59|[39m     ] as const) {
+    [90m 60|[39m       const pad = Number(rule(css, scroller).match(/padding-top:\s*(\d…
+    [90m 61|[39m       expect(pad, `${scroller} 与顶栏高度不配套`).toBe(wideHeight + 12);
+    [90m   |[39m                                           [31m^[39m
+    [90m 62|[39m     }
+    [90m 63|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/styles/reading-shell.test.ts[2m > [22m阅读页悬浮玻璃外壳[2m > [22m输入坞没有横线，靠内缩与间距和正文分离
+[31m[1mAssertionError[22m: expected '\n  position: relative;\n  flex: none…' not to match /border-top/[39m
+
+[32m- Expected:[39m
+/border-top/
+
+[31m+ Received:[39m
+"
+  position: relative;
+  flex: none;
+  padding: var(--s2) var(--s8) var(--s3);
+  border-top: 1px solid var(--hairline);
+  background: var(--bg);
+"
+
+[36m [2m❯[22m test/styles/reading-shell.test.ts:[2m74:22[22m[39m
+    [90m 72|[39m   it("输入坞没有横线，靠内缩与间距和正文分离", () => {
+    [90m 73|[39m     const dock = rule(workspace, ".chat-dock");
+    [90m 74|[39m     expect(dock).not.toMatch(/border-top/);
+    [90m   |[39m                      [31m^[39m
+    [90m 75|[39m     expect(dock).toMatch(/padding:\s*0 var\(--s3\) var\(--s3\)/);
+    [90m 76|[39m     const glassDock = rule(read(glassPath), ".chat-dock");
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/styles/reading-shell.test.ts[2m > [22m阅读页悬浮玻璃外壳[2m > [22m输入框是悬浮玻璃卡：圆角与内边距落在 token 上
+[31m[1mAssertionError[22m: expected '\n  max-width: 720px;\n  margin: 0 au…' to match /border-radius:\s*var\(--r-2xl\)/[39m
+
+[32m- Expected:[39m
+/border-radius:\s*var\(--r-2xl\)/
+
+[31m+ Received:[39m
+"
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--s4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--sh-2);
+"
+
+[36m [2m❯[22m test/styles/reading-shell.test.ts:[2m82:42[22m[39m
+    [90m 80|[39m
+    [90m 81|[39m   it("输入框是悬浮玻璃卡：圆角与内边距落在 token 上", () => {
+    [90m 82|[39m     expect(rule(workspace, ".composer")).toMatch(/border-radius:\s*var…
+    [90m   |[39m                                          [31m^[39m
+    [90m 83|[39m     const dockComposer = rule(workspace, ".chat-dock .composer");
+    [90m 84|[39m     expect(dockComposer).toMatch(/padding:\s*var\(--s3\) var\(--s4\) v…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/styles/reading-shell.test.ts[2m > [22m阅读页悬浮玻璃外壳[2m > [22m答案动作是玻璃圆点，不再用一条线收尾
+[31m[1mAssertionError[22m: expected '\n  display: flex;\n  align-items: ce…' not to match /border-top/[39m
+
+[32m- Expected:[39m
+/border-top/
+
+[31m+ Received:[39m
+"
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  margin-top: var(--s6);
+  padding-top: var(--s3);
+  border-top: 1px solid var(--line);
+"
+
+[36m [2m❯[22m test/styles/reading-shell.test.ts:[2m89:25[22m[39m
+    [90m 87|[39m   it("答案动作是玻璃圆点，不再用一条线收尾", () => {
+    [90m 88|[39m     const actions = rule(workspace, ".chat-answer-actions");
+    [90m 89|[39m     expect(actions).not.toMatch(/border-top/);
+    [90m   |[39m                         [31m^[39m
+    [90m 90|[39m     const dot = rule(workspace, ".chat-answer-actions .icon-btn");
+    [90m 91|[39m     expect(dot).toMatch(/width:\s*44px/);
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/styles/reading-shell.test.ts[2m > [22m阅读页悬浮玻璃外壳[2m > [22m窄窗外壳再收一档，抽屉与顶栏仍是浮面
+[31m[1mAssertionError[22m: missing rule: .app-workspace: expected -1 to be greater than or equal to 0[39m
+[36m [2m❯[22m rule test/styles/reading-shell.test.ts:[2m21:43[22m[39m
+    [90m 19|[39m function rule(css: string, selector: string): string {
+    [90m 20|[39m   const at = css.indexOf(`${selector} {`);
+    [90m 21|[39m   expect(at, `missing rule: ${selector}`).toBeGreaterThanOrEqual(0);
+    [90m   |[39m                                           [31m^[39m
+    [90m 22|[39m   const open = css.indexOf("{", at);
+    [90m 23|[39m   return css.slice(open + 1, css.indexOf("}", open));
+[90m [2m❯[22m test/styles/reading-shell.test.ts:[2m99:12[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/9]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[31m9 failed[39m[22m[2m | [22m[1m[32m15 passed[39m[22m[90m (24)[39m
+[2m   Start at [22m 09:39:56
+[2m   Duration [22m 326ms[2m (import 38%, tests 25%, transform 22%, worker 13%, environment 1%)[22m

@@ -3,7 +3,7 @@ import { act, createElement, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WorkspaceDataProvider } from "../../src/components/WorkspaceDataProvider";
-import { copyText } from "../../src/copy";
+import { copyFormat, copyText } from "../../src/copy";
 import { AppShell } from "../../src/layouts/AppShell";
 import { WorkspaceRouter } from "../../src/pages/WorkspaceRouter";
 import { FixtureRuntimeAdapter, memoryFixtureSource } from "../../src/platform/FixtureRuntimeAdapter";
@@ -56,7 +56,6 @@ async function escape(): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
 }
-
 describe("工作区对话页：阅读、复制、面板与知识树", () => {
   let restore: (() => void) | undefined;
   let host: HTMLElement;
@@ -68,6 +67,14 @@ describe("工作区对话页：阅读、复制、面板与知识树", () => {
     restore = injectRuntime(new FixtureRuntimeAdapter(memoryFixtureSource(bundledEntries())));
     host = document.createElement("div");
     document.body.append(host);
+    Object.defineProperty(Range.prototype, "getBoundingClientRect", {
+      configurable: true,
+      value: () => ({
+        x: 300, y: 400, width: 300, height: 20,
+        top: 400, left: 300, right: 600, bottom: 420,
+        toJSON: () => ({})
+      })
+    });
   });
 
   afterEach(() => {
@@ -78,6 +85,7 @@ describe("工作区对话页：阅读、复制、面板与知识树", () => {
     restore?.();
     restore = undefined;
     host.remove();
+    window.getSelection()?.removeAllRanges();
     Object.defineProperty(navigator, "clipboard", { configurable: true, value: undefined });
     window.history.replaceState(null, "", "/");
   });
@@ -93,6 +101,27 @@ describe("工作区对话页：阅读、复制、面板与知识树", () => {
   async function openChat(topic = 0): Promise<void> {
     openTopic(topic, 2);
     root = await render(host, chatShell());
+  }
+
+  /** 用真实 Range 选区，再让宿主收到 selectionchange；矩形由 beforeEach 的 stub 提供。 */
+  async function select(selector: string): Promise<string> {
+    const el = host.querySelector(selector);
+    expect(el, selector).not.toBeNull();
+    const range = document.createRange();
+    range.selectNodeContents(el!);
+    const sel = window.getSelection();
+    expect(sel).not.toBeNull();
+    await act(async () => {
+      sel!.removeAllRanges();
+      sel!.addRange(range);
+      document.dispatchEvent(new Event("selectionchange"));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    return sel!.toString();
+  }
+
+  function toolbar(): Element | null {
+    return host.querySelector(".selection-toolbar");
   }
 
   it("主题 0 的标题、模型、时间、回答结构与三条建议都来自夹具", async () => {
@@ -286,5 +315,115 @@ describe("工作区对话页：阅读、复制、面板与知识树", () => {
     expect(host.querySelector('[data-action="chat-copy"]')?.hasAttribute("disabled")).toBe(true);
     expect(host.querySelector('[data-action="chat-fork"]')?.hasAttribute("disabled")).toBe(true);
     expect(workspaceSnapshot().topic).toBe(1);
+  });
+
+  it("选正文出现六格浮条；选侧栏或折叠选区不出现", async () => {
+    await openChat();
+    expect(toolbar()).toBeNull();
+    await select(".chat-answer p");
+    expect(toolbar()).not.toBeNull();
+    expect(host.querySelectorAll(".selection-toolbar button")).toHaveLength(6);
+
+    await select(".brand-word");
+    expect(toolbar()).toBeNull();
+
+    await act(async () => {
+      window.getSelection()!.removeAllRanges();
+      document.dispatchEvent(new Event("selectionchange"));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    expect(toolbar()).toBeNull();
+  });
+
+  it("浮条复制写入选中文字并给出成功反馈，拒绝时明确失败", async () => {
+    const written: string[] = [];
+    const writeText = vi.fn(async (text: string) => {
+      written.push(text);
+    });
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText }
+    });
+    await openChat();
+    const selected = await select(".chat-answer p");
+    await press(host, '[data-word-action="copy"]');
+    expect(writeText).toHaveBeenCalledTimes(1);
+    expect(written[0]).toBe(selected);
+    expect(host.querySelector('[data-copy-status]')?.textContent)
+      .toBe(copyText("chat_selection_copied"));
+    expect(toolbar()).toBeNull();
+
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: vi.fn(async () => Promise.reject(new Error("denied"))) }
+    });
+    Object.defineProperty(document, "execCommand", {
+      configurable: true,
+      value: vi.fn(() => false)
+    });
+    await select(".chat-answer p");
+    await press(host, '[data-word-action="copy"]');
+    expect(host.querySelector('[data-copy-status]')?.textContent).toBe(copyText("chat_copy_failed"));
+  });
+
+  it("浮条全选选中整条回答，浮条仍在", async () => {
+    await openChat();
+    await select(".chat-answer p");
+    await press(host, '[data-word-action="select_all"]');
+    const answer = host.querySelector(".chat-answer")?.textContent ?? "";
+    expect(window.getSelection()?.toString()).toBe(answer);
+    expect(toolbar()).not.toBeNull();
+  });
+
+  it("问 AI 后出引用条与三个追问 chip，chip 只填草稿，清除引用后一起消失", async () => {
+    await openChat();
+    const selected = await select(".chat-answer p");
+    await press(host, '[data-word-action="ask_ai"]');
+
+    expect(toolbar()).toBeNull();
+    const quote = host.querySelector(".chat-quote");
+    expect(quote?.textContent).toContain(copyFormat("chat_quoted", selected));
+    const chips = host.querySelectorAll("[data-ask-chip]");
+    expect(chips).toHaveLength(3);
+    expect(chips[0]?.textContent).toBe(copyText("chat_ask_chip_why"));
+    expect(chips[1]?.textContent).toBe(copyText("chat_ask_chip_what"));
+    expect(chips[2]?.textContent).toBe(copyText("chat_ask_chip_how"));
+    const input = host.querySelector("#chat-composer-input") as HTMLTextAreaElement | null;
+    expect(document.activeElement).toBe(input);
+
+    await press(host, '[data-ask-chip="why"]');
+    expect(input?.value).toBe(copyText("chat_ask_query_why"));
+    expect(document.activeElement).toBe(input);
+    expect(draftFor("chat:0")).toBe(copyText("chat_ask_query_why"));
+
+    await press(host, '[data-action="chat-quote-clear"]');
+    expect(host.querySelector(".chat-quote")).toBeNull();
+    expect(host.querySelectorAll("[data-ask-chip]")).toHaveLength(0);
+  });
+
+  it("滚动、Esc 与窗口缩放都收起浮条", async () => {
+    await openChat();
+    const scroll = host.querySelector(".chat-scroll");
+    expect(scroll).not.toBeNull();
+
+    await select(".chat-answer p");
+    expect(toolbar()).not.toBeNull();
+    await act(async () => {
+      scroll!.dispatchEvent(new Event("scroll", { bubbles: true }));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    expect(toolbar()).toBeNull();
+
+    await select(".chat-answer p");
+    await escape();
+    expect(toolbar()).toBeNull();
+    expect(window.getSelection()?.rangeCount).toBe(0);
+
+    await select(".chat-answer p");
+    await act(async () => {
+      window.dispatchEvent(new Event("resize"));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    expect(toolbar()).toBeNull();
   });
 });

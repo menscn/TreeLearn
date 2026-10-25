@@ -1,0 +1,213 @@
+== 1440x900 顶部 ==
+{
+ "viewport": [
+  1440,
+  900
+ ],
+ "overflowX": false,
+ "dockH": "176px",
+ "dockInline": "176px",
+ "dock": {
+  "x": 264,
+  "y": 712,
+  "w": 1164,
+  "h": 176,
+  "bottom": 888
+ },
+ "composer": {
+  "x": 454,
+  "y": 712,
+  "w": 784,
+  "h": 164,
+  "bottom": 876
+ },
+ "scrollBox": {
+  "x": 264,
+  "y": 12,
+  "w": 1164,
+  "h": 876,
+  "bottom": 888
+ },
+ "scrollPos": 0,
+ "scrollRange": 2537,
+ "dockPosition": "absolute",
+ "dockZ": "2",
+ "dockPointer": "none",
+ "dockBg": "rgba(0, 0, 0, 0)",
+ "composerPointer": "auto",
+ "composerBlur": "blur(28px) saturate(1.5)",
+ "mask": "linear-gradient(rgb(22, 36, 28) calc(100% - 176px), rgba(0, 0, 0, 0.26))",
+ "readingPadBottom": "200px",
+ "lastContentBottom": 3201,
+ "lastClearsDock": false,
+ "hitDockLeftGap": "chat-scroll",
+ "hitDockRightGap": "chat-scroll",
+ "hitComposer": "TEXTAREA",
+ "quotePresent": false,
+ "askChips": 0
+}
+SHOT 085-chat-1440-top.png 2880x1800
+PASS 坞是悬浮层而非占一行 {"position":"absolute","z":"2"}
+PASS 滚动容器铺到底缘，坞覆盖在它之上而非把正文截断 {"scrollBottom":888,"dockBottom":888,"dockTop":712}
+PASS 底缘遮罩已生效且羽化带高度取自坞高 {"mask":"linear-gradient(rgb(22, 36, 28) calc(100% - 176px), rgba(0, 0, 0, 0.26))","dockH":"176px"}
+PASS 指针事件只落在输入框上 {"dock":"none","composer":"auto"}
+PASS 坞两侧空白不吃正文点击 {"left":"chat-scroll","right":"chat-scroll"}
+PASS 输入框自身仍可点击 {"hit":"TEXTAREA"}
+PASS 玻璃模糊仍在 {"blur":"blur(28px) saturate(1.5)"}
+PASS 1440 宽窗无横向溢出
+== 1440x900 滚到底 ==
+{
+ "viewport": [
+  1440,
+  900
+ ],
+ "overflowX": false,
+ "dockH": "176px",
+ "dockInline": "176px",
+ "dock": {
+  "x": 264,
+  "y": 712,
+  "w": 1164,
+  "h": 176,
+  "bottom": 888
+ },
+ "composer": {
+  "x": 454,
+  "y": 712,
+  "w": 784,
+  "h": 164,
+  "bottom": 876
+ },
+ "scrollBox": {
+  "x": 264,
+  "y": 12,
+  "w": 1164,
+  "h": 876,
+  "bottom": 888
+ },
+ "scrollPos": 2537,
+ "scrollRange": 2537,
+ "dockPosition": "absolute",
+ "dockZ": "2",
+ "dockPointer": "none",
+ "dockBg": "rgba(0, 0, 0, 0)",
+ "composerPointer": "auto",
+ "composerBlur": "blur(28px) saturate(1.5)",
+ "mask": "linear-gradient(rgb(22, 36, 28) calc(100% - 176px), rgba(0, 0, 0, 0.26))",
+ "readingPadBottom": "200px",
+ "lastContentBottom": 664,
+ "lastClearsDock": true,
+ "hitDockLeftGap": "chat-scroll",
+ "hitDockRightGap": "chat-scroll",
+ "hitComposer": "TEXTAREA",
+ "quotePresent": false,
+ "askChips": 0
+}
+SHOT 085-chat-1440-bottom.png 2880x1800
+PASS 末行滚到底不被输入框压住 {"lastContentBottom":664,"dockTop":712}
+== 1440x900 引用条出现后滚到底 ==
+{
+ "viewport": [
+  1440,
+  900
+ ],
+ "overflowX": false,
+ "dockH": "291px",
+ "dockInline": "291px",
+ "dock": {
+  "x": 264,
+  "y": 597,
+  "w": 1164,
+  "h": 291,
+  "bottom": 888
+ },
+ "composer": {
+  "x": 454,
+  "y": 597,
+  "w": 784,
+  "h": 279,
+  "bottom": 876
+ },
+ "scrollBox": {
+  "x": 264,
+  "y": 12,
+  "w": 1164,
+  "h": 876,
+  "bottom": 888
+ },
+ "scrollPos": 2652,
+ "scrollRange": 2652,
+ "dockPosition": "absolute",
+ "dockZ": "2",
+ "dockPointer": "none",
+ "dockBg": "rgba(0, 0, 0, 0)",
+ "composerPointer": "auto",
+ "composerBlur": "blur(28px) saturate(1.5)",
+ "mask": "linear-gradient(rgb(22, 36, 28) calc(100% - 291px), rgba(0, 0, 0, 0.26))",
+ "readingPadBottom": "315px",
+ "lastContentBottom": 549,
+ "lastClearsDock": true,
+ "hitDockLeftGap": "chat-scroll",
+ "hitDockRightGap": "chat-scroll",
+ "hitComposer": "chat-quote-text",
+ "quotePresent": true,
+ "askChips": 3
+}
+SHOT 085-chat-1440-quote.png 2880x1800
+PASS 引用条与三个追问 chip 已出现 {"chips":3}
+PASS 坞高变化被实测并写回 --dock-h {"before":"176px","after":"291px"}
+PASS 坞长高后末行仍不被压住 {"lastContentBottom":549,"dockTop":597}
+== 720x900 窄窗 ==
+{
+ "viewport": [
+  720,
+  900
+ ],
+ "overflowX": false,
+ "dockH": "291px",
+ "dockInline": "291px",
+ "dock": {
+  "x": 8,
+  "y": 601,
+  "w": 704,
+  "h": 291,
+  "bottom": 892
+ },
+ "composer": {
+  "x": 16,
+  "y": 601,
+  "w": 688,
+  "h": 283,
+  "bottom": 884
+ },
+ "scrollBox": {
+  "x": 8,
+  "y": 8,
+  "w": 704,
+  "h": 884,
+  "bottom": 892
+ },
+ "scrollPos": 2627,
+ "scrollRange": 2627,
+ "dockPosition": "absolute",
+ "dockZ": "2",
+ "dockPointer": "none",
+ "dockBg": "rgba(0, 0, 0, 0)",
+ "composerPointer": "auto",
+ "composerBlur": "blur(28px) saturate(1.5)",
+ "mask": "linear-gradient(rgb(22, 36, 28) calc(100% - 291px), rgba(0, 0, 0, 0.26))",
+ "readingPadBottom": "307px",
+ "lastContentBottom": 561,
+ "lastClearsDock": true,
+ "hitDockLeftGap": "chat-scroll",
+ "hitDockRightGap": "chat-scroll",
+ "hitComposer": "chat-quote-text",
+ "quotePresent": true,
+ "askChips": 3
+}
+SHOT 085-chat-720.png 1440x1800
+PASS 720 窄窗无横向溢出 {"viewport":[720,900]}
+PASS 窄窗坞同样悬浮 {"position":"absolute"}
+PASS 窄窗羽化带同样跟随坞高 {"mask":"linear-gradient(rgb(22, 36, 28) calc(100% - 291px), rgba(0, 0, 0, 0.26))","dockH":"291px"}
+RESULT pass=15 fail=0
+EXITCODE=0

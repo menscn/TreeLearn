@@ -1,0 +1,86 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.5 [39m[90mD:/Project/Android/Treelearn/frontend[39m
+
+ [31m❯[39m test/styles/reading-shell.test.ts [2m([22m[2m15 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 13[2mms[22m[39m
+   [32m✓[39m 阅读页悬浮玻璃外壳 [2m(7)[22m
+     [32m✓[39m 外壳四边内缩，侧栏成为独立浮起的玻璃面[32m 1[2mms[22m[39m
+     [32m✓[39m 顶栏是胶囊，不再贴满窗口也不画下边框[32m 0[2mms[22m[39m
+     [32m✓[39m 滚动留白等于栏高加 12px 间距，两种断点都不留空带[32m 1[2mms[22m[39m
+     [32m✓[39m 输入坞没有横线，玻璃面自身不画背景[32m 1[2mms[22m[39m
+     [32m✓[39m 输入框是悬浮玻璃卡：圆角与内边距落在 token 上[32m 0[2mms[22m[39m
+     [32m✓[39m 答案动作是玻璃圆点，不再用一条线收尾[32m 0[2mms[22m[39m
+     [32m✓[39m 窄窗外壳再收一档，抽屉与顶栏仍是浮面[32m 0[2mms[22m[39m
+   [32m✓[39m 输入坞悬浮与底缘羽化 [2m(5)[22m
+     [32m✓[39m 输入坞脱离文档流悬浮，只有输入框接收指针事件[32m 0[2mms[22m[39m
+     [32m✓[39m 坞高是单点声明：默认值写在 .chat-main，其余两处只 var 它[32m 0[2mms[22m[39m
+     [32m✓[39m 底缘用遮罩淡出正文，不盖一层色带[32m 0[2mms[22m[39m
+     [32m✓[39m 羽化终点单点声明，且不进四方 token 链[32m 1[2mms[22m[39m
+     [32m✓[39m 悬浮坞压在分支面板、抽屉与选区浮条之下[32m 0[2mms[22m[39m
+   [32m✓[39m 输入框焦点由玻璃卡承担，输入格自身不画框 [2m(2)[22m
+     [32m✓[39m 两档页面作用域都压过输入格上的直角 outline[32m 0[2mms[22m[39m
+     [32m✓[39m 卡片自己给出焦点环，去掉内框后仍有可见反馈[32m 0[2mms[22m[39m
+   [31m❯[39m 空态说明句是提示而不是标题 [2m(1)[22m
+[31m     [31m×[31m 左对齐贴在输入下方，不再居中横在卡片里[39m[32m 4[2mms[22m[39m
+ [31m❯[39m test/components/Composer.test.tsx [2m([22m[2m4 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 40[2mms[22m[39m
+   [31m❯[39m 输入坞说明句只在空态出现 [2m(4)[22m
+     [32m✓[39m 空草稿时说明句在场，文案来自 copy 表[32m 23[2mms[22m[39m
+     [32m✓[39m 纯空白也算空态：trim 之后才决定退场[32m 4[2mms[22m[39m
+[31m     [31m×[31m 开始打字就退场，卡片里只剩输入与动作[39m[32m 7[2mms[22m[39m
+     [32m✓[39m 说明退场后能力边界仍在：两个动作都禁用并写明尚未接通[32m 4[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m test/components/Composer.test.tsx[2m > [22m输入坞说明句只在空态出现[2m > [22m开始打字就退场，卡片里只剩输入与动作
+[31m[1mAssertionError[22m: 有草稿时不许再占一行说明: expected <p class="composer-help"></p> to be null[39m
+
+[32m- Expected:[39m
+null
+
+[31m+ Received:[39m
+<p
+  class="composer-help"
+>
+  发送、上传与分支创建尚未接通；这里可以写草稿，也可以复制回答。
+</p>
+
+[36m [2m❯[22m test/components/Composer.test.tsx:[2m64:64[22m[39m
+    [90m 62|[39m   it("开始打字就退场，卡片里只剩输入与动作", async () => {
+    [90m 63|[39m     const el = await render("你好");
+    [90m 64|[39m     expect(el.querySelector(".composer-help"), "有草稿时不许再占一行说明").toBeNul…
+    [90m   |[39m                                                                [31m^[39m
+    [90m 65|[39m     expect((el.querySelector(".composer textarea") as HTMLTextAreaElem…
+    [90m 66|[39m     expect(el.querySelectorAll(".composer-row .chip").length, "模型 chip…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/styles/reading-shell.test.ts[2m > [22m空态说明句是提示而不是标题[2m > [22m左对齐贴在输入下方，不再居中横在卡片里
+[31m[1mAssertionError[22m: 居中的 11px 灰字读起来像表单系统提示: expected '\r\n  margin: var(--s2) 0 0;\r\n  col…' not to match /text-align:\s*center/[39m
+
+[32m- Expected:[39m
+/text-align:\s*center/
+
+[31m+ Received:[39m
+"
+  margin: var(--s2) 0 0;
+  color: var(--ink3);
+  font-size: var(--fs-cap);
+  text-align: center;
+"
+
+[36m [2m❯[22m test/styles/reading-shell.test.ts:[2m206:47[22m[39m
+    [90m204|[39m   it("左对齐贴在输入下方，不再居中横在卡片里", () => {
+    [90m205|[39m     const help = rule(read(workspacePath), ".composer-help");
+    [90m206|[39m     expect(help, "居中的 11px 灰字读起来像表单系统提示").not.toMatch(/text-align:\s*c…
+    [90m   |[39m                                               [31m^[39m
+    [90m207|[39m   });
+    [90m208|[39m });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m17 passed[39m[22m[90m (19)[39m
+[2m   Start at [22m 19:54:19
+[2m   Duration [22m 922ms[2m (environment 81%, import 7%, tests 6%, transform 4%, worker 1%)[22m
+
+EXITCODE=1

@@ -80,16 +80,15 @@ describe("Web 玻璃纵深消费", () => {
     expect(bar).toMatch(/position:\s*absolute/);
     expect(bar).toMatch(/z-index:/);
     expect(rule(ws, ".workspace-column")).toMatch(/position:\s*relative/);
-    const height = bar.match(/height:\s*(\d+)px/);
-    expect(height, "the bar keeps one declared height").not.toBeNull();
+    const height = Number(bar.match(/height:\s*(\d+)px/)?.[1]);
+    expect(height, "the bar keeps one declared height").toBeGreaterThan(0);
     const rooms: Record<string, string> = {
       ".chat-scroll": ws,
       ".page-scroll": read(pagesPath),
     };
     for (const [scroller, css] of Object.entries(rooms)) {
-      const pad = rule(css, scroller).match(/padding-top:\s*(\d+)px/);
-      expect(pad, `${scroller} must take the bar's room`).not.toBeNull();
-      expect(pad?.[1], `${scroller} drifts from the bar height`).toBe(height?.[1]);
+      const pad = Number(rule(css, scroller).match(/padding-top:\s*(\d+)px/)?.[1]);
+      expect(pad, `${scroller} must take the bar's room plus the floating gap`).toBe(height + 12);
     }
   });
 
@@ -99,15 +98,14 @@ describe("Web 玻璃纵深消费", () => {
       return css.slice(css.indexOf("@media (max-width: 760px)"));
     };
     const wsBar = rule(narrow(workspacePath), ".workspace-topbar");
-    const height = wsBar.match(/height:\s*(\d+)px/);
-    expect(height, "the narrow bar declares its own height").not.toBeNull();
+    const height = Number(wsBar.match(/height:\s*(\d+)px/)?.[1]);
+    expect(height, "the narrow bar declares its own height").toBeGreaterThan(0);
     for (const [scroller, css] of [
       [".chat-scroll", narrow(workspacePath)],
       [".page-scroll", narrow(pagesPath)],
     ] as const) {
-      const pad = rule(css, scroller).match(/padding-top:\s*(\d+)px/);
-      expect(pad, `${scroller} must follow the narrow bar`).not.toBeNull();
-      expect(pad?.[1], `${scroller} leaves a gap under the narrow bar`).toBe(height?.[1]);
+      const pad = Number(rule(css, scroller).match(/padding-top:\s*(\d+)px/)?.[1]);
+      expect(pad, `${scroller} leaves a gap under the narrow bar`).toBe(height + 12);
     }
   });
 

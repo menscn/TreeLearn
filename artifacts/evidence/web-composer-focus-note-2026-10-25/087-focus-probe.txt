@@ -1,0 +1,86 @@
+== 首页 #/ 键盘焦点下 ==
+{
+ "hash": "#/",
+ "active": true,
+ "focusVisible": true,
+ "taOutlineStyle": "none",
+ "taOutlineWidth": "3px",
+ "taOutlineColor": "rgb(22, 36, 28)",
+ "taBorder": "none 0px",
+ "cardRingSpreads": [
+  "0px 0px 0px 1px",
+  "0px 0px 0px 2px"
+ ],
+ "cardShadow": "rgba(255, 255, 255, 0.88) 0px 0px 0px 1px inset, color(srgb 0.168627 0.431373 0.270588 / 0.26) 0px 0px 0px 2px, rgba(22, 36, 28, 0.42) 0px 20px 40px -28px, rgba(22, 36, 28, 0.05) 0px 2px 6px 0px",
+ "cardBlur": "blur(28px) saturate(1.5)",
+ "cardBox": [
+  398,
+  91,
+  896,
+  164
+ ],
+ "noteText": "点推荐问题或历史主题进入对话 · 发送与上传尚未接通",
+ "noteAlign": "start",
+ "noteSize": "11px",
+ "noteColor": "rgb(98, 112, 103)",
+ "noteBox": [
+  414,
+  219,
+  864,
+  28
+ ],
+ "noteInsideCard": true
+}
+PASS 首页：探针确实处于 :focus-visible 态 {"active":true}
+PASS 首页：输入格自身不再画直角框 {"style":"none","width":"3px","border":"none 0px"}
+PASS 首页：卡片那圈 2px 绿环在，焦点仍可见 {"rings":["0px 0px 0px 1px","0px 0px 0px 2px"]}
+PASS 首页：玻璃模糊未被这条改动碰掉 {"blur":"blur(28px) saturate(1.5)"}
+NOTE 首页 说明句 {"text":"点推荐问题或历史主题进入对话 · 发送与上传尚未接通","align":"start","size":"11px","box":[414,219,864,28],"insideCard":true}
+SHOT 087-home-1440-focus.png 3712x784
+== 首页 按钮焦点态 == {"label":"收起侧栏","focusVisible":true,"outlineStyle":"solid","outlineWidth":"2px"}
+PASS 首页：按钮/条目的焦点框没有被误伤 {"label":"收起侧栏","style":"solid"}
+== 对话页 #/chat/0 键盘焦点下 ==
+{
+ "hash": "#/chat/0",
+ "active": true,
+ "focusVisible": true,
+ "taOutlineStyle": "none",
+ "taOutlineWidth": "3px",
+ "taOutlineColor": "rgb(22, 36, 28)",
+ "taBorder": "none 0px",
+ "cardRingSpreads": [
+  "0px 0px 0px 1px",
+  "0px 0px 0px 2px"
+ ],
+ "cardShadow": "rgba(255, 255, 255, 0.88) 0px 0px 0px 1px inset, color(srgb 0.168627 0.431373 0.270588 / 0.26) 0px 0px 0px 2px, rgba(22, 36, 28, 0.42) 0px 20px 40px -28px, rgba(22, 36, 28, 0.05) 0px 2px 6px 0px",
+ "cardBlur": "blur(28px) saturate(1.5)",
+ "cardBox": [
+  454,
+  712,
+  784,
+  164
+ ],
+ "noteText": "发送、上传与分支创建尚未接通；这里可以写草稿，也可以复制回答。",
+ "noteAlign": "start",
+ "noteSize": "11px",
+ "noteColor": "rgb(98, 112, 103)",
+ "noteBox": [
+  470,
+  840,
+  752,
+  28
+ ],
+ "noteInsideCard": true
+}
+PASS 对话页：探针确实处于 :focus-visible 态 {"active":true}
+PASS 对话页：输入格自身不再画直角框 {"style":"none","width":"3px","border":"none 0px"}
+PASS 对话页：卡片那圈 2px 绿环在，焦点仍可见 {"rings":["0px 0px 0px 1px","0px 0px 0px 2px"]}
+PASS 对话页：玻璃模糊未被这条改动碰掉 {"blur":"blur(28px) saturate(1.5)"}
+NOTE 对话页 说明句 {"text":"发送、上传与分支创建尚未接通；这里可以写草稿，也可以复制回答。","align":"start","size":"11px","box":[470,840,752,28],"insideCard":true}
+SHOT 087-chat-1440-focus.png 3264x784
+== 对话页 按钮焦点态 == {"label":"收起侧栏","focusVisible":true,"outlineStyle":"solid","outlineWidth":"2px"}
+PASS 对话页：按钮/条目的焦点框没有被误伤 {"label":"收起侧栏","style":"solid"}
+SHOT 087-home-1440-full.png 2880x1800
+PROBE pass=10 fail=0
+VERDICT: PASS
+EXITCODE=0

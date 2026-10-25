@@ -1,0 +1,90 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.5 [39m[90mD:/Project/Android/Treelearn/frontend[39m
+
+ [31m❯[39m test/pages/ChatPage.test.tsx [2m([22m[2m14 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[33m 975[2mms[22m[39m
+   [31m❯[39m 工作区对话页：阅读、复制、面板与知识树 [2m(14)[22m
+     [32m✓[39m 主题 0 的标题、模型、时间、回答结构与三条建议都来自夹具[32m 80[2mms[22m[39m
+     [32m✓[39m 点建议把问题填进草稿并聚焦输入框，草稿在换视图后仍读得回来[32m 163[2mms[22m[39m
+     [32m✓[39m 离开对话时记下正文滚动位置，回来按主题恢复[32m 62[2mms[22m[39m
+     [32m✓[39m 复制取原始回答全文并给出成功反馈；剪贴板拒绝时明确失败[32m 57[2mms[22m[39m
+     [32m✓[39m 发送、附件、重置与新建分支都禁用，可访问名说明尚未接通[32m 45[2mms[22m[39m
+     [32m✓[39m 分支面板默认关闭，打开后列根分支、子分支数与 AI 总结，Esc 还焦[32m 63[2mms[22m[39m
+     [32m✓[39m 窄窗遮罩可点关闭分支面板[32m 58[2mms[22m[39m
+     [32m✓[39m 知识树显示真实根节点，缩放夹在 50–150%，Esc 关闭并还焦[32m 154[2mms[22m[39m
+     [32m✓[39m 主题 1 只显示学习库摘要与无基线说明，不借用主题 0 的回答[32m 45[2mms[22m[39m
+[31m     [31m×[31m 选正文出现六格浮条；选侧栏或折叠选区不出现[39m[32m 68[2mms[22m[39m
+[31m     [31m×[31m 浮条复制写入选中文字并给出成功反馈，拒绝时明确失败[39m[32m 42[2mms[22m[39m
+[31m     [31m×[31m 浮条全选选中整条回答，浮条仍在[39m[32m 46[2mms[22m[39m
+[31m     [31m×[31m 问 AI 后出引用条与三个追问 chip，chip 只填草稿，清除引用后一起消失[39m[32m 47[2mms[22m[39m
+[31m     [31m×[31m 滚动、Esc 与窗口缩放都收起浮条[39m[32m 43[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 5 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m test/pages/ChatPage.test.tsx[2m > [22m工作区对话页：阅读、复制、面板与知识树[2m > [22m选正文出现六格浮条；选侧栏或折叠选区不出现
+[31m[1mAssertionError[22m: expected null not to be null[39m
+[36m [2m❯[22m test/pages/ChatPage.test.tsx:[2m324:27[22m[39m
+    [90m322|[39m     expect(toolbar()).toBeNull();
+    [90m323|[39m     await select(".chat-answer p");
+    [90m324|[39m     expect(toolbar()).not.toBeNull();
+    [90m   |[39m                           [31m^[39m
+    [90m325|[39m     expect(host.querySelectorAll(".selection-toolbar button")).toHaveL…
+    [90m326|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/pages/ChatPage.test.tsx[2m > [22m工作区对话页：阅读、复制、面板与知识树[2m > [22m浮条复制写入选中文字并给出成功反馈，拒绝时明确失败
+[31m[1mAssertionError[22m: [data-word-action="copy"]: expected null not to be null[39m
+[36m [2m❯[22m press test/pages/ChatPage.test.tsx:[2m35:28[22m[39m
+    [90m 33|[39m async function press(host: HTMLElement, selector: string): Promise<voi…
+    [90m 34|[39m   const el = host.querySelector(selector);
+    [90m 35|[39m   expect(el, selector).not.toBeNull();
+    [90m   |[39m                            [31m^[39m
+    [90m 36|[39m   await act(async () => {
+    [90m 37|[39m     el!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+[90m [2m❯[22m test/pages/ChatPage.test.tsx:[2m349:11[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/pages/ChatPage.test.tsx[2m > [22m工作区对话页：阅读、复制、面板与知识树[2m > [22m浮条全选选中整条回答，浮条仍在
+[31m[1mAssertionError[22m: [data-word-action="select_all"]: expected null not to be null[39m
+[36m [2m❯[22m press test/pages/ChatPage.test.tsx:[2m35:28[22m[39m
+    [90m 33|[39m async function press(host: HTMLElement, selector: string): Promise<voi…
+    [90m 34|[39m   const el = host.querySelector(selector);
+    [90m 35|[39m   expect(el, selector).not.toBeNull();
+    [90m   |[39m                            [31m^[39m
+    [90m 36|[39m   await act(async () => {
+    [90m 37|[39m     el!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+[90m [2m❯[22m test/pages/ChatPage.test.tsx:[2m372:11[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/pages/ChatPage.test.tsx[2m > [22m工作区对话页：阅读、复制、面板与知识树[2m > [22m问 AI 后出引用条与三个追问 chip，chip 只填草稿，清除引用后一起消失
+[31m[1mAssertionError[22m: [data-word-action="ask_ai"]: expected null not to be null[39m
+[36m [2m❯[22m press test/pages/ChatPage.test.tsx:[2m35:28[22m[39m
+    [90m 33|[39m async function press(host: HTMLElement, selector: string): Promise<voi…
+    [90m 34|[39m   const el = host.querySelector(selector);
+    [90m 35|[39m   expect(el, selector).not.toBeNull();
+    [90m   |[39m                            [31m^[39m
+    [90m 36|[39m   await act(async () => {
+    [90m 37|[39m     el!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+[90m [2m❯[22m test/pages/ChatPage.test.tsx:[2m381:11[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/pages/ChatPage.test.tsx[2m > [22m工作区对话页：阅读、复制、面板与知识树[2m > [22m滚动、Esc 与窗口缩放都收起浮条
+[31m[1mAssertionError[22m: expected null not to be null[39m
+[36m [2m❯[22m test/pages/ChatPage.test.tsx:[2m410:27[22m[39m
+    [90m408|[39m
+    [90m409|[39m     await select(".chat-answer p");
+    [90m410|[39m     expect(toolbar()).not.toBeNull();
+    [90m   |[39m                           [31m^[39m
+    [90m411|[39m     await act(async () => {
+    [90m412|[39m       scroll!.dispatchEvent(new Event("scroll", { bubbles: true }));
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m9 passed[39m[22m[90m (14)[39m
+[2m   Start at [22m 09:50:51
+[2m   Duration [22m 2.14s[2m (tests 49%, environment 37%, transform 9%, import 6%)[22m

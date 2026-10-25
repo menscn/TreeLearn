@@ -6,10 +6,13 @@ import { Icon } from "../components/Icon";
 import { IconButton } from "../components/IconButton";
 import { Notice } from "../components/Notice";
 import { PersonaPicker } from "../components/PersonaPicker";
+import { SelectionToolbar } from "../components/SelectionToolbar";
 import { TreeOverlay } from "../components/TreeOverlay";
 import { useWorkspaceData } from "../components/WorkspaceDataProvider";
 import { copyFormat } from "../copy";
 import { useCopy } from "../hooks/useCopy";
+import { useDockHeight } from "../hooks/useDockHeight";
+import { useTextSelection } from "../hooks/useTextSelection";
 import { useWorkspace } from "../hooks/useWorkspace";
 import { personaNameKey, type PersonaId } from "../store/persona";
 import {
@@ -21,7 +24,13 @@ import {
   setTreeOpen
 } from "../store/workspace";
 
-type CopyFeedback = "copied" | "failed" | null;
+type CopyFeedback = "copied" | "selection" | "failed" | null;
+
+const ASK_CHIPS = [
+  { id: "why", label: "chat_ask_chip_why", query: "chat_ask_query_why", a11y: "cd_chat_ask_why" },
+  { id: "what", label: "chat_ask_chip_what", query: "chat_ask_query_what", a11y: "cd_chat_ask_what" },
+  { id: "how", label: "chat_ask_chip_how", query: "chat_ask_query_how", a11y: "cd_chat_ask_how" }
+] as const;
 
 async function writeClipboard(text: string): Promise<boolean> {
   try {
@@ -62,14 +71,20 @@ export function ChatPage() {
   const [draft, setDraftState] = useState(() => draftFor(topicKey));
   const [feedback, setFeedback] = useState<CopyFeedback>(null);
   const [personaNote, setPersonaNote] = useState<string | null>(null);
+  const [quote, setQuote] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const mainRef = useRef<HTMLDivElement>(null);
+  const dockRef = useRef<HTMLDivElement>(null);
+  const readingRef = useRef<HTMLElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const feedbackTimer = useRef<number | undefined>(undefined);
   const personaTimer = useRef<number | undefined>(undefined);
+  const { selection, clear: clearSelection, selectAll } = useTextSelection(readingRef);
 
   useEffect(() => {
     setDraftState(draftFor(topicKey));
     setPersonaNote(null);
+    setQuote(null);
   }, [topicKey]);
 
   useLayoutEffect(() => {
@@ -83,6 +98,8 @@ export function ChatPage() {
     if (feedbackTimer.current !== undefined) window.clearTimeout(feedbackTimer.current);
     if (personaTimer.current !== undefined) window.clearTimeout(personaTimer.current);
   }, []);
+
+  useDockHeight(mainRef, dockRef);
 
   const updateDraft = (value: string): void => {
     setDraftState(value);
@@ -106,6 +123,29 @@ export function ChatPage() {
     report(await writeClipboard(chat.answer) ? "copied" : "failed");
   };
 
+  const copySelection = async (text: string): Promise<void> => {
+    report(await writeClipboard(text) ? "selection" : "failed");
+    clearSelection();
+  };
+
+  const askSelection = (text: string): void => {
+    setQuote(text);
+    clearSelection();
+    inputRef.current?.focus();
+  };
+
+  const selectWholeAnswer = (): void => {
+    selectAll(readingRef.current?.querySelector<HTMLElement>(".chat-answer") ?? null);
+  };
+
+  const feedbackText = feedback === "copied"
+    ? t("chat_copied")
+    : feedback === "selection"
+      ? t("chat_selection_copied")
+      : feedback === "failed"
+        ? t("chat_copy_failed")
+        : "";
+
   const closeTree = useCallback((): void => {
     setTreeOpen(false);
     window.setTimeout(() => document.getElementById("tree-toggle")?.focus(), 0);
@@ -122,14 +162,14 @@ export function ChatPage() {
   return (
     <section className="chat-screen" data-screen="chat">
       <div className="chat-shell">
-        <div className="chat-main">
+        <div ref={mainRef} className="chat-main">
           <div
             ref={scrollRef}
             className="chat-scroll"
             data-slot="chat-scroll"
             onScroll={(event) => rememberScroll(topicKey, event.currentTarget.scrollTop)}
           >
-            <article className="chat-reading">
+            <article ref={readingRef} className="chat-reading">
               <h1 className="chat-title" data-node="chat_title">{topic.title}</h1>
               <p className="chat-meta">{chat?.time ?? topic.meta}</p>
 
@@ -174,7 +214,7 @@ export function ChatPage() {
                 />
               </div>
               <p className="chat-feedback" data-copy-status={feedback ?? undefined} role="status">
-                {feedback === "copied" ? t("chat_copied") : feedback === "failed" ? t("chat_copy_failed") : ""}
+                {feedbackText}
               </p>
 
               {chat !== null && chat.suggestions.length > 0 ? (
@@ -204,6 +244,7 @@ export function ChatPage() {
             placeholder={chat?.placeholder ?? t("chat_composer_placeholder")}
             model={chat?.model ?? ""}
             inputRef={inputRef}
+            dockRef={dockRef}
             onChange={updateDraft}
             personaSlot={
               <PersonaPicker
@@ -217,10 +258,49 @@ export function ChatPage() {
                 <p className="persona-feedback" data-persona-feedback role="status">{personaNote}</p>
               )
             }
+            quoteSlot={quote === null ? null : (
+              <>
+                <div className="chat-quote" data-quote>
+                  <p className="chat-quote-text">{copyFormat("chat_quoted", quote)}</p>
+                  <IconButton
+                    action="chat-quote-clear"
+                    className="chat-quote-clear"
+                    glyph="chat_close"
+                    label={t("chat_quote_clear")}
+                    onClick={() => setQuote(null)}
+                  />
+                </div>
+                <div className="chat-ask-chips" role="group" aria-label={t("chat_quote_chips")}>
+                  {ASK_CHIPS.map((chip) => (
+                    <button
+                      aria-label={t(chip.a11y)}
+                      className="chat-ask-chip"
+                      data-ask-chip={chip.id}
+                      key={chip.id}
+                      type="button"
+                      onClick={() => {
+                        updateDraft(t(chip.query));
+                        inputRef.current?.focus();
+                      }}
+                    >
+                      {t(chip.label)}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           />
         </div>
         <BranchPanel branch={branch} open={state.panelOpen} />
       </div>
+      <SelectionToolbar
+        selection={selection}
+        onAskAi={askSelection}
+        onCopy={(text) => {
+          void copySelection(text);
+        }}
+        onSelectAll={selectWholeAnswer}
+      />
       {tree !== null && state.treeOpen ? <TreeOverlay tree={tree} onClose={closeTree} /> : null}
     </section>
   );

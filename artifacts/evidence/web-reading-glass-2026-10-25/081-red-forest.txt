@@ -1,0 +1,46 @@
+$ pnpm --dir frontend exec vitest run test/styles
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.5 [39m[90mD:/Project/Android/Treelearn/frontend[39m
+
+ [32m✓[39m test/styles/glass.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m test/styles/morandi-material.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m test/styles/chat-column.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [31m❯[39m test/styles/reading-shell.test.ts [2m([22m[2m7 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 13[2mms[22m[39m
+   [31m❯[39m 阅读页悬浮玻璃外壳 [2m(7)[22m
+     [32m✓[39m 外壳四边内缩，侧栏成为独立浮起的玻璃面[32m 2[2mms[22m[39m
+     [32m✓[39m 顶栏是胶囊，不再贴满窗口也不画下边框[32m 0[2mms[22m[39m
+[31m     [31m×[31m 滚动留白等于栏高加 12px 间距，两种断点都不留空带[39m[32m 7[2mms[22m[39m
+     [32m✓[39m 输入坞没有横线，靠内缩与间距和正文分离[32m 1[2mms[22m[39m
+     [32m✓[39m 输入框是悬浮玻璃卡：圆角与内边距落在 token 上[32m 0[2mms[22m[39m
+     [32m✓[39m 答案动作是玻璃圆点，不再用一条线收尾[32m 0[2mms[22m[39m
+     [32m✓[39m 窄窗外壳再收一档，抽屉与顶栏仍是浮面[32m 0[2mms[22m[39m
+ [32m✓[39m test/styles/glass-depth.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m test/styles/reading-shell.test.ts[2m > [22m阅读页悬浮玻璃外壳[2m > [22m滚动留白等于栏高加 12px 间距，两种断点都不留空带
+[31m[1mAssertionError[22m: .forest-page 与顶栏高度不配套: expected 76 to be 64 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 64[39m
+[31m+ 76[39m
+
+[36m [2m❯[22m test/styles/reading-shell.test.ts:[2m63:43[22m[39m
+    [90m 61|[39m     ] as const) {
+    [90m 62|[39m       const pad = Number(rule(css, scroller).match(/padding-top:\s*(\d…
+    [90m 63|[39m       expect(pad, `${scroller} 与顶栏高度不配套`).toBe(wideHeight + 12);
+    [90m   |[39m                                           [31m^[39m
+    [90m 64|[39m     }
+    [90m 65|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (5)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m26 passed[39m[22m[90m (27)[39m
+[2m   Start at [22m 10:22:24
+[2m   Duration [22m 268ms[2m (import 37%, transform 33%, tests 18%, worker 11%, environment 1%)[22m
+
+EXITCODE=1

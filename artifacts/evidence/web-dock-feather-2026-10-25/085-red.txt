@@ -1,0 +1,71 @@
+  --fs-sm: 13px;
+  --fs-cap: 11px;
+  --sh-1: 0 1px 2px rgba(22,36,28,.04);
+  --sh-2: 0 4px 12px rgba(22,36,28,.06);
+  --kai: 'LXGW WenKai','Noto Serif SC','Songti SC',serif;
+  --serif: 'Noto Serif SC','Songti SC',Georgia,serif;
+  --brush: 'Ma Shan Zheng','LXGW WenKai',serif;
+  --sans: 'Noto Sans SC',-apple-system,sans-serif;
+  --paper-rule: rgba(30,43,35,.018);
+  --paper-write: rgba(46,125,79,.075);
+  --lh-read: 28px;
+  --glass-blur: 28px;
+  --glass-saturate: 150%;
+  --glass-tint-falloff: .58;
+}
+"
+
+[36m [2m❯[22m test/styles/reading-shell.test.ts:[2m153:30[22m[39m
+    [90m151|[39m
+    [90m152|[39m   it("羽化残影落在 token 上，样式里不出现裸颜色", () => {
+    [90m153|[39m     expect(read(tokensPath)).toMatch(/--dock-feather-ghost:\s*rgba\(/);
+    [90m   |[39m                              [31m^[39m
+    [90m154|[39m     const css = read(glassPath);
+    [90m155|[39m     expect(`${workspace}${css}`.match(/rgba\(/g) ?? []).toHaveLength(0…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/styles/reading-shell.test.ts[2m > [22m输入坞悬浮与底缘羽化[2m > [22m悬浮坞压在分支面板、抽屉与选区浮条之下
+[31m[1mAssertionError[22m: 坞必须浮在正文之上: expected NaN to be greater than 0[39m
+[36m [2m❯[22m test/styles/reading-shell.test.ts:[2m161:28[22m[39m
+    [90m159|[39m     const dock = rule(workspace, ".chat-dock");
+    [90m160|[39m     const z = Number(dock.match(/z-index:\s*(\d+)/)?.[1]);
+    [90m161|[39m     expect(z, "坞必须浮在正文之上").toBeGreaterThan(0);
+    [90m   |[39m                            [31m^[39m
+    [90m162|[39m     const narrow = narrow(workspace);
+    [90m163|[39m     const branch = Number(workspace.match(/\.branch-panel\s*\{[^}]*z-i…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (6)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m27 passed[39m[22m[90m (32)[39m
+[2m   Start at [22m 14:20:12
+[2m   Duration [22m 12.16s[2m (environment 96%, worker 2%, import 1%, transform 1%)[22m
+
+   [32m✓[39m 阅读页悬浮玻璃外壳 [2m(7)[22m
+     [32m✓[39m 外壳四边内缩，侧栏成为独立浮起的玻璃面[32m 2[2mms[22m[39m
+     [32m✓[39m 顶栏是胶囊，不再贴满窗口也不画下边框[32m 0[2mms[22m[39m
+     [32m✓[39m 滚动留白等于栏高加 12px 间距，两种断点都不留空带[32m 1[2mms[22m[39m
+     [32m✓[39m 输入坞没有横线，玻璃面自身不画背景[32m 1[2mms[22m[39m
+     [32m✓[39m 输入框是悬浮玻璃卡：圆角与内边距落在 token 上[32m 0[2mms[22m[39m
+     [32m✓[39m 答案动作是玻璃圆点，不再用一条线收尾[32m 0[2mms[22m[39m
+     [32m✓[39m 窄窗外壳再收一档，抽屉与顶栏仍是浮面[32m 0[2mms[22m[39m
+[31m     [31m×[31m 输入坞脱离文档流悬浮，只有输入框接收指针事件[39m[32m 5[2mms[22m[39m
+[31m     [31m×[31m 坞高是单点声明：默认值写在 .chat-main，其余两处只 var 它[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m 底缘用遮罩淡出正文，不盖一层色带[39m[32m 2[2mms[22m[39m
+[31m     [31m×[31m 羽化残影落在 token 上，样式里不出现裸颜色[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m 悬浮坞压在分支面板、抽屉与选区浮条之下[39m[32m 1[2mms[22m[39m
+ [32m✓[39m test/styles/glass-depth.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m test/styles/morandi-material.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m test/styles/glass.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m test/styles/chat-column.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+[41m[1m FAIL [22m[49m test/hooks/useDockHeight.test.ts[2m [ test/hooks/useDockHeight.test.ts ][22m
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 5 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+[41m[1m FAIL [22m[49m test/styles/reading-shell.test.ts[2m > [22m输入坞悬浮与底缘羽化[2m > [22m输入坞脱离文档流悬浮，只有输入框接收指针事件
+[41m[1m FAIL [22m[49m test/styles/reading-shell.test.ts[2m > [22m输入坞悬浮与底缘羽化[2m > [22m坞高是单点声明：默认值写在 .chat-main，其余两处只 var 它
+[41m[1m FAIL [22m[49m test/styles/reading-shell.test.ts[2m > [22m输入坞悬浮与底缘羽化[2m > [22m底缘用遮罩淡出正文，不盖一层色带
+[41m[1m FAIL [22m[49m test/styles/reading-shell.test.ts[2m > [22m输入坞悬浮与底缘羽化[2m > [22m羽化残影落在 token 上，样式里不出现裸颜色
+[41m[1m FAIL [22m[49m test/styles/reading-shell.test.ts[2m > [22m输入坞悬浮与底缘羽化[2m > [22m悬浮坞压在分支面板、抽屉与选区浮条之下
+[2m Test Files [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (6)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m27 passed[39m[22m[90m (32)[39m

@@ -1,0 +1,43 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.5 [39m[90mD:/Project/Android/Treelearn/frontend[39m
+
+ [31m❯[39m test/styles/reading-shell.test.ts [2m([22m[2m14 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 16[2mms[22m[39m
+   [32m✓[39m 阅读页悬浮玻璃外壳 [2m(7)[22m
+     [32m✓[39m 外壳四边内缩，侧栏成为独立浮起的玻璃面[32m 3[2mms[22m[39m
+     [32m✓[39m 顶栏是胶囊，不再贴满窗口也不画下边框[32m 0[2mms[22m[39m
+     [32m✓[39m 滚动留白等于栏高加 12px 间距，两种断点都不留空带[32m 2[2mms[22m[39m
+     [32m✓[39m 输入坞没有横线，玻璃面自身不画背景[32m 1[2mms[22m[39m
+     [32m✓[39m 输入框是悬浮玻璃卡：圆角与内边距落在 token 上[32m 0[2mms[22m[39m
+     [32m✓[39m 答案动作是玻璃圆点，不再用一条线收尾[32m 1[2mms[22m[39m
+     [32m✓[39m 窄窗外壳再收一档，抽屉与顶栏仍是浮面[32m 0[2mms[22m[39m
+   [32m✓[39m 输入坞悬浮与底缘羽化 [2m(5)[22m
+     [32m✓[39m 输入坞脱离文档流悬浮，只有输入框接收指针事件[32m 0[2mms[22m[39m
+     [32m✓[39m 坞高是单点声明：默认值写在 .chat-main，其余两处只 var 它[32m 0[2mms[22m[39m
+     [32m✓[39m 底缘用遮罩淡出正文，不盖一层色带[32m 0[2mms[22m[39m
+     [32m✓[39m 羽化终点单点声明，且不进四方 token 链[32m 1[2mms[22m[39m
+     [32m✓[39m 悬浮坞压在分支面板、抽屉与选区浮条之下[32m 0[2mms[22m[39m
+   [31m❯[39m 输入框焦点由玻璃卡承担，输入格自身不画框 [2m(2)[22m
+[31m     [31m×[31m 两档页面作用域都压过输入格上的直角 outline[39m[32m 5[2mms[22m[39m
+     [32m✓[39m 卡片自己给出焦点环，去掉内框后仍有可见反馈[32m 0[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m test/styles/reading-shell.test.ts[2m > [22m输入框焦点由玻璃卡承担，输入格自身不画框[2m > [22m两档页面作用域都压过输入格上的直角 outline
+[31m[1mAssertionError[22m: 缺少压过页面级焦点框的作用域规则: expected null not to be null[39m
+[36m [2m❯[22m test/styles/reading-shell.test.ts:[2m192:42[22m[39m
+    [90m190|[39m       /\.workspace-page \.composer textarea:focus-visible,\s*\.chat-sc…
+    [90m191|[39m     );
+    [90m192|[39m     expect(kill, "缺少压过页面级焦点框的作用域规则").not.toBeNull();
+    [90m   |[39m                                          [31m^[39m
+    [90m193|[39m     expect(kill?.[1]).toMatch(/outline:\s*none/);
+    [90m194|[39m   });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m13 passed[39m[22m[90m (14)[39m
+[2m   Start at [22m 18:39:57
+[2m   Duration [22m 212ms[2m (import 35%, tests 34%, transform 19%, worker 11%)[22m
+
+EXITCODE=1

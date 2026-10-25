@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>知芽 · 阅读页玻璃方案 v1（Web / 桌面共用）</title>
+<!--
+  ============================================================================
+  知芽（TreeLearn）阅读页玻璃方案 v1 · 2026-10-25
+  ============================================================================
+  目的：把 Web / Electron 阅读页对齐 Android Scheme A 的结构，并统一玻璃材质。
+  结构来源（Android）：
+    - 胶囊顶栏 52dp、上缘 6dp、左右 16dp、radius_full、elevation 8dp
+    - 阅读面板左右 12dp、radius 28dp、--glass-reader 93%
+    - 输入坞左右 12dp、radius 24dp、内边距 14/11/12/11、--glass-card
+    - 选中文本六格图标选单：问 AI / 新建主题 / 高亮 / 批注 / 复制 / 全选
+    - 引用条 + 三个一问即发的 chip：为什么 / 是什么 / 怎么用
+  材质来源（Web tokens.css）：
+    --glass-chrome / --glass-card / --glass-reader / --glass-control
+    --glass-edge / --glass-sheen / --glass-shadow-key / --glass-shadow-ambient
+  说明：本文件是供评审的设计稿，不是生产实现的第二权威；落地时数值仍从 tokens 取。
+  单文件、无外部依赖，双击即可打开。
+  ============================================================================
+-->
+<style>
+:root {
+  --bg: #F4F1EB;
+  --surface: #FCFBF8;
+  --ink: #16241C;
+  --ink2: #435449;
+  --ink3: #627067;
+  --line: #E2DFD6;
+  --green: #2B6E45;
+  --green-deep: #164027;
+  --green-soft: #E3F0E7;
+  --green-faint: #F0F7F1;
+  --amber: #B05108;
+  --yellow-hl: #FFF3B0;
+
+  --glass-chrome: rgba(255,255,255,.74);
+  --glass-card: rgba(255,255,255,.86);
+  --glass-reader: rgba(255,255,255,.93);
+  --glass-field: rgba(244,241,235,.74);
+  --glass-control: rgba(255,255,255,.98);
+  --glass-edge: rgba(255,255,255,.88);
+  --glass-line: rgba(22,36,28,.06);
+  --glass-sheen: rgba(255,255,255,.50);
+  --glass-shadow-key: rgba(22,36,28,.42);
+  --glass-shadow-ambient: rgba(22,36,28,.05);
+  --glass-blur: 28px;
+  --glass-saturate: 150%;
+
+  --glow-green: rgba(43,110,69,.18);
+  --glow-sand: rgba(214,169,110,.22);
+  --glow-white: rgba(255,255,255,.55);
+  --glow-rose: rgba(201,164,162,.20);
+  --glow-lilac: rgba(163,156,186,.18);
+  --mist-base: #EDEDE4;
+  --mist-warm: #F7F1E4;
+  --mist-cool: #DCE6DF;
+  --mist-deep: #C7D6CE;
+
+  --serif: "Noto Serif SC","Source Han Serif SC","Songti SC","STSong",SimSun,Georgia,serif;
+  --sans: "Noto Sans SC","Source Han Sans SC","PingFang SC","Microsoft YaHei",-apple-system,"Segoe UI",sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: var(--sans);
+  color: var(--ink);
+  background: #E7E7DE;
+  -webkit-font-smoothing: antialiased;
+}
+p, h1, h2, h3, ul, figure { margin: 0; }
+ul { padding: 0; list-style: none; }
+button, textarea { font: inherit; color: inherit; }
+button { border: 0; background: none; padding: 0; cursor: pointer; }
+svg { display: block; }
+::selection { background: rgba(43,110,69,.18); }
+
+/* ---------- 评审台 ---------- */
+.stage {
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 40px;
+  padding: 32px 24px 48px;
+}
+.guide {
+  width: 292px;
+  flex: none;
+  position: sticky;
+  top: 32px;
+}
+.guide-brand { display: flex; align-items: center; gap: 9px; margin-bottom: 4px; }
+.guide-brand svg { width: 22px; height: 22px; color: var(--green-deep); }
+.guide-name { font-family: var(--serif); font-size: 24px; font-weight: 700; }
+.guide-badge {
+  font-size: 10px; font-weight: 600; letter-spacing: .08em;
+  color: var(--green-deep); background: var(--green-soft);
+  border-radius: 99px; padding: 3px 9px;
+}
+.guide-sub { font-size: 12px; color: var(--ink3); line-height: 1.7; margin-bottom: 18px; }
+.guide h3 {
+  margin: 18px 0 8px;
+  font-size: 11px; font-weight: 700; letter-spacing: .16em;
+  color: var(--green-deep);
+}
+.guide-steps { counter-reset: step; list-style: none; padding: 0; }
+.guide-steps li {
+  counter-increment: step;
+  position: relative;
+  padding: 7px 0 7px 28px;
+  border-bottom: 1px dashed rgba(22,36,28,.12);
+  font-size: 12.5px; line-height: 1.65; color: var(--ink2);
+}
+.guide-steps li::before {
+  content: counter(step);
+  position: absolute; left: 0; top: 8px;
+  width: 19px; height: 19px; border-radius: 50%;
+  background: var(--green-soft); color: var(--green-deep);
+  font-size: 10.5px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.guide-steps b { color: var(--ink); font-weight: 600; }
+.tools { display: flex; flex-wrap: wrap; gap: 7px; }
+.chip {
+  padding: 6px 12px;
+  border-radius: 99px;
+  border: 1px solid rgba(22,36,28,.14);
+  background: rgba(255,255,255,.72);
+  color: var(--ink2);
+  font-size: 12px;
+  transition: background .15s, border-color .15s;
+}
+.chip:hover { border-color: var(--green); }
+.chip.on { background: var(--green-deep); border-color: var(--green-deep); color: #fff; }
+.spec { display: flex; flex-direction: column; gap: 6px; }
+.spec li {
+  display: flex; justify-content: space-between; gap: 10px;
+  padding: 6px 9px; border-radius: 8px;
+  background: rgba(255,255,255,.55);
+  font-size: 11px; color: var(--ink2);
+}
+.spec code { font-family: ui-monospace, Consolas, monospace; font-size: 10px; color: var(--green-deep); }
+.guide-note {
+  margin-top: 16px; padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(22,36,28,.05);
+  font-size: 11.5px; line-height: 1.75; color: var(--ink3);
+}
+
+.stage-frame { flex: none; transform-origin: top left; }
+.stage-frame[data-zoom="85"] { transform: scale(.85); margin-right: -177px; margin-bottom: -123px; }
+.stage-frame[data-zoom="100"] { transform: none; }
+
+/* ---------- 桌面窗口 ---------- */
+.device {
+  position: relative;
+  width: 1180px;
+  height: 820px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--mist-base);
+  box-shadow:
+    0 0 0 1px rgba(22,36,28,.14),
+    0 36px 80px -34px rgba(22,36,28,.5);
+}
+.device::after {
+  content: "";
+  position: absolute; inset: 0;
+  z-index: 30;
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.45);
+  pointer-events: none;
+}
+.titlebar {
+  position: relative;
+  z-index: 4;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 6px 0 14px;
+  background: rgba(250,249,245,.92);
+  border-bottom: 1px solid rgba(22,36,28,.07);
+  font-size: 12px; color: var(--ink2);
+}
+.titlebar svg { width: 16px; height: 16px; color: var(--green-deep); }
+.titlebar .win-btns { margin-left: auto; display: flex; }
+.titlebar .win-btns span {
+  width: 44px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink2); font-size: 11px;
+}
+.titlebar .win-btns span:hover { background: rgba(22,36,28,.06); }
+.titlebar .win-btns span.close:hover { background: #C42B1C; color: #fff; }
+
+.app {
+  position: relative;
+  height: calc(100% - 40px);
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background-color: var(--mist-base);
+  background-image:
+    radial-gradient(560px 460px at 30% 74%, rgba(43,110,69,.20), transparent 70%),
+    radial-gradient(520px 420px at 66% 92%, rgba(214,169,110,.26), transparent 72%),
+    radial-gradient(720px 620px at 94% 56%, var(--glow-rose), transparent 62%),
+    radial-gradient(680px 600px at 4% 26%, var(--glow-lilac), transparent 60%),
+    radial-gradient(1100px 860px at 82% 8%, var(--glow-white), transparent 64%),
+    radial-gradient(860px 700px at 78% 16%, var(--glow-green), transparent 66%),
+    radial-gradient(940px 760px at 8% 82%, var(--glow-sand), transparent 68%),
+    linear-gradient(135deg, var(--mist-warm), var(--mist-base) 38%, var(--mist-cool) 72%, var(--mist-deep));
+}
+.app::before {
+  content: "";
+  position: absolute; inset: 0;
+  pointer-events: none;
+  opacity: .035;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- 玻璃基材 ---------- */
+.glass {
+  position: relative;
+  box-shadow:
+    inset 0 0 0 1px var(--glass-edge),
+    0 24px 48px -32px var(--glass-shadow-key),
+    0 2px 6px var(--glass-shadow-ambient);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}
+.glass::before {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image:
+    linear-gradient(180deg, var(--glass-sheen), transparent 24%),
+    linear-gradient(145deg, transparent 40%, rgba(255,255,255,.22));
+}
+
+/* ---------- 侧栏 ---------- */
+.sidebar {
+  position: relative;
+  z-index: 2;
+  width: 228px;
+  flex: none;
+  border-radius: 28px;
+  padding: 18px 14px 14px;
+  background-color: var(--glass-chrome);
+  background-image:
+    linear-gradient(180deg, var(--glass-sheen), transparent 22%),
+    linear-gradient(145deg, var(--glass-chrome), rgba(255,255,255,.42));
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.brand {
+  display: flex; align-items: center; gap: 9px;
+  padding: 0 6px 18px;
+  font-family: var(--serif);
+  font-size: 24px; font-weight: 600; letter-spacing: .02em;
+  color: var(--ink);
+}
+.brand svg { width: 24px; height: 24px; color: var(--green-deep); }
+.nav { display: flex; flex-direction: column; gap: 4px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  height: 38px; padding: 0 11px;
+  border-radius: 12px;
+  font-size: 13.5px; color: var(--ink2);
+  text-align: left;
+}
+.nav-item svg { width: 18px; height: 18px; }
+.nav-item:hover { background: rgba(255,255,255,.56); }
+.nav-item.on { background: var(--green-faint); color: var(--green-deep); font-weight: 600; }
+.forest-card {
+  margin-top: 18px;
+  padding: 11px 12px;
+  border-radius: 18px;
+  background-color: var(--glass-card);
+  background-image: linear-gradient(145deg, var(--glass-card), rgba(255,255,255,.56));
+  box-shadow: inset 0 0 0 1px var(--glass-edge), 0 12px 24px -20px var(--glass-shadow-key);
+  display: flex; align-items: center; gap: 10px;
+  text-align: left;
+}
+.forest-mark {
+  width: 34px; height: 34px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 12px;
+  background: var(--green-soft); color: var(--green-deep);
+}
+.forest-mark svg { width: 20px; height: 20px; }
+.forest-text { flex: 1; min-width: 0; }
+.forest-text b { display: block; font-size: 12.5px; font-weight: 600; }
+.forest-text small { display: block; margin-top: 2px; font-size: 10.5px; color: var(--ink3); }
+.forest-card > svg { width: 15px; height: 15px; color: var(--ink3); }
+.side-label {
+  margin: 22px 0 8px; padding: 0 8px;
+  font-size: 10.5px; letter-spacing: .08em; color: var(--ink3);
+}
+.recent { display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
+.recent-item {
+  padding: 9px 10px; border-radius: 12px; text-align: left;
+}
+.recent-item:hover { background: rgba(255,255,255,.5); }
+.recent-item b {
+  display: block; font-size: 12px; font-weight: 500; line-height: 1.55;
+  color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.recent-item small { display: block; margin-top: 3px; font-size: 10px; color: var(--ink3); }
+.sidebar-foot {
+  margin-top: auto; padding: 10px 8px 2px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 10px; color: var(--ink3);
+}
+.live-dot { display: inline-flex; align-items: center; gap: 5px; }
+.live-dot::before {
+  content: ""; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green); box-shadow: 0 0 0 3px rgba(43,110,69,.14);
+}
+
+/* ---------- 主列 ---------- */
+.main {
+  position: relative;
+  z-index: 1;
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column;
+  padding-bottom: 0;
+}
+.topbar {
+  height: 52px;
+  flex: none;
+  margin: 0 4px 10px;
+  border-radius: 99px;
+  padding: 0 8px;
+  display: flex; align-items: center; gap: 4px;
+  background-color: var(--glass-chrome);
+  background-image:
+    linear-gradient(180deg, var(--glass-sheen), transparent 26%),
+    linear-gradient(145deg, var(--glass-chrome), rgba(255,255,255,.44));
+}
+.icon-key {
+  width: 36px; height: 36px; flex: none;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink2);
+}
+.icon-key:hover { background: rgba(255,255,255,.62); }
+.icon-key svg { width: 19px; height: 19px; }
+.topbar-title {
+  flex: 1; min-width: 0;
+  margin-left: 4px;
+  font-size: 13px; font-weight: 600; color: var(--ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ---------- 阅读面板 ---------- */
+.reader {
+  flex: 1; min-height: 0;
+  position: relative;
+  margin: 0;
+  border-radius: 28px;
+  background-color: var(--glass-reader);
+  background-image:
+    linear-gradient(180deg, var(--glass-sheen), transparent 18%),
+    linear-gradient(145deg, var(--glass-reader), rgba(255,255,255,.62));
+  overflow: hidden;
+}
+.reader-scroll {
+  height: 100%;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(22,36,28,.18) transparent;
+}
+.reader-scroll::-webkit-scrollbar { width: 6px; }
+.reader-scroll::-webkit-scrollbar-thumb { background: rgba(22,36,28,.16); border-radius: 99px; }
+.article {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 34px 44px 56px;
+}
+.article h1 {
+  font-family: var(--serif);
+  font-size: 26px; font-weight: 600; line-height: 1.55;
+  letter-spacing: .01em;
+}
+.article-meta { margin-top: 10px; font-size: 11px; color: var(--ink3); }
+.assistant {
+  display: flex; align-items: center; gap: 6px;
+  margin: 26px 0 12px;
+  font-size: 12.5px; font-weight: 600; color: var(--green-deep);
+}
+.assistant svg { width: 17px; height: 17px; }
+.assistant small { font-size: 10.5px; font-weight: 400; color: var(--ink3); }
+.article p, .article li {
+  font-family: var(--serif);
+  font-size: 15px; line-height: 30px;
+  color: var(--ink);
+}
+.article p { margin-bottom: 14px; }
+.article h2 {
+  margin: 26px 0 10px;
+  font-family: var(--serif);
+  font-size: 18px; font-weight: 600;
+}
+.article h3 {
+  margin: 20px 0 6px;
+  font-family: var(--serif);
+  font-size: 15.5px; font-weight: 600;
+}
+.article mark.hl {
+  background: var(--yellow-hl);
+  color: inherit;
+  border-radius: 2px;
+  padding: 1px 0;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.answer-actions { display: flex; gap: 8px; margin-top: 18px; }
+.dot-key {
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  color: var(--ink2);
+}
+.dot-key span {
+  width: 29px; height: 29px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background-color: var(--glass-chrome);
+  background-image:
+    linear-gradient(180deg, var(--glass-sheen), transparent 40%),
+    linear-gradient(145deg, rgba(255,255,255,.86), rgba(255,255,255,.58));
+  box-shadow: inset 0 0 0 1px var(--glass-edge), 0 4px 10px -8px var(--glass-shadow-key);
+}
+.dot-key svg { width: 16px; height: 16px; }
+.dot-key:hover span { background-color: var(--glass-control); }
+.dot-key:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ---------- 输入坞 ---------- */
+.dock {
+  flex: none;
+  margin-top: 12px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.quote-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 8px 7px 14px;
+  border-radius: 14px;
+  background-color: color-mix(in srgb, var(--green-faint) 82%, transparent);
+  background-image: linear-gradient(180deg, rgba(255,255,255,.55), transparent 60%);
+  box-shadow: inset 0 0 0 1px var(--glass-edge);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
+  font-size: 12px; color: var(--ink2);
+}
+.quote-row .qmark { color: var(--green); font-family: var(--serif); font-size: 16px; line-height: 1; }
+.quote-row .qtext {
+  flex: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.quote-row .icon-key { width: 32px; height: 32px; }
+.ask-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.ask-chip {
+  height: 30px; padding: 0 14px;
+  border-radius: 99px;
+  font-size: 12px; color: var(--green-deep);
+  background: var(--green-soft);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.6);
+}
+.ask-chip:hover { background: #d9ecdf; }
+.composer {
+  border-radius: 24px;
+  padding: 14px 20px 11px;
+  background-color: var(--glass-card);
+  background-image:
+    linear-gradient(180deg, var(--glass-sheen), transparent 22%),
+    linear-gradient(145deg, var(--glass-card), rgba(255,255,255,.54));
+}
+.composer:focus-within {
+  box-shadow:
+    inset 0 0 0 1px var(--glass-edge),
+    0 0 0 2px color-mix(in srgb, var(--green) 26%, transparent),
+    0 24px 48px -32px var(--glass-shadow-key),
+    0 2px 6px var(--glass-shadow-ambient);
+}
+.composer textarea {
+  display: block;
+  width: 100%; min-height: 52px;
+  padding: 0; border: 0; outline: none; resize: none;
+  background: none;
+  font-size: 14.5px; line-height: 26px; color: var(--ink);
+}
+.composer textarea::placeholder { color: var(--ink3); }
+.composer-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.chip-sm {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: var(--green-faint);
+  color: var(--green-deep);
+  font-size: 10.5px;
+  white-space: nowrap;
+}
+.chip-sm svg { width: 13px; height: 13px; }
+.composer-spacer { flex: 1; }
+.composer-help {
+  margin-top: 6px;
+  text-align: center;
+  font-size: 10px; color: var(--ink3);
+}
+
+/* ---------- 选中浮条（六格，照 Android 顺序） ---------- */
+.word-menu {
+  position: absolute;
+  z-index: 40;
+  display: flex; align-items: stretch;
+  padding: 4px;
+  border-radius: 18px;
+  background-color: var(--glass-control);
+  background-image:
+    linear-gradient(180deg, var(--glass-sheen), transparent 30%),
+    linear-gradient(145deg, rgba(255,255,255,.98), rgba(255,255,255,.90));
+  box-shadow:
+    inset 0 0 0 1px var(--glass-edge),
+    0 20px 40px -24px var(--glass-shadow-key),
+    0 2px 6px var(--glass-shadow-ambient);
+  -webkit-backdrop-filter: blur(28px) saturate(150%);
+  backdrop-filter: blur(28px) saturate(150%);
+  animation: menuIn .12s ease-out;
+}
+@keyframes menuIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+.word-cell {
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 10px;
+  color: var(--ink);
+  transition: background .12s, color .12s;
+}
+.word-cell:hover { background: var(--green-faint); color: var(--green-deep); }
+.word-cell svg { width: 20px; height: 20px; }
+.word-sep {
+  width: 1px; height: 24px;
+  align-self: center;
+  background: rgba(22,36,28,.10);
+}
+
+/* ---------- Toast ---------- */
+.toast {
+  position: absolute;
+  left: 50%; bottom: 176px;
+  z-index: 45;
+  transform: translateX(-50%);
+  padding: 8px 18px;
+  border-radius: 99px;
+  background: rgba(22,36,28,.86);
+  color: #fff;
+  font-size: 12px;
+  white-space: nowrap;
+  box-shadow: 0 10px 26px -12px rgba(22,36,28,.6);
+  animation: menuIn .16s ease-out;
+  pointer-events: none;
+}
+
+[hidden] { display: none !important; }
+
+@media (max-width: 1440px) {
+  .stage { flex-wrap: wrap; }
+  .guide { position: static; width: 100%; max-width: 1180px; }
+  .guide-steps { display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; }
+  .stage-frame { transform: none !important; margin: 0 !important; }
+}
+</style>
+</head>
+<body>
+<div class="stage">
+  <aside class="guide">
+    <div class="guide-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 21.5V13"/><path d="M12 13C12 9.2 9.2 6.5 4.8 6.5C4.8 10.3 7.6 13 12 13Z"/><path d="M12 11C12 6.8 15 4 19.5 4C19.5 8.2 16.5 11 12 11Z"/>
+      </svg>
+      <span class="guide-name">知芽</span>
+      <span class="guide-badge">方案 V1</span>
+    </div>
+    <p class="guide-sub">阅读页玻璃方案 · Web 与 Windows 桌面共用一份前端产物。结构照 Android Scheme A，材质沿用晨雾玻璃 token。</p>
+
+    <h3>可以这样试</h3>
+    <ol class="guide-steps">
+      <li>用鼠标<b>拖选正文任意一句</b>，六格浮条从选区上沿升起。</li>
+      <li>点<b>问 AI</b>：输入坞上方出现引用条和「为什么 / 是什么 / 怎么用」三枚 chip。</li>
+      <li>点<b>高亮</b>：所选文字落成黄色记号；点<b>复制</b>走真实剪贴板。</li>
+      <li>输入卡下方<b>没有横条</b>，正文从玻璃下穿过；侧栏、顶栏、阅读面、输入坞四层玻璃共用同一道 1px 高光边。</li>
+    </ol>
+
+    <h3>快速演示</h3>
+    <div class="tools">
+      <button class="chip" id="demoSelect">选中示例文字</button>
+      <button class="chip" id="clearQuote">清空引用</button>
+      <button class="chip" id="zoom100">100%</button>
+      <button class="chip on" id="zoom85">85%</button>
+    </div>
+
+    <h3>四类玻璃面</h3>
+    <ul class="spec">
+      <li><span>侧栏 / 顶栏</span><code>--glass-chrome .74</code></li>
+      <li><span>阅读面板</span><code>--glass-reader .93</code></li>
+      <li><span>输入坞 / 消息卡</span><code>--glass-card .86</code></li>
+      <li><span>选中浮条 / 悬浮控件</span><code>--glass-control .98</code></li>
+      <li><span>模糊</span><code>blur 28px · saturate 150%</code></li>
+      <li><span>圆角</span><code>顶栏 99 · 阅读 28 · 输入坞 24</code></li>
+    </ul>
+
+    <div class="guide-note">
+      结构参照 Android：胶囊顶栏 52 / 上缘 6 / 左右 16；阅读面左右 12、圆角 28；输入坞左右 12、圆角 24、内边距 14/11/12/11；选单六格为 问 AI / 新建主题 / 高亮 / 批注 / 复制 / 全选。
+      本文件只用于评审，落地数值仍以 tokens 与 Android 资源为准。
+    </div>
+  </aside>
+
+  <div class="stage-frame" id="stageFrame" data-zoom="85">
+    <!-- 默认 85% 便于整窗审视；右侧「100%」按 1:1 看材质细节。 -->
+    <div class="device" id="device">
+      <div class="titlebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 21.5V13"/><path d="M12 13C12 9.2 9.2 6.5 4.8 6.5C4.8 10.3 7.6 13 12 13Z"/><path d="M12 11C12 6.8 15 4 19.5 4C19.5 8.2 16.5 11 12 11Z"/>
+        </svg>
+        <span>知芽</span>
+        <div class="win-btns"><span>—</span><span>□</span><span class="close">×</span></div>
+      </div>
+
+      <div class="app">
+        <aside class="sidebar glass">
+          <div class="brand">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 21.5V13"/><path d="M12 13C12 9.2 9.2 6.5 4.8 6.5C4.8 10.3 7.6 13 12 13Z"/><path d="M12 11C12 6.8 15 4 19.5 4C19.5 8.2 16.5 11 12 11Z"/>
+            </svg>
+            <span>知芽</span>
+          </div>
+
+          <nav class="nav">
+            <button class="nav-item on">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z"/>
+              </svg>
+              主页
+            </button>
+            <button class="nav-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 5.5h6v13H4z"/><path d="M10 5.5h10v13H10z"/>
+              </svg>
+              学习库
+            </button>
+            <button class="nav-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2.1 2.1M16.9 16.9 19 19M19 5l-2.1 2.1M7.1 16.9 5 19"/>
+              </svg>
+              设置
+            </button>
+          </nav>
+
+          <button class="forest-card">
+            <span class="forest-mark">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 21.5V13"/><path d="M12 13C12 9.2 9.2 6.5 4.8 6.5C4.8 10.3 7.6 13 12 13Z"/><path d="M12 11C12 6.8 15 4 19.5 4C19.5 8.2 16.5 11 12 11Z"/>
+              </svg>
+            </span>
+            <span class="forest-text"><b>我的森林</b><small>全部主题长成一片林子</small></span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+          </button>
+
+          <p class="side-label">最近学习</p>
+          <div class="recent">
+            <button class="recent-item"><b>注意力权重可视化与模型可解释性的关系</b><small>1 个分支 · 3 天前</small></button>
+            <button class="recent-item"><b>系统理解 Transformer 的注意力机制</b><small>2 个分支 · 3 天前</small></button>
+            <button class="recent-item"><b>消融实验怎么设计对照组</b><small>1 个分支 · 5 天前</small></button>
+          </div>
+
+          <div class="sidebar-foot">
+            <span class="live-dot">本地优先</span>
+            <span>v1.0.0</span>
+          </div>
+        </aside>
+
+        <main class="main">
+          <header class="topbar glass">
+            <button class="icon-key" title="收起侧栏" aria-label="收起侧栏">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3.5" y="4.5" width="17" height="15" rx="3"/><path d="M9.5 4.5v15"/>
+              </svg>
+            </button>
+            <button class="icon-key" title="返回" aria-label="返回">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+            </button>
+            <div class="topbar-title">注意力权重可视化与模型可解释性的关系</div>
+            <button class="icon-key" title="分享" aria-label="分享">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/>
+                <path d="M8.2 10.8 15.8 6.8M8.2 13.2l7.6 4"/>
+              </svg>
+            </button>
+            <button class="icon-key" title="主题树" aria-label="主题树">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="5" cy="12" r="2.1"/><circle cx="17.5" cy="6" r="2.1"/><circle cx="17.5" cy="18" r="2.1"/>
+                <path d="M7 11.2 15.5 6.8M7 12.8l8.5 4.4"/>
+              </svg>
+            </button>
+          </header>
+
+          <section class="reader glass" id="reader">
+            <div class="reader-scroll" id="readerScroll">
+              <article class="article" id="article">
+                <h1>注意力权重可视化与模型可解释性的关系</h1>
+                <p class="article-meta">3 天前</p>
+
+                <p class="assistant">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 21.5V13"/><path d="M12 13C12 9.2 9.2 6.5 4.8 6.5C4.8 10.3 7.6 13 12 13Z"/><path d="M12 11C12 6.8 15 4 19.5 4C19.5 8.2 16.5 11 12 11Z"/>
+                  </svg>
+                  知芽 <small>V4.1 Flash</small>
+                </p>
+
+                <p data-demo>核心先说结论：注意力头消融（ablation）的基本流程是“逐个或成组地让某个头失效，再测量任务指标变化”；而“该头重要”与“其他头补偿”的区分，关键不在消融本身，而在于是否测量了被消融后的内部状态变化，以及是否做了针对补偿路径的对照实验。下面分两部分讲清楚。</p>
+
+                <h2>一、消融实验的具体流程</h2>
+                <p>以“某层某头是否对任务重要”为例，标准实验步骤：</p>
+
+                <h3>1. 固定基线</h3>
+                <p>在同一验证集上先跑完整模型，记录任务指标（如准确率、BLEU、困惑度）和每个样本的预测。基线是后续所有对照的参照点，没有它，任何下降幅度都只是数字。</p>
+
+                <h3>2. 单头消融</h3>
+                <p>逐个将注意力头置零，观察指标下降幅度。下降越大，说明该头越关键；但要注意重复消融的交互效应——两个头同时移除，损失可能远大于各自单独移除之和。</p>
+
+                <h2>二、重要性与补偿的区分</h2>
+                <p>如果某个头被消融后指标几乎不变，不等于它不重要——其他头可能补偿了它的功能。要区分“不重要”和“被补偿”，需要在消融后继续测量内部状态：表示是否漂移、梯度是否改道、其他头的注意力分布是否接住了这块职责。</p>
+
+                <p>因此，注意力权重可视化只能作为线索，不能单独当作重要性证据。它告诉你模型在看哪里，但不告诉你模型为什么必须看那里。</p>
+
+                <div class="answer-actions">
+                  <button class="dot-key" id="copyAnswer" title="复制回答" aria-label="复制回答"><span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M11 9h7a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z"/>
+                      <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                  </span></button>
+                  <button class="dot-key" disabled title="重置回答（未接通）" aria-label="重置回答，未接通"><span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M4 5v5h5"/><path d="M4.6 10A8 8 0 1 1 6 17.6"/>
+                    </svg>
+                  </span></button>
+                  <button class="dot-key" disabled title="新建分支（未接通）" aria-label="新建分支，未接通"><span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="6" cy="6" r="2.1"/><circle cx="6" cy="18" r="2.1"/><circle cx="18" cy="8" r="2.1"/>
+                      <path d="M6 8.1v7.8M6 13c0-2.4 2.6-3.4 5.4-3.4h4.4"/>
+                    </svg>
+                  </span></button>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <div class="dock">
+            <div class="quote-row" id="quoteRow" hidden>
+              <span class="qmark">“</span>
+              <span class="qtext" id="quoteText"></span>
+              <button class="icon-key" id="quoteClear" title="取消引用" aria-label="取消引用">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+              </button>
+            </div>
+
+            <div class="ask-chips" id="askChips" hidden>
+              <button class="ask-chip" data-ask="为什么">为什么</button>
+              <button class="ask-chip" data-ask="是什么">是什么</button>
+              <button class="ask-chip" data-ask="怎么用">怎么用</button>
+            </div>
+
+            <form class="composer glass" id="composer" onsubmit="return false">
+              <textarea id="draft" rows="2" placeholder="在当前分支继续追问…" aria-label="追问输入框"></textarea>
+              <div class="composer-row">
+                <span class="chip-sm">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 13.8 9 19.5 10.8 13.8 12.6 12 18.5 10.2 12.6 4.5 10.8 10.2 9z"/></svg>
+                  V4.1 Flash
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                </span>
+                <span class="chip-sm">默认</span>
+                <span class="composer-spacer"></span>
+                <button class="dot-key" disabled title="上传附件（未接通）" aria-label="上传附件，未接通"><span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.5 11 21a5 5 0 0 1-7.1-7.1L13.8 4a3.5 3.5 0 0 1 5 5L9.7 18.1a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg>
+                </span></button>
+                <button class="dot-key" disabled title="发送（未接通）" aria-label="发送，未接通"><span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></svg>
+                </span></button>
+              </div>
+              <p class="composer-help">发送、上传与分支创建尚未接通；这里可以写草稿，也可以复制回答。</p>
+            </form>
+          </div>
+        </main>
+      </div>
+
+      <div class="word-menu" id="wordMenu" hidden role="toolbar" aria-label="选中文字的操作"></div>
+      <div class="toast" id="toast" hidden></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const device = document.getElementById("device");
+  const reader = document.getElementById("reader");
+  const readerScroll = document.getElementById("readerScroll");
+  const article = document.getElementById("article");
+  const menu = document.getElementById("wordMenu");
+  const toastEl = document.getElementById("toast");
+  const quoteRow = document.getElementById("quoteRow");
+  const quoteText = document.getElementById("quoteText");
+  const askChips = document.getElementById("askChips");
+  const draft = document.getElementById("draft");
+  const stageFrame = document.getElementById("stageFrame");
+
+  const ICONS = {
+    ask: '<path d="M12 3.5 13.8 9 19.5 10.8 13.8 12.6 12 18.5 10.2 12.6 4.5 10.8 10.2 9z"/><path d="M18.5 3.5v3M20 5h-3"/>',
+    fork: '<circle cx="6" cy="6" r="2.1"/><circle cx="6" cy="18" r="2.1"/><circle cx="18" cy="8" r="2.1"/><path d="M6 8.1v7.8M6 13c0-2.4 2.6-3.4 5.4-3.4h4.4"/>',
+    highlight: '<path d="M14.06 4.94a2.2 2.2 0 0 1 3.11 3.11L10.4 14.82 7.29 11.71Z"/><path d="M7.29 11.71 4.6 14.4l3.11 3.11 2.69-2.69"/><path d="M4 20.5h13"/>',
+    note: '<path d="M5 4.5h14v9.5l-5.5 5.5H5Z"/><path d="M13.5 19.5V14H19"/>',
+    copy: '<path d="M11 9h7a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z"/><path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"/>',
+    selectAll: '<path d="M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M8 12.2 10.8 15 16.4 9.4"/>'
+  };
+
+  const CELLS = [
+    { id: "ask", label: "问 AI", desc: "就选中的这段文字继续提问" },
+    { id: "fork", label: "新建主题", desc: "用选中的这段文字新建主题" },
+    { id: "highlight", label: "高亮", desc: "高亮选中的这段文字" },
+    { id: "note", label: "批注", desc: "给选中的这段文字加批注" },
+    { id: "copy", label: "复制", desc: "复制选中的这段文字" },
+    { id: "selectAll", label: "全选", desc: "选中这一段的完整内容" }
+  ];
+
+  CELLS.forEach((cell, index) => {
+    if (index > 0) {
+      const sep = document.createElement("span");
+      sep.className = "word-sep";
+      sep.setAttribute("aria-hidden", "true");
+      menu.append(sep);
+    }
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "word-cell";
+    button.dataset.action = cell.id;
+    button.title = cell.label;
+    button.setAttribute("aria-label", cell.desc);
+    button.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + ICONS[cell.id] + "</svg>";
+    menu.append(button);
+  });
+
+  let pending = null;
+  let toastTimer = 0;
+
+  function say(message) {
+    toastEl.textContent = message;
+    toastEl.hidden = false;
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => { toastEl.hidden = true; }, 1700);
+  }
+
+  function readSelection() {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return null;
+    const range = selection.getRangeAt(0);
+    if (!article.contains(range.commonAncestorContainer)) return null;
+    const text = selection.toString().trim();
+    if (!text) return null;
+    return { range: range.cloneRange(), rect: range.getBoundingClientRect(), text };
+  }
+
+  function showMenu(info) {
+    pending = info;
+    menu.hidden = false;
+    menu.style.left = "0px";
+    menu.style.top = "0px";
+    const scale = device.getBoundingClientRect().width / device.offsetWidth;
+    const base = device.getBoundingClientRect();
+    const width = menu.offsetWidth;
+    const height = menu.offsetHeight;
+    const pad = 10;
+    const left = (info.rect.left - base.left) / scale + info.rect.width / 2 - width / 2;
+    const maxLeft = device.offsetWidth - width - pad;
+    menu.style.left = Math.max(pad, Math.min(maxLeft, left)) + "px";
+    let top = (info.rect.top - base.top) / scale - height - pad;
+    if (top < 48) top = (info.rect.bottom - base.top) / scale + pad;
+    menu.style.top = Math.max(48, Math.min(device.offsetHeight - height - pad, top)) + "px";
+  }
+
+  function hideMenu() {
+    menu.hidden = true;
+    pending = null;
+  }
+
+  document.addEventListener("mouseup", () => {
+    window.setTimeout(() => {
+      const info = readSelection();
+      if (info) showMenu(info); else hideMenu();
+    }, 0);
+  });
+
+  document.addEventListener("mousedown", (event) => {
+    if (!menu.hidden && !menu.contains(event.target)) hideMenu();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") hideMenu();
+  });
+
+  readerScroll.addEventListener("scroll", hideMenu);
+
+  menu.addEventListener("mousedown", (event) => event.preventDefault());
+
+  function wrapSelection(range, tagName, className) {
+    const wrapper = document.createElement(tagName);
+    if (className) wrapper.className = className;
+    wrapper.append(range.extractContents());
+    range.insertNode(wrapper);
+    return wrapper;
+  }
+
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text).then(() => true).catch(() => fallbackCopy(text));
+    }
+    return Promise.resolve(fallbackCopy(text));
+  }
+
+  function fallbackCopy(text) {
+    try {
+      const area = document.createElement("textarea");
+      area.value = text;
+      area.style.position = "fixed";
+      area.style.top = "-1000px";
+      document.body.append(area);
+      area.select();
+      const ok = document.execCommand("copy");
+      area.remove();
+      return ok;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function selectBlock(info) {
+    const node = info.range.startContainer;
+    const element = node.nodeType === 3 ? node.parentElement : node;
+    const block = element && element.closest ? element.closest("p, li, h2, h3") : null;
+    if (!block) return;
+    const range = document.createRange();
+    range.selectNodeContents(block);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    showMenu({ range: range.cloneRange(), rect: range.getBoundingClientRect(), text: selection.toString() });
+  }
+
+  menu.addEventListener("click", (event) => {
+    const button = event.target.closest(".word-cell");
+    if (!button || !pending) return;
+    const info = pending;
+    const action = button.dataset.action;
+
+    if (action === "ask") {
+      quoteText.textContent = info.text;
+      quoteRow.hidden = false;
+      askChips.hidden = false;
+      say("已引用所选句子，可继续追问");
+      hideMenu();
+      return;
+    }
+    if (action === "fork") {
+      say("新建主题尚未接通");
+      hideMenu();
+      return;
+    }
+    if (action === "highlight") {
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        wrapSelection(selection.getRangeAt(0), "mark", "hl");
+      } else {
+        wrapSelection(info.range, "mark", "hl");
+      }
+      selection && selection.removeAllRanges();
+      say("已高亮，松手即可继续阅读");
+      hideMenu();
+      return;
+    }
+    if (action === "note") {
+      say("批注面板尚未接通");
+      hideMenu();
+      return;
+    }
+    if (action === "copy") {
+      copyText(info.text).then((ok) => say(ok ? "已复制所选文字" : "复制失败，请重试"));
+      hideMenu();
+      return;
+    }
+    if (action === "selectAll") {
+      selectBlock(info);
+    }
+  });
+
+  document.getElementById("copyAnswer").addEventListener("click", () => {
+    const text = article.innerText.replace(/\s+\n/g, "\n").trim();
+    copyText(text).then((ok) => say(ok ? "已复制回答" : "复制失败，请重试"));
+  });
+
+  document.getElementById("quoteClear").addEventListener("click", () => {
+    quoteRow.hidden = true;
+    askChips.hidden = true;
+    quoteText.textContent = "";
+  });
+
+  askChips.addEventListener("click", (event) => {
+    const chip = event.target.closest(".ask-chip");
+    if (!chip) return;
+    const question = chip.dataset.ask;
+    const quoted = quoteText.textContent.trim();
+    draft.value = quoted ? question + "：「" + quoted.slice(0, 28) + (quoted.length > 28 ? "…" : "") + "」" : question;
+    draft.focus();
+    draft.setSelectionRange(draft.value.length, draft.value.length);
+    say("已写入草稿，发送尚未接通");
+  });
+
+  document.getElementById("demoSelect").addEventListener("click", () => {
+    const target = article.querySelector("[data-demo]");
+    if (!target) return;
+    const textNode = target.firstChild;
+    const range = document.createRange();
+    range.setStart(textNode, 7);
+    range.setEnd(textNode, 27);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    showMenu({ range: range.cloneRange(), rect: range.getBoundingClientRect(), text: selection.toString() });
+  });
+
+  document.getElementById("clearQuote").addEventListener("click", () => {
+    quoteRow.hidden = true;
+    askChips.hidden = true;
+    quoteText.textContent = "";
+    draft.value = "";
+  });
+
+  const zoom100 = document.getElementById("zoom100");
+  const zoom85 = document.getElementById("zoom85");
+  zoom100.addEventListener("click", () => {
+    stageFrame.dataset.zoom = "100";
+    zoom100.classList.add("on");
+    zoom85.classList.remove("on");
+  });
+  zoom85.addEventListener("click", () => {
+    stageFrame.dataset.zoom = "85";
+    zoom85.classList.add("on");
+    zoom100.classList.remove("on");
+  });
+})();
+</script>
+</body>
+</html>

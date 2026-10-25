@@ -1,0 +1,49 @@
+T-2026-10-25-081 浏览器实测记录（2026-10-25）
+开发服务器：vite 8.3.4，http://127.0.0.1:5174/#/chat/0（后台任务 bbaha40lr）
+驱动：artifacts/tmp/075-web-capture.mjs（CDP，隐藏滚动条，视口截图）
+探针：artifacts/tmp/081-layout-probe.mjs、artifacts/tmp/081-degrade-probe.mjs
+
+== 截图 ==
+081-chat-top.png            1440x900@2x  chat 宽窗：侧栏/胶囊顶栏/阅读面/输入坞四面浮起
+081-chat-narrow.png         900x620@2x   desktop 最小窗口，侧栏常驻
+081-chat-narrow-drawer.png  900x620@2x   抽屉（>760 时侧栏本就常驻，toggle 为折叠态）
+081-chat-720.png            720x900@2x   760 以下：侧栏移出、内容满宽
+081-chat-720-drawer.png     720x900@2x   760 以下抽屉 + 遮罩
+081-home-top.png            1440x900@2x  非对话页：正文从胶囊下方开始
+081-library-top.png         720x900@2x   非对话页窄窗：同留白，无溢出
+
+== 横向溢出（documentElement/scrollBody 对比视口）==
+1440x900: viewport=1440x900 scroll=1440x900 body=1440x900
+ 720x900: viewport=720x900  scroll=720x900  body=720x900
+结论：两档均无横向溢出。
+
+== 几何实测（1440x900）==
+.app-workspace    x=0   y=0   w=1440 h=900  bg=transparent
+.app-sidebar      x=12  y=12  w=240  h=876  radius=28px bg=rgba(255,255,255,0.74)
+.workspace-topbar x=264 y=12  w=1164 h=52   radius=99px bg=rgba(255,255,255,0.74) border-top=0
+.chat-scroll      x=264 y=12  w=1164 h=700（padding-top 64 = 52 + 12）
+.chat-reading     x=454 y=100 w=784  radius=28px bg=rgba(255,255,255,0.93)
+.chat-dock        x=264 y=712 w=1164 h=176 bg=transparent border-top=0 border-shadow=none
+.composer         x=454 y=712 w=784  h=164 radius=28px bg=rgba(255,255,255,0.86)
+结论：输入坞上方无任何横线（dock 既无 border-top 也无 box-shadow），四块玻璃各自独立。
+
+== 几何实测（720x900）==
+.app-sidebar      x=-240（抽屉关闭，inset 8px）
+.workspace-topbar x=8 y=8 w=704 h=48 radius=99px
+.chat-scroll      y=8 h=708（padding-top 60 = 48 + 12）
+.chat-reading     x=18 y=92 w=684 radius=28px
+.chat-dock        x=8 y=716 w=704 border-top=0
+.composer         x=16 y=716 w=688 radius=28px
+结论：窄窗留白与胶囊同步，输入坞左右 8/底 8 内缩，无溢出。
+
+== 降级实测（Emulation.setEmulatedMedia prefers-reduced-transparency: reduce）==
+.app-sidebar      backdrop=none bg=rgb(252,251,248)
+.workspace-topbar backdrop=none bg=rgb(252,251,248)
+.chat-reading     backdrop=none bg=rgb(252,251,248)
+.composer         backdrop=none bg=rgb(252,251,248)
+结论：减少透明度降级仍把四个面退回实色；不支持 backdrop-filter 的降级块由
+glass-depth.test.ts 的 `@supports not ((backdrop-filter` 断言继续钉住。
+
+== 测试与静态检查 ==
+pnpm --dir frontend exec vitest run       25 files / 164 tests passed
+pnpm --dir frontend run lint              EXITCODE=0（依赖方向/器件时间/文案/夹具同步全绿）

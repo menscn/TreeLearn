@@ -1,0 +1,57 @@
+RUN-ALL-GUARDS tier=precommit selected=6/45 subset=yes
+PASS         check_offline_bundle                   rc=0 0.2s
+             > offline scan root=dist assets=2 allowed-non-load-urls=20 violations=0
+PASS         check_offline_bundle --selftest        rc=0 0.2s
+             > SELFTEST cases=6 ok=6 fail=0
+PASS         frontend verify                        rc=0 32.3s
+             > verify steps=16 ok=16 bad=0 fault=0
+FAIL         line-budget                            rc=1 WARN 0.9s
+             > 业务变更行: 1253 (已跟踪 新增+删除 与 未跟踪 全部行；已排除生成/迁移/文档/证据 2925 行；扫描业务文件 20 个，其中未跟踪 60 个)
+             DIAG line-budget lines=4/4 mode=full
+             | [line-budget] 基点: HEAD ; 范围: (whole repository)
+             | 业务变更行: 1253 (已跟踪 新增+删除 与 未跟踪 全部行；已排除生成/迁移/文档/证据 2925 行；扫描业务文件 20 个，其中未跟踪 60 个)
+             | [line-budget] 提示: 跳过 11 行非 numstat 输出(git 警告)
+             | [line-budget] FAIL: 业务变更 >500 行，超出硬预算，须拆 task
+PASS         no-kotlin-check                        rc=0 68.4s
+             > VERDICT: PASS (13 OK line(s))
+TIMEOUT      guard-selftest -Fast                   timeout after 300s — 本轮对这条没有判据，既不是绿也不是红
+             DIAG guard-selftest -Fast lines=35/35 mode=full
+             | === Treelearn Java-only guard self-test ===
+             | Generated : 2026-10-25T14:54:43+08:00
+             | Command   : powershell -NoProfile -ExecutionPolicy Bypass -File D:\Project\Android\Treelearn\android\scripts\dev\guard-selftest.ps1 -Fast
+             | Guard     : D:\Project\Android\Treelearn\android\scripts\no-kotlin-check.ps1  [SHA-256 DDB9EC51E8EF9B161BCB702E467D04F2B4A4FFB19C7AB4163A508196F32C0299 lines 692]
+             | Library   : D:\Project\Android\Treelearn\android\scripts\lib\evidence-integrity.ps1  [SHA-256 DD2E4A55A6641D949C735AFDDBCE1A6D8654BD158F07119E59099786CA65B426 lines 169]
+             | CASE 0  untouched copy
+             |   scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+             |   OK       untouched copy, static stage => no problem (expected 2, got 2)
+             | CASE 1  slashy string swallowing following lines (round-3 bypass)
+             |   scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+             |   OK       slashy + releaseImplementation kotlin => FAIL (expected 1, got 1)
+             | CASE 2  slashy string + Kotlin Gradle plugin
+             |   scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+             |   OK       slashy + id("kotlin") plugin => FAIL (expected 1, got 1)
+             | CASE 3  injection matrix (each must be caught by the static stage)
+             |   scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+             |   OK       injected implementation => FAIL (expected 1, got 1)
+             |   scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+             |   OK       injected compileOnly => FAIL (expected 1, got 1)
+             |   scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+             |   OK       injected androidTestImpl => FAIL (expected 1, got 1)
+             |   scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+             |   OK       injected kapt plugin => FAIL (expected 1, got 1)
+             |   scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+             |   OK       injected kapt block => FAIL (expected 1, got 1)
+             |   scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+             |   OK       injected ksp plugin => FAIL (expected 1, got 1)
+             |   scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+             |   OK       injected kotlinOptions => FAIL (expected 1, got 1)
+             |   scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+             |   OK       injected kotlin.ext => FAIL (expected 1, got 1)
+             |   scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+             |   OK       injected kotlinVersion => FAIL (expected 1, got 1)
+             |   scratch root 'C:\Users\23745\AppData\Local\Temp\tls'; longest deep artifact path 234 character(s)
+             |   OK       injected libs.plugins => FAIL (expected 1, got 1)
+NOTE         not-selected                           未选中：39 条不在本次判定面内（档位选择），整表绿不由此声明
+RUN-ALL-GUARDS pass=4 fail=1 inconclusive=0 fault=0 timeout=1
+VERDICT: INCONCLUSIVE (1 guard(s) hit their own timeout, so nothing was judged for them — 重跑或换串行姿势，别去查不存在的回归)
+EXITCODE=3
