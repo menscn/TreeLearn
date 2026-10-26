@@ -126,7 +126,7 @@ Follow [regression prevention and behavior evidence](../rules/regression.md).
 ## Verification report
 
 - Verdict: PASS
-- Evidence: `104-red-parity.txt`（3 failures / EXITCODE=1）、`104-green-parity.txt`（20/20 / EXITCODE=0）、`precommit-run.txt`（`RUN-ALL-GUARDS tier=precommit selected=10/49`，9 PASS + `line-budget` FAIL）、`core-run.txt`（`RUN-ALL-GUARDS pass=39 fail=0 inconclusive=0 fault=0 timeout=0`、`VERDICT: PASS (subset only — 39/49 entry(ies) judged)`、`EXITCODE=0`）、`checkers_selftest` 33/33、`no-kotlin.txt`（`VERDICT: PASS (13 OK line(s))`）。
+- Evidence: `104-red-parity.txt`（3 failures / EXITCODE=1）、`104-green-parity.txt`（20/20 / EXITCODE=0）、`precommit-run.txt`（`RUN-ALL-GUARDS tier=precommit selected=10/49`，9 PASS + `line-budget` FAIL）、`precommit-postcommit.txt`（提交后复跑：`pass=10 fail=0`、`line-budget` 业务变更行 0、`VERDICT: PASS (subset only — 10/49)`、`EXITCODE=0`）、`core-run.txt`（`RUN-ALL-GUARDS pass=39 fail=0 inconclusive=0 fault=0 timeout=0`、`VERDICT: PASS (subset only — 39/49 entry(ies) judged)`、`EXITCODE=0`）、`checkers_selftest` 33/33、`no-kotlin.txt`（`VERDICT: PASS (13 OK line(s))`）。
 - Changed/deleted assertion rationale and equivalent behavior coverage: 无删除；新增 4 条注册项，每条都带自己的判据 needle，正反两面由 `check_run_all_guards.py` 的自检覆盖。
 - Gaps: `line-budget` 在提交前恒红，本片不闭合它；core 档整跑耗时约 5 分钟（含浏览器判据）。
 - Risks: precommit 档 +16 秒；清单/账本是生成物，下一次资源变化需要再重生。
