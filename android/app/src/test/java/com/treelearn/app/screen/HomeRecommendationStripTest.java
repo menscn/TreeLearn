@@ -220,17 +220,19 @@ public final class HomeRecommendationStripTest {
     @Test
     public void theFadeWidthIsAWidthAndNotASpacingToken() throws Exception {
         String dimens = read(RES.resolve(Paths.get("values", "dimens.xml")));
+        // 2026-10-25 (T-2026-10-25-099): the board's mask stops at 26px, replacing the prototype's
+        // 20px. The token stays a width rather than becoming a spacing alias.
         assertTrue("the fade width is its own token",
-                dimens.contains("<dimen name=\"rec_fade_width\">20dp</dimen>"));
+                dimens.contains("<dimen name=\"rec_fade_width\">26dp</dimen>"));
 
-        // The prototype spells it as 20px inside a mask-image, which is neither the gutter nor a gap.
-        // Sharing a value with page_gutter is a coincidence of the prototype, not a reason to alias it:
-        // changing the gutter must not silently move the fade.
+        // The board spells it as 26px inside a mask-image, which is neither the gutter nor a gap.
+        // Sharing a value with page_gutter is a coincidence, not a reason to alias it: changing the
+        // gutter must not silently move the fade.
         String fade = read(SRC.resolve(Paths.get("screen", "EdgeFadeLayout.java")));
         assertTrue("the layout reads the token",
                 fade.contains("R.dimen.rec_fade_width"));
         assertFalse("and never spells the number inline",
-                fade.contains("20f") || fade.contains("20dp"));
+                fade.contains("26f") || fade.contains("26dp"));
         assertTrue("nor reads the gutter", !fade.contains("R.dimen.page_gutter"));
     }
 
@@ -278,12 +280,19 @@ public final class HomeRecommendationStripTest {
     // ------------------------------------------------------------------
 
     @Test
-    public void theStripIsSeparatedFromTheComposerByOneSpaceStep() throws Exception {
+    public void theStripIsSeparatedFromTheComposerByTheBoardsGap() throws Exception {
+        // 2026-10-25 (T-2026-10-25-100): the board gives every block in the column the same 22dp
+        // step, so the composer now carries the gap above it rather than only the section below.
         String section = elementAround(body(), "home_recommendations_section");
-        assertTrue("the section now carries the separation",
-                section.contains("android:layout_marginTop=\"@dimen/space_s4\""));
+        assertTrue("the section carries the board's step",
+                section.contains("android:layout_marginTop=\"@dimen/home_section_gap\""));
+        String recent = elementAround(body(), "home_recent_section");
+        assertTrue("and so does the history block",
+                recent.contains("android:layout_marginTop=\"@dimen/home_section_gap\""));
         String composer = elementAround(body(), "home_composer");
-        assertFalse("and the composer was not the one moved, so its own padding is untouched",
+        assertTrue("the composer gets one step under the headline too",
+                composer.contains("android:layout_marginTop=\"@dimen/home_section_gap\""));
+        assertFalse("and keeps its bottom edge from adding a second one",
                 composer.contains("android:layout_marginBottom"));
     }
 

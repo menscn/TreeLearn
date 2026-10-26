@@ -1,0 +1,16 @@
+$ tsc --noEmit && vite build && node scripts/check_offline_bundle.mjs && node scripts/inline_offline.mjs
+[36mvite v8.3.4 [32mbuilding client environment for production...[36m[39m
+transforming...
+✓ 69 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                     0.58 kB │ gzip:   0.45 kB
+dist/assets/noto-serif-sc-subset-XoowcXtq.woff  4,018.04 kB
+dist/assets/style-DP6aMLIj.css                     55.57 kB │ gzip:   9.58 kB
+dist/assets/index-BQz3gtKy.js                     463.55 kB │ gzip: 107.83 kB
+
+[32m✓ built in 940ms[39m
+offline scan root=dist assets=2 allowed-non-load-urls=20 violations=0
+offline ok — 产物内没有任何需要联网加载的脚本、字体或样式
+inline dist=dist scripts=1 styles=1 js=450936B css=5412955B fonts=1 fontBytes=4018044B single=dist-offline/index.html bytes=5864300 violations=0
+inline ok — 单文件产物不需要目录、不需要服务，双击即可执行（模块已内联，file:// 无 CORS 取回）

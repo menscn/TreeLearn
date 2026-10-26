@@ -1,0 +1,36 @@
+/* ============================================================
+ * 衬线身份随包（086 线 X1／片 T-2026-10-25-090）
+ *
+ * 判据要解决的问题：`--serif` 的首选族名是 'Noto Serif SC'，而 APK 里放着
+ * `android/app/src/main/res/font/noto_serif_sc.otf`（24,427,224 字节），Web／桌面却
+ * 一个字节都不带。没装该族的 Windows——1.0.0 便携 exe 的目标机——按
+ * `'Noto Serif SC','Songti SC',Georgia,serif` 逐字降级：前两个族名不存在，Georgia
+ * 的 cmap 里没有汉字，于是中文落到 generic serif = 宋体。同一份 tokens.json，
+ * 两端两种字面。这张表就是让 Web 和 exe 拿到与安卓同一个字面。
+ *
+ * 为什么族名仍写 'Noto Serif SC' 而不是子集自己的名字：族名是 token 面的东西，
+ * `--serif` 的四处权威源（原型 :root → tokens.json → tokens.css → 安卓 colors.xml）
+ * 都按这个名字取值；改名字等于把一次「补字节」的修复扩成一次 token 重命名。
+ * `src` 指向哪才是随包面，两件事分开。
+ *
+ * 子集口径：GB2312 全量 + ASCII + 中英标点 + 仓库可见文案，共 7,566 码位、13,716 字形、
+ * 4,018,044 字节（源文件的 16.4%）。由 `.codex/scripts/dev/gen_serif_subset.py` 生成并签入，
+ * 许可文本 `frontend/src/fonts/OFL.txt` 同目录随包（OFL 允许子集化与再分发）。
+ * 覆盖不到的字（GB2312 之外的生僻字、日文假名混排等）按 `--serif` 继续降级，
+ * 到 'SimSun' 这一档就有字可渲——这是明确的决定，不是随机落到宋体。
+ *
+ * 只有一个字重：源 otf 是 NotoSerifCJKsc-Regular（OS/2 usWeightClass=400、无 fvar），
+ * 所以标题上的 600/700 由浏览器合成粗体。安卓用的同一份 otf，合成行为与真机一致，
+ * 不是本次引入的偏差；要改得连安卓一起改，登记为 090 的 Gap。
+ *
+ * font-display: swap 是必须的：这段字节 base64 后 5,357,392 字符，全部内联在单文件里，
+ * 若用默认的 auto，首屏文字要等子集解析完才出现，宁可先拿兜底字面顶上。
+ * ============================================================ */
+
+@font-face {
+  font-family: 'Noto Serif SC';
+  src: url("../fonts/noto-serif-sc-subset.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}

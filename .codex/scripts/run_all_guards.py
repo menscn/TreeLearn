@@ -208,6 +208,20 @@ GUARDS = [
     E("check_offline_bundle --selftest", NODE,
       ["frontend/scripts/check_offline_bundle.mjs", "--selftest"],
       [SELFTEST_NEEDLE], ["precommit"]),
+    # ── 2026-10-25 线的两支判据（T-2026-10-25-104）──
+    # A1/A5 读的是离线包里的字体字节，渲染判据要真起浏览器读 `dist-offline/index.html`，
+    # 两者都依赖构建产物，所以进 precommit 而不是 core。判据在修复前各自判过红（088/089），
+    # 入库的前提是两支都已转绿，而不是「先挂一条恒红的仪器」。
+    E("check_ui_asset_parity", PY, [".codex/scripts/dev/check_ui_asset_parity.py"],
+      [CHECKS_NEEDLE], ["precommit"], timeout=300),
+    E("check_ui_asset_parity --selftest", PY,
+      [".codex/scripts/dev/check_ui_asset_parity.py", "--selftest"],
+      ["selftest judgement cases executed ="], ["precommit"], timeout=300),
+    E("check_ui_readability", NODE, [".codex/scripts/dev/check_ui_readability.mjs"],
+      [CHECKS_NEEDLE], ["precommit"], timeout=600),
+    E("check_ui_readability --selftest", NODE,
+      [".codex/scripts/dev/check_ui_readability.mjs", "--selftest"],
+      ["selftest judgement cases executed ="], ["precommit"], timeout=300),
     E("frontend verify", NODE, ["frontend/scripts/verify.mjs"],
       ["verify steps="], ["precommit"], timeout=900),
     E("line-budget", PS, [".codex/skills/line-budget/line-budget.ps1"],

@@ -82,12 +82,35 @@ public final class RecommendationTagTest {
                 Recommendation.Kind.FOLLOW_UP));
         assertEquals(R.color.tl_line, RecommendationTag.backgroundRes(
                 Recommendation.Kind.STARTER));
-        assertEquals(R.color.tl_ink3, RecommendationTag.textColorRes(
+        // 2026-10-25 (T-2026-10-25-101): the neutral pill's text moved from ink3 to ink2. At the
+        // board's 12sp the lighter grey read as disabled, and the label is information, not a hint.
+        assertEquals(R.color.tl_ink2, RecommendationTag.textColorRes(
                 Recommendation.Kind.STARTER));
         assertEquals(R.color.tl_line, RecommendationTag.backgroundRes(
                 Recommendation.Kind.NEW_DIRECTION));
-        assertEquals(R.color.tl_ink3, RecommendationTag.textColorRes(
+        assertEquals(R.color.tl_ink2, RecommendationTag.textColorRes(
                 Recommendation.Kind.NEW_DIRECTION));
+    }
+
+    /**
+     * 2026-10-25 (T-2026-10-25-101): the review's AH3 - four history-derived cards all wore
+     * 「顺着你学的」 because the wiring built every item as FOLLOW_UP. PRD 6.2.17 point 3 allows two
+     * non-starter kinds and the artifact carries neither, so the kind is assigned by position. The
+     * starter fallback stays uniform on purpose: it is the empty state, and varying it would claim a
+     * history that does not exist.
+     */
+    @Test
+    public void theDerivedStripAlternatesTheTwoKindsInsteadOfRepeatingOne() throws Exception {
+        String wiring = read(SRC.resolve(Paths.get("wiring", "HomeWiring.java")));
+        assertTrue("derived items take their kind from the item's position",
+                wiring.contains("derivedKind(index)"));
+        assertTrue("both kinds PRD 6.2.17 point 3 allows are reachable",
+                wiring.contains("index % 2 == 0 ? Recommendation.Kind.FOLLOW_UP")
+                        && wiring.contains(": Recommendation.Kind.NEW_DIRECTION"));
+        assertFalse("every derived card wearing FOLLOW_UP is exactly the 2026-10-25 data bug",
+                wiring.contains("new Recommendation(question, Recommendation.Kind.FOLLOW_UP)"));
+        assertTrue("the starter fallback stays one kind: no history, no variety to claim",
+                wiring.contains("StarterRecommendations.all()"));
     }
 
     @Test

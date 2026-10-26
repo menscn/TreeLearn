@@ -202,7 +202,9 @@ public final class BottomTabShellInstrumentedTest {
                 waitFor(R.id.chat_root));
         assertBarHidden("a conversation is a second-level screen");
 
-        click(R.id.chat_nav);
+        // 2026-10-25 (T-2026-10-25-096): the tree entry lives in the reading header now, not in the
+        // topbar; it reports the same navigation gesture.
+        click(R.id.chat_branch_tree);
         assertNotNull("the conversation's navigation entry opens the navigation page",
                 waitFor(R.id.navigation_root));
         assertBarHidden("the navigation page is a second-level screen");
@@ -237,6 +239,13 @@ public final class BottomTabShellInstrumentedTest {
         assertEquals("the completed segment exposes its item count",
                 context().getString(R.string.library_segment_done) + " 0",
                 ((TextView) view(R.id.library_segment_done)).getText().toString());
+        // 2026-10-25 (T-2026-10-25-102): two working topics and no archived branch is one populated
+        // side, so the capsule is not drawn and the label names it instead.
+        assertEquals("no switch is drawn while only one side has rows", View.GONE,
+                view(R.id.library_segment).getVisibility());
+        String liveLabel = ((TextView) view(R.id.library_segment_summary)).getText().toString();
+        assertTrue("the label names the live side: " + liveLabel,
+                liveLabel.contains(context().getString(R.string.library_unit_topics, 2)));
         assertNotNull("library rows use the prototype card surface", rows.getChildAt(0).getBackground());
 
         assertEquals("one row per stored topic", 2, rows.getChildCount());

@@ -22,10 +22,12 @@ import com.treelearn.core.domain.Guard;
  * <ul>
  *   <li>brand - {@code tl_green_soft} pill, {@code tl_green_deep} text (the prototype's
  *       {@code --green-soft} / {@code --green-deep}).</li>
- *   <li>neutral - {@code tl_line} pill, {@code tl_ink3} text. The prototype hard-codes {@code #EDEBE2}
+ *   <li>neutral - {@code tl_line} pill, {@code tl_ink2} text. The prototype hard-codes {@code #EDEBE2}
  *       for this pill; the token guard does not allow that grey to become a new resource, and the
  *       design-system entry for this row names {@code line} as the neutral tier, so {@code line} is
- *       what is used.</li>
+ *       what is used. The text moved from {@code ink3} to {@code ink2} on 2026-10-25 (T-2026-10-25-101):
+ *       at 12sp on the board's tint the lighter grey read as disabled, and this label is information,
+ *       not a hint. The brand pill keeps {@code green_deep}.</li>
  * </ul>
  *
  * <p>Nothing here touches Android APIs beyond resource ids, so the whole judgement is reachable from the
@@ -66,6 +68,6 @@ public final class RecommendationTag {
 
     /** The tag's text colour resource. */
     public static int textColorRes(Recommendation.Kind kind) {
-        return brandTinted(kind) ? R.color.tl_green_deep : R.color.tl_ink3;
+        return brandTinted(kind) ? R.color.tl_green_deep : R.color.tl_ink2;
     }
 }

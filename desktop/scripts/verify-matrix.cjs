@@ -4,9 +4,10 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { buildWindowOptions, APP_TITLE } = require("../window-options.cjs");
 const { SCREEN_MATRIX, WINDOW_SIZES } = require("./matrix.cjs");
+const { evidenceDir } = require("./evidence-dir.cjs");
 
 const INDEX = path.join(__dirname, "..", "app", "index.html");
-const OUT = path.join(__dirname, "..", "..", "artifacts", "evidence", "desktop-shell", "2026-10-24");
+const OUT = evidenceDir();
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 

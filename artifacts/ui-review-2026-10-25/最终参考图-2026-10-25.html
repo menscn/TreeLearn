@@ -1,0 +1,1272 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>知芽 · 最终参考图（2026-10-25）</title>
+<!--
+  这块板是 v2 最终参考：把 086 里 22 条发现的目标态定稿，右栏即实施依据。
+  2026-10-25 已按 anti-ui-slop 1.4.0 复核：22 条全部接受，修正 3 处（学习库 0 档、
+  首页说明假链接、历史行长标题规则），2 项带到实机（fontScale 1.3、PagerSnap 卡宽/触屏看全名）。
+  颜色、字号、间距取仓库真实 token（frontend/src/styles/tokens.css）与安卓 dimens.xml；
+  文案取 frontend/src/copy/zh-CN.ts 与 android/res/values/strings.xml；Web 组件按 1:1 CSS px，
+  安卓按 1dp = 1px 绘制。它不是渲染截图，别当像素证据；未实测的部分在页脚写明。
+-->
+<style>
+:root{
+  --paper:#F4F1EB; --surface:#FCFBF8; --ink:#16241C; --ink2:#435449; --ink3:#627067;
+  --line:#E2DFD6; --hairline:rgba(26,40,32,.07);
+  --green:#2B6E45; --green-deep:#164027; --green-soft:#E3F0E7; --green-faint:#F0F7F1;
+  --red:#C0392B; --red-soft:#FBEAE7; --amber:#B05108; --amber-soft:#FBF3E2;
+  --tint-sage:#E3EDE4; --mist:#EDEDE4;
+  --serif:'Noto Serif SC','Songti SC',Georgia,'SimSun',serif;
+  --sans:'Noto Sans SC',-apple-system,'Segoe UI','PingFang SC',sans-serif;
+  --mono:ui-monospace,'Cascadia Mono',Consolas,'Courier New',monospace;
+  --sh-card:inset 0 0 0 1px rgba(255,255,255,.88),0 20px 40px -28px rgba(22,36,28,.42),0 2px 6px rgba(22,36,28,.05);
+  --sh-soft:inset 0 0 0 1px rgba(255,255,255,.8),0 10px 24px -20px rgba(22,36,28,.38);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-size:15px;line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+.i{width:20px;height:20px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
+.wrap{max-width:1240px;margin:0 auto;padding:56px 32px 88px}
+
+/* ---------- 板头 ---------- */
+.masthead{display:flex;justify-content:space-between;align-items:flex-end;gap:32px;flex-wrap:wrap;padding-bottom:26px;border-bottom:1px solid var(--line)}
+.kicker{font-size:11.5px;letter-spacing:.2em;color:var(--green);margin:0 0 10px}
+h1{font-family:var(--serif);font-size:42px;line-height:1.22;font-weight:600;letter-spacing:.01em;color:var(--green-deep);margin:0}
+.lede{margin:14px 0 0;max-width:66ch;color:var(--ink2);font-size:14.5px;line-height:1.85}
+.lede b{color:var(--ink);font-weight:600}
+.meta{text-align:right;font-size:12px;line-height:2;color:var(--ink3);font-variant-numeric:tabular-nums}
+.meta strong{display:block;font-family:var(--serif);font-size:20px;color:var(--ink);font-weight:600;line-height:1.4}
+.legend{display:flex;gap:22px;flex-wrap:wrap;margin:20px 0 0;font-size:12px;color:var(--ink3)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend .sw{width:12px;height:12px;border-radius:4px;border:1px solid var(--line);display:inline-block}
+.legend .sw.now{background:#EAE7DE}
+.legend .sw.aft{background:#EFF7F1;border-color:#CDE3D4}
+.legend .sw.dash{background:#fff;border:1px dashed rgba(192,57,43,.55)}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 0}
+.toc a{display:inline-flex;align-items:baseline;gap:6px;font-size:12.5px;color:var(--ink2);text-decoration:none;border:1px solid var(--line);border-radius:99px;padding:5px 13px;background:var(--surface)}
+.toc a:hover{border-color:var(--green);color:var(--green-deep)}
+.toc a em{font-style:normal;color:var(--ink3);font-size:11px}
+
+/* ---------- anti-ui-slop 复核条 ---------- */
+.audit{margin:22px 0 0;border:1px solid var(--line);border-radius:18px;background:var(--surface);padding:16px 22px 8px}
+.audit-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.audit-h b{font-family:var(--serif);font-size:16px;color:var(--green-deep)}
+.audit-h span{font-size:11.5px;color:var(--ink3)}
+.audit ul{list-style:none;margin:0;padding:0}
+.audit li{display:flex;gap:12px;padding:7px 0;border-top:1px solid var(--hairline);font-size:12.5px;line-height:1.75;color:var(--ink2)}
+.audit li:first-child{border-top:0}
+.audit .tag{flex:none;width:50px;padding-top:3px;font-size:11px;letter-spacing:.04em;color:var(--ink3)}
+.audit .tag.ok{color:var(--green)}
+.audit .tag.fix{color:var(--amber)}
+.audit .tag.risk{color:var(--red)}
+
+/* ---------- 面 ---------- */
+.surf{margin-top:56px}
+.surf-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.surf-head .no{font-family:var(--serif);font-size:13px;color:var(--green);letter-spacing:.08em}
+h2{font-family:var(--serif);font-size:27px;font-weight:600;color:var(--green-deep);margin:0;letter-spacing:.01em}
+.surf-head .cnt{margin-left:auto;font-size:11.5px;color:var(--ink3);letter-spacing:.06em}
+.surf-sub{margin:8px 0 20px;padding-bottom:14px;border-bottom:1px solid var(--line);color:var(--ink3);font-size:12.5px}
+
+/* ---------- 发现卡 ---------- */
+.finding{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:22px 24px 24px;margin:0 0 20px}
+.f-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.f-no{width:26px;height:26px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-family:var(--serif);font-size:14px;font-weight:600;flex:none}
+.f-title{font-family:var(--serif);font-size:17px;font-weight:600;margin:0;letter-spacing:.01em}
+.sev{font-size:11px;letter-spacing:.04em;padding:2px 9px;border-radius:99px;white-space:nowrap}
+.sev.crit{background:var(--red-soft);color:var(--red)}
+.sev.major{background:var(--amber-soft);color:var(--amber)}
+.sev.minor{background:var(--green-soft);color:var(--green-deep)}
+.done{background:var(--green-soft);color:var(--green-deep);font-size:11px;padding:2px 9px;border-radius:99px;letter-spacing:.03em}
+.refs{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink3);letter-spacing:.02em;white-space:nowrap}
+.refs b{color:var(--ink2);font-weight:600}
+
+.pair{display:flex;gap:18px;align-items:flex-start}
+.pair.stack{display:block}
+.half{flex:1;min-width:0}
+.pair.stack .half+.half{margin-top:16px}
+.stage{position:relative;padding:18px;border:1px solid var(--line);border-radius:16px;background:#EAE7DE;overflow:hidden}
+.stage.aft{background:linear-gradient(180deg,#EFF7F1,#EAF4EC);border-color:#CDE3D4}
+.stamp{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px;font-size:11px;color:var(--ink3);letter-spacing:.04em}
+.stamp b{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--ink2);background:rgba(255,255,255,.7);border:1px solid var(--line);border-radius:99px;padding:2px 10px}
+.stage.aft .stamp b{color:var(--green-deep);border-color:#C9DFD1;background:#fff}
+.stamp i{font-style:normal}
+.note{margin:16px 0 0;padding-left:13px;border-left:2px solid var(--green);font-size:13px;line-height:1.8;color:var(--ink2)}
+.note b{color:var(--ink);font-weight:600}
+.note code{font-family:var(--mono);font-size:12px;background:var(--green-faint);color:var(--green-deep);padding:1px 5px;border-radius:4px}
+.note .warn{color:var(--amber)}
+
+.mark{position:absolute;border:1px dashed rgba(192,57,43,.5);border-radius:10px;pointer-events:none}
+.mark::after{content:attr(data-l);position:absolute;left:-1px;bottom:calc(100% + 5px);font-size:10.5px;line-height:1.4;color:var(--red);background:#fff;border:1px solid rgba(192,57,43,.25);padding:1px 6px;border-radius:5px;white-space:nowrap}
+.mark.ok{border-color:rgba(43,110,69,.5)}
+.mark.ok::after{color:var(--green-deep);border-color:#C9DFD1}
+
+/* ---------- Web：侧栏 ---------- */
+.wsb{width:240px;min-height:474px;background:rgba(255,255,255,.76);border-radius:16px;padding:10px 12px 16px;font-size:13px;color:var(--ink2);box-shadow:var(--sh-card)}
+.wsb .brand{display:flex;align-items:center;gap:8px;padding:6px 8px;color:var(--green-deep)}
+.wsb .brand .i{width:28px;height:28px}
+.wsb .brand b{font-family:var(--serif);font-size:30px;line-height:1;letter-spacing:.06em;font-weight:600}
+.wsb .nav{display:flex;flex-direction:column;gap:4px;margin-top:28px}
+.wsb .link{display:flex;align-items:center;gap:12px;min-height:44px;padding:8px 12px;border-radius:8px;color:var(--ink2);font-size:13px}
+.wsb .link .i{width:20px;height:20px}
+.wsb .link.on{background:var(--green-soft);color:var(--green-deep);font-weight:600}
+.wsb .fentry{display:flex;align-items:center;gap:8px;margin-top:12px;padding:8px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--surface) 70%,var(--green-faint))}
+.wsb .fico{width:28px;height:28px;border-radius:99px;background:var(--green-soft);color:var(--green-deep);display:grid;place-items:center;flex:none}
+.wsb .fico .i{width:18px;height:18px}
+.wsb .fmain{flex:1;min-width:0}
+.wsb .fmain b{display:block;font-size:15px;font-weight:600;color:var(--ink);line-height:1.3}
+.wsb .fmain i{display:block;margin-top:2px;font-style:normal;font-size:11px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wsb .farrow{color:var(--ink3)}
+.wsb .farrow .i{width:18px;height:18px}
+.wsb .sect{margin:30px 0 8px;padding:0 12px;font-size:11px;letter-spacing:.06em;color:var(--ink3)}
+.wsb .rlink{padding:12px;border-radius:8px;font-size:13px;line-height:1.65;color:var(--ink2)}
+.wsb .rlink small{display:block;margin-top:4px;font-size:11px;color:var(--ink3)}
+.wsb .rlink.hover{background:var(--green-faint)}
+.wsb.aft .sect{margin-top:20px;padding:14px 12px 0;border-top:1px solid var(--line);font-size:12px}
+.wsb.aft .rlink{color:var(--ink3)}
+.wsb.aft .rlink small{font-size:12px}
+.wsb.aft .fmain i{font-size:12px}
+
+/* ---------- Web：输入卡 ---------- */
+.wc{width:720px;max-width:100%;margin:0 auto}
+.wc-box{position:relative;background:rgba(255,255,255,.87);border-radius:28px;padding:12px 16px 10px;box-shadow:var(--sh-card)}
+.wc-input{min-height:56px;font-size:15px;line-height:28px;color:var(--ink3);letter-spacing:.01em}
+.wc-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+.wc-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:99px;background:var(--green-faint);color:var(--green-deep);font-size:11px;white-space:nowrap}
+.wc-chip .i{width:14px;height:14px}
+.wc .sp{flex:1}
+.wc-icons{display:flex;align-items:center;gap:18px;color:var(--ink3)}
+.wc-icons .i{width:20px;height:20px}
+.wc-help{margin:8px 0 0;font-size:11px;line-height:1.6;color:var(--ink3);text-align:center}
+.wc-out{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:8px 4px 0;font-size:11.5px;color:var(--ink3)}
+.wc-out a{font-size:13px;color:var(--green);text-decoration:none;border-bottom:1px solid rgba(43,110,69,.28);padding-bottom:1px;white-space:nowrap}
+.wc-out .lr{display:inline-flex;align-items:center;gap:5px}
+.wc-out .lr .i{width:14px;height:14px;color:var(--green)}
+
+/* ---------- Web：历史主题行 ---------- */
+.wrow{width:960px;max-width:100%;padding:24px 0;border-bottom:1px solid var(--line)}
+.wrow .top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.wrow h4{margin:0;font-size:16px;font-weight:600;line-height:1.6;color:var(--ink);letter-spacing:.01em}
+.wrow .chev{margin-top:4px;color:var(--ink3)}
+.wrow .chev .i{width:16px;height:16px}
+.wrow p.ex{margin:8px 0 0;font-size:13px;line-height:1.9;color:var(--ink2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wrow .meta{display:flex;align-items:center;gap:4px;margin:8px 0 0;font-size:11px;color:var(--ink3)}
+.wrow .meta .i{width:14px;height:14px}
+.wrow.aft{padding:18px 0}
+.wrow.aft .top{align-items:center}
+.wrow.aft .ttl{display:flex;align-items:baseline;gap:8px;min-width:0;flex-wrap:nowrap}
+.wrow.aft .ttl h4{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wrow.aft .meta{margin:0;font-size:13px;color:var(--ink3);flex:none}
+.wrow.aft p.ex{margin:6px 0 0;-webkit-line-clamp:1;font-size:13px;line-height:1.7}
+.wrow.aft h4{font-size:16px}
+
+/* ---------- Web：阅读列 ---------- */
+.colwrap{position:relative;margin:0 auto;padding-right:18px}
+.colwrap .reader{background:#fff;border-radius:16px;padding:26px 30px 24px;box-shadow:var(--sh-card)}
+.colwrap .rhead{font-family:var(--serif);font-size:20px;font-weight:600;line-height:1.5;margin:0 0 8px;color:var(--ink)}
+.colwrap .when{font-size:11px;color:var(--ink3)}
+.colwrap.aft .when{font-size:13px}
+.colwrap .who{display:flex;align-items:center;gap:6px;margin:16px 0 10px;font-size:11px;color:var(--ink3)}
+.colwrap .who .i{width:14px;height:14px;color:var(--green)}
+.colwrap .body{font-size:15px;line-height:1.9;color:var(--ink)}
+.colwrap .body p{margin:0 0 14px}
+.colwrap .body h5{font-size:20px;font-weight:600;line-height:1.5;margin:24px 0 12px;font-family:var(--serif)}
+.colwrap .body h6{font-size:16px;font-weight:600;margin:16px 0 6px}
+.colwrap .edge{position:absolute;top:0;bottom:22px;right:18px;width:0;border-right:1px dashed rgba(192,57,43,.45)}
+.colwrap .ruler{display:flex;align-items:center;gap:10px;margin:10px 18px 0 0;font-size:11px;color:var(--ink3);font-variant-numeric:tabular-nums}
+.colwrap .ruler em{font-style:normal;background:#fff;border:1px solid var(--line);border-radius:99px;padding:2px 9px;white-space:nowrap}
+.colwrap .ruler .bar{flex:1;height:1px;background:var(--ink3);opacity:.35;position:relative}
+.colwrap .ruler .bar::before,.colwrap .ruler .bar::after{content:'';position:absolute;top:-4px;width:1px;height:9px;background:var(--ink3);opacity:.6}
+.colwrap .ruler .bar::before{left:0}
+.colwrap .ruler .bar::after{right:0}
+.colwrap .ruler strong{font-weight:600;color:var(--ink2)}
+
+/* ---------- Web：对话小样 ---------- */
+.mini-stack{display:flex;flex-direction:column;gap:10px;width:420px;max-width:100%}
+.mini-card{background:#fff;border-radius:14px;padding:14px 18px;box-shadow:var(--sh-soft)}
+.mini-card .t{font-family:var(--serif);font-size:16px;font-weight:600;margin:0}
+.mini-card .m{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:11px;color:var(--ink3)}
+.mini-card .m .cap{font-size:11px}
+.mini-card .m .sm{font-size:11px}
+.mini-card.aft .m .cap{font-size:12px}
+.mini-card.aft .m .sm{font-size:13px;color:var(--ink2)}
+.mini-card .m .dot{width:3px;height:3px;border-radius:99px;background:var(--ink3);opacity:.6}
+
+/* ---------- 森林舞台 ---------- */
+.fstage{position:relative;width:1000px;max-width:100%;height:430px;border:1px solid var(--line);border-radius:18px;overflow:hidden;
+  background:
+    radial-gradient(72% 52% at 32% 24%, var(--green-faint) 0%, transparent 70%),
+    radial-gradient(90% 60% at 50% 108%, var(--green-soft) 0%, transparent 62%),
+    linear-gradient(165deg,var(--green-soft) 0%,var(--green-faint) 44%,var(--green-soft) 100%);}
+.fstage .dots{position:absolute;inset:0;background-image:radial-gradient(var(--green) .7px,transparent .8px);background-size:14px 14px;opacity:.05}
+.fstage .vignette{position:absolute;inset:0;box-shadow:inset 0 0 100px var(--green-soft),inset 0 -60px 80px var(--green-soft)}
+.fstage svg.terrain{position:absolute;inset:0;width:100%;height:100%}
+.fstage .hint{position:absolute;left:18px;top:14px;display:inline-flex;align-items:center;gap:6px;padding:4px 12px 4px 9px;border-radius:99px;background:rgba(255,255,255,.72);box-shadow:inset 0 0 0 1px rgba(255,255,255,.9),0 2px 6px rgba(22,36,28,.05);font-size:11.5px;color:var(--ink2)}
+.fstage .hint .i{width:14px;height:14px;color:var(--green)}
+.fstage .compass{position:absolute;right:16px;top:12px;width:26px;height:26px;border-radius:99px;background:rgba(255,255,255,.74);box-shadow:inset 0 0 0 1px rgba(255,255,255,.9);display:grid;place-items:center;font-size:9.5px;color:var(--ink3);letter-spacing:.02em}
+.fstage .compass i{position:absolute;top:4px;width:1px;height:7px;background:var(--ink3);opacity:.55}
+.fstage .foot{position:absolute;left:0;right:0;bottom:9px;text-align:center;font-size:11px;color:var(--ink3);letter-spacing:.03em}
+.fstage.aft .foot{font-size:13px;color:var(--ink2)}
+.tree{position:absolute;width:124px;height:124px;transform:translate(-50%,-100%)}
+.ttag{position:absolute;transform:translateX(-50%);font-size:12px;line-height:1.5;color:var(--ink2);background:rgba(255,255,255,.75);padding:1px 8px;border-radius:99px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.9);white-space:nowrap}
+.ttip{position:absolute;transform:translate(-50%,-100%);margin-bottom:8px;background:var(--green-deep);color:#F4F1EB;font-size:11.5px;line-height:1.5;padding:4px 10px;border-radius:8px;white-space:nowrap;box-shadow:0 8px 18px -12px rgba(22,36,28,.7)}
+.ttip::after{content:'';position:absolute;left:50%;top:100%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--green-deep)}
+
+/* 角落裁切（指南针 / 等高线） */
+.corner{position:relative;width:180px;height:132px;border-radius:14px;overflow:hidden;border:1px solid var(--line);
+  background:
+    radial-gradient(80% 60% at 70% 10%,var(--green-faint),transparent 70%),
+    linear-gradient(165deg,var(--green-soft),var(--green-faint));}
+.corner .compass{position:absolute;right:14px;top:12px;width:26px;height:26px;border-radius:99px;background:rgba(255,255,255,.78);box-shadow:inset 0 0 0 1px rgba(255,255,255,.9);display:grid;place-items:center;font-size:9.5px;color:var(--ink3)}
+.corner .compass i{position:absolute;top:4px;width:1px;height:7px;background:var(--ink3);opacity:.55}
+.terraincrop{position:relative;width:330px;height:180px;border-radius:14px;overflow:hidden;border:1px solid var(--line);
+  background:
+    radial-gradient(80% 60% at 30% 20%,var(--green-faint),transparent 72%),
+    linear-gradient(165deg,var(--green-soft),var(--green-faint) 55%,var(--green-soft));}
+.terraincrop svg{position:absolute;inset:0;width:100%;height:100%}
+.terraincrop .dl{position:absolute;left:12px;bottom:10px;font-size:10.5px;color:var(--ink3);background:rgba(255,255,255,.8);border-radius:99px;padding:2px 8px;font-variant-numeric:tabular-nums}
+
+/* ---------- 字体样张 / 图标样张 ---------- */
+.spec{background:#fff;border-radius:16px;padding:24px 26px;box-shadow:var(--sh-card)}
+.spec .word{font-size:52px;line-height:1.2;letter-spacing:.05em;color:var(--green-deep);font-weight:600}
+.spec.before .word{font-family:'SimSun','Songti SC','NSimSun',serif}
+.spec.after .word{font-family:'Noto Serif SC','Songti SC',Georgia,serif}
+.spec .cap{margin:12px 0 0;font-size:11.5px;color:var(--ink3);line-height:1.7}
+.spec .cap b{color:var(--ink2)}
+.spec .tagline{margin:14px 0 0;font-size:13px;color:var(--ink3)}
+.specrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;font-size:11px;color:var(--ink3)}
+.specrow span{border:1px solid var(--line);border-radius:99px;padding:2px 9px;background:var(--paper)}
+.iconchip{width:82px;height:82px;border-radius:22px;background:#fff;box-shadow:var(--sh-card);display:grid;place-items:center;color:var(--green-deep)}
+.iconchip .i{width:34px;height:34px}
+.iconrow{display:flex;align-items:center;gap:12px;margin-top:14px;font-size:13px;color:var(--ink2)}
+.iconrow .i{width:20px;height:20px;color:var(--green-deep)}
+.filecard{background:#fff;border-radius:14px;padding:16px 18px;box-shadow:var(--sh-soft);font-size:12.5px;color:var(--ink2)}
+.filecard .fh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--ink)}
+.filecard .fh .dot{width:7px;height:7px;border-radius:99px;background:var(--red);flex:none}
+.filecard.aft .fh .dot{background:var(--green)}
+.filecard .fm{margin:6px 0 10px;font-size:11px;color:var(--ink3);font-variant-numeric:tabular-nums}
+.filecard .names{font-family:var(--mono);font-size:11.5px;line-height:1.9;color:var(--ink3)}
+.filecard .names s{text-decoration-color:rgba(192,57,43,.5);color:#8A7F79}
+.filecard .bad{margin-top:10px;font-size:11.5px;color:var(--red)}
+.filecard .good{margin-top:10px;font-size:11.5px;color:var(--green-deep)}
+
+/* ---------- 安卓：手机框 ---------- */
+.phone{position:relative;width:360px;height:800px;border-radius:30px;overflow:hidden;border:1px solid #D7D2C4;
+  background:linear-gradient(160deg,#F8F5EF 0%,#F1EFE6 55%,#E8F0E7 100%);
+  box-shadow:0 34px 60px -46px rgba(22,36,28,.6),inset 0 0 0 1px rgba(255,255,255,.75);}
+.p-status{display:flex;justify-content:space-between;align-items:center;padding:9px 20px 0;font-size:11px;color:#3C4C42;letter-spacing:.02em}
+.p-status .si{display:flex;align-items:center;gap:5px;font-size:9.5px;letter-spacing:.04em;opacity:.85}
+.p-status .batt{display:inline-flex;align-items:center;gap:3px}
+.p-status .batt i{display:block;width:16px;height:8px;border:1px solid #3C4C42;border-radius:2px;position:relative}
+.p-status .batt i::after{content:'';position:absolute;inset:1px;right:4px;background:#3C4C42;border-radius:1px}
+.p-bar{position:relative;margin:10px 16px 0;height:52px;border-radius:99px;background:rgba(255,255,255,.78);box-shadow:var(--sh-card);display:flex;align-items:center;gap:4px;padding:0 8px}
+.p-bar .ib{width:36px;height:36px;border-radius:99px;display:grid;place-items:center;color:var(--green-deep);flex:none}
+.p-bar .ib .i{width:20px;height:20px}
+.p-bar .sp{flex:1}
+.p-bar .ttl{flex:1;min-width:0;font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0 2px}
+.p-bar.tworow{height:76px;flex-wrap:wrap;align-content:center;padding:4px 8px 6px}
+.p-bar.tworow .r1{display:flex;align-items:center;width:100%;height:44px;gap:2px}
+.p-bar.tworow .ib{width:44px;height:44px}
+.p-bar.tworow .r2{width:100%;padding:0 4px 0 6px;font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-hr{position:absolute;left:20px;right:20px;border-top:1px dashed rgba(192,57,43,.4);z-index:5}
+.p-hr::after{content:attr(data-l);position:absolute;right:0;top:-16px;font-size:9.5px;color:var(--red);background:rgba(255,255,255,.85);padding:0 4px;border-radius:4px}
+
+.a-hero{text-align:center;padding:70px 20px 49px}
+.a-hero .lockup{display:flex;align-items:center;justify-content:center;gap:12px}
+.a-hero .amark{width:40px;height:40px;color:var(--green-deep)}
+.a-hero .aword{font-family:var(--serif);font-size:41px;line-height:1;letter-spacing:.06em;font-weight:700;color:var(--green-deep)}
+.a-hero .asub{margin:12px 0 0;font-size:12px;line-height:1.6;letter-spacing:.06em;color:var(--ink2)}
+.a-hero.aft{padding:8px 14px 10px}
+.a-hero.aft .lockup{gap:6px;flex-wrap:nowrap;justify-content:center}
+.a-hero.aft .amark{flex:none}
+.a-hero.aft .aword{flex:none;white-space:nowrap}
+.a-hero.aft .asub{margin:0 0 0 8px;font-size:12px;letter-spacing:.02em;white-space:nowrap;flex:none}
+.a-composer{margin:0 20px;min-height:138px;border-radius:26px;background:rgba(255,255,255,.87);box-shadow:var(--sh-card);padding:12px 14px 10px;display:flex;flex-direction:column}
+.a-composer .hint{flex:1;font-size:15px;line-height:1.55;color:var(--ink3)}
+.a-composer .row{display:flex;align-items:center;gap:8px;margin-top:8px}
+.a-chip{display:inline-flex;align-items:center;gap:4px;background:var(--green-faint);color:var(--green-deep);border-radius:99px;padding:4px 10px;font-size:11px;white-space:nowrap}
+.a-chip .i{width:14px;height:14px}
+.a-send{width:44px;height:44px;border-radius:99px;background:#E5E1D5;color:#fff;display:grid;place-items:center;margin-left:auto}
+.a-send .i{width:20px;height:20px;stroke-width:2.2}
+.a-sec{margin:16px 20px 0}
+.a-sechead{display:flex;align-items:center;gap:4px;color:var(--green-deep);font-size:11px;font-weight:700;letter-spacing:.02em}
+.a-sechead .i{width:14px;height:14px;color:var(--green)}
+.a-sechead .pill{margin-left:4px;font-weight:400;font-size:11px;color:var(--green-deep);background:var(--tint-sage);border-radius:99px;padding:1px 7px}
+.a-marq{display:flex;gap:8px;margin-top:8px;overflow:hidden}
+.a-card{width:232px;flex:none;background:rgba(255,255,255,.87);border-radius:16px;padding:11px 12px;box-shadow:var(--sh-soft)}
+.a-card .top{display:flex;align-items:center;gap:4px}
+.a-card .top .i{width:14px;height:14px;color:var(--green)}
+.a-pill{background:var(--tint-sage);color:var(--green-deep);border-radius:99px;padding:2px 8px;font-size:11px;white-space:nowrap}
+.a-card p{margin:4px 0 0;font-size:11px;line-height:1.5;color:var(--ink2)}
+.a-card.wide{width:312px}
+.a-card.wide p{font-size:12px;line-height:1.55}
+.a-dots{display:flex;gap:5px;justify-content:center;margin-top:9px}
+.a-dots span{width:5px;height:5px;border-radius:99px;background:#C8C4B6}
+.a-dots span.on{width:14px;background:var(--green)}
+.a-hist{margin:16px 20px 0}
+.a-hrow{background:rgba(255,255,255,.87);border-radius:16px;padding:12px 13px;margin-top:8px;box-shadow:var(--sh-soft)}
+.a-hrow .t{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;font-weight:600;color:var(--ink)}
+.a-hrow .t .i{width:16px;height:16px;color:var(--ink3);flex:none}
+.a-hrow p{margin:6px 0 0;font-size:11px;line-height:1.5;color:var(--ink2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.a-hrow .m{display:flex;align-items:center;gap:4px;margin-top:6px;font-size:11px;color:var(--ink3)}
+.a-hrow .m .i{width:14px;height:14px}
+.a-tabbar{position:absolute;left:24px;right:24px;bottom:20px;height:62px;border-radius:99px;background:rgba(255,255,255,.8);box-shadow:var(--sh-card);display:flex;gap:2px;padding:6px;z-index:4}
+.a-tabbar .tab{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:99px;font-size:11px;color:var(--ink2)}
+.a-tabbar .tab.on{background:#FBF9F3;box-shadow:inset 0 0 0 1px rgba(255,255,255,.9);color:var(--ink);font-weight:600}
+.a-tabbar .tab .i{width:18px;height:18px}
+.phone.crop-shell{height:auto;min-height:0;padding-bottom:16px;border-radius:22px}
+
+/* ---------- 安卓：局部件 ---------- */
+.acard{width:100%;max-width:329px;background:var(--red-soft);border-radius:18px;padding:12px 14px 12px;box-shadow:inset 0 0 0 1px rgba(192,57,43,.10)}
+.acard .msg{margin:0;font-size:13px;line-height:1.6;color:var(--red)}
+.acard .hint{margin:8px 0 0;font-size:11px;line-height:1.6;color:var(--ink3)}
+.acard .retry{display:inline-flex;align-items:center;justify-content:center;min-width:44px;height:44px;padding:0 16px;border-radius:12px;border:1px solid rgba(22,36,28,.14);background:#FBF9F3;color:var(--green-deep);font-size:13px;font-weight:600}
+.acard .row{display:flex;align-items:center;gap:10px;margin-top:8px}
+.acard .row .hint{margin:0;flex:1}
+.acard.aft .hint{font-size:13px;color:var(--ink2);margin-top:6px}
+.acard.aft .go{margin-top:10px}
+.barwrap{width:360px;margin:0 auto;padding:12px 16px;border-radius:22px;background:linear-gradient(160deg,#F8F5EF,#EDF3EA)}
+.canvas-empty{position:relative;width:360px;margin:0 auto;height:196px;border-radius:22px;background:rgba(255,255,255,.72);box-shadow:inset 0 0 0 1px rgba(255,255,255,.9);display:grid;place-items:center;padding:24px}
+.canvas-empty .txt{font-size:13px;color:var(--ink3);text-align:center;line-height:1.7}
+.canvas-empty .cta{display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 18px;border-radius:99px;background:var(--green);color:#fff;font-size:13px;font-weight:600;box-shadow:0 6px 14px -10px rgba(22,46,30,.8)}
+.canvas-empty.aft{display:flex;flex-direction:column;justify-content:center;gap:16px}
+.segwrap{width:360px;margin:0 auto;padding:0 20px}
+.seg{width:100%;height:44px;border-radius:99px;background:rgba(255,255,255,.62);box-shadow:inset 0 0 0 1px rgba(255,255,255,.9);display:flex;gap:4px;padding:4px}
+.seg .half{flex:1;height:36px;border-radius:99px;display:flex;align-items:center;justify-content:center;gap:4px;font-size:10.5px;color:var(--ink2)}
+.seg .half.on{background:#FBF9F3;box-shadow:inset 0 0 0 1px rgba(255,255,255,.9);color:var(--ink);font-weight:600}
+.seg.aft{width:auto;display:inline-flex;gap:0;background:none;box-shadow:none;padding:0;height:32px;align-items:center}
+.seg.aft .half{flex:none;padding:0 14px;height:32px;background:var(--green-faint);box-shadow:inset 0 0 0 1px var(--line);font-size:13px;color:var(--ink);font-weight:600}
+.seg.aft .zero{margin-left:8px;font-size:12px;color:var(--ink3)}
+.statecap{margin:0 0 8px;font-size:11px;color:var(--ink3);letter-spacing:.02em}
+.libhead{display:flex;align-items:baseline;gap:6px;margin:0 0 10px;font-size:13px;font-weight:600;color:var(--ink)}
+.libhead .n{font-size:12px;font-weight:400;color:var(--ink3)}
+.searchf{display:flex;align-items:center;gap:8px;width:100%;height:44px;padding:0 14px;border-radius:99px;background:rgba(255,255,255,.8);box-shadow:var(--sh-soft);font-size:11px;color:var(--ink3)}
+.searchf .i{width:16px;height:16px;color:var(--ink3)}
+.libcard{width:100%;background:rgba(255,255,255,.88);border-radius:16px;padding:12px 13px;box-shadow:var(--sh-soft)}
+.libcard .t{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;font-weight:600;color:var(--ink)}
+.libcard .t .i{width:16px;height:16px;color:var(--ink3)}
+.libcard p{margin:6px 0 0;font-size:11px;line-height:1.55;color:var(--ink2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.libcard.aft p{-webkit-line-clamp:2}
+.libcard .m{display:flex;align-items:center;gap:4px;margin-top:6px;font-size:11px;color:var(--ink3)}
+.libcard .m .i{width:14px;height:14px}
+.caption{margin:10px 0 0;font-size:11px;color:var(--ink3);text-align:center}
+
+/* ---------- 页脚 ---------- */
+footer{margin-top:64px;padding-top:28px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:28px}
+footer h3{font-family:var(--serif);font-size:15px;margin:0 0 10px;color:var(--ink)}
+footer ul{margin:0;padding-left:18px;font-size:12.5px;line-height:1.9;color:var(--ink2)}
+footer li{margin-bottom:6px}
+footer code{font-family:var(--mono);font-size:11.5px;background:rgba(255,255,255,.7);padding:1px 4px;border-radius:4px}
+.foot-note{grid-column:1/-1;font-size:11.5px;color:var(--ink3);line-height:1.8;margin:0}
+
+@media (max-width:900px){
+  .wrap{padding:36px 18px 64px}
+  h1{font-size:32px}
+  .pair{flex-direction:column}
+  .half{width:100%}
+  footer{grid-template-columns:1fr}
+  .meta{text-align:left}
+  .fstage{height:320px}
+  .phone{transform-origin:top left}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="g-sprout" viewBox="0 0 24 24"><path d="M12 21.5V13"/><path d="M12 13C12 9.2 9.2 6.5 4.8 6.5C4.8 10.3 7.6 13 12 13Z" fill="currentColor" fill-opacity=".18"/><path d="M12 11C12 6.8 15 4 19.5 4C19.5 8.2 16.5 11 12 11Z" fill="currentColor" fill-opacity=".3"/></symbol>
+  <symbol id="g-home" viewBox="0 0 24 24"><path d="M3.6 10.2 12 3.6 20.4 10.2V19.8H3.6ZM9.4 19.8V14.2h5.2v5.6"/></symbol>
+  <symbol id="g-book" viewBox="0 0 24 24"><path d="M12 6.6C10.2 5 7.2 4.6 4.6 5.4v13c2.6-.8 5.6-.4 7.4 1.2M12 6.6c1.8-1.6 4.8-2 7.4-1.2v13c-2.6-.8-5.6-.4-7.4 1.2M12 6.6v13"/></symbol>
+  <symbol id="g-sun" viewBox="0 0 24 24"><path d="M12 12m-3 0a3 3 0 1 1 6 0a3 3 0 1 1-6 0"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2.1 2.1M16.9 16.9 19 19M19 5l-2.1 2.1M7.1 16.9 5 19"/></symbol>
+  <symbol id="g-gear" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="g-tree" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2.1"/><circle cx="17.5" cy="6" r="2.1"/><circle cx="17.5" cy="18" r="2.1"/><path d="M7 11.2 15.5 6.8M7 12.8l8.5 4.4"/></symbol>
+  <symbol id="g-forest" viewBox="0 0 24 24"><path d="M12 3l3.2 5.2H8.8L12 3z"/><path d="M12 7.3l4.4 6.2H7.6L12 7.3z"/><path d="M12 21v-6.2"/><path d="M5 9.2l2.4 4H2.6L5 9.2z"/><path d="M5 21v-4.2"/><path d="M19 9.2l2.4 4h-4.8L19 9.2z"/><path d="M19 21v-4.2"/></symbol>
+  <symbol id="g-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="g-sparkle" viewBox="0 0 24 24"><path d="M12 3.5 13.8 9 19.5 10.8 13.8 12.6 12 18.5 10.2 12.6 4.5 10.8 10.2 9z"/><path d="M18.5 3.5v3M20 5h-3"/></symbol>
+  <symbol id="g-attach" viewBox="0 0 24 24"><path d="M20.5 11.5 11 21a5 5 0 0 1-7.1-7.1L13.8 4a3.5 3.5 0 0 1 5 5L9.7 18.1a2 2 0 0 1-2.8-2.8l8.5-8.5"/></symbol>
+  <symbol id="g-send" viewBox="0 0 24 24"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></symbol>
+  <symbol id="g-search" viewBox="0 0 24 24"><path d="M10.8 4.2A6.6 6.6 0 1 0 10.8 17.4A6.6 6.6 0 1 0 10.8 4.2M15.7 15.7 20.2 20.2"/></symbol>
+  <symbol id="g-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="g-share" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2.1"/><circle cx="17.5" cy="6" r="2.1"/><circle cx="17.5" cy="18" r="2.1"/><path d="M7 11.2 15.5 6.8M7 12.8l8.5 4.4"/></symbol>
+  <symbol id="g-map" viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></symbol>
+  <symbol id="g-more" viewBox="0 0 24 24"><circle cx="5.5" cy="12" r="1.1"/><circle cx="12" cy="12" r="1.1"/><circle cx="18.5" cy="12" r="1.1"/></symbol>
+  <symbol id="g-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="g-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 1 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="9.8" r="2.2"/></symbol>
+</defs></svg>
+
+<div class="wrap">
+
+<header class="masthead">
+  <div>
+    <p class="kicker">TREELEARN · 最终参考图 · 2026-10-25</p>
+    <h1>22 条改法，定稿成这一版</h1>
+    <p class="lede">右栏是实施时要照着做的目标态，左栏保留为差异证据。本版已按 <b>anti-ui-slop</b> 复核过一遍：22 条全部接受，另修 3 处、留 2 项到实机。颜色取 <b>tokens.css</b>、尺寸取 Web 的真实 CSS px 与安卓的 <b>dimens.xml</b>、文案取 <b>zh-CN.ts</b> 与 <b>strings.xml</b>。</p>
+  </div>
+  <div class="meta">
+    <strong>22 条 · 全部接受</strong>
+    18 条屏内　4 条跨面<br>
+    已落 1 条（X1）　复核修正 3 处<br>
+    2026-10-25 · v2
+  </div>
+</header>
+
+<div class="legend">
+  <span><i class="sw now"></i>现在（按 081 / 059 / forest-070 截图重画）</span>
+  <span><i class="sw aft"></i>改后（目标状态）</span>
+  <span><i class="sw dash"></i>虚线＝测量边界或改动落点</span>
+  <span>右上角数字＝实施卡号（086 的映射）</span>
+</div>
+
+<section class="audit">
+  <div class="audit-h"><b>anti-ui-slop 复核</b><span>1.4.0 · polish + craft · 只读审一遍，改的是板与三处目标态</span></div>
+  <ul>
+    <li><span class="tag ok">接受</span><span>22 条全部接受：每条都落在真实 token / dimens / 文案上，分级与目标尺寸自洽；现在与改后都带文字标签，没有只靠底色区分。</span></li>
+    <li><span class="tag fix">修正 1</span><span>学习库分段改成两支：只有一档有内容时整条隐藏、用一行「进行中 3」说明；两档都有才出现分段。0 档不画成任何控件，免得造出一个点不动的目标。</span></li>
+    <li><span class="tag fix">修正 2</span><span>首页输入卡说明不再做假链接。提示语不加交互外观；真实入口就在下方卡片，只有真能跳的文字才配下划线。</span></li>
+    <li><span class="tag fix">修正 3</span><span>历史主题行补一条长标题规则：标题超长只截标题，meta 与箭头不换行；否则「紧跟 8px」在第一条长标题上就散了。</span></li>
+    <li><span class="tag risk">带实机</span><span>hero 单行只在 fontScale 1.0 成立（1.3 允许 tagline 换行）；PagerSnap 312 卡宽与触屏看树名分别在 360dp / Pad 验一次。</span></li>
+  </ul>
+</section>
+
+<nav class="toc">
+  <a href="#cross">跨面 <em>4</em></a>
+  <a href="#web-home">首页 · Web <em>3</em></a>
+  <a href="#web-chat">对话 · Web <em>3</em></a>
+  <a href="#web-forest">我的森林 · Web <em>3</em></a>
+  <a href="#and-home">首页 · 安卓 <em>3</em></a>
+  <a href="#and-chat">对话 · 安卓 <em>3</em></a>
+  <a href="#and-lib">学习库 · 安卓 <em>3</em></a>
+</nav>
+
+<!-- ============================================================ 跨面 -->
+<section class="surf" id="cross">
+  <div class="surf-head"><span class="no">00</span><h2>跨面四条</h2><span class="cnt">不归某一屏，四条一起收</span></div>
+  <p class="surf-sub">这一组是身份与地基：字体、图标、字号地板、死样式。前两条直接改「看起来是不是同一个产品」，后两条改的是后续所有守门能不能立起来。</p>
+
+  <!-- X1 -->
+  <article class="finding">
+    <div class="f-top"><span class="f-no">X1</span><h3 class="f-title">衬线身份在 Web / 桌面只剩宿主字体</h3><span class="sev crit">严重</span><span class="done">已落 090</span><span class="refs"><b>088</b> · <b>090</b></span></div>
+    <div class="pair">
+      <div class="half"><div class="stage">
+        <div class="stamp"><b>现在</b><i>Windows 目标机</i></div>
+        <div class="spec before">
+          <div class="word">知芽</div>
+          <p class="cap"><b>只写了族名</b>，没有随包字节；目标机落到宋体，笔画粗细和安卓不是一副字。</p>
+          <div class="specrow"><span>src：无</span><span>离线包：不带字体</span><span>安卓：早已随包</span></div>
+        </div>
+      </div></div>
+      <div class="half"><div class="stage aft">
+        <div class="stamp"><b>改后</b><i>同一张字面</i></div>
+        <div class="spec after">
+          <div class="word">知芽</div>
+          <p class="cap"><b>同一份 4.0 MB 子集</b>随包，base64 内联进离线单文件；Windows / macOS / 安卓一副字。</p>
+          <div class="specrow"><span>7,566 码位</span><span>4,018,044 B</span><span>单文件 +5.35 MB</span></div>
+        </div>
+      </div></div>
+    </div>
+    <p class="note"><b>不是换字体，是把安卓上已经在随包的那一面也带进 Web。</b>兜底栈保留 <code>'SimSun'</code>——子集没覆盖的码位仍要有中文衬线接住。判据已绿：7 条字体测试 + <code>check_ui_asset_parity</code> 的 A1/A2/A4/A5；卡 090 还差一次 CDP 取证与卡片落盘。</p>
+  </article>
+
+  <!-- X2 -->
+  <article class="finding">
+    <div class="f-top"><span class="f-no">X2</span><h3 class="f-title">「设置」画出来是一轮太阳</h3><span class="sev major">重要</span><span class="refs"><b>088</b> · <b>091</b></span></div>
+    <div class="pair">
+      <div class="half"><div class="stage">
+        <div class="stamp"><b>现在</b><i>ic_chat_gear.xml ＋ Icon.tsx 同一段 pathData</i></div>
+        <div style="display:flex;gap:26px;align-items:flex-start">
+          <div><div class="iconchip"><svg class="i"><use href="#g-sun"/></svg></div><p class="caption" style="margin-top:8px">设置</p></div>
+          <div><div class="iconchip"><svg class="i"><use href="#g-sun"/></svg></div><p class="caption" style="margin-top:8px">聊天页同图标</p></div>
+        </div>
+        <div class="iconrow"><svg class="i"><use href="#g-sun"/></svg><span>圆 + 八条放射线：语义是「亮度」</span></div>
+      </div></div>
+      <div class="half"><div class="stage aft">
+        <div class="stamp"><b>改后</b><i>有齿的齿轮</i></div>
+        <div style="display:flex;gap:26px;align-items:flex-start">
+          <div><div class="iconchip"><svg class="i"><use href="#g-gear"/></svg></div><p class="caption" style="margin-top:8px">设置</p></div>
+          <div><div class="iconchip"><svg class="i"><use href="#g-gear"/></svg></div><p class="caption" style="margin-top:8px">聊天页同图标</p></div>
+        </div>
+        <div class="iconrow"><svg class="i"><use href="#g-gear"/></svg><span>轮齿 + 轴心：语义是「设置」</span></div>
+      </div></div>
+    </div>
+    <p class="note"><b>两端一起换，source of truth 只留一份。</b>091 把图标纳入 parity 检查——现在只比对 brand 与 send，所以「同一个名字画成太阳」这种漂移没人在看。</p>
+  </article>
+
+  <!-- X3 -->
+  <article class="finding">
+    <div class="f-top"><span class="f-no">X3</span><h3 class="f-title">标签层 11px / 11sp，而且正好用在导航上</h3><span class="sev major">重要</span><span class="refs"><b>089</b> · <b>092</b></span></div>
+    <div class="pair">
+      <div class="half"><div class="stage">
+        <div class="stamp"><b>现在</b><i>cap = 11</i></div>
+        <div class="mini-stack">
+          <div class="mini-card">
+            <p class="sect" style="margin:0 0 6px;font-size:11px;color:var(--ink3);letter-spacing:.06em">最近学习</p>
+            <p style="margin:0;font-size:13px;line-height:1.65;color:var(--ink2)">注意力权重可视化与模型可解释性的关系</p>
+            <p style="margin:4px 0 0;font-size:11px;color:var(--ink3)">1 个分支 · 3天前</p>
+          </div>
+          <div class="barwrap" style="width:auto;padding:10px 12px">
+            <div class="a-tabbar" style="position:static;left:auto;right:auto;bottom:auto;margin:0">
+              <div class="tab on"><svg class="i"><use href="#g-home"/></svg>主页</div>
+              <div class="tab"><svg class="i"><use href="#g-book"/></svg>学习库</div>
+            </div>
+          </div>
+        </div>
+      </div></div>
+      <div class="half"><div class="stage aft">
+        <div class="stamp"><b>改后</b><i>cap = 12</i></div>
+        <div class="mini-stack">
+          <div class="mini-card aft">
+            <p class="sect" style="margin:0 0 6px;font-size:12px;color:var(--ink3);letter-spacing:.06em">最近学习</p>
+            <p style="margin:0;font-size:13px;line-height:1.65;color:var(--ink2)">注意力权重可视化与模型可解释性的关系</p>
+            <p style="margin:4px 0 0;font-size:12px;color:var(--ink3)">1 个分支 · 3天前</p>
+          </div>
+          <div class="barwrap" style="width:auto;padding:10px 12px">
+            <div class="a-tabbar" style="position:static;left:auto;right:auto;bottom:auto;margin:0">
+              <div class="tab on" style="font-size:12px"><svg class="i"><use href="#g-home"/></svg>主页</div>
+              <div class="tab" style="font-size:12px"><svg class="i"><use href="#g-book"/></svg>学习库</div>
+            </div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+    <p class="note"><b>一条 token 走四路：</b>原型 <code>:root</code> → <code>tokens.json</code> → 重新生成的 <code>tokens.css</code> → 安卓 <code>dimens.xml</code>，跑 <code>check_design_tokens.py</code>。11 在这一屏承担的是导航与元信息——前端 38 处、安卓 84 处 <code>text_cap</code> 消费者；正文 15 / 13 一档不动。</p>
+  </article>
+
+  <!-- X4 -->
+  <article class="finding">
+    <div class="f-top"><span class="f-no">X4</span><h3 class="f-title">app.css 是死表，`--kai` 靠它假活着</h3><span class="sev minor">优化</span><span class="refs"><b>088</b> · <b>093</b></span></div>
+    <div class="pair">
+      <div class="half"><div class="stage">
+        <div class="stamp"><b>现在</b><i>仍被 main.tsx import</i></div>
+        <div class="filecard">
+          <div class="fh"><span class="dot"></span>styles/app.css</div>
+          <div class="fm">425 行 · 6.8 KB · 29 个类名</div>
+          <div class="names"><s>.app-main</s> <s>.app-tab</s> <s>.appbar-brand</s> <s>.chat-answer-run</s> <s>.rec-list</s> <s>.topic-card</s> <s>.word-menu</s> …</div>
+          <div class="bad">29 / 29 个类名在 tsx 里 0 消费者；<br>glass.css 的 <code>.rec-tag</code> 也是 0 用户。</div>
+        </div>
+        <div class="filecard" style="margin-top:10px">
+          <div class="fh"><span class="dot"></span>--kai</div>
+          <div class="fm">声明 1 · 真消费者 0</div>
+          <div class="names">两个「消费者」都在死表里：<s>.appbar-brand</s>、<s>.chat-answer-run</s></div>
+          <div class="bad">任何按 CSS grep 判字体存活率的守门都会误报「楷体还在用」。</div>
+        </div>
+      </div></div>
+      <div class="half"><div class="stage aft">
+        <div class="stamp"><b>改后</b><i>删表 + 退役 token</i></div>
+        <div class="filecard aft">
+          <div class="fh"><span class="dot"></span>styles/</div>
+          <div class="fm">tokens · glass · workspace · pages · forest · snapshot</div>
+          <div class="names" style="font-family:var(--sans);font-size:12px">app.css 删除；<code>--kai</code> 从原型 / tokens.json / tokens.css / colors.xml 四路一起退掉。</div>
+          <div class="good">字体存活率判据从此只认真消费者；单文件包不再带这张表。</div>
+        </div>
+        <div class="filecard aft" style="margin-top:10px">
+          <div class="fh"><span class="dot"></span>glass.css · .rec-tag</div>
+          <div class="fm">0 用户的一条规则</div>
+          <div class="names" style="font-family:var(--sans);font-size:12px">跟着 093 一起删；截图快照里若还有这枚标签，按新 DOM 重画，不靠死类名续命。</div>
+          <div class="good">093 完成后重测单文件体积，数字写进卡面。</div>
+        </div>
+      </div></div>
+    </div>
+    <p class="note"><b>删，而不是注释掉。</b>`--kai` 的 note 自己写了「退役待后续清理」——只要这两个选择器还在，退役就永远做不掉。删表前排一遍安卓侧同名 id，<code>.chat-answer-run</code> 是从 <code>view_chat_answer_text.xml</code> 抄来的。</p>
+  </article>
+</section>
+
+<!-- ============================================================ Web 首页 -->
+<section class="surf" id="web-home">
+  <div class="surf-head"><span class="no">01</span><h2>首页 · Web</h2><span class="cnt">侧栏 / 输入卡 / 历史主题行</span></div>
+  <p class="surf-sub">首页是产品递出的第一张脸。现在它一屏里混了三种性质的内容，而且第一张卡片的最后一行在替自己道歉。</p>
+
+  <article class="finding">
+    <div class="f-top"><span class="f-no">1</span><h3 class="f-title">侧栏一列混了路由、路由卡与内容</h3><span class="sev major">重要</span><span class="refs"><b>097</b></span></div>
+    <div class="pair">
+      <div class="half"><div class="stage">
+        <div class="stamp"><b>现在</b><i>240px 一列，共用一套 hover</i></div>
+        <div class="wsb">
+          <div class="brand"><svg class="i"><use href="#g-sprout"/></svg><b>知芽</b></div>
+          <div class="nav">
+            <div class="link on"><svg class="i"><use href="#g-home"/></svg>主页</div>
+            <div class="link"><svg class="i"><use href="#g-book"/></svg>学习库</div>
+            <div class="link"><svg class="i"><use href="#g-sun"/></svg>设置</div>
+          </div>
+          <div class="fentry">
+            <span class="fico"><svg class="i"><use href="#g-forest"/></svg></span>
+            <span class="fmain"><b>我的森林</b><i>全部主题长成一片林子</i></span>
+            <span class="farrow"><svg class="i"><use href="#g-chev"/></svg></span>
+          </div>
+          <p class="sect">最近学习</p>
+          <div class="rlink hover">注意力权重可视化与模型可解释性的关系<small>1 个分支 · 3天前</small></div>
+          <div class="rlink">系统理解 Transformer 的注意力机制<small>2 个分支 · 3天前</small></div>
+        </div>
+      </div></div>
+      <div class="half"><div class="stage aft">
+        <div class="stamp"><b>改后</b><i>只降一档：颜色退后、hover 撤掉</i></div>
+        <div class="wsb aft">
+          <div class="brand"><svg class="i"><use href="#g-sprout"/></svg><b>知芽</b></div>
+          <div class="nav">
+            <div class="link on"><svg class="i"><use href="#g-home"/></svg>主页</div>
+            <div class="link"><svg class="i"><use href="#g-book"/></svg>学习库</div>
+            <div class="link"><svg class="i"><use href="#g-gear"/></svg>设置</div>
+          </div>
+          <div class="fentry">
+            <span class="fico"><svg class="i"><use href="#g-forest"/></svg></span>
+            <span class="fmain"><b>我的森林</b><i>全部主题长成一片林子</i></span>
+            <span class="farrow"><svg class="i"><use href="#g-chev"/></svg></span>
+          </div>
+          <p class="sect">最近学习</p>
+          <div class="rlink">注意力权重可视化与模型可解释性的关系<small>1 个分支 · 3天前</small></div>
+          <div class="rlink">系统理解 Transformer 的注意力机制<small>2 个分支 · 3天前</small></div>
+        </div>
+      </div></div>
+    </div>
+    <p class="note"><b>取保守值：不搬走，只降一档。</b>13px 保留、颜色退到 <code>--ink3</code>、撤掉和路由共用的 hover 底色，区块前加一条 hairline。侧栏从此只剩三类：路由、森林入口、可折叠历史——眼睛能分清哪一行会换页、哪一行会换内容。</p>
+  </article>
+
+  <article class="finding">
+    <div class="f-top"><span class="f-no">2</span><h3 class="f-title">主输入卡的下沿，是一句自我否定</h3><span class="sev major">重要</span><span class="refs"><b>098</b></span></div>
+    <div class="pair stack">
+      <div class="half"><div class="stage">
+        <div class="stamp"><b>现在</b><i>说明写在动作容器里</i></div>
+        <div class="wc">
+          <div class="wc-box">
+            <div class="wc-input">输入你的根问题，例如：帮我系统理解 Transformer 的注意力机制</div>
+            <div class="wc-row"><span class="wc-chip"><svg class="i"><use href="#g-sparkle"/></svg>V4.1 Flash<svg class="i"><use href="#g-chev"/></svg></span><span class="sp"></span><span class="wc-icons"><svg class="i"><use href="#g-attach"/></svg><svg class="i"><use href="#g-send"/></svg></span></div>
+            <p class="wc-help">发送与上传尚未接通；点推荐问题或历史主题进入对话。</p>
+            <span class="mark" data-l="卡内下沿" style="left:12px;right:12px;bottom:6px;height:26px"></span>
+          </div>
+        </div>
+      </div></div>
+      <div class="half"><div class="stage aft">
+        <div class="stamp"><b>改后</b><i>卡外 8px；一次说清</i></div>
+        <div class="wc">
+          <div class="wc-box">
+            <div class="wc-input">输入你的根问题，例如：帮我系统理解 Transformer 的注意力机制</div>
+            <div class="wc-row"><span class="wc-chip"><svg class="i"><use href="#g-sparkle"/></svg>V4.1 Flash<svg class="i"><use href="#g-chev"/></svg></span><span class="sp"></span><span class="wc-icons"><svg class="i"><use href="#g-attach"/></svg><svg class="i"><use href="#g-send"/></svg></span></div>
+          </div>
+          <div class="wc-out">
+            <span>发送与上传尚未接通 · 可从下方推荐问题或历史主题开始</span>
+          </div>
+          <span class="mark ok" data-l="卡外 8px" style="left:-6px;right:-6px;bottom:-10px;height:28px"></span>
+        </div>
+      </div></div>
+    </div>
+    <p class="note"><b>不接通是范围决定，诚实文案是规则要求，两点都不改；改的只有位置。</b>按钮继续禁用，说明移到卡外、只出现一次。后半句仍是提示语，<span class="warn">不给它加链接外观</span>——真实入口就在下方推荐卡与历史行，点不动的下划线只会多造一个假目标（复核修正 2）。</p>
+  </article>
+
+  <article class="finding">
+    <div class="f-top"><span class="f-no">3</span><h3 class="f-title">历史主题行：视线落点和操作落点分家</h3><span class="sev minor">优化</span><span class="refs"><b>097</b></span></div>
+    <div class="pair stack">
+      <div class="half"><div class="stage">
+        <div class="stamp"><b>现在</b><i>标题在左、箭头在 960 的最右</i></div>
+        <div class="wrow">
+          <div class="top"><h4>注意力权重可视化与模型可解释性的关系</h4><span class="chev"><svg class="i"><use href="#g-chev"/></svg></span></div>
+          <p class="ex">本分支从注意力权重可视化与模型可解释性的关系出发，明确可视化只是局部内部机制观察工具、不等同于解释（权重与因果贡献不等同），随后深入讨论注意力头消融实验的流程以及如何区分「头真重要」与「其他头补偿性替代」。</p>
+          <p class="meta"><svg class="i"><use href="#g-tree"/></svg>1 个分支 · 3天前</p>
+        </div>
+      </div></div>
+      <div class="half"><div class="stage aft">
+        <div class="stamp"><b>改后</b><i>摘要 1 行；meta 紧跟标题 8px</i></div>
+        <div class="wrow aft">
+          <div class="top"><span class="ttl"><h4>注意力权重可视化与模型可解释性的关系</h4><span class="meta"><svg class="i"><use href="#g-tree"/></svg>1 个分支 · 3天前</span></span><span class="chev"><svg class="i"><use href="#g-chev"/></svg></span></div>
+          <p class="ex">本分支从注意力权重可视化与模型可解释性的关系出发，明确可视化只是局部内部机制观察工具、不等同于解释…</p>
+        </div>
+      </div></div>
+    </div>
+    <p class="note"><b>摘要收成 1 行（最多 2 行截断），「1 个分支 · 3天前」紧跟标题右侧 8px。</b>整行仍然可点，但眼睛找的标题和手找的箭头回到同一行——不再隔着两行正文密度的字。标题超长时<span class="warn">只截标题</span>，meta 与箭头不换行（复核修正 3）。</p>
+  </article>
+</section>
+
+<!-- ============================================================ Web 对话 -->
+<section class="surf" id="web-chat">
+  <div class="surf-head"><span class="no">02</span><h2>对话 · Web</h2><span class="cnt">阅读列 / 元信息 / 未接通</span></div>
+  <p class="surf-sub">阅读页是停留时间最长的一屏。现在它每行 48 个汉字，且第二屏又把同一句「未接通」说了一遍。</p>
+
+  <article class="finding">
+    <div class="f-top"><span class="f-no">1</span><h3 class="f-title">阅读正文 720px @ 15px，一行 48 个汉字</h3><span class="sev major">重要</span><span class="refs"><b>089</b> · <b>094</b></span></div>
+    <div class="pair stack">
+      <div class="half"><div class="stage">
+        <div class="stamp"><b>现在</b><i>720px · 约 48 字 / 行</i></div>
+        <div class="colwrap" style="width:720px;max-width:100%">
+          <div class="reader">
+            <p class="rhead">注意力权重可视化与模型可解释性的关系</p>
+            <p class="when">3天前</p>
+            <div class="who"><svg class="i"><use href="#g-sprout"/></svg>知芽 <span style="opacity:.7">V4.1 Flash</span></div>
+            <div class="body">
+              <p>核心先说结论：注意力头消融（ablation）的基本流程是「逐个或成组地让某个头失效，再测量任务指标变化」；而「该头重要」与「其他头补偿」的区分，关键不在消融本身，而在于是否测量了被消融后的内部状态变化，以及是否做了针对补偿路径的对照实验。下面分两部分讲清楚。</p>
+              <h5>一、消融实验的具体流程</h5>
+              <p>以「某层某头是否对任务重要」为例，标准实验步骤：在同一验证集上先跑完整模型，记录任务指标（如准确率、BLEU、困惑度）和每个样本的预测。基线是后续所有比较的参照。</p>
+            </div>
+          </div>
+          <span class="edge"></span>
+        </div>
+        <div class="colwrap" style="width:720px;max-width:100%;padding:0">
+          <div class="ruler"><span class="bar"></span><em><strong>720px</strong> · 约 48 字 / 行</em></div>
+        </div>
+      </div></div>
+      <div class="half"><div class="stage aft">
+        <div class="stamp"><b>改后</b><i>620px · 约 41 字 / 行</i></div>
+        <div class="colwrap aft" style="width:620px;max-width:100%">
+          <div class="reader">
+            <p class="rhead">注意力权重可视化与模型可解释性的关系</p>
+            <p class="when">3天前</p>
+            <div class="who"><svg class="i"><use href="#g-sprout"/></svg>知芽 <span style="opacity:.7">V4.1 Flash</span></div>
+            <div class="body">
+              <p>核心先说结论：注意力头消融（ablation）的基本流程是「逐个或成组地让某个头失效，再测量任务指标变化」；而「该头重要」与「其他头补偿」的区分，关键不在消融本身，而在于是否测量了被消融后的内部状态变化，以及是否做了针对补偿路径的对照实验。下面分两部分讲清楚。</p>
+              <h5>一、消融实验的具体流程</h5>
+              <p>以「某层某头是否对任务重要」为例，标准实验步骤：在同一验证集上先跑完整模型，记录任务指标（如准确率、BLEU、困惑度）和每个样本的预测。基线是后续所有比较的参照。</p>
+            </div>
+          </div>
+          <span class="edge" style="border-color:rgba(43,110,69,.45)"></span>
+        </div>
+        <div class="colwrap" style="width:620px;max-width:100%;padding:0">
+          <div class="ruler"><span class="bar"></span><em><strong>620px</strong> · 约 41 字 / 行</em></div>
+        </div>
+      </div></div>
+    </div>
+    <p class="note"><b>只加一条 <code>max-width: 620px</code>，不动字号与行高。</b>项目里已有先例——<code>pages.css</code> 给 <code>.persona-card</code> 用了 <code>62ch</code>，反而阅读正文没有约束。选区浮条与引用条跟这条列宽走，094 一次改齐。</p>
+  </article>
+
+  <article class="finding">
+    <div class="f-top"><span class="f-no">2</span><h3 class="f-title">字号档位中段是空的，meta 只能挤在 11</h3><span class="sev minor">优化</span><span class="refs"><b>092</b></span></div>
+    <div class="pair">
+      <div class="half"><div class="stage">
+        <div class="stamp"><b>现在</b><i>11 / 13 / 15 / 16 / 20 …</i></div>
+        <div class="mini-stack">
+          <div class="mini-card">
+            <p class="t">注意力权重可视化与模型可解释性的关系</p>
+            <div class="m"><span class="cap">3天前</span><span class="dot"></span><span class="cap">1 个分支</span></div>
+          </div>
+          <div class="mini-card">
+            <p class="t" style="font-size:15px">「3天前」「1 个分支」和导航标签同一档</p>
+            <div class="m"><span class="cap">11px · --fs-cap</span></div>
+          </div>
+        </div>
+      </div></div>
+      <div class="half"><div class="stage aft">
+        <div class="stamp"><b>改后</b><i>cap 12；meta 用 13</i></div>
+        <div class="mini-stack">
+          <div class="mini-card aft">
+            <p class="t">注意力权重可视化与模型可解释性的关系</p>
+            <div class="m"><span class="sm">3天前</span><span class="dot"></span><span class="sm">1 个分支</span></div>
+          </div>
+          <div class="mini-card aft">
+            <p class="t" style="font-size:15px">meta 离开最小档，中段空缺等真需要第三级再补</p>
+            <div class="m"><span class="sm">13px · --fs-sm</span></div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+    <p class="note"><b>先不加新 token。</b>全局把 <code>fs-cap</code> / <code>text_cap</code> 从 11 抬到 12，再把这处「3天前」提到 <code>fs-sm</code>（13）。中段的第三级标题等真出现需求再决定，不提前造一格。</p>
+  </article>
+
+  <article class="finding">
+    <div class="f-top"><span class="f-no">3</span><h3 class="f-title">同一句「未接通」在两屏各说一遍</h3><span class="sev minor">优化</span><span class="refs"><b>098</b></span></div>
+    <div class="pair stack">
+      <div class="half"><div class="stage">
+        <div class="stamp"><b>现在</b><i>两屏两句不同措辞的灰字</i></div>
+        <div class="mini-stack" style="width:100%">
+          <div class="mini-card" style="padding:14px 18px 12px">
+            <div class="mini-card" style="box-shadow:none;padding:0">
+              <div style="font-size:13px;color:var(--ink3);margin-bottom:8px">首页</div>
+              <p class="wc-help" style="text-align:center">发送与上传尚未接通；点推荐问题或历史主题进入对话。</p>
+            </div>
+          </div>
+          <div class="mini-card" style="padding:14px 18px 12px">
+            <div style="font-size:13px;color:var(--ink3);margin-bottom:8px">对话页</div>
+            <p class="wc-help" style="text-align:center">发送、上传与分支创建尚未接通；这里可以写草稿，也可以复制回答。</p>
+          </div>
+        </div>
+      </div></div>
+      <div class="half"><div class="stage aft">
+        <div class="stamp"><b>改后</b><i>首页说一次；对话页交给禁用态</i></div>
+        <div class="mini-stack" style="width:100%">
+          <div class="mini-card" style="padding:14px 18px 12px">
+            <div style="font-size:13px;color:var(--ink3);margin-bottom:8px">首页 · 唯一一次说明</div>
+            <div class="wc-out" style="margin:0">
+              <span>发送与上传尚未接通</span>
+              <a href="#web-home"><span class="lr"><svg class="i"><use href="#g-chev"/></svg>从推荐问题或历史主题开始</span></a>
+            </div>
+          </div>
+          <div class="mini-card" style="padding:14px 18px 12px">
+            <div style="font-size:13px;color:var(--ink3);margin-bottom:8px">对话页 · 不再重复</div>
+            <div style="display:flex;align-items:center;gap:12px;color:var(--ink3);font-size:11.5px">
+              <span style="display:inline-flex;align-items:center;gap:6px"><svg class="i" style="width:16px;height:16px;opacity:.55"><use href="#g-attach"/></svg>禁用</span>
+              <span style="display:inline-flex;align-items:center;gap:6px"><svg class="i" style="width:16px;height:16px;opacity:.55"><use href="#g-send"/></svg>禁用</span>
+              <span>可访问名里写明「尚未接通」</span>
+            </div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+    <p class="note"><b>禁用态本身承担「不能点」，一次说明承担「为什么」。</b>全站收敛成一种表达：不要每进一屏读到一行新的灰字道歉。098 同时管措辞，首页那条与对话页那条不再各写各的。</p>
+  </article>
+</section>
+
+<!-- ============================================================ Web 森林 -->
+<section class="surf" id="web-forest">
+  <div class="surf-head"><span class="no">03</span><h2>我的森林 · Web</h2><span class="cnt">信息密度 / 指南针 / 等高线</span></div>
+  <p class="surf-sub">这是产品的招牌屏：隐喻已经到位，但一屏只有两棵没有名字的树。</p>
+
+  <article class="finding">
+    <div class="f-top"><span class="f-no">1</span><h3 class="f-title">隐喻到位了，信息没进来</h3><span class="sev major">重要</span><span class="refs"><b>103</b></span></div>
+    <div class="pair stack">
+      <div class="half"><div class="stage">
+        <div class="stamp"><b>现在</b><i>1200×800 场地，两棵无名的树</i></div>
+        <div class="fstage">
+          <div class="dots"></div>
+          <svg class="terrain" viewBox="0 0 1000 430" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M-20 96 C 150 60, 290 128, 460 100 S 780 54, 1020 88" fill="none" stroke="#2B6E45" stroke-opacity=".06" stroke-width="1"/>
+            <path d="M-20 150 C 180 118, 320 176, 500 146 S 800 106, 1020 140" fill="none" stroke="#2B6E45" stroke-opacity=".10" stroke-width="1"/>
+            <path d="M-20 286 C 170 250, 330 318, 520 288 S 820 246, 1020 282" fill="none" stroke="#2B6E45" stroke-opacity=".10" stroke-width="1"/>
+            <path d="M-20 340 C 190 306, 340 366, 540 336 S 830 296, 1020 332" fill="none" stroke="#2B6E45" stroke-opacity=".06" stroke-width="1"/>
+            <g stroke="#2B6E45" stroke-opacity=".22" stroke-width="1.2" stroke-linecap="round">
+              <path d="M300 200 l7 -11 M300 200 l-6 -8 M760 210 l7 -11 M760 210 l-6 -8 M790 206 l5 -8"/>
+            </g>
+            <ellipse cx="210" cy="238" rx="4" ry="2.6" fill="#627067" opacity=".10"/>
+            <ellipse cx="880" cy="252" rx="5" ry="3" fill="#627067" opacity=".10"/>
+          </svg>
+          <div class="vignette"></div>
+          <span class="hint"><svg class="i"><use href="#g-pin"/></svg>点一棵树看看</span>
+          <span class="compass"><i></i>N</span>
+          <svg class="tree" style="left:48%;top:62%" viewBox="0 0 124 124" aria-hidden="true">
+            <ellipse cx="62" cy="106" rx="22" ry="5.5" fill="#164027" opacity=".10"/>
+            <path d="M62 102V62" stroke="#164027" stroke-width="5" stroke-linecap="round"/>
+            <path d="M62 76 50 64M62 80 74 68" stroke="#164027" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="62" cy="48" r="25" fill="#2B6E45" opacity=".88"/>
+            <circle cx="47" cy="57" r="15" fill="#2B6E45" opacity=".82"/>
+            <circle cx="78" cy="56" r="14" fill="#2B6E45" opacity=".82"/>
+            <circle cx="63" cy="40" r="3" fill="#E3F0E7" opacity=".45"/>
+          </svg>
+          <svg class="tree" style="left:66%;top:73%;width:100px;height:100px" viewBox="0 0 124 124" aria-hidden="true">
+            <ellipse cx="62" cy="106" rx="20" ry="5" fill="#164027" opacity=".10"/>
+            <path d="M62 102V64" stroke="#164027" stroke-width="5" stroke-linecap="round"/>
+            <path d="M62 78 51 67M62 82 73 70" stroke="#164027" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="62" cy="50" r="24" fill="#2B6E45" opacity=".86"/>
+            <circle cx="48" cy="58" r="14" fill="#2B6E45" opacity=".8"/>
+            <circle cx="77" cy="57" r="13" fill="#2B6E45" opacity=".8"/>
+          </svg>
+          <p class="foot">2 棵树 · 3 段枝</p>
+        </div>
+      </div></div>
+      <div class="half"><div class="stage aft">
+        <div class="stamp"><b>改后</b><i>树冠下 12px 标主题名；脚注 13</i></div>
+        <div class="fstage aft">
+          <div class="dots"></div>
+          <svg class="terrain" viewBox="0 0 1000 430" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M-20 96 C 150 60, 290 128, 460 100 S 780 54, 1020 88" fill="none" stroke="#2B6E45" stroke-opacity=".06" stroke-width="1"/>
+            <path d="M-20 150 C 180 118, 320 176, 500 146 S 800 106, 1020 140" fill="none" stroke="#2B6E45" stroke-opacity=".10" stroke-width="1"/>
+            <path d="M-20 286 C 170 250, 330 318, 520 288 S 820 246, 1020 282" fill="none" stroke="#2B6E45" stroke-opacity=".10" stroke-width="1"/>
+            <path d="M-20 340 C 190 306, 340 366, 540 336 S 830 296, 1020 332" fill="none" stroke="#2B6E45" stroke-opacity=".06" stroke-width="1"/>
+            <g stroke="#2B6E45" stroke-opacity=".22" stroke-width="1.2" stroke-linecap="round">
+              <path d="M300 200 l7 -11 M300 200 l-6 -8 M760 210 l7 -11 M760 210 l-6 -8 M790 206 l5 -8"/>
+            </g>
+            <ellipse cx="210" cy="238" rx="4" ry="2.6" fill="#627067" opacity=".10"/>
+            <ellipse cx="880" cy="252" rx="5" ry="3" fill="#627067" opacity=".10"/>
+          </svg>
+          <div class="vignette"></div>
+          <span class="hint"><svg class="i"><use href="#g-pin"/></svg>点一棵树看看</span>
+          <svg class="tree" style="left:48%;top:62%" viewBox="0 0 124 124" aria-hidden="true">
+            <ellipse cx="62" cy="106" rx="22" ry="5.5" fill="#164027" opacity=".10"/>
+            <path d="M62 102V62" stroke="#164027" stroke-width="5" stroke-linecap="round"/>
+            <path d="M62 76 50 64M62 80 74 68" stroke="#164027" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="62" cy="48" r="25" fill="#2B6E45" opacity=".88"/>
+            <circle cx="47" cy="57" r="15" fill="#2B6E45" opacity=".82"/>
+            <circle cx="78" cy="56" r="14" fill="#2B6E45" opacity=".82"/>
+            <circle cx="63" cy="40" r="3" fill="#E3F0E7" opacity=".45"/>
+          </svg>
+          <span class="ttag" style="left:48%;top:65.5%">注意力权重可视化与…</span>
+          <span class="ttip" style="left:48%;top:56%">注意力权重可视化与模型可解释性的关系</span>
+          <svg class="tree" style="left:66%;top:73%;width:100px;height:100px" viewBox="0 0 124 124" aria-hidden="true">
+            <ellipse cx="62" cy="106" rx="20" ry="5" fill="#164027" opacity=".10"/>
+            <path d="M62 102V64" stroke="#164027" stroke-width="5" stroke-linecap="round"/>
+            <path d="M62 78 51 67M62 82 73 70" stroke="#164027" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="62" cy="50" r="24" fill="#2B6E45" opacity=".86"/>
+            <circle cx="48" cy="58" r="14" fill="#2B6E45" opacity=".8"/>
+            <circle cx="77" cy="57" r="13" fill="#2B6E45" opacity=".8"/>
+          </svg>
+          <span class="ttag" style="left:66%;top:77%">系统理解 Transformer…</span>
+          <p class="foot">2 棵树 · 3 段枝</p>
+        </div>
+      </div></div>
+    </div>
+    <p class="note"><b>加字不等于破坏留白——现在是留白吃掉了内容。</b>树冠下 12px / <code>--ink2</code> 标主题名（8 字截断，hover 给全名），脚注计数从 11 提到 <code>fs-sm</code>。103 同时把「点一棵树看看」从提示条降为次要信息，别再和树名抢第一眼。</p>
+  </article>
+
+  <article class="finding">
+    <div class="f-top"><span class="f-no">2</span><h3 class="f-title">右上角圆圈里的「N」没有任何解释</h3><span class="sev minor">优化</span><span class="refs"><b>103</b></span></div>
+    <div class="pair">
+      <div class="half"><div class="stage">
+        <div class="stamp"><b>现在</b><i>唯一的操作符号，没有 hover、没有可访问名</i></div>
+        <div class="corner">
+          <span class="compass"><i></i>N</span>
+        </div>
+        <p class="caption">看不出是指北、刷新还是缩放复位</p>
+      </div></div>
+      <div class="half"><div class="stage aft">
+        <div class="stamp"><b>改后</b><i>去掉</i></div>
+        <div class="corner" style="background:linear-gradient(165deg,var(--green-soft),var(--green-faint))"></div>
+        <p class="caption">场地隐喻不需要方位；少一个只有符号没有动作的圆</p>
+      </div></div>
+    </div>
+    <p class="note"><b>去掉比补说明更省，也更诚实。</b>这个圆既不响应 hover，也没有可访问名——留着只能让用户猜。103 一并确认页面没有第二个「指北」依赖。</p>
+  </article>
+
+  <article class="finding">
+    <div class="f-top"><span class="f-no">3</span><h3 class="f-title">等高线是全场唯一纹理，但几乎看不见</h3><span class="sev minor">优化</span><span class="refs"><b>103</b></span></div>
+    <div class="pair">
+      <div class="half"><div class="stage">
+        <div class="stamp"><b>现在</b><i>green @ .06–.10</i></div>
+        <div class="terraincrop">
+          <svg viewBox="0 0 330 180" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M-10 54 C 60 34, 120 70, 186 52 S 300 30, 340 48" fill="none" stroke="#2B6E45" stroke-opacity=".06" stroke-width="1"/>
+            <path d="M-10 96 C 70 74, 130 112, 200 92 S 310 70, 340 90" fill="none" stroke="#2B6E45" stroke-opacity=".10" stroke-width="1"/>
+            <path d="M-10 138 C 60 118, 130 152, 204 132 S 312 112, 340 128" fill="none" stroke="#2B6E45" stroke-opacity=".06" stroke-width="1"/>
+          </svg>
+          <span class="dl">ΔL ≈ 2–3</span>
+        </div>
+        <p class="caption">压在背景里，等于没画</p>
+      </div></div>
+      <div class="half"><div class="stage aft">
+        <div class="stamp"><b>改后</b><i>按同一把尺子抬到可辨</i></div>
+        <div class="terraincrop" style="background:linear-gradient(165deg,var(--green-soft),var(--green-faint) 55%,var(--green-soft))">
+          <svg viewBox="0 0 330 180" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M-10 54 C 60 34, 120 70, 186 52 S 300 30, 340 48" fill="none" stroke="#2B6E45" stroke-opacity=".20" stroke-width="1"/>
+            <path d="M-10 96 C 70 74, 130 112, 200 92 S 310 70, 340 90" fill="none" stroke="#2B6E45" stroke-opacity=".30" stroke-width="1"/>
+            <path d="M-10 138 C 60 118, 130 152, 204 132 S 312 112, 340 128" fill="none" stroke="#2B6E45" stroke-opacity=".20" stroke-width="1"/>
+          </svg>
+          <span class="dl">目标 ΔL ≥ 8</span>
+        </div>
+        <p class="caption">和 2026-10-22 加深 mist-base 用同一把尺子</p>
+      </div></div>
+    </div>
+    <p class="note"><b>要么承认看不见就别画，要么抬到能穿过 <code>check_glass_depth.py</code> 那条 8 L 线。</b>图上是示意档，真实取值由脚本对四角与线本身实测后写进 103，不拿目测当数。</p>
+  </article>
+</section>
+
+<!-- ============================================================ 安卓 首页 -->
+<section class="surf" id="and-home">
+  <div class="surf-head"><span class="no">04</span><h2>首页 · 安卓</h2><span class="cnt">纵向预算 / 推荐卡 / 重复 pill</span></div>
+  <p class="surf-sub">360dp 宽的真机首屏：现在第一眼可点的东西落在中线附近，推荐区右列还裁成半张卡、断成半句话。</p>
+
+  <article class="finding">
+    <div class="f-top"><span class="f-no">1</span><h3 class="f-title">首屏纵向预算：可操作的东西落在中线以下</h3><span class="sev major">重要</span><span class="refs"><b>100</b></span></div>
+    <div class="pair">
+      <div class="half"><div class="stage">
+        <div class="stamp"><b>现在</b><i>hero 吃掉上半屏</i></div>
+        <div class="phone">
+          <div class="p-status"><span>15:44</span><span class="si"><span>◎</span><span>◔</span><span class="batt"><i></i></span>100%</span></div>
+          <div class="p-bar"><span class="ib"><svg class="i"><use href="#g-menu"/></svg></span><span class="sp"></span><span class="ib"><svg class="i"><use href="#g-sun"/></svg></span></div>
+          <div class="p-hr" data-l="首屏中线 400" style="top:400px"></div>
+          <div class="a-hero">
+            <div class="lockup"><svg class="i amark"><use href="#g-sprout"/></svg><span class="aword">知芽</span></div>
+            <p class="asub">把复杂问题，学成自己的知识树</p>
+          </div>
+          <div class="a-composer">
+            <div class="hint">输入你的根问题，例如：帮我系统理解 Transformer 的注意力机制</div>
+            <div class="row"><span class="a-chip"><svg class="i"><use href="#g-sparkle"/></svg>V4.1 Flash<svg class="i"><use href="#g-chev"/></svg></span><span class="a-send"><svg class="i"><use href="#g-send"/></svg></span></div>
+          </div>
+          <div class="a-sec">
+            <div class="a-sechead"><svg class="i"><use href="#g-sparkle"/></svg>猜你想学</div>
+            <div class="a-marq">
+              <div class="a-card"><div class="top"><svg class="i"><use href="#g-sparkle"/></svg><span class="a-pill">顺着你学的</span></div><p>注意力头消融实验中如何区分关键头与补偿性替代头</p></div>
+              <div class="a-card" style="width:97px;overflow:hidden"><div class="top"><svg class="i"><use href="#g-sparkle"/></svg><span class="a-pill">顺着你学的</span></div><p>从注意力可视化至法的能力边界</p></div>
+            </div>
+          </div>
+          <div class="a-hist">
+            <div class="a-sechead" style="color:var(--ink);font-size:13px">历史主题<span style="font-weight:400;color:var(--ink3);font-size:11px;margin-left:8px">2 个</span></div>
+            <div class="a-hrow"><div class="t">注意力权重可视化与模型可解释性的关系<svg class="i"><use href="#g-chev"/></svg></div><p>本分支从注意力权重可视化与模型可解释性的关系出发，明确可视化只是局部内部机制观察工具…</p><div class="m"><svg class="i"><use href="#g-tree"/></svg>1 个分支 · 3天前</div></div>
+          </div>
+          <div class="a-tabbar"><div class="tab on"><svg class="i"><use href="#g-home"/></svg>主页</div><div class="tab"><svg class="i"><use href="#g-book"/></svg>学习库</div></div>
+        </div>
+      </div></div>
+      <div class="half"><div class="stage aft">
+        <div class="stamp"><b>改后</b><i>hero 与 tagline 并一行，整体上移 ~132dp</i></div>
+        <div class="phone">
+          <div class="p-status"><span>15:44</span><span class="si"><span>◎</span><span>◔</span><span class="batt"><i></i></span>100%</span></div>
+          <div class="p-bar"><span class="ib"><svg class="i"><use href="#g-menu"/></svg></span><span class="sp"></span><span class="ib"><svg class="i"><use href="#g-gear"/></svg></span></div>
+          <div class="p-hr" data-l="首屏中线 400" style="top:400px;border-color:rgba(43,110,69,.35)"></div>
+          <div class="a-hero aft">
+            <div class="lockup"><svg class="i amark"><use href="#g-sprout"/></svg><span class="aword">知芽</span><span class="asub">把复杂问题，学成自己的知识树</span></div>
+          </div>
+          <div class="a-composer">
+            <div class="hint">输入你的根问题，例如：帮我系统理解 Transformer 的注意力机制</div>
+            <div class="row"><span class="a-chip"><svg class="i"><use href="#g-sparkle"/></svg>V4.1 Flash<svg class="i"><use href="#g-chev"/></svg></span><span class="a-send"><svg class="i"><use href="#g-send"/></svg></span></div>
+          </div>
+          <div class="a-sec">
+            <div class="a-sechead"><svg class="i"><use href="#g-sparkle"/></svg>猜你想学<span class="pill">顺着你学的</span></div>
+            <div class="a-marq">
+              <div class="a-card wide"><div class="top"><svg class="i"><use href="#g-sparkle"/></svg></div><p>注意力权重与因果贡献不等同的实证检验方法</p></div>
+              <div class="a-card" style="width:8px;padding:0;opacity:.7"></div>
+            </div>
+            <div class="a-dots"><span class="on"></span><span></span><span></span><span></span></div>
+          </div>
+          <div class="a-hist">
+            <div class="a-sechead" style="color:var(--ink);font-size:13px">历史主题<span style="font-weight:400;color:var(--ink3);font-size:12px;margin-left:8px">2 个</span></div>
+            <div class="a-hrow"><div class="t">注意力权重可视化与模型可解释性的关系<svg class="i"><use href="#g-chev"/></svg></div><p>本分支从注意力权重可视化与模型可解释性的关系出发，明确可视化只是局部内部机制观察工具…</p><div class="m"><svg class="i"><use href="#g-tree"/></svg>1 个分支 · 3天前</div></div>
+            <div class="a-hrow"><div class="t">系统理解 Transformer 的注意力机制<svg class="i"><use href="#g-chev"/></svg></div><div class="m"><svg class="i"><use href="#g-tree"/></svg>2 个分支 · 3天前</div></div>
+          </div>
+          <div class="a-tabbar"><div class="tab on" style="font-size:12px"><svg class="i"><use href="#g-home"/></svg>主页</div><div class="tab" style="font-size:12px"><svg class="i"><use href="#g-book"/></svg>学习库</div></div>
+        </div>
+      </div></div>
+    </div>
+    <p class="note"><b>取保守值：品牌字面与字号都不动，只把 tagline 并进锁标那一行、hero 上下留白各收到 s2。</b>输入卡从跨中线（282–420）抬到中线以上（150–288），历史主题的第二条完整露出。— <span class="warn">这四个数值要在 100 里用一次真机 bounds 定稿</span>：2026-10-25 的 <code>uiautomator dump</code> 取首页失败（Error type 3），别把这张图当实测。<span class="warn">还要在 fontScale 1.3 复测一次</span>：单行锁标只在 1.0 成立，放大后允许 tagline 换到下一行，输入卡仍须整体留在中线以上。</p>
+  </article>
+
+  <article class="finding">
+    <div class="f-top"><span class="f-no">2</span><h3 class="f-title">推荐区右列被裁成半张卡，文字断成半句</h3><span class="sev major">重要</span><span class="refs"><b>099</b></span></div>
+    <div class="pair">
+      <div class="half"><div class="stage">
+        <div class="stamp"><b>现在</b><i>232 卡宽 + 97 露出 = 42%</i></div>
+        <div class="phone crop-shell" style="width:360px">
+          <div class="a-sec" style="margin:20px 20px 16px">
+            <div class="a-sechead"><svg class="i"><use href="#g-sparkle"/></svg>猜你想学</div>
+            <div class="a-marq">
+              <div class="a-card"><div class="top"><svg class="i"><use href="#g-sparkle"/></svg><span class="a-pill">顺着你学的</span></div><p>注意力头消融实验中如何区分关键头与补偿性替代头</p></div>
+              <div class="a-card" style="width:97px;overflow:hidden"><div class="top"><svg class="i"><use href="#g-sparkle"/></svg><span class="a-pill">顺着你学的</span></div><p>从注意力可视化至法的能力边界</p></div>
+            </div>
+          </div>
+        </div>
+        <p class="caption">「从注意力可视化至 / 法的能力边界」——读起来像渲染坏了</p>
+      </div></div>
+      <div class="half"><div class="stage aft">
+        <div class="stamp"><b>改后</b><i>PagerSnap：一页一整卡 + 进度点</i></div>
+        <div class="phone crop-shell" style="width:360px">
+          <div class="a-sec" style="margin:20px 20px 16px">
+            <div class="a-sechead"><svg class="i"><use href="#g-sparkle"/></svg>猜你想学<span class="pill">顺着你学的</span></div>
+            <div class="a-marq">
+              <div class="a-card wide"><div class="top"><svg class="i"><use href="#g-sparkle"/></svg></div><p>从注意力可视化到模型可解释性的能力边界</p></div>
+              <div class="a-card" style="width:8px;padding:0;opacity:.7"></div>
+            </div>
+            <div class="a-dots"><span class="on"></span><span></span><span></span><span></span></div>
+          </div>
+        </div>
+        <p class="caption">整句留在一张卡里；露出的一条边只表示「还能翻」</p>
+      </div></div>
+    </div>
+    <p class="note"><b>半句话比没有话更糟。</b>露出量给到卡宽 60% 在 329dp 里做不到（232 + 139 &gt; 329），所以直接换成整卡翻页：卡宽 312、一页一张、圆点给进度。<span class="warn">卡高按两行文本锁定</span>，翻页不跳动；同一类问题在学习库第三张卡也出现，101 一起按句末截断。</p>
+  </article>
+
+  <article class="finding">
+    <div class="f-top"><span class="f-no">3</span><h3 class="f-title">四张推荐卡挂着同一个「顺着你学的」</h3><span class="sev minor">优化</span><span class="refs"><b>101</b></span></div>
+    <div class="pair">
+      <div class="half"><div class="stage">
+        <div class="stamp"><b>现在</b><i>同屏四次，零区分度</i></div>
+        <div style="width:520px;max-width:100%">
+          <div class="a-sechead" style="margin-bottom:8px"><svg class="i"><use href="#g-sparkle"/></svg>猜你想学</div>
+          <div style="display:grid;grid-template-columns:232px 232px;gap:8px">
+            <div class="a-card"><div class="top"><svg class="i"><use href="#g-sparkle"/></svg><span class="a-pill">顺着你学的</span></div><p>注意力头消融实验中如何区分关键头与补偿性替代头</p></div>
+            <div class="a-card"><div class="top"><svg class="i"><use href="#g-sparkle"/></svg><span class="a-pill">顺着你学的</span></div><p>注意力权重与因果贡献不等同的实证检验方法</p></div>
+            <div class="a-card"><div class="top"><svg class="i"><use href="#g-sparkle"/></svg><span class="a-pill">顺着你学的</span></div><p>从注意力可视化到模型可解释性的能力边界</p></div>
+            <div class="a-card"><div class="top"><svg class="i"><use href="#g-sparkle"/></svg><span class="a-pill">顺着你学的</span></div><p>面向模型可解释性的残余分析</p></div>
+          </div>
+          <p class="caption" style="text-align:left">四张卡展开排列（真机 marquee 分两页）</p>
+        </div>
+      </div></div>
+      <div class="half"><div class="stage aft">
+        <div class="stamp"><b>改后</b><i>pill 只在区块标题出现一次</i></div>
+        <div style="width:520px;max-width:100%">
+          <div class="a-sechead" style="margin-bottom:8px"><svg class="i"><use href="#g-sparkle"/></svg>猜你想学<span class="pill">顺着你学的</span></div>
+          <div style="display:grid;grid-template-columns:232px 232px;gap:8px">
+            <div class="a-card"><div class="top"><svg class="i"><use href="#g-sparkle"/></svg></div><p>注意力头消融实验中如何区分关键头与补偿性替代头</p></div>
+            <div class="a-card"><div class="top"><svg class="i"><use href="#g-sparkle"/></svg></div><p>注意力权重与因果贡献不等同的实证检验方法</p></div>
+            <div class="a-card"><div class="top"><svg class="i"><use href="#g-sparkle"/></svg></div><p>从注意力可视化到模型可解释性的能力边界</p></div>
+            <div class="a-card"><div class="top"><svg class="i"><use href="#g-sparkle"/></svg></div><p>面向模型可解释性的残余分析</p></div>
+          </div>
+          <p class="caption" style="text-align:left">每张卡让出一行高度，标签只回答一次「为什么是这些」</p>
+        </div>
+      </div></div>
+    </div>
+    <p class="note"><b>同屏重复四次的标签不携带任何区分信息。</b>pill 只留在「猜你想学」区块标题处一次，卡内留 sparkle 足够；Web 两张卡同样处理。101 与学习库摘要截断同批落地。</p>
+  </article>
+</section>
+
+<!-- ============================================================ 安卓 对话 -->
+<section class="surf" id="and-chat">
+  <div class="surf-head"><span class="no">05</span><h2>对话 · 安卓</h2><span class="cnt">中断卡 / 顶栏 / 空态</span></div>
+  <p class="surf-sub">错误态是产品可信度最脆弱的一屏。现在风险说明被排成了按钮的副标题，标题还被三个图标挤掉一半。</p>
+
+  <article class="finding">
+    <div class="f-top"><span class="f-no">1</span><h3 class="f-title">中断卡把风险提示排成了按钮的副标题</h3><span class="sev crit">严重</span><span class="refs"><b>095</b></span></div>
+    <div class="pair">
+      <div class="half"><div class="stage">
+        <div class="stamp"><b>现在</b><i>说明 11sp，和按钮挤一行</i></div>
+        <div style="width:360px;margin:0 auto;padding:16px;background:linear-gradient(160deg,#F8F5EF,#EFF4EC);border-radius:22px">
+          <div class="acard">
+            <p class="msg">生成中断，以上为部分回答，不可作为分支来源。</p>
+            <div class="row"><span class="hint">重试不新增消息或分支</span><span class="retry">重试</span></div>
+          </div>
+        </div>
+        <p class="caption">用户决定点不点之前必须读到的风险说明，现在像按钮的注释</p>
+      </div></div>
+      <div class="half"><div class="stage aft">
+        <div class="stamp"><b>改后</b><i>主句 / 说明 / 按钮 三行</i></div>
+        <div style="width:360px;margin:0 auto;padding:16px;background:linear-gradient(160deg,#F8F5EF,#EFF4EC);border-radius:22px">
+          <div class="acard aft">
+            <p class="msg">生成中断，以上为部分回答，不可作为分支来源。</p>
+            <p class="hint">重试不新增消息或分支</p>
+            <div class="go"><span class="retry">重试</span></div>
+          </div>
+        </div>
+        <p class="caption">说明独占一行、提到 13sp；按钮第三行左对齐</p>
+      </div></div>
+    </div>
+    <p class="note"><b>风险句不是按钮的副标题。</b>主句一行、说明独占第二行、按钮第三行左对齐（或把按钮移到卡片右上角，把整行留给说明）。095 单独走一遍错误态的排版，不搭其它改动。</p>
+  </article>
+
+  <article class="finding">
+    <div class="f-top"><span class="f-no">2</span><h3 class="f-title">顶栏标题截到约 10 字，还要挤三个图标</h3><span class="sev major">重要</span><span class="refs"><b>096</b></span></div>
+    <div class="pair stack">
+      <div class="half"><div class="stage">
+        <div class="stamp"><b>现在</b><i>52dp 单行：标题 + 三个动作</i></div>
+        <div class="barwrap">
+          <div class="p-bar" style="margin:0">
+            <span class="ib"><svg class="i"><use href="#g-back"/></svg></span>
+            <span class="ttl">注意力权重与因果贡献不等…</span>
+            <span class="ib"><svg class="i"><use href="#g-share"/></svg></span>
+            <span class="ib"><svg class="i"><use href="#g-map"/></svg></span>
+            <span class="ib"><svg class="i"><use href="#g-sun"/></svg></span>
+          </div>
+        </div>
+        <p class="caption">用户判断「我在哪棵树的哪个分支」全靠这行字</p>
+      </div></div>
+      <div class="half"><div class="stage aft">
+        <div class="stamp"><b>改后</b><i>标题独占一行，第三动作进溢出菜单</i></div>
+        <div class="barwrap">
+          <div class="p-bar tworow" style="margin:0">
+            <div class="r1"><span class="ib"><svg class="i"><use href="#g-back"/></svg></span><span class="sp"></span><span class="ib"><svg class="i"><use href="#g-share"/></svg></span><span class="ib"><svg class="i"><use href="#g-map"/></svg></span><span class="ib"><svg class="i"><use href="#g-more"/></svg></span></div>
+            <div class="r2">注意力权重与因果贡献不等同的实证检验方法</div>
+          </div>
+        </div>
+        <p class="caption">22 个字在 13sp 下约 286dp，独占一行放得下</p>
+      </div></div>
+    </div>
+    <p class="note"><b>标题是导航信息，不该和动作争同一行。</b>胶囊长到 76dp、分两行：上排返回 + 两个主动作 + 溢出，下排整行标题。096 同时给溢出菜单一个可访问名与 44dp 热区。</p>
+  </article>
+
+  <article class="finding">
+    <div class="f-top"><span class="f-no">3</span><h3 class="f-title">空态只有一行字，没有出口</h3><span class="sev minor">优化</span><span class="refs"><b>096</b></span></div>
+    <div class="pair">
+      <div class="half"><div class="stage">
+        <div class="stamp"><b>现在</b><i>总览画布空态</i></div>
+        <div class="canvas-empty"><p class="txt">这棵树还没有分支。</p></div>
+        <p class="caption">留白很克制，但也是死路</p>
+      </div></div>
+      <div class="half"><div class="stage aft">
+        <div class="stamp"><b>改后</b><i>补一个主按钮</i></div>
+        <div class="canvas-empty aft"><p class="txt" style="margin:0">这棵树还没有分支。</p><span class="cta">回首页提问</span></div>
+        <p class="caption">和森林空态已有的「去种第一棵树」对齐</p>
+      </div></div>
+    </div>
+    <p class="note"><b>空态不是墙，是岔路口。</b>文案保留，补一个真能走的主按钮；096 一并检查其它空态（学习库/搜索）是否都只有字。</p>
+  </article>
+</section>
+
+<!-- ============================================================ 安卓 学习库 -->
+<section class="surf" id="and-lib">
+  <div class="surf-head"><span class="no">06</span><h2>学习库 · 安卓</h2><span class="cnt">空分段 / placeholder / 截断</span></div>
+  <p class="surf-sub">三段小问题叠在一起：一个恒为 0 的分段、一句字段清单、一处从词中间切开的摘要。</p>
+
+  <article class="finding">
+    <div class="f-top"><span class="f-no">1</span><h3 class="f-title">「已完成 0」也占一整段 44dp</h3><span class="sev major">重要</span><span class="refs"><b>102</b></span></div>
+    <div class="pair stack">
+      <div class="half"><div class="stage">
+        <div class="stamp"><b>现在</b><i>两档各占一半，恒有一档是 0</i></div>
+        <div class="segwrap">
+          <div class="seg"><div class="half on">进行中 <span style="opacity:.65">3</span></div><div class="half">已完成 <span style="opacity:.65">0</span></div></div>
+          <div class="libcard" style="margin-top:14px"><div class="t">注意力权重与因果贡献不等同的实证检验方法<svg class="i"><use href="#g-chev"/></svg></div><div class="m"><svg class="i"><use href="#g-tree"/></svg>1 个分支 · 1分钟前</div></div>
+        </div>
+      </div></div>
+      <div class="half"><div class="stage aft">
+        <div class="stamp"><b>改后</b><i>一档有内容 / 两档都有，两种都画</i></div>
+        <div class="segwrap">
+          <p class="statecap">A · 只有一档有内容：整条分段隐藏，用一行文字说明列表</p>
+          <div class="libhead">进行中<span class="n">3</span></div>
+          <div class="libcard"><div class="t">注意力权重与因果贡献不等同的实证检验方法<svg class="i"><use href="#g-chev"/></svg></div><div class="m"><svg class="i"><use href="#g-tree"/></svg>1 个分支 · 1分钟前</div></div>
+          <p class="statecap" style="margin-top:16px">B · 两档都有内容：保留分段，两半都可点</p>
+          <div class="seg"><div class="half on">进行中 <span style="opacity:.65">3</span></div><div class="half">已完成 <span style="opacity:.65">2</span></div></div>
+          <div class="libcard" style="margin-top:10px"><div class="t">注意力权重与因果贡献不等同的实证检验方法<svg class="i"><use href="#g-chev"/></svg></div><div class="m"><svg class="i"><use href="#g-tree"/></svg>1 个分支 · 1分钟前</div></div>
+        </div>
+      </div></div>
+    </div>
+    <p class="note"><b>空分段是纯死重量，还把第一条真实内容往下推了 44dp。</b>规则按状态分两支：<b>只有一档有内容</b>时整条分段隐藏，用一行「进行中 3」文字说明当前列表，<span class="warn">不画一个点不动的胶囊</span>；<b>两档都有内容</b>时才出现分段，两半都可点。0 档不单独出现——没有可切换的目标，就没有控件。102 的判据要同时覆盖这两支。</p>
+  </article>
+
+  <article class="finding">
+    <div class="f-top"><span class="f-no">2</span><h3 class="f-title">搜索框 placeholder 写的是字段清单</h3><span class="sev minor">优化</span><span class="refs"><b>099</b></span></div>
+    <div class="pair stack">
+      <div class="half"><div class="stage">
+        <div class="stamp"><b>现在</b><i>给实现者看的可搜范围</i></div>
+        <div class="segwrap">
+          <div class="searchf"><svg class="i"><use href="#g-search"/></svg><span>标题、问题、回答、锚定原文…</span></div>
+        </div>
+        <p class="caption">用户不需要被提醒字段名，需要知道能搜什么</p>
+      </div></div>
+      <div class="half"><div class="stage aft">
+        <div class="stamp"><b>改后</b><i>一句人话</i></div>
+        <div class="segwrap">
+          <div class="searchf"><svg class="i"><use href="#g-search"/></svg><span>搜索主题、回答或原文</span></div>
+        </div>
+        <p class="caption">可搜范围交给结果页说明；<code>library_search_scope</code> 仍只在有查询时出现</p>
+      </div></div>
+    </div>
+    <p class="note"><b>placeholder 是给用户的提示，不是给实现者的字段清单。</b>缩短成「搜索主题、回答或原文」，与 Web 侧学习库同一句；099 同时把这类占位符纳入文案检查。</p>
+  </article>
+
+  <article class="finding">
+    <div class="f-top"><span class="f-no">3</span><h3 class="f-title">卡片摘要按字符数硬截断，切在词中间</h3><span class="sev minor">优化</span><span class="refs"><b>101</b></span></div>
+    <div class="pair stack">
+      <div class="half"><div class="stage">
+        <div class="stamp"><b>现在</b><i>第二行末尾出现「与符…」</i></div>
+        <div class="segwrap">
+          <div class="libcard">
+            <div class="t">系统理解 Transformer 的注意力机制<svg class="i"><use href="#g-chev"/></svg></div>
+            <p>本分支系统讲解了 Transformer 的注意力机制：先给出注意力的精确函数定义，再聚焦缩放点积注意力的矩阵形式与符…</p>
+            <div class="m"><svg class="i"><use href="#g-tree"/></svg>2 个分支 · 6天前</div>
+          </div>
+        </div>
+      </div></div>
+      <div class="half"><div class="stage aft">
+        <div class="stamp"><b>改后</b><i>在句末收住</i></div>
+        <div class="segwrap">
+          <div class="libcard aft">
+            <div class="t">系统理解 Transformer 的注意力机制<svg class="i"><use href="#g-chev"/></svg></div>
+            <p>本分支系统讲解了 Transformer 的注意力机制：先给出精确的函数定义，再聚焦缩放点积注意力。</p>
+            <div class="m"><svg class="i"><use href="#g-tree"/></svg>2 个分支 · 6天前</div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+    <p class="note"><b>按句末标点截断。</b>最后一句放不下就整句不显示，宁可少一行，也不从词中间切；101 与首页推荐卡的截断用同一条规则，避免两处各写一套。</p>
+  </article>
+</section>
+
+<footer>
+  <div>
+    <h3>已实测（可直接引）</h3>
+    <ul>
+      <li>Web 列宽与字号：<code>.page</code> 960、<code>.app-sidebar</code> 240、<code>.chat-answer</code> 720 @15px（Playwright 渲染离线包，081 截图同批）。</li>
+      <li>安卓尺寸：<code>dimens.xml</code>（topbar 52、tab bar 62/50、rec 卡 232、text_cap 11sp、text_topbar_title 13sp）；文案取 <code>strings.xml</code> 与 <code>zh-CN.ts</code>。</li>
+      <li>字体子集：7,566 码位 / 4,018,044 B / 13,716 字形（<code>090-subset.txt</code>）；单文件内联后 5.8 MB。</li>
+      <li>死类名：app.css 29 个 + glass.css 1 个，0 消费者（<code>088-dead-classes.txt</code>）。</li>
+    </ul>
+  </div>
+  <div>
+    <h3>未实测（图上为设计值）</h3>
+    <ul>
+      <li>安卓首页改后的纵向坐标（输入卡 282–420 → 150–288、中线 400 为图内模拟值）：待 100 用真机 bounds 定稿；2026-10-25 的 <code>uiautomator dump</code> 取首页失败（Error type 3）。</li>
+      <li>等高线抬到哪一档：待 <code>check_glass_depth.py</code> 量 ΔL；图上标注的是目标线，不是已取值。</li>
+      <li>森林树名 8 字截断与 hover 全名的实际宽度：待 103 用真实树位与最长标题验。</li>
+      <li>PagerSnap 卡宽 312 与进度点：待 099 在 360dp 真机与 Pad 上各验一次；触屏看树名不能只靠 hover。</li>
+      <li>hero 单行锁标的 fontScale 1.3 表现：待 100 用大字号跑一次，确认 tagline 换行后输入卡仍在中线以上。</li>
+    </ul>
+  </div>
+  <p class="foot-note">这块板是手绘 HTML，不是渲染截图：除上面「已实测」四项外，不要把它当像素证据。右栏就是实施依据：按 088 → 104 的顺序落地，X1 已在 090 里落了代码与判据，还差一次 CDP 取证与卡片落盘。实机复测前，不把任何设计值写成实测。</p>
+</footer>
+
+</div>
+</body>
+</html>

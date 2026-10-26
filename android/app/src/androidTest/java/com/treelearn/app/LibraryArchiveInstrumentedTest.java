@@ -191,7 +191,8 @@ public final class LibraryArchiveInstrumentedTest {
                 texts(R.id.library_rows).contains(ARCHIVED_TITLE));
         assertFalse("the branch is back in the working tree, not archived",
                 navigation.load(TOPIC).node(tree.archived.id).archived);
-        tap(R.id.library_segment_in_progress);
+        // 2026-10-25 (T-2026-10-25-102): the completed side is empty now, so the page follows the
+        // working side by itself - there is no capsule left to tap back with.
         assertTrue("and its topic is still a working topic: " + texts(R.id.library_rows),
                 texts(R.id.library_rows).contains(TOPIC_TITLE));
 
@@ -243,25 +244,34 @@ public final class LibraryArchiveInstrumentedTest {
     }
 
     // ------------------------------------------------------------------
-    // 4. An empty completed segment, and a branch without a summary.
+    // 4. One side with rows: the capsule gives way to its label.
     // ------------------------------------------------------------------
 
     @Test
-    public void theCompletedSegmentSaysThereIsNothingThereRatherThanShowingABlankList() {
+    public void theCapsuleGivesWayToTheLabelWhileOnlyTheWorkingSegmentHasRows() {
         navigation.setArchived(tree.archived.id, false, T0 + 20_000L);
         presenter.start();
 
-        tap(R.id.library_segment_done);
+        // T-2026-10-25-102: a two-half control whose other half switches to nothing is not a
+        // control. With no archived branch the capsule is gone and the one live side is named.
+        assertEquals("no switch is drawn while only one side has rows", View.GONE,
+                view(R.id.library_segment).getVisibility());
+        assertEquals("the label takes its place", View.VISIBLE,
+                view(R.id.library_segment_summary).getVisibility());
+        assertTrue("and names the live side with its count: " + text(R.id.library_segment_summary),
+                text(R.id.library_segment_summary).contains(
+                        context().getString(R.string.library_unit_topics, 1)));
+        assertTrue("while the working list is what is on screen: " + texts(R.id.library_rows),
+                texts(R.id.library_rows).contains(TOPIC_TITLE));
 
-        assertEquals("an empty completed segment is its own state", View.VISIBLE,
+        // There is no half left to offer the empty side, and a render follows the one side with
+        // rows even if a stale selection asked for the other: the page never paints 已完成里还没有
+        // under a label that says 进行中.
+        tap(R.id.library_segment_done);
+        assertTrue("the working list stays on screen: " + texts(R.id.library_rows),
+                texts(R.id.library_rows).contains(TOPIC_TITLE));
+        assertEquals("and the empty-completed state is never painted", View.GONE,
                 view(R.id.library_state).getVisibility());
-        String sentence = text(R.id.library_state);
-        assertTrue("it names the fact: " + sentence,
-                sentence.contains(context().getString(R.string.done_empty)));
-        assertTrue("and it points at the next step: " + sentence,
-                sentence.contains(context().getString(R.string.done_empty_guide)));
-        assertFalse("with words of its own, not the working segment's: " + sentence,
-                sentence.contains(context().getString(R.string.library_empty)));
     }
 
     @Test

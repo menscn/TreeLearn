@@ -8,6 +8,11 @@
  * 在 `file://` 下照常执行（同一条实测里两半都验过：内联模块出字、外部经典脚本出字、外部模块被拦）。
  *
  * 它不替代 `check_offline_bundle.mjs`：那支判「产物不需要联网」（规格 §3），本脚本判「产物不需要目录」。
+ *
+ * 顺带承担的第二件事：样式里的字体引用换成 `data:` 字节（片 090）。衬线子集 4MB，超过 Vite 的
+ * `assetsInlineLimit`，一定以外部资产输出；不在这一步换掉，`<style>` 内联后 `url(./x.woff)` 就相对
+ * 产物 HTML 解析，双击打开时字节根本不存在——那时产物仍「零外部主机」，判据却已经在骗人。
+ *
  * 退出码：0 成立 / 1 判据不符 / 2 用法错误 / 3 仪器故障（dist 不存在等）。
  * 用法：node frontend/scripts/inline_offline.mjs [--dist <dir>] [--out <dir>]
  *       node frontend/scripts/inline_offline.mjs --selftest
@@ -25,6 +30,17 @@ const SCRIPT = path.relative(FRONTEND, fileURLToPath(import.meta.url)).replace(/
 const SCRIPT_TAG = /<script\b[^>]*\bsrc="([^"]+)"[^>]*>\s*<\/script>/g;
 const STYLE_TAG = /<link\b[^>]*\brel="stylesheet"[^>]*\bhref="([^"]+)"[^>]*>/g;
 
+/** 收完之后 CSS 里剩下的每一条 `url(...)`：引号可有可无，内容原样带出。 */
+const CSS_URL = /url\(\s*(?:"([^"]*)"|'([^']*)'|([^)\s]*))\s*\)/g;
+
+/**
+ * 单文件里能内联的资产类型：只有字体。
+ * 为什么现在只列字体而不是「任何资源」：字体是这条链上唯一真实存在的相对资源
+ * （`frontend/src/styles/fonts.css` → `src/fonts/*.woff`），把别的类型一并写进来等于
+ * 在没有产物的路径上装通过。以后加一类，必须同时加一条自检反例。
+ */
+const ASSET_MIME = { woff: "font/woff", woff2: "font/woff2", ttf: "font/ttf", otf: "font/otf" };
+
 /** 内联后仍会「去别处取东西」的写法：模块级 import 与动态 import()。有就说明这个包不能收成单文件。 */
 const STILL_LOADS = /(^|[;\n{])\s*import\s+[\w{*]|\bimport\s*\(/m;
 
@@ -33,11 +49,47 @@ function relPath(ref) {
   return null;
 }
 
+/**
+ * 把样式里的相对字体引用换成 `data:` 字节。
+ *
+ * 为什么非做不可：Vite 的 `assetsInlineLimit` 是 1 MiB，而衬线子集 4,018,044 字节，
+ * 它一定被当外部资产输出。`<style>` 一内联，`url(./x.woff)` 就相对**产物 HTML** 解析，
+ * 双击打开时指到 `dist-offline/../…`，字节根本不存在——离线包表面上「零外部主机」，
+ * 实际上衬线身份仍然拿不到字。`check_offline_bundle.mjs` 只抓 `http(s)://`，抓不到这种
+ * 「不需要联网但需要目录」的引用，所以修在收包这一步。
+ */
+function inlineCssAssets(css, cssFile, dist, bad, stats) {
+  return css.replace(CSS_URL, (tag, dq, sq, bare) => {
+    const raw = (dq ?? sq ?? bare ?? "").trim();
+    if (raw === "" || raw.startsWith("data:") || raw.startsWith("#")) return tag;
+    if (/^(https?:)?\/\//.test(raw)) {
+      bad.push(`${path.basename(cssFile)} 的样式里有外部加载 URL: ${raw}`);
+      return tag;
+    }
+    const file = raw.startsWith("/") ? path.join(dist, raw.slice(1)) : path.resolve(path.dirname(cssFile), raw);
+    if (!fs.existsSync(file)) {
+      bad.push(`${path.basename(cssFile)} 引用了不存在的包内资产: ${raw}（解析为 ${file}）`);
+      return tag;
+    }
+    const ext = path.extname(file).slice(1).toLowerCase();
+    const mime = ASSET_MIME[ext];
+    if (!mime) {
+      bad.push(`${path.basename(cssFile)} 引用了无法内联的资源类型 .${ext}: ${raw}（单文件会缺字节）`);
+      return tag;
+    }
+    const buf = fs.readFileSync(file);
+    stats.fonts += 1;
+    stats.fontBytes += buf.length;
+    return `url(data:${mime};base64,${buf.toString("base64")})`;
+  });
+}
+
 /** 收一次：返回判决需要的全部读数，不掺期望值。 */
 function inline(dist, out) {
   const index = path.join(dist, "index.html");
   const html = fs.readFileSync(index, "utf8");
   const bad = [];
+  const stats = { fonts: 0, fontBytes: 0 };
   let jsBytes = 0;
   let cssBytes = 0;
   let scripts = 0;
@@ -61,11 +113,19 @@ function inline(dist, out) {
       if (rel === null) { bad.push(`样式引用不是包内相对路径，无法内联: ${ref}`); return tag; }
       const file = path.join(dist, rel);
       if (!fs.existsSync(file)) { bad.push(`样式引用指向不存在的文件: ${rel}`); return tag; }
-      const css = fs.readFileSync(file, "utf8");
+      const css = inlineCssAssets(fs.readFileSync(file, "utf8"), file, dist, bad, stats);
       cssBytes += css.length;
       styles += 1;
       return `<style>\n${css}\n</style>`;
     });
+  /* 单文件里不许剩任何「相对路径的 url()」：它相对产物 HTML 解析，指到 dist 之外，字节并不存在。
+     这一条是**出口复核**，不依赖上面那轮替换认不认得这个扩展名——替换已经逐条点名过，
+     这里兜的是「判据漏网但产物已残缺」。 */
+  for (const m of body.matchAll(CSS_URL)) {
+    const raw = (m[1] ?? m[2] ?? m[3] ?? "").trim();
+    if (raw !== "" && !raw.startsWith("data:") && !raw.startsWith("#") && !/^(https?:)?\/\//.test(raw))
+      bad.push(`单文件里仍留着相对资源引用: url(${raw})——双击打开时它指向产物目录之外`);
+  }
   /* 收完之后标签上必须什么都不剩。掏空只按**自己写出的那两种包裹**做（`<script type="module">\n…\n</script>`
      与 `<style>\n…\n</style>`），不按通用 `</script` 规则——那样会把没能内联、原样留在出口里的外部引用一起掏掉，
      而那种引用正是必须被点名的（实测：掏早了会把 unpkg 那条漏判）。库代码里的 `<img src="…">` 字符串
@@ -84,13 +144,14 @@ function inline(dist, out) {
   fs.mkdirSync(out, { recursive: true });
   const target = path.join(out, "index.html");
   fs.writeFileSync(target, body);
-  return { target, scripts, styles, jsBytes, cssBytes, bytes: body.length, bad };
+  return { target, scripts, styles, jsBytes, cssBytes, bytes: body.length, fonts: stats.fonts, fontBytes: stats.fontBytes, bad };
 }
 
 function report(dist, out) {
   const r = inline(dist, out);
   console.log(`inline dist=${path.relative(FRONTEND, dist).replace(/\\/g, "/")} `
     + `scripts=${r.scripts} styles=${r.styles} js=${r.jsBytes}B css=${r.cssBytes}B `
+    + `fonts=${r.fonts} fontBytes=${r.fontBytes}B `
     + `single=${path.relative(FRONTEND, r.target).replace(/\\/g, "/")} bytes=${r.bytes} violations=${r.bad.length}`);
   for (const b of r.bad.slice(0, 8)) console.log(`  VIOLATION ${b}`);
   if (r.bad.length > 0) {
@@ -143,6 +204,33 @@ function selftest() {
     fs.writeFileSync(path.join(empty, "index.html"), '<html><body><div id="root"></div></body></html>');
     fs.writeFileSync(path.join(empty, "assets", "a.js"), "var v=1;");
     add("零脚本不得算通过", 1, inline(empty, path.join(tmp, "out-empty")).bad.length);
+
+    /* —— 字体随包（090）：正例 + 两类反例，双向都要实测 —— */
+    const hits = (list, re) => list.filter((b) => re.test(b)).length;
+    const mk = (name, css) => {
+      const dir = path.join(tmp, name);
+      fs.mkdirSync(path.join(dir, "assets"), { recursive: true });
+      fs.writeFileSync(path.join(dir, "index.html"),
+        '<html><head><link rel="stylesheet" href="./assets/a.css"></head>'
+        + '<body><div id="root"></div><script type="module" src="./assets/a.js"></script></body></html>');
+      fs.writeFileSync(path.join(dir, "assets", "a.js"), "var v=1;");
+      fs.writeFileSync(path.join(dir, "assets", "x.woff"), "WOFFBYTES");
+      fs.writeFileSync(path.join(dir, "assets", "a.png"), "PNGBYTES");
+      fs.writeFileSync(path.join(dir, "assets", "a.css"), css);
+      return inline(dir, path.join(tmp, "out-" + name));
+    };
+    const fr = mk("font-ok", '@font-face{font-family:"F";src:url(./x.woff) format("woff")}'
+      + '.i{mask:url(#frag)}.d{background:url("data:image/svg+xml,%3Csvg/%3E")}');
+    add("包内字体换成 data: 字节，碎片引用与既有 data: 不误伤", 0, fr.bad.length);
+    add("内联到的字体被计数（零内联不构成通过）", 1, fr.fonts);
+    const fsingle = fs.readFileSync(fr.target, "utf8");
+    add("单文件里没有相对 url() 残留", 0, /url\(\.\/x\.woff\)/.test(fsingle) ? 1 : 0);
+    add("单文件里有 base64 的 woff 字节", 1, /url\(data:font\/woff;base64,[A-Za-z0-9+/=]+\)/.test(fsingle) ? 1 : 0);
+    const ms = mk("font-missing", '@font-face{src:url("./gone.woff") format("woff")}');
+    add("指向不存在文件的字体被点名", 1, hits(ms.bad, /不存在的包内资产/));
+    add("同一处缺失，出口复核也拦一道（防替换漏认）", 1, hits(ms.bad, /仍留着相对资源引用/));
+    const px = mk("font-png", ".b{background:url(./a.png)}");
+    add("无法内联的资源类型被点名而不是静默留空", 1, hits(px.bad, /无法内联的资源类型/));
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }

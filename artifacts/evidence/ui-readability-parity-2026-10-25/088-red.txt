@@ -1,0 +1,9 @@
+FAIL A1 衬线身份随包 — --serif 首选族 'Noto Serif SC' 在 frontend/src/styles 没有任何 @font-face（当前栈：'Noto Serif SC','Songti SC',Georgia,serif）
+FAIL A2 兜底栈含 Windows 中文衬线 — 栈里没有任何 ['SimSun', 'NSimSun', 'SimSun-ExtB', '宋体']；没装首选族的机器会落到 generic serif，最终字面由宿主决定
+FAIL A3 样式表类名有消费者 — 扫描 6 张样式表，frontend/src/styles/app.css：29 个无消费者（app-main, app-shell, app-tab, app-tabs, appbar, appbar-brand…）；frontend/src/styles/glass.css：1 个无消费者（rec-tag…）
+NOTE A4 随包字体字节有上限 — 没有任何内联字体字节，无从判上限（该缺陷已由 A1 判红，不重复计一条）
+FAIL A5 产物面与源面同字面 — 产物面 Noto Serif SC：@font-face 没有，外部字体引用 0 处
+OK   A6 参照面 Android 字体仍在 — android/app/src/main/res/font/noto_serif_sc.otf 24427224 字节
+
+check_ui_asset_parity: 4 check(s) failed
+EXITCODE=1

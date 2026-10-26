@@ -38,9 +38,13 @@ describe("Web 莫兰迪材质消费", () => {
     expect(css).toMatch(/background-image:[^;]*var\(--glow-lilac\)/s);
   });
 
-  it("推荐标签用 tint 作非文字表面，且材质层不写裸色值", () => {
+  it("推荐标签的 tint 语义仍在，且材质层不写裸色值", () => {
+    // 2026-10-25（T-2026-10-25-093）：原先这里断言的是 glass.css 的 `.rec-tag`，
+    // 它在 frontend/src 里没有任何消费者（判据 A3），已随 app.css 退役。
+    // 推荐标签的活样式是 pages.css 的 `.suggestion-tag`，颜色依旧只引 token。
+    const pages = read(fileURLToPath(new URL("../../src/styles/pages.css", import.meta.url)));
     const css = read(glassPath);
-    expect(css).toMatch(/\.rec-tag[^{]*\{[^}]*var\(--tint-sage\)/s);
+    expect(pages).toMatch(/\.suggestion-tag\s*\{[^}]*color:\s*var\(--green-deep\)/s);
     expect(css.match(/#[0-9a-fA-F]{3,8}\b/g) ?? []).toEqual([]);
   });
 });

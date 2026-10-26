@@ -1,93 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The row of answer actions. 2026-09-28 user decision: the row carries only the four buttons the
-  prototype's .ai-actions leads with - copy, reset (regenerate), fork (new branch), the data-driven
-  child entry - plus the time at the end. The app's own extras (quote, translation, speech) and the
-  hidden version switcher are removed from this row: the user marked them out on the annotated shot
-  ("删除不需要的按钮，比如那个定位、还有语音播放" / "左侧分别为 复制、重新生成、新建分支、分支列表，
-  右侧是生成时间，其他的不要"). Quote keeps its whole-answer entry beside the selection menu, and
-  translation keeps the translation card's header entry, so no learner-facing capability is lost.
+  The row of answer actions. 2026-09-28 user decision: the row carries only the prototype's own four
+  leads - copy, reset (regenerate), fork (new branch), the data-driven child entry. The app's own
+  extras (quote, translation, speech) and the hidden version switcher are removed from this row: the
+  user marked them out on the annotated shot ("删除不需要的按钮，比如那个定位、还有语音播放" / "左侧分别为
+  复制、重新生成、新建分支、分支列表，右侧是生成时间，其他的不要"). Quote keeps its whole-answer entry
+  beside the selection menu, and translation keeps the translation card's header entry, so no
+  learner-facing capability is lost.
 
-  Spacing 2026-09-28 user decision: the row read "现在隔的太开了". The surplus was never the 44dp
-  target but the 6dp inner padding each button carried on top of its 4dp start margin. Both are gone:
-  every button is @dimen/touch_min wide with no padding, so the four lead in an even 44dp rhythm and
-  the glyphs centre themselves. The 44dp height stays untouched (WCAG 2.5.8 needs 24dp; the prototype's
-  own targets are 17px glyphs).
+  2026-10-25 user decision (T-2026-10-25-101), on the same row seen again: "傻大傻大，不够精致". The
+  board settles its geometry - a 44dp hit with a 29dp glass face inside it, 18dp glyphs, the leads
+  flush left. Until this pass each lead was a Material Button carrying its glyph as a compound
+  drawable, and a compound drawable is laid out at its intrinsic 24dp against the button's start edge,
+  not centred in the 44dp cell; four 24dp glyphs in four 44dp cells read as one heavy band. Each lead
+  is now a 44dp FrameLayout holding a centred 18dp ImageView, so the face (the same
+  @drawable/bg_action_glass, already inset to 29dp by @dimen/action_glass_inset) and the glyph can be
+  sized independently and both sit on the cell's centre line.
 
-  All four leads are now glyphs. 2026-09-28 user decision on the child entry: "分支列表 对应的也是图标，
-  不要是文字！" - it used to be a text Button reading "子分支 N"; it is now the prototype's own ITree
-  glyph with the count in a green badge (.ai-act-n), which is exactly what the prototype draws at line
-  1178. Its glyph is ic_nav_tree, the same asset the app bar's nav entry uses - one glyph, one meaning.
+  The time left this row on 2026-10-25. It was added here on 2026-09-27 to keep the answer's tag line
+  clean; the reading-area header now carries the branch's time once, so repeating it after every
+  answer's actions was a second copy of the same fact on the same screen. That reverses the 2026-09-27
+  placement, not the fact: the time is still shown, and still only on a stable answer's screen.
+
+  The 44dp height and width of every lead are untouched (WCAG 2.5.8 needs 24dp; the board's own
+  targets are 44dp cells with 29dp faces).
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/answer_actions"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center_vertical"
+    android:gravity="start|center_vertical"
     android:orientation="horizontal">
 
-    <!-- 2026-10-16 user decision: the three glyph leads stop being bare Buttons under an unbounded
-         ripple. Each one now takes a bounded background, so the press highlight ends at the control's
-         own edge instead of a ~62dp disc over the neighbours ("这个背景太傻大了"); the tint is
-         tl_glyph, so a lead the store would refuse is drawn grey rather than asking for a tap it will
-         swallow ("点击某些按钮没有任何反应"); and the Material Button's own state list animator is
-         nulled, because lifting an invisible card off the page on press is the motion the user marked
-         as wrong ("按钮的点击和动效也不太对"). 2026-10-22 (T-056): that background is Scheme A's
-         inset glass dot, bg_action_glass, drawn inside the same 44dp target. -->
-    <Button
+    <!-- 2026-10-16 user decision: each lead takes a bounded background, so the press highlight ends at
+         the control's own edge instead of a ~62dp disc over the neighbours ("这个背景太傻大了"); the
+         tint is tl_glyph, so a lead the store would refuse is drawn grey rather than asking for a tap
+         it will swallow ("点击某些按钮没有任何反应"); and the state list animator is nulled, because
+         lifting an invisible card off the page on press is the motion the user marked as wrong. -->
+    <FrameLayout
         android:id="@+id/act_copy"
         android:layout_width="@dimen/touch_min"
         android:layout_height="@dimen/touch_min"
         android:background="@drawable/bg_action_glass"
         android:contentDescription="@string/cd_act_copy"
-        android:drawableStart="@drawable/ic_action_copy"
-        android:drawableTint="@color/tl_glyph"
-        android:drawablePadding="0dp"
-        android:paddingStart="0dp"
-        android:paddingEnd="0dp"
-        android:stateListAnimator="@null"
-        android:text=""
-        android:textColor="@color/tl_glyph"
-        android:textSize="@dimen/text_cap" />
+        android:focusable="true">
 
-    <Button
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_gravity="center"
+            android:duplicateParentState="true"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_action_copy"
+            android:tint="@color/tl_glyph" />
+    </FrameLayout>
+
+    <FrameLayout
         android:id="@+id/act_reset"
         android:layout_width="@dimen/touch_min"
         android:layout_height="@dimen/touch_min"
         android:background="@drawable/bg_action_glass"
         android:contentDescription="@string/cd_act_reset"
-        android:drawableStart="@drawable/ic_nav_restore"
-        android:drawableTint="@color/tl_glyph"
-        android:drawablePadding="0dp"
-        android:paddingStart="0dp"
-        android:paddingEnd="0dp"
-        android:stateListAnimator="@null"
-        android:text=""
-        android:textColor="@color/tl_glyph"
-        android:textSize="@dimen/text_cap" />
+        android:focusable="true">
 
-    <Button
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_gravity="center"
+            android:duplicateParentState="true"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_nav_restore"
+            android:tint="@color/tl_glyph" />
+    </FrameLayout>
+
+    <FrameLayout
         android:id="@+id/act_fork"
         android:layout_width="@dimen/touch_min"
         android:layout_height="@dimen/touch_min"
         android:background="@drawable/bg_action_glass"
         android:contentDescription="@string/cd_act_fork"
-        android:drawableStart="@drawable/ic_action_fork"
-        android:drawableTint="@color/tl_glyph"
-        android:drawablePadding="0dp"
-        android:paddingStart="0dp"
-        android:paddingEnd="0dp"
-        android:stateListAnimator="@null"
-        android:text=""
-        android:textColor="@color/tl_glyph"
-        android:textSize="@dimen/text_cap" />
+        android:focusable="true">
+
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_gravity="center"
+            android:duplicateParentState="true"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_action_fork"
+            android:tint="@color/tl_glyph" />
+    </FrameLayout>
 
     <!-- Child-branch list (prototype line 1178): the tree glyph with the child count in a green
          badge pinned to its top-right corner (.ai-act-n), NOT a text label. 2026-09-28 user decision:
-         "分支列表 对应的也是图标，不要是文字！" The glyph is the prototype's own ITree, which is the
-         same asset the app bar's nav button already draws - one glyph, one meaning. The badge is a
-         child view rather than a compound drawable because it must sit *outside* the glyph's box,
-         which no compound-drawable arrangement can express. -->
+         "分支列表 对应的也是图标，不要是文字！" The badge is a child view rather than a compound
+         drawable because it must sit *outside* the glyph's box, which no compound-drawable arrangement
+         can express; the glyph itself is 18dp from 2026-10-25 like the other three. -->
     <FrameLayout
         android:id="@+id/act_children"
         android:layout_width="@dimen/touch_min"
@@ -97,8 +105,8 @@
         android:visibility="gone">
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
             android:layout_gravity="center"
             android:duplicateParentState="true"
             android:importantForAccessibility="no"
@@ -122,20 +130,4 @@
             android:textColor="@color/tl_surface"
             android:textSize="9.5sp" />
     </FrameLayout>
-
-    <!-- The time rides the action row (prototype .ai-time, line 877); the weight spacer pins
-         it to the end without a fixed width. -->
-    <View
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_weight="1" />
-
-    <TextView
-        android:id="@+id/act_time"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/touch_min"
-        android:layout_marginStart="@dimen/space_s1"
-        android:gravity="center_vertical"
-        android:textColor="@color/tl_ink3"
-        android:textSize="@dimen/text_cap" />
 </LinearLayout>

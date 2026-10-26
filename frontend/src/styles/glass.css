@@ -168,10 +168,9 @@ body {
   background: var(--glass-control);
 }
 
-/* 推荐标签用 tint 作非文字表面：文字仍由 app.css 的 green-deep 表达语义。 */
-.rec-tag {
-  background: var(--tint-sage);
-}
+/* 2026-10-25（T-2026-10-25-093）：这里原来还有一条推荐标签的 tint 背景规则，
+   `frontend/src/**` 里没有任何消费者——推荐标签的活样式在 `pages.css` 的 `.suggestion-tag`。
+   它已随 `app.css` 一起退役；同屏的 tint 语义仍由 `.suggestion-tag` 自己表达。 */
 
 .search-field {
   border: 0;

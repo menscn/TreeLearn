@@ -41,6 +41,7 @@ public final class TreeCanvasScreen extends FrameLayout {
     private final TextView notice;
     private final View loading;
     private final View empty;
+    private final View emptyAction;
     private final View error;
     /** The fold control as an icon (058); its image and description follow the selected branch. */
     private final ImageButton fold;
@@ -73,6 +74,7 @@ public final class TreeCanvasScreen extends FrameLayout {
         notice = findViewById(R.id.tree_notice);
         loading = findViewById(R.id.tree_loading);
         empty = findViewById(R.id.tree_empty);
+        emptyAction = findViewById(R.id.tree_empty_action);
         error = findViewById(R.id.tree_error);
         fold = findViewById(R.id.tree_fold);
         open = findViewById(R.id.tree_open);
@@ -84,6 +86,7 @@ public final class TreeCanvasScreen extends FrameLayout {
         center = findViewById(R.id.tree_center);
 
         findViewById(R.id.tree_back).setOnClickListener(view -> fire(TreeCanvasActions::onBackPressed));
+        emptyAction.setOnClickListener(view -> fire(TreeCanvasActions::onBackPressed));
         findViewById(R.id.tree_fit).setOnClickListener(view -> fire(TreeCanvasActions::onFit));
         findViewById(R.id.tree_fit_tool).setOnClickListener(view -> fire(TreeCanvasActions::onFit));
         zoomIn.setOnClickListener(view -> fire(actions -> actions.onZoom(1.18f,
@@ -122,6 +125,7 @@ public final class TreeCanvasScreen extends FrameLayout {
         boolean ready = next.phase == TreeCanvasViewState.Phase.READY;
         loading.setVisibility(next.phase == TreeCanvasViewState.Phase.LOADING ? VISIBLE : GONE);
         empty.setVisibility(next.phase == TreeCanvasViewState.Phase.EMPTY ? VISIBLE : GONE);
+        emptyAction.setVisibility(next.phase == TreeCanvasViewState.Phase.EMPTY ? VISIBLE : GONE);
         error.setVisibility(next.phase == TreeCanvasViewState.Phase.ERROR ? VISIBLE : GONE);
         notice.setVisibility(next.notice == null ? GONE : VISIBLE);
         if (next.notice != null) {

@@ -109,6 +109,26 @@ public final class ChatMotionLayoutStabilityTest {
                 elementAround(row, "chat_failure_text").contains("@color/tl_red"));
     }
 
+    /**
+     * 2026-10-25 (T-2026-10-25-095): the review's AC1 - the interrupt card had the risk sentence
+     * sharing a row with the retry key, so on a phone the sentence was whatever width the key left
+     * and the key's centre never lined up with the two-line hint it explained. Three rows now: what
+     * happened, what the kept text may still be used for, then the key.
+     */
+    @Test
+    public void theFailureBarStacksItsReasonAboveItsKey() throws Exception {
+        String row = read(RES.resolve(Paths.get("layout", "item_chat_message.xml")));
+        int reason = row.indexOf("android:id=\"@+id/chat_failure_text\"");
+        int hint = row.indexOf("android:id=\"@+id/chat_retry_hint\"");
+        int retry = row.indexOf("android:id=\"@+id/chat_retry\"");
+        assertTrue("what happened, then the kept-text note, then the key - in that order",
+                reason >= 0 && reason < hint && hint < retry);
+        assertTrue("the note owns the card's full width instead of the key's leftover",
+                elementAround(row, "chat_retry_hint").contains("android:layout_width=\"match_parent\""));
+        assertTrue("the key closes the card on its own line",
+                elementAround(row, "chat_retry").contains("android:layout_marginTop="));
+    }
+
     @Test
     public void theStateChangesAreAnnouncedToTalkBack() throws Exception {
         String screen = read(SRC.resolve(Paths.get("screen", "ChatScreen.java")));

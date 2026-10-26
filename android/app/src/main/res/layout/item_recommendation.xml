@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  One recommendation card (2026-10-22 Scheme A): the proposal's .suggest is a 232dp glass card led
-  by a green sparkle. The card is stacked because the product keeps PRD 6.2.17 point 3's category
-  tag: the tag and the sparkle share the first line, the question takes the lines below it.
+  One recommendation card (2026-10-25 board, T-2026-10-25-101): the proposal's .suggest is a 232dp
+  glass card led by a green sparkle, with the PRD 6.2.17 point 3 category tag in its top-right corner.
+  The question takes the lines below, 12sp, two of them.
+
+  Until 2026-10-25 the tag sat immediately right of the sparkle and the question ran to three lines. The
+  board moves the tag out to the card's opposite corner (the sparkle stays left) so the two read as a
+  card header rather than a sentence, and the card keeps a fixed 88dp floor so a row of them is the
+  same height whatever the question's length.
 
   Two things this markup deliberately does not decide:
 
@@ -20,7 +25,7 @@
     android:background="@drawable/bg_rec_card"
     android:clickable="true"
     android:focusable="true"
-    android:minHeight="@dimen/touch_min"
+    android:minHeight="@dimen/rec_card_min_height"
     android:orientation="vertical"
     android:paddingStart="@dimen/rec_pad_h"
     android:paddingTop="@dimen/rec_pad_v"
@@ -41,17 +46,23 @@
             android:src="@drawable/ic_sparkle"
             android:tint="@color/tl_green" />
 
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <!-- The tag is a label, not an action, so it is not a tap target: its s1 vertical padding is
+             the pill's own breathing room and sits well below the 44dp floor on purpose. -->
         <TextView
             android:id="@+id/rec_tag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/space_s1"
             android:background="@drawable/bg_pill"
             android:importantForAccessibility="no"
             android:paddingStart="@dimen/space_s2"
-            android:paddingTop="@dimen/space_s1"
+            android:paddingTop="2dp"
             android:paddingEnd="@dimen/space_s2"
-            android:paddingBottom="@dimen/space_s1"
+            android:paddingBottom="2dp"
             android:textSize="@dimen/text_cap" />
     </LinearLayout>
 
@@ -59,10 +70,10 @@
         android:id="@+id/rec_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/space_s1"
+        android:layout_marginTop="@dimen/space_s2"
         android:importantForAccessibility="no"
         android:lineSpacingMultiplier="1.5"
-        android:maxLines="3"
+        android:maxLines="2"
         android:textColor="@color/tl_ink2"
         android:textSize="@dimen/text_cap" />
 </LinearLayout>

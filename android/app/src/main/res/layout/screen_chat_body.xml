@@ -19,9 +19,11 @@
     android:orientation="vertical">
 
     <!-- Scheme A's capsule topbar (.topbar): 52dp, 6dp below the status bar, 16dp from each side,
-         8dp inner padding, 36dp keys drawing 20dp glyphs. The proposal's title chevron is not
-         drawn: this app has no independent branch switcher behind it (052 decision), so it would
-         be a button that answers a tap with nothing. -->
+         8dp inner padding, 36dp keys drawing 20dp glyphs. 2026-10-25 (T-2026-10-25-096): the bar is
+         back / title / more, three entries. The tree entry moved into the reading-area header's meta
+         row, and the overview (tree map) and settings entries moved behind 更多; the user's review
+         marked the four-icon bar as too dense and the board measures the title at 231dp instead of
+         157dp once the two extra keys are gone. -->
     <LinearLayout
         android:id="@+id/chat_appbar"
         android:layout_width="match_parent"
@@ -59,36 +61,14 @@
             android:textStyle="bold" />
 
         <ImageView
-            android:id="@+id/chat_nav"
+            android:id="@+id/chat_more"
             android:layout_width="@dimen/topbar_icon"
             android:layout_height="@dimen/topbar_icon"
             android:background="@drawable/bg_icon_button"
-            android:contentDescription="@string/cd_chat_nav"
+            android:contentDescription="@string/cd_chat_more"
             android:padding="8dp"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_nav_tree"
-            android:tint="@color/tl_green_deep" />
-
-        <ImageView
-            android:id="@+id/chat_overview"
-            android:layout_width="@dimen/topbar_icon"
-            android:layout_height="@dimen/topbar_icon"
-            android:background="@drawable/bg_icon_button"
-            android:contentDescription="@string/cd_chat_overview"
-            android:padding="8dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_chat_overview"
-            android:tint="@color/tl_green_deep" />
-
-        <ImageView
-            android:id="@+id/chat_settings"
-            android:layout_width="@dimen/topbar_icon"
-            android:layout_height="@dimen/topbar_icon"
-            android:background="@drawable/bg_icon_button"
-            android:contentDescription="@string/cd_chat_settings"
-            android:padding="8dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_chat_gear"
+            android:src="@drawable/ic_nav_more"
             android:tint="@color/tl_green_deep" />
     </LinearLayout>
 
@@ -138,6 +118,89 @@
             android:paddingTop="@dimen/reader_pad"
             android:paddingEnd="@dimen/reader_pad"
             android:paddingBottom="@dimen/reader_pad_bottom">
+
+        <!-- 2026-10-25 (T-2026-10-25-096): the branch's full title opens the reading area. The topbar
+             keeps a 14sp single-line copy as sticky context (it must survive scrolling), and this is
+             the whole one: 19sp serif, two lines on a phone. The meta row below carries the time once
+             for the whole branch - the action row no longer repeats it per answer - and hands the
+             tree entry its own 44dp cell on the right. -->
+        <LinearLayout
+            android:id="@+id/chat_reader_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/reader_header_gap"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/chat_reader_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="@font/noto_serif_sc"
+                android:lineSpacingMultiplier="1.4"
+                android:maxLines="2"
+                android:textColor="@color/tl_ink"
+                android:textSize="@dimen/text_reader_title"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_s1"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/chat_reader_meta"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@color/tl_ink3"
+                    android:textSize="@dimen/text_cap" />
+
+                <!-- The ghost key the board draws at .cghost: 44dp tall, negative vertical margins so
+                     its extra height does not push the rule down, and only its 15dp glyph plus 12sp
+                     label are visible. -->
+                <LinearLayout
+                    android:id="@+id/chat_branch_tree"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/touch_min"
+                    android:layout_marginStart="@dimen/space_s2"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:contentDescription="@string/cd_chat_nav"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="@dimen/space_s2"
+                    android:paddingEnd="@dimen/space_s2">
+
+                    <ImageView
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_nav_tree"
+                        android:tint="@color/tl_green_deep" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_s1"
+                        android:text="@string/chat_branch_tree"
+                        android:textColor="@color/tl_green_deep"
+                        android:textSize="@dimen/text_cap"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/hairline"
+                android:layout_marginTop="@dimen/space_s2"
+                android:background="@color/tl_line" />
+        </LinearLayout>
 
         <!-- T-065: the source card of a non-root branch - collapsed to the summary line, the
              upstream history only after the learner opens it. Read-only: no row is tappable. -->

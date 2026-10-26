@@ -24,6 +24,10 @@ import org.junit.Test;
  * <p>What is deliberately not pinned here: the 40dp segment capsule and the 24dp row menu are below
  * this project's 44dp touch floor, so the layouts draw their faces inside 44dp targets. The pins
  * therefore hold the touch sizes and the visible face tokens, not the proposal's raw hit boxes.
+ *
+ * <p>2026-10-25 (T-2026-10-25-102) raised the library's type to the review board's 13/14/12.5/12
+ * and made the two-half capsule conditional: when only one segment has rows the board draws one
+ * 13sp label line instead of a control whose other half switches to nothing.
  */
 public final class SchemeALibraryNavigationLayoutTest {
 
@@ -222,7 +226,7 @@ public final class SchemeALibraryNavigationLayoutTest {
                         && inProgress.contains("android:layout_weight=\"1\""));
         assertTrue("and fills its 44dp height",
                 inProgress.contains("android:layout_height=\"match_parent\""));
-        assertTrue("at 10.5sp", inProgress.contains(
+        assertTrue("at the board's 13sp", inProgress.contains(
                 "android:textSize=\"@dimen/text_library_segment\""));
 
         String screen = screen("LibraryScreen.java");
@@ -230,9 +234,10 @@ public final class SchemeALibraryNavigationLayoutTest {
                 screen.contains("next.rows.size()"));
         assertTrue("the completed count is the real archived count",
                 screen.contains("next.archived.size()"));
-        assertTrue("the count is drawn at 9.5sp without splitting the text contract",
+        assertTrue("the count is a smaller span of the same text, not a second view",
                 screen.contains("RelativeSizeSpan")
-                        && dimens().contains("<dimen name=\"text_library_segment_num\">9.5sp</dimen>"));
+                        && dimens().contains(
+                                "<dimen name=\"text_library_segment_num\">12sp</dimen>"));
         assertTrue("the selected segment paints Scheme A's bright face",
                 screen.contains("R.drawable.bg_segment_active"));
         String active = drawable("bg_segment_active.xml");
@@ -241,6 +246,72 @@ public final class SchemeALibraryNavigationLayoutTest {
                 active.contains("android:top=\"@dimen/space_s1\"")
                         && active.contains("android:bottom=\"@dimen/space_s1\""));
         assertTrue("and keeps the capsule shape", active.contains("@dimen/radius_full"));
+    }
+
+    /**
+     * 2026-10-25 (T-2026-10-25-101, review AL2): the hint named the index's columns
+     * ("标题、问题、回答、锚定原文") instead of telling the learner what a search finds. It now names
+     * the three things the search matches, and the field stays one line.
+     */
+    @Test
+    public void theSearchHintNamesWhatCanBeFoundRatherThanTheIndexedFields() throws Exception {
+        String all = strings();
+        int start = all.indexOf("<string name=\"library_search_hint\">");
+        assertTrue("the hint must exist", start >= 0);
+        String value = all.substring(start, all.indexOf("</string>", start));
+        assertFalse("a field list is the index's shape, not an instruction",
+                value.contains("标题") || value.contains("锚定原文"));
+        assertTrue("it names what a search matches",
+                value.contains("主题") && value.contains("回答") && value.contains("原文"));
+    }
+
+    /**
+     * 2026-10-25 (T-2026-10-25-102): a two-half control whose second half switches to nothing is
+     * not a control. The capsule is drawn only when both segments have rows; otherwise the board
+     * puts one label line where it would have been, carrying the same name and count.
+     */
+    @Test
+    public void theCapsuleGivesWayToAOneSidedSummaryLine() throws Exception {
+        String body = layout("screen_library_body.xml");
+        String summary = elementAround(body, "library_segment_summary");
+        assertTrue("the line sits above the capsule, where the capsule would have been",
+                body.indexOf("android:id=\"@+id/library_segment_summary\"")
+                        < body.indexOf("android:id=\"@+id/library_segment\""));
+        assertTrue("it starts hidden", summary.contains("android:visibility=\"gone\""));
+        assertTrue("its name is the board's 13sp semibold",
+                summary.contains("android:textSize=\"@dimen/text_library_segment\"")
+                        && summary.contains("android:textStyle=\"bold\""));
+        assertTrue("it is a label, not a control",
+                !summary.contains("android:clickable=\"true\"")
+                        && !summary.contains("android:focusable=\"true\""));
+        assertTrue("the board's 20/10 margins are named",
+                summary.contains("android:layout_marginTop=\"@dimen/library_state_top\"")
+                        && summary.contains(
+                                "android:layout_marginBottom=\"@dimen/library_state_bottom\""));
+        assertTrue(dimens().contains("<dimen name=\"library_state_top\">20dp</dimen>")
+                && dimens().contains("<dimen name=\"library_state_bottom\">10dp</dimen>"));
+
+        String screen = screen("LibraryScreen.java");
+        assertTrue("both sides with rows keep the capsule",
+                screen.contains("boolean both = inProgress && archived;")
+                        && screen.contains("segmentGroup.setVisibility(both ? VISIBLE : GONE);"));
+        assertTrue("one side with rows replaces it with the line",
+                screen.contains("boolean sole = next.phase == LibraryViewState.Phase.READY")
+                        && screen.contains("segmentSummary.setVisibility(sole ? VISIBLE : GONE);"));
+        assertTrue("a loading or empty page names neither side",
+                screen.contains("next.phase == LibraryViewState.Phase.READY"));
+        assertTrue("the line reads the live count and its own unit",
+                screen.contains("inProgress ? next.rows.size() : next.archived.size()")
+                        && screen.contains("R.string.library_unit_topics")
+                        && screen.contains("R.string.library_unit_branches"));
+        assertTrue("and its count is the smaller ink3 band",
+                screen.contains("new ForegroundColorSpan(context.getColor(R.color.tl_ink3))"));
+        assertTrue("the units are real strings",
+                strings().contains("name=\"library_unit_topics\"")
+                        && strings().contains("name=\"library_unit_branches\""));
+
+        assertTrue("search hides the one-sided line, which would name rows off screen",
+                screen.contains("segmentSummary.setVisibility(GONE);"));
     }
 
     @Test
@@ -261,19 +332,22 @@ public final class SchemeALibraryNavigationLayoutTest {
                 item.contains("library_topic_accent"));
 
         String title = elementAround(item, "library_topic_title");
-        assertTrue("the title is 12.5sp",
+        // 2026-10-25 (T-2026-10-25-102): the board's library type is 14/12.5/12. The 12.5sp title
+        // and 10.5sp summary of the earlier pass sat under the 12px readability floor once the card
+        // padding and meta line were re-measured against the board.
+        assertTrue("the title is 14sp",
                 title.contains("android:textSize=\"@dimen/text_library_card_title\""));
         assertTrue("semibold", title.contains("android:textStyle=\"bold\""));
 
         String summary = elementAround(item, "library_topic_summary");
-        assertTrue("the summary is 10.5sp",
+        assertTrue("the summary is 12.5sp",
                 summary.contains("android:textSize=\"@dimen/text_library_summary\""));
         assertTrue("at the proposal's 1.55 leading",
                 summary.contains("android:lineSpacingMultiplier=\"1.55\""));
         assertTrue("clamped to two lines", summary.contains("android:maxLines=\"2\""));
 
         String meta = elementAround(item, "library_topic_meta");
-        assertTrue("the meta line is 9sp",
+        assertTrue("the meta line is 12sp",
                 meta.contains("android:textSize=\"@dimen/text_library_meta\""));
         String metaRow = elementAround(item, "library_topic_meta_row");
         assertTrue("and sits 6dp under the summary",
@@ -290,9 +364,9 @@ public final class SchemeALibraryNavigationLayoutTest {
                 chevron.contains("@drawable/ic_chevron_right"));
 
         String dims = dimens();
-        assertTrue(dims.contains("<dimen name=\"text_library_card_title\">12.5sp</dimen>"));
-        assertTrue(dims.contains("<dimen name=\"text_library_summary\">10.5sp</dimen>"));
-        assertTrue(dims.contains("<dimen name=\"text_library_meta\">9sp</dimen>"));
+        assertTrue(dims.contains("<dimen name=\"text_library_card_title\">14sp</dimen>"));
+        assertTrue(dims.contains("<dimen name=\"text_library_summary\">12.5sp</dimen>"));
+        assertTrue(dims.contains("<dimen name=\"text_library_meta\">12sp</dimen>"));
         assertTrue(dims.contains("<dimen name=\"library_card_pad_v\">12dp</dimen>"));
         assertTrue(dims.contains("<dimen name=\"library_card_pad_h\">13dp</dimen>"));
     }

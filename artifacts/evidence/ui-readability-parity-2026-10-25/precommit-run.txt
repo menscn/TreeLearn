@@ -1,0 +1,31 @@
+RUN-ALL-GUARDS tier=precommit selected=10/49 subset=yes
+PASS         check_offline_bundle                   rc=0 0.1s
+             > offline scan root=dist assets=2 allowed-non-load-urls=20 violations=0
+PASS         check_offline_bundle --selftest        rc=0 0.2s
+             > SELFTEST cases=6 ok=6 fail=0
+PASS         check_ui_asset_parity                  rc=0 0.5s
+             > check_ui_asset_parity: 0 check(s) failed
+PASS         check_ui_asset_parity --selftest       rc=0 0.5s
+             > selftest judgement cases executed = 17
+PASS         check_ui_readability                   rc=0 15.8s
+             > check_ui_readability: 0 check(s) failed
+PASS         check_ui_readability --selftest        rc=0 0.1s
+             > selftest judgement cases executed = 11
+PASS         frontend verify                        rc=0 7.8s
+             > verify steps=16 ok=16 bad=0 fault=0
+FAIL         line-budget                            rc=1 WARN 1.3s
+             > 业务变更行: 2876 (已跟踪 新增+删除 与 未跟踪 全部行；已排除生成/迁移/文档/证据 11972 行；扫描业务文件 60 个，其中未跟踪 138 个)
+             DIAG line-budget lines=4/4 mode=full
+             | [line-budget] 基点: HEAD ; 范围: (whole repository)
+             | 业务变更行: 2876 (已跟踪 新增+删除 与 未跟踪 全部行；已排除生成/迁移/文档/证据 11972 行；扫描业务文件 60 个，其中未跟踪 138 个)
+             | [line-budget] 提示: 跳过 49 行非 numstat 输出(git 警告)
+             | [line-budget] FAIL: 业务变更 >500 行，超出硬预算，须拆 task
+PASS         no-kotlin-check                        rc=0 67.0s
+             > VERDICT: PASS (13 OK line(s))
+PASS         guard-selftest -Fast                   rc=0 268.5s
+             > OVERALL = SELFTEST PASS (38 case(s))
+NOTE         not-selected                           未选中：39 条不在本次判定面内（档位选择），整表绿不由此声明
+RUN-ALL-GUARDS pass=9 fail=1 inconclusive=0 fault=0 timeout=0
+VERDICT: FAIL (1 guard(s) red or silent)
+EXITCODE=1
+EXITCODE=1

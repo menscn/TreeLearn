@@ -9,6 +9,7 @@ import android.text.TextWatcher;
 import android.text.format.DateUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
+import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -46,6 +47,8 @@ public final class LibraryScreen extends LinearLayout {
 
     private final LinearLayout rows;
     private final TextView state;
+    private final View segmentGroup;
+    private final TextView segmentSummary;
     private final TextView segmentInProgress;
     private final TextView segmentDone;
     private final TextView searchScope;
@@ -63,6 +66,8 @@ public final class LibraryScreen extends LinearLayout {
 
         rows = findViewById(R.id.library_rows);
         state = findViewById(R.id.library_state);
+        segmentGroup = findViewById(R.id.library_segment);
+        segmentSummary = findViewById(R.id.library_segment_summary);
         segmentInProgress = findViewById(R.id.library_segment_in_progress);
         segmentDone = findViewById(R.id.library_segment_done);
         searchScope = findViewById(R.id.library_search_scope);
@@ -109,7 +114,7 @@ public final class LibraryScreen extends LinearLayout {
     public void render(LibraryViewState next) {
         rendering = true;
         try {
-            boolean done = next.segment == LibraryViewState.Segment.DONE;
+            boolean done = shownSegment(next) == LibraryViewState.Segment.DONE;
             searchScope.setVisibility(GONE);
             note.setVisibility(VISIBLE);
             drawSegments(next, done);
@@ -136,8 +141,11 @@ public final class LibraryScreen extends LinearLayout {
      *
      * <p>The state is here for one thing only: the empty state echoes the query that found nothing.
      * Which pane is on screen, what each row says and in what order the rows come were all decided
-     * before this was called. The two segment pills stay put - tapping one is how the learner walks
-     * out of the search state and back to the library's own lists.
+     * before this was called. The capsule keeps the visibility the last library render gave it -
+     * tapping a half is one way out of the search state, and that way survives whenever the capsule
+     * exists. The one-sided summary line is hidden here: it names a count of rows that are not on
+     * screen, and the search field already says where the learner is. When the capsule is hidden
+     * (only one segment has rows) the way out is back, which clears the query.
      *
      * <p>An empty query is not a search page: the guide pane is the prototype's search <em>screen</em>,
      * and this implementation inlines search into the library, so there is nowhere for the guide to
@@ -152,6 +160,7 @@ public final class LibraryScreen extends LinearLayout {
         rendering = true;
         try {
             searchScope.setVisibility(VISIBLE);
+            segmentSummary.setVisibility(GONE);
             note.setVisibility(GONE);
             rows.removeAllViews();
             boolean listed = page.pane == SearchPage.Pane.LIST;
@@ -248,9 +257,36 @@ public final class LibraryScreen extends LinearLayout {
     }
 
     /**
+     * The segment the page can actually show. While both sides have rows the presenter's stored
+     * selection decides; when only one side has rows {@link #drawSegments} hides the capsule and
+     * names that side, so the list follows it too. A label that names 进行中 over a page that says
+     * 已完成里还没有 is worse than ignoring a switch the learner can no longer see - and this is the
+     * path a deletion takes when it empties the segment that was on screen.
+     */
+    private static LibraryViewState.Segment shownSegment(LibraryViewState next) {
+        if (next.phase != LibraryViewState.Phase.READY) {
+            return next.segment;
+        }
+        if (next.rows.isEmpty() && !next.archived.isEmpty()) {
+            return LibraryViewState.Segment.DONE;
+        }
+        if (next.archived.isEmpty() && !next.rows.isEmpty()) {
+            return LibraryViewState.Segment.IN_PROGRESS;
+        }
+        return next.segment;
+    }
+
+    /**
      * The selected half wears Scheme A's bright glass face; the other is transparent inside the same
      * capsule. The count is a smaller span of the same text rather than a second view, so the two
      * halves keep one text contract ("进行中 2") for readers and for the instrumented tests.
+     *
+     * <p><strong>One side with rows means no capsule.</strong> Since T-2026-10-25-102 the capsule is
+     * drawn only when both segments have something to show. A two-half control whose other half is
+     * empty switches to nothing, and it costs 44dp above the first row; the board replaces it with one
+     * line naming the live segment and its count. That line is a label, not a control, so it is not
+     * focusable and carries no tap. Both halves are still measured and drawn when the capsule is
+     * hidden, so switching back costs no new state - it is the same two views.
      */
     private void drawSegments(LibraryViewState next, boolean done) {
         segmentInProgress.setText(segment(R.string.library_segment_in_progress,
@@ -259,6 +295,39 @@ public final class LibraryScreen extends LinearLayout {
                 next.archived.size(), done));
         face(segmentInProgress, !done);
         face(segmentDone, done);
+
+        boolean inProgress = !next.rows.isEmpty();
+        boolean archived = !next.archived.isEmpty();
+        boolean both = inProgress && archived;
+        segmentGroup.setVisibility(both ? VISIBLE : GONE);
+        // While the page is loading, failing, or empty on both sides there is nothing to name: the
+        // one line would either read "0 个主题" or invent a count the store has not answered yet.
+        boolean sole = next.phase == LibraryViewState.Phase.READY && inProgress != archived;
+        segmentSummary.setVisibility(sole ? VISIBLE : GONE);
+        if (sole) {
+            segmentSummary.setText(soleSegment(inProgress
+                    ? R.string.library_segment_in_progress : R.string.library_segment_done,
+                    inProgress ? next.rows.size() : next.archived.size(),
+                    inProgress ? R.string.library_unit_topics : R.string.library_unit_branches));
+        }
+    }
+
+    /** The board's .lstate: the segment's name, then its count in the smaller secondary band. */
+    private CharSequence soleSegment(int name, int count, int unit) {
+        Context context = getContext();
+        String label = context.getString(name);
+        String text = label + " " + context.getString(unit, count);
+        SpannableStringBuilder span = new SpannableStringBuilder(text);
+        int start = label.length() + 1;
+        float ratio = context.getResources().getDimension(R.dimen.text_library_segment_num)
+                / context.getResources().getDimension(R.dimen.text_library_segment);
+        span.setSpan(new RelativeSizeSpan(ratio), start, text.length(),
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        span.setSpan(new StyleSpan(Typeface.NORMAL), start, text.length(),
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        span.setSpan(new ForegroundColorSpan(context.getColor(R.color.tl_ink3)),
+                start, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return span;
     }
 
     private CharSequence segment(int name, int count, boolean selected) {
@@ -333,7 +402,7 @@ public final class LibraryScreen extends LinearLayout {
                     && next.pendingDelete.targetBranchId.equals(row.branchId);
             TextView prompt = view.findViewById(R.id.library_done_prompt);
             prompt.setVisibility(pending ? VISIBLE : GONE);
-            view.findViewById(R.id.library_done_actions).setVisibility(pending ? VISIBLE : GONE);
+            view.findViewById(R.id.library_done_confirm_row).setVisibility(pending ? VISIBLE : GONE);
             if (pending) {
                 prompt.setText(getContext().getString(R.string.done_delete_prompt, row.title,
                         next.pendingDelete.branchCount()));

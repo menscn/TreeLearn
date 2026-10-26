@@ -1,0 +1,47 @@
+/* 应用底座：只放三端共用、又不属于任何一面材质的四条规则。
+ *
+ * 2026-10-25（T-2026-10-25-093）从 `app.css` 里搬出来。`app.css` 是原型期的整屏样式表，
+ * 425 行里 29 个类名在 `frontend/src/**` 已经没有任何消费者（判据 A3 的名单：
+ * `app-shell` / `app-tab` / `appbar` / `node-*` / `rec-*` / `chat-*` …），却仍被 `main.tsx`
+ * 无条件打进离线包，还替 `--kai` 维持着最后一个假消费者。整表删除时只有下面这几条仍在工作，
+ * 它们搬到这里，而不是留在原地当「大概还有人用」的化石：
+ *
+ *   - `html/body/#root` 撑满：`WorkspaceRouter` 靠 100% 高度让内容槽自己滚；
+ *   - `body` 的字体、字号、行高与底色：`glass.css` 只补背景层，不重复排版基线；
+ *   - `.icon` 的 24px 基准：所有 glyph 的尺寸都由它起步，页面再按需覆写宽高；
+ *   - `.screen` 的列布局：`SnapshotScreen` 的 `.snap-screen` 与它同用一条竖向节奏。
+ *
+ * 颜色、字号仍只读 tokens；这里不新增任何数值。
+ */
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-read);
+  -webkit-font-smoothing: antialiased;
+}
+
+.icon {
+  display: block;
+  flex: none;
+  height: var(--s6);
+  max-height: 100%;
+  max-width: 100%;
+  width: var(--s6);
+}
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s4);
+  padding: var(--s3) var(--gutter) var(--s6);
+}

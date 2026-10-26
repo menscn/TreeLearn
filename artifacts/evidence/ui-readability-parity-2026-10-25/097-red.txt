@@ -1,0 +1,90 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.5 [39m[90mD:/Project/Android/Treelearn/frontend[39m
+
+ [31m❯[39m test/styles/recent-row.test.ts [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 7[2mms[22m[39m
+   [31m❯[39m 侧栏历史行 [2m(3)[22m
+[31m     [31m×[31m 历史行的 hover 只提字色，不再与路由共用那块底色[39m[32m 4[2mms[22m[39m
+[31m     [31m×[31m 标题、meta 与箭头排在同一行，meta 与箭头不参与压缩[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m 摘要另起一行，收 1 行[39m[32m 0[2mms[22m[39m
+ [31m❯[39m test/shell/AppShell.test.ts [2m([22m[2m8 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 286[2mms[22m[39m
+   [31m❯[39m 工作区外壳：侧栏、顶部栏与内容槽 [2m(8)[22m
+     [32m✓[39m 标题仍来自文案表；侧栏名称、最近学习与主内容槽都在[32m 47[2mms[22m[39m
+[31m     [31m×[31m 历史行把标题、meta 与箭头收进同一行[39m[32m 43[2mms[22m[39m
+     [32m✓[39m 折叠按钮的可访问名与 aria-expanded 跟着状态走[32m 28[2mms[22m[39m
+     [32m✓[39m 侧栏进入学习库后面包屑跟随，返回按钮把视图退回去[32m 32[2mms[22m[39m
+     [32m✓[39m 最近学习点进主题，面包屑用真实主题标题[32m 27[2mms[22m[39m
+     [32m✓[39m 窄窗侧栏初始收起，遮罩可把展开的侧栏收起[32m 40[2mms[22m[39m
+     [32m✓[39m 窗口缩到窄窗时侧栏自动收起[32m 36[2mms[22m[39m
+     [32m✓[39m 所有图标按钮都有可访问名与悬停提示[32m 31[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 4 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m test/styles/recent-row.test.ts[2m > [22m侧栏历史行[2m > [22m历史行的 hover 只提字色，不再与路由共用那块底色
+[31m[1mAssertionError[22m: .recent-link:hover 必须存在: expected '' not to be '' // Object.is equality[39m
+[36m [2m❯[22m test/styles/recent-row.test.ts:[2m28:50[22m[39m
+    [90m 26|[39m   it("历史行的 hover 只提字色，不再与路由共用那块底色", () => {
+    [90m 27|[39m     const hover = rule(".recent-link:hover");
+    [90m 28|[39m     expect(hover, ".recent-link:hover 必须存在").not.toBe("");
+    [90m   |[39m                                                  [31m^[39m
+    [90m 29|[39m     expect(hover).toMatch(/color:\s*var\(--ink\)/);
+    [90m 30|[39m     expect(hover, "hover 一旦加底色，历史行就又读成第四个路由").not.toMatch(/background/…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/styles/recent-row.test.ts[2m > [22m侧栏历史行[2m > [22m标题、meta 与箭头排在同一行，meta 与箭头不参与压缩
+[31m[1mAssertionError[22m: expected '' to match /display:\s*flex/[39m
+
+[32m- Expected:[39m
+/display:\s*flex/
+
+[31m+ Received:[39m
+""
+
+[36m [2m❯[22m test/styles/recent-row.test.ts:[2m35:34[22m[39m
+    [90m 33|[39m
+    [90m 34|[39m   it("标题、meta 与箭头排在同一行，meta 与箭头不参与压缩", () => {
+    [90m 35|[39m     expect(rule(".recent-head")).toMatch(/display:\s*flex/);
+    [90m   |[39m                                  [31m^[39m
+    [90m 36|[39m     expect(rule(".recent-meta")).toMatch(/flex:\s*none/);
+    [90m 37|[39m     expect(rule(".recent-meta")).toMatch(/font-size:\s*var\(--fs-cap\)…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/styles/recent-row.test.ts[2m > [22m侧栏历史行[2m > [22m摘要另起一行，收 1 行
+[31m[1mAssertionError[22m: expected '' to match /-webkit-line-clamp:\s*1/[39m
+
+[32m- Expected:[39m
+/-webkit-line-clamp:\s*1/
+
+[31m+ Received:[39m
+""
+
+[36m [2m❯[22m test/styles/recent-row.test.ts:[2m44:21[22m[39m
+    [90m 42|[39m   it("摘要另起一行，收 1 行", () => {
+    [90m 43|[39m     const summary = rule(".recent-summary");
+    [90m 44|[39m     expect(summary).toMatch(/-webkit-line-clamp:\s*1/);
+    [90m   |[39m                     [31m^[39m
+    [90m 45|[39m     expect(summary).toMatch(/font-size:\s*var\(--fs-cap\)/);
+    [90m 46|[39m   });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/shell/AppShell.test.ts[2m > [22m工作区外壳：侧栏、顶部栏与内容槽[2m > [22m历史行把标题、meta 与箭头收进同一行
+[31m[1mAssertionError[22m: 标题行是 recent-head: expected null not to be null[39m
+[36m [2m❯[22m test/shell/AppShell.test.ts:[2m96:42[22m[39m
+    [90m 94|[39m     expect(row).not.toBeNull();
+    [90m 95|[39m     const head = row!.querySelector(".recent-head");
+    [90m 96|[39m     expect(head, "标题行是 recent-head").not.toBeNull();
+    [90m   |[39m                                          [31m^[39m
+    [90m 97|[39m     expect(head!.querySelector(".recent-title")?.textContent).toBeTrut…
+    [90m 98|[39m     expect(head!.querySelector(".recent-meta")?.textContent).toBeTruth…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m7 passed[39m[22m[90m (11)[39m
+[2m   Start at [22m 00:40:21
+[2m   Duration [22m 1.16s[2m (environment 54%, tests 27%, transform 10%, import 8%, worker 1%)[22m
+
+EXITCODE=1

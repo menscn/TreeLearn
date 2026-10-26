@@ -4,7 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
-import android.widget.Button;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -13,21 +13,26 @@ import com.treelearn.app.R;
 import com.treelearn.app.ui.ChatMessage;
 
 /**
- * One answer's action row (prototype v2.5 `.ai-actions`). 2026-09-28 user decision: the row carries
- * only the prototype's own four leads - copy, reset, fork, the data-driven child entry - and the
- * time at the end (prototype `.ai-time`, line 877). The extras it used to offer here (quote,
- * translation, speech) and the hidden version switcher are gone from this row; the user marked them
- * out on the annotated shot. Quote still reaches the learner from the selection menu that opens on
- * the answer text, and the translation card keeps its own header entry, so nothing is lost.
+ * One answer's action row (prototype v2.5 `.ai-actions`, re-drawn on the 2026-10-25 board).
+ * 2026-09-28 user decision: the row carries only the prototype's own four leads - copy, reset, fork,
+ * the data-driven child entry. The extras it used to offer here (quote, translation, speech) and the
+ * hidden version switcher are gone from this row; the user marked them out on the annotated shot.
+ * Quote still reaches the learner from the selection menu that opens on the answer text, and the
+ * translation card keeps its own header entry, so nothing is lost.
+ *
+ * <p><strong>The time left this row on 2026-10-25 (T-2026-10-25-101).</strong> It was placed here on
+ * 2026-09-27 so the answer's tag line could stay clean, and the reading-area header now shows the
+ * branch's time once. Keeping it here as well repeated the same fact after every answer, and the user
+ * read the result as a busy row. The date is still shown, once, above the conversation.
  *
  * <p>All four leads are glyphs. The child entry is the tree glyph (the prototype's own ITree, line
  * 1178) with its count in a green badge, not the bare text "子分支 N" it used to be - the user asked
  * for that explicitly ("分支列表 对应的也是图标，不要是文字！"). The count is the only part that
  * varies, so it lives in a badge child; the glyph never changes and never needs re-measuring.
  *
- * <p><strong>Enablement is read, never decided here.</strong> Every button takes its enabled flag from
+ * <p><strong>Enablement is read, never decided here.</strong> Every lead takes its enabled flag from
  * the message's own predicate, which is the same judgement T-010's use case makes before it writes, so
- * a button that looks pressable is a command the store accepts. The row adds nothing to that rule; it
+ * a lead that looks pressable is a command the store accepts. The row adds nothing to that rule; it
  * only decides what the state cannot show: an answer with no children has no child entry.
  *
  * <p>A tap is forwarded with the message id; the screen maps it to the presenter. Nothing here knows
@@ -47,12 +52,11 @@ public final class AnswerActionBar extends LinearLayout {
         void onChildrenPressed(String messageId);
     }
 
-    private final Button copy;
-    private final Button reset;
-    private final Button fork;
+    private final View copy;
+    private final View reset;
+    private final View fork;
     private final FrameLayout children;
     private final TextView childrenCount;
-    private final TextView time;
 
     private String messageId = "";
     private Listener listener;
@@ -66,7 +70,6 @@ public final class AnswerActionBar extends LinearLayout {
         fork = findViewById(R.id.act_fork);
         children = findViewById(R.id.act_children);
         childrenCount = findViewById(R.id.act_children_count);
-        time = findViewById(R.id.act_time);
         copy.setContentDescription(getContext().getString(R.string.chat_copy_title));
         reset.setContentDescription(getContext().getString(R.string.chat_reset_title));
         fork.setContentDescription(getContext().getString(R.string.chat_fork_title));
@@ -109,18 +112,6 @@ public final class AnswerActionBar extends LinearLayout {
     /** The answer the row currently draws; the screen needs it to read a selection. */
     public String messageId() {
         return messageId;
-    }
-
-    /**
-     * Paints the row's trailing time (prototype `.ai-time`). The row is hidden while the answer
-     * streams, so the time appears exactly when the prototype shows it: on a stable answer.
-     */
-    public void renderTime(long createdAtMs) {
-        CharSequence next = android.text.format.DateUtils.getRelativeTimeSpanString(createdAtMs,
-                System.currentTimeMillis(), android.text.format.DateUtils.MINUTE_IN_MILLIS);
-        if (!TextUtils.equals(time.getText(), next)) {
-            time.setText(next);
-        }
     }
 
     private void fire(java.util.function.Consumer<Listener> call) {

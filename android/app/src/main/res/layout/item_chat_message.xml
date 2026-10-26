@@ -142,6 +142,11 @@
             android:textSize="@dimen/text_cap"
             android:visibility="gone" />
 
+        <!-- 2026-10-25 (T-2026-10-25-095): the interrupt card stacks three rows - what happened, what
+             the kept text may still be used for, and the retry key. The hint used to share a row with
+             the key, so on a phone the sentence was squeezed into whatever width the key left and the
+             key's vertical centre never lined up with the two-line hint it explained. Each row now
+             takes the card's full width and the key closes the card on its own line. -->
         <LinearLayout
             android:id="@+id/chat_failure"
             android:layout_width="match_parent"
@@ -163,32 +168,26 @@
                 android:textColor="@color/tl_red"
                 android:textSize="@dimen/text_sm" />
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/chat_retry_hint"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_marginTop="@dimen/space_s1"
+                android:text="@string/chat_retry_hint"
+                android:textColor="@color/tl_ink3"
+                android:textSize="@dimen/text_cap" />
 
-                <TextView
-                    android:id="@+id/chat_retry_hint"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/chat_retry_hint"
-                    android:textColor="@color/tl_ink3"
-                    android:textSize="@dimen/text_cap" />
-
-                <Button
-                    android:id="@+id/chat_retry"
-                    android:layout_width="wrap_content"
-                    android:layout_height="@dimen/touch_min"
-                    android:background="@drawable/bg_button_ghost"
-                    android:minWidth="@dimen/touch_min"
-                    android:stateListAnimator="@null"
-                    android:text="@string/chat_retry"
-                    android:textColor="@color/tl_action_text"
-                    android:textSize="@dimen/text_sm" />
-            </LinearLayout>
+            <Button
+                android:id="@+id/chat_retry"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/touch_min"
+                android:layout_marginTop="@dimen/space_s1"
+                android:background="@drawable/bg_button_ghost"
+                android:minWidth="@dimen/touch_min"
+                android:stateListAnimator="@null"
+                android:text="@string/chat_retry"
+                android:textColor="@color/tl_action_text"
+                android:textSize="@dimen/text_sm" />
         </LinearLayout>
 
         <TextView android:id="@+id/chat_canceled" android:layout_width="match_parent"

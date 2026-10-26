@@ -241,6 +241,22 @@ describe("工作区学习库：搜索、筛选、摘要与恢复", () => {
     expect(toggle?.getAttribute("aria-label")).toContain(copyText("library_expand"));
   });
 
+  // 2026-10-25 (T-2026-10-25-101, review AL2): the hint used to list the indexed fields
+  // ("搜索标题、摘要或来源问题…"), which tells the learner about the index rather than about what
+  // they can type. It now names the three things a search matches.
+  it("搜索提示说的是能搜到什么，不是索引里有哪些字段", async () => {
+    root = await render(host, workspaceShell());
+    const input = host.querySelector<HTMLInputElement>("#library-search");
+    expect(input).not.toBeNull();
+    expect(input!.placeholder).toBe(copyText("library_search_placeholder"));
+    expect(input!.placeholder).not.toContain("标题");
+    expect(input!.placeholder).not.toContain("摘要");
+    expect(input!.placeholder).not.toContain("来源问题");
+    expect(input!.placeholder).toContain("主题");
+    expect(input!.placeholder).toContain("回答");
+    expect(input!.placeholder).toContain("原文");
+  });
+
   it("library 夹具缺失时显示采集缺失文案，而不是空列表", async () => {
     const entries = { ...bundledEntries() };
     delete entries.library;

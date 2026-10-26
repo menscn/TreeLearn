@@ -65,10 +65,43 @@
             android:src="@drawable/ic_nav_menu"
             android:tint="@color/tl_ink2" />
 
-        <View
+        <!-- 2026-10-25 (T-2026-10-25-100): the brand lockup moved up from the column's first row into
+             this bar. The board's home is a short bar - menu, wordmark, gear - and a 22sp serif headline
+             below it; the 41sp wordmark that used to open the page is what made the hero taller than the
+             composer. The cells on either side are 36dp controls with their own 8dp padding, so the
+             lockup's weight-1 cell keeps the wordmark optically centred in the bar, not in the gap
+             between two touch targets. -->
+        <LinearLayout
+            android:id="@+id/home_brand_lockup"
             android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/home_brand_mark"
+                android:layout_width="@dimen/brand_mark_topbar"
+                android:layout_height="@dimen/brand_mark_topbar"
+                android:contentDescription="@string/cd_home_brand"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_brand_sprout" />
+
+            <!-- Height is the declared line-height rather than wrap_content: the bundled serif's
+                 2.858em CFF line box would otherwise make the bar taller than topbar_height.
+                 WordmarkTextView centres the font box inside this frame. -->
+            <com.treelearn.app.screen.WordmarkTextView
+                android:id="@+id/home_brand"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/brand_topbar_line_height"
+                android:layout_marginStart="@dimen/brand_topbar_gap"
+                android:fontFamily="@font/noto_serif_sc"
+                android:letterSpacing="0.06"
+                android:text="@string/app_name"
+                android:textColor="@color/tl_green_deep"
+                android:textSize="@dimen/text_brand_topbar"
+                android:textStyle="bold" />
+        </LinearLayout>
 
         <ImageView
             android:id="@+id/home_settings_button"

@@ -1,0 +1,133 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.5 [39m[90mD:/Project/Android/Treelearn/frontend[39m
+
+ [31m❯[39m test/styles/serif-face.test.ts [2m([22m[2m7 tests[22m[2m | [22m[31m7 failed[39m[2m)[22m[32m 13[2mms[22m[39m
+   [31m❯[39m 衬线字面随包 [2m(7)[22m
+[31m     [31m×[31m @font-face 的族名与 --serif 的首选一致[39m[32m 5[2mms[22m[39m
+[31m     [31m×[31m src 只允许包内字节，不许出现任何远端加载[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m 子集资产真的签在仓库里，且体积不超过判据上限[39m[32m 0[2mms[22m[39m
+[31m     [31m×[31m OFL 许可文本随包（子集化再分发是 OFL 允许的，但许可必须一起走）[39m[32m 0[2mms[22m[39m
+[31m     [31m×[31m 兜底栈里有一个 Windows 真实存在的中文衬线[39m[32m 2[2mms[22m[39m
+[31m     [31m×[31m fonts.css 被 main.tsx 引进构建面[39m[32m 2[2mms[22m[39m
+[31m     [31m×[31m 离线打包链会把字体资产转成 data: 内联字节[39m[32m 1[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 7 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m test/styles/serif-face.test.ts[2m > [22m衬线字面随包[2m > [22m@font-face 的族名与 --serif 的首选一致
+[31m[1mError[22m: frontend/src/styles/fonts.css 不存在：衬线身份没有随包声明，Windows 目标机落到宋体（D:\Project\Android\Treelearn\frontend\src\styles\fonts.css）[39m
+[36m [2m❯[22m readRequired test/styles/serif-face.test.ts:[2m30:32[22m[39m
+    [90m 28|[39m /** RED 阶段字体文件还不存在：抛在单条用例里，别让整个 suite 挂掉冒充判据。 */
+    [90m 29|[39m function readRequired(path: string, why: string): string {
+    [90m 30|[39m   if (!existsSync(path)) throw new Error(`${why}（${path}）`);
+    [90m   |[39m                                [31m^[39m
+    [90m 31|[39m   return read(path);
+    [90m 32|[39m }
+[90m [2m❯[22m fontsCss test/styles/serif-face.test.ts:[2m54:5[22m[39m
+[90m [2m❯[22m test/styles/serif-face.test.ts:[2m57:17[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/styles/serif-face.test.ts[2m > [22m衬线字面随包[2m > [22msrc 只允许包内字节，不许出现任何远端加载
+[31m[1mError[22m: frontend/src/styles/fonts.css 不存在：衬线身份没有随包声明，Windows 目标机落到宋体（D:\Project\Android\Treelearn\frontend\src\styles\fonts.css）[39m
+[36m [2m❯[22m readRequired test/styles/serif-face.test.ts:[2m30:32[22m[39m
+    [90m 28|[39m /** RED 阶段字体文件还不存在：抛在单条用例里，别让整个 suite 挂掉冒充判据。 */
+    [90m 29|[39m function readRequired(path: string, why: string): string {
+    [90m 30|[39m   if (!existsSync(path)) throw new Error(`${why}（${path}）`);
+    [90m   |[39m                                [31m^[39m
+    [90m 31|[39m   return read(path);
+    [90m 32|[39m }
+[90m [2m❯[22m fontsCss test/styles/serif-face.test.ts:[2m54:5[22m[39m
+[90m [2m❯[22m test/styles/serif-face.test.ts:[2m65:17[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/styles/serif-face.test.ts[2m > [22m衬线字面随包[2m > [22m子集资产真的签在仓库里，且体积不超过判据上限
+[31m[1mError[22m: frontend/src/styles/fonts.css 不存在：衬线身份没有随包声明，Windows 目标机落到宋体（D:\Project\Android\Treelearn\frontend\src\styles\fonts.css）[39m
+[36m [2m❯[22m readRequired test/styles/serif-face.test.ts:[2m30:32[22m[39m
+    [90m 28|[39m /** RED 阶段字体文件还不存在：抛在单条用例里，别让整个 suite 挂掉冒充判据。 */
+    [90m 29|[39m function readRequired(path: string, why: string): string {
+    [90m 30|[39m   if (!existsSync(path)) throw new Error(`${why}（${path}）`);
+    [90m   |[39m                                [31m^[39m
+    [90m 31|[39m   return read(path);
+    [90m 32|[39m }
+[90m [2m❯[22m fontsCss test/styles/serif-face.test.ts:[2m54:5[22m[39m
+[90m [2m❯[22m test/styles/serif-face.test.ts:[2m73:17[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/styles/serif-face.test.ts[2m > [22m衬线字面随包[2m > [22mOFL 许可文本随包（子集化再分发是 OFL 允许的，但许可必须一起走）
+[31m[1mError[22m: frontend/src/fonts/OFL.txt 不存在：子集是 OFL 授权下的再分发，许可文本要一起随包（D:\Project\Android\Treelearn\frontend\src\fonts\OFL.txt）[39m
+[36m [2m❯[22m readRequired test/styles/serif-face.test.ts:[2m30:32[22m[39m
+    [90m 28|[39m /** RED 阶段字体文件还不存在：抛在单条用例里，别让整个 suite 挂掉冒充判据。 */
+    [90m 29|[39m function readRequired(path: string, why: string): string {
+    [90m 30|[39m   if (!existsSync(path)) throw new Error(`${why}（${path}）`);
+    [90m   |[39m                                [31m^[39m
+    [90m 31|[39m   return read(path);
+    [90m 32|[39m }
+[90m [2m❯[22m test/styles/serif-face.test.ts:[2m84:17[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/styles/serif-face.test.ts[2m > [22m衬线字面随包[2m > [22m兜底栈里有一个 Windows 真实存在的中文衬线
+[31m[1mAssertionError[22m: --serif 栈 noto serif sc / songti sc / georgia / serif 里没有任何 Windows 自带中文衬线: expected undefined to be truthy[39m
+
+[32m- Expected:[39m
+true
+
+[31m+ Received:[39m
+undefined
+
+[36m [2m❯[22m test/styles/serif-face.test.ts:[2m94:72[22m[39m
+    [90m 92|[39m     const names = serifParts(tokens).map((p) => p.replace(/^["']|["']$…
+    [90m 93|[39m     const hit = WINDOWS_SERIF.find((w) => names.includes(w.toLowerCase…
+    [90m 94|[39m     expect(hit, `--serif 栈 ${names.join(" / ")} 里没有任何 Windows 自带中文衬线`)…
+    [90m   |[39m                                                                        [31m^[39m
+    [90m 95|[39m   });
+    [90m 96|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/styles/serif-face.test.ts[2m > [22m衬线字面随包[2m > [22mfonts.css 被 main.tsx 引进构建面
+[31m[1mAssertionError[22m: main.tsx 没有 import ./styles/fonts.css：@font-face 进了样式表但没进构建图: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m test/styles/serif-face.test.ts:[2m99:130[22m[39m
+    [90m 97|[39m   it("fonts.css 被 main.tsx 引进构建面", () => {
+    [90m 98|[39m     const main = read(mainPath);
+    [90m 99|[39m     expect(/import\s+["']\.\/styles\/fonts\.css["']/.test(main), "main…
+    [90m   |[39m                                                                                                                                  [31m^[39m
+    [90m100|[39m   });
+    [90m101|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/styles/serif-face.test.ts[2m > [22m衬线字面随包[2m > [22m离线打包链会把字体资产转成 data: 内联字节
+[31m[1mAssertionError[22m: inline_offline.mjs 不认 woff/otf/ttf 这类字体后缀，字体资产不会被内联: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m test/styles/serif-face.test.ts:[2m104:95[22m[39m
+    [90m102|[39m   it("离线打包链会把字体资产转成 data: 内联字节", () => {
+    [90m103|[39m     const mjs = read(inlinePath);
+    [90m104|[39m     expect(/woff2?|ttf|otf/.test(mjs), "inline_offline.mjs 不认 woff/otf…
+    [90m   |[39m                                                                                               [31m^[39m
+    [90m105|[39m     expect(/base64/.test(mjs), "字体必须以 base64 内联，否则单文件产物离线时拿不到字节").toBe…
+    [90m106|[39m   });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m7 failed[39m[22m[90m (7)[39m
+[2m   Start at [22m 20:22:29
+[2m   Duration [22m 262ms[2m (transform 40%, import 35%, tests 19%, worker 7%)[22m
+

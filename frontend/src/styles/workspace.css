@@ -94,9 +94,14 @@
 }
 
 .side-link:hover,
-.recent-link:hover,
 .brand:hover {
   background: var(--green-faint);
+}
+
+/* 历史行不再与路由共用那块 hover 底色（T-097）：路由是「去哪儿」，历史是「回到哪儿」，
+   两者用同一个底色会让侧栏读成一列同级入口。历史行 hover 只把字色提一档。 */
+.recent-link:hover {
+  color: var(--ink);
 }
 
 .side-link.active {
@@ -123,10 +128,14 @@
   overflow: auto;
 }
 
+/* 历史行：标题与「N 个分支 · 3天前」同一行，摘要收 1 行。
+   超长时只截标题——meta 与箭头 `flex: none`，不会被标题挤掉换行。 */
 .recent-link {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   width: 100%;
-  padding: var(--s3);
+  padding: var(--s2) var(--s3);
   border: 0;
   border-radius: var(--r-sm);
   background: none;
@@ -142,11 +151,44 @@
   color: var(--green-deep);
 }
 
-.recent-link small {
-  display: block;
-  margin-top: var(--s1);
+.recent-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  min-width: 0;
+}
+
+.recent-title {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-meta {
+  flex: none;
   color: var(--ink3);
   font-size: var(--fs-cap);
+  white-space: nowrap;
+}
+
+.recent-chevron {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: var(--ink3);
+  opacity: .7;
+}
+
+.recent-summary {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  color: var(--ink3);
+  font-size: var(--fs-cap);
+  line-height: 1.6;
 }
 
 .app-workspace[data-nav="collapsed"] .app-sidebar {
@@ -286,7 +328,10 @@
 }
 
 .chat-main {
-  --chat-column: 784px;
+  /* 2026-10-25（T-094）：阅读轴 784 → 684。`.chat-reading` 的 max-width 含两侧 32px 内边距，
+     所以正文内宽 = 684 − 64 = 620px，15px 字号下一行约 41 个汉字（判据 R2 的上限）。
+     输入坞读同一个变量，正文与输入卡共用一条轴，窗口变宽时不会一宽一窄。 */
+  --chat-column: 684px;
   position: relative;
   /* 坞出流后不再撑高布局：首帧先给一个兜底高度，useDockHeight 在绘制前写成实测值。 */
   --dock-h: 168px;
@@ -738,13 +783,14 @@
   background: none;
 }
 
-/* 空态说明：贴着输入下方左对齐的一条灰字提示。居中会让它读起来像表单的系统提示，
-   而它只在草稿为空时出现（Composer 里判 `value.trim()`），出现与退场都会改变坞高——
-   对话页的 `--dock-h` 由 ResizeObserver 实测，羽化带与末行留白跟着走。 */
+/* 空态说明：卡外 8px 的一条灰字，贴着输入卡左缘，不再占卡片内部的地面。
+   它只在草稿为空时出现（Composer 里判 `value.trim()`），而且只有首页传 `note`——
+   对话页不再重复同一句「尚未接通」（同一事实一屏只说一次）。 */
 .composer-help {
   margin: var(--s2) 0 0;
   color: var(--ink3);
   font-size: var(--fs-cap);
+  line-height: 1.7;
 }
 
 /* 回答风格：输入行 chip ＋ 向上弹出的七档列表。选择只写会话内的主题级状态。 */

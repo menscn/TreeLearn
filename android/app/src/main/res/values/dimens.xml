@@ -30,13 +30,13 @@
     <dimen name="brand_line_height">41sp</dimen>
     <dimen name="text_h1">20sp</dimen>
     <!-- The home subtitle's own size: Scheme A's .home-brand p is 12px, below the caption tier. -->
-    <dimen name="text_home_sub">12sp</dimen>
+    <dimen name="text_home_sub">22sp</dimen>
     <!-- The composer's writing size (Scheme A .composer-input 14.5px), a half step below body. -->
     <dimen name="text_composer">14.5sp</dimen>
     <dimen name="text_h2">16sp</dimen>
     <dimen name="text_body">15sp</dimen>
     <dimen name="text_sm">13sp</dimen>
-    <dimen name="text_cap">11sp</dimen>
+    <dimen name="text_cap">12sp</dimen>
     <!-- 2026-10-22 Scheme A chat type: .topbar .title 13px, .user-msg 12.5px, .who 9px,
          .ai-tag 9.5px, .answer 13.2px, .branch-label 9.5px, .branch-item 10.5px. -->
     <dimen name="text_topbar_title">13sp</dimen>
@@ -82,7 +82,7 @@
     <dimen name="tab_bar_tablet_width">480dp</dimen>
     <dimen name="glass_capsule_elevation">8dp</dimen>
     <!-- Scheme A's .composer: min-height 138px, padding 14px 14px 12px, row margin-top 10px. -->
-    <dimen name="composer_min_height">138dp</dimen>
+    <dimen name="composer_min_height">132dp</dimen>
     <dimen name="composer_pad">14dp</dimen>
     <dimen name="composer_pad_bottom">12dp</dimen>
     <dimen name="composer_row_top">10dp</dimen>
@@ -106,6 +106,10 @@
     <dimen name="chat_gap">10dp</dimen>
     <dimen name="reader_pad">15dp</dimen>
     <dimen name="reader_pad_bottom">14dp</dimen>
+    <!-- 2026-10-25 board: the reading-area header is 19sp serif (two lines) over a 12sp meta row,
+         with the rule 8dp under the meta row and the whole header 12dp above the first message. -->
+    <dimen name="text_reader_title">19sp</dimen>
+    <dimen name="reader_header_gap">12dp</dimen>
     <dimen name="dock_radius">24dp</dimen>
     <dimen name="dock_pad_start">14dp</dimen>
     <dimen name="dock_pad">11dp</dimen>
@@ -138,12 +142,12 @@
          their faces are drawn inside 44dp targets. -->
     <dimen name="text_library_title">19sp</dimen>
     <dimen name="text_library_search">11sp</dimen>
-    <dimen name="text_library_segment">10.5sp</dimen>
-    <dimen name="text_library_segment_num">9.5sp</dimen>
-    <dimen name="text_library_card_title">12.5sp</dimen>
-    <dimen name="text_library_summary">10.5sp</dimen>
-    <dimen name="text_library_meta">9sp</dimen>
-    <dimen name="text_library_note">10sp</dimen>
+    <dimen name="text_library_segment">13sp</dimen>
+    <dimen name="text_library_segment_num">12sp</dimen>
+    <dimen name="text_library_card_title">14sp</dimen>
+    <dimen name="text_library_summary">12.5sp</dimen>
+    <dimen name="text_library_meta">12sp</dimen>
+    <dimen name="text_library_note">12sp</dimen>
     <dimen name="library_body_top">14dp</dimen>
     <dimen name="library_search_pad">13dp</dimen>
     <dimen name="library_segment_pad">4dp</dimen>
@@ -204,11 +208,27 @@
     <dimen name="popup_width">280dp</dimen>
     <dimen name="rec_text_max">260dp</dimen>
     <dimen name="picker_min_width">240dp</dimen>
-    <!-- 2026-09-28: how far the recommendation block's chips dissolve at each end. The prototype
-         spells this as 20px inside its own mask-image gradient, not as one of the space tokens, so
-         it is a width and not a gap - and it is deliberately not space_s5/page_gutter even though it
-         shares their value, because changing the page gutter must not move the fade. -->
-    <dimen name="rec_fade_width">20dp</dimen>
+    <!-- How far the recommendation block's chips dissolve at each end. The 2026-10-25 board draws
+         the mask stops at 26px (artifacts/ui-review-2026-10-25/改后核心界面-2026-10-25.html,
+         .recmarq), replacing the prototype's 20px; either way it is a width inside a mask, not one
+         of the space tokens, and it is deliberately not space_s5/page_gutter even where the values
+         coincide, because changing the page gutter must not move the fade. -->
+    <dimen name="rec_fade_width">26dp</dimen>
+    <!-- 2026-10-25（T-2026-10-25-100）：品牌上移到常驻顶栏，20sp 字标 + 22dp 芽标；
+         首屏只留一句 22sp 两行标题，段间 22dp。原型 D1 的数值未经真机复测，取评审板保守值。 -->
+    <dimen name="text_brand_topbar">20sp</dimen>
+    <dimen name="brand_mark_topbar">22dp</dimen>
+    <dimen name="brand_topbar_line_height">20sp</dimen>
+    <dimen name="brand_topbar_gap">6dp</dimen>
+    <dimen name="home_hero_top">26dp</dimen>
+    <dimen name="home_section_gap">22dp</dimen>
+    <dimen name="rec_card_min_height">88dp</dimen>
+    <dimen name="rec_row_gap">4dp</dimen>
+    <dimen name="library_state_top">20dp</dimen>
+    <dimen name="library_state_bottom">10dp</dimen>
+    <dimen name="library_archived_pad_bottom">4dp</dimen>
+    <dimen name="library_actions_top">8dp</dimen>
+    <dimen name="library_actions_pad_top">6dp</dimen>
 
     <!-- 2026-09-28: the selection menu became four icon cells in one row (was four full-width text
          rows). Each cell is the 44dp touch target wide, so the row is 4 × 44 + 3 hairlines + the

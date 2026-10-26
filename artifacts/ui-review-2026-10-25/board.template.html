@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>知芽 · 安卓与 Web 界面可优化点 · 校样批注 2026-10-25</title>
+<style>
+  :root{
+    --paper:#FFFFFF; --ink:#17191B; --ink2:#3D4348; --ink3:#6B7176;
+    --line:#DEE0E1; --rule:#17191B;
+    --green:#2B6E45; --green-deep:#164027; --green-faint:#F0F7F1;
+    --red:#B3261E; --amber:#8A4108; --blue:#2557C7;
+    --sans:"Noto Sans SC","Microsoft YaHei",-apple-system,sans-serif;
+    --mono:ui-monospace,Consolas,"Noto Sans SC",monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+       font-size:16px;line-height:1.85;-webkit-font-smoothing:antialiased}
+  .sheet{max-width:1240px;margin:0 auto;padding:64px 40px 96px}
+
+  /* 报头 —— 校样：白纸、黑规则、红铅笔。这张板子故意不用它正在评审的那款衬线，
+      因为 X1 说的就是那款衬线在没装字体的机器上会掉成宋体。 */
+  header{border-bottom:3px solid var(--rule);padding-bottom:28px;margin-bottom:40px}
+  .kicker{font-size:14px;color:var(--ink3);letter-spacing:.02em;margin:0 0 12px}
+  h1{font-size:34px;line-height:1.5;font-weight:600;margin:0;letter-spacing:.005em}
+  .lede{font-size:17px;color:var(--ink2);margin:18px 0 0;max-width:74ch}
+  .lede b{color:var(--ink);font-weight:600;box-shadow:inset 0 -8px 0 #F3F5F3}
+  .stamp{display:inline-block;margin-top:22px;padding:6px 16px;border:1.5px solid var(--red);
+         color:var(--red);font-size:14px;font-weight:600;border-radius:2px;letter-spacing:.01em}
+
+  /* 评分 */
+  h2{font-size:24px;font-weight:600;margin:0 0 6px;letter-spacing:.01em}
+  .sec-head{display:flex;align-items:baseline;gap:18px;margin:60px 0 26px;
+            border-bottom:1px solid var(--rule);padding-bottom:12px}
+  .sec-head p{margin:0;font-size:14px;color:var(--ink3)}
+  .scores{display:grid;grid-template-columns:repeat(3,1fr);gap:22px 40px;margin:0 0 8px}
+  .sc{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:6px 10px}
+  .sc dt{font-size:14px;color:var(--ink2);grid-column:1}
+  .sc dd{margin:0;grid-column:2;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
+  .bar{grid-column:1/-1;height:4px;background:var(--line);overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--rule)}
+  .verdict{margin:28px 0 0;padding:22px 26px;background:#F7F8F8;border-left:3px solid var(--rule);
+           font-size:15px;color:var(--ink2)}
+  .verdict b{color:var(--ink);font-size:16px}
+
+  /* 条目 */
+  .item{display:grid;grid-template-columns:82px 1fr;gap:0 22px;padding:24px 0;border-bottom:1px solid var(--line)}
+  .item:last-child{border-bottom:0}
+  .tag{font-size:14px;font-weight:600;letter-spacing:.04em;padding-top:4px}
+  .sev-crit{color:var(--red)} .sev-major{color:var(--amber)} .sev-minor{color:var(--blue)}
+  .item h3{margin:0 0 10px;font-size:19px;line-height:1.6;font-weight:600;letter-spacing:.005em}
+  .item p{margin:0 0 12px;font-size:15px;color:var(--ink2);max-width:90ch}
+  .item p:last-child{margin-bottom:0}
+  .lbl{display:inline-block;min-width:56px;margin-right:10px;font-size:14px;color:var(--ink3);font-weight:600}
+  code{font-family:var(--mono);font-size:14px;background:#F2F3F3;padding:1px 6px;color:var(--green-deep)}
+  .fix{padding:14px 18px;background:var(--green-faint);border-left:3px solid var(--green)}
+  .fix .lbl{color:var(--green)}
+
+  /* 逐屏对照 */
+  .screen{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:0 44px;
+          padding:36px 0;border-top:1px solid var(--line)}
+  .shot{position:sticky;top:24px;align-self:start}
+  .shot img{display:block;max-width:100%;max-height:72vh;width:auto;height:auto;margin-inline:auto;
+            border:1px solid var(--line)}
+  .shot figcaption{margin-top:10px;font-size:14px;color:var(--ink3)}
+  .shot .ph{display:inline-block;margin-bottom:8px;padding:3px 10px;
+            font-size:14px;font-weight:600;color:#fff;letter-spacing:.02em}
+  .ph-web{background:var(--green-deep)} .ph-and{background:var(--ink2)}
+  ol{margin:0;padding:0;list-style:none;counter-reset:n}
+  ol li{counter-increment:n;position:relative;padding:18px 0 18px 42px;border-bottom:1px dashed var(--line)}
+  ol li:last-child{border-bottom:0}
+  ol li::before{content:counter(n);position:absolute;left:0;top:19px;width:28px;height:28px;
+                border-radius:50%;background:var(--rule);color:#fff;font-size:14px;font-weight:600;
+                display:grid;place-items:center;font-family:var(--sans)}
+  ol li h4{margin:0 0 8px;font-size:17px;font-weight:600;line-height:1.6}
+  ol li p{margin:0;font-size:15px;color:var(--ink2);line-height:1.8}
+  ol li p+p{margin-top:10px}
+  .s{font-weight:600}
+  .s-crit{color:var(--red)} .s-major{color:var(--amber)} .s-minor{color:var(--blue)}
+
+  /* 边界 */
+  .bounds{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:8px}
+  .bounds>div{padding:22px 24px;border:1px solid var(--line)}
+  .bounds h3{margin:0 0 12px;font-size:16px;font-weight:600}
+  .bounds ul{margin:0;padding-left:18px;font-size:14px;color:var(--ink2)}
+  .bounds li{margin-bottom:8px}
+  .ok h3{color:var(--green)} .warn h3{color:var(--amber)} .stale h3{color:var(--ink3)}
+  footer{margin-top:60px;padding-top:24px;border-top:3px solid var(--rule);font-size:15px;color:var(--ink2)}
+  footer b{color:var(--ink)}
+  @media (max-width:920px){
+    .sheet{padding:36px 20px 64px} h1{font-size:26px}
+    .scores,.bounds{grid-template-columns:1fr}
+    .screen{grid-template-columns:1fr;gap:24px} .shot{position:static}
+    .item{grid-template-columns:1fr;gap:4px}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+<header>
+  <p class="kicker">知芽 TreeLearn 界面校样，2026-10-25。依据是 <code>Docs/04-ux-design/design-system/tokens.json</code> 与两端生产代码，不是示意稿。</p>
+  <h1>概念和纪律都在水准上，<br>卡住上限的是「读起来对不对」这一层。</h1>
+  <p class="lede">安卓原生面和 Web／桌面面的视觉母题（生长绿、纸感、玻璃五面、一题一树）是立得住的，token 系统的纪律也少见地严。<b>问题集中在字面、图标语义、行长、标签尺寸、纵向预算这五处</b>——它们都不是「不够好看」，是用户在错误的机器上、错误的时刻，读到的不是设计稿想让他读到的东西。</p>
+  <span class="stamp">总评 7.0 / 10，良好档：2 条严重、10 条重要、10 条优化</span>
+</header>
+
+<section>
+  <div class="sec-head"><h2>六维评分</h2><p>App UI 场景按功能性、细节执行为主，哲学一致性可放宽</p></div>
+  <dl class="scores">
+    <div class="sc"><dt>概念 / 立意</dt><dd>8.0</dd><span class="bar"><i style="width:80%"></i></span></div>
+    <div class="sc"><dt>创新性</dt><dd>8.0</dd><span class="bar"><i style="width:80%"></i></span></div>
+    <div class="sc"><dt>哲学一致性</dt><dd>7.0</dd><span class="bar"><i style="width:70%"></i></span></div>
+    <div class="sc"><dt>细节执行</dt><dd>7.0</dd><span class="bar"><i style="width:70%"></i></span></div>
+    <div class="sc"><dt>视觉层级</dt><dd>6.0</dd><span class="bar"><i style="width:60%"></i></span></div>
+    <div class="sc"><dt>功能性</dt><dd>6.0</dd><span class="bar"><i style="width:60%"></i></span></div>
+  </dl>
+  <p class="verdict"><b>六维取的是工作室判断，不是加权公式。</b>「一题一树，慢慢长」不是贴在页面上的口号，它长在导航项、空态文案、统计口径和整块森林页的结构上——盖住文字，两棵树加等高线仍然认得出这是知芽。这是这个项目最贵的资产，任何后续改动都不该拿它换统一性。扣的两分在：首页本身没有承担这个母题，它是一张通用的对话首页。功能性 6 分扣在导航与阅读的物理层：底部标签栏只有两项、设置入口画成太阳、阅读正文 48 字一行、标签字号 11px。这几处都在「用户能不能顺利读到下一句」的层面，不在审美层面。</p>
+</section>
+
+<section>
+  <div class="sec-head"><h2>跨面四条</h2><p>同时影响安卓与 Web／桌面，改一处不如改一套</p></div>
+
+  <div class="item">
+    <div class="tag sev-crit">严重</div>
+    <div>
+      <h3>桌面端和 Web 没有随包字体，衬线身份由宿主系统兜底</h3>
+      <p><span class="lbl">证据</span>离线包 <code>frontend/dist-offline/index.html</code> 里 <code>@font-face</code> 出现 0 次、字体 CDN 出现 0 次，<code>frontend/</code> 下没有 fonts 目录；同一时间 APK 里放着 <code>noto_serif_sc.otf</code>，24,427,224 字节。</p>
+      <p><span class="lbl">后果</span><code>--serif</code> 的栈是 <code>'Noto Serif SC','Songti SC',Georgia,serif</code>。没装 Noto Serif SC 的 Windows——正是 1.0.0 便携 exe 的目标机——会依次落到 Georgia（没有中文字形）再落到 generic serif，也就是宋体。品牌标题和阅读页大标题在用户机器上不是设计稿那个字面，而 Android 端是。同一份 tokens.json，两端两种字面。</p>
+      <p><span class="lbl">为什么截图看不出</span>这台评审机装了 Noto Serif SC 和 Noto Sans SC（注册表 366 条字体里查到），所以下面所有 Web 截图都是「对的」。这条只能靠代码判定。</p>
+      <p class="fix"><span class="lbl">改法</span>把 APK 那份 otf 做子集（GB2312 常用 6763 字 + 拉丁数字标点，约 3–5MB），base64 内嵌进离线包，让 Web 和 exe 与 Android 用同一个字面；同时在 <code>--serif</code> 里补一个 Windows 上真实存在的中文衬线，把降级变成明确决定而不是随机结果。</p>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="tag sev-major">重要</div>
+    <div>
+      <h3>「设置」图标画的是一轮太阳</h3>
+      <p><span class="lbl">证据</span><code>android/app/src/main/res/drawable/ic_chat_gear.xml</code> 与 <code>frontend/src/components/Icon.tsx</code> 的 <code>chat_gear</code> 共用同一条 pathData：中心一个圆，外加八条放射短线。文件头注释写着 "Gear (prototype icons.tsx IGear)"——从原型起它就不是齿轮。</p>
+      <p><span class="lbl">影响面</span>它是 Web 侧栏「设置」的图标，也是安卓首页右上角唯一的设置入口。用户读到的是「亮度」或「主题切换」，点下去进的是 API Key 管理。</p>
+      <p class="fix"><span class="lbl">改法</span>两端同批换成真齿轮或滑杆（sliders）。顺带一个流程问题：颜色 token 有 <code>check_design_tokens.py</code> 守门，图标没有——同一份 pathData 手抄在两端，抄错或改漏都不会报警。建议把图标纳入 parity 守面。</p>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="tag sev-major">重要</div>
+    <div>
+      <h3>标签层是 11px / 11sp，而且用在导航文字上</h3>
+      <p><span class="lbl">证据</span><code>tokens.json</code> 的 <code>fs-cap = 11px</code>，Web 侧 12 处以上消费者；<code>android/.../values/dimens.xml</code> 的 <code>text_cap = 11sp</code>，底部标签栏「主页 / 学习库」正是用它（标签栏本身高 50dp，触控尺寸是够的，问题只在字）。</p>
+      <p><span class="lbl">为什么算问题</span>12px 是中文界面小字可读性的下限，11px 的中文在 1080p 手机和 Windows 桌面上会先掉横画。导航标签是全应用点击率最高的一行字，不该是字号最小的一行。</p>
+      <p class="fix"><span class="lbl">改法</span>二选一：把 <code>fs-cap</code> 提到 12px，或把导航标签降到 <code>fs-sm</code>（13px）。这是 token 级改动，四处同批：原型 <code>:root</code> → <code>tokens.json</code> → 重新生成 <code>tokens.css</code> → 安卓 <code>dimens.xml</code>，然后跑 <code>check_design_tokens.py</code>。</p>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="tag sev-minor">优化</div>
+    <div>
+      <h3>app.css 425 行是死样式表，还在打进 508K 离线包</h3>
+      <p><span class="lbl">证据</span><code>main.tsx:11</code> 仍 <code>import "./styles/app.css"</code>。抽样它里面 12 个类名去 tsx 里找消费者，10 个是 0 命中：<code>appbar-brand</code>、<code>chat-answer-run</code>、<code>chat-row</code>、<code>home-topic</code>、<code>notice-text</code>、<code>glass-surface</code>、<code>tab-bar</code>、<code>screen-root</code>、<code>model-chip</code>、<code>word-menu</code>。</p>
+      <p><span class="lbl">真正的代价</span>已声明放弃的 <code>--kai</code> 在这张死表里还有两个「消费者」（<code>appbar-brand</code>、<code>chat-answer-run</code>）。tokens.json 的 note 写着「楷体身份已放弃，本片保留不删，退役待后续清理」——但只要这两个选择器还在 CSS 里，任何按 CSS grep 判字体存活率的守门都会误报 kai 还在用，退役就永远做不掉。</p>
+      <p class="fix"><span class="lbl">改法</span>删表，然后按 note 自己写的计划把 <code>--kai</code> 从 tokens.json 退掉。注意 <code>.chat-answer-run</code> 是从安卓 <code>view_chat_answer_text.xml</code> 的 id 抄来的，删之前确认安卓侧同名资源不受影响。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><h2>逐屏批注</h2><p>每屏三条以内，按严重度排。截图是真机与真渲染，不是示意稿。</p></div>
+
+  <div class="screen">
+    <figure class="shot"><span class="ph ph-web">Web 1440</span>
+      <img src="{{IMG_WEB_HOME}}" alt="Web 首页 1440 宽截图">
+      <figcaption>首页，截图 081-home-top（2026-10-25）</figcaption></figure>
+    <ol>
+      <li><h4><span class="s s-major">重要</span>　侧栏一列里混了三种性质的东西</h4>
+        <p>主页 / 学习库 / 设置 是路由，我的森林 是路由卡，最近学习 是内容——三者共用 240px 一列、同一套 hover 底色。实测 <code>.app-sidebar</code> 宽 240、<code>.page</code> 宽 960，侧栏只有 240 的预算，却要同时承担导航和历史列表。</p>
+        <p>改法：最近学习降一档（13px + <code>--ink3</code>、去掉 hover 底色），或整块移出侧栏进内容列底部；侧栏只留路由。</p></li>
+      <li><h4><span class="s s-major">重要</span>　主输入卡的下沿是一句自我否定</h4>
+        <p>「发送与上传尚未接通；点推荐问题或历史主题进入对话。」13px 灰字，位置在 CTA 卡内部下沿。用户走到首页、看到输入框、输入框说自己不能用。</p>
+        <p>不接通是项目有意的范围决定，诚实文案是规则要求的，这两点都不该改；该改的只有位置——挪到卡外下方 8px。后半句是当前唯一真实路径，应该做成可点，而不是用分号跟在前半句后面。</p></li>
+      <li><h4><span class="s s-minor">优化</span>　历史主题行的视线落点和操作落点分家</h4>
+        <p>标题从 x=366 起，chevron 贴到 960px 列的最右端，中间塞 2–3 行摘要。整行确实可点，但眼睛找的是标题，手找的是箭头，中间隔着两行正文密度的字。</p>
+        <p>改法：摘要收成 1 行、2 行截断；「1 个分支 · 3天前」紧跟标题右侧 8px，不要另起一行。</p></li>
+    </ol>
+  </div>
+
+  <div class="screen">
+    <figure class="shot"><span class="ph ph-web">Web 1440</span>
+      <img src="{{IMG_WEB_CHAT}}" alt="Web 对话阅读页 1440 宽截图">
+      <figcaption>对话与阅读面，截图 081-chat-top（2026-10-25）</figcaption></figure>
+    <ol>
+      <li><h4><span class="s s-major">重要</span>　阅读正文实测 48 个中文字一行</h4>
+        <p>Playwright 渲染离线包量到 <code>.chat-answer</code> 宽 720px、<code>font-size: 15px</code> → 每行约 48 个汉字。中文长文的舒适区间是 32–40 字，超过之后换行找回行首的成本陡增，这是阅读类产品最实在的一处漏。</p>
+        <p>改法：给 <code>.chat-answer</code> 加 <code>max-width: 620px</code>（约 41 字）。项目里已有先例——<code>pages.css:721</code> 给 <code>.persona-card</code> 用了 <code>max-width: 62ch</code>，反而阅读正文没有约束。选区浮条和引用条跟着这个列宽走。</p></li>
+      <li><h4><span class="s s-minor">优化</span>　字号档位中段是空的，层级只能靠颜色撑</h4>
+        <p>token 序列是 11 / 13 / 15 / 16 / 20 / 26 / 30：16 到 20 之间没有第三级标题，11 到 13 之间没有小字。结果是「3天前」「1 个分支」这类 meta 和导航标签挤在同一档。</p>
+        <p>改法：先不加 token。把「3天前」从 <code>fs-cap</code> 提到 <code>fs-sm</code>，中段的空缺等真出现第三级需求时再决定。</p></li>
+      <li><h4><span class="s s-minor">优化</span>　同一句「未接通」在第二屏又出现一次</h4>
+        <p>输入卡底部「发送、上传与分支创建尚未接通；这里可以写草稿，也可以复制回答。」和首页那条是同一个模式：说明写在动作的容器里。</p>
+        <p>改法：全站把「未接通」收敛成一种表达——禁用态本身承担「不能点」，一次说明承担「为什么」。不要每进一屏读到一行新的灰字道歉。</p></li>
+    </ol>
+  </div>
+
+  <div class="screen">
+    <figure class="shot"><span class="ph ph-web">Web 1440</span>
+      <img src="{{IMG_WEB_FOREST}}" alt="Web 我的森林页截图">
+      <figcaption>我的森林，截图 forest-070-desktop（2026-10-23）</figcaption></figure>
+    <ol>
+      <li><h4><span class="s s-major">重要</span>　隐喻到位了，信息没进来</h4>
+        <p>约 1200×800 的场地上两棵树。树没有名字、没有 hover 标题、没有时间；全场唯一的量化信息是底部一行 11px 的「2 棵树 · 3 段枝」。这是产品的招牌屏，也是信息密度最低的一屏。</p>
+        <p>改法：树冠下方 12px / <code>--ink2</code> 标主题名（8 字截断，hover 给全名）；底部计数提到 <code>fs-sm</code>。加字不等于破坏留白——现在是留白吃掉了内容。</p></li>
+      <li><h4><span class="s s-minor">优化</span>　右上角圆圈里的「N」没有任何解释</h4>
+        <p>场地隐喻里唯一的操作符号，没有 hover 态、没有 aria-label，看不出是指北、刷新还是缩放复位。</p>
+        <p>改法：要么去掉（场地不需要方位），要么补 hover 说明和可访问名。</p></li>
+      <li><h4><span class="s s-minor">优化</span>　等高线是全场唯一的纹理，但它几乎看不见</h4>
+        <p>压在 <code>rgba(22,36,28,.06)</code> 一档。项目对「看不见」是有量法的：2026-10-22 因为真机四角跨度只有 7.7 L，把 <code>mist-base</code> 整体加深过。</p>
+        <p>改法：用同一把尺子量等高线的 ΔL。要么承认看不见就别画，要么按实测抬到能穿过 <code>check_glass_depth.py</code> 那条 8 L 线。</p></li>
+    </ol>
+  </div>
+
+  <div class="screen">
+    <figure class="shot"><span class="ph ph-and">安卓真机</span>
+      <img src="{{IMG_AND_HOME}}" alt="安卓首页真机截图">
+      <figcaption>首页，真机 059-home（2026-10-22，1200×2652）</figcaption></figure>
+    <ol>
+      <li><h4><span class="s s-major">重要</span>　首屏纵向预算：可操作的东西落在中线以下</h4>
+        <p>状态栏 + 玻璃 app bar 之后，品牌 hero「知芽」加 tagline 吃掉上半屏，输入卡落在屏幕中线附近。手机上第一屏唯一能点的是输入卡和被裁掉的半张推荐卡。</p>
+        <p>这条是目测自截图，<b>没做 bounds 实测</b>：今天试图用 <code>uiautomator dump</code> 抓 <code>com.treelearn</code> 首页失败（启动报 Error type 3，前台是另一个应用）。改法方向明确——hero 与 tagline 并成一行，或把 hero 上边距压到 <code>s8</code>——但数值要等一次真机 bounds 才能定。</p></li>
+      <li><h4><span class="s s-major">重要</span>　推荐区右列被裁成半张卡，文字断成半句</h4>
+        <p>「从注意力可视化至 / 法的能力边界」——读起来像渲染坏了，实际是 marquee 的露出量。半句话比没有话更糟：用户会以为是页面出错，而不是「还有更多」。</p>
+        <p>改法：露出量至少给到卡宽的 60%，或换 PagerSnap 整卡翻页。同一类问题在学习库第三张卡的摘要末尾也出现了（「符…」）。</p></li>
+      <li><h4><span class="s s-minor">优化</span>　四张推荐卡挂着同一个「顺着你学的」</h4>
+        <p>同屏重复四次的标签不携带任何区分信息，只吃掉每张卡一行高度（Web 两张卡也一样）。</p>
+        <p>改法：pill 只在「猜你想学」区块标题处出现一次，卡内保留 sparkle 图标足够。</p></li>
+    </ol>
+  </div>
+
+  <div class="screen">
+    <figure class="shot"><span class="ph ph-and">安卓真机</span>
+      <img src="{{IMG_AND_CHAT}}" alt="安卓对话页中断态真机截图">
+      <figcaption>对话，真机 059-chat（2026-10-22，生成中断态）</figcaption></figure>
+    <ol>
+      <li><h4><span class="s s-crit">严重</span>　中断卡把风险提示排成了按钮的副标题</h4>
+        <p>「重试不新增消息或分支」和「重试」按钮挤在同一行、按钮右对齐。这句是用户决定点不点之前必须读到的风险说明，现在它读起来像按钮的注释文字，字号还比主句小一档。</p>
+        <p>改法：主句一行、说明独占第二行、按钮第三行左对齐；或按钮移到卡片右上角，把下方整行留给说明。错误态是产品可信度最脆弱的一屏，值得单独走一遍排版。</p></li>
+      <li><h4><span class="s s-major">重要</span>　顶栏标题截断到约 10 字，还要挤三个图标</h4>
+        <p>「注意力权重与因果贡献不等…」——标题被截，同时一行里还排着分享、地图、设置三个动作。用户判断「我在哪棵树的哪个分支」全靠这行字。</p>
+        <p>改法：标题独占一行，第三个动作收进溢出菜单；或标题降到副标题位（13px），主标题位留给分支名。</p></li>
+      <li><h4><span class="s s-minor">优化</span>　空态只有文字，没有出口</h4>
+        <p>对话页大面积留白；总览画布空态是「这棵树还没有分支。」一行字。两句文案都很克制，但都没给下一步。</p>
+        <p>改法：空态补一个主按钮（回首页提问 / 去森林看看），别让留白变成死路。</p></li>
+    </ol>
+  </div>
+
+  <div class="screen">
+    <figure class="shot"><span class="ph ph-and">安卓真机</span>
+      <img src="{{IMG_AND_LIB}}" alt="安卓学习库真机截图">
+      <figcaption>学习库，真机 059-library（2026-10-22）</figcaption></figure>
+    <ol>
+      <li><h4><span class="s s-major">重要</span>　「已完成 0」也占一整段 44dp 分段位</h4>
+        <p>分段控件占满一行，两档里有一档恒为 0。空分段是纯死重量，还把它下面第一条真实内容往下推了 44dp。</p>
+        <p>改法：为 0 的那一档收成计数徽标（不占分段位），只有一档有内容时直接隐藏分段控件。</p></li>
+      <li><h4><span class="s s-minor">优化</span>　搜索框 placeholder 写的是字段清单</h4>
+        <p>「标题、问题、回答、锚定原文…」——这是给实现者看的可搜范围，不是给用户的提示。用户不需要被提醒字段名，需要知道现在能不能搜、搜什么。</p>
+        <p>改法：缩短成「搜索主题、回答或原文」，把可搜范围交给 filter 或结果页的说明。</p></li>
+      <li><h4><span class="s s-minor">优化</span>　卡片摘要固定两行，第三张末尾出现「符…」</h4>
+        <p>按字符数硬截断，截在词中间。和首页 marquee 是同一类问题。</p>
+        <p>改法：按句末标点截断补省略号；或给摘要一个真实的最小信息量（不足一句就整行不显示）。</p></li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><h2>验证边界</h2><p>哪些是量出来的，哪些不是——这条评审的可信范围就到这里</p></div>
+  <div class="bounds">
+    <div class="ok"><h3>已实测</h3><ul>
+      <li>Web 列宽与字号：Playwright 渲染离线包，<code>.page</code> 960、<code>.app-sidebar</code> 240、<code>.chat-answer</code> 720px @15px</li>
+      <li>字体资产：离线包 grep <code>@font-face</code> 0 处、CDN 0 处；APK 内 otf 24,427,224 字节；本机注册表 366 条字体里查到 Noto Serif SC</li>
+      <li>死样式表：app.css 抽样 12 个类名，10 个 0 消费者</li>
+      <li>图标 pathData、<code>fs-cap 11px</code> / <code>text_cap 11sp</code> / <code>tab_bar_item 50dp</code> 数值</li>
+    </ul></div>
+    <div class="warn"><h3>未实测</h3><ul>
+      <li>安卓首页纵向预算——uiautomator 抓取失败，第 D 屏第 1 条是目测，数值待定</li>
+      <li>森林等高线的 ΔL 跨度，没跑 <code>check_glass_depth.py</code></li>
+      <li>宋体兜底在真实用户机上的样子：这台机器装了 Noto Serif SC，截图证明不了这个缺陷，只有代码能</li>
+      <li>平板 <code>layout-sw600dp</code> 六个变体本轮没看</li>
+    </ul></div>
+    <div class="stale"><h3>截图时效</h3><ul>
+      <li>Web / 桌面：2026-10-25（081 / 085 / 084 三批），对应当前工作树</li>
+      <li>安卓：最新真机截图是 2026-10-22（059 / 062 两批）。10-23 之后安卓面若有未截图的改动，本评审看不到</li>
+      <li>本报告不改任何生产代码与文档，产物只落在 <code>artifacts/ui-review-2026-10-25/</code></li>
+    </ul></div>
+  </div>
+</section>
+
+<footer>
+  <p><b>这张板子自己用的字体是故意的。</b>它通体无衬线，没有用它在评审的那款 Noto Serif SC——因为 X1 说的就是那款衬线在没装字体的机器上会掉成宋体。一张校样不该带着被校的那个缺陷。</p>
+  <p><b>如果要把这些改法画成改后对照。</b>那是新的视觉设计，按规矩先出三个方向给你选，选定之后才动手。三方向的价值在这里很具体：X1（字面）和 X3（标签尺寸）是 token 级、几乎无争议的必修；D1（首页纵向预算）和 C1（森林信息密度）是有取舍的方向题——一个把品牌让给效率，一个把留白让给信息，选多狠是产品决定，不是排版决定。别把它们和必修项捆在同一次改动里。</p>
+</footer>
+
+</div>
+</body>
+</html>

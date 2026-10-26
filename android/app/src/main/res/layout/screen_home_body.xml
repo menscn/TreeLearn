@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The home page as Scheme A draws it (2026-10-22): the large serif brand lockup with its sans
-  subtitle, the tall glass composer, recommendations and history. The column stacks from the top and
-  the order is the proposal's own - brand, composer, recommendations, history.
+  The home page as the 2026-10-25 board draws it: one serif headline, the tall glass composer,
+  recommendations and history. The column stacks from the top and the order is unchanged - headline,
+  composer, recommendations, history.
 
-  The glass capsule topbar is not in this column: since 2026-10-23-075 it floats over the scroll
-  container in layout/screen_home.xml, so it stays on screen while this column moves under it. That
-  is why this file starts at the brand and why the scroll container carries @dimen/top_bar_clearance.
+  The brand lockup is no longer here. Until T-2026-10-25-100 the column opened with the 41sp wordmark
+  and its 12sp subtitle, which put the page's identity inside the scrolling content; the board moves
+  the wordmark into the floating topbar (layout/screen_home.xml) and leaves this column one headline
+  at 22sp. The topbar itself still floats over the scroll container since 2026-10-23-075, which is why
+  the scroll container carries @dimen/top_bar_clearance and this file starts at the headline.
 
-  The subtitle is always shown since Scheme A always shows it. It keeps the `home_hero_title` id and
-  the existing copy (the 2026-10-22 decision changed placement, not wording); only its type changed
-  from a serif headline to the proposal's 12sp sans line.
+  The headline keeps the `home_hero_title` id and the existing copy (no wording changed, only rank and
+  type). It is the only text in the page that is serif.
 
   The topbar carries no attachment entry: since 2026-10-22 the home has no end-to-end path from a
   draft to a first-message attachment, and the user's rule is to delete an entry that cannot reach
@@ -33,64 +34,29 @@
         android:paddingEnd="@dimen/space_s4"
         android:paddingBottom="@dimen/space_s4">
 
-        <LinearLayout
-            android:id="@+id/home_hero"
+        <!-- 2026-10-25 (T-2026-10-25-100): the lockup left this column for the floating topbar, and the
+             subtitle became the page's one headline. The board's home opens with a 22sp serif line in
+             brand green, two lines on a phone, 26dp under the bar; it keeps the `home_hero_title` id
+             because the copy did not change, only its rank and type. -->
+        <TextView
+            android:id="@+id/home_hero_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:paddingTop="@dimen/home_brand_top"
-            android:paddingBottom="@dimen/home_brand_bottom">
-
-            <LinearLayout
-                android:id="@+id/home_brand_lockup"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/home_brand_mark"
-                    android:layout_width="@dimen/brand_mark_size"
-                    android:layout_height="@dimen/brand_mark_size"
-                    android:contentDescription="@string/cd_home_brand"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/ic_brand_sprout" />
-
-                <!-- The height is the proposal's line-height: 1, not wrap_content: the bundled
-                     serif's 2.858em CFF line box otherwise pushes the subtitle 52dp down
-                     (2026-10-22 walkthrough). WordmarkTextView centres the font box in this frame. -->
-                <com.treelearn.app.screen.WordmarkTextView
-                    android:id="@+id/home_brand"
-                    android:layout_width="wrap_content"
-                    android:layout_height="@dimen/brand_line_height"
-                    android:layout_marginStart="@dimen/space_s3"
-                    android:fontFamily="@font/noto_serif_sc"
-                    android:letterSpacing="0.06"
-                    android:text="@string/app_name"
-                    android:textColor="@color/tl_green_deep"
-                    android:textSize="@dimen/text_brand"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/home_hero_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_s3"
-                android:gravity="center"
-                android:letterSpacing="0.06"
-                android:lineSpacingMultiplier="1.6"
-                android:text="@string/home_hero_title"
-                android:textAlignment="center"
-                android:textColor="@color/tl_ink2"
-                android:textSize="@dimen/text_home_sub" />
-        </LinearLayout>
+            android:layout_marginTop="@dimen/home_hero_top"
+            android:fontFamily="@font/noto_serif_sc"
+            android:gravity="center"
+            android:lineSpacingMultiplier="1.55"
+            android:text="@string/home_hero_title"
+            android:textAlignment="center"
+            android:textColor="@color/tl_green_deep"
+            android:textSize="@dimen/text_home_sub"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:id="@+id/home_composer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/home_section_gap"
             android:background="@drawable/bg_glass_composer"
             android:elevation="@dimen/card_elevation"
             android:minHeight="@dimen/composer_min_height"
@@ -153,23 +119,17 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- 2026-09-28 user decision: the strip now sits space_s4 (16dp) under the composer.
-             Three layers disagree here, which is why this carries a note:
-               - the prototype's .rec-block is padding:4px 0 6px with no margin of its own, i.e. it
-                 sits almost flush under the input card (Docs/04-ux-design/...-v1.1.html line 360);
-               - the home visual spec's token matrix maps .rec-block to space_s4 without saying
-                 whether that is padding or margin (Docs/spec/SPEC-2026-09-27-home-visual-fidelity.md
-                 line 52), and its value does not appear anywhere in the prototype's own rule;
-               - the Android build had implemented 8dp (space_s2 on the marquee alone) and the
-                 learner reported it as too tight.
-             This line takes the spec's own number, which the learner's walkthrough independently
-             asked for. It is a departure from the prototype, not a fidelity gap - and it is NOT the
-             prototype's 4px. Do not "fix" it back to 4px or 8dp without asking. -->
+        <!-- 2026-10-25 (T-2026-10-25-100): the section gap is now 22dp. It was 16dp (space_s4) from
+             2026-09-28, which was itself a deliberate departure from the prototype's 4px taken against
+             the learner's "too tight" walkthrough note - so this is not a fidelity gap being closed,
+             it is the approved board of 2026-10-25 raising the same number one step
+             (artifacts/ui-review-2026-10-25/改后核心界面-2026-10-25.html). The earlier note is kept
+             here only so the 16dp does not get "restored" as if it were the original value. -->
         <LinearLayout
             android:id="@+id/home_recommendations_section"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_s4"
+            android:layout_marginTop="@dimen/home_section_gap"
             android:orientation="vertical"
             android:visibility="gone">
 
@@ -212,7 +172,7 @@
             android:id="@+id/home_recent_section"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_s4"
+            android:layout_marginTop="@dimen/home_section_gap"
             android:orientation="vertical">
 
             <!-- The prototype's .home-sec: a short heading and a count on one baseline, the count

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The library column, aligned to Scheme A's fifth figure on 2026-10-22 (T-2026-10-22-057): the 44dp
-  pill search field, one glass segment capsule whose two halves carry real counts, the compact glass
+  The library column, aligned to Scheme A's fifth figure on 2026-10-22 (T-2026-10-22-057) and re-drawn
+  on the 2026-10-25 board (T-2026-10-25-102): the 44dp pill search field, then either the glass segment
+  capsule (both segments have rows) or one line naming the only segment that does, the compact glass
   topic cards, and the sprout note that closes the page. Shared by the phone page and the tablet page,
   so the two cannot drift.
 
@@ -64,6 +65,25 @@
         android:text="@string/library_search_scope"
         android:textColor="@color/tl_ink3"
         android:textSize="@dimen/text_cap"
+        android:visibility="gone" />
+
+    <!-- 2026-10-25 (T-2026-10-25-102): when only one segment has rows the capsule is not drawn at
+         all - a two-half control with one empty half offers a switch to nothing and costs 44dp above
+         the first row. This line takes its place: the live segment's name and count, 13sp/600 for the
+         name and 12sp/400 gray for the count, exactly the board's .lstate. It is a label, not a
+         control, so it is not given a tap target. -->
+    <TextView
+        android:id="@+id/library_segment_summary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/page_gutter"
+        android:layout_marginTop="@dimen/library_state_top"
+        android:layout_marginEnd="@dimen/page_gutter"
+        android:layout_marginBottom="@dimen/library_state_bottom"
+        android:includeFontPadding="false"
+        android:textColor="@color/tl_ink"
+        android:textSize="@dimen/text_library_segment"
+        android:textStyle="bold"
         android:visibility="gone" />
 
     <!-- One capsule, two halves. The halves stay 44dp tall; only the bright face is inset (see the

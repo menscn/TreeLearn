@@ -1,0 +1,85 @@
+✖ 默认按运行当天分目录，重跑不覆盖历史证据 (6.9708ms)
+✖ 月日补零，跨年与跨月都读本地日期 (0.5967ms)
+✖ 显式日期只用于复跑某一档，空白值回落当天 (0.167ms)
+✔ 证据根目录固定在 artifacts/evidence/desktop-shell (0.1836ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 1
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 114.2534
+
+✖ failing tests:
+
+test at test\evidence-dir.test.mjs:9:1
+✖ 默认按运行当天分目录，重跑不覆盖历史证据 (6.9708ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '2026-10-24'
+  - '2026-10-27'
+              ^
+  
+      at TestContext.<anonymous> (file:///D:/Project/Android/Treelearn/desktop/test/evidence-dir.test.mjs:11:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.start (node:internal/test_runner/test:1096:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '2026-10-24',
+    expected: '2026-10-27',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test\evidence-dir.test.mjs:15:1
+✖ 月日补零，跨年与跨月都读本地日期 (0.5967ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '2026-10-24'
+  - '2027-01-05'
+        ^
+  
+      at TestContext.<anonymous> (file:///D:/Project/Android/Treelearn/desktop/test/evidence-dir.test.mjs:16:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '2026-10-24',
+    expected: '2027-01-05',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test\evidence-dir.test.mjs:20:1
+✖ 显式日期只用于复跑某一档，空白值回落当天 (0.167ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '2026-10-24'
+  - '2026-10-27'
+              ^
+  
+      at TestContext.<anonymous> (file:///D:/Project/Android/Treelearn/desktop/test/evidence-dir.test.mjs:23:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '2026-10-24',
+    expected: '2026-10-27',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+EXITCODE=1

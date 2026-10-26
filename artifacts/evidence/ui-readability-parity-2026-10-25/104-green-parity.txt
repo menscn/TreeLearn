@@ -1,0 +1,123 @@
+usage: gen_parity_ledger.py [-h] [--inventory INVENTORY] [--profile PROFILE]
+                            [--java JAVA] [--res RES] [--spec SPEC]
+                            [--out OUT] [--no-write]
+gen_parity_ledger.py: error: unrecognized arguments: --definitely-not-an-option
+CASE pos-real-tree                    rc=0 want=0 ok
+  check tier 0 on the filed inventory                        ok
+  check no FAIL line printed                                 ok
+  check freshness and exit code do not contradict each other（本次读数 一致=True STALE=False rc=0） ok
+  check rows counted from the inventory                      ok
+  check the row split matches the inventory                  ok
+  check the measured screen is recognised                    ok
+  check unmeasured screens are counted, not hidden           ok
+  check the replay spec is recognised                        ok
+  check the behaviour instrument row is present and template-shaped（本次 adopted=True 其余两态=False） ok
+  check exit code derived from judgements                    ok
+CASE pos-fail-line-scan-catches-a-leading-fail rc=0 want=0 ok
+  check a leading FAIL is seen as a judgement line           ok
+  check the adjacency form this replaces missed it           ok
+  check a FAIL inside prose is not a judgement line          ok
+CASE pos-instrument-adoption-states   rc=0 want=0 ok
+  check 新路径在位即 adopted（实测 adopted）                           ok
+  check 只有前身时点名旧路径而不是笼统报缺（实测 not-adopted:artifacts/tmp/verify_1to1.mjs） ok
+  check 两处都无时是 absent 而不是 adopted（实测 absent）                 ok
+  check 三档互不相同（同一棵树读出两个答案是判据失效）                              ok
+  check 用例结束后生产 REPO 已还原（还原=True，还原后读数=adopted）              ok
+CASE pos-fixture-tree                 rc=0 want=0 ok
+  check tier 0 with the fixture tree                         ok
+  check the s01 screen reads MEASURED                        ok
+  check its behaviour cell reads REPLAY-SPEC                 ok
+  check no staleness complaint                               ok
+CASE neg-stale-inventory              rc=1 want=1 ok
+  check tier 1 not tier 3                                    ok
+  check staleness named in words                             ok
+  check both faces printed so the diff is checkable          ok
+  check the ledger still reports its rows                    ok
+CASE neg-pointer-drift                rc=1 want=1 ok
+  check tier 1 for a pointer disagreement                    ok
+  check drift named in words                                 ok
+  check the header marks the disagreement too                ok
+  check the missing-pointer guard did not fire here          ok
+  check nothing else fired, so the red is attributable       ok
+  check a spec without the pointer is red at the inventory itself ok
+  check tier 1 for a dangling pointer                        ok
+  check the dangling pointer is named                        ok
+  check and it is not reported as drift                      ok
+CASE pos-drift-ignores-the-source-path rc=0 want=0 ok
+  check tier 0 with only the path differing                  ok
+  check no drift complaint                                   ok
+  check the header still reports agreement                   ok
+  check the counts are still read from the inventory and printed ok
+CASE neg-row-floor                    rc=1 want=1 ok
+  check tier 1 for a coverage shortfall                      ok
+  check the floor fired and names both numbers               ok
+  check the shortfall is not dressed up as success           ok
+  check staleness did not fire, so the red is attributable   ok
+CASE neg-rows-mismatch                rc=1 want=1 ok
+  check tier 1                                               ok
+  check the cross-check names the mismatch                   ok
+CASE neg-unreached-screen             rc=1 want=1 ok
+  check tier 1                                               ok
+  check the suspect class is named                           ok
+  check it is called a coverage hole, not a footnote         ok
+CASE pos-absence-is-a-token-not-a-blank rc=0 want=0 ok
+  check tier 0: absence is a state, not a failure            ok
+  check missing record named                                 ok
+  check missing section named with the number                ok
+  check missing shot named                                   ok
+  check missing replay spec named                            ok
+  check every state is tallied                               ok
+CASE pos-written-artifact-selfdescribes rc=0 want=0 ok
+  check tier 0                                               ok
+  check file written where asked                             ok
+  check bytes are strict UTF-8                               ok
+  check generation command in the file                       ok
+  check the real invocation is in the file                   ok
+  check source commit in the file                            ok
+  check inventory hash in the file                           ok
+  check exit code is the last line                           ok
+  check the printed byte count is the size of the file       ok
+  check the printed sha256 is the hash of the written bytes  ok
+  check row tally in the file equals the tally printed       ok
+CASE pos-no-write-writes-nothing      rc=0 want=0 ok
+  check tier 0                                               ok
+  check report says it did not write                         ok
+  check no file created                                      ok
+CASE neg-missing-inventory            rc=3 want=3 ok
+  check tier 3 for a missing input                           ok
+  check fault names the path                                 ok
+CASE neg-inventory-not-json           rc=3 want=3 ok
+  check tier 3                                               ok
+  check fault says it is not readable JSON                   ok
+CASE neg-inventory-shape-drift        rc=3 want=3 ok
+  check tier 3 for an inventory of another schema            ok
+  check the fault names the missing key                      ok
+  check and says what to do about it                         ok
+  check nothing is reported as a judgement                   ok
+  check a missing counts sub-key faults the same way         ok
+  check it names the sub-key rather than crashing            ok
+CASE neg-inventory-crlf-checkout      rc=3 want=3 ok
+  check the same bytes with LF still judge clean             ok
+  check LF control prints a byte fingerprint                 ok
+  check a CR checkout is tier 3, not a judgement             ok
+  check the fault says which file and why                    ok
+  check it names the pin to restore                          ok
+  check no ledger body is emitted from smudged bytes         ok
+  check nothing is reported as a judgement                   ok
+CASE neg-missing-profile              rc=3 want=3 ok
+  check tier 3 when the profile is gone                      ok
+  check fault names the profile                              ok
+CASE neg-inventory-instrument-absent  rc=3 want=3 ok
+  check tier 3, not the case-mismatch tier                   ok
+  check fault names the instrument that could not be loaded  ok
+  check the fault is reported on stdout, not only as a crash ok
+  check the run prints its own exit-code line                ok
+  check no traceback escapes to stderr                       ok
+  check no ledger comes out of a tree that cannot be measured ok
+CASE neg-unknown-arg                  rc=2 want=2 ok
+  check tier 2 for bad usage                                 ok
+  check no ledger printed                                    ok
+cases executed=20 expected=20 failures=0
+VERDICT: PASS
+EXITCODE=0
+EXITCODE=0

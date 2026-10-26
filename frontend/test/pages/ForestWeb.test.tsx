@@ -21,6 +21,7 @@ import {
 
 const SEPARATOR = ` ${copyText("forest_meta_separator")} `;
 const FOOT_SEPARATOR = ` ${copyText("forest_foot_separator")} `;
+const COUNT_PREFIX = `${copyText("forest_meta_separator")} `;
 const TITLES = [
   "注意力权重可视化与模型可解释性的关系",
   "系统理解 Transformer 的注意力机制"
@@ -116,7 +117,7 @@ describe("Web 我的森林：入口、林地、选中纸条与诚实页脚", () 
     expect(host.querySelector('[data-slot="breadcrumb"]')?.textContent).toBe(copyText("forest_title"));
   });
 
-  it("林地渲染页头、提示、罗盘与每个主题一棵树", async () => {
+  it("林地渲染页头、提示与每个主题一棵树，数字在标题行", async () => {
     await mount();
     await act(async () => {
       openView("forest");
@@ -125,10 +126,13 @@ describe("Web 我的森林：入口、林地、选中纸条与诚实页脚", () 
     const screen = host.querySelector('[data-screen="forest"]');
     expect(screen).not.toBeNull();
     expect(textOf(screen as HTMLElement, '[data-node="forest_title"]')).toBe(copyText("forest_title"));
-    expect(textOf(host, "[data-forest-subtitle]")).toBe(copyText("forest_subtitle"));
+    expect(textOf(host, "[data-forest-subtitle]")).toBe(
+      copyText("forest_subtitle") + COUNT_PREFIX
+      + [copyFormat("forest_foot_tree", 2), copyFormat("forest_foot_segments", 3)].join(FOOT_SEPARATOR)
+    );
     expect(textOf(host, "[data-forest-hint]")).toBe(copyText("forest_hint"));
-    expect(host.querySelector("[data-forest-compass]")?.getAttribute("aria-label"))
-      .toBe(copyText("cd_forest_compass"));
+    // 旧版右上角那枚「N」指北圆已撤：场地隐喻不需要方位，屏幕只留一条指令。
+    expect(host.querySelector("[data-forest-compass]")).toBeNull();
     expect(host.querySelector("[data-forest-scene]")?.getAttribute("aria-label"))
       .toBe(copyFormat("cd_forest_scene", 2));
     const trees = Array.from(host.querySelectorAll("[data-forest-tree]"));
@@ -160,6 +164,8 @@ describe("Web 我的森林：入口、林地、选中纸条与诚实页脚", () 
     );
     expect(host.querySelector("[data-forest-go]")?.getAttribute("aria-label"))
       .toBe(copyFormat("cd_forest_open_topic", TITLES[1]));
+    // 一棵树已选中时不再挂「点一棵树看看」：同一屏两句话互相否定。
+    expect(host.querySelector("[data-forest-hint]")).toBeNull();
 
     await press(host, '[data-forest-tree="0"]');
     expect(textOf(host, "[data-forest-sheet-title]")).toBe(TITLES[0]);
@@ -185,18 +191,19 @@ describe("Web 我的森林：入口、林地、选中纸条与诚实页脚", () 
     );
   });
 
-  it("页脚只写读得到的数字：树数恒有，段枝总数在缺失时省略", async () => {
+  it("标题行只写读得到的数字：树数恒有，段枝总数在缺失时省略", async () => {
     await mount();
     await act(async () => {
       openView("forest");
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
-    expect(textOf(host, "[data-forest-foot]")).toBe(
-      [copyFormat("forest_foot_tree", 2), copyFormat("forest_foot_segments", 3)].join(FOOT_SEPARATOR)
+    expect(textOf(host, "[data-forest-count]")).toBe(
+      COUNT_PREFIX + [copyFormat("forest_foot_tree", 2), copyFormat("forest_foot_segments", 3)].join(FOOT_SEPARATOR)
     );
+    expect(host.querySelector("[data-forest-foot]"), "页脚撤掉，数字不再在底端重复").toBeNull();
   });
 
-  it("某主题段枝数读不到时，纸条省略段枝、页脚只留树数", async () => {
+  it("某主题段枝数读不到时，纸条省略段枝、标题行只留树数", async () => {
     await mount(variant((raw) => {
       const payload = raw.payload as Record<string, unknown>;
       payload.nodes = JSON.parse(JSON.stringify(payload.nodes).replaceAll("1 个分支 · 3天前", "3天前"));
@@ -206,7 +213,7 @@ describe("Web 我的森林：入口、林地、选中纸条与诚实页脚", () 
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
     expect(host.querySelectorAll("[data-forest-tree]")).toHaveLength(2);
-    expect(textOf(host, "[data-forest-foot]")).toBe(copyFormat("forest_foot_tree", 2));
+    expect(textOf(host, "[data-forest-count]")).toBe(COUNT_PREFIX + copyFormat("forest_foot_tree", 2));
     await press(host, '[data-forest-tree="0"]');
     expect(textOf(host, "[data-forest-sheet-meta]")).toBe(copyText(personaNameKey("default")));
   });

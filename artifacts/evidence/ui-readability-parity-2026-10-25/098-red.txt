@@ -1,0 +1,186 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.5 [39m[90mD:/Project/Android/Treelearn/frontend[39m
+
+ [31m❯[39m test/components/Composer.test.tsx [2m([22m[2m5 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 54[2mms[22m[39m
+   [31m❯[39m 输入坞说明句只在空态出现 [2m(5)[22m
+[31m     [31m×[31m 宿主给了 note：空草稿时说明句在卡外，文案就是宿主给的那句[39m[32m 33[2mms[22m[39m
+     [32m✓[39m 纯空白也算空态：trim 之后才决定退场[32m 4[2mms[22m[39m
+     [32m✓[39m 开始打字就退场，卡片里只剩输入与动作[32m 6[2mms[22m[39m
+[31m     [31m×[31m 宿主不给 note 就一句都不画：对话页不重复同一句尚未接通[39m[32m 4[2mms[22m[39m
+     [32m✓[39m 说明退场后能力边界仍在：两个动作都禁用并写明尚未接通[32m 4[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m test/components/Composer.test.tsx[2m > [22m输入坞说明句只在空态出现[2m > [22m宿主给了 note：空草稿时说明句在卡外，文案就是宿主给的那句
+[31m[1mAssertionError[22m: 说明句不再占卡片内部的地面: expected <form class="composer">…(3)</form> to be null[39m
+
+[32m- Expected:[39m
+null
+
+[31m+ Received:[39m
+<form
+  class="composer"
+>
+  <textarea
+    aria-label="追问输入框"
+    id="chat-composer-input"
+    placeholder="输入你的根问题"
+    rows="2"
+  />
+  <div
+    class="composer-row"
+  >
+    <span
+      class="chip"
+      data-node="chat_model_chip"
+    >
+      <svg
+        aria-hidden="true"
+        class="icon chip-effort"
+        focusable="false"
+        viewBox="0 0 24 24"
+      >
+        <g
+          fill="none"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="1.8"
+        >
+          <path
+            d="M12 4.5a5 5 0 0 0-3 9v2.5h6V13.5a5 5 0 0 0-3-9z"
+          />
+          <path
+            d="M10 19h4"
+          />
+        </g>
+      </svg>
+      <span
+        data-node="model_chip_label"
+      >
+        V4.1 Flash
+      </span>
+      <svg
+        aria-hidden="true"
+        class="icon chip-chevron"
+        focusable="false"
+        viewBox="0 0 24 24"
+      >
+        <g
+          fill="none"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="1.8"
+        >
+          <path
+            d="M6 9l6 6 6-6"
+          />
+        </g>
+      </svg>
+    </span>
+    <span
+      class="composer-spacer"
+    />
+    <button
+      aria-label="添加附件 · 尚未接通"
+      class="icon-btn composer-attach"
+      data-action="chat-attach"
+      disabled=""
+      title="添加附件 · 尚未接通"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="icon"
+        focusable="false"
+        viewBox="0 0 24 24"
+      >
+        <g
+          fill="none"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="1.8"
+        >
+          <path
+            d="M20.5 11.5 11 21a5 5 0 0 1-7.1-7.1L13.8 4a3.5 3.5 0 0 1 5 5L9.7 18.1a2 2 0 0 1-2.8-2.8l8.5-8.5"
+          />
+        </g>
+      </svg>
+    </button>
+    <button
+      aria-label="发送 · 尚未接通"
+      class="icon-btn composer-send"
+      data-action="chat-send"
+      disabled=""
+      title="发送 · 尚未接通"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="icon"
+        focusable="false"
+        viewBox="0 0 24 24"
+      >
+        <g
+          fill="none"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="1.8"
+        >
+          <path
+            d="M12 19V5M5.5 11.5 12 5l6.5 6.5"
+          />
+        </g>
+      </svg>
+    </button>
+  </div>
+  <p
+    class="composer-help"
+  >
+    点推荐问题或历史主题进入对话 · 发送与上传尚未接通
+  </p>
+</form>
+
+[36m [2m❯[22m test/components/Composer.test.tsx:[2m59:57[22m[39m
+    [90m 57|[39m     expect(help, "空态必须给出这条说明").not.toBeNull();
+    [90m 58|[39m     expect(help?.textContent).toBe(note);
+    [90m 59|[39m     expect(help?.closest(".composer"), "说明句不再占卡片内部的地面").toBeNull();
+    [90m   |[39m                                                         [31m^[39m
+    [90m 60|[39m   });
+    [90m 61|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/components/Composer.test.tsx[2m > [22m输入坞说明句只在空态出现[2m > [22m宿主不给 note 就一句都不画：对话页不重复同一句尚未接通
+[31m[1mAssertionError[22m: expected <p class="composer-help"></p> to be null[39m
+
+[32m- Expected:[39m
+null
+
+[31m+ Received:[39m
+<p
+  class="composer-help"
+>
+  发送、上传与分支创建尚未接通；这里可以写草稿，也可以复制回答。
+</p>
+
+[36m [2m❯[22m test/components/Composer.test.tsx:[2m76:48[22m[39m
+    [90m 74|[39m   it("宿主不给 note 就一句都不画：对话页不重复同一句尚未接通", async () => {
+    [90m 75|[39m     const el = await render("");
+    [90m 76|[39m     expect(el.querySelector(".composer-help")).toBeNull();
+    [90m   |[39m                                                [31m^[39m
+    [90m 77|[39m   });
+    [90m 78|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (5)[39m
+[2m   Start at [22m 00:40:47
+[2m   Duration [22m 990ms[2m (environment 84%, tests 6%, import 6%, transform 4%, worker 1%)[22m
+
+EXITCODE=1

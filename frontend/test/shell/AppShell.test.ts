@@ -84,6 +84,22 @@ describe("工作区外壳：侧栏、顶部栏与内容槽", () => {
     expect(host.querySelector(".crumb-current")?.textContent).toBe(copyText("tab_home"));
   });
 
+  /**
+   * T-2026-10-25-097（评审 WH3）：历史行的标题、meta 与箭头收进同一行；箭头是「回到哪儿」的
+   * 落点，不再另占一行。摘要由 CSS 判据钉住（recent-row.test.ts），这里只判结构。
+   */
+  it("历史行把标题、meta 与箭头收进同一行", async () => {
+    root = await render(host, shell());
+    const row = host.querySelector('[data-recent-topic="0"]');
+    expect(row).not.toBeNull();
+    const head = row!.querySelector(".recent-head");
+    expect(head, "标题行是 recent-head").not.toBeNull();
+    expect(head!.querySelector(".recent-title")?.textContent).toBeTruthy();
+    expect(head!.querySelector(".recent-meta")?.textContent).toBeTruthy();
+    expect(head!.querySelector(".recent-chevron"), "箭头在标题行内，不再另占一行").not.toBeNull();
+    expect(row!.querySelector(":scope > .recent-head"), "标题行是历史行的直接子节点").not.toBeNull();
+  });
+
   it("折叠按钮的可访问名与 aria-expanded 跟着状态走", async () => {
     root = await render(host, shell());
     const shellEl = host.querySelector(".app-workspace");

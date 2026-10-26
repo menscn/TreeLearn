@@ -131,7 +131,6 @@ public class IconAssetsTest {
             "ic_chat_attach.xml",
             "ic_chat_close.xml",
             "ic_chat_gear.xml",
-            "ic_chat_overview.xml",
     };
 
     @Test
@@ -170,16 +169,25 @@ public class IconAssetsTest {
 
     @Test
     public void chatReplacedActionKeepsItsOriginalIdIconTintAndDescription() throws Exception {
-        // App bar: back reuses the nav back chevron; nav reuses the branch tree; overview and
-        // settings get their own glyphs; the quote-row clear gets a close glyph.
+        // App bar: back reuses the nav back chevron and the overflow key draws the shared more
+        // glyph. 2026-10-25 (T-2026-10-25-096): the tree, overview and settings keys left the bar -
+        // the tree entry moved into the reading header, the other two behind 更多 - so those three
+        // ids must not own an icon key here any more.
         assertIconAction("layout/screen_chat_body.xml", "chat_back",
                 "@drawable/ic_nav_back", "@string/cd_chat_back");
-        assertIconAction("layout/screen_chat_body.xml", "chat_nav",
-                "@drawable/ic_nav_tree", "@string/cd_chat_nav");
-        assertIconAction("layout/screen_chat_body.xml", "chat_overview",
-                "@drawable/ic_chat_overview", "@string/cd_chat_overview");
-        assertIconAction("layout/screen_chat_body.xml", "chat_settings",
-                "@drawable/ic_chat_gear", "@string/cd_chat_settings");
+        assertIconAction("layout/screen_chat_body.xml", "chat_more",
+                "@drawable/ic_nav_more", "@string/cd_chat_more");
+        String chat = read(RES.resolve(Paths.get("layout", "screen_chat_body.xml")));
+        assertTrue("the reading header's tree entry keeps its glyph and description",
+                chat.contains("@drawable/ic_nav_tree")
+                        && chat.contains("@string/cd_chat_nav")
+                        && chat.contains("android:tint=\"@color/tl_green_deep\""));
+        for (String gone : new String[] {"chat_nav", "chat_overview", "chat_settings"}) {
+            assertTrue(gone + " no longer owns an icon key in the bar",
+                    !chat.contains("android:id=\"@+id/" + gone + "\""));
+        }
+        assertTrue("the overview key's glyph retired with the key, not left orphaned",
+                !Files.exists(RES.resolve(Paths.get("drawable", "ic_chat_overview.xml"))));
         assertIconAction("layout/screen_chat_body.xml", "chat_quote_clear",
                 "@drawable/ic_chat_close", "@string/cd_chat_quote_clear");
         assertIconAction("layout/screen_chat_body.xml", "chat_attach",
@@ -189,12 +197,25 @@ public class IconAssetsTest {
                 "@drawable/ic_chat_send", "@string/cd_chat_send");
         // Answer action row: copy/reset/fork iconify; children stays textual (Java-driven). 2026-09-28
         // user decision: quote/translate/speak left the row, so act_quote is no longer asserted here.
-        assertIconAction("layout/view_answer_actions.xml", "act_copy",
-                "@drawable/ic_action_copy", "@string/cd_act_copy");
-        assertIconAction("layout/view_answer_actions.xml", "act_reset",
-                "@drawable/ic_nav_restore", "@string/cd_act_reset");
-        assertIconAction("layout/view_answer_actions.xml", "act_fork",
-                "@drawable/ic_action_fork", "@string/cd_act_fork");
+        // 2026-10-25 (T-2026-10-25-101): each lead is a FrameLayout holding a centred glyph, so the
+        // drawable lives on the child while the description stays on the cell.
+        String actions = read(RES.resolve(Paths.get("layout", "view_answer_actions.xml")));
+        for (String[] cell : new String[][] {
+                {"act_copy", "@drawable/ic_action_copy", "@string/cd_act_copy"},
+                {"act_reset", "@drawable/ic_nav_restore", "@string/cd_act_reset"},
+                {"act_fork", "@drawable/ic_action_fork", "@string/cd_act_fork"}}) {
+            int start = actions.indexOf("android:id=\"@+id/" + cell[0] + "\"");
+            assertTrue(cell[0] + " must exist", start >= 0);
+            int end = actions.indexOf("</FrameLayout>", start);
+            assertTrue(cell[0] + " is a closed cell", end > start);
+            String element = actions.substring(start, end);
+            assertTrue(cell[0] + " must reference " + cell[1], element.contains(cell[1]));
+            assertTrue(cell[0] + " must tint through a token",
+                    element.contains("android:tint=\"@color/tl_")
+                            || element.contains("android:drawableTint=\"@color/tl_"));
+            assertTrue(cell[0] + " must carry a contentDescription",
+                    element.contains("android:contentDescription=\"" + cell[2] + "\""));
+        }
         // 2026-09-28 user decision: the recommendation strip's fork zone is a glyph too, drawn with the
         // very same asset the action row uses - one glyph, one meaning. It used to be a text Button.
         assertIconAction("layout/item_chat_suggestion.xml", "suggestion_fork",

@@ -1,0 +1,123 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.5 [39m[90mD:/Project/Android/Treelearn/frontend[39m
+
+ [31m❯[39m test/pages/ForestWeb.test.tsx [2m([22m[2m9 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[33m 379[2mms[22m[39m
+   [31m❯[39m Web 我的森林：入口、林地、选中纸条与诚实页脚 [2m(9)[22m
+     [32m✓[39m 侧栏森林入口卡在主导航与「最近学习」之间，点入 forest 视图[32m 72[2mms[22m[39m
+[31m     [31m×[31m 林地渲染页头、提示与每个主题一棵树，数字在标题行[39m[32m 50[2mms[22m[39m
+[31m     [31m×[31m 点树出现选中标记与纸条：段枝数 + 当前人设，箭头进入该主题[39m[32m 50[2mms[22m[39m
+     [32m✓[39m 纸条显示该主题当前人设档名[32m 52[2mms[22m[39m
+[31m     [31m×[31m 标题行只写读得到的数字：树数恒有，段枝总数在缺失时省略[39m[32m 27[2mms[22m[39m
+[31m     [31m×[31m 某主题段枝数读不到时，纸条省略段枝、标题行只留树数[39m[32m 47[2mms[22m[39m
+     [32m✓[39m 没有主题时是空态，按钮回首页[32m 25[2mms[22m[39m
+     [32m✓[39m 学习库读不到时是错误态：只有说明，不画不生效的重试按钮[32m 15[2mms[22m[39m
+     [32m✓[39m 森林只读：进出森林不改视图栈以外的状态[32m 40[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 4 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m test/pages/ForestWeb.test.tsx[2m > [22mWeb 我的森林：入口、林地、选中纸条与诚实页脚[2m > [22m林地渲染页头、提示与每个主题一棵树，数字在标题行
+[31m[1mAssertionError[22m: expected '一题一树，慢慢长' to be '一题一树，慢慢长· 2 棵树 · 3 段枝' // Object.is equality[39m
+
+Expected: [32m"一题一树，慢慢长[7m· 2 棵树 · 3 段枝[27m"[39m
+Received: [31m"一题一树，慢慢长"[39m
+
+[36m [2m❯[22m test/pages/ForestWeb.test.tsx:[2m129:52[22m[39m
+    [90m127|[39m     expect(screen).not.toBeNull();
+    [90m128|[39m     expect(textOf(screen as HTMLElement, '[data-node="forest_title"]')…
+    [90m129|[39m     expect(textOf(host, "[data-forest-subtitle]")).toBe(
+    [90m   |[39m                                                    [31m^[39m
+    [90m130|[39m       copyText("forest_subtitle") + COUNT_PREFIX
+    [90m131|[39m       + [copyFormat("forest_foot_tree", 2), copyFormat("forest_foot_se…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/pages/ForestWeb.test.tsx[2m > [22mWeb 我的森林：入口、林地、选中纸条与诚实页脚[2m > [22m点树出现选中标记与纸条：段枝数 + 当前人设，箭头进入该主题
+[31m[1mAssertionError[22m: expected <p class="forest-hint" …(1)>…(1)</p> to be null[39m
+
+[32m- Expected:[39m
+null
+
+[31m+ Received:[39m
+<p
+  class="forest-hint"
+  data-forest-hint="true"
+>
+  <svg
+    aria-hidden="true"
+    class="forest-hint-icon"
+    focusable="false"
+    viewBox="0 0 24 24"
+  >
+    <g
+      fill="none"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="1.8"
+    >
+      <path
+        d="M12 21s-7-6.2-7-11a7 7 0 1 1 14 0c0 4.8-7 11-7 11z"
+      />
+      <path
+        d="M12 12.2a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4z"
+      />
+    </g>
+  </svg>
+  点一棵树看看
+</p>
+
+[36m [2m❯[22m test/pages/ForestWeb.test.tsx:[2m168:54[22m[39m
+    [90m166|[39m       .toBe(copyFormat("cd_forest_open_topic", TITLES[1]));
+    [90m167|[39m     // 一棵树已选中时不再挂「点一棵树看看」：同一屏两句话互相否定。
+    [90m168|[39m     expect(host.querySelector("[data-forest-hint]")).toBeNull();
+    [90m   |[39m                                                      [31m^[39m
+    [90m169|[39m
+    [90m170|[39m     await press(host, '[data-forest-tree="0"]');
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/pages/ForestWeb.test.tsx[2m > [22mWeb 我的森林：入口、林地、选中纸条与诚实页脚[2m > [22m标题行只写读得到的数字：树数恒有，段枝总数在缺失时省略
+[31m[1mAssertionError[22m: expected null to be '· 2 棵树 · 3 段枝' // Object.is equality[39m
+
+[32m- Expected:[39m
+"· 2 棵树 · 3 段枝"
+
+[31m+ Received:[39m
+null
+
+[36m [2m❯[22m test/pages/ForestWeb.test.tsx:[2m200:49[22m[39m
+    [90m198|[39m       await new Promise((resolve) => setTimeout(resolve, 0));
+    [90m199|[39m     });
+    [90m200|[39m     expect(textOf(host, "[data-forest-count]")).toBe(
+    [90m   |[39m                                                 [31m^[39m
+    [90m201|[39m       COUNT_PREFIX + [copyFormat("forest_foot_tree", 2), copyFormat("f…
+    [90m202|[39m     );
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/pages/ForestWeb.test.tsx[2m > [22mWeb 我的森林：入口、林地、选中纸条与诚实页脚[2m > [22m某主题段枝数读不到时，纸条省略段枝、标题行只留树数
+[31m[1mAssertionError[22m: expected null to be '· 2 棵树' // Object.is equality[39m
+
+[32m- Expected:[39m
+"· 2 棵树"
+
+[31m+ Received:[39m
+null
+
+[36m [2m❯[22m test/pages/ForestWeb.test.tsx:[2m216:49[22m[39m
+    [90m214|[39m     });
+    [90m215|[39m     expect(host.querySelectorAll("[data-forest-tree]")).toHaveLength(2…
+    [90m216|[39m     expect(textOf(host, "[data-forest-count]")).toBe(COUNT_PREFIX + co…
+    [90m   |[39m                                                 [31m^[39m
+    [90m217|[39m     await press(host, '[data-forest-tree="0"]');
+    [90m218|[39m     expect(textOf(host, "[data-forest-sheet-meta]")).toBe(copyText(per…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m5 passed[39m[22m[90m (9)[39m
+[2m   Start at [22m 00:43:18
+[2m   Duration [22m 1.37s[2m (environment 51%, tests 30%, transform 11%, import 8%)[22m
+
+EXITCODE=1

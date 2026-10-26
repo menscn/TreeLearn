@@ -256,7 +256,7 @@ export function ForestScene({ trees, selected, onSelect }: ForestSceneProps) {
             <path key={`contour-${base}`} className="fs-contour" d={contourPath(base, width, height)} />
           ))}
           <path className="fs-contour" d={blobPath(KNOLL, width, height)} />
-          <path className="fs-contour fs-contour-faint" d={blobPath(KNOLL_INNER, width, height)} />
+          <path className="fs-contour fs-contour-near" d={blobPath(KNOLL_INNER, width, height)} />
           {GRASS_SPOTS.map(([x, y]) => (
             <path key={`grass-${x}-${y}`} className="fs-grass" d={grassPath(x as number, y as number, width, height)} />
           ))}

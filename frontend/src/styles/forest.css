@@ -118,6 +118,11 @@
   font-size: var(--fs-cap);
 }
 
+/* 数字跟在副标题后面，不在屏幕底端另起一行（T-2026-10-25-103）。 */
+.forest-count {
+  margin-left: var(--s1);
+}
+
 .forest-stage {
   position: relative;
   flex: 1;
@@ -162,15 +167,18 @@
 }
 
 /* 地形与树的填色只在这里落地，全部引 token 变量。 */
+/* 等高线（2026-10-25，T-2026-10-25-103）：.10/.06 在真机与桌面上都读作「几乎看不见」，
+   与项目自己量 mist-base 的尺子不自洽。两档提到 .30 与 .42——远景 .30、近景 .42，
+   按合成色估算与底色的 L* 差落在 8–15。**未经真机复测**（用户拍板取保守值）。 */
 .fs-contour {
   fill: none;
   stroke: var(--green);
   stroke-width: 1;
-  stroke-opacity: .10;
+  stroke-opacity: .30;
 }
 
-.fs-contour-faint {
-  stroke-opacity: .06;
+.fs-contour-near {
+  stroke-opacity: .42;
 }
 
 .fs-grass {
@@ -263,17 +271,19 @@
 
 .forest-tag {
   position: absolute;
-  /* 名牌默认落在树的脚下：斜俯瞰里它读作「这棵树的牌子」，也不会压到上方的邻树。 */
+  /* 名牌默认落在树的脚下：斜俯瞰里它读作「这棵树的牌子」，也不会压到上方的邻树。
+     2026-10-25（T-103）：字重降到 400、颜色降一档到 ink2——名字要进来，但不抢戏；
+     8 个字之后截断（CJK 一字约 1em，8em 连带左右内边距正好读作 8 字）。 */
   transform: translate(-50%, 0);
-  max-width: 220px;
-  padding: 3px var(--s3);
+  max-width: min(8em, 220px);
+  padding: 3px var(--s2);
   border: 1px solid var(--line);
   border-radius: var(--r-full);
   background: var(--surface);
   box-shadow: var(--sh-1);
-  color: var(--ink);
+  color: var(--ink2);
   font-size: var(--fs-cap);
-  font-weight: 600;
+  font-weight: 400;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -283,7 +293,7 @@
   transform: translate(-50%, -100%);
 }
 
-/* ---- 提示胶囊与罗盘 ---- */
+/* ---- 提示胶囊（罗盘已于 2026-10-25 撤掉；胶囊本体保留，只在没选中树时挂） ---- */
 .forest-hint {
   position: absolute;
   top: var(--s3);
@@ -307,36 +317,6 @@
   height: 13px;
   flex: none;
   color: var(--green);
-}
-
-.forest-compass {
-  position: absolute;
-  top: var(--s3);
-  right: var(--s4);
-  z-index: 4;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1px;
-  width: 30px;
-  height: 30px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-full);
-  background: var(--surface);
-  box-shadow: var(--sh-1);
-  color: var(--ink3);
-  font-size: 9px;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.forest-compass-needle {
-  width: 0;
-  height: 0;
-  border-left: 3px solid transparent;
-  border-right: 3px solid transparent;
-  border-bottom: 4px solid var(--green);
 }
 
 /* ---- 底部纸条与页脚 ---- */
@@ -407,18 +387,6 @@
   height: 18px;
 }
 
-.forest-foot {
-  position: absolute;
-  right: 0;
-  bottom: 12px;
-  left: 0;
-  z-index: 4;
-  margin: 0;
-  color: var(--ink3);
-  font-size: 10px;
-  letter-spacing: .02em;
-  text-align: center;
-}
 
 /* ---- 空态与错误态 ---- */
 .forest-state {
@@ -511,11 +479,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-
-  .forest-compass {
-    top: var(--s2);
-    right: var(--s3);
   }
 
   .forest-sheet {

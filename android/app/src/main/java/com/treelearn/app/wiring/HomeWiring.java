@@ -98,7 +98,7 @@ public final class HomeWiring implements HomeData, RootQuestionSubmitter {
     }
 
     /**
-     * The strip is the starter set, and its argument is deliberately unused.
+     * The strip: history-derived when it can be, starter set otherwise.
      *
      * <p>PRD 6.2.17 point 3 makes the history-derived set the answer for a learner who already has
      * topics, and that set is T-011's {@code HOME_RECOMMENDATIONS} artifact. No production producer
@@ -106,6 +106,20 @@ public final class HomeWiring implements HomeData, RootQuestionSubmitter {
      * so a history-derived strip cannot be produced, and PRD 6.2.17's own fallback ("a failed
      * recommendation is answered with the starter set") is the honest answer for both cases. It never
      * throws and never comes back empty, which is what this port promises.
+     *
+     * <p><strong>The derived items no longer all wear the same tag.</strong> Until 2026-10-25 every
+     * question the artifact returned was built as {@code FOLLOW_UP}, so a strip of four cards read
+     * "顺着你学的" four times (the 2026-10-25 review's data-bug entry). PRD 6.2.17 point 3 asks the strip
+     * to distinguish two non-starter kinds - an extension of what was learned and a different new
+     * direction - and the artifact carries neither: it returns bare questions. The kind is therefore
+     * assigned here, by position, alternating between the two kinds PRD allows. Position is stable for
+     * as long as the artifact's order is, which matters because {@code Recommendation} compares by
+     * value and the marquee skips a rebuild on an equal list; a per-render random draw would restart
+     * the drift on every keystroke.
+     *
+     * <p>The starter fallback is deliberately uniform: PRD 6.2.17 point 3 says "无历史主题时统一为入门
+     * 起点", so all four starter cards keep {@code STARTER}. Varying them would make the empty state
+     * claim a history that does not exist.
      */
     @Override
     public Recommendations recommendations(boolean hasTopics) {
@@ -120,14 +134,20 @@ public final class HomeWiring implements HomeData, RootQuestionSubmitter {
                         GenerationModel.FLASH);
                 if (!questions.isEmpty()) {
                     List<Recommendation> items = new ArrayList<Recommendation>();
-                    for (String question : questions) {
-                        items.add(new Recommendation(question, Recommendation.Kind.FOLLOW_UP));
+                    for (int index = 0; index < questions.size(); index++) {
+                        items.add(new Recommendation(questions.get(index), derivedKind(index)));
                     }
                     return Recommendations.fromHistory(items);
                 }
             }
         }
         return Recommendations.starterFallback(StarterRecommendations.all());
+    }
+
+    /** The two kinds PRD 6.2.17 point 3 allows for a learner who already has topics. */
+    private static Recommendation.Kind derivedKind(int index) {
+        return index % 2 == 0 ? Recommendation.Kind.FOLLOW_UP
+                : Recommendation.Kind.NEW_DIRECTION;
     }
 
     /**

@@ -105,6 +105,10 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
     private final int basePaddingBottom;
 
     private final TextView title;
+    /** 2026-10-25: the full branch title at the top of the reading area, and its meta line. */
+    private final TextView readerTitle;
+    private final TextView readerMeta;
+    private final View readerHeader;
     private final FollowScrollView scroll;
     private final LinearLayout messageFlow;
     private final View loading;
@@ -220,6 +224,9 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         });
         LayoutInflater.from(context).inflate(R.layout.screen_chat, this, true);
         title = findViewById(R.id.chat_title);
+        readerTitle = findViewById(R.id.chat_reader_title);
+        readerMeta = findViewById(R.id.chat_reader_meta);
+        readerHeader = findViewById(R.id.chat_reader_header);
         scroll = findViewById(R.id.chat_scroll);
         messageFlow = findViewById(R.id.chat_messages);
         loading = findViewById(R.id.chat_loading);
@@ -321,12 +328,14 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
             findViewById(id).setOnClickListener(v -> fire(a -> a.onFullscreenEditClosed()));
         }
         findViewById(R.id.chat_back).setOnClickListener(view -> fire(actions -> actions.onBackPressed()));
-        findViewById(R.id.chat_overview)
-                .setOnClickListener(view -> fire(actions -> actions.onOverviewPressed()));
-        findViewById(R.id.chat_nav)
+        // 2026-10-25 (T-2026-10-25-096): one overflow key replaces the tree, overview and settings
+        // icons. The tree entry keeps a direct 44dp cell in the reading header (below the title), and
+        // the other two live behind this menu. There is no share entry in this build - the app has no
+        // share path that reaches real data - so the menu names what exists rather than what the
+        // board's copy suggests.
+        findViewById(R.id.chat_more).setOnClickListener(this::showMoreMenu);
+        findViewById(R.id.chat_branch_tree)
                 .setOnClickListener(view -> fire(actions -> actions.onNavigationPressed()));
-        findViewById(R.id.chat_settings)
-                .setOnClickListener(view -> fire(actions -> actions.onSettingsPressed()));
         findViewById(R.id.chat_quote_clear)
                 .setOnClickListener(view -> fire(actions -> actions.onQuoteCleared()));
         findViewById(R.id.chat_source_header)
@@ -454,12 +463,68 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
         menu.show();
     }
 
+    /**
+     * The topbar's overflow (T-2026-10-25-096): the two entries that no longer own a 36dp key.
+     *
+     * <p>The board's copy says 分享 / 设置, but this build has no share path that reaches real data -
+     * the project rule is to delete a control that cannot do its job rather than draw it - so the
+     * menu carries the two gestures that already exist: 总览 (the tree map) and 设置. Adding a share
+     * item would be a second lie about what the app can do.
+     */
+    private void showMoreMenu(View anchor) {
+        PopupMenu menu = new PopupMenu(getContext(), anchor);
+        menu.getMenu().add(Menu.NONE, 1, 0, R.string.chat_overview);
+        menu.getMenu().add(Menu.NONE, 2, 1, R.string.settings_title);
+        menu.setOnMenuItemClickListener(item -> {
+            switch (item.getItemId()) {
+                case 1:
+                    fire(actions -> actions.onOverviewPressed());
+                    return true;
+                case 2:
+                    fire(actions -> actions.onSettingsPressed());
+                    return true;
+                default:
+                    return false;
+            }
+        });
+        menu.show();
+    }
+
+    /**
+     * The reading-area header (T-2026-10-25-096): the branch's full title, then the time it started
+     * and the tree entry.
+     *
+     * <p>The time is read from the first row of the conversation, which for a branch is the root
+     * question created with it; that keeps the fact inside the one read the screen already has. The
+     * header is hidden until a title exists, because an untitled branch is still loading its derived
+     * title and a lone time line over a blank heading would say less than nothing.
+     */
+    private void renderReader(ChatViewState state) {
+        String heading = state.branchTitle == null ? "" : state.branchTitle;
+        if (heading.isEmpty()) {
+            readerHeader.setVisibility(GONE);
+            return;
+        }
+        readerHeader.setVisibility(VISIBLE);
+        if (!TextUtils.equals(readerTitle.getText(), heading)) {
+            readerTitle.setText(heading);
+        }
+        String meta = state.messages.isEmpty() ? "" : android.text.format.DateUtils
+                .getRelativeTimeSpanString(state.messages.get(0).createdAt,
+                        System.currentTimeMillis(),
+                        android.text.format.DateUtils.MINUTE_IN_MILLIS).toString();
+        if (!TextUtils.equals(readerMeta.getText(), meta)) {
+            readerMeta.setText(meta);
+        }
+    }
+
     public void render(ChatViewState state) {
         rendering = true;
         try {
             prepareFollowState(state);
             lastRenderedState = state;
             title.setText(state.branchTitle);
+            renderReader(state);
             loading.setVisibility(state.phase == ChatViewState.Phase.LOADING ? VISIBLE : GONE);
             error.setVisibility(state.phase == ChatViewState.Phase.ERROR ? VISIBLE : GONE);
             renderMessages(state);
@@ -1246,9 +1311,9 @@ public final class ChatScreen extends LinearLayout implements ChatSpeaker.Sink {
                 renderQuestion(message);
                 return;
             }
-            // 2026-09-27 user decision: the time lives in the action row now (prototype .ai-time),
-            // so it appears with the stable answer instead of on the tag line.
-            actionBar.renderTime(message.createdAt);
+            // 2026-10-25: the answer's time left the action row for the reading-area header, where it
+            // is shown once per branch (T-2026-10-25-101). See renderReader for the one place it is
+            // written.
             AnswerContentProjection projection = AnswerContentProjection.project(message);
             answerProjection = projection;
             String disclosureReasoning = message.reasoning.isEmpty()

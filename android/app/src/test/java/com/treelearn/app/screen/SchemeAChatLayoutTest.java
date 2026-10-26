@@ -26,6 +26,10 @@ import org.junit.Test;
  *
  * <p>The popup files must be gone rather than merely unused: a second carrier left in the tree is
  * the next reader's invitation to wire it back in.
+ *
+ * <p>2026-10-25 (T-2026-10-25-096): the topbar is back / title / more, the branch's full serif title
+ * opens the reading area with the time and the tree entry, and the answer actions are the board's
+ * 29dp faces in 44dp targets with no time in the row.
  */
 public final class SchemeAChatLayoutTest {
 
@@ -81,14 +85,23 @@ public final class SchemeAChatLayoutTest {
                 bar.contains("android:layout_marginStart=\"@dimen/space_s4\"")
                         && bar.contains("android:layout_marginEnd=\"@dimen/space_s4\""));
         assertTrue("8dp inner padding", bar.contains("android:padding=\"@dimen/space_s2\""));
-        for (String id : new String[]{"chat_back", "chat_nav", "chat_overview", "chat_settings"}) {
+        for (String id : new String[]{"chat_back", "chat_more"}) {
             String icon = elementAround(chat, id);
             assertTrue(id + " is the 36dp capsule key",
                     icon.contains("android:layout_width=\"@dimen/topbar_icon\"")
                             && icon.contains("android:layout_height=\"@dimen/topbar_icon\""));
             assertTrue(id + " draws a 20dp glyph inside", icon.contains("android:padding=\"8dp\""));
         }
-        assertTrue("the title is Scheme A's 13sp semibold line",
+        // 2026-10-25 (T-2026-10-25-096): three entries - back, title, more. The tree entry moved to
+        // the reading header and the overview/settings entries behind the overflow, so a fourth key
+        // left in the bar would be density the board explicitly removed.
+        for (String gone : new String[]{"chat_nav", "chat_overview", "chat_settings"}) {
+            assertFalse(gone + " must not remain in the bar",
+                    chat.contains("android:id=\"@+id/" + gone + "\""));
+        }
+        assertTrue("the overflow key is the shared more glyph",
+                elementAround(chat, "chat_more").contains("@drawable/ic_nav_more"));
+        assertTrue("the title keeps the 13sp semibold line",
                 chat.contains("android:textSize=\"@dimen/text_topbar_title\""));
         // 2026-10-22 parent decision: the proposal's title chevron has no real branch switcher
         // behind it, so the page must not grow a dead one. The follow-latest key legitimately draws
@@ -97,6 +110,82 @@ public final class SchemeAChatLayoutTest {
         assertFalse("no title chevron",
                 title.contains("android:drawableEnd=") || title.contains("android:drawableRight="));
         assertFalse("no title chevron node", chat.contains("chat_title_chevron"));
+    }
+
+    /**
+     * 2026-10-25 (T-2026-10-25-096): the topbar keeps one 14sp line, so the branch's full title
+     * opens the reading area. The time is stated once for the branch here rather than repeated on
+     * every answer, and the tree entry gets its own 44dp cell on the meta row.
+     */
+    @Test
+    public void theReaderHeaderCarriesTheTitleTheTimeAndTheTreeEntry() throws Exception {
+        String chat = layout("screen_chat_body.xml");
+        String header = elementAround(chat, "chat_reader_header");
+        assertTrue("the header opens the reading column, above the messages",
+                chat.indexOf("android:id=\"@+id/chat_reader_header\"")
+                        < chat.indexOf("android:id=\"@+id/chat_messages\""));
+        assertTrue("it keeps the board's 12dp gap to the first answer",
+                header.contains("android:layout_marginBottom=\"@dimen/reader_header_gap\""));
+        assertTrue("it is a column: title, meta row, rule",
+                header.contains("android:orientation=\"vertical\""));
+
+        String title = elementAround(chat, "chat_reader_title");
+        assertTrue("the title is the bundled serif",
+                title.contains("android:fontFamily=\"@font/noto_serif_sc\""));
+        assertTrue("at the board's 19sp", title.contains(
+                "android:textSize=\"@dimen/text_reader_title\""));
+        assertTrue("semibold", title.contains("android:textStyle=\"bold\""));
+        assertTrue("two lines on a phone", title.contains("android:maxLines=\"2\""));
+        assertTrue("at 1.4 leading", title.contains("android:lineSpacingMultiplier=\"1.4\""));
+
+        String meta = elementAround(chat, "chat_reader_meta");
+        assertTrue("the time is the shared 12sp secondary line",
+                meta.contains("android:textSize=\"@dimen/text_cap\""));
+
+        String tree = elementAround(chat, "chat_branch_tree");
+        assertTrue("the tree entry keeps a 44dp target",
+                tree.contains("android:layout_height=\"@dimen/touch_min\""));
+        assertTrue("it is a real control", tree.contains("android:clickable=\"true\""));
+        assertTrue("named for a screen reader", tree.contains("@string/cd_chat_nav"));
+        assertTrue("with its glyph and label",
+                chat.contains("@drawable/ic_nav_tree")
+                        && chat.contains("@string/chat_branch_tree"));
+
+        String screen = read(SRC.resolve(Paths.get("screen", "ChatScreen.java")));
+        assertTrue("the header is hidden until a title exists",
+                screen.contains("readerHeader.setVisibility(GONE)"));
+        assertTrue("the title is the state's branch title",
+                screen.contains("state.branchTitle"));
+        assertTrue("the time is read from the branch's root row",
+                screen.contains("state.messages.get(0).createdAt"));
+        assertTrue("and drawn as a relative time",
+                screen.contains("DateUtils") && screen.contains("getRelativeTimeSpanString"));
+        assertTrue("a render paints it",
+                screen.contains("renderReader(state);"));
+        assertTrue("the tree entry reports the existing navigation gesture",
+                screen.contains("R.id.chat_branch_tree")
+                        && screen.contains("actions.onNavigationPressed()"));
+
+        assertDimen("text_reader_title", "19sp");
+        assertDimen("reader_header_gap", "12dp");
+    }
+
+    /**
+     * The overflow carries the two entries that no longer own a 36dp key, and only those: this build
+     * has no share path, and the menu must not draw an item that cannot act.
+     */
+    @Test
+    public void theOverflowCarriesOnlyTheGesturesThatExist() throws Exception {
+        String screen = read(SRC.resolve(Paths.get("screen", "ChatScreen.java")));
+        int menu = screen.indexOf("private void showMoreMenu");
+        assertTrue("the overflow is a real method", menu > 0);
+        String body = screen.substring(menu, Math.min(screen.length(), menu + 1400));
+        assertTrue("it offers the tree overview", body.contains("R.string.chat_overview"));
+        assertTrue("and settings", body.contains("R.string.settings_title"));
+        assertTrue("each entry calls the gesture that already existed",
+                body.contains("actions.onOverviewPressed()")
+                        && body.contains("actions.onSettingsPressed()"));
+        assertFalse("no share item is invented", body.contains("share"));
     }
 
     @Test
@@ -163,7 +252,22 @@ public final class SchemeAChatLayoutTest {
             assertTrue(id + " keeps the 44dp target",
                     element.contains("android:layout_width=\"@dimen/touch_min\"")
                             && element.contains("android:layout_height=\"@dimen/touch_min\""));
+            assertTrue(id + " holds a centred 18dp glyph rather than a compound drawable",
+                    !element.contains("android:drawableStart="));
         }
+        // 2026-10-25 (T-2026-10-25-101): each lead is a FrameLayout with a centred 18dp ImageView.
+        // A compound drawable was laid out at its intrinsic 24dp against the button's start edge,
+        // which is what made the four controls read as one heavy band.
+        int glyphs = actions.split("android:layout_width=\"18dp\"", -1).length - 1;
+        assertTrue("all four glyphs are 18dp", glyphs == 4);
+        assertTrue("and each follows its parent's enabled state",
+                (actions.split("android:duplicateParentState=\"true\"", -1).length - 1) == 5);
+        assertTrue("the leads are flush left, not spread across the row",
+                elementAround(actions, "answer_actions")
+                        .contains("android:gravity=\"start|center_vertical\""));
+        assertFalse("the row no longer repeats the answer's time", actions.contains("act_time"));
+        assertFalse("and no time text is drawn in it", actions.contains("@string/act_time"));
+
         String glass = drawable("bg_action_glass.xml");
         assertTrue("a full-round dot", glass.contains("@dimen/radius_full"));
         assertTrue("token glass inside", glass.contains("@color/glass_chrome")
@@ -171,6 +275,10 @@ public final class SchemeAChatLayoutTest {
         assertTrue("the dot is inset inside the 44dp target",
                 glass.contains("@dimen/action_glass_inset"));
         assertDimen("action_glass_inset", "7.5dp");
+
+        String bar = read(SRC.resolve(Paths.get("screen", "AnswerActionBar.java")));
+        assertFalse("the bar no longer renders a time", bar.contains("renderTime"));
+        assertFalse("and keeps no time view", bar.contains("act_time"));
     }
 
     @Test

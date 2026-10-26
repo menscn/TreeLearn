@@ -138,8 +138,14 @@ export function AppShell({ children = null }: { children?: ReactNode }) {
                 aria-current={active ? "page" : undefined}
                 onClick={() => openTopic(index, data.topics.length)}
               >
-                <span className="recent-title">{topic.title}</span>
-                <small>{topic.meta}</small>
+                <span className="recent-head">
+                  <span className="recent-title">{topic.title}</span>
+                  <span className="recent-meta">{topic.meta}</span>
+                  <Icon name="chevron_right" className="recent-chevron" />
+                </span>
+                {topic.summary ? (
+                  <span className="recent-summary">{topic.summary}</span>
+                ) : null}
               </button>
             );
           })}

@@ -14,11 +14,16 @@ import org.junit.Test;
 /**
  * The bundled Chinese serif (T-2026-10-22-054).
  *
- * <p>Scheme A sets only the brand and the library page title in serif; topic cards, search hits and
- * the branch-navigation topbar keep the body sans. Before this slice every serif was the ROM's own
- * {@code serif}, whose glyphs and weight differ between vendors, so the brand could not look the
- * same on two phones. The font now ships in the APK under the OFL, and these pins keep the licence
- * next to it and keep the serif from leaking back onto card titles or the shared topbar.
+ * <p>Scheme A sets only the brand, the home headline and the library page title in serif; topic
+ * cards, search hits and the branch-navigation topbar keep the body sans. Before this slice every
+ * serif was the ROM's own {@code serif}, whose glyphs and weight differ between vendors, so the
+ * brand could not look the same on two phones. The font now ships in the APK under the OFL, and
+ * these pins keep the licence next to it and keep the serif from leaking back onto card titles or
+ * the shared topbar.
+ *
+ * <p>T-2026-10-25-100 moved the brand lockup from the column's first row into the floating topbar
+ * and promoted the former 12sp subtitle to the page's one headline, so both changed file and size
+ * without changing the rule: brand and headline serif, everything else sans.
  */
 public final class ChineseSerifTitleTest {
 
@@ -71,13 +76,15 @@ public final class ChineseSerifTitleTest {
     }
 
     @Test
-    public void onlyTheBrandAndLibraryTitleUseTheBundledSerif() throws Exception {
+    public void onlyTheBrandTheHeadlineAndLibraryTitleUseTheBundledSerif() throws Exception {
+        // 2026-10-25 (T-2026-10-25-100): the brand lockup now sits in the floating topbar, so the
+        // pin reads screen_home.xml rather than the column.
         assertTrue("the home brand uses the bundled serif",
-                elementAround(layout("screen_home_body.xml"), "home_brand")
+                elementAround(layout("screen_home.xml"), "home_brand")
                         .contains("@font/noto_serif_sc"));
-        // 2026-10-22 Scheme A moved the old hero headline under the lockup as its 12sp sans
-        // subtitle (T-2026-10-22-055), so the id stays but the face must not.
-        assertFalse("the home subtitle is the proposal's sans line",
+        // The former 12sp sans subtitle became the page's one headline at 22sp serif: the same
+        // literal under the same id, now the largest serif on the page.
+        assertTrue("the home headline uses it",
                 elementAround(layout("screen_home_body.xml"), "home_hero_title")
                         .contains("@font/noto_serif_sc"));
         assertTrue("the library page title uses it",
@@ -94,14 +101,16 @@ public final class ChineseSerifTitleTest {
      * The bundled serif's CFF bounding box is 2.858em, and Android turns it into the line's ascent
      * and descent. The wordmark therefore cannot be {@code wrap_content}: at 41sp the box measured
      * 381px around 124px of ink and set the subtitle 52dp below the brand instead of the proposal's
-     * 12dp (2026-10-22 walkthrough). The layout frames the view at {@code brand_line_height} and
-     * {@link com.treelearn.app.screen.WordmarkTextView} centres the font's box inside that frame.
+     * 12dp (2026-10-22 walkthrough). At the topbar's 20sp the box is still nearly three times the
+     * declared line, which is why the rule survived the move. The layout frames the view at
+     * {@code brand_topbar_line_height} and {@link com.treelearn.app.screen.WordmarkTextView} centres
+     * the font's box inside that frame.
      */
     @Test
     public void theWordmarkFramesTheFontsOwnLineBoxAtTheProposalHeight() throws Exception {
-        String brand = elementAround(layout("screen_home_body.xml"), "home_brand");
-        assertTrue("the frame is the proposal's line-height: 1, not the font's box",
-                brand.contains("android:layout_height=\"@dimen/brand_line_height\""));
+        String brand = elementAround(layout("screen_home.xml"), "home_brand");
+        assertTrue("the frame is the declared line-height, not the font's box",
+                brand.contains("android:layout_height=\"@dimen/brand_topbar_line_height\""));
         assertTrue("and the view that draws it is the one that centres the box",
                 brand.startsWith("<com.treelearn.app.screen.WordmarkTextView"));
 

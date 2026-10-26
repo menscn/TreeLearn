@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  One archived branch, as the 「已完成」 segment draws it (T-053), aligned to Scheme A's library card on
-  2026-10-22 (T-2026-10-22-057). The card geometry and type are the live topic card's - the same 12dp /
-  13dp padding, 12.5sp title and 9sp meta - so an archived branch reads as the branch it was rather
-  than as a different kind of thing. The old 3dp accent bar is gone here too: the archived mark already
-  names the state, and the proposal draws no second colour bar.
+  One archived branch, as the 「已完成」 segment draws it (T-053), re-drawn on the 2026-10-25 board
+  (T-2026-10-25-102). The card geometry and type are the live topic card's - 12dp / 13dp padding,
+  14sp title, 12.5sp summary, 12sp meta - so an archived branch reads as the branch it was rather
+  than as a different kind of thing.
 
-  Three lines, and one of them is optional: the title, the branch's own summary, and the row's own
-  facts (the archived mark and where the branch came from). The summary is `gone` until the derived
-  service has written one, and the row then draws one line fewer - never a sentence standing in for it
-  (PRD item 7 forbids "摘要将随本分支对话自动更新" on exactly this kind of surface).
+  What changed on 2026-10-25: 「恢复 / 删除」 used to share the title's row, so on a 369dp phone the
+  two 44dp buttons took roughly half of the card's width and the title wrapped to two lines against a
+  100dp hole. The board moves them to a row of their own under a hairline, right-aligned, text-only
+  (the delete is red text, not a red button) and 44dp tall. The title now owns the full inner width.
+
+  Four lines, and one of them is optional: the title, the branch's own summary, the row's own facts
+  (the archived mark and where the branch came from), and the action row. The summary is `gone` until
+  the derived service has written one, and the row then draws one line fewer - never a sentence
+  standing in for it (PRD item 7 forbids "摘要将随本分支对话自动更新" on exactly this kind of surface).
 
   The confirmation is inline rather than a dialog: the row asks, the row names the exact number of
   branches the deletion removes, and nothing is written until 「永久删除」 is tapped. That number comes
@@ -28,96 +32,108 @@
     android:paddingStart="@dimen/library_card_pad_h"
     android:paddingTop="@dimen/library_card_pad_v"
     android:paddingEnd="@dimen/library_card_pad_h"
-    android:paddingBottom="@dimen/library_card_pad_v">
+    android:paddingBottom="@dimen/library_archived_pad_bottom">
+
+    <TextView
+        android:id="@+id/library_done_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:lineSpacingMultiplier="1.45"
+        android:maxLines="2"
+        android:textColor="@color/tl_ink"
+        android:textSize="@dimen/text_library_card_title"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/library_done_summary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_s1"
+        android:ellipsize="end"
+        android:lineSpacingMultiplier="1.55"
+        android:maxLines="2"
+        android:textColor="@color/tl_ink2"
+        android:textSize="@dimen/text_library_summary"
+        android:visibility="gone" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/library_meta_top"
         android:gravity="center_vertical"
-        android:minHeight="@dimen/touch_min"
         android:orientation="horizontal">
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/library_done_mark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_pill"
+            android:backgroundTint="@color/tl_amber_soft"
+            android:paddingStart="@dimen/space_s2"
+            android:paddingTop="2dp"
+            android:paddingEnd="@dimen/space_s2"
+            android:paddingBottom="2dp"
+            android:textColor="@color/tl_amber"
+            android:textSize="@dimen/text_library_meta" />
+
+        <TextView
+            android:id="@+id/library_done_meta"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/library_meta_gap"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/tl_ink3"
+            android:textSize="@dimen/text_library_meta" />
+    </LinearLayout>
 
-            <TextView
-                android:id="@+id/library_done_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:lineSpacingMultiplier="1.45"
-                android:maxLines="2"
-                android:textColor="@color/tl_ink"
-                android:textSize="@dimen/text_library_card_title"
-                android:textStyle="bold" />
+    <!-- The board's .dactions: a hairline, then the two text actions right-aligned. Both keep the
+         44dp touch floor; nothing in this row is below it, so the two destructive-ish actions are as
+         easy to hit as the row itself. -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/hairline"
+        android:layout_marginTop="@dimen/library_actions_top"
+        android:background="@color/tl_line" />
 
-            <TextView
-                android:id="@+id/library_done_summary"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_s1"
-                android:ellipsize="end"
-                android:lineSpacingMultiplier="1.55"
-                android:maxLines="2"
-                android:textColor="@color/tl_ink2"
-                android:textSize="@dimen/text_library_summary"
-                android:visibility="gone" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/library_meta_top"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/library_done_mark"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_pill"
-                    android:backgroundTint="@color/tl_amber_soft"
-                    android:paddingStart="@dimen/space_s2"
-                    android:paddingEnd="@dimen/space_s2"
-                    android:textColor="@color/tl_amber"
-                    android:textSize="@dimen/text_library_meta" />
-
-                <TextView
-                    android:id="@+id/library_done_meta"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/library_meta_gap"
-                    android:layout_weight="1"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:textColor="@color/tl_ink3"
-                    android:textSize="@dimen/text_library_meta" />
-            </LinearLayout>
-        </LinearLayout>
+    <LinearLayout
+        android:id="@+id/library_done_actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/library_actions_pad_top">
 
         <Button
             android:id="@+id/library_done_restore"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/touch_min"
-            android:background="@drawable/bg_icon_button"
-            android:minWidth="@dimen/touch_min"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:minWidth="0dp"
+            android:paddingStart="@dimen/space_s3"
+            android:paddingEnd="@dimen/space_s3"
             android:stateListAnimator="@null"
             android:text="@string/done_restore"
             android:textColor="@color/tl_green_deep"
-            android:textSize="@dimen/text_cap" />
+            android:textSize="@dimen/text_library_segment"
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/library_done_delete"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/touch_min"
-            android:background="@drawable/bg_danger_link_ripple"
-            android:minWidth="@dimen/touch_min"
+            android:layout_marginStart="@dimen/space_s1"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:minWidth="0dp"
+            android:paddingStart="@dimen/space_s3"
+            android:paddingEnd="@dimen/space_s3"
             android:stateListAnimator="@null"
             android:text="@string/done_delete"
             android:textColor="@color/tl_red"
-            android:textSize="@dimen/text_cap" />
+            android:textSize="@dimen/text_library_segment"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <TextView
@@ -130,7 +146,7 @@
         android:visibility="gone" />
 
     <LinearLayout
-        android:id="@+id/library_done_actions"
+        android:id="@+id/library_done_confirm_row"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="end"

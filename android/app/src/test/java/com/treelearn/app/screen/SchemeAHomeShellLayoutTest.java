@@ -106,6 +106,20 @@ public final class SchemeAHomeShellLayoutTest {
                 swapBody.contains("firstLevel ? View.VISIBLE : View.GONE"));
     }
 
+    /**
+     * 2026-10-25 (T-2026-10-25-092): the caption tier is a floor, not a habit. The 2026-10-25 review
+     * measured the tab bar's labels at 11sp on a 1080p phone and the caption token at 11px on the Web
+     * side; both are below what Chinese small text needs. The token is the single place this is
+     * decided, so the token is what this pins - a layout that spells 11sp itself is caught by the
+     * "label uses @dimen/text_cap" assertion right above.
+     */
+    @Test
+    public void theCaptionTierIsTwelveSp() throws Exception {
+        String dims = read(RES.resolve(Paths.get("values", "dimens.xml")));
+        assertTrue("text_cap is the caption floor and must be 12sp: 11sp is below the Chinese small-text floor",
+                dims.contains("<dimen name=\"text_cap\">12sp</dimen>"));
+    }
+
     @Test
     public void theTabBarIsACapsuleWithTwoPillItems() throws Exception {
         String bar = layout("screen_tab_bar.xml");
@@ -245,63 +259,63 @@ public final class SchemeAHomeShellLayoutTest {
     }
 
     @Test
-    public void theBrandBlockMatchesSchemeA() throws Exception {
-        String body = layout("screen_home_body.xml");
-        String brand = elementAround(body, "home_brand");
+    public void theBrandBlockMovesIntoTheTopbar() throws Exception {
+        String shell = layout("screen_home.xml");
+        String brand = elementAround(shell, "home_brand");
         assertTrue("the wordmark keeps the bundled serif",
                 brand.contains("android:fontFamily=\"@font/noto_serif_sc\""));
-        assertTrue("Scheme A's 41sp wordmark",
-                brand.contains("android:textSize=\"@dimen/text_brand\""));
+        assertTrue("the bar's wordmark is 20sp, not the old 41sp hero size",
+                brand.contains("android:textSize=\"@dimen/text_brand_topbar\""));
         assertTrue("at 600 weight", brand.contains("android:textStyle=\"bold\""));
         assertTrue("with the tracked spacing",
                 brand.contains("android:letterSpacing=\"0.06\""));
         assertTrue("in the deep green of the lockup",
                 brand.contains("android:textColor=\"@color/tl_green_deep\""));
-        assertTrue("the sprout and wordmark are 12dp apart",
-                brand.contains("android:layout_marginStart=\"@dimen/space_s3\""));
+        assertTrue("the sprout and wordmark are 6dp apart",
+                brand.contains("android:layout_marginStart=\"@dimen/brand_topbar_gap\""));
         assertTrue("the wordmark is framed by the view that clamps the bundled font's line box",
                 brand.startsWith("<com.treelearn.app.screen.WordmarkTextView"));
-        assertTrue("at the proposal's line-height: 1 rather than the font's 2.858em box",
-                brand.contains("android:layout_height=\"@dimen/brand_line_height\""));
+        assertTrue("at the bar's line-height frame rather than the font's 2.858em box",
+                brand.contains("android:layout_height=\"@dimen/brand_topbar_line_height\""));
 
-        String mark = elementAround(body, "home_brand_mark");
-        assertTrue("the sprout is the 40dp lockup mark",
-                mark.contains("android:layout_width=\"@dimen/brand_mark_size\""));
+        String mark = elementAround(shell, "home_brand_mark");
+        assertTrue("the sprout is the bar's 22dp mark",
+                mark.contains("android:layout_width=\"@dimen/brand_mark_topbar\""));
 
-        String hero = elementAround(body, "home_hero");
-        assertTrue("the brand block keeps Scheme A's 22dp top",
-                hero.contains("android:paddingTop=\"@dimen/home_brand_top\""));
-        assertTrue("and 20dp bottom",
-                hero.contains("android:paddingBottom=\"@dimen/home_brand_bottom\""));
+        String lockup = elementAround(shell, "home_brand_lockup");
+        assertTrue("the lockup owns the bar's middle cell",
+                lockup.contains("android:layout_weight=\"1\""));
+        assertTrue("and centres itself in it", lockup.contains("android:gravity=\"center\""));
+        assertTrue("the lockup sits between the drawer and the settings keys",
+                shell.indexOf("home_drawer_button") < shell.indexOf("home_brand_lockup")
+                        && shell.indexOf("home_brand_lockup") < shell.indexOf("home_settings_button"));
 
-        String subtitle = elementAround(body, "home_hero_title");
-        assertFalse("the subtitle is the sans line in Scheme A",
-                subtitle.contains("@font/noto_serif_sc"));
-        assertTrue("at 12sp", subtitle.contains("android:textSize=\"@dimen/text_home_sub\""));
-        assertTrue("in secondary ink", subtitle.contains("android:textColor=\"@color/tl_ink2\""));
-        assertTrue("with the same tracking as the proposal",
-                subtitle.contains("android:letterSpacing=\"0.06\""));
-        assertTrue("and 12dp under the lockup",
-                subtitle.contains("android:layout_marginTop=\"@dimen/space_s3\""));
-
-        String home = read(SRC.resolve(Paths.get("screen", "HomeScreen.java")));
-        assertFalse("Scheme A always shows the subtitle, so no render hides it",
-                home.contains("heroTitle.setVisibility"));
-        assertFalse("and no render toggles the brand block",
-                home.contains("hero.setVisibility"));
+        String body = layout("screen_home_body.xml");
+        assertFalse("the old hero lockup is gone from the scrolling column",
+                body.contains("home_hero\""));
+        String title = elementAround(body, "home_hero_title");
+        assertTrue("the headline takes the bundled serif",
+                title.contains("android:fontFamily=\"@font/noto_serif_sc\""));
+        assertTrue("at 22sp", title.contains("android:textSize=\"@dimen/text_home_sub\""));
+        assertTrue("in brand green", title.contains("android:textColor=\"@color/tl_green_deep\""));
+        assertTrue("bold", title.contains("android:textStyle=\"bold\""));
+        assertTrue("two comfortable lines", title.contains("android:lineSpacingMultiplier=\"1.55\""));
+        assertTrue("26dp under the floating bar",
+                title.contains("android:layout_marginTop=\"@dimen/home_hero_top\""));
 
         String dims = dimens();
-        assertTrue("the mark lands as 40dp",
-                dims.contains("<dimen name=\"brand_mark_size\">40dp</dimen>"));
-        assertTrue("the wordmark lands as 41sp",
-                dims.contains("<dimen name=\"text_brand\">41sp</dimen>"));
+        assertTrue("the bar's mark lands as 22dp",
+                dims.contains("<dimen name=\"brand_mark_topbar\">22dp</dimen>"));
+        assertTrue("the bar's wordmark lands as 20sp",
+                dims.contains("<dimen name=\"text_brand_topbar\">20sp</dimen>"));
         assertTrue("and its line-height frame is its own token",
-                dims.contains("<dimen name=\"brand_line_height\">41sp</dimen>"));
-        assertTrue("the subtitle lands as 12sp",
-                dims.contains("<dimen name=\"text_home_sub\">12sp</dimen>"));
-        assertTrue("the block offsets are named",
-                dims.contains("<dimen name=\"home_brand_top\">22dp</dimen>")
-                        && dims.contains("<dimen name=\"home_brand_bottom\">20dp</dimen>"));
+                dims.contains("<dimen name=\"brand_topbar_line_height\">20sp</dimen>"));
+        assertTrue("the headline lands as 22sp",
+                dims.contains("<dimen name=\"text_home_sub\">22sp</dimen>"));
+        assertTrue("with its own top offset",
+                dims.contains("<dimen name=\"home_hero_top\">26dp</dimen>"));
+        assertTrue("and the column's section gap is 22dp",
+                dims.contains("<dimen name=\"home_section_gap\">22dp</dimen>"));
     }
 
     @Test
@@ -310,7 +324,7 @@ public final class SchemeAHomeShellLayoutTest {
         String composer = elementAround(body, "home_composer");
         assertTrue("the composer is the 28dp glass card",
                 composer.contains("android:background=\"@drawable/bg_glass_composer\""));
-        assertTrue("Scheme A's 138dp minimum",
+        assertTrue("the board's 132dp minimum",
                 composer.contains("android:minHeight=\"@dimen/composer_min_height\""));
         assertTrue("with 14dp sides and top",
                 composer.contains("android:paddingStart=\"@dimen/composer_pad\"")
@@ -337,7 +351,7 @@ public final class SchemeAHomeShellLayoutTest {
                 chip.contains("@dimen/model_chip_height"));
 
         String dims = dimens();
-        assertTrue(dims.contains("<dimen name=\"composer_min_height\">138dp</dimen>"));
+        assertTrue(dims.contains("<dimen name=\"composer_min_height\">132dp</dimen>"));
         assertTrue(dims.contains("<dimen name=\"text_composer\">14.5sp</dimen>"));
         assertTrue(dims.contains("<dimen name=\"composer_row_top\">10dp</dimen>"));
     }

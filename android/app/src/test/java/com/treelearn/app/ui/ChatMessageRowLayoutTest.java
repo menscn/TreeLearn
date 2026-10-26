@@ -16,10 +16,11 @@ import org.junit.Test;
  * the user's annotated-shot decision (the conversation page follows the design shot):
  *
  * <ul>
- *   <li><strong>The action row carries only the four prototype buttons plus the time.</strong> Copy,
- *       reset, fork, the data-driven child entry, then the time closes the row (prototype
- *       `.ai-actions`, lines 867-878). The extras this row used to carry - quote, translation,
- *       speech - and the hidden version switcher were removed on 2026-09-28 ("其他的不要").
+ *   <li><strong>The action row carries only the four prototype buttons.</strong> Copy, reset, fork
+ *       and the data-driven child entry. The extras this row used to carry - quote, translation,
+ *       speech - and the hidden version switcher were removed on 2026-09-28. 2026-10-25 removed the
+ *       answer's time from this row too: the reading-area header states the branch's time once, so a
+ *       copy after every answer was a second version of the same fact.
  *   <li><strong>The learner's message is plain text</strong> (`.msg-user`, line 182), the same
  *       treatment the AI answer gets - the green bubble was retired on 2026-09-28 - and the answer
  *       body is flush: the green left edge is voided with the design shot (spec V1.1 §3.3).
@@ -96,24 +97,26 @@ public final class ChatMessageRowLayoutTest {
     }
 
     @Test
-    public void theActionBarLeadsWithThePrototypeSetAndTheTimeClosesIt() throws Exception {
+    public void theActionBarLeadsWithThePrototypeSetAndCarriesNoTime() throws Exception {
         String xml = read(RES.resolve(Paths.get("layout", "view_answer_actions.xml")));
         int copy = xml.indexOf("android:id=\"@+id/act_copy\"");
         int reset = xml.indexOf("android:id=\"@+id/act_reset\"");
         int fork = xml.indexOf("android:id=\"@+id/act_fork\"");
         int children = xml.indexOf("android:id=\"@+id/act_children\"");
-        int time = xml.indexOf("android:id=\"@+id/act_time\"");
         assertTrue(copy >= 0);
-        assertTrue("copy, reset, fork, the child entry, and the time last",
-                copy < reset && reset < fork && fork < children && children < time);
+        assertTrue("copy, reset, fork, then the child entry",
+                copy < reset && reset < fork && fork < children);
+        // 2026-10-25 (T-2026-10-25-101): the branch's time moved to the reading header, where it is
+        // stated once; the row no longer ends with a second copy of it.
+        assertFalse("no time view closes the row", xml.contains("android:id=\"@+id/act_time\""));
     }
 
     @Test
     public void theActionRowDropsTheExtrasTheUserMarkedOut() throws Exception {
         // 2026-09-28 user decision: the annotated shot crossed out the app's own extras and the
         // hidden version switcher ("删除不需要的按钮，比如那个定位、还有语音播放" / "其他的不要").
-        // The row is exactly the four prototype buttons plus the time - nothing else may come back
-        // without a fresh decision, which is why this asserts absence rather than a count.
+        // The row is exactly the four prototype buttons - nothing else may come back without a
+        // fresh decision, which is why this asserts absence rather than a count.
         String xml = read(RES.resolve(Paths.get("layout", "view_answer_actions.xml")));
         for (String gone : new String[] {"act_quote", "act_translate", "act_speak", "act_version"}) {
             assertFalse(gone + " was removed from the row and must not reappear",
@@ -166,18 +169,21 @@ public final class ChatMessageRowLayoutTest {
     @Test
     public void theActionButtonsCarryNoInnerPadding() throws Exception {
         // 2026-09-28 user decision: the row read "现在隔的太开了". The surplus was the 6dp inner
-        // padding each button stacked on its 4dp start margin, not the 44dp target. Both are gone,
-        // so the four leads sit in an even 44dp rhythm with the glyphs centring themselves.
+        // padding each button stacked on its 4dp start margin, not the 44dp target. Both are gone.
+        // 2026-10-25 (T-2026-10-25-101): the lead is a FrameLayout now, so it carries no padding at
+        // all and the 18dp glyph centres itself inside the 44dp cell.
         String xml = read(RES.resolve(Paths.get("layout", "view_answer_actions.xml")));
         for (String id : new String[] {"act_copy", "act_reset", "act_fork"}) {
             String element = elementAround(xml, id);
             assertTrue(id + " must be exactly the 44dp target wide, so the glyph centres in it",
                     element.contains("android:layout_width=\"@dimen/touch_min\""));
-            assertTrue(id + " must carry no start padding", element.contains("android:paddingStart=\"0dp\""));
-            assertTrue(id + " must carry no end padding", element.contains("android:paddingEnd=\"0dp\""));
+            assertFalse(id + " must not pad its 44dp target", element.contains("android:padding"));
             assertFalse(id + " must not add its own start margin on top of the 44dp target",
                     element.contains("android:layout_marginStart="));
         }
+        assertTrue("the glyph is centred by the cell, not pushed by padding",
+                elementWithBody(xml, "act_copy")
+                        .contains("android:layout_gravity=\"center\""));
         // Copy leads the row; nothing in the row carries a start margin any more.
         assertFalse("no action button may re-introduce a start margin",
                 elementAround(xml, "act_copy").contains("android:layout_marginStart="));
