@@ -12,7 +12,6 @@ import { fileURLToPath } from "node:url";
 
 const require = createRequire(import.meta.url);
 const DESKTOP = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const BUILD = path.join(os.tmpdir(), "treelearn-desktop-build");
 const RELEASE = path.join(DESKTOP, "release");
 const CLI = require.resolve("electron-builder/cli.js");
 const MIRROR = "https://npmmirror.com/mirrors/electron-builder-binaries/";
@@ -20,7 +19,8 @@ const MIRROR = "https://npmmirror.com/mirrors/electron-builder-binaries/";
 const sync = spawnSync(process.execPath, ["scripts/sync-app.mjs"], { cwd: DESKTOP, stdio: "inherit" });
 if (sync.status !== 0) process.exit(sync.status ?? 1);
 
-fs.rmSync(BUILD, { recursive: true, force: true });
+// A unique directory avoids deleting a previous build or another process's files.
+const BUILD = fs.mkdtempSync(path.join(os.tmpdir(), "treelearn-desktop-build-"));
 const build = spawnSync(process.execPath, [CLI, "--win", "portable", `--config.directories.output=${BUILD}`], {
   cwd: DESKTOP,
   stdio: "inherit",
@@ -35,6 +35,8 @@ if (!fs.existsSync(artifact)) {
   process.exit(1);
 }
 fs.mkdirSync(RELEASE, { recursive: true });
-const target = path.join(RELEASE, path.basename(artifact));
-fs.copyFileSync(artifact, target);
+// Preserve any existing portable build, including one currently in use.
+const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+const target = path.join(RELEASE, `Treelearn-${version}-portable-${stamp}.exe`);
+fs.copyFileSync(artifact, target, fs.constants.COPYFILE_EXCL);
 console.log(`PACKAGE_OK ${target} ${fs.statSync(target).size}`);

@@ -78,6 +78,7 @@ describe("工作区对话页：阅读、复制、面板与知识树", () => {
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     act(() => {
       root?.unmount();
     });
@@ -151,6 +152,7 @@ describe("工作区对话页：阅读、复制、面板与知识树", () => {
   });
 
   it("点建议把问题填进草稿并聚焦输入框，草稿在换视图后仍读得回来", async () => {
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
     await openChat();
     const first = host.querySelector('[data-suggestion="0"]');
     const question = first?.textContent ?? "";
@@ -162,6 +164,7 @@ describe("工作区对话页：阅读、复制、面板与知识树", () => {
     expect(input?.value).toBe(question);
     expect(document.activeElement).toBe(input);
     expect(draftFor("chat:0")).toBe(question);
+    expect(confirm).not.toHaveBeenCalled();
 
     await typeInto(host, "#chat-composer-input", "我想继续追问补偿性替代头");
     expect(draftFor("chat:0")).toBe("我想继续追问补偿性替代头");
@@ -171,6 +174,38 @@ describe("工作区对话页：阅读、复制、面板与知识树", () => {
     await press(host, '[data-recent-topic="0"]');
     const restored = host.querySelector("#chat-composer-input") as HTMLTextAreaElement | null;
     expect(restored?.value).toBe("我想继续追问补偿性替代头");
+  });
+
+  it("对话推荐遇到草稿先确认，取消保留，确认后才替换并聚焦", async () => {
+    const confirm = vi.spyOn(window, "confirm").mockReturnValueOnce(false).mockReturnValueOnce(true);
+    await openChat();
+    await typeInto(host, "#chat-composer-input", "对话原草稿");
+    const question = host.querySelector('[data-suggestion="0"]')?.textContent;
+    await press(host, '[data-suggestion="0"]');
+    expect(draftFor("chat:0")).toBe("对话原草稿");
+    expect((host.querySelector("#chat-composer-input") as HTMLTextAreaElement).value).toBe("对话原草稿");
+    expect(confirm).toHaveBeenCalledWith(copyText("draft_replace_confirm"));
+    await press(host, '[data-suggestion="0"]');
+    const input = host.querySelector("#chat-composer-input") as HTMLTextAreaElement;
+    expect(input.value).toBe(question);
+    expect(draftFor("chat:0")).toBe(question);
+    expect(document.activeElement).toBe(input);
+  });
+
+  it("引用快捷追问保护草稿并保留引用，确认后才替换", async () => {
+    const confirm = vi.spyOn(window, "confirm").mockReturnValueOnce(false).mockReturnValueOnce(true);
+    await openChat();
+    await typeInto(host, "#chat-composer-input", "引用前草稿");
+    const selected = await select(".chat-answer p");
+    await press(host, '[data-word-action="ask_ai"]');
+    await press(host, '[data-ask-chip="why"]');
+    expect(draftFor("chat:0")).toBe("引用前草稿");
+    expect(host.querySelector(".chat-quote")?.textContent).toContain(selected);
+    expect(confirm).toHaveBeenCalledWith(copyText("draft_replace_confirm"));
+    await press(host, '[data-ask-chip="why"]');
+    expect(draftFor("chat:0")).toBe(copyText("chat_ask_query_why"));
+    expect(host.querySelector(".chat-quote")?.textContent).toContain(selected);
+    expect(document.activeElement).toBe(host.querySelector("#chat-composer-input"));
   });
 
   it("离开对话时记下正文滚动位置，回来按主题恢复", async () => {

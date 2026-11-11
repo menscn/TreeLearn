@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 import { act, createElement, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WorkspaceDataProvider } from "../../src/components/WorkspaceDataProvider";
 import { copyText } from "../../src/copy";
+import { zhCN } from "../../src/copy/zh-CN";
 import { AppShell } from "../../src/layouts/AppShell";
 import { WorkspaceRouter } from "../../src/pages/WorkspaceRouter";
 import { FixtureRuntimeAdapter, memoryFixtureSource } from "../../src/platform/FixtureRuntimeAdapter";
@@ -12,6 +13,7 @@ import { injectRuntime } from "../../src/platform/runtime";
 import {
   draftFor,
   resetWorkspace,
+  setDraft,
   workspaceSnapshot
 } from "../../src/store/workspace";
 
@@ -76,6 +78,7 @@ describe("工作区主页：真实推荐、主题与草稿", () => {
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     act(() => {
       root?.unmount();
     });
@@ -118,6 +121,7 @@ describe("工作区主页：真实推荐、主题与草稿", () => {
   });
 
   it("点推荐进入主题 0，并把这条问题写进对话草稿", async () => {
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
     root = await render(host, workspaceShell());
     await press(host, '[data-recommendation="0"]');
 
@@ -126,6 +130,43 @@ describe("工作区主页：真实推荐、主题与草稿", () => {
     expect(draftFor("chat:0")).toBe(FIRST_QUESTION);
     const chatInput = host.querySelector("#chat-composer-input") as HTMLTextAreaElement | null;
     expect(chatInput?.value).toBe(FIRST_QUESTION);
+    expect(confirm).not.toHaveBeenCalled();
+  });
+
+  it("覆盖提示按当前文案表即时解析，而不保存到草稿", async () => {
+    const resources = zhCN as unknown as Record<string, string>;
+    const original = zhCN.draft_replace_confirm;
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+    try {
+      setDraft("chat:0", "保留的草稿");
+      root = await render(host, workspaceShell());
+      resources.draft_replace_confirm = "测试时切换的提示";
+      await press(host, '[data-recommendation="0"]');
+      expect(confirm).toHaveBeenCalledWith("测试时切换的提示");
+      expect(draftFor("chat:0")).toBe("保留的草稿");
+    } finally {
+      resources.draft_replace_confirm = original;
+    }
+  });
+
+  it("首页推荐保护目标主题已有草稿：取消留在首页，确认才替换并跳转", async () => {
+    const confirm = vi.spyOn(window, "confirm").mockReturnValueOnce(false).mockReturnValueOnce(true);
+    setDraft("chat:0", "目标主题原草稿");
+    setDraft("chat:1", "另一个主题草稿");
+    root = await render(host, workspaceShell());
+    await typeInto(host, "#home-composer-input", "首页草稿");
+
+    await press(host, '[data-recommendation="0"]');
+    expect(workspaceSnapshot().view).toBe("home");
+    expect(draftFor("chat:0")).toBe("目标主题原草稿");
+    expect(confirm).toHaveBeenCalledWith(copyText("draft_replace_confirm"));
+    expect(draftFor("home")).toBe("首页草稿");
+
+    await press(host, '[data-recommendation="0"]');
+    expect(workspaceSnapshot().view).toBe("chat");
+    expect(workspaceSnapshot().topic).toBe(0);
+    expect(draftFor("chat:0")).toBe(FIRST_QUESTION);
+    expect(draftFor("chat:1")).toBe("另一个主题草稿");
   });
 
   it("点历史主题进入对应主题；主页草稿在往返与窗口变化后都还在", async () => {

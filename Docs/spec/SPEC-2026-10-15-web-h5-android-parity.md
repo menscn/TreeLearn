@@ -7,6 +7,8 @@ intent: Docs/intent/INTENT-2026-10-15-web-h5-android-parity.md
 author: 技术架构师（主会话）
 status: accepted
 
+> 2026-11-10 更新：用户授权为桌面可用性调整此前规格。本文保留早期 Web parity 与 JVM 服务规划作为历史；Windows 桌面当前以 `desktop/` 的 Electron 主进程、本机 SQLite 和系统凭据保护为准，实际支持范围见 `desktop/README.md`。Android 与桌面数据独立，不自动同步；此前 JVM 服务方案属于历史规划。本文中仅描述旧 JVM 方案的内容不再约束桌面实现。
+
 ## Requirement spec（需求规格）
 
 - 范围：新建 `frontend/`（可构建的 Web 界面工程）与 `backend/`（仅本机可达的 Java 服务），把 Android 当前界面逐屏还原为 H5 形态；还原以 Android 现状为唯一界面事实权威，高保真原型作为 token 与视觉意图来源并作为一次性提取源。**首批范围 = 屏幕清单的每一条目**，条目数不在本文复述：唯一权威是生成的 `Docs/04-ux-design/parity/screen-inventory.json` 的 `counts`，Android 代码一改、重跑 `python .codex/scripts/dev/gen_screen_inventory.py` 即随之更新，本文不需要跟着改。2026-10-15 拍板时写的是「全部 16 屏 + 6 浮层」，那是盘点仪器建立之前的人写估计；用户 2026-10-16 裁定「以实测清单为准」。两处差额成因不同，均已登记在 `T-2026-10-15-screen-inventory-parity-ledger-005.md`：浮层一侧是仪器的模式词表手抄导致**少计**（已修，因此 6→16 是把漏的补回来，不是范围扩张）；屏一侧的差额**已于 2026-10-16 逐条对应，且不需要等阶段 1**：清单 `screens` 的类名集合与 `android/app/src/main/java/com/treelearn/app/screen/` 下全部 `*Screen.java` 的基名集合是同一集合，且清单的不可达屏数为 0，因此不存在漏屏；多出的两个名字是入口别名而不是屏——`MainActivity.openOverview` 只是 `showTree(branchId)` 的委托，落点是树画布屏，「版本」入口 `MainActivity.openVersions` 委托 `ChatScreen.showVersions`、后者就地 `new PopupMenu(...)` 弹菜单，已经算在浮层一侧（回算命令与集合比对记在 `T-2026-10-15-screen-inventory-parity-ledger-005.md` 的 Gaps ①；被检文件的行号一律不写进本文，它随任何 Android 改动位移）。阶段一到阶段六不依赖任何宿主：界面由「快照夹具」驱动，夹具是从 Android 侧成对采集的真机截图与状态/几何快照。阶段七才接入 `backend/`。
@@ -66,7 +68,7 @@ React + TypeScript + Vite + pnpm；构建产物可离线打开；**不得经外�
 
 ### 6. 后端形态（架构师决策，依据「高可维护性与扩展性」）
 
-**采用零框架方案：JDK 17 `com.sun.net.httpserver` + 自建窄路由 + 桌面 SQLite，不引入 Spring Boot。** 第三方依赖只允许 SQLite JDBC 驱动一项，且在实现任务里先核实版本、许可证、原生库打包与启动开销，再固定。
+**历史 JVM 方案**：此前计划在桌面发行包内使用 JDK 21 `com.sun.net.httpserver`、窄路由和 SQLite。2026-11-10 用户授权调整后，桌面运行路径使用 Electron 主进程及内置 SQLite，此前 JVM 服务方案不作为当前桌面程序依赖；当前能力与限制见 `desktop/README.md`。
 
 理由：本地单用户服务的可维护性不来自框架，而来自分层方向与「业务规则只有一处」；框架在此处只会带入依赖树审计成本、启动内存与方言适配（Flyway 的历史表语义与 Android 的 `user_version` 前向迁移不同）。扩展性由端口与适配器分层保证——将来新增终端只加 `RuntimePort` 实现，不改服务。
 
@@ -77,7 +79,7 @@ React + TypeScript + Vite + pnpm；构建产物可离线打开；**不得经外�
 3. **网络边界**：仅绑定环回地址、随机化会话令牌、严格同源与 CORS 策略；不监听公网接口，不做远程部署。
 4. **可观测**：只记录操作 ID、状态、错误类别与耗时，不记录问题、回答、推理、提示词或密钥。
 
-### 7. 单一来源三项（防止第二份实现）
+### 7. 单一来源三项（历史 JVM 方案）
 
 - **DDL 与 SQL 文本**：新建一个纯 JVM 模块承载建表语句、迁移步骤文本与约束名，Android 的 `:data` 与 `backend/` **都依赖它**；两侧只有驱动不同（`android.database` 与 JDBC）。配套**跨引擎差分测试**：同一份 fixture 数据在 Android SQLite 与桌面 SQLite 上跑同一语句，断言行数与关键列一致，并共用同一套约束扩展错误码判据。此项触碰 Android 生产数据层与共享代码区，必须单独成任务、叠加 `db-migration-reviewer` 与 `android-no-kotlin-guard`，并遵守防回归规则。
 - **树几何**：`:tree-layout` 是唯一实现（已是 `java-library`、零 Android 引用、并被 `android/build.gradle` 的 `pureJvmModules` 守门）。阶段一到六的画屏**不重算**，直接渲染 Android 采集好的坐标快照；阶段七起服务直接依赖同一模块，浏览器侧不自算，从而几何分叉风险归零。**禁止把布局算法手抄成 TypeScript**。
@@ -85,7 +87,7 @@ React + TypeScript + Vite + pnpm；构建产物可离线打开；**不得经外�
 
 ### 8. 密钥保管
 
-Android 侧不变（Keystore，别名不可导出，密钥不进数据库、日志或备份）。服务侧新增 `SecretPort` 抽象：实现为本地密钥库文件（JDK 原生 PKCS12 + AES-GCM）加首次启动口令派生，接口化以便将来接系统钥匙串。**必须单独写一份威胁模型正文**，明确桌面方案无硬件根、强度低于 Keystore，并声明这是 PC 端可用性的前提代价。密钥永不下发到浏览器，只由服务在代理请求时使用。
+Android 侧保持原有 Keystore。历史 JVM 路线曾计划使用独立凭据库；当前 Windows 桌面使用 Electron `safeStorage` 对供应商密钥加密，界面仅读取密钥是否存在，模型请求由可信主进程发起。桌面与 Android 凭据不自动同步。
 
 ### 9. 数据通道（导出与导入）
 
@@ -158,3 +160,5 @@ Android 侧当前**没有任何导出实现**，这是本次净新增交付物�
 - 2026-10-18｜阶段 3 的**已交付面与未闭合的一半必须一起读**，否则 29/0 会被读成「1:1 已达成」。已交付：13 屏渲染与换屏接线在 dev(5173)、preview(4173)、`file://` 单文件三面同判据同结果，控制台零错误，`node scripts/verify.mjs` 16 步全绿。未闭合：① 视觉层未量测——Android 用 `maxLines`+省略号收掉的正文（主页历史卡摘要、推荐位问题句）在 Web 侧整段展开，覆盖判据按定义看不见这类差异；② 图标按钮目前渲染 `content-desc` 文本、发送按钮是纯色圆，矢量图形属阶段 4；③ 13 屏里 10 屏是通用夹具渲染（结构同源、形状未逐屏校），主页/对话/学习库三屏按 Android 布局手工整形；④ Web 侧内容是夹具快照，真实发送要等 §11 阶段 7 的 `backend/`；⑤ §10「双环境」的第二档（移动 WebView/WebKit）未跑。判据退化风险另记一条：覆盖判据目前只取夹具的 `text`，若 Android 侧改由 `content-desc` 承载正文，需同步把 `desc` 纳入，兜底是走查自检里「每一屏都还剩得出正文」那条。
 - 2026-10-21｜**Web 主路径改为「侧栏＋轻量学习工作区」，逐屏快照降为 parity 证据路径。** 用户当日确认 `Docs/04-ux-design/知芽-TreeLearn-Web学习工作区-交互示意-v1.html` 的「轻量学习工作区」方向，并确认图标优先、真实浏览器验证与资产保护要求（需求父卡 `T-2026-10-21-web-learning-workspace-requirement-041`）。落地面：`frontend/src/layouts/AppShell.tsx` 的侧栏（主页/学习库/最近学习/设置）＋顶栏＋主区，`pages/` 的主页/对话/学习库/设置四屏，`store/workspace.ts` 的视图/主题/分支/面板/草稿/滚动/筛选/设置分类状态与 `#/<view>/<topic>` hash 后退，`components/{BranchPanel,TreeOverlay,ChatAnswer,Composer,IconButton}.tsx`，样式在 `styles/workspace.css` 与 `styles/pages.css`。**能力边界**：所有内容仍只读夹具，不接后端、不生成、不上传、不建分支；发送/附件/重置/新建分支/设置保存删除替换开关试听一律 `disabled` 并标注「尚未接通」；复制是真实剪贴板能力；草稿、筛选、展开、阅读位置只存内存，刷新后仅恢复 hash 里的视图/主题；主题 1 无对话基线时显示诚实空态，不复用主题 0 回答；设置六类详情只读。**旧路径状态**：`SnapshotScreen`/`ScreenRouter`/`screenRoute`/`screenLinks` 与其测试保留，作为逐屏夹具证据，不再接主入口；2026-10-18 那条「图标按钮渲染 `content-desc` 文本、矢量图形属阶段 4」仅对旧快照路径仍成立，工作区主路径已改用 Android drawable 同源 SVG（`Icon.tsx`），本条不改写旧记录。**证据**：`artifacts/evidence/web-workspace-implementation-2026-10-21/`（11 张 1440×900/390×844 截图、`readings.json` 22 项读数、README），守门 `lint/test/verify/design_tokens/validate_tasks` 全部退出码 0；片 042–046 任务卡登记 RED/GREEN 与验证结论。**资产**：示意稿 HTML 与说明 MD 未改（SHA-256 见证据 README），未新增依赖，未改 `android/**` 与 `backend/**`。
 - 2026-10-23｜**AI 内置人设与「我的森林」两面接入工作区主路径**（片 069/070，需求父卡 `T-2026-10-21-ai-persona-and-forest-requirement-038`）。视图面：`frontend/src/store/workspace.ts` 的 `WorkspaceView` 现为 `home / library / settings / chat / persona-intro / forest`，`persona-intro` 与 `forest` 各有 hash 路由（`#/forest`、`#/persona-intro`）并可后退。人设面：`frontend/src/store/persona.ts` 的七个 wireId 与 Android `:core` `Persona` 逐字同集合，`personaFromWireId` 与 Android 064 同口径（未知值回落默认档并给一次性 `fellBack` 信号，缺省值不算回落），选择状态按**主题级**存在 `state.personas`（内存，刷新即回默认）；对话页 chip＋弹层＋七档介绍页（`frontend/src/pages/PersonaIntroPage.tsx`）与 Android 066/067 同结构。**parity 边界三条，写在此处而不是散在各屏注释里**：① Web 不持久化人设，权威在 Android 的 `topics.persona`，因此未知档的回落**提示**归 Android（`MainActivity.showPersonaFellBack`），Web 只保留 store 层信号，不弹一个夹具里永远不会响的 toast；② 森林是只读回顾面，页脚与纸条只写这次真读到的数字——Android 侧读得到的归档计数与连续天数在 Web 没有数据来源，因此**省略而不是写 0 冒充**，学习库整屏读不到时显示「森林暂时读不到」且**不画不生效的重试按钮**；③ 几何 parity 的判据是**同常量同算法**，不是「同 id 得同坐标」——Web 主题 id 由下标派生（`topic-${index}`）而 Android 用真实主键，`frontend/src/store/forestLayout.ts` 与 `android/app/src/main/java/com/treelearn/app/forest/ForestLayout.java` 靠同一组常量与同一支 FNV-1a 对齐，两侧各有一份钉住常量的用例。落点：`frontend/src/pages/ForestPage.tsx`、`frontend/src/components/ForestScene.tsx`、`frontend/src/styles/forest.css`、`frontend/src/copy/zh-CN.ts` 的 `forest_*`/`drawer_forest_*` 键。文档回写与本面相关的 BASE-14 收窄登记在 `Docs/01-demand/结构化需求基准说明书_知芽（TreeLearn）_V3.0.md` 的版本修改记录，权威正文见 `Docs/spec/SPEC-2026-10-21-my-forest.md`；Android 侧说明见 `android/README.md` 的「AI 内置人设（T-064 → T-067）」与「我的森林（T-068）」两节。
+- 2026-11-08｜桌面运行路径不依赖历史 JVM 服务方案。Web 工作区的首页推荐、对话推荐和引用快捷问题在目标草稿非空时先确认替换；取消保留原草稿，空草稿仍直接填入，草稿仍只存在当前进程。实际行为见 `frontend/src/hooks/useDraftReplacement.ts`、`frontend/src/pages/HomePage.tsx` 与 `frontend/src/pages/ChatPage.tsx`。
+- 2026-11-08｜对话输入框使用设计系统已有颜色 token 显示轮廓，获得焦点时沿用绿色焦点提示；首页输入框不受此对话专用样式影响。实现见 `frontend/src/styles/glass.css`；验证入口见 `frontend/test/electron/composer-contrast.cjs`。

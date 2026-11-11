@@ -1,21 +1,33 @@
-const { app, BrowserWindow, Menu, dialog } = require("electron");
+const { app, BrowserWindow, Menu, dialog, ipcMain, safeStorage } = require("electron");
 const fs = require("node:fs");
 const path = require("node:path");
 const { APP_TITLE, buildWindowOptions } = require("./window-options.cjs");
 const { isAllowedNavigation } = require("./navigation.cjs");
+const { createLearningService, PERSONA_IDS } = require("./learning-service.cjs");
+const { registerDesktopIpc } = require("./desktop-ipc.cjs");
+const { closeService } = require("./close-service.cjs");
+const { createCloseCoordinator } = require("./close-coordinator.cjs");
+const { readSelectedAttachment } = require("./attachment-reader.cjs");
 
 const SMOKE = process.argv.includes("--smoke");
 const INDEX = path.join(__dirname, "app", "index.html");
+let currentWindow = null;
+let service = null;
 
 app.setName(APP_TITLE);
 app.setAppUserModelId("com.treelearn.zhiya");
 
 function createWindow() {
-  const win = new BrowserWindow(buildWindowOptions());
+  const options = buildWindowOptions();
+  if (!SMOKE) options.webPreferences.preload = path.join(__dirname, "preload.cjs");
+  const win = new BrowserWindow(options);
+  currentWindow = win;
+  if (!SMOKE) createCloseCoordinator({ win, ipcMain, entry: INDEX, getService: () => service, clearService: () => { service = null; }, showError: (title, message) => dialog.showErrorBox(title, message) });
+  win.on("closed", () => { if (currentWindow === win) currentWindow = null; });
 
   win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   win.webContents.on("will-navigate", (event, url) => {
-    if (!isAllowedNavigation(url)) event.preventDefault();
+    if (!isAllowedNavigation(url, INDEX)) event.preventDefault();
   });
   win.once("ready-to-show", () => {
     if (!SMOKE) win.show();
@@ -98,6 +110,21 @@ if (!hasLock) {
       reportMissingBundle();
       return;
     }
+    if (!SMOKE) {
+      try {
+        const resource = JSON.parse(fs.readFileSync(path.join(__dirname, "app", "learning-prompt.json"), "utf8"));
+        if (resource.version !== 1 || typeof resource.prompt !== "string" || !resource.prompt.trim()) throw new Error("invalid prompt");
+        if (!resource.personas || typeof resource.personas !== "object" || Object.keys(resource.personas).length !== PERSONA_IDS.length || PERSONA_IDS.some(id => typeof resource.personas[id] !== "string" || (id === "default" ? resource.personas[id] !== "" : !resource.personas[id].trim()))) throw new Error("invalid persona policies");
+        service = createLearningService({ database: path.join(app.getPath("userData"), "desktop-learning-v1", "learning.sqlite"), secrets: safeStorage, tutorPrompt: resource.prompt, personaPrompts: resource.personas });
+        registerDesktopIpc({ ipcMain, service, entry: INDEX, getWindow: () => currentWindow,
+          chooseAttachment: win => dialog.showOpenDialog(win, { title: "选择文本资料", properties: ["openFile"], filters: [{ name: "文本资料", extensions: ["txt", "md"] }] }),
+          readAttachment: readSelectedAttachment });
+      } catch {
+        dialog.showErrorBox("知芽启动失败", "本地学习数据无法安全打开。请检查存储空间、访问权限或应用版本；已有数据不会被重置。");
+        app.quit();
+        return;
+      }
+    }
     Menu.setApplicationMenu(null);
     const win = createWindow();
     if (SMOKE) {
@@ -113,5 +140,13 @@ if (!hasLock) {
 
   app.on("window-all-closed", () => {
     if (process.platform !== "darwin") app.quit();
+  });
+  app.on("before-quit", event => {
+    if (currentWindow && !currentWindow.isDestroyed() && service) {
+      event.preventDefault();
+      currentWindow.close();
+      return;
+    }
+    closeService(event, () => service, () => { service = null; }, (title, message) => dialog.showErrorBox(title, message));
   });
 }

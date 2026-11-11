@@ -131,7 +131,7 @@ describe("工作区学习库：搜索、筛选、摘要与恢复", () => {
     expect(workspaceSnapshot().libraryExpanded).toEqual([]);
   });
 
-  it("搜索命中标题、摘要与来源问题，大小写不敏感；无命中出空态并可清空", async () => {
+  it("搜索命中标题、摘要与推荐问题，大小写不敏感；无命中出空态并可清空", async () => {
     root = await render(host, workspaceShell());
     await typeInto(host, "#library-search", "Transformer");
     expect(rows(host)).toEqual(["系统理解 Transformer 的注意力机制"]);
@@ -141,6 +141,11 @@ describe("工作区学习库：搜索、筛选、摘要与恢复", () => {
 
     await typeInto(host, "#library-search", "关键头");
     expect(rows(host)).toEqual(["注意力权重可视化与模型可解释性的关系"]);
+
+    // This phrase occurs in a follow-up question in the bundled conversation,
+    // but not in the library's titles, summaries or home recommendations.
+    await typeInto(host, "#library-search", "分布偏移程度不同");
+    expect(rows(host)).toEqual([]);
 
     await typeInto(host, "#library-search", "transformer");
     expect(rows(host)).toEqual(["系统理解 Transformer 的注意力机制"]);
@@ -241,20 +246,16 @@ describe("工作区学习库：搜索、筛选、摘要与恢复", () => {
     expect(toggle?.getAttribute("aria-label")).toContain(copyText("library_expand"));
   });
 
-  // 2026-10-25 (T-2026-10-25-101, review AL2): the hint used to list the indexed fields
-  // ("搜索标题、摘要或来源问题…"), which tells the learner about the index rather than about what
-  // they can type. It now names the three things a search matches.
-  it("搜索提示说的是能搜到什么，不是索引里有哪些字段", async () => {
+  it("搜索提示与当前可匹配的内容一致", async () => {
     root = await render(host, workspaceShell());
     const input = host.querySelector<HTMLInputElement>("#library-search");
     expect(input).not.toBeNull();
     expect(input!.placeholder).toBe(copyText("library_search_placeholder"));
-    expect(input!.placeholder).not.toContain("标题");
-    expect(input!.placeholder).not.toContain("摘要");
-    expect(input!.placeholder).not.toContain("来源问题");
     expect(input!.placeholder).toContain("主题");
-    expect(input!.placeholder).toContain("回答");
-    expect(input!.placeholder).toContain("原文");
+    expect(input!.placeholder).toContain("摘要");
+    expect(input!.placeholder).toContain("推荐问题");
+    expect(input!.placeholder).not.toContain("回答");
+    expect(input!.placeholder).not.toContain("原文");
   });
 
   it("library 夹具缺失时显示采集缺失文案，而不是空列表", async () => {

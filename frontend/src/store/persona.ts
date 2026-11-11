@@ -2,7 +2,8 @@ import type { CopyKey } from "../copy";
 
 /**
  * 七个内置人设的稳定 wireId（`Docs/spec/SPEC-2026-09-21-ai-persona-preference.md` 2026-10-23 定）。
- * Web 端不持久化人设：权威在 Android 的 `topics.persona`，这里只承载会话内选择与文案键映射。
+ * 浏览器演示仅保存会话内选择；桌面工作区由本地数据库持久化，Android 数据独立。
+ * 本模块提供两种前端入口共用的 wireId 与文案键映射。
  */
 export type PersonaId =
   | "default"

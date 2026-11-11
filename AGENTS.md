@@ -21,7 +21,7 @@
 
 - `android/` 是本地优先 Android 客户端，Java-only 是硬约束；Android SQLite、原生桥接、手机/Pad 展示和 APK 运行证据必须按专项规则验证。
 - `frontend/` 是 React/TypeScript 前端；用户可见文案、时间展示、设计 token、API 客户端和错误语义遵循前端规则。
-- `desktop/` 是 Electron 桌面壳，加载 `frontend/dist-offline/index.html` 并打包为 Windows 便携 exe；不另写界面与样式，构建、启动与窗口证据遵循启动和多端规则。
+- `desktop/` 是 Electron Windows 桌面应用，加载 `frontend/dist-offline/index.html`；桌面工作区通过隔离桥使用本机数据，构建、启动与窗口证据遵循启动和多端规则。
 - `backend/` 是规划中的本机环回 Java/Spring Boot 服务；目录尚未落地时只保留规则和 owner，不把规划事实写成已运行服务。
 - `Docs/04-ux-design/` 与设计 token 是当前设计事实源；Figma/原型工具只服务于 Treelearn 对应画布。
 - 项目默认不引入远程账号、远程同步或远程遥测；若未来改变该边界，必须先更新权威规格和对应规则。

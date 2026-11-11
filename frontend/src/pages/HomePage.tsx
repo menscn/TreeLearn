@@ -3,6 +3,7 @@ import { Composer } from "../components/Composer";
 import { Icon } from "../components/Icon";
 import { useWorkspaceData } from "../components/WorkspaceDataProvider";
 import { useCopy } from "../hooks/useCopy";
+import { useDraftReplacement } from "../hooks/useDraftReplacement";
 import {
   draftFor,
   openTopic,
@@ -14,6 +15,7 @@ const HOME_DRAFT_KEY = "home";
 /** 主页：输入根问题、顺推荐进入主题 0，或直接回到某个真实历史主题。 */
 export function HomePage() {
   const t = useCopy();
+  const canReplaceDraft = useDraftReplacement();
   const data = useWorkspaceData();
   const [draft, setDraftState] = useState(() => draftFor(HOME_DRAFT_KEY));
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -24,6 +26,7 @@ export function HomePage() {
   };
 
   const enterRecommendation = (text: string, topicIndex: number): void => {
+    if (!canReplaceDraft(`chat:${topicIndex}`)) return;
     setDraft(`chat:${topicIndex}`, text);
     openTopic(topicIndex, data.topics.length);
   };

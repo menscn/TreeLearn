@@ -72,6 +72,8 @@ Branch navigation and the tree overview show the directions you have explored, h
 
 On Android, learning records are stored locally and no account is required. Using an online AI service requires a provider and API key; relevant request content is sent to the provider, and charges may apply. Enabling web search also sends requests to the selected search service.
 
+The Windows desktop app supports local learning history, drafts, model settings, and streaming conversations. Configure your API key in the desktop app before use. See the [desktop guide](desktop/README.md) for current capabilities and storage; desktop and Android data do not sync automatically. The [desktop and web specification](Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md) describes earlier development work.
+
 ## License
 
 This project is not licensed as open source. Use, copying, modification, and distribution of the code are subject to the terms in [LICENSE](LICENSE). Third-party components remain subject to their respective licenses.

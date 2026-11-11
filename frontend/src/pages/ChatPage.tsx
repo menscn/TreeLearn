@@ -11,6 +11,7 @@ import { TreeOverlay } from "../components/TreeOverlay";
 import { useWorkspaceData } from "../components/WorkspaceDataProvider";
 import { copyFormat } from "../copy";
 import { useCopy } from "../hooks/useCopy";
+import { useDraftReplacement } from "../hooks/useDraftReplacement";
 import { useDockHeight } from "../hooks/useDockHeight";
 import { useTextSelection } from "../hooks/useTextSelection";
 import { useWorkspace } from "../hooks/useWorkspace";
@@ -60,6 +61,7 @@ async function writeClipboard(text: string): Promise<boolean> {
 /** 对话工作区：正文独立滚动，输入区固定在底部；未接通的动作只说现状。 */
 export function ChatPage() {
   const t = useCopy();
+  const canReplaceDraft = useDraftReplacement();
   const state = useWorkspace();
   const data = useWorkspaceData();
   const topic = data.topics[state.topic];
@@ -227,6 +229,7 @@ export function ChatPage() {
                       key={`suggestion-${index}`}
                       type="button"
                       onClick={() => {
+                        if (!canReplaceDraft(topicKey)) return;
                         updateDraft(text);
                         inputRef.current?.focus();
                       }}
@@ -279,6 +282,7 @@ export function ChatPage() {
                       key={chip.id}
                       type="button"
                       onClick={() => {
+                        if (!canReplaceDraft(topicKey)) return;
                         updateDraft(t(chip.query));
                         inputRef.current?.focus();
                       }}

@@ -1,6 +1,10 @@
 # 知芽 Treelearn 桌面端（Electron 壳）
 
-桌面端不另写界面：它把 `frontend/` 构建出的离线单文件产物装进一个标准 Windows 窗口，布局、样式、交互与 Web 版完全一致。
+桌面端加载 `frontend/` 的离线单文件界面，通过隔离桥接使用本机学习数据；普通浏览器仍使用演示夹具。用户可在桌面设置模型服务地址、模型与 API Key，提问、追问、选择回答风格、查看和搜索学习记录、复制回答，以及停止或重试生成。
+
+学习记录和草稿保存在当前 Windows 用户的应用数据目录下 `desktop-learning-v1/learning.sqlite`；模型密钥由 Electron `safeStorage` 加密后保存，不会回传到界面。首次使用需要在桌面设置中输入自己的 API Key；Android 数据不会自动导入。问题和对话上下文会发送到用户配置的模型服务商。
+
+桌面学习工作区可基于完整回答创建学习分支，通过层级导航切换、返回来源并保存各分支草稿；分支继承创建时固定的上下文。回答风格按主题保存，历史回答保留生成时的风格。每次可选择一份 UTF-8 的 TXT 或 Markdown 文本资料，文件最多 128 KiB、正文最多 20,000 个 UTF-16 编码单元；选择后正文会保存在本机数据库，发送时提供给当前模型服务商。当前不支持 PDF、图片、Word、划词锚点或单分支删除；模型生成质量和可用性取决于所选服务与模型。
 
 ## 结构
 
@@ -8,7 +12,10 @@
 desktop/
 ├─ main.js                 Electron 主进程：窗口、导航拦截、单实例、smoke 模式
 ├─ window-options.cjs      窗口参数的唯一来源（尺寸、标题、隔离选项）
-├─ navigation.cjs          导航白名单：只允许 file://
+├─ navigation.cjs          导航白名单：只允许应用入口页面
+├─ preload.cjs             仅暴露受限桌面接口的隔离桥
+├─ desktop-ipc.cjs         校验窗口、来源并映射接口错误
+├─ learning-service.cjs    本机 SQLite、加密凭据和流式模型请求
 ├─ scripts/
 │  ├─ sync-app.mjs         把 frontend/dist-offline/index.html 复制成 desktop/app/index.html
 │  ├─ matrix.cjs           逐屏矩阵：14 个状态 × 两档尺寸
@@ -31,23 +38,23 @@ desktop/
 
 ```bash
 pnpm --dir desktop install         # 首次安装 Electron 工具链
-pnpm --dir desktop test            # 单元测试（15 例）
+pnpm --dir desktop test            # 桌面单元与契约测试
 pnpm --dir desktop start           # 构建产物同步 + 打开桌面窗口（开发态）
 pnpm --dir desktop run smoke       # 无头启动一次并断言页面已渲染
 pnpm --dir desktop run verify      # sync + smoke + 14 屏 × 2 尺寸矩阵
-pnpm --dir desktop run package:win # 产出 desktop/release/Treelearn-1.0.0-portable.exe
+pnpm --dir desktop run package:win # 在 desktop/release/ 生成带时间戳的便携 exe
 ```
 
 `verify` 的截图与报告在 `artifacts/evidence/desktop-shell/<运行日>/`：每个状态两档尺寸各一张 JPEG，`report.json` 记录标题、根节点、文本长度、横向溢出、控制台错误与筛选/分类命中。目录按**运行当天**分（`scripts/evidence-dir.cjs` 一处解析），重跑不会再覆盖前一天的历史证据；要复跑某一档时用 `TREELEARN_EVIDENCE_DATE=2026-10-24` 这类显式日期，空白值回落当天。矩阵按成品窗口外框设置 1180×820 / 900×620，内容区实测为 1167×785 / 887×586，两档都高于 Web 的 760 折叠断点。
 
-当前成品（2026-10-27 重打包）：`release/Treelearn-1.0.0-portable.exe` 114,592,941 字节，内嵌 `app/index.html` 与 `frontend/dist-offline/index.html` 同 sha256（`8dc53a86…6735`，5,871,820 字节）；真实启动窗口标题「知芽」，1180×820 逻辑尺寸（200% 缩放下外框 2360×1640）。
+2026-10-27 的便携包是历史产物，不能代表当前源码或真实学习能力；发布前需重新构建并验证新的便携包。
 
 ## 行为约定
 
 - 窗口为标准 Windows 标题栏，可缩放；默认 1180×820，最小 900×620（保证侧栏为展开态）。
-- 移除 Electron 默认菜单，不开放新窗口，不允许导航到 `file://` 以外的地址。
+- 移除 Electron 默认菜单，不开放新窗口，仅允许导航至应用自身的入口页面及其 hash 路由。
 - 单实例：重复双击便携版会聚焦已有窗口，不再开第二个进程。
-- `--smoke` 模式不显示窗口，断言 `#root` 有子节点、标题非空、无渲染错误后自行退出。
+- `--smoke` 模式不显示窗口，检查夹具页面渲染；该模式不证明真实桌面数据、凭据或模型请求。
 
 ## 图标
 
@@ -57,6 +64,6 @@ pnpm --dir desktop run package:win # 产出 desktop/release/Treelearn-1.0.0-port
 
 ## 打包说明
 
-- 构建输出放在系统临时目录，只把成品 exe 拷回 `desktop/release/`。原因：IDE 的文件索引会长期占用工作区内的 `.asar`，electron-builder 重复清理时会报 `EBUSY`。
+- 构建输出放在本次专属系统临时目录，只把带时间戳的成品 exe 拷回 `desktop/release/`，保留已有构建；构建前须先运行前端 build。
 - 打包器二进制默认走 `ELECTRON_BUILDER_BINARIES_MIRROR=https://npmmirror.com/mirrors/electron-builder-binaries/`，可用同名环境变量覆盖；Electron 本体由 `.npmrc` 的 `electron_mirror` 指向镜像。
 - `pnpm-workspace.yaml` 将 `@electron/get` 覆盖为 5.1.0：electron-builder 26.18.0 的依赖范围仍是 ^3，但其代码引用了 5.x 才有的 `ElectronDownloadCacheMode`。

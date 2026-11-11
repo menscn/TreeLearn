@@ -144,7 +144,7 @@
 
 ### 默认不引入远程服务端
 - **类型**：声明型
-- **唯一权威**：`Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md:77`
+- **唯一权威**：`Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md:79`
 - **更新时机**：要引入远程账号、云同步、远程遥测或多实例服务之前
 - **漂移检查**：`python -X utf8 .codex/scripts/dev/check_stack_facts.py`
 - **锚点**：`不监听公网接口|不做远程部署`
@@ -152,7 +152,7 @@
 
 ### backend 仅监听本机环回
 - **类型**：声明型
-- **唯一权威**：`Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md:77`
+- **唯一权威**：`Docs/spec/SPEC-2026-10-15-web-h5-android-parity.md:79`
 - **更新时机**：`backend/` 目录落地、或绑定地址与会话令牌口径变化时
 - **漂移检查**：`python -X utf8 .codex/scripts/dev/check_stack_facts.py`
 - **锚点**：`仅监听本机环回地址|仅绑定环回地址`
